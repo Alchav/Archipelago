@@ -10,6 +10,13 @@ class CardPairs(Range):
     default = 4
 
 
+class RevealRewards(Toggle):
+    """Start with all Bingo rewards hinted."""
+    display_name = "Reveal Rewards"
+    default = 1
+
+
 bingo_options: typing.Dict[str, type(Option)] = {
     "card_pairs": CardPairs,
+    "reveal_rewards": RevealRewards
 }

@@ -66,6 +66,7 @@ class BingoWorld(World):
         self.world.itempool += pool
         self.world.get_location("Completed Cards", self.player).place_locked_item(BingoItem("Completion", self.player))
         self.world.completion_condition[self.player] = lambda state: state.has("Completion", self.player)
+        self.sending_visible = self.world.reveal_rewards[self.player]
 
     def set_rules(self):
         self.generate_cards(self.world, self.player)
@@ -91,8 +92,9 @@ class BingoWorld(World):
         with open(out_file, 'w') as f:
             # Web design is my passion, as you can tell
             f.write("<HTML><HEAD><STYLE>body {font-family: Courier;}</STYLE></HEAD><BODY>")
-            for card in self.cards[self.player]:
-                f.write("|--------------|<BR>|&nbsp; B I N G O &nbsp;&nbsp;|<BR>|--------------|<BR>")
+            for cardnum in range(0, len(self.cards[self.player])):
+                card = self.cards[self.player][cardnum]
+                f.write(f"|--------------|<BR>| B I N G O &nbsp;{cardnum} |<BR>|--------------|<BR>")
                 for row in card:
                     f.write("|")
                     for c in row:
