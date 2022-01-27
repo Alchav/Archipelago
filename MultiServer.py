@@ -736,10 +736,11 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
         for player in bingo_checks:
             bingo_call(ctx, team, player)
 
+
 def bingo_call(ctx, team, player):
     from worlds.bingo.Locations import location_table
     cards = ctx.slot_data[player]['cards']
-    received_items = get_received_items(ctx, team, player)
+    received_items = get_received_items(ctx, team, player, True)
     bingocalls = []
     for b in received_items:
         bingocalls.append(get_item_name_from_id(b.item))
@@ -779,6 +780,13 @@ def bingo_call(ctx, team, player):
             if not failed_line:
                 loc = f"Card {card+1} Diagonal {line+1}"
                 register_location_checks(ctx, team, player, {location_table[loc]})
+    if len(bingocalls) == len(cards) * 12:
+        ctx.client_game_state[team, player] = ClientStatus.CLIENT_GOAL
+        finished_msg = f'{ctx.get_aliased_name(team, player)} (Team #{team + 1})' \
+                       f' has been completed.'
+        ctx.notify_all(finished_msg)
+
+
 
 
 

@@ -13,7 +13,7 @@ class CardPairs(Range):
 class RevealRewards(Toggle):
     """Start with all Bingo rewards hinted."""
     display_name = "Reveal Rewards"
-    default = 1
+    default = 0
 
 
 class ForceNonLocal(Toggle):
