@@ -13,7 +13,6 @@ from Utils import restricted_loads
 from worlds import lookup_any_item_id_to_name, lookup_any_location_id_to_name
 from MultiServer import get_item_name_from_id, Context
 
-
 alttp_icons = {
     "Blue Shield": r"https://www.zeldadungeon.net/wiki/images/8/85/Fighters-Shield.png",
     "Red Shield": r"https://www.zeldadungeon.net/wiki/images/5/55/Fire-Shield.png",
@@ -909,19 +908,20 @@ def __renderBingoTracker(multisave: Dict[str, Any], room: Room, locations: Dict[
     from worlds.bingo.Items import item_table
     ordered_items = multisave.get('received_items', {}).get((team, player, True), [])
     # web design is my passion
-    text = "<HTML><HEAD><STYLE>body {font-family: Courier;}</STYLE></HEAD><BODY>"
+    text = "<HTML><HEAD><title>Bingo tracker</title><meta http-equiv=\"refresh\" content=\"15\" />"
+    text += "<STYLE>body {font-family: Courier;}</STYLE></HEAD><BODY><table><tr>"
     for cardnum in range(0, len(slot_data["cards"])):
-        text += "|--------------|<BR>"
-        text += f"| B I N G O &nbsp;{cardnum+1} |<BR>"
+        text += "<td>|--------------|<BR>"
+        text += "|B&nbsp;&nbsp;I&nbsp;&nbsp;N&nbsp;&nbsp;G&nbsp;&nbsp;O&nbsp;|<br>"
         text += "|--------------|<BR>"
         for row in slot_data["cards"][cardnum]:
             text += "|"
             for c in row:
+                s = False
                 if c == 0:
                     c = "**"
                 else:
                     itemid = item_table[c].code
-                    s = False
                     for i in ordered_items:
                         if i.item == itemid:
                             s = True
@@ -931,13 +931,17 @@ def __renderBingoTracker(multisave: Dict[str, Any], room: Room, locations: Dict[
                 else:
                     text += f"{c}|"
             text += "<br>"
-        text += "|--------------|<br><br>"
-    text += "</BODY></HTML"
+        text += "|--------------|<br>"
+        text += f"|&nbsp;&nbsp;Card&nbsp;&nbsp;&nbsp;#&nbsp;{cardnum+1}&nbsp;&nbsp;|<br>"
+        text += "|--------------|</td>"
+    text += "</tr></table></BODY></HTML"
     return text
 
 def __renderGenericTracker(multisave: Dict[str, Any], room: Room, locations: Dict[int, Dict[int, Tuple[int, int, int]]],
                            inventory: Counter, team: int, player: int, playerName: str,
                            seed_checks_in_area: Dict[int, Dict[str, int]], checks_done: Dict[str, int]) -> str:
+
+    checked_locations = multisave.get("location_checks", {}).get((team, player), set())
     player_received_items = {}
     if multisave.get('version', 0) > 0:
         # add numbering to all items but starter_inventory
