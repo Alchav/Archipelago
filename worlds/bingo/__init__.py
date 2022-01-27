@@ -93,7 +93,7 @@ class BingoWorld(World):
         filename = f"AP-{self.world.seed_name}-P{self.player}-{self.world.player_name[self.player]}.html"
         out_file = os.path.join(output_directory, filename)
         with open(out_file, 'w') as f:
-            # Web design is my passion, as you can tell
+            # Web design is my passion
             f.write("<HTML><HEAD><STYLE>body {font-family: Courier;}</STYLE></HEAD><BODY>")
             for cardnum in range(0, len(self.cards[self.player])):
                 card = self.cards[self.player][cardnum]
@@ -104,7 +104,7 @@ class BingoWorld(World):
                         if c == 0:
                             f.write("**|")
                         else:
-                            f.write(str(c) + "|")
+                            f.write(str(c.split()[2]) + "|")
                     f.write("<BR>|--------------|<BR>")
                 f.write("<BR>")
             f.write("</BODY></HTML>")
