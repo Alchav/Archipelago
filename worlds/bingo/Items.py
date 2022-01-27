@@ -109,10 +109,6 @@ item_table = {
     "D9": ItemData(993),
     "E9": ItemData(994),
     "F9": ItemData(995),
-    "G9": ItemData(996),
-    "H9": ItemData(997),
-    "I9": ItemData(998),
-    "J9": ItemData(999),
     "Completion": ItemData(None)
 }
 

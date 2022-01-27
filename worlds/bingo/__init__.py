@@ -1,6 +1,6 @@
 import string
 
-from BaseClasses import Item, MultiWorld, Region, Location, Entrance
+from BaseClasses import Item, MultiWorld, Region, Location, Entrance, LocationProgressType
 from .Items import item_table
 from .Locations import location_table
 from .Rules import set_rules
@@ -60,7 +60,10 @@ class BingoWorld(World):
         b = 0
         for _ in range(0, card_pairs):
             for _ in range(0, 24):
-                pool.append(BingoItem(items[b], self.player))
+                item = BingoItem(items[b], self.player)
+                pool.append(item)
+                if self.world.force_non_local[self.player]:
+                    self.world.non_local_items[self.player].value.add(item.name)
                 b += 1
 
         self.world.itempool += pool
@@ -94,7 +97,7 @@ class BingoWorld(World):
             f.write("<HTML><HEAD><STYLE>body {font-family: Courier;}</STYLE></HEAD><BODY>")
             for cardnum in range(0, len(self.cards[self.player])):
                 card = self.cards[self.player][cardnum]
-                f.write(f"|--------------|<BR>| B I N G O &nbsp;{cardnum} |<BR>|--------------|<BR>")
+                f.write(f"|--------------|<BR>| B I N G O &nbsp;{cardnum+1} |<BR>|--------------|<BR>")
                 for row in card:
                     f.write("|")
                     for c in row:
@@ -117,6 +120,8 @@ def create_region(world: MultiWorld, player: int, name: str, locations=None, exi
                 if loc_id - 900 >= (world.card_pairs[player] * 24):
                     continue
             location = BingoLocation(player, location, loc_id, ret)
+            if world.advancement_items_only[player]:
+                location.progress_type = LocationProgressType.PRIORITY
             ret.locations.append(location)
     if exits:
         for exit in exits:

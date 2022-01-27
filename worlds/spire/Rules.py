@@ -1,7 +1,7 @@
 from BaseClasses import MultiWorld
 from ..AutoWorld import LogicMixin
 from ..generic.Rules import set_rule
-
+import logging
 
 class SpireLogic(LogicMixin):
     def _spire_has_relics(self, player: int, amount: int) -> bool:
@@ -15,6 +15,7 @@ class SpireLogic(LogicMixin):
 
 def set_rules(world: MultiWorld, player: int):
 
+    logging.info("Create rules Spire")
     # Act 1 Card Draws
     set_rule(world.get_location("Card Draw 1", player), lambda state: True)
     set_rule(world.get_location("Card Draw 2", player), lambda state: True)

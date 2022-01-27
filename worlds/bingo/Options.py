@@ -16,7 +16,21 @@ class RevealRewards(Toggle):
     default = 1
 
 
+class ForceNonLocal(Toggle):
+    """Automatically place all Bingo calls into the non-local-items list"""
+    display_name = "Force Non-Local"
+    default = 1
+
+
+class AdvancementItemsOnly(Toggle):
+    """Restrict Bingo cards to have only advancement items"""
+    display_name = "Advancement Items Only"
+    default = 1
+
+
 bingo_options: typing.Dict[str, type(Option)] = {
     "card_pairs": CardPairs,
-    "reveal_rewards": RevealRewards
+    "reveal_rewards": RevealRewards,
+    "force_non_local": ForceNonLocal,
+    "advancement_items_only": AdvancementItemsOnly
 }
