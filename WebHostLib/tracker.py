@@ -925,7 +925,6 @@ def __renderBingoTracker(multisave: Dict[str, Any], room: Room, locations: Dict[
                     for i in ordered_items:
                         if i.item == itemid:
                             s = True
-                loc = f"Card {cardnum+1} "
                 if s:
                     text += f"<s>{c.split()[2]}</s>|"
                 else:
