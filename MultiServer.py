@@ -722,6 +722,8 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
                 ctx.player_names[(team, target_player)], get_location_name_from_id(location)))
             info_text = json_format_send_event(new_item, target_player)
             ctx.broadcast_team(team, [info_text])
+            if ctx.games[target_player] == 'Bingo':
+                bingo_checks.add(target_player)
 
         ctx.location_checks[team, slot] |= new_locations
         send_new_items(ctx)
@@ -740,8 +742,6 @@ def bingo_call(ctx, team, player):
     cards = ctx.slot_data[player]['cards']
     received_items = get_received_items(ctx, team, player, True)
     bingocalls = []
-    logging.info("XXX")
-    breakpoint()
     for b in received_items:
         bingocalls.append(get_item_name_from_id(b.item))
     for card in range(0, len(cards)):
@@ -750,9 +750,8 @@ def bingo_call(ctx, team, player):
             row = cards[card][r]
             failed_line = 0
             for i in row:
-                if i != 0:
-                    if i.split()[2] not in bingocalls:
-                        failed_line = 1
+                if i not in bingocalls and i != 0:
+                    failed_line = 1
             if not failed_line:
                 loc = f"Card {card+1} Horizontal {r+1}"
                 register_location_checks(ctx, team, player, {location_table[loc]})
@@ -760,9 +759,8 @@ def bingo_call(ctx, team, player):
         for c in range(0, 5):
             failed_line = 0
             for r in range(0, 5):
-                if cards[card][r][c] != 0:
-                    if cards[card][r][c].split()[2] not in bingocalls:
-                        failed_line = 1
+                if cards[card][r][c] not in bingocalls and cards[card][r][c] != 0:
+                    failed_line = 1
             if not failed_line:
                 loc = f"Card {card+1} Vertical {c+1}"
                 register_location_checks(ctx, team, player, {location_table[loc]})
@@ -777,9 +775,8 @@ def bingo_call(ctx, team, player):
                     diag.append(cards[card][4-x][x])
             failed_line = 0
             for i in diag:
-                if i != 0:
-                    if i.split()[2] not in bingocalls:
-                        failed_line = 1
+                if i not in bingocalls and i != 0:
+                    failed_line = 1
             if not failed_line:
                 loc = f"Card {card+1} Diagonal {line+1}"
                 register_location_checks(ctx, team, player, {location_table[loc]})

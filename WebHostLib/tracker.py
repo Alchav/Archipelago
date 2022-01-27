@@ -917,19 +917,19 @@ def __renderBingoTracker(multisave: Dict[str, Any], room: Room, locations: Dict[
         for row in slot_data["cards"][cardnum]:
             text += "|"
             for c in row:
-                s = False
                 if c == 0:
-                    c = "Bingo Call **"
+                    c = "**"
                 else:
                     itemid = item_table[c].code
+                    s = False
                     for i in ordered_items:
                         if i.item == itemid:
                             s = True
                 loc = f"Card {cardnum+1} "
                 if s:
-                    text += f"<s>{c.split()[2]}</s>|"
+                    text += f"<s>{c}</s>|"
                 else:
-                    text += f"{c.split()[2]}|"
+                    text += f"{c}|"
             text += "<br>"
         text += "|--------------|<br><br>"
     text += "</BODY></HTML"
