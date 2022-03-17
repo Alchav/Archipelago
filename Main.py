@@ -208,6 +208,8 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                                                                 group["replacement_items"][player]))
                 else:
                     AutoWorld.call_single(world, "create_filler", player)
+                if itemcount >= len(world.itempool):
+                    break
     if any(world.item_links.values()):
         world._recache()
         world._all_state = None
