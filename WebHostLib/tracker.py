@@ -213,6 +213,8 @@ del item
 
 def attribute_item(inventory, team, recipient, item):
     target_item = links.get(item, item)
+    if recipient + 1 > len(inventory[team]):
+        return
     if item in levels:  # non-progressive
         inventory[team][recipient][target_item] = max(inventory[team][recipient][target_item], levels[item])
     else:
