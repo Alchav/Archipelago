@@ -1030,7 +1030,8 @@ def getTracker(tracker: UUID):
                 item_id, item_player, flags = values
             else: # TODO: remove around version 0.2.5
                 item_id, item_player = values
-
+            if item_player not in player_big_key_locations.keys():
+                continue
             if item_id in ids_big_key:
                 player_big_key_locations[item_player].add(ids_big_key[item_id])
             elif item_id in ids_small_key:
