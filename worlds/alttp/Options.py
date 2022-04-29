@@ -76,7 +76,7 @@ class map_shuffle(DungeonItem):
 class key_drop_shuffle(Toggle):
     """Shuffle keys found in pots and dropped from killed enemies."""
     display_name = "Key Drop Shuffle"
-    default = False
+    default = True
 
 class Crystals(Range):
     range_start = 0
