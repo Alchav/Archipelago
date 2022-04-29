@@ -1408,7 +1408,7 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
                 errors.add('InvalidGame')
             minver = min_client_version if ignore_game else ctx.minimum_client_versions[slot]
             if minver > args['version']:
-                errors.add('IncompatibleVersion')
+                pass # errors.add('IncompatibleVersion')
             if args.get('items_handling', None) is None:
                 # fall back to load from multidata
                 client.no_items = False
