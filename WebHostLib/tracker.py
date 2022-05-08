@@ -979,8 +979,8 @@ def getTracker(tracker: UUID):
     for loc_data in locations.values():
          for values in loc_data.values():
             item_id, item_player, flags = values
-            if item_player not in player_big_key_locations.keys():
-                continue
+            #if item_player not in player_big_key_locations.keys():
+            #    continue
             if item_id in ids_big_key:
                 player_big_key_locations[item_player].add(ids_big_key[item_id])
             elif item_id in ids_small_key:

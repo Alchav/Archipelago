@@ -165,11 +165,12 @@ def distribute_items_restrictive(world: MultiWorld) -> None:
     prioritylocations = locations[LocationProgressType.PRIORITY]
     defaultlocations = locations[LocationProgressType.DEFAULT]
     excludedlocations = locations[LocationProgressType.EXCLUDED]
-
+    print(f"priority: {len(prioritylocations)} loc, {len(progitempool)} items")
     fill_restrictive(world, world.state, prioritylocations, progitempool)
     if prioritylocations:
         defaultlocations = prioritylocations + defaultlocations
 
+    print(f"prog fill: {len(defaultlocations)} loc, {len(progitempool)} items")
     if progitempool:
         fill_restrictive(world, world.state, defaultlocations, progitempool)
         if progitempool:

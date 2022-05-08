@@ -211,6 +211,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                 item_to_add.never_exclude = False
                 item_to_add.advancement = False
                 items_to_add.append(item_to_add)
+                print(f"{item_to_add.name}")
             world.random.shuffle(items_to_add)
             world.itempool.extend(items_to_add[:itemcount - len(world.itempool)])
 
@@ -364,7 +365,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
 
                 locations_data: Dict[int, Dict[int, Tuple[int, int, int]]] = {player: {} for player in world.player_ids}
                 for location in world.get_filled_locations():
-                    if type(location.address) == int:
+                    if type(location.address) == int and location.item.code is not None:
                         assert location.item.code is not None, "item code None should be event, " \
                                                                "location.address should then also be None"
                         locations_data[location.player][location.address] = \
