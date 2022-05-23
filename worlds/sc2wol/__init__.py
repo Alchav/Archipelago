@@ -122,8 +122,8 @@ def assign_starter_items(world: MultiWorld, player: int, excluded_items: Set[str
     if not local_basic_unit:
         raise Exception("At least one basic unit must be local")
 
-    assign_starter_item(world, player, excluded_items, locked_locations, 'Liberation Day: First Statue',
-                        local_basic_unit)
+    #assign_starter_item(world, player, excluded_items, locked_locations, 'Liberation Day: First Statue',
+    #                    local_basic_unit)
 
 
 def assign_starter_item(world: MultiWorld, player: int, excluded_items: Set[str], locked_locations: List[str],
