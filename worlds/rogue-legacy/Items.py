@@ -49,7 +49,7 @@ static_classes_table = {
 progressive_classes_table = {
     ItemName.progressive_knight: ItemData(90003, False, 2),
     ItemName.progressive_mage: ItemData(90004, False, 2),
-    ItemName.progressive_barbarian: ItemData(90005, False, 2),
+    ItemName.progressive_barbarian: ItemData(90005, True, 2),
     ItemName.progressive_knave: ItemData(90006, False, 2),
     ItemName.progressive_shinobi: ItemData(90007, False, 2),
     ItemName.progressive_miner: ItemData(90008, False, 2),
@@ -58,12 +58,12 @@ progressive_classes_table = {
 }
 
 configurable_skill_unlocks_table = {
-    ItemName.health: ItemData(90013, True, 15),
-    ItemName.mana: ItemData(90014, True, 15),
-    ItemName.attack: ItemData(90015, True, 15),
-    ItemName.magic_damage: ItemData(90016, True, 15),
-    ItemName.armor: ItemData(90017, True, 10),
-    ItemName.equip: ItemData(90018, True, 10),
+    ItemName.health: ItemData(90013, False, 15),
+    ItemName.mana: ItemData(90014, False, 15),
+    ItemName.attack: ItemData(90015, False, 15),
+    ItemName.magic_damage: ItemData(90016, False, 15),
+    ItemName.armor: ItemData(90017, False, 10),
+    ItemName.equip: ItemData(90018, False, 10),
     ItemName.crit_chance: ItemData(90019, False, 5),
     ItemName.crit_damage: ItemData(90020, False, 5),
 }
@@ -98,7 +98,7 @@ blueprints_table = {
 }
 
 progressive_blueprint_table = {
-    ItemName.progressive_blueprints: ItemData(90055, False),
+    ItemName.progressive_blueprints: ItemData(90055, True),
 }
 
 runes_table = {
@@ -111,7 +111,7 @@ runes_table = {
     ItemName.bounty_runes: ItemData(90066, False),
     ItemName.haste_runes: ItemData(90067, False),
     ItemName.curse_runes: ItemData(90068, False),
-    ItemName.grace_runes: ItemData(90069, False),
+    ItemName.grace_runes: ItemData(90069, True),
     ItemName.balance_runes: ItemData(90070, False),
 }
 

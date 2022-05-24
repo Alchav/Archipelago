@@ -152,11 +152,11 @@ def set_rules(world: MultiWorld, player: int):
 
     # Standard Zone Progression
     set_rule(world.get_location(LocationName.garden, player),
-             lambda state: state._legacy_has_stat_upgrades(player, 0.125 * state._legacy_total_stat_upgrades_count(player)) and state.has(ItemName.boss_castle, player))
+             lambda state: state.has("Progressive Blueprints", player, 3) and state.has(ItemName.boss_castle, player))
     set_rule(world.get_location(LocationName.tower, player),
-             lambda state: state._legacy_has_stat_upgrades(player, 0.3125 * state._legacy_total_stat_upgrades_count(player)) and state.has(ItemName.boss_forest, player))
+             lambda state: state.has("Progressive Blueprints", player, 7) and state.has("Progressive Barbarians", player) and state.has(ItemName.boss_forest, player))
     set_rule(world.get_location(LocationName.dungeon, player),
-             lambda state: state._legacy_has_stat_upgrades(player, 0.5 * state._legacy_total_stat_upgrades_count(player)) and state.has(ItemName.boss_tower, player))
+             lambda state: state.has("Progressive Blueprints", player, 11) and state.has("Progressive Barbarians", player) and state.has("Grace Runes", player) and state.has(ItemName.boss_tower, player))
 
     # Bosses
     set_rule(world.get_location(LocationName.boss_castle, player),
@@ -168,8 +168,7 @@ def set_rules(world: MultiWorld, player: int):
     set_rule(world.get_location(LocationName.boss_dungeon, player),
              lambda state: state.has(ItemName.boss_dungeon, player))
     set_rule(world.get_location(LocationName.fountain, player),
-             lambda state: state._legacy_has_stat_upgrades(player, 0.625 * state._legacy_total_stat_upgrades_count(player))
-                and state.has(ItemName.boss_castle, player)
+             lambda state: state.has("Progressive Blueprints", player, 15) and state.has(ItemName.boss_castle, player)
                 and state.has(ItemName.boss_forest, player)
                 and state.has(ItemName.boss_tower, player)
                 and state.has(ItemName.boss_dungeon, player))

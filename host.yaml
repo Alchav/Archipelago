@@ -70,7 +70,7 @@ generator:
   # 0 -> None
   # 1 -> Spoiler without playthrough
   # 2 -> Full spoiler
-  spoiler: 1
+  spoiler: 2
   # Glitch to Triforce room from Ganon
   # When disabled, you have to have a weapon that can hurt ganon (master sword or swordless/easy item functionality + hammer)
   # and have completed the goal required for killing ganon to be able to access the triforce room.
