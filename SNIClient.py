@@ -1135,6 +1135,63 @@ async def game_watcher(ctx: Context):
                 ctx.locations_scouted.add(scout_location)
                 await ctx.send_msgs([{"cmd": "LocationScouts", "locations": [scout_location]}])
             await track_locations(ctx, roomid, roomdata)
+
+            def create_hint(loc):
+                asyncio.create_task(ctx.send_msgs([{"cmd": "LocationScouts", "locations": [loc], "create_as_hint": True}]))
+
+            # pos = await snes_read(ctx, WRAM_START + 0x20, 4)
+            # (x, y) = (pos[3] * 256 + pos[2], pos[1] * 256 + pos[0])
+            # ow_screen = await snes_read(ctx, WRAM_START + 0x8A, 1)
+            # ow_screen = ow_screen[0]
+            # dungeon_room = await snes_read(ctx, WRAM_START + 0xA0, 2)
+            # dungeon_room = dungeon_room[1] * 256 + dungeon_room[0]
+            # if gamemode[0] == 0x09:  # overworld
+            #     if ow_screen == 0x30:  # Desert
+            #         if 0x0F00 > y > 0x03EE and x < 0xE2:
+            #     elif ow_screen == 0x03:  # West Death Mountain
+            #         if 0x0888 > x > 0x0799 and 0x01C9 > y > 0x00EC:
+            #             create_hint(1573184)
+            #     elif ow_screen == 0x05:  # East Death Mountain
+            #         if 0x0D6D > x > 0x0C70 and y < 0x0098:
+            #             create_hint(1573185)
+            #     elif ow_screen == 0x35:  # Lake Hylia
+            #         if 0x0C0D > x > 0x0B1F and 0x0CC1 > y > 0x0D94:
+            #             create_hint(1573188)
+            #     elif ow_screen == 0x28:  # Maze Raze
+            #         if x < 0x010:
+            #             create_hint(1573186)
+            #     elif ow_screen == 0x4A:  # Bumper Cave Entrance
+            #         if x > 0x04F8 and y < 0x02E4:
+            #             create_hint(1573190)
+            # elif gamemode[0] == 0x0B:  # special overworld
+            #     if ow_screen == 0x81:  # Zora
+            #         if 0x0330 < x < 0x042F and 0x02DC > y > 0x01FD:
+            #             create_hint(1573193)
+            # elif gamemode == 0x07:  # dungeon
+            #     if dungeon_room == 0x010F: # Village of Outcasts Shop
+            #         create_hint(4194316)
+            #         create_hint(4194317)
+            #         create_hint(4194318)
+            #     elif dungeon_room == 0x010f: # Dark World Lumberjack Shop
+            #         create_hint(4194313)
+            #         create_hint(4194314)
+            #         create_hint(4194315)
+            #     elif dungeon_room == 0x010f: # Dark Lake Hylia Shop
+            #         pass
+            #     elif dungeon_room == 0x0110: # Dark World Potion Shop
+            #         create_hint(4194319)
+            #         create_hint(4194320)
+            #         create_hint(4194321)
+            #     elif dungeon_room == 0x011F: # Kakariko Shop
+            #         if x > 0x1F37:
+            #             create_hint(4194325)
+            #             create_hint(4194326)
+            #             create_hint(4194327)
+            #     elif dungeon_room == 0x0112: # Lake Hylia Cave Shop
+            #         pass
+
+
+
         elif ctx.game == GAME_SM:
             gamemode = await snes_read(ctx, WRAM_START + 0x0998, 1)
             if "DeathLink" in ctx.tags and gamemode and ctx.last_death_link + 1 < time.time():
