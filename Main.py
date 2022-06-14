@@ -150,10 +150,10 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             for item in world.itempool:
                 if item.player == player:
                     player_item_pool[item.name] = player_item_pool.setdefault(item.name, 0) + 1
-            if not world.custom_item_pool[player].value.setdefault('use_defaults', True):
+            if world.custom_item_pool[player].value.setdefault('use_defaults', True):
                 custom_item_pool = player_item_pool.copy()
             for item_name, count in world.custom_item_pool[player].value.setdefault('set', {}).items():
-                    custom_item_pool[item_name] = count
+                custom_item_pool[item_name] = count
             for item_name, modify in world.custom_item_pool[player].value.setdefault('modify', {}).items():
                 custom_item_pool[item_name] = custom_item_pool.setdefault(item_name, 0) + modify
             for item_name, replacement in world.custom_item_pool[player].value.setdefault('replace', {}).items():
@@ -162,13 +162,17 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             for item_name, custom_pool_count in custom_item_pool.items():
                 player_pool_count = player_item_pool.setdefault(item_name, 0)
                 if custom_pool_count > player_pool_count:
+                    item = world.create_item(item_name, player)
                     for _ in range(0, custom_pool_count - player_pool_count):
-                        item = world.create_item(item_name, player)
                         world.itempool.append(item)
                 elif custom_pool_count < player_pool_count:
+                    item = world.create_item(item_name, player)
                     for _ in range(0, player_pool_count - custom_pool_count):
-                        item = world.create_item(item_name, player)
-                        world.itempool.remove(item)
+                        try:
+                            world.itempool.remove(item)
+                        except ValueError:
+                            logging.warning(f"Could not remove {item.name} for {world.player_name[player]} for custom item pool, item does not exist")
+                            break
             if world.custom_item_pool[player].value.setdefault('item_pool_correction', True):
                 custom_pool_size = sum(custom_item_pool.values())
                 player_pool_size = sum(player_item_pool.values())
@@ -183,11 +187,11 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                             if removed_items == diff:
                                 break
                     else:
-                        logging.warning(f"Unable to remove enough filler items for player {world.player_mame[player]} to correct item pool size")
-                        logging.warning(f"Player {world.player_mame[player]}'s item pool oversized by {diff - removed_items} items")
+                        logging.warning(f"Unable to remove enough filler items for player {world.player_name[player]} to correct item pool size")
+                        logging.warning(f"Player {world.player_name[player]}'s item pool oversized by {diff - removed_items} items")
                 for _ in range(diff, 0):
                     world.itempool.append(AutoWorld.call_single(world, "create_filler", player))
-
+        print(f"{world.player_name[player]} - {sum(custom_item_pool.values()) - sum(player_item_pool.values())}")
 
     for group_id, group in world.groups.items():
         def find_common_pool(players: Set[int], shared_pool: Set[str]):
@@ -260,7 +264,6 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                 item_to_add.never_exclude = False
                 item_to_add.advancement = False
                 items_to_add.append(item_to_add)
-                print(f"{item_to_add.name}")
             world.random.shuffle(items_to_add)
             world.itempool.extend(items_to_add[:itemcount - len(world.itempool)])
 

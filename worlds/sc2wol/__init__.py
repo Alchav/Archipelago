@@ -139,7 +139,7 @@ def assign_starter_items(world: MultiWorld, player: int, excluded_items: Set[str
         first_location = first_location + ": Victory"
 
     #assign_starter_item(world, player, excluded_items, locked_locations, first_location,
-                        local_basic_unit)
+    #                    local_basic_unit)
 
 
 def assign_starter_item(world: MultiWorld, player: int, excluded_items: Set[str], locked_locations: List[str],
