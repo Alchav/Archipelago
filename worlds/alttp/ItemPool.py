@@ -464,7 +464,7 @@ def generate_itempool(world):
 
     world.itempool += progressionitems + nonprogressionitems
 
-    if world.retro[player]:
+    if world.retro_caves[player]:
         set_up_take_anys(world, player)  # depends on world.itempool to be set
 
 
@@ -555,7 +555,7 @@ def get_pool_core(world, player: int):
     goal = world.goal[player]
     mode = world.mode[player]
     swordless = world.swordless[player]
-    retro = world.retro[player]
+    retro_bow = world.retro_bow[player]
     logic = world.logic[player]
 
     pool = []
@@ -671,7 +671,7 @@ def get_pool_core(world, player: int):
         place_item('Master Sword Pedestal', 'Triforce')
         pool.remove("Rupees (20)")
 
-    if retro:
+    if retro_bow:
         replace = {'Single Arrow', 'Arrows (10)', 'Arrow Upgrade (+5)', 'Arrow Upgrade (+10)'}
         pool = ['Rupees (5)' if item in replace else item for item in pool]
     if world.smallkey_shuffle[player] == smallkey_shuffle.option_universal:
