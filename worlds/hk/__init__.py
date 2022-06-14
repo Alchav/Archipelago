@@ -206,9 +206,12 @@ class HKWorld(World):
             geo_replace.add("Shade_Soul")
             geo_replace.add("Descending_Dark")
 
+        location_types = {1: LocationProgressType.DEFAULT, 2: LocationProgressType.PRIORITY, 3:
+                          LocationProgressType.EXCLUDED}
         wp_exclusions = self.white_palace_exclusions()
         for option_key, option in hollow_knight_randomize_options.items():
-            if getattr(self.world, option_key)[self.player]:
+            option_choice = getattr(self.world, option_key)[self.player]
+            if option_choice:
                 for item_name, location_name in zip(option.items, option.locations):
                     if location_name in wp_exclusions:
                         continue
@@ -219,8 +222,8 @@ class HKWorld(World):
                     if location_name == "Start":
                         self.world.push_precollected(item)
                     else:
-                        self.create_location(location_name)
                         pool.append(item)
+                        self.create_location(location_name).progress_type = location_types[option_choice]
             # elif option_key not in logicless_options:
             else:
                 for item_name, location_name in zip(option.items, option.locations):
