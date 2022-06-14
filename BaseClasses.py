@@ -225,7 +225,8 @@ class MultiWorld():
                     item_links[item_link["name"]]["non_local_items"] &= set(item_link.get("non_local_items", []))
                 else:
                     if item_link["name"] in self.player_name.values():
-                        raise Exception(f"Cannot name a ItemLink group the same as a player ({item_link['name']}) ({self.get_player_name(player)}).")
+                        raise Exception(
+                            f"Cannot name a ItemLink group the same as a player ({item_link['name']}) ({self.get_player_name(player)}).")
                     item_links[item_link["name"]] = {
                         "players": {player: item_link["replacement_item"]},
                         "item_pool": set(item_link["item_pool"]),
@@ -436,7 +437,8 @@ class MultiWorld():
                     location.player == player and location.item is not None]
         return [location for location in self.get_locations() if location.item is not None]
 
-    def get_reachable_locations(self, state: Optional[CollectionState] = None, player: Optional[int] = None) -> List[Location]:
+    def get_reachable_locations(self, state: Optional[CollectionState] = None, player: Optional[int] = None) -> List[
+        Location]:
         if state is None:
             state = self.state
         return [location for location in self.get_locations() if
@@ -547,8 +549,8 @@ class MultiWorld():
         def location_relevant(location: Location):
             """Determine if this location is relevant to sweep."""
             if location.progress_type != LocationProgressType.EXCLUDED \
-                and (location.player in players["locations"] or location.event
-                     or (location.item and location.item.advancement)):
+                    and (location.player in players["locations"] or location.event
+                         or (location.item and location.item.advancement)):
                 return True
             return False
 
@@ -1181,7 +1183,8 @@ class Item():
 
     @property
     def flags(self) -> int:
-        return self.advancement + (self.never_exclude << 1) + (self.trap << 2)
+        return self.advancement + (self.never_exclude << 1) + (self.trap << 2) \
+               + ((0 if self.location is None else (self.location.progress_type == LocationProgressType.EXCLUDED)) << 3)
 
     def __eq__(self, other):
         return self.name == other.name and self.player == other.player
