@@ -191,7 +191,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                         logging.warning(f"Player {world.player_name[player]}'s item pool oversized by {diff - removed_items} items")
                 for _ in range(diff, 0):
                     world.itempool.append(AutoWorld.call_single(world, "create_filler", player))
-        print(f"{world.player_name[player]} - {sum(custom_item_pool.values()) - sum(player_item_pool.values())}")
+        #print(f"{world.player_name[player]} - {sum(custom_item_pool.values()) - sum(player_item_pool.values())}")
 
     for group_id, group in world.groups.items():
         def find_common_pool(players: Set[int], shared_pool: Set[str]):

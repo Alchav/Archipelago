@@ -16,6 +16,7 @@ import pickle
 import itertools
 import time
 import operator
+import math
 
 import ModuleUpdate
 
@@ -111,6 +112,8 @@ class Context:
 
     simple_options = {"hint_cost": int,
                       "location_check_points": int,
+                      "minutes_to_hint": int,
+                      "hint_start_time": int,
                       "server_password": str,
                       "password": str,
                       "forfeit_mode": str,
@@ -127,7 +130,7 @@ class Context:
     stored_data_notification_clients: typing.Dict[str, typing.Set[Client]]
 
     def __init__(self, host: str, port: int, server_password: str, password: str, location_check_points: int,
-                 hint_cost: int, item_cheat: bool, forfeit_mode: str = "disabled", collect_mode="disabled",
+                 hint_cost: int, minutes_to_hint: int, item_cheat: bool, forfeit_mode: str = "disabled", collect_mode="disabled",
                  remaining_mode: str = "disabled", auto_shutdown: typing.SupportsFloat = 0, compatibility: int = 2,
                  log_network: bool = False):
         super(Context, self).__init__()
@@ -161,6 +164,8 @@ class Context:
         self.hint_cost = hint_cost
         self.player_hint_costs = {}
         self.location_check_points = location_check_points
+        self.minutes_to_hint = minutes_to_hint
+        self.hint_start_time = int(time.time())
         self.hints_used = collections.defaultdict(int)
         self.hints: typing.Dict[team_slot, typing.Set[NetUtils.Hint]] = collections.defaultdict(set)
         self.forfeit_mode: str = forfeit_mode
@@ -446,6 +451,7 @@ class Context:
             "group_collected": dict(self.group_collected),
             "stored_data": self.stored_data,
             "game_options": {"hint_cost": self.hint_cost, "location_check_points": self.location_check_points,
+                             "minutes_to_hint": self.minutes_to_hint, "hint_start_time": self.hint_start_time,
                              "server_password": self.server_password, "password": self.password, "forfeit_mode":
                              self.forfeit_mode, "remaining_mode": self.remaining_mode, "collect_mode":
                              self.collect_mode, "item_cheat": self.item_cheat, "compatibility": self.compatibility}
@@ -484,6 +490,9 @@ class Context:
             self.collect_mode = savedata["game_options"]["collect_mode"]
             self.item_cheat = savedata["game_options"]["item_cheat"]
             self.compatibility = savedata["game_options"]["compatibility"]
+            if 'minutes_to_hint' in savedata["game_options"]:
+                self.minutes_to_hint = savedata["game_options"]["minutes_to_hint"]
+                self.hint_start_time = savedata["game_options"]["hint_start_time"]
 
         if "group_collected" in savedata:
             self.group_collected = savedata["group_collected"]
@@ -647,6 +656,7 @@ async def on_client_connected(ctx: Context, client: Client):
         'permissions': get_permissions(ctx),
         'hint_cost': ctx.hint_cost,
         'location_check_points': ctx.location_check_points,
+        'minutes_to_hint': ctx.minutes_to_hint,
         'datapackage_version': network_data_package["version"],
         'datapackage_versions': {game: game_data["version"] for game, game_data
                                  in network_data_package["games"].items()},
@@ -1373,13 +1383,14 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
 
 
 def get_client_points(ctx: Context, client: Client) -> int:
-    return (ctx.location_check_points * len([loc for loc in ctx.location_checks[client.team, client.slot]
-                                             if not ctx.locations[client.slot][loc][2] & 8]) - ctx.get_hint_cost(client.slot)
-                                             * ctx.hints_used[client.team, client.slot])
+    return ((ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) +
+             (int(((time.time() - ctx.hint_start_time) / (60 * ctx.minutes_to_hint)) * ctx.get_hint_cost(client.slot)))) -
+            ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
-    return (ctx.location_check_points * len([loc for loc in ctx.location_checks[team, slot] if not ctx.locations[slot][loc][2] & 8]) -
+    return ((ctx.location_check_points * len(ctx.location_checks[team, slot]) +
+             (int(((time.time() - ctx.hint_start_time) / (60 * ctx.minutes_to_hint)) * ctx.get_hint_cost(slot)))) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
 
 
@@ -1842,11 +1853,13 @@ class ServerCommandProcessor(CommonCommandProcessor):
                     if input_text.lower() in {"null", "none", '""', "''"}:
                         return None
                     return input_text
+            if option_name == "hint_start_time" and option == "now":
+                option = int(time.time())
             setattr(self.ctx, option_name, attrtype(option))
             self.output(f"Set option {option_name} to {getattr(self.ctx, option_name)}")
             if option_name in {"forfeit_mode", "remaining_mode", "collect_mode"}:
                 self.ctx.broadcast_all([{"cmd": "RoomUpdate", 'permissions': get_permissions(self.ctx)}])
-            elif option_name in {"hint_cost", "location_check_points"}:
+            elif option_name in {"hint_cost", "location_check_points", "minutes_to_hint"}:
                 self.ctx.calculate_hint_costs()
                 self.ctx.broadcast_all([{"cmd": "RoomUpdate", option_name: getattr(self.ctx, option_name)}])
             return True
@@ -1888,6 +1901,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--loglevel', default=defaults["loglevel"],
                         choices=['debug', 'info', 'warning', 'error', 'critical'])
     parser.add_argument('--location_check_points', default=defaults["location_check_points"], type=int)
+    parser.add_argument('--minutes_to_hint', default=defaults["minutes_to_hint"], type=int)
     parser.add_argument('--hint_cost', default=defaults["hint_cost"], type=int)
     parser.add_argument('--disable_item_cheat', default=defaults["disable_item_cheat"], action='store_true')
     parser.add_argument('--forfeit_mode', default=defaults["forfeit_mode"], nargs='?',
@@ -1961,7 +1975,7 @@ async def main(args: argparse.Namespace):
     Utils.init_logging("Server", loglevel=args.loglevel.lower())
 
     ctx = Context(args.host, args.port, args.server_password, args.password, args.location_check_points,
-                  args.hint_cost, not args.disable_item_cheat, args.forfeit_mode, args.collect_mode,
+                  args.hint_cost, args.minutes_to_hint, not args.disable_item_cheat, args.forfeit_mode, args.collect_mode,
                   args.remaining_mode,
                   args.auto_shutdown, args.compatibility, args.log_network)
     data_filename = args.multidata
