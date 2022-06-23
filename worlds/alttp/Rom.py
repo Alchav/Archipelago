@@ -790,6 +790,8 @@ def patch_rom(world, rom, player, enemized):
                         rom.write_byte(location.player_address, min(location.item.player, ROM_PLAYER_LIMIT))
                     else:
                         itemid = 0x5A
+                    if location.item.name == "Exploding Triforce Piece":
+                        itemid = 0x6C
             location_address = old_location_address_to_new_location_address.get(location.address, location.address)
             rom.write_byte(location_address, itemid)
         else:
