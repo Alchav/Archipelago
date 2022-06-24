@@ -208,6 +208,8 @@ class HKWorld(World):
             junk_replace.add("Shade_Soul")
             junk_replace.add("Descending_Dark")
 
+        location_types = {1: LocationProgressType.DEFAULT, 2: LocationProgressType.PRIORITY, 3:
+                          LocationProgressType.EXCLUDED}
         wp_exclusions = self.white_palace_exclusions()
         for option_key, option in hollow_knight_randomize_options.items():
             randomized = getattr(self.world, option_key)[self.player]

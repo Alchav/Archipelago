@@ -11,6 +11,19 @@ else:
     Random = typing.Any
 
 
+class Disabled(Toggle):
+    def __init__(self, value: int):
+        super(Disabled, self).__init__(0)
+
+    @classmethod
+    def from_text(cls, text: str) -> Toggle:
+        return cls(0)
+
+    @classmethod
+    def from_any(cls, data: typing.Any):
+        return cls(0)
+
+
 locations = {"option_" + start: i for i, start in enumerate(starts)}
 # This way the dynamic start names are picked up by the MetaClass Choice belongs to
 StartLocation = type("StartLocation", (Choice,), {"__module__": __name__, "auto_display_name": False, **locations,
@@ -113,6 +126,16 @@ shop_to_option = {
     "Salubra_(Requires_Charms)": "IseldaShopSlots"
 }
 
+
+class RandomizeOptions(Choice):
+    option_off = 0
+    option_on = 1
+    option_priority = 2
+    option_exclude = 3
+    alias_true = 1
+    alias_false = 0
+
+
 hollow_knight_randomize_options: typing.Dict[str, type(Option)] = {}
 
 for option_name, option_data in pool_options.items():
@@ -120,9 +143,11 @@ for option_name, option_data in pool_options.items():
     if option_name in option_docstrings:
         extra_data["__doc__"] = option_docstrings[option_name]
     if option_name in default_on:
-        option = type(option_name, (DefaultOnToggle,), extra_data)
+        extra_data['default'] = 1
     else:
-        option = type(option_name, (Toggle,), extra_data)
+        extra_data['default'] = 0
+    extra_data['display_name'] = option_name[0:9] + ' ' + option_name[9:]
+    option = type(option_name, (RandomizeOptions,), extra_data)
     globals()[option.__name__] = option
     hollow_knight_randomize_options[option.__name__] = option
 
@@ -134,6 +159,9 @@ for option_name in logic_options.values():
     if option_name in option_docstrings:
         extra_data["__doc__"] = option_docstrings[option_name]
         option = type(option_name, (Toggle,), extra_data)
+    if option_name in disabled:
+        extra_data["__doc__"] = "Disabled Option. Not implemented."
+        option = type(option_name, (Disabled,), extra_data)
     globals()[option.__name__] = option
     hollow_knight_logic_options[option.__name__] = option
 
