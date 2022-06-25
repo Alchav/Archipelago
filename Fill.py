@@ -110,7 +110,7 @@ def fill_restrictive(world: MultiWorld, base_state: CollectionState, locations: 
                     # Can't place this item, move on to the next
                     unplaced_items.append(item_to_place)
                     continue
-
+            print(f"placing {item_to_place.name} at {spot_to_fill.name}")
             world.push_item(spot_to_fill, item_to_place, False)
             spot_to_fill.locked = lock
             placements.append(spot_to_fill)

@@ -115,6 +115,33 @@ default_on = {
     "RandomizeRelics"
 }
 
+no_shuffle = {
+    "RandomizeGrubs",
+    "RandomizeRancidEggs",
+    "RandomizeMimics",
+    "RandomizeMaskShards",
+    "RandomizeVesselFragments",
+    "RandomizeCharmNotches",
+    "RandomizePaleOre",
+    "RandomizeGrimmkinFlames",
+    "RandomizeFocus",
+    "RandomizeSwim",
+    "RandomizeNail"
+}
+
+allow_priority = {
+    "RandomizeDreamers",
+    "RandomizeSkills",
+    "RandomizeCharms",
+    "RandomizeKeys",
+    "RandomizeBossEssence",
+    "RandomizeGrubs",
+    "RandomizeStags",
+    "RandomizeWhisperingRoots",
+    "RandomizeGrimmkinFlames",
+    "RandomizeRancidEggs"
+}
+
 shop_to_option = {
     "Seer": "SeerRewardSlots",
     "Grubfather": "GrubfatherRewardSlots",
@@ -130,7 +157,6 @@ shop_to_option = {
 class RandomizeOptions(Choice):
     option_off = 0
     option_on = 1
-    option_priority = 2
     option_exclude = 3
     alias_true = 1
     alias_false = 0
@@ -142,12 +168,26 @@ for option_name, option_data in pool_options.items():
     extra_data = {"__module__": __name__, "items": option_data[0], "locations": option_data[1]}
     if option_name in option_docstrings:
         extra_data["__doc__"] = option_docstrings[option_name]
+
+    extra_data["__doc__"] +=\
+        "\r\nOn fully randomizes these locations. Off leaves them in their original locations."
+    if option_name in allow_priority:
+        extra_data["__doc__"] += "\r\nPriority and Exclude fully randomize these locations and adds them to priority_locations or exclude_locations, respectively."
+        extra_data['option_priority'] = 2
+    else:
+        extra_data["__doc__"] += "\r\nExclude fully randomizes these locations and adds them to exclude_locations."
+    if option_name not in no_shuffle:
+        extra_data["__doc__"] += "\r\nShuffle will shuffle these items across only these locations"
+        extra_data['option_shuffle'] = 4
     if option_name in default_on:
         extra_data['default'] = 1
     else:
         extra_data['default'] = 0
     extra_data['display_name'] = option_name[0:9] + ' ' + option_name[9:]
+    #if option_name in no_shuffle:
     option = type(option_name, (RandomizeOptions,), extra_data)
+    #else:
+    #    option = type(option_name, (RandomizeOptionsWithShuffle,), extra_data)
     globals()[option.__name__] = option
     hollow_knight_randomize_options[option.__name__] = option
 
@@ -159,18 +199,16 @@ for option_name in logic_options.values():
     if option_name in option_docstrings:
         extra_data["__doc__"] = option_docstrings[option_name]
         option = type(option_name, (Toggle,), extra_data)
-    if option_name in disabled:
-        extra_data["__doc__"] = "Disabled Option. Not implemented."
-        option = type(option_name, (Disabled,), extra_data)
     globals()[option.__name__] = option
     hollow_knight_logic_options[option.__name__] = option
 
 
-class RandomizeElevatorPass(Toggle):
+class RandomizeElevatorPass(RandomizeOptions):
     """Adds an Elevator Pass item to the item pool, which is then required to use the large elevators connecting
     City of Tears to the Forgotten Crossroads and Resting Grounds."""
     display_name = "Randomize Elevator Pass"
-    default = False
+    option_priority = 2
+    default = 0
 
 
 class SplitMothwingCloak(Toggle):
