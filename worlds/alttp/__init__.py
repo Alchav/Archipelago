@@ -118,7 +118,7 @@ class ALTTPWorld(World):
     item_name_to_id = {name: data.item_code for name, data in item_table.items() if type(data.item_code) == int}
     location_name_to_id = lookup_name_to_id
 
-    data_version = 8
+    data_version = 9
     remote_items: bool = False
     remote_start_inventory: bool = False
     required_client_version = (0, 3, 2)
