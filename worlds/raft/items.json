@@ -56,7 +56,7 @@
     },
     {
         "id": 47012,
-        "progression": false,
+        "progression": true,
         "name": "Empty bottle"
     },
     {
@@ -136,7 +136,7 @@
     },
     {
         "id": 47028,
-        "progression": false,
+        "progression": true,
         "name": "Grass plot"
     },
     {
@@ -261,7 +261,7 @@
     },
     {
         "id": 47053,
-        "progression": false,
+        "progression": true,
         "name": "Birds nest"
     },
     {
@@ -366,17 +366,17 @@
     },
     {
         "id": 47074,
-        "progression": false,
+        "progression": true,
         "name": "Metal detector"
     },
     {
         "id": 47075,
-        "progression": false,
+        "progression": true,
         "name": "Shears"
     },
     {
         "id": 47076,
-        "progression": false,
+        "progression": true,
         "name": "Shovel"
     },
     {
@@ -386,12 +386,12 @@
     },
     {
         "id": 47078,
-        "progression": false,
+        "progression": true,
         "name": "Basic bow"
     },
     {
         "id": 47079,
-        "progression": false,
+        "progression": true,
         "name": "Stone arrow"
     },
     {
@@ -406,7 +406,7 @@
     },
     {
         "id": 47082,
-        "progression": true,
+        "progression": false,
         "name": "Metal spear"
     },
     {
@@ -421,12 +421,12 @@
     },
     {
         "id": 47085,
-        "progression": false,
+        "progression": true,
         "name": "Net launcher"
     },
     {
         "id": 47086,
-        "progression": false,
+        "progression": true,
         "name": "Net canister"
     },
     {
