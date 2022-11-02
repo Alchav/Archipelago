@@ -597,6 +597,12 @@ class MultiWorld():
             if all_done():
                 return True
 
+        if self.has_beaten_game(state):
+            beatable_fulfilled = True
+
+        if all_done():
+            return True
+
         return False
 
 

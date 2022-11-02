@@ -11,7 +11,7 @@ import zipfile
 from typing import Dict, List, Tuple, Optional, Set
 
 from BaseClasses import MultiWorld, CollectionState, Region, RegionType, LocationProgressType, Location,\
-    ItemClassification
+    ItemClassification, Item
 from worlds.alttp.Items import item_name_groups
 from worlds.alttp.Regions import is_main_entrance
 from Fill import distribute_items_restrictive, flood_items, balance_multiworld_progression, distribute_planned
@@ -153,6 +153,10 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
 
     AutoWorld.call_all(world, "generate_basic")
 
+    if not world.fulfills_accessibility(world.get_all_state(False)):
+        raise Exception("Accessibility requirements failed immediately after setting up item pools, "
+                        "something has gone horribly wrong.")
+
     # temporary home for custom item pool and item links, should be moved out of Main
     pool_size_groups = {}
      # count up everyone's items
@@ -243,6 +247,10 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             # pool is too small, need to create fillers
             world.itempool.append(AutoWorld.call_single(world, "create_filler", world.random.choice(link_group)))
 
+
+    if not world.fulfills_accessibility(world.get_all_state(False)):
+        raise Exception("Accessibility requirements failed after running custom item pool, "
+                        "required items have been removed.")
 
     for group_id, group in world.groups.items():
         def find_common_pool(players: Set[int], shared_pool: Set[str]) -> Tuple[
