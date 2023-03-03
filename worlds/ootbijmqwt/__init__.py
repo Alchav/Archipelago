@@ -5,33 +5,28 @@ from BaseClasses import ItemClassification, LocationProgressType
 
 
 default_options = ['logic_no_night_tokens_without_suns_song', 'open_forest', 'open_kakariko', 'open_door_of_time',
-                  'zora_fountain', 'gerudo_fortress', 'bridge', 'trials',
-                   'owl_drops','shopsanity',  'shop_slots',
-                  'bombchus_in_logic', 'dungeon_shortcuts', 'dungeon_shortcuts_list',
-                  'mq_dungeons_list', 'mq_dungeons_count', 'bridge_stones', 'bridge_medallions',
-                  'bridge_rewards', 'bridge_tokens', 'bridge_hearts',  'shuffle_hideoutkeys', 'enhance_map_compass',
-                  'ganon_bosskey_medallions', 'ganon_bosskey_stones',
-                  'ganon_bosskey_tokens', 'ganon_bosskey_hearts',
-                  'shopsanity_prices', 'tokensanity', 'shuffle_scrubs', 'shuffle_child_trade',
-                  'logic_rules',
-                  'shuffle_kokiri_sword', 'shuffle_gerudo_card', 'shuffle_beans',
-                  'shuffle_medigoron_carpet_salesman', 'shuffle_frog_song_rupees', 'no_escape_sequence',
-                  'no_guard_stealth', 'no_epona_race', 'skip_some_minigame_phases', 'complete_mask_quest',
-                  'useful_cutscenes', 'fast_chests', 'fast_bunny_hood', 'plant_beans',
-                  'chicken_count', 'fae_torch_count', 'hint_dist',
-                  'starting_tod', 'blue_fire_arrows', 'fix_broken_drops', 'start_with_rupees', 'item_pool_value',
-                  'adult_trade_start',  'shuffle_bosses', 'key_rings', 'key_rings_list']
+                   'zora_fountain', 'gerudo_fortress', 'bridge', 'trials', 'owl_drops', 'shopsanity', 'shop_slots',
+                   'bombchus_in_logic', 'dungeon_shortcuts', 'dungeon_shortcuts_list', 'mq_dungeons_list',
+                   'mq_dungeons_count', 'bridge_stones', 'bridge_medallions', 'bridge_rewards', 'bridge_tokens',
+                   'bridge_hearts',  'shuffle_hideoutkeys', 'enhance_map_compass', 'ganon_bosskey_medallions',
+                   'ganon_bosskey_stones', 'ganon_bosskey_tokens', 'ganon_bosskey_hearts', 'shopsanity_prices',
+                   'tokensanity', 'shuffle_scrubs', 'shuffle_child_trade', 'logic_rules', 'logic_tricks',
+                   'shuffle_kokiri_sword', 'shuffle_gerudo_card', 'shuffle_beans', 'shuffle_medigoron_carpet_salesman',
+                   'shuffle_frog_song_rupees', 'no_escape_sequence', 'no_guard_stealth', 'no_epona_race',
+                   'skip_some_minigame_phases', 'complete_mask_quest', 'useful_cutscenes', 'fast_chests',
+                   'fast_bunny_hood', 'plant_beans', 'chicken_count', 'fae_torch_count', 'hint_dist', 'starting_tod',
+                   'blue_fire_arrows', 'fix_broken_drops', 'start_with_rupees', 'item_pool_value', 'adult_trade_start',
+                   'shuffle_bosses', 'key_rings', 'key_rings_list']
 
 set_options = {'starting_age': 'adult', 'shuffle_interior_entrances': 'all', 'spawn_positions': 'adult',
-               'shuffle_grotto_entrances': 'on', 'shuffle_dungeon_entrances': 'all', 'shuffle_overworld_entrances': 'on',
+               'shuffle_grotto_entrances': 'on', 'shuffle_dungeon_entrances': 'all',
                'hints': 'none', 'triforce_hunt': 'on', 'triforce_goal': 1, 'extra_triforce_percentage': 1,
                'shuffle_pots': "all", 'shuffle_crates': "all", 'shuffle_cows': "on", 'shuffle_beehives': "on",
                'shuffle_ocarinas': "on", 'shuffle_freestanding_items': "all", 'shuffle_song_items': "any",
                "mq_dungeons_mode": "mq", 'misc_hints': "off", 'free_scarecrow': 'on', 'big_poe_count': 4,
                'ganon_bosskey_rewards': 2, 'shuffle_ganon_bosskey': "dungeons",'warp_songs': 'on',
                'shuffle_mapcompass': 'keysanity', 'shuffle_smallkeys': 'keysanity', 'shuffle_bosskeys': 'keysanity',
-               'junk_ice_traps': 'off', 'ice_trap_appearance': 'anything'}
-
+               'junk_ice_traps': 'off', 'ice_trap_appearance': 'anything', 'shuffle_overworld_entrances': 'on'}
 
 warp_song_connectors = [
     "Nocturne of Shadow Warp -> Graveyard Warp Pad Region", "Minuet of Forest Warp -> Sacred Forest Meadow",
@@ -55,17 +50,14 @@ connections = [
 ]
 
 option_pool_size = ((136, 149), (128, 145))
-#item_pool = ["Gold Skulltula Token"] * 50
-#item_pool += ["Bottle with Big Poe"] * 4
-always_pool = ["Progressive Hookshot", "Magic Meter", "Ocarina", "Small Key (Water Temple)", "Progressive Scale"]
+
+always_pool = ["Progressive Hookshot", "Magic Meter", "Ocarina", "Small Key (Water Temple)", "Progressive Scale"] * 2
 always_pool += ["Progressive Strength Upgrade"] * 3
 always_pool += ["Song of Time", "Zeldas Lullaby", "Fire Arrows", "Bow", "Ice Arrows", "Light Arrows",
                 "Bomb Bag", "Double Defense", "Dins Fire", 'Megaton Hammer', "Lens of Truth",
                 "Biggoron Sword", "Iron Boots", "Zora Tunic", "Hover Boots", "Nayrus Love",
                 "Farores Wind",  "Map (Water Temple)", "Compass (Water Temple)", "Goron Tunic", "Deku Nut Capacity",
                 "Hylian Shield", "Mirror Shield"]
-#31
-#item_pool += ["Piece of Heart"] * 17
 
 useful = ["Hylian Shield", "Mirror Shield"]
 filler = ["Ice Arrows", "Light Arrows", "Megaton Hammer", "Lens of Truth", "Progressive Strength Upgrade", "Goron Tunic"]
@@ -97,8 +89,9 @@ class WarpSongs(Toggle):
 
 
 class BossKeyOption(Choice):
-    """Where your Boss Key (Water Temple) may be found. Note that if you do not place it at a Skulltula Reward location,
-    your game may end up being over with very quickly."""
+    """Where your Boss Key (Water Temple) may be found. Note that if you do not place it at a Skulltula reward location,
+    your game may end up being over with very quickly. If a Skulltula reward location is chosen, rewards beyond the one
+    chosen will be guaranteed to contain filler items."""
     display_name = "Boss Key Location"
     option_anywhere = 0
     option_own_game = 1
@@ -125,6 +118,49 @@ class LocalTokens(Toggle):
     default = 1
 
 
+class EnableScarecrow(Toggle):
+    """Enable the Scarecrow to be spawned by using your Ocarina."""
+    default = 1
+    display_name = "Enable Scarecrow"
+
+
+class LogicFewerTunicRequirements(Toggle):
+    """Enable the "Fewer Tunic Requirements" trick to logic, which may require you to do any and all of Water Temple
+    except below the central pillar without Zora Tunic."""
+    display_name = "Logic: Fewer Tunic Requirements"
+
+
+class LogicWaterDragonJumpDive(Toggle):
+    """Enable the "Water Temple Dragon Statue Jump Dive" trick into logic, which may require you to reach the submerged
+    tunnel in the dragon statue room without Scales or Iron Boots using momentum from your fall from above."""
+    display_name = "Logic: Water Temple Dragon Statue Jump Dive"
+
+
+class LogicWaterTempleNorthBasementLedgewWithPreciseJump(Toggle):
+    """Enable the "Water Temple North Basement Ledge with Precise Jump" trick to logic, which may require a precise jump
+    in the northern basement to reach the ledge without hover boots or scarecrow."""
+    display_name = "Logic: Water Temple North Basement Ledge with Precise Jump"
+
+
+class LogicWaterMQCentralPillarWithFireArrows(Toggle):
+    """Enable the "Water Temple MQ Central Pillar with Fire Arrows" trick to logic, which may require you to light the
+    torches in the Central Pillar with Fire Arrows."""
+    display_name = "Logic: Water MQ Central Pillar with Fire Arrows"
+
+
+class LogicWaterTempleMQNorthBasementGSWithoutSmallKey(Toggle):
+    """Enable the "Water Temple MQ North Basement GS Without Small Key" trick to logic, which may require hookshotting an
+    invisible hookshot target to get over the gate to the basement GS, skipping the locked door."""
+    display_name = "Logic: Water Temple MQ North Basement GS without Small"
+
+
+class LogicLakeHyliaLabDive(Toggle):
+    """Enable the "Lake Hylia Lab Dive without Gold Scale" trick to logic, which may require removing the Iron Boots in
+    the midst of hookshotting the crate, to trick the scientist into thinking you're a great swimmer.
+    Only relevant if shuffle_warp_songs is on."""
+    display_name = "Logic: Lake Hylia Lab Dive without Gold Scale"
+
+
 class OOTBIJMQWTWorld(OOTWorld):
     game: str = "Ocarina of Time but it's just Master Quest Water Temple"
     oot_options = OOTWorld.option_definitions.copy()
@@ -132,7 +168,14 @@ class OOTBIJMQWTWorld(OOTWorld):
         del oot_options[option]
     option_definitions = {"burger_king_start": BurgerKingStart, "shuffle_warp_songs": WarpSongs,
                           "boss_key_location": BossKeyOption, "tokens_in_pool": TokensInPool,
-                          "local_tokens": LocalTokens, **oot_options}
+                          "local_tokens": LocalTokens, "enable_scarecrow": EnableScarecrow,
+                          "logic_fewer_tunic_requirements": LogicFewerTunicRequirements,
+                          "logic_water_mq_central_pillar": LogicWaterMQCentralPillarWithFireArrows,
+                          "logic_water_mq_locked_gs": LogicWaterTempleMQNorthBasementGSWithoutSmallKey,
+                          "logic_lab_diving": LogicLakeHyliaLabDive,
+                          "logic_water_dragon_jump_dive": LogicWaterDragonJumpDive,
+                          "logic_water_north_basement_ledge_jump": LogicWaterTempleNorthBasementLedgewWithPreciseJump,
+                          **oot_options}
 
     topology_present: bool = False
     item_name_to_id = OOTWorld.item_name_to_id
@@ -149,11 +192,8 @@ class OOTBIJMQWTWorld(OOTWorld):
     def stage_assert_generate(cls, multiworld):
         setattr(multiworld, "mix_entrance_pools", {})
         for world in multiworld.get_game_worlds("Ocarina of Time but it's just Master Quest Water Temple"):
-            multiworld.accessibility[world.player] = multiworld.accessibility[world.player].from_text("items")
-            if multiworld.local_tokens[world.player]:
-                multiworld.local_items[world.player].value.add("Gold Skulltula Token")
-            if multiworld.boss_key_location[world.player] == "own_game":
-                multiworld.local_items[world.player].value.add("Boss Key (Water Temple)")
+            multiworld.worlds[world.player].game = "Ocarina of Time"
+            multiworld.game[world.player] = "Ocarina of Time"
             for option in default_options:
                 try:
                     optiondict = getattr(multiworld, option)
@@ -175,10 +215,17 @@ class OOTBIJMQWTWorld(OOTWorld):
                 if isinstance(set_options[option], int):
                     optiondict[world.player].value = set_options[option]
 
-    # BN: 127
-    # NN: 135
-    # BW: 152
-    # NW: 156
+            multiworld.accessibility[world.player] = multiworld.accessibility[world.player].from_text("items")
+            if multiworld.local_tokens[world.player]:
+                multiworld.local_items[world.player].value.add("Gold Skulltula Token")
+            if multiworld.boss_key_location[world.player] == "own_game":
+                multiworld.local_items[world.player].value.add("Boss Key (Water Temple)")
+            multiworld.free_scarecrow[world.player].value = multiworld.enable_scarecrow[world.player].value
+            for trick in ["logic_fewer_tunic_requirements", "logic_water_mq_central_pillar","logic_water_mq_locked_gs",
+                          "logic_lab_diving", "logic_water_dragon_jump_dive", "logic_water_north_basement_ledge_jump"]:
+                if getattr(multiworld, trick)[world.player]:
+                    multiworld.logic_tricks[world.player].value.append(getattr(multiworld, trick)[world.player].display_name.split(": ")[1].casefold())
+
     def create_items(self):
         set_drop_location_names(self)
 
@@ -204,6 +251,9 @@ class OOTBIJMQWTWorld(OOTWorld):
             item_pool.append("Boss Key (Water Temple)")
         else:
             pool_size -= 1
+            r = self.multiworld.boss_key_location[self.player].value * 10
+            for i in range(r, 50, 10):
+                self.multiworld.get_location(f"Kak {i} Gold Skulltula Reward", self.player).progress_type = LocationProgressType.EXCLUDED
 
         for i in (20, 30, 40, 50):
             if token_count < i:
@@ -215,7 +265,8 @@ class OOTBIJMQWTWorld(OOTWorld):
         item_pool += ["Piece of Heart"] * 4 * heart_piece_sets
 
         extrapool = ["Bombchus (20)", 'Arrows (30)', "Bombchus (10)", 'Arrows (10)', "Bombs (10)", "Bombs (20)",
-                     'Deku Nuts (5)', 'Deku Nuts (10)', 'Recovery Heart', 'Arrows (5)',  "Bombs (5)", "Bombchus (5)"]
+                     'Deku Nuts (5)', 'Deku Nuts (10)', 'Recovery Heart', 'Arrows (5)',  "Bombs (5)", "Bombchus (5)",
+                     'Ice Trap']
 
         while len(item_pool) < pool_size:
             item_pool += self.multiworld.random.sample(extrapool, min(pool_size - len(item_pool), len(extrapool)))
@@ -235,19 +286,18 @@ class OOTBIJMQWTWorld(OOTWorld):
             self.starting_items['Deku Nuts'] = 40
 
         self.multiworld.itempool += self.itempool
-        #self.multiworld.get_location("Morpha", self.player).place_locked_item(self.multiworld.create_item("Water Medallion", self.player))
-        #self.multiworld.get_location("Links Pocket", self.player).place_locked_item(self.multiworld.create_item("Zora Sapphire", self.player))
         for boss in ['Queen Gohma', 'King Dodongo', 'Barinade', 'Phantom Ganon', 'Morpha', 'Volvagia', 'Bongo Bongo',
                      'Twinrova', 'Links Pocket']:
             loc = self.multiworld.get_location(boss, self.player)
             loc.place_locked_item(self.multiworld.create_item(loc.vanilla_item, self.player))
-        #always_pool += OOTWorld.item_name_groups['rewards']
-        #self.fill_bosses()
+
 
     def set_rules(self):
+        multiworld = self.multiworld
+        world = self
         from worlds.oot.EntranceShuffle import set_all_entrances_data
         from worlds.oot.Rules import set_rules, set_entrances_based_rules
-        set_all_entrances_data(self.multiworld, self.player)
+        set_all_entrances_data(multiworld, self.player)
         entrances = self.get_shufflable_entrances()
         for entrance in entrances:
             if entrance.data:
@@ -256,63 +306,59 @@ class OOTBIJMQWTWorld(OOTWorld):
         set_rules(self)
         set_entrances_based_rules(self)
 
-    def get_entrance(self, entrance):
-        return self.multiworld.get_entrance(entrance, self.player)
-
-    @classmethod
-    def stage_set_rules(cls, multiworld):
-        for world in multiworld.get_game_worlds("Ocarina of Time but it's just Master Quest Water Temple"):
-            for connection in connections:
-                c1, c2 = world.get_entrance(connection[0]), world.get_entrance(connection[1])
-                c1.connect(world.get_region(c2.vanilla_connected_region))
-                c1.replaces = c2
-            if multiworld.shuffle_warp_songs[world.player]:
-                connectors = warp_song_connectors.copy()
-                multiworld.random.shuffle(connectors)
-                destinations = warp_song_destinations.copy()
-                if multiworld.burger_king_start[world.player]:
-                    destinations.append("Market Entrance -> Market Guard House")
-                    c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"),\
-                             world.get_entrance("Lake Hylia -> Water Temple Lobby")
-                    c1.connect(world.get_region(c2.vanilla_connected_region))
-                    c1.replaces = c2
-                else:
-                    destinations.append("Kokiri Forest -> KF Midos House")
-                    c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"),\
-                             world.get_entrance("Market Entrance -> Market Guard House")
-                    c1.connect(world.get_region(c2.vanilla_connected_region))
-                    c1.replaces = c2
-                for connection, destination in zip(connectors, destinations):
-                    c1, c2 = world.get_entrance(connection), world.get_entrance(destination)
-                    c1.connect(world.get_region(c2.vanilla_connected_region))
-                    c1.replaces = c2
-            else:
-                c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"),\
-                         world.get_entrance("Kakariko Village -> Kak House of Skulltula")
-                c1.connect(world.get_region(c2.vanilla_connected_region))
-                c1.replaces = c2
+        for connection in connections:
+            c1, c2 = world.get_entrance(connection[0]), world.get_entrance(connection[1])
+            c1.connect(world.get_region(c2.vanilla_connected_region))
+            c1.replaces = c2
+        if multiworld.shuffle_warp_songs[world.player]:
+            connectors = warp_song_connectors.copy()
+            multiworld.random.shuffle(connectors)
+            destinations = warp_song_destinations.copy()
             if multiworld.burger_king_start[world.player]:
-                print("borger")
-                c1, c2 = world.get_entrance("Adult Spawn -> Temple of Time"),\
+                destinations.append("Market Entrance -> Market Guard House")
+                c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"), \
                          world.get_entrance("Lake Hylia -> Water Temple Lobby")
                 c1.connect(world.get_region(c2.vanilla_connected_region))
                 c1.replaces = c2
             else:
-                c1, c2 = world.get_entrance("Adult Spawn -> Temple of Time"),\
+                destinations.append("Kokiri Forest -> KF Midos House")
+                c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"), \
                          world.get_entrance("Market Entrance -> Market Guard House")
                 c1.connect(world.get_region(c2.vanilla_connected_region))
                 c1.replaces = c2
+            for connection, destination in zip(connectors, destinations):
+                c1, c2 = world.get_entrance(connection), world.get_entrance(destination)
+                c1.connect(world.get_region(c2.vanilla_connected_region))
+                c1.replaces = c2
+        else:
+            c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"), \
+                     world.get_entrance("Kakariko Village -> Kak House of Skulltula")
+            c1.connect(world.get_region(c2.vanilla_connected_region))
+            c1.replaces = c2
+        if multiworld.burger_king_start[world.player]:
+            print("borger")
+            c1, c2 = world.get_entrance("Adult Spawn -> Temple of Time"), \
+                     world.get_entrance("Lake Hylia -> Water Temple Lobby")
+            c1.connect(world.get_region(c2.vanilla_connected_region))
+            c1.replaces = c2
+        else:
+            c1, c2 = world.get_entrance("Adult Spawn -> Temple of Time"), \
+                     world.get_entrance("Market Entrance -> Market Guard House")
+            c1.connect(world.get_region(c2.vanilla_connected_region))
+            c1.replaces = c2
 
-            if not multiworld.burger_king_start[world.player]:
-                if "Fewer Tunic Requirements" in multiworld.logic_tricks[world.player]:
-                    multiworld.early_items[world.player]["Iron Boots"] = 1
-                elif multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
-                    multiworld.early_items[world.player]["Iron Boots"] = 1
-                    multiworld.early_items[world.player]["Zora Tunic"] = 1
-                else:
-                    multiworld.early_items[world.player]["Progressive Hookshot"] = 2
-                    multiworld.early_items[world.player]["Small Key (Water Temple)"] = 1
+        if not multiworld.burger_king_start[world.player]:
+            if "fewer tunic requirements" in multiworld.logic_tricks[world.player]:
+                multiworld.early_items[world.player]["Iron Boots"] = 1
+            elif multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
+                multiworld.early_items[world.player]["Iron Boots"] = 1
+                multiworld.early_items[world.player]["Zora Tunic"] = 1
+            else:
+                multiworld.early_items[world.player]["Progressive Hookshot"] = 2
+                multiworld.early_items[world.player]["Small Key (Water Temple)"] = 1
 
+    def get_entrance(self, entrance):
+        return self.multiworld.get_entrance(entrance, self.player)
 
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
@@ -349,14 +395,15 @@ class OOTBIJMQWTWorld(OOTWorld):
                     fill_locations.remove(location)
                 elif location.type == "Drop":
                     location.place_locked_item(multiworld.worlds[location.player].create_item(location.vanilla_item))
+                    location.show_in_spoiler = False
                     fill_locations.remove(location)
+
+        # this is to prevent the early spheres from being filled with tokens which had caused some generation failures
         progitempool.sort(key=lambda i: i.name == "Gold Skulltula Token")
 
     @classmethod
     def stage_generate_early(cls, multiworld):
         for world in multiworld.get_game_worlds("Ocarina of Time but it's just Master Quest Water Temple"):
+            # this gets undone because of the triforce setting, it's needed to be "dungeons" so that gift from sages
+            # is not disabled.
             multiworld.worlds[world.player].shuffle_ganon_bosskey = "dungeons"
-
-    def post_fill(self):
-        self.multiworld.worlds[self.player].game = "Ocarina of Time"
-        self.multiworld.game[self.player] = "Ocarina of Time"
