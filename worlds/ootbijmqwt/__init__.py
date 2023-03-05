@@ -2,7 +2,7 @@ from worlds.oot import OOTWorld
 from worlds.oot.LocationList import set_drop_location_names
 from Options import Choice, Toggle, Range
 from BaseClasses import ItemClassification, LocationProgressType
-
+import logging
 
 default_options = ['logic_no_night_tokens_without_suns_song', 'open_forest', 'open_kakariko', 'open_door_of_time',
                    'zora_fountain', 'gerudo_fortress', 'bridge', 'trials', 'owl_drops', 'shopsanity', 'shop_slots',
@@ -16,7 +16,8 @@ default_options = ['logic_no_night_tokens_without_suns_song', 'open_forest', 'op
                    'skip_some_minigame_phases', 'complete_mask_quest', 'useful_cutscenes', 'fast_chests',
                    'fast_bunny_hood', 'plant_beans', 'chicken_count', 'fae_torch_count', 'hint_dist', 'starting_tod',
                    'blue_fire_arrows', 'fix_broken_drops', 'start_with_rupees', 'item_pool_value', 'adult_trade_start',
-                   'shuffle_bosses', 'key_rings', 'key_rings_list']
+                   'shuffle_bosses', 'key_rings', 'key_rings_list', 'sfx_horse_neigh', 'sfx_nightfall',
+                   'boomerang_trail_color_outer', 'boomerang_trail_color_inner', ]
 
 set_options = {'starting_age': 'adult', 'shuffle_interior_entrances': 'all', 'spawn_positions': 'adult',
                'shuffle_grotto_entrances': 'on', 'shuffle_dungeon_entrances': 'all',
@@ -24,7 +25,7 @@ set_options = {'starting_age': 'adult', 'shuffle_interior_entrances': 'all', 'sp
                'shuffle_pots': "all", 'shuffle_crates': "all", 'shuffle_cows': "on", 'shuffle_beehives': "on",
                'shuffle_ocarinas': "on", 'shuffle_freestanding_items': "all", 'shuffle_song_items': "any",
                "mq_dungeons_mode": "mq", 'misc_hints': "off", 'free_scarecrow': 'on', 'big_poe_count': 4,
-               'ganon_bosskey_rewards': 2, 'shuffle_ganon_bosskey': "dungeons",'warp_songs': 'on',
+               'ganon_bosskey_rewards': 2, 'shuffle_ganon_bosskey': "dungeons", 'warp_songs': 'on',
                'shuffle_mapcompass': 'keysanity', 'shuffle_smallkeys': 'keysanity', 'shuffle_bosskeys': 'keysanity',
                'junk_ice_traps': 'off', 'ice_trap_appearance': 'anything', 'shuffle_overworld_entrances': 'on'}
 
@@ -55,9 +56,8 @@ always_pool = ["Progressive Hookshot", "Magic Meter", "Ocarina", "Small Key (Wat
 always_pool += ["Progressive Strength Upgrade"] * 3
 always_pool += ["Song of Time", "Zeldas Lullaby", "Fire Arrows", "Bow", "Ice Arrows", "Light Arrows",
                 "Bomb Bag", "Double Defense", "Dins Fire", 'Megaton Hammer', "Lens of Truth",
-                "Biggoron Sword", "Iron Boots", "Zora Tunic", "Hover Boots", "Nayrus Love",
-                "Farores Wind",  "Map (Water Temple)", "Compass (Water Temple)", "Goron Tunic", "Deku Nut Capacity",
-                "Hylian Shield", "Mirror Shield"]
+                "Biggoron Sword", "Hover Boots", "Nayrus Love", "Farores Wind",  "Map (Water Temple)",
+                "Compass (Water Temple)", "Goron Tunic", "Deku Nut Capacity", "Hylian Shield", "Mirror Shield"]
 
 useful = ["Hylian Shield", "Mirror Shield"]
 filler = ["Ice Arrows", "Light Arrows", "Megaton Hammer", "Lens of Truth", "Progressive Strength Upgrade", "Goron Tunic"]
@@ -72,12 +72,16 @@ final_clears = ['Skull Mask from Market Mask Shop', 'Mask of Truth from Market M
                 'Spirit Trial Clear from Ganons Castle Spirit Trial Ending']
 
 
-class BurgerKingStart(Toggle):
-    """You ever START a game in BK before? Probably not, because normally AP games are supposed to always have some
-    sphere 1 checks. Turn this on, however, and we'll break all the rules. I won't tell if you won't.
-    Of course, this will fail generation in a solo game, or if everyone has this option turned on.
-    If this is left off, you'll have the adult Market Guard House pots to start you off."""
-    display_name = "Burger King Start"
+class StartMode(Choice):
+    """Determines how, if at all, you can reach sphere 1 locations.
+    iron_boots starts you with Iron Boots and, if fewer_tunic_requirements is off, Zora Tunic.
+    guard_house starts you in the Market Guard House with 7 pots to open.
+    burger_king starts you with nothing. No sphere 1 for you. We'll break all the rules. I won't tell if you won't.
+    If every player in the multiworld has burger_king selected, one player will be changed to guard_house."""
+    option_burger_king = 0
+    option_iron_boots = 1
+    option_guard_house = 2
+    default = 2
 
 
 class WarpSongs(Toggle):
@@ -108,7 +112,7 @@ class TokensInPool(Range):
     display_name = "Tokens in Pool"
     range_start = 10
     range_end = 70
-    default = 70
+    default = 50
 
 
 class LocalTokens(Toggle):
@@ -122,6 +126,13 @@ class EnableScarecrow(Toggle):
     """Enable the Scarecrow to be spawned by using your Ocarina."""
     default = 1
     display_name = "Enable Scarecrow"
+
+
+class MaxHealth(Range):
+    """What maximum hearts will be obtainable."""
+    range_start = 3
+    range_end = 20
+    default = 12
 
 
 class LogicFewerTunicRequirements(Toggle):
@@ -166,9 +177,9 @@ class OOTBIJMQWTWorld(OOTWorld):
     oot_options = OOTWorld.option_definitions.copy()
     for option in (default_options + list(set_options.keys())):
         del oot_options[option]
-    option_definitions = {"burger_king_start": BurgerKingStart, "shuffle_warp_songs": WarpSongs,
+    option_definitions = {"start_mode": StartMode, "shuffle_warp_songs": WarpSongs,
                           "boss_key_location": BossKeyOption, "tokens_in_pool": TokensInPool,
-                          "local_tokens": LocalTokens, "enable_scarecrow": EnableScarecrow,
+                          "local_tokens": LocalTokens, "enable_scarecrow": EnableScarecrow, "max_health": MaxHealth,
                           "logic_fewer_tunic_requirements": LogicFewerTunicRequirements,
                           "logic_water_mq_central_pillar": LogicWaterMQCentralPillarWithFireArrows,
                           "logic_water_mq_locked_gs": LogicWaterTempleMQNorthBasementGSWithoutSmallKey,
@@ -191,6 +202,13 @@ class OOTBIJMQWTWorld(OOTWorld):
     @classmethod
     def stage_assert_generate(cls, multiworld):
         setattr(multiworld, "mix_entrance_pools", {})
+        if len(multiworld.start_mode) == multiworld.players:
+            # every player is playing OOTBIJMQWT
+            options = set(multiworld.start_mode.values())
+            if len(options) == 1 and list(multiworld.start_mode.values())[0] == "burger_king":
+                # every player has the same option and first player has bk start = every player has bk start
+                multiworld.random.choice(list(multiworld.start_mode.values())).value = 2
+                logging.warning("Every player has burger_king start, changing one to guard_house")
         for world in multiworld.get_game_worlds("Ocarina of Time but it's just Master Quest Water Temple"):
             multiworld.worlds[world.player].game = "Ocarina of Time"
             multiworld.game[world.player] = "Ocarina of Time"
@@ -200,7 +218,6 @@ class OOTBIJMQWTWorld(OOTWorld):
                 except AttributeError:
                     optiondict = {}
                     setattr(multiworld, option, optiondict)
-                #setattr(multiworld, option, OOTWorld.option_definitions[option])
                 optionobj = OOTWorld.option_definitions[option]
                 optiondict[world.player] = optionobj(optionobj.default)
             for option in set_options.keys():
@@ -209,7 +226,6 @@ class OOTBIJMQWTWorld(OOTWorld):
                 except AttributeError:
                     optiondict = {}
                     setattr(multiworld, option, optiondict)
-                #setattr(multiworld, option, OOTWorld.option_definitions[option])
                 optionobj = OOTWorld.option_definitions[option]
                 optiondict[world.player] = optionobj(optionobj.from_any(set_options[option]))
                 if isinstance(set_options[option], int):
@@ -234,7 +250,8 @@ class OOTBIJMQWTWorld(OOTWorld):
         if self.multiworld.shuffle_warp_songs[self.player]:
             item_pool += ["Prelude of Light", "Serenade of Water", "Bolero of Fire", "Nocturne of Shadow",
                           "Requiem of Spirit", "Minuet of Forest", "Eponas Song", "Suns Song"]
-        if self.multiworld.burger_king_start[self.player] and not self.multiworld.shuffle_warp_songs[self.player]:
+        if self.multiworld.start_mode[self.player] != "guard_house" and not self.multiworld.shuffle_warp_songs[self.player]:
+            # there is no guard house, no use for big poes
             item_pool += ["Bottle with Red Potion", "Bottle with Green Potion", "Bottle with Blue Potion",
                           "Bottle with Fairy"]
         else:
@@ -245,7 +262,7 @@ class OOTBIJMQWTWorld(OOTWorld):
         item_pool += ["Gold Skulltula Token"] * token_count
 
         pool_size = option_pool_size[
-            self.multiworld.burger_king_start[self.player].value][self.multiworld.shuffle_warp_songs[self.player].value]
+            self.multiworld.start_mode[self.player] != "guard_house"][self.multiworld.shuffle_warp_songs[self.player].value]
 
         if self.multiworld.boss_key_location[self.player] < 2:
             item_pool.append("Boss Key (Water Temple)")
@@ -255,13 +272,24 @@ class OOTBIJMQWTWorld(OOTWorld):
             for i in range(r, 50, 10):
                 self.multiworld.get_location(f"Kak {i} Gold Skulltula Reward", self.player).progress_type = LocationProgressType.EXCLUDED
 
+        if self.multiworld.start_mode[self.player] == "iron_boots":
+            self.multiworld.push_precollected(self.create_item("Iron Boots"))
+            if "fewer tunic requirements" not in self.multiworld.logic_tricks[self.player]:
+                self.multiworld.push_precollected(self.create_item("Zora Tunic"))
+            else:
+                item_pool.append("Zora Tunic")
+        else:
+            item_pool.append("Iron Boots")
+            item_pool.append("Zora Tunic")
+
         for i in (20, 30, 40, 50):
             if token_count < i:
                 pool_size -= 1
 
-        heart_piece_sets = min(int((pool_size - (len(item_pool) + 17)) / 3), 17)
+        heart_piece_sets = min(int((pool_size - (len(item_pool) + self.multiworld.max_health[self.player].value)) / 3),
+                               self.multiworld.max_health[self.player].value)
 
-        item_pool += ["Heart Container"] * (17 - heart_piece_sets)
+        item_pool += ["Heart Container"] * (self.multiworld.max_health[self.player].value - heart_piece_sets)
         item_pool += ["Piece of Heart"] * 4 * heart_piece_sets
 
         extrapool = ["Bombchus (20)", 'Arrows (30)', "Bombchus (10)", 'Arrows (10)', "Bombs (10)", "Bombs (20)",
@@ -271,6 +299,12 @@ class OOTBIJMQWTWorld(OOTWorld):
         while len(item_pool) < pool_size:
             item_pool += self.multiworld.random.sample(extrapool, min(pool_size - len(item_pool), len(extrapool)))
 
+
+        for item in self.multiworld.precollected_items[self.player]:
+            self.starting_items[item.name] += 1
+        if self.start_with_consumables:
+            self.starting_items['Deku Nuts'] = 40
+
         self.itempool = []
         for item_name in item_pool:
             item = self.create_item(item_name)
@@ -279,18 +313,11 @@ class OOTBIJMQWTWorld(OOTWorld):
             elif item_name in useful:
                 item.classification = ItemClassification.useful
             self.itempool.append(item)
-
-        for item in self.multiworld.precollected_items[self.player]:
-            self.starting_items[item.name] += 1
-        if self.start_with_consumables:
-            self.starting_items['Deku Nuts'] = 40
-
         self.multiworld.itempool += self.itempool
         for boss in ['Queen Gohma', 'King Dodongo', 'Barinade', 'Phantom Ganon', 'Morpha', 'Volvagia', 'Bongo Bongo',
                      'Twinrova', 'Links Pocket']:
             loc = self.multiworld.get_location(boss, self.player)
             loc.place_locked_item(self.multiworld.create_item(loc.vanilla_item, self.player))
-
 
     def set_rules(self):
         multiworld = self.multiworld
@@ -314,7 +341,7 @@ class OOTBIJMQWTWorld(OOTWorld):
             connectors = warp_song_connectors.copy()
             multiworld.random.shuffle(connectors)
             destinations = warp_song_destinations.copy()
-            if multiworld.burger_king_start[world.player]:
+            if multiworld.start_mode[world.player] != "guard_house":
                 destinations.append("Market Entrance -> Market Guard House")
                 c1, c2 = world.get_entrance("Water Temple Lobby -> Lake Hylia"), \
                          world.get_entrance("Lake Hylia -> Water Temple Lobby")
@@ -335,8 +362,7 @@ class OOTBIJMQWTWorld(OOTWorld):
                      world.get_entrance("Kakariko Village -> Kak House of Skulltula")
             c1.connect(world.get_region(c2.vanilla_connected_region))
             c1.replaces = c2
-        if multiworld.burger_king_start[world.player]:
-            print("borger")
+        if multiworld.start_mode[world.player] != "guard_house":
             c1, c2 = world.get_entrance("Adult Spawn -> Temple of Time"), \
                      world.get_entrance("Lake Hylia -> Water Temple Lobby")
             c1.connect(world.get_region(c2.vanilla_connected_region))
@@ -347,12 +373,11 @@ class OOTBIJMQWTWorld(OOTWorld):
             c1.connect(world.get_region(c2.vanilla_connected_region))
             c1.replaces = c2
 
-        if not multiworld.burger_king_start[world.player]:
-            if "fewer tunic requirements" in multiworld.logic_tricks[world.player]:
+        if multiworld.start_mode[world.player] != "iron_boots":
+            if multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
                 multiworld.early_items[world.player]["Iron Boots"] = 1
-            elif multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
-                multiworld.early_items[world.player]["Iron Boots"] = 1
-                multiworld.early_items[world.player]["Zora Tunic"] = 1
+                if "fewer tunic requirements" in multiworld.logic_tricks[world.player]:
+                    multiworld.early_items[world.player]["Zora Tunic"] = 1
             else:
                 multiworld.early_items[world.player]["Progressive Hookshot"] = 2
                 multiworld.early_items[world.player]["Small Key (Water Temple)"] = 1
@@ -372,14 +397,12 @@ class OOTBIJMQWTWorld(OOTWorld):
                     location.place_locked_item(multiworld.worlds[location.player].create_item(location.vanilla_item))
                 location.item.classification = ItemClassification.filler
                 location.event = False
-        #locations = multiworld.get_locations(world.player)
         for location in reversed(fill_locations):
             if location.player in wtplayerids:
-                if location.name == "Gift from Sages":  #"Water Temple Morpha Heart":
+                if location.name == "Gift from Sages":
                     location.item = None
                     location.place_locked_item(multiworld.worlds[location.player].create_item("Triforce Piece"))
                     fill_locations.remove(location)
-                    #location.access_rule = lambda state: state.can_reach(multiworld.get_location("Water Temple Morpha Heart", 1))
                 elif location.name == f"Kak {multiworld.boss_key_location[location.player].current_key.split('_')[0]} Gold Skulltula Reward":
                     location.place_locked_item(multiworld.worlds[location.player].create_item("Boss Key (Water Temple)"))
                     fill_locations.remove(location)
