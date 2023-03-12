@@ -390,7 +390,8 @@ class OOTBIJMQWTWorld(OOTWorld):
         if self.multiworld.shuffle_warp_songs[self.player]:
             for entrance in [self.multiworld.get_entrance(entrance, self.player) for entrance in warp_song_connectors]:
                 for location in entrance.connected_region.locations:
-                    er_hint_data[self.player][location.address] = entrance.name.split(" -> ")[0]
+                    if type(location.address) == int:
+                        er_hint_data[self.player][location.address] = entrance.name.split(" -> ")[0]
 
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
