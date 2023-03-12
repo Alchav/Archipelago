@@ -385,6 +385,13 @@ class OOTBIJMQWTWorld(OOTWorld):
     def get_entrance(self, entrance):
         return self.multiworld.get_entrance(entrance, self.player)
 
+    def extend_hint_information(self, er_hint_data: dict):
+        er_hint_data[self.player] = {}
+        if self.multiworld.shuffle_warp_songs[self.player]:
+            for entrance in [self.multiworld.get_entrance(entrance, self.player) for entrance in warp_song_connectors]:
+                for location in entrance.connected_region.locations:
+                    er_hint_data[self.player][location.address] = entrance.name.split(" -> ")[0]
+
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
         wtplayerids = [world.player for world in
