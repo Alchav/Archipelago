@@ -107,6 +107,9 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
 
     AutoWorld.call_stage(world, "assert_generate")
 
+    for player in world.accessibility:
+        world.accessibility[player] = world.accessibility[player].from_text("minimal")
+
     AutoWorld.call_all(world, "generate_early")
 
     logger.info('')
@@ -234,6 +237,16 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
 
     distribute_planned(world)
 
+    from BaseClasses import ItemClassification
+    for player in world.completion_condition:
+        world.completion_condition[player] = lambda state: True
+    for location in world.get_locations():
+        location.access_rule = lambda state: True
+    for entrance in world.get_entrances():
+        entrance.access_rule = lambda state: True
+    for item in world.itempool:
+        item.classification = ItemClassification.filler
+
     logger.info('Running Pre Main Fill.')
 
     AutoWorld.call_all(world, "pre_fill")
@@ -246,6 +259,10 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
         distribute_items_restrictive(world)
 
     AutoWorld.call_all(world, 'post_fill')
+
+    for location in world.get_locations():
+        location.access_rule = lambda state: True
+        location.item.classification = ItemClassification.filler
 
     if world.players > 1:
         balance_multiworld_progression(world)
