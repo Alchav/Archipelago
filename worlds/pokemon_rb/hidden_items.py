@@ -1,0 +1,28 @@
+from regions import map_ids
+
+no_hidden_object_maps = [
+    'Pallet Town', 'Pewter City', 'Lavender Town', 'Fuchsia City', 'Cinnabar Island', 'Saffron City', 'Route 1',
+    'Route 2', 'Route 3', 'Route 5', 'Route 6', 'Route 7', 'Route 8', 'Route 14', 'Route 15', 'Route 16',
+    'Route 18', 'Route 19', 'Route 20', 'Route 21', 'Route 22', 'Route 24', 'Reds House 1F', 'Viridian Nickname House',
+    'Digletts Cave Route 2', 'Viridian Forest North Gate', 'Route 2 Trade House', 'Route 2 Gate',
+    'Viridian Forest South Gate', 'Museum 2F', 'Pewter Nidoran House', 'Pewter Speech House', 'Mt Moon 1F',
+    'Mt Moon B1F', 'Cerulean Trashed House', 'Cerulean Trade House', 'Route 5 Gate', 'Underground Path Route 5',
+    'Daycare', 'Route 6 Gate', 'Underground Path Route 6', 'Route 7 Gate', 'Underground Path Route 7', 'Route 8 Gate',
+    'Underground Path Route 8', 'Rock Tunnel 1F', 'Route 11 Gate 1F', 'Digletts Cave Route 11', 'Route 11 Gate 2F',
+    'Route 12 Gate 1F', 'Pokemon Fan Club', 'Vermilion Mart', 'Vermilion Pidgey House', 'SS Anne 1F', 'SS Anne 2F',
+    'SS Anne 3F', 'SS Anne B1F', 'SS Anne Bow', 'SS Anne Captains Room', 'SS Anne 1F Rooms', 'SS Anne 2F Rooms',
+    'Lances Room', 'Hall Of Fame', 'Champions Room', 'Celadon Mart 1F', 'Celadon Mart 2F', 'Celadon Mart 3F',
+    'Celadon Mart 4F', 'Celadon Mart Roof', 'Celadon Mart Elevator', 'Celadon Mansion 1F', 'Celadon Mansion 3F',
+    'Celadon Mansion Roof', 'Celadon Mart 5F', 'Game Corner Prize Room', 'Celadon Diner', 'Celadon Chief House',
+    'Pokemon Tower 1F', 'Pokemon Tower 2F', 'Pokemon Tower 3F', 'Pokemon Tower 4F', 'Pokemon Tower 6F',
+    'Pokemon Tower 7F', 'Lavender Mart', 'Lavender Cubone House', 'Fuchsia Mart', 'Fuchsia Bills Grandpas House',
+    'Wardens House', 'Fuchsia Meeting Room', 'Seafoam Islands B1F', 'Vermilion Old Rod House', 'Fuchsia Good Rod House',
+    'Cinnabar Lab', 'Cinnabar Lab Trade Room', 'Cinnabar Lab Metronome Room', 'Cinnabar Mart',
+    'Copycats House 1F', 'Saffron Pidgey House', 'Saffron Mart', 'Silph Co 1F', 'Mr Psychics House', 'Route 15 Gate 1F',
+    'Route 16 Gate 1F', 'Route 16 Gate 2F', 'Route 16 Fly House', 'Route 12 Super Rod House', 'Route 18 Gate 1F',
+    'Route 18 Gate 2F', 'Seafoam Islands 1F', 'Route 22 Gate', 'Route 12 Gate 2F', 'Vermilion Trade House',
+    'Digletts Cave', 'Victory Road 3F', 'Rocket Hideout B2F', 'Rocket Hideout Elevator', 'Silph Co 2F', 'Silph Co 3F',
+    'Silph Co 4F', 'Silph Co 6F', 'Silph Co 7F', 'Silph Co 8F', 'Safari Zone East', 'Safari Zone North',
+    'Safari Zone Center', 'Safari Zone Center Rest House', 'Safari Zone Secret House', 'Cerulean Cave 2F',
+    'Name Raters House', 'Cerulean Badge House', 'Rock Tunnel B1F', 'Silph Co 10F', 'Silph Co Elevator',
+    'Loreleis Room', 'Brunos Room', 'Agathas Room']
