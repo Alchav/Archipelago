@@ -1,13 +1,24 @@
 from __future__ import annotations
+
 import abc
+import logging
 from copy import deepcopy
+from dataclasses import dataclass
+import functools
 import math
 import numbers
-import typing
 import random
+import typing
+from copy import deepcopy
 
-from schema import Schema, And, Or, Optional
+from schema import And, Optional, Or, Schema
+
 from Utils import get_fuzzy_results
+
+if typing.TYPE_CHECKING:
+    from BaseClasses import PlandoOptions
+    from worlds.AutoWorld import World
+    import pathlib
 
 
 class AssembleOptions(abc.ABCMeta):
@@ -95,11 +106,11 @@ class Option(typing.Generic[T], metaclass=AssembleOptions):
     supports_weighting = True
 
     # filled by AssembleOptions:
-    name_lookup: typing.Dict[int, str]
+    name_lookup: typing.Dict[T, str]
     options: typing.Dict[str, int]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.get_current_option_name()})"
+        return f"{self.__class__.__name__}({self.current_option_name})"
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -109,7 +120,14 @@ class Option(typing.Generic[T], metaclass=AssembleOptions):
         return self.name_lookup[self.value]
 
     def get_current_option_name(self) -> str:
-        """For display purposes."""
+        """Deprecated. use current_option_name instead. TODO remove around 0.4"""
+        logging.warning(DeprecationWarning(f"get_current_option_name for {self.__class__.__name__} is deprecated."
+                                           f" use current_option_name instead. Worlds should use {self}.current_key"))
+        return self.current_option_name
+
+    @property
+    def current_option_name(self) -> str:
+        """For display purposes. Worlds should be using current_key."""
         return self.get_option_name(self.value)
 
     @classmethod
@@ -131,17 +149,14 @@ class Option(typing.Generic[T], metaclass=AssembleOptions):
         ...
 
     if typing.TYPE_CHECKING:
-        from Generate import PlandoOptions
-        from worlds.AutoWorld import World
-
-        def verify(self, world: World, player_name: str, plando_options: PlandoOptions) -> None:
+        def verify(self, world: typing.Type[World], player_name: str, plando_options: PlandoOptions) -> None:
             pass
     else:
         def verify(self, *args, **kwargs) -> None:
             pass
 
 
-class FreeText(Option):
+class FreeText(Option[str]):
     """Text option that allows users to enter strings.
     Needs to be validated by the world or option definition."""
 
@@ -162,7 +177,7 @@ class FreeText(Option):
         return cls.from_text(str(data))
 
     @classmethod
-    def get_option_name(cls, value: T) -> str:
+    def get_option_name(cls, value: str) -> str:
         return value
 
 
@@ -198,6 +213,12 @@ class NumericOption(Option[int], numbers.Integral, abc.ABC):
             return self.value > other.value
         else:
             return self.value > other
+
+    def __ge__(self, other: typing.Union[int, NumericOption]) -> bool:
+        if isinstance(other, NumericOption):
+            return self.value >= other.value
+        else:
+            return self.value >= other
 
     def __bool__(self) -> bool:
         return bool(self.value)
@@ -424,6 +445,7 @@ class Choice(NumericOption):
 
 class TextChoice(Choice):
     """Allows custom string input and offers choices. Choices will resolve to int and text will resolve to string"""
+    value: typing.Union[str, int]
 
     def __init__(self, value: typing.Union[str, int]):
         assert isinstance(value, str) or isinstance(value, int), \
@@ -434,8 +456,7 @@ class TextChoice(Choice):
     def current_key(self) -> str:
         if isinstance(self.value, str):
             return self.value
-        else:
-            return self.name_lookup[self.value]
+        return super().current_key
 
     @classmethod
     def from_text(cls, text: str) -> TextChoice:
@@ -450,7 +471,7 @@ class TextChoice(Choice):
     def get_option_name(cls, value: T) -> str:
         if isinstance(value, str):
             return value
-        return cls.name_lookup[value]
+        return super().get_option_name(value)
 
     def __eq__(self, other: typing.Any):
         if isinstance(other, self.__class__):
@@ -573,12 +594,11 @@ class PlandoBosses(TextChoice, metaclass=BossMeta):
     def valid_location_name(cls, value: str) -> bool:
         return value in cls.locations
 
-    def verify(self, world, player_name: str, plando_options) -> None:
+    def verify(self, world: typing.Type[World], player_name: str, plando_options: "PlandoOptions") -> None:
         if isinstance(self.value, int):
             return
-        from Generate import PlandoOptions
+        from BaseClasses import PlandoOptions
         if not(PlandoOptions.bosses & plando_options):
-            import logging
             # plando is disabled but plando options were given so pull the option and change it to an int
             option = self.value.split(";")[-1]
             self.value = self.options[option]
@@ -676,10 +696,18 @@ class Range(NumericOption):
         return int(round(random.triangular(lower, end, tri), 0))
 
 
-class SpecialRange(Range):
-    special_range_cutoff = 0
+class NamedRange(Range):
     special_range_names: typing.Dict[str, int] = {}
     """Special Range names have to be all lowercase as matching is done with text.lower()"""
+
+    def __init__(self, value: int) -> None:
+        if value < self.range_start and value not in self.special_range_names.values():
+            raise Exception(f"{value} is lower than minimum {self.range_start} for option {self.__class__.__name__} " +
+                            f"and is also not one of the supported named special values: {self.special_range_names}")
+        elif value > self.range_end and value not in self.special_range_names.values():
+            raise Exception(f"{value} is higher than maximum {self.range_end} for option {self.__class__.__name__} " +
+                            f"and is also not one of the supported named special values: {self.special_range_names}")
+        self.value = value
 
     @classmethod
     def from_text(cls, text: str) -> Range:
@@ -687,6 +715,19 @@ class SpecialRange(Range):
         if text in cls.special_range_names:
             return cls(cls.special_range_names[text])
         return super().from_text(text)
+
+
+class SpecialRange(NamedRange):
+    special_range_cutoff = 0
+
+    # TODO: remove class SpecialRange, earliest 3 releases after 0.4.3
+    def __new__(cls, value: int) -> SpecialRange:
+        from Utils import deprecate
+        deprecate(f"Option type {cls.__name__} is a subclass of SpecialRange, which is deprecated and pending removal. "
+                  "Consider switching to NamedRange, which supports all use-cases of SpecialRange, and more. In "
+                  "NamedRange, range_start specifies the lower end of the regular range, while special values can be "
+                  "placed anywhere (below, inside, or above the regular range).")
+        return super().__new__(cls, value)
 
     @classmethod
     def weighted_range(cls, text) -> Range:
@@ -707,8 +748,16 @@ class SpecialRange(Range):
                             f"random-range-high-<min>-<max>, or random-range-<min>-<max>.")
 
 
-class VerifyKeys:
-    valid_keys = frozenset()
+class FreezeValidKeys(AssembleOptions):
+    def __new__(mcs, name, bases, attrs):
+        if "valid_keys" in attrs:
+            attrs["_valid_keys"] = frozenset(attrs["valid_keys"])
+        return super(FreezeValidKeys, mcs).__new__(mcs, name, bases, attrs)
+
+
+class VerifyKeys(metaclass=FreezeValidKeys):
+    valid_keys: typing.Iterable = []
+    _valid_keys: frozenset  # gets created by AssembleOptions from valid_keys
     valid_keys_casefold: bool = False
     convert_name_groups: bool = False
     verify_item_name: bool = False
@@ -716,20 +765,25 @@ class VerifyKeys:
     value: typing.Any
 
     @classmethod
-    def verify_keys(cls, data):
+    def verify_keys(cls, data: typing.List[str]):
         if cls.valid_keys:
             data = set(data)
             dataset = set(word.casefold() for word in data) if cls.valid_keys_casefold else set(data)
-            extra = dataset - cls.valid_keys
+            extra = dataset - cls._valid_keys
             if extra:
                 raise Exception(f"Found unexpected key {', '.join(extra)} in {cls}. "
-                                f"Allowed keys: {cls.valid_keys}.")
+                                f"Allowed keys: {cls._valid_keys}.")
 
-    def verify(self, world, player_name: str, plando_options) -> None:
+    def verify(self, world: typing.Type[World], player_name: str, plando_options: "PlandoOptions") -> None:
         if self.convert_name_groups and self.verify_item_name:
             new_value = type(self.value)()  # empty container of whatever value is
             for item_name in self.value:
                 new_value |= world.item_name_groups.get(item_name, {item_name})
+            self.value = new_value
+        elif self.convert_name_groups and self.verify_location_name:
+            new_value = type(self.value)()
+            for loc_name in self.value:
+                new_value |= world.location_name_groups.get(loc_name, {loc_name})
             self.value = new_value
         if self.verify_item_name:
             for item_name in self.value:
@@ -747,7 +801,7 @@ class VerifyKeys:
                                     f"Did you mean '{picks[0][0]}' ({picks[0][1]}% sure)")
 
 
-class OptionDict(Option[typing.Dict[str, typing.Any]], VerifyKeys):
+class OptionDict(Option[typing.Dict[str, typing.Any]], VerifyKeys, typing.Mapping[str, typing.Any]):
     default: typing.Dict[str, typing.Any] = {}
     supports_weighting = False
 
@@ -765,8 +819,14 @@ class OptionDict(Option[typing.Dict[str, typing.Any]], VerifyKeys):
     def get_option_name(self, value):
         return ", ".join(f"{key}: {v}" for key, v in value.items())
 
-    def __contains__(self, item):
-        return item in self.value
+    def __getitem__(self, item: str) -> typing.Any:
+        return self.value.__getitem__(item)
+
+    def __iter__(self) -> typing.Iterator[str]:
+        return self.value.__iter__()
+
+    def __len__(self) -> int:
+        return self.value.__len__()
 
 
 class ItemDict(OptionDict):
@@ -779,6 +839,10 @@ class ItemDict(OptionDict):
 
 
 class OptionList(Option[typing.List[typing.Any]], VerifyKeys):
+    # Supports duplicate entries and ordering.
+    # If only unique entries are needed and input order of elements does not matter, OptionSet should be used instead.
+    # Not a docstring so it doesn't get grabbed by the options system.
+
     default: typing.List[typing.Any] = []
     supports_weighting = False
 
@@ -830,7 +894,9 @@ class OptionSet(Option[typing.Set[str]], VerifyKeys):
         return item in self.value
 
 
-local_objective = Toggle  # local triforce pieces, local dungeon prizes etc.
+class ItemSet(OptionSet):
+    verify_item_name = True
+    convert_name_groups = True
 
 
 class Accessibility(Choice):
@@ -846,7 +912,7 @@ class Accessibility(Choice):
     default = 1
 
 
-class ProgressionBalancing(SpecialRange):
+class ProgressionBalancing(NamedRange):
     """A system that can move progression earlier, to try and prevent the player from getting stuck and bored early.
     A lower setting means more getting stuck. A higher setting means less getting stuck."""
     default = 50
@@ -860,15 +926,58 @@ class ProgressionBalancing(SpecialRange):
     }
 
 
-common_options = {
-    "progression_balancing": ProgressionBalancing,
-    "accessibility": Accessibility
-}
+class OptionsMetaProperty(type):
+    def __new__(mcs,
+                name: str,
+                bases: typing.Tuple[type, ...],
+                attrs: typing.Dict[str, typing.Any]) -> "OptionsMetaProperty":
+        for attr_type in attrs.values():
+            assert not isinstance(attr_type, AssembleOptions),\
+                f"Options for {name} should be type hinted on the class, not assigned"
+        return super().__new__(mcs, name, bases, attrs)
+
+    @property
+    @functools.lru_cache(maxsize=None)
+    def type_hints(cls) -> typing.Dict[str, typing.Type[Option[typing.Any]]]:
+        """Returns type hints of the class as a dictionary."""
+        return typing.get_type_hints(cls)
 
 
-class ItemSet(OptionSet):
-    verify_item_name = True
-    convert_name_groups = True
+@dataclass
+class CommonOptions(metaclass=OptionsMetaProperty):
+    progression_balancing: ProgressionBalancing
+    accessibility: Accessibility
+
+    def as_dict(self, *option_names: str, casing: str = "snake") -> typing.Dict[str, typing.Any]:
+        """
+        Returns a dictionary of [str, Option.value]
+        
+        :param option_names: names of the options to return
+        :param casing: case of the keys to return. Supports `snake`, `camel`, `pascal`, `kebab`
+        """
+        option_results = {}
+        for option_name in option_names:
+            if option_name in type(self).type_hints:
+                if casing == "snake":
+                    display_name = option_name
+                elif casing == "camel":
+                    split_name = [name.title() for name in option_name.split("_")]
+                    split_name[0] = split_name[0].lower()
+                    display_name = "".join(split_name)
+                elif casing == "pascal":
+                    display_name = "".join([name.title() for name in option_name.split("_")])
+                elif casing == "kebab":
+                    display_name = option_name.replace("_", "-")
+                else:
+                    raise ValueError(f"{casing} is invalid casing for as_dict. "
+                                     "Valid names are 'snake', 'camel', 'pascal', 'kebab'.")
+                value = getattr(self, option_name).value
+                if isinstance(value, set):
+                    value = sorted(value)
+                option_results[display_name] = value
+            else:
+                raise ValueError(f"{option_name} not found in {tuple(type(self).type_hints)}")
+        return option_results
 
 
 class LocalItems(ItemSet):
@@ -887,27 +996,36 @@ class StartInventory(ItemDict):
     display_name = "Start Inventory"
 
 
+class StartInventoryPool(StartInventory):
+    """Start with these items and don't place them in the world.
+    The game decides what the replacement items will be."""
+    verify_item_name = True
+    display_name = "Start Inventory from Pool"
+
+
 class StartHints(ItemSet):
     """Start with these item's locations prefilled into the !hint command."""
     display_name = "Start Hints"
 
 
-class StartLocationHints(OptionSet):
+class LocationSet(OptionSet):
+    verify_location_name = True
+    convert_name_groups = True
+
+
+class StartLocationHints(LocationSet):
     """Start with these locations and their item prefilled into the !hint command"""
     display_name = "Start Location Hints"
-    verify_location_name = True
 
 
-class ExcludeLocations(OptionSet):
+class ExcludeLocations(LocationSet):
     """Prevent these locations from having an important item"""
     display_name = "Excluded Locations"
-    verify_location_name = True
 
 
-class PriorityLocations(OptionSet):
+class PriorityLocations(LocationSet):
     """Prevent these locations from having an unimportant item"""
     display_name = "Priority Locations"
-    verify_location_name = True
 
 
 class DeathLink(Toggle):
@@ -917,6 +1035,7 @@ class DeathLink(Toggle):
 
 class ItemLinks(OptionList):
     """Share part of your item pool with other players."""
+    display_name = "Item Links"
     default = []
     schema = Schema([
         {
@@ -948,7 +1067,7 @@ class ItemLinks(OptionList):
                 pool |= {item_name}
         return pool
 
-    def verify(self, world, player_name: str, plando_options) -> None:
+    def verify(self, world: typing.Type[World], player_name: str, plando_options: "PlandoOptions") -> None:
         link: dict
         super(ItemLinks, self).verify(world, player_name, plando_options)
         existing_links = set()
@@ -979,17 +1098,71 @@ class ItemLinks(OptionList):
             link.setdefault("link_replacement", None)
 
 
-per_game_common_options = {
-    **common_options,  # can be overwritten per-game
-    "local_items": LocalItems,
-    "non_local_items": NonLocalItems,
-    "start_inventory": StartInventory,
-    "start_hints": StartHints,
-    "start_location_hints": StartLocationHints,
-    "exclude_locations": ExcludeLocations,
-    "priority_locations": PriorityLocations,
-    "item_links": ItemLinks
-}
+@dataclass
+class PerGameCommonOptions(CommonOptions):
+    local_items: LocalItems
+    non_local_items: NonLocalItems
+    start_inventory: StartInventory
+    start_hints: StartHints
+    start_location_hints: StartLocationHints
+    exclude_locations: ExcludeLocations
+    priority_locations: PriorityLocations
+    item_links: ItemLinks
+
+
+def generate_yaml_templates(target_folder: typing.Union[str, "pathlib.Path"], generate_hidden: bool = True):
+    import os
+
+    import yaml
+    from jinja2 import Template
+
+    from worlds import AutoWorldRegister
+    from Utils import local_path, __version__
+
+    full_path: str
+
+    os.makedirs(target_folder, exist_ok=True)
+
+    # clean out old
+    for file in os.listdir(target_folder):
+        full_path = os.path.join(target_folder, file)
+        if os.path.isfile(full_path) and full_path.endswith(".yaml"):
+            os.unlink(full_path)
+
+    def dictify_range(option: Range):
+        data = {option.default: 50}
+        for sub_option in ["random", "random-low", "random-high"]:
+            if sub_option != option.default:
+                data[sub_option] = 0
+
+        notes = {}
+        for name, number in getattr(option, "special_range_names", {}).items():
+            notes[name] = f"equivalent to {number}"
+            if number in data:
+                data[name] = data[number]
+                del data[number]
+            else:
+                data[name] = 0
+
+        return data, notes
+
+    for game_name, world in AutoWorldRegister.world_types.items():
+        if not world.hidden or generate_hidden:
+            all_options: typing.Dict[str, AssembleOptions] = world.options_dataclass.type_hints
+
+            with open(local_path("data", "options.yaml")) as f:
+                file_data = f.read()
+            res = Template(file_data).render(
+                options=all_options,
+                __version__=__version__, game=game_name, yaml_dump=yaml.dump,
+                dictify_range=dictify_range,
+            )
+
+            del file_data
+
+            with open(os.path.join(target_folder, game_name + ".yaml"), "w", encoding="utf-8-sig") as f:
+                f.write(res)
+
 
 if __name__ == "__main__":
 
