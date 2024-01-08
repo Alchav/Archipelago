@@ -1,7 +1,7 @@
-from worlds.oot import OOTWorld
+from worlds.oot import OOTWorld, OOTCollectionState
 from worlds.oot.LocationList import set_drop_location_names
 from Options import Choice, Toggle, Range
-from BaseClasses import ItemClassification, LocationProgressType
+from BaseClasses import ItemClassification, LocationProgressType, CollectionState
 import logging
 
 default_options = ['logic_no_night_tokens_without_suns_song', 'open_forest', 'open_kakariko', 'open_door_of_time',
@@ -172,6 +172,26 @@ class LogicLakeHyliaLabDive(Toggle):
     display_name = "Logic: Lake Hylia Lab Dive without Gold Scale"
 
 
+def init_mixin(self, parent):
+    oot_ids = (parent.get_game_players(OOTWorld.game) + parent.get_game_groups(OOTWorld.game)
+               + parent.get_game_players(OOTBIJMQWTWorld.game) + parent.get_game_groups(OOTBIJMQWTWorld.game))
+    self.child_reachable_regions = {player: set() for player in oot_ids}
+    self.adult_reachable_regions = {player: set() for player in oot_ids}
+    self.child_blocked_connections = {player: set() for player in oot_ids}
+    self.adult_blocked_connections = {player: set() for player in oot_ids}
+    self.day_reachable_regions = {player: set() for player in oot_ids}
+    self.dampe_reachable_regions = {player: set() for player in oot_ids}
+    self.age = {player: None for player in oot_ids}
+
+
+for i, function in enumerate(CollectionState.additional_init_functions):
+    if function == OOTCollectionState.init_mixin:
+        CollectionState.additional_init_functions[i] = init_mixin
+        break
+else:
+    raise Exception("OOTBIJMQWT failed to inject CollectionState init_mixin function")
+
+
 class OOTBIJMQWTWorld(OOTWorld):
     game: str = "Ocarina of Time but it's just Master Quest Water Temple"
     oot_options = OOTWorld.option_definitions.copy()
@@ -247,6 +267,8 @@ class OOTBIJMQWTWorld(OOTWorld):
 
         item_pool = always_pool.copy()
 
+        self.pre_fill_items = []
+
         if self.multiworld.shuffle_warp_songs[self.player]:
             item_pool += ["Prelude of Light", "Serenade of Water", "Bolero of Fire", "Nocturne of Shadow",
                           "Requiem of Spirit", "Minuet of Forest", "Eponas Song", "Suns Song"]
@@ -319,6 +341,9 @@ class OOTBIJMQWTWorld(OOTWorld):
             loc = self.multiworld.get_location(boss, self.player)
             loc.place_locked_item(self.multiworld.create_item(loc.vanilla_item, self.player))
 
+    def pre_fill(self):
+        pass
+
     def set_rules(self):
         multiworld = self.multiworld
         world = self
@@ -331,7 +356,6 @@ class OOTBIJMQWTWorld(OOTWorld):
                 entrance.shuffled = True
                 entrance.replaces = entrance
         set_rules(self)
-        set_entrances_based_rules(self)
 
         for connection in connections:
             c1, c2 = world.get_entrance(connection[0]), world.get_entrance(connection[1])
