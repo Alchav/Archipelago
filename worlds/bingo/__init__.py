@@ -21,6 +21,7 @@ def bingo_letter(i):
 class Bingo(World):
     game = "Bingo"
     item_name_to_id = {f"{bingo_letter(i)}-{i}": (start_ids + i) for i in range(1, 76)}
+    hint_blacklist = {item for item in item_name_to_id}
     location_name_to_id = {}
     id = start_ids
     for card in range(1, 9):
@@ -38,6 +39,9 @@ class Bingo(World):
         self.cards = None
         super().__init__(multiworld, player)
 
+    # def generate_early(self) -> None:
+        # self.multiworld.start_location_hints[self.player].value.update({loc for loc in self.location_name_to_id})
+
     def create_regions(self) -> None:
         menu = Region("Menu", self.player, self.multiworld)
         self.multiworld.regions.append(menu)
@@ -48,7 +52,7 @@ class Bingo(World):
 
     def set_rules(self) -> None:
         for location in self.multiworld.get_region("Menu", self.player).locations:
-            location.progress_type = LocationProgressType.PRIORITY
+            # location.progress_type = LocationProgressType.PRIORITY
             location.item_rule = lambda item: item.game != "Bingo"
             card = int(location.name.split(" ")[2]) - 1
             n = int(location.name.split(" ")[5]) - 1
@@ -64,7 +68,9 @@ class Bingo(World):
                     coords = [(i, i) for i in range(5)]
                 else:
                     coords = [(i, 4-i) for i in range(5)]
-            location.access_rule = lambda state, card=card, coords=coords: state.has_all([f"{bingo_letter(self.cards[card][c[0]][c[1]])}-{self.cards[card][c[0]][c[1]]}" for c in coords if self.cards[card][c[0]][c[1]] != 0], self.player)
+            bingo_calls = [f"{bingo_letter(self.cards[card][c[0]][c[1]])}-{self.cards[card][c[0]][c[1]]}" for c in coords if self.cards[card][c[0]][c[1]] != 0]
+            location.access_rule = lambda state, card=card, coords=coords: state.has_all(bingo_calls, self.player)
+            location.calls_needed = bingo_calls
 
     def create_item(self, name):
         return BingoItem(name, ItemClassification.progression, self.item_name_to_id[name], self.player)
@@ -90,9 +96,10 @@ class Bingo(World):
     def fill_slot_data(self):
         return {"cards": self.cards}
 
-    # def extend_hint_information(self, hint_data: Dict[int, Dict[int, str]]):
-    #     for location in self.multiworld.get_region("Menu", self.player).locations:
-
+    def extend_hint_information(self, hint_data: Dict[int, Dict[int, str]]):
+        hint_data[self.player] = {}
+        for location in self.multiworld.get_region("Menu", self.player).locations:
+            hint_data[self.player][location.address] = ", ".join(location.calls_needed)
 
 
 class BingoItem(Item):
