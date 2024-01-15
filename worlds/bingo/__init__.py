@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from BaseClasses import Location, Region, Item, ItemClassification, LocationProgressType
 from worlds.AutoWorld import World, WebWorld
@@ -39,8 +39,10 @@ class Bingo(World):
         self.cards = None
         super().__init__(multiworld, player)
 
-    # def generate_early(self) -> None:
+    def generate_early(self) -> None:
         # self.multiworld.start_location_hints[self.player].value.update({loc for loc in self.location_name_to_id})
+        self.multiworld.start_hints[self.player].value.update({item for item in self.item_name_to_id})
+        self.multiworld.non_local_items[self.player].value.update({item for item in self.item_name_to_id})
 
     def create_regions(self) -> None:
         menu = Region("Menu", self.player, self.multiworld)
@@ -52,9 +54,8 @@ class Bingo(World):
 
     def set_rules(self) -> None:
         for location in self.multiworld.get_region("Menu", self.player).locations:
-            # location.progress_type = LocationProgressType.PRIORITY
-            location.item_rule = lambda item: item.game != "Bingo"
-            card = int(location.name.split(" ")[2]) - 1
+            location.progress_type = LocationProgressType.PRIORITY
+            location.item_rule = lambda item: item.game != "Bingo" and item.classification == ItemClassification.progression
             n = int(location.name.split(" ")[5]) - 1
             line_type = location.name.split(" ")[4]
             if line_type == "Horizontal":
@@ -68,8 +69,8 @@ class Bingo(World):
                     coords = [(i, i) for i in range(5)]
                 else:
                     coords = [(i, 4-i) for i in range(5)]
-            bingo_calls = [f"{bingo_letter(self.cards[card][c[0]][c[1]])}-{self.cards[card][c[0]][c[1]]}" for c in coords if self.cards[card][c[0]][c[1]] != 0]
-            location.access_rule = lambda state, card=card, coords=coords: state.has_all(bingo_calls, self.player)
+            bingo_calls = [f"{bingo_letter(self.cards[n][c[0]][c[1]])}-{self.cards[n][c[0]][c[1]]}" for c in coords if self.cards[n][c[0]][c[1]] != 0]
+            location.access_rule = lambda state, b=bingo_calls: state.has_all(b, self.player)
             location.calls_needed = bingo_calls
 
     def create_item(self, name):
