@@ -162,7 +162,7 @@ class LogicWaterMQCentralPillarWithFireArrows(Toggle):
 class LogicWaterTempleMQNorthBasementGSWithoutSmallKey(Toggle):
     """Enable the "Water Temple MQ North Basement GS Without Small Key" trick to logic, which may require hookshotting an
     invisible hookshot target to get over the gate to the basement GS, skipping the locked door."""
-    display_name = "Logic: Water Temple MQ North Basement GS without Small"
+    display_name = "Logic: Water Temple MQ North Basement GS without Small Key"
 
 
 class LogicLakeHyliaLabDive(Toggle):
@@ -251,13 +251,12 @@ class OOTBIJMQWTWorld(OOTWorld):
                 if isinstance(set_options[option], int):
                     optiondict[world.player].value = set_options[option]
 
-            multiworld.accessibility[world.player] = multiworld.accessibility[world.player].from_text("items")
             if multiworld.local_tokens[world.player]:
                 multiworld.local_items[world.player].value.add("Gold Skulltula Token")
             if multiworld.boss_key_location[world.player] == "own_game":
                 multiworld.local_items[world.player].value.add("Boss Key (Water Temple)")
             multiworld.free_scarecrow[world.player].value = multiworld.enable_scarecrow[world.player].value
-            for trick in ["logic_fewer_tunic_requirements", "logic_water_mq_central_pillar","logic_water_mq_locked_gs",
+            for trick in ["logic_fewer_tunic_requirements", "logic_water_mq_central_pillar", "logic_water_mq_locked_gs",
                           "logic_lab_diving", "logic_water_dragon_jump_dive", "logic_water_north_basement_ledge_jump"]:
                 if getattr(multiworld, trick)[world.player]:
                     multiworld.logic_tricks[world.player].value.append(getattr(multiworld, trick)[world.player].display_name.split(": ")[1].casefold())
