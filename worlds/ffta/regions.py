@@ -422,7 +422,7 @@ def create_regions(world, player) -> None:
 
         # Connect the path finish events to the final mission
         path1_complete.connect(final_mission, final_mission.name)
-        path2_complete.connect(final_mission, final_mission.name)
+        path2_complete.connect(final_mission, final_mission.name + " 2")
 
     elif world.options.gate_paths.value == 3:
         for x in range(len(valid_gates)):
