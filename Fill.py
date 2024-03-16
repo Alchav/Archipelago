@@ -505,6 +505,8 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         return 0
 
     for sphere in multiworld.get_spheres():
+        if not sphere:
+            break
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
