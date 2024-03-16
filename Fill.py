@@ -88,7 +88,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                 perform_access_check = True
 
             for i, location in enumerate(locations):
-                if (not single_player_placement or location.player == item_to_place.player) \
+                if location.player == item_to_place.player \
                         and location.can_fill(maximum_exploration_state, item_to_place, perform_access_check):
                     # popping by index is faster than removing by content,
                     spot_to_fill = locations.pop(i)
@@ -219,7 +219,7 @@ def remaining_fill(multiworld: MultiWorld,
         spot_to_fill: typing.Optional[Location] = None
 
         for i, location in enumerate(locations):
-            if location.item_rule(item_to_place):
+            if location.player == item_to_place.player and location.item_rule(item_to_place):
                 # popping by index is faster than removing by content,
                 spot_to_fill = locations.pop(i)
                 # skipping a scan for the element
@@ -488,6 +488,34 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         print_data = {"items": items_counter, "locations": locations_counter}
         logging.info(f'Per-Player counts: {print_data})')
 
+    # spheres = []
+    # sphere_state = CollectionState(multiworld)
+    # while True:
+    #
+    from BaseClasses import ItemClassification
+
+    def iclass(i: Item):
+        if i.classification == ItemClassification.filler:
+            return 3
+        elif i.classification == ItemClassification.progression_skip_balancing or i.classification == ItemClassification.useful:
+            return 2
+        elif i.classification == ItemClassification.progression:
+            return 1
+        return 0
+
+    for sphere in multiworld.get_spheres():
+        sphere_list = list(sphere)
+        sphere_list.sort()
+        multiworld.random.shuffle(sphere_list)
+        sphere_t = [[], [], [], []]
+        for loc in sphere_list:
+            if loc.address and not loc.locked:
+                sphere_t[iclass(loc.item)].append(loc)
+        for t in sphere_t[1:]:
+            for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
+                if a.item_rule(b.item) and b.item_rule(a.item):
+                    a.item, b.item = b.item, a.item
+
 
 def flood_items(multiworld: MultiWorld) -> None:
     # get items to distribute
@@ -562,7 +590,7 @@ def balance_multiworld_progression(multiworld: MultiWorld) -> None:
         for player in multiworld.player_ids
         if multiworld.worlds[player].options.progression_balancing > 0
     }
-    if not balanceable_players:
+    if True: #not balanceable_players:
         logging.info('Skipping multiworld progression balancing.')
     else:
         logging.info(f'Balancing multiworld progression for {len(balanceable_players)} Players.')
@@ -713,7 +741,7 @@ def balance_multiworld_progression(multiworld: MultiWorld) -> None:
                                     old_location.can_fill(state, new_location.item, False):
                                 replacement_locations.pop(i)
                                 swap_location_item(old_location, new_location)
-                                logging.debug(f"Progression balancing moved {new_location.item} to {new_location}, "
+                                logging.info(f"Progression balancing moved {new_location.item} to {new_location}, "
                                               f"displacing {old_location.item} into {old_location}")
                                 moved_item_count += 1
                                 state.collect(new_location.item, True, new_location)
