@@ -489,24 +489,47 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         print_data = {"items": items_counter, "locations": locations_counter}
         logging.info(f'Per-Player counts: {print_data})')
 
-    # spheres = []
-    # sphere_state = CollectionState(multiworld)
-    # while True:
-    #
+    def get_item_spheres():
+        state = CollectionState(multiworld)
+        locations = set(multiworld.get_filled_locations())
+
+        while locations:
+            reachable_locations = {location for location in locations if location.can_reach(state)}
+            old_reachable_locations = None
+            while old_reachable_locations != reachable_locations:
+                old_reachable_locations = reachable_locations.copy()
+                reachable_events = {location for location in reachable_locations if location.address is None}
+                for location in reachable_events:
+                    state.collect(location.item, True, location)
+                locations -= reachable_events
+                reachable_locations = {location for location in locations if location.can_reach(state)}
+            if not reachable_locations:
+                break  # don't swap unreachables
+                if locations:
+                    yield locations  # unreachable locations
+                break
+            else:
+                yield reachable_locations
+
+            for location in reachable_locations:
+                if location.item.advancement:
+                    state.collect(location.item, True, location)
+            locations -= reachable_locations
+
     from BaseClasses import ItemClassification
 
     def iclass(i: Item):
         if i.classification == ItemClassification.filler:
             return 3
+        elif i.game in ("Rogue Legacy", "Slay the Spire", "Starcraft 2"):
+            return 2
         elif i.classification == ItemClassification.progression_skip_balancing or i.classification == ItemClassification.useful:
             return 2
         elif i.classification == ItemClassification.progression:
             return 1
         return 0
 
-    for sphere in multiworld.get_spheres():
-        if not sphere:
-            break
+    for sphere in get_item_spheres():
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
