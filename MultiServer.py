@@ -606,7 +606,7 @@ class Context:
 
     def get_hint_cost(self, slot):
         if self.hint_cost:
-            return max(1, int(self.hint_cost * 0.01 * len(self.locations[slot])))
+            return max(1, int(self.hint_cost * 0.01 * sum([len(self.locations[player]) for player in self.slot_info if player in self.locations])))
         return 0
 
     def recheck_hints(self, team: typing.Optional[int] = None, slot: typing.Optional[int] = None):
@@ -1584,7 +1584,8 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
 
 
 def get_client_points(ctx: Context, client: Client) -> int:
-    return (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
+    checks = len(sum([list(ctx.location_checks[client.team, slot]) for slot in ctx.slot_info], []))
+    return (ctx.location_check_points * checks -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 

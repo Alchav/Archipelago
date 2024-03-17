@@ -653,10 +653,15 @@ class PokemonRedBlueWorld(World):
 
     @classmethod
     def stage_generate_output(cls, multiworld, output_directory):
-        level_scaling(multiworld)
-
+        try:
+            level_scaling(multiworld)
+        except Exception as e:
+            breakpoint()
     def generate_output(self, output_directory: str):
-        generate_output(self, output_directory)
+        try:
+            generate_output(self, output_directory)
+        except Exception as e:
+            breakpoint()
 
     def modify_multidata(self, multidata: dict):
         rom_name = bytearray(f'AP{__version__.replace(".", "")[0:3]}_{self.player}_{self.multiworld.seed:11}\0',

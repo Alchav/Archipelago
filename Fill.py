@@ -26,7 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-
+z = (8, 11, 21)
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -51,6 +51,8 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
     reachable_items: typing.Dict[int, typing.Deque[Item]] = {}
     for item in item_pool:
         reachable_items.setdefault(item.player, deque()).append(item)
+
+    single_player_placement = True
 
     # for progress logging
     total = min(len(item_pool), len(locations))
@@ -88,7 +90,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                 perform_access_check = True
 
             for i, location in enumerate(locations):
-                if location.player == item_to_place.player \
+                if (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)) \
                         and location.can_fill(maximum_exploration_state, item_to_place, perform_access_check):
                     # popping by index is faster than removing by content,
                     spot_to_fill = locations.pop(i)
@@ -98,11 +100,14 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
             else:
                 # we filled all reachable spots.
                 if swap:
+                    print(f"Swapping {item_to_place.name}")
                     # try swapping this item with previously placed items in a safe way then in an unsafe way
                     swap_attempts = ((i, location, unsafe)
                                      for unsafe in (False, True)
                                      for i, location in enumerate(placements))
                     for (i, location, unsafe) in swap_attempts:
+                        if not (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)):
+                            continue
                         placed_item = location.item
                         # Unplaceable items can sometimes be swapped infinitely. Limit the
                         # number of times we will swap an individual item to prevent this
@@ -110,13 +115,14 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                         if swap_count > 1:
                             continue
 
+                        print(f"Attempting to swap {item_to_place.name} into {location.name}")
                         location.item = None
                         placed_item.location = None
                         swap_state = sweep_from_pool(base_state, [placed_item, *item_pool] if unsafe else item_pool)
                         # unsafe means swap_state assumes we can somehow collect placed_item before item_to_place
                         # by continuing to swap, which is not guaranteed. This is unsafe because there is no mechanic
                         # to clean that up later, so there is a chance generation fails.
-                        if (not single_player_placement or location.player == item_to_place.player) \
+                        if (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)) \
                                 and location.can_fill(swap_state, item_to_place, perform_access_check):
 
                             # Verify placing this item won't reduce available locations, which would be a useless swap.
@@ -161,7 +167,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
             placements.append(spot_to_fill)
             spot_to_fill.event = item_to_place.advancement
             placed += 1
-            if not placed % 1000:
+            if not placed % 100:
                 _log_fill_progress(name, placed, total)
             if on_place:
                 on_place(spot_to_fill)
@@ -220,7 +226,7 @@ def remaining_fill(multiworld: MultiWorld,
         spot_to_fill: typing.Optional[Location] = None
 
         for i, location in enumerate(locations):
-            if location.player == item_to_place.player and location.item_rule(item_to_place):
+            if (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)) and location.item_rule(item_to_place):
                 # popping by index is faster than removing by content,
                 spot_to_fill = locations.pop(i)
                 # skipping a scan for the element
@@ -272,9 +278,14 @@ def remaining_fill(multiworld: MultiWorld,
         _log_fill_progress(name, placed, total)
 
     if unplaced_items and locations:
-        # There are leftover unplaceable items and locations that won't accept them
-        raise FillError(f'No more spots to place {unplaced_items}, locations {locations} are invalid. '
-                        f'Already placed {len(placements)}: {", ".join(str(place) for place in placements)}')
+        while unplaced_items and locations:
+            multiworld.push_item(unplaced_items.pop(), locations.pop(), False)
+        # return
+        #
+        #
+        # # There are leftover unplaceable items and locations that won't accept them
+        # raise FillError(f'No more spots to place {unplaced_items}, locations {locations} are invalid. '
+        #                 f'Already placed {len(placements)}: {", ".join(str(place) for place in placements)}')
 
     itempool.extend(unplaced_items)
 
@@ -452,6 +463,15 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         accessibility_corrections(multiworld, multiworld.state, prioritylocations, progitempool)
         defaultlocations = prioritylocations + defaultlocations
 
+    # morph_balls = [i for i in progitempool if i.name == "Morph"]
+    # progitempool = [i for i in progitempool if i not in morph_balls]
+    # l = [loc for loc in defaultlocations if loc.player in z and loc.can_reach(multiworld.state)]
+    # lx = multiworld.random.sample(l, 2)
+    # defaultlocations.remove(lx[0])
+    # defaultlocations.remove(lx[1])
+    # multiworld.push_item(lx[0], morph_balls[0], False)
+    # multiworld.push_item(lx[1], morph_balls[1], False)
+
     if progitempool:
         # "advancement/progression fill"
         fill_restrictive(multiworld, multiworld.state, defaultlocations, progitempool, name="Progression")
@@ -466,6 +486,8 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
     del mark_for_locking, lock_later
 
     inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
+
+    filleritempool.sort(key=lambda i: not i.trap)
 
     remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded")
     if excludedlocations:
@@ -519,7 +541,11 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
     from BaseClasses import ItemClassification
 
     def iclass(i: Item):
-        if i.classification == ItemClassification.filler:
+        if i.classification == ItemClassification.trap:
+            return 0
+        elif i.classification == ItemClassification.filler:
+            if i.game in ("Super Metroid", "Super Metroid Map Rando"):
+                return 2
             return 3
         elif i.game in ("Rogue Legacy", "Slay the Spire", "Starcraft 2"):
             return 2
@@ -527,7 +553,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
             return 2
         elif i.classification == ItemClassification.progression:
             return 1
-        return 0
+        breakpoint()
 
     for sphere in get_item_spheres():
         sphere_list = list(sphere)

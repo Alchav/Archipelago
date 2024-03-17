@@ -17,7 +17,10 @@ from .Names import ItemName, LocationName
 from .Client import SMWSNIClient
 from worlds.AutoWorld import WebWorld, World
 from .Rom import LocalRom, patch_rom, get_base_rom_path, SMWDeltaPatch
+import Utils
 
+Utils.__version__ = "0.4.5"
+Utils.version_tuple = Utils.tuplize_version("0.4.5")
 
 class SMWSettings(settings.Group):
     class RomFile(settings.SNESRomPath):
