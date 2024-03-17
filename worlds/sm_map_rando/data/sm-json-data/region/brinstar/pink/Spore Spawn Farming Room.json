@@ -1,0 +1,221 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 64,
+  "name": "Spore Spawn Farming Room",
+  "area": "Brinstar",
+  "subarea": "Pink",
+  "playable": true,
+  "roomAddress": "0x7A0A4",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "green",
+      "nodeAddress": "0x0018f82",
+      "doorEnvironments": [{"physics": "air"}],
+      "leaveWithGModeSetup": [
+        {"strats": [
+          {
+            "name": "Get Hit By Zeb",
+            "notable": false,
+            "requires": []
+          }
+        ]}
+      ],
+      "locks": [
+        {
+          "name": "Spore Spawn Farming Room Green Lock (to Big Pink)",
+          "lockType": "coloredDoor",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canOpenGreenDoors"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0018f76",
+      "doorEnvironments": [{"physics": "air"}],
+      "leaveWithGModeSetup": [
+        {"strats": [
+          {
+            "name": "Get Hit By Zeb",
+            "notable": false,
+            "requires": []
+          }
+        ]}
+      ]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Spore Spawn Farming Room Zeelas",
+      "enemyName": "Zeela",
+      "quantity": 2,
+      "homeNodes": [1]
+    },
+    {
+      "id": "e2",
+      "groupName": "Spore Spawn Farming Room Left Zebs",
+      "enemyName": "Zeb",
+      "quantity": 2,
+      "homeNodes": [1],
+      "farmCycles": [
+        {
+          "name": "Alternating Farm",
+          "cycleFrames": 120,
+          "requires": [],
+          "note": "Getting the two spawners to desynch and jumping back and forth between the two."
+        }
+      ]
+    },
+    {
+      "id": "e3",
+      "groupName": "Spore Spawn Farming Room Right Zeb",
+      "enemyName": "Zeb",
+      "quantity": 1,
+      "homeNodes": [1],
+      "farmCycles": [
+        {
+          "name": "Crouch over spawn point",
+          "cycleFrames": 120,
+          "requires": []
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Zeb Farm",
+      "requires": [
+        {"refill": ["Energy", "Missile", "Super"]}
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 12,
+          "steepUpTiles": 2,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 21,
+          "steepUpTiles": 2,
+          "openEnd": 0
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 10
+        }
+      },
+      "note": [
+        "Stand to the right of the right-most bug pipe, and run to the right to gain a shortcharge.",
+        "Run back to the left, jump over the bug pipes with one jump, and exit through the left door."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged (Space Jump)",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 21,
+          "steepUpTiles": 2,
+          "openEnd": 0
+        }},
+        "SpaceJump",
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 25
+        }
+      },
+      "note": [
+        "Stand to the right of the right-most bug pipe, and run to the right to gain a shortcharge.",
+        "Run back to the left, Space Jump over the bug pipes, and exit through the left door."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave With Shinespark",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 21,
+          "steepUpTiles": 2,
+          "openEnd": 0
+        }},
+        "canShinechargeMovement",
+        {"shinespark": {"frames": 20}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "note": [
+        "Stand to the right of the right-most bug pipe, and run to the right to gain a shortcharge.",
+        "Run back to the left, jump over the bug pipes, and shinespark through the left door."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 22,
+          "steepUpTiles": 2,
+          "openEnd": 0
+        }
+      }
+    }
+  ]
+}

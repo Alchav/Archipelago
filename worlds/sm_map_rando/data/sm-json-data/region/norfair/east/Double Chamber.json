@@ -1,0 +1,1000 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 104,
+  "name": "Double Chamber",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7ADAD",
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Top Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019606",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Bottom Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019612",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 3,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "red",
+      "nodeAddress": "0x001961e",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Double Chamber Red Lock (to Wave)",
+          "lockType": "coloredDoor",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canOpenRedDoors"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Item",
+      "nodeType": "item",
+      "nodeSubType": "visible",
+      "nodeItem": "Missile",
+      "nodeAddress": "0x78CBC"
+    },
+    {
+      "id": 5,
+      "name": "Junction Below Spikes",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "A",
+      "name": "Blue Gate",
+      "obstacleType": "inanimate"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Double Chamber Funes",
+      "enemyName": "Fune",
+      "quantity": 2,
+      "betweenNodes": [1, 2],
+      "dropRequires": ["h_heatProof"]
+    },
+    {
+      "id": "e2",
+      "groupName": "Double Chamber Ripper 2",
+      "enemyName": "Ripper 2 (green)",
+      "quantity": 1,
+      "betweenNodes": [3, 5],
+      "dropRequires": ["h_heatProof"]
+    },
+    {
+      "id": "e3",
+      "groupName": "Double Chamber Kago",
+      "enemyName": "Kago",
+      "quantity": 1,
+      "homeNodes": [5],
+      "dropRequires": ["h_heatProof"]
+    }
+  ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Double Chamber Walljump Climb Using the Kamer",
+      "note": [
+        "Wall jump up the left wall and then on the moving platform (Kamer) while avoiding the Fune's fireball.",
+        "The Kamers will temporarily move down if Samus is below them, so it is best to walk under the first Kamer before climbing the wall.",
+        "It is possible to freeze or kill the Fune with a Super or Power Bomb to make things easier."
+      ]
+    },
+    {
+      "name": "Double Chamber Shinespark through Wave Beam Door",
+      "note": [
+        "Charge a spark along the bottom of Double Chamber and use it to spark through the right side door.",
+        "Requires opening the door and shutter first."
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 3},
+        {"id": 4},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 1},
+        {"id": 3},
+        {"id": 4},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 5,
+      "to": [
+        {"id": 2},
+        {"id": 3},
+        {"id": 5}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 150}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canShinechargeMovement",
+        {"heatFrames": 150}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 45
+        }
+      }
+    },
+    {
+      "link": [1, 4],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 250}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [2, 1],
+      "name": "Double Chamber Walljump Climb Using the Kamer",
+      "notable": true,
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canPreciseWalljump",
+        "canConsecutiveWalljump",
+        "canUseEnemies",
+        {"or": [
+          {"heatFrames": 560},
+          {"and": [
+            "canCarefulJump",
+            {"heatFrames": 360}
+          ]},
+          {"and": [
+            "canTrickyJump",
+            {"heatFrames": 240}
+          ]},
+          {"and": [
+            {"or": [
+              "canUseFrozenEnemies",
+              {"ammo": {"type": "Super", "count": 1}}
+            ]},
+            {"heatFrames": 432}
+          ]},
+          {"and": [
+            {"ammo": {"type": "PowerBomb", "count": 1}},
+            {"heatFrames": 456}
+          ]}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Double Chamber Walljump Climb Using the Kamer",
+      "note": [
+        "Wall jump up the left wall and then on the moving platform (Kamer) while avoiding the Fune's fireball.",
+        "The Kamers will temporarily move down if Samus is below them, so it is best to walk under the first Kamer before climbing the wall.",
+        "It is possible to freeze or kill the Fune with a Super or Power Bomb to make things easier."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Double Chamber Walljump Climb Using the Kamer with HiJump",
+      "notable": true,
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "HiJump",
+        "canUseEnemies",
+        "canWalljump",
+        {"or": [
+          {"heatFrames": 360},
+          {"and": [
+            "canCarefulJump",
+            {"heatFrames": 250}
+          ]}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Double Chamber Walljump Climb Using the Kamer",
+      "note": [
+        "Wall jump up the left wall and then on the moving platform (Kamer) while avoiding the Fune's fireball.",
+        "The Kamers will temporarily move down if Samus is below them, so it is best to walk under the first Kamer before climbing the wall."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Delayed Walljump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canDelayedWalljump",
+        "canConsecutiveWalljump",
+        "canTrickyJump",
+        "canUseEnemies",
+        {"or": [
+          {"heatFrames": 190},
+          {"and": [
+            "canPrepareForNextRoom",
+            {"heatFrames": 120}
+          ]}
+        ]}
+      ],
+      "note": "Wall jump up the left wall, perform a delayed wall jump on the Fune to reach the door."
+    },
+    {
+      "link": [2, 1],
+      "name": "Space Jump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 300}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "IBJ",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_canIBJ",
+        {"heatFrames": 1450}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Charge Shinespark",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"canShineCharge": {
+          "usedTiles": 28,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 3,
+          "openEnd": 0
+        }},
+        {"shinespark": {"frames": 27, "excessFrames": 4}},
+        {"heatFrames": 450}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Shinespark Deep Stuck X-Ray Climb",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 1
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 1, "excessFrames": 1}},
+        "canShinesparkDeepStuck",
+        "canXRayClimb",
+        "canBePatient",
+        {"heatFrames": 1600}
+      ],
+      "note": "Climb up 1 screen."
+    },
+    {
+      "link": [2, 1],
+      "name": "G-Mode Deep Stuck X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "h_heatProof",
+        "canXRayClimb"
+      ],
+      "note": "Climb up 1 screen."
+    },
+    {
+      "link": [2, 1],
+      "name": "Very Deep Stuck X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "h_heatProof",
+        "canXRayClimb"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Enter with G-mode direct, back up to between 1 and 6 pixels from the door transition, and activate X-ray to get very deep stuck in the door.",
+        "Climb up 1 screen, and perform a turnaround buffered spin-jump away from the door to trigger the transition, bypassing any lock on the door."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Come in Charged",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 40
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"shinespark": {"frames": 27, "excessFrames": 4}},
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Speedjump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpeedBooster",
+        "HiJump",
+        {"heatFrames": 350}
+      ],
+      "note": "Run from the right wall to 2/3 of the way across the room and jump up onto the moving platforms."
+    },
+    {
+      "link": [2, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canShinechargeMovementComplex",
+        "HiJump",
+        {"or": [
+          "SpaceJump",
+          {"and": [
+            "canPreciseWalljump",
+            "canTrickyJump"
+          ]}
+        ]},
+        {"heatFrames": 400},
+        {"canShineCharge": {
+          "usedTiles": 28,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 3,
+          "openEnd": 0
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 30
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canShinechargeMovement",
+        {"heatFrames": 300},
+        {"canShineCharge": {
+          "usedTiles": 28,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 3,
+          "openEnd": 0
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 140
+        }
+      }
+    },
+    {
+      "link": [2, 5],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Double Chamber Shinespark through Wave Beam Door (Top Path)",
+      "notable": true,
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "HiJump",
+        {"or": [
+          "SpaceJump",
+          "Grapple"
+        ]},
+        {"or": [
+          {"obstaclesCleared": ["A"]},
+          "Wave",
+          {"and": [
+            "h_canHeatedBlueGateGlitch",
+            {"heatFrames": 60}
+          ]}
+        ]},
+        {"or": [
+          {"and": [
+            "canTrickyDashJump",
+            "canWalljump"
+          ]},
+          "SpaceJump"
+        ]},
+        {"canShineCharge": {
+          "usedTiles": 28,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 3,
+          "openEnd": 0
+        }},
+        {"heatFrames": 780},
+        {"shinespark": {"frames": 57}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "clearsObstacles": ["A"],
+      "reusableRoomwideNotable": "Double Chamber Shinespark through Wave Beam Door",
+      "note": [
+        "Charge a spark along the bottom of Double Chamber and use it to spark through the right side door.",
+        "Requires opening the door and shutter first."
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Double Chamber Shinespark through Wave Beam Door (Through Crumbles)",
+      "notable": true,
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "HiJump",
+        "Morph",
+        {"or": [
+          {"obstaclesCleared": ["A"]},
+          {"heatFrames": 240}
+        ]},
+        {"or": [
+          {"and": [
+            "canTrickyDashJump",
+            "canWalljump"
+          ]},
+          "SpaceJump"
+        ]},
+        {"canShineCharge": {
+          "usedTiles": 28,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 3,
+          "openEnd": 0
+        }},
+        {"heatFrames": 780},
+        {"shinespark": {"frames": 57}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "clearsObstacles": ["A"],
+      "reusableRoomwideNotable": "Double Chamber Shinespark through Wave Beam Door",
+      "note": [
+        "Charge a spark along the bottom of Double Chamber and use it to spark through the right side door.",
+        "Requires opening the door and shutter first."
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "XMode with Walljump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_canXMode",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "canWalljump",
+        "SpeedBooster",
+        {"heatFrames": 540},
+        {"shinespark": {"frames": 5}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "note": "Jump into the spikes and try to bounce on the crumble blocks moving towards the door.",
+      "devNote": "Three spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
+    },
+    {
+      "link": [3, 3],
+      "name": "XMode with HiJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_canXMode",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "SpeedBooster",
+        "HiJump",
+        {"heatFrames": 480}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 40
+        }
+      },
+      "note": "Jump into the spikes and try to bounce on the crumble blocks moving towards the door.",
+      "devNote": "Three spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
+    },
+    {
+      "link": [3, 4],
+      "name": "Grapple",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Grapple",
+        {"heatFrames": 180}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Space Jump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 160}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Double Chamber Spike IBJ",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "h_canIBJ",
+        {"heatFrames": 1200}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Double Chamber Spike SpringBall",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "canSpringBallJumpMidAir",
+        {"heatFrames": 300}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Double Chamber Spike HiJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "canWalljump",
+        "HiJump",
+        {"heatFrames": 300}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Shinespark (Come In Shinecharging)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 5,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 140},
+        {"shinespark": {"frames": 45, "excessFrames": 14}}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Shinespark (Come in with Spark)",
+      "entranceCondition": {
+        "comeInWithSpark": {}
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 140},
+        {"shinespark": {"frames": 51, "excessFrames": 14}}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Double Chamber Spike Speedjump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "SpeedBooster",
+        "HiJump",
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Hijumpless Double Chamber Spike Speedjump",
+      "notable": true,
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "SpeedBooster",
+        "canTrickyDashJump",
+        {"heatFrames": 300}
+      ],
+      "failures": [
+        {
+          "name": "Crumble Fall",
+          "leadsToNode": 5,
+          "note": "Falls down into node 5 with no possiblity of quick crumble escape."
+        }
+      ],
+      "note": [
+        "Position Samus into the bottom right corner, using invulnerability frames run then jump while on the crumble blocks.",
+        "It is possible to use a damage boost on the Ripper to save energy and position Samus into the corner."
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "XMode Shinespark",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_canXMode",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "canTrickyJump",
+        "canMidairShinespark",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"heatFrames": 400},
+        {"shinespark": {"frames": 12, "excessFrames": 4}}
+      ],
+      "note": "A short hop from the door can bounce on the crumbles.  Just be careful of being pushed back onto the crumble blocks by the spikes.",
+      "devNote": "Two spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
+    },
+    {
+      "link": [3, 4],
+      "name": "Double Chamber HiJumpless Wall Jump",
+      "notable": true,
+      "requires": [
+        "h_heatProof",
+        "canInsaneWalljump",
+        {"or": [
+          "canIframeSpikeJump",
+          "canCrumbleJump"
+        ]},
+        {"enemyDamage": {
+          "enemy": "Ripper 2 (green)",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "note": [
+        "Jump into the spike pit, hitting the Ripper to avoid spike damage.",
+        "Climb the left wall while avoiding falling onto the spikes or through the crumble blocks. The ledge is the same size of that in writg."
+      ]
+    },
+    {
+      "link": [3, 5],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 250}
+      ]
+    },
+    {
+      "link": [4, 1],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 250},
+        {"or": [
+          {"and": [
+            "Wave",
+            {"heatFrames": 100}
+          ]},
+          {"obstaclesCleared": ["A"]}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [4, 1],
+      "name": "Gate Glitch",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 250},
+        "h_canHeatedBlueGateGlitch"
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [4, 3],
+      "name": "Walljump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canWalljump",
+        {"heatFrames": 300}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Grapple",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Grapple",
+        {"heatFrames": 180}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Space Jump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 160}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Walljump Leave with Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canWalljump",
+        {"heatFrames": 280}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [4, 3],
+      "name": "Grapple Leave with Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Grapple",
+        {"heatFrames": 160}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [4, 3],
+      "name": "Space Jump Leave with Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 140}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [4, 3],
+      "name": "IBJ",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "h_canJumpIntoIBJ",
+        {"heatFrames": 1200}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "MidAir SpringBall",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "canSpringBallJumpMidAir",
+        {"heatFrames": 300}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Speedjump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canIframeSpikeJump",
+        {"spikeHits": 1},
+        "HiJump",
+        "SpeedBooster",
+        {"heatFrames": 250}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "XMode Shinespark",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_canXMode",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "canTrickyJump",
+        "canIframeSpikeJump",
+        "canMidairShinespark",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"heatFrames": 480},
+        {"shinespark": {"frames": 11, "excessFrames": 4}}
+      ],
+      "note": "A short hop from the ledge can bounce on the crumbles and into the spikes.  Just be careful of being pushed back onto the crumble blocks by the spikes.",
+      "devNote": "Two spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
+    },
+    {
+      "link": [4, 4],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [4, 5],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 160}
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [5, 3],
+      "name": "Crystal Flash Clip",
+      "requires": [
+        "h_heatProof",
+        "h_canJumpIntoCrystalFlashClip",
+        "Grapple"
+      ],
+      "note": [
+        "Jump from below the respawning shot block into a Crystal Flash.",
+        "Use Grappling Beam as the Crystal Flash finishes to be placed next to the door.",
+        "Do not aim down as the Crystal Flash finishes."
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "Kago Farm",
+      "requires": [
+        "h_heatProof",
+        "Morph",
+        {"resetRoom": {
+          "nodes": [2],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "Missile", "Super", "PowerBomb"]}
+      ],
+      "devNote": "FIXME: Other nodes could be used to reset the room, with additional requirements."
+    },
+    {
+      "link": [5, 5],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    }
+  ]
+}

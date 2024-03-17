@@ -1,0 +1,1033 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 173,
+  "name": "Fish Tank",
+  "area": "Maridia",
+  "subarea": "Outer",
+  "playable": true,
+  "roomAddress": "0x7D017",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Bottom Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a3d8",
+      "doorEnvironments": [{"physics": "water"}],
+      "gModeImmobile": {
+        "requires": [
+          {"enemyDamage": {
+            "enemy": "Skultera",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Bottom Right Door",
+      "nodeType": "door",
+      "nodeSubType": "red",
+      "nodeAddress": "0x001a3e4",
+      "doorEnvironments": [{"physics": "water"}],
+      "locks": [
+        {
+          "name": "Fish Tank Red Lock (to Mama Turtle)",
+          "lockType": "coloredDoor",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canOpenRedDoors"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Top Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a3fc",
+      "doorEnvironments": [{"physics": "water"}]
+    },
+    {
+      "id": 4,
+      "name": "Top Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a3f0",
+      "doorEnvironments": [{"physics": "water"}],
+      "spawnAt": 8
+    },
+    {
+      "id": 5,
+      "name": "Platform Junction Near Top Left Door",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    },
+    {
+      "id": 6,
+      "name": "Middle Junction Near Top Left Pirate",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    },
+    {
+      "id": 7,
+      "name": "Spawn At Junction Near Top Right Door",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    },
+    {
+      "id": 8,
+      "name": "Spawn At Junction Near Top Left Door",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Fish Tank Bottom Skultera",
+      "enemyName": "Skultera",
+      "quantity": 1,
+      "homeNodes": [1]
+    },
+    {
+      "id": "e2",
+      "groupName": "Fish Tank Top Left Skultera",
+      "enemyName": "Skultera",
+      "quantity": 1,
+      "homeNodes": [5]
+    },
+    {
+      "id": "e3",
+      "groupName": "Fish Tank Central Skultera",
+      "enemyName": "Skultera",
+      "quantity": 1,
+      "homeNodes": [6]
+    },
+    {
+      "id": "e4",
+      "groupName": "Fish Tank Top Right Skultera",
+      "enemyName": "Skultera",
+      "quantity": 1,
+      "homeNodes": [7]
+    },
+    {
+      "id": "e5",
+      "groupName": "Fish Tank Bottom Pirate",
+      "enemyName": "Pink Space Pirate (standing)",
+      "quantity": 1,
+      "homeNodes": [2]
+    },
+    {
+      "id": "e6",
+      "groupName": "Fish Tank Central Pirate",
+      "enemyName": "Pink Space Pirate (standing)",
+      "quantity": 1,
+      "homeNodes": [6]
+    },
+    {
+      "id": "e7",
+      "groupName": "Fish Tank Top Right Pirate",
+      "enemyName": "Pink Space Pirate (standing)",
+      "quantity": 1,
+      "homeNodes": [7]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {
+          "id": 4,
+          "note": "Direct link for cross room jump and IBJ, which can't be done from 5 to 4 and must be directly from 1.",
+          "devNote": "This link also exists because it will become useful as an alternate to walljumping"
+        },
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 2},
+        {"id": 5},
+        {"id": 6}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {"id": 7}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 1},
+        {"id": 5},
+        {"id": 7},
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 5,
+      "to": [
+        {"id": 1},
+        {"id": 4},
+        {"id": 5},
+        {"id": 6}
+      ]
+    },
+    {
+      "from": 6,
+      "to": [
+        {"id": 2},
+        {"id": 5},
+        {"id": 6},
+        {"id": 7}
+      ]
+    },
+    {
+      "from": 7,
+      "to": [
+        {"id": 3},
+        {"id": 6},
+        {"id": 7}
+      ]
+    },
+    {
+      "from": 8,
+      "to": [
+        {"id": 1},
+        {"id": 5}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "IBJ",
+      "requires": [
+        "Gravity",
+        "h_canIBJ"
+      ],
+      "note": "Once high enough, it may be necessary to kill the fish and open the door."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with HiJump and Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 4
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround"
+      ],
+      "note": "Requires a runway of at least 4 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 18
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of at least 18 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 5],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "canWalljump",
+          "h_canFly",
+          {"and": [
+            "HiJump",
+            "SpeedBooster"
+          ]},
+          "canSpringBallJumpMidAir",
+          "canGravityJump"
+        ]}
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 30
+        }
+      },
+      "requires": [
+        "h_canNavigateUnderwater",
+        {"shinespark": {"frames": 55}}
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Springball to the Frozen Fish",
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickyUseFrozenEnemies",
+        "HiJump",
+        "canSpringBallJumpMidAir"
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Double Springball Jump",
+      "requires": [
+        "canSuitlessMaridia",
+        "canDoubleSpringBallJumpMidAir",
+        "HiJump"
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Cross Room Jump to the Frozen Fish",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 2.4375
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround",
+        "canTrickyUseFrozenEnemies",
+        "canTrickyJump",
+        "canDownGrab",
+        {"or": [
+          "Wave",
+          "Spazer",
+          "Plasma"
+        ]}
+      ],
+      "note": [
+        "Requires 3 tiles of run speed (with no open end) to make it past the overhang above the door.",
+        "Cross Room jump and aim towards the left side where the fish is.",
+        "Shooting at it from below can deal damage sooner to get a faster freeze.",
+        "Hug the frozen fish to gain the extra height needed to climb on top."
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Cross Room Jump with HiJump and Springball",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 2.4375
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround",
+        "canSpringBallJumpMidAir"
+      ],
+      "note": "Requires 3 tiles of run speed (with no open end) to make it past the overhang above the door."
+    },
+    {
+      "link": [1, 5],
+      "name": "Cross Room Jump with HiJump and Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 3
+        }
+      },
+      "requires": [
+        "HiJump",
+        "SpeedBooster",
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround"
+      ],
+      "note": "Requires a runway of at least 3 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 5],
+      "name": "Cross Room Jump with HiJump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 4
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround"
+      ],
+      "note": "Requires a runway of at least 4 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 5],
+      "name": "Tricky Cross Room Jump with Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 7
+        }
+      },
+      "requires": [
+        "canTrickyDashJump",
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround"
+      ],
+      "note": "Requires running a very precise distance of 7 tiles in the adjacent room, to hit a peak of the speed vs height graph."
+    },
+    {
+      "link": [1, 5],
+      "name": "Cross Room Jump with Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 11.4375
+        }
+      },
+      "requires": [
+        "SpeedBooster",
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of at least 12 tiles (with no open end) in the adjacent room."
+    },
+    {
+      "link": [1, 5],
+      "name": "Cross Room Jump with Speedbooster and Springball",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 10
+        }
+      },
+      "requires": [
+        "SpeedBooster",
+        "canCrossRoomJumpIntoWater",
+        "canSpringBallJumpMidAir"
+      ],
+      "note": "Requires a runway of at least 10 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 5],
+      "name": "G-Mode Morph IBJ",
+      "requires": [
+        {"comeInWithGMode": {
+          "fromNodes": [1],
+          "mode": "any",
+          "artificialMorph": true
+        }},
+        "h_canArtificialMorphIBJ",
+        "Gravity"
+      ],
+      "note": "Kill the first fish with bombs then dodge or kill the second one."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 33,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 5],
+      "name": "Suitless Water Shinecharge",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 0.4375
+        }
+      },
+      "requires": [
+        "canWaterShineCharge",
+        {"or": [
+          {"shinespark": {"frames": 41, "excessFrames": 7}},
+          {"and": [
+            "canMidairShinespark",
+            {"shinespark": {"frames": 38, "excessFrames": 7}}
+          ]}
+        ]}
+      ],
+      "note": "Start the dash as close to the door transition as possible in order to have a larger window for storing the shinecharge."
+    },
+    {
+      "link": [2, 6],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "HiJump",
+          "canWalljump",
+          "h_canFly",
+          "canCarefulJump",
+          "canSpringBallJumpMidAir",
+          "canGravityJump",
+          {"enemyDamage": {
+            "enemy": "Pink Space Pirate (standing)",
+            "type": "contact",
+            "hits": 1
+          }},
+          {"enemyKill": {
+            "enemies": [["Pink Space Pirate (standing)"]],
+            "explicitWeapons": ["Plasma"]
+          }}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 6],
+      "name": "Suitless",
+      "requires": [
+        "canSuitlessMaridia",
+        "HiJump",
+        {"or": [
+          "canCarefulJump",
+          "canSpringBallJumpMidAir",
+          {"enemyDamage": {
+            "enemy": "Pink Space Pirate (standing)",
+            "type": "contact",
+            "hits": 1
+          }},
+          {"enemyKill": {
+            "enemies": [["Pink Space Pirate (standing)"]],
+            "explicitWeapons": ["Plasma", "ScrewAttack"]
+          }}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 6],
+      "name": "Fish Tank SpringBall Escape",
+      "requires": [
+        "canSuitlessMaridia",
+        "canStationaryLateralMidAirMorph",
+        "canSpringBallJumpMidAir"
+      ],
+      "note": "The second jump is doable by combining a stationary mid-air mockball with a mid-air springball jump.",
+      "devNote": "The second jump is actually doable with just a regular SpringBall jump but is ridiculously tight."
+    },
+    {
+      "link": [2, 6],
+      "name": "Suitless Water Shinecharge Vertical Spark",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 0.4375
+        }
+      },
+      "requires": [
+        "canWaterShineCharge",
+        {"or": [
+          {"shinespark": {"frames": 43, "excessFrames": 9}},
+          {"and": [
+            "canMidairShinespark",
+            {"shinespark": {"frames": 38, "excessFrames": 9}}
+          ]}
+        ]}
+      ],
+      "note": [
+        "Start the dash as close to the door transition as possible in order to have a larger window for storing the shinecharge.",
+        "Spark up and fall onto the platform left of the fish."
+      ]
+    },
+    {
+      "link": [2, 6],
+      "name": "Suitless Water Shinecharge Diagonal Spark",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 0.4375
+        }
+      },
+      "requires": [
+        "canWaterShineCharge",
+        {"or": [
+          {"shinespark": {"frames": 43, "excessFrames": 26}},
+          {"and": [
+            "canMidairShinespark",
+            {"shinespark": {"frames": 38, "excessFrames": 25}}
+          ]}
+        ]},
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Pink Space Pirate (standing)",
+            "type": "contact",
+            "hits": 1
+          }},
+          {"enemyKill": {
+            "enemies": [["Pink Space Pirate (standing)"]],
+            "explicitWeapons": ["Plasma"]
+          }}
+        ]},
+        {"or": [
+          "h_canCrouchJumpDownGrab",
+          "canSpringBallJumpMidAir",
+          {"and": [
+            "Ice",
+            "Plasma"
+          ]}
+        ]}
+      ],
+      "note": [
+        "Start the dash as close to the door transition as possible in order to have a larger window for storing the shinecharge.",
+        "With low energy, shinespark diagonally to the middle ledge on the left."
+      ],
+      "devNote": "FIXME: It is possible to get over the space pirate, damageless, but it is challenging, especially when keeping the Skulltera alive for other frozen strats."
+    },
+    {
+      "link": [3, 1],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 25
+        }
+      },
+      "requires": [
+        "h_canNavigateUnderwater",
+        {"shinespark": {"frames": 90}}
+      ],
+      "devNote": [
+        "Spark through 5 into the wall past 4. Then fall down to 1.",
+        "Ending the spark a bit early would work but lets work with the expected cost.",
+        "If you can continue from 5 then it can be reached with another item already."
+      ]
+    },
+    {
+      "link": [3, 7],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 5],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        "h_canNavigateUnderwater",
+        "canPrepareForNextRoom",
+        {"shinespark": {"frames": 3, "excessFrames": 0}}
+      ],
+      "note": "Requires Samus to enter in a state that can spark immediately."
+    },
+    {
+      "link": [4, 5],
+      "name": "G-Mode Morph IBJ",
+      "requires": [
+        {"comeInWithGMode": {
+          "fromNodes": [4],
+          "mode": "any",
+          "artificialMorph": true
+        }},
+        "h_canArtificialMorphIBJ",
+        "Gravity"
+      ],
+      "note": "Kill or dodge the fish by the top left door."
+    },
+    {
+      "link": [4, 7],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        "Gravity",
+        "canPrepareForNextRoom",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 70, "excessFrames": 16}}
+      ],
+      "note": "Immediately spark after the door transition into the wall just to the right of the top right door."
+    },
+    {
+      "link": [4, 7],
+      "name": "Suitless Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "canPrepareForNextRoom",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 88, "excessFrames": 21}}
+      ],
+      "note": "Immediately spark after the door transition into the wall just to the right of the top right door."
+    },
+    {
+      "link": [4, 7],
+      "name": "G-Mode Morph IBJ",
+      "requires": [
+        {"comeInWithGMode": {
+          "fromNodes": [4],
+          "mode": "any",
+          "artificialMorph": true
+        }},
+        "h_canArtificialMorphIBJ",
+        "Gravity",
+        "canBombHorizontally"
+      ],
+      "note": "Kill or dodge the fish by the top left door and the one in the middle of the room."
+    },
+    {
+      "link": [4, 8],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [5, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [5, 4],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "canWalljump",
+          "h_canFly",
+          "canTrickyJump",
+          "canUseFrozenEnemies",
+          "canGravityJump"
+        ]}
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Suitless",
+      "requires": [
+        "canSuitlessMaridia",
+        "canUseFrozenEnemies",
+        {"or": [
+          "HiJump",
+          "canSpringBallJumpMidAir"
+        ]}
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Rolling Jump",
+      "requires": [
+        "canSuitlessMaridia",
+        "HiJump",
+        "h_canUseSpringBall"
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Fish Tank Top Left Flatley Jump",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canFlatleyJump",
+        {"or": [
+          "canSpringBallJumpMidAir",
+          "HiJump"
+        ]}
+      ],
+      "note": "Use a flatley jump with either HiJump or a spring ball jump to get into the top left doorway.",
+      "devNote": "Can be done with a spring ball jump without a flatley jump, but it's obscure and tight."
+    },
+    {
+      "link": [5, 4],
+      "name": "Wall Hug Turnaround",
+      "requires": [
+        "canSuitlessMaridia",
+        "HiJump",
+        "canMomentumConservingTurnaround"
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [5, 6],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateUnderwater"
+      ]
+    },
+    {
+      "link": [6, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [6, 5],
+      "name": "Base",
+      "requires": [
+        "Gravity"
+      ]
+    },
+    {
+      "link": [6, 5],
+      "name": "Suitless With Jump Assist",
+      "requires": [
+        "canSuitlessMaridia",
+        {"or": [
+          "HiJump",
+          "canSpringBallJumpMidAir"
+        ]}
+      ]
+    },
+    {
+      "link": [6, 5],
+      "name": "Suitless With Ice",
+      "requires": [
+        "canSuitlessMaridia",
+        "canCarefulJump",
+        "canUseFrozenEnemies"
+      ],
+      "note": "Freeze the fish while it is moving leftward, a bit left of the peak in its swim cycle. Build run speed on top of the fish before jumping to the ledge."
+    },
+    {
+      "link": [6, 6],
+      "name": "Space Pirate Farm",
+      "requires": [
+        {"or": [
+          "Gravity",
+          "HiJump"
+        ]},
+        {"or": [
+          "Plasma",
+          {"and": [
+            "ScrewAttack",
+            "Gravity"
+          ]}
+        ]},
+        {"resetRoom": {
+          "nodes": [2, 3],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "Missile"]}
+      ]
+    },
+    {
+      "link": [6, 7],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "HiJump",
+          "canWalljump",
+          "h_canFly",
+          "canGravityJump",
+          "canCarefulJump",
+          "canSpringBallJumpMidAir",
+          {"enemyDamage": {
+            "enemy": "Pink Space Pirate (standing)",
+            "type": "contact",
+            "hits": 1
+          }},
+          {"enemyKill": {
+            "enemies": [["Pink Space Pirate (standing)"]],
+            "explicitWeapons": ["Plasma", "ScrewAttack"]
+          }}
+        ]}
+      ]
+    },
+    {
+      "link": [6, 7],
+      "name": "Suitless",
+      "requires": [
+        "canSuitlessMaridia",
+        {"or": [
+          "HiJump",
+          "canSpringBallJumpMidAir"
+        ]}
+      ]
+    },
+    {
+      "link": [6, 7],
+      "name": "Fish Tank Insane Naked Jump Over Pirate (Left to Right)",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickyJump"
+      ],
+      "note": "This is particularly precise, and requires subpixel precision.",
+      "devNote": "Possibly add a new tech, i.e. canInsaneJump, but it is probably worth keeping notable."
+    },
+    {
+      "link": [6, 7],
+      "name": "Suitless Frozen Pirate",
+      "requires": [
+        "canSuitlessMaridia",
+        "Plasma",
+        "canUseFrozenEnemies"
+      ]
+    },
+    {
+      "link": [7, 3],
+      "name": "Base",
+      "requires": [
+        "Gravity"
+      ]
+    },
+    {
+      "link": [7, 3],
+      "name": "Suitless",
+      "requires": [
+        "canSuitlessMaridia",
+        {"or": [
+          "HiJump",
+          "canSpringBallJumpMidAir"
+        ]}
+      ]
+    },
+    {
+      "link": [7, 6],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateUnderwater"
+      ]
+    },
+    {
+      "link": [7, 7],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [8, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [8, 5],
+      "name": "Fish Tank Entry Fall onto Frozen Fish",
+      "notable": true,
+      "requires": [
+        "h_canNavigateUnderwater",
+        "canPrepareForNextRoom",
+        "canTrickyUseFrozenEnemies",
+        {"or": [
+          {"and": [
+            "Wave",
+            "Plasma"
+          ]},
+          {"and": [
+            "Plasma",
+            "Charge"
+          ]},
+          {"and": [
+            "Wave",
+            "Spazer",
+            "Charge"
+          ]}
+        ]}
+      ],
+      "note": "The beam must be pre-charged and aiming down before the transition is close to required.",
+      "devNote": "The fish is too far left to naturally be above, entering the room."
+    },
+    {
+      "link": [8, 5],
+      "name": "Damage Boost",
+      "requires": [
+        "Gravity",
+        "canHorizontalDamageBoost",
+        "canPrepareForNextRoom",
+        {"enemyDamage": {
+          "enemy": "Skultera",
+          "hits": 1,
+          "type": "contact"
+        }}
+      ]
+    },
+    {
+      "link": [8, 5],
+      "name": "Fish Tank Entry Reset Fall Speed",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "h_canResetFallSpeed",
+        "canPrepareForNextRoom"
+      ],
+      "note": "Morph and unmorph then drift to the ledge.",
+      "devNote": "Strat starts before entering this transition. An enemy can be used for this strat instead of morph."
+    },
+    {
+      "link": [8, 5],
+      "name": "Fish Tank Wall Jump Entry",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canPreciseWalljump",
+        "canPrepareForNextRoom",
+        "canMidairWiggle",
+        "canCarefulJump"
+      ],
+      "note": [
+        "Wall jump in the room above, on the right wall of the doorway, immdiately before the door transition. Failure will likely result in a soft lock.",
+        "To get to the ledge: If the room above has normal physics, hold right in this room. If the room above has water physics, shoot to break spin while holding right in this room."
+      ],
+      "devNote": [
+        "Strat starts before entering this transition.",
+        "FIXME: The midair wiggle is only needed if the room above has water physics. That's not something in the logic for vertical doors currently. Also if the room above is heated, these may require some heat frames to set up."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 165,
+  "name": "Spiky Death Room",
+  "area": "Wrecked Ship",
+  "subarea": "Main",
+  "playable": true,
+  "roomAddress": "0x7CB8B",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a24c",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a258",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged, X-Mode",
+      "requires": [
+        "f_DefeatedPhantoon",
+        "h_canXMode",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "Gravity",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        "canShinechargeMovement"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 80
+        }
+      },
+      "note": "Jumping from the door and bouncing on the platform enemy works pretty well.",
+      "devNote": "Two spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Unpowered",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        "canSuitlessMaridia",
+        {"spikeHits": 2}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Naked Spiky Death Room (Left to Right)",
+      "requires": [
+        "canSuitlessMaridia",
+        "canCarefulJump"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Passage With Assist",
+      "requires": [
+        {"or": [
+          "Morph",
+          "Gravity",
+          "canSpaceJumpWaterBounce"
+        ]}
+      ],
+      "devNote": "The room is considerably more forgiving with Morph, Gravity, or Space Jump so this is there as an alternate strat."
+    },
+    {
+      "link": [2, 1],
+      "name": "Unpowered",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": [
+        "canSuitlessMaridia",
+        {"spikeHits": 2}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Naked Spiky Death Room (Right to Left)",
+      "requires": [
+        "canSuitlessMaridia",
+        "canCarefulJump"
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Passage With Assist",
+      "requires": [
+        {"or": [
+          "Morph",
+          "Gravity",
+          "canSpaceJumpWaterBounce"
+        ]}
+      ],
+      "devNote": "The room is considerably more forgiving with Morph, Gravity, or Space Jump so this is there as an alternate strat."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged, X-Mode",
+      "requires": [
+        "f_DefeatedPhantoon",
+        "h_canXMode",
+        "h_XModeSpikeHit",
+        "h_XModeSpikeHit",
+        "Gravity",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        "canShinechargeMovement"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 80
+        }
+      },
+      "note": "Jumping from the door and bouncing on the platform enemy works pretty well.",
+      "devNote": "Two spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    }
+  ]
+}

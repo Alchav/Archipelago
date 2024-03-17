@@ -1,0 +1,255 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 204,
+  "name": "Botwoon Quicksand Room",
+  "area": "Maridia",
+  "subarea": "Inner",
+  "subsubarea": "Pink",
+  "playable": true,
+  "roomAddress": "0x7D898",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Top Left Sand Entrance",
+      "nodeType": "entrance",
+      "nodeSubType": "sandpit"
+    },
+    {
+      "id": 2,
+      "name": "Bottom Left Sand Exit",
+      "nodeType": "exit",
+      "nodeSubType": "sandpit",
+      "nodeAddress": "0x001a8ac"
+    },
+    {
+      "id": 3,
+      "name": "Top Right Sand Entrance",
+      "nodeType": "entrance",
+      "nodeSubType": "sandpit"
+    },
+    {
+      "id": 4,
+      "name": "Bottom Right Sand Exit",
+      "nodeType": "exit",
+      "nodeSubType": "sandpit",
+      "nodeAddress": "0x001a8b8"
+    },
+    {
+      "id": 5,
+      "name": "Hidden Morph Tunnel Junction",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Botwoon Quicksand Bulls",
+      "enemyName": "Bull",
+      "quantity": 9,
+      "homeNodes": [2, 4]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 4},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 2},
+        {"id": 3},
+        {"id": 4},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 5,
+      "to": [
+        {"id": 2},
+        {"id": 4},
+        {"id": 5}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Bull",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": false
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode Morph",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": true
+        }
+      }
+    },
+    {
+      "link": [1, 4],
+      "name": "G-Mode Morph, Through the Hidden Tunnel",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": true
+        }
+      }
+    },
+    {
+      "link": [1, 5],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "G-Mode Morph, Through the Hidden Tunnel",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": true
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Bull",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [3, 4],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [3, 4],
+      "name": "G-Mode",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": false
+        }
+      }
+    },
+    {
+      "link": [3, 4],
+      "name": "G-Mode Morph",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": true
+        }
+      }
+    },
+    {
+      "link": [3, 5],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 107,
+  "name": "Ice Beam Acid Room",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "West",
+  "playable": true,
+  "roomAddress": "0x7A75D",
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019282",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019276",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Ice Beam Acid Room Trippers",
+      "enemyName": "Tripper",
+      "quantity": 3,
+      "homeNodes": [1, 2],
+      "dropRequires": ["h_heatProof"],
+      "note": "Drops can be reached from land without issues"
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [
+        {"heatFrames": 70}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway with Frozen Tripper",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        {"heatFrames": 115}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 190}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Platforming and Leave with Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 170}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Platforming and Leave with Frozen Tripper Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canTrickyUseFrozenEnemies",
+        {"heatFrames": 240}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Space Jump",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        "canCarefulJump",
+        {"heatFrames": 135}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 210}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Platforming and Leave with Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 190}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 1],
+      "name": "Platforming and Leave with Frozen Tripper Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canTrickyUseFrozenEnemies",
+        {"heatFrames": 330}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 1],
+      "name": "Space Jump",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        "canCarefulJump",
+        {"heatFrames": 135}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [
+        {"heatFrames": 70}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway with Frozen Tripper",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        {"heatFrames": 140}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    }
+  ]
+}

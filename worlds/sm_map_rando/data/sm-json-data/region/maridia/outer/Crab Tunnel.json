@@ -1,0 +1,293 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 176,
+  "name": "Crab Tunnel",
+  "area": "Maridia",
+  "subarea": "Outer",
+  "playable": true,
+  "roomAddress": "0x7D08A",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a414",
+      "doorEnvironments": [{"physics": "water"}],
+      "leaveWithGModeSetup": [
+        {"strats": [
+          {
+            "name": "Get Hit By Sciser",
+            "notable": false,
+            "requires": []
+          }
+        ]}
+      ],
+      "gModeImmobile": {
+        "requires": [
+          {"enemyDamage": {
+            "enemy": "Sciser",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a420",
+      "doorEnvironments": [{"physics": "water"}],
+      "leaveWithGModeSetup": [
+        {"strats": [
+          {
+            "name": "Get Hit By Sciser",
+            "notable": false,
+            "requires": []
+          }
+        ]}
+      ],
+      "gModeImmobile": {
+        "requires": [
+          {"enemyDamage": {
+            "enemy": "Sciser",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]
+      }
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "A",
+      "obstacleType": "inanimate",
+      "name": "Green Gate"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Crab Tunnel Left Sciser",
+      "enemyName": "Sciser",
+      "quantity": 1,
+      "homeNodes": [1]
+    },
+    {
+      "id": "e2",
+      "groupName": "Crab Tunnel Right Scisers",
+      "enemyName": "Sciser",
+      "quantity": 5,
+      "homeNodes": [2]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 13,
+          "gentleUpTiles": 2,
+          "steepUpTiles": 2,
+          "steepDownTiles": 1,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway (Open Gate)",
+      "requires": [
+        {"or": [
+          {"obstaclesCleared": ["A"]},
+          {"ammo": {"type": "Super", "count": 1}}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 45,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Suitless Stutter Shinecharge, Shinespark Return",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 2
+        }
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "canShinechargeMovement",
+        "canStutterWaterShineCharge",
+        {"shinespark": {"frames": 9}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Sciser Farm",
+      "requires": [
+        "h_canNavigateUnderwater",
+        {"resetRoom": {
+          "nodes": [1],
+          "mustStayPut": false
+        }},
+        {"refill": ["PowerBomb"]}
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          {"ammo": {"type": "Super", "count": 1}},
+          {"obstaclesCleared": ["A"]}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [1, 2],
+      "name": "Indirect G-Mode Gate Despawn",
+      "requires": [
+        {"comeInWithGMode": {
+          "fromNodes": [1],
+          "mode": "indirect",
+          "artificialMorph": false
+        }}
+      ],
+      "note": "The gate will not spawn in indirect g-mode, and can be freely passed."
+    },
+    {
+      "link": [1, 2],
+      "name": "Crab Tunnel Stutter Shinecharge Through The Gate",
+      "notable": true,
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 1.4375
+        }
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "canShinechargeMovementComplex",
+        "canStutterWaterShineCharge",
+        "canDodgeWhileShooting",
+        {"ammo": {"type": "Super", "count": 1}}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 70
+        }
+      },
+      "note": [
+        "Requires a very precise stutter where Samus is moving slow enough while near the gate, so she can shoot it and it is fully open before she collides with it.",
+        "A runway in the adjacent room of 2 tiles works best - with a longer runway, Samus will be moving too fast."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Green Gate Glitch",
+      "requires": [
+        {"or": [
+          "h_canGreenGateGlitch",
+          {"obstaclesCleared": ["A"]}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [2, 1],
+      "name": "Indirect G-Mode Gate Despawn",
+      "requires": [
+        {"comeInWithGMode": {
+          "fromNodes": [2],
+          "mode": "indirect",
+          "artificialMorph": false
+        }}
+      ],
+      "note": "The gate will not spawn in indirect g-mode, and can be freely passed."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Sciser Farm",
+      "requires": [
+        "h_canNavigateUnderwater",
+        {"resetRoom": {
+          "nodes": [2],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "PowerBomb"]}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "Gravity",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 120
+        }
+      }
+    }
+  ]
+}

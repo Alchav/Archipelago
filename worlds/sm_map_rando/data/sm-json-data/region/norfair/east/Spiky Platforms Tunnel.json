@@ -1,0 +1,167 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 117,
+  "name": "Spiky Platforms Tunnel",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7AE07",
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019636",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019642",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Spiky Platforms Tunnel Left Tripper",
+      "enemyName": "Tripper",
+      "quantity": 1,
+      "homeNodes": [1],
+      "dropRequires": ["h_heatProof", "Gravity"]
+    },
+    {
+      "id": "e2",
+      "groupName": "Spiky Platforms Tunnel Right Tripper",
+      "enemyName": "Tripper",
+      "quantity": 1,
+      "homeNodes": [2],
+      "dropRequires": ["h_heatProof", "Gravity"]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Gravity",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Gravity",
+        {"heatFrames": 360},
+        {"lavaFrames": 120},
+        {"or": [
+          "canCarefulJump",
+          {"heatFrames": 40}
+        ]}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Tripper Morphing",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"heatFrames": 1050}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Lava Bath",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canSuitlessLavaDive",
+        {"heatFrames": 900},
+        {"lavaFrames": 200}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Gravity",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Gravity",
+        {"heatFrames": 390},
+        {"lavaFrames": 100},
+        {"or": [
+          "canCarefulJump",
+          {"heatFrames": 40}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Tripper Morphing",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"heatFrames": 1050}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Lava Bath",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canSuitlessLavaDive",
+        {"heatFrames": 900},
+        {"lavaFrames": 200}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,442 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 132,
+  "name": "Main Hall",
+  "area": "Norfair",
+  "subarea": "Lower",
+  "subsubarea": "East",
+  "roomAddress": "0x7B236",
+  "playable": true,
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019852",
+      "doorEnvironments": [{"physics": "air"}],
+      "runways": [
+        {
+          "name": "Base Runway - Main Hall Left Door (to Acid Statue)",
+          "length": 2,
+          "strats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canNavigateHeatRooms",
+                {"heatFrames": 75}
+              ]
+            }
+          ],
+          "usableComingIn": false,
+          "openEnd": 0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001985e",
+      "doorEnvironments": [{"physics": "air"}],
+      "runways": [
+        {
+          "name": "Base Runway - Main Hall Right Door (to Fast Pillars Setup Room)",
+          "length": 5,
+          "strats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canNavigateHeatRooms",
+                {"heatFrames": 90}
+              ]
+            }
+          ],
+          "openEnd": 0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Elevator Platform",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    },
+    {
+      "id": 4,
+      "name": "Top of Elevator Ride",
+      "nodeType": "door",
+      "nodeSubType": "elevator",
+      "nodeAddress": "0x001986a"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Main Hall Dragons",
+      "enemyName": "Dragon",
+      "quantity": 5,
+      "betweenNodes": [1, 3],
+      "dropRequires": ["Grapple", "h_heatProof"]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 2},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {
+          "id": 4,
+          "note": "This link exists because of how Samus takes heatdamage while riding the elevator."
+        }
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {
+          "id": 3,
+          "note": "This link exists because of how Samus takes heatdamage while riding the elevator."
+        }
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Normal Jumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Dragon",
+            "type": "fireball",
+            "hits": 3
+          }},
+          {"and": [
+            "Ice",
+            "Wave"
+          ]},
+          {"enemyKill": {
+            "enemies": [["Dragon", "Dragon"]],
+            "explicitWeapons": ["Wave+Plasma"]
+          }}
+        ]},
+        {"heatFrames": 900}
+      ],
+      "note": "High jumps for more control when landing."
+    },
+    {
+      "link": [1, 3],
+      "name": "Careful Jumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canCarefulJump",
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Dragon",
+            "type": "fireball",
+            "hits": 2
+          }},
+          "Ice",
+          {"enemyKill": {
+            "enemies": [["Dragon", "Dragon"]],
+            "explicitWeapons": ["Super", "Plasma"]
+          }}
+        ]},
+        {"heatFrames": 700}
+      ],
+      "note": "Take the platforms one at a time."
+    },
+    {
+      "link": [1, 3],
+      "name": "TrickyJumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canTrickyJump",
+        {"heatFrames": 570}
+      ],
+      "note": "Take the platforms two at a time by building some run speed for each jump on a one tile runway."
+    },
+    {
+      "link": [1, 3],
+      "name": "Power Bomb Clear",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"enemyKill": {
+          "enemies": [["Dragon"]],
+          "explicitWeapons": ["PowerBombPeriphery"]
+        }},
+        {"enemyKill": {
+          "enemies": [["Dragon", "Dragon"]],
+          "explicitWeapons": ["PowerBomb"]
+        }},
+        {"heatFrames": 2200}
+      ],
+      "note": [
+        "Wait for the Dragons to stop attacking and kill them with Power Bombs",
+        "It can be faster to control Samus so the Power Bomb does not bounce her, or to avoid Dragon projectiles while Power Bombing them.",
+        "Dragons must be on screen to take damage."
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "SpaceJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 510}
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Shinespark",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canShinechargeMovement",
+        "canMidairShinespark",
+        {"canComeInCharged": {
+          "framesRemaining": 16,
+          "fromNode": 1
+        }},
+        {"shinespark": {"frames": 75, "excessFrames": 10}},
+        {"heatFrames": 270}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 360}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "SpaceJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 450}
+      ],
+      "note": "Use a two tile wide platform to get a good amount of running speed to avoid the room hazards."
+    },
+    {
+      "link": [3, 1],
+      "name": "Invulnerable SpaceJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"or": [
+          "ScrewAttack",
+          {"and": [
+            "canBlueSpaceJump",
+            {"canShineCharge": {
+              "usedTiles": 23,
+              "openEnd": 2
+            }}
+          ]}
+        ]},
+        {"heatFrames": 410}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Shinespark",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canMidairShinespark",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 24,
+          "openEnd": 1
+        }},
+        {"shinespark": {"frames": 75, "excessFrames": 5}},
+        {"heatFrames": 380}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Normal Jumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Dragon",
+            "type": "fireball",
+            "hits": 3
+          }},
+          {"and": [
+            "Ice",
+            "Wave"
+          ]},
+          {"enemyKill": {
+            "enemies": [["Dragon", "Dragon"]],
+            "explicitWeapons": ["Wave+Plasma"]
+          }}
+        ]},
+        {"heatFrames": 1100}
+      ],
+      "note": "High jumps for more control when landing."
+    },
+    {
+      "link": [3, 1],
+      "name": "Careful Jumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canCarefulJump",
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Dragon",
+            "type": "fireball",
+            "hits": 2
+          }},
+          {"enemyKill": {
+            "enemies": [["Dragon", "Dragon"]],
+            "explicitWeapons": ["Super", "Plasma"]
+          }},
+          "Ice"
+        ]},
+        {"heatFrames": 700}
+      ],
+      "note": "Taking the platforms one at a time is not fast enough to avoid the room hazards."
+    },
+    {
+      "link": [3, 1],
+      "name": "Tricky Jumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canTrickyJump",
+        {"heatFrames": 500}
+      ],
+      "note": "Take the platforms two at a time by building some run speed for each jump on a one tile runway."
+    },
+    {
+      "link": [3, 1],
+      "name": "Power Bomb Clear",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"enemyKill": {
+          "enemies": [
+            ["Dragon"],
+            ["Dragon"]
+          ],
+          "explicitWeapons": ["PowerBomb"]
+        }},
+        {"heatFrames": 2200}
+      ],
+      "note": "Dragons must be on screen to take damage."
+    },
+    {
+      "link": [3, 2],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 330}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "SpaceJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 250}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_MainHallElevatorFrames"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Leave Shinecharged - Full Runway",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 24,
+          "openEnd": 1
+        }},
+        "h_canNavigateHeatRooms",
+        "canShinechargeMovement",
+        {"heatFrames": 300}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 90
+        }
+      }
+    },
+    {
+      "link": [3, 4],
+      "name": "Leave Shinecharged - Finish Shortcharge Near Elevator",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 18,
+          "openEnd": 1
+        }},
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 210}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 140
+        }
+      }
+    },
+    {
+      "link": [4, 3],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "h_MainHallElevatorFrames"
+      ]
+    }
+  ]
+}

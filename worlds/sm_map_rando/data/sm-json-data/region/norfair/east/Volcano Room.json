@@ -1,0 +1,233 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 116,
+  "name": "Volcano Room",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7AE32",
+  "roomEnvironments": [
+    {
+      "entranceNodes": [1],
+      "heated": false,
+      "note": "This room is not heated when entering from the top"
+    },
+    {
+      "entranceNodes": [2],
+      "heated": true,
+      "note": "This room is only heated when entering from the bottom"
+    }
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Top Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001964e",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Bottom Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001965a",
+      "doorEnvironments": [
+        {
+          "physics": "lava",
+          "entranceNodes": [1],
+          "note": "There is always lava at this door if entering from node 1"
+        },
+        {
+          "physics": "air",
+          "entranceNodes": [2],
+          "note": "Lava can eventually rise up to this door entering from node 2, but it's possible to have air physics"
+        }
+      ]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Volcano Room Top Funes",
+      "enemyName": "Fune",
+      "quantity": 5,
+      "homeNodes": [1],
+      "dropRequires": ["h_heatProof"]
+    },
+    {
+      "id": "e2",
+      "groupName": "Volcano Room Bottom Fune",
+      "enemyName": "Fune",
+      "quantity": 1,
+      "homeNodes": [2],
+      "dropRequires": ["h_heatProof", "Gravity"]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {
+          "id": 2,
+          "note": "The room is heated when entering from bottom but not when entering from top."
+        }
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 8,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        {"resetRoom": {
+          "nodes": [1],
+          "mustStayPut": false
+        }},
+        "h_canCrystalFlash"
+      ],
+      "devNote": "Resetting the room through node 1 ensures that there is no heat."
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        "Morph",
+        {"or": [
+          {"and": [
+            "canMockball",
+            "canCarefulJump",
+            {"lavaFrames": 60}
+          ]},
+          {"lavaFrames": 100}
+        ]},
+        {"or": [
+          {"lavaFrames": 150},
+          {"and": [
+            "SpaceJump",
+            {"lavaFrames": 60}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Suitless Volcano Dive",
+      "requires": [
+        "canSuitlessLavaDive",
+        "Morph",
+        {"or": [
+          {"and": [
+            "canCarefulJump",
+            "canMockball",
+            {"lavaFrames": 180}
+          ]},
+          {"lavaFrames": 220}
+        ]},
+        {"or": [
+          {"and": [
+            "canSpaceJumpWaterBounce",
+            {"lavaFrames": 120}
+          ]},
+          {"lavaFrames": 150}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"or": [
+          "canMockball",
+          {"heatFrames": 25}
+        ]},
+        {"heatFrames": 480}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Leave with Runway",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        {"or": [
+          "canMockball",
+          {"heatFrames": 25}
+        ]},
+        {"heatFrames": 440}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 8,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 1],
+      "name": "SpaceJump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Morph",
+        "SpaceJump",
+        {"or": [
+          "canMockball",
+          {"heatFrames": 25}
+        ]},
+        {"heatFrames": 440}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [
+        {"resetRoom": {
+          "nodes": [2],
+          "mustStayPut": true
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        {"resetRoom": {
+          "nodes": [2],
+          "mustStayPut": false
+        }},
+        "h_canHeatedCrystalFlash"
+      ],
+      "devNote": "Resetting the room ensures that the lava is not a factor."
+    }
+  ]
+}
