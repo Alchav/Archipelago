@@ -541,18 +541,21 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
     from BaseClasses import ItemClassification
 
     def iclass(i: Item):
+        game = i.game
+        if game == "Generic":
+            game = multiworld.worlds[i.player].game
         if i.classification == ItemClassification.trap:
             return 0
         elif i.classification == ItemClassification.filler:
-            if i.game in ("Super Metroid", "Super Metroid Map Rando"):
-                return 2
-            return 3
-        elif i.game in ("Rogue Legacy", "Slay the Spire", "Starcraft 2"):
-            return 2
-        elif i.classification == ItemClassification.progression_skip_balancing or i.classification == ItemClassification.useful:
-            return 2
+            if "Super Metroid" in game:
+                return multiworld.random.randint(3, 4)
+            return multiworld.random.randint(4, 5)
+        elif game in ("Rogue Legacy", "Slay the Spire", "Starcraft 2") or i.classification == ItemClassification.useful:
+            return multiworld.random.randint(3, 4)
+        elif i.classification == ItemClassification.progression_skip_balancing:
+            return multiworld.random.randint(2, 3)
         elif i.classification == ItemClassification.progression:
-            return 1
+            return multiworld.random.randint(1, 2)
         breakpoint()
 
     for sphere in get_item_spheres():
