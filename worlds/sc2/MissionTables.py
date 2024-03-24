@@ -386,6 +386,23 @@ def gauntlet_order() -> Dict[SC2Campaign, List[FillMission]]:
         ]
     }
 
+def alchav_order() -> Dict[SC2Campaign, List[FillMission]]:
+    return {
+        SC2Campaign.GLOBAL: [
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "STARTER"),
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "STARTER"),
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "STARTER"),
+            FillMission(MissionPools.EASY, [MissionConnection(-1)], "EASY"),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(-1)], "MEDIUM"),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(-1)], "MEDIUM"),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(-1)], "MEDIUM"),
+            FillMission(MissionPools.HARD, [MissionConnection(-1)], "HARD"),
+            FillMission(MissionPools.HARD, [MissionConnection(-1)], "HARD"),
+            FillMission(MissionPools.HARD, [MissionConnection(-1)], "HARD"),
+            FillMission(MissionPools.FINAL, [MissionConnection(1), MissionConnection(2), MissionConnection(3)], "FINAL", number=8, completion_critical=True, or_requirements=True)
+        ]
+    }
+
 
 def mini_gauntlet_order() -> Dict[SC2Campaign, List[FillMission]]:
     return {
@@ -445,6 +462,30 @@ def tiny_grid_order() -> Dict[SC2Campaign, List[FillMission]]:
         ]
     }
 
+def blitz_2_order() -> Dict[SC2Campaign, List[FillMission]]:
+    return {
+        SC2Campaign.GLOBAL: [
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "I"),
+            FillMission(MissionPools.EASY, [MissionConnection(0)], "II"),
+            FillMission(MissionPools.EASY, [MissionConnection(0)], "II"),
+            FillMission(MissionPools.EASY, [MissionConnection(0)], "II"),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(1), MissionConnection(2), MissionConnection(3)], "III", number=3, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(1), MissionConnection(2), MissionConnection(3)], "III", number=3, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(5)], "IV", or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(5)], "IV", or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(5)], "IV", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(6), MissionConnection(7), MissionConnection(8)], "V", number=7, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(6), MissionConnection(7), MissionConnection(8)], "V", number=7, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(10)], "VI", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(10)], "VI", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(10)], "VI", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(11), MissionConnection(12), MissionConnection(13)], "VII", number=12, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(11), MissionConnection(12), MissionConnection(13)], "VII", number=12, or_requirements=True),
+            FillMission(MissionPools.FINAL, [MissionConnection(14), MissionConnection(15)], "FINAL", number=14, or_requirements=True)
+        ]
+    }
+
+
 def blitz_order() -> Dict[SC2Campaign, List[FillMission]]:
     return {
         SC2Campaign.GLOBAL: [
@@ -464,13 +505,15 @@ def blitz_order() -> Dict[SC2Campaign, List[FillMission]]:
     }
 
 
+
+
 mission_orders: List[Callable[[], Dict[SC2Campaign, List[FillMission]]]] = [
     vanilla_shuffle_order,
     vanilla_shuffle_order,
     mini_campaign_order,
     grid_order,
     mini_grid_order,
-    blitz_order,
+    alchav_order,
     gauntlet_order,
     mini_gauntlet_order,
     tiny_grid_order
