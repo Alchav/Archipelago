@@ -546,7 +546,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
             game = multiworld.worlds[i.player].game
         if i.classification == ItemClassification.trap:
             return 0
-        elif i.classification == ItemClassification.filler:
+        elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
             if "Super Metroid" in game:
                 return multiworld.random.randint(3, 4)
             return multiworld.random.randint(4, 5)
