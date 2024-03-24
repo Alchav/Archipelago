@@ -16,7 +16,7 @@ default_options = ['logic_no_night_tokens_without_suns_song', 'open_forest', 'op
                    'skip_some_minigame_phases', 'complete_mask_quest', 'useful_cutscenes', 'fast_chests',
                    'fast_bunny_hood', 'plant_beans', 'chicken_count', 'fae_torch_count', 'hint_dist', 'starting_tod',
                    'blue_fire_arrows', 'fix_broken_drops', 'start_with_rupees', 'item_pool_value', 'adult_trade_start',
-                   'shuffle_bosses', 'key_rings', 'key_rings_list', 'sfx_horse_neigh', 'sfx_nightfall',
+                   'key_rings', 'key_rings_list', 'sfx_horse_neigh', 'sfx_nightfall',
                    'boomerang_trail_color_outer', 'boomerang_trail_color_inner', ]
 
 set_options = {'starting_age': 'adult', 'shuffle_interior_entrances': 'all', 'spawn_positions': 'adult',
@@ -27,7 +27,8 @@ set_options = {'starting_age': 'adult', 'shuffle_interior_entrances': 'all', 'sp
                "mq_dungeons_mode": "mq", 'misc_hints': "off", 'free_scarecrow': 'on', 'big_poe_count': 4,
                'ganon_bosskey_rewards': 2, 'shuffle_ganon_bosskey': "dungeons", 'warp_songs': 'on',
                'shuffle_mapcompass': 'keysanity', 'shuffle_smallkeys': 'keysanity', 'shuffle_bosskeys': 'keysanity',
-               'junk_ice_traps': 'off', 'ice_trap_appearance': 'anything', 'shuffle_overworld_entrances': 'on'}
+               'junk_ice_traps': 'off', 'ice_trap_appearance': 'anything', 'shuffle_overworld_entrances': 'on',
+               'shuffle_bosses': 'full'}
 
 warp_song_connectors = [
     "Nocturne of Shadow Warp -> Graveyard Warp Pad Region", "Minuet of Forest Warp -> Sacred Forest Meadow",
@@ -50,6 +51,17 @@ connections = [
     ('KF Midos House -> Kokiri Forest', "Lake Hylia -> Water Temple Lobby")
 ]
 
+boss_rooms = {
+    "queen_gohma": ("Deku Tree Boss Door -> Queen Gohma Boss Room", "Queen Gohma Boss Room -> Deku Tree Boss Door"),
+    "king_dodongo": ("Dodongos Cavern Boss Door -> King Dodongo Boss Room", "King Dodongo Boss Room -> Dodongos Cavern Boss Door"),
+    "phantom_ganon": ("Forest Temple Boss Door -> Phantom Ganon Boss Room", "Phantom Ganon Boss Room -> Forest Temple Boss Door"),
+    "volvagia": ("Fire Temple Boss Door -> Volvagia Boss Room", "Volvagia Boss Room -> Fire Temple Boss Door"),
+    "morpha": ("Water Temple Boss Door -> Morpha Boss Room", "Morpha Boss Room -> Water Temple Boss Door"),
+    "twinrova": ("Spirit Temple Boss Door -> Twinrova Boss Room", "Twinrova Boss Room -> Spirit Temple Boss Door"),
+    "bongo_bongo": ("Shadow Temple Boss Door -> Bongo Bongo Boss Room", "Bongo Bongo Boss Room -> Shadow Temple Boss Door"),
+
+}
+
 option_pool_size = ((136, 149), (128, 145))
 
 always_pool = ["Progressive Hookshot", "Magic Meter", "Ocarina", "Small Key (Water Temple)", "Progressive Scale"] * 2
@@ -59,23 +71,24 @@ always_pool += ["Song of Time", "Zeldas Lullaby", "Fire Arrows", "Bow", "Ice Arr
                 "Biggoron Sword", "Hover Boots", "Nayrus Love", "Farores Wind",  "Map (Water Temple)",
                 "Compass (Water Temple)", "Goron Tunic", "Deku Nut Capacity", "Hylian Shield", "Mirror Shield"]
 
-useful = ["Hylian Shield", "Mirror Shield"]
-filler = ["Ice Arrows", "Light Arrows", "Megaton Hammer", "Lens of Truth", "Progressive Strength Upgrade", "Goron Tunic"]
+filler = ["Hylian Shield", "Ice Arrows", "Light Arrows"]
 
-final_clears = ['Skull Mask from Market Mask Shop', 'Mask of Truth from Market Mask Shop', 'Queen Gohma', 'King Dodongo',
-                'Barinade', 'Phantom Ganon', 'Volvagia', 'Bongo Bongo', 'Twinrova',
+final_clears = ['Skull Mask from Market Mask Shop', 'Mask of Truth from Market Mask Shop', 'Queen Gohma',
+                'King Dodongo', 'Barinade', 'Phantom Ganon', 'Morpha', 'Volvagia', 'Bongo Bongo', 'Twinrova',
                 'Forest Trial Clear from Ganons Castle Forest Trial Ending',
                 'Water Trial Clear from Ganons Castle Water Trial Ending',
                 'Shadow Trial Clear from Ganons Castle Shadow Trial Ending',
                 'Fire Trial Clear from Ganons Castle Fire Trial',
                 'Light Trial Clear from Ganons Castle Light Trial Ending',
-                'Spirit Trial Clear from Ganons Castle Spirit Trial Ending']
+                'Spirit Trial Clear from Ganons Castle Spirit Trial Ending',
+                'Water Temple Clear from Morpha Boss Room']
 
 
 class StartMode(Choice):
     """Determines how, if at all, you can reach sphere 1 locations.
     iron_boots starts you with Iron Boots and, if fewer_tunic_requirements is off, Zora Tunic.
-    guard_house starts you in the Market Guard House with 7 pots to open.
+    guard_house starts you in the Market Guard House with 7 pots to open. If warp_songs is off, you can return
+    to the Guard House by exiting the Water Temple into the Gold Skulltula House, then exiting it..
     burger_king starts you with nothing. No sphere 1 for you. We'll break all the rules. I won't tell if you won't.
     If every player in the multiworld has burger_king selected, one player will be changed to guard_house."""
     option_burger_king = 0
@@ -105,6 +118,17 @@ class BossKeyOption(Choice):
     option_40_skulltulas_reward = 5
     option_50_skulltulas_reward = 6
     default = 4
+
+
+class Boss(Choice):
+    """Select which boss you will fight at the end of the dungeon."""
+    option_king_dodongo = 0
+    option_phantom_ganon = 1
+    option_volvagia = 2
+    option_morpha = 3
+    option_twinrova = 4
+    option_bongo_bongo = 5
+    default = 3
 
 
 class TokensInPool(Range):
@@ -197,7 +221,7 @@ class OOTBIJMQWTWorld(OOTWorld):
     oot_options = OOTWorld.option_definitions.copy()
     for option in (default_options + list(set_options.keys())):
         del oot_options[option]
-    option_definitions = {"start_mode": StartMode, "shuffle_warp_songs": WarpSongs,
+    option_definitions = {"start_mode": StartMode, "shuffle_warp_songs": WarpSongs, "boss": Boss,
                           "boss_key_location": BossKeyOption, "tokens_in_pool": TokensInPool,
                           "local_tokens": LocalTokens, "enable_scarecrow": EnableScarecrow, "max_health": MaxHealth,
                           "logic_fewer_tunic_requirements": LogicFewerTunicRequirements,
@@ -317,9 +341,12 @@ class OOTBIJMQWTWorld(OOTWorld):
                      'Deku Nuts (5)', 'Deku Nuts (10)', 'Recovery Heart', 'Arrows (5)',  "Bombs (5)", "Bombchus (5)",
                      'Ice Trap']
 
+        boss = self.multiworld.boss[self.player].current_key
+        if boss == "king_dodongo":
+            pool_size += 1
+
         while len(item_pool) < pool_size:
             item_pool += self.multiworld.random.sample(extrapool, min(pool_size - len(item_pool), len(extrapool)))
-
 
         for item in self.multiworld.precollected_items[self.player]:
             self.starting_items[item.name] += 1
@@ -331,8 +358,6 @@ class OOTBIJMQWTWorld(OOTWorld):
             item = self.create_item(item_name)
             if item_name in filler:
                 item.classification = ItemClassification.filler
-            elif item_name in useful:
-                item.classification = ItemClassification.useful
             self.itempool.append(item)
         self.multiworld.itempool += self.itempool
         for boss in ['Queen Gohma', 'King Dodongo', 'Barinade', 'Phantom Ganon', 'Morpha', 'Volvagia', 'Bongo Bongo',
@@ -355,6 +380,17 @@ class OOTBIJMQWTWorld(OOTWorld):
                 entrance.shuffled = True
                 entrance.replaces = entrance
         set_rules(self)
+
+        boss_room_door = boss_rooms[self.multiworld.boss[self.player].current_key]
+
+        c1, c2 = world.get_entrance("Water Temple Boss Door -> Morpha Boss Room"), \
+            world.get_entrance(boss_room_door[0])
+        c1.connect(world.get_region(c2.vanilla_connected_region))
+        c1.replaces = c2
+        c1, c2 = world.get_entrance(boss_room_door[1]), \
+            world.get_entrance("Morpha Boss Room -> Water Temple Boss Door")
+        c1.connect(world.get_region(c2.vanilla_connected_region))
+        c1.replaces = c2
 
         for connection in connections:
             c1, c2 = world.get_entrance(connection[0]), world.get_entrance(connection[1])
@@ -385,6 +421,11 @@ class OOTBIJMQWTWorld(OOTWorld):
                      world.get_entrance("Kakariko Village -> Kak House of Skulltula")
             c1.connect(world.get_region(c2.vanilla_connected_region))
             c1.replaces = c2
+            if self.multiworld.start_mode[self.player] == "guard_house":
+                c1, c2 = world.get_entrance("Kak House of Skulltula -> Kakariko Village"), \
+                    world.get_entrance("Market Entrance -> Market Guard House")
+                c1.connect(world.get_region(c2.vanilla_connected_region))
+                c1.replaces = c2
         if multiworld.start_mode[world.player] != "guard_house":
             c1, c2 = world.get_entrance("Adult Spawn -> Temple of Time"), \
                      world.get_entrance("Lake Hylia -> Water Temple Lobby")
@@ -423,7 +464,8 @@ class OOTBIJMQWTWorld(OOTWorld):
         state = multiworld.get_all_state(False)
         for player in wtplayerids:
             state.collect(multiworld.worlds[player].create_item("Boss Key (Water Temple)"))
-            for location in [multiworld.get_location(loc, player) for loc in final_clears]:
+            for location in [multiworld.get_location(loc, player) for loc in final_clears
+                             if loc != multiworld.boss[player].current_key.replace("_", " ").title()]:
                 if location.item is None:
                     location.place_locked_item(multiworld.worlds[location.player].create_item(location.vanilla_item))
                 location.item.classification = ItemClassification.filler
