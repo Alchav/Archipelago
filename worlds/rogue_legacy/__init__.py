@@ -124,7 +124,7 @@ class RLWorld(World):
         self.multiworld.itempool += item_pool
 
     def set_rules(self):
-        self.multiworld.completion_condition[self.player] = lambda state: state.has("Defeat The Fountain", self.player)
+        # self.multiworld.completion_condition[self.player] = lambda state: state.has("Defeat The Fountain", self.player)
 
         # Special rules to allow this specific region to "lock itself"... because why not.
         allow_self_locking_items(self.multiworld.get_region("Cheapskate Elf", self.player), "Nerdy Glasses Shrine")

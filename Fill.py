@@ -550,7 +550,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
             if "Super Metroid" in game:
                 return multiworld.random.randint(3, 4)
             return multiworld.random.randint(4, 5)
-        elif game in ("Rogue Legacy", "Slay the Spire", "Starcraft 2") or i.classification == ItemClassification.useful:
+        elif game in ("Starcraft 2",) or i.classification == ItemClassification.useful:
             return multiworld.random.randint(3, 4)
         elif i.classification == ItemClassification.progression_skip_balancing:
             return multiworld.random.randint(2, 3)

@@ -18,24 +18,24 @@ region_table: Dict[str, List[RegionExit]] = {
     "Menu": [RegionExit("Manor - Tier 1"), RegionExit("Castle Hamson")],
 
     # Manor Renovation
-    "Manor - Tier 1": [RegionExit("Manor - Tier 2", can_afford_tier2)],
-    "Manor - Tier 2": [RegionExit("Manor - Tier 3", can_afford_tier3)],
-    "Manor - Tier 3": [RegionExit("Manor - Tier 4", can_afford_tier4)],
+    "Manor - Tier 1": [RegionExit("Manor - Tier 2")],
+    "Manor - Tier 2": [RegionExit("Manor - Tier 3")],
+    "Manor - Tier 3": [RegionExit("Manor - Tier 4")],
     "Manor - Tier 4": [],
 
     # Main Zones
     "Castle Hamson": [
-        RegionExit("Forest Abkhazia", has_defeated_castle),
-        RegionExit("The Maya", has_defeated_forest),
-        RegionExit("The Land of Darkness", has_defeated_tower),
-        RegionExit("The Fountain Room", can_open_door),
-        RegionExit("Castle Fairy Chests", has_fairy_progression),
-        RegionExit("Cheapskate Elf", can_cheat_cheapskate_elf),
-        RegionExit("The Secret Room", can_access_secret_room),
+        RegionExit("Forest Abkhazia"),
+        RegionExit("The Maya"),
+        RegionExit("The Land of Darkness"),
+        RegionExit("The Fountain Room"),
+        RegionExit("Castle Fairy Chests"),
+        RegionExit("Cheapskate Elf"),
+        RegionExit("The Secret Room"),
     ],
-    "Forest Abkhazia": [RegionExit("Forest Fairy Chests", has_fairy_progression)],
-    "The Maya": [RegionExit("Tower Fairy Chests", has_fairy_progression)],
-    "The Land of Darkness": [RegionExit("Dungeon Fairy Chests", has_fairy_progression)],
+    "Forest Abkhazia": [RegionExit("Forest Fairy Chests")],
+    "The Maya": [RegionExit("Tower Fairy Chests")],
+    "The Land of Darkness": [RegionExit("Dungeon Fairy Chests")],
     "The Fountain Room": [],
 
     # Fairy Chests
