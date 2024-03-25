@@ -562,7 +562,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
-        sphere_t = [[], [], [], []]
+        sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
             if loc.address and not loc.locked:
                 sphere_t[iclass(loc.item)].append(loc)
