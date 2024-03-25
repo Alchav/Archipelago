@@ -389,17 +389,17 @@ def gauntlet_order() -> Dict[SC2Campaign, List[FillMission]]:
 def alchav_order() -> Dict[SC2Campaign, List[FillMission]]:
     return {
         SC2Campaign.GLOBAL: [
-            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "STARTER"),
-            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "STARTER"),
-            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "STARTER"),
-            FillMission(MissionPools.EASY, [MissionConnection(-1)], "EASY"),
-            FillMission(MissionPools.MEDIUM, [MissionConnection(-1)], "MEDIUM"),
-            FillMission(MissionPools.MEDIUM, [MissionConnection(-1)], "MEDIUM"),
-            FillMission(MissionPools.MEDIUM, [MissionConnection(-1)], "MEDIUM"),
-            FillMission(MissionPools.HARD, [MissionConnection(-1)], "HARD"),
-            FillMission(MissionPools.HARD, [MissionConnection(-1)], "HARD"),
-            FillMission(MissionPools.HARD, [MissionConnection(-1)], "HARD"),
-            FillMission(MissionPools.FINAL, [MissionConnection(1), MissionConnection(2), MissionConnection(3)], "FINAL", number=8, completion_critical=True, or_requirements=True)
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "_1"),
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "_2"),
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "_3"),
+            FillMission(MissionPools.EASY, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_4", number=1, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_5", number=2, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_6", number=3, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_7", number=4, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_8", number=5, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_9", number=6, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_10", number=7, or_requirements=True),
+            FillMission(MissionPools.FINAL, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_11", number=8, completion_critical=True, or_requirements=True)
         ]
     }
 
