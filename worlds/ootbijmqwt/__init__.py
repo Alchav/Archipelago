@@ -122,13 +122,14 @@ class BossKeyOption(Choice):
 
 class Boss(Choice):
     """Select which boss you will fight at the end of the dungeon."""
-    option_king_dodongo = 0
-    option_phantom_ganon = 1
-    option_volvagia = 2
-    option_morpha = 3
-    option_twinrova = 4
-    option_bongo_bongo = 5
-    default = 3
+    option_queen_gohma = 0
+    option_king_dodongo = 1
+    option_phantom_ganon = 2
+    option_volvagia = 3
+    option_morpha = 4
+    option_twinrova = 5
+    option_bongo_bongo = 6
+    default = 4
 
 
 class TokensInPool(Range):
