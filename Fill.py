@@ -487,7 +487,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
 
     inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
-    filleritempool.sort(key=lambda i: not i.trap)
+    filleritempool.sort(key=lambda i: i.trap)
 
     remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded")
     if excludedlocations:
@@ -525,13 +525,14 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                     state.collect(location.item, True, location)
                 locations -= reachable_events
                 reachable_locations = {location for location in locations if location.can_reach(state)}
+            beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state)}
             if not reachable_locations:
                 break  # don't swap unreachables
                 if locations:
                     yield locations  # unreachable locations
                 break
             else:
-                yield reachable_locations
+                yield {loc for loc in reachable_locations if loc.player not in beaten_games}
 
             for location in reachable_locations:
                 if location.item.advancement:
@@ -550,13 +551,14 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
             if "Super Metroid" in game:
                 return multiworld.random.randint(3, 4)
             return multiworld.random.randint(4, 5)
-        elif game in ("Starcraft 2",) or i.classification == ItemClassification.useful:
+        elif i.classification == ItemClassification.useful:
             return multiworld.random.randint(3, 4)
-        elif i.classification == ItemClassification.progression_skip_balancing:
+        elif game in ("Starcraft 2",) or i.classification == ItemClassification.progression_skip_balancing:
             return multiworld.random.randint(2, 3)
         elif i.classification == ItemClassification.progression:
             return multiworld.random.randint(1, 2)
         breakpoint()
+    s = [_ for _ in get_item_spheres()]
 
     for sphere in get_item_spheres():
         sphere_list = list(sphere)
