@@ -514,7 +514,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
     def get_item_spheres():
         state = CollectionState(multiworld)
         locations = set(multiworld.get_filled_locations())
-
+        beaten_games = set()
         while locations:
             reachable_locations = {location for location in locations if location.can_reach(state)}
             old_reachable_locations = None
@@ -525,7 +525,6 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                     state.collect(location.item, True, location)
                 locations -= reachable_events
                 reachable_locations = {location for location in locations if location.can_reach(state)}
-            beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state)}
             if not reachable_locations:
                 break  # don't swap unreachables
                 if locations:
@@ -533,6 +532,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                 break
             else:
                 yield {loc for loc in reachable_locations if loc.player not in beaten_games}
+                beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state)}
 
             for location in reachable_locations:
                 if location.item.advancement:
