@@ -26,7 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-z = (8, 11, 21)
+z = []#(6, 9)
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -482,7 +482,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
 
     for location in lock_later:
         if location.item:
-            location.locked = True
+            add_item_rule(location, lambda i: i.advancement)
     del mark_for_locking, lock_later
 
     inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
@@ -558,7 +558,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         elif i.classification == ItemClassification.progression:
             return multiworld.random.randint(1, 2)
         breakpoint()
-    s = [_ for _ in get_item_spheres()]
+    # s = [_ for _ in get_item_spheres()]
 
     for sphere in get_item_spheres():
         sphere_list = list(sphere)

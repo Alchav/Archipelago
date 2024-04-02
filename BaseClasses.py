@@ -739,7 +739,7 @@ class CollectionState():
         reachable_events = True
         # since the loop has a good chance to run more than once, only filter the events once
         locations = {location for location in locations if location.event and location not in self.events and
-                     not key_only or getattr(location.item, "locked_dungeon_item", False)}
+                     ((not key_only) or (not location.address))}
         while reachable_events:
             reachable_events = {location for location in locations if location.can_reach(self)}
             locations -= reachable_events
@@ -1245,12 +1245,14 @@ class Spoiler:
         for num, sphere in reversed(tuple(enumerate(collection_spheres))):
             to_delete = set()
             for location in sphere:
+                # if not location.address:
+                #     continue
                 # we remove the item at location and check if game is still beatable
                 logging.debug('Checking if %s (Player %d) is required to beat the game.', location.item.name,
                               location.item.player)
                 old_item = location.item
                 location.item = None
-                if multiworld.can_beat_game(state_cache[num]):
+                if location.address and multiworld.can_beat_game(state_cache[num]):
                     to_delete.add(location)
                     restore_later[location] = old_item
                 else:
@@ -1295,7 +1297,10 @@ class Spoiler:
 
             required_locations -= sphere
             if not sphere:
-                raise RuntimeError(f'Not all required items reachable. Unreachable locations: {required_locations}')
+                if {location for location in required_locations if location.address}:
+                    raise RuntimeError(f'Not all required items reachable. Unreachable locations: {required_locations}')
+                else:
+                    break
 
         # we can finally output our playthrough
         self.playthrough = {"0": sorted([self.multiworld.get_name_string_for_object(item) for item in
