@@ -559,7 +559,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         elif i.classification == ItemClassification.progression:
             return multiworld.random.randint(1, 2)
         breakpoint()
-    # s = [_ for _ in get_item_spheres()]
+    s = [_ for _ in get_item_spheres()]
 
     for sphere in get_item_spheres():
         sphere_list = list(sphere)
