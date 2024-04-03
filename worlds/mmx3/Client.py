@@ -472,7 +472,7 @@ class MMX3SNIClient(SNIClient):
             ctx.finished_game = True
             return
 
-        await self.handle_energy_link(ctx)
+        # await self.handle_energy_link(ctx)
         await self.handle_item_queue(ctx)
         
         from worlds.mmx3.Rom import weapon_rom_data, ride_armor_rom_data, upgrades_rom_data, boss_access_rom_data, refill_rom_data

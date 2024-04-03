@@ -62,7 +62,7 @@ def set_rules(world: MMX3World):
     # Vile entrance rules
     vile_open = world.options.vile_open
     entrance_blizzard = multiworld.get_entrance(f"{RegionName.blizzard_buffalo_start} -> {RegionName.vile}", player)
-    entrance_toxic = multiworld.get_entrance(f"{RegionName.volt_catfish_start} -> {RegionName.vile}", player)
+    entrance_toxic = multiworld.get_entrance(f"{RegionName.toxic_seahorse_start} -> {RegionName.vile}", player)
     entrance_crush = multiworld.get_entrance(f"{RegionName.crush_crawfish_start} -> {RegionName.vile}", player)
     if vile_open == "multiworld":
         set_rule(entrance_blizzard, lambda state: state.has(ItemName.stage_vile, player))
