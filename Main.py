@@ -333,6 +333,42 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             er_hint_data: Dict[int, Dict[int, str]] = {}
             AutoWorld.call_all(multiworld, 'extend_hint_information', er_hint_data)
 
+            def get_item_spheres():
+                state = CollectionState(multiworld)
+                locations = set(multiworld.get_filled_locations())
+                while locations:
+                    reachable_locations = {location for location in locations if location.can_reach(state)}
+                    old_reachable_locations = None
+                    while old_reachable_locations != reachable_locations:
+                        old_reachable_locations = reachable_locations.copy()
+                        reachable_events = {location for location in reachable_locations if location.address is None}
+                        for location in reachable_events:
+                            state.collect(location.item, True, location)
+                        locations -= reachable_events
+                        reachable_locations = {location for location in locations if location.can_reach(state)}
+                    if not reachable_locations:
+                        if locations:
+                            yield locations  # unreachable locations
+                        break
+                    else:
+                        yield {loc for loc in reachable_locations if loc.player}
+
+                    for location in reachable_locations:
+                        if location.item.advancement:
+                            state.collect(location.item, True, location)
+                    locations -= reachable_locations
+
+            for i, sphere in enumerate(get_item_spheres(), 1):
+                for location in sphere:
+                    if (not location.address) or type(location.address) != int:
+                        continue
+                    if location.player not in er_hint_data:
+                        er_hint_data[location.player] = {}
+                    if location.address not in er_hint_data[location.player]:
+                        er_hint_data[location.player][location.address] = f"Sphere {i}"
+                    else:
+                        er_hint_data[location.player][location.address] = f"{er_hint_data[location.player][location.address]} / Sphere {i}"
+
             def write_multidata():
                 import NetUtils
                 slot_data = {}

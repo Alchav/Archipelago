@@ -131,7 +131,7 @@ class SMMapRandoWorld(World):
 
     game: str = "Super Metroid Map Rando"
     topology_present = True
-    data_version = 1
+    data_version = 0
     options_dataclass = SMMROptions
     options: SMMROptions
 

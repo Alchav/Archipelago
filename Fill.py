@@ -26,8 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-z = []#(6, 9)
-z = []#(6, 9)
+z = [7, 21, 34] #, 10, 19]
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -280,7 +279,7 @@ def remaining_fill(multiworld: MultiWorld,
 
     if unplaced_items and locations:
         while unplaced_items and locations:
-            multiworld.push_item(unplaced_items.pop(), locations.pop(), False)
+            multiworld.push_item(locations.pop(), unplaced_items.pop(), False)
         # return
         #
         #
@@ -387,24 +386,24 @@ def distribute_early_items(multiworld: MultiWorld,
             player_local = early_local_rest_items[player]
             fill_restrictive(multiworld, base_state,
                              [loc for loc in early_locations if loc.player == player],
-                             player_local, lock=True, allow_partial=True, name=f"Local Early Items P{player}")
+                             player_local, lock=False, allow_partial=True, name=f"Local Early Items P{player}")
             if player_local:
                 logging.warning(f"Could not fulfill rules of early items: {player_local}")
                 early_rest_items.extend(early_local_rest_items[player])
         early_locations = [loc for loc in early_locations if not loc.item]
-        fill_restrictive(multiworld, base_state, early_locations, early_rest_items, lock=True, allow_partial=True,
+        fill_restrictive(multiworld, base_state, early_locations, early_rest_items, lock=False, allow_partial=True,
                          name="Early Items")
         early_locations += early_priority_locations
         for player in multiworld.player_ids:
             player_local = early_local_prog_items[player]
             fill_restrictive(multiworld, base_state,
                              [loc for loc in early_locations if loc.player == player],
-                             player_local, lock=True, allow_partial=True, name=f"Local Early Progression P{player}")
+                             player_local, lock=False, allow_partial=True, name=f"Local Early Progression P{player}")
             if player_local:
                 logging.warning(f"Could not fulfill rules of early items: {player_local}")
                 early_prog_items.extend(player_local)
         early_locations = [loc for loc in early_locations if not loc.item]
-        fill_restrictive(multiworld, base_state, early_locations, early_prog_items, lock=True, allow_partial=True,
+        fill_restrictive(multiworld, base_state, early_locations, early_prog_items, lock=False, allow_partial=True,
                          name="Early Progression")
         unplaced_early_items = early_rest_items + early_prog_items
         if unplaced_early_items:
@@ -424,6 +423,13 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
     itempool = sorted(multiworld.itempool)
     multiworld.random.shuffle(itempool)
 
+    for player, ei in multiworld.early_items.items():
+        for item, count in ei.items():
+            if item in multiworld.local_early_items[player]:
+                multiworld.local_early_items[player][item] += count
+            else:
+                multiworld.local_early_items[player][item] = count
+        multiworld.early_items[player] = {}
     fill_locations, itempool = distribute_early_items(multiworld, fill_locations, itempool)
 
     progitempool: typing.List[Item] = []
