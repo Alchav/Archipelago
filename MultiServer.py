@@ -1618,7 +1618,8 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
         errors = set()
         if ctx.password and args['password'] != ctx.password:
             errors.add('InvalidPassword')
-
+        if args['name'][:20] in ctx.connect_names:
+            args['name'] = args['name'][:20]
         if args['name'] not in ctx.connect_names:
             errors.add('InvalidSlot')
         else:
