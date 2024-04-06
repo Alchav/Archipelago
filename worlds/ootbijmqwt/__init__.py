@@ -197,6 +197,17 @@ class LogicLakeHyliaLabDive(Toggle):
     display_name = "Logic: Lake Hylia Lab Dive without Gold Scale"
 
 
+class LogicBongoBongoWithoutLensOfTruth(Toggle):
+    """Enable the "Shadow Temple Bongo Bongo without Lens of Truth" trick to logic."""
+    display_name = "Logic: Shadow Temple Bongo Bongo without Lens of Truth"
+
+
+class LogicDodongosCavernSmashtheBossLobbyFloor(Toggle):
+    """Enable the "Dodongo's Cavern Smash the Boss Lobby Floor" trick to logic. The bombable floor before King Dodongo
+    can be destroyed with Hammer if hit in the very center."""
+    display_name = "Logic: Dodongo's Cavern Smash the Boss Lobby Floor"
+
+
 def init_mixin(self, parent):
     oot_ids = (parent.get_game_players(OOTWorld.game) + parent.get_game_groups(OOTWorld.game)
                + parent.get_game_players(OOTBIJMQWTWorld.game) + parent.get_game_groups(OOTBIJMQWTWorld.game))
@@ -231,6 +242,8 @@ class OOTBIJMQWTWorld(OOTWorld):
                           "logic_lab_diving": LogicLakeHyliaLabDive,
                           "logic_water_dragon_jump_dive": LogicWaterDragonJumpDive,
                           "logic_water_north_basement_ledge_jump": LogicWaterTempleNorthBasementLedgewWithPreciseJump,
+                          "logic_dc_hammer_floor": LogicDodongosCavernSmashtheBossLobbyFloor,
+                          "logic_lens_bongo": LogicBongoBongoWithoutLensOfTruth,
                           **oot_options}
 
     topology_present: bool = False
@@ -282,7 +295,8 @@ class OOTBIJMQWTWorld(OOTWorld):
                 multiworld.local_items[world.player].value.add("Boss Key (Water Temple)")
             multiworld.free_scarecrow[world.player].value = multiworld.enable_scarecrow[world.player].value
             for trick in ["logic_fewer_tunic_requirements", "logic_water_mq_central_pillar", "logic_water_mq_locked_gs",
-                          "logic_lab_diving", "logic_water_dragon_jump_dive", "logic_water_north_basement_ledge_jump"]:
+                          "logic_lab_diving", "logic_water_dragon_jump_dive", "logic_water_north_basement_ledge_jump",
+                          "logic_dc_hammer_floor", "logic_lens_bongo"]:
                 if getattr(multiworld, trick)[world.player]:
                     multiworld.logic_tricks[world.player].value.append(getattr(multiworld, trick)[world.player].display_name.split(": ")[1].casefold())
 
