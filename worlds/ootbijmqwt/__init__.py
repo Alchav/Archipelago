@@ -181,7 +181,7 @@ class LogicWaterTempleNorthBasementLedgewWithPreciseJump(Toggle):
 class LogicWaterMQCentralPillarWithFireArrows(Toggle):
     """Enable the "Water Temple MQ Central Pillar with Fire Arrows" trick to logic, which may require you to light the
     torches in the Central Pillar with Fire Arrows."""
-    display_name = "Logic: Water MQ Central Pillar with Fire Arrows"
+    display_name = "Logic: Water Temple MQ Central Pillar with Fire Arrows"
 
 
 class LogicWaterTempleMQNorthBasementGSWithoutSmallKey(Toggle):
