@@ -968,7 +968,8 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
             logging.info('(Team #%d) %s sent %s to %s (%s)' % (
                 team + 1, ctx.player_names[(team, slot)], ctx.item_names[item_id],
                 ctx.player_names[(team, target_player)], ctx.location_names[location]))
-            info_text = json_format_send_event(new_item, target_player)
+
+            info_text = json_format_send_event(new_item, target_player, ctx.er_hint_data.get(slot, {}).get(new_item.location, ""))
             ctx.broadcast_team(team, [info_text])
 
         ctx.location_checks[team, slot] |= new_locations
@@ -1030,9 +1031,10 @@ def format_hint(ctx: Context, team: int, hint: NetUtils.Hint) -> str:
     return text + (". (found)" if hint.found else ".")
 
 
-def json_format_send_event(net_item: NetworkItem, receiving_player: int):
+def json_format_send_event(net_item: NetworkItem, receiving_player: int, hint):
     parts = []
     NetUtils.add_json_text(parts, net_item.player, type=NetUtils.JSONTypes.player_id)
+
     if net_item.player == receiving_player:
         NetUtils.add_json_text(parts, " found their ")
         NetUtils.add_json_item(parts, net_item.item, net_item.player, net_item.flags)
@@ -1044,6 +1046,8 @@ def json_format_send_event(net_item: NetworkItem, receiving_player: int):
 
     NetUtils.add_json_text(parts, " (")
     NetUtils.add_json_location(parts, net_item.location, net_item.player)
+    if hint:
+        NetUtils.add_json_text(parts, f" at {hint}")
     NetUtils.add_json_text(parts, ")")
 
     return {"cmd": "PrintJSON", "data": parts, "type": "ItemSend",
