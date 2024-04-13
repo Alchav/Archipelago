@@ -348,6 +348,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                         reachable_locations = {location for location in locations if location.can_reach(state)}
                     if not reachable_locations:
                         if locations:
+                            yield "Unreachable"
                             yield locations  # unreachable locations
                         break
                     else:
@@ -358,16 +359,23 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                             state.collect(location.item, True, location)
                     locations -= reachable_locations
 
+            unr = False
             for i, sphere in enumerate(get_item_spheres(), 1):
+                if sphere == "Unreachable":
+                    unr = True
+                    continue
                 for location in sphere:
                     if (not location.address) or type(location.address) != int:
                         continue
                     if location.player not in er_hint_data:
                         er_hint_data[location.player] = {}
                     if location.address not in er_hint_data[location.player]:
-                        er_hint_data[location.player][location.address] = f"Sphere {i}"
+                        er_hint_data[location.player][location.address] = "Unreachable" if unr else f"Sphere {i}"
                     else:
-                        er_hint_data[location.player][location.address] = f"{er_hint_data[location.player][location.address]} / Sphere {i}"
+                        t = f"Sphere {i}"
+                        if unr:
+                            t = "Unreachable"
+                        er_hint_data[location.player][location.address] = f"{t} / {er_hint_data[location.player][location.address]}"
 
             def write_multidata():
                 import NetUtils

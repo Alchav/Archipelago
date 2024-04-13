@@ -565,7 +565,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         elif i.classification == ItemClassification.progression:
             return multiworld.random.randint(1, 2)
         breakpoint()
-    s = [_ for _ in get_item_spheres()]
+    # s = [_ for _ in get_item_spheres()]
 
     for sphere in get_item_spheres():
         sphere_list = list(sphere)
@@ -573,7 +573,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         multiworld.random.shuffle(sphere_list)
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
-            if loc.address and not loc.locked:
+            if loc.address and not loc.locked and loc.item.name not in multiworld.local_items[loc.player]:
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
