@@ -92,6 +92,7 @@ class Bingo(World):
         def get_item_spheres():
             state = CollectionState(multiworld)
             locations = set(multiworld.get_filled_locations())
+            locations = {loc for loc in locations if loc.progress_type != LocationProgressType.EXCLUDED}
             beaten_games = set()
             while locations:
                 reachable_locations = {location for location in locations if location.can_reach(state)}
@@ -126,7 +127,7 @@ class Bingo(World):
         sphere = list(sphere)
         sphere.sort(key=lambda l: l.name)
         self.random.shuffle(sphere)
-        for a, b in zip(self.multiworld.get_unfilled_locations(self.player), sphere):
+        for a, b in zip([loc for loc in self.multiworld.get_unfilled_locations(self.player) if not loc.progress_type == LocationProgressType.EXCLUDED], sphere):
             a.item = b.item
             b.item = item_pool.pop()
         pass

@@ -26,7 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-z = [7, 30, 33] #, 10, 19]
+z = [] #[7, 30, 33] #, 10, 19]
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -278,14 +278,14 @@ def remaining_fill(multiworld: MultiWorld,
         _log_fill_progress(name, placed, total)
 
     if unplaced_items and locations:
-        while unplaced_items and locations:
-            multiworld.push_item(locations.pop(), unplaced_items.pop(), False)
+        # while unplaced_items and locations:
+        #     multiworld.push_item(locations.pop(), unplaced_items.pop(), False)
         # return
         #
         #
-        # # There are leftover unplaceable items and locations that won't accept them
-        # raise FillError(f'No more spots to place {unplaced_items}, locations {locations} are invalid. '
-        #                 f'Already placed {len(placements)}: {", ".join(str(place) for place in placements)}')
+        # There are leftover unplaceable items and locations that won't accept them
+        raise FillError(f'No more spots to place {unplaced_items}, locations {locations} are invalid. '
+                        f'Already placed {len(placements)}: {", ".join(str(place) for place in placements)}')
 
     itempool.extend(unplaced_items)
 
@@ -450,6 +450,10 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         loc_type: [] for loc_type in LocationProgressType}
 
     for loc in fill_locations:
+        if (loc.progress_type == LocationProgressType.EXCLUDED
+                and multiworld.worlds[loc.player].accessibility != "locations"):
+            loc.progress_type = LocationProgressType.DEFAULT
+            loc.access_rule = lambda state: False
         locations[loc.progress_type].append(loc)
 
     prioritylocations = locations[LocationProgressType.PRIORITY]
