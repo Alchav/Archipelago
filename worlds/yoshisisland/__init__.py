@@ -1,21 +1,23 @@
+import base64
 import os
 import typing
 import threading
 
-from typing import List, Set, TextIO
-from BaseClasses import Item, MultiWorld, Location, Tutorial, ItemClassification
+from typing import List, Set, TextIO, Dict
+from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
 from worlds.AutoWorld import World, WebWorld
 import settings
 from .Items import get_item_names_per_category, item_table, filler_items, trap_items
 from .Locations import get_locations
 from .Regions import init_areas
-from .Options import YoshisIslandOptions
+from .Options import YoshisIslandOptions, PlayerGoal, ObjectVis, StageLogic, MinigameChecks
 from .setup_game import setup_gamevars
-from .Client import YISNIClient
+from .Client import YoshisIslandSNIClient
 from .Rules import set_easy_rules, set_normal_rules, set_hard_rules
-from .Rom import LocalRom, patch_rom, get_base_rom_path, YIDeltaPatch, USHASH
+from .Rom import LocalRom, patch_rom, get_base_rom_path, YoshisIslandDeltaPatch, USHASH
 
-class YISettings(settings.Group):
+
+class YoshisIslandSettings(settings.Group):
     class RomFile(settings.SNESRomPath):
         """File name of the Yoshi's Island 1.0 US rom"""
         description = "Yoshi's Island ROM File"
@@ -24,13 +26,13 @@ class YISettings(settings.Group):
 
     rom_file: RomFile = RomFile(RomFile.copy_to)
 
-class YIWeb(WebWorld):
+
+class YoshisIslandWeb(WebWorld):
     theme = "ocean"
 
     setup_en = Tutorial(
         "Multiworld Setup Guide",
-        "A guide to setting up the Yoshi's Island randomizer"
-        "and connecting to an Archipelago server.",
+        "A guide to setting up the Yoshi's Island randomizer and connecting to an Archipelago server.",
         "English",
         "setup_en.md",
         "setup/en",
@@ -39,29 +41,29 @@ class YIWeb(WebWorld):
 
     tutorials = [setup_en]
 
-class YIWorld(World):
-    """Yoshi's Island is a 2D platforming game.
-        During a delivery, Bowser's evil ward, Kamek, attacked the stork, kidnapping Luigi and dropping Mario onto Yoshi's Island.
-        As Yoshi, you must run, jump, and throw eggs to escort the baby Mario across the island to defeat Bowser and reunite the two brothers with their parents."""
+
+class YoshisIslandWorld(World):
+    """
+    Yoshi's Island is a 2D platforming game.
+    During a delivery, Bowser's evil ward, Kamek, attacked the stork, kidnapping Luigi and dropping Mario onto Yoshi's Island.
+    As Yoshi, you must run, jump, and throw eggs to escort the baby Mario across the island to defeat Bowser and reunite the two brothers with their parents.
+    """
     game = "Yoshi's Island"
     option_definitions = YoshisIslandOptions
-    data_version = 1
     required_client_version = (0, 4, 4)
 
     item_name_to_id = {item: item_table[item].code for item in item_table}
-    location_name_to_id = {location.name: location.code for
-                           location in get_locations(None)}
+    location_name_to_id = {location.name: location.code for location in get_locations(None)}
     item_name_groups = get_item_names_per_category()
 
-    web = YIWeb()
-    settings: typing.ClassVar[YISettings]
-    #topology_present = True
+    web = YoshisIslandWeb()
+    settings: typing.ClassVar[YoshisIslandSettings]
+    # topology_present = True
 
     options_dataclass = YoshisIslandOptions
     options: YoshisIslandOptions
 
     locked_locations: List[str]
-    location_cache: List[Location]
     set_req_bosses: str
     lives_high: int
     lives_low: int
@@ -71,22 +73,22 @@ class YIWorld(World):
     leader_color: int
     boss_order: list
     boss_burt: int
-    luigi_pieces: int
+    luigi_count: int
 
-    def __init__(self, world: MultiWorld, player: int):
+    rom_name: bytearray
+
+    def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
-        super().__init__(world, player)
-
-        self.locked_locations= []
-        self.location_cache= []
+        super().__init__(multiworld, player)
+        self.locked_locations = []
 
     @classmethod
-    def stage_assert_generate(cls, multiworld):
+    def stage_assert_generate(cls, multiworld: MultiWorld) -> None:
         rom_file = get_base_rom_path()
         if not os.path.exists(rom_file):
             raise FileNotFoundError(rom_file)
 
-    def fill_slot_data(self):
+    def fill_slot_data(self) -> Dict[str, List[int]]:
         return {
             "world_1": self.world_1_stages,
             "world_2": self.world_2_stages,
@@ -164,71 +166,58 @@ class YIWorld(World):
 
     def create_item(self, name: str) -> Item:
         data = item_table[name]
+        return Item(name, data.classification, data.code, self.player)
 
-        if data.useful:
-            classification = ItemClassification.useful
-        elif data.progression:
-            classification = ItemClassification.progression
-        elif data.trap:
-            classification = ItemClassification.trap
-        else:
-            classification = ItemClassification.filler
-
-        item = Item(name, classification, data.code, self.player)
-
-        return item
-
-    def create_regions(self):
+    def create_regions(self) -> None:
         init_areas(self, get_locations(self))
 
     def get_filler_item_name(self) -> str:
         trap_chance: int = self.options.trap_percent.value
 
-        if self.random.random() < (trap_chance / 100) and self.options.traps_enabled.value == 1:
+        if self.random.random() < (trap_chance / 100) and self.options.traps_enabled:
             return self.random.choice(trap_items)
         else:
             return self.random.choice(filler_items)
 
-    def set_rules(self):
-        if self.options.stage_logic == 0:
-            set_easy_rules(self)
-        elif self.options.stage_logic == 1:
-            set_normal_rules(self)
+    def set_rules(self) -> None:
+        rules_per_difficulty = {
+            0: set_easy_rules,
+            1: set_normal_rules,
+            2: set_hard_rules
+        }
+
+        rules_per_difficulty[self.options.stage_logic.value](self)
+        self.multiworld.completion_condition[self.player] = lambda state: state.has("Saved Baby Luigi", self.player)
+        self.get_location("Burt The Bashful's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Salvo The Slime's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Bigger Boo's Boss Room", ).place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Roger The Ghost's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Prince Froggy's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Naval Piranha's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Marching Milde's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Hookbill The Koopa's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Sluggy The Unshaven's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Raphael The Raven's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+        self.get_location("Tap-Tap The Red Nose's Boss Room").place_locked_item(self.create_item("Boss Clear"))
+
+        if self.options.goal == PlayerGoal.option_luigi_hunt:
+            self.get_location("Reconstituted Luigi").place_locked_item(self.create_item("Saved Baby Luigi"))
         else:
-            set_hard_rules(self)
-        self.multiworld.completion_condition[self.player] = lambda state: state.has('Saved Baby Luigi', self.player)
-        self.multiworld.get_location("Burt The Bashful's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Salvo The Slime's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Bigger Boo's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Roger The Ghost's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Prince Froggy's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Naval Piranha's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Marching Milde's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Hookbill The Koopa's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Sluggy The Unshaven's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Raphael The Raven's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
-        self.multiworld.get_location("Tap-Tap The Red Nose's Boss Room", self.player).place_locked_item(self.create_item("Boss Clear"))
+            self.get_location("King Bowser's Castle: Level Clear").place_locked_item(
+                self.create_item("Saved Baby Luigi")
+            )
 
-        if self.options.goal.value == 1:
-            self.multiworld.get_location("Reconstituted Luigi", self.player).place_locked_item(self.create_item("Saved Baby Luigi"))
-        else:
-            self.multiworld.get_location("King Bowser's Castle: Level Clear", self.player).place_locked_item(self.create_item("Saved Baby Luigi"))
+        self.get_location("Touch Fuzzy Get Dizzy: Gather Coins").place_locked_item(
+            self.create_item("Bandit Consumables")
+        )
+        self.get_location("The Cave Of the Mystery Maze: Seed Spitting Contest").place_locked_item(
+            self.create_item("Bandit Watermelons")
+        )
+        self.get_location("Lakitu's Wall: Gather Coins").place_locked_item(self.create_item("Bandit Consumables"))
+        self.get_location("Ride Like The Wind: Gather Coins").place_locked_item(self.create_item("Bandit Consumables"))
 
-        self.multiworld.get_location("Touch Fuzzy Get Dizzy: Gather Coins", self.player).place_locked_item(self.create_item("Bandit Consumables"))
-        self.multiworld.get_location("The Cave Of the Mystery Maze: Seed Spitting Contest", self.player).place_locked_item(self.create_item("Bandit Watermelons"))
-        self.multiworld.get_location("Lakitu's Wall: Gather Coins", self.player).place_locked_item(self.create_item("Bandit Consumables"))
-        self.multiworld.get_location("Ride Like The Wind: Gather Coins", self.player).place_locked_item(self.create_item("Bandit Consumables"))
-
-    def place_locked_item(self, excluded_items: Set[str], location: str, item: str) -> None:
-        excluded_items.add(item)
-
-        item = self.create_item(item)
-
-        self.multiworld.get_location(location, self.player).place_locked_item(item)
-
-    def generate_early(self):
+    def generate_early(self) -> None:
         setup_gamevars(self)
-
 
     def get_excluded_items(self) -> Set[str]:
         excluded_items: Set[str] = set()
@@ -236,75 +225,74 @@ class YIWorld(World):
         starting_gate = ["World 1 Gate", "World 2 Gate", "World 3 Gate",
                          "World 4 Gate", "World 5 Gate", "World 6 Gate"]
 
-
         excluded_items.add(starting_gate[self.options.starting_world])
 
-        if self.options.shuffle_midrings.value == 0:
-            excluded_items.add('Middle Ring')
+        if not self.options.shuffle_midrings:
+            excluded_items.add("Middle Ring")
 
-        if self.options.add_secretlens.value == 0:
-            excluded_items.add('Secret Lens')
+        if not self.options.add_secretlens:
+            excluded_items.add("Secret Lens")
 
-        if self.options.extras_enabled.value == 0:
-            excluded_items.add('Extra Panels')
-            excluded_items.add('Extra 1')
-            excluded_items.add('Extra 2')
-            excluded_items.add('Extra 3')
-            excluded_items.add('Extra 4')
-            excluded_items.add('Extra 5')
-            excluded_items.add('Extra 6')
+        if not self.options.extras_enabled:
+            excluded_items.add("Extra Panels")
+            excluded_items.add("Extra 1")
+            excluded_items.add("Extra 2")
+            excluded_items.add("Extra 3")
+            excluded_items.add("Extra 4")
+            excluded_items.add("Extra 5")
+            excluded_items.add("Extra 6")
 
-        if self.options.split_extras.value == 1:
-            excluded_items.add('Extra Panels')
+        if self.options.split_extras:
+            excluded_items.add("Extra Panels")
         else:
-            excluded_items.add('Extra 1')
-            excluded_items.add('Extra 2')
-            excluded_items.add('Extra 3')
-            excluded_items.add('Extra 4')
-            excluded_items.add('Extra 5')
-            excluded_items.add('Extra 6')
+            excluded_items.add("Extra 1")
+            excluded_items.add("Extra 2")
+            excluded_items.add("Extra 3")
+            excluded_items.add("Extra 4")
+            excluded_items.add("Extra 5")
+            excluded_items.add("Extra 6")
 
-        if self.options.split_bonus.value == 1:
-            excluded_items.add('Bonus Panels')
+        if self.options.split_bonus:
+            excluded_items.add("Bonus Panels")
         else:
-            excluded_items.add('Bonus 1')
-            excluded_items.add('Bonus 2')
-            excluded_items.add('Bonus 3')
-            excluded_items.add('Bonus 4')
-            excluded_items.add('Bonus 5')
-            excluded_items.add('Bonus 6')
+            excluded_items.add("Bonus 1")
+            excluded_items.add("Bonus 2")
+            excluded_items.add("Bonus 3")
+            excluded_items.add("Bonus 4")
+            excluded_items.add("Bonus 5")
+            excluded_items.add("Bonus 6")
 
         return excluded_items
 
-    def create_item_with_correct_settings(self, player: int, name: str) -> Item:
+    def create_item_with_correct_settings(self, name: str) -> Item:
         data = item_table[name]
-        if data.useful:
-            classification = ItemClassification.useful
-        elif data.progression:
-            classification = ItemClassification.progression
-        elif data.trap:
-            classification = ItemClassification.trap
-        else:
-            classification = ItemClassification.filler
-        item = Item(name, classification, data.code, player)
+        item = Item(name, data.classification, data.code, self.player)
 
         if not item.advancement:
             return item
 
-        if name == 'Car Morph' and self.options.stage_logic.value != 0:
+        if name == "Car Morph" and self.options.stage_logic != StageLogic.option_strict:
             item.classification = ItemClassification.useful
 
-        if name == 'Secret Lens' and (self.options.hidden_object_visibility.value >= 2 or self.options.stage_logic.value != 0):
+        secret_lens_visibility_check = (
+                self.options.hidden_object_visibility >= ObjectVis.option_clouds_only
+                or self.options.stage_logic != StageLogic.option_strict
+        )
+        if name == "Secret Lens" and secret_lens_visibility_check:
             item.classification = ItemClassification.useful
 
-        if name in ["Bonus 1", "Bonus 2", "Bonus 3", "Bonus 4", "Bonus 5", "Bonus 6", "Bonus Panels"] and self.options.minigame_checks.value <= 1:
+        is_bonus_location = name in {"Bonus 1", "Bonus 2", "Bonus 3", "Bonus 4", "Bonus 5", "Bonus 6", "Bonus Panels"}
+        bonus_games_disabled = (
+            self.options.minigame_checks not in {MinigameChecks.option_bonus_games, MinigameChecks.option_both}
+        )
+        if is_bonus_location and bonus_games_disabled:
             item.classification = ItemClassification.useful
 
-        if name in ["Bonus 1", "Bonus 3", "Bonus 4", 'Bonus Panels'] and self.options.item_logic.value == 1:
+        if name in {"Bonus 1", "Bonus 3", "Bonus 4", "Bonus Panels"} and self.options.item_logic:
             item.classification = ItemClassification.progression
 
-        if name == 'Piece of Luigi' and self.options.goal.value != 0:
-            if self.luigi_count >= self.options.luigi_pieces_required.value:
+        if name == "Piece of Luigi" and self.options.goal == PlayerGoal.option_luigi_hunt:
+            if self.luigi_count >= self.options.luigi_pieces_required:
                 item.classification = ItemClassification.useful
             else:
                 item.classification = ItemClassification.progression_skip_balancing
@@ -312,72 +300,65 @@ class YIWorld(World):
 
         return item
 
-    def generate_filler(self, multiworld: MultiWorld, player: int,
-                                        pool: List[Item]):
-        if self.playergoal == 1:
+    def generate_filler(self, pool: List[Item]) -> None:
+        if self.options.goal == PlayerGoal.option_luigi_hunt:
             for _ in range(self.options.luigi_pieces_in_pool.value):
-                item = self.create_item_with_correct_settings(player, "Piece of Luigi")
+                item = self.create_item_with_correct_settings("Piece of Luigi")
                 pool.append(item)
 
-        for _ in range(len(multiworld.get_unfilled_locations(player)) - len(pool) - 16):
-            item = self.create_item_with_correct_settings(player, self.get_filler_item_name())
+        for _ in range(len(self.multiworld.get_unfilled_locations(self.player)) - len(pool) - 16):
+            item = self.create_item_with_correct_settings(self.get_filler_item_name())
             pool.append(item)
 
-    def get_item_pool(self, player: int, excluded_items: Set[str]) -> List[Item]:
+    def get_item_pool(self, excluded_items: Set[str]) -> List[Item]:
         pool: List[Item] = []
 
         for name, data in item_table.items():
             if name not in excluded_items:
                 for _ in range(data.amount):
-                    item = self.create_item_with_correct_settings(player, name)
+                    item = self.create_item_with_correct_settings(name)
                     pool.append(item)
 
         return pool
 
-
-
-    def create_items(self):
+    def create_items(self) -> None:
         self.luigi_count = 0
 
-        if self.options.minigame_checks.value >= 2:
-            self.multiworld.get_location("Flip Cards", self.player).place_locked_item(self.create_item("Bonus Consumables"))
-            self.multiworld.get_location("Drawing Lots", self.player).place_locked_item(self.create_item("Bonus Consumables"))
-            self.multiworld.get_location("Match Cards", self.player).place_locked_item(self.create_item("Bonus Consumables"))
+        if self.options.minigame_checks in {MinigameChecks.option_bonus_games, MinigameChecks.option_both}:
+            self.multiworld.get_location("Flip Cards", self.player).place_locked_item(
+                self.create_item("Bonus Consumables"))
+            self.multiworld.get_location("Drawing Lots", self.player).place_locked_item(
+                self.create_item("Bonus Consumables"))
+            self.multiworld.get_location("Match Cards", self.player).place_locked_item(
+                self.create_item("Bonus Consumables"))
 
+        pool = self.get_item_pool(self.get_excluded_items())
 
-        excluded_items = self.get_excluded_items()
-
-        pool = self.get_item_pool(self.player, excluded_items)
-
-        self.generate_filler(self.multiworld, self.player, pool)
+        self.generate_filler(pool)
 
         self.multiworld.itempool += pool
 
-    def generate_output(self, output_directory: str):
-
+    def generate_output(self, output_directory: str) -> None:
         rompath = ""  # if variable is not declared finally clause may fail
         try:
             world = self.multiworld
             player = self.player
             rom = LocalRom(get_base_rom_path())
-            patch_rom(self, rom, self.player, self.multiworld)
+            patch_rom(self, rom, self.player)
 
-            rompath = os.path.join(output_directory,
-                                   f"{self.multiworld.get_out_file_name_base(self.player)}.sfc")
+            rompath = os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.sfc")
             rom.write_to_file(rompath)
             self.rom_name = rom.name
 
-            patch = YIDeltaPatch(os.path.splitext(rompath)[0]+YIDeltaPatch.patch_file_ending,
-                                  player=player, player_name=world.player_name[player],
-                                  patched_path=rompath)
+            patch = YoshisIslandDeltaPatch(os.path.splitext(rompath)[0] + YoshisIslandDeltaPatch.patch_file_ending,
+                                           player=player, player_name=world.player_name[player], patched_path=rompath)
             patch.write()
         finally:
             self.rom_name_available_event.set()
             if os.path.exists(rompath):
                 os.unlink(rompath)
 
-    def modify_multidata(self, multidata: dict):
-        import base64
+    def modify_multidata(self, multidata: dict) -> None:
         # wait for self.rom_name to be available.
         self.rom_name_available_event.wait()
         rom_name = getattr(self, "rom_name", None)
@@ -385,20 +366,22 @@ class YIWorld(World):
             new_name = base64.b64encode(bytes(self.rom_name)).decode()
             multidata["connect_names"][new_name] = multidata["connect_names"][self.multiworld.player_name[self.player]]
 
-    def extend_hint_information(self, hint_data: typing.Dict[int, typing.Dict[int, str]]):
+    def extend_hint_information(self, hint_data: typing.Dict[int, typing.Dict[int, str]]) -> None:
+        world_names = [f"World {i}" for i in range(1, 7)]
+        world_stages = [
+            self.world_1_stages, self.world_2_stages, self.world_3_stages,
+            self.world_4_stages, self.world_5_stages, self.world_6_stages
+        ]
+
         stage_pos_data = {}
         for loc in self.multiworld.get_locations(self.player):
-            if loc.LevelID is not None and loc.address is not None:
-                if loc.LevelID in self.world_1_stages:
-                    stage_pos_data[loc.address] = "World 1"
-                elif loc.LevelID in self.world_2_stages:
-                    stage_pos_data[loc.address] = "World 2"
-                if loc.LevelID in self.world_3_stages:
-                    stage_pos_data[loc.address] = "World 3"
-                if loc.LevelID in self.world_4_stages:
-                    stage_pos_data[loc.address] = "World 4"
-                if loc.LevelID in self.world_5_stages:
-                    stage_pos_data[loc.address] = "World 5"
-                if loc.LevelID in self.world_6_stages:
-                    stage_pos_data[loc.address] = "World 6"
+            if loc.address is None:
+                continue
+
+            level_id = getattr(loc, "level_id")
+            for level, stages in zip(world_names, world_stages):
+                if level_id in stages:
+                    stage_pos_data[loc.address] = level
+                    break
+
         hint_data[self.player] = stage_pos_data
