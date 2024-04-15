@@ -3,17 +3,31 @@ import typing
 
 from Options import Choice, Range, Toggle, DefaultOnToggle, DeathLink, PerGameCommonOptions, StartInventoryPool
 
+class LogicZSaber(Choice):
+    """
+    Adds the Z-Saber to the game's logic.
+    """
+    display_name = "Z-Saber Logic"
+    option_not_required = 5
+    option_required_for_lab_1 = 0
+    option_required_for_lab_2 = 1
+    option_required_for_lab_3 = 2
+    option_required_for_doppler = 3
+    option_only_sigma = 4
+    default = 2
 
 class EnergyLink(DefaultOnToggle):
     """
-    Energy Link
+    Enable EnergyLink support.
+    EnergyLink works as a big Sub Tank/HP pool where players can request HP manually or automatically when
+    they lose HP. You make use of this feature by typing /pool, /heal <amount> or /autoheal in the client.
     """
     display_name = "Energy Link"
 
 class StartingLifeCount(Range):
     """
     How many lives to start the game with. 
-    This number becomes the new default life count, meaning that it will persist after a game over.
+    Note: This number becomes the new default life count, meaning that it will persist after a game over.
     """
     display_name = "Starting Life Count"
     range_start = 0
@@ -22,7 +36,7 @@ class StartingLifeCount(Range):
 
 class DisableChargeFreeze(DefaultOnToggle):
     """
-    wea
+    Allows X and Zero to move while shooting a level 3 charged shot.
     """
     display_name = "Disable Level 3 Charge freeze after shooting"
 
@@ -34,8 +48,8 @@ class LogicBossWeakness(DefaultOnToggle):
 
 class LogicRequireVileDefeatForDoppler(DefaultOnToggle):
     """
-    Añade a la logica de Dr. Doppler's Lab que Vile sea derrotado para poder accesar.
-    No afecta a las opciones que realmente abren Dr. Doppler's Lab.
+    Adds a logic check for Dr. Doppler's Lab access so that it expects Vile to be defeated before accessing it.
+    Note: It does not affect the actual Dr. Doppler's Lab access options.
     """
     display_name = "Vile in logic for Lab Access"
 
@@ -60,19 +74,19 @@ class PickupSanity(Toggle):
 
 class Lab2Boss(Choice):
     """
-    Which boss will be featured in second Dr Doppler's Lab stage
-    Note: Also affects the stage.
+    Which boss will appear in the second Dr Doppler's Lab stage.
+    Note: Also affects the stage variation.
     """
-    display_name = "Doppler Lab 2 Boss"
+    display_name = "Dr. Doppler Lab 2 Boss"
     option_volt_kurageil = 0
     option_vile = 1
     default = 0
 
 class Lab3BossRematchCount(Range):
     """
-    How many boss rematches are needed in the third Dr. Doppler's Lab stage
+    How many boss rematches are needed in the third Dr. Doppler's Lab stage.
     """
-    display_name = "Doppler Lab 2 Boss"
+    display_name = "Dr. Doppler Lab 3 Rematch count"
     range_start = 0
     range_end = 8
     default = 8
@@ -185,7 +199,7 @@ class VileArmorUpgradeCount(Range):
     display_name = "Vile Armor Upgrade Count"
     range_start = 0
     range_end = 8
-    default = 3
+    default = 4
 
 class VileHeartTankCount(Range):
     """
@@ -217,8 +231,7 @@ class BitMedalCount(Range):
 class ByteMedalCount(Range):
     """
     How many Maverick Medals are required to access Byte's fight.
-    Note: If Byte's medal count is less or equal than Bit's the
-          value will be adjusted to Bit's + 1 
+    Note: If Byte's medal count is less than or equal to Bit's, the value will be adjusted to Bit's + 1.
     """
     display_name = "Byte Medal Count"
     range_start = 1

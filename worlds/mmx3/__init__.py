@@ -3,43 +3,50 @@ import os
 import typing
 import math
 import settings
+import hashlib
 import threading
+import pkgutil
 
 from BaseClasses import Item, MultiWorld, Tutorial, ItemClassification
 from Options import PerGameCommonOptions
 from worlds.AutoWorld import World, WebWorld
 from .Items import MMX3Item, ItemData, item_table, junk_table, item_groups
-from .Locations import MMX3Location, setup_locations, all_locations
+from .Locations import MMX3Location, setup_locations, all_locations, location_groups
 from .Regions import create_regions, connect_regions
 from .Names import ItemName, LocationName, EventName
 from .Options import MMX3Options
 from .Client import MMX3SNIClient
-from .Rom import LocalRom, patch_rom, get_base_rom_path, MMX3DeltaPatch
-from worlds.generic.Rules import add_rule, exclusion_rules
+from .Rom import patch_rom, MMX3ProcedurePatch, HASH_US, HASH_LEGACY
 
 class MMX3Settings(settings.Group):
     class RomFile(settings.SNESRomPath):
-        """File name of the SMW US rom"""
+        """File name of the Mega Man X3 US ROM"""
         description = "Mega Man X3 (USA) ROM File"
         copy_to = "Mega Man X3 (USA).sfc"
-        md5s = [MMX3DeltaPatch.hash]
+        md5s = [HASH_US, HASH_LEGACY]
 
     rom_file: RomFile = RomFile(RomFile.copy_to)
 
 
 class MMX3Web(WebWorld):
+    theme = "ice"
+
     setup_en = Tutorial(
-        "setup",
-        "description here",
-        "en",
+        "Multiworld Setup Guide",
+        "A guide to playing Mega Man X3 with Archipelago",
+        "English",
         "setup_en.md",
         "setup/en",
         ["lx5"]
     )
+
     tutorials = [setup_en]
 
 
 class MMX3World(World):
+    """
+    Mega Man X3 WIP
+    """
     game = "Mega Man X3"
     web = MMX3Web()
 
@@ -51,6 +58,7 @@ class MMX3World(World):
     item_name_to_id = {name: data.code for name, data in item_table.items()}
     location_name_to_id = all_locations
     item_name_groups = item_groups
+    location_name_groups = location_groups
 
     def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
@@ -64,7 +72,9 @@ class MMX3World(World):
         
         connect_regions(self)
         
-        total_required_locations = 53
+        total_required_locations = 45
+        if self.options.doppler_lab_3_boss_rematch_count != 0:
+            total_required_locations += 8
         if self.options.pickupsanity:
             total_required_locations += 58
         
@@ -193,28 +203,19 @@ class MMX3World(World):
         return self.random.choice(list(junk_table.keys()))
 
     def generate_output(self, output_directory: str):
-        rompath = ""  # if variable is not declared finally clause may fail
         try:
-            multiworld = self.multiworld
-            player = self.player
+            patch = MMX3ProcedurePatch()
+            patch.write_file("mmx3_basepatch.bsdiff4", pkgutil.get_data(__name__, "data/mmx3_basepatch.bsdiff4"))
+            patch_rom(self, patch)
 
-            rom = LocalRom(get_base_rom_path())
-            patch_rom(self, rom, self.player)
+            self.rom_name = patch.name
 
-            rompath = os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.sfc")
-            rom.write_to_file(rompath)
-            self.rom_name = rom.name
-
-            patch = MMX3DeltaPatch(os.path.splitext(rompath)[0]+MMX3DeltaPatch.patch_file_ending, player=player,
-                                  player_name=multiworld.player_name[player], patched_path=rompath)
-            patch.write()
-        except:
+            patch.write(os.path.join(output_directory,
+                                     f"{self.multiworld.get_out_file_name_base(self.player)}{patch.patch_file_ending}"))
+        except Exception:
             raise
         finally:
             self.rom_name_available_event.set()  # make sure threading continues and errors are collected
-            if os.path.exists(rompath):
-                os.unlink(rompath)
-
 
     def modify_multidata(self, multidata: dict):
         import base64
