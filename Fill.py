@@ -462,7 +462,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
 
     for loc in fill_locations:
         if (loc.progress_type == LocationProgressType.EXCLUDED
-                and multiworld.worlds[loc.player].accessibility != "locations"):
+                and multiworld.worlds[loc.player].options.accessibility != "locations"):
             loc.progress_type = LocationProgressType.DEFAULT
             loc.access_rule = lambda state: False
         locations[loc.progress_type].append(loc)
