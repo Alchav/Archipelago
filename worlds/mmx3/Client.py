@@ -355,7 +355,7 @@ class MMX3SNIClient(SNIClient):
         elif next_item[0] == "heart tank":
             heart_tanks = await snes_read(ctx, MMX3_HEART_TANKS, 0x1)
             heart_tanks = heart_tanks[0]
-            heart_tank_count = heart_tanks.bit_count()
+            heart_tank_count = bin(heart_tanks).count('1')
             if heart_tank_count < 8:
                 heart_tanks |= 1 << heart_tank_count
                 snes_buffered_write(ctx, MMX3_HEART_TANKS, bytearray([heart_tanks]))
@@ -370,7 +370,7 @@ class MMX3SNIClient(SNIClient):
             sub_tanks = list(sub_tanks)
             upgrade = upgrades[0]
             upgrade = upgrade & 0xF0
-            sub_tank_count = upgrade.bit_count()
+            sub_tank_count = bin(upgrade).count('1')
             if sub_tank_count < 4:
                 upgrade = upgrades[0]
                 upgrade |= 0x10 << sub_tank_count
@@ -582,7 +582,7 @@ class MMX3SNIClient(SNIClient):
                         if required_rematches != 0:
                             if boss_id >= 0x13 and boss_id <= 0x1A: 
                                 # Auto complete every rematch boss if the required amount was reached
-                                if completed_rematches.bit_count() >= required_rematches:
+                                if bin(completed_rematches).count('1') >= required_rematches:
                                     defeated_bosses[boss_id] = 0xFF
                                     completed_rematches = 0xFF
                                     new_checks.append(loc_id)
