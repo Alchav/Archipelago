@@ -325,10 +325,6 @@ class MarioLand2World(World):
                         coin_rule(state, self.player, num_coins)
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Wario Defeated", self.player)
 
-        from worlds.generic.Rules import add_item_rule
-        for location in self.multiworld.get_locations(self.player):
-            add_item_rule(location, lambda i, loc=location.name: "Auto Scroll" not in i.name or i.name.split("- ")[1] in loc)
-
     def create_items(self):
         item_counts = {
             "Space Zone Progression": 1,
