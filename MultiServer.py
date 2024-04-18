@@ -1265,6 +1265,28 @@ class ClientMessageProcessor(CommonCommandProcessor):
 
         return self.ctx.commandprocessor(command)
 
+    def _cmd_spheres(self, player=None):
+        if player:
+            players = [self.ctx.player_name_lookup[player][1]]
+        else:
+            players = self.ctx.er_hint_data.keys()
+        spheres = {}
+        spheres_checked = {}
+        for player in players:
+            for location in self.ctx.locations[player]:
+                if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                    sphere = -1
+                else:
+                    sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                if sphere not in spheres:
+                    spheres[sphere] = 0
+                    spheres_checked[sphere] = 0
+                spheres[sphere] += 1
+                if location in self.ctx.location_checks[(0, player)]:
+                    spheres_checked[sphere] += 1
+        text = "\n".join(sorted([f"{spheres_checked[sphere]}/{spheres[sphere]} Checked Locations in Sphere {sphere}" for sphere in spheres], key=lambda text: int(text.split(" ")[-1])))
+        self.output(text)
+
     def _cmd_players(self) -> bool:
         """Get information about connected and missing players."""
         if len(self.ctx.player_names) < 10:
