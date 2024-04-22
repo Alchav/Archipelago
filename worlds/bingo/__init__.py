@@ -109,7 +109,8 @@ class Bingo(World):
                         yield locations  # unreachable locations
                     break
                 else:
-                    yield {loc for loc in reachable_locations if loc.player not in beaten_games and not loc.locked}
+                    yield {loc for loc in reachable_locations if loc.player not in beaten_games and (not loc.locked)
+                           and loc.item.name not in multiworld.worlds[loc.item.player].options.local_items}
                     beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state)}
 
                 for location in reachable_locations:
@@ -119,7 +120,10 @@ class Bingo(World):
         item_pool = []
         for item in self.item_name_to_id.keys():
             item_pool.append(self.create_item(item))
-        item_pool += [self.create_item(item) for item in self.multiworld.random.sample(list(self.item_name_to_id.keys()), 21)]
+
+        # item_pool += [self.create_item(item) for item in self.multiworld.random.sample(list(self.item_name_to_id.keys()), 21)]
+        item_pool += [multiworld.worlds[1].create_item("Nothing") for _ in range(21)]
+
         spheres = [s for s in get_item_spheres() if len(s) >= 96]
         spheres.sort(key=lambda s: len(s))
         sphere = spheres[0]
