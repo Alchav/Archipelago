@@ -20,8 +20,8 @@ robot_master_weapon_table = {
     leaf_shield: ItemData(0x880003, True),
     bubble_lead: ItemData(0x880004, True),
     quick_boomerang: ItemData(0x880005, True),
-    time_stopper: ItemData(0x880006, True, True),
-    metal_blade: ItemData(0x880007, True, True),
+    time_stopper: ItemData(0x880006, True),
+    metal_blade: ItemData(0x880007, True),
     crash_bomber: ItemData(0x880008, True),
 }
 
@@ -37,9 +37,9 @@ stage_access_table = {
 }
 
 item_item_table = {
-    item_1: ItemData(0x880011, True, True, True),
-    item_2: ItemData(0x880012, True, True, True),
-    item_3: ItemData(0x880013, True, True, True)
+    item_1: ItemData(0x880011, True, False, True),
+    item_2: ItemData(0x880012, True, False, True),
+    item_3: ItemData(0x880013, True, False, True)
 }
 
 filler_item_table = {
