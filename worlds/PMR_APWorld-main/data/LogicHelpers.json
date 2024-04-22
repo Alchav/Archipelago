@@ -1,0 +1,37 @@
+{
+    "Boots": "(Progressive_Boots, 1)",
+    "Super_Boots": "(Progressive_Boots, 2)",
+    "Ultra_Boots": "(Progressive_Boots, 3)",
+    "Hammer": "(Progressive_Hammer, 1)",
+    "Super_Hammer": "(Progressive_Hammer, 2)",
+    "Ultra_Hammer": "(Progressive_Hammer, 3)",
+
+    "can_flip_panels": "Ultra_Hammer or Super_Boots",
+
+    "can_shake_trees": "Bombette or Hammer",
+
+    "can_hit_grounded_blocks": "can_use_ability_bombette or can_use_ability_kooper or Super_Boots or Hammer",
+    "can_hit_floating_blocks": "can_use_ability_kooper or Boots",
+    "can_hit_grounded_switches": "can_use_ability_bombette or can_use_ability_kooper or Boots or Hammer or can_use_ability_parakarry",
+
+    "can_climb_steps": "Boots or can_use_ability_parakarry",
+    "saved_all_yoshi_kids": "'RF_SavedYoshiKid_1' and 'RF_SavedYoshiKid_2' and 'RF_SavedYoshiKid_3' and 'RF_SavedYoshiKid_4' and 'RF_SavedYoshiKid_5'",
+    "can_reenter_vertical_pipes": "can_use_ability_kooper or Boots or can_use_ability_parakarry",
+
+    "can_see_hidden_blocks": "can_use_ability_watt or hidden_block_mode == 3",
+
+    "has_required_spirits": "('STARSPIRIT_1' or 1 not in required_spirits) and ('STARSPIRIT_2' or 2 not in required_spirits) and ('STARSPIRIT_3' or 3 not in required_spirits) and ('STARSPIRIT_4' or 4 not in required_spirits) and ('STARSPIRIT_5' or 5 not in required_spirits) and ('STARSPIRIT_6' or 6 not in required_spirits) and ('STARSPIRIT_7' or 7 not in required_spirits)",
+
+    "star_way_star_spirits": "('STARSPIRIT', star_spirits_required) and not power_star_hunt and not require_specific_spirits",
+    "star_way_power_stars": "(Power_Star, required_power_stars) and power_star_hunt",
+    "star_way_specific_spirits": "require_specific_spirits and not power_star_hunt and has_required_spirits",
+    "can_reach_star_way": "star_way_star_spirits or star_way_power_stars or star_way_specific_spirits",
+
+    "can_use_ability_kooper": "Kooper or partners_always_usable",
+    "can_use_ability_bombette": "Bombette or partners_always_usable",
+    "can_use_ability_parakarry": "Parakarry or partners_always_usable",
+    "can_use_ability_bow": "Bow or partners_always_usable",
+    "can_use_ability_watt": "Watt or partners_always_usable",
+    "can_use_ability_sushie": "Sushie or partners_always_usable",
+    "can_use_ability_lakilester": "Lakilester or partners_always_usable"
+}
