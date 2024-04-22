@@ -68,9 +68,9 @@
     "Desert Palace": ("Small Key (Desert Palace)", "Big Key (Desert Palace)"),
     "Tower of Hera": ("Small Key (Tower of Hera)", "Big Key (Tower of Hera)"),
     "Palace of Darkness": ("Small Key (Palace of Darkness)", "Big Key (Palace of Darkness)"),
-    "Thieves' Town": ("Small Key (Thieves Town)", "Big Key (Thieves Town)"),
-    "Skull Woods": ("Small Key (Skull Woods)", "Big Key (Skull Woods)"),
     "Swamp Palace": ("Small Key (Swamp Palace)", "Big Key (Swamp Palace)"),
+    "Thieves Town": ("Small Key (Thieves Town)", "Big Key (Thieves Town)"),
+    "Skull Woods": ("Small Key (Skull Woods)", "Big Key (Skull Woods)"),
     "Ice Palace": ("Small Key (Ice Palace)", "Big Key (Ice Palace)"),
     "Misery Mire": ("Small Key (Misery Mire)", "Big Key (Misery Mire)"),
     "Turtle Rock": ("Small Key (Turtle Rock)", "Big Key (Turtle Rock)"),
@@ -146,40 +146,41 @@
                 <div><img src="{{ icons['Big Key'] }}" alt="BK" title="Big Keys"></div>
             </div>
 
-            {% for region, locations in regions.items() %}
-                {% if locations | length > 0 %}
-                <details class="region-details">
-                    <summary>
-                        {% if region in dungeon_keys %}
-                        <div class="region">
-                            <span>{{ region }}</span>
-                            <span>{{ completed_locations[region] }} / {{ locations | length }}</span>
-                            <span>{{ inventory[dungeon_keys[region][0]] }}</span>
-                            <span>
-                                {% if region == "Agahnims Tower" %}
-                                    &mdash;
-                                {% elif inventory[dungeon_keys[region][1]] %}
-                                    ✔
-                                {% endif %}
-                            </span>
-                        </div>
-                        {% else %}
-                        <div class="region">
-                            <span>{{ region }}</span>
-                            <span>{{ completed_locations[region] }} / {{ locations | length }}</span>
-                            <span>&mdash;</span>
-                            <span>&mdash;</span>
-                        </div>
-                        {% endif %}
-                    </summary>
+            {% for region_name in known_regions %}
+                {% set region_data = regions[region_name] %}
+                {% if region_data["locations"] | length > 0 %}
+                    <details class="region-details">
+                        <summary>
+                            {% if region_name in dungeon_keys %}
+                                <div class="region">
+                                    <span>{{ region_name }}</span>
+                                    <span>{{ region_data["checked"] }} / {{ region_data["locations"] | length }}</span>
+                                    <span>{{ inventory[dungeon_keys[region_name][0]] }}</span>
+                                    <span>
+                                        {% if region_name == "Agahnims Tower" %}
+                                            &mdash;
+                                        {% elif inventory[dungeon_keys[region_name][1]] %}
+                                            ✔
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            {% else %}
+                                <div class="region">
+                                    <span>{{ region_name }}</span>
+                                    <span>{{ region_data["checked"] }} / {{ region_data["locations"] | length }}</span>
+                                    <span>&mdash;</span>
+                                    <span>&mdash;</span>
+                                </div>
+                            {% endif %}
+                        </summary>
 
-                    <div class="location-rows">
-                        {% for location, checked in locations %}
-                        <div>{{ location }}</div>
-                        <div>{% if checked %}✔{% endif %}</div>
-                        {% endfor %}
-                    </div>
-                </details>
+                        <div class="location-rows">
+                            {% for location, checked in region_data["locations"] %}
+                                <div>{{ location }}</div>
+                                <div>{% if checked %}✔{% endif %}</div>
+                            {% endfor %}
+                        </div>
+                    </details>
                 {% endif %}
             {% endfor %}
         </div>
