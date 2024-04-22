@@ -502,7 +502,7 @@ class PaperMarioWorld(World):
         for item in replenish_items:
             self.pre_fill_items.remove(item)
 
-        locations = list(filter(lambda location: location.name in replenish_locations,
+        locations = list(filter(lambda location: location.name in replenish_locations and location.progress_type != LocationProgressType.PRIORITY,
                                 self.multiworld.get_unfilled_locations(player=self.player)))
 
         self.multiworld.random.shuffle(locations)
@@ -574,7 +574,7 @@ class PaperMarioWorld(World):
         # Now throw the rest wherever
         locations = self.multiworld.get_unfilled_locations(player=self.player)
         self.multiworld.random.shuffle(locations)
-        fast_fill(self.multiworld, self.pre_fill_items, locations)
+        fast_fill(self.multiworld, self.pre_fill_items, [location for location in locations if location.progress_type != LocationProgressType.PRIORITY])
 
         # Locations with unrandomized junk should be changed to events
         for loc in self.get_locations():
