@@ -41,7 +41,7 @@ class Bingo(World):
 
     def generate_early(self) -> None:
         # self.multiworld.start_location_hints[self.player].value.update({loc for loc in self.location_name_to_id})
-        self.multiworld.start_hints[self.player].value.update({item for item in self.item_name_to_id})
+        # self.multiworld.start_hints[self.player].value.update({item for item in self.item_name_to_id})
         self.multiworld.non_local_items[self.player].value.update({item for item in self.item_name_to_id})
 
     # def create_regions(self) -> None:

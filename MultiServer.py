@@ -614,7 +614,7 @@ class Context:
             if (team is None or team == hint_team) and (slot is None or slot == hint_slot):
                 self.hints[hint_team, hint_slot] = {
                     hint.re_check(self, hint_team) for hint in
-                    self.hints[hint_team, hint_slot]
+                    self.hints[hint_team, hint_slot] if hint.location not in self.location_checks[(hint_team, hint_slot)]
                 }
 
     def get_rechecked_hints(self, team: int, slot: int):
