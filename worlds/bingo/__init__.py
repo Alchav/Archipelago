@@ -83,9 +83,8 @@ class Bingo(World):
                     coords = [(i, i) for i in range(5)]
                 else:
                     coords = [(i, 4-i) for i in range(5)]
-            bingo_calls = [f"{bingo_letter(self.cards[n][c[0]][c[1]])}-{self.cards[n][c[0]][c[1]]}" for c in coords if self.cards[n][c[0]][c[1]] != 0]
-            location.access_rule = lambda state, b=bingo_calls: state.has_all(b, self.player)
-            location.calls_needed = bingo_calls
+            location.calls_needed = [f"{bingo_letter(self.cards[n][c[0]][c[1]])}-{self.cards[n][c[0]][c[1]]}" for c in coords if self.cards[n][c[0]][c[1]] != 0]
+            location.access_rule = lambda state, loc=location: state.has_all(loc.calls_needed, self.player)
 
         from BaseClasses import CollectionState
         multiworld = self.multiworld
