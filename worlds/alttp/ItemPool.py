@@ -354,7 +354,7 @@ def generate_itempool(world):
     dungeon_items = [item for item in get_dungeon_item_pool_player(world)
                      if item.name not in multiworld.worlds[player].dungeon_local_item_names]
 
-    dungeon_item_replacements = sum(difficulties[multiworld.difficulty[player]].extras, []) * 2
+    dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
     multiworld.random.shuffle(dungeon_item_replacements)
 
     for x in range(len(dungeon_items)-1, -1, -1):

@@ -14,6 +14,7 @@ from BaseClasses import ItemClassification as Ic, LocationProgressType
 from .data.enum_types import BlockType
 from .Locations import location_factory
 from .data.chapter_logic import get_chapter_excluded_item_names, get_chapter_excluded_location_names
+from worlds.generic.Rules import add_item_rule
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -108,6 +109,7 @@ def get_pool_core(world: "PaperMarioWorld"):
             shuffle_item = world.options.include_shops.value
             if not shuffle_item:
                 location.disabled = True
+            add_item_rule(location, lambda i: i.name not in item_multiples_base_name.values() and "Progressive" not in i.name and "Key" not in i.name and "Upgrade" not in i.name)
 
         if location.name in location_groups["HiddenPanel"]:
             shuffle_item = world.options.shuffle_hidden_panels.value

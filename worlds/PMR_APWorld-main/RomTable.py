@@ -27,7 +27,7 @@ class RomTable:
     def __getitem__(self, key):
         return self.db[key]
 
-    def generate_pairs(self,  options: PaperMarioOptions, placed_items: list[Node], placed_blocks: dict, entrances: list,
+    def generate_pairs(self,  options: PaperMarioOptions, placed_items: list, placed_blocks: dict, entrances: list,
                        actor_attributes: list, move_costs: list, palettes: list, quizzes: list, music_list: list,
                        mapmirror_list: list, puzzle_list: list, mystery_opts: MysteryOptions, required_spirits: list):
         table_data = []
@@ -230,64 +230,62 @@ def get_dbtuples(options: PaperMarioOptions, mystery_opts: MysteryOptions, requi
         option_value = -1
         if ap_option == "":
             #  handle options that are calculated, not yet implemented, or otherwise not changeable by the player
-            match rom_option:
-                # Always turned on
-                case "BlocksMatchContent" | "FastTextSkip" | "ShuffleItems" | "RandomQuiz" \
-                     | "PeachCastleReturnPipe" | "MultiworldEnabled":
-                    option_value = 1
+            if rom_option in ("BlocksMatchContent" , "FastTextSkip" , "ShuffleItems" , "RandomQuiz" \
+                     , "PeachCastleReturnPipe" , "MultiworldEnabled"):
+                option_value = 1
                 # Always turned off
-                case "ChallengeMode" | "ShuffleDungeonRooms" | "ShuffleEntrancesByAll" | "MatchEntranceTypes" \
-                     | "Widescreen" | "PawnsEnabled":
-                    option_value = 0
+            elif rom_option in ("ChallengeMode" , "ShuffleDungeonRooms" , "ShuffleEntrancesByAll" , "MatchEntranceTypes" \
+                     , "Widescreen" , "PawnsEnabled"):
+                option_value = 0
                 # NYI
-                case "StartingItem0" | "StartingItem1" | "StartingItem2" | "StartingItem3" | "StartingItem4":
-                    option_value = 0
-                case "StartingItem5" | "StartingItem6" | "StartingItem7" | "StartingItem8" | "StartingItem9":
-                    option_value = 0
-                case "StartingItemA" | "StartingItemB" | "StartingItemC" | "StartingItemD" | "StartingItemE":
-                    option_value = 0
-                case "StartingItemF":
-                    option_value = 0
-                case "XPMultiplier":
-                    option_value = int(options.enemy_xp_multiplier.value * 2)  # value is halved by the game
-                # One setting on the front end, but two separate flags for the mod
-                case "DoubleDamage":
-                    option_value = options.enemy_damage.value == EnemyDamage.option_Double_Pain
-                case "QuadrupleDamage":
-                    option_value = options.enemy_damage.value == EnemyDamage.option_Quadruple_Pain
-                case "EnabledCheckBits":
-                    option_value = map_tracker_check_bits
-                case "EnabledShopBits":
-                    option_value = map_tracker_shop_bits
-                case "ColorMode":
-                    option_value = color_mode
-                case "Box5ColorA":
-                    option_value = menu_color_a
-                case "Box5ColorB":
-                    option_value = menu_color_b
-                case "ItemChoiceA":
-                    option_value = mystery_opts.mystery_itemA
-                case "ItemChoiceB":
-                    option_value = mystery_opts.mystery_itemB
-                case "ItemChoiceC":
-                    option_value = mystery_opts.mystery_itemC
-                case "ItemChoiceD":
-                    option_value = mystery_opts.mystery_itemD
-                case "ItemChoiceE":
-                    option_value = mystery_opts.mystery_itemE
-                case "ItemChoiceF":
-                    option_value = mystery_opts.mystery_itemF
-                case "ItemChoiceG":
-                    option_value = mystery_opts.mystery_itemG
-                # Calculated based on starting stats
-                case "StartingLevel":
-                    option_value = int(options.starting_hp.value / 5 +
-                                       options.starting_fp.value / 5 +
-                                       options.starting_bp.value / 3) - 3
-                case "StartingMap":
-                    option_value = starting_maps[options.starting_map.value][0]
-                case "StarWaySpiritsNeededEnc":
-                    option_value = encoded_spirits
+            elif rom_option in ("StartingItem0" , "StartingItem1" , "StartingItem2" , "StartingItem3" , "StartingItem4"):
+                option_value = 0
+            elif rom_option in ("StartingItem5" , "StartingItem6" , "StartingItem7" , "StartingItem8" , "StartingItem9"):
+                option_value = 0
+            elif rom_option in  ("StartingItemA" , "StartingItemB" , "StartingItemC" , "StartingItemD" , "StartingItemE"):
+                option_value = 0
+            elif rom_option == "StartingItemF":
+                option_value = 0
+            elif rom_option ==  "XPMultiplier":
+                option_value = int(options.enemy_xp_multiplier.value * 2)  # value is halved by the game
+            # One setting on the front end, but two separate flags for the mod
+            elif rom_option ==  "DoubleDamage":
+                option_value = options.enemy_damage.value == EnemyDamage.option_Double_Pain
+            elif rom_option ==  "QuadrupleDamage":
+                option_value = options.enemy_damage.value == EnemyDamage.option_Quadruple_Pain
+            elif rom_option ==  "EnabledCheckBits":
+                option_value = map_tracker_check_bits
+            elif rom_option ==  "EnabledShopBits":
+                option_value = map_tracker_shop_bits
+            elif rom_option ==  "ColorMode":
+                option_value = color_mode
+            elif rom_option ==  "Box5ColorA":
+                option_value = menu_color_a
+            elif rom_option ==  "Box5ColorB":
+                option_value = menu_color_b
+            elif rom_option ==  "ItemChoiceA":
+                option_value = mystery_opts.mystery_itemA
+            elif rom_option ==  "ItemChoiceB":
+                option_value = mystery_opts.mystery_itemB
+            elif rom_option ==  "ItemChoiceC":
+                option_value = mystery_opts.mystery_itemC
+            elif rom_option ==  "ItemChoiceD":
+                option_value = mystery_opts.mystery_itemD
+            elif rom_option ==  "ItemChoiceE":
+                option_value = mystery_opts.mystery_itemE
+            elif rom_option ==  "ItemChoiceF":
+                option_value = mystery_opts.mystery_itemF
+            elif rom_option ==  "ItemChoiceG":
+                option_value = mystery_opts.mystery_itemG
+            # Calculated based on starting stats
+            elif rom_option ==  "StartingLevel":
+                option_value = int(options.starting_hp.value / 5 +
+                                   options.starting_fp.value / 5 +
+                                   options.starting_bp.value / 3) - 3
+            elif rom_option ==  "StartingMap":
+                option_value = starting_maps[options.starting_map.value][0]
+            elif rom_option ==  "StarWaySpiritsNeededEnc":
+                option_value = encoded_spirits
 
         else:
             option_value = getattr(options, ap_option).value
@@ -299,4 +297,4 @@ def get_dbtuples(options: PaperMarioOptions, mystery_opts: MysteryOptions, requi
 
 def get_db_key(rom_option):
     data = rom_option_table[rom_option]
-    return (0xAF << 24) | (data[1] << 16) | (data[2] << 8) | data[3]
+    return (0xAF << 24) | (data[1] << 16) | (data[2] << 8) , data[3]

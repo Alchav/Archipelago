@@ -26,7 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-z = [] #[7, 30, 33] #, 10, 19]
+z = [6, 8, 22] #[7, 30, 33] #, 10, 19]
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -570,17 +570,22 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
             game = multiworld.worlds[i.player].game
         if i.classification == ItemClassification.trap:
             return 0
-        elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
-            if "Super Metroid" in game:
-                return multiworld.random.randint(3, 4)
-            return multiworld.random.randint(4, 5)
-        elif i.classification == ItemClassification.useful:
-            return multiworld.random.randint(3, 4)
-        elif game in ("Starcraft 2",) or i.classification == ItemClassification.progression_skip_balancing:
-            return multiworld.random.randint(2, 3)
-        elif i.classification == ItemClassification.progression:
-            return multiworld.random.randint(1, 2)
-        breakpoint()
+        if game == "Starcraft 2":
+            return 1
+        # elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
+        #     if "Super Metroid" in game:
+        #         return multiworld.random.randint(3, 4)
+        #     return multiworld.random.randint(4, 5)
+        # elif i.classification == ItemClassification.useful:
+        #     return multiworld.random.randint(3, 4)
+        # elif game in ("Starcraft 2",) or i.classification == ItemClassification.progression_skip_balancing:
+        #     return multiworld.random.randint(2, 3)
+        # elif i.classification == ItemClassification.progression:
+        #     return multiworld.random.randint(1, 2)
+        # breakpoint()
+        if i.classification == ItemClassification.progression and i.classification != ItemClassification.progression_skip_balancing:
+            return 2
+        return 1
     # s = [_ for _ in get_item_spheres()]
 
     for sphere in get_item_spheres():

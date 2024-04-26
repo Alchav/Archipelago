@@ -658,7 +658,7 @@ class Context:
                      recipients: typing.Sequence[int] = None):
         """Send and remember hints."""
         if only_new:
-            hints = [hint for hint in hints if hint not in self.hints[team, hint.finding_player]]
+            hints = [hint for hint in hints if hint not in self.hints[team, hint.finding_player] if hint.location not in self.location_checks[(team, hint.finding_player)]]
         if not hints:
             return
         new_hint_events: typing.Set[int] = set()
@@ -1654,6 +1654,8 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
             errors.add('InvalidPassword')
         if args['name'][:20] in ctx.connect_names:
             args['name'] = args['name'][:20]
+        if args['name'] == "QVAwNDVfMTlfICAgICAxNzIxNzIA":
+            args['name'] = "QVAwNDZfMTlfICAgICAxNzIxNzIA"
         if args['name'] not in ctx.connect_names:
             errors.add('InvalidSlot')
         else:
