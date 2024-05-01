@@ -549,12 +549,11 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                 locations -= reachable_events
                 reachable_locations = {location for location in locations if location.can_reach(state)}
             if not reachable_locations:
-                break  # don't swap unreachables
                 if locations:
                     yield locations  # unreachable locations
                 break
             else:
-                yield {loc for loc in reachable_locations if loc.player not in beaten_games}
+                yield {loc for loc in reachable_locations} # if loc.player not in beaten_games}
                 beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state)}
 
             for location in reachable_locations:
@@ -570,8 +569,8 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
             game = multiworld.worlds[i.player].game
         if i.classification == ItemClassification.trap:
             return 0
-        if game == "Starcraft 2":
-            return 1
+        # if game == "Starcraft 2":
+        #     return 1
         # elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
         #     if "Super Metroid" in game:
         #         return multiworld.random.randint(3, 4)
