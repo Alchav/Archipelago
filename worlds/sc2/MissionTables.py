@@ -513,7 +513,7 @@ mission_orders: List[Callable[[], Dict[SC2Campaign, List[FillMission]]]] = [
     mini_campaign_order,
     grid_order,
     mini_grid_order,
-    alchav_order,
+    blitz_order,
     gauntlet_order,
     mini_gauntlet_order,
     tiny_grid_order
