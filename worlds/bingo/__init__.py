@@ -72,6 +72,7 @@ class Bingo(World):
             location.item_rule = lambda item: item.game != "Bingo" and item.classification == ItemClassification.progression
             n = int(location.name.split(" ")[5]) - 1
             line_type = location.name.split(" ")[4]
+            card = int(location.name.split(" ")[2]) - 1
             if line_type == "Horizontal":
                 coords = [(i, n) for i in range(5)]
                 # location.access_rule = lambda state: state.has_all([f"Bingo Call {bingo_letter(self.cards[card][r][n])}-{self.cards[card][r][n]}" for r in range(1, 6)], self.player)
@@ -83,7 +84,7 @@ class Bingo(World):
                     coords = [(i, i) for i in range(5)]
                 else:
                     coords = [(i, 4-i) for i in range(5)]
-            location.calls_needed = [f"{bingo_letter(self.cards[n][c[0]][c[1]])}-{self.cards[n][c[0]][c[1]]}" for c in coords if self.cards[n][c[0]][c[1]] != 0]
+            location.calls_needed = [f"{bingo_letter(self.cards[card][c[0]][c[1]])}-{self.cards[card][c[0]][c[1]]}" for c in coords if self.cards[card][c[0]][c[1]] != 0]
             location.access_rule = lambda state, loc=location: state.has_all(loc.calls_needed, self.player)
 
         from BaseClasses import CollectionState
