@@ -4,6 +4,7 @@ import os
 import logging
 from typing import Dict, Any
 from BaseClasses import (Tutorial, CollectionState, MultiWorld, ItemClassification as ic, LocationProgressType)
+from .SettingsString import load_settings_from_site_string
 from worlds.AutoWorld import World, WebWorld
 from . import Locations, options
 from .data.chapter_logic import areas_by_chapter, get_chapter_excluded_location_names
@@ -29,11 +30,12 @@ from .modules.random_actor_stats import get_shuffled_chapter_difficulty
 from .Rules import set_rules
 from .modules.random_partners import get_rnd_starting_partners
 from .options import (EnemyDifficulty, PaperMarioOptions, ShuffleKootFavors, PartnerUpgradeShuffle, HiddenBlockMode,
-                      ShuffleSuperMultiBlocks, GearShuffleMode, StartingMap, BowserCastleMode, ShuffleLetters)
+                      ShuffleSuperMultiBlocks, GearShuffleMode, StartingMap, BowserCastleMode, ShuffleLetters,
+                      ItemTraps, MirrorMode)
 from .data.node import Node
 from .data.starting_maps import starting_maps
 from .Rom import generate_output
-from Fill import fill_restrictive, fast_fill
+from Fill import fill_restrictive
 from .modules.random_blocks import get_block_placement
 import pkg_resources
 from .client import PaperMarioClient  # unused but required for generic client to hook onto
@@ -116,6 +118,7 @@ class PaperMarioWorld(World):
         self.itempool = []
         self.pre_fill_items = []
         self.dungeon_restricted_items = {}
+        self.remove_from_start_inventory = []  # some items we start with are baked into the rom
 
         self._regions_cache = {}
         self.parser = Rule_AST_Transformer(self, self.player)
@@ -129,6 +132,27 @@ class PaperMarioWorld(World):
 
     # Do some housekeeping before generating, namely fixing some options that might be incompatible with each other
     def generate_early(self) -> None:
+
+        # load settings from pmr string before anything else, since almost all settings can be loaded this way
+        if self.options.pmr_settings_string.value != "None":
+            load_settings_from_site_string(self)
+
+        # fail generation if attempting to use options that are not fully implemented yet
+        nyi_warnings = ""
+        if self.options.random_puzzles.value:  # NYI
+            nyi_warnings += "\n'random_puzzles' must be set to False"
+        if self.options.item_traps.value != ItemTraps.option_No_Traps:  # not possible with current base mod
+            nyi_warnings += "\n'item_traps' must be set to No_Traps"
+        if self.options.shuffle_dungeon_entrances.value:  # NYI
+            nyi_warnings += "\n'shuffle_dungeon_entrances' must be set to False"
+        if self.options.mirror_mode.value == MirrorMode.option_Static_Random:  # NYI
+            nyi_warnings += "\n'mirror_mode' cannot be set to Static_Random"
+
+        if nyi_warnings:
+            nyi_warnings = ((f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]}) has settings "
+                             "are not yet implemented in the .apworld being used for generation. "
+                             "Please check for a newer release and/or adjust the settings below : ") + nyi_warnings)
+            raise ValueError(nyi_warnings)
 
         # Unclear which type of game is desired, raise error and have the player choose
         if self.options.require_specific_spirits.value and self.options.power_star_hunt.value:
@@ -147,8 +171,6 @@ class PaperMarioWorld(World):
                 lcl_warnings += "\n'gear_shuffle_mode' must be set to full_shuffle"
             if not self.options.keysanity.value:
                 lcl_warnings += "\n'keysanity' must be set to True"
-            if self.options.merlow_items.value:
-                lcl_warnings += "\n'merlow_items' must be set to False"
             if not self.options.partners.value:
                 lcl_warnings += "\n'partners' must be set to True"
 
@@ -161,7 +183,6 @@ class PaperMarioWorld(World):
             raise ValueError(f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]}) has limit "
                              "chapter logic set to true. Specific star spirits must also be set to true if you wish to "
                              "limit chapter logic")
-
 
         # Make sure it doesn't try to shuffle Koot coins if rewards aren't shuffled
         if self.options.koot_favors.value == ShuffleKootFavors.option_Vanilla:
@@ -186,10 +207,6 @@ class PaperMarioWorld(World):
             logging.warning(f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]}) did not select a "
                             f"starting partner and will be given one at random.")
             self.options.start_random_partners.value = True
-
-        self.options.min_start_items.value, self.options.max_start_items.value = (
-            min([self.options.min_start_items.value, self.options.max_start_items.value]),
-            max(self.options.min_start_items.value, self.options.max_start_items.value))
 
         if self.options.start_random_partners.value:
             starting_partners = get_rnd_starting_partners(self.options.start_partners.value)
@@ -291,32 +308,78 @@ class PaperMarioWorld(World):
         # Gear
         for boots in range(1, self.options.starting_boots.value + 2):
             self.multiworld.push_precollected(self.create_item("Progressive Boots"))
+            self.remove_from_start_inventory.append("Progressive Boots")
 
         for hammer in range(1, self.options.starting_hammer.value + 2):
             self.multiworld.push_precollected(self.create_item("Progressive Hammer"))
+            self.remove_from_start_inventory.append("Progressive Hammer")
 
         # Partners
         if self.options.start_with_goombario.value:
             self.multiworld.push_precollected(self.create_item("Goombario"))
+            self.remove_from_start_inventory.append("Goombario")
         if self.options.start_with_kooper.value:
             self.multiworld.push_precollected(self.create_item("Kooper"))
+            self.remove_from_start_inventory.append("Kooper")
         if self.options.start_with_bombette.value:
             self.multiworld.push_precollected(self.create_item("Bombette"))
+            self.remove_from_start_inventory.append("Bombette")
         if self.options.start_with_parakarry.value:
             self.multiworld.push_precollected(self.create_item("Parakarry"))
+            self.remove_from_start_inventory.append("Parakarry")
         if self.options.start_with_bow.value:
             self.multiworld.push_precollected(self.create_item("Bow"))
+            self.remove_from_start_inventory.append("Bow")
         if self.options.start_with_watt.value:
             self.multiworld.push_precollected(self.create_item("Watt"))
+            self.remove_from_start_inventory.append("Watt")
         if self.options.start_with_sushie.value:
             self.multiworld.push_precollected(self.create_item("Sushie"))
+            self.remove_from_start_inventory.append("Sushie")
         if self.options.start_with_lakilester.value:
             self.multiworld.push_precollected(self.create_item("Lakilester"))
+            self.remove_from_start_inventory.append("Lakilester")
+
+        # Randomly start with up to 16 items
+        if self.options.random_start_items.value:
+            self.random.shuffle(self.itempool)
+
+            # Mario can only hold 10 consumables, so disallow more than 10 from being sent to his inventory
+            popped_consumables = []
+            starting_items = []
+            consumable_count = 0
+            while len(starting_items) < self.options.random_start_items.value:
+                item_to_add = self.itempool.pop()
+                if item_to_add.type == "ITEM" and consumable_count == 10:
+                    popped_consumables.append(item_to_add)
+                else:
+                    starting_items.append(item_to_add)
+                    if item_to_add.type == "ITEM":
+                        consumable_count += 1
+
+            for item in starting_items:
+                self.multiworld.push_precollected(item)
+
+            # add items back to itempool regardless of if they were in starting_items or not
+            # removed items are handled in next block
+            self.itempool.extend(starting_items)
+            self.itempool.extend(popped_consumables)
+
+        # handle start inventory, be it from the AP option or from
+        removed_items = []
+        for item in self.multiworld.precollected_items[self.player]:
+            if item.name in self.remove_from_start_inventory:
+                self.remove_from_start_inventory.remove(item.name)
+                removed_items.append(item.name)
+            elif item in self.itempool:
+                self.itempool.remove(item)
+                self.itempool.append(self.create_item(self.get_filler_item_name()))
 
         # remove prefill items from item pool to be randomized
         self.itempool, self.pre_fill_items, self.dungeon_restricted_items = self.divide_itempools()
 
         self.multiworld.itempool.extend(self.itempool)
+        self.remove_from_start_inventory.extend(removed_items)
 
     def set_rules(self) -> None:
         set_rules(self)
@@ -502,7 +565,8 @@ class PaperMarioWorld(World):
         for item in replenish_items:
             self.pre_fill_items.remove(item)
 
-        locations = list(filter(lambda location: location.name in replenish_locations and location.progress_type != LocationProgressType.PRIORITY,
+        locations = list(filter(lambda location: location.name in replenish_locations
+                                and location.progress_type != LocationProgressType.PRIORITY,
                                 self.multiworld.get_unfilled_locations(player=self.player)))
 
         self.multiworld.random.shuffle(locations)
@@ -558,7 +622,7 @@ class PaperMarioWorld(World):
                         self.pre_fill_items.remove(item)
                     self.multiworld.random.shuffle(locations)
                     fill_restrictive(self.multiworld, prefill_state(state), locations, key_items,
-                                     single_player_placement=True, lock=True, allow_excluded=True)
+                                     single_player_placement=True, lock=True, allow_excluded=False)
 
         # Anything remaining in pre fill items is a consumable that got selected randomly to be kept local
         # LCL can really skew the item pool, so fill up the excluded locations to prevent generation errors
@@ -569,12 +633,15 @@ class PaperMarioWorld(World):
             items_for_excluded = []
             for _ in locations:
                 items_for_excluded.append(self.pre_fill_items.pop())
-            fast_fill(self.multiworld, items_for_excluded, locations)
+            fill_restrictive(self.multiworld, prefill_state(state), locations, items_for_excluded,
+                             single_player_placement=True, lock=True, allow_excluded=True)
 
         # Now throw the rest wherever
-        locations = self.multiworld.get_unfilled_locations(player=self.player)
+        locations = list(filter(lambda location: location.progress_type != LocationProgressType.PRIORITY,
+                                self.multiworld.get_unfilled_locations(player=self.player)))
         self.multiworld.random.shuffle(locations)
-        fast_fill(self.multiworld, self.pre_fill_items, [location for location in locations if location.progress_type != LocationProgressType.PRIORITY])
+        fill_restrictive(self.multiworld, prefill_state(state), locations, self.pre_fill_items,
+                         single_player_placement=True, lock=True, allow_excluded=True)
 
         # Locations with unrandomized junk should be changed to events
         for loc in self.get_locations():
@@ -583,6 +650,15 @@ class PaperMarioWorld(World):
 
     def generate_output(self, output_directory: str):
         generate_output(self, output_directory)
+
+    # handle star pieces from quizmo, triple star piece items
+    def collect(self, state: CollectionState, item: PMItem) -> bool:
+        if item.name == "3x Star Pieces":
+            state.prog_items[self.player]["Star Piece"] += 3
+        # Quizmo star pieces are events that can exist in multiple places, format "StarPiece_MAC_1"
+        elif item.name.startswith("StarPiece_") and state.prog_items[self.player][item.name] == 1:
+            state.prog_items[self.player]["Star Piece"] += 1
+        return super().collect(state, item)
 
     def get_locations(self):
         return self.multiworld.get_locations(self.player)

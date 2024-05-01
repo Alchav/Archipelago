@@ -10,6 +10,7 @@ Paper Mario:
     # Many settings do not affect logic or generation in any way and will only be relevant when an actual file gets created. These will be marked (NLA).
     # Changing these settings is usually fine, just don't be too surprised if they don't work. If you have generation issues or crash issues, leave them as is to ensure they aren't the cause.
     
+    # AP World Version: 0.3.1
 
     # Items
     keysanity: True                         # Other options: False
@@ -29,7 +30,7 @@ Paper Mario:
     rowf_items: True                        # Other options: False
     merlow_items: False                     # Other options: True
     cheato_items: 6                         # Other options: 0 to 11
-    local_consumables: 100                  # Other options: 0 to 100 (NYI) Leave this alone, receiving consumables from others not working currently
+    local_consumables: 100                  # Other options: 0 to 100 It's recommended you leave this alone, as receiving consumables from others with a full inventory means the item disappears.
 
     # Partner
     partners: True                          # Other options: False
@@ -51,14 +52,15 @@ Paper Mario:
     partner_fp_shuffle: vanilla             # Other options: balanced_random, shuffled, fully_random
     sp_shuffle: vanilla                     # Other options: balanced_random, shuffled, fully_random
     mystery_shuffle: vanilla                # Other options: random_pick, random_per_use
-    formation_shuffle: False                # Other options: True (NYI)
+    formation_shuffle: False                # Other options: True
     random_puzzles: False                   # Other options: True (NYI)
+    blooper_damage_requirements: None       # Other options: Low, Medium, High
 
     # General Difficulty
-    enemy_difficulty: progressive_scaling   # Other options: shuffle_chapter_difficulty (NYI), progressive_scaling
+    enemy_difficulty: progressive_scaling   # Other options: shuffle_chapter_difficulty, progressive_scaling
     enemy_damage: Normal                    # Other options: double_pain, quadruple_pain
     cap_enemy_xp: False                     # Other options: True
-    enemy_xp_multiplier: 2                  # Other options: 0-2
+    enemy_xp_multiplier: 2                  # Other options: 0-4, set this to double the desired multiplier; ex: for double xp, set this to 4
     no_save_blocks: False                   # Other options: True
     no_heart_blocks: False                  # Other options: True
     no_healing_items: False                 # Other options: True
@@ -78,9 +80,7 @@ Paper Mario:
     starting_bp: 3                          # Other options: 3-30
     starting_fp: 5                          # Other options: 5-50
     starting_sp: 0                          # Other options: 0-7
-    start_with_random_items: False          # Other options: True (NYI)
-    min_start_items: 0                      # Other options: 0-10 (NYI)
-    max_start_items: 0                      # Other options: 0-10 (NYI)
+    random_start_items: 0                   # Other options: 0-16
 
     # Item Pool
     consumable_item_pool: vanilla           # Other options: fully_random, balanced_random, mystery_only
@@ -90,7 +90,7 @@ Paper Mario:
     unused_badge_dupes: False               # Other options: True
     beta_items: False                       # Other options: True
     progressive_badges: False               # Other options: True
-    badge_pool_limit: 79                    # Other options: 0-128 (NYI)
+    badge_pool_limit: 79                    # Other options: 0-128
 
     # World Settings
     starting_map: Toad_Town                 # Other options: goomba_village, dry_dry_outpost, yoshi_village
@@ -125,15 +125,15 @@ Paper Mario:
     skip_epilogue: True                     # Other options: False
 
     # Cosmetics (see Options.py for settings with too many options to list here
-    mario_palette: Default                  # Other options: [A lot of 'em], random_pick_no_vanilla
-    goombario_palette: Default              # Other options: [A lot of 'em], random_pick_no_vanilla
-    kooper_palette: Default                 # Other options: [A lot of 'em], random_pick_no_vanilla
-    bombette_palette: Default               # Other options: [A lot of 'em], random_pick_no_vanilla
-    parakarry_palette: Default              # Other options: [A lot of 'em], random_pick_no_vanilla
-    bow_palette: Default                    # Other options: [A lot of 'em], random_pick_no_vanilla
-    watt_palette: Default                   # Other options: [A lot of 'em], random_pick_no_vanilla
-    sushie_palette: Default                 # Other options: [A lot of 'em], random_pick_no_vanilla
-    lakilester_palette: Default             # Other options: [A lot of 'em], random_pick_no_vanilla
+    mario_palette: Default                  # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    goombario_palette: Default              # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    kooper_palette: Default                 # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    bombette_palette: Default               # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    parakarry_palette: Default              # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    bow_palette: Default                    # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    watt_palette: Default                   # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    sushie_palette: Default                 # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
+    lakilester_palette: Default             # Other options: [A lot of 'em], random_pick_no_vanilla, random_on_every_load
     boss_palette: Default                   # Other options: random_pick, random_pick_no_vanilla, random_on_every_load
     npc_palette: Default                    # Other options: random_pick, random_pick_no_vanilla, random_on_every_load
     enemy_palette: Default                  # Other options: random_pick, random_pick_no_vanilla, random_on_every_load

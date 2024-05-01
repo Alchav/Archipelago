@@ -118,7 +118,7 @@ ap_to_rom_option_table = {
     # General
     "BlocksMatchContent": "",  # always true
     "HiddenBlockMode": "hidden_block_mode",
-    "AllowPhysicsGlitches": "prevent_ooblzs",
+    "AllowPhysicsGlitches": "",
     "BadgeSynergy": "badge_synergy",
 
     # QOL
@@ -134,10 +134,10 @@ ap_to_rom_option_table = {
     "MuteDangerBeeps": "mute_danger_beeps",
 
     # Difficulty and enemies
-    "ProgressiveScaling": "enemy_difficulty",
+    "ProgressiveScaling": "",
     "ChallengeMode": "",  # NYI, always false
     "CapEnemyXP": "cap_enemy_xp",
-    "XPMultiplier": "",
+    "XPMultiplier": "enemy_xp_multiplier",
     "DoubleDamage": "",  # damage multiplier == 2
     "QuadrupleDamage": "",  # damage multiplier == 4
     "OHKO": "one_hit_ko",
@@ -178,8 +178,8 @@ ap_to_rom_option_table = {
     "StartingMaxFP": "starting_fp",
     "StartingMaxBP": "starting_bp",
     "StartingStarPower": "starting_sp",
-    "StartingBoots": "starting_boots",
-    "StartingHammer": "starting_hammer",
+    "StartingBoots": "",
+    "StartingHammer": "",
     "StartingCoins": "starting_coins",
 
     "StartingItem0": "",  # not currently doable?

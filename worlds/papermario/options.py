@@ -3,29 +3,30 @@ Option definitions for Paper Mario 64
 """
 
 from typing import Dict
-from Options import Option, Choice, Range, DeathLink, Toggle, DefaultOnToggle, StartInventoryPool, PerGameCommonOptions
+from Options import Choice, Range, DeathLink, Toggle, DefaultOnToggle, FreeText, PerGameCommonOptions
 from dataclasses import dataclass
 
 
 class ShuffleKeys(DefaultOnToggle):
-    """If disabled, keys can only be found in their respective dungeons"""
+    """If disabled, keys can only be found in their respective dungeons."""
     display_name = "Keysanity"
 
 
 class ShuffleTradeEvents(Toggle):
     """Adds the 3 rewards obtained for doing the Trading Toad quests (started via Koopa Village's radio) in the item
-    pool. These are available with 0, 2, and 5 star spirits saved."""
+    pool. These checks are available with 1, 3, and 5 star spirits saved."""
     display_name = "Include Trading Event Rewards"
 
 
 class ShuffleHiddenPanels(Toggle):
-    """Hidden panels can have any item; the star pieces normally hidden under them are added to the item pool"""
+    """Hidden panels can have any item; the star pieces normally hidden under them are added to the item pool. To flip
+    hidden panels, you need Super Boots or Ultra Boots."""
     display_name = "Include Hidden Panels"
 
 
 class ShuffleDojoRewards(Toggle):
     """Include Dojo fight rewards in the item pool. The logic can only expect you to do the 2nd fight with 1 star
-    spirit saved. Master fights requirements are 3,4 and 5 star spirits saved."""
+    spirit saved. The three Master fights are only in logic after you have 3, 4, and 5 star spirits saved."""
     display_name = "Include Dojo Rewards"
 
 
@@ -36,7 +37,7 @@ class ShuffleSuperMultiBlocks(Toggle):
 
 class GearShuffleMode(Choice):
     """Boots and Hammers can appear in their Vanilla locations, be shuffled amongst the upgrade chests and the bush in
-    Jr. Troopa's playground, or appear anywhere"""
+    Jr. Troopa's playground, or appear anywhere."""
     display_name = "Gear Shuffle"
     option_Vanilla = 0
     option_Gear_Location_Shuffle = 1
@@ -58,7 +59,9 @@ class ShuffleLetters(Choice):
 
 
 class ShuffleKootFavors(Choice):
-    """Vanilla: Koopa Koot Favor rewards and quest items are unshuffled.
+    """Koopa Koot's Favors unlock after ridding the village of the Fuzzies, and three more are unlocked per star spirit
+    saved up to 6 star spirits.
+    Vanilla: Koopa Koot Favor rewards and quest items are unshuffled.
     Shuffle rewards: Shuffle the favor rewards, but not the key items for his quests.
     Full Shuffle: Shuffle the rewards AND the quest key items."""
     display_name = "Koopa Koot Favors"
@@ -101,7 +104,8 @@ class LogicRowfItems(DefaultOnToggle):
 
 
 class LogicMerlowItems(Toggle):
-    """Determines whether Merlow's Star Piece rewards can be required for progression."""
+    """Determines whether Merlow's Star Piece rewards can be required for progression. The items that you buy directly
+    are never progression items. This is specifically for the rewards which are granted after spending X Star Pieces."""
     display_name = "Merlow Items in Logic"
 
 
@@ -130,7 +134,9 @@ class ShuffleFoliageCoins(Toggle):
 class LocalConsumables(Range):
     """A percentage of consumable items will remain in the player's world instead of being shuffled into the multiworld.
     This can prevent other people from getting too many of your filler items, as well as make it easier to restock your
-    inventory without farming items from enemies or using a potentially limited variety of consumables."""
+    inventory without farming items from enemies or using a potentially limited variety of consumables.
+    Note: It's recommended that this stays at 100. There is currently no handling for receiving consumables with a full
+    inventory. Extra items will disappear into the aether. Change at your own risk."""
     display_name = "Local Consumables Percentage"
     range_start = 0
     range_end = 100
@@ -144,7 +150,7 @@ class ShufflePartners(DefaultOnToggle):
 
 
 class PartnersAlwaysUsable(Toggle):
-    """All partner field abilities are available to use even before you have unlocked them"""
+    """All partner field abilities are available to use even before you have unlocked them."""
     display_name = "Partners Always Usable"
 
 
@@ -154,7 +160,7 @@ class StartRandomPartners(DefaultOnToggle):
 
 
 class StartPartners(Range):
-    """Number of partners you start with, from 1 to 8"""
+    """Number of random partners you start with, from 1 to 8"""
     display_name = "Number of Starting Partners"
     range_start = 1
     range_end = 8
@@ -266,8 +272,25 @@ class ShuffleBattleFormations(Toggle):
 
 
 class RandomPuzzles(Toggle):
-    """Randomizes most of the games puzzles."""
+    """Randomizes most of the game's puzzles.
+    Note: This is not yet implemented and will fail to generate if set to True."""
     display_name = "Randomize Puzzles"
+
+
+class BlooperDamageRequirements(Choice):
+    """There are 3 Blooper fights. Regardless of what order you visit the fight locations, you always fight Blooper,
+    then Electro Blooper, then Super Blooper. This setting can add logic such that you are able to deal enough damage
+    per turn with jump and partner attacks to comfortably defeat all 3 Bloopers before needing to defeat any of them.
+    Note that damage is calculated only by partners and boot upgrades, not badges or partner upgrades/abilities.
+    None: No logical requirements to defeat Bloopers
+    Low: 3 damage per turn required
+    Medium: 6 damage per turn required
+    High: 9 damage per turn required"""
+    display_name = "Blooper Damage Requirements"
+    option_None = 0
+    option_Low = 1
+    option_Medium = 2
+    option_High = 3
 
 
 # Difficulty settings
@@ -296,11 +319,12 @@ class OneHitKO(Toggle):
 
 
 class XPMultiplier(Range):
-    """Increase or decrease the star points gained from enemies."""
+    """Increase or decrease the star points gained from enemies. Double the desired value for this setting.
+    ex: if you want double XP, set this to 4; for vanilla XP, set this to 2"""
     display_name = "XP Multiplier"
     range_start = 0
-    range_end = 2
-    default = 1
+    range_end = 4
+    default = 2
 
 
 class CapEnemyXP(Toggle):
@@ -357,13 +381,17 @@ class RequireSpecificSpirits(Toggle):
 
 
 class LimitChapterLogic(Toggle):
-    """Progression items will only appear in required chapters, the prologue, and in common areas."""
+    """Progression items will only appear in required chapters, the prologue, and in common areas. You will not need to
+    check the chapters that are out of logic whatsoever, and the checks in those chapters will not grant you
+    hint points. You can still visit them for local items (badges, consumables, etc) if you want or need to."""
     display_name = "Limit Chapter Logic"
 
 
 # Difficulty Stats and Gear
 class StartingBoots(Choice):
-    """Level of the boots that Mario will start the game with"""
+    """Level of the boots that Mario will start the game with.
+    Note: While jumpless, you can still climb up some places with Parakarry.
+    You can also hit floating blocks by using Kooper's ability beneath them."""
     display_name = "Starting Boots"
     option_Jumpless = -1
     option_Normal = 0
@@ -372,7 +400,8 @@ class StartingBoots(Choice):
 
 
 class StartingHammer(Choice):
-    """Level of the hammer that Mario will start the game with"""
+    """Level of the hammer that Mario will start the game with.
+    Note: Without hammer, you can still hit trees and break yellow blocks using Bombette's ability."""
     display_name = "Starting Hammer"
     option_Hammerless = -1
     option_Normal = 0
@@ -381,11 +410,13 @@ class StartingHammer(Choice):
 
 
 class StartingCoins(Range):
-    """Amount of coins Mario will start the game with"""
+    """Amount of coins Mario will start the game with.
+    Note: You will need to pay 50 coins to get past Kent C Koopa on the way to Koopa Village. It's recommended that you
+    don't spend all your coins before paying him off."""
     display_name = "Starting Coins"
     range_start = 0
     range_end = 999
-    default = 100
+    default = 150
 
 
 class StartingBP(Range):
@@ -424,26 +455,13 @@ class StartingSP(Range):
     default = 0
 
 
-# Difficulty Starting Items TODO
-class StartWithRandomItems(Toggle):
-    """Start the game with a random or specific number of random items"""
-    display_name = "Start With Random Items"
-
-
-class MinStartItems(Range):
-    """Minimum number of items you start with"""
-    display_name = "Minimum Starting Items"
+# Difficulty Starting Items
+class RandomStartItems(Range):
+    """Number of random items you want to start with."""
+    display_name = "Random Starting Items"
     range_start = 0
     range_end = 16
     default = 0
-
-
-class MaxStartItems(Range):
-    """Maximum number of items you start with, must be greater than or equal to the minimum"""
-    display_name = "Maximum Starting Items"
-    range_start = 0
-    range_end = 16
-    default = 16
 
 
 # Difficulty Item Pool
@@ -501,7 +519,8 @@ class BadgePoolLimit(Range):
 
 
 class ItemTraps(Choice):
-    """Replaces some items with fakes that deal 2 damage upon contact."""
+    """Replaces some items with fakes that deal 2 damage upon contact.
+    Note: Traps are not yet implemented, so leave this setting set to No Traps."""
     display_name = "Item Traps"
     option_No_Traps = 0
     option_Sparse = 1
@@ -518,7 +537,7 @@ class StartingMap(Choice):
     option_Toad_Town = 0
     option_Goomba_Village = 1
     option_Dry_Dry_Outpost = 2
-    option_Yoshi_Village = 3
+    option_Yoshi_Village = 5
 
 
 class OpenPrologue(Toggle):
@@ -554,7 +573,8 @@ class OpenWhale(Toggle):
 
 
 class MagicalSeedsRequired(Range):
-    """The amount of Magical Seeds required to open the gate to Flower Fields"""
+    """The amount of Magical Seeds required to open the gate to Flower Fields. Changing this does not remove the
+    Bub-ulb checks."""
     display_name = "Magical Seeds Required"
     range_start = 0
     range_end = 4
@@ -578,7 +598,8 @@ class MirrorMode(Choice):
     """Off: The overworld is never mirrored.
        Always On: The overworld is always mirrored.
        Random On Every Load: Whether the overworld is mirrored or not is random with every screen transition.
-       Static Random: Some overworld screens are mirrored, some are not, but they won't change within a playthrough."""
+       Static Random: Some overworld screens are mirrored, some are not, but they won't change within a playthrough.
+       Note: The Static Random option is not yet implemented and will fail to generate."""
     display_name = "Mirror Mode"
     option_Off = 0
     option_Always_On = 1
@@ -597,13 +618,14 @@ class BowserCastleMode(Choice):
 
 
 class ShuffleDungeonEntrances(Toggle):
-    """Shuffles the main entrance of every chapter dungeon."""
+    """Shuffles the main entrance of every chapter dungeon.
+    Note: This is not yet implemented and will fail to generate if set to True."""
     display_name = "Shuffle Dungeon Entrances"
 
 
 class PowerStarHunt(Toggle):
     """Adds power stars into the item pool. You must collect a certain amount and give them to Eldstar at
-    Shooting Star Summit to open up Star Way."""
+    Shooting Star Summit to open up Star Way. """
     display_name = "Power Star Hunt"
 
 
@@ -649,17 +671,17 @@ class PreventOOBLZS(Toggle):
     display_name = "Prevent OOB/LZS Tricks"
 
 
-class SkipQuiz(Toggle):
+class SkipQuiz(DefaultOnToggle):
     """When enabled, quiz rewards will be handed out without having to answer questions."""
     display_name = "Skip Quiz"
 
 
-class QuizmoAlwaysAppears(Toggle):
+class QuizmoAlwaysAppears(DefaultOnToggle):
     """When enabled, Chuck Quizmo always appears somewhere in town until his location questions have been answered."""
     display_name = "Quizmo Always Appears"
 
 
-class VisibleHiddenPanels(Toggle):
+class VisibleHiddenPanels(DefaultOnToggle):
     """When enabled, hidden panels will have an altered appearance to make identifying them easier.
     Recommended for players not familiar with every single hidden panel locations when shuffling hidden panels."""
     display_name = "Visible Hidden Panels"
@@ -673,21 +695,22 @@ class CutsceneMode(Choice):
     option_Vanilla = 0
     option_Shortened = 1
     option_Minimal = 2
+    default = 1
 
 
-class AlwaysSpeedySpin(Toggle):
+class AlwaysSpeedySpin(DefaultOnToggle):
     """When enabled, Mario will always spin fast when pressing Z without needing to equip the Speedy Spin badge.
     The Speedy Spin badge is also removed from the item pool."""
     display_name = "Always Speedy Spin"
 
 
-class AlwaysPeekaboo(Toggle):
+class AlwaysPeekaboo(DefaultOnToggle):
     """When enabled, you will always be able to see enemy's HP bars without needing to equip the Peekaboo badge.
     The Peekaboo badge is also removed from the item pool."""
     display_name = "Always Peekaboo"
 
 
-class AlwaysISpy(Toggle):
+class AlwaysISpy(DefaultOnToggle):
     """When enabled, you will always get an indicator if you enter a room with a hidden panel without needing to equip
     the I Spy badge. The sound effect is removed, so it is only a visual cue.
     The I Spy badge is also removed from the item pool.
@@ -695,7 +718,7 @@ class AlwaysISpy(Toggle):
     display_name = "Always I Spy"
 
 
-class FoliageItemHints(Toggle):
+class FoliageItemHints(DefaultOnToggle):
     """When enabled, bushes and trees will emit a glow when they are hiding something."""
     display_name = "Foliage Item Hints"
 
@@ -706,7 +729,7 @@ class CookWithoutFryingPan(Toggle):
     display_name = "Cook Without Frying Pan"
 
 
-class SkipEpilogue(Toggle):
+class SkipEpilogue(DefaultOnToggle):
     """When enabled, the game will skip directly to credits once you have acquired the Star Rod."""
     display_name = "Skip Epilogue"
 
@@ -837,36 +860,36 @@ class BossColorPalette(Choice):
     """Changes the way the sprites look in-game."""
     display_name = "Bosses Color Palettes"
     option_Default = 0
-    option_Random_Pick = 10
-    option_Random_Pick_No_Vanilla = 11
-    option_Random_On_Every_Load = 12
+    option_Random_Pick = 2
+    option_Random_Pick_No_Vanilla = 3
+    option_Random_On_Every_Load = 4
 
 
 class NPCColorPalette(Choice):
     """Changes the way the sprites look in-game."""
     display_name = "NPC Color Palettes"
     option_Default = 0
-    option_Random_Pick = 10
-    option_Random_Pick_No_Vanilla = 11
-    option_Random_On_Every_Load = 12
+    option_Random_Pick = 2
+    option_Random_Pick_No_Vanilla = 3
+    option_Random_On_Every_Load = 4
 
 
 class EnemyColorPalette(Choice):
     """Changes the way the sprites look in-game."""
     display_name = "Enemy Color Palettes"
     option_Default = 0
-    option_Random_Pick = 10
-    option_Random_Pick_No_Vanilla = 11
-    option_Random_On_Every_Load = 12
+    option_Random_Pick = 2
+    option_Random_Pick_No_Vanilla = 3
+    option_Random_On_Every_Load = 4
 
 
 class HammerColorPalette(Choice):
     """Changes the way the sprite looks in-game."""
     display_name = "Hammer Color Palette"
     option_Default = 0
-    option_Random_Pick = 10
-    option_Random_Pick_No_Vanilla = 11
-    option_Random_On_Every_Load = 12
+    option_Random_Pick = 2
+    option_Random_Pick_No_Vanilla = 3
+    option_Random_On_Every_Load = 4
 
 
 class StatusMenuColorPalette(Choice):
@@ -879,8 +902,8 @@ class StatusMenuColorPalette(Choice):
     option_Brown = 4
     option_Purple = 5
     option_Grey = 6
-    option_Random_Pick = 10
-    option_Animated = 11
+    option_Random_Pick = 7
+    option_Animated = 8
 
 
 class CoinColorPalette(Choice):
@@ -931,6 +954,14 @@ class MuteDangerBeeps(Toggle):
     display_name = "Mute Danger Beeps"
 
 
+class PMRSiteSettingsString(FreeText):
+    """Put a value for this if grabbing the settings string from https://pm64randomizer.com/. Keep in mind not to use
+    settings specific to base PMR, and that AP-specific settings not on the site will keep their default values.
+    If you aren't using the site to get your settings, leave this as 'None'."""
+    display_name = "PMR Settings String"
+    default = "None"
+
+
 @dataclass
 class PaperMarioOptions(PerGameCommonOptions):
     # Items
@@ -975,6 +1006,7 @@ class PaperMarioOptions(PerGameCommonOptions):
     mystery_shuffle: MysteryShuffle
     formation_shuffle: ShuffleBattleFormations
     random_puzzles: RandomPuzzles
+    blooper_damage_requirements: BlooperDamageRequirements
 
     # General Difficulty
     enemy_difficulty: EnemyDifficulty
@@ -1000,9 +1032,7 @@ class PaperMarioOptions(PerGameCommonOptions):
     starting_bp: StartingBP
     starting_fp: StartingFP
     starting_sp: StartingSP
-    start_with_random_items: StartWithRandomItems
-    min_start_items: MinStartItems
-    max_start_items: MaxStartItems
+    random_start_items: RandomStartItems
 
     # Item Pool
     consumable_item_pool: ConsumableItemPool
@@ -1070,5 +1100,7 @@ class PaperMarioOptions(PerGameCommonOptions):
     shuffle_jingles: ShuffleJingles
     random_pitch: RandomPitch
     mute_danger_beeps: MuteDangerBeeps
+
+    pmr_settings_string: PMRSiteSettingsString
 
     death_link: DeathLink

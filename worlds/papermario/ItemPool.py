@@ -4,7 +4,7 @@
 from collections import namedtuple
 from itertools import chain
 
-from .data.chapter_logic import get_bowser_castle_removed_locations
+from .data.chapter_logic import get_bowser_castle_removed_locations, areas_by_chapter
 from .data.ItemList import taycet_items, item_table, progression_miscitems, item_groups, item_multiples_base_name
 from .data.LocationsList import location_groups, location_table, missable_locations
 from .options import *
@@ -14,7 +14,6 @@ from BaseClasses import ItemClassification as Ic, LocationProgressType
 from .data.enum_types import BlockType
 from .Locations import location_factory
 from .data.chapter_logic import get_chapter_excluded_item_names, get_chapter_excluded_location_names
-from worlds.generic.Rules import add_item_rule
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -63,7 +62,7 @@ def get_pool_core(world: "PaperMarioWorld"):
         ch_excluded_items = get_chapter_excluded_item_names(world.excluded_spirits)
 
     # Exclude locations that are either missable or are going to be considered not in logic based on settings
-    excluded_locations = missable_locations + get_locations_to_exclude(world)
+    excluded_locations = missable_locations + get_locations_to_exclude(world, bc_removed_locations)
 
     # remove unused items from the pool
 
@@ -109,7 +108,6 @@ def get_pool_core(world: "PaperMarioWorld"):
             shuffle_item = world.options.include_shops.value
             if not shuffle_item:
                 location.disabled = True
-            add_item_rule(location, lambda i: i.name not in item_multiples_base_name.values() and "Progressive" not in i.name and "Key" not in i.name and "Upgrade" not in i.name)
 
         if location.name in location_groups["HiddenPanel"]:
             shuffle_item = world.options.shuffle_hidden_panels.value
@@ -470,18 +468,85 @@ def get_items_to_exclude(world: "PaperMarioWorld") -> list:
     return excluded_items
 
 
-def get_locations_to_exclude(world: "PaperMarioWorld") -> list:
+def get_locations_to_exclude(world: "PaperMarioWorld", bc_removed_locations: list) -> list:
     excluded_locations = []
 
-    # remove merlow rewards
+    # exclude locations which require more star spirits than are expected to be needed to beat the seed
+    if not world.options.power_star_hunt.value:
+        if world.options.star_spirits_required.value < 6:
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 20")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 19")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 18")
+        if world.options.star_spirits_required.value < 5:
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 17")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 16")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 15")
+            excluded_locations.append("TT Gate District Dojo: Master 3")
+            excluded_locations.append("TT Port District Radio Trade Event 3 Reward")
+        if world.options.star_spirits_required.value < 4:
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 14")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 13")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 12")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 5 - 3")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 5 - 2")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 5 - 1")
+            excluded_locations.append("TT Gate District Dojo: Master 2")
+        if world.options.star_spirits_required.value < 3:
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 11")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 10")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 9")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 4 - 3")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 4 - 2")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 4 - 1")
+            excluded_locations.append("TT Gate District Dojo: Master 1")
+            excluded_locations.append("TT Port District Radio Trade Event 2 Reward")
+        if world.options.star_spirits_required.value < 2:
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 8")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 7")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 6")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 3 - 3")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 3 - 2")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 3 - 1")
+        if world.options.star_spirits_required.value < 1:
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 5")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 4")
+            excluded_locations.append("KR Koopa Village 2 Koopa Koot Reward 3")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 2 - 3")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 2 - 2")
+            excluded_locations.append("TT Plaza District Rowf's Shop Set 2 - 1")
+            excluded_locations.append("TT Gate District Dojo: Lee")
+            excluded_locations.append("TT Port District Radio Trade Event 1 Reward")
+
+    # exclude some amount of chapter 8 locations depending upon access requirements
+    late_game_locations = []
+    for prefix in areas_by_chapter[8]:
+        late_game_locations.extend([name for (name, data) in location_table.items() if name.startswith(prefix)
+                                    and name not in bc_removed_locations])
+    late_game_locations.append("PCG Hijacked Castle Entrance Hidden Block")
+    late_game_locations.append("SSS Star Haven Shop Item 1")
+    late_game_locations.append("SSS Star Haven Shop Item 2")
+    late_game_locations.append("SSS Star Haven Shop Item 3")
+    late_game_locations.append("SSS Star Haven Shop Item 4")
+    late_game_locations.append("SSS Star Haven Shop Item 5")
+    late_game_locations.append("SSS Star Haven Shop Item 6")
+
+    late_game_exclude_rate = get_star_haven_access_ratio(world.options) * 100
+
+    for location in late_game_locations:
+        if world.random.randint(1, 100) <= late_game_exclude_rate:
+            excluded_locations.append(location)
+
+    # exclude merlow rewards
     if not world.options.merlow_items.value:
         excluded_locations.extend(location_groups["MerlowReward"])
 
-    # remove rowf item locations
+    # exclude rowf item locations
     if not world.options.rowf_items.value:
-        excluded_locations.extend(location_groups["RowfShop"])
+        for location in location_groups["RowfShop"]:
+            if location not in excluded_locations:
+                excluded_locations.append(location)
 
-    # remove rip cheato locations
+    # exclude rip cheato locations
     for i in range(0, 11):
         location_name = location_groups["RipCheato"][i]
         if location_table[location_name][5] >= world.options.cheato_items.value:
@@ -494,3 +559,15 @@ def get_item_multiples_base_name(item_name: str) -> str:
     if item_name in item_multiples_base_name.keys():
         return item_multiples_base_name[item_name]
     return item_name
+
+
+def get_star_haven_access_ratio(options: PaperMarioOptions):
+    if options.power_star_hunt.value:
+        if options.star_hunt_skips_ch8.value:
+            return 1
+        else:
+            return options.required_power_stars.value / options.total_power_stars.value
+
+    else:
+        return options.star_spirits_required.value / 7
+
