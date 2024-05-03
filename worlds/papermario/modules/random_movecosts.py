@@ -93,11 +93,13 @@ def _get_fully_random_costs(movetype: str, costtype: str) -> list:
     min_value = value_limits.get(movetype).get(costtype).get("min")
     if (movetype, costtype) == ("BADGE", "BP"):
         # Special case for bp costs: 1-8 simply has too high of a median
-        max_value = 6
+        max_value = 2
     else:
         max_value = value_limits.get(movetype).get(costtype).get("max")
 
     for id, data in move_table.items():
+        if (movetype, costtype) == ("BADGE", "BP"):
+            min_value = random.randint(0, 1)
         if data[1] == movetype and data[2] == costtype:
             new_cost = random.randint(min_value, max_value)
             fully_random_costs.append((get_key(data), new_cost))
