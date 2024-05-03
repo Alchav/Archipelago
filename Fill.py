@@ -567,7 +567,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         game = i.game
         if game == "Generic":
             game = multiworld.worlds[i.player].game
-        if i.classification == ItemClassification.trap:
+        if i.classification == ItemClassification.trap and game != "Super Mario Land 2":
             return 0
         # if game == "Starcraft 2":
         #     return 1
