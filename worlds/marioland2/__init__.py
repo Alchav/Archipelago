@@ -1,17 +1,19 @@
 import base64
-
 import Utils
 import settings
+from copy import deepcopy
 
 from worlds.AutoWorld import World, WebWorld
 from BaseClasses import Region, Location, Item, ItemClassification, Tutorial
 
 from . import client
-from .rom import generate_output, SuperMarioLand2DeltaPatch
+from .rom import generate_output, SuperMarioLand2ProcedurePatch
 from .options import SML2Options
 from .locations import (locations, location_name_to_id, level_name_to_id, level_id_to_name, START_IDS, coins_coords,
                         auto_scroll_max)
 from .items import items
+from .sprites import level_sprites
+from .sprite_randomizer import randomize_enemies, randomize_platforms
 from .logic import has_pipe_up, has_pipe_down, has_pipe_left, has_pipe_right, has_level_progression, is_auto_scroll
 from . import logic
 
@@ -21,7 +23,7 @@ class MarioLand2Settings(settings.Group):
         """File name of the Super Mario Land 2 1.0 ROM"""
         description = "Super Mario Land 2 - 6 Golden Coins (USA, Europe) 1.0 ROM File"
         copy_to = "Super Mario Land 2 - 6 Golden Coins (USA, Europe).gb"
-        md5s = [SuperMarioLand2DeltaPatch.hash]
+        md5s = [SuperMarioLand2ProcedurePatch.hash]
 
     rom_file: SML2RomFile = SML2RomFile(SML2RomFile.copy_to)
 
@@ -88,9 +90,17 @@ class MarioLand2World(World):
         self.auto_scroll_levels = []
         self.num_coin_locations = []
         self.max_coin_locations = {}
+        self.sprite_data = {}
         self.coin_fragments_required = 0
 
     def generate_early(self):
+        self.sprite_data = deepcopy(level_sprites)
+        randomize_enemies(self.sprite_data, self.random)
+        randomize_platforms(self.sprite_data, self.random)
+
+        if self.options.marios_castle_midway_bell:
+            self.sprite_data["Mario's Castle"][35]["sprite"] = "Midway Bell"
+
         if self.options.auto_scroll_chances == -1:
             self.auto_scroll_levels = [int(i in [19, 25, 30]) for i in range(32)]
         else:
@@ -148,22 +158,26 @@ class MarioLand2World(World):
 
             if "Midway Bell" in location_name and not self.options.shuffle_midway_bells:
                 continue
+            if location_name == "Mario's Castle - Midway Bell" and not self.options.marios_castle_midway_bell:
+                continue
             region.locations.append(MarioLand2Location(self.player, location_name,
                                                        self.location_name_to_id[location_name], region))
         self.multiworld.get_region("Macro Zone Secret Course", self.player).connect(
             self.multiworld.get_region("Macro Zone 4", self.player))
         self.multiworld.get_region("Macro Zone 4", self.player).connect(
             self.multiworld.get_region("Macro Zone Secret Course", self.player))
-        castle = Region("Mario's Castle", self.player, self.multiworld)
-        menu_region.connect(castle)
+        # castle = Region("Mario's Castle", self.player, self.multiworld)
+        # menu_region.connect(castle)
+        castle = self.multiworld.get_region("Mario's Castle", self.player)
         wario = MarioLand2Location(self.player, "Mario's Castle - Wario", parent=castle)
         castle.locations.append(wario)
         wario.place_locked_item(MarioLand2Item("Wario Defeated", ItemClassification.progression, None, self.player))
 
         if self.options.coinsanity:
             coinsanity_checks = self.options.coinsanity_checks.value
-            self.num_coin_locations = [[region, 1] for region in created_regions]
-            self.max_coin_locations = {region: len(coins_coords[region]) for region in created_regions}
+            self.num_coin_locations = [[region, 1] for region in created_regions if region != "Mario's Castle"]
+            self.max_coin_locations = {region: len(coins_coords[region]) for region in created_regions
+                                       if region != "Mario's Castle"}
             if self.options.accessibility == "locations" or self.options.auto_scroll_mode == "always":
                 for level in self.max_coin_locations:
                     if level in auto_scroll_max and self.auto_scroll_levels[level_name_to_id[level]] in (1, 3):
@@ -308,7 +322,9 @@ class MarioLand2World(World):
                                                                                    self.player),
             "Turtle Zone 3 - Boss": lambda state: has_pipe_right(state, self.player),
             "Mario's Castle - Wario": lambda state: has_pipe_right(
-                state, self.player) and has_pipe_left(state, self.player)
+                state, self.player) and has_pipe_left(state, self.player),
+            "Mario's Castle - Midway Bell": lambda state: (has_pipe_right(state, self.player) and has_pipe_left(
+                state, self.player)) or state.has("Mario's Castle Midway Bell", self.player)
         }
 
         for entrance, rule in entrance_rules.items():
@@ -401,7 +417,8 @@ class MarioLand2World(World):
 
         if self.options.shuffle_midway_bells:
             for item in [item for item in items if "Midway Bell" in item]:
-                item_counts[item] = 1
+                if item != "Mario's Castle Midway Bell" or self.options.marios_castle_midway_bell:
+                    item_counts[item] = 1
 
         if self.options.difficulty_mode == "easy_to_normal":
             item_counts["Normal Mode"] = 1
@@ -418,16 +435,17 @@ class MarioLand2World(World):
         else:
             self.multiworld.push_precollected(self.create_item("Pipe Traversal"))
 
-        if self.options.auto_scroll_mode == "global_trap_item":
-            item_counts["Auto Scroll"] = 1
-        elif self.options.auto_scroll_mode == "global_cancel_item":
-            item_counts["Cancel Auto Scroll"] = 1
-        else:
-            for level, i in enumerate(self.auto_scroll_levels):
-                if i == 3:
-                    item_counts[f"Auto Scroll - {level_id_to_name[level]}"] = 1
-                elif i == 2:
-                    item_counts[f"Cancel Auto Scroll - {level_id_to_name[level]}"] = 1
+        if any(self.auto_scroll_levels):
+            if self.options.auto_scroll_mode == "global_trap_item":
+                item_counts["Auto Scroll"] = 1
+            elif self.options.auto_scroll_mode == "global_cancel_item":
+                item_counts["Cancel Auto Scroll"] = 1
+            else:
+                for level, i in enumerate(self.auto_scroll_levels):
+                    if i == 3:
+                        item_counts[f"Auto Scroll - {level_id_to_name[level]}"] = 1
+                    elif i == 2:
+                        item_counts[f"Cancel Auto Scroll - {level_id_to_name[level]}"] = 1
 
         for item in self.multiworld.precollected_items[self.player]:
             if item.name in item_counts and item_counts[item.name] > 0:
