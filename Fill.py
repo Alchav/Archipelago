@@ -26,7 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-z = [6, 8, 22] #[7, 30, 33] #, 10, 19]
+z = [5, 20]
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -115,7 +115,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                         if swap_count > 1:
                             continue
 
-                        print(f"Attempting to swap {item_to_place.name} into {location.name}")
+                        print(f"Attempting to swap {item_to_place.player}'s {item_to_place.name} into {location.name}")
                         location.item = None
                         placed_item.location = None
                         swap_state = sweep_from_pool(base_state, [placed_item, *item_pool] if unsafe else item_pool)
@@ -480,7 +480,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         # "priority fill"
         fill_restrictive(multiworld, multiworld.state, prioritylocations, progitempool, swap=False, on_place=mark_for_locking,
                          name="Priority")
-        accessibility_corrections(multiworld, multiworld.state, prioritylocations, progitempool)
+        # accessibility_corrections(multiworld, multiworld.state, prioritylocations, progitempool)
         defaultlocations = prioritylocations + defaultlocations
 
     # morph_balls = [i for i in progitempool if i.name == "Morph"]
@@ -500,14 +500,16 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                 f"Not enough locations for progression items. "
                 f"There are {len(progitempool)} more progression items than there are available locations."
             )
-        accessibility_corrections(multiworld, multiworld.state, defaultlocations)
+        # accessibility_corrections(multiworld, multiworld.state, defaultlocations)
 
     for location in lock_later:
         if location.item:
             add_item_rule(location, lambda i: i.advancement)
     del mark_for_locking, lock_later
 
-    inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
+    # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
+
+    filleritempool.sort(key=lambda i: i.trap)
 
     filleritempool.sort(key=lambda i: i.trap)
 
