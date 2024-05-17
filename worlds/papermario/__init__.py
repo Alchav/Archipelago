@@ -34,7 +34,7 @@ from .options import (SeedGoal, PaperMarioOptions, ShuffleKootFavors, PartnerUpg
 from .data.node import Node
 from .data.starting_maps import starting_maps
 from .Rom import generate_output, PaperMarioDeltaPatch
-from Fill import fill_restrictive
+from Fill import fill_restrictive, remaining_fill
 from .modules.random_blocks import get_block_placement
 import pkg_resources
 from .client import PaperMarioClient  # unused but required for generic client to hook onto
@@ -314,6 +314,16 @@ class PaperMarioWorld(World):
             self.entrance_list = get_bowser_rush_pairs()
         elif self.options.bowser_castle_mode.value == BowserCastleMode.option_Shortened:
             self.entrance_list = get_bowser_shortened_pairs()
+
+        from worlds.generic.Rules import add_item_rule
+        for i in range(1, 16):
+            add_item_rule(self.multiworld.get_location(f"SSS Merluvlee's House Merlow's Badges {i}", self.player),
+                          lambda item: "Star Piece" not in item.name
+                                       and item.classification != ic.progression_skip_balancing)
+        for i in range(1, 7):
+            add_item_rule(self.multiworld.get_location(f"SSS Merluvlee's House Merlow's Rewards {i}", self.player),
+                          lambda item: "Star Piece" not in item.name
+                                       and item.classification != ic.progression_skip_balancing)
 
     def create_items(self) -> None:
         # This checks what locations are being included, gets those items, places non-shuffled items,
@@ -654,25 +664,21 @@ class PaperMarioWorld(World):
         if self.options.limit_chapter_logic.value:
             locations = list(filter(lambda location: location.progress_type == LocationProgressType.EXCLUDED,
                                     self.multiworld.get_unfilled_locations(player=self.player)))
-            if len(locations) <= len(self.pre_fill_items):
-                self.random.shuffle(self.pre_fill_items)
-                items_for_excluded = []
-
-                for _ in locations:
-                    items_for_excluded.append(self.pre_fill_items.pop())
-
-                fill_restrictive(self.multiworld, prefill_state(state), locations, items_for_excluded,
-                                 single_player_placement=True, lock=True, allow_excluded=True)
-                for loc in locations:
-                    if loc.item:
-                        loc.locked = True
+            self.random.shuffle(self.pre_fill_items)
+            items_for_excluded = []
+            for _ in locations:
+                items_for_excluded.append(self.pre_fill_items.pop())
+            # fill_restrictive(self.multiworld, prefill_state(state), locations, items_for_excluded,
+            #                  single_player_placement=True, lock=True, allow_excluded=True)
+            remaining_fill(self.multiworld, locations, items_for_excluded, "pm junk excluded")
 
         # Now throw the rest wherever
         locations = list(filter(lambda location: location.progress_type != LocationProgressType.PRIORITY,
                                 self.multiworld.get_unfilled_locations(player=self.player)))
         self.multiworld.random.shuffle(locations)
-        fill_restrictive(self.multiworld, prefill_state(state), locations, self.pre_fill_items,
-                         single_player_placement=True, lock=True, allow_excluded=True)
+        # fill_restrictive(self.multiworld, prefill_state(state), locations, self.pre_fill_items,
+        #                  single_player_placement=True, lock=True, allow_excluded=True)
+        remaining_fill(self.multiworld, locations, self.pre_fill_items, "pm junk")
 
         # Locations with unrandomized junk should be changed to events
         for loc in self.get_locations():
