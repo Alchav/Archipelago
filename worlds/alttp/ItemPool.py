@@ -563,7 +563,7 @@ def set_up_take_anys(multiworld, world, player):
         location = ALttPLocation(player, take_any.name, shop_table_by_location[take_any.name], parent=take_any)
         location.shop_slot = 1
         take_any.locations.append(location)
-        location.place_locked_item(item_factory("Boss Heart Container", world.worlds[player]))
+        location.place_locked_item(item_factory("Boss Heart Container", world))
 
 
 def get_pool_core(world, player: int):

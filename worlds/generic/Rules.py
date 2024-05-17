@@ -46,9 +46,9 @@ def locality_rules(world: MultiWorld):
                 for sending_player in world.player_ids:
                     if receiving_player != sending_player:
                         forbid(sending_player, receiving_player, local_items)
-            non_local_items: typing.Set[str] = world.worlds[receiving_player].options.non_local_items.value
-            if non_local_items:
-                forbid(receiving_player, receiving_player, non_local_items)
+            # non_local_items: typing.Set[str] = world.worlds[receiving_player].options.non_local_items.value
+            # if non_local_items:
+            #     forbid(receiving_player, receiving_player, non_local_items)
 
         # Group
         for receiving_group_id, receiving_group in world.groups.items():

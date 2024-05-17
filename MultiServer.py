@@ -611,11 +611,10 @@ class Context:
 
     def recheck_hints(self, team: typing.Optional[int] = None, slot: typing.Optional[int] = None):
         for hint_team, hint_slot in self.hints:
-            if (team is None or team == hint_team) and (slot is None or slot == hint_slot):
-                self.hints[hint_team, hint_slot] = {
-                    hint.re_check(self, hint_team) for hint in
-                    self.hints[hint_team, hint_slot] if hint.location not in self.location_checks[(hint_team, hint_slot)]
-                }
+            self.hints[hint_team, hint_slot] = {
+                hint.re_check(self, hint_team) for hint in self.hints[hint_team, hint_slot]
+            }
+            self.hints[hint_team, hint_slot] = {hint for hint in self.hints[hint_team, hint_slot] if not hint.found}
 
     def get_rechecked_hints(self, team: int, slot: int):
         self.recheck_hints(team, slot)
@@ -960,9 +959,8 @@ def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False):
                 if set(group_players) == group_collected_players:
                     collect_player(ctx, team, group, True)
 
-
 def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[int]:
-    return ctx.locations.get_remaining(ctx.location_checks, team, slot)
+    return ctx.locations.get_remaining(ctx.location_checks, team, slot, ctx.er_hint_data)
 
 
 def send_items_to(ctx: Context, team: int, target_slot: int, *items: NetworkItem):
@@ -1494,6 +1492,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
         if not input_text:
             hints = {hint.re_check(self.ctx, self.client.team) for hint in
                      self.ctx.hints[self.client.team, self.client.slot]}
+            hints = {hint for hint in hints if not hint.found}
             self.ctx.hints[self.client.team, self.client.slot] = hints
             self.ctx.notify_hints(self.client.team, list(hints), recipients=(self.client.slot,))
             self.output(f"A hint costs {self.ctx.get_hint_cost(self.client.slot)} points. "
@@ -1582,7 +1581,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     hint = not_found_hints.pop()
                     hints.append(hint)
                     can_pay -= 1
-                    self.ctx.hints_used[self.client.team, self.client.slot] += 1
+
+                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
+                        self.ctx.hints_used[self.client.team, self.client.slot] += 1
+
                     points_available = get_client_points(self.ctx, self.client)
 
                 if not_found_hints:

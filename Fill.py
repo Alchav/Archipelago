@@ -26,7 +26,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events()
     return new_state
 
-z = [5, 20]
+z = [4, 14, 20, 13, 25]
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -589,18 +589,42 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         return 1
     # s = [_ for _ in get_item_spheres()]
 
+    from worlds.papermario.data.ItemList import progression_miscitems
+
     for sphere in get_item_spheres():
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
-            if loc.address and not loc.locked and loc.item.name not in multiworld.local_items[loc.player]:
+            if isinstance(loc.address, int) and loc.item.name not in multiworld.local_items[loc.player] and not (
+                    loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems):
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
                 if a.item_rule(b.item) and b.item_rule(a.item):
                     a.item, b.item = b.item, a.item
+            for loc in t:
+                if loc.player == loc.item.player and loc.item.name in multiworld.worlds[loc.player].options.non_local_items.value:
+                    for loc2 in t:
+                        if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
+                            loc.item, loc2.item = loc2.item, loc.item
+                            break
+
+    sc2_player = 6
+    supplies = 0
+    for location in multiworld.get_locations():
+        if location.address and multiworld.random.randint(0, 4):
+            if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
+                    or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
+                    or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
+                                              "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up")):
+                if supplies < 200:
+                    location.item = multiworld.worlds[sc2_player].create_item("Additional Starting Supply")
+                    supplies += 1
+                else:
+                    location.item = multiworld.worlds[sc2_player].create_item(multiworld.random.choice(
+                        ("Additional Starting Minerals", "Additional Starting Vespene")))
 
 
 def flood_items(multiworld: MultiWorld) -> None:

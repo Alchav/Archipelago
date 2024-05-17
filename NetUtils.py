@@ -395,13 +395,13 @@ class _LocationStore(dict, typing.MutableMapping[int, typing.Dict[int, typing.Tu
                 location_id in self[slot] if
                 location_id not in checked]
 
-    def get_remaining(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int
+    def get_remaining(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int, hint_data
                       ) -> typing.List[int]:
         checked = state[team, slot]
         player_locations = self[slot]
         return sorted([player_locations[location_id][0] for
                        location_id in player_locations if
-                       location_id not in checked])
+                       location_id not in checked and "Unreachable" not in hint_data[slot][location_id]])
 
 
 if typing.TYPE_CHECKING:  # type-check with pure python implementation until we have a typing stub

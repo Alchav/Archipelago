@@ -10,7 +10,7 @@ from ..data.enum_options import RandomMoveCosts
 from ..data.MoveList import move_table
 
 value_limits = {
-    "BADGE":     {"BP": {"min": 1, "max": 8, }, "FP": {"min": 1, "max": 7, }},
+    "BADGE":     {"BP": {"min": 0, "max": 1, }, "FP": {"min": 1, "max": 7, }},
     "PARTNER":   {"FP": {"min": 1, "max": 8, }},
     "STARPOWER": {"FP": {"min": 1, "max": 3, }}
 }
@@ -91,15 +91,15 @@ def _get_fully_random_costs(movetype: str, costtype: str) -> list:
     fully_random_costs = []
 
     min_value = value_limits.get(movetype).get(costtype).get("min")
-    if (movetype, costtype) == ("BADGE", "BP"):
-        # Special case for bp costs: 1-8 simply has too high of a median
-        max_value = 2
-    else:
-        max_value = value_limits.get(movetype).get(costtype).get("max")
+    # if (movetype, costtype) == ("BADGE", "BP"):
+    #     # Special case for bp costs: 1-8 simply has too high of a median
+    #     pass
+    # else:
+    max_value = value_limits.get(movetype).get(costtype).get("max")
 
     for id, data in move_table.items():
-        if (movetype, costtype) == ("BADGE", "BP"):
-            min_value = random.randint(0, 1)
+        # if (movetype, costtype) == ("BADGE", "BP"):
+        #     min_value = random.randint(0, 1)
         if data[1] == movetype and data[2] == costtype:
             new_cost = random.randint(min_value, max_value)
             fully_random_costs.append((get_key(data), new_cost))

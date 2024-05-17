@@ -35,7 +35,7 @@ from .options import (EnemyDifficulty, PaperMarioOptions, ShuffleKootFavors, Par
 from .data.node import Node
 from .data.starting_maps import starting_maps
 from .Rom import generate_output
-from Fill import fill_restrictive
+from Fill import fill_restrictive, remaining_fill
 from .modules.random_blocks import get_block_placement
 import pkg_resources
 from .client import PaperMarioClient  # unused but required for generic client to hook onto
@@ -633,15 +633,17 @@ class PaperMarioWorld(World):
             items_for_excluded = []
             for _ in locations:
                 items_for_excluded.append(self.pre_fill_items.pop())
-            fill_restrictive(self.multiworld, prefill_state(state), locations, items_for_excluded,
-                             single_player_placement=True, lock=True, allow_excluded=True)
+            # fill_restrictive(self.multiworld, prefill_state(state), locations, items_for_excluded,
+            #                  single_player_placement=True, lock=True, allow_excluded=True)
+            remaining_fill(self.multiworld, locations, items_for_excluded, "pm junk excluded")
 
         # Now throw the rest wherever
         locations = list(filter(lambda location: location.progress_type != LocationProgressType.PRIORITY,
                                 self.multiworld.get_unfilled_locations(player=self.player)))
         self.multiworld.random.shuffle(locations)
-        fill_restrictive(self.multiworld, prefill_state(state), locations, self.pre_fill_items,
-                         single_player_placement=True, lock=True, allow_excluded=True)
+        # fill_restrictive(self.multiworld, prefill_state(state), locations, self.pre_fill_items,
+        #                  single_player_placement=True, lock=True, allow_excluded=True)
+        remaining_fill(self.multiworld, locations, self.pre_fill_items, "pm junk")
 
         # Locations with unrandomized junk should be changed to events
         for loc in self.get_locations():
