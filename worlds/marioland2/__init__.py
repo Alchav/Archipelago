@@ -320,12 +320,44 @@ class MarioLand2World(World):
                 self.player, "Turtle Zone 2"), #state.has_any(["Swim", "Turtle Zone 2  Midway Bell"], self.player),  # hard logic option?
             "Turtle Zone Secret Course - Normal Exit": lambda state: state.has_any(["Fire Flower", "Carrot"],
                                                                                    self.player),
-            "Turtle Zone 3 - Boss": lambda state: has_pipe_right(state, self.player),
-            "Mario's Castle - Wario": lambda state: has_pipe_right(
-                state, self.player) and has_pipe_left(state, self.player),
-            "Mario's Castle - Midway Bell": lambda state: (has_pipe_right(state, self.player) and has_pipe_left(
-                state, self.player)) or state.has("Mario's Castle Midway Bell", self.player)
+            "Turtle Zone 3 - Boss": lambda state: has_pipe_right(state, self.player)
         }
+
+        if self.options.shuffle_golden_coins == "mario_coin_fragment_hunt":
+            location_rules["Mario's Castle - Midway Bell"] = lambda state: ((state.has_all(
+                ["Tree Coin", "Space Coin", "Macro Coin", "Pumpkin Coin", "Turtle Coin"], self.player)
+                and state.has("Mario Coin Fragment", self.player, self.coin_fragments_required)) 
+                and ((has_pipe_right(state, self.player)
+                and has_pipe_left(state, self.player))
+                or state.has("Mario's Castle Midway Bell", self.player)))
+        else:
+            location_rules["Mario's Castle - Midway Bell"] = lambda state: (([
+                    state.has("Tree Coin", self.player), state.has("Space Coin", self.player),
+                    state.has("Macro Coin", self.player), state.has("Pumpkin Coin", self.player),
+                    state.has("Mario Coin", self.player), state.has("Turtle Coin", self.player)
+                ].count(True) >= self.options.required_golden_coins)
+                and ((has_pipe_right(state, self.player)
+                and has_pipe_left(state, self.player))
+                or state.has("Mario's Castle Midway Bell", self.player)))
+            
+        if self.options.shuffle_golden_coins == "mario_coin_fragment_hunt":
+            location_rules["Mario's Castle - Wario"] = lambda state: ((state.has_all(
+                ["Tree Coin", "Space Coin", "Macro Coin", "Pumpkin Coin", "Turtle Coin"], self.player)
+                and state.has("Mario Coin Fragment", self.player, self.coin_fragments_required)) 
+                and ((has_pipe_right(state, self.player)
+                and has_pipe_left(state, self.player))
+                or (state.has("Mario's Castle Midway Bell", self.player)
+                and has_pipe_right(state, self.player))))
+        else:
+            location_rules["Mario's Castle - Wario"] = lambda state: (([
+                    state.has("Tree Coin", self.player), state.has("Space Coin", self.player),
+                    state.has("Macro Coin", self.player), state.has("Pumpkin Coin", self.player),
+                    state.has("Mario Coin", self.player), state.has("Turtle Coin", self.player)
+                ].count(True) >= self.options.required_golden_coins)
+                and ((has_pipe_right(state, self.player)
+                and has_pipe_left(state, self.player))
+                or (state.has("Mario's Castle Midway Bell", self.player)
+                and has_pipe_right(state, self.player))))
 
         for entrance, rule in entrance_rules.items():
             self.multiworld.get_entrance(entrance, self.player).access_rule = rule
