@@ -959,8 +959,15 @@ def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False):
                 if set(group_players) == group_collected_players:
                     collect_player(ctx, team, group, True)
 
-def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[int]:
-    return ctx.locations.get_remaining(ctx.location_checks, team, slot, ctx.er_hint_data)
+def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
+    def g(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int, hint_data, item_names
+                      ) -> typing.List[str]:
+        checked = state[team, slot]
+        player_locations = self[slot]
+        return sorted([item_names[player_locations[location_id][0]] + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
+                       location_id in player_locations if
+                       location_id not in checked])
+    return g(ctx.locations, ctx.location_checks, team, slot, ctx.er_hint_data, ctx.item_names)
 
 
 def send_items_to(ctx: Context, team: int, target_slot: int, *items: NetworkItem):
@@ -1286,26 +1293,39 @@ class ClientMessageProcessor(CommonCommandProcessor):
         return self.ctx.commandprocessor(command)
 
     def _cmd_spheres(self, player=None):
-        if player:
-            players = [self.ctx.player_name_lookup[player][1]]
+        if player and (player.isdigit() or player == "-1"):
+            sphere = int(player)
+            players = {player: 0 for player in self.ctx.er_hint_data.keys()}
+            checked = {player: 0 for player in self.ctx.er_hint_data.keys()}
+            for player in players:
+                for location in self.ctx.locations[player]:
+                    if (self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1] == str(sphere)) or (sphere == -1 and "Unreachable" in self.ctx.er_hint_data[player][location]):
+                        players[player] += 1
+                        if location in self.ctx.location_checks[(0, player)]:
+                            checked[player] += 1
+            self.output_multiple([f"{checked[player]}/{players[player]} Locations Checked in Sphere {sphere} by {self.ctx.player_names[(0, player)]}" for player in players if players[player] > 0])
         else:
-            players = self.ctx.er_hint_data.keys()
-        spheres = {}
-        spheres_checked = {}
-        for player in players:
-            for location in self.ctx.locations[player]:
-                if "Unreachable" in self.ctx.er_hint_data[player][location]:
-                    sphere = -1
-                else:
-                    sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
-                if sphere not in spheres:
-                    spheres[sphere] = 0
-                    spheres_checked[sphere] = 0
-                spheres[sphere] += 1
-                if location in self.ctx.location_checks[(0, player)]:
-                    spheres_checked[sphere] += 1
-        text = "\n".join(sorted([f"{spheres_checked[sphere]}/{spheres[sphere]} Checked Locations in Sphere {sphere}" for sphere in spheres], key=lambda text: int(text.split(" ")[-1])))
-        self.output(text)
+            if player:
+                player = str(player)
+                players = [self.ctx.player_name_lookup[player][1]]
+            else:
+                players = self.ctx.er_hint_data.keys()
+            spheres = {}
+            spheres_checked = {}
+            for player in players:
+                for location in self.ctx.locations[player]:
+                    if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                        sphere = -1
+                    else:
+                        sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                    if sphere not in spheres:
+                        spheres[sphere] = 0
+                        spheres_checked[sphere] = 0
+                    spheres[sphere] += 1
+                    if location in self.ctx.location_checks[(0, player)]:
+                        spheres_checked[sphere] += 1
+            text = "\n".join(sorted([f"{spheres_checked[sphere]}/{spheres[sphere]} Checked Locations in Sphere {sphere}" for sphere in spheres], key=lambda text: int(text.split(" ")[-1])))
+            self.output(text)
 
     def _cmd_players(self) -> bool:
         """Get information about connected and missing players."""
@@ -1368,8 +1388,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
         if self.ctx.remaining_mode == "enabled":
             remaining_item_ids = get_remaining(self.ctx, self.client.team, self.client.slot)
             if remaining_item_ids:
-                self.output("Remaining items: " + ", ".join(self.ctx.item_names[item_id]
-                                                            for item_id in remaining_item_ids))
+                self.output_multiple(["Remaining: " + itemn for itemn in remaining_item_ids])
             else:
                 self.output("No remaining items found.")
             return True
@@ -1381,8 +1400,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
             if self.ctx.client_game_state[self.client.team, self.client.slot] == ClientStatus.CLIENT_GOAL:
                 remaining_item_ids = get_remaining(self.ctx, self.client.team, self.client.slot)
                 if remaining_item_ids:
-                    self.output("Remaining items: " + ", ".join(self.ctx.item_names[item_id]
-                                                                for item_id in remaining_item_ids))
+                    self.output_multiple(["Remaining: " + itemn for itemn in remaining_item_ids])
                 else:
                     self.output("No remaining items found.")
                 return True
