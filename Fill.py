@@ -83,14 +83,14 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
 
             # if minimal accessibility, only check whether location is reachable if game not beatable
             if multiworld.worlds[item_to_place.player].options.accessibility == Accessibility.option_minimal:
-                perform_access_check = not multiworld.has_beaten_game(maximum_exploration_state,
-                                                                 item_to_place.player) \
+                perform_access_check = (item_to_place.player not in multiworld.groups and not multiworld.has_beaten_game(maximum_exploration_state,
+                                        item_to_place.player)) \
                     if single_player_placement else not has_beaten_game
             else:
                 perform_access_check = True
 
             for i, location in enumerate(locations):
-                if (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)) \
+                if (location.player == item_to_place.player or (item_to_place.player in multiworld.groups and location.player in multiworld.groups[item_to_place.player]["players"]) or (location.player in z and item_to_place.player in z)) \
                         and location.can_fill(maximum_exploration_state, item_to_place, perform_access_check):
                     # popping by index is faster than removing by content,
                     spot_to_fill = locations.pop(i)
@@ -611,20 +611,20 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                             loc.item, loc2.item = loc2.item, loc.item
                             break
 
-    sc2_player = 6
-    supplies = 0
-    for location in multiworld.get_locations():
-        if location.address and multiworld.random.randint(0, 4):
-            if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
-                    or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
-                    or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
-                                              "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up")):
-                if supplies < 200:
-                    location.item = multiworld.worlds[sc2_player].create_item("Additional Starting Supply")
-                    supplies += 1
-                else:
-                    location.item = multiworld.worlds[sc2_player].create_item(multiworld.random.choice(
-                        ("Additional Starting Minerals", "Additional Starting Vespene")))
+    # sc2_player = 6
+    # supplies = 0
+    # for location in multiworld.get_locations():
+    #     if location.address and multiworld.random.randint(0, 4):
+    #         if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
+    #                 or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
+    #                 or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
+    #                                           "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up")):
+    #             if supplies < 200:
+    #                 location.item = multiworld.worlds[sc2_player].create_item("Additional Starting Supply")
+    #                 supplies += 1
+    #             else:
+    #                 location.item = multiworld.worlds[sc2_player].create_item(multiworld.random.choice(
+    #                     ("Additional Starting Minerals", "Additional Starting Vespene")))
 
 
 def flood_items(multiworld: MultiWorld) -> None:
