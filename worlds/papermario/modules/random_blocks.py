@@ -26,10 +26,13 @@ def get_block_placement(
     # make list of blocks to shuffle, taking care to change supers to normal item blocks if that setting is on
     for block, data in block_table.items():
         block_names.append(block)
-        if data[4] == BlockType.SUPER and supers_are_yellow:
-            block_values.append(2)  # BlockType.YELLOW
+        if data[4] == BlockType.SUPER:
+            if supers_are_yellow:
+                block_values.append(BlockType.YELLOW)
+            else:
+                block_values.append(BlockType.SUPER)
         else:
-            block_values.append(data[4])
+            block_values.append(BlockType.YELLOW)
 
     if shuffle_blocks:
         random.shuffle(block_values)

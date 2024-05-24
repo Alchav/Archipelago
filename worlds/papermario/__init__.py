@@ -748,4 +748,4 @@ class PaperMarioWorld(World):
             self.multiworld.player_name[self.player]]
 
     def get_filler_item_name(self) -> str:
-        return "Super Shroom"
+        return self.random.choice(sorted(self.item_name_groups["Consumables"]))
