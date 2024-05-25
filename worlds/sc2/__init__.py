@@ -62,6 +62,7 @@ class SC2World(World):
         super(SC2World, self).__init__(multiworld, player)
         self.location_cache = []
         self.locked_locations = []
+        self.filtered_items = []
 
     def create_item(self, name: str) -> Item:
         data = get_full_item_list()[name]

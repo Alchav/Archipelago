@@ -610,21 +610,24 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                         if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
                             loc.item, loc2.item = loc2.item, loc.item
                             break
+    world = multiworld.get_game_worlds("Starcraft 2")[0]
+    sc2_items = world.filtered_items
+    sc2_items += [world.create_item("Additional Starting Supply") for _ in range(20)]
+    sc2_items += [world.create_item("Additional Starting Minerals") for _ in range(20)]
+    sc2_items += [world.create_item("Additional Starting Vespene") for _ in range(20)]
 
-    # sc2_player = 6
-    # supplies = 0
-    # for location in multiworld.get_locations():
-    #     if location.address and multiworld.random.randint(0, 4):
-    #         if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
-    #                 or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
-    #                 or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
-    #                                           "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up")):
-    #             if supplies < 200:
-    #                 location.item = multiworld.worlds[sc2_player].create_item("Additional Starting Supply")
-    #                 supplies += 1
-    #             else:
-    #                 location.item = multiworld.worlds[sc2_player].create_item(multiworld.random.choice(
-    #                     ("Additional Starting Minerals", "Additional Starting Vespene")))
+    locs = list(multiworld.get_locations())
+    multiworld.random.shuffle(locs)
+    for location in locs:
+        if not sc2_items:
+            break
+        if location.address:
+            if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
+                    or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
+                    or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
+                                              "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up",
+                                              "Deku Seeds (30)", "Mystery")):
+                location.item = sc2_items.pop()
 
 
 def flood_items(multiworld: MultiWorld) -> None:

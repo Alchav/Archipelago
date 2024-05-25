@@ -260,7 +260,8 @@ class ValidInventory:
             len(FACTORY_UNITS.intersection(self.logical_inventory)) > self.min_units_per_structure and \
             len(STARPORT_UNITS.intersection(self.logical_inventory)) > self.min_units_per_structure
 
-    def generate_reduced_inventory(self, inventory_size: int, mission_requirements: List[Tuple[str, Callable]]) -> List[Item]:
+    def generate_reduced_inventory(self, inventory_size: int, mission_requirements: List[Tuple[str, Callable]]) -> \
+    tuple[list[Item], list[Item]]:
         """Attempts to generate a reduced inventory that can fulfill the mission requirements."""
         inventory: List[Item] = list(self.item_pool)
         locked_items: List[Item] = list(self.locked_items)
@@ -273,6 +274,7 @@ class ValidInventory:
         parent_items = self.item_children.keys()
         parent_lookup = {child: parent for parent, children in self.item_children.items() for child in children}
         minimum_upgrades = get_option_value(self.world, "min_number_of_upgrades")
+        filtered_items = []
 
         def attempt_removal(item: Item) -> bool:
             inventory.remove(item)
@@ -285,6 +287,7 @@ class ValidInventory:
                     for _ in range(get_item_quantity(item, self.world)):
                         locked_items.append(copy_item(item))
                     return False
+            filtered_items.append(item)
             return True
 
         # Limit the maximum number of upgrades
@@ -374,11 +377,12 @@ class ValidInventory:
                 while len(removable_generic_items) > 0 and len(locked_items) > inventory_size:
                     removed_item = removable_generic_items.pop()
                     locked_items.remove(removed_item)
+                    filtered_items.append(removed_item)
                 # If there still isn't enough space, push locked items into start inventory
                 self.world.random.shuffle(locked_items)
                 while len(locked_items) > inventory_size:
                     item: Item = locked_items.pop()
-                    self.multiworld.push_precollected(item)
+                    filtered_items.append(item)
                 break
             # Select random item from removable items
             item = self.world.random.choice(inventory)
@@ -552,7 +556,7 @@ class ValidInventory:
             item = replacement_items.pop()
             inventory.append(item)
 
-        return inventory
+        return inventory, filtered_items
 
     def __init__(self, world: World ,
                  item_pool: List[Item], existing_items: List[Item], locked_items: List[Item],
@@ -619,7 +623,8 @@ def filter_items(world: World, mission_req_table: Dict[SC2Campaign, Dict[str, Mi
     mission_requirements = [(location.name, location.access_rule) for location in location_cache]
     valid_inventory = ValidInventory(world, item_pool, existing_items, locked_items, used_races, nova_equipment_used)
 
-    valid_items = valid_inventory.generate_reduced_inventory(inventory_size, mission_requirements)
+    valid_items, filtered_items = valid_inventory.generate_reduced_inventory(inventory_size, mission_requirements)
+    world.filtered_items = filtered_items
     return valid_items
 
 

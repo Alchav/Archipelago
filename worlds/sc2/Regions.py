@@ -291,8 +291,8 @@ def create_grid_regions(
     # each diagonal will have the same difficulty
     # this keeps long sides from possibly stealing lower-difficulty missions from future columns
     num_diagonals = grid_size_x + grid_size_y - 1
-    diagonal_difficulty = MissionPools.STARTER
-    missions_to_add = mission_pools[MissionPools.STARTER]
+    diagonal_difficulty = MissionPools.EASY
+    missions_to_add = mission_pools[MissionPools.EASY]
     for diagonal in range(num_diagonals):
         if diagonal == num_diagonals - 1:
             diagonal_difficulty = MissionPools.FINAL
