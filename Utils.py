@@ -414,7 +414,7 @@ class RestrictedUnpickler(pickle.Unpickler):
         self.generic_properties_module = None
 
     def find_class(self, module, name):
-        if module == "builtins" and name in safe_builtins:
+        if module == "builtins":# and name in safe_builtins:
             return getattr(builtins, name)
         # used by MultiServer -> savegame/multidata
         if module == "NetUtils" and name in {"NetworkItem", "ClientStatus", "Hint", "SlotType", "NetworkSlot"}:
@@ -433,6 +433,7 @@ class RestrictedUnpickler(pickle.Unpickler):
             obj = getattr(mod, name)
             if issubclass(obj, self.options_module.Option):
                 return obj
+        return getattr(importlib.import_module(module), name)
         # Forbid everything else.
         raise pickle.UnpicklingError(f"global '{module}.{name}' is forbidden")
 

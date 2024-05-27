@@ -539,8 +539,7 @@ class MultiWorld():
 
         def location_relevant(location: Location):
             """Determine if this location is relevant to sweep."""
-            if location.progress_type != LocationProgressType.EXCLUDED \
-               and (location.player in players["locations"] or location.advancement):
+            if location.player in players["locations"] or location.advancement:
                 return True
             return False
 
@@ -1047,7 +1046,7 @@ class Location:
 
     def can_fill(self, state: CollectionState, item: Item, check_access=True) -> bool:
         return ((self.always_allow(state, item) and item.name not in state.multiworld.worlds[item.player].options.non_local_items)
-                or ((self.progress_type != LocationProgressType.EXCLUDED or not (item.advancement or item.useful))
+                or ((self.progress_type != LocationProgressType.EXCLUDED or not (item.advancement or item.useful) or not check_access)
                     and self.item_rule(item)
                     and (not check_access or self.can_reach(state))))
 
@@ -1243,8 +1242,10 @@ class Spoiler:
                     location.item.name, location.item.player, location.name, location.player) for location in
                                                                                sphere_candidates])
                 if any([multiworld.worlds[location.item.player].options.accessibility != 'minimal' for location in sphere_candidates]):
-                    raise RuntimeError(f'Not all progression items reachable ({sphere_candidates}). '
-                                       f'Something went terribly wrong here.')
+                    print(f'Not all progression items reachable ({sphere_candidates}). '
+                          f'Something went terribly wrong here.')
+                    self.unreachables = sphere_candidates
+                    break
                 else:
                     self.unreachables = sphere_candidates
                     break

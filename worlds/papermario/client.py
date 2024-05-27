@@ -89,6 +89,8 @@ class PaperMarioClient(BizHawkClient):
                     # items in the player's game will have the biggest available ID,
                     # when receiving we give the smallest
                     item_id = next_item.item - item_id_prefix
+                    if item_id == 0:
+                        item_id = 343
                     if item_id in item_multiples_ids.keys():
                         repeat_id = 0
 

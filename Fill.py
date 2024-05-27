@@ -27,7 +27,7 @@ def sweep_from_pool(base_state: CollectionState, itempool: typing.Sequence[Item]
     new_state.sweep_for_events(locations=locations)
     return new_state
 
-z = [4, 14, 20, 13, 25]
+z = [3, 6, 18]
 def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locations: typing.List[Location],
                      item_pool: typing.List[Item], single_player_placement: bool = False, lock: bool = False,
                      swap: bool = True, on_place: typing.Optional[typing.Callable[[Location], None]] = None,
@@ -69,8 +69,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                     item_pool.pop(p)
                     break
         maximum_exploration_state = sweep_from_pool(
-            base_state, item_pool + unplaced_items, multiworld.get_filled_locations(item.player)
-            if single_player_placement else None)
+            base_state, item_pool + unplaced_items, None)
 
         has_beaten_game = multiworld.has_beaten_game(maximum_exploration_state)
 
@@ -121,8 +120,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                         location.item = None
                         placed_item.location = None
                         swap_state = sweep_from_pool(base_state, [placed_item, *item_pool] if unsafe else item_pool,
-                                                     multiworld.get_filled_locations(item.player)
-                                                     if single_player_placement else None)
+                                                     None)
                         # unsafe means swap_state assumes we can somehow collect placed_item before item_to_place
                         # by continuing to swap, which is not guaranteed. This is unsafe because there is no mechanic
                         # to clean that up later, so there is a chance generation fails.
@@ -181,8 +179,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
     if cleanup_required:
         # validate all placements and remove invalid ones
         state = sweep_from_pool(
-            base_state, [], multiworld.get_filled_locations(item.player)
-            if single_player_placement else None)
+            base_state, [], None)
         for placement in placements:
             if multiworld.worlds[placement.item.player].options.accessibility != "minimal" and not placement.can_reach(state):
                 placement.item.location = None
@@ -465,10 +462,10 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
         loc_type: [] for loc_type in LocationProgressType}
 
     for loc in fill_locations:
-        if (loc.progress_type == LocationProgressType.EXCLUDED
-                and multiworld.worlds[loc.player].options.accessibility != "locations"):
-            loc.progress_type = LocationProgressType.DEFAULT
-            loc.access_rule = lambda state: False
+        # if (loc.progress_type == LocationProgressType.EXCLUDED
+        #         and multiworld.worlds[loc.player].options.accessibility != "locations"):
+        #     loc.progress_type = LocationProgressType.DEFAULT
+        #     loc.access_rule = lambda state: False
         locations[loc.progress_type].append(loc)
 
     prioritylocations = locations[LocationProgressType.PRIORITY]
@@ -618,6 +615,7 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                         if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
                             loc.item, loc2.item = loc2.item, loc.item
                             break
+
     world = multiworld.get_game_worlds("Starcraft 2")[0]
     sc2_items = world.filtered_items
     sc2_items += [world.create_item("Additional Starting Supply") for _ in range(20)]
