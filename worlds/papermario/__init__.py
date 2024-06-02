@@ -658,7 +658,7 @@ class PaperMarioWorld(World):
         if item.name == "3x Star Pieces":
             state.prog_items[self.player]["Star Piece"] += 3
         # Quizmo star pieces are events that can exist in multiple places, format "StarPiece_MAC_1"
-        elif item.name.startswith("StarPiece_") and state.prog_items[self.player][item.name] == 1:
+        elif item.name.startswith("StarPiece_") and state.prog_items[self.player][item.name] == 0:
             state.prog_items[self.player]["Star Piece"] += 1
         return super().collect(state, item)
 

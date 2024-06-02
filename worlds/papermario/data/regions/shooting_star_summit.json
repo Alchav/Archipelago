@@ -68,8 +68,8 @@
     "map_id": "3",
     "map_name": "Star Haven",
     "events": {
-      "Star_Piece_HOS_1": "True",
-      "Star_Piece_HOS_8": "True"
+      "StarPiece_HOS_1": "True",
+      "StarPiece_HOS_8": "True"
     },
     "locations": {
       "SSS Star Haven Shop Item 1": "Boots",
