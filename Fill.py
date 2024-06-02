@@ -616,7 +616,10 @@ def distribute_items_restrictive(multiworld: MultiWorld) -> None:
                             loc.item, loc2.item = loc2.item, loc.item
                             break
 
-    world = multiworld.get_game_worlds("Starcraft 2")[0]
+    sc2_worlds = multiworld.get_game_worlds("Starcraft 2")
+    if not sc2_worlds:
+        return
+    world = sc2_worlds[0]
     sc2_items = world.filtered_items
     sc2_items += [world.create_item("Additional Starting Supply") for _ in range(20)]
     sc2_items += [world.create_item("Additional Starting Minerals") for _ in range(20)]
