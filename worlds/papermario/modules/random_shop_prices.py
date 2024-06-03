@@ -26,9 +26,9 @@ def get_shop_price(node: PMLocation,
             # even if an item is placed in an expensive reward slot,
             # gathering the required star pieces becomes much easier
             # overall.
-            starpiece_increments = 10
+            starpiece_increments = 14
             if merlow_cost_setting == MerlowRewardsPricing.option_Cheap:
-                starpiece_increments = 5
+                starpiece_increments = 7
 
             if "ShopRewardA" in node.identifier:
                 buy_price = starpiece_increments * 1
@@ -45,21 +45,21 @@ def get_shop_price(node: PMLocation,
         else:
             # Merlow's StarPiece trade (for a total cost of all 112 StarPieces)
             if any(True for i in ["ShopBadgeA", "ShopBadgeB"] if i in node.identifier):
-                buy_price = 1
+                buy_price = 7
             elif any(True for i in ["ShopBadgeC", "ShopBadgeD"] if i in node.identifier):
-                buy_price = 2
+                buy_price = 7
             elif any(True for i in ["ShopBadgeE", "ShopBadgeF"] if i in node.identifier):
-                buy_price = 4
+                buy_price = 7
             elif any(True for i in ["ShopBadgeG", "ShopBadgeH"] if i in node.identifier):
-                buy_price = 6
+                buy_price = 7
             elif any(True for i in ["ShopBadgeI", "ShopBadgeJ"] if i in node.identifier):
-                buy_price = 8
+                buy_price = 7
             elif any(True for i in ["ShopBadgeK", "ShopBadgeL"] if i in node.identifier):
-                buy_price = 10
+                buy_price = 7
             elif any(True for i in ["ShopBadgeM", "ShopBadgeN"] if i in node.identifier):
-                buy_price = 15
+                buy_price = 7
             elif "ShopBadgeO" in node.identifier:
-                buy_price = 20
+                buy_price = 7
     else:
         # Regular Shop
         item_type = item.type
