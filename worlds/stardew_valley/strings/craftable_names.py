@@ -25,6 +25,7 @@ class WildSeeds:
     winter = "Winter Seeds"
     ancient = "Ancient Seeds"
     grass_starter = "Grass Starter"
+    blue_grass_starter = "Blue Grass Starter"
     tea_sapling = "Tea Sapling"
     fiber = "Fiber Seeds"
 
@@ -48,6 +49,7 @@ class Floor:
 class Fishing:
     spinner = "Spinner"
     trap_bobber = "Trap Bobber"
+    sonar_bobber = "Sonar Bobber"
     cork_bobber = "Cork Bobber"
     quality_bobber = "Quality Bobber"
     treasure_hunter = "Treasure Hunter"
@@ -59,6 +61,8 @@ class Fishing:
     magic_bait = "Magic Bait"
     lead_bobber = "Lead Bobber"
     curiosity_lure = "Curiosity Lure"
+    deluxe_bait = "Deluxe Bait"
+    challenge_bait = "Challenge Bait"
 
 
 class Ring:
@@ -88,6 +92,15 @@ class Consumable:
     warp_totem_desert = "Warp Totem: Desert"
     warp_totem_island = "Warp Totem: Island"
     rain_totem = "Rain Totem"
+    mystery_box = "Mystery Box"
+    gold_mystery_box = "Golden Mystery Box"
+    treasure_totem = "Treasure Totem"
+    fireworks_red = "Fireworks (Red)"
+    fireworks_purple = "Fireworks (Purple)"
+    fireworks_green = "Fireworks (Green)"
+    far_away_stone = "Far Away Stone"
+    golden_animal_cracker = "Golden Animal Cracker"
+    butterfly_powder = "Butterfly Powder"
 
 
 class Lighting:
@@ -116,12 +129,20 @@ class Furniture:
 class Storage:
     chest = "Chest"
     stone_chest = "Stone Chest"
+    big_chest = "Big Chest"
+    big_stone_chest = "Big Stone Chest"
 
 
 class Sign:
     wood = "Wood Sign"
     stone = "Stone Sign"
     dark = "Dark Sign"
+    text = "Text Sign"
+
+
+class Statue:
+    blessings = "Statue Of Blessings"
+    dwarf_king = "Statue Of The Dwarf King"
 
 
 class Craftable:
@@ -137,6 +158,7 @@ class Craftable:
     farm_computer = "Farm Computer"
     hopper = "Hopper"
     cookout_kit = "Cookout Kit"
+    tent_kit = "Tent Kit"
 
 
 class ModEdible:

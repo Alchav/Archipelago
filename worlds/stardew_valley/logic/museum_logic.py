@@ -6,10 +6,13 @@ from .base_logic import BaseLogic, BaseLogicMixin
 from .has_logic import HasLogicMixin
 from .received_logic import ReceivedLogicMixin
 from .region_logic import RegionLogicMixin
+from .tool_logic import ToolLogicMixin
 from .. import options
 from ..data.museum_data import MuseumItem, all_museum_items, all_museum_artifacts, all_museum_minerals
-from ..stardew_rule import StardewRule, And, False_
+from ..stardew_rule import StardewRule, False_
+from ..strings.metal_names import Mineral
 from ..strings.region_names import Region
+from ..strings.tool_names import Tool, ToolMaterial
 
 
 class MuseumLogicMixin(BaseLogicMixin):
@@ -18,7 +21,7 @@ class MuseumLogicMixin(BaseLogicMixin):
         self.museum = MuseumLogic(*args, **kwargs)
 
 
-class MuseumLogic(BaseLogic[Union[ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, ActionLogicMixin, MuseumLogicMixin]]):
+class MuseumLogic(BaseLogic[Union[ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, ActionLogicMixin, ToolLogicMixin, MuseumLogicMixin]]):
 
     def can_donate_museum_items(self, number: int) -> StardewRule:
         return self.logic.region.can_reach(Region.museum) & self.logic.museum.can_find_museum_items(number)
@@ -33,14 +36,14 @@ class MuseumLogic(BaseLogic[Union[ReceivedLogicMixin, HasLogicMixin, RegionLogic
         else:
             region_rule = False_()
         if item.geodes:
-            geodes_rule = And(*(self.logic.action.can_open_geode(geode) for geode in item.geodes))
+            geodes_rule = self.logic.and_(*(self.logic.action.can_open_geode(geode) for geode in item.geodes))
         else:
             geodes_rule = False_()
         # monster_rule = self.can_farm_monster(item.monsters)
         # extra_rule = True_()
         pan_rule = False_()
-        if item.item_name == "Earth Crystal" or item.item_name == "Fire Quartz" or item.item_name == "Frozen Tear":
-            pan_rule = self.logic.action.can_pan()
+        if item.item_name == Mineral.earth_crystal or item.item_name == Mineral.fire_quartz or item.item_name == Mineral.frozen_tear:
+            pan_rule = self.logic.tool.has_tool(Tool.pan, ToolMaterial.iridium)
         return pan_rule | region_rule | geodes_rule  # & monster_rule & extra_rule
 
     def can_find_museum_artifacts(self, number: int) -> StardewRule:
@@ -74,7 +77,7 @@ class MuseumLogic(BaseLogic[Union[ReceivedLogicMixin, HasLogicMixin, RegionLogic
 
         for donation in all_museum_items:
             rules.append(self.logic.museum.can_find_museum_item(donation))
-        return And(*rules) & self.logic.region.can_reach(Region.museum)
+        return self.logic.and_(*rules) & self.logic.region.can_reach(Region.museum)
 
     def can_donate(self, item: str) -> StardewRule:
         return self.logic.has(item) & self.logic.region.can_reach(Region.museum)

@@ -10,7 +10,7 @@ from ...logic.skill_logic import SkillLogicMixin
 from ...logic.tool_logic import ToolLogicMixin
 from ...mods.mod_data import ModNames
 from ...options import ElevatorProgression
-from ...stardew_rule import StardewRule, True_, And, true_
+from ...stardew_rule import StardewRule, True_, true_
 from ...strings.ap_names.mods.mod_items import DeepWoodsItem, SkillLevel
 from ...strings.ap_names.transport_names import ModTransportation
 from ...strings.craftable_names import Bomb
@@ -45,11 +45,11 @@ CookingLogicMixin]]):
                          self.logic.received(ModTransportation.woods_obelisk))
 
         tier = int(depth / 25) + 1
-        if self.options.skill_progression == options.SkillProgression.option_progressive:
+        if self.options.skill_progression >= options.SkillProgression.option_progressive:
             combat_tier = min(10, max(0, tier + 5))
             rules.append(self.logic.skill.has_level(Skill.combat, combat_tier))
 
-        return And(*rules)
+        return self.logic.and_(*rules)
 
     def has_woods_rune_to_depth(self, floor: int) -> StardewRule:
         if self.options.elevator_progression == ElevatorProgression.option_vanilla:
@@ -70,4 +70,4 @@ CookingLogicMixin]]):
         else:
             rules.append(
                 self.logic.has(Meal.magic_rock_candy))  # You need more luck than this, but it'll push the logic down a ways; you can get the rest there.
-        return And(*rules)
+        return self.logic.and_(*rules)

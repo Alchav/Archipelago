@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from typing import Protocol, ClassVar
 
@@ -73,6 +74,7 @@ class FarmType(Choice):
     option_wilderness = 4
     option_four_corners = 5
     option_beach = 6
+    option_meadowlands = 7
 
 
 class StartingMoney(NamedRange):
@@ -255,12 +257,14 @@ class ElevatorProgression(Choice):
 class SkillProgression(Choice):
     """Shuffle skill levels?
     Vanilla: Leveling up skills is normal
-    Progressive: Skill levels are unlocked randomly, and earning xp sends checks"""
+    Progressive: Skill levels are unlocked randomly, and earning xp sends checks. Masteries are excluded
+    With Masteries: Skill levels are unlocked randomly, and earning xp sends checks. Masteries are included"""
     internal_name = "skill_progression"
     display_name = "Skill Progression"
-    default = 1
+    default = 2
     option_vanilla = 0
     option_progressive = 1
+    option_progressive_with_masteries = 2
 
 
 class BuildingProgression(Choice):
@@ -533,6 +537,22 @@ class FriendsanityHeartSize(Range):
     # step = 1
 
 
+class Booksanity(Choice):
+    """Shuffle Books?
+    None: All books behave like vanilla
+    Power: Power books are turned into checks
+    Power and Skill: Power and skill books are turned into checks.
+    All: Lost books are also included in the shuffling
+    """
+    internal_name = "booksanity"
+    display_name = "Booksanity"
+    default = 2
+    option_none = 0
+    option_power = 1
+    option_power_skill = 2
+    option_all = 3
+
+
 class NumberOfMovementBuffs(Range):
     """Number of movement speed buffs to the player that exist as items in the pool.
     Each movement speed buff is a +25% multiplier that stacks additively"""
@@ -678,19 +698,32 @@ class Gifting(Toggle):
     default = 1
 
 
+# These mods have been disabled because either they are not updated for the current supported version of Stardew Valley,
+# or we didn't find the time to validate that they work or fix compatibility issues if they do.
+# Once a mod is validated to be functional, it can simply be removed from this list
+disabled_mods = {ModNames.deepwoods, ModNames.tractor,
+                 ModNames.luck_skill, ModNames.magic, ModNames.socializing_skill, ModNames.archaeology,
+                 ModNames.cooking_skill, ModNames.binning_skill, ModNames.juna,
+                 ModNames.yoba, ModNames.eugene,
+                 ModNames.wellwick, ModNames.shiko, ModNames.delores,
+                 ModNames.ayeisha, ModNames.riley, ModNames.sve, ModNames.distant_lands,
+                 ModNames.lacey, ModNames.boarding_house}
+
+if 'unittest' in sys.modules.keys() or 'pytest' in sys.modules.keys():
+    disabled_mods = {}
+
+
 class Mods(OptionSet):
     """List of mods that will be included in the shuffling."""
     internal_name = "mods"
     display_name = "Mods"
-    valid_keys = {
-        ModNames.deepwoods, ModNames.tractor, ModNames.big_backpack,
-        ModNames.luck_skill, ModNames.magic, ModNames.socializing_skill, ModNames.archaeology,
-        ModNames.cooking_skill, ModNames.binning_skill, ModNames.juna,
-        ModNames.jasper, ModNames.alec, ModNames.yoba, ModNames.eugene,
-        ModNames.wellwick, ModNames.ginger, ModNames.shiko, ModNames.delores,
-        ModNames.ayeisha, ModNames.riley, ModNames.skull_cavern_elevator, ModNames.sve, ModNames.distant_lands,
-        ModNames.alecto, ModNames.lacey, ModNames.boarding_house
-    }
+    valid_keys = {ModNames.deepwoods, ModNames.tractor, ModNames.big_backpack,
+                  ModNames.luck_skill, ModNames.magic, ModNames.socializing_skill, ModNames.archaeology,
+                  ModNames.cooking_skill, ModNames.binning_skill, ModNames.juna,
+                  ModNames.jasper, ModNames.alec, ModNames.yoba, ModNames.eugene,
+                  ModNames.wellwick, ModNames.ginger, ModNames.shiko, ModNames.delores,
+                  ModNames.ayeisha, ModNames.riley, ModNames.skull_cavern_elevator, ModNames.sve, ModNames.distant_lands,
+                  ModNames.alecto, ModNames.lacey, ModNames.boarding_house}.difference(disabled_mods)
 
 
 @dataclass
@@ -720,6 +753,7 @@ class StardewValleyOptions(PerGameCommonOptions):
     craftsanity: Craftsanity
     friendsanity: Friendsanity
     friendsanity_heart_size: FriendsanityHeartSize
+    booksanity: Booksanity
     exclude_ginger_island: ExcludeGingerIsland
     quick_start: QuickStart
     starting_money: StartingMoney

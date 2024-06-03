@@ -1,14 +1,21 @@
 from collections import Counter
 
+from BaseClasses import ItemClassification
 from . import SVTestBase
-from .. import options, HasProgressionPercent
+from .. import options, HasProgressionPercent, Event
 from ..data.craftable_data import all_crafting_recipes_by_name
 from ..locations import locations_by_tag, LocationTags, location_table
 from ..options import ToolProgression, BuildingProgression, ExcludeGingerIsland, Chefsanity, Craftsanity, Shipsanity, SeasonRandomization, Friendsanity, \
-    FriendsanityHeartSize, BundleRandomization, SkillProgression
+    FriendsanityHeartSize, BundleRandomization, SkillProgression, Museumsanity, FarmType
 from ..strings.entrance_names import Entrance
 from ..strings.region_names import Region
 from ..strings.tool_names import Tool, ToolMaterial
+
+
+class TestHasProgressionPercent(SVTestBase):
+    def test_max_item_amount_is_full_collection(self):
+        progression_item_count = sum(1 for i in self.multiworld.get_items() if ItemClassification.progression in i.classification)
+        self.assertEqual(self.world.total_progression_items, progression_item_count - 1)  # -1 to skip Victory
 
 
 class TestProgressiveToolsLogic(SVTestBase):
@@ -77,10 +84,12 @@ class TestProgressiveToolsLogic(SVTestBase):
         self.assert_rule_true(rule, self.multiworld.state)
 
         self.remove(fall)
+        self.remove(self.world.create_item(Event.fall_farming))
         self.assert_rule_false(rule, self.multiworld.state)
         self.remove(tuesday)
 
         green_house = self.world.create_item("Greenhouse")
+        self.collect(self.world.create_item(Event.fall_farming))
         self.multiworld.state.collect(green_house, event=False)
         self.assert_rule_false(rule, self.multiworld.state)
 
@@ -89,8 +98,21 @@ class TestProgressiveToolsLogic(SVTestBase):
         self.assertTrue(self.multiworld.get_location("Old Master Cannoli", 1).access_rule(self.multiworld.state))
 
         self.remove(green_house)
+        self.remove(self.world.create_item(Event.fall_farming))
         self.assert_rule_false(rule, self.multiworld.state)
         self.remove(friday)
+
+
+class TestMuseumMilestones(SVTestBase):
+    options = {
+        Museumsanity.internal_name: Museumsanity.option_milestones
+    }
+
+    def test_50_milestone(self):
+        self.multiworld.state.prog_items = {1: Counter()}
+
+        milestone_rule = self.world.logic.museum.can_find_museum_items(50)
+        self.assert_rule_false(milestone_rule, self.multiworld.state)
 
 
 class TestBundlesLogic(SVTestBase):
@@ -107,7 +129,8 @@ class TestBundlesLogic(SVTestBase):
 
 class TestBuildingLogic(SVTestBase):
     options = {
-        BuildingProgression.internal_name: BuildingProgression.option_progressive
+        FarmType.internal_name: FarmType.option_standard,
+        BuildingProgression.internal_name: BuildingProgression.option_progressive,
     }
 
     def test_coop_blueprint(self):

@@ -1,12 +1,13 @@
 import random
 
 from BaseClasses import get_seed
-from .. import setup_solo_multiworld, SVTestBase, SVTestCase, allsanity_options_without_mods, allsanity_options_with_mods, complete_options_with_default
+from .. import setup_solo_multiworld, SVTestBase, SVTestCase, allsanity_no_mods_5_x_x, allsanity_mods_5_x_x, complete_options_with_default
 from ..assertion import ModAssertMixin, WorldAssertMixin
 from ... import items, Group, ItemClassification
 from ... import options
 from ...items import items_by_group
 from ...mods.mod_data import all_mods
+from ...options import SkillProgression
 from ...regions import RandomizationFlag, randomize_connections, create_final_connections_and_regions
 
 
@@ -30,11 +31,11 @@ class TestGenerateModsOptions(WorldAssertMixin, ModAssertMixin, SVTestCase):
                     self.assert_stray_mod_items(mod, multi_world)
 
     def test_allsanity_all_mods_when_generate_then_basic_checks(self):
-        with self.solo_world_sub_test(world_options=allsanity_options_with_mods(), dirty_state=True) as (multi_world, _):
+        with self.solo_world_sub_test(world_options=allsanity_mods_5_x_x(), dirty_state=True) as (multi_world, _):
             self.assert_basic_checks(multi_world)
 
     def test_allsanity_all_mods_exclude_island_when_generate_then_basic_checks(self):
-        world_options = allsanity_options_with_mods()
+        world_options = allsanity_mods_5_x_x()
         world_options.update({options.ExcludeGingerIsland.internal_name: options.ExcludeGingerIsland.option_true})
         with self.solo_world_sub_test(world_options=world_options, dirty_state=True) as (multi_world, _):
             self.assert_basic_checks(multi_world)
@@ -50,12 +51,14 @@ class TestBaseLocationDependencies(SVTestBase):
 
 class TestBaseItemGeneration(SVTestBase):
     options = {
-        options.Friendsanity.internal_name: options.Friendsanity.option_all_with_marriage,
         options.SeasonRandomization.internal_name: options.SeasonRandomization.option_progressive,
+        options.SkillProgression.internal_name: options.SkillProgression.option_progressive_with_masteries,
         options.SpecialOrderLocations.internal_name: options.SpecialOrderLocations.option_board_qi,
+        options.Friendsanity.internal_name: options.Friendsanity.option_all_with_marriage,
         options.Shipsanity.internal_name: options.Shipsanity.option_everything,
         options.Chefsanity.internal_name: options.Chefsanity.option_all,
         options.Craftsanity.internal_name: options.Craftsanity.option_all,
+        options.Booksanity.internal_name: options.Booksanity.option_all,
         options.Mods.internal_name: all_mods
     }
 
@@ -78,12 +81,14 @@ class TestBaseItemGeneration(SVTestBase):
 
 class TestNoGingerIslandModItemGeneration(SVTestBase):
     options = {
-        options.Friendsanity.internal_name: options.Friendsanity.option_all_with_marriage,
         options.SeasonRandomization.internal_name: options.SeasonRandomization.option_progressive,
-        options.ExcludeGingerIsland.internal_name: options.ExcludeGingerIsland.option_true,
+        options.SkillProgression.internal_name: options.SkillProgression.option_progressive_with_masteries,
+        options.Friendsanity.internal_name: options.Friendsanity.option_all_with_marriage,
         options.Shipsanity.internal_name: options.Shipsanity.option_everything,
         options.Chefsanity.internal_name: options.Chefsanity.option_all,
         options.Craftsanity.internal_name: options.Craftsanity.option_all,
+        options.Booksanity.internal_name: options.Booksanity.option_all,
+        options.ExcludeGingerIsland.internal_name: options.ExcludeGingerIsland.option_true,
         options.Mods.internal_name: all_mods
     }
 
@@ -116,6 +121,7 @@ class TestModEntranceRando(SVTestCase):
             sv_options = complete_options_with_default({
                 options.EntranceRandomization.internal_name: option,
                 options.ExcludeGingerIsland.internal_name: options.ExcludeGingerIsland.option_false,
+                SkillProgression.internal_name: SkillProgression.option_progressive_with_masteries,
                 options.Mods.internal_name: all_mods
             })
             seed = get_seed()
@@ -143,7 +149,7 @@ class TestModTraps(SVTestCase):
             if value == "no_traps":
                 continue
 
-            world_options = allsanity_options_without_mods()
+            world_options = allsanity_no_mods_5_x_x()
             world_options.update({options.TrapItems.internal_name: options.TrapItems.options[value], options.Mods: "Magic"})
             multi_world = setup_solo_multiworld(world_options)
             trap_items = [item_data.name for item_data in items_by_group[Group.TRAP] if Group.DEPRECATED not in item_data.groups]
