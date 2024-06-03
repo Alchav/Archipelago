@@ -24,7 +24,7 @@ from .MissionTables import MissionInfo, SC2Campaign, lookup_name_to_mission, SC2
 
 
 class Starcraft2WebWorld(WebWorld):
-    setup = Tutorial(
+    setup_en = Tutorial(
         "Multiworld Setup Guide",
         "A guide to setting up the Starcraft 2 randomizer connected to an Archipelago Multiworld",
         "English",
@@ -33,7 +33,16 @@ class Starcraft2WebWorld(WebWorld):
         ["TheCondor", "Phaneros"]
     )
 
-    tutorials = [setup]
+    setup_fr = Tutorial(
+        setup_en.tutorial_name,
+        setup_en.description,
+        "Français",
+        "setup_fr.md",
+        "setup/fr",
+        ["Neocerber"]
+    )
+
+    tutorials = [setup_en, setup_fr]
 
 
 class SC2World(World):

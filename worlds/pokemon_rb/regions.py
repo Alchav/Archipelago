@@ -1561,7 +1561,7 @@ def create_regions(self):
                             <= self.options.trap_percentage.value and combined_traps != 0):
                         item = self.create_item(self.select_trap())
 
-                if self.options.key_items_only and (not location.event) and (not item.advancement):
+                if self.options.key_items_only and (not location.event) and (not item.advancement) and location.original_item != "Exp. All":
                     continue
 
                 if item.name in start_inventory and start_inventory[item.name] > 0 and \
