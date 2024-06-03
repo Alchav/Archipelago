@@ -117,7 +117,8 @@ class TestMuseumMilestones(SVTestBase):
 
 class TestBundlesLogic(SVTestBase):
     options = {
-        BundleRandomization.internal_name: BundleRandomization.option_vanilla
+        options.BundleRandomization: BundleRandomization.option_vanilla,
+        options.BundlePrice: options.BundlePrice.default,
     }
 
     def test_vault_2500g_bundle(self):
@@ -293,6 +294,7 @@ class TestWeaponsLogic(SVTestBase):
         self.multiworld.state.collect(self.world.create_item("Progressive Pickaxe"), event=True)
         self.multiworld.state.collect(self.world.create_item("Progressive Pickaxe"), event=True)
         self.multiworld.state.collect(self.world.create_item("Progressive Pickaxe"), event=True)
+        self.multiworld.state.collect(self.world.create_item("Progressive House"), event=True)
         self.collect([self.world.create_item("Combat Level")] * 10)
         self.collect([self.world.create_item("Mining Level")] * 10)
         self.collect([self.world.create_item("Progressive Mine Elevator")] * 24)

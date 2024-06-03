@@ -3,6 +3,7 @@ from typing import Union
 
 from Utils import cache_self1
 from .base_logic import BaseLogic, BaseLogicMixin
+from .book_logic import BookLogicMixin
 from .has_logic import HasLogicMixin
 from .received_logic import ReceivedLogicMixin
 from ..stardew_rule import StardewRule, HasProgressionPercent
@@ -23,16 +24,7 @@ class TimeLogicMixin(BaseLogicMixin):
         self.time = TimeLogic(*args, **kwargs)
 
 
-class TimeLogic(BaseLogic[Union[TimeLogicMixin, HasLogicMixin, ReceivedLogicMixin]]):
-
-    @cache_self1
-    def can_grind_item(self, quantity: int) -> StardewRule:
-        if quantity <= MIN_ITEMS:
-            return self.logic.true_
-
-        quantity = min(quantity, MAX_ITEMS)
-        price = max(1, quantity * PERCENT_REQUIRED_FOR_MAX_ITEM // MAX_ITEMS)
-        return HasProgressionPercent(self.player, price)
+class TimeLogic(BaseLogic[Union[TimeLogicMixin, HasLogicMixin, ReceivedLogicMixin, BookLogicMixin]]):
 
     @cache_self1
     def has_lived_months(self, number: int) -> StardewRule:

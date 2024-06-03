@@ -3,17 +3,19 @@ from typing import Union, Any, Iterable
 
 from .artisan_logic import ArtisanLogicMixin
 from .base_logic import BaseLogicMixin, BaseLogic
+from .grind_logic import GrindLogicMixin
 from .harvesting_logic import HarvestingLogicMixin
 from .has_logic import HasLogicMixin
 from .money_logic import MoneyLogicMixin
 from .received_logic import ReceivedLogicMixin
 from .region_logic import RegionLogicMixin
+from .requirement_logic import RequirementLogicMixin
 from .tool_logic import ToolLogicMixin
 from ..data.artisan import MachineSource
-from ..data.game_item import PermanentSource, ItemSource, GameItem, GenericToolSource
+from ..data.game_item import GenericSource, ItemSource, GameItem, CustomRuleSource
 from ..data.harvest import ForagingSource, FruitBatsSource, MushroomCaveSource, SeasonalForagingSource, \
     HarvestCropSource, HarvestFruitTreeSource
-from ..data.shop import ShopSource
+from ..data.shop import ShopSource, MysteryBoxSource, ArtifactTroveSource, PrizeMachineSource, FishingTreasureChestSource
 
 
 class SourceLogicMixin(BaseLogicMixin):
@@ -23,7 +25,7 @@ class SourceLogicMixin(BaseLogicMixin):
 
 
 class SourceLogic(BaseLogic[Union[SourceLogicMixin, HasLogicMixin, ReceivedLogicMixin, HarvestingLogicMixin, MoneyLogicMixin, RegionLogicMixin,
-ArtisanLogicMixin, ToolLogicMixin]]):
+ArtisanLogicMixin, ToolLogicMixin, RequirementLogicMixin, GrindLogicMixin]]):
 
     def has_access_to_item(self, item: GameItem):
         rules = []
@@ -35,11 +37,20 @@ ArtisanLogicMixin, ToolLogicMixin]]):
         return self.logic.and_(*rules)
 
     def has_access_to_any(self, sources: Iterable[ItemSource]):
-        return self.logic.or_(*(self.logic.source.has_access_to(source) for source in sources))
+        return self.logic.or_(*(self.logic.source.has_access_to(source) & self.logic.requirement.meet_all_requirements(source.other_requirements)
+                                for source in sources))
 
     @functools.singledispatchmethod
     def has_access_to(self, source: Any):
         raise ValueError(f"Sources of type{type(source)} have no rule registered.")
+
+    @has_access_to.register
+    def _(self, source: GenericSource):
+        return self.logic.region.can_reach_any(source.regions) if source.regions else self.logic.true_
+
+    @has_access_to.register
+    def _(self, source: CustomRuleSource):
+        return source.create_rule(self.logic)
 
     @has_access_to.register
     def _(self, source: ForagingSource):
@@ -75,9 +86,17 @@ ArtisanLogicMixin, ToolLogicMixin]]):
         return self.logic.artisan.can_produce_from(source)
 
     @has_access_to.register
-    def _(self, source: PermanentSource):
-        return self.logic.region.can_reach_any(source.regions) if source.regions else self.logic.true_
+    def _(self, source: MysteryBoxSource):
+        return self.logic.grind.can_grind_mystery_boxes(source.amount)
 
     @has_access_to.register
-    def _(self, source: GenericToolSource):
-        return self.logic.region.can_reach_any(source.regions) & self.logic.tool.has_all_tools(source.tools)
+    def _(self, source: ArtifactTroveSource):
+        return self.logic.grind.can_grind_artifact_troves(source.amount)
+
+    @has_access_to.register
+    def _(self, source: PrizeMachineSource):
+        return self.logic.grind.can_grind_prize_tickets(source.amount)
+
+    @has_access_to.register
+    def _(self, source: FishingTreasureChestSource):
+        return self.logic.grind.can_grind_fishing_treasure_chests(source.amount)

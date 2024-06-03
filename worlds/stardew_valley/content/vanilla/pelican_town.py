@@ -1,18 +1,21 @@
 from ..game_content import ContentPack
 from ...data import villagers_data, fish_data
-from ...data.game_item import PermanentSource, GenericToolSource, ItemTag, Tag
+from ...data.game_item import GenericSource, ItemTag, Tag, CustomRuleSource
 from ...data.harvest import ForagingSource, SeasonalForagingSource
-from ...data.shop import ShopSource
+from ...data.requirement import ToolRequirement, BookRequirement, SkillRequirement, SeasonRequirement
+from ...data.shop import ShopSource, MysteryBoxSource, ArtifactTroveSource, PrizeMachineSource, FishingTreasureChestSource
 from ...strings.book_names import Book
 from ...strings.crop_names import Fruit
 from ...strings.fish_names import WaterItem
 from ...strings.food_names import Beverage, Meal
 from ...strings.forageable_names import Forageable, Mushroom
 from ...strings.fruit_tree_names import Sapling
+from ...strings.generic_names import Generic
 from ...strings.material_names import Material
 from ...strings.region_names import Region, LogicRegion
 from ...strings.season_names import Season
 from ...strings.seed_names import Seed, TreeSeed
+from ...strings.skill_names import Skill
 from ...strings.tool_names import Tool, ToolMaterial
 
 pelican_town = ContentPack(
@@ -84,12 +87,13 @@ pelican_town = ContentPack(
             ForagingSource(seasons=(Season.winter,),
                            regions=(Region.farm, Region.backwoods, Region.mountain, Region.bus_stop, Region.town, Region.forest, Region.railroad,
                                     Region.secret_woods, Region.beach),
-                           requires_hoe=True),
+                           other_requirements=(ToolRequirement(Tool.hoe),)),
         ),
         Forageable.winter_root: (
             ForagingSource(seasons=(Season.winter,),
                            regions=(Region.farm, Region.backwoods, Region.mountain, Region.bus_stop, Region.town, Region.forest, Region.railroad,
-                                    Region.secret_woods, Region.beach), requires_hoe=True),
+                                    Region.secret_woods, Region.beach),
+                           other_requirements=(ToolRequirement(Tool.hoe),)),
         ),
 
         # Mushrooms
@@ -134,11 +138,11 @@ pelican_town = ContentPack(
         Book.jack_be_nimble_jack_be_thick: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
             ForagingSource(regions=(Region.forest, Region.backwoods, Region.bus_stop, Region.farm, Region.mountain),
-                           seasons=Season.all, requires_hoe=True),),
-        # Needs a condition for owning an axe. Plus maybe the abysmal drop rate with a time gate?
+                           other_requirements=(ToolRequirement(Tool.hoe),)),),
         Book.woodys_secret: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
-            ForagingSource(regions=(Region.forest, Region.mountain), seasons=Season.all),),
+            GenericSource(regions=(Region.forest, Region.mountain),
+                          other_requirements=(ToolRequirement(Tool.axe, ToolMaterial.iron), SkillRequirement(Skill.foraging, 5))),),
     },
     shop_sources={
         # Saplings
@@ -203,16 +207,16 @@ pelican_town = ContentPack(
         Book.animal_catalogue: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
             ShopSource(money_price=5000, shop_region=Region.ranch),),
-        Book.book_of_mysteries: (  # Needs a MysteryBoxSource, THIS ONE IS INVALID RIGHT NOW
+        Book.book_of_mysteries: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
-            ShopSource(money_price=999999999, shop_region=Region.blacksmith),),
+            MysteryBoxSource(amount=38),),  # After 38 boxes, there are 49.99% chances player received the book.
         Book.dwarvish_safety_manual: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
             ShopSource(money_price=4000, shop_region=LogicRegion.mines_dwarf_shop),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
         Book.friendship_101: (
-            # ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_rares),  # You can get this one in the prize machine, but how do I logic that :(
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
+            PrizeMachineSource(amount=9),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
         Book.horse_the_book: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
@@ -220,15 +224,17 @@ pelican_town = ContentPack(
         Book.jack_be_nimble_jack_be_thick: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
-        Book.jewels_of_the_sea: (  # Needs a source for Fishing Treasure Chests
+        Book.jewels_of_the_sea: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
+            FishingTreasureChestSource(amount=21),  # After 21 chests, there are 49.44% chances player received the book.
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
         Book.mapping_cave_systems: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
-            PermanentSource(regions=Region.adventurer_guild_bedroom),
+            GenericSource(regions=Region.adventurer_guild_bedroom),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
-        Book.monster_compendium: (  # Needs a source for monster drops
+        Book.monster_compendium: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
+            CustomRuleSource(create_rule=lambda logic: logic.monster.can_kill_many(Generic.any)),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
         Book.ol_slitherlegs: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
@@ -238,15 +244,21 @@ pelican_town = ContentPack(
             ShopSource(money_price=3000, shop_region=LogicRegion.bookseller_2),),
         Book.the_alleyway_buffet: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
-            GenericToolSource(regions=Region.town, tools=((Tool.axe, ToolMaterial.iron), (Tool.pickaxe, ToolMaterial.iron))),
+            GenericSource(regions=Region.town,
+                          other_requirements=(ToolRequirement(Tool.axe, ToolMaterial.iron), ToolRequirement(Tool.pickaxe, ToolMaterial.iron))),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
-        Book.the_art_o_crabbing: (  # Needs a source for the SquidFest Iridium Tier,
+        Book.the_art_o_crabbing: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
+            GenericSource(regions=Region.beach,
+                          other_requirements=(ToolRequirement(Tool.fishing_rod, ToolMaterial.iridium),
+                                              SkillRequirement(Skill.fishing, 6),
+                                              SeasonRequirement(Season.winter))),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
-        Book.treasure_appraisal_guide: (  # Needs a source for artifact troves and mystery boxes,
+        Book.treasure_appraisal_guide: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
+            ArtifactTroveSource(amount=18),  # After 18 troves, there is 49,88% chances player received the book.
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
-        Book.raccoon_journal: (  # Needs a source for the AP item you'll get for completion of the 2nd raccoon bundle,
+        Book.raccoon_journal: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),
             ShopSource(items_price=((999, Material.fiber),), shop_region=LogicRegion.raccoon_shop),),
@@ -255,8 +267,7 @@ pelican_town = ContentPack(
             ShopSource(money_price=15000, shop_region=LogicRegion.bookseller_2),),
         Book.way_of_the_wind_pt_2: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
-            ShopSource(money_price=35000, shop_region=LogicRegion.bookseller_2),),
-        # This one requires the first book. If randomized, should have logic?
+            ShopSource(money_price=35000, shop_region=LogicRegion.bookseller_2, other_requirements=(BookRequirement(Book.way_of_the_wind_pt_1),)),),
         Book.woodys_secret: (
             Tag(ItemTag.BOOK, ItemTag.BOOK_POWER),
             ShopSource(money_price=20000, shop_region=LogicRegion.bookseller_3),),
@@ -324,7 +335,7 @@ pelican_town = ContentPack(
         fish_data.void_salmon,
         fish_data.walleye,
         fish_data.woodskip,
-        fish_data.blob_fish,
+        fish_data.blobfish,
         fish_data.midnight_squid,
         fish_data.spook_fish,
 

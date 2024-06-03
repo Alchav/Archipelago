@@ -18,11 +18,13 @@ from .logic.logic import StardewLogic
 from .logic.time_logic import MAX_MONTHS
 from .logic.tool_logic import tool_upgrade_prices
 from .mods.mod_data import ModNames
-from .options import StardewValleyOptions, ToolProgression, BuildingProgression, ExcludeGingerIsland, SpecialOrderLocations, Museumsanity, BackpackProgression, \
-    Shipsanity, Monstersanity, Chefsanity, Craftsanity, ArcadeMachineLocations, Cooksanity, SkillProgression
+from .options import StardewValleyOptions, Booksanity, Walnutsanity
+from .options import ToolProgression, BuildingProgression, ExcludeGingerIsland, SpecialOrderLocations, Museumsanity, BackpackProgression, Shipsanity, \
+    Monstersanity, Chefsanity, Craftsanity, ArcadeMachineLocations, Cooksanity, SkillProgression
 from .stardew_rule import And, StardewRule, true_
 from .stardew_rule.indirect_connection import look_for_indirect_connection
 from .stardew_rule.rule_explain import explain
+from .strings.ap_names.ap_option_names import OptionName
 from .strings.ap_names.community_upgrade_names import CommunityUpgrade
 from .strings.ap_names.event_names import Event
 from .strings.ap_names.mods.mod_items import SVEQuestItem, SVERunes
@@ -31,12 +33,15 @@ from .strings.artisan_good_names import ArtisanGood
 from .strings.building_names import Building
 from .strings.bundle_names import CCRoom
 from .strings.calendar_names import Weekday
-from .strings.craftable_names import Bomb
-from .strings.crop_names import Fruit
+from .strings.craftable_names import Bomb, Furniture
+from .strings.crop_names import Fruit, Vegetable
 from .strings.entrance_names import dig_to_mines_floor, dig_to_skull_floor, Entrance, move_to_woods_depth, DeepWoodsEntrance, AlecEntrance, \
     SVEEntrance, LaceyEntrance, BoardingHouseEntrance, LogicEntrance
+from .strings.forageable_names import Forageable
+from .strings.geode_names import Geode
 from .strings.material_names import Material
-from .strings.metal_names import MetalBar
+from .strings.metal_names import MetalBar, Mineral
+from .strings.monster_names import Monster
 from .strings.performance_names import Performance
 from .strings.quest_names import Quest
 from .strings.region_names import Region
@@ -140,12 +145,12 @@ def set_bundle_rules(bundle_rooms: List[BundleRoom], logic: StardewLogic, multiw
         for bundle in bundle_room.bundles:
             location = multiworld.get_location(bundle.name, player)
             bundle_rules = logic.bundle.can_complete_bundle(bundle)
-            room_rules.append(bundle_rules)
             if bundle_room.name == CCRoom.raccoon_requests:
                 num = int(bundle.name[-1])
                 extra_raccoons = 1 if world_options.quest_locations >= 0 else 0
                 extra_raccoons = extra_raccoons + num
                 bundle_rules = logic.received(CommunityUpgrade.raccoon, extra_raccoons) & bundle_rules
+            room_rules.append(bundle_rules)
             MultiWorldRules.set_rule(location, bundle_rules)
         if bundle_room.name == CCRoom.abandoned_joja_mart or bundle_room.name == CCRoom.raccoon_requests:
             continue
@@ -258,6 +263,7 @@ def set_dangerous_mine_rules(logic, multiworld, player, world_options: StardewVa
 
 
 def set_farm_buildings_entrance_rules(logic, multiworld, player):
+    set_entrance_rule(multiworld, player, Entrance.downstairs_to_cellar, logic.building.has_house(3))
     set_entrance_rule(multiworld, player, Entrance.use_desert_obelisk, logic.can_use_obelisk(Transportation.desert_obelisk))
     set_entrance_rule(multiworld, player, Entrance.enter_greenhouse, logic.received("Greenhouse"))
     set_entrance_rule(multiworld, player, Entrance.enter_coop, logic.building.has_building(Building.coop))
@@ -360,6 +366,7 @@ def set_ginger_island_rules(logic: StardewLogic, multiworld, player, world_optio
                              logic.has(Bomb.cherry_bomb))
     MultiWorldRules.add_rule(multiworld.get_location("Complete Island Field Office", player),
                              logic.can_complete_field_office())
+    set_walnut_rules(logic, multiworld, player, world_options)
 
 
 def set_boat_repair_rules(logic: StardewLogic, multiworld, player):
@@ -414,10 +421,11 @@ def set_island_entrances_rules(logic: StardewLogic, multiworld, player, world_op
 
 
 def set_island_parrot_rules(logic: StardewLogic, multiworld, player):
-    has_walnut = logic.has_walnut(1)
-    has_5_walnut = logic.has_walnut(5)
-    has_10_walnut = logic.has_walnut(10)
-    has_20_walnut = logic.has_walnut(20)
+    # Logic rules require more walnuts than in reality, to allow the player to spend them "wrong"
+    has_walnut = logic.has_walnut(5)
+    has_5_walnut = logic.has_walnut(15)
+    has_10_walnut = logic.has_walnut(40)
+    has_20_walnut = logic.has_walnut(60)
     MultiWorldRules.add_rule(multiworld.get_location("Leo's Parrot", player),
                              has_walnut)
     MultiWorldRules.add_rule(multiworld.get_location("Island West Turtle", player),
@@ -443,6 +451,73 @@ def set_island_parrot_rules(logic: StardewLogic, multiworld, player):
                              has_10_walnut)
 
 
+def set_walnut_rules(logic: StardewLogic, multiworld, player, world_options: StardewValleyOptions):
+    if world_options.walnutsanity == Walnutsanity.preset_none:
+        return
+
+    set_walnut_puzzle_rules(logic, multiworld, player, world_options)
+    set_walnut_bushes_rules(logic, multiworld, player, world_options)
+    set_walnut_dig_spot_rules(logic, multiworld, player, world_options)
+    set_walnut_repeatable_rules(logic, multiworld, player, world_options)
+
+
+def set_walnut_puzzle_rules(logic, multiworld, player, world_options):
+    if OptionName.walnutsanity_puzzles not in world_options.walnutsanity:
+        return
+
+    MultiWorldRules.add_rule(multiworld.get_location("Open Golden Coconut", player), logic.has(Geode.golden_coconut))
+    MultiWorldRules.add_rule(multiworld.get_location("Banana Altar", player), logic.has(Fruit.banana))
+    MultiWorldRules.add_rule(multiworld.get_location("Leo's Tree", player), logic.tool.has_tool(Tool.axe))
+    MultiWorldRules.add_rule(multiworld.get_location("Gem Birds Shrine", player), logic.has(Mineral.amethyst) & logic.has(Mineral.aquamarine) &
+                             logic.has(Mineral.emerald) & logic.has(Mineral.ruby) & logic.has(Mineral.topaz) &
+                             logic.region.can_reach_all((Region.island_north, Region.island_west, Region.island_east, Region.island_south)))
+    MultiWorldRules.add_rule(multiworld.get_location("Gourmand Frog Melon", player), logic.has(Fruit.melon) & logic.region.can_reach(Region.island_west))
+    MultiWorldRules.add_rule(multiworld.get_location("Gourmand Frog Wheat", player), logic.has(Vegetable.wheat) & logic.region.can_reach(Region.island_west))
+    MultiWorldRules.add_rule(multiworld.get_location("Gourmand Frog Garlic", player), logic.has(Vegetable.garlic) & logic.region.can_reach(Region.island_west))
+    MultiWorldRules.add_rule(multiworld.get_location("Whack A Mole", player), logic.tool.has_tool(Tool.watering_can, ToolMaterial.iridium))
+    MultiWorldRules.add_rule(multiworld.get_location("Complete Large Animal Collection", player), logic.can_complete_large_animal_collection())
+    MultiWorldRules.add_rule(multiworld.get_location("Complete Snake Collection", player), logic.can_complete_snake_collection())
+    MultiWorldRules.add_rule(multiworld.get_location("Complete Mummified Frog Collection", player), logic.can_complete_frog_collection())
+    MultiWorldRules.add_rule(multiworld.get_location("Complete Mummified Bat Collection", player), logic.can_complete_bat_collection())
+    MultiWorldRules.add_rule(multiworld.get_location("Protruding Tree Walnut", player), logic.combat.has_slingshot)
+    MultiWorldRules.add_rule(multiworld.get_location("Starfish Tide Pool", player), logic.tool.has_fishing_rod(1))
+    MultiWorldRules.add_rule(multiworld.get_location("Mermaid Song", player), logic.has(Furniture.flute_block))
+
+
+def set_walnut_bushes_rules(logic, multiworld, player, world_options):
+    if OptionName.walnutsanity_bushes not in world_options.walnutsanity:
+        return
+    # I don't think any of the bushes require something special, but that might change with ER
+    return
+
+
+def set_walnut_dig_spot_rules(logic, multiworld, player, world_options):
+    if OptionName.walnutsanity_dig_spots not in world_options.walnutsanity:
+        return
+
+    for dig_spot_walnut in locations.locations_by_tag[LocationTags.WALNUTSANITY_DIG]:
+        rule = logic.tool.has_tool(Tool.hoe)
+        if "Journal Scrap" in dig_spot_walnut.name:
+            rule = rule & logic.has(Forageable.journal_scrap)
+        if "Starfish Diamond" in dig_spot_walnut.name:
+            rule = rule & logic.tool.has_tool(Tool.pickaxe, ToolMaterial.iron)
+        MultiWorldRules.set_rule(multiworld.get_location(dig_spot_walnut.name, player), rule)
+
+
+def set_walnut_repeatable_rules(logic, multiworld, player, world_options):
+    if OptionName.walnutsanity_repeatables not in world_options.walnutsanity:
+        return
+    for i in range(1, 6):
+        MultiWorldRules.set_rule(multiworld.get_location(f"Fishing Walnut {i}", player), logic.tool.has_fishing_rod(1))
+        MultiWorldRules.set_rule(multiworld.get_location(f"Harvesting Walnut {i}", player), logic.skill.can_get_farming_xp)
+        MultiWorldRules.set_rule(multiworld.get_location(f"Mussel Node Walnut {i}", player), logic.tool.has_tool(Tool.pickaxe))
+        MultiWorldRules.set_rule(multiworld.get_location(f"Volcano Rocks Walnut {i}", player), logic.tool.has_tool(Tool.pickaxe))
+        MultiWorldRules.set_rule(multiworld.get_location(f"Volcano Monsters Walnut {i}", player), logic.combat.has_galaxy_weapon)
+        MultiWorldRules.set_rule(multiworld.get_location(f"Volcano Crates Walnut {i}", player), logic.combat.has_any_weapon)
+    MultiWorldRules.set_rule(multiworld.get_location(f"Tiger Slime Walnut", player), logic.monster.can_kill(Monster.tiger_slime))
+
+
+
 def set_cropsanity_rules(logic: StardewLogic, multiworld, player, world_content: StardewContent):
     if not world_content.features.cropsanity.is_enabled:
         return
@@ -464,23 +539,21 @@ def set_story_quests_rules(all_location_names: Set[str], logic: StardewLogic, mu
 
 def set_special_order_rules(all_location_names: Set[str], logic: StardewLogic, multiworld, player,
                             world_options: StardewValleyOptions):
-    if world_options.special_order_locations == SpecialOrderLocations.option_disabled:
-        return
-    board_rule = logic.received("Special Order Board") & logic.time.has_lived_months(4)
-    for board_order in locations.locations_by_tag[LocationTags.SPECIAL_ORDER_BOARD]:
-        if board_order.name in all_location_names:
-            order_rule = board_rule & logic.registry.special_order_rules[board_order.name]
-            MultiWorldRules.set_rule(multiworld.get_location(board_order.name, player), order_rule)
+    if world_options.special_order_locations & SpecialOrderLocations.option_board:
+        board_rule = logic.received("Special Order Board") & logic.time.has_lived_months(4)
+        for board_order in locations.locations_by_tag[LocationTags.SPECIAL_ORDER_BOARD]:
+            if board_order.name in all_location_names:
+                order_rule = board_rule & logic.registry.special_order_rules[board_order.name]
+                MultiWorldRules.set_rule(multiworld.get_location(board_order.name, player), order_rule)
 
     if world_options.exclude_ginger_island == ExcludeGingerIsland.option_true:
         return
-    if world_options.special_order_locations == SpecialOrderLocations.option_board_only:
-        return
-    qi_rule = logic.region.can_reach(Region.qi_walnut_room) & logic.time.has_lived_months(8)
-    for qi_order in locations.locations_by_tag[LocationTags.SPECIAL_ORDER_QI]:
-        if qi_order.name in all_location_names:
-            order_rule = qi_rule & logic.registry.special_order_rules[qi_order.name]
-            MultiWorldRules.set_rule(multiworld.get_location(qi_order.name, player), order_rule)
+    if world_options.special_order_locations & SpecialOrderLocations.value_qi:
+        qi_rule = logic.region.can_reach(Region.qi_walnut_room) & logic.time.has_lived_months(8)
+        for qi_order in locations.locations_by_tag[LocationTags.SPECIAL_ORDER_QI]:
+            if qi_order.name in all_location_names:
+                order_rule = qi_rule & logic.registry.special_order_rules[qi_order.name]
+                MultiWorldRules.set_rule(multiworld.get_location(qi_order.name, player), order_rule)
 
 
 help_wanted_prefix = "Help Wanted:"

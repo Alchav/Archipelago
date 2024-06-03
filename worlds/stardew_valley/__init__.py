@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, Iterable, Optional, Union, List, TextIO
 
-from BaseClasses import Region, Entrance, Location, Item, Tutorial, ItemClassification, MultiWorld
+from BaseClasses import Region, Entrance, Location, Item, Tutorial, ItemClassification, MultiWorld, CollectionState
 from Options import PerGameCommonOptions
 from worlds.AutoWorld import World, WebWorld
 from . import rules
@@ -15,13 +15,14 @@ from .logic.bundle_logic import BundleLogic
 from .logic.logic import StardewLogic
 from .logic.time_logic import MAX_MONTHS
 from .option_groups import sv_option_groups
-from .options import StardewValleyOptions, SeasonRandomization, Goal, BundleRandomization, BundlePrice, NumberOfLuckBuffs, NumberOfMovementBuffs, \
-    BackpackProgression, BuildingProgression, ExcludeGingerIsland, TrapItems, EntranceRandomization, FarmType
+from .options import StardewValleyOptions, SeasonRandomization, Goal, BundleRandomization, BundlePrice, EnabledFillerBuffs, NumberOfMovementBuffs, \
+    BackpackProgression, BuildingProgression, ExcludeGingerIsland, TrapItems, EntranceRandomization, FarmType, Walnutsanity
 from .presets import sv_options_presets
 from .regions import create_regions
 from .rules import set_rules
 from .stardew_rule import True_, StardewRule, HasProgressionPercent, true_
 from .strings.ap_names.event_names import Event
+from .strings.ap_names.received_currency_names import ReceivedCurrency
 from .strings.entrance_names import Entrance as EntranceName
 from .strings.goal_names import Goal as GoalName
 from .strings.metal_names import Ore
@@ -110,6 +111,11 @@ class StardewValleyWorld(World):
             player_name = self.multiworld.player_name[self.player]
             logging.warning(
                 f"Goal '{goal_name}' requires Ginger Island. Exclude Ginger Island setting forced to 'False' for player {self.player} ({player_name})")
+        if exclude_ginger_island and self.options.walnutsanity != Walnutsanity.preset_none:
+            self.options.walnutsanity.value = Walnutsanity.preset_none
+            player_name = self.multiworld.player_name[self.player]
+            logging.warning(
+                f"Walnutsanity requires Ginger Island. Ginger Island was excluded from {self.player} ({player_name})'s world, so walnutsanity was force disabled")
 
     def create_regions(self):
         def create_region(name: str, exits: Iterable[str]) -> Region:
@@ -404,7 +410,7 @@ class StardewValleyWorld(World):
                 for i, item in enumerate(bundle.items):
                     bundles[room.name][bundle.name][i] = f"{item.get_item()}|{item.amount}|{item.quality}"
 
-        excluded_options = [BundleRandomization, NumberOfMovementBuffs, NumberOfLuckBuffs]
+        excluded_options = [BundleRandomization, NumberOfMovementBuffs, EnabledFillerBuffs]
         excluded_option_names = [option.internal_name for option in excluded_options]
         generic_option_names = [option_name for option_name in PerGameCommonOptions.type_hints]
         excluded_option_names.extend(generic_option_names)
@@ -418,3 +424,26 @@ class StardewValleyWorld(World):
         })
 
         return slot_data
+
+    def collect(self, state: CollectionState, item: StardewItem) -> bool:
+        change = super().collect(state, item)
+        if change:
+            state.prog_items[self.player][ReceivedCurrency.walnut] += self.get_walnut_amount(item.name)
+        return change
+
+    def remove(self, state: CollectionState, item: StardewItem) -> bool:
+        change = super().remove(state, item)
+        if change:
+            state.prog_items[self.player][ReceivedCurrency.walnut] -= self.get_walnut_amount(item.name)
+        return change
+
+    @staticmethod
+    def get_walnut_amount(item_name: str) -> int:
+        if item_name == "Golden Walnut":
+            return 1
+        if item_name == "3 Golden Walnuts":
+            return 3
+        if item_name == "5 Golden Walnuts":
+            return 5
+        return 0
+

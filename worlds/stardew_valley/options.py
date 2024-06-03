@@ -1,9 +1,11 @@
 import sys
+import typing
 from dataclasses import dataclass
 from typing import Protocol, ClassVar
 
-from Options import Range, NamedRange, Toggle, Choice, OptionSet, PerGameCommonOptions, DeathLink
+from Options import Range, NamedRange, Toggle, Choice, OptionSet, PerGameCommonOptions, DeathLink, OptionList
 from .mods.mod_data import ModNames
+from .strings.ap_names.ap_option_names import OptionName
 
 
 class StardewValleyOption(Protocol):
@@ -19,7 +21,7 @@ class Goal(Choice):
     Master Angler: Catch every fish. Adapts to Fishsanity
     Complete Collection: Complete the museum collection
     Full House: Get married and have 2 children
-    Greatest Walnut Hunter: Find 130 Golden Walnuts
+    Greatest Walnut Hunter: Find 130 Golden Walnuts. Pairs well with Walnutsanity
     Protector of the Valley: Complete the monster slayer goals. Adapts to Monstersanity
     Full Shipment: Ship every item. Adapts to Shipsanity
     Gourmet Chef: Cook every recipe. Adapts to Cooksanity
@@ -157,6 +159,7 @@ class EntranceRandomization(Choice):
     Pelican Town: Only doors in the main town area are randomized with each other
     Non Progression: Only entrances that are always available are randomized with each other
     Buildings: All entrances that allow you to enter a building are randomized with each other
+    Buildings Without House: Buildings, but excluding the farmhouse
     Chaos: Same as "Buildings", but the entrances get reshuffled every single day!
     """
     # Everything: All buildings and areas are randomized with each other
@@ -171,9 +174,10 @@ class EntranceRandomization(Choice):
     option_disabled = 0
     option_pelican_town = 1
     option_non_progression = 2
-    option_buildings = 3
-    # option_everything = 4
-    option_chaos = 5
+    option_buildings_without_house = 3
+    option_buildings = 4
+    # option_everything = 10
+    option_chaos = 12
     # option_buildings_one_way = 6
     # option_everything_one_way = 7
     # option_chaos_one_way = 8
@@ -323,13 +327,26 @@ class SpecialOrderLocations(Choice):
     Disabled: The special orders are not included in the Archipelago shuffling.
     Board Only: The Special Orders on the board in town are location checks
     Board and Qi: The Special Orders from Mr Qi's walnut room are checks, in addition to the board in town
+    Short: All Special Order requirements are reduced by 40%
+    Very Short: All Special Order requirements are reduced by 80%
     """
     internal_name = "special_order_locations"
     display_name = "Special Order Locations"
-    default = 1
-    option_disabled = 0
-    option_board_only = 1
-    option_board_qi = 2
+    option_vanilla = 0b0000  # 0
+    option_board = 0b0001  # 1
+    value_qi = 0b0010  # 2
+    value_short = 0b0100  # 4
+    value_very_short = 0b1000  # 8
+    option_board_qi = option_board | value_qi  # 3
+    option_vanilla_short = value_short  # 4
+    option_board_short = option_board | value_short  # 5
+    option_board_qi_short = option_board_qi | value_short  # 7
+    option_vanilla_very_short = value_very_short  # 8
+    option_board_very_short = option_board | value_very_short  # 9
+    option_board_qi_very_short = option_board_qi | value_very_short  # 11
+    alias_disabled = option_vanilla
+    alias_board_only = option_board
+    default = option_board_short
 
 
 class QuestLocations(NamedRange):
@@ -553,6 +570,30 @@ class Booksanity(Choice):
     option_all = 3
 
 
+class Walnutsanity(OptionSet):
+    """Shuffle walnuts?
+    Puzzles: Walnuts obtained from solving a special puzzle or winning a minigame
+    Bushes: Walnuts that are in a bush and can be collected by clicking it
+    Dig spots: Walnuts that are underground and must be digged up. Includes Journal scrap walnuts
+    Repeatables: Random chance walnuts from normal actions (fishing, farming, combat, etc)
+    """
+    internal_name = "walnutsanity"
+    display_name = "Walnutsanity"
+    valid_keys = frozenset({OptionName.walnutsanity_puzzles, OptionName.walnutsanity_bushes, OptionName.walnutsanity_dig_spots,
+                            OptionName.walnutsanity_repeatables, })
+    preset_none = frozenset()
+    preset_all = valid_keys
+    default = preset_none
+
+    def __eq__(self, other: typing.Any) -> bool:
+        if isinstance(other, OptionSet):
+            return set(self.value) == other.value
+        if isinstance(other, OptionList):
+            return set(self.value) == set(other.value)
+        else:
+            return typing.cast(bool, self.value == other)
+
+
 class NumberOfMovementBuffs(Range):
     """Number of movement speed buffs to the player that exist as items in the pool.
     Each movement speed buff is a +25% multiplier that stacks additively"""
@@ -564,15 +605,26 @@ class NumberOfMovementBuffs(Range):
     # step = 1
 
 
-class NumberOfLuckBuffs(Range):
-    """Number of luck buffs to the player that exist as items in the pool.
-    Each luck buff is a bonus to daily luck of 0.025"""
-    internal_name = "luck_buff_number"
-    display_name = "Number of Luck Buffs"
-    range_start = 0
-    range_end = 12
-    default = 4
-    # step = 1
+class EnabledFillerBuffs(OptionSet):
+    """Enable various permanent player buffs to roll as filler items
+    Luck: Increase daily luck
+    Damage: Increased Damage %
+    Defense: Increased Defense
+    Immunity: Increased Immunity
+    Health: Increased Max Health
+    Energy: Increased Max Energy
+    Bite Rate: Shorter delay to get a bite when fishing
+    Fish Trap: Effect similar to the Trap Bobber, but weaker
+    Fishing Bar Size: Increased Fishing Bar Size
+    """
+    internal_name = "enabled_filler_buffs"
+    display_name = "Enabled Filler Buffs"
+    valid_keys = frozenset({OptionName.buff_luck, OptionName.buff_damage, OptionName.buff_defense, OptionName.buff_immunity, OptionName.buff_health,
+                            OptionName.buff_energy, OptionName.buff_bite, OptionName.buff_fish_trap, OptionName.buff_fishing_bar})
+                            # OptionName.buff_quality, OptionName.buff_glow}) # Disabled these two buffs because they are too hard to make on the mod side
+    preset_none = frozenset()
+    preset_all = valid_keys
+    default = frozenset({OptionName.buff_luck, OptionName.buff_defense, OptionName.buff_bite})
 
 
 class ExcludeGingerIsland(Toggle):
@@ -701,13 +753,26 @@ class Gifting(Toggle):
 # These mods have been disabled because either they are not updated for the current supported version of Stardew Valley,
 # or we didn't find the time to validate that they work or fix compatibility issues if they do.
 # Once a mod is validated to be functional, it can simply be removed from this list
-disabled_mods = {ModNames.deepwoods, ModNames.tractor,
-                 ModNames.luck_skill, ModNames.magic, ModNames.socializing_skill, ModNames.archaeology,
-                 ModNames.cooking_skill, ModNames.binning_skill, ModNames.juna,
+disabled_mods = {ModNames.deepwoods, ModNames.magic,
+                 ModNames.cooking_skill, ModNames.jasper,
                  ModNames.yoba, ModNames.eugene,
-                 ModNames.wellwick, ModNames.shiko, ModNames.delores,
-                 ModNames.ayeisha, ModNames.riley, ModNames.sve, ModNames.distant_lands,
+                 ModNames.wellwick, ModNames.shiko, ModNames.delores, ModNames.riley, ModNames.distant_lands,
                  ModNames.lacey, ModNames.boarding_house}
+
+# In Progress:
+# Tractor
+# Luck
+# Socializing
+# Archaeology
+# Binning Skill
+# Juna
+# Alec
+# Mister Ginger
+# Ayeisha
+# Alecto
+# Bigger Backpack
+# Skull Cavern Elevator
+
 
 if 'unittest' in sys.modules.keys() or 'pytest' in sys.modules.keys():
     disabled_mods = {}
@@ -754,6 +819,7 @@ class StardewValleyOptions(PerGameCommonOptions):
     friendsanity: Friendsanity
     friendsanity_heart_size: FriendsanityHeartSize
     booksanity: Booksanity
+    walnutsanity: Walnutsanity
     exclude_ginger_island: ExcludeGingerIsland
     quick_start: QuickStart
     starting_money: StartingMoney
@@ -762,7 +828,7 @@ class StardewValleyOptions(PerGameCommonOptions):
     friendship_multiplier: FriendshipMultiplier
     debris_multiplier: DebrisMultiplier
     movement_buff_number: NumberOfMovementBuffs
-    luck_buff_number: NumberOfLuckBuffs
+    enabled_filler_buffs: EnabledFillerBuffs
     trap_items: TrapItems
     multiple_day_sleep_enabled: MultipleDaySleepEnabled
     multiple_day_sleep_cost: MultipleDaySleepCost

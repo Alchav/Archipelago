@@ -1,13 +1,13 @@
 import random
 
 from BaseClasses import get_seed
-from .. import setup_solo_multiworld, SVTestBase, SVTestCase, allsanity_no_mods_5_x_x, allsanity_mods_5_x_x, complete_options_with_default
+from .. import SVTestBase, SVTestCase, allsanity_no_mods_6_x_x, allsanity_mods_6_x_x, complete_options_with_default, solo_multiworld
 from ..assertion import ModAssertMixin, WorldAssertMixin
 from ... import items, Group, ItemClassification
 from ... import options
 from ...items import items_by_group
 from ...mods.mod_data import all_mods
-from ...options import SkillProgression
+from ...options import SkillProgression, Walnutsanity
 from ...regions import RandomizationFlag, randomize_connections, create_final_connections_and_regions
 
 
@@ -15,7 +15,7 @@ class TestGenerateModsOptions(WorldAssertMixin, ModAssertMixin, SVTestCase):
 
     def test_given_single_mods_when_generate_then_basic_checks(self):
         for mod in all_mods:
-            with self.solo_world_sub_test(f"Mod: {mod}", {options.Mods: mod}, dirty_state=True) as (multi_world, _):
+            with self.solo_world_sub_test(f"Mod: {mod}", {options.Mods: mod}) as (multi_world, _):
                 self.assert_basic_checks(multi_world)
                 self.assert_stray_mod_items(mod, multi_world)
 
@@ -26,18 +26,18 @@ class TestGenerateModsOptions(WorldAssertMixin, ModAssertMixin, SVTestCase):
                     options.EntranceRandomization.internal_name: options.EntranceRandomization.options[option],
                     options.Mods: mod
                 }
-                with self.solo_world_sub_test(f"entrance_randomization: {option}, Mod: {mod}", world_options, dirty_state=True) as (multi_world, _):
+                with self.solo_world_sub_test(f"entrance_randomization: {option}, Mod: {mod}", world_options) as (multi_world, _):
                     self.assert_basic_checks(multi_world)
                     self.assert_stray_mod_items(mod, multi_world)
 
     def test_allsanity_all_mods_when_generate_then_basic_checks(self):
-        with self.solo_world_sub_test(world_options=allsanity_mods_5_x_x(), dirty_state=True) as (multi_world, _):
+        with self.solo_world_sub_test(world_options=allsanity_mods_6_x_x()) as (multi_world, _):
             self.assert_basic_checks(multi_world)
 
     def test_allsanity_all_mods_exclude_island_when_generate_then_basic_checks(self):
-        world_options = allsanity_mods_5_x_x()
+        world_options = allsanity_mods_6_x_x()
         world_options.update({options.ExcludeGingerIsland.internal_name: options.ExcludeGingerIsland.option_true})
-        with self.solo_world_sub_test(world_options=world_options, dirty_state=True) as (multi_world, _):
+        with self.solo_world_sub_test(world_options=world_options) as (multi_world, _):
             self.assert_basic_checks(multi_world)
 
 
@@ -53,12 +53,14 @@ class TestBaseItemGeneration(SVTestBase):
     options = {
         options.SeasonRandomization.internal_name: options.SeasonRandomization.option_progressive,
         options.SkillProgression.internal_name: options.SkillProgression.option_progressive_with_masteries,
+        options.ExcludeGingerIsland.internal_name: options.ExcludeGingerIsland.option_false,
         options.SpecialOrderLocations.internal_name: options.SpecialOrderLocations.option_board_qi,
         options.Friendsanity.internal_name: options.Friendsanity.option_all_with_marriage,
         options.Shipsanity.internal_name: options.Shipsanity.option_everything,
         options.Chefsanity.internal_name: options.Chefsanity.option_all,
         options.Craftsanity.internal_name: options.Craftsanity.option_all,
         options.Booksanity.internal_name: options.Booksanity.option_all,
+        Walnutsanity.internal_name: Walnutsanity.preset_all,
         options.Mods.internal_name: all_mods
     }
 
@@ -117,6 +119,7 @@ class TestModEntranceRando(SVTestCase):
     def test_mod_entrance_randomization(self):
         for option, flag in [(options.EntranceRandomization.option_pelican_town, RandomizationFlag.PELICAN_TOWN),
                              (options.EntranceRandomization.option_non_progression, RandomizationFlag.NON_PROGRESSION),
+                             (options.EntranceRandomization.option_buildings_without_house, RandomizationFlag.BUILDINGS),
                              (options.EntranceRandomization.option_buildings, RandomizationFlag.BUILDINGS)]:
             sv_options = complete_options_with_default({
                 options.EntranceRandomization.internal_name: option,
@@ -149,11 +152,11 @@ class TestModTraps(SVTestCase):
             if value == "no_traps":
                 continue
 
-            world_options = allsanity_no_mods_5_x_x()
-            world_options.update({options.TrapItems.internal_name: options.TrapItems.options[value], options.Mods: "Magic"})
-            multi_world = setup_solo_multiworld(world_options)
-            trap_items = [item_data.name for item_data in items_by_group[Group.TRAP] if Group.DEPRECATED not in item_data.groups]
-            multiworld_items = [item.name for item in multi_world.get_items()]
-            for item in trap_items:
-                with self.subTest(f"Option: {value}, Item: {item}"):
-                    self.assertIn(item, multiworld_items)
+            world_options = allsanity_no_mods_6_x_x()
+            world_options.update({options.TrapItems.internal_name: options.TrapItems.options[value], options.Mods.internal_name: "Magic"})
+            with solo_multiworld(world_options) as (multi_world, _):
+                trap_items = [item_data.name for item_data in items_by_group[Group.TRAP] if Group.DEPRECATED not in item_data.groups]
+                multiworld_items = [item.name for item in multi_world.get_items()]
+                for item in trap_items:
+                    with self.subTest(f"Option: {value}, Item: {item}"):
+                        self.assertIn(item, multiworld_items)

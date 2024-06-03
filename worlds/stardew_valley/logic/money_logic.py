@@ -2,7 +2,7 @@ from typing import Union
 
 from Utils import cache_self1
 from .base_logic import BaseLogicMixin, BaseLogic
-from .buff_logic import BuffLogicMixin
+from .grind_logic import GrindLogicMixin
 from .has_logic import HasLogicMixin
 from .received_logic import ReceivedLogicMixin
 from .region_logic import RegionLogicMixin
@@ -25,8 +25,8 @@ class MoneyLogicMixin(BaseLogicMixin):
         self.money = MoneyLogic(*args, **kwargs)
 
 
-class MoneyLogic(BaseLogic[Union[RegionLogicMixin, MoneyLogicMixin, TimeLogicMixin, RegionLogicMixin, ReceivedLogicMixin, HasLogicMixin, BuffLogicMixin,
-SeasonLogicMixin]]):
+class MoneyLogic(BaseLogic[Union[RegionLogicMixin, MoneyLogicMixin, TimeLogicMixin, RegionLogicMixin, ReceivedLogicMixin, HasLogicMixin, SeasonLogicMixin,
+GrindLogicMixin]]):
 
     @cache_self1
     def can_have_earned_total(self, amount: int) -> StardewRule:
@@ -75,7 +75,7 @@ SeasonLogicMixin]]):
         item_rules = []
         if source.items_price is not None:
             for price, item in source.items_price:
-                item_rules.append(self.logic.has(item) & self.logic.time.can_grind_item(price))
+                item_rules.append(self.logic.has(item) & self.logic.grind.can_grind_item(price))
 
         region_rule = self.logic.region.can_reach(source.shop_region)
 
@@ -90,9 +90,9 @@ SeasonLogicMixin]]):
         if currency == Currency.star_token:
             return self.logic.region.can_reach(LogicRegion.fair)
         if currency == Currency.qi_coin:
-            return self.logic.region.can_reach(Region.casino) & self.logic.buff.has_max_luck()
+            return self.logic.region.can_reach(Region.casino) & self.logic.time.has_lived_months(amount // 1000)
         if currency == Currency.qi_gem:
-            if self.options.special_order_locations == SpecialOrderLocations.option_board_qi:
+            if self.options.special_order_locations & SpecialOrderLocations.value_qi:
                 number_rewards = min(len(qi_gem_rewards), max(1, (amount // 10)))
                 return self.logic.received_n(*qi_gem_rewards, count=number_rewards)
             number_rewards = 2
@@ -101,7 +101,7 @@ SeasonLogicMixin]]):
         if currency == Currency.golden_walnut:
             return self.can_spend_walnut(amount)
 
-        return self.logic.has(currency) & self.logic.time.has_lived_months(amount)
+        return self.logic.has(currency) & self.logic.grind.can_grind_item(amount)
 
     # Should be cached
     def can_trade_at(self, region: str, currency: str, amount: int) -> StardewRule:

@@ -1,13 +1,12 @@
 from typing import List
 
 from BaseClasses import ItemClassification, Item
-from . import SVTestBase, allsanity_no_mods_5_x_x, \
-    allsanity_mods_5_x_x, minimal_locations_maximal_items, minimal_locations_maximal_items_with_island, get_minsanity_options, default_5_x_x
+from . import SVTestBase
 from .. import items, location_table, options
-from ..items import Group, item_table
+from ..items import Group
 from ..locations import LocationTags
 from ..options import Friendsanity, SpecialOrderLocations, Shipsanity, Chefsanity, SeasonRandomization, Craftsanity, ExcludeGingerIsland, ToolProgression, \
-    SkillProgression, Booksanity
+    SkillProgression, Booksanity, Walnutsanity
 from ..strings.region_names import Region
 
 
@@ -15,12 +14,14 @@ class TestBaseItemGeneration(SVTestBase):
     options = {
         SeasonRandomization.internal_name: SeasonRandomization.option_progressive,
         SkillProgression.internal_name: SkillProgression.option_progressive_with_masteries,
+        ExcludeGingerIsland.internal_name: ExcludeGingerIsland.option_false,
         SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_qi,
         Friendsanity.internal_name: Friendsanity.option_all_with_marriage,
         Shipsanity.internal_name: Shipsanity.option_everything,
         Chefsanity.internal_name: Chefsanity.option_all,
         Craftsanity.internal_name: Craftsanity.option_all,
         Booksanity.internal_name: Booksanity.option_all,
+        Walnutsanity.internal_name: Walnutsanity.preset_all,
     }
 
     def test_all_progression_items_are_added_to_the_pool(self):
@@ -119,7 +120,11 @@ class TestNoGingerIslandItemGeneration(SVTestBase):
 
 
 class TestMonstersanityNone(SVTestBase):
-    options = {options.Monstersanity.internal_name: options.Monstersanity.option_none}
+    options = {
+        options.Monstersanity.internal_name: options.Monstersanity.option_none,
+        # Not really necessary, but it adds more locations, so we don't have to remove useful items.
+        options.Fishsanity.internal_name: options.Fishsanity.option_all
+    }
 
     @property
     def run_default_tests(self) -> bool:
@@ -393,6 +398,7 @@ class TestShipsanityNone(SVTestBase):
 class TestShipsanityCrops(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_crops,
+        ExcludeGingerIsland.internal_name: ExcludeGingerIsland.option_false,
         SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_qi
     }
 
@@ -439,7 +445,7 @@ class TestShipsanityCropsExcludeIsland(SVTestBase):
 class TestShipsanityCropsNoQiCropWithoutSpecialOrders(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_crops,
-        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_only
+        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board
     }
 
     def test_only_crop_shipsanity_locations(self):
@@ -462,6 +468,7 @@ class TestShipsanityCropsNoQiCropWithoutSpecialOrders(SVTestBase):
 class TestShipsanityFish(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_fish,
+        ExcludeGingerIsland.internal_name: ExcludeGingerIsland.option_false,
         SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_qi
     }
 
@@ -510,7 +517,7 @@ class TestShipsanityFishExcludeIsland(SVTestBase):
 class TestShipsanityFishExcludeQiOrders(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_fish,
-        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_only
+        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board
     }
 
     def test_only_fish_shipsanity_locations(self):
@@ -534,6 +541,7 @@ class TestShipsanityFishExcludeQiOrders(SVTestBase):
 class TestShipsanityFullShipment(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_full_shipment,
+        ExcludeGingerIsland.internal_name: ExcludeGingerIsland.option_false,
         SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_qi
     }
 
@@ -587,7 +595,7 @@ class TestShipsanityFullShipmentExcludeIsland(SVTestBase):
 class TestShipsanityFullShipmentExcludeQiBoard(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_full_shipment,
-        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_disabled
+        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_vanilla
     }
 
     def test_only_full_shipment_shipsanity_locations(self):
@@ -614,6 +622,7 @@ class TestShipsanityFullShipmentExcludeQiBoard(SVTestBase):
 class TestShipsanityFullShipmentWithFish(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_full_shipment_with_fish,
+        ExcludeGingerIsland.internal_name: ExcludeGingerIsland.option_false,
         SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_qi
     }
 
@@ -683,7 +692,7 @@ class TestShipsanityFullShipmentWithFishExcludeIsland(SVTestBase):
 class TestShipsanityFullShipmentWithFishExcludeQiBoard(SVTestBase):
     options = {
         Shipsanity.internal_name: Shipsanity.option_full_shipment_with_fish,
-        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board_only
+        SpecialOrderLocations.internal_name: SpecialOrderLocations.option_board
     }
 
     def test_only_full_shipment_and_fish_shipsanity_locations(self):

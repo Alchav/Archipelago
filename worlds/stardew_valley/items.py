@@ -15,7 +15,8 @@ from .logic.logic_event import all_events
 from .mods.mod_data import ModNames
 from .options import StardewValleyOptions, TrapItems, FestivalLocations, ExcludeGingerIsland, SpecialOrderLocations, SeasonRandomization, Museumsanity, \
     BuildingProgression, SkillProgression, ToolProgression, ElevatorProgression, BackpackProgression, ArcadeMachineLocations, Monstersanity, Goal, \
-    Chefsanity, Craftsanity, BundleRandomization, EntranceRandomization, Shipsanity
+    Chefsanity, Craftsanity, BundleRandomization, EntranceRandomization, Shipsanity, Walnutsanity, EnabledFillerBuffs
+from .strings.ap_names.ap_option_names import OptionName
 from .strings.ap_names.ap_weapon_names import APWeapon
 from .strings.ap_names.buff_names import Buff
 from .strings.ap_names.community_upgrade_names import CommunityUpgrade
@@ -85,6 +86,7 @@ class Group(enum.Enum):
     CRAFTSANITY = enum.auto()
     BOOK_POWER = enum.auto()
     LOST_BOOK = enum.auto()
+    PLAYER_BUFF = enum.auto()
     # Mods
     MAGIC_SPELL = enum.auto()
     MOD_WARP = enum.auto()
@@ -240,7 +242,7 @@ def create_unique_items(item_factory: StardewItemFactory, options: StardewValley
     create_stardrops(item_factory, options, content, items)
     create_museum_items(item_factory, options, items)
     create_arcade_machine_items(item_factory, options, items)
-    create_player_buffs(item_factory, options, items)
+    create_movement_buffs(item_factory, options, items)
     create_traveling_merchant_items(item_factory, items)
     items.append(item_factory("Return Scepter"))
     create_seasons(item_factory, options, items)
@@ -249,6 +251,7 @@ def create_unique_items(item_factory: StardewItemFactory, options: StardewValley
     create_festival_rewards(item_factory, options, items)
     create_special_order_board_rewards(item_factory, options, items)
     create_special_order_qi_rewards(item_factory, options, items)
+    create_walnuts(item_factory, options, items)
     create_walnut_purchase_rewards(item_factory, options, items)
     create_crafting_recipes(item_factory, options, items)
     create_cooking_recipes(item_factory, options, items)
@@ -488,20 +491,9 @@ def create_arcade_machine_items(item_factory: StardewItemFactory, options: Stard
         items.extend(item_factory(item) for item in ["Junimo Kart: Extra Life"] * 8)
 
 
-def create_player_buffs(item_factory: StardewItemFactory, options: StardewValleyOptions, items: List[Item]):
+def create_movement_buffs(item_factory, options: StardewValleyOptions, items: List[Item]):
     movement_buffs: int = options.movement_buff_number.value
-    luck_buffs: int = options.luck_buff_number.value
-    need_all_buffs = options.special_order_locations == SpecialOrderLocations.option_board_qi
-    need_half_buffs = options.festival_locations == FestivalLocations.option_easy
-    create_player_buff(item_factory, Buff.movement, movement_buffs, need_all_buffs, need_half_buffs, items)
-    create_player_buff(item_factory, Buff.luck, luck_buffs, True, need_half_buffs, items)
-
-
-def create_player_buff(item_factory, buff: str, amount: int, need_all_buffs: bool, need_half_buffs: bool, items: List[Item]):
-    progression_buffs = amount if need_all_buffs else (amount // 2 if need_half_buffs else 0)
-    useful_buffs = amount - progression_buffs
-    items.extend(item_factory(item, ItemClassification.useful) for item in [buff] * useful_buffs)
-    items.extend(item_factory(item) for item in [buff] * progression_buffs)
+    items.extend(item_factory(item) for item in [Buff.movement] * movement_buffs)
 
 
 def create_traveling_merchant_items(item_factory: StardewItemFactory, items: List[Item]):
@@ -536,6 +528,35 @@ def create_festival_rewards(item_factory: StardewItemFactory, options: StardewVa
     items.extend([*festival_rewards, item_factory("Stardrop", get_stardrop_classification(options))])
 
 
+def create_walnuts(item_factory: StardewItemFactory, options: StardewValleyOptions, items: List[Item]):
+    walnutsanity = options.walnutsanity
+    if options.exclude_ginger_island == ExcludeGingerIsland.option_true or walnutsanity == Walnutsanity.preset_none:
+        return
+
+    # Give baseline walnuts just to be nice
+    num_single_walnuts = 0
+    num_triple_walnuts = 2
+    num_penta_walnuts = 1
+    # https://stardewvalleywiki.com/Golden_Walnut
+    # Totals should be accurate, but distribution is slightly offset to make room for baseline walnuts
+    if OptionName.walnutsanity_puzzles in walnutsanity:  # 61
+        num_single_walnuts += 6  # 6
+        num_triple_walnuts += 5  # 15
+        num_penta_walnuts += 8  # 40
+    if OptionName.walnutsanity_bushes in walnutsanity:  # 25
+        num_single_walnuts += 16  # 16
+        num_triple_walnuts += 3  # 9
+    if OptionName.walnutsanity_dig_spots in walnutsanity:  # 18
+        num_single_walnuts += 18  # 18
+    if OptionName.walnutsanity_repeatables in walnutsanity:  # 33
+        num_single_walnuts += 30  # 30
+        num_triple_walnuts += 1  # 3
+
+    items.extend([item_factory(item) for item in ["Golden Walnut"] * num_single_walnuts])
+    items.extend([item_factory(item) for item in ["3 Golden Walnuts"] * num_triple_walnuts])
+    items.extend([item_factory(item) for item in ["5 Golden Walnuts"] * num_penta_walnuts])
+
+
 def create_walnut_purchase_rewards(item_factory: StardewItemFactory, options: StardewValleyOptions, items: List[Item]):
     if options.exclude_ginger_island == ExcludeGingerIsland.option_true:
         return
@@ -548,12 +569,9 @@ def create_walnut_purchase_rewards(item_factory: StardewItemFactory, options: St
 
 
 def create_special_order_board_rewards(item_factory: StardewItemFactory, options: StardewValleyOptions, items: List[Item]):
-    if options.special_order_locations == SpecialOrderLocations.option_disabled:
-        return
-
-    special_order_board_items = [item for item in items_by_group[Group.SPECIAL_ORDER_BOARD]]
-
-    items.extend([item_factory(item) for item in special_order_board_items])
+    if options.special_order_locations & SpecialOrderLocations.option_board:
+        special_order_board_items = [item for item in items_by_group[Group.SPECIAL_ORDER_BOARD]]
+        items.extend([item_factory(item) for item in special_order_board_items])
 
 
 def special_order_board_item_classification(item: ItemData, need_all_recipes: bool) -> ItemClassification:
@@ -577,7 +595,7 @@ def create_special_order_qi_rewards(item_factory: StardewItemFactory, options: S
         qi_gem_rewards.append("15 Qi Gems")
 
     # Add test to
-    if options.special_order_locations == SpecialOrderLocations.option_board_qi:
+    if options.special_order_locations & SpecialOrderLocations.value_qi:
         qi_gem_rewards.extend(["100 Qi Gems", "10 Qi Gems", "40 Qi Gems", "25 Qi Gems", "25 Qi Gems",
                                "40 Qi Gems", "20 Qi Gems", "50 Qi Gems", "40 Qi Gems", "35 Qi Gems"])
 
@@ -735,18 +753,21 @@ def fill_with_resource_packs_and_traps(item_factory: StardewItemFactory, options
     trap_items = [trap for trap in items_by_group[Group.TRAP]
                   if trap.name not in items_already_added_names and
                   (trap.mod_name is None or trap.mod_name in options.mods)]
-    trap_items.extend([bonus for bonus in items_by_group[Group.BONUS]
-                       if bonus.name not in items_already_added_names and
-                       (bonus.mod_name is None or bonus.mod_name in options.mods)])
+    # trap_items.extend([bonus for bonus in items_by_group[Group.BONUS]
+    #                    if bonus.name not in items_already_added_names and
+    #                    (bonus.mod_name is None or bonus.mod_name in options.mods)])
+    player_buffs = get_allowed_player_buffs(options.enabled_filler_buffs)
 
     priority_filler_items = []
     priority_filler_items.extend(useful_resource_packs)
+    priority_filler_items.extend(player_buffs)
 
     if include_traps:
         priority_filler_items.extend(trap_items)
 
     exclude_ginger_island = options.exclude_ginger_island == ExcludeGingerIsland.option_true
     all_filler_packs = remove_excluded_items(get_all_filler_items(include_traps, exclude_ginger_island), options)
+    all_filler_packs.extend(player_buffs)
     priority_filler_items = remove_excluded_items(priority_filler_items, options)
 
     number_priority_items = len(priority_filler_items)
@@ -812,14 +833,42 @@ def remove_limited_amount_packs(packs):
     return [pack for pack in packs if Group.MAXIMUM_ONE not in pack.groups and Group.EXACTLY_TWO not in pack.groups]
 
 
-def get_all_filler_items(include_traps: bool, exclude_ginger_island: bool):
+def get_all_filler_items(include_traps: bool, exclude_ginger_island: bool) -> List[ItemData]:
     all_filler_items = [pack for pack in items_by_group[Group.RESOURCE_PACK]]
     all_filler_items.extend(items_by_group[Group.TRASH])
+    # all_filler_items.extend(get_allowed_player_buffs(buff_option)) # Not sure how to do this
     if include_traps:
         all_filler_items.extend(items_by_group[Group.TRAP])
-        all_filler_items.extend(items_by_group[Group.BONUS])
+        # all_filler_items.extend(items_by_group[Group.BONUS])
     all_filler_items = remove_excluded_items_island_mods(all_filler_items, exclude_ginger_island, set())
     return all_filler_items
+
+
+def get_allowed_player_buffs(buff_option: EnabledFillerBuffs) -> List[ItemData]:
+    allowed_buffs = []
+    if OptionName.buff_luck in buff_option:
+        allowed_buffs.append(item_table[Buff.luck])
+    if OptionName.buff_damage in buff_option:
+        allowed_buffs.append(item_table[Buff.damage])
+    if OptionName.buff_defense in buff_option:
+        allowed_buffs.append(item_table[Buff.defense])
+    if OptionName.buff_immunity in buff_option:
+        allowed_buffs.append(item_table[Buff.immunity])
+    if OptionName.buff_health in buff_option:
+        allowed_buffs.append(item_table[Buff.health])
+    if OptionName.buff_energy in buff_option:
+        allowed_buffs.append(item_table[Buff.energy])
+    if OptionName.buff_bite in buff_option:
+        allowed_buffs.append(item_table[Buff.bite_rate])
+    if OptionName.buff_fish_trap in buff_option:
+        allowed_buffs.append(item_table[Buff.fish_trap])
+    if OptionName.buff_fishing_bar in buff_option:
+        allowed_buffs.append(item_table[Buff.fishing_bar])
+    if OptionName.buff_quality in buff_option:
+        allowed_buffs.append(item_table[Buff.quality])
+    if OptionName.buff_glow in buff_option:
+        allowed_buffs.append(item_table[Buff.glow])
+    return allowed_buffs
 
 
 def get_stardrop_classification(options) -> ItemClassification:

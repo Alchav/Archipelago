@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import cached_property
 from typing import Collection, Callable
 
 from .ability_logic import AbilityLogicMixin
@@ -9,7 +10,7 @@ from .animal_logic import AnimalLogicMixin
 from .arcade_logic import ArcadeLogicMixin
 from .artisan_logic import ArtisanLogicMixin
 from .base_logic import LogicRegistry
-from .buff_logic import BuffLogicMixin
+from .book_logic import BookLogicMixin
 from .building_logic import BuildingLogicMixin
 from .bundle_logic import BundleLogicMixin
 from .combat_logic import CombatLogicMixin
@@ -18,6 +19,7 @@ from .crafting_logic import CraftingLogicMixin
 from .farming_logic import FarmingLogicMixin
 from .fishing_logic import FishingLogicMixin
 from .gift_logic import GiftLogicMixin
+from .grind_logic import GrindLogicMixin
 from .harvesting_logic import HarvestingLogicMixin
 from .has_logic import HasLogicMixin
 from .logic_event import all_logic_events
@@ -31,15 +33,17 @@ from .quest_logic import QuestLogicMixin
 from .received_logic import ReceivedLogicMixin
 from .region_logic import RegionLogicMixin
 from .relationship_logic import RelationshipLogicMixin
+from .requirement_logic import RequirementLogicMixin
 from .season_logic import SeasonLogicMixin
 from .shipping_logic import ShippingLogicMixin
 from .skill_logic import SkillLogicMixin
 from .source_logic import SourceLogicMixin
 from .special_order_logic import SpecialOrderLogicMixin
-from .time_logic import TimeLogicMixin, ONE_YEAR
+from .time_logic import TimeLogicMixin
 from .tool_logic import ToolLogicMixin
 from .traveling_merchant_logic import TravelingMerchantLogicMixin
 from .wallet_logic import WalletLogicMixin
+from ..strings.ap_names.received_currency_names import ReceivedCurrency
 from ..content.game_content import StardewContent
 from ..data.craftable_data import all_crafting_recipes
 from ..data.museum_data import all_museum_items
@@ -47,11 +51,11 @@ from ..data.recipe_data import all_cooking_recipes
 from ..mods.logic.magic_logic import MagicLogicMixin
 from ..mods.logic.mod_logic import ModLogicMixin
 from ..mods.mod_data import ModNames
-from ..options import SpecialOrderLocations, ExcludeGingerIsland, FestivalLocations, StardewValleyOptions
+from ..options import SpecialOrderLocations, ExcludeGingerIsland, FestivalLocations, StardewValleyOptions, Walnutsanity
 from ..stardew_rule import False_, True_, StardewRule
 from ..strings.animal_names import Animal
 from ..strings.animal_product_names import AnimalProduct
-from ..strings.ap_names.ap_weapon_names import APWeapon
+from ..strings.ap_names.ap_option_names import OptionName
 from ..strings.ap_names.buff_names import Buff
 from ..strings.ap_names.community_upgrade_names import CommunityUpgrade
 from ..strings.artisan_good_names import ArtisanGood
@@ -87,12 +91,13 @@ from ..strings.wallet_item_names import Wallet
 logger = logging.getLogger(__name__)
 
 
-class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogicMixin, TravelingMerchantLogicMixin, TimeLogicMixin,
+class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, TravelingMerchantLogicMixin, TimeLogicMixin,
                    SeasonLogicMixin, MoneyLogicMixin, ActionLogicMixin, ArcadeLogicMixin, ArtisanLogicMixin, GiftLogicMixin,
                    BuildingLogicMixin, ShippingLogicMixin, RelationshipLogicMixin, MuseumLogicMixin, WalletLogicMixin, AnimalLogicMixin,
                    CombatLogicMixin, MagicLogicMixin, MonsterLogicMixin, ToolLogicMixin, PetLogicMixin, QualityLogicMixin,
                    SkillLogicMixin, FarmingLogicMixin, BundleLogicMixin, FishingLogicMixin, MineLogicMixin, CookingLogicMixin, AbilityLogicMixin,
-                   SpecialOrderLogicMixin, QuestLogicMixin, CraftingLogicMixin, ModLogicMixin, HarvestingLogicMixin, SourceLogicMixin):
+                   SpecialOrderLogicMixin, QuestLogicMixin, CraftingLogicMixin, ModLogicMixin, HarvestingLogicMixin, SourceLogicMixin,
+                   RequirementLogicMixin, BookLogicMixin, GrindLogicMixin):
     player: int
     options: StardewValleyOptions
     content: StardewContent
@@ -190,25 +195,19 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
             ArtisanGood.cheese: (self.has(AnimalProduct.cow_milk) & self.has(Machine.cheese_press)) | (self.region.can_reach(Region.desert) & self.has(Mineral.emerald)),
             ArtisanGood.cloth: (self.has(AnimalProduct.wool) & self.has(Machine.loom)) | (self.region.can_reach(Region.desert) & self.has(Mineral.aquamarine)),
             ArtisanGood.dinosaur_mayonnaise: self.artisan.can_mayonnaise(AnimalProduct.dinosaur_egg),
-            ArtisanGood.dried_fruit: self.artisan.has_dried_fruits(),
-            ArtisanGood.dried_mushroom: self.artisan.has_dried_mushrooms(),
             ArtisanGood.duck_mayonnaise: self.artisan.can_mayonnaise(AnimalProduct.duck_egg),
             ArtisanGood.goat_cheese: self.has(AnimalProduct.goat_milk) & self.has(Machine.cheese_press),
             ArtisanGood.honey: self.money.can_spend_at(Region.oasis, 200) | (self.has(Machine.bee_house) & self.season.has_any_not_winter()),
-            ArtisanGood.jelly: self.artisan.has_jelly(),
             ArtisanGood.maple_syrup: self.has(Machine.tapper),
             ArtisanGood.mayonnaise: self.artisan.can_mayonnaise(AnimalProduct.chicken_egg),
             ArtisanGood.mystic_syrup: self.has(Machine.tapper) & self.has(TreeSeed.mystic),
             ArtisanGood.oak_resin: self.has(Machine.tapper),
-            ArtisanGood.pickles: self.artisan.has_pickle(),
             ArtisanGood.pine_tar: self.has(Machine.tapper),
-            ArtisanGood.raisins: self.artisan.has_raisins(),
             ArtisanGood.smoked_fish: self.artisan.has_smoked_fish(),
             ArtisanGood.targeted_bait: self.artisan.has_targeted_bait(),
             ArtisanGood.stardrop_tea: self.has(WaterChest.golden_fishing_chest),
             ArtisanGood.truffle_oil: self.has(AnimalProduct.truffle) & self.has(Machine.oil_maker),
             ArtisanGood.void_mayonnaise: (self.skill.can_fish(Region.witch_swamp)) | (self.artisan.can_mayonnaise(AnimalProduct.void_egg)),
-            Beverage.coffee: self.artisan.can_keg(Seed.coffee) | self.has(Machine.coffee_maker) | (self.money.can_spend_at(Region.saloon, 300)) | self.has("Hot Java Ring"),
             Beverage.pina_colada: self.money.can_spend_at(Region.island_resort, 600),
             Beverage.triple_shot_espresso: self.has("Hot Java Ring"),
             Consumable.butterfly_powder: self.money.can_spend_at(Region.sewer, 20000),
@@ -305,7 +304,6 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
             RetainingSoil.basic: self.money.can_spend_at(Region.pierre_store, 100),
             RetainingSoil.quality: self.time.has_year_two & self.money.can_spend_at(Region.pierre_store, 150),
             Sapling.tea: self.relationship.has_hearts(NPC.caroline, 2) & self.has(Material.fiber) & self.has(Material.wood),
-            Seed.coffee_starter: self.traveling_merchant.has_days(3) & self.monster.can_kill(Monster.dust_sprite, ONE_YEAR),
             SpeedGro.basic: self.money.can_spend_at(Region.pierre_store, 100),
             SpeedGro.deluxe: self.time.has_year_two & self.money.can_spend_at(Region.pierre_store, 150),
             Trash.broken_cd: self.skill.can_crab_pot,
@@ -320,7 +318,6 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
             TreeSeed.mushroom: self.money.can_trade_at(Region.qi_walnut_room, Currency.qi_gem, 5),
             TreeSeed.pine: self.skill.has_level(Skill.foraging, 1) & self.ability.can_chop_trees(),
             TreeSeed.mossy: self.ability.can_chop_trees() & self.season.has(Season.summer),
-            Vegetable.tea_leaves: self.has(Sapling.tea) & self.time.has_lived_months(2) & self.season.has_any_not_winter(),
             Fish.clam: self.tool.can_forage(Generic.any, Region.beach),
             Fish.cockle: self.tool.can_forage(Generic.any, Region.beach),
             WaterItem.green_algae: self.fishing.can_fish_in_freshwater(), #
@@ -336,7 +333,6 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
         content_rules = {
             item_name: self.source.has_access_to_item(game_item)
             for item_name, game_item in self.content.game_items.items()
-            if not game_item.has_custom_rule
         }
 
         for item in set(content_rules.keys()).intersection(self.registry.item_rules.keys()):
@@ -432,7 +428,7 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
             FestivalCheck.shrimp_donut: True_(),
             FestivalCheck.smell_of_the_sea: True_(),
             FestivalCheck.desert_gumbo: True_(),
-            FestivalCheck.free_cactus: True_(),
+            FestivalCheck.free_cactis: True_(),
             FestivalCheck.monster_hunt: self.monster.can_kill(Monster.serpent),
             FestivalCheck.deep_dive: self.region.can_reach(Region.skull_cavern_50),
             FestivalCheck.treasure_hunt: self.region.can_reach(Region.skull_cavern_25),
@@ -466,18 +462,31 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
     def can_smelt(self, item: str) -> StardewRule:
         return self.has(Machine.furnace) & self.has(item)
 
-    def can_complete_field_office(self) -> StardewRule:
+    @cached_property
+    def can_start_field_office(self) -> StardewRule:
         field_office = self.region.can_reach(Region.field_office)
         professor_snail = self.received("Open Professor Snail Cave")
-        tools = self.tool.has_tool(Tool.pickaxe) & self.tool.has_tool(Tool.hoe) & self.tool.has_tool(Tool.scythe)
-        leg_and_snake_skull = self.has_all(Fossil.fossilized_leg, Fossil.snake_skull)
-        ribs_and_spine = self.has_all(Fossil.fossilized_ribs, Fossil.fossilized_spine)
-        skull = self.has(Fossil.fossilized_skull)
-        tail = self.has(Fossil.fossilized_tail)
-        frog = self.has(Fossil.mummified_frog)
-        bat = self.has(Fossil.mummified_bat)
-        snake_vertebrae = self.has(Fossil.snake_vertebrae)
-        return field_office & professor_snail & tools & leg_and_snake_skull & ribs_and_spine & skull & tail & frog & bat & snake_vertebrae
+        return field_office & professor_snail
+
+    def can_complete_large_animal_collection(self) -> StardewRule:
+        fossils = self.has_all(Fossil.fossilized_leg, Fossil.fossilized_ribs, Fossil.fossilized_skull, Fossil.fossilized_spine, Fossil.fossilized_tail)
+        return self.can_start_field_office & fossils
+
+    def can_complete_snake_collection(self) -> StardewRule:
+        fossils = self.has_all(Fossil.snake_skull, Fossil.snake_vertebrae)
+        return self.can_start_field_office & fossils
+
+    def can_complete_frog_collection(self) -> StardewRule:
+        fossils = self.has_all(Fossil.mummified_frog)
+        return self.can_start_field_office & fossils
+
+    def can_complete_bat_collection(self) -> StardewRule:
+        fossils = self.has_all(Fossil.mummified_bat)
+        return self.can_start_field_office & fossils
+
+    def can_complete_field_office(self) -> StardewRule:
+        return self.can_complete_large_animal_collection() & self.can_complete_snake_collection() & \
+               self.can_complete_frog_collection() & self.can_complete_bat_collection()
 
     def can_finish_grandpa_evaluation(self) -> StardewRule:
         # https://stardewvalleywiki.com/Grandpa
@@ -507,10 +516,7 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
         return self.count(12, *rules_worth_a_point)
 
     def can_win_egg_hunt(self) -> StardewRule:
-        number_of_movement_buffs = self.options.movement_buff_number
-        if self.options.festival_locations == FestivalLocations.option_hard or number_of_movement_buffs < 2:
-            return True_()
-        return self.received(Buff.movement, number_of_movement_buffs // 2)
+        return True_()
 
     def can_succeed_luau_soup(self) -> StardewRule:
         if self.options.festival_locations != FestivalLocations.option_hard:
@@ -530,7 +536,7 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
     def can_succeed_grange_display(self) -> StardewRule:
         if self.options.festival_locations != FestivalLocations.option_hard:
             return True_()
-        
+
         animal_rule = self.animal.has_animal(Generic.any)
         artisan_rule = self.artisan.can_keg(Generic.any) | self.artisan.can_preserves_jar(Generic.any)
         cooking_rule = self.money.can_spend_at(Region.saloon, 220)  # Salads at the bar are good enough
@@ -566,6 +572,44 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
             return False_()
         if number <= 0:
             return True_()
+
+        if self.options.walnutsanity == Walnutsanity.preset_none:
+            return self.can_get_walnuts(number)
+        if self.options.walnutsanity == Walnutsanity.preset_all:
+            return self.has_received_walnuts(number)
+        puzzle_walnuts = 61
+        bush_walnuts = 25
+        dig_walnuts = 18
+        repeatable_walnuts = 33
+        total_walnuts = puzzle_walnuts + bush_walnuts + dig_walnuts + repeatable_walnuts
+        walnuts_to_receive = 0
+        walnuts_to_collect = number
+        if OptionName.walnutsanity_puzzles in self.options.walnutsanity:
+            puzzle_walnut_rate = puzzle_walnuts / total_walnuts
+            puzzle_walnuts_required = round(puzzle_walnut_rate * number)
+            walnuts_to_receive += puzzle_walnuts_required
+            walnuts_to_collect -= puzzle_walnuts_required
+        if OptionName.walnutsanity_bushes in self.options.walnutsanity:
+            bush_walnuts_rate = bush_walnuts / total_walnuts
+            bush_walnuts_required = round(bush_walnuts_rate * number)
+            walnuts_to_receive += bush_walnuts_required
+            walnuts_to_collect -= bush_walnuts_required
+        if OptionName.walnutsanity_dig_spots in self.options.walnutsanity:
+            dig_walnuts_rate = dig_walnuts / total_walnuts
+            dig_walnuts_required = round(dig_walnuts_rate * number)
+            walnuts_to_receive += dig_walnuts_required
+            walnuts_to_collect -= dig_walnuts_required
+        if OptionName.walnutsanity_repeatables in self.options.walnutsanity:
+            repeatable_walnuts_rate = repeatable_walnuts / total_walnuts
+            repeatable_walnuts_required = round(repeatable_walnuts_rate * number)
+            walnuts_to_receive += repeatable_walnuts_required
+            walnuts_to_collect -= repeatable_walnuts_required
+        return self.has_received_walnuts(walnuts_to_receive) & self.can_get_walnuts(walnuts_to_collect)
+
+    def has_received_walnuts(self, number: int) -> StardewRule:
+        return self.received_custom(ReceivedCurrency.walnut, number)
+
+    def can_get_walnuts(self, number: int) -> StardewRule:
         # https://stardewcommunitywiki.com/Golden_Walnut#Walnut_Locations
         reach_south = self.region.can_reach(Region.island_south)
         reach_north = self.region.can_reach(Region.island_north)
@@ -585,7 +629,7 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
         reach_caves = self.logic.and_(self.region.can_reach(Region.qi_walnut_room), self.region.can_reach(Region.dig_site),
                                       self.region.can_reach(Region.gourmand_frog_cave),
                                       self.region.can_reach(Region.colored_crystals_cave),
-                                      self.region.can_reach(Region.shipwreck), self.received(APWeapon.slingshot))
+                                      self.region.can_reach(Region.shipwreck), self.combat.has_slingshot)
         reach_entire_island = self.logic.and_(reach_outside_areas, reach_all_volcano,
                                               reach_caves, reach_southeast, reach_field_office, reach_pirate_cove)
         if number <= 5:
@@ -637,9 +681,9 @@ class StardewLogic(ReceivedLogicMixin, HasLogicMixin, RegionLogicMixin, BuffLogi
         return self.received("Stardrop", number_of_stardrops_to_receive) & self.logic.and_(*other_rules)
 
     def has_prismatic_jelly_reward_access(self) -> StardewRule:
-        if self.options.special_order_locations == SpecialOrderLocations.option_disabled:
-            return self.special_order.can_complete_special_order("Prismatic Jelly")
-        return self.received("Monster Musk Recipe")
+        if self.options.special_order_locations & SpecialOrderLocations.option_board:
+            return self.received("Monster Musk Recipe")
+        return self.special_order.can_complete_special_order("Prismatic Jelly")
 
     def has_all_rarecrows(self) -> StardewRule:
         rules = []

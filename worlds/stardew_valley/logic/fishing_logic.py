@@ -31,12 +31,10 @@ class FishingLogic(BaseLogic[Union[HasLogicMixin, FishingLogicMixin, ReceivedLog
         return self.logic.skill.can_fish() & self.logic.region.can_reach_any((Region.forest, Region.town, Region.mountain))
 
     def has_max_fishing(self) -> StardewRule:
-        skill_rule = self.logic.skill.has_level(Skill.fishing, 10)
-        return self.logic.tool.has_fishing_rod(4) & skill_rule
+        return self.logic.tool.has_fishing_rod(4) & self.logic.skill.has_level(Skill.fishing, 10)
 
     def can_fish_chests(self) -> StardewRule:
-        skill_rule = self.logic.skill.has_level(Skill.fishing, 6)
-        return self.logic.tool.has_fishing_rod(4) & skill_rule
+        return self.logic.tool.has_fishing_rod(4) & self.logic.skill.has_level(Skill.fishing, 6)
 
     def can_fish_at(self, region: str) -> StardewRule:
         return self.logic.skill.can_fish() & self.logic.region.can_reach(region)
@@ -66,7 +64,7 @@ class FishingLogic(BaseLogic[Union[HasLogicMixin, FishingLogicMixin, ReceivedLog
     def can_start_extended_family_quest(self) -> StardewRule:
         if self.options.exclude_ginger_island == ExcludeGingerIsland.option_true:
             return False_()
-        if self.options.special_order_locations != SpecialOrderLocations.option_board_qi:
+        if not self.options.special_order_locations & SpecialOrderLocations.value_qi:
             return False_()
         return (self.logic.region.can_reach(Region.qi_walnut_room) &
                 self.logic.and_(*(self.logic.fishing.can_catch_fish(fish) for fish in fish_data.vanilla_legendary_fish)))

@@ -2,6 +2,7 @@ from ..game_content import ContentPack, StardewContent
 from ...data.artisan import MachineSource
 from ...data.game_item import ItemTag, CustomRuleSource, GameItem
 from ...data.harvest import HarvestFruitTreeSource, HarvestCropSource
+from ...data.skill import Skill
 from ...strings.artisan_good_names import ArtisanGood
 from ...strings.craftable_names import WildSeeds
 from ...strings.crop_names import Fruit, Vegetable
@@ -10,8 +11,10 @@ from ...strings.food_names import Beverage
 from ...strings.forageable_names import all_edible_mushrooms, Mushroom, Forageable
 from ...strings.fruit_tree_names import Sapling
 from ...strings.machine_names import Machine
+from ...strings.monster_names import Monster
 from ...strings.season_names import Season
 from ...strings.seed_names import Seed
+from ...strings.skill_names import Skill as SkillName
 
 all_fruits = (
     Fruit.ancient_fruit, Fruit.apple, Fruit.apricot, Fruit.banana, Forageable.blackberry, Fruit.blueberry, Forageable.cactus_fruit, Fruit.cherry,
@@ -27,7 +30,7 @@ all_vegetables = (
     Vegetable.tea_leaves, Vegetable.tomato, Vegetable.unmilled_rice, Vegetable.wheat, Vegetable.yam
 )
 
-non_juiceable_vegetables = (Vegetable.hops, Vegetable.tea_leaves, Vegetable.wheat)
+non_juiceable_vegetables = (Vegetable.hops, Vegetable.tea_leaves, Vegetable.wheat, Vegetable.tea_leaves)
 
 
 # This will hold items, skills and stuff that is available everywhere across the game, but not directly needing pelican town (crops, ore, foraging, etc.)
@@ -58,11 +61,16 @@ class BaseGameContentPack(ContentPack):
             content.source_item(wine, MachineSource(item=fruit.name, machine=Machine.keg))
             content.source_item(ArtisanGood.wine, MachineSource(item=fruit.name, machine=Machine.keg))
 
-            dried = ArtisanGood.specific_dried(fruit.name)
-            content.source_item(dried, MachineSource(item=fruit.name, machine=Machine.dehydrator))
+            if fruit.name == Fruit.grape:
+                content.source_item(ArtisanGood.raisins, MachineSource(item=fruit.name, machine=Machine.dehydrator))
+            else:
+                dried_fruit = ArtisanGood.specific_dried_fruit(fruit.name)
+                content.source_item(dried_fruit, MachineSource(item=fruit.name, machine=Machine.dehydrator))
+                content.source_item(ArtisanGood.dried_fruit, MachineSource(item=fruit.name, machine=Machine.dehydrator))
 
             jelly = ArtisanGood.specific_jelly(fruit.name)
             content.source_item(jelly, MachineSource(item=fruit.name, machine=Machine.preserves_jar))
+            content.source_item(ArtisanGood.jelly, MachineSource(item=fruit.name, machine=Machine.preserves_jar))
 
         for vegetable in tuple(content.find_tagged_items(ItemTag.VEGETABLE)):
             if vegetable.name not in non_juiceable_vegetables:
@@ -72,10 +80,17 @@ class BaseGameContentPack(ContentPack):
 
             pickles = ArtisanGood.specific_pickles(vegetable.name)
             content.source_item(pickles, MachineSource(item=vegetable.name, machine=Machine.preserves_jar))
+            content.source_item(ArtisanGood.pickles, MachineSource(item=vegetable.name, machine=Machine.preserves_jar))
 
         for mushroom in tuple(content.find_tagged_items(ItemTag.EDIBLE_MUSHROOM)):
-            dried = ArtisanGood.specific_dried(mushroom.name)
-            content.source_item(dried, MachineSource(item=mushroom.name, machine=Machine.dehydrator))
+            dried_mushroom = ArtisanGood.specific_dried_mushroom(mushroom.name)
+            content.source_item(dried_mushroom, MachineSource(item=mushroom.name, machine=Machine.dehydrator))
+            content.source_item(ArtisanGood.dried_mushroom, MachineSource(item=mushroom.name, machine=Machine.dehydrator))
+
+        # for fish in tuple(content.find_tagged_items(ItemTag.FISH)):
+        #     smoked_fish = ArtisanGood.specific_smoked_fish(fish.name)
+        #     content.source_item(smoked_fish, MachineSource(item=fish.name, machine=Machine.fish_smoker))
+        #     content.source_item(ArtisanGood.smoked_fish, MachineSource(item=fish.name, machine=Machine.fish_smoker))
 
 
 base_game = BaseGameContentPack(
@@ -132,17 +147,26 @@ base_game = BaseGameContentPack(
         Fruit.sweet_gem_berry: (HarvestCropSource(seed=Seed.rare_seed, seasons=(Season.fall,)),),
         Fruit.ancient_fruit: (HarvestCropSource(seed=WildSeeds.ancient, seasons=(Season.spring, Season.summer, Season.fall,)),),
 
-        Seed.coffee_starter: (CustomRuleSource(),),  # from monsters and travelling merchant
+        Seed.coffee_starter: (CustomRuleSource(lambda logic: logic.traveling_merchant.has_days(3) & logic.monster.can_kill_many(Monster.dust_sprite)),),
         Seed.coffee: (HarvestCropSource(seed=Seed.coffee_starter, seasons=(Season.spring, Season.summer,)),),
 
-        Vegetable.tea_leaves: (CustomRuleSource(),),  # friendship with Caroline
+        Vegetable.tea_leaves: (CustomRuleSource(lambda logic: logic.has(Sapling.tea) & logic.time.has_lived_months(2) & logic.season.has_any_not_winter()),),
     },
     artisan_good_sources={
         Beverage.beer: (MachineSource(item=Vegetable.wheat, machine=Machine.keg),),
         # Ingredient.vinegar: (MachineSource(item=Ingredient.rice, machine=Machine.keg),),
-        Beverage.coffee: (MachineSource(item=Seed.coffee, machine=Machine.keg), CustomRuleSource(),),  # Coffee machine
+        Beverage.coffee: (MachineSource(item=Seed.coffee, machine=Machine.keg),
+                          CustomRuleSource(lambda logic: logic.has(Machine.coffee_maker)),
+                          CustomRuleSource(lambda logic: logic.has("Hot Java Ring"))),
         ArtisanGood.green_tea: (MachineSource(item=Vegetable.tea_leaves, machine=Machine.keg),),
         ArtisanGood.mead: (MachineSource(item=ArtisanGood.honey, machine=Machine.keg),),
         ArtisanGood.pale_ale: (MachineSource(item=Vegetable.hops, machine=Machine.keg),),
-    }
+    },
+    skills=(
+        Skill(SkillName.farming, has_mastery=True),
+        Skill(SkillName.foraging, has_mastery=True),
+        Skill(SkillName.fishing, has_mastery=True),
+        Skill(SkillName.mining, has_mastery=True),
+        Skill(SkillName.combat, has_mastery=True),
+    )
 )

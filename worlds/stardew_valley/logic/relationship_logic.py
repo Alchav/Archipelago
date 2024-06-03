@@ -121,7 +121,7 @@ ReceivedLogicMixin, HasLogicMixin]]):
         heart_item = friendsanity.to_item_name(villager.name)
 
         number_required = math.ceil(hearts / self.content.features.friendsanity.heart_size)
-        return self.logic.received(heart_item, number_required)
+        return self.logic.received(heart_item, number_required) & self.can_meet(villager.name)
 
     @cache_self1
     def can_meet(self, npc: str) -> StardewRule:
@@ -135,7 +135,7 @@ ReceivedLogicMixin, HasLogicMixin]]):
             rules.append(self.logic.time.has_year_two)
 
         elif npc == NPC.leo:
-            rules.append(self.logic.received("Island West Turtle"))
+            rules.append(self.logic.received("Island North Turtle"))
 
         elif npc == ModNPC.lance:
             rules.append(self.logic.region.can_reach(Region.volcano_floor_10))
