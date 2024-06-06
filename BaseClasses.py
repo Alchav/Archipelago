@@ -62,6 +62,8 @@ class MultiWorld():
     precollected_items: Dict[int, List[Item]]
     state: CollectionState
 
+    post_fill: bool = False
+
     plando_options: PlandoOptions
     accessibility: Dict[int, Options.Accessibility]
     early_items: Dict[int, Dict[str, int]]
@@ -798,6 +800,8 @@ class CollectionState():
             changed = True
 
         self.stale[item.player] = True
+        if item.player % 2:
+            self.stale[item.player+1] = True
 
         if changed and not event:
             self.sweep_for_events()
@@ -1046,9 +1050,7 @@ class Location:
 
     def can_fill(self, state: CollectionState, item: Item, check_access=True) -> bool:
         return ((self.always_allow(state, item) and item.name not in state.multiworld.worlds[item.player].options.non_local_items)
-                or ((self.progress_type != LocationProgressType.EXCLUDED or not (item.advancement or item.useful) or not check_access)
-                    and self.item_rule(item)
-                    and (not check_access or self.can_reach(state))))
+                or (self.item_rule(item) and (not check_access or self.can_reach(state))))
 
     def can_reach(self, state: CollectionState) -> bool:
         # self.access_rule computes faster on average, so placing it first for faster abort

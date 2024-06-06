@@ -754,8 +754,8 @@ gear_locations = [
 
 missable_locations = [
     "MR Mt Rugged 1 Hurting Whacka",  # Item can stop spawning
-    # "SSS Merluvlee's House Merlow's Badges 1",  # Merlow's badge shop requires all star pieces to complete
-    # "SSS Merluvlee's House Merlow's Badges 2",  # Instead of expecting all star pieces, exclude the locations
+    # "SSS Merluvlee's House Merlow's Badges 1",
+    # "SSS Merluvlee's House Merlow's Badges 2",
     # "SSS Merluvlee's House Merlow's Badges 3",
     # "SSS Merluvlee's House Merlow's Badges 4",
     # "SSS Merluvlee's House Merlow's Badges 5",

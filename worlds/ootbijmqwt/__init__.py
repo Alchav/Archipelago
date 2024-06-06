@@ -238,8 +238,6 @@ class OOTBIJMQWTWorld(OOTWorld):
     location_name_to_id = OOTWorld.location_name_to_id
     web = OOTWorld.web
 
-    data_version = OOTWorld.data_version
-
     required_client_version = OOTWorld.required_client_version
 
     item_name_groups = OOTWorld.item_name_groups
