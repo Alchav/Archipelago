@@ -28,7 +28,7 @@ class SVELogicMixin(BaseLogicMixin):
 
 
 class SVELogic(BaseLogic[Union[HasLogicMixin, ReceivedLogicMixin, QuestLogicMixin, RegionLogicMixin, RelationshipLogicMixin, TimeLogicMixin, ToolLogicMixin,
-CookingLogicMixin, MoneyLogicMixin, CombatLogicMixin, SeasonLogicMixin, QuestLogicMixin]]):
+                               CookingLogicMixin, MoneyLogicMixin, CombatLogicMixin, SeasonLogicMixin]]):
     def initialize_rules(self):
         self.registry.sve_location_rules.update({
             SVELocation.tempered_galaxy_sword: self.logic.money.can_spend_at(SVERegion.alesia_shop, 350000),
@@ -45,9 +45,24 @@ CookingLogicMixin, MoneyLogicMixin, CombatLogicMixin, SeasonLogicMixin, QuestLog
             return self.logic.quest.can_complete_quest(ModQuest.RailroadBoulder)
         return self.logic.received(SVEQuestItem.iridium_bomb)
 
+    def has_marlon_boat(self):
+        if self.options.quest_locations < 0:
+            return self.logic.quest.can_complete_quest(ModQuest.MarlonsBoat)
+        return self.logic.received(SVEQuestItem.marlon_boat_paddle)
+
+    def has_grandpa_shed_repaired(self):
+        if self.options.quest_locations < 0:
+            return self.logic.quest.can_complete_quest(ModQuest.GrandpasShed)
+        return self.logic.received(SVEQuestItem.grandpa_shed)
+
+    def has_bear_knowledge(self):
+        if self.options.quest_locations < 0:
+            return self.logic.quest.can_complete_quest(Quest.strange_note)
+        return self.logic.received(Wallet.bears_knowledge)
+
     def can_buy_bear_recipe(self):
         access_rule = (self.logic.quest.can_complete_quest(Quest.strange_note) & self.logic.tool.has_tool(Tool.axe, ToolMaterial.basic) &
                        self.logic.tool.has_tool(Tool.pickaxe, ToolMaterial.basic))
         forage_rule = self.logic.region.can_reach_any((Region.forest, Region.backwoods, Region.mountain))
-        knowledge_rule = self.logic.received(Wallet.bears_knowledge)
+        knowledge_rule = self.has_bear_knowledge()
         return access_rule & forage_rule & knowledge_rule

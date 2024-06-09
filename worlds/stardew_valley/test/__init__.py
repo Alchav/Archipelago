@@ -5,14 +5,13 @@ from argparse import Namespace
 from contextlib import contextmanager
 from typing import Dict, ClassVar, Iterable, Tuple, Optional, List, Union, Any
 
-from BaseClasses import MultiWorld, CollectionState, get_seed, Location, Item
+from BaseClasses import MultiWorld, CollectionState, get_seed, Location, Item, ItemClassification
 from Options import VerifyKeys
 from test.bases import WorldTestBase
 from test.general import gen_steps, setup_solo_multiworld as setup_base_solo_multiworld
 from worlds.AutoWorld import call_all
 from .assertion import RuleAssertMixin
-from .. import StardewValleyWorld, options
-from ..mods.mod_data import all_mods
+from .. import StardewValleyWorld, options, StardewItem
 from ..options import StardewValleyOptions, StardewValleyOption
 
 DEFAULT_TEST_SEED = get_seed()
@@ -93,7 +92,7 @@ def allsanity_no_mods_6_x_x():
 
 def allsanity_mods_6_x_x():
     allsanity = allsanity_no_mods_6_x_x()
-    allsanity.update({options.Mods.internal_name: all_mods})
+    allsanity.update({options.Mods.internal_name: frozenset(options.Mods.valid_keys)})
     return allsanity
 
 
@@ -230,17 +229,22 @@ class SVTestBase(RuleAssertMixin, WorldTestBase, SVTestCase):
 
         self.multiworld = setup_solo_multiworld(self.options, seed=self.seed)
         self.multiworld.lock.acquire()
+        world = self.multiworld.worlds[self.player]
+
         self.original_state = self.multiworld.state.copy()
         self.original_itempool = self.multiworld.itempool.copy()
+        self.original_prog_item_count = world.total_progression_items
         self.unfilled_locations = self.multiworld.get_unfilled_locations(1)
         if self.constructed:
-            self.world = self.multiworld.worlds[self.player]  # noqa
+            self.world = world  # noqa
 
     def tearDown(self) -> None:
         self.multiworld.state = self.original_state
         self.multiworld.itempool = self.original_itempool
         for location in self.unfilled_locations:
             location.item = None
+        self.world.total_progression_items = self.original_prog_item_count
+
         self.multiworld.lock.release()
 
     @property
@@ -251,18 +255,25 @@ class SVTestBase(RuleAssertMixin, WorldTestBase, SVTestCase):
 
     def collect_lots_of_money(self):
         self.multiworld.state.collect(self.world.create_item("Shipping Bin"), event=False)
-        for i in range(100):
+        required_prog_items = int(round(self.multiworld.worlds[self.player].total_progression_items * 0.25))
+        for i in range(required_prog_items):
             self.multiworld.state.collect(self.world.create_item("Stardrop"), event=False)
 
     def collect_all_the_money(self):
         self.multiworld.state.collect(self.world.create_item("Shipping Bin"), event=False)
-        for i in range(1000):
+        required_prog_items = int(round(self.multiworld.worlds[self.player].total_progression_items * 0.95))
+        for i in range(required_prog_items):
             self.multiworld.state.collect(self.world.create_item("Stardrop"), event=False)
 
     def collect_everything(self):
         non_event_items = [item for item in self.multiworld.get_items() if item.code]
         for item in non_event_items:
             self.multiworld.state.collect(item)
+
+    def collect_all_except(self, item_to_not_collect: str):
+        for item in self.multiworld.get_items():
+            if item.name != item_to_not_collect:
+                self.multiworld.state.collect(item)
 
     def get_real_locations(self) -> List[Location]:
         return [location for location in self.multiworld.get_locations(self.player) if location.address is not None]
@@ -276,15 +287,21 @@ class SVTestBase(RuleAssertMixin, WorldTestBase, SVTestCase):
             super().collect(item)
             return
         if count == 1:
-            item = self.multiworld.create_item(item, self.player)
+            item = self.create_item(item)
             self.multiworld.state.collect(item)
             return item
         items = []
         for i in range(count):
-            item = self.multiworld.create_item(item, self.player)
+            item = self.create_item(item)
             self.multiworld.state.collect(item)
             items.append(item)
         return items
+
+    def create_item(self, item: str) -> StardewItem:
+        created_item = self.world.create_item(item)
+        if created_item.classification == ItemClassification.progression:
+            self.multiworld.worlds[self.player].total_progression_items -= 1
+        return created_item
 
 
 pre_generated_worlds = {}
@@ -294,24 +311,27 @@ pre_generated_worlds = {}
 def solo_multiworld(world_options: Optional[Dict[Union[str, StardewValleyOption], Any]] = None,
                     *,
                     seed=DEFAULT_TEST_SEED,
-                    world_caching=True) -> MultiWorld:
+                    world_caching=True) -> Tuple[MultiWorld, StardewValleyWorld]:
     if not world_caching:
         multiworld = setup_solo_multiworld(world_options, seed, _cache={})
         yield multiworld, multiworld.worlds[1]
     else:
         multiworld = setup_solo_multiworld(world_options, seed)
         multiworld.lock.acquire()
+        world = multiworld.worlds[1]
 
         original_state = multiworld.state.copy()
         original_itempool = multiworld.itempool.copy()
         unfilled_locations = multiworld.get_unfilled_locations(1)
+        original_prog_item_count = world.total_progression_items
 
-        yield multiworld, multiworld.worlds[1]
+        yield multiworld, world
 
         multiworld.state = original_state
         multiworld.itempool = original_itempool
         for location in unfilled_locations:
             location.item = None
+        multiworld.total_progression_items = original_prog_item_count
 
         multiworld.lock.release()
 
@@ -364,8 +384,10 @@ def setup_solo_multiworld(test_options: Optional[Dict[Union[str, StardewValleyOp
     return multiworld
 
 
-def parse_class_option_keys(test_options: dict) -> dict:
+def parse_class_option_keys(test_options: Optional[Dict]) -> dict:
     """ Now the option class is allowed as key. """
+    if test_options is None:
+        return {}
     parsed_options = {}
 
     for option, value in test_options.items():

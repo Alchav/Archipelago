@@ -1,4 +1,5 @@
 import itertools
+import logging
 from typing import List, Dict, Set
 
 from BaseClasses import MultiWorld, CollectionState
@@ -18,7 +19,7 @@ from .logic.logic import StardewLogic
 from .logic.time_logic import MAX_MONTHS
 from .logic.tool_logic import tool_upgrade_prices
 from .mods.mod_data import ModNames
-from .options import StardewValleyOptions, Booksanity, Walnutsanity
+from .options import StardewValleyOptions, Walnutsanity
 from .options import ToolProgression, BuildingProgression, ExcludeGingerIsland, SpecialOrderLocations, Museumsanity, BackpackProgression, Shipsanity, \
     Monstersanity, Chefsanity, Craftsanity, ArcadeMachineLocations, Cooksanity, SkillProgression
 from .stardew_rule import And, StardewRule, true_
@@ -51,6 +52,8 @@ from .strings.tool_names import Tool, ToolMaterial
 from .strings.tv_channel_names import Channel
 from .strings.villager_names import NPC, ModNPC
 from .strings.wallet_item_names import Wallet
+
+logger = logging.getLogger(__name__)
 
 
 def set_rules(world):
@@ -249,6 +252,10 @@ def set_entrance_rules(logic: StardewLogic, multiworld, player, world_options: S
     set_entrance_rule(multiworld, player, LogicEntrance.shipping, logic.shipping.can_use_shipping_bin)
     set_entrance_rule(multiworld, player, LogicEntrance.watch_queen_of_sauce, logic.action.can_watch(Channel.queen_of_sauce))
     set_entrance_rule(multiworld, player, Entrance.forest_to_mastery_cave, logic.skill.can_enter_mastery_cave())
+    set_entrance_rule(multiworld, player, Entrance.forest_to_mastery_cave, logic.skill.can_enter_mastery_cave())
+    set_entrance_rule(multiworld, player, LogicEntrance.buy_experience_books, logic.time.has_lived_months(2))
+    set_entrance_rule(multiworld, player, LogicEntrance.buy_year1_books, logic.time.has_year_two)
+    set_entrance_rule(multiworld, player, LogicEntrance.buy_year3_books, logic.time.has_year_three)
 
 
 def set_dangerous_mine_rules(logic, multiworld, player, world_options: StardewValleyOptions):
@@ -515,7 +522,6 @@ def set_walnut_repeatable_rules(logic, multiworld, player, world_options):
         MultiWorldRules.set_rule(multiworld.get_location(f"Volcano Monsters Walnut {i}", player), logic.combat.has_galaxy_weapon)
         MultiWorldRules.set_rule(multiworld.get_location(f"Volcano Crates Walnut {i}", player), logic.combat.has_any_weapon)
     MultiWorldRules.set_rule(multiworld.get_location(f"Tiger Slime Walnut", player), logic.monster.can_kill(Monster.tiger_slime))
-
 
 
 def set_cropsanity_rules(logic: StardewLogic, multiworld, player, world_content: StardewContent):
@@ -999,7 +1005,7 @@ def set_sve_rules(logic: StardewLogic, multiworld: MultiWorld, player: int, worl
     set_entrance_rule(multiworld, player, SVEEntrance.outpost_warp_to_outpost, logic.received(SVERunes.nexus_outpost))
     set_entrance_rule(multiworld, player, SVEEntrance.wizard_warp_to_wizard, logic.received(SVERunes.nexus_wizard))
     set_entrance_rule(multiworld, player, SVEEntrance.use_purple_junimo, logic.relationship.has_hearts(ModNPC.apples, 10))
-    set_entrance_rule(multiworld, player, SVEEntrance.grandpa_interior_to_upstairs, logic.received(SVEQuestItem.grandpa_shed))
+    set_entrance_rule(multiworld, player, SVEEntrance.grandpa_interior_to_upstairs, logic.mod.sve.has_grandpa_shed_repaired())
     set_entrance_rule(multiworld, player, SVEEntrance.use_bear_shop, (logic.mod.sve.can_buy_bear_recipe()))
     set_entrance_rule(multiworld, player, SVEEntrance.railroad_to_grampleton_station, logic.received(SVEQuestItem.scarlett_job_offer))
     set_entrance_rule(multiworld, player, SVEEntrance.museum_to_gunther_bedroom, logic.relationship.has_hearts(ModNPC.gunther, 2))
@@ -1014,7 +1020,7 @@ def set_sve_rules(logic: StardewLogic, multiworld: MultiWorld, player: int, worl
 def set_sve_ginger_island_rules(logic: StardewLogic, multiworld: MultiWorld, player: int, world_options: StardewValleyOptions):
     if world_options.exclude_ginger_island == ExcludeGingerIsland.option_true:
         return
-    set_entrance_rule(multiworld, player, SVEEntrance.summit_to_highlands, logic.received(SVEQuestItem.marlon_boat_paddle))
+    set_entrance_rule(multiworld, player, SVEEntrance.summit_to_highlands, logic.mod.sve.has_marlon_boat())
     set_entrance_rule(multiworld, player, SVEEntrance.wizard_to_fable_reef, logic.received(SVEQuestItem.fable_reef_portal))
     set_entrance_rule(multiworld, player, SVEEntrance.highlands_to_cave,
                       logic.tool.has_tool(Tool.pickaxe, ToolMaterial.iron) & logic.tool.has_tool(Tool.axe, ToolMaterial.iron))
@@ -1035,8 +1041,7 @@ def set_entrance_rule(multiworld, player, entrance: str, rule: StardewRule):
 
         MultiWorldRules.set_rule(multiworld.get_entrance(entrance, player), rule)
     except KeyError as ex:
-        print(f"Failed to evaluate indirect connection in {entrance}")
-        print(explain(rule, CollectionState(multiworld)))
+        logger.error(f"""Failed to evaluate indirect connection in: {explain(rule, CollectionState(multiworld))}""")
         raise ex
 
 

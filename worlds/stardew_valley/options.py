@@ -754,24 +754,10 @@ class Gifting(Toggle):
 # or we didn't find the time to validate that they work or fix compatibility issues if they do.
 # Once a mod is validated to be functional, it can simply be removed from this list
 disabled_mods = {ModNames.deepwoods, ModNames.magic,
-                 ModNames.cooking_skill, ModNames.jasper,
+                 ModNames.cooking_skill,
                  ModNames.yoba, ModNames.eugene,
-                 ModNames.wellwick, ModNames.shiko, ModNames.delores, ModNames.riley, ModNames.distant_lands,
-                 ModNames.lacey, ModNames.boarding_house}
-
-# In Progress:
-# Tractor
-# Luck
-# Socializing
-# Archaeology
-# Binning Skill
-# Juna
-# Alec
-# Mister Ginger
-# Ayeisha
-# Alecto
-# Bigger Backpack
-# Skull Cavern Elevator
+                 ModNames.wellwick, ModNames.shiko, ModNames.delores, ModNames.riley,
+                 ModNames.boarding_house}
 
 
 if 'unittest' in sys.modules.keys() or 'pytest' in sys.modules.keys():
