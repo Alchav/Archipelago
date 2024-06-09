@@ -470,7 +470,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             multiworld.spoiler.create_playthrough(create_paths=args.spoiler > 2)
 
         if args.spoiler:
-            multiworld.spoiler.to_file(os.path.join(temp_dir, '%s_Spoiler.txt' % outfilebase))
+            multiworld.spoiler.to_file(os.path.join(temp_dir, '%s_Spoiler.txt' % outfilebase), er_hint_data)
 
         zipfilename = output_path(f"AP_{multiworld.seed_name}.zip")
         logger.info(f"Creating final archive at {zipfilename}")

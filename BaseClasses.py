@@ -1367,7 +1367,7 @@ class Spoiler:
                         self.paths[str(multiworld.get_region('Inverted Big Bomb Shop', player))] = \
                             get_path(state, multiworld.get_region('Inverted Big Bomb Shop', player))
 
-    def to_file(self, filename: str) -> None:
+    def to_file(self, filename: str, er_hint_data) -> None:
         from itertools import chain
         from worlds import AutoWorld
         from Options import Visibility
@@ -1415,11 +1415,12 @@ class Spoiler:
                 outfile.write("\n\nStarting Items:\n\n")
                 outfile.write("\n".join([item for item in precollected_items]))
 
-            locations = [(str(location), str(location.item) if location.item is not None else "Nothing")
+            locations = [(str(location), str(location.item) if location.item is not None else "Nothing", er_hint_data[location.player][location.address] if isinstance(location.address, int) and location.address in er_hint_data[location.player] else "")
                          for location in self.multiworld.get_locations() if location.show_in_spoiler]
+            locations.sort(key=lambda loc: loc[2].split("/")[0].split(" ")[-1].zfill(2) if loc[2].split("/")[0].split(" ")[-1].isdigit() else "00" if loc[2].split(" ")[-1] == "Unreachable" else "x")
             outfile.write('\n\nLocations:\n\n')
             outfile.write('\n'.join(
-                ['%s: %s' % (location, item) for location, item in locations]))
+                ['%s: %s at %s' % (location, item, hint) for location, item, hint in locations]))
 
             outfile.write('\n\nPlaythrough:\n\n')
             outfile.write('\n'.join(['%s: {\n%s\n}' % (sphere_nr, '\n'.join(

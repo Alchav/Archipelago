@@ -624,8 +624,8 @@ class Context:
     # rest
 
     def get_hint_cost(self, slot):
-        if self.hint_cost:
-            return max(1, int(self.hint_cost * 0.01 * sum([len(self.locations[player]) for player in self.slot_info if player in self.locations])))
+        if self.hint_cost: # hint_data[slot][location_id]
+            return max(1, int(self.hint_cost * 0.01 * sum([len([location for location in self.locations[player] if "Unreachable" not in self.er_hint_data[player][location]]) for player in self.slot_info if player in self.locations])))
         return 0
 
     def recheck_hints(self, team: typing.Optional[int] = None, slot: typing.Optional[int] = None):
@@ -988,7 +988,7 @@ def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
                       ) -> typing.List[str]:
         checked = state[team, slot]
         player_locations = self[slot]
-        return sorted([item_names[player_locations[location_id][0]] + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
+        return sorted([item_names[player_locations[location_id][0]] + f" ({ctx.games[player_locations[location_id][1]]})" + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
                        location_id in player_locations if
                        location_id not in checked])
     return g(ctx.locations, ctx.location_checks, team, slot, ctx.er_hint_data, ctx.item_names)
@@ -1670,7 +1670,7 @@ def get_client_points(ctx: Context, client: Client) -> int:
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
-    return (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
+    return (ctx.location_check_points * len([location for location in ctx.location_checks[team, slot] if "Unreachable" not in ctx.er_hint_data[slot][location]]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
 
 
@@ -1719,6 +1719,12 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
                 client.items_handling = args['items_handling']
             except (ValueError, TypeError):
                 errors.add('InvalidItemsHandling')
+
+        #player in ctx.client_game_state and ctx.client_game_state[player] == ClientStatus.CLIENT_GOAL
+        if client.slot % 2 == 0:
+            dependant = (client.team, client.slot - 1)
+            if dependant not in ctx.client_game_state or ctx.client_game_state[dependant] != ClientStatus.CLIENT_GOAL:
+                errors.add("InvalidGame")
 
         # only exact version match allowed
         if ctx.compatibility == 0 and args['version'] != version_tuple:

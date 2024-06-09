@@ -5,6 +5,7 @@ import typing
 from collections import Counter, deque
 
 from BaseClasses import CollectionState, Item, Location, LocationProgressType, MultiWorld
+from BaseClasses import ItemClassification
 from Options import Accessibility
 
 from worlds.AutoWorld import call_all
@@ -101,7 +102,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
             else:
                 # we filled all reachable spots.
                 if swap:
-                    print(f"Swapping {item_to_place.name}")
+                    logging.info(f"Swapping {item_to_place.name}")
                     # try swapping this item with previously placed items in a safe way then in an unsafe way
                     swap_attempts = ((i, location, unsafe)
                                      for unsafe in (False, True)
@@ -116,7 +117,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                         if swap_count > 1:
                             continue
 
-                        print(f"Attempting to swap {item_to_place.player}'s {item_to_place.name} into {location.name}")
+                        logging.info(f"Attempting to swap {item_to_place.player}'s {item_to_place.name} into {location.name}")
                         location.item = None
                         placed_item.location = None
                         swap_state = sweep_from_pool(base_state, [placed_item, *item_pool] if unsafe else item_pool,
@@ -475,7 +476,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # i = 0
     # while True:
     #     i += 1
-    #     print(f"Bogosort attempt {i}")
+    #     logging.info(f"Bogosort attempt {i}")
     #     multiworld.random.shuffle(sdv_locs)
     #     sdv_locs.sort(key=lambda loc: not loc.can_reach(multiworld.state))
     #     multiworld.random.shuffle(sdv_items)
@@ -487,7 +488,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #     for loc, item in zip(sdv_locs, sdv_items):
     #         loc.item = None
     #         item.location = None
-    # print("Bogosort successful")
+    # logging.info("Bogosort successful")
     # fill_locations = [loc for loc in fill_locations if not loc.item]
     # progitempool = [item for item in progitempool if not item.location]
 
@@ -515,6 +516,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         nonlocal lock_later
         lock_later.append(location)
 
+    progitempool.sort(key=lambda i: i.classification != ItemClassification.progression_skip_balancing)
     if prioritylocations:
         # "priority fill"
         fill_restrictive(multiworld, multiworld.state, prioritylocations, progitempool,
@@ -522,7 +524,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                          name="Priority")
         # accessibility_corrections(multiworld, multiworld.state, prioritylocations, progitempool)
         defaultlocations = prioritylocations + defaultlocations
-
+    multiworld.random.shuffle(progitempool)
     # morph_balls = [i for i in progitempool if i.name == "Morph"]
     # progitempool = [i for i in progitempool if i not in morph_balls]
     # l = [loc for loc in defaultlocations if loc.player in z and loc.can_reach(multiworld.state)]
@@ -534,21 +536,20 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     if progitempool:
         # "advancement/progression fill"
+        panic_method = "start_inventory"
         if panic_method == "swap":
             fill_restrictive(multiworld, multiworld.state, defaultlocations, progitempool,
-                             swap=True,
-                             on_place=mark_for_locking, name="Progression", single_player_placement=multiworld.players == 1)
+                             swap=True, name="Progression", single_player_placement=multiworld.players == 1)
         elif panic_method == "raise":
             fill_restrictive(multiworld, multiworld.state, defaultlocations, progitempool,
-                             swap=False,
-                             on_place=mark_for_locking, name="Progression", single_player_placement=multiworld.players == 1)
+                             swap=False, name="Progression", single_player_placement=multiworld.players == 1)
         elif panic_method == "start_inventory":
             fill_restrictive(multiworld, multiworld.state, defaultlocations, progitempool,
                              swap=False, allow_partial=True,
-                             on_place=mark_for_locking, name="Progression", single_player_placement=multiworld.players == 1)
+                             name="Progression", single_player_placement=multiworld.players == 1)
             if progitempool:
                 for item in progitempool:
-                    logging.debug(f"Moved {item} to start_inventory to prevent fill failure.")
+                    logging.info(f"Moved {item} to start_inventory to prevent fill failure.")
                     multiworld.push_precollected(item)
                     filleritempool.append(multiworld.worlds[item.player].create_filler())
                 logging.warning(f"{len(progitempool)} items moved to start inventory,"
@@ -570,8 +571,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     del mark_for_locking, lock_later
 
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
-
-    filleritempool.sort(key=lambda i: i.trap)
 
     filleritempool.sort(key=lambda i: i.trap)
 
@@ -599,21 +598,21 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         items_counter = Counter(location.item.player for location in multiworld.get_filled_locations())
         locations_counter = Counter(location.player for location in multiworld.get_locations())
         items_counter.update(item.player for item in unplaced)
-        print_data = {"items": items_counter, "locations": locations_counter}
-        logging.info(f"Per-Player counts: {print_data})")
+        logging.info_data = {"items": items_counter, "locations": locations_counter}
+        logging.info(f"Per-Player counts: {logging.info_data})")
 
-    # for player, world in multiworld.worlds.items():
-    #     if player % 2:
-    #         continue
-    #     menu = multiworld.get_region("Menu", player)
-    #     rule = multiworld.completion_condition[player-1]
-    #     for location in menu.locations:
-    #         add_rule(location, rule)
-    #     for entrance in menu.exits:
-    #         add_rule(entrance, rule)
+    for player, world in multiworld.worlds.items():
+        if player % 2:
+            continue
+        menu = multiworld.get_region("Menu", player)
+        rule = multiworld.completion_condition[player-1]
+        for location in menu.locations:
+            add_rule(location, rule)
+        for entrance in menu.exits:
+            add_rule(entrance, rule)
+
 
     beaten_game_spheres = {}
-
     def get_item_spheres():
         state = CollectionState(multiworld)
         locations = set(multiworld.get_filled_locations())
@@ -634,7 +633,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             new_beaten_games = beaten_games - old_beaten_games
             for player in new_beaten_games:
                 beaten_game_spheres[player] = i
-                print(f"{i} - {new_beaten_games}")
+                logging.info(f"{i} - {new_beaten_games}")
             i += 1
             if not reachable_locations:
                 if locations:
@@ -648,7 +647,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     state.collect(location.item, True, location)
             locations -= reachable_locations
 
-    from BaseClasses import ItemClassification
 
     def iclass(i: Item):
         game = i.game
@@ -682,21 +680,73 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if i.classification == ItemClassification.progression and i.classification != ItemClassification.progression_skip_balancing:
             return 2
         return 1
-    # s = [_ for _ in get_item_spheres()]
 
     from worlds.papermario.data.ItemList import progression_miscitems
 
-    sp = list(get_item_spheres())
+    spheres = list(get_item_spheres())
+
+
+    pseudo_prog_items = [
+        {
+            "Game": "Paper Mario",
+            "Items": ["Koot Koopa Legends", "Koot Tape", "Luigi Autograph", "Koot Empty Wallet", "Merluvlee Autograph",
+                      "Koot Old Photo", "Koot Glasses", "Koot Package", "Koot Red Jar"]
+        },
+        {
+            "Game": "The Legend of Zelda",
+            "Items": ["Boomerang", "Magical Boomerang"]
+        },
+        {
+            "Game": "The Legend of Zelda",
+            "Items": ["Blue Ring", "Red Ring"]
+        },
+        {
+            "Game": "The Legend of Zelda",
+            "Items": ["Sword", "White Sword", "Magical Sword"]
+        },
+        {
+            "Game": "The Legend of Zelda",
+            "Items": ["Bow", "Arrow", "Silver Arrow"]
+        },
+        {
+            "Game": "The Legend of Zelda",
+            "Items": ["Small Key", "Magical Key"]
+        },
+        {
+            "Game": "Super Metroid Map Rando",
+            "Items": ["Morph", "Bombs"]
+        },
+    ]
+    for chain in pseudo_prog_items:
+        player_chains = {player: [] for player in multiworld.get_game_players(chain["Game"])}
+        if not player_chains:
+            continue
+        for sphere in spheres:
+            for location in sphere:
+                if location.item.game == chain["Game"] and location.item.name in chain["Items"]:
+                    player_chains[location.item.player].append(location)
+        for player, locations in player_chains.items():
+            items = [location.item for location in locations]
+            items.sort(key=lambda i: chain["Items"].index(i.name))
+            for item, location in zip(items, locations):
+                logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
+                location.item = item
+    beaten_game_spheres = {}
+    spheres = list(get_item_spheres())
+
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
-    for sphere in sp:
+    for i, sphere in enumerate(spheres):
         for player in game_spheres:
             if [loc for loc in sphere if loc.player == player]:
-                game_spheres[player] += 1
+                game_spheres[player] = i
 
     for player in game_spheres:
-        print(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
+        try:
+            logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
+        except Exception:
+            pass
 
-    for sphere in get_item_spheres():
+    for sphere in spheres:
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
@@ -704,12 +754,17 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         for loc in sphere_list:
             if (isinstance(loc.address, int) and loc.item.name not in multiworld.local_items[loc.player] and not (
                     loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems)
-                    and "SSS Merluvlee's House Merlow's Badges" not in loc.name):
+                    and "SSS Merluvlee's House Merlow's Badges" not in loc.name) and not (loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name)):
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
                 if a.item_rule(b.item) and b.item_rule(a.item):
                     a.item, b.item = b.item, a.item
+                else:
+                    if not a.item_rule(b.item):
+                        logging.info(f"{a.name} cannot accept {b.item.name}")
+                    if not b.item_rule(a.item):
+                        logging.info(f"{b.name} cannot accept {a.item.name}")
             for loc in t:
                 if loc.player == loc.item.player and loc.item.name in multiworld.worlds[loc.player].options.non_local_items.value:
                     for loc2 in t:

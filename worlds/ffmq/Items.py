@@ -274,10 +274,10 @@ def create_items(self) -> None:
 
     self.multiworld.itempool += items
 
-    if len(self.multiworld.player_ids) > 1:
-        early_choices = ["Sand Coin", "River Coin"]
-        early_item = self.multiworld.random.choice(early_choices)
-        self.multiworld.early_items[self.player][early_item] = 1
+    # if len(self.multiworld.player_ids) > 1:
+    #     early_choices = ["Sand Coin", "River Coin"]
+    #     early_item = self.multiworld.random.choice(early_choices)
+    #     self.multiworld.early_items[self.player][early_item] = 1
 
 
 class FFMQItem(Item):
