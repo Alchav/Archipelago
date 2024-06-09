@@ -163,7 +163,7 @@
       "id": 8,
       "name": "G-Mode Morph Junction (Ship)",
       "nodeType": "junction",
-      "nodeSubType": "junction",
+      "nodeSubType": "g-mode",
       "note": "Represents being at the Ship with G-Mode Morph (artificial morph)"
     }
   ],
@@ -352,7 +352,7 @@
         }
       },
       "requires": [
-        "Bombs"
+        "h_canArtificialMorphBombs"
       ],
       "note": [
         "Overload the scroll PLMs which are one tile to the left of the bomb blocks leading to Gauntlet.",
@@ -388,7 +388,11 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 4],
@@ -412,6 +416,10 @@
           "fallSpeedInTiles": 2
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ],
       "note": "Break the Bomb blocks using Screw Attack in a Moonfall or SpeedBooster."
     },
     {
@@ -441,6 +449,7 @@
         }
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {
           "frames": 125,
           "excessFrames": 33
@@ -471,9 +480,15 @@
         ]}
       ],
       "exitCondition": {
-        "leaveWithSpark": {}
+        "leaveWithSpark": {
+          "position": "top"
+        }
       },
-      "devNote": "The Gauntlet Entrance door must be open, so the connecting room at 3 cannot be used."
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "devNote": [
+        "The Gauntlet Entrance door must be open, so the connecting room at 3 cannot be used.",
+        "Unlocking the door is free since the obstacle C cleared means that any lock was already taken care of."
+      ]
     },
     {
       "link": [3, 1],
@@ -556,6 +571,7 @@
         "canWrapAroundShot",
         {"doorUnlockedAtNode": 1}
       ],
+      "unlocksDoors": [{"nodeId": 1, "types": ["ammo"], "requires": ["never"]}],
       "clearsObstacles": ["C"],
       "note": [
         "Open the Gauntlet Entrance door by shooting a charged Wave shot through the right wall to wrap around to hit the door.",
@@ -590,6 +606,7 @@
       "link": [4, 1],
       "name": "Shinespark",
       "requires": [
+        "canHorizontalShinespark",
         {"canShineCharge": {
           "usedTiles": 19,
           "steepUpTiles": 2,
@@ -617,8 +634,14 @@
         }}
       ],
       "exitCondition": {
-        "leaveWithSpark": {}
-      }
+        "leaveWithSpark": {
+          "position": "top"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "devNote": [
+        "Unlocking the door is free since the obstacle C cleared means that any lock was already taken care of."
+      ]
     },
     {
       "link": [4, 1],
@@ -632,12 +655,53 @@
           "steepDownTiles": 1,
           "openEnd": 2
         }},
-        {"shinespark": {"frames": 95, "excessFrames": 33}}
+        {"or": [
+          {"shinespark": {"frames": 95, "excessFrames": 33}},
+          {"and": [
+            "canShinechargeMovementTricky",
+            {"shinespark": {"frames": 87, "excessFrames": 33}}
+          ]}
+        ]}
       ],
       "clearsObstacles": ["A"],
       "note": [
         "Store the spark on the right side of the ledge.  Run left and do a big jump towards the gauntlet door and then midair spark at the right time.",
         "The lines in the background make for a good way to measure height."
+      ]
+    },
+    {
+      "link": [4, 1],
+      "name": "Big Jump Midair Shinespark Through Door",
+      "requires": [
+        {"obstaclesCleared": ["C"]},
+        "canMidairShinespark",
+        "canShinechargeMovementComplex",
+        {"canShineCharge": {
+          "usedTiles": 19,
+          "steepUpTiles": 2,
+          "steepDownTiles": 1,
+          "openEnd": 2
+        }},
+        {"or": [
+          {"shinespark": {"frames": 96}},
+          {"and": [
+            "canShinechargeMovementTricky",
+            {"shinespark": {"frames": 88}}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {
+          "position": "top"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Store the spark on the right side of the ledge.  Run left and do a big jump towards the gauntlet door and then midair spark at the right time.",
+        "The lines in the background make for a good way to measure height."
+      ],
+      "devNote": [
+        "Unlocking the door is free since the obstacle C cleared means that any lock was already taken care of."
       ]
     },
     {
@@ -665,8 +729,7 @@
         {"canShineCharge": {
           "usedTiles": 33,
           "openEnd": 2
-        }},
-        {"shinespark": {"frames": 95, "excessFrames": 33}}
+        }}
       ],
       "clearsObstacles": ["A"],
       "note": [
@@ -710,7 +773,11 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [4, 2],
@@ -738,6 +805,10 @@
           "fallSpeedInTiles": 2
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ],
       "note": "Break the Bomb blocks using Screw Attack in a Moonfall or SpeedBooster."
     },
     {
@@ -766,7 +837,7 @@
       "requires": [
         "canTrickyDashJump",
         "HiJump",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump"
       ]
     },
     {
@@ -1007,7 +1078,7 @@
     },
     {
       "link": [7, 1],
-      "name": "Springball",
+      "name": "Spring Ball",
       "requires": [
         "canSpringBallJumpMidAir",
         {"or": [
@@ -1032,7 +1103,7 @@
         ]}
       ],
       "clearsObstacles": ["A"],
-      "devNote": "This is for sparking from 5 -> 1."
+      "note": "Shinespark diagonally from the small hill left of the ship to break part way into the hidden bomb wall, then use Bombs or another means to continue to the left."
     },
     {
       "link": [7, 5],
@@ -1044,7 +1115,7 @@
       "name": "G-Mode Morph Power Bomb",
       "requires": [
         "h_canArtificialMorphIBJ",
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+        "h_canArtificialMorphPowerBomb"
       ],
       "note": [
         "Using IBJ to reach the Gauntlet entrance bomb blocks, place a Power Bomb and it will hit but not break the blocks.",
@@ -1071,7 +1142,7 @@
       "link": [8, 4],
       "name": "G-Mode Morph Power Bomb",
       "requires": [
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+        "h_canArtificialMorphPowerBomb"
       ],
       "clearsObstacles": ["B"],
       "note": "Place a Power Bomb then quickly exit G-Mode before it explodes to break the bomb blocks."

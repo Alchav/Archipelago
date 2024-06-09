@@ -277,7 +277,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [],
       "note": "Overload PLMs using scroll blocks a few tiles in front of the bomb blocks."
@@ -288,8 +289,33 @@
       "notable": true,
       "entranceCondition": {
         "comeInShinecharged": {
+          "framesRequired": 55
+        },
+        "comesThroughToilet": "no"
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"or": [
+          "canCrouchJump",
+          "canMidairShinespark"
+        ]},
+        {"shinespark": {"frames": 5}}
+      ],
+      "reusableRoomwideNotable": "Climb Behemoth Shinespark",
+      "note": [
+        "Diagonal shinespark up the climb to break the bomb blocks to the top right morph tunnel.",
+        "A consistent place to spark from is the small platform below the bomb block, using a crouch jump and then a diagonal spark (not a crouched diagonal spark)."
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Climb Behemoth Shinespark (Top Door, Through Toilet)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInShinecharged": {
           "framesRequired": 65
-        }
+        },
+        "comesThroughToilet": "yes"
       },
       "requires": [
         "canShinechargeMovementComplex",
@@ -312,7 +338,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": true
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canArtificialMorphMovement"
@@ -327,7 +354,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": true
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [],
       "note": "Overload PLMs using the scroll block next to the bomb blocks."
@@ -373,7 +401,8 @@
           "length": 30,
           "openEnd": 0
         }
-      }
+      },
+      "unlocksDoors": [{"nodeId": 5, "types": ["ammo"], "requires": []}]
     },
     {
       "link": [2, 2],
@@ -511,7 +540,13 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]},
+        {"nodeId": 2, "types": ["missiles", "super"], "requires": []},
+        {"nodeId": 2, "types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 5],
@@ -540,7 +575,13 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]},
+        {"nodeId": 2, "types": ["missiles", "super"], "requires": []},
+        {"nodeId": 2, "types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 5],
@@ -559,6 +600,10 @@
           "fallSpeedInTiles": 2
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ],
       "note": "Break the Bomb blocks using Screw Attack in a Moonfall, then escape the tiles with Grapple Beam."
     },
     {
@@ -647,11 +692,11 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
-          "Bombs",
+          "h_canArtificialMorphSpringBall",
+          "h_canArtificialMorphBombs",
           {"and": [
             "Morph",
-            "h_canThreeTileJumpMorph"
+            "h_canFourTileJumpMorph"
           ]}
         ]}
       ],
@@ -690,11 +735,11 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
-          "Bombs",
+          "h_canArtificialMorphSpringBall",
+          "h_canArtificialMorphBombs",
           {"and": [
             "Morph",
-            "h_canThreeTileJumpMorph"
+            "h_canFourTileJumpMorph"
           ]}
         ]}
       ],
@@ -722,6 +767,7 @@
         }
       },
       "requires": [
+        "canInsaneJump",
         "canSpeedball",
         "canTrickyDashJump",
         "canSlowShortCharge"
@@ -741,11 +787,11 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
-          "Bombs",
+          "h_canArtificialMorphSpringBall",
+          "h_canArtificialMorphBombs",
           {"and": [
             "Morph",
-            "h_canThreeTileJumpMorph"
+            "h_canFourTileJumpMorph"
           ]}
         ]}
       ],
@@ -763,11 +809,11 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
-          "Bombs",
+          "h_canArtificialMorphSpringBall",
+          "h_canArtificialMorphBombs",
           {"and": [
             "Morph",
-            "h_canThreeTileJumpMorph"
+            "h_canFourTileJumpMorph"
           ]}
         ]}
       ],
@@ -819,7 +865,7 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           "Morph"
         ]}
       ],
@@ -840,7 +886,7 @@
       },
       "requires": [
         "h_canArtificialMorphIBJ",
-        "canBeVeryPatient"
+        "canBeExtremelyPatient"
       ],
       "reusableRoomwideNotable": "Climb G-Mode Morph Insane IBJ to Top",
       "note": [
@@ -904,7 +950,8 @@
       "requires": [
         "canSpeedball",
         "canTrickyDashJump",
-        "canSlowShortCharge"
+        "canSlowShortCharge",
+        "canInsaneJump"
       ],
       "reusableRoomwideNotable": "Climb Morph Tunnel SpeedBall",
       "note": "Enter the room with a very specific run speed to jump from the door, squeeze by the ceiling, and land a speedball perfectly in the tunnel to break the Bomb block.",
@@ -921,11 +968,11 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
-          "Bombs",
+          "h_canArtificialMorphSpringBall",
+          "h_canArtificialMorphBombs",
           {"and": [
             "Morph",
-            "h_canThreeTileJumpMorph"
+            "h_canFourTileJumpMorph"
           ]}
         ]}
       ],
@@ -935,7 +982,9 @@
       "link": [5, 2],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {
+          "position": "bottom"
+        }
       },
       "requires": [
         {"shinespark": {"frames": 43, "excessFrames": 17}}
@@ -1001,7 +1050,13 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]},
+        {"nodeId": 5, "types": ["missiles", "super"], "requires": []},
+        {"nodeId": 5, "types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [5, 2],
@@ -1030,7 +1085,13 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]},
+        {"nodeId": 5, "types": ["missiles", "super"], "requires": []},
+        {"nodeId": 5, "types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [5, 2],
@@ -1049,6 +1110,10 @@
           "fallSpeedInTiles": 2
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ],
       "note": "Break the Bomb blocks using Screw Attack in a Moonfall, then escape the tiles with Grapple Beam."
     },
     {
@@ -1108,7 +1173,7 @@
       },
       "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           "Morph"
         ]}
       ],
@@ -1129,7 +1194,7 @@
       },
       "requires": [
         "h_canArtificialMorphIBJ",
-        "canBeVeryPatient"
+        "canBeExtremelyPatient"
       ],
       "reusableRoomwideNotable": "Climb G-Mode Morph Insane IBJ to Top",
       "note": [
@@ -1208,7 +1273,7 @@
         {"or": [
           "Morph",
           {"and": [
-            "SpringBall",
+            "h_canArtificialMorphSpringBall",
             {"or": [
               "HiJump",
               "canCarefulJump"
@@ -1220,7 +1285,7 @@
           ]},
           {"and": [
             "h_canArtificialMorphMovement",
-            {"ammo": {"type": "PowerBomb", "count": 1}}
+            "h_canArtificialMorphPowerBomb"
           ]}
         ]}
       ],
@@ -1266,7 +1331,8 @@
           "length": 30,
           "openEnd": 0
         }
-      }
+      },
+      "unlocksDoors": [{"nodeId": 2, "types": ["ammo"], "requires": []}]
     },
     {
       "link": [5, 6],
@@ -1424,6 +1490,7 @@
           ]}
         ]}
       ],
+      "unlocksDoors": [{"nodeId": 2, "types": ["ammo"], "requires": []}],
       "reusableRoomwideNotable": "Climb Temporary Blue Chain Through Bomb Blocks",
       "note": "A Temporary Blue Chain with movement assists to climb up and destroy the bomb blocks blocking the bottom morph tunnel."
     },
@@ -1436,7 +1503,7 @@
       "link": [6, 6],
       "name": "Space Pirate Farm",
       "requires": [
-        "f_ZebesAwake",
+        "h_ZebesIsAwake",
         {"resetRoom": {
           "nodes": [1, 5],
           "mustStayPut": false

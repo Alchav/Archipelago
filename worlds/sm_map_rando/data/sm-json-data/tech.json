@@ -11,9 +11,16 @@
           "note": "Executing a strat that requires waiting or doing the same thing over and over again for a substantial amount of time, potentially more than 1.5 minutes, even with good execution.",
           "extensionTechs": [
             {
-                "name": "canBeVeryPatient",
-                "requires": ["canBePatient"],
-                "note": "Executing a strat that requires waiting or doing the same thing over and over again for a long time, potentially more than 3 minutes, even with good execution."
+              "name": "canBeVeryPatient",
+              "requires": ["canBePatient"],
+              "note": "Executing a strat that requires waiting or doing the same thing over and over again for a long time, potentially more than 3 minutes, even with good execution.",
+              "extensionTechs": [
+                {
+                  "name": "canBeExtremelyPatient",
+                  "requires": ["canBeVeryPatient"],
+                  "note": "Executing a strat that requires waiting or doing the same thing over and over again for a very long time, potentially more than 6 minutes, even with good execution."
+                }
+              ]
             }
           ]
         },
@@ -133,6 +140,42 @@
               ]
             }
           ]
+        },
+        {
+          "name": "canManageReserves",
+          "requires": [],
+          "note": [
+            "The ability to manage reserve energy efficiently, including the following techniques:",
+            "1) Avoiding wasted energy from reserves overfilling into regular energy, either manually or automatically,",
+            "2) Preventing a double enemy hit by having only a small amount of reserve energy when auto refilling,",
+            "3) Manually refilling from reserves during a shinespark to prevent the spark from ending early due to low energy."
+          ],
+          "devNote": [
+            "This tech shouldn't need to be added to strat requirements, but should instead be accounted for by randomizers or other applications. Without this tech:",
+            "1) Samus' reserve energy should be logically treated as never exceeding her regular energy capacity, due to the likelihood that any extra reverse energy would be wasted by overfill.",
+            "2) She should never be able to take an enemy hit that deals as much or more than her regular energy capacity.",
+            "3) Shinesparks should not be in logic if their frames (minus excess frames) would put Samus below 29 energy.",
+            "4) Manually refilling in advance of an enemy hit or shinespark may still be assumed to be doable, given enough regular energy capacity, but only in a complete way that leaves reserves empty.",
+            "With this tech (but without canPauseAbuse tech):",
+            "1) If Samus takes a hit that exceeds her energy capacity, while having any reserve energy, it should logically result in 1 Energy and 0 Reserve Energy afterward, under an assumption that reserve energy was previously drained to allow i-frames to be conserved",
+            "2) Samus should not be required to refill twice (nor refill once particularly precisely) during a shinespark if she has no Energy Tanks, roughly if the frames minus excess frames exceeds 120."
+          ],
+          "extensionTechs": [
+            {
+              "name": "canPauseAbuse",
+              "requires": [ "canManageReserves" ],
+              "note": [
+                "The ability to pause in order to avoid death while reaching 0 Energy.",
+                "Energy must be obtained before the unpause fade-in finishes, either by picking up an Energy drop or refilling with Reserve Energy."
+              ],
+              "devNote": [
+                "This tech has additional implications that should be accounted for by randomizers or other applications. With this tech:",
+                "1) Samus can take an enemy hit as long as her total energy (regular energy + reserve energy) is greater than what the enemy deals.",
+                "2) Samus can be expected to refill twice during a shinespark even with no Energy Tanks.",
+                "When Samus is at low energy, it would be possible with pause abuse to take less damage than what the enemy deals, but in general this is not assumed to be required."
+              ]
+            }
+          ]
         }
       ]
     },
@@ -245,27 +288,27 @@
               ],
               "extensionTechs": [
                 {
-                  "name": "can2HighWallMidAirMorph",
+                  "name": "can3HighWallMidAirMorph",
                   "requires": [
                     "canPreciseWalljump",
                     "canWallJumpInstantMorph",
                     "canDisableEquipment"
                   ],
                   "note" : [
-                    "Getting up a 2-tile-high jump in a morph passage by mid-air morphing off of a wall jump. This is easier from an opposite wall.",
+                    "Getting up into a morph passage from a 3-tile-high space by mid-air morphing off of a wall jump. This is easier from an opposite wall.",
                     "After the wall jump, continue holding jump in order to only need to press down a single time to morph."
                   ]
                 }
               ]
             },
             {
-              "name": "can3HighMidAirMorph",
+              "name": "can4HighMidAirMorph",
               "requires": [
                 "canMidAirMorph",
                 "canDisableEquipment"
               ],
               "note" : [
-                "A mid-air morph that has to be done within an elevation difference of 3 tiles (with a ceiling removing any extra room).",
+                "A mid-air morph that has to be done in a 4-tile-high space.",
                 "It's a lot more precise than with more room. Turn off HiJump before attempting this."
               ]
             },
@@ -276,7 +319,7 @@
                 "canDisableEquipment"
               ],
               "note": [
-                "A technique for mid-air morphing over a two tile wall in air physics, or a one tile wall in water physics.",
+                "A technique for mid-air morphing in a 3-tile-high space in air physics, or a 2-tile-high space in water physics.",
                 "The key point is that pausing can be used to morph much faster than double pressing down.",
                 "\"R\" means holding angle aim before the first down press so Samus has a smaller hitbox for slightly more space to work with.",
                 "1) Hold angle aim (up or down) and down while in a crouching position.",
@@ -405,12 +448,28 @@
                 "canMidAirMorph",
                 {"or": [
                   "HiJump",
-                  "can3HighMidAirMorph"
+                  "can4HighMidAirMorph"
                 ]}
               ],
               "note": [
                 "Using Grapple to propel Samus upwards, then continuously morphing/unmorphing/jumping in mid-air to climb upwards.",
                 "This is much more lenient with HiJump."
+              ],
+              "extensionTechs": [
+                {
+                  "name": "canTrickyGrappleJump",
+                  "requires": [
+                    "canGrappleJump"
+                  ],
+                  "note": [
+                    "The ability to Grapple Jump while also performing difficult movements.",
+                    "1) Aiming a Grapple Fling with a precise angle.",
+                    "2) Morphing and unmorphing very quickly without the slowdown of water physics.",
+                    "3) Positioning the Grapple Jump with a Mid-Air Wiggle at high speeds.",
+                    "4) Performing actions between individual Grapple Jumps, such as arm pumping."
+                  ],
+                  "devNote": "canMidairWiggle is better added to the strat to show exactly what is needed to do the trick."
+                }
               ]
             },
             {
@@ -429,6 +488,29 @@
                 "This trick is effectively double frame perfect and kills the enemy requiring either a room reset, or a respawning enemy."
               ],
               "devNote": "Bombs is a leniency as the trick has a high chance of failure."
+            },
+            {
+              "name": "canGrappleTeleport",
+              "requires": [
+                "canUseGrapple"
+              ],
+              "note": [
+                "Exiting a door transition while grappled, in order to initiate a teleport in the next room.",
+                "The position to which Samus teleports corresponds to the position of the grapple block in the first room.",
+                "The corresponding position in the destination room (counting tiles from the top-left corner of the room) must have a block to which Samus can remain grappled (e.g. a solid block would work but air would not);",
+                "otherwise the teleport will not occur."
+              ]
+            },
+            {
+              "name": "canGrappleBombHang",
+              "requires": [
+                "canUseGrapple"
+              ],
+              "note": [
+                "Receiving a boost from a Bomb or Power Bomb while grappled, to enter a 'glitched grapple hanging' state.",
+                "Among other things, this state gives a way to trigger a door transition while still grappled.",
+                "The game may lag heavily in this state: if lag persists, it can sometimes be alleviated by changing the inputs held."
+              ]
             }
           ]
         }
@@ -512,6 +594,30 @@
                 "This can also be used out of a Spring Wall or from a spin jump, in order to gain more horizontal distance before triggering the second jump.",
                 "This, along with a crouch jump, is also needed in order to perform a maximum height spring ball jump.",
                 "Maximum height jumps primarily have underwater applications, as it enables Samus to barely make it up 7 tiles vertically."
+              ],
+              "extensionTechs": [
+                {
+                  "name": "canDoubleSpringBallJumpMidAir",
+                  "requires": [ "canTrickySpringBallJump" ],
+                  "note": [
+                    "Using a mid-air Spring Ball jump twice during a single jump to gain even more height.",
+                    "This consists of a tight variant of mid-air Spring Ball jump, then turning off Spring Ball, then a second mid-air Spring Ball jump all while still climbing upwards.",
+                    "This is typically used underwater with HiJump, but it is technically possible in lava without HiJump or to perform more than two Spring Ball jumps in acid."
+                  ]
+                },
+                {
+                  "name": "canUnderwaterBombIntoSpringBallJump",
+                  "requires": [ 
+                    "canTrickySpringBallJump",
+                    "h_canJumpIntoIBJ"
+                  ],
+                  "note": [
+                    "Use the tiny amount of height gain from an underwater Bomb explosion to re-equip Springball and perform a Springball jump.",
+                    "This is most often used to get a second SpringBall jump when underwater without HiJump.",
+                    "Bombs are required since Power Bombs will prevent pausing."
+                  ],
+                  "devNote": "Similar to an underwater walljump into springballjump, but that has no applications yet since double springballjump is easier for similar requirements."
+                }
               ]
             },
             {
@@ -522,31 +628,22 @@
               ],
               "note": [
                 "A mid-air Spring Ball jump that starts with a wall jump to gain more height.",
-                "It often relies on the momentum change when equipping or unequipping Spring Ball while morphed and moving horizontally."
+                "It often benefits from the momentum change when equipping Spring Ball while morphed and moving horizontally after a WallJump."
               ]
             },
-            {
-              "name": "canDoubleSpringBallJumpMidAir",
-              "requires": [ "canTrickySpringBallJump" ],
-              "note": [
-                "Using a mid-air Spring Ball jump twice during a single jump to gain even more height.",
-                "This consists of a tight variant of mid-air Spring Ball jump, then turning off Spring Ball, then a second mid-air Spring Ball jump all while still climbing upwards.",
-                "This is typically used underwater with HiJump, but it is technically possible in lava without HiJump or to perform more than two Spring Ball jumps in acid."
-              ]
-            },
-            {
-              "name": "canUnderwaterBombIntoSpringBallJump",
-              "requires": [ 
-                "canTrickySpringBallJump",
-                "h_canJumpIntoIBJ"
-              ],
-              "note": [
-                "Use the tiny amount of height gain from an underwater Bomb explosion to re-equip Springball and perform a Springball jump.",
-                "This is most often used to get a second SpringBall jump when underwater without HiJump.",
-                "Bombs are required since Power Bombs will prevent pausing."
-              ],
-              "devNote": "Similar to an underwater walljump into springballjump, but that has no applications yet since double springballjump is easier for similar requirements."
-            }
+          {
+            "name": "canSpringFling",
+            "requires": [
+              "canDisableEquipment",
+              "SpringBall"
+            ],
+            "note": [
+              "The ability to gain extra distance meerly by turning Springball on or off.",
+              "When equipping or unequipping Springball while Morphed, Samus' speed is reset.",
+              "If rising (and not in liquid physics), the horizontal speed is set to full roll speed.",
+              "If falling, the vertical speed is set to zero and horizontal speed is reset unless SpeedBooster is equipped."
+            ]
+          }
           ]
         },
         {
@@ -576,6 +673,13 @@
                   "note": [
                     "Using Speed Booster and jumping with a precise runway length in order to jump higher than with a slightly shorter or longer run.",
                     "This works because of the extreme non-linearity of the speed to jump height ratio, when Speed Booster is active."
+                  ]
+                },
+                {
+                  "name": "canInsaneJump",
+                  "requires": ["canTrickyJump"],
+                  "note": [
+                    "Executing a jump that requires extremely precise timing, in the vicinity of frame-perfect precision."
                   ]
                 },
                 {
@@ -653,6 +757,15 @@
               ]
             }
           ]
+        },
+        {
+          "name": "canJumpIntoRespawningBlock",
+          "requires": [],
+          "note": [
+            "The ability to time a jump up into a respawning block so that Samus gets stuck in it and can jump up again.",
+            "The bottom of Samus' hitbox must be completely in the respawning block or she will fall out.",
+            "Because of this, it is typically required to aim down or morph to stay in the block."
+          ]
         }
       ]
     },
@@ -723,7 +836,14 @@
             {
               "name": "canCeilingBombJump",
               "requires": [ "canBombAboveIBJ" ],
-              "note": "The ability to IBJ at the ceiling and place bombs at a steady rhythm while slowly moving horizontally."
+              "note": "The ability to IBJ at the ceiling and place bombs at a steady rhythm while slowly moving horizontally.",
+              "extensionTechs": [
+                {
+                  "name": "canLongCeilingBombJump",
+                  "requires": [ "canCeilingBombJump" ],
+                  "note": "The ability to ceiling bomb jump over a distance of two screens or more."
+                }
+              ]
             },
             {
               "name": "canDiagonalBombJump",
@@ -760,7 +880,7 @@
         },
         {
           "name": "canSpringBallBombJump",
-          "requires": ["SpringBall"],
+          "requires": [ "SpringBall" ],
           "note": [
             "After gaining some height with a single bomb explosion from the ground, use Spring Ball to jump higher.",
             "Usable only when Samus' vertical speed is 0 (at the max height gained by the bomb)."
@@ -859,28 +979,6 @@
                   "note": "Using a frozen Mochtroid to climb upwards, by continually jumping as it thaws and refreezing it higher."
                 },
                 {
-                  "name": "canRemorphZebetiteSkip",
-                  "requires": [
-                    "canUseFrozenEnemies",
-                    "Wave",
-                    "Morph"
-                  ],
-                  "note": [
-                    "Being able to glitch through the second Zebetite barrier, clipping through it by morphing/unmorphing/remorphing on a frozen Rinka.",
-                    "Spinjump into the lower portion of the Zebetite to becoming wedged between it and the frozen rinka. Morphing twice raises Samus to the right height to roll through.",
-                    "Also known as the Spring Ball Zebetite Skip."
-                  ]
-                },
-                {
-                  "name": "canIceZebetitesSkip",
-                  "requires": [ "canUseFrozenEnemies" ],
-                  "note":[
-                    "Being able to glitch through the Mother Brain zebetites by using a frozen Rinka and i-frames.",
-                    "Spinjump or Down-Back onto the rinka after acquiring i-frames to clip inside of the Zebetite, then jump through.",
-                    "Note that Zebetites cause i-frames but deal no damage."
-                  ]
-                },
-                {
                   "name": "canTrickyUseFrozenEnemies",
                   "requires": [ "canUseFrozenEnemies" ],
                   "note": [
@@ -941,6 +1039,30 @@
               "name": "canEscapeEnemyGrab",
               "requires": [],
               "note": "The ability to become grabbed by Draygon or a Beetom and then escape by pressing 60+ inputs."
+            },
+            {
+              "name": "canEnemyExtendRunway",
+              "requires": ["canUseEnemies"],
+              "note": [
+                "The ability to use an enemy to extend the length of a runway.",
+                "This is typically set up with a frozen wall-crawler, but can include other frozen enemies or Snails, Trippers, etc.",
+                "The enemy can be up to 3 pixels higher than the adjacent runway and still have benefits.",
+                "At 3 pixels above the runway, Samus can run off of the enemy and not lose speed, which is often useful for cross-room speedy jumps and jumps into water.",
+                "At 2 pixels above, single-stutter shortcharges often fail and multi-stutters are unreliable.",
+                "At 1 pixel above, multi-stutters are fairly reliable.",
+                "A pixel-perfect positioning is necessary when using an enemy to bridge a gap, where Samus needs to run onto and off of the frozen enemy.",
+                "If the enemy is even 1 pixel lower than the runway, it cannot be used."
+              ],
+              "extensionTechs": [
+                {
+                  "name": "canTrickyEnemyExtendRunway",
+                  "requires": [ "canEnemyExtendRunway" ],
+                  "note": [
+                    "The ability to use tricky enemy setups to extend the length of a runway.",
+                    "This includes the use of unintuitive or particularly precise setups or the use of multiple enemies with non-trivial setups."
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -1056,21 +1178,42 @@
         {
           "name": "canShinespark",
           "requires": [ "SpeedBooster" ],
-          "note": "The ability to use the Speed Booster to store a shinecharge, then fly in a direction until an obstacle is hit or Samus gets down to 29 energy.",
+          "note": [
+            "The ability to use the Speed Booster to store a shinecharge, then fly in a direction until an obstacle is hit or Samus gets down to 29 energy.",
+            "Assumes Samus can shinespark vertically or diagonally from the ground."
+          ],
           "extensionTechs": [
             {
-              "name": "canMidairShinespark",
+              "name": "canHorizontalShinespark",
               "requires": [ "canShinespark" ],
-              "note": "The ability to jump and shinespark mid-air: vertically, horizontally, or diagonally.",
-              "devNote": "This is typically not used to simply save energy.",
+              "note": [
+                "The ability to shinespark horizontally from the ground.",
+                "This can be achieved by starting without horizontal momentum and pressing jump and then forward while still holding jump (or repressing jump).",
+                "These inputs can be done in rapid succession or with a short delay.",
+                "Shinesparking in water can be done the same way, but requires a slightly longer delay between the jump and forward presses, and it is particularly important to ensure Samus has no horizontal momentum."
+              ],
               "extensionTechs": [
                 {
-                  "name": "canShinesparkDeepStuck",
-                  "requires": [ "canMidairShinespark" ],
+                  "name": "canMidairShinespark",
+                  "requires": [ "canHorizontalShinespark" ],
                   "note": [
-                    "Activating a shinespark to get deep stuck in a door.",
-                    "This is done by shooting open the door and spin-jumping towards it with a shine charge, then pressing angle up to activate a shinespark on the same frame as getting a wall jump check by moving away from the transition tiles.",
-                    "While going through the transition, hold jump and angle up."
+                    "The ability to jump and shinespark mid-air: vertically, horizontally, or diagonally.",
+                    "Mid-air horizontal sparks are the most tricky.",
+                    "They can be performed by spin jumping, breaking spin, initiating the shinespark without holding jump, then pressing jump and forward.",
+                    "One of the easiest methods is to hold forward the entire time, spin jump, release jump at the desired height, tap either up or the diagonal up angle button,",
+                    "then tap or press jump again (while up/angle is no longer pressed). The timing of the jump after the up/angle is fairly lenient and doesn't need to be rushed.",
+                    "Note that mid-air shinesparks can't be performed from a fall, only from a jump."
+                  ],
+                  "extensionTechs": [
+                    {
+                      "name": "canShinesparkDeepStuck",
+                      "requires": [ "canMidairShinespark" ],
+                      "note": [
+                        "Activating a shinespark to get deep stuck in a door.",
+                        "This is done by shooting open the door and spin-jumping towards it with a shine charge, then pressing angle up to activate a shinespark on the same frame as getting a wall jump check by moving away from the transition tiles.",
+                        "While going through the transition, hold jump and angle up."
+                      ]
+                    }
                   ]
                 }
               ]
@@ -1089,6 +1232,16 @@
                   "note": [
                     "The ability to make multiple movement actions with a shinespark charge timer running to get into position to shinespark.",
                     "This reposition may be necessary to avoid obstacles, conserve energy, etc."
+                  ],
+                  "extensionTechs": [
+                    {
+                      "name": "canShinechargeMovementTricky",
+                      "requires": [ "canShinechargeMovementComplex" ],
+                      "note": [
+                        "The ability to make precise and potentially unintuitive movement actions with a shinespark charge timer running to get into position to shinespark.",
+                        "A common example is using the Shinespark Wind-Up animation to wait for a hero shot to open an off-camera door."
+                      ]
+                    }
                   ]
                 }
               ]
@@ -1097,27 +1250,6 @@
               "name": "canUseSpeedEchoes",
               "requires": [ "canShinespark" ],
               "note": "Using the Samus echoes that are emitted after a shinespark bonk as a weapon to kill enemies."
-            },
-            {
-              "name": "canSpeedZebetitesSkip",
-              "requires": [
-                "canShinespark",
-                {"enemyDamage": {
-                  "enemy": "Rinka",
-                  "type": "contact",
-                  "hits": 1
-                }}
-              ],
-              "note": [
-                "Being able to glitch through the Mother Brain Zebetites by using a shinespark and i-frames."
-              ],
-              "devNote": "FIXME Could use a better description."
-            },
-            {
-              "name": "canShinesparkWithReserve",
-              "requires": [ "canShinespark" ],
-              "note": "Manually triggering reserve energy during a shinespark to prevent Samus' energy from getting too low and stopping the spark early.",
-              "devNote": "This tech shouldn't need to be added to strat requirements."
             }
           ]
         },
@@ -1194,7 +1326,8 @@
                 "Performing a canWaterShineCharge in a shorter runway by using a stutter that is greatly extended by the water slowdown.",
                 "Perform a stutter shortly before entering water, typically through a door transition, by briefly releasing and then repressing forward before, but as close to, the transition as possible while continuing the dash.",
                 "This carries the stutter into the water where Samus will run in place while building the shinecharge, Allowing Samus to enter the water with little momentum.",
-                "After entering the water, dash should be held the entire time. With Gravity Suit it is possible to do this without leaving water, with or without a room transition, by removing the suit just after stuttering."
+                "After entering the water, dash should be held the entire time. With Gravity Suit it is possible to do this without leaving water, with or without a room transition, by removing the suit just after stuttering.",
+                "The same technique is applicable with acid."
               ]
             }
           ]
@@ -1355,6 +1488,22 @@
       "description": "A tech not referring to gameplay but to the handling of the model itself.",
       "techs": [
         {
+          "name": "canAwakenZebes",
+          "requires": [],
+          "note": [
+            "Understanding game behavior related to how the planet is awakened.",
+            "The planet is awakened by unlocking any gray door locked by killing enemies in the room (not including bosses or minibosses).",
+            "Pit Room and Baby Kraid Room are two examples where this can be done.",
+            "Awakening the planet causes enemies to spawn in Parlor, Climb, Morph Ball Room, Construction Zone, and Blue Brinstar Energy Tank Room.",
+            "It also causes the item in the left side of Morph Ball Room and in The Final Missile to spawn.",
+            "The item and enemies in Pit Room do not spawn until entering with Morph and Missiles collected, regardless of whether the planet is awake."
+          ],
+          "devNote": [
+            "This tech is for understanding how the planet is awakened and how to utilize that.",
+            "As such, strats that require the planet to not be awakened, with canRiskPermanentLossOfAccess, are also not in logic without this tech."
+          ]
+        },
+        {
           "name": "canRiskPermanentLossOfAccess",
           "requires": [],
           "note": [
@@ -1477,11 +1626,17 @@
           ]
         },
         {
-          "name": "canPauseAbuse",
+          "name": "canDeepTransition",
           "requires": [],
           "note": [
-            "The ability to pause in order to avoid death while reaching 0 energy.",
-            "Energy must be obtained before the unpause fade-in finishes."
+            "The ability to trigger a door transition deeper than normal, resulting in a more distant spawn position in the next room.",
+            "There are many possible ways that this could be achieved; this tech includes two methods:",
+            "1) performing a well-aligned horizontal shinespark; starting 1 or 2 pixels from the door is an example position that works;",
+            "2) using an unpause where the fade-in ends exactly on the frame when the transition would trigger, delaying the transition by a frame.",
+            "For the shinespark version, about one third of positions will work, with working positions occuring in periodic windows that are each approximately two pixels wide, separated by bad windows that are approximately 4 pixels wide.",
+            "The unpause version refers to a buffered technique of standing at a specific distance from the door, pausing, and then unpausing while holding forward and run.",
+            "When starting facing the door, the position is approximately a 3-pixel window, at a distance of a 6-tile closed-end runway, with possible variations due to slopes.",
+            "When starting facing away from the door (doing a turnaround while unpausing), the position is approximately a 2-pixel window, at a distance of about 3.7 tiles."
           ]
         },
         {

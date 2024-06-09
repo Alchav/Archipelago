@@ -28,8 +28,7 @@
       "id": 3,
       "name": "Crab Maze Middle Junction",
       "nodeType": "junction",
-      "nodeSubType": "junction",
-      "note": "Exists mainly to separate node 2 from the shot block."
+      "nodeSubType": "junction"
     }
   ],
   "enemies": [
@@ -182,16 +181,14 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": true
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           {"and": [
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 1}}
-            ]},
+            "h_canArtificialMorphBombThings",
             "Gravity"
           ]},
           "h_canArtificialMorphIBJ"
@@ -218,9 +215,9 @@
             "h_canArtificialMorphIBJ"
           ]},
           {"and": [
-            "SpringBall",
+            "h_canArtificialMorphSpringBall",
             "HiJump",
-            "Bombs"
+            "h_canArtificialMorphBombs"
           ]}
         ]}
       ],

@@ -15,19 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a7e0",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {
-          "knockback": false,
-          "strats": [
-            {
-              "name": "Get Hit By Mochtroid",
-              "notable": false,
-              "requires": []
-            }
-          ]
-        }
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -36,18 +24,6 @@
       "nodeSubType": "green",
       "nodeAddress": "0x001a7f8",
       "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {
-          "knockback": false,
-          "strats": [
-            {
-              "name": "Get Hit By Mochtroid",
-              "notable": false,
-              "requires": []
-            }
-          ]
-        }
-      ],
       "locks": [
         {
           "name": "Colosseum Green Lock (to Previous Room)",
@@ -71,18 +47,6 @@
       "nodeSubType": "red",
       "nodeAddress": "0x001a7ec",
       "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {
-          "knockback": false,
-          "strats": [
-            {
-              "name": "Get Hit By Mochtroid",
-              "notable": false,
-              "requires": []
-            }
-          ]
-        }
-      ],
       "locks": [
         {
           "name": "Colosseum Red Lock (to Save)",
@@ -118,7 +82,7 @@
       ]
     },
     {
-      "name": "Colosseum Mochtroid Ice Climb",
+      "name": "Colosseum Mochtroid Suitless, HiJumpless Ice Climb",
       "note": [
         "Cross the Colosseum by using the Mochtroids as frozen platforms.",
         "Some Mochtroids need to be led into the water either from the previous section of room or from jumping high in the current section.",
@@ -146,6 +110,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3}
       ]
@@ -173,6 +138,41 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Mochtroid",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "canMochtroidIceClimb",
+          {"and": [
+            "Gravity",
+            {"or": [
+              "SpaceJump",
+              "canWalljump"
+            ]}
+          ]}
+        ]},
+        {"enemyDamage": {
+          "enemy": "Mochtroid",
+          "type": "contact",
+          "hits": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Use a frozen Mochtroid to extend the length of the runway.",
+        "Positioning the Mochtroid can be done by dropping down below then climbing back up with the frozen Mochtroid as a platform.",
+        "Alternatively, freeze the Mochtroid with an angle-down shot while falling below then quickly climb back up."
+      ],
+      "devNote": "There are many other ways to get into position, but they would require manipulating the Mochtroid as much as canMochtroidIceClimb expects."
+    },
+    {
+      "link": [1, 1],
       "name": "Mochtroid Farm",
       "requires": [
         {"resetRoom": {
@@ -190,6 +190,17 @@
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
     },
     {
       "link": [1, 2],
@@ -260,13 +271,10 @@
       "requires": [
         "Gravity",
         {"or": [
-          {"and": [
-            "canPlayInSand",
-            "canSandIBJ"
-          ]},
+          "canSandIBJ",
           {"and": [
             "h_canUseSpringBall",
-            "canJumpIntoIBJ"
+            "h_canJumpIntoIBJ"
           ]}
         ]}
       ]
@@ -278,7 +286,7 @@
         "Gravity",
         "HiJump",
         "canPlayInSand",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump"
       ]
     },
     {
@@ -313,17 +321,7 @@
             "canPlayInSand",
             "HiJump",
             "canNeutralDamageBoost",
-            "canSpringBallJumpMidAir",
-            {"spikeHits": 2}
-          ]},
-          {"and": [
-            {"adjacentRunway": {
-              "fromNode": 1,
-              "usedTiles": 2,
-              "physics": ["normal"]
-            }},
-            "h_canUseSpringBall",
-            "canMockball",
+            "canTrickySpringBallJump",
             {"spikeHits": 2}
           ]}
         ]},
@@ -336,7 +334,36 @@
       "note": [
         "Use the spikes, which are not in the water, to jump from platform to platform as a way to cross the Colosseum.",
         "Requires knowing the position of every spike in the room, and hitting the spikes while morphed can help.",
-        "The first jump is particularly tough.  A springball rolling jump, SpringBallJump from the sand with HiJump, or Grapple can be used to get past it."
+        "The first jump is particularly tough.  A SpringBallJump from the sand with HiJump, or Grapple can be used to get past it."
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Colosseum Spike Platforming with SpringBall (Left to Right)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 2,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "canWalljump",
+        "Morph",
+        "canCarefulJump",
+        "canIframeSpikeJump",
+        "h_canUseSpringBall",
+        "canMockball",
+        {"spikeHits": 3},
+        {"or": [
+          {"spikeHits": 1},
+          "canHorizontalDamageBoost"
+        ]}
+      ],
+      "note": [
+        "Use the spikes, which are not in the water, to jump from platform to platform as a way to cross the Colosseum.",
+        "Requires knowing the position of every spike in the room, and hitting the spikes while morphed can help.",
+        "The first jump is particularly tough.  A springball rolling jump can be used to get past it."
       ]
     },
     {
@@ -345,7 +372,7 @@
       "notable": true,
       "requires": [
         "canWalljump",
-        "canTrickyJump",
+        "canInsaneJump",
         "canHorizontalDamageBoost",
         "canIframeSpikeJump",
         {"spikeHits": 3},
@@ -363,34 +390,66 @@
     },
     {
       "link": [1, 3],
-      "name": "Colosseum Mochtroid Ice Climb (Left to Right)",
-      "notable": true,
+      "name": "Mochtroid Ice Climb (Left to Right)",
       "requires": [
         "h_canNavigateUnderwater",
         "canMochtroidIceClimb",
         "canPlayInSand",
-        "canWalljump",
         "canCameraManip",
-        {"enemyDamage": {
-          "enemy": "Mochtroid",
-          "type": "contact",
-          "hits": 2
-        }},
         {"or": [
-          "HiJump",
-          "canTrickyJump"
+          "Gravity",
+          "HiJump"
+        ]},
+        "canTrickyJump",
+        {"or": [
+          "canInsaneJump",
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }}
         ]}
       ],
-      "reusableRoomwideNotable": "Colosseum Mochtroid Ice Climb",
       "note": [
         "Climb a mochtroid with ice using the wall to help guide them.",
-        "It is very easy to take damage if not careful."
-      ],
-      "devNote": [
-        "Mochtroid damage is pretty hard to avoid, but it is possible.",
-        "HiJump listed as a safety mostly to counter how easy it is to fall in sand and die without it.",
-        "canWalljump is also a safety.  Mochtroid movement and freeze timing gets harder for the jump out of the water."
+        "It is very easy to take damage if not preemptive with freezes.",
+        "Mochtroid movement and freeze timing gets harder at the waterline."
       ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Colosseum Mochtroid Suitless, HiJumpless Ice Climb (Left to Right)",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canMochtroidIceClimb",
+        "canPlayInSand",
+        "canCameraManip",
+        "canTrickyJump",
+        {"or": [
+          "canInsaneJump",
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Colosseum Mochtroid Suitless, HiJumpless Ice Climb",
+      "note": [
+        "Climb a mochtroid with ice using the wall to help guide them.",
+        "Mochtroid damage is pretty hard to avoid, but it is possible."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -421,7 +480,8 @@
       "devNote": [
         "FIXME: Investigate how TAS clips behind the grapple blocks from above.",
         "1) with a bomb to make the grapple go to jank 2) by clipping a pixel into the grapple blocks on the left",
-        "Both ways swing up through the top blocks by being closer than collision detects."
+        "Both ways swing up through the top blocks by being closer than collision detects.",
+        "FIXME: Moondance from 3 can clip behind the grapple blocks."
       ]
     },
     {
@@ -437,10 +497,46 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave With Runway - Frozen Mochtroid",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "Gravity",
+        "canPlayInSand",
+        {"enemyDamage": {
+          "enemy": "Mochtroid",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Use a frozen Mochtroid to extend the length of the runway.",
+        "Positioning the Mochtroid is easiest by dropping into the sand and freezing it.",
+        "Maintain a half-tile gap between the Mochtroid and the runway in order to extend it as much as possible."
+      ]
+    },
+    {
+      "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
     },
     {
       "link": [2, 3],
@@ -457,13 +553,19 @@
           {"and": [
             "HiJump",
             "canGravityJump"
-          ]},
-          {"and": [
-            "canSpringBallJumpMidAir",
-            "canGravityJump"
           ]}
         ]}
       ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Gravity Jump, SpringBall Jump",
+      "requires": [
+        "canTrickySpringBallJump",
+        "canGravityJump",
+        "canTrickyJump"
+      ],
+      "note": "Pause for the Gravity Jump as late as possible and then repause as soon as possible for the SpringBall Jump."
     },
     {
       "link": [2, 3],
@@ -500,11 +602,12 @@
       "entranceCondition": {
         "comeInJumping": {
           "speedBooster": false,
-          "minTiles": 0.4375
+          "minTiles": 1
         }
       },
       "requires": [
-        "h_canIBJ",
+        "h_canJumpIntoIBJ",
+        "canTrickyJump",
         "canCrossRoomJumpIntoWater",
         "canMomentumConservingTurnaround",
         {"enemyDamage": {
@@ -513,7 +616,8 @@
           "hits": 2
         }}
       ],
-      "note": "Requires a runway of one tile in the adjacent room."
+      "note": "Requires a runway of one tile in the adjacent room.",
+      "devNote": "Possible with no openend using a harder jump but a runway that small doesn't exist."
     },
     {
       "link": [2, 3],
@@ -526,6 +630,7 @@
       },
       "requires": [
         "HiJump",
+        "canTrickyJump",
         "canCrossRoomJumpIntoWater",
         "canMomentumConservingTurnaround",
         "canDownGrab"
@@ -555,15 +660,16 @@
       "entranceCondition": {
         "comeInJumping": {
           "speedBooster": false,
-          "minTiles": 0.4375
+          "minTiles": 1
         }
       },
       "requires": [
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canCrossRoomJumpIntoWater",
         "canMomentumConservingTurnaround"
       ],
-      "note": "Requires a runway of one tile in the adjacent room."
+      "note": "Requires a runway of one tile in the adjacent room.",
+      "devNote": "Possible with no openend using a harder jump but a runway that small doesn't exist."
     },
     {
       "link": [2, 3],
@@ -622,12 +728,13 @@
     {
       "link": [2, 3],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "Gravity",
         "h_canArtificialMorphIBJ"
       ],
@@ -684,7 +791,7 @@
         "Gravity",
         "HiJump",
         "canPlayInSand",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump"
       ]
     },
     {
@@ -705,7 +812,7 @@
       "notable": true,
       "requires": [
         "canPreciseWalljump",
-        "canTrickyJump",
+        "canInsaneJump",
         "canIframeSpikeJump",
         {"spikeHits": 3},
         "canNeutralDamageBoost",
@@ -724,33 +831,68 @@
     },
     {
       "link": [3, 1],
-      "name": "Colosseum Mochtroid Ice Climb (Right to Left)",
-      "notable": true,
+      "name": "Mochtroid Ice Climb (Right to Left)",
       "requires": [
+        "h_canNavigateUnderwater",
         {"or": [
           "Gravity",
-          {"and": [
-            "canSuitlessMaridia",
-            "HiJump"
-          ]}
+          "HiJump"
         ]},
-        "canWalljump",
+        "canTrickyJump",
         "canPlayInSand",
         "canMochtroidIceClimb",
         "canCameraManip",
-        {"enemyDamage": {
-          "enemy": "Mochtroid",
-          "type": "contact",
-          "hits": 2
-        }}
+        {"or": [
+          "canInsaneJump",
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]}
       ],
-      "reusableRoomwideNotable": "Colosseum Mochtroid Ice Climb",
-      "note": "Jump out of the sand to lure down mochtroids to freeze.  Or bring them from the previous section of room.",
-      "devNote": [
+      "note": [
+        "Jump out of the sand to lure down mochtroids to freeze.",
+        "It's recommended to bring a Mochtroid into the middle section of the room.",
         "Mochtroid damage is pretty hard to avoid, but can be.",
-        "HiJump is used to lure down Mochtroids.",
-        "canWalljump is a safety.  Mochtroid movement and freeze timing gets harder for the jump out of the water."
+        "Mochtroid movement and freeze timing gets harder at the waterline."
       ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Colosseum Mochtroid Suitless, HiJumpless Ice Climb (Right to Left)",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickyJump",
+        "canPlayInSand",
+        "canMochtroidIceClimb",
+        "canCameraManip",
+        {"or": [
+          "canInsaneJump",
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Colosseum Mochtroid Suitless, HiJumpless Ice Climb",
+      "note": [
+        "Jump out of the sand to lure down mochtroids to freeze.",
+        "It's recommended to bring a Mochtroid into the middle section of the room.",
+        "Mochtroid damage is pretty hard to avoid, but can be."
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [3, 2],
@@ -770,10 +912,56 @@
     },
     {
       "link": [3, 3],
+      "name": "Leave With Runway - Frozen Mochtroid",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "canMochtroidIceClimb",
+          {"and": [
+            "Gravity",
+            {"or": [
+              "SpaceJump",
+              "canWalljump"
+            ]}
+          ]}
+        ]},
+        {"enemyDamage": {
+          "enemy": "Mochtroid",
+          "type": "contact",
+          "hits": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Use a frozen Mochtroid to extend the length of the runway.",
+        "Positioning the Mochtroid can be done by dropping down below then climbing back up with the frozen Mochtroid as a platform.",
+        "Alternatively, freeze the Mochtroid with an angle-down shot while falling below then quickly climb back up."
+      ],
+      "devNote": "There are many other ways to get into position, but they would require manipulating the Mochtroid as much as canMochtroidIceClimb expects."
+    },
+    {
+      "link": [3, 3],
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [3, 3],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
     }
   ]
 }

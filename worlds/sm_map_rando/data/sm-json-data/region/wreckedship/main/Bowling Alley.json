@@ -52,7 +52,7 @@
       "id": 4,
       "name": "Bottom Chozo Item",
       "nodeType": "item",
-      "nodeSubType": "chozo",
+      "nodeSubType": "visible",
       "nodeItem": "Missile",
       "nodeAddress": "0x7C2EF",
       "locks": [
@@ -79,7 +79,7 @@
       "id": 5,
       "name": "Top Right Item",
       "nodeType": "item",
-      "nodeSubType": "visible",
+      "nodeSubType": "chozo",
       "nodeItem": "ReserveTank",
       "nodeAddress": "0x7C2E9",
       "locks": [
@@ -114,6 +114,12 @@
       "id": "A",
       "name": "Destructible Chozo Statue",
       "obstacleType": "inanimate"
+    },
+    {
+      "id": "B",
+      "name": "Traversing the Room Backwards",
+      "obstacleType": "abstract",
+      "note": "Clipping to the reserve location means the camera does not follow Samus and the crumble blocks are not broken."
     }
   ],
   "enemies": [
@@ -128,8 +134,12 @@
   ],
   "reusableRoomwideNotable": [
     {
-      "name": "Bowling Alley Ceiling Bomb Jump",
-      "note": "This is a very long ceiling bomb jump."
+      "name": "Bowling Alley Speed Block Moondance",
+      "note": [
+        "Use SpeedBooster to construct a structure for Moondancing that has 2 top blocks intact, 2 middle blocks removed, and the bottom left block intact but the bottom right block removed.",
+        "Crystal Flash inside the middle hole to standup and then begin Moondancing.",
+        "After Samus sinks through the bottom tile, it is possible to wiggle right and then Turn-Around Aim Cancel to escape to the right."
+      ]
     }
   ],
   "links": [
@@ -137,20 +147,14 @@
       "from": 1,
       "to": [
         {"id": 1},
-        {"id": 6}
+        {"id": 5}
       ]
     },
     {
       "from": 2,
       "to": [
         {"id": 2},
-        {
-          "id": 6,
-          "devNote": [
-            "It's one-way because there's no logical reason to go to the statue and back out to the door.",
-            "The spikes only do damage if Phantoon is defeated, but there's no reason to cross to 6 unless he has."
-          ]
-        }
+        {"id": 6}
       ]
     },
     {
@@ -247,11 +251,12 @@
           "length": 45,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
     },
     {
       "link": [1, 1],
-      "name": "Leave with Runway, Enter with Shinespark",
+      "name": "Leave with Runway (Enter with Shinespark to Break the Blocks)",
       "entranceCondition": {
         "comeInWithSpark": {}
       },
@@ -263,7 +268,8 @@
           "length": 45,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
     },
     {
       "link": [1, 1],
@@ -271,6 +277,107 @@
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Bowling Alley Speed Block Moondance (Leave with Stored Fall Speed)",
+      "notable": true,
+      "requires": [
+        "h_canCrystalFlash",
+        "canInsaneJump",
+        "canTurnaroundAimCancel",
+        "canTemporaryBlue",
+        "canMoondance",
+        {"canShineCharge": {
+          "openEnd": 0,
+          "usedTiles": 16,
+          "startingDownTiles": 4
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "reusableRoomwideNotable": "Bowling Alley Speed Block Moondance",
+      "note": [
+        "Use SpeedBooster to construct a structure for Moondancing that has 2 top blocks intact, 2 middle blocks removed, and the bottom left block intact but the bottom right block removed.",
+        "Crystal Flash inside the middle hole to standup and then begin Moondancing.",
+        "After Samus sinks through the bottom tile, it is possible to wiggle right and then Turn-Around Aim Cancel to escape to the right.",
+        "Finally, shortcharge to break the remaining Speed blocks and reach the door."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Bowling Alley Speed Block Moondance (Leave with More Stored Fall Speed)",
+      "notable": true,
+      "requires": [
+        "h_canCrystalFlash",
+        "canInsaneJump",
+        "canTurnaroundAimCancel",
+        "canTemporaryBlue",
+        "canExtendedMoondance",
+        "Grapple",
+        {"canShineCharge": {
+          "openEnd": 0,
+          "usedTiles": 16,
+          "startingDownTiles": 4
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
+      "reusableRoomwideNotable": "Bowling Alley Speed Block Moondance",
+      "note": [
+        "Use SpeedBooster to construct a structure for Moondancing that has 2 top blocks intact, 2 middle blocks removed, and the bottom left block intact but the bottom right block removed.",
+        "Crystal Flash inside the middle hole to standup and then begin Moondancing.",
+        "Continue building fall speed by using Grappling Beam to return the the Moondance position.",
+        "Stop Moondancing exactly one Moonfall before Samus would sink through 2 tiles.",
+        "After Samus sinks through the bottom tile, it is possible to wiggle right and then Turn-Around Aim Cancel to escape to the right.",
+        "Finally, shortcharge to break the remaining Speed blocks and reach the door."
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Bowling Alley Speed Block Moondance (Moonfall Clip)",
+      "notable": true,
+      "requires": [
+        "h_canCrystalFlash",
+        "canInsaneJump",
+        "canTurnaroundAimCancel",
+        "canTemporaryBlue",
+        "canMoondance",
+        {"canShineCharge": {
+          "openEnd": 0,
+          "usedTiles": 16,
+          "startingDownTiles": 4
+        }}
+      ],
+      "clearsObstacles": ["B"],
+      "reusableRoomwideNotable": "Bowling Alley Speed Block Moondance",
+      "note": [
+        "Use SpeedBooster to construct a structure for Moondancing that has 2 top blocks intact, 2 middle blocks removed, and the bottom left block intact but the bottom right block removed.",
+        "Crystal Flash inside the middle hole to standup and then begin Moondancing.",
+        "After Samus sinks through the bottom tile, it is possible to wiggle right and then Turn-Around Aim Cancel to escape to the right.",
+        "The Camera will not follow Samus after clipping."
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "requires": [
+        "SpeedBooster",
+        "canMoonfall"
+      ],
+      "clearsObstacles": ["B"],
+      "note": "The camera will not follow Samus after clipping."
     },
     {
       "link": [2, 2],
@@ -285,9 +392,8 @@
     },
     {
       "link": [2, 2],
-      "name": "Leave Shinecharged, X-Mode",
+      "name": "Leave Shinecharged (X-Mode or Phantoon Alive)",
       "requires": [
-        "f_DefeatedPhantoon",
         "h_canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
@@ -301,14 +407,14 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 70
+          "framesRemaining": 100
         }
       },
       "devNote": "Three spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
     },
     {
       "link": [2, 2],
-      "name": "Leave Shinecharged, Phantoon Alive",
+      "name": "Leave Shinecharged (Phantoon Alive)",
       "requires": [
         {"not": "f_DefeatedPhantoon"},
         "canRiskPermanentLossOfAccess",
@@ -320,7 +426,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 115
+          "framesRemaining": 140
         }
       }
     },
@@ -343,6 +449,27 @@
       "name": "Space Jump",
       "requires": [
         "SpaceJump"
+      ]
+    },
+    {
+      "link": [2, 6],
+      "name": "SpringFling Bowling",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 12,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canTrickyJump",
+        "canSpringFling",
+        "canLateralMidAirMorph",
+        "canIframeSpikeJump",
+        {"spikeHits": 1}
+      ],
+      "note": [
+        "Start with Springball disabled.  Jump over the spikes and midair morph.",
+        "SpringFling on the way down, SpringBall bounce through the spikes, then SpringFling again to reach the statue taking only one spike hit."
       ]
     },
     {
@@ -406,31 +533,60 @@
       "notable": true,
       "requires": [
         "h_canCeilingBombJump",
+        "canLongCeilingBombJump",
         "canBeVeryPatient"
       ],
-      "reusableRoomwideNotable": "Bowling Alley Ceiling Bomb Jump",
       "note": "This is a very long ceiling bomb jump."
     },
     {
       "link": [3, 2],
-      "name": "X-Ray Climb",
+      "name": "Bowling Alley X-Ray Climb",
+      "notable": true,
       "entranceCondition": {
         "comeInWithDoorStuckSetup": {}
       },
       "requires": [
         "canXRayClimb",
         {"or": [
-          {"spikeHits": 3},
+          {"and": [
+            {"spikeHits": 3},
+            {"resourceCapacity": [{"type": "RegularEnergy", "count": 199}]}
+          ]},
           {"and": [
             {"not": "f_DefeatedPhantoon"},
             "canRiskPermanentLossOfAccess"
+          ]},
+          {"and": [
+            "canOffScreenMovement",
+            {"or": [
+              {"spikeHits": 1},
+              "Grapple",
+              {"and": [
+                "SpaceJump",
+                "canInsaneJump",
+                "canBeVeryPatient"
+              ]}
+            ]}
           ]}
         ]}
       ],
       "note": [
-        "Climb up 1 screen.",
-        "Climb quickly once you reach the spikes to minimize damage (if Phantoon is dead).",
-        "I-frames will run out while using X-Ray, so you don't want to hold X-Ray for long."
+        "Climb up about half a screen.",
+        "If Phantoon is dead, the last part of the climb should be done carefully to avoid triggering collision with the spikes:",
+        "Do not press forward or turn-around except while X-Ray is active.",
+        "For each X-ray stand-up, release the turn-around input quickly to make sure that it is not still held after X-Ray deactivates.",
+        "Once Samus is high enough, unequip X-Ray, jump up (from either standing or crouch) to clip past the spikes, and land, taking a single spike hit.",
+        "Then use the i-frames from the spike hit to run and jump to the left to make it to the door.",
+        "Samus is high enough after the top of her arm cannon first becomes visible at the bottom of the screen; or up to 3 additional climbs can be performed after that point.",
+        "In case of an accidental spike collision, it is possible to recover:",
+        "Unless Samus climbed higher than needed, she will still be stuck in the wall, will take a single spike hit, and be able to continue climbing.",
+        "With Grapple it is possible to swing on the Grapple blocks, avoiding all spike damage.",
+        "Spike damage can also be avoided with Space Jump, by doing a stationary turn-around spin jump, which is very precise."
+      ],
+      "devNote": [
+        "FIXME: The canBeVeryPatient is for difficulty placement, as the damageless Space Jump version would likely require many attempts.",
+        "The resourceCapacity requirement is to ensure that reserve energy management will not be needed for the lower-difficulty version of the strat;",
+        "this could be refined since suits can affect spike damage, but we don't yet have a good way to represent that cleanly, given that randomizers are likely to modify suit damage protection."
       ]
     },
     {
@@ -495,7 +651,8 @@
       "link": [4, 3],
       "name": "Base",
       "requires": [
-        "h_canBombThings"
+        "h_canBombThings",
+        {"obstaclesNotCleared": ["B"]}
       ],
       "note": "The bomb block respawns. It must be broken on the way back too."
     },
@@ -503,6 +660,7 @@
       "link": [4, 3],
       "name": "Temporary Blue Bounce and SpringBall",
       "requires": [
+        {"obstaclesNotCleared": ["B"]},
         "h_canUseSpringBall",
         "canTemporaryBlue",
         "canCarefulJump",
@@ -535,6 +693,36 @@
       "devNote": "Killing phantoon only removes requirements for the strat."
     },
     {
+      "link": [4, 3],
+      "name": "Blind Traversal",
+      "requires": [
+        {"obstaclesCleared": ["B"]},
+        "h_canBombThings",
+        "canOffScreenMovement",
+        {"or": [
+          {"and": [
+            "canXRayStandUp",
+            "canPartialFloorClip",
+            "h_additionalBomb"
+          ]},
+          {"and": [
+            {"or": [
+              {"and": [
+                "SpeedBooster",
+                "h_ShinesparksCostEnergy"
+              ]},
+              "f_DefeatedPhantoon"
+            ]},
+            "h_canCrystalFlash"
+          ]}
+        ]}
+      ],
+      "note": [
+        "The shot blocks must be broken using Bombs or Power Bombs because Beams will instantly despawn.",
+        "Use X-Ray or a Crystal Flash to stand up, followed by a Partial Floor clip to jump through the Crumble blocks."
+      ]
+    },
+    {
       "link": [4, 5],
       "name": "Chozo Statue Already Broken",
       "requires": [
@@ -564,22 +752,55 @@
       "name": "Crystal Flash Grapple Clip",
       "requires": [
         "h_canJumpIntoCrystalFlashClip",
-        "Grapple"
+        "Grapple",
+        {"obstaclesNotCleared": ["B"]}
       ],
       "note": "Menu to Grappling Beam before the crystal flash ends and mash shoot while holding down."
+    },
+    {
+      "link": [5, 1],
+      "name": "Damage Down then Crystal Flash Grapple Clip",
+      "requires": [
+        {"obstaclesCleared": ["B"]},
+        "h_ShinesparksCostEnergy",
+        "h_canJumpIntoCrystalFlashClip",
+        "Grapple",
+        "canOffScreenMovement",
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "openEnd": 1
+        }}
+      ],
+      "note": [
+        "Fall through the Crumble blocks in order to damage down using either the spikes or repeated Shinesparks.",
+        "Touching the Chozo statue will lock the camera in a less useful position.",
+        "Menu to Grappling Beam before the crystal flash ends and mash shoot while holding down."
+      ],
+      "devNote": [
+        "FIXME: If power is on, spikes or worker robots can damage Samus.",
+        "  but multiples of 60 may not put Samus into Crystal Flash range, and visiting the robots will lock the camera making the jump-into-CF much harder."
+      ]
     },
     {
       "link": [5, 4],
       "name": "Base",
       "requires": [
-        {"obstaclesCleared": ["A"]}
+        {"obstaclesCleared": ["A"]},
+        {"or": [
+          {"obstaclesNotCleared": ["B"]},
+          "canOffScreenMovement"
+        ]}
       ]
     },
     {
       "link": [5, 4],
       "name": "Power Bomb the Chozo Statue",
       "requires": [
-        "h_canUsePowerBombs"
+        "h_canUsePowerBombs",
+        {"or": [
+          {"obstaclesNotCleared": ["B"]},
+          "canOffScreenMovement"
+        ]}
       ],
       "clearsObstacles": ["A"]
     },

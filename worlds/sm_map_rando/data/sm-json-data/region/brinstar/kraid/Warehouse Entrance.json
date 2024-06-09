@@ -21,25 +21,7 @@
       "name": "Elevator",
       "nodeType": "door",
       "nodeSubType": "elevator",
-      "nodeAddress": "0x0019246",
-      "leaveWithGMode": [
-        {
-          "leavesWithArtificialMorph": false,
-          "strats": [
-            {
-              "name": "Carry G-Mode Down the Elevator",
-              "notable": false,
-              "requires": [
-                {"comeInWithGMode": {
-                  "fromNodes": [1],
-                  "artificialMorph": false,
-                  "mode": "any"
-                }}
-              ]
-            }
-          ]
-        }
-      ]
+      "nodeAddress": "0x0019246"
     },
     {
       "id": 3,
@@ -83,6 +65,7 @@
     {
       "from": 3,
       "to": [
+        {"id": 1},
         {"id": 3},
         {"id": 4}
       ]
@@ -134,29 +117,141 @@
       "requires": []
     },
     {
-      "link": [2, 1],
-      "name": "Base",
-      "requires": []
-    },
-    {
-      "link": [2, 2],
-      "name": "Leave Shinecharged, Come In Shinecharging",
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 13,
           "openEnd": 0
         }
       },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
       "exitCondition": {
         "leaveShinecharged": {
           "framesRemaining": 130
         }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged (Short Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 6,
+          "openEnd": 0
+        }
       },
+      "requires": [
+        "canStopOnADime",
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 170
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 30
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry G-Mode Down the Elevator",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": false
+        }
+      }
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
       "requires": []
     },
     {
+      "link": [2, 1],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 45
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": []
+        },
+        {
+          "types": ["missiles", "powerbomb"],
+          "requires": [
+            "never"
+          ]
+        }
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Come in Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 15
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 12}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": []
+        },
+        {
+          "types": ["missiles", "powerbomb"],
+          "requires": [
+            "never"
+          ]
+        }
+      ]
+    },
+    {
       "link": [2, 2],
-      "name": "Leave Shinecharged, Super Blocks Broken",
+      "name": "Leave Shinecharged (Super Blocks Broken)",
       "requires": [
         {"obstaclesCleared": ["A"]},
         {"canShineCharge": {
@@ -169,6 +264,37 @@
           "framesRemaining": 130
         }
       }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged",
+      "requires": [
+        {"or": [
+          {"canShineCharge": {
+            "usedTiles": 13,
+            "openEnd": 0
+          }},
+          {"and": [
+            {"doorUnlockedAtNode": 1},
+            {"canShineCharge": {
+              "usedTiles": 14,
+              "openEnd": 0
+            }}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 130
+        }
+      },
+      "unlocksDoors": [
+        {
+          "nodeId": 1,
+          "types": ["ammo"],
+          "requires": []
+        }
+      ]
     },
     {
       "link": [2, 4],
@@ -210,6 +336,16 @@
       ],
       "note": "Use 2 supers, then squeeze through with a spin jump or down-aim jump."
     },
+    {
+      "link": [3, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },    
     {
       "link": [3, 3],
       "name": "Leave With Runway",
@@ -328,7 +464,7 @@
     },
     {
       "link": [4, 3],
-      "name": "SpringBall",
+      "name": "Spring Ball",
       "requires": [
         {"or": [
           "h_canSpringBallBombJump",
@@ -341,6 +477,22 @@
       ],
       "note": "Use Springball as a movement item to reach the Kraid Mouth ledge by jumping from the elevator runway, or by jumping from below.",
       "devNote": "By reaching 4, the super wall has been broken enough to fit in morph."
+    },
+    {
+      "link": [4, 3],
+      "name": "Warehouse Entrance Arm Pump Jump",
+      "notable": true,
+      "requires": [
+        "h_canBackIntoCorner",
+        "canInsaneJump",
+        "canDownGrab"
+      ],
+      "note": [
+        "Back up against the wall of the single-tile ledge.",
+        "Run forward, perform a single arm pump, and jump on the last possible frame.",
+        "Aim down just before reaching the platform.",
+        "The arm pump can be performed by pressing shot, or by pressing an angle button (but not releasing it until after the jump)."
+      ]
     }
   ]
 }

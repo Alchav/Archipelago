@@ -45,25 +45,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018e92",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Sidehopper",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Sm. Sidehopper",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 4,
@@ -84,7 +66,7 @@
   "obstacles": [
     {
       "id": "A",
-      "name": "G-Mode Morph: Remote Acquire the item",
+      "name": "G-Mode Morph - Remote Acquire the item",
       "obstacleType": "abstract"
     }
   ],
@@ -244,6 +226,80 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave Shinecharged (HiJump)",
+      "requires": [
+        "HiJump",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovementTricky"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 50
+        }
+      },
+      "note": [
+        "Use the runway below the bug pipe to gain a shinecharge.",
+        "Use HiJump to reach the door with shinecharge frames remaining."
+      ],
+      "devNote": [
+        "One tile of runway is considered unusable in order to have space to quickly jump up onto the bomb blocks above.",
+        "It could also be possible to break the bomb blocks, but this doesn't seem very worth considering."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged (Wall Jump)",
+      "requires": [
+        "canWalljump",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovementTricky"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 10
+        }
+      },
+      "note": [
+        "Use the runway below the bug pipe to gain a shinecharge.",
+        "Use a wall jump to reach the door with shinecharge frames remaining."
+      ],
+      "devNote": [
+        "One tile of runway is considered unusable in order to have space to quickly jump up onto the bomb blocks above.",
+        "It could also be possible to break the bomb blocks, potentially increasing the framesRemaining slightly."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged (Ledge Grabs)",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovementTricky"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 5
+        }
+      },
+      "note": [
+        "Use the runway below the bug pipe to gain a shinecharge.",
+        "Use precise ledge grabs to barely reach the door with shinecharge frames remaining."
+      ],
+      "devNote": [
+        "One tile of runway is considered unusable in order to have space to quickly jump up onto the bomb blocks above.",
+        "It could also be possible to break the bomb blocks, potentially increasing the framesRemaining slightly."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Geega Farm",
       "requires": [
         {"refill": ["Energy", "Missile", "Super"]},
@@ -344,12 +400,13 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump"
@@ -376,7 +433,13 @@
         "leaveShinecharged": {
           "framesRemaining": 120
         }
-      }
+      },
+      "unlocksDoors": [
+        {
+          "types": ["ammo"],
+          "requires": []
+        }
+      ]
     },
     {
       "link": [1, 4],
@@ -400,18 +463,19 @@
     {
       "link": [1, 4],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump",
           {"and": [
             "HiJump",
-            "SpringBall"
+            "h_canArtificialMorphSpringBall"
           ]}
         ]}
       ],
@@ -421,12 +485,13 @@
     {
       "link": [1, 4],
       "name": "G-Mode Morph Remote Acquire",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "direct",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump"
@@ -444,7 +509,7 @@
           "h_canFly",
           "canWalljump",
           "canUseFrozenEnemies",
-          "canTrickySpringBallJump"
+          "canSpringBallJumpMidAir"
         ]}
       ]
     },
@@ -454,7 +519,8 @@
       "requires": [
         "SpeedBooster",
         "canTrickyJump",
-        "canLateralMidAirMorph"
+        "canLateralMidAirMorph",
+        "can4HighMidAirMorph"
       ]
     },
     {
@@ -490,6 +556,55 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave Shinecharged (HiJump)",
+      "requires": [
+        "HiJump",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 25
+        }
+      },
+      "note": [
+        "Use the runway below the bug pipe to gain a shinecharge.",
+        "Use HiJump to reach the door with shinecharge frames remaining."
+      ],
+      "devNote": [
+        "One tile of runway is considered unusable in order to have space to quickly jump up onto the bomb blocks above.",
+        "It could also be possible to break the bomb blocks, but this doesn't seem very worth considering."
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Spark",
+      "requires": [
+        "canPreciseWalljump",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovementTricky",
+        {"shinespark": {"frames": 19}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "note": [
+        "Use the runway below the bug pipe to gain a shinecharge.",
+        "Then walljump off the bomb blocks and the bug pipe to approach the door and spark out."
+      ],
+      "devNote": [
+        "One tile of runway is considered unusable in order to have space to quickly jump up to the bomb blocks above.",
+        "It could also be possible to break the bomb blocks, but this doesn't seem very worth considering."
+      ]
+    },
+    {
+      "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
@@ -498,12 +613,13 @@
     {
       "link": [2, 4],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump"
@@ -514,18 +630,19 @@
     {
       "link": [2, 4],
       "name": "G-Mode Morph Remote Acquire",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "direct",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump",
           {"and": [
             "HiJump",
-            "SpringBall"
+            "h_canArtificialMorphSpringBall"
           ]}
         ]}
       ],
@@ -553,50 +670,56 @@
       "requires": [
         "Grapple",
         "SpeedBooster",
-        "canTrickyJump",
-        "canBePatient"
+        "canTrickyJump"
       ],
       "note": [
-        "Build up some run speed and then extend the Grapple Beam through the Blue Gate, while jumping, to open it from the wrong side.",
-        "This may take many attempts."
+        "Build up some run speed and then extend the Grapple Beam through the Blue Gate, while jumping, to open it from the wrong side."
       ]
     },
     {
       "link": [3, 1],
       "name": "G-Mode Indirect Despawn Gate",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [3],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "indirect",
-          "artificialMorph": false
-        }}
-      ]
+          "morphed": false
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [3, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [3, 2],
       "name": "G-Mode Morph Indirect Despawn Gate - To the Top Right Door",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [3],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "indirect",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "canTrickyJump",
           {"and": [
-            "Bombs",
-            {"ammo": {"type": "PowerBomb", "count": 1}}
+            "h_canArtificialMorphBombs",
+            "h_canArtificialMorphPowerBomb"
           ]},
           {"ammo": {"type": "PowerBomb", "count": 3}}
         ]},
         {"or": [
           "h_canArtificialMorphIBJ",
           {"and": [
-            "canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]}
+            "h_canArtificialMorphSpringBallBombJump",
+            "h_additionalBomb"
           ]}
         ]}
       ],
@@ -611,6 +734,43 @@
         "IBJ or bomb boost spring ball jump up to the top right door."
       ],
       "devNote": "The canTrickyJump is used for rolling into a precise location, dodging hoppers while rolling, and spring ball jumping past enemies."
+    },
+    {
+      "link": [3, 2],
+      "name": "Green Hills Grapple Teleport Fling to Right (from Moat)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [
+        "canInsaneJump"
+      ],
+      "note": [
+        "After teleporting, extend the Grapple, and swing back and forth to fix the camera and then to gain momentum.",
+        "A precisely timed release of Grapple will allow Samus to fling onto the ledge on the right."
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Green Hills Grapple Teleport into Grapple Jump (from Red Brinstar Firefleas)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3]]
+        }
+      },
+      "requires": [
+        "canTrickyGrappleJump",
+        "canInsaneJump"
+      ],
+      "note": [
+        "After teleporting, swing back and forth to fix the camera.",
+        "Swing to the right by soft-bouncing against the door followed by fully extending the Grapple Beam.",
+        "Release grapple low, but not too low, to get enough momentum while also leaving enough space to gain more height with a grapple jump to reach the ledge.",
+        "Holding jump just before releasing Grapple may help prevent losing momentum."
+      ]
     },
     {
       "link": [3, 3],
@@ -635,7 +795,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 120
+          "framesRemaining": 140
         }
       }
     },
@@ -647,19 +807,41 @@
       ]
     },
     {
+      "link": [3, 3],
+      "name": "G-Mode Setup - Get Hit By Sidehopper",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Sm. Sidehopper",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
       "link": [3, 4],
       "name": "G-Mode Morph Indirect Despawn Gate - Into the Pipe",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [3],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "indirect",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "canTrickyJump",
           {"and": [
-            "Bombs",
-            {"ammo": {"type": "PowerBomb", "count": 1}}
+            "h_canArtificialMorphBombs",
+            "h_canArtificialMorphPowerBomb"
           ]},
           {"ammo": {"type": "PowerBomb", "count": 3}}
         ]},
@@ -668,7 +850,7 @@
           "h_canArtificialMorphSpringBallBombJump",
           {"and": [
             "HiJump",
-            "SpringBall"
+            "h_canArtificialMorphSpringBall"
           ]}
         ]}
       ],
@@ -695,11 +877,8 @@
         {"or": [
           "h_canArtificialMorphIBJ",
           {"and": [
-            "canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]}
+            "h_canArtificialMorphSpringBallBombJump",
+            "h_additionalBomb"
           ]}
         ]}
       ],

@@ -15,25 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a5d0",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Puyo",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Puyo",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -90,6 +72,19 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Puyo",
+      "requires": [
+        "h_canTrickyFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
       "name": "Puyo Farm",
       "requires": [
         {"resetRoom": {
@@ -107,6 +102,27 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Puyo",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Puyo",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
       "link": [1, 2],
       "name": "Base",
       "requires": [
@@ -120,11 +136,7 @@
               "canUseFrozenEnemies"
             ]}
           ]},
-          {"and": [
-            "canSpringBallJumpMidAir",
-            "canCarefulJump",
-            "canCrouchJump"
-          ]}
+          "canTrickySpringBallJump"
         ]}
       ]
     },
@@ -155,17 +167,64 @@
     },
     {
       "link": [1, 2],
-      "name": "G-Mode Morph",
+      "name": "Shinespark Deep Stuck X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithDoorStuckSetup": {}
+      },
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+        "canShinesparkDeepStuck",
+        {"shinespark": {"frames": 1, "excessFrames": 1}},
+        "canXRayClimb",
+        "canBePatient",
+        "canOffScreenMovement"
+      ],
+      "note": [
+        "Climb up 2.5 screens.",
+        "Stop when about half of Samus (or less) is visible at the top of the screen.",
+        "Turn-around a couple times to move to the right, to get close to falling out.",
+        "Then perform a buffered spin-jump while turning around to the right, to make it onto the platform.",
+        "The Choot will be safely off-camera and will not hit Samus while passing through it."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode Deep Stuck X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "canXRayClimb",
+        "canBePatient",
+        "canOffScreenMovement"
+      ],
+      "note": [
+        "Climb up 2.5 screens.",
+        "Stop when about half of Samus (or less) is visible at the top of the screen.",
+        "Turn-around a couple times to move to the right, to get close to falling out.",
+        "Then perform a buffered spin-jump while turning around to the right, to make it onto the platform.",
+        "The Choot will be safely off-camera and will not hit Samus while passing through it."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         {"or": [
-          "SpringBall",
-          {"ammo": {"type": "PowerBomb", "count": 2}},
+          "h_canArtificialMorphSpringBall",
+          {"and": [
+            "h_canArtificialMorphPowerBomb",
+            "h_canArtificialMorphPowerBomb"
+          ]},
           {"and": [
             "h_canArtificialMorphStaggeredIBJ",
             "canBeVeryPatient"

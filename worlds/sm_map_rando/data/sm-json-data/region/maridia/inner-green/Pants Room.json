@@ -29,25 +29,7 @@
           "roomAddress": "0x7D69A",
           "doorAddress": "0x001a7bc"
         }
-      ],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Puyo",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Puyo",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      ]
     },
     {
       "id": 3,
@@ -262,6 +244,31 @@
       ]
     },
     {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Puyo",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Puyo",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {},
+      "devNote": [
+        "This is not possible in vanilla, because there is no way to enter through this door.",
+        "FIXME: There is a strat from here to 5 with IBJ (Spring Ball + HiJump or ceiling bomb jump)."
+      ]
+    },
+    {
       "link": [3, 1],
       "name": "Base",
       "requires": [
@@ -355,13 +362,8 @@
       "notable": true,
       "requires": [
         "canSuitlessMaridia",
-        "canGrappleJump",
+        "canTrickyGrappleJump",
         "canMidairWiggle",
-        "canTrickyJump",
-        {"or": [
-          "HiJump",
-          "can3HighMidAirMorph"
-        ]},
         {"or": [
           {"enemyDamage": {
             "enemy": "Menu",
@@ -441,8 +443,7 @@
       "requires": [
         "Gravity",
         "Grapple",
-        "canSpringBallJumpMidAir",
-        "canTrickyJump",
+        "canTrickySpringBallJump",
         "canPlayInSand"
       ],
       "note": "Break spin before touching the sand, and then spinjump to get a good jump off of the sand."
@@ -463,7 +464,7 @@
       "requires": [
         "Gravity",
         "Grapple",
-        "SpringBall",
+        "h_canUseSpringBall",
         "h_canJumpIntoIBJ"
       ],
       "note": "Springball can keep Samus out of the sand.  Place the first bomb right after Samus begins falling back towards the sand."
@@ -491,15 +492,14 @@
     },
     {
       "link": [4, 5],
-      "name": "Pants Room Suitless MidAir SpringBall Jump with HiJump",
-      "notable": true,
+      "name": "Suitless MidAir SpringBall Jump with HiJump",
       "requires": [
         "Grapple",
         "canSuitlessMaridia",
         "HiJump",
         "canSpringBallJumpMidAir",
         "canPlayInSand",
-        "canCarefulJump"
+        "canTrickyJump"
       ],
       "note": [
         "Requires a mid-air SpringBall jump off the sand.",
@@ -529,12 +529,7 @@
       "notable": true,
       "requires": [
         "canSuitlessMaridia",
-        "canGrappleJump",
-        "canTrickyJump",
-        {"or": [
-          "HiJump",
-          "can3HighMidAirMorph"
-        ]},
+        "canTrickyGrappleJump",
         "canMidairWiggle"
       ],
       "reusableRoomwideNotable": "Pants Room Grapple Jump",

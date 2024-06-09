@@ -15,15 +15,6 @@
       "nodeSubType": "grey",
       "nodeAddress": "0x001ab28",
       "doorEnvironments": [{"physics": "air"}],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Tourian Space Pirate (all)",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      },
       "locks": [
         {
           "name": "Tourian Escape 4 Lock (to Escape Room 3)",
@@ -79,6 +70,16 @@
       "homeNodes": [2]
     }
   ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Tourian Escape Room 4 Acid Bath Shinespark",
+      "note": [
+        "Gain a shinecharge by running right-to-left at the bottom of the room.",
+        "This can be done either using Gravity and a regular shortcharge, or suitless by performing a stutter just before entering acid physics.",
+        "Shinespark up the shaft."
+      ]
+    }
+  ],
   "links": [
     {
       "from": 1,
@@ -93,6 +94,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3}
       ]
@@ -129,6 +131,18 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Tourian Space Pirate (all)",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
       "link": [1, 3],
       "name": "Base",
       "requires": [
@@ -136,20 +150,37 @@
           "HiJump",
           "SpaceJump",
           "canWalljump",
-          "h_canIBJ"
+          "h_canIBJ",
+          "canSpringBallJumpMidAir"
         ]}
       ],
       "note": "The pirates are free to kill, although they take some time."
     },
     {
       "link": [1, 3],
-      "name": "G-Mode Morph Power Bomb Pirate Kill",
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 15
+        }
+      },
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+        "canPrepareForNextRoom",
+        "canShinechargeMovement",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 57, "excessFrames": 13}}
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "G-Mode Morph Power Bomb Pirate Kill",
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         {"ammo": {"type": "PowerBomb", "count": 10}}
       ],
@@ -157,6 +188,40 @@
         "IBJ and use 10 PBs to kill the pirates and get to the top. Exit gmode and fall to the bottom.",
         "Note that there is a path up to the right that doesn't need wall jumps, but a crouch jump down grab is needed to get to the final platform."
       ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Crystal Flash Grapple Clip",
+      "requires": [
+        "h_canJumpIntoCrystalFlashClip",
+        "HiJump",
+        "Grapple"
+      ],
+      "note": [
+        "Clear the Pirates near the door.",
+        "Jump into a Crystal Flash clip where the ceiling is a single tile thick.",
+        "Switch to Grappling Beam before the Crystal Flash ends and mash shoot while holding down."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -408,6 +473,69 @@
       ]
     },
     {
+      "link": [3, 1],
+      "name": "Tourian Escape Room 4 Acid Bath Shinespark (Gravity)",
+      "notable": true,
+      "reusableRoomwideNotable": "Tourian Escape Room 4 Acid Bath Shinespark",
+      "requires": [
+        "Gravity",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 0
+        }},
+        {"acidFrames": 90},
+        "canShinechargeMovementComplex",
+        "canMidairShinespark",
+        {"shinespark": {
+          "frames": 76,
+          "excessFrames": 6
+        }}
+      ],
+      "note": [
+        "Gain a shinecharge by running right-to-left at the bottom of the room.",
+        "Move quickly to minimize damage from the acid, which will begin rising as soon as you reach the bottom of the room.",
+        "Shinespark up the shaft."
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Tourian Escape Room 4 Acid Bath Shinespark (Suitless)",
+      "notable": true,
+      "reusableRoomwideNotable": "Tourian Escape Room 4 Acid Bath Shinespark",
+      "requires": [
+        "canStutterWaterShineCharge",
+        {"acidFrames": 215},
+        "canShinechargeMovementTricky",
+        "canMidairShinespark",
+        {"shinespark": {
+          "frames": 83,
+          "excessFrames": 2
+        }}
+      ],
+      "note": [
+        "Gain a shinecharge by running right-to-left at the bottom of the room, performing a stutter just before the acid reaches Samus' feet.",
+        "Use spin jumps to minimize damage from the acid, and spark diagonally (to the left) mid-air to make it up the shaft."
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Tourian Escape Room 4 IBJ and Acid Bath",
+      "notable": true,
+      "requires": [
+        "canSuitlessLavaDive",
+        "h_canJumpIntoIBJ",
+        "canDoubleBombJump",
+        {"or": [
+          {"and": [
+            "Gravity",
+            {"acidFrames": 150}
+          ]},
+          {"acidFrames": 450}
+        ]}
+      ],
+      "note": "Clear the right side Space Pirates and then race the rising acid by bomb jumping."
+    },
+    {
       "link": [3, 2],
       "name": "Base",
       "requires": [
@@ -415,7 +543,9 @@
           "HiJump",
           "SpaceJump",
           "canWalljump",
-          "h_canCrouchJumpDownGrab"
+          "h_canCrouchJumpDownGrab",
+          "h_canJumpIntoIBJ",
+          "canSpringBallJumpMidAir"
         ]},
         {"or": [
           "canCarefulJump",
@@ -427,8 +557,7 @@
           }}
         ]}
       ],
-      "clearsObstacles": ["A"],
-      "devNote": "IBJ can be used to avoid wall jumps before the acid starts rising, but a crouch jump down grab is needed near the right door."
+      "clearsObstacles": ["A"]
     },
     {
       "link": [3, 3],

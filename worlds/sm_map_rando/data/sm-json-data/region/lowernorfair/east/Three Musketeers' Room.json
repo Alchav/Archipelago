@@ -15,41 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019a4a",
-      "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Three Musketeers Left Door (to Single Chamber)",
-          "length": 5,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 90}
-              ]
-            }
-          ],
-          "openEnd": 1
-        },
-        {
-          "name": "Runway with Blocks Intact - Three Musketeers Left Door (to Single Chamber)",
-          "length": 12,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"obstaclesNotCleared": ["A"]},
-                {"heatFrames": 140}
-              ]
-            }
-          ],
-          "openEnd": 0,
-          "note": "This longer runway is not usable if the shot blocks are destroyed."
-        }
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -57,25 +23,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019a56",
-      "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Three Musketeers Right Door (to Spring Ball Maze)",
-          "length": 2,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 70}
-              ]
-            }
-          ],
-          "usableComingIn": false,
-          "openEnd": 1
-        }
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 3,
@@ -148,6 +96,30 @@
   "strats": [
     {
       "link": [1, 1],
+      "name": "Leave With Runway (Short Runway)",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway (Full Runway)",
+      "requires": [
+        {"obstaclesNotCleared": ["A"]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 13,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "link": [1, 1],
       "name": "Red Kihunter Farm",
       "requires": [
         "h_heatProof",
@@ -163,7 +135,7 @@
           "nodes": [1],
           "mustStayPut": false
         }},
-        {"refill": ["Energy", "Missile", "Super"]}
+        {"refill": ["Energy", "Super"]}
       ]
     },
     {
@@ -212,8 +184,7 @@
       "requires": [
         "h_canNavigateHeatRooms",
         "canTrickyJump",
-        "Morph",
-        {"heatFrames": 540}
+        {"heatFrames": 500}
       ],
       "note": [
         "Wait for the top one to pass by.",
@@ -267,14 +238,9 @@
         "h_canNavigateHeatRooms",
         "Plasma",
         "Wave",
-        {"or": [
-          "canDodgeWhileShooting",
-          {"heatFrames": 30}
-        ]},
-        {"heatFrames": 790}
+        {"heatFrames": 720}
       ],
-      "clearsObstacles": ["A"],
-      "note": "The top KiHunter can be ignored."
+      "clearsObstacles": ["A"]
     },
     {
       "link": [1, 4],
@@ -289,7 +255,7 @@
             {"heatFrames": 1800}
           ]}
         ]},
-        {"heatFrames": 1320}
+        {"heatFrames": 1200}
       ],
       "clearsObstacles": ["A"],
       "note": "Jump to the previous level when the enemy gets close, or fight entirely from safety."
@@ -300,28 +266,23 @@
       "requires": [
         "h_canNavigateHeatRooms",
         {"enemyKill": {
-          "enemies": [["Kihunter (red)", "Kihunter (red)"]],
+          "enemies": [["Kihunter (red)", "Kihunter (red)", "Kihunter (red)"]],
           "explicitWeapons": ["Super"]
         }},
+        {"heatFrames": 800},
         {"or": [
           "canDodgeWhileShooting",
           {"and": [
             "canCarefulJump",
-            {"enemyKill": {
-              "enemies": [["Kihunter (red)"]],
-              "explicitWeapons": ["Super"]
-            }},
-            {"heatFrames": 960}
+            {"heatFrames": 800}
           ]}
-        ]},
-        {"heatFrames": 690}
+        ]}
       ],
       "clearsObstacles": ["A"],
       "note": [
         "Jump to the previous level when the enemy gets close, or fight entirely from safety.",
-        "Two supers can hit per cycle when shooting from above."
-      ],
-      "devNote": "Without two supers per cycle, this requires heatproof."
+        "Two supers can hit per cycle when shooting from above."        
+      ]
     },
     {
       "link": [1, 4],
@@ -356,6 +317,17 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
         "h_canHeatedCrystalFlash"
@@ -372,29 +344,41 @@
     },
     {
       "link": [2, 4],
-      "name": "HiJump Speed Mockball",
+      "name": "HiJump Speed Mockball (Gravity)",
       "requires": [
         "h_canNavigateHeatRooms",
         "canMockball",
         "HiJump",
         "SpeedBooster",
         "canCarefulJump",
+        "Gravity",
+        {"heatFrames": 310},
+        {"acidFrames": 25}
+      ],
+      "note": [
+        "Run into the acid to quickly jump over the first pillar.",
+        "Build speed and jump over the second pillar to mockball through the tunnel without taking much acid damage."
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "HiJump Speed Mockball (Come in Running)",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canMockball",
+        "HiJump",
+        "SpeedBooster",
+        "canCarefulJump",
+        "canWalljump",
         {"or": [
-          {"and": [
-            "Gravity",
-            {"acidFrames": 20}
-          ]},
-          {"and": [
-            "canWalljump",
-            {"adjacentRunway": {
-              "fromNode": 2,
-              "usedTiles": 3
-            }},
-            {"or": [
-              "canInsaneWalljump",
-              {"acidFrames": 30}
-            ]}
-          ]}
+          "canInsaneWalljump",
+          {"acidFrames": 30}
         ]},
         {"heatFrames": 310},
         {"acidFrames": 5}
@@ -407,15 +391,17 @@
     {
       "link": [2, 4],
       "name": "SpaceJump Weave",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 4,
+          "speedBooster": "any"
+        }
+      },
       "requires": [
         "h_canNavigateHeatRooms",
         "SpaceJump",
         "Morph",
         "canTrickyJump",
-        {"adjacentRunway": {
-          "fromNode": 2,
-          "usedTiles": 4
-        }},
         "canPrepareForNextRoom",
         {"heatFrames": 270}
       ],
@@ -459,10 +445,8 @@
           ]},
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]},
+            "h_additionalBomb",
+            "h_additionalBomb",
             {"heatFrames": 250}
           ]}
         ]},
@@ -654,10 +638,8 @@
           ]},
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]},
+            "h_additionalBomb",
+            "h_additionalBomb",
             {"heatFrames": 250}
           ]}
         ]},
@@ -691,10 +673,8 @@
           ]},
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]},
+            "h_additionalBomb",
+            "h_additionalBomb",
             {"heatFrames": 250}
           ]}
         ]},
@@ -727,10 +707,8 @@
           ]},
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]},
+            "h_additionalBomb",
+            "h_additionalBomb",
             {"heatFrames": 250}
           ]}
         ]},
@@ -774,10 +752,8 @@
           ]},
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]},
+            "h_additionalBomb",
+            "h_additionalBomb",
             {"heatFrames": 250}
           ]}
         ]},
@@ -814,10 +790,8 @@
           ]},
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]},
+            "h_additionalBomb",
+            "h_additionalBomb",
             {"heatFrames": 250}
           ]}
         ]},
@@ -851,10 +825,8 @@
           "h_canIBJ",
           {"and": [
             "h_canSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]}
+            "h_additionalBomb",
+            "h_additionalBomb"
           ]}
         ]}
       ],

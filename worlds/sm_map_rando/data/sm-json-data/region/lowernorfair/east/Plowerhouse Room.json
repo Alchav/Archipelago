@@ -16,24 +16,6 @@
       "nodeSubType": "blue",
       "nodeAddress": "0x001995a",
       "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Plowerhouse Left Door (to Farming Room)",
-          "length": 3,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 300}
-              ]
-            }
-          ],
-          "usableComingIn": false,
-          "openEnd": 1
-        }
-      ],
       "devNote": "FIXME can leave charged by charging in the acid"
     },
     {
@@ -43,23 +25,6 @@
       "nodeSubType": "blue",
       "nodeAddress": "0x0019966",
       "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Plowerhouse Right Door (to Metal Pirates)",
-          "length": 3,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 70}
-              ]
-            }
-          ],
-          "openEnd": 1
-        }
-      ],
       "devNote": "FIXME can leave charged by charging in the acid"
     },
     {
@@ -160,6 +125,7 @@
     {
       "from": 1,
       "to": [
+        {"id": 1},
         {"id": 2},
         {
           "id": 3,
@@ -191,6 +157,18 @@
     }
   ],
   "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway (Short Runway)",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "note": "This runway does not require taking care of the Holtzes."
+    },
     {
       "link": [1, 2],
       "name": "Base",
@@ -359,6 +337,59 @@
       ]
     },
     {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 45}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway - Frozen Holtz",
+      "requires": [
+        "h_canTrickyFrozenEnemyRunway",
+        {"heatFrames": 800},
+        {"or": [
+          {"and": [
+            "Wave",
+            {"heatFrames": 500}
+          ]},
+          {"and": [
+            "Spazer",
+            {"heatFrames": 500}
+          ]},
+          {"and": [
+            "Plasma",
+            {"heatFrames": 200}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 7,
+          "openEnd": 0
+        }
+      },
+      "note": "On entry lure both Holtz. Kill one and freeze the other in position.",
+      "devNote": "FIXME: These heatFrames can likely be tightened."
+    },
+    {
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
@@ -445,7 +476,87 @@
     },
     {
       "link": [3, 1],
-      "name": "Farm to Full",
+      "name": "Leave With Runway (Full Runway)",
+      "requires": [
+        {"heatFrames": 100}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Farm then Leave",
+      "requires": [
+        "h_heatResistant",
+        {"heatFrames": 100}
+      ],
+      "note": [
+        "Leaving from the farm node assumes killing all the Holtzes and farming to full before exiting.",
+        "Gaining Energy from the farm requires some sort of heat reduction."
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Farm then Leave With Runway - Frozen Holtz",
+      "requires": [
+        "h_heatResistant",
+        "h_canTrickyFrozenEnemyRunway",
+        {"heatFrames": 300}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 7,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Assumes killing all the Holtzes except for one that can be frozen to extend the runway.",
+        "Get the Holtz stuck under the platform then farming to full before freezing it to extend the runway.",
+        "Gaining Energy from the farm requires some sort of heat reduction."
+      ],
+      "devNote": "FIXME: Another strat could be added without the farm or heat resistance."
+    },
+    {
+      "link": [3, 1],
+      "name": "Farm then Leave With Runway - Frozen Zebbo",
+      "requires": [
+        "h_heatResistant",
+        "h_canFrozenEnemyRunway",
+        "Morph",
+        {"heatFrames": 500}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Assumes killing all the Holtzes then farming to full.",
+        "Morph on the ground near the Zebbo spawner then quickly unmorph and shoot as it starts to move horizontally.",
+        "While on the runway near the door, freeze the Zebbo again while maintaining a half-tile gap between it and the runway to extend it as much as possible.",
+        "Gaining Energy from the farm requires some sort of heat reduction."
+      ],
+      "devNote": "FIXME: Another strat could be added without the farm or heat resistance."
+    },
+    {
+      "link": [3, 2],
+      "name": "Farm then Leave",
       "requires": [
         "h_canNavigateHeatRooms",
         "h_heatResistant",
@@ -453,21 +564,58 @@
       ],
       "note": [
         "Leaving from the farm node assumes killing all the Holtzes and farming to full before exiting.",
-        "Gaining energy from the farm requires some sort of heat reduction."
+        "Gaining Energy from the farm requires some sort of heat reduction."
       ]
     },
     {
       "link": [3, 2],
-      "name": "Farm to Full",
+      "name": "Farm then Leave With Runway - Frozen Holtz",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_heatResistant",
-        {"heatFrames": 100}
+        "h_canTrickyFrozenEnemyRunway",
+        {"heatFrames": 300}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 7,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
       ],
       "note": [
-        "Leaving from the farm node assumes killing all the Holtzes and farming to full before exiting.",
-        "Gaining energy from the farm requires some sort of heat reduction."
-      ]
+        "Assumes killing all the Holtzes except for one that can be frozen to extend the runway.",
+        "Get the Holtz stuck under the platform then farming to full before freezing it to extend the runway.",
+        "Gaining Energy from the farm requires some sort of heat reduction."
+      ],
+      "devNote": "FIXME: Another strat could be added without the farm or heat resistance."
+    },
+    {
+      "link": [3, 2],
+      "name": "Farm then Leave With Runway - Frozen Zebbo",
+      "requires": [
+        "h_heatResistant",
+        "h_canFrozenEnemyRunway",
+        "Morph",
+        {"heatFrames": 500}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Assumes killing all the Holtzes then farming to full.",
+        "Morph on the ground near the Zebbo spawner then quickly unmorph and shoot as it starts to move horizontally.",
+        "While on the runway near the door, freeze the Zebbo again while maintaining a half-tile gap between it and the runway to extend it as much as possible.",
+        "Gaining Energy from the farm requires some sort of heat reduction."
+      ],
+      "devNote": "FIXME: Another strat could be added without the farm or heat resistance."
     },
     {
       "link": [3, 3],

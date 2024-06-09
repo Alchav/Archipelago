@@ -14,16 +14,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018d2a",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Zeb",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -62,7 +53,10 @@
     {
       "from": 1,
       "to": [
-        {"id": 1},
+        {
+          "id": 1,
+          "devNote": "FIXME: Moondance can be setup on the slope by freezing a new bug whenever the freeze effect expires."
+        },
         {"id": 3}
       ]
     },
@@ -99,6 +93,15 @@
           "steepUpTiles": 2,
           "openEnd": 0
         }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Zeb",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
       }
     },
     {
@@ -140,12 +143,13 @@
     {
       "link": [2, 1],
       "name": "G-Mode Overload PLMS with Camera Scroll Blocks",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": false
-        }},
+          "morphed": false
+        }
+      },
+      "requires": [
         {"or": [
           "canConsecutiveWalljump",
           "SpaceJump"
@@ -156,6 +160,16 @@
         "This is mostly an alternative to the canBeVeryPatient X-Ray climb.",
         "This is possible with an IBJ, but it's still about 3 minutes, and you can't remotely acquire the item because it's in a Chozo Ball."
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],

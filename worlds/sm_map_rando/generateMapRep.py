@@ -10,9 +10,9 @@ def write_file_list(directory_path, output_file_path):
 
 if __name__ == '__main__':
     # Set the directory path and output file path here
-    directory_path_tame = '../MapRepositoryV94Tame'
+    directory_path_tame = '../MapRepositoryV110Tame'
     output_file_path_tame = 'worlds/sm_map_rando\data/mapRepositoryTame.json'
-    directory_path_wild = '../MapRepositoryV94Wild'
+    directory_path_wild = '../MapRepositoryV110Wild'
     output_file_path_wild = 'worlds/sm_map_rando\data/mapRepositoryWild.json'
 
     # Call the write_file_list function with the specified directory and output file paths

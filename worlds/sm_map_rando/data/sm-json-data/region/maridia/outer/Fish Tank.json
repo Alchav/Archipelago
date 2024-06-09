@@ -14,16 +14,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a3d8",
-      "doorEnvironments": [{"physics": "water"}],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Skultera",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      "doorEnvironments": [{"physics": "water"}]
     },
     {
       "id": 2,
@@ -141,6 +132,15 @@
       "homeNodes": [7]
     }
   ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Fish Tank Top Left Direct Jump",
+      "note": [
+        "Jump into the Top-Left door of the Fish Tank room from the nearby ledge using one of Gravity, HiJump, or SpringBall.",
+        "This requires a very precise jump from the very edge of the ledge and risks falling into the Bottom-Left pit which may be difficult to climb back from."
+      ]
+    }
+  ],
   "links": [
     {
       "from": 1,
@@ -157,7 +157,9 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
+        {"id": 4},
         {"id": 5},
         {"id": 6}
       ]
@@ -232,6 +234,18 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Skultera",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
       "link": [1, 4],
       "name": "IBJ",
       "requires": [
@@ -254,7 +268,11 @@
         "canCrossRoomJumpIntoWater",
         "canMomentumConservingTurnaround"
       ],
-      "note": "Requires a runway of at least 4 tiles in the adjacent room."
+      "note": "Requires a runway of at least 4 tiles in the adjacent room.",
+      "devNote": [
+        "Using more run speed to avoid the momentumConservingTurnaround requirement will bonk the door, requiring a turnaround to get through",
+        "This would be a way to bring high vertical speed into the room on the other side of 4."
+      ]
     },
     {
       "link": [1, 4],
@@ -266,9 +284,24 @@
         }
       },
       "requires": [
-        "canCrossRoomJumpIntoWater"
+        "canCrossRoomJumpIntoWater",
+        "canTrickyJump"
       ],
       "note": "Requires a runway of at least 18 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with Speedbooster (lenient)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 22
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of at least 22 tiles in the adjacent room."
     },
     {
       "link": [1, 5],
@@ -307,7 +340,7 @@
         "canSuitlessMaridia",
         "canTrickyUseFrozenEnemies",
         "HiJump",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump"
       ]
     },
     {
@@ -315,8 +348,7 @@
       "name": "Double Springball Jump",
       "requires": [
         "canSuitlessMaridia",
-        "canDoubleSpringBallJumpMidAir",
-        "HiJump"
+        "h_canDoubleSpringBallJumpWithHiJump"
       ]
     },
     {
@@ -333,7 +365,7 @@
         "canCrossRoomJumpIntoWater",
         "canMomentumConservingTurnaround",
         "canTrickyUseFrozenEnemies",
-        "canTrickyJump",
+        "canInsaneJump",
         "canDownGrab",
         {"or": [
           "Wave",
@@ -361,7 +393,8 @@
         "HiJump",
         "canCrossRoomJumpIntoWater",
         "canMomentumConservingTurnaround",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump",
+        "canInsaneJump"
       ],
       "note": "Requires 3 tiles of run speed (with no open end) to make it past the overhang above the door."
     },
@@ -376,9 +409,9 @@
       },
       "requires": [
         "HiJump",
-        "SpeedBooster",
         "canCrossRoomJumpIntoWater",
-        "canMomentumConservingTurnaround"
+        "canMomentumConservingTurnaround",
+        "canTrickyJump"
       ],
       "note": "Requires a runway of at least 3 tiles in the adjacent room."
     },
@@ -441,23 +474,52 @@
       "requires": [
         "SpeedBooster",
         "canCrossRoomJumpIntoWater",
-        "canSpringBallJumpMidAir"
+        "canSpringBallJumpMidAir",
+        "canTrickyJump"
       ],
       "note": "Requires a runway of at least 10 tiles in the adjacent room."
     },
     {
       "link": [1, 5],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ],
       "note": "Kill the first fish with bombs then dodge or kill the second one."
+    },
+    {
+      "link": [1, 5],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [],
+      "note": [
+        "After teleporting, Grapple will open the door (if it is blue), making it not possible to swing over to the ledge."
+      ],
+      "devNote": [
+        "FIXME: Add canRiskPermanentLossOfAccess variations to get onto the ledge if the door is not blue;",
+        "also to get up through the door with a tricky grapple jump, if the door is pink or green (using a Super to open it)."
+      ]
     },
     {
       "link": [2, 2],
@@ -475,6 +537,32 @@
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Fish Tank Grapple Teleport into Grapple Jump",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3]]
+        }
+      },
+      "requires": [
+        {"doorUnlockedAtNode": 4},
+        "canMidairWiggle",
+        "canTrickyGrappleJump",
+        "canInsaneJump"
+      ],
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Swing to the right, shoot open the door above, and grapple jump through it."
+      ],
+      "devNote": [
+        "FIXME: Add a version of this with an exit condition for grapple jumping through the transition."
       ]
     },
     {
@@ -499,6 +587,21 @@
       "note": "Start the dash as close to the door transition as possible in order to have a larger window for storing the shinecharge."
     },
     {
+      "link": [2, 5],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3]]
+        }
+      },
+      "requires": [],
+      "note": [
+        "Swing over the right to make it to the ledge.",
+        "Avoid extending Grapple, to prevent being damaged by the Skulltera.",
+        "You can wait for the camera to fix itself; continue swinging while waiting, to avoid damage."
+      ]
+    },
+    {
       "link": [2, 6],
       "name": "Base",
       "requires": [
@@ -517,7 +620,7 @@
           }},
           {"enemyKill": {
             "enemies": [["Pink Space Pirate (standing)"]],
-            "explicitWeapons": ["Plasma"]
+            "explicitWeapons": ["Plasma", "ScrewAttack"]
           }}
         ]}
       ]
@@ -538,21 +641,39 @@
           }},
           {"enemyKill": {
             "enemies": [["Pink Space Pirate (standing)"]],
-            "explicitWeapons": ["Plasma", "ScrewAttack"]
+            "explicitWeapons": ["Plasma"]
           }}
         ]}
       ]
     },
     {
       "link": [2, 6],
-      "name": "Fish Tank SpringBall Escape",
+      "name": "SpringBall Escape",
       "requires": [
         "canSuitlessMaridia",
-        "canStationaryLateralMidAirMorph",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump",
+        {"or": [
+          "canStationaryLateralMidAirMorph",
+          "canSpringFling"
+        ]},
+        {"or": [
+          "canTrickyJump",
+          {"enemyDamage": {
+            "enemy": "Pink Space Pirate (standing)",
+            "type": "contact",
+            "hits": 1
+          }},
+          {"enemyKill": {
+            "enemies": [["Pink Space Pirate (standing)"]],
+            "explicitWeapons": ["Plasma"]
+          }}
+        ]}
       ],
-      "note": "The second jump is doable by combining a stationary mid-air mockball with a mid-air springball jump.",
-      "devNote": "The second jump is actually doable with just a regular SpringBall jump but is ridiculously tight."
+      "note": [
+        "The second jump is harder than a normal mid-air springball jump.",
+        "Use either a stationary lateral mid air morph, to gain enough horizontal momentum,",
+        "or a SpringFling to reduce Samus' fall speed as soon as it begins to build up."
+      ]
     },
     {
       "link": [2, 6],
@@ -627,11 +748,13 @@
       "name": "Shinespark",
       "entranceCondition": {
         "comeInShinecharged": {
-          "framesRequired": 25
-        }
+          "framesRequired": 15
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canNavigateUnderwater",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 90}}
       ],
       "devNote": [
@@ -656,24 +779,124 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 10
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canNavigateUnderwater",
         "canPrepareForNextRoom",
+        "canMidairShinespark",
         {"shinespark": {"frames": 3, "excessFrames": 0}}
       ],
-      "note": "Requires Samus to enter in a state that can spark immediately."
+      "note": "Requires Samus to enter in a state that can diagonally spark immediately.",
+      "devNote": [
+        "FIXME: The requirement to be in a pose that can spark immediately may not align with the exit condition in the other room.",
+        "We need a way to make this requirement explicit and take it into account."
+      ]
+    },
+    {
+      "link": [4, 5],
+      "name": "Fish Tank Entry Fall onto Frozen Fish",
+      "notable": true,
+      "entranceCondition": {
+        "comeInNormally": {},
+        "comesThroughToilet": "no"
+      },
+      "requires": [
+        "h_canNavigateUnderwater",
+        "canPrepareForNextRoom",
+        "canTrickyUseFrozenEnemies",
+        {"or": [
+          {"and": [
+            "Wave",
+            "Plasma"
+          ]},
+          {"and": [
+            "Plasma",
+            "Charge"
+          ]},
+          {"and": [
+            "Wave",
+            "Spazer",
+            "Charge"
+          ]}
+        ]}
+      ],
+      "note": "Enter on the left side of the door while aiming down and freeze the fish immediately."
+    },
+    {
+      "link": [4, 5],
+      "name": "Damage Boost",
+      "entranceCondition": {
+        "comeInNormally": {},
+        "comesThroughToilet": "no"
+      },
+      "requires": [
+        "Gravity",
+        "canHorizontalDamageBoost",
+        "canPrepareForNextRoom",
+        {"enemyDamage": {
+          "enemy": "Skultera",
+          "hits": 1,
+          "type": "contact"
+        }}
+      ],
+      "note": "Enter on the left side of the door in order to land on the fish, then Damage Boost to reach the ledge on the right."
+    },
+    {
+      "link": [4, 5],
+      "name": "Fish Tank Entry Reset Fall Speed",
+      "notable": true,
+      "entranceCondition": {
+        "comeInNormally": {},
+        "comesThroughToilet": "no"
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "h_canResetFallSpeed",
+        "canPrepareForNextRoom"
+      ],
+      "note": [
+        "Morph and unmorph before reaching the transition, and then drift to the ledge.",
+        "Enter the room as far right as possible."
+      ],
+      "devNote": "FIXME: An enemy can hit Samus where she would unmorph as a way to perform this strat without Morph."
+    },
+    {
+      "link": [4, 5],
+      "name": "Fish Tank Wall Jump Entry",
+      "notable": true,
+      "entranceCondition": {
+        "comeInNormally": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "canPreciseWalljump",
+        "canPrepareForNextRoom",
+        "canMidairWiggle",
+        "canCarefulJump"
+      ],
+      "note": [
+        "Wall jump in the room above, on the right wall of the doorway, immdiately before the door transition. Failure will likely result in a soft lock.",
+        "To get to the ledge: If the room above has normal physics, hold right in this room. If the room above has water physics, shoot to break spin while holding right in this room."
+      ],
+      "devNote": [
+        "Strat starts before entering this transition.",
+        "FIXME: The midair wiggle is only needed if the room above has water physics. That's not something in the logic for vertical doors currently. Also if the room above is heated, these may require some heat frames to set up."
+      ]
     },
     {
       "link": [4, 5],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ],
@@ -685,7 +908,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 10
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "Gravity",
@@ -701,7 +925,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 10
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
@@ -710,21 +935,6 @@
         {"shinespark": {"frames": 88, "excessFrames": 21}}
       ],
       "note": "Immediately spark after the door transition into the wall just to the right of the top right door."
-    },
-    {
-      "link": [4, 7],
-      "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_canArtificialMorphIBJ",
-        "Gravity",
-        "canBombHorizontally"
-      ],
-      "note": "Kill or dodge the fish by the top left door and the one in the middle of the room."
     },
     {
       "link": [4, 8],
@@ -744,7 +954,6 @@
         {"or": [
           "canWalljump",
           "h_canFly",
-          "canTrickyJump",
           "canUseFrozenEnemies",
           "canGravityJump"
         ]}
@@ -752,7 +961,7 @@
     },
     {
       "link": [5, 4],
-      "name": "Suitless",
+      "name": "Suitless Frozen Fish",
       "requires": [
         "canSuitlessMaridia",
         "canUseFrozenEnemies",
@@ -773,26 +982,54 @@
     },
     {
       "link": [5, 4],
-      "name": "Fish Tank Top Left Flatley Jump",
+      "name": "Fish Tank Top Left Direct Jump with Gravity",
       "notable": true,
       "requires": [
-        "canSuitlessMaridia",
-        "canFlatleyJump",
-        {"or": [
-          "canSpringBallJumpMidAir",
-          "HiJump"
-        ]}
+        "Gravity",
+        "canTrickyJump"
       ],
-      "note": "Use a flatley jump with either HiJump or a spring ball jump to get into the top left doorway.",
-      "devNote": "Can be done with a spring ball jump without a flatley jump, but it's obscure and tight."
+      "reusableRoomwideNotable": "Fish Tank Top Left Direct Jump",
+      "note": "Build up run speed and jump at the last moment to reach the door."
     },
     {
       "link": [5, 4],
-      "name": "Wall Hug Turnaround",
+      "name": "Fish Tank Top Left Direct Suitless HiJump",
+      "notable": true,
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canMomentumConservingTurnaround"
+        "canTrickyJump",
+        {"or": [
+          "canFlatleyJump",
+          "canMomentumConservingTurnaround"
+        ]}
+      ],
+      "reusableRoomwideNotable": "Fish Tank Top Left Direct Jump",
+      "note": [
+        "Jump towards the door with HiJump equipped.",
+        "A Flatley style jump can position Samus over the edge of the ledge, closer to the door.",
+        "Turning around while facing down, just before touching the ceiling, is another way to move Samus a few pixels closer to the door."
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Fish Tank Top Left Direct Suitless Springball Jump",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickySpringBallJump",
+        {"or": [
+          "canTrickyJump",
+          "canStationaryLateralMidAirMorph"
+        ]}
+      ],
+      "reusableRoomwideNotable": "Fish Tank Top Left Direct Jump",
+      "note": [
+        "Jump towards the door with a Springball Jump, jumping as late as possible.",
+        "A Flatley style jump can position Samus over the edge of the ledge, closer to the door, allowing for an earlier Springball jump.",
+        "The slight fall from a Flatley Jump helps with the Springball jump, but then Samus must unmorph to extend her hitbox to touch the transition.",
+        "A Stationary Lateral MidAir Morph also helps with this jump.",
+        "Unmorphing after a missed jump can return Samus to the ledge to try again."
       ]
     },
     {
@@ -837,10 +1074,14 @@
       "name": "Suitless With Ice",
       "requires": [
         "canSuitlessMaridia",
-        "canCarefulJump",
-        "canUseFrozenEnemies"
+        "canTrickyJump",
+        "canTrickyUseFrozenEnemies"
       ],
-      "note": "Freeze the fish while it is moving leftward, a bit left of the peak in its swim cycle. Build run speed on top of the fish before jumping to the ledge."
+      "note": [
+        "Freeze the fish a bit left of the peak in its swim cycle.",
+        "Build run speed on top of the fish before jumping to the ledge.",
+        "The positioning is more lenient if the fish is frozen while moving leftward."
+      ]
     },
     {
       "link": [6, 6],
@@ -893,6 +1134,7 @@
       "name": "Suitless",
       "requires": [
         "canSuitlessMaridia",
+        "canCarefulJump",
         {"or": [
           "HiJump",
           "canSpringBallJumpMidAir"
@@ -905,10 +1147,9 @@
       "notable": true,
       "requires": [
         "canSuitlessMaridia",
-        "canTrickyJump"
+        "canInsaneJump"
       ],
-      "note": "This is particularly precise, and requires subpixel precision.",
-      "devNote": "Possibly add a new tech, i.e. canInsaneJump, but it is probably worth keeping notable."
+      "note": "This is particularly precise, and requires subpixel precision."
     },
     {
       "link": [6, 7],
@@ -955,79 +1196,6 @@
       "link": [8, 1],
       "name": "Base",
       "requires": []
-    },
-    {
-      "link": [8, 5],
-      "name": "Fish Tank Entry Fall onto Frozen Fish",
-      "notable": true,
-      "requires": [
-        "h_canNavigateUnderwater",
-        "canPrepareForNextRoom",
-        "canTrickyUseFrozenEnemies",
-        {"or": [
-          {"and": [
-            "Wave",
-            "Plasma"
-          ]},
-          {"and": [
-            "Plasma",
-            "Charge"
-          ]},
-          {"and": [
-            "Wave",
-            "Spazer",
-            "Charge"
-          ]}
-        ]}
-      ],
-      "note": "The beam must be pre-charged and aiming down before the transition is close to required.",
-      "devNote": "The fish is too far left to naturally be above, entering the room."
-    },
-    {
-      "link": [8, 5],
-      "name": "Damage Boost",
-      "requires": [
-        "Gravity",
-        "canHorizontalDamageBoost",
-        "canPrepareForNextRoom",
-        {"enemyDamage": {
-          "enemy": "Skultera",
-          "hits": 1,
-          "type": "contact"
-        }}
-      ]
-    },
-    {
-      "link": [8, 5],
-      "name": "Fish Tank Entry Reset Fall Speed",
-      "notable": true,
-      "requires": [
-        "canSuitlessMaridia",
-        "h_canResetFallSpeed",
-        "canPrepareForNextRoom"
-      ],
-      "note": "Morph and unmorph then drift to the ledge.",
-      "devNote": "Strat starts before entering this transition. An enemy can be used for this strat instead of morph."
-    },
-    {
-      "link": [8, 5],
-      "name": "Fish Tank Wall Jump Entry",
-      "notable": true,
-      "requires": [
-        "canSuitlessMaridia",
-        "canPreciseWalljump",
-        "canPrepareForNextRoom",
-        "canMidairWiggle",
-        "canCarefulJump"
-      ],
-      "note": [
-        "Wall jump in the room above, on the right wall of the doorway, immdiately before the door transition. Failure will likely result in a soft lock.",
-        "To get to the ledge: If the room above has normal physics, hold right in this room. If the room above has water physics, shoot to break spin while holding right in this room."
-      ],
-      "devNote": [
-        "Strat starts before entering this transition.",
-        "FIXME: The midair wiggle is only needed if the room above has water physics. That's not something in the logic for vertical doors currently. Also if the room above is heated, these may require some heat frames to set up."
-      ]
     }
   ]
 }

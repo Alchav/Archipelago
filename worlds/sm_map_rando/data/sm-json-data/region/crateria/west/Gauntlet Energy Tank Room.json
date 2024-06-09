@@ -28,7 +28,7 @@
       "id": 3,
       "name": "Item",
       "nodeType": "item",
-      "nodeSubType": "chozo",
+      "nodeSubType": "visible",
       "nodeItem": "ETank",
       "nodeAddress": "0x78264"
     },
@@ -64,6 +64,12 @@
       "name": "Blue Suit",
       "obstacleType": "abstract",
       "note": "Samus has obtained a blue suit from R-Mode."
+    },
+    {
+      "id": "E",
+      "name": "Respawning Block",
+      "obstacleType": "abstract",
+      "note": "Breaking the respawning blocks with a Power Bomb to pass through it twice."
     }
   ],
   "enemies": [
@@ -108,6 +114,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3},
         {"id": 4}
@@ -286,7 +293,7 @@
         }
       },
       "requires": [
-        "Bombs"
+        "h_canArtificialMorphBombs"
       ],
       "clearsObstacles": ["B"],
       "note": "Place a Power Bomb to the left of the Zebbo, then exit G-Mode, to break the bomb wall to the right."
@@ -301,7 +308,7 @@
         }
       },
       "requires": [
-        "Bombs"
+        "h_canArtificialMorphBombs"
       ],
       "clearsObstacles": ["C"],
       "note": "Carefully kill the Zebbo, then place two bombs against the right wall to break the left half of the wall to slightly increase the length of the runway."
@@ -353,6 +360,7 @@
         ]}
       ],
       "clearsObstacles": ["B", "D"],
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "note":  [
         "Use R-Mode to get a blue suit to cross the room and get the item, or to leave the right shinecharged.",
         "In R-Mode, fill your Reserves at the farm. Damage down again so that Samus is within 1 Zebbo hit from triggering Reserves.",
@@ -501,7 +509,7 @@
     },
     {
       "link": [1, 4],
-      "name": "Gauntlet E-Tank Room with Bombs (Left to Right)",
+      "name": "Bombs",
       "requires": [
         {"or": [
           "canCarefulJump",
@@ -514,7 +522,7 @@
     },
     {
       "link": [1, 4],
-      "name": "Power Bomb Gauntlet E-Tank Room (Left to Right)",
+      "name": "Power Bombs",
       "requires": [
         {"or": [
           "canCarefulJump",
@@ -539,6 +547,7 @@
       "link": [1, 4],
       "name": "In-Room Shinecharge, Spark Through the Room",
       "requires": [
+        "canHorizontalShinespark",
         {"obstaclesCleared": ["B"]},
         {"or": [
           {"canShineCharge": {
@@ -561,6 +570,43 @@
       ],
       "clearsObstacles": ["A"],
       "note": "It is possible to return to the farm after sparking to regain Energy."
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Gauntlet Energy Tank Room Spark Master",
+      "notable": true,
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 8,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canSlowShortCharge",
+        "canShinechargeMovementTricky",
+        "h_canUsePowerBombs",
+        "HiJump",
+        "Gravity",
+        {"acidFrames": 16},
+        "canInsaneJump",
+        {"shinespark": {"frames": 93, "excessFrames": 15}}
+      ],
+      "note": [
+        "Use SpeedBooster to break the runway Bomb block and then to shinespark across the room, saving Power Bombs.",
+        "One Power Bomb is still needed to break the tunnel block.",
+        "The shinespark timer is very tight and breaking the runway block while storing the Shinespark is required as it saves movement frames."
+      ],
+      "devNote": "There are variations with Screw or Bombs that wouldn't need Gravity.  But then you can cross the room normally."
     },
     {
       "link": [2, 2],
@@ -633,7 +679,7 @@
         "canLateralMidAirMorph",
         {"or": [
           "canChainTemporaryBlue",
-          "can3HighMidAirMorph"
+          "can4HighMidAirMorph"
         ]}
       ],
       "note": "A quick jump morph from the top of the slope will bounce into the tunnel and avoid acid damage.",
@@ -654,6 +700,22 @@
         {"acidFrames": 27}
       ],
       "devNote": "There is 1 unusable tile in this runway."
+    },
+    {
+      "link": [2, 4],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "requires": [
+        "Morph",
+        "canMoonfall"
+      ],
+      "note": [
+        "Moonfall against the Chozo statue to clip into the Morph Tunnel, past the Bomb block."
+      ]
     },
     {
       "link": [3, 1],
@@ -685,14 +747,41 @@
           "framesRemaining": 180
         }
       },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "devNote": "FIXME: Add a way to leave with blue suit."
     },
     {
       "link": [3, 4],
       "name": "Base",
       "requires": [
-        "h_canBombThings"
+        "h_canUsePowerBombs"
       ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Bombs",
+      "requires": [
+        "h_canUseMorphBombs",
+        {"or": [
+          "canCarefulJump",
+          {"acidFrames": 40}
+        ]}
+      ],
+      "note": [
+        "Delay breaking the runway block so that it will not respawn too quickly.",
+        "Wait for the acid to be rising to break the tunnel block, and then go through the tunnel on the next cycle."
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Quickly Return Through Respawning Blocks",
+      "requires": [
+        "canTrickyJump",
+        {"obstaclesCleared": ["E"]}
+      ],
+      "resetsObstacles": ["E"],
+      "note": "Grab the item and quickly return through the blocks before they respawn.",
+      "devNote": "This does not require the item to be there, but there is no reason to go through the tunnel twice if it's not."
     },
     {
       "link": [4, 1],
@@ -715,7 +804,7 @@
     },
     {
       "link": [4, 1],
-      "name": "Gauntlet E-Tank Room with Bombs (Right to Left)",
+      "name": "Bombs",
       "requires": [
         {"or": [
           "canCarefulJump",
@@ -751,7 +840,7 @@
     },
     {
       "link": [4, 1],
-      "name": "Power Bomb Gauntlet E-Tank Room (Right to Left)",
+      "name": "Power Bombs",
       "requires": [
         {"or": [
           "canCarefulJump",
@@ -764,10 +853,46 @@
     },
     {
       "link": [4, 3],
-      "name": "Base",
+      "name": "Power Bombs",
       "requires": [
-        "h_canBombThings"
-      ]
+        "h_canUsePowerBombs",
+        {"or": [
+          "canCarefulJump",
+          "h_canUseSpringBall",
+          {"acidFrames": 5}
+        ]}
+      ],
+      "clearsObstacles": ["E"]
+    },
+    {
+      "link": [4, 3],
+      "name": "Bombs",
+      "requires": [
+        "h_canUseMorphBombs",
+        {"or": [
+          "h_canUseSpringBall",
+          {"acidFrames": 10}
+        ]},
+        {"or": [
+          "canInsaneJump",
+          {"and": [
+            "canTrickyJump",
+            {"acidFrames": 10}
+          ]},
+          {"and": [
+            "canCarefulJump",
+            {"acidFrames": 120}
+          ]},
+          {"acidFrames": 200}
+        ]}
+      ],
+      "note": [
+        "Break the tunnel block with a Bomb and then return to safety.",
+        "Break the runway block on the next cycle.",
+        "SpringBall helps avoid acid damage.",
+        "Bombing Samus up through the runway with a second Bomb can help, or it can trap Samus in the acid if liquid physics take effect."
+      ],
+      "devNote": "Damageless is possible without SpringBall but it is very likely you end up taking more damage by attempting it."
     }
   ]
 }

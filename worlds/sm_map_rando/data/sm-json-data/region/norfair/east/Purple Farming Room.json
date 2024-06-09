@@ -36,7 +36,6 @@
           "name": "Crouch over Gamets",
           "cycleFrames": 120,
           "requires": [
-            "h_canNavigateHeatRooms",
             {"heatFrames": 120}
           ]
         }
@@ -81,11 +80,13 @@
         "leaveWithRunway": {
           "length": 13,
           "openEnd": 0,
-          "startingDownTiles": 2,
           "gentleDownTiles": 3,
           "gentleUpTiles": 1
         }
       },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
       "note": "Involves leaving some drops hanging after killing the Gamets so they don't respawn.",
       "devNote": "Health drops are collected while using this runway, offsetting any heat frames used to get into position."
     },

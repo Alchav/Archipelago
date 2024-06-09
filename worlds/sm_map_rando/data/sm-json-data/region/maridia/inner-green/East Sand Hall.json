@@ -55,6 +55,23 @@
       "betweenNodes": [2, 4]
     }
   ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "East Sand Hall Cross-Room Speed Jump",
+      "note": [
+        "Stand at an effective distance of approximately 20 tiles from the door.",
+        "Run through the door, and jump any time after the transition, holding jump through the entire room to make it to the other side.",
+        "Samus will go over the Evirs, so there is no need for blue speed."
+      ]
+    },
+    {
+      "name": "East Sand Hall Cross-Room SpringBall Jump",
+      "note": [
+        "Enter with enough run speed to jump (after the transition) across the full room using one SpringBall Jump.",
+        "When exiting the first Sandfall, Samus will be rising still.  That is the time to Springball jump."
+      ]
+    }
+  ],
   "links": [
     {
       "from": 1,
@@ -196,6 +213,52 @@
     },
     {
       "link": [1, 2],
+      "name": "East Sand Hall Cross-Room Speed Jump (Left to Right)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 19.3625,
+          "maxTiles": 21.25,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canPlayInSand",
+        "canCrossRoomJumpIntoWater",
+        "canTrickyDashJump"
+      ],
+      "reusableRoomwideNotable": "East Sand Hall Cross-Room Speed Jump",
+      "note": [
+        "Stand at an effective distance of between about 20 and 21 tiles from the door.",
+        "Run through the door, and jump any time after the transition, holding jump through the entire room to make it to the other side.",
+        "Samus will go over the Evirs, so there is no need for blue speed."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "East Sand Hall Cross-Room SpringBall Jump (Left to Right)",
+      "notable": true,
+      "reusableRoomwideNotable": "East Sand Hall Cross-Room SpringBall Jump",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 10,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canPlayInSand",
+        "canCrossRoomJumpIntoWater",
+        "canLateralMidAirMorph",
+        "canTrickySpringBallJump",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Enter with enough run speed to jump (after the transition) across the full room using one SpringBall Jump.",
+        "When exiting the first Sandfall, Samus will be rising still.  That is the time to Springball jump."
+      ]
+    },
+    {
+      "link": [1, 2],
       "name": "G-Mode",
       "entranceCondition": {
         "comeInWithGMode": {
@@ -209,7 +272,7 @@
           "Gravity",
           "HiJump",
           "canSpringBallJumpMidAir",
-          "canTrickyJump"
+          "canInsaneJump"
         ]}
       ],
       "note": [
@@ -349,7 +412,7 @@
       "requires": [
         "canCrossRoomJumpIntoWater",
         "canPlayInSand",
-        "canTrickyJump",
+        "canInsaneJump",
         {"or": [
           "canTrickyUseFrozenEnemies",
           {"and": [
@@ -395,7 +458,8 @@
       ],
       "note": [
         "Requires a runway of 7 tiles (with no open end) in the adjacent room.",
-        "Jump into an air ball on room entry in order to get to the first pillar."
+        "Jump into an air ball on room entry in order to get to the first pillar.",
+        "Aim down after the transition to avoid hitting the overhang near the door."
       ],
       "devNote": "It is assumed that getting to the second pillar is free relative to getting to the right door."
     },
@@ -407,19 +471,63 @@
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
-        {"or": [
-          "canTrickyJump",
-          {"and": [
-            "canCarefulJump",
-            "canSpringBallBombJump"
-          ]}
-        ]}
+        "canTrickyJump"
       ],
       "note": [
-        "Bomb boost through the doorway as close to the door transition as possible in order to get as far as possible.",
-        "Alternatively, with spring ball it is possible to use a bomb boost spring ball jump."
+        "Bomb boost through the doorway as close to the door transition as possible in order to get as far as possible."
       ],
       "devNote": "It is assumed that getting to the second pillar is free relative to getting to the right door."
+    },
+    {
+      "link": [2, 1],
+      "name": "East Sand Hall Cross-Room Speed Jump (Right to Left)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 19.3625,
+          "maxTiles": 20.3,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canPlayInSand",
+        "canCrossRoomJumpIntoWater",
+        "canTrickyDashJump"
+      ],
+      "reusableRoomwideNotable": "East Sand Hall Cross-Room Speed Jump",
+      "note": [
+        "Stand at an effective distance of about 20 tiles from the door.",
+        "Run through the door, and jump any time after the transition, holding jump through the entire room to make it to the other side.",
+        "Samus will go over the Evirs, so there is no need for blue speed."
+      ],
+      "devNote": [
+        "A little higher run speed can also work but may require releasing jump near the peak to avoid getting caught on the overhang."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "East Sand Hall Cross-Room SpringBall Jump (Right to Left)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 10,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canPlayInSand",
+        "canCrossRoomJumpIntoWater",
+        "canLateralMidAirMorph",
+        "canTrickySpringBallJump",
+        "canTrickyJump"
+      ],
+      "reusableRoomwideNotable": "East Sand Hall Cross-Room SpringBall Jump",
+      "note": [
+        "Enter with enough run speed to jump (after the transition) across the full room using one SpringBall Jump.",
+        "When exiting the first Sandfall, Samus will be rising still.  That is the time to Springball jump.",
+        "Alternatively, an immediate pause can be used to SpringBall jump during the first narrow gap between Sandfalls.",
+        "Sometimes Samus will land above the sand on the far left end of the room, where it will be necessary to unmorph and jump out."
+      ]
     },
     {
       "link": [2, 1],
@@ -551,7 +659,7 @@
         "canPlayInSand",
         "canMidairWiggle",
         "HiJump",
-        "canTrickyJump"
+        "canInsaneJump"
       ],
       "exitCondition": {
         "leaveWithGModeSetup": {}
@@ -615,13 +723,26 @@
       "devNote": "It is assumed that getting to the third pillar is free relative to getting to the left door."
     },
     {
+      "link": [2, 4],
+      "name": "Spring Ball Jump",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        "canTrickySpringBallJump"
+      ],
+      "note": [
+        "Freeze the Evir soon after entering the room.",
+        "Use a Spring Ball jump to reach the first pillar, then continue across using the Evir as a platform."
+      ]
+    },
+    {
       "link": [3, 1],
       "name": "G-Mode",
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canNavigateUnderwater",
@@ -641,7 +762,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canNavigateUnderwater",
@@ -679,10 +801,15 @@
         {"or": [
           "Gravity",
           "HiJump",
-          "canSandfallBounce"
+          "canInsaneJump"
         ]}
       ],
-      "note": "Enter on the right side of the transition to prevent the Evirs from firing."
+      "note": [
+        "To safely avoid the Evir shot, enter in a spin jump from either the far left or far right side of the transition."
+      ],
+      "devNote": [
+        "Entering from a non-sand room, or passing throught the toilet does not change the ability to dodge the evirs much."
+      ]
     },
     {
       "link": [4, 1],
@@ -757,18 +884,31 @@
         "canTrickyJump",
         "canTrickyUseFrozenEnemies",
         "canPlayInSand",
-        "canCrouchJump",
-        {"ammo": {"type": "PowerBomb", "count": 1}},
-        {"enemyDamage": {
-          "enemy": "Evir",
-          "type": "particle",
-          "hits": 1
-        }}
+        {"or": [
+          "canCameraManip",
+          {"and": [
+            {"ammo": {"type": "PowerBomb", "count": 1}},
+            {"enemyDamage": {
+              "enemy": "Evir",
+              "type": "particle",
+              "hits": 2
+            }}
+          ]}
+        ]}
       ],
       "note": [
-        "From the left pillar, jump and place a PB to make the Evirs rise again, while being careful not to kill the close Evir.",
-        "Freeze the first Evir such that its bottom is only slightly lower than the top of the pillar.",
-        "Crouch jump onto the Evir, then freeze the second about 1.5 to 2.5 tiles lower. Jump off of the sand to get to the left door."
+        "If entering from the sandfall above, come in at the far left of the transition, with either a spin-jump or i-frames, to avoid the Evir shot;",
+        "land on the right side of the pillar to the left, being careful to not bring left Evir on camera.",
+        "If coming from the right side of the room, then moonwalk on the center pillar to scroll the camera as far right as possible, to avoid getting hit by an Evir shot;",
+        "alternatively, jump slightly to the left and freeze the Evir, then return back to the center pillar before jumping across the sand.",
+        "Freeze the right Evir and jump onto it.",
+        "Quickly move left and fire an angle-down shot to freeze the left Evir before it descends too far.",
+        "Jump onto the left Evir, back up to the right side of it to maximize space to build momentum, and jump to the left onto the sand and then onto the ledge.",
+        "If Samus does not quite get enough height to make it onto the ledge, then break spin, turn around to the right, land on the sand again, and do a turnaround spin-jump to the left.",
+        "If the Evirs descend too far, it is possible to use a Power Bomb to bring them back up again, but caution is needed to avoid killing the first Evir, and it is difficult to avoid getting shot."
+      ],
+      "devNote": [
+        "This strat is still possible after falling through the sandpit after being centered by the toilet by landing towards the right, then crossing back left."
       ]
     },
     {
@@ -803,9 +943,11 @@
             "canWalljump",
             "HiJump",
             "canUseFrozenEnemies",
+            "canGravityJump",
             {"and": [
               "canTrickyJump",
-              "canSpringBallJumpMidAir"
+              "can4HighMidAirMorph",
+              "canTrickySpringBallJump"
             ]}
           ]}
         ]}
@@ -831,7 +973,7 @@
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canCarefulJump",
+        "canTrickyJump",
         "canTrickyUseFrozenEnemies",
         "canPlayInSand"
       ],
@@ -847,8 +989,9 @@
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canStationaryLateralMidAirMorph",
+        "canSpringFling",
         "canPlayInSand",
         {"or": [
           {"enemyDamage": {
@@ -874,12 +1017,10 @@
       "notable": true,
       "requires": [
         "canSuitlessMaridia",
-        "canTrickyJump",
         "canTrickyUseFrozenEnemies",
         "canPlayInSand",
-        "canSpringBallJumpMidAir",
-        "canStationaryLateralMidAirMorph",
-        "canCrouchJump"
+        "h_canMaxHeightSpringBallJump",
+        "canStationaryLateralMidAirMorph"
       ],
       "note": [
         "From the sand fall, quickly get onto the left platform to prevent the right side Evir from lowering too far.",

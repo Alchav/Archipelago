@@ -65,12 +65,9 @@
       "link": [1, 2],
       "name": "Base",
       "requires": [
-        "Morph",
         "Gravity",
-        {"or": [
-          "Bombs",
-          {"ammo": {"type": "PowerBomb", "count": 2}}
-        ]}
+        "h_canBombThings",
+        "h_additionalBomb"
       ]
     },
     {
@@ -100,20 +97,23 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           {"and": [
             "Gravity",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 2}}
-            ]}
+            "h_canArtificialMorphBombs"
+          ]},
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphPowerBomb",
+            "h_additionalBomb"
           ]}
         ]}
       ],
@@ -128,7 +128,7 @@
         {"or": [
           "canWalljump",
           "HiJump",
-          "canIBJ",
+          "h_canIBJ",
           "canGravityJump",
           "h_canSpringBallBombJump",
           "canSpringBallJumpMidAir",
@@ -159,7 +159,7 @@
         "canSuitlessMaridia",
         "HiJump",
         "canSpaceJumpWaterBounce",
-        "can3HighMidAirMorph"
+        "can4HighMidAirMorph"
       ],
       "note": "Space jump while partially submerged for more time to mid-air morph."
     },
@@ -187,14 +187,14 @@
         "canSpringBallJumpMidAir",
         "canSunkenTileWideWallClimb",
         "canTrickyJump",
-        "can3HighMidAirMorph",
+        "can4HighMidAirMorph",
         "canSpaceJumpWaterBounce"
       ],
       "note": [
         "Perform a canSunkenTileWideWallClimb to get to the water surface, then use space jump at the water surface.",
         "Then either use space jump when the water is low then a spring ball jump to escape, or space jump when the water is high into a tight midair morph."
       ],
-      "devNote": "The canSpringBallJumpMidAir is for the bottom left part of the room. The can3HighMidAirMorph is to represent the quick morph during the escape."
+      "devNote": "The canSpringBallJumpMidAir is for the bottom left part of the room. The can4HighMidAirMorph is to represent the quick morph during the escape."
     }
   ]
 }

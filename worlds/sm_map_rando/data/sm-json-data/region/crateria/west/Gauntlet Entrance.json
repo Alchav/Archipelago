@@ -193,6 +193,10 @@
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [], "useImplicitRequires": false}
+      ],
       "note": [
         "Place a Power Bomb near the door, then wait for the Waver to get into position to hit Samus through the transition.",
         "The Waver only moves while on camera, and needs to move around the region several times before being set up properly."
@@ -214,6 +218,7 @@
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "devNote": [
         "Freeing the Waver with a shinespark is not reliable, and depends on when and where the shinespark starts.",
         "Most of these strats kill the Wavers or set up situations where they can't reach the door."
@@ -223,24 +228,70 @@
       "link": [1, 2],
       "name": "Base",
       "requires": [
-        "ScrewAttack"
+        "ScrewAttack",
+        {"or": [
+          "canCarefulJump",
+          {"acidFrames": 15}
+        ]}
       ],
       "clearsObstacles": ["A"]
     },
     {
       "link": [1, 2],
-      "name": "Gauntlet Entrance with Bombs (Left to Right)",
+      "name": "Bombs",
       "requires": [
-        "h_canUseMorphBombs"
+        "h_canUseMorphBombs",
+        {"or": [
+          "canTrickyJump",
+          "Ice",
+          {"ammo": {"type": "Super", "count": 2}},
+          {"acidFrames": 100}
+        ]},
+        {"or": [
+          "canDodgeWhileShooting",
+          "Wave",
+          "Spazer",
+          {"enemyDamage": {
+            "enemy": "Waver",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]},
+        {"or": [
+          "canCarefulJump",
+          {"and": [
+            "h_canUseSpringBall",
+            {"acidFrames": 20}
+          ]},
+          {"and": [
+            "Gravity",
+            {"acidFrames": 20}
+          ]},
+          {"acidFrames": 60}
+        ]}
       ],
-      "clearsObstacles": ["A"]
+      "clearsObstacles": ["A"],
+      "devNote": "Yapping maw / Wavers / Center bomb blockade"
     },
     {
       "link": [1, 2],
-      "name": "Power Bomb Gauntlet Entrance (Left to Right)",
+      "name": "Power Bombs",
       "requires": [
         "Morph",
-        {"ammo": {"type": "PowerBomb", "count": 3}}
+        {"ammo": {"type": "PowerBomb", "count": 3}},
+        {"or": [
+          "canDodgeWhileShooting",
+          {"enemyDamage": {
+            "enemy": "Waver",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]},
+        {"or": [
+          "canCarefulJump",
+          {"ammo": {"type": "PowerBomb", "count": 1}},
+          {"acidFrames": 104}
+        ]}
       ],
       "clearsObstacles": ["A"]
     },
@@ -279,6 +330,7 @@
       },
       "requires": [
         "canShinechargeMovement",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 70}},
         {"or": [
           "Morph",
@@ -330,6 +382,7 @@
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "note": [
         "This is harder when crossing the room and easier if the right door can be used to reset the room, but it will cost one extra Power Bomb.",
         "One method is to place a Power Bomb near the first bomb wall, killing the first Waver, but keeping the second, global Waver.",
@@ -341,24 +394,65 @@
       "link": [2, 1],
       "name": "Base",
       "requires": [
-        "ScrewAttack"
+        "ScrewAttack",
+        {"or": [
+          "canCarefulJump",
+          {"acidFrames": 15}
+        ]},
+        {"or": [
+          "canCarefulJump",
+          "Ice",
+          {"ammo": {"type": "Super", "count": 1}},
+          {"acidFrames": 100}
+        ]}
       ],
       "clearsObstacles": ["A"]
     },
     {
       "link": [2, 1],
-      "name": "Gauntlet Entrance with Bombs (Right to Left)",
+      "name": "Bombs",
       "requires": [
-        "h_canUseMorphBombs"
+        "h_canUseMorphBombs",
+        {"or": [
+          "canDodgeWhileShooting",
+          "Ice",
+          {"ammo": {"type": "Super", "count": 2}},
+          {"acidFrames": 100}
+        ]},
+        {"or": [
+          "canTrickyJump",
+          "Wave",
+          {"enemyDamage": {
+            "enemy": "Waver",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]},
+        {"or": [
+          "canCarefulJump",
+          {"acidFrames": 30}
+        ]}
       ],
-      "clearsObstacles": ["A"]
+      "clearsObstacles": ["A"],
+      "devNote": "Yapping Maw / Waver / Left of Blockade Bomb Wall"
     },
     {
       "link": [2, 1],
-      "name": "Power Bomb Gauntlet Entrance (Right to Left)",
+      "name": "Power Bombs",
       "requires": [
         "Morph",
-        {"ammo": {"type": "PowerBomb", "count": 3}}
+        {"ammo": {"type": "PowerBomb", "count": 3}},
+        {"or": [
+          "canDodgeWhileShooting",
+          "Ice",
+          {"ammo": {"type": "Super", "count": 1}},
+          {"acidFrames": 100}
+        ]},
+        {"or": [
+          "canCarefulJump",
+          {"ammo": {"type": "PowerBomb", "count": 1}},
+          {"acidFrames": 20}
+        ]}
       ],
       "clearsObstacles": ["A"]
     },
@@ -416,6 +510,16 @@
     },
     {
       "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 1],
       "name": "G-Mode Setup - Get hit by Waver, Using Power Bombs",
       "notable": false,
       "requires": [
@@ -426,6 +530,7 @@
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "note": [
         "This is harder when crossing the room and easier if the left door can be used to reset the room, but it will cost one extra Power Bomb.",
         "Place a Power Bomb near the first and third bomb walls. One Waver will be alive by the fifth wall, which will only move while on camera.",
@@ -571,6 +676,7 @@
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "devNote": [
         "Freeing the Waver with a shinespark is not reliable, and depends on when and where the shinespark starts.",
         "Most of these strats kill the Wavers or set up situations where they can't reach the door."

@@ -61,9 +61,18 @@
   "strats": [
     {
       "link": [1, 1],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [1, 1],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 40, "excessFrames": 40}}
@@ -119,7 +128,8 @@
       "link": [1, 2],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "no"
       },
       "requires": [
         {"shinespark": {"frames": 40, "excessFrames": 6}}
@@ -141,6 +151,22 @@
           "openEnd": 1
         }
       }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway - Frozen Geemer",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "Plasma",
+        {"ammo": {"type": "Super", "count": 1}}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      },
+      "note": "Knock a Geemer off with a Super then follow it back to the top. Grey Geemers can only be frozen with Plasma."
     },
     {
       "link": [2, 2],

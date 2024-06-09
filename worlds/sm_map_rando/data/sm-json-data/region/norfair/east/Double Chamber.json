@@ -127,12 +127,14 @@
       "to": [
         {"id": 1},
         {"id": 2},
+        {"id": 4},
         {"id": 5}
       ]
     },
     {
       "from": 3,
       "to": [
+        {"id": 1},
         {"id": 3},
         {"id": 4},
         {"id": 5}
@@ -179,7 +181,6 @@
       "link": [1, 2],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 150}
       ]
     },
@@ -193,7 +194,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "canShinechargeMovement",
         {"heatFrames": 150}
       ],
@@ -201,13 +201,16 @@
         "leaveShinecharged": {
           "framesRemaining": 45
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [1, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 250}
       ],
       "clearsObstacles": ["A"]
@@ -217,7 +220,6 @@
       "name": "Double Chamber Walljump Climb Using the Kamer",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canPreciseWalljump",
         "canConsecutiveWalljump",
         "canUseEnemies",
@@ -256,7 +258,6 @@
       "name": "Double Chamber Walljump Climb Using the Kamer with HiJump",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         "canUseEnemies",
         "canWalljump",
@@ -278,7 +279,6 @@
       "link": [2, 1],
       "name": "Delayed Walljump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canDelayedWalljump",
         "canConsecutiveWalljump",
         "canTrickyJump",
@@ -297,33 +297,62 @@
       "link": [2, 1],
       "name": "Space Jump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
-        {"heatFrames": 300}
+        {"heatFrames": 200},
+        {"or": [
+          "canPrepareForNextRoom",
+          {"heatFrames": 100}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "HiJump Space Jump",
+      "requires": [
+        "HiJump",
+        "SpaceJump",
+        {"heatFrames": 120},
+        {"or": [
+          "canPrepareForNextRoom",
+          {"heatFrames": 70}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "HiJump Spring Ball Jump",
+      "requires": [
+        "HiJump",
+        "canSpringBallJumpMidAir",
+        {"heatFrames": 160}
       ]
     },
     {
       "link": [2, 1],
       "name": "IBJ",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canIBJ",
         {"heatFrames": 1450}
       ]
     },
     {
       "link": [2, 1],
-      "name": "Charge Shinespark",
+      "name": "Shinespark (In-Room)",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"canShineCharge": {
           "usedTiles": 28,
           "gentleUpTiles": 3,
           "gentleDownTiles": 3,
           "openEnd": 0
         }},
-        {"shinespark": {"frames": 27, "excessFrames": 4}},
-        {"heatFrames": 450}
+        {"or": [
+          {"shinespark": {"frames": 27, "excessFrames": 4}},
+          {"and": [
+            "canMidairShinespark",
+            {"shinespark": {"frames": 17, "excessFrames": 4}}
+          ]}
+        ]},
+        {"heatFrames": 380}
       ]
     },
     {
@@ -379,14 +408,13 @@
     },
     {
       "link": [2, 1],
-      "name": "Come in Charged",
+      "name": "Shinespark (Come in Charged)",
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 40
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         {"shinespark": {"frames": 27, "excessFrames": 4}},
         {"heatFrames": 200}
       ]
@@ -395,7 +423,6 @@
       "link": [2, 1],
       "name": "Speedjump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpeedBooster",
         "HiJump",
         {"heatFrames": 350}
@@ -404,9 +431,63 @@
     },
     {
       "link": [2, 1],
+      "name": "Tricky Dash Jump",
+      "requires": [
+        "canTrickyDashJump",
+        {"heatFrames": 450}
+      ],
+      "note": [
+        "Run under the second moving platform from the right to trigger it to move down.",
+        "Then run back to the left wall, run again to the right, and jump when on the center of the mound just to the right below the platform."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Cross Room HiJump Spring Ball Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 1,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canPrepareForNextRoom",
+        "canSpringBallJumpMidAir",
+        {"heatFrames": 120}
+
+      ],
+      "note": [
+        "Spin jump into the room with at least 1 tile of run speed.",
+        "Then perform a mid-air Spring Ball jump to reach the ledge above."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Cross Room Tricky Spring Ball Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 1,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "canPrepareForNextRoom",
+        "canLateralMidAirMorph",
+        "canTrickySpringBallJump",
+        "canTrickyJump",
+        {"heatFrames": 160}
+      ],
+      "note": [
+        "Spin jump into the room with at least 1 tile of run speed.",
+        "Perform a lateral mid-air morph into a spring ball jump.",
+        "Press against the left side of the first moving platform to gain enough height to get on top of it."
+      ]
+    },
+    {
+      "link": [2, 1],
       "name": "Leave Shinecharged",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canShinechargeMovementComplex",
         "HiJump",
         {"or": [
@@ -428,7 +509,12 @@
         "leaveShinecharged": {
           "framesRemaining": 30
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 240}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 100}]}
+      ]
     },
     {
       "link": [2, 2],
@@ -452,7 +538,6 @@
       "link": [2, 2],
       "name": "Leave Shinecharged",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canShinechargeMovement",
         {"heatFrames": 300},
         {"canShineCharge": {
@@ -469,12 +554,167 @@
       }
     },
     {
+      "link": [2, 4],
+      "name": "HiJump Speed Jump",
+      "requires": [
+        "HiJump",
+        "SpeedBooster",
+        {"heatFrames": 220}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "HiJump Space Jump",
+      "requires": [
+        "HiJump",
+        "SpaceJump",
+        {"heatFrames": 250}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Space Jump",
+      "requires": [
+        "SpaceJump",
+        {"heatFrames": 310}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "HiJump Wall Jump",
+      "requires": [
+        "HiJump",
+        "canWalljump",
+        "canTrickyJump",
+        {"heatFrames": 380}
+      ],
+      "note": "Run to the right, wait a moment for the platforms to come down, then wall jump off the second platform from the right."
+    },
+    {
+      "link": [2, 4],
+      "name": "HiJump Spring Ball Jump",
+      "requires": [
+        "HiJump",
+        "canSpringBallJumpMidAir",
+        {"heatFrames": 250}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Tricky Dash Jump",
+      "requires": [
+        "canTrickyDashJump",
+        {"heatFrames": 380}
+      ],
+      "note": [
+        "Run under the furthest right moving platform to trigger it to move down.",
+        "Then run back to the left wall, run again to the right, and jump when on the center of the mound just to the left below the platform.",
+        "Shoot straight up to open the gate on the way up."
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Tricky Dash Jump Wall Jump",
+      "requires": [
+        "canTrickyDashJump",
+        "canWalljump",
+        {"heatFrames": 300}
+      ],
+      "note": [
+        "Starting from the left wall, run to the right and when on the center of the mound just to the right of the second moving platform from the right.",
+        "Wall jump off of the platform as it moves down."
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Shinespark (In-Room)",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 28,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 3,
+          "openEnd": 0
+        }},
+        {"shinespark": {"frames": 24, "excessFrames": 8}},
+        {"heatFrames": 300},
+        {"or": [
+          "canHeroShot",
+          {"heatFrames": 100}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room HiJump Speed Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 4,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "HiJump",
+        {"heatFrames": 220}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room HiJump Wall Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 1,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "canPrepareForNextRoom",
+        "HiJump",
+        "canWalljump",
+        "canTrickyJump",
+        {"heatFrames": 260}
+      ],
+      "note": "Jump through the door transition, and wall jump off the second moving platform to get on top."
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Tricky Spring Ball Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 2,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "canPrepareForNextRoom",
+        "canLateralMidAirMorph",
+        "canTrickySpringBallJump",
+        "canTrickyJump",
+        {"heatFrames": 280}
+      ],
+      "note": [
+        "Spin jump into the room with at least 2 tiles of run speed.",
+        "Perform a lateral mid-air morph into a spring ball jump.",
+        "Land on the second moving platform."
+      ]
+    },
+    {
       "link": [2, 5],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Morph",
         {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 50}
       ]
     },
     {
@@ -500,7 +740,6 @@
       "name": "Double Chamber Shinespark through Wave Beam Door (Top Path)",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         {"or": [
           "SpaceJump",
@@ -538,6 +777,10 @@
       "note": [
         "Charge a spark along the bottom of Double Chamber and use it to spark through the right side door.",
         "Requires opening the door and shutter first."
+      ],
+      "devNote": [
+        "A hero shot variation of this strat might be possible, starting from a node to the left;",
+        "if nothing else it could be done with a shortcharge on the 12-tile platform to the left."
       ]
     },
     {
@@ -545,7 +788,6 @@
       "name": "Double Chamber Shinespark through Wave Beam Door (Through Crumbles)",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         "Morph",
         {"or": [
@@ -582,7 +824,6 @@
       "link": [3, 3],
       "name": "XMode with Walljump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
@@ -602,7 +843,6 @@
       "link": [3, 3],
       "name": "XMode with HiJump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
@@ -623,7 +863,6 @@
       "link": [3, 4],
       "name": "Grapple",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Grapple",
         {"heatFrames": 180}
       ]
@@ -632,27 +871,22 @@
       "link": [3, 4],
       "name": "Space Jump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
         {"heatFrames": 160}
       ]
     },
     {
       "link": [3, 4],
-      "name": "Double Chamber Spike IBJ",
+      "name": "Spike IBJ",
       "requires": [
-        "h_canNavigateHeatRooms",
-        "canIframeSpikeJump",
-        {"spikeHits": 1},
-        "h_canIBJ",
-        {"heatFrames": 1200}
+        "h_HeatedIBJFromSpikes",
+        {"heatFrames": 1100}
       ]
     },
     {
       "link": [3, 4],
       "name": "Double Chamber Spike SpringBall",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canIframeSpikeJump",
         {"spikeHits": 1},
         "canSpringBallJumpMidAir",
@@ -661,9 +895,24 @@
     },
     {
       "link": [3, 4],
+      "name": "SpringFling over the Spikes",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 4,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canSpringFling",
+        "canLateralMidAirMorph",
+        "canCarefulJump",
+        {"heatFrames": 120}
+      ]
+    },
+    {
+      "link": [3, 4],
       "name": "Double Chamber Spike HiJump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canIframeSpikeJump",
         {"spikeHits": 1},
         "canWalljump",
@@ -681,7 +930,7 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
+        "canHorizontalShinespark",
         {"heatFrames": 140},
         {"shinespark": {"frames": 45, "excessFrames": 14}}
       ]
@@ -693,7 +942,6 @@
         "comeInWithSpark": {}
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 140},
         {"shinespark": {"frames": 51, "excessFrames": 14}}
       ]
@@ -702,7 +950,6 @@
       "link": [3, 4],
       "name": "Double Chamber Spike Speedjump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canIframeSpikeJump",
         {"spikeHits": 1},
         "SpeedBooster",
@@ -715,7 +962,6 @@
       "name": "Hijumpless Double Chamber Spike Speedjump",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canIframeSpikeJump",
         {"spikeHits": 1},
         "SpeedBooster",
@@ -738,7 +984,6 @@
       "link": [3, 4],
       "name": "XMode Shinespark",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
@@ -780,7 +1025,6 @@
       "link": [3, 5],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 250}
       ]
     },
@@ -788,7 +1032,6 @@
       "link": [4, 1],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 250},
         {"or": [
           {"and": [
@@ -804,7 +1047,6 @@
       "link": [4, 1],
       "name": "Gate Glitch",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 250},
         "h_canHeatedBlueGateGlitch"
       ],
@@ -814,7 +1056,6 @@
       "link": [4, 3],
       "name": "Walljump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canWalljump",
         {"heatFrames": 300}
       ]
@@ -823,7 +1064,6 @@
       "link": [4, 3],
       "name": "Grapple",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Grapple",
         {"heatFrames": 180}
       ]
@@ -832,7 +1072,6 @@
       "link": [4, 3],
       "name": "Space Jump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
         {"heatFrames": 160}
       ]
@@ -841,7 +1080,6 @@
       "link": [4, 3],
       "name": "Walljump Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canWalljump",
         {"heatFrames": 280}
       ],
@@ -850,13 +1088,17 @@
           "length": 6,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [4, 3],
       "name": "Grapple Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Grapple",
         {"heatFrames": 160}
       ],
@@ -865,13 +1107,17 @@
           "length": 6,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [4, 3],
       "name": "Space Jump Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
         {"heatFrames": 140}
       ],
@@ -880,24 +1126,25 @@
           "length": 6,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [4, 3],
-      "name": "IBJ",
+      "name": "Spike IBJ",
       "requires": [
-        "h_canNavigateHeatRooms",
-        "canIframeSpikeJump",
-        {"spikeHits": 1},
-        "h_canJumpIntoIBJ",
-        {"heatFrames": 1200}
+        "h_HeatedIBJFromSpikes",
+        {"heatFrames": 1100}
       ]
     },
     {
       "link": [4, 3],
       "name": "MidAir SpringBall",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canIframeSpikeJump",
         {"spikeHits": 1},
         "canSpringBallJumpMidAir",
@@ -908,7 +1155,6 @@
       "link": [4, 3],
       "name": "Speedjump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canIframeSpikeJump",
         {"spikeHits": 1},
         "HiJump",
@@ -920,7 +1166,6 @@
       "link": [4, 3],
       "name": "XMode Shinespark",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
@@ -948,7 +1193,6 @@
       "link": [4, 5],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 160}
       ]
     },
@@ -956,7 +1200,6 @@
       "link": [5, 2],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Morph",
         {"heatFrames": 200}
       ]

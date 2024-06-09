@@ -59,16 +59,30 @@
       ]
     }
   ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Croc Escape Frozen Geruta Shinecharge",
+      "note": [
+        "Enter from the right door and spin jump onto the first ledge while barely landing on the ledge in order to prevent getting the Geruta on camera.",
+        "Walk against the left wall and jump to trigger the Geruta. It should now be moving leftwards.",
+        "Stand on the next platform against the right wall and shoot the Geruta to get it one shot away from being frozen.",
+        "After a few swoops, it will come down; either freeze it or tank a hit. Then go up and stand on the corner and freeze it when it is in position.",
+        "The Geruta will be stuck below and keep swooping, so if Energy permits, Samus will have several attempts."
+      ]
+    }
+  ],
   "links": [
     {
       "from": 1,
       "to": [
-        {"id": 1}
+        {"id": 1},
+        {"id": 3}
       ]
     },
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3}
       ]
@@ -102,6 +116,28 @@
       ]
     },
     {
+      "link": [1, 3],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 45}
+      ]
+    },
+    {
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -126,8 +162,39 @@
         "leaveShinecharged": {
           "framesRemaining": 15
         }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Croc Escape Frozen Geruta Shinecharge (Shinespark Out Right)",
+      "reusableRoomwideNotable": "Croc Escape Frozen Geruta Shinecharge",
+      "notable": true,
+      "entranceCondition": {
+        "comeInNormally": {}
       },
-      "devNote": "FIXME: A frozen Geruta can be used to extend the runway."
+      "requires": [
+        "h_canTrickyFrozenEnemyRunway",
+        "canCarefulJump",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovementTricky",
+        {"heatFrames": 1260},
+        {"shinespark": {"frames": 2, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter from the right door and spin jump onto the first ledge while barely landing on the ledge in order to prevent getting the Geruta on camera.",
+        "Walk against the left wall and jump to trigger the Geruta. It should now be moving leftwards.",
+        "Stand on the next platform against the right wall and shoot the Geruta to get it one shot away from being frozen.",
+        "After a few swoops, it will come down; either freeze it or tank a hit. Then go up and stand on the corner and freeze it when it is in position.",
+        "The Geruta will be stuck below and keep swooping, so if Energy permits, Samus will have several attempts.",
+        "Quickly shinecharge left to right, kill the Geruta and spark out the bottom right door."
+      ]
     },
     {
       "link": [2, 2],
@@ -140,7 +207,6 @@
       "link": [2, 3],
       "name": "Grapple",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Grapple",
         {"heatFrames": 600}
       ]
@@ -149,7 +215,6 @@
       "link": [2, 3],
       "name": "Space Jump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
         {"heatFrames": 600}
       ]
@@ -158,7 +223,6 @@
       "link": [2, 3],
       "name": "Speedjump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         "SpeedBooster",
         "canWalljump",
@@ -169,7 +233,6 @@
       "link": [2, 3],
       "name": "Croc Escape Jump IBJ",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canJumpIntoIBJ",
         {"heatFrames": 1650}
       ]
@@ -188,7 +251,6 @@
       "link": [2, 3],
       "name": "MidAir SpringBall",
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         "canSpringBallJumpMidAir",
         {"heatFrames": 600}
@@ -199,7 +261,6 @@
       "name": "Croc Escape SpringBall Bomb Boost",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canSpringBallJumpMidAir",
         "canUnmorphBombBoost",
         "h_canCrouchJumpDownGrab",
@@ -215,7 +276,6 @@
       "name": "Croc Escape SpringBall Freeze",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyUseFrozenEnemies",
         "canSpringBallJumpMidAir",
         {"heatFrames": 1600},
@@ -231,7 +291,6 @@
       "link": [2, 3],
       "name": "Croc Escape HiJump Freeze",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canUseFrozenEnemies",
         "HiJump",
         {"heatFrames": 1150}
@@ -243,7 +302,6 @@
       "name": "Croc Escape Ice Only Geruta Platforming",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyUseFrozenEnemies",
         "canCarefulJump",
         {"or": [
@@ -275,12 +333,12 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 70, "excessFrames": 12}},
         "canShinechargeMovementComplex",
         {"heatFrames": 330}
       ],
-      "note": "Watch out for the Geruda.  Running left before jumping to bring it on camera will make it swoop left."
+      "note": "Watch out for the Geruda. Running left before jumping to bring it on camera will make it swoop left."
     },
     {
       "link": [2, 3],
@@ -292,32 +350,65 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 70, "excessFrames": 12}},
         "canShinechargeMovementComplex",
         {"heatFrames": 330}
       ],
-      "note": "Watch out for the Geruda.  Running left before jumping to bring it on camera will make it swoop left."
+      "note": "Watch out for the Geruda. Running left before jumping to bring it on camera will make it swoop left."
     },
     {
       "link": [2, 3],
       "name": "Croc Escape Short Short Charge",
       "requires": [
-        "h_canNavigateHeatRooms",
+        "canHorizontalShinespark",
         {"canShineCharge": {
           "usedTiles": 15,
           "openEnd": 2
         }},
         {"shinespark": {"frames": 50}},
         {"heatFrames": 600}
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Croc Escape Frozen Geruta Shinecharge (Shinespark Left)",
+      "reusableRoomwideNotable": "Croc Escape Frozen Geruta Shinecharge",
+      "notable": true,
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
+      "requires": [
+        "h_canTrickyFrozenEnemyRunway",
+        "canCarefulJump",
+        "canHorizontalShinespark",
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        {"heatFrames": 1050},
+        {"or": [
+          {"shinespark": {"frames": 55, "excessFrames": 15}},
+          {"and": [
+            "h_heatProof",
+            "canMidairShinespark",
+            {"shinespark": {"frames": 32, "excessFrames": 15}}
+          ]}
+        ]}
       ],
-      "devNote": "FIXME: A frozen Geruta can be used to extend the runway."
+      "note": [
+        "Enter from the right door and spin jump onto the first ledge while barely landing on the ledge in order to prevent getting the Geruta on camera.",
+        "Walk against the left wall and jump to trigger the Geruta. It should now be moving leftwards.",
+        "Stand on the next platform against the right wall and shoot the Geruta to get it one shot away from being frozen.",
+        "After a few swoops, it will come down; either freeze it or tank a hit. Then go up and stand on the corner and freeze it when it is in position.",
+        "The Geruta will be stuck below and keep swooping, so if Energy permits, Samus will have several attempts.",
+        "With full heat protection, Samus can quickly shinecharge left to right then run and spark midair to the left to save Energy."
+      ]
     },
     {
       "link": [3, 1],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"ammo": {"type": "Super", "count": 1}},
         {"heatFrames": 180}
       ]
@@ -326,7 +417,6 @@
       "link": [3, 1],
       "name": "Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"ammo": {"type": "Super", "count": 1}},
         {"heatFrames": 160}
       ],
@@ -335,13 +425,17 @@
           "length": 17,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 70}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 120}]}
+      ]
     },
     {
       "link": [3, 2],
       "name": "Grapple",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Grapple",
         {"heatFrames": 500}
       ]
@@ -350,7 +444,6 @@
       "link": [3, 2],
       "name": "Space Jump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
         {"heatFrames": 500}
       ]
@@ -359,7 +452,6 @@
       "link": [3, 2],
       "name": "Speedjump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         "SpeedBooster",
         {"heatFrames": 500}
@@ -370,7 +462,6 @@
       "link": [3, 2],
       "name": "HiJump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "HiJump",
         "canWalljump",
         {"heatFrames": 600}
@@ -381,7 +472,6 @@
       "link": [3, 2],
       "name": "Morph",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Morph",
         {"heatFrames": 400}
       ]
@@ -390,7 +480,6 @@
       "link": [3, 2],
       "name": "Quick Lava Bath",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 350},
         {"or": [
           {"lavaFrames": 70},

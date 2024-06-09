@@ -31,29 +31,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019762",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Frozen Gammets",
-            "notable": false,
-            "requires": [
-              "h_heatProof",
-              "canUpwardGModeSetup",
-              "canTrickyUseFrozenEnemies",
-              "Morph"
-            ],
-            "note": [
-              "Freeze the stack of Gammets together a few times to try and raise them as high as possible.",
-              "Run with them to the door and freeze the top two such that Samus can stand on the lower and take damage from the higher Gammet when it unfreezes."
-            ],
-            "devNote": [
-              "Landing on the Gammet with an aim down, or spin, wasn't working.  So require Morph.",
-              "Would be notable but its a GMode strat."
-            ]
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 4,
@@ -74,7 +52,6 @@
           "name": "Crouch 3 tiles over Gamets",
           "cycleFrames": 165,
           "requires": [
-            "h_canNavigateHeatRooms",
             {"heatFrames": 165}
           ]
         },
@@ -82,7 +59,6 @@
           "name": "Lava Gamets down shots",
           "cycleFrames": 120,
           "requires": [
-            "h_canNavigateHeatRooms",
             {"heatFrames": 120},
             {"lavaFrames": 120}
           ],
@@ -111,6 +87,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3},
         {"id": 4}
@@ -139,9 +116,18 @@
       "link": [1, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 70}
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -165,7 +151,6 @@
       "link": [2, 3],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 80}
       ]
     },
@@ -173,7 +158,6 @@
       "link": [2, 3],
       "name": "In-Room Shortcharge",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           {"canShineCharge": {
             "usedTiles": 13,
@@ -194,7 +178,16 @@
         "leaveShinecharged": {
           "framesRemaining": 90
         }
-      }
+      },
+      "unlocksDoors": [
+        {"nodeId": 2, "types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"nodeId": 2, "types": ["super"], "requires": []},
+        {"nodeId": 2, "types": ["powerbomb"], "requires": [{"heatFrames": 110}]},
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ],
+      "devNote": "FIXME: One Power Bomb would open both doors."
     },
     {
       "link": [2, 3],
@@ -205,13 +198,63 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         {"shinespark": {"frames": 8}},
         {"heatFrames": 50}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "devNote": "FIXME: Missiles could unlock the door with more shinespark frames available."
+    },
+    {
+      "link": [2, 3],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 65
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"heatFrames": 65}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": "Break spin to trigger the transition early, or use a wall jump."
+    },
+    {
+      "link": [2, 3],
+      "name": "Carry Shinecharge (HiJump)",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 50
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canShinechargeMovementComplex",
+        {"heatFrames": 50}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 3],
@@ -223,26 +266,35 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 80}
       ],
       "exitCondition": {
         "leaveShinecharged": {
           "framesRemaining": 90
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "devNote": "FIXME: Missiles could unlock the door but would end with fewer shinespark frames available."
     },
     {
       "link": [2, 3],
       "name": "Leave With Door Frame Below",
       "requires": [
-        {"heatFrames": 80}
+        {"heatFrames": 65}
       ],
       "exitCondition": {
         "leaveWithDoorFrameBelow": {
           "height": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [2, 3],
@@ -256,16 +308,16 @@
           "leftPosition": -2,
           "rightPosition": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
     },
     {
       "link": [2, 3],
       "name": "Leave With Platform Below (Full Runway)",
       "requires": [
-        {"or": [
-          "canXRayTurnaround",
-          "canMoonwalk"
-        ]},
+        "h_canBackIntoCorner",
         {"heatFrames": 100}
       ],
       "exitCondition": {
@@ -275,6 +327,11 @@
           "rightPosition": 6
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ],
       "devNote": [
         "This includes time to moonwalk back against the right door, without shooting it open.",
         "An additional tile could be used by opening the right door but there is not yet any known application."
@@ -284,7 +341,6 @@
       "link": [2, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 210}
       ]
     },
@@ -292,8 +348,52 @@
       "link": [3, 2],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 55}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 50
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"heatFrames": 50}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Come in Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 30
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 10, "excessFrames": 0}},
+        {"heatFrames": 50}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ]
     },
     {
@@ -338,10 +438,31 @@
       "devNote": "An additional tile could be used by opening the right door but there is not yet any known application."
     },
     {
+      "link": [3, 3],
+      "name": "G-Mode Setup - Frozen Gammets",
+      "notable": false,
+      "requires": [
+        "h_heatProof",
+        "canUpwardGModeSetup",
+        "canTrickyUseFrozenEnemies",
+        "Morph"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Freeze the stack of Gammets together a few times to try and raise them as high as possible.",
+        "Run with them to the door and freeze the top two such that Samus can stand on the lower and take damage from the higher Gammet when it unfreezes."
+      ],
+      "devNote": [
+        "Landing on the Gammet with an aim down, or spin, wasn't working.  So require Morph.",
+        "Would be notable but its a GMode strat."
+      ]
+    },
+    {
       "link": [3, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 210}
       ]
     },
@@ -349,7 +470,6 @@
       "link": [4, 1],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 80}
       ]
     },
@@ -357,7 +477,6 @@
       "link": [4, 1],
       "name": "Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 10}
       ],
       "exitCondition": {
@@ -365,21 +484,25 @@
           "length": 14,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
     },
     {
       "link": [4, 2],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 210}
+      ],
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": []}
       ]
     },
     {
       "link": [4, 2],
       "name": "Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 155}
       ],
       "exitCondition": {
@@ -387,13 +510,17 @@
           "length": 14,
           "openEnd": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 40}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [4, 3],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 210}
       ]
     },
@@ -401,7 +528,6 @@
       "link": [4, 3],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 210}
       ]
     },
@@ -415,7 +541,12 @@
         "leaveWithDoorFrameBelow": {
           "height": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [4, 3],
@@ -429,7 +560,12 @@
           "leftPosition": -7.5,
           "rightPosition": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [4, 3],

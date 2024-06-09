@@ -65,7 +65,8 @@
           "length": 14,
           "openEnd": 0
         }
-      }
+      },
+      "unlocksDoors": [{"nodeId": 2, "types": ["ammo"], "requires": []}]
     },
     {
       "link": [1, 1],
@@ -81,6 +82,66 @@
     },
     {
       "link": [1, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 13,
+          "openEnd": 0
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 160
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        {"shinespark": {
+          "frames": 21
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 55
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [1, 2],
       "name": "Transition with Stored Fall Speed",
       "entranceCondition": {
         "comeInWithStoredFallSpeed": {
@@ -92,7 +153,11 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [1, 2],
@@ -107,12 +172,76 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 1],
       "name": "Base",
       "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 13,
+          "openEnd": 0
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 160
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        {"shinespark": {
+          "frames": 21
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 55
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 1],
@@ -127,7 +256,11 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 1
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 1],
@@ -142,7 +275,11 @@
         "leaveWithStoredFallSpeed": {
           "fallSpeedInTiles": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 2],
@@ -166,7 +303,8 @@
           "length": 14,
           "openEnd": 0
         }
-      }
+      },
+      "unlocksDoors": [{"nodeId": 1, "types": ["ammo"], "requires": []}]
     }
   ]
 }

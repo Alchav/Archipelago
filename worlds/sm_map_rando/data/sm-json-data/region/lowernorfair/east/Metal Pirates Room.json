@@ -16,24 +16,6 @@
       "nodeSubType": "grey",
       "nodeAddress": "0x0019a32",
       "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Metal Pirates Room Left Door (to Plowerhouse)",
-          "length": 0,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 100}
-              ],
-              "note": "Just using the open end of this 0-tile runway does take some maneuvering time."
-            }
-          ],
-          "openEnd": 1
-        }
-      ],
       "locks": [
         {
           "name": "Metal Pirates Grey Lock (to Plowerhouse)",
@@ -58,25 +40,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019a3e",
-      "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Metal Pirates Room Right Door (to Wasteland)",
-          "length": 0,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 100}
-              ],
-              "note": "Just using the open end of this 0-tile runway does take some maneuvering time."
-            }
-          ],
-          "openEnd": 1
-        }
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 3,
@@ -100,6 +64,15 @@
       "quantity": 2,
       "homeNodes": [3],
       "dropRequires": ["h_heatProof"]
+    }
+  ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Metal Pirates Speed Echoes Kill",
+      "note": [
+        "Use the Echoes created by shinesparking to defeat the Metal Pirates.",
+        "This involves Shineparking into a precise point while also turning the Pirates vulnerable as the echoes reach them."
+      ]
     }
   ],
   "links": [
@@ -130,6 +103,17 @@
   ],
   "devNote": "All kill heatframes have been lowered by 250 to adjust for the traversal requirement",
   "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
     {
       "link": [1, 1],
       "name": "Crystal Flash",
@@ -174,6 +158,17 @@
           "framesRemaining": 120
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 180}]
+        },
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 150}]
+        }
+      ],
       "note": "FIXME: Shorter runway shinecharges could be added from 3."
     },
     {
@@ -217,7 +212,29 @@
           "framesRemaining": 120
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 180}]
+        },
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 150}]
+        }
+      ],
       "note": "FIXME: Shorter runway shinecharges could be added from 3."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
     },
     {
       "link": [2, 2],
@@ -443,7 +460,8 @@
     },
     {
       "link": [3, 3],
-      "name": "Speed Echoes Kill",
+      "name": "Metal Pirates Speed Echoes Kill",
+      "notable": true,
       "requires": [
         "h_canNavigateHeatRooms",
         "canUseSpeedEchoes",
@@ -455,7 +473,12 @@
         }},
         {"shinespark": {"frames": 18}}
       ],
-      "clearsObstacles": ["A"]
+      "clearsObstacles": ["A"],
+      "reusableRoomwideNotable": "Metal Pirates Speed Echoes Kill",
+      "note": [
+        "Use the Echoes created by shinesparking to defeat the Metal Pirates.",
+        "This involves Shineparking into a precise point while also turning the Pirates vulnerable as the echoes reach them."
+      ]
     },
     {
       "link": [3, 3],
@@ -463,14 +486,25 @@
       "requires": [
         "h_heatProof",
         "canDodgeWhileShooting",
-        {"or": [
-          "Plasma",
-          {"and": [
-            "canUseSpeedEchoes",
-            "canHitbox"
-          ]}
-        ]},
+        "Plasma",
         {"refill": ["Energy", "Super"]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Metal Pirates Shinespark Farm",
+      "notable": true,
+      "requires": [
+        "h_heatProof",
+        "canDodgeWhileShooting",
+        "canUseSpeedEchoes",
+        "canHitbox",
+        {"refill": ["Energy", "Super"]}
+      ],
+      "reusableRoomwideNotable": "Metal Pirates Speed Echoes Kill",
+      "note": [
+        "Use the Echoes created by shinesparking to defeat the Metal Pirates.",
+        "This involves Shineparking into a precise point while also turning the Pirates vulnerable as the echoes reach them."
       ]
     }
   ]

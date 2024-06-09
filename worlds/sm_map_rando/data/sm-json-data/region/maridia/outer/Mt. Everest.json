@@ -14,24 +14,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a438",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Sciser - Long Lure",
-            "notable": false,
-            "requires": [
-              "Gravity",
-              "SpaceJump"
-            ],
-            "note": [
-              "Follow the crab from the bottom right door to the top left door. This takes approximately 90 seconds.",
-              "It is also possible to knock the crab off of the middle peak with a super and follow it to the left to save time."
-            ],
-            "devNote": "This could be done with many other sets of item combinations, but it would be very tedious for a g-mode setup."
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "water"}]
     },
     {
       "id": 2,
@@ -55,21 +38,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a468",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Sciser - Long Lure",
-            "notable": false,
-            "requires": [
-              "Gravity",
-              "SpaceJump"
-            ],
-            "note": "Follow the crab from the bottom right door to the top right door. This takes approximately 30 seconds.",
-            "devNote": "This could be done with many other sets of item combinations, but it would be very tedious for a g-mode setup."
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "water"}]
     },
     {
       "id": 5,
@@ -78,25 +47,7 @@
       "nodeSubType": "blue",
       "nodeAddress": "0x001a42c",
       "doorEnvironments": [{"physics": "water"}],
-      "spawnAt": 9,
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Frozen Sciser",
-            "notable": false,
-            "requires": [
-              "Gravity",
-              "canUpwardGModeSetup",
-              "SpaceJump",
-              "canTrickyUseFrozenEnemies",
-              {"or": [
-                "Morph",
-                "canTwoTileSqueeze"
-              ]}
-            ]
-          }
-        ]}
-      ]
+      "spawnAt": 9
     },
     {
       "id": 6,
@@ -105,187 +56,7 @@
       "nodeSubType": "passage",
       "nodeAddress": "0x001a45c",
       "doorEnvironments": [{"physics": "water"}],
-      "note": "It's not quite a door, but it is a morph passage transition to another room",
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Sciser",
-            "notable": false,
-            "requires": [
-              "h_EverestMorphTunnelExpanded"
-            ]
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          "h_EverestMorphTunnelExpanded",
-          {"enemyDamage": {
-            "enemy": "Sciser",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      },
-      "leaveWithGMode": [
-        {
-          "leavesWithArtificialMorph": true,
-          "strats": [
-            {
-              "name": "Carry G-Mode Morph Through Tunnel From Top Left",
-              "notable": false,
-              "requires": [
-                {"comeInWithGMode": {
-                  "fromNodes": [1],
-                  "artificialMorph": false,
-                  "mode": "any"
-                }},
-                "Morph",
-                {"or": [
-                  {"and": [
-                    "Gravity",
-                    {"or": [
-                      "HiJump",
-                      "canWalljump",
-                      "SpeedBooster",
-                      "h_canFly",
-                      "canSpringBallJumpMidAir",
-                      "h_canSpringBallBombJump"
-                    ]}
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "HiJump",
-                    "canSpringBallJumpMidAir"
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "canTrickyUseFrozenEnemies",
-                    "Grapple"
-                  ]}
-                ]}
-              ]
-            },
-            {
-              "name": "Carry G-Mode Morph Through Tunnel From Bottom Left",
-              "notable": false,
-              "requires": [
-                {"comeInWithGMode": {
-                  "fromNodes": [2],
-                  "artificialMorph": false,
-                  "mode": "any"
-                }},
-                "Morph",
-                {"or": [
-                  {"and": [
-                    "Gravity",
-                    {"or": [
-                      "HiJump",
-                      "canWalljump",
-                      "SpeedBooster",
-                      "h_canFly",
-                      "canSpringBallJumpMidAir",
-                      "h_canSpringBallBombJump"
-                    ]}
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "HiJump",
-                    "canSpringBallJumpMidAir"
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "canTrickyUseFrozenEnemies",
-                    "Grapple"
-                  ]}
-                ]}
-              ]
-            },
-            {
-              "name": "Carry G-Mode Morph Through Tunnel From Top Middle",
-              "notable": false,
-              "requires": [
-                {"comeInWithGMode": {
-                  "fromNodes": [5],
-                  "artificialMorph": false,
-                  "mode": "any"
-                }},
-                "Morph",
-                {"or": [
-                  {"and": [
-                    "canGravityJump",
-                    {"or": [
-                      "HiJump",
-                      "canTrickyJump",
-                      "canLateralMidAirMorph"
-                    ]}
-                  ]},
-                  {"and": [
-                    "Gravity",
-                    "HiJump",
-                    "SpeedBooster"
-                  ]},
-                  {"and": [
-                    "Gravity",
-                    "h_canFly"
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "Grapple",
-                    "HiJump",
-                    "canSpringBallJumpMidAir"
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "canTrickyUseFrozenEnemies",
-                    "Grapple"
-                  ]}
-                ]}
-              ]
-            },
-            {
-              "name": "Carry G-Mode Morph Through Tunnel From Top Right",
-              "notable": false,
-              "requires": [
-                {"comeInWithGMode": {
-                  "fromNodes": [4],
-                  "artificialMorph": false,
-                  "mode": "any"
-                }},
-                "Morph",
-                {"or": [
-                  "canGravityJump",
-                  {"and": [
-                    "Gravity",
-                    "canInsaneWalljump"
-                  ]},
-                  {"and": [
-                    "Gravity",
-                    "HiJump",
-                    "canTrickyDashJump",
-                    "canWalljump"
-                  ]},
-                  {"and": [
-                    "Gravity",
-                    "h_canFly"
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "Grapple",
-                    "HiJump",
-                    "canSpringBallJumpMidAir"
-                  ]},
-                  {"and": [
-                    "canSuitlessMaridia",
-                    "canTrickyUseFrozenEnemies",
-                    "Grapple"
-                  ]}
-                ]}
-              ]
-            }
-          ]
-        }
-      ]
+      "note": "It's not quite a door, but it is a morph passage transition to another room"
     },
     {
       "id": 7,
@@ -316,6 +87,13 @@
       "name": "Upper Left Ledge Junction",
       "nodeType": "junction",
       "nodeSubType": "junction"
+    },
+    {
+      "id": 12,
+      "name": "G-Mode Junction (In Morph Tunnel)",
+      "nodeType": "junction",
+      "nodeSubType": "g-mode",
+      "note": "Represents being in the morph tunnel with G-Mode and morph or artificial morph"
     }
   ],
   "obstacles": [
@@ -420,6 +198,13 @@
         "Climbing the right side of Mt. Everest with only one super and ice. (A trickier version than that used in 14% Icebooster)",
         "Requires only luring 2 crabs. Only one crab and no supers are useable for the second half of the climb."
       ]
+    },
+    {
+      "name": "Mt. Everest Top Left Shinecharge",
+      "note": [
+        "Gain a shinecharge on the ledge near the top-left door.",
+        "This is a very short runway, making it an exceptionally difficult short-charge."
+      ]
     }
   ],
   "links": [
@@ -428,7 +213,6 @@
       "to": [
         {"id": 1},
         {"id": 4, "note": "Shinespark direct link"},
-        {"id": 6},
         {
           "id": 9,
           "devNote": [
@@ -436,7 +220,8 @@
             "It is also possible to have a precise amount of energy to fall onto the blocks."
           ]
         },
-        {"id": 11}
+        {"id": 11},
+        {"id": 12}
       ]
     },
     {
@@ -447,13 +232,11 @@
           "note": "One-way link for shinesparking and crab climb."
         },
         {"id": 2},
-        {"id": 3},
         {
           "id": 4,
           "note": "One-way link for shinesparking"
         },
         {"id": 5},
-        {"id": 6},
         {"id": 7},
         {"id": 8},
         {
@@ -463,7 +246,8 @@
         {
           "id": 11,
           "devNote": "One-way link for superless crab climb and cross-room jump."
-        }
+        },
+        {"id": 12}
       ]
     },
     {
@@ -493,7 +277,6 @@
           "note": "This link is for shinespark and cross room jumps. All other strats should take other routes."
         },
         {"id": 4},
-        {"id": 6},
         {
           "id": 9,
           "devNote": [
@@ -502,7 +285,8 @@
           ]
         },
         {"id": 10},
-        {"id": 11}
+        {"id": 11},
+        {"id": 12}
       ]
     },
     {
@@ -510,20 +294,21 @@
       "to": [
         {"id": 1},
         {"id": 4},
-        {"id": 6},
-        {"id": 9}
+        {"id": 5},
+        {"id": 9},
+        {"id": 12}
       ]
     },
     {
       "from": 6,
       "to": [
-        {"id": 1},
         {"id": 2},
-        {"id": 3},
         {"id": 4},
         {"id": 6},
+        {"id": 7},
         {"id": 8},
-        {"id": 9}
+        {"id": 9},
+        {"id": 11}
       ]
     },
     {
@@ -581,8 +366,15 @@
           "id": 1,
           "devNote": "No Powamp grapple strat because that is covered by 11 -> 9 -> 1."
         },
+        {"id": 5},
         {"id": 8},
         {"id": 9}
+      ]
+    },
+    {
+      "from": 12,
+      "to": [
+        {"id": 6}
       ]
     }
   ],
@@ -600,9 +392,137 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Sciser - Long Lure",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "Gravity",
+        "canBePatient",
+        {"or": [
+          "SpaceJump",
+          {"and": [
+            {"ammo": {"type": "Super", "count": 1}},
+            {"or": [
+              "HiJump",
+              "canSpringBallJumpMidAir",
+              "canGravityJump",
+              "canConsecutiveWalljump",
+              "SpeedBooster"
+            ]}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Follow the crab from the bottom right door to the top left door. This takes approximately 90 seconds.",
+        "It is also possible to knock the crab off of the middle peak with a super and follow it to the left which may save time."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway - Frozen Sciser - Very Long Lure",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "Gravity",
+        "canBeVeryPatient",
+        {"or": [
+          "canGravityJump",
+          "canPreciseGrapple",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Follow the crab from the bottom right door to the top left door.",
+        "It is also possible to knock the crab off of the middle peak with a super and follow it."
+      ],
+      "devNote": [
+        "These strats take approximately 2 minutes each, but because it is just for a 1.5 tile runway extension, canBeVeryPatient was added.",
+        "This could be done with many other sets of item combinations, but it would be very tedious for a runway extension."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Sciser - Long Lure",
+      "notable": false,
+      "requires": [
+        "Gravity",
+        "canBePatient",
+        {"or": [
+          "SpaceJump",
+          {"and": [
+            {"ammo": {"type": "Super", "count": 1}},
+            {"or": [
+              "HiJump",
+              "canSpringBallJumpMidAir",
+              "canGravityJump",
+              "canConsecutiveWalljump",
+              "SpeedBooster"
+            ]}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Follow the crab from the bottom right door to the top left door. This takes approximately 90 seconds.",
+        "It is also possible to knock the crab off of the middle peak with a super and follow it to the left which may save time."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Sciser - Very Long Lure",
+      "notable": false,
+      "requires": [
+        "canBeVeryPatient",
+        {"or": [
+          "canGravityJump",
+          {"and": [
+            "canPreciseGrapple",
+            {"or": [
+              "HiJump",
+              "Gravity"
+            ]}
+          ]},
+          {"and": [
+            {"ammo": {"type": "Super", "count": 1}},
+            {"or": [
+              "canTrickyUseFrozenEnemies",
+              {"and": [
+                "HiJump",
+                "canSpringBallJumpMidAir"
+              ]}
+            ]}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Follow the crab from the bottom right door to the top left door with Gravity or Grapple.",
+        "It is also possible to knock the crab off of the middle peak with a super and follow it to the left with Ice or HiJump and Spring Ball."
+      ],
+      "devNote": [
+        "These strats take approximately 2 minutes each, but because it is just for a G-Mode Setup, canBeVeryPatient was added.",
+        "This could be done with many other sets of item combinations, but it would be very tedious for a g-mode setup."
       ]
     },
     {
@@ -636,43 +556,16 @@
     {
       "link": [1, 4],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ]
-    },
-    {
-      "link": [1, 6],
-      "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        {"or": [
-          "SpringBall",
-          {"and": [
-            "Gravity",
-            "h_canArtificialMorphIBJ"
-          ]},
-          {"and": [
-            "Gravity",
-            "h_canArtificialMorphBombHorizontally"
-          ]},
-          {"enemyDamage": {
-            "enemy": "Sciser",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]}
-      ],
-      "devNote": "This technically requires going through the trransition while in G-Mode, but that shouldn't cause a problem."
     },
     {
       "link": [1, 9],
@@ -694,6 +587,7 @@
       "requires": [
         "canSuitlessMaridia",
         "h_canCrouchJumpDownGrab",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 56, "excessFrames": 0}}
       ],
       "note": "Crouch on the lowest stair, then shinespark horizontally to bonk at the top corner of the grapple block. Down grab to get onto it.",
@@ -705,12 +599,13 @@
     {
       "link": [1, 9],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ]
@@ -721,12 +616,78 @@
       "requires": []
     },
     {
+      "link": [1, 12],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          "Morph",
+          "h_canArtificialMorphSpringBall",
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]},
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphBombHorizontally"
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Sciser",
+              "type": "contact",
+              "hits": 1
+            }},
+            {"or": [
+              "h_EverestMorphTunnelExpanded",
+              {"enemyDamage": {
+                "enemy": "Sciser",
+                "type": "contact",
+                "hits": 1
+              }}
+            ]}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [1, 12],
+      "name": "G-Mode Morph Suitless Bounce Into Tunnel",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickyJump",
+        {"or": [
+          "h_EverestMorphTunnelExpanded",
+          {"enemyDamage": {
+            "enemy": "Sciser",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]}
+      ],
+      "note": [
+        "Bounce from the right peak into the morph tunnel.",
+        "Samus can't bounce twice in a single fall, so start from the right ground, not the raised scaffolding by the door."
+      ]
+    },
+    {
       "link": [2, 1],
       "name": "Suitless Shinespark",
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 5
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
@@ -757,35 +718,12 @@
       ]
     },
     {
-      "link": [2, 1],
-      "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_canArtificialMorphIBJ",
-        "Gravity"
-      ]
-    },
-    {
-      "link": [2, 1],
-      "name": "G-Mode Morph SpringBall Bomb Jump",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
-        "h_canArtificialMorphSpringBallBombJump",
-        {"or": [
-          "Bombs",
-          {"ammo": {"type": "PowerBomb", "count": 2}}
-        ]}
-      ],
-      "note": "This requires three spring ball bomb jumps."
+      "link": [2, 2],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -823,33 +761,6 @@
       ]
     },
     {
-      "link": [2, 3],
-      "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_canArtificialMorphIBJ",
-        "Gravity"
-      ]
-    },
-    {
-      "link": [2, 3],
-      "name": "G-Mode Morph SpringBall Bomb Jump",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
-        "h_canArtificialMorphSpringBallBombJump"
-      ],
-      "note": "This requires one spring ball bomb jump."
-    },
-    {
       "link": [2, 4],
       "name": "Shinespark",
       "requires": [
@@ -865,12 +776,14 @@
     {
       "link": [2, 4],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ]
@@ -884,14 +797,15 @@
           "minHeight": 9,
           "maxHeight": 9,
           "maxLeftPosition": -38.5,
-          "minRightPosition": -2  
-        }
+          "minRightPosition": -2
+        },
+        "comesThroughToilet": "no"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
         "SpeedBooster",
         "HiJump",
-        "canTrickyJump"
+        "canInsaneJump"
       ],
       "note": [
         "Run and jump up through the door using SpeedBooster in the room below.",
@@ -913,38 +827,9 @@
       ],
       "devNote": [
         "This strat applies only with Post Crocomire Jump Room below.",
-        "In Crocomire's Room, the different platform height affects which vertical speeds are obtainable, and apparently none of them work."
+        "In Crocomire's Room, the different platform height affects which vertical speeds are obtainable, and apparently none of them work.",
+        "FIXME: Check if this strat works through Toilet (either from PCJR or Crocomire's Room)"
       ]
-    },
-    {
-      "link": [2, 6],
-      "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
-        {"or": [
-          "h_canArtificialMorphIBJ",
-          {"and": [
-            "SpringBall",
-            {"or": [
-              "canGravityJump",
-              "HiJump"
-            ]}
-          ]},
-          {"and": [
-            "h_canArtificialMorphSpringBallBombJump",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 1}}
-            ]}
-          ]}
-        ]}
-      ],
-      "devNote": "This technically requires going through the trransition while in G-Mode, but that shouldn't cause a problem."
     },
     {
       "link": [2, 7],
@@ -959,6 +844,26 @@
           "canSpringBallJumpMidAir",
           "h_canSpringBallBombJump"
         ]}
+      ]
+    },
+    {
+      "link": [2, 7],
+      "name": "Gravity Jump",
+      "requires": [
+        "canGravityJump"
+      ]
+    },
+    {
+      "link": [2, 7],
+      "name": "Tricky Crouch Jump Down Grab",
+      "requires": [
+        "Gravity",
+        "h_canCrouchJumpDownGrab",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Stand on higher ground on the right side and face left.",
+        "Crouch jump and immediately press left (almost simultaneously) to avoid bonking the ceiling."
       ]
     },
     {
@@ -1001,6 +906,19 @@
     },
     {
       "link": [2, 7],
+      "name": "Everest Crab HiJump Bomb-Grapple-Jump",
+      "notable": true,
+      "requires": [
+        "h_canNavigateUnderwater",
+        "HiJump",
+        "canBombGrappleJump"
+      ],
+      "note": [
+        "Jump into a mid-air morph, lay a Bomb, unmorph, use grapple to kill a Scisor, to be able to get a second jump mid-air."
+      ]
+    },
+    {
+      "link": [2, 7],
       "name": "Everest Double Crab Bomb-Grapple-Jump",
       "notable": true,
       "requires": [
@@ -1013,6 +931,37 @@
         "This gives a total of 3 jumps to climb from the bottom of Everest up to one of the lower peaks.",
         "In the likely event of failure, the room will need to be reset and the crabs repositioned for the next attempt."
       ]
+    },
+    {
+      "link": [2, 7],
+      "name": "G-Mode Morph IBJ",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "h_canArtificialMorphIBJ",
+        "Gravity"
+      ]
+    },
+    {
+      "link": [2, 7],
+      "name": "G-Mode Morph SpringBall Bomb Jump",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphSpringBallBombJump"
+      ],
+      "note": "This requires one spring ball bomb jump."
     },
     {
       "link": [2, 8],
@@ -1032,7 +981,8 @@
       "link": [2, 8],
       "name": "Cross Room Jump - HiJump Space Jump",
       "entranceCondition": {
-        "comeInWithSpaceJumpBelow": {}
+        "comeInWithSpaceJumpBelow": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1049,7 +999,8 @@
           "maxHeight": 7,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1067,7 +1018,8 @@
           "maxHeight": 9,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1084,7 +1036,8 @@
           "maxHeight": 10,
           "maxLeftPosition": -38.5,
           "minRightPosition": -7
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1101,7 +1054,8 @@
       "entranceCondition": {
         "comeInWithWallJumpBelow": {
           "minHeight": 2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater"
@@ -1116,7 +1070,8 @@
           "maxHeight": 9,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1135,7 +1090,8 @@
           "maxHeight": 10,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1151,7 +1107,8 @@
       "link": [2, 8],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 58, "excessFrames": 29}}
@@ -1179,7 +1136,8 @@
           "maxHeight": 10,
           "maxLeftPosition": -38.5,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1199,12 +1157,14 @@
     {
       "link": [2, 9],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ]
@@ -1227,13 +1187,34 @@
     },
     {
       "link": [2, 11],
+      "name": "Cross Room Jump - HiJump Wall Jump through Toilet",
+      "entranceCondition": {
+        "comeInWithWallJumpBelow": {
+          "minHeight": 2
+        },
+        "comesThroughToilet": "yes"
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "HiJump",
+        "canPreciseWalljump",
+        "canDownGrab"
+      ],
+      "note": [
+        "Wall jump from a high position on either side of the door frame, pass through the Toilet, and down-grab onto the ledge.",
+        "The Toilet affects Samus' vertical spawn position, making this jump possible."
+      ]
+    },
+    {
+      "link": [2, 11],
       "name": "Cross Room Jump - Tricky Dash Jump",
       "entranceCondition": {
         "comeInWithPlatformBelow": {
           "maxHeight": 6,
           "maxLeftPosition": 2.5,
           "minRightPosition": -2.5
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1251,7 +1232,8 @@
           "maxHeight": 10,
           "maxLeftPosition": -38.5,
           "minRightPosition": 0
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1266,17 +1248,56 @@
       "link": [2, 11],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 58, "excessFrames": 16}}
       ]
     },
     {
+      "link": [2, 12],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "Gravity",
+        {"or": [
+          "h_canArtificialMorphIBJ",
+          {"and": [
+            "h_canArtificialMorphSpringBall",
+            {"or": [
+              "canGravityJump",
+              "HiJump"
+            ]}
+          ]},
+          {"and": [
+            "h_canArtificialMorphSpringBallBombJump",
+            "h_additionalBomb"
+          ]}
+        ]}
+      ],
+      "devNote": "FIXME: Add strats to get here with Morph."
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
       "link": [3, 3],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 60, "excessFrames": 60}}
@@ -1298,7 +1319,8 @@
           "maxHeight": 10,
           "maxLeftPosition": -38.5,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1327,6 +1349,13 @@
           "h_canFly",
           "canSpringBallJumpMidAir"
         ]}
+      ]
+    },
+    {
+      "link": [3, 7],
+      "name": "Gravity Jump",
+      "requires": [
+        "canGravityJump"
       ]
     },
     {
@@ -1364,7 +1393,8 @@
       "link": [3, 7],
       "name": "Cross Room Jump - Space Jump",
       "entranceCondition": {
-        "comeInWithSpaceJumpBelow": {}
+        "comeInWithSpaceJumpBelow": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater"
@@ -1379,7 +1409,8 @@
           "maxHeight": 7,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater"
@@ -1394,7 +1425,8 @@
           "maxHeight": 10,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1412,7 +1444,8 @@
           "maxHeight": 10,
           "maxLeftPosition": -38.5,
           "minRightPosition": -7
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1436,7 +1469,8 @@
           "maxHeight": 9,
           "maxLeftPosition": -6,
           "minRightPosition": 2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1460,7 +1494,8 @@
           "maxHeight": 8,
           "maxLeftPosition": -2,
           "minRightPosition": 6
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1479,7 +1514,8 @@
       "entranceCondition": {
         "comeInWithWallJumpBelow": {
           "minHeight": 2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater"
@@ -1494,7 +1530,8 @@
           "maxHeight": 10,
           "maxLeftPosition": 2,
           "minRightPosition": -2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1508,7 +1545,8 @@
       "link": [3, 7],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 60, "excessFrames": 43}}
@@ -1520,7 +1558,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 5
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "Gravity",
@@ -1535,7 +1574,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 5
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
@@ -1548,7 +1588,8 @@
       "link": [3, 10],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 60, "excessFrames": 15}}
@@ -1560,12 +1601,14 @@
       "entranceCondition": {
         "comeInWithWallJumpBelow": {
           "minHeight": 2
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
         "HiJump",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump",
+        "canTrickyJump"
       ],
       "note": "Wall jump off either side of the door frame in the room below and Springball Jump at the height of the jump."
     },
@@ -1577,13 +1620,14 @@
           "maxHeight": 6,
           "maxLeftPosition": 2.5,
           "minRightPosition": -2.5
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
         "HiJump",
         "SpeedBooster",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump"
       ],
       "note": "Run and jump up through the door using HiJump and SpeedBooster in the room below and Springball Jump at the top of the jump."
     },
@@ -1595,13 +1639,15 @@
           "maxHeight": 7,
           "maxLeftPosition": 2.5,
           "minRightPosition": -2.5
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
         "HiJump",
         "SpeedBooster",
-        "canTrickySpringBallJump"
+        "canTrickySpringBallJump",
+        "canTrickyJump"
       ],
       "note": "Run and jump up through the door using HiJump and SpeedBooster in the room below and Springball Jump at the peak of the jump."
     },
@@ -1612,8 +1658,9 @@
         "comeInWithPlatformBelow": {
           "maxHeight": 10,
           "maxLeftPosition": -38.5,
-          "minRightPosition": -2  
-        }
+          "minRightPosition": -2
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canCrossRoomJumpIntoWater",
@@ -1654,6 +1701,7 @@
         }
       },
       "requires": [
+        "canInsaneJump",
         "canTrickyDashJump",
         "canSpringBallBounce",
         "canCrossRoomJumpIntoWater"
@@ -1665,34 +1713,13 @@
     },
     {
       "link": [4, 1],
-      "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_canArtificialMorphIBJ",
-        "Gravity"
-      ]
-    },
-    {
-      "link": [4, 1],
-      "name": "G-Mode Morph SpringBall Bomb Jump",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
-        "h_canArtificialMorphSpringBallBombJump",
-        {"or": [
-          "Bombs",
-          {"ammo": {"type": "PowerBomb", "count": 1}}
-        ]}
-      ],
-      "note": "This requires two spring ball bomb jumps."
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [4, 4],
@@ -1707,34 +1734,67 @@
     },
     {
       "link": [4, 4],
+      "name": "Leave With Runway - Frozen Sciser",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "Gravity",
+        {"or": [
+          "SpaceJump",
+          "canGravityJump",
+          "Grapple"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Follow the crab from the bottom right door to the top right door. Depending on the item setup, this takes 30-50 seconds.",
+        "Keep a half-tile gap between the crab and the runway in order to extend it as much as possible."
+      ],
+      "devNote": [
+        "This could be done with many other sets of item combinations, but it would be very tedious for a 1.5 tile runway extension."
+      ]
+    },
+    {
+      "link": [4, 4],
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
       ]
     },
     {
-      "link": [4, 6],
-      "name": "G-Mode Morph",
+      "link": [4, 4],
+      "name": "G-Mode Setup - Get Hit By Sciser - Lure From Bottom Right",
+      "notable": false,
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
         {"or": [
           {"and": [
-            "SpringBall",
+            "Gravity",
+            "SpaceJump"
+          ]},
+          "canGravityJump",
+          {"and": [
+            "Grapple",
             {"or": [
-              "canGravityJump",
-              "HiJump"
+              "HiJump",
+              "Gravity"
             ]}
           ]},
-          "h_canArtificialMorphIBJ",
-          "h_canArtificialMorphSpringBallBombJump"
+          "h_canDoubleSpringBallJumpWithHiJump"
         ]}
       ],
-      "devNote": "This technically requires going through the trransition while in G-Mode, but that shouldn't cause a problem."
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Follow the crab from the bottom right door to the top right door. Depending on the item setup, this takes 30-50 seconds."
+      ],
+      "devNote": [
+        "This could be done with many other sets of item combinations, but it would be very tedious for a g-mode setup."
+      ]
     },
     {
       "link": [4, 9],
@@ -1755,6 +1815,7 @@
         }
       },
       "requires": [
+        "canInsaneJump",
         "canTrickyDashJump",
         "canSpringBallBounce",
         "canCrossRoomJumpIntoWater"
@@ -1776,6 +1837,7 @@
       },
       "requires": [
         "HiJump",
+        "canInsaneJump",
         "canTrickyDashJump",
         "canSpringBallBounce",
         "canCrossRoomJumpIntoWater"
@@ -1788,12 +1850,13 @@
     {
       "link": [4, 9],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ]
@@ -1818,15 +1881,43 @@
       "devNote": "With enough energy, this goes all the way to 1, but with less it stops prematurely at 11."
     },
     {
+      "link": [4, 12],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "Gravity",
+        {"or": [
+          "Morph",
+          {"and": [
+            "h_canArtificialMorphSpringBall",
+            {"or": [
+              "canGravityJump",
+              "HiJump"
+            ]}
+          ]},
+          "h_canArtificialMorphIBJ",
+          "h_canArtificialMorphSpringBallBombJump"
+        ]}
+      ],
+      "devNote": "FIXME: Add strats to get here with Morph, suitless."
+    },
+    {
       "link": [5, 1],
       "name": "Suitless Shinespark",
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 90
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 61, "excessFrames": 10}}
       ],
       "devNote": "This could be done with Gravity to save Energy, but getting from 5 to 1 with Gravity and SpeedBooster is free."
@@ -1837,7 +1928,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 15
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
@@ -1853,7 +1945,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 55
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "Gravity",
@@ -1868,7 +1961,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 15
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "Gravity",
@@ -1884,7 +1978,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 90
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
@@ -1899,7 +1994,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 20
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
@@ -1912,27 +2008,72 @@
     {
       "link": [5, 4],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [5],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         "Gravity"
       ]
     },
     {
-      "link": [5, 6],
-      "name": "G-Mode Morph",
+      "link": [5, 5],
+      "name": "G-Mode Setup - Frozen Sciser",
+      "notable": false,
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [5],
-          "mode": "any",
-          "artificialMorph": true
-        }},
         {"or": [
-          "SpringBall",
+          {"and": [
+            "Gravity",
+            "SpaceJump"
+          ]},
+          {"and": [
+            "HiJump",
+            "canPreciseGrapple",
+            {"or": [
+              "Gravity",
+              "canSpringBallJumpMidAir"
+            ]}
+          ]},
+          {"and": [
+            "HiJump",
+            "canGravityJump",
+            "canBeVeryPatient"
+          ]}
+        ]},
+        "canUpwardGModeSetup",
+        "canTrickyUseFrozenEnemies",
+        {"or": [
+          "Morph",
+          "canTwoTileSqueeze"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [5, 9],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [5, 12],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        {"or": [
+          "Morph",
+          "h_canArtificialMorphSpringBall",
           {"and": [
             "Gravity",
             "h_canArtificialMorphIBJ"
@@ -1942,49 +2083,38 @@
             "h_canArtificialMorphBombHorizontally"
           ]}
         ]}
-      ],
-      "devNote": "This technically requires going through the trransition while in G-Mode, but that shouldn't cause a problem."
+      ]
     },
     {
-      "link": [5, 9],
-      "name": "Base",
-      "requires": []
-    },
-    {
-      "link": [6, 1],
-      "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
+      "link": [5, 12],
+      "name": "G-Mode Morph Suitless Bounce Into Tunnel",
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_EverestMorphTunnelExpanded",
-        "h_canArtificialMorphIBJ",
-        "Gravity"
-      ],
-      "note": "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab."
-    },
-    {
-      "link": [6, 1],
-      "name": "G-Mode Morph SpringBall Bomb Jump",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
-          "mode": "any",
-          "artificialMorph": true
+        "canSuitlessMaridia",
+        "canTrickyJump",
+        {"enemyDamage": {
+          "enemy": "Sciser",
+          "type": "contact",
+          "hits": 1
         }},
-        "h_EverestMorphTunnelExpanded",
-        "Gravity",
-        "h_canArtificialMorphSpringBallBombJump",
         {"or": [
-          "Bombs",
-          {"ammo": {"type": "PowerBomb", "count": 2}}
+          "h_EverestMorphTunnelExpanded",
+          {"enemyDamage": {
+            "enemy": "Sciser",
+            "type": "contact",
+            "hits": 1
+          }}
         ]}
       ],
       "note": [
-        "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab.",
-        "This requires three spring ball bomb jumps."
+        "Bounce from the right peak into the morph tunnel.",
+        "Samus can't bounce twice in a single fall, so come to a stop on the top platform or avoid it completely."
       ]
     },
     {
@@ -1995,14 +2125,15 @@
       ]
     },
     {
-      "link": [6, 3],
+      "link": [6, 4],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_EverestMorphTunnelExpanded",
         "h_canArtificialMorphIBJ",
         "Gravity"
@@ -2010,33 +2141,15 @@
       "note": "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab."
     },
     {
-      "link": [6, 3],
-      "name": "G-Mode Morph SpringBall Bomb Jump",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_EverestMorphTunnelExpanded",
-        "Gravity",
-        "h_canArtificialMorphSpringBallBombJump"
-      ],
-      "note": [
-        "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab.",
-        "This requires one spring ball bomb jump."
-      ]
-    },
-    {
       "link": [6, 4],
-      "name": "G-Mode Morph IBJ",
+      "name": "G-Mode Morph Indirect IBJ",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "indirect",
+          "morphed": true
+        }
+      },
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "h_EverestMorphTunnelExpanded",
         "h_canArtificialMorphIBJ",
         "Gravity"
       ],
@@ -2064,29 +2177,158 @@
       ]
     },
     {
-      "link": [6, 8],
-      "name": "Mt. Everest SpringBall out of Morph Tunnel",
-      "notable": true,
+      "link": [6, 6],
+      "name": "G-Mode Setup - Get Hit By Sciser",
+      "notable": false,
       "requires": [
-        "canTrickyJump",
+        "h_EverestMorphTunnelExpanded"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [6, 6],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        "h_EverestMorphTunnelExpanded",
+        {"enemyDamage": {
+          "enemy": "Sciser",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [6, 7],
+      "name": "G-Mode Morph IBJ or SpringBall Bomb Jump",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_EverestMorphTunnelExpanded",
+        "Gravity",
+        {"or": [
+          "h_canArtificialMorphIBJ",
+          "h_canArtificialMorphSpringBallBombJump"
+        ]}
+      ],
+      "note": "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab."
+    },
+    {
+      "link": [6, 7],
+      "name": "G-Mode Morph Indirect IBJ or SpringBall Bomb Jump",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "indirect",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "Gravity",
+        {"or": [
+          "h_canArtificialMorphIBJ",
+          "h_canArtificialMorphSpringBallBombJump"
+        ]}
+      ],
+      "note": "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab."
+    },
+    {
+      "link": [6, 8],
+      "name": "SpringBall out of Morph Tunnel",
+      "requires": [
+        "canInsaneJump",
         "h_canUseSpringBall"
+      ],
+      "note": "Jump using Springball with the right timing leaving the Morph tunnel to avoid falling."
+    },
+    {
+      "link": [6, 8],
+      "name": "SpringBall out of Morph Tunnel (Artificial Morph)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_EverestMorphTunnelExpanded",
+        "canInsaneJump",
+        "h_canArtificialMorphSpringBall"
+      ],
+      "note": "Jump using Springball with the right timing leaving the Morph tunnel to avoid falling."
+    },
+    {
+      "link": [6, 8],
+      "name": "SpringBall out of Morph Tunnel (Artificial Morph, Indirect)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "indirect",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canInsaneJump",
+        "h_canArtificialMorphSpringBall"
       ],
       "note": "Jump using Springball with the right timing leaving the Morph tunnel to avoid falling."
     },
     {
       "link": [6, 9],
       "name": "G-Mode Morph IBJ",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_EverestMorphTunnelExpanded",
         "h_canArtificialMorphIBJ",
         "Gravity"
       ],
       "note": "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab."
+    },
+    {
+      "link": [6, 9],
+      "name": "G-Mode Morph Indirect IBJ",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "indirect",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphIBJ",
+        "Gravity"
+      ],
+      "note": "After entering the room, quickly leave the morph tunnel in order to prevent getting hit by the crab."
+    },
+    {
+      "link": [6, 11],
+      "name": "Shinespark Deep Transition X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithSpark": {
+          "position": "top"
+        }
+      },
+      "requires": [
+        "canDeepTransition",
+        {"shinespark": {"frames": 2, "excessFrames": 2}},
+        "canXRayClimb"
+      ],
+      "note": [
+        "Perform a horizontal shinespark through the top of the door transition, from a horizontal position that triggers a deep door transition.",
+        "Sparking from one or two pixels away from the door is an example position that works (if possible in the neighboring room).",
+        "If successful, after the shinespark crash animation ends Samus should be standing inside the wall and be able to X-Ray climb."
+      ],
+      "devNote": [
+        "If the morph tunnel is not expanded, then a deep transition is not necessary; any horizontal shinespark in top position would work."
+      ]
     },
     {
       "link": [7, 2],
@@ -2128,7 +2370,14 @@
         "canSuitlessMaridia",
         {"or": [
           "HiJump",
-          "canSpringBallJumpMidAir"
+          {"and": [
+            "canTrickySpringBallJump",
+            {"or": [
+              "canCrouchJump",
+              "canSpringFling",
+              "canStationaryLateralMidAirMorph"
+            ]}
+          ]}
         ]}
       ]
     },
@@ -2199,7 +2448,7 @@
     },
     {
       "link": [7, 10],
-      "name": "CanFly",
+      "name": "Base",
       "requires": [
         "Gravity",
         "h_canFly"
@@ -2228,7 +2477,7 @@
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canTrickyUseFrozenEnemies"
       ],
       "clearsObstacles": ["A", "B"],
@@ -2243,8 +2492,7 @@
       "name": "Double Spring Ball Jump",
       "requires": [
         "canSuitlessMaridia",
-        "HiJump",
-        "canDoubleSpringBallJumpMidAir"
+        "h_canDoubleSpringBallJumpWithHiJump"
       ],
       "clearsObstacles": ["A", "B"],
       "note": "Start the springball jumps from the highest ledge on the wall.",
@@ -2273,7 +2521,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canCrazyCrabClimb",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         {"ammo": {"type": "Super", "count": 1}}
       ],
       "clearsObstacles": ["A", "B"],
@@ -2357,7 +2605,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canCrazyCrabClimb",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canTrickyJump",
         "canCameraManip"
       ],
@@ -2506,6 +2754,9 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
       "devNote": [
         "Implicitly drops down to 2 first.",
         "There is no link directly from 2 to 5 because the door must be opened first.",
@@ -2554,6 +2805,25 @@
           "framesRemaining": 30
         }
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": [
+          {"or": [
+            "Grapple",
+            {"shinespark": {"frames": 59}},
+            {"and": [
+              "HiJump",
+              "canSpringBallJumpMidAir"
+            ]},
+            {"and": [
+              "HiJump",
+              "canTrickyDashJump",
+              "canWalljump"
+            ]},
+            "canGravityJump"
+          ]}
+        ]}
+      ],
       "note": [
         "Charge on the upper right ledge, and store the spark as Samus walks off the ledge to drop down onto the door.",
         "Opening the door first and moonfalling can help but is not required."
@@ -2638,13 +2908,16 @@
       "requires": [
         "canSuitlessMaridia",
         "canPreciseGrapple",
-        "canCrouchJump"
+        {"or": [
+          "canCrouchJump",
+          "canTrickyJump"
+        ]}
       ],
       "note": [
         "Crouch at the edge of the overhang. Jump and just after the peak of the jump, grapple to the grapple blocks.",
-        "This strat is finicky, and failure doesn't usually allow a second try (assuming the Powamp is not there)."
-      ],
-      "devNote": "This is possible to do without a crouch jump, but it is much harder."
+        "This strat is finicky, and failure doesn't usually allow a second try (assuming the Powamp is not there).",
+        "This is possible to do without a crouch jump, but it is much harder."
+      ]
     },
     {
       "link": [10, 4],
@@ -2662,7 +2935,7 @@
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canFlatleyJump"
       ],
       "note": "Start the jump from the higher ground to the left, specifically the right side of the second highest region."
@@ -2675,20 +2948,21 @@
         "HiJump",
         "canSpringBallJumpMidAir",
         "canTrickyUseFrozenEnemies",
-        {"obstaclesCleared": ["B"]}
+        {"obstaclesCleared": ["B"]},
+        "canTrickyJump"
       ],
       "note": [
         "Requires having already lured a crab, likely from above the bottom right door.",
         "Freeze the crab midway up the right wall and jump and spring ball jump up to the door."
-      ]
+      ],
+      "devNote": "The canTrickyJump is used to indicate the trickiness of bringing a crab from below."
     },
     {
       "link": [10, 4],
       "name": "Double Spring Ball Jump",
       "requires": [
         "canSuitlessMaridia",
-        "HiJump",
-        "canDoubleSpringBallJumpMidAir"
+        "h_canDoubleSpringBallJumpWithHiJump"
       ]
     },
     {
@@ -2699,20 +2973,22 @@
         "HiJump",
         "canTrickyUseFrozenEnemies",
         {"ammo": {"type": "Super", "count": 1}},
-        {"obstaclesCleared": ["A"]}
+        {"obstaclesCleared": ["A"]},
+        "canTrickyJump"
       ],
       "note": [
         "Climbing the right side of Mt. Everest with only two supers, ice, and HiJump.",
         "Requires originally luring 3 crabs. Two crabs and one super are needed from this location.",
         "Use a super to knock off and freeze a crab midair. Jump on it and freeze the second as a platform to jump up to the door."
-      ]
+      ],
+      "devNote": "The canTrickyJump is used to indicate the trickiness of bringing the crabs from below."
     },
     {
       "link": [10, 4],
       "name": "Mt. Everest Right Top Half Crab Climb with Supers and Spring Ball",
       "requires": [
         "canSuitlessMaridia",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canCrazyCrabClimb",
         {"ammo": {"type": "Super", "count": 1}},
         {"obstaclesCleared": ["A"]}
@@ -2791,7 +3067,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canCrazyCrabClimb",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canTrickyJump",
         "canCameraManip",
         {"obstaclesCleared": ["B"]}
@@ -2803,6 +3079,75 @@
         "Freeze the crab again to use as a platform, approximately knee high. Jump on it and then jump to the platform above.",
         "Note: The hardest part of this climb is the pixel precision when jumping around a ledge.",
         "Too many pixels: left is a fall, right you clip through the crab, low you miss the jump and fall, high is a bonk or crab clip."
+      ]
+    },
+    {
+      "link": [10, 4],
+      "name": "Leave With Spark",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "SpaceJump",
+          "canGravityJump",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canWalljump",
+              "canTrickyDashJump"
+            ]}
+          ]}
+        ]},
+        {"canShineCharge": {
+          "usedTiles": 20,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 1,
+          "steepUpTiles": 1,
+          "openEnd": 0
+        }},
+        "canShinechargeMovementComplex",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 8}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Run right-to-left to gain a shinecharge on the upper right ledge.",
+        "Use a gravity jump, Space Jump, or HiJump to approach the door above and spark out."
+      ],
+      "devNote": [
+        "With some of these methods it is technically possible (but harder) to reach the door transition with a few frames remaining."
+      ]
+    },
+    {
+      "link": [10, 4],
+      "name": "Leave Shinecharged (HiJump SpaceJump)",
+      "requires": [
+        "Gravity",
+        "HiJump",
+        "SpaceJump",
+        {"canShineCharge": {
+          "usedTiles": 20,
+          "gentleUpTiles": 3,
+          "gentleDownTiles": 1,
+          "steepUpTiles": 1,
+          "openEnd": 0
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 45
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Run right-to-left to gain a shinecharge on the upper right ledge."
       ]
     },
     {
@@ -2826,6 +3171,91 @@
           "HiJump",
           "canSpringBallJumpMidAir"
         ]}
+      ]
+    },
+    {
+      "link": [11, 1],
+      "name": "Mt. Everest Top Left Shinecharge (to Top Left)",
+      "reusableRoomwideNotable": "Mt. Everest Top Left Shinecharge",
+      "notable": true,
+      "requires": [
+        "Gravity",
+        {"canShineCharge": {
+          "usedTiles": 11,
+          "steepUpTiles": 5,
+          "openEnd": 2
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 30
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Run right-to-left to gain a shinecharge on the ledge near the top-left door, and perform tight ledge-grabs to make it through the door with shinecharge frames remaining.",
+        "This is a very short runway, making it an exceptionally difficult short-charge."
+      ]
+    },
+    {
+      "link": [11, 5],
+      "name": "Mt. Everest Top Left Shinecharge (to Top Center)",
+      "reusableRoomwideNotable": "Mt. Everest Top Left Shinecharge",
+      "notable": true,
+      "requires": [
+        "Gravity",
+        "SpaceJump",
+        "canTrickyDashJump",
+        {"canShineCharge": {
+          "usedTiles": 11,
+          "steepUpTiles": 5,
+          "openEnd": 2
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 15
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Run right-to-left to gain a shinecharge on the ledge near the top-left door, and Space Jump to the top center door with shinecharge frames remaining.",
+        "This is a very short runway, making it an exceptionally difficult short-charge."
+      ]
+    },
+    {
+      "link": [11, 5],
+      "name": "Mt. Everest Top Left Shinecharge (to Top Center, with HiJump)",
+      "reusableRoomwideNotable": "Mt. Everest Top Left Shinecharge",
+      "notable": true,
+      "requires": [
+        "Gravity",
+        "HiJump",
+        "SpaceJump",
+        {"canShineCharge": {
+          "usedTiles": 11,
+          "steepUpTiles": 5,
+          "openEnd": 2
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 40
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Run right-to-left to gain a shinecharge on the ledge near the top-left door, and Space Jump to the top center door with shinecharge frames remaining.",
+        "This is a very short runway, making it an exceptionally difficult short-charge."
       ]
     },
     {
@@ -2865,10 +3295,25 @@
       "name": "Double Spring Ball Jump",
       "requires": [
         "canSuitlessMaridia",
-        "HiJump",
-        "canDoubleSpringBallJumpMidAir"
+        "h_canDoubleSpringBallJumpWithHiJump"
       ],
       "note": "Start the spring ball jumps from the bottom of the slope."
+    },
+    {
+      "link": [12, 6],
+      "name": "Base",
+      "requires": [],
+      "devNote": "This technically requires h_EverestMorphTunnelExpanded or going through the transition while in G-Mode, but that shouldn't cause a problem."
+    },
+    {
+      "link": [12, 6],
+      "name": "Carry G-Mode Through the Tunnel",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": true
+        }
+      }
     }
   ],
   "devNote": [

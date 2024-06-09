@@ -169,6 +169,7 @@
       },
       "requires": [
         "Gravity",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 76, "excessFrames": 4}}
       ]
     },
@@ -255,7 +256,7 @@
           "canSandIBJ",
           {"and": [
             "HiJump",
-            "can3HighMidAirMorph"
+            "can4HighMidAirMorph"
           ]}
         ]}
       ],
@@ -327,6 +328,31 @@
         "With any longer of a runway, the jump is much less precise."
       ],
       "devNote": "This is not technically a canCrossRoomJumpIntoWater, but it is used here because of the way the momentum changes as Samus enters the water."
+    },
+    {
+      "link": [1, 5],
+      "name": "West Sand Hall Spring Fling with Momentum",
+      "notable": true,
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canPlayInSand",
+        "canLateralMidAirMorph",
+        "canTrickySpringBallJump",
+        "canSpringFling"
+      ],
+      "note": [
+        "Enter with at least 1 tile of run speed from an air room, with Speedbooster unequipped.",
+        "Jump from near the end of the runway (though a jump from 1-2 tiles away from the end can still work).",
+        "Press pause while crossing the narrow first sandfall, then perform a lateral mid-air morph after exiting the sandfall.",
+        "Equip both Spring Ball and Speed Booster, and perform a mid-air Spring Ball jump at somewhere close to the maximum height.",
+        "Unequip Spring Ball while descending through the wide second sidefall."
+      ]
     },
     {
       "link": [1, 5],
@@ -410,6 +436,7 @@
       },
       "requires": [
         "Gravity",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 76, "excessFrames": 4}}
       ]
     },
@@ -451,6 +478,16 @@
         "h_canNavigateUnderwater",
         "canCarefulJump"
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -557,7 +594,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canNavigateUnderwater",
@@ -585,7 +623,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "h_canNavigateUnderwater"
@@ -612,10 +651,14 @@
         {"or": [
           "Gravity",
           "HiJump",
-          "canSandfallBounce"
+          "canInsaneJump"
         ]}
       ],
-      "note": "Enter on the right side of the transition and move left to avoid damage."
+      "note": "Enter on the right side of the transition and move left to avoid damage.",
+      "devNote": [
+        "Entering from a non-sand room makes the suitless+hijumpless dodge only possible with a walljump.",
+        "Entering through the Toilet does not affect this dodge strat much."
+      ]
     },
     {
       "link": [4, 2],
@@ -669,9 +712,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canPlayInSand",
-        "canTrickyJump",
-        "canCrouchJump",
-        "canTrickySpringBallJump",
+        "h_canMaxHeightSpringBallJump",
         "canStationaryLateralMidAirMorph",
         {"or": [
           {"enemyKill": {
@@ -771,10 +812,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canPlayInSand",
-        "canTrickyJump",
-        "canCrouchJump",
-        "canTrickySpringBallJump",
-        "canStationaryLateralMidAirMorph",
+        "h_canMaxHeightSpringBallJump",
         {"or": [
           {"enemyKill": {
             "enemies": [["Evir"]],
@@ -822,7 +860,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canPlayInSand",
-        "canTrickyJump",
+        "canInsaneJump",
         "canCrouchJump",
         "canNeutralDamageBoost",
         {"enemyDamage": {
@@ -923,9 +961,7 @@
       "requires": [
         "canSuitlessMaridia",
         "canPlayInSand",
-        "canTrickyJump",
-        "canCrouchJump",
-        "canTrickySpringBallJump",
+        "h_canMaxHeightSpringBallJump",
         "canStationaryLateralMidAirMorph"
       ],
       "reusableRoomwideNotable": "West Sand Hall Suitless Bootless Spring Ball",

@@ -44,7 +44,7 @@
   "obstacles": [
     {
       "id": "A",
-      "name": "G-Mode Morph: Remote Acquire the item",
+      "name": "G-Mode Morph - Remote Acquire the item",
       "obstacleType": "abstract"
     }
   ],
@@ -107,25 +107,26 @@
     {
       "link": [1, 3],
       "name": "G-mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }}
-      ]
+          "morphed": true
+        }
+      },
+      "requires": []
     },
     {
       "link": [1, 3],
       "name": "G-mode Morph Remote Acquire",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "direct",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           {"and": [
             "h_canArtificialMorphIBJ",
             "canOffScreenMovement"
@@ -159,7 +160,7 @@
         "canTrickyJump",
         {"or": [
           "canTemporaryBlue",
-          "SpringBall"
+          "h_canUseSpringBall"
         ]}
       ],
       "note": [

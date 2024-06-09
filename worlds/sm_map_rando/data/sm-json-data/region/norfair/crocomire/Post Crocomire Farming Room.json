@@ -146,6 +146,32 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Gamet",
+      "requires": [
+        "SpaceJump",
+        {"or": [
+          "h_canTrickyFrozenEnemyRunway",
+          {"and": [
+            "h_canFrozenEnemyRunway",
+            "Morph"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Lure the Gamets up; it may be helpful to freeze them on the ascent to prevent them from separating and moving horizontally.",
+        "Freeze a Gamet at the correct height, and then use it as a platform to reach the door.",
+        "Positioning is much easier with Morph; simply morph on any of the stairs before they start separating.",
+        "Finally, freeze a Gamet while there is a half-tile gap between it and the runway in order to extend it as much as possible."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
         "h_canCrystalFlash"
@@ -170,6 +196,7 @@
         }
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 29, "excessFrames": 5}}
       ]
     },
@@ -189,7 +216,11 @@
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [1, 5],
@@ -200,12 +231,21 @@
       "link": [2, 1],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "no"
       },
       "requires": [
         {"shinespark": {"frames": 25, "excessFrames": 5}}
       ],
       "note": "Enter on the far right side of the doorway to reach the ledge above."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -230,7 +270,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 10
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 25}}
@@ -245,7 +286,8 @@
       "link": [2, 5],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 15, "excessFrames": 15}}
@@ -301,7 +343,11 @@
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [3, 1],
@@ -323,6 +369,10 @@
           "framesRemaining": 20
         }
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
       "note": "Kill the Gamets with SpeedBooster and then jump directly up to the top left door."
     },
     {
@@ -341,6 +391,10 @@
           "framesRemaining": 120
         }
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
       "devNote": "The Gamets are killed with SpeedBooster"
     },
     {
@@ -363,6 +417,10 @@
           "framesRemaining": 120
         }
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
       "devNote": "The Gamets are killed with SpeedBooster"
     },
     {
@@ -416,7 +474,11 @@
         "leaveShinecharged": {
           "framesRemaining": 15
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [3, 4],
@@ -436,7 +498,11 @@
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [3, 4],
@@ -456,7 +522,11 @@
         "leaveShinecharged": {
           "framesRemaining": 45
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [3, 4],
@@ -480,6 +550,10 @@
           "framesRemaining": 15
         }
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
       "note": "Shoot the Gamets while entering the room for more runway."
     },
     {
@@ -553,6 +627,7 @@
         }
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 29, "excessFrames": 5}}
       ]
     },
@@ -572,7 +647,11 @@
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [4, 4],
@@ -584,6 +663,31 @@
           "openEnd": 1
         }
       }
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Runway - Frozen Gamet",
+      "requires": [
+        {"or": [
+          "h_canTrickyFrozenEnemyRunway",
+          {"and": [
+            "h_canFrozenEnemyRunway",
+            "Morph"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Lure the Gamets up; it may be helpful to freeze them on the ascent to prevent them from separating and moving horizontally.",
+        "At the top, freeze a Gamet while there is a half-tile gap between it and the runway in order to extend it as much as possible.",
+        "Positioning is much easier with Morph; simply morph on any of the stairs before they start separating.",
+        "Freezing one or two Gamets after they separate but before they start moving can help with dodging and avoiding damage."
+      ]
     },
     {
       "link": [4, 5],
@@ -670,6 +774,9 @@
           ]}
         ]},
         {"shinespark": {"frames": 25, "excessFrames": 5}}
+      ],
+      "unlocksDoors": [
+        {"nodeId": 3, "types": ["ammo"], "requires": []}
       ]
     },
     {
@@ -724,6 +831,10 @@
           "framesRemaining": 10
         }
       },
+      "unlocksDoors": [
+        {"nodeId": 3, "types": ["ammo"], "requires": []},
+        {"types": ["ammo"], "requires": []}
+      ],
       "note": "Shortcharge to the right and then jump from below the floating platform to reach the top left door."
     },
     {
@@ -757,7 +868,11 @@
         "leaveShinecharged": {
           "framesRemaining": 130
         }
-      }
+      },
+      "unlocksDoors": [
+        {"nodeId": 3, "types": ["ammo"], "requires": []},
+        {"types": ["ammo"], "requires": []}
+      ]
     },
     {
       "link": [5, 3],
@@ -776,6 +891,9 @@
           "gentleDownTiles": 2
         }
       },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
       "note": "Leave some drops after killing the Gamets so they don't respawn."
     },
     {
@@ -850,6 +968,9 @@
           ]}
         ]},
         {"shinespark": {"frames": 25}}
+      ],
+      "unlocksDoors": [
+        {"nodeId": 3, "types": ["ammo"], "requires": []}
       ]
     },
     {
@@ -880,7 +1001,11 @@
         "leaveShinecharged": {
           "framesRemaining": 10
         }
-      }
+      },
+      "unlocksDoors": [
+        {"nodeId": 3, "types": ["ammo"], "requires": []},
+        {"types": ["ammo"], "requires": []}
+      ]
     },
     {
       "link": [5, 4],
@@ -909,7 +1034,11 @@
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"nodeId": 3, "types": ["ammo"], "requires": []},
+        {"types": ["ammo"], "requires": []}
+      ]
     },
     {
       "link": [5, 5],

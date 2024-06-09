@@ -15,18 +15,6 @@
       "nodeSubType": "grey",
       "nodeAddress": "0x0019162",
       "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {
-          "knockback": false,
-          "strats": [
-            {
-              "name": "Get Hit By Beetom",
-              "notable": false,
-              "requires": []
-            }
-          ]
-        }
-      ],
       "locks": [
         {
           "name": "Warehouse E-Tank Grey Lock (to Zeelas)",
@@ -124,6 +112,51 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Single Frozen Beetom",
+      "requires": [
+        {"obstaclesNotCleared": ["A"]},
+        "h_canFrozenEnemyRunway",
+        {"enemyDamage": {
+          "enemy": "Beetom",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 2,
+          "openEnd": 1
+        }
+      },
+      "note": "Freeze a single Beetom to extend the runway. Freeze any Beetoms that latch onto Samus to minimize taking damage."
+    },
+    {
+      "link": [1, 1],
+      "name": "Warehouse Energy Tank Frozen Beetom Runway",
+      "notable": true,
+      "requires": [
+        {"obstaclesNotCleared": ["A"]},
+        "canTrickyJump",
+        "h_canTrickyFrozenEnemyRunway",
+        {"enemyDamage": {
+          "enemy": "Beetom",
+          "type": "contact",
+          "hits": 6
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Freeze multiple Beetoms to extend the runway. Continually refreeze the ones that are in a good position while manipulating the rest.",
+        "This assumes three extra tiles of runway, which can be accomplished with two perfectly placed Beetoms, three adjacent ones, or four which are partially overlapping."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
         {"or": [
@@ -156,6 +189,17 @@
         "h_can10PowerBombCrystalFlash"
       ],
       "devNote": "Resetting the room could be required to farm a bit of energy to get above health-bomb range, to ensure a Power Bomb drop."
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Beetom",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
     },
     {
       "link": [1, 2],
@@ -207,16 +251,17 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph Kill the Beetoms",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "indirect",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
-          {"ammo": {"type": "PowerBomb", "count": 1}},
+          "h_canArtificialMorphPowerBomb",
           {"and": [
-            "Bombs",
+            "h_canArtificialMorphBombs",
             {"or": [
               "canTrickyJump",
               {"enemyDamage": {

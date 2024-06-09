@@ -519,10 +519,12 @@
       "name": "Full Shinespark",
       "entranceCondition": {
         "comeInShinecharged": {
-          "framesRequired": 120
-        }
+          "framesRequired": 80
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 115}}
       ],
       "clearsObstacles": ["B"],
@@ -533,10 +535,12 @@
       "name": "Shinespark Ends Over Acid",
       "entranceCondition": {
         "comeInShinecharged": {
-          "framesRequired": 120
-        }
+          "framesRequired": 80
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {
           "frames": 115,
           "excessFrames": 85
@@ -633,7 +637,10 @@
         "SpeedBooster",
         {"or": [
           "HiJump",
-          "canSpringBallJumpMidAir"
+          {"and": [
+            "canLateralMidAirMorph",
+            "canTrickySpringBallJump"
+          ]}
         ]}
       ]
     },
@@ -703,15 +710,16 @@
       "requires": [
         "SpeedBooster",
         "HiJump",
-        "canWalljump"
+        "canWalljump",
+        "canCarefulJump"
       ],
       "note": "Run on the moving platform (Kamer)."
     },
     {
       "link": [5, 1],
-      "name": "PCJR Left Side Spring Wall",
+      "name": "Tricky Spring Wall",
       "requires": [
-        "canSpringwall"
+        "h_canTrickySpringwall"
       ]
     },
     {
@@ -750,7 +758,7 @@
       "requires": [
         "HiJump",
         "canTrickyDashJump",
-        "canSpringBallJumpMidAir"
+        "canTrickySpringBallJump"
       ]
     },
     {
@@ -759,9 +767,9 @@
       "notable": true,
       "requires": [
         "HiJump",
-        "canSpringwall",
+        "h_canTrickySpringwall",
         "canPreciseWalljump",
-        "can2HighWallMidAirMorph"
+        "can3HighWallMidAirMorph"
       ],
       "note": [
         "A particularly precise springwall.",
@@ -792,8 +800,13 @@
       "requires": [
         "canUseFrozenEnemies",
         "canManipulateMellas",
-        "canBeVeryPatient",
-        "canConsecutiveWalljump",
+        {"or": [
+          {"and": [
+            "canBePatient",
+            "canWalljump"
+          ]},
+          "canBeVeryPatient"
+        ]},
         {"or": [
           {"obstaclesCleared": ["B"]},
           "Morph"
@@ -801,7 +814,8 @@
       ],
       "note": [
         "Lure a Mella from the right by breaking the speed blocks or using Morph.",
-        "Then you need to manipulate it to go high enough to be used as a stepping stone once frozen."
+        "Then manipulate it to go high enough to be used as a stepping stone once frozen.",
+        "Without movement items it may be necessary to continue manipulating it from above, jumping and aiming down to freeze it."
       ]
     },
     {
@@ -831,6 +845,8 @@
       "notable": true,
       "requires": [
         "Gravity",
+        "canShinechargeMovement",
+        "canHorizontalShinespark",
         {"canShineCharge": {
           "usedTiles": 33,
           "openEnd": 2

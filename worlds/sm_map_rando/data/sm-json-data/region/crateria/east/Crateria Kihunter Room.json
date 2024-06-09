@@ -179,13 +179,13 @@
     },
     {
       "link": [2, 2],
-      "name": "Kihunter and Sciser Farm",
+      "name": "Sciser Farm",
       "requires": [
         {"resetRoom": {
           "nodes": [1, 2, 3],
           "mustStayPut": false
         }},
-        {"refill": ["Energy", "Missile", "PowerBomb"]}
+        {"refill": ["Energy", "PowerBomb"]}
       ]
     },
     {
@@ -235,6 +235,14 @@
     },
     {
       "link": [3, 3],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [3, 3],
       "name": "Crateria Kihunter Room Ice Moonfall Door Lock Skip",
       "notable": true,
       "requires": [
@@ -252,7 +260,8 @@
       "link": [3, 3],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 2, "excessFrames": 2}}

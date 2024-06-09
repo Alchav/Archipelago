@@ -73,7 +73,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 100
+          "framesRemaining": 140
         }
       }
     },
@@ -132,9 +132,10 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 80
+          "framesRemaining": 100
         }
-      }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
     },
     {
       "link": [1, 2],
@@ -149,9 +150,13 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 50
+          "framesRemaining": 60
         }
       },
+      "unlocksDoors": [
+        {"types": ["powerbomb"], "requires": []},
+        {"types": ["missiles", "super"], "requires": ["canTrickyJump"]}
+      ],
       "note": [
         "Shoot the bridge to see where it ends.",
         "Opening the door requires a shot that is fired while Samus has some momentum from running to the right.",
@@ -192,7 +197,32 @@
       "requires": [
         "canSuitlessMaridia",
         "canTrickySpringBallJump"
+      ],
+      "note": "It helps to begin jumping when the water level is high."
+    },
+    {
+      "link": [2, 1],
+      "name": "WallJump Bomb Boost",
+      "requires": [
+        "canWallJumpBombBoost"
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Spring Ball Bomb Jump",
+      "requires": [
+        {"doorUnlockedAtNode": 2},
+        {"or": [
+          "h_canCrouchJumpDownGrab",
+          "canWalljump"
+        ]},
+        "canSpringBallBombJump",
+        "h_canBombThings"
+      ],
+      "unlocksDoors": [
+        {"nodeId": 2, "types": ["ammo"], "requires": []}
+      ],
+      "note": "Requires waiting until the last moment before SpringBall jumping."
     },
     {
       "link": [2, 1],
@@ -239,6 +269,16 @@
     },
     {
       "link": [2, 1],
+      "name": "Speedy Airball",
+      "requires": [
+        {"doorUnlockedAtNode": 2},
+        "SpeedBooster",
+        "canLateralMidAirMorph",
+        "canCarefulJump"
+      ]
+    },
+    {
+      "link": [2, 1],
       "name": "G-Mode Direct Doorsill Jump",
       "entranceCondition": {
         "comeInWithGMode": {
@@ -269,7 +309,7 @@
       },
       "requires": [
         "h_canArtificialMorphJumpIntoIBJ",
-        "canBombHorizontally"
+        "h_canArtificialMorphBombHorizontally"
       ],
       "note": "Starting an IBJ from spring ball with no other items is not very precise, it just takes a bit of an odd timing."
     },

@@ -101,12 +101,14 @@
       "from": 1,
       "to": [
         {"id": 1},
+        {"id": 2},
         {"id": 4}
       ]
     },
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 4}
       ]
@@ -147,68 +149,121 @@
       ]
     },
     {
+      "link": [1, 2],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {
+          "position": "top"
+        }
+      },
+      "requires": [
+        {"heatFrames": 240},
+        {"shinespark": {"frames": 57, "excessFrames": 0}}
+      ]
+    },
+    {
       "link": [1, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 300}
       ]
     },
     {
       "link": [1, 4],
       "name": "Space Jump",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
       "requires": [
-        "h_canNavigateHeatRooms",
         "SpaceJump",
-        {"or": [
-          {"and": [
-            {"adjacentRunway": {
-              "fromNode": 1,
-              "usedTiles": 3,
-              "physics": ["normal"]
-            }},
-            {"heatFrames": 140}
-          ]},
-          {"heatFrames": 200}
-        ]}
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Space Jump (Come in Running)",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "SpaceJump",
+        {"heatFrames": 140}
       ]
     },
     {
       "link": [1, 4],
       "name": "Tricky Platforming",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyJump",
-        {"or": [
-          {"and": [
-            "SpeedBooster",
-            {"adjacentRunway": {
-              "fromNode": 1,
-              "usedTiles": 5,
-              "physics": ["normal"]
-            }},
-            {"heatFrames": 200}
-          ]},
-          {"heatFrames": 220}
-        ]}
+        {"heatFrames": 220}
+      ],
+      "devNote": "FIXME: Jumping fully over the platform, and killing the sova before landing on it is a little faster, with no movement items."
+    },
+    {
+      "link": [1, 4],
+      "name": "Tricky Platforming (Come In Running)",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 5,
+          "speedBooster": true
+        }
+      },
+      "requires": [
+        "canTrickyJump"
       ],
       "devNote": "FIXME: Jumping fully over the platform, and killing the sova before landing on it is a little faster, with no movement items."
     },
     {
       "link": [1, 4],
       "name": "Mockball",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
       "requires": [
-        "h_canNavigateHeatRooms",
         "canCarefulJump",
         "canMockball",
-        {"adjacentRunway": {
-          "fromNode": 1,
-          "usedTiles": 3,
-          "physics": ["normal"]
-        }},
         {"heatFrames": 180}
       ],
       "note": "Upon room entry, jump and mockball on top of the first pillar."
+    },
+    {
+      "link": [2, 1],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 5,
+          "openEnd": 0,
+          "gentleUpTiles": 2
+        }
+      },
+      "requires": [
+        "canShinechargeMovementTricky",
+        "canHorizontalShinespark",
+        {"heatFrames": 225},
+        {"shinespark": {"frames": 53, "excessFrames": 0}},
+        {"heatFrames": 105}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 45}
+      ]
     },
     {
       "link": [2, 2],
@@ -234,7 +289,6 @@
       "link": [2, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 250}
       ]
     },
@@ -242,7 +296,6 @@
       "link": [2, 4],
       "name": "Tricky Platforming",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyJump",
         {"or": [
           "ScrewAttack",
@@ -266,7 +319,6 @@
       "link": [3, 4],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 200},
         {"or": [
           {"lavaFrames": 50},
@@ -289,7 +341,6 @@
       "link": [4, 1],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           "Plasma",
           "ScrewAttack",
@@ -302,15 +353,20 @@
           {"obstaclesCleared": ["A"]}
         ]},
         {"heatFrames": 280}
+      ],
+      "unlocksDoors": [
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 50}]}
       ]
     },
     {
       "link": [4, 1],
       "name": "Careful Jump",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canCarefulJump",
         {"heatFrames": 176}
+      ],
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 25}]}
       ],
       "note": "Build speed on the central platform and jump to the door."
     },
@@ -318,8 +374,12 @@
       "link": [4, 2],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 250}
+      ],
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 60}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
       ]
     },
     {
@@ -335,15 +395,24 @@
           "gentleDownTiles": 2,
           "startingDownTiles": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 60}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+      ]
     },
     {
       "link": [4, 2],
       "name": "Tricky Platforming",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyJump",
         {"heatFrames": 160}
+      ],
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 60}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
       ]
     },
     {
@@ -360,13 +429,17 @@
           "gentleDownTiles": 2,
           "startingDownTiles": 2
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 60}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+      ]
     },
     {
       "link": [4, 3],
       "name": "Kill the Geruta",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Morph",
         {"heatFrames": 350},
         {"or": [
@@ -402,7 +475,6 @@
       "link": [4, 3],
       "name": "Tank the Geruta",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Morph",
         {"heatFrames": 350},
         {"or": [

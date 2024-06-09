@@ -15,20 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a498",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Menu",
-            "notable": false,
-            "requires": [
-              "canBeVeryPatient",
-              "canManipulateMellas"
-            ],
-            "devNote": "FIXME Add details on how this works and check if it actually requires canBeVeryPatient."
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -36,16 +23,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a4a4",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Menu",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 3,
@@ -136,16 +114,32 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Menu",
+      "notable": false,
+      "requires": [
+        "canBeVeryPatient",
+        "canManipulateMellas"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "devNote": [
+        "FIXME Add details on how this works and check if it actually requires canBeVeryPatient."
+      ]
+    },
+    {
       "link": [1, 2],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           {"and": [
             "h_canArtificialMorphIBJ",
             "Gravity"
@@ -157,18 +151,17 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph Blind Bomb Boost",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "canOffScreenMovement",
         "h_canArtificialMorphBombHorizontally",
-        {"or": [
-          "Bombs",
-          {"ammo": {"type": "PowerBomb", "count": 2}}
-        ]}
+        "h_canArtificialMorphBombThings",
+        "h_additionalBomb"
       ],
       "note": [
         "Use one bomb to get to the off-screen region. After going a full screen to the right, when Samus is partially visible in the left wall, bomb to the middle platform on the right.",
@@ -183,16 +176,17 @@
     {
       "link": [2, 1],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "canOffScreenMovement",
         "h_canArtificialMorphIBJ",
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           "Gravity"
         ]}
       ],
@@ -200,6 +194,16 @@
         "Spring Ball and Gravity wouldn't be required with some risky off-screen horizontal bomb jumps.",
         "This strat is only useful for avoiding a wall jump. A simpler variant exits G-Mode after the morph tunnel."
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -289,6 +293,15 @@
       "clearsObstacles": ["A"]
     },
     {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Menu",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
       "link": [2, 3],
       "name": "Base",
       "requires": [
@@ -318,7 +331,7 @@
       "link": [2, 3],
       "name": "Maridia Bug Room Suitless MidAir Morph",
       "requires": [
-        "h_canTwoTileJumpMorph",
+        "h_canThreeTileJumpMorph",
         {"obstaclesCleared": ["A"]}
       ]
     },
@@ -347,22 +360,24 @@
     {
       "link": [2, 3],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
-          "SpringBall",
+          "h_canArtificialMorphSpringBall",
           {"and": [
+            "h_canArtificialMorphBombThings",
+            "h_additionalBomb",
             {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 3}}
-            ]},
-            {"or": [
-              "canBombHorizontally",
-              "Gravity"
+              "h_canArtificialMorphBombHorizontally",
+              {"and": [
+                "h_additionalBomb",
+                "Gravity"
+              ]}
             ]}
           ]}
         ]}
@@ -447,6 +462,9 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
       "note": "Charge a spark below towards the right then run back and jump up and spark out of the left door."
     },
     {
@@ -465,6 +483,9 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
       "note": "Charge a spark below towards the right then run back and jump up and spark out of the left door."
     },
     {
@@ -484,6 +505,9 @@
           "framesRemaining": 30
         }
       },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
       "note": "Charge a spark left and use the last bit of platform to jump up to the ledge above."
     },
     {
@@ -510,6 +534,16 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": [
+          {"or": [
+            "h_canUseSpringBall",
+            "h_canBombThings",
+            "h_canThreeTileJumpMorph"
+          ]}
+        ]}
+      ],
       "note": [
         "Charge on the central runway then carry the spark through the morph tunnel and out the right door.",
         "The door can be shot just before initiating the spark.",
@@ -532,6 +566,16 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": [
+          {"or": [
+            "h_canUseSpringBall",
+            "h_canBombThings",
+            "h_canThreeTileJumpMorph"
+          ]}
+        ]}
+      ],
       "note": [
         "Charge on the central runway then carry the spark through the morph tunnel and out the right door.",
         "This can be done by being careful not to fall off of the runway and into the water or timing the tide.",

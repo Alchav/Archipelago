@@ -158,6 +158,25 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Atomic",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "f_DefeatedPhantoon"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Freeze the Atomic in position to extend the runway. Maintain a half-tile gap between the Atomic and the runway to extend it as far as possible.",
+        "One easy method to align the Atomic is to lure the it high then stand under it to freeze it."
+      ],
+      "devNote": "This should be possible with a frozen Covern, but it is annoying to set up."
+    },
+    {
+      "link": [1, 1],
       "name": "Leave Shinecharged, Second Closest Runway",
       "requires": [
         "canShinechargeMovement",
@@ -168,7 +187,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 45
+          "framesRemaining": 60
         }
       }
     },
@@ -360,6 +379,14 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 2],
       "name": "Atomic Ice Moonfall Door Lock Skip",
       "requires": [
         "f_DefeatedPhantoon",
@@ -414,7 +441,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 155
+          "framesRemaining": 165
         }
       }
     },
@@ -422,7 +449,8 @@
       "link": [2, 2],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 6, "excessFrames": 6}}
@@ -473,9 +501,10 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 30
+          "framesRemaining": 60
         }
-      }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
     },
     {
       "link": [2, 3],

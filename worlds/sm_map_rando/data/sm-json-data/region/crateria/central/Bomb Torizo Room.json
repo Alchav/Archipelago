@@ -69,9 +69,17 @@
               "name": "Base",
               "notable": false,
               "requires": [
-                "Bombs"
-              ],
-              "note": "Killing Bomb Torizo requires only Power Beam, but Bombs are needed for it to activate."
+                "h_canActivateBombTorizo",
+                {"or": [
+                  "canDodgeWhileShooting",
+                  {"ammo": {"type": "Super", "count": 2}},
+                  {"enemyDamage": {
+                    "enemy": "Bomb Torizo",
+                    "type": "contact",
+                    "hits": 3
+                  }}
+                ]}
+              ]
             }
           ]
         }
@@ -157,6 +165,22 @@
         "leaveWithRunway": {
           "length": 1,
           "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "f_DefeatedBombTorizo",
+        {"canShineCharge": {
+          "usedTiles": 13,
+          "openEnd": 0
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 140
         }
       }
     },

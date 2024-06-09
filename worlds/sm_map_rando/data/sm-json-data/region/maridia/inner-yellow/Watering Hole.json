@@ -15,16 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a48c",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Zeb",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -116,10 +107,51 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Zeb",
+      "requires": [
+        "h_canFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 13,
+          "openEnd": 0
+        }
+      },
+      "note": "Requires a pixel-perfect freeze in order to run onto and off of the frozen Zeb."
+    },
+    {
+      "link": [1, 1],
+      "name": "Watering Hole Double Frozen Zeb Runway",
+      "notable": true,
+      "requires": [
+        "h_canTrickyFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 20,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Freeze both Zebs in order to significantly extend the length of the runway.",
+        "Requires a pixel-perfect freeze in order to run onto and off of the frozen Zebs."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Zeb Farm",
       "requires": [
         {"refill": ["Energy", "Missile", "Super"]}
       ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Zeb",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
     },
     {
       "link": [1, 4],
@@ -145,14 +177,31 @@
           "canWalljump",
           "HiJump",
           "h_canFly",
-          "canSpringBallJumpMidAir",
-          {"and": [
-            "canCarefulJump",
-            "h_canCrouchJumpDownGrab"
-          ]}
+          "canSpringBallJumpMidAir"
         ]}
+      ]
+    },
+    {
+      "link": [4, 1],
+      "name": "Frozen Choot",
+      "requires": [
+        "Gravity",
+        "canTrickyUseFrozenEnemies"
       ],
-      "note": "Getting out with only Gravity and no wall jump requires a tight Crouch Jump and Down Grab while above the water."
+      "devNote": "The only thing tricky about this is realizing to leave the Choot alive before going down."
+    },
+    {
+      "link": [4, 1],
+      "name": "Crouch Jump Down Grab",
+      "requires": [
+        "Gravity",
+        "canTrickyJump",
+        "h_canCrouchJumpDownGrab"
+      ],
+      "note": [
+        "Getting out with only Gravity and no wall jump requires a tight crouch jump and down grab while above the water:",
+        "Position very close to the edge, and press forward immediately after crouch jumping (almost simultaneously)."
+      ]
     },
     {
       "link": [4, 1],

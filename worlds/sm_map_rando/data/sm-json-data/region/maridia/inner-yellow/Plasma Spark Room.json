@@ -173,7 +173,8 @@
       "from": 5,
       "to": [
         {"id": 1},
-        {"id": 3}
+        {"id": 3},
+        {"id": 4}
       ]
     },
     {
@@ -186,12 +187,21 @@
   "strats": [
     {
       "link": [1, 1],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [1, 1],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
-        {"shinespark": {"frames": 5, "excessFrames": 5}}
+        {"shinespark": {"frames": 6, "excessFrames": 6}}
       ],
       "note": "Enter on the right side of the doorway to reduce the amount of energy used.",
       "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
@@ -211,12 +221,14 @@
     {
       "link": [1, 4],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         {"or": [
           "h_canArtificialMorphSpringBallBombJump",
@@ -241,12 +253,9 @@
             ]}
           ]},
           {"and": [
-            "canSpringBallBombJump",
-            "Morph",
-            {"or": [
-              "Bombs",
-              {"ammo": {"type": "PowerBomb", "count": 3}}
-            ]}
+            "h_canSpringBallBombJump",
+            "h_additionalBomb",
+            "h_additionalBomb"
           ]}
         ]}
       ]
@@ -257,7 +266,8 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 120
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canShinechargeMovementComplex",
@@ -288,12 +298,14 @@
     {
       "link": [1, 5],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
         {"or": [
           {"and": [
             "h_canArtificialMorphIBJ",
@@ -301,7 +313,9 @@
           ]},
           {"and": [
             "h_canArtificialMorphSpringBallBombJump",
-            {"ammo": {"type": "PowerBomb", "count": 3}}
+            "h_additionalBomb",
+            "h_additionalBomb",
+            "h_additionalBomb"
           ]}
         ]}
       ]
@@ -321,11 +335,16 @@
     },
     {
       "link": [2, 1],
-      "name": "Suitless Jump Assist",
+      "name": "Suitless Spring Ball",
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canSpringBallJumpMidAir"
+        "canSpringBallJumpMidAir",
+        {"or": [
+          "h_canCrouchJumpDownGrab",
+          "canTrickySpringBallJump",
+          "canWalljump"
+        ]}
       ]
     },
     {
@@ -334,7 +353,8 @@
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canUseFrozenEnemies",
+        "canCarefulJump",
+        "canTrickyUseFrozenEnemies",
         "h_canCrouchJumpDownGrab"
       ]
     },
@@ -385,12 +405,13 @@
     {
       "link": [2, 1],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "Gravity",
         "h_canArtificialMorphIBJ"
       ]
@@ -462,12 +483,13 @@
     {
       "link": [2, 3],
       "name": "G-Mode Deep Stuck X-Ray Climb",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "direct",
-          "artificialMorph": false
-        }},
+          "morphed": false
+        }
+      },
+      "requires": [
         "canXRayClimb"
       ],
       "note": "Climb up 2 screens."
@@ -507,27 +529,112 @@
     },
     {
       "link": [2, 3],
-      "name": "G-Mode Morph",
+      "name": "Leave with Spark",
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
         "Gravity",
-        "h_canArtificialMorphIBJ"
-      ]
+        "SpeedBooster",
+        {"enemyKill": {
+          "enemies": [["Owtch", "Owtch"]]
+        }},
+        "canShinechargeMovementComplex",
+        {"canShineCharge": {
+          "usedTiles": 16,
+          "openEnd": 2,
+          "gentleDownTiles": 2,
+          "gentleUpTiles": 2,
+          "steepDownTiles": 1,
+          "steepUpTiles": 1,
+          "startingDownTiles": 1
+        }},
+        {"shinespark": {"frames": 10}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Gain a shinecharge by running right-to-left on the underwater runway on the right side of the room.",
+        "Perform quick ledge-grabs to reach the platform in front of the door in time to spark out."
+      ],
+      "devNote": "FIXME: It's technically possible to evade the Owtches without killing them, but it's unclear if this can be done reliably."
+    },
+    {
+      "link": [2, 4],
+      "name": "Shinespark",
+      "requires": [
+        "Gravity",
+        "SpeedBooster",
+        {"or": [
+          "HiJump",
+          "canTrickySpringBallJump",
+          "canWalljump",
+          {"and": [
+            "canGravityJump",
+            "canShinechargeMovementTricky"
+          ]}
+        ]},
+        {"enemyKill": {
+          "enemies": [["Owtch", "Owtch"]]
+        }},
+        "canShinechargeMovementComplex",
+        {"canShineCharge": {
+          "usedTiles": 16,
+          "openEnd": 2,
+          "gentleDownTiles": 2,
+          "gentleUpTiles": 2,
+          "steepDownTiles": 1,
+          "steepUpTiles": 1,
+          "startingDownTiles": 1
+        }},
+        {"shinespark": {"frames": 43, "excessFrames": 3}}
+      ],
+      "note": [
+        "Gain a shinecharge by running right-to-left on the underwater runway on the right side of the room.",
+        "Use HiJump or a Spring Ball jump to quickly exit the water to the left and spark up."
+      ],
+      "devNote": "FIXME: It's technically possible to evade the Owtches without killing them, but it's unclear if this can be done reliably."
     },
     {
       "link": [2, 4],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          "Gravity",
+          {"and": [
+            "canSuitlessMaridia",
+            "HiJump",
+            "h_canArtificialMorphSpringBall"
+          ]}
+        ]},
+        "h_canArtificialMorphIBJ"
+      ]
+    },
+    {
+      "link": [2, 5],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          "Gravity",
+          {"and": [
+            "canSuitlessMaridia",
+            "HiJump",
+            "h_canArtificialMorphSpringBall"
+          ]}
+        ]},
         "h_canArtificialMorphIBJ"
       ]
     },
@@ -615,17 +722,32 @@
     },
     {
       "link": [3, 4],
-      "name": "Frozen Choot",
+      "name": "Frozen Choot Wall Jump",
       "requires": [
         "canTrickyUseFrozenEnemies",
         "HiJump",
-        {"or": [
-          "canWalljump",
-          {"and": [
-            "canTrickyDashJump",
-            "canSpringBallJumpMidAir"
-          ]}
-        ]}
+        "canWalljump"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Frozen Choot Speedy Spring Ball Jump",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        "HiJump",
+        "SpeedBooster",
+        "canTrickyJump",
+        "canSpringBallJumpMidAir"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Frozen Choot Spring Ball Jump Unmorph Bomb Boost",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        "HiJump",
+        "canSpringBallJumpMidAir",
+        "canUnmorphBombBoost"
       ]
     },
     {
@@ -654,12 +776,13 @@
     {
       "link": [3, 4],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [3],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ"
       ]
     },
@@ -776,12 +899,13 @@
     {
       "link": [3, 5],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [3],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ"
       ]
     },
@@ -845,12 +969,13 @@
     {
       "link": [4, 5],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [4],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ"
       ]
     },
@@ -863,6 +988,29 @@
       "link": [5, 3],
       "name": "Base",
       "requires": []
+    },
+    {
+      "link": [5, 4],
+      "name": "Base",
+      "requires": [
+        "canPreciseWalljump"
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Plasma Spark Room SpringFling into Top Right Door",
+      "notable": true,
+      "requires": [
+        "canInsaneJump",
+        "h_canSpringFling",
+        "canResetFallSpeed",
+        "canDownBack"
+      ],
+      "note": [
+        "Roll off the above ledge and use both the vertical speed resets from first (un)equipping SpringBall and then by unmorphing in order to reach the door.",
+        "Pause shortly after rolling off the ledge, after falling for 1 tile.  The timing is very precise.",
+        "A downback helps by shrinking Samus' hitbox."
+      ]
     },
     {
       "link": [6, 2],

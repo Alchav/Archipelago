@@ -15,19 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a708",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Yard",
-            "notable": false,
-            "requires": [
-              "h_canUsePowerBombs"
-            ],
-            "devNote": "FIXME There is currently no way to represent coming in from the top and bringing a Snail with Samus."
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "water"}]
     },
     {
       "id": 2,
@@ -36,24 +24,6 @@
       "nodeSubType": "red",
       "nodeAddress": "0x001a744",
       "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Yard",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Yard",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      },
       "locks": [
         {
           "name": "Aqueduct Save Red Lock (to Save)",
@@ -90,26 +60,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a738",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Yard",
-            "notable": false,
-            "requires": [],
-            "devNote": "Requires no items or tech if you step on a Snail - canUseEnemies is necessary for G-Mode Setup."
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Yard",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      "doorEnvironments": [{"physics": "water"}]
     },
     {
       "id": 6,
@@ -118,31 +69,7 @@
       "nodeSubType": "blue",
       "nodeAddress": "0x001a72c",
       "doorEnvironments": [{"physics": "water"}],
-      "spawnAt": 9,
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Snail Platform",
-            "notable": false,
-            "requires": [
-              "canUpwardGModeSetup",
-              "h_canNavigateUnderwater",
-              "canTwoTileSqueeze"
-            ],
-            "note": "The two snails together can setup G-Mode on either side of the door."
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Yard",
-            "type": "contact",
-            "hits": 1
-          }}
-        ],
-        "devNote": "Requires entry on either side of the doorway, but not the center."
-      }
+      "spawnAt": 9
     },
     {
       "id": 7,
@@ -165,6 +92,20 @@
       "name": "Junction Below Top Door",
       "nodeType": "junction",
       "nodeSubType": "junction"
+    },
+    {
+      "id": 10,
+      "name": "G-Mode Morph Junction (By Bottom Left Door)",
+      "nodeType": "junction",
+      "nodeSubType": "g-mode",
+      "note": "Represents being at the bottom left door with G-Mode and morph or artificial morph."
+    },
+    {
+      "id": 11,
+      "name": "G-Mode Overloaded PLMs Junction (By Bottom Left Door)",
+      "nodeType": "junction",
+      "nodeSubType": "g-mode",
+      "note": "Represents being at the bottom left door with G-Mode and PLMs overloaded."
     }
   ],
   "obstacles": [
@@ -228,7 +169,9 @@
         {"id": 1},
         {"id": 2},
         {"id": 7},
-        {"id": 9}
+        {"id": 9},
+        {"id": 10},
+        {"id": 11}
       ]
     },
     {
@@ -237,21 +180,19 @@
         {"id": 1},
         {"id": 2},
         {"id": 3},
-        {
-          "id": 4,
-          "devNote": "There's nothing difficult about getting here suitless, but it does run a heavy risk of leading the player into suitless Maridia situations"
-        },
+        {"id": 4},
         {"id": 5},
-        {
-          "id": 7,
-          "note": "This direct link is just for the shinespark"
-        },
-        {"id": 9}
+        {"id": 7},
+        {"id": 9},
+        {"id": 10},
+        {"id": 11}
       ]
     },
     {
       "from": 3,
       "to": [
+        {"id": 2},
+        {"id": 3},
         {"id": 4}
       ]
     },
@@ -270,7 +211,10 @@
         {"id": 2},
         {"id": 5},
         {"id": 7},
-        {"id": 8}
+        {"id": 8},
+        {"id": 9},
+        {"id": 10},
+        {"id": 11}
       ]
     },
     {
@@ -278,7 +222,11 @@
       "to": [
         {"id": 1},
         {"id": 5},
-        {"id": 9}
+        {"id": 6},
+        {"id": 7},
+        {"id": 9},
+        {"id": 10},
+        {"id": 11}
       ]
     },
     {
@@ -306,6 +254,22 @@
         {"id": 6},
         {"id": 9}
       ]
+    },
+    {
+      "from": 10,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 7},
+        {"id": 11}
+      ]
+    },
+    {
+      "from": 11,
+      "to": [
+        {"id": 1},
+        {"id": 7}
+      ]
     }
   ],
   "strats": [
@@ -329,6 +293,35 @@
       "clearsObstacles": ["A"]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Yard",
+      "notable": false,
+      "requires": [
+        {"or": [
+          {"obstaclesCleared": ["A"]},
+          "h_canUsePowerBombs"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Morph Break the Power Bomb Blocks",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphPowerBomb"
+      ],
+      "clearsObstacles": ["A"],
+      "note": "Place a Power Bomb then exit G-Mode."
+    },
+    {
       "link": [1, 2],
       "name": "Base",
       "requires": [
@@ -341,49 +334,20 @@
     },
     {
       "link": [1, 2],
-      "name": "G-Mode Morph PB",
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
       "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+        "canMoonfall"
       ],
-      "clearsObstacles": ["A"],
-      "note": "Place a PB then exit G-Mode."
-    },
-    {
-      "link": [1, 7],
-      "name": "G-Mode Morph Overload PLMs - Bomb the PB Blocks",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Bombs",
-        {"or": [
-          {"and": [
-            "Gravity",
-            "h_canArtificialMorphIBJ"
-          ]},
-          {"and": [
-            "canSuitlessMaridia",
-            "HiJump",
-            "canSpringBallJumpMidAir",
-            "canSnailClimb"
-          ]},
-          {"and": [
-            "canSuitlessMaridia",
-            "HiJump",
-            "canConsecutiveWalljump",
-            "canPreciseWalljump",
-            "canSnailClimb"
-          ]}
-        ]}
-      ],
-      "note": "Bomb the PB blocks below to overload PLMs, then go up through the crumble blocks to escape, then climb through the Speed blocks."
+      "note": [
+        "Moonfall twice into the wall adjacent the Power Bomb blocks and then wiggle out to the right.",
+        "Then moonfall again to clip through the Power Bomb Blocks",
+        "Without Gravity, break spin to avoid clipping down too far."
+      ]
     },
     {
       "link": [1, 9],
@@ -405,25 +369,70 @@
     {
       "link": [1, 9],
       "name": "G-Mode Morph Overload PLMs - Bomb the PB Blocks",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
-        "Bombs",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphBombs",
+        "h_canNavigateUnderwater",
         {"or": [
           {"and": [
             "Gravity",
             "h_canArtificialMorphIBJ"
           ]},
           {"and": [
-            "canSuitlessMaridia",
             "HiJump",
             "canSpringBallJumpMidAir"
           ]},
           {"and": [
-            "canSuitlessMaridia",
+            "HiJump",
+            "canConsecutiveWalljump",
+            "canPreciseWalljump"
+          ]}
+        ]}
+      ],
+      "note": "Bomb the Power Bomb blocks below to overload PLMs, then go up through the crumble blocks to escape."
+    },
+    {
+      "link": [1, 10],
+      "name": "G-Mode Morph Overload PLMs - Bomb the Power Bomb Blocks",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ],
+      "note": "Bomb the Power Bomb blocks below to overload PLMs, then IBJ up through the crumble blocks to escape."
+    },
+    {
+      "link": [1, 11],
+      "name": "G-Mode Morph Overload PLMs - Bomb the PB Blocks",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphBombs",
+        "h_canNavigateUnderwater",
+        {"or": [
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]},
+          {"and": [
+            "HiJump",
+            "canSpringBallJumpMidAir"
+          ]},
+          {"and": [
             "HiJump",
             "canConsecutiveWalljump",
             "canPreciseWalljump"
@@ -622,7 +631,10 @@
         "leaveShinecharged": {
           "framesRemaining": 50
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
     },
     {
       "link": [2, 1],
@@ -644,44 +656,9 @@
         "leaveShinecharged": {
           "framesRemaining": 70
         }
-      }
-    },
-    {
-      "link": [2, 1],
-      "name": "G-Mode Overload PLMs with Grapple",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2, 5, 6],
-          "mode": "any",
-          "artificialMorph": false
-        }},
-        "Grapple",
-        "h_canNavigateUnderwater",
-        "canSnailClimb"
-      ]
-    },
-    {
-      "link": [2, 1],
-      "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        {"or": [
-          {"and": [
-            "h_canArtificialMorphIBJ",
-            "Gravity"
-          ]},
-          {"ammo": {"type": "PowerBomb", "count": 1}},
-          {"and": [
-            "Bombs",
-            "HiJump",
-            "SpringBall",
-            "canSnailClimb"
-          ]}
-        ]}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
       ]
     },
     {
@@ -712,11 +689,21 @@
           "usedTiles": 33,
           "openEnd": 2
         }},
-        {"shinespark": {"frames": 9}}
+        {"or": [
+          {"shinespark": {"frames": 12}},
+          {"and": [
+            "canShinechargeMovementTricky",
+            {"shinespark": {"frames": 3}}
+          ]}
+        ]}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 2],
@@ -725,6 +712,57 @@
         "h_canCrystalFlash"
       ],
       "clearsObstacles": ["A"]
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Yard",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Yard",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [2, 3],
+      "name": "Gravity",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "SpaceJump",
+          "canPlayInSand",
+          {"canShineCharge": {
+            "usedTiles": 32,
+            "openEnd": 1
+          }},
+          "h_canUseSpringBall"
+        ]}
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Suitless",
+      "requires": [
+        "canSuitlessMaridia",
+        {"or": [
+          {"and": [
+            "HiJump",
+            "h_canUseSpringBall"
+          ]},
+          "canPlayInSand"
+        ]}
+      ]
     },
     {
       "link": [2, 3],
@@ -739,6 +777,7 @@
         "canSuitlessMaridia",
         "canShinechargeMovementComplex",
         "canWaterShineCharge",
+        "canHorizontalShinespark",
         {"canShineCharge": {
           "usedTiles": 33,
           "openEnd": 2
@@ -748,7 +787,7 @@
           "excessFrames": 66
         }}
       ],
-      "devNote": "This is obscure enough that it's assumed you can "
+      "devNote": "This is obscure enough that it's assumed you can canShinechargeMovementComplex"
     },
     {
       "link": [2, 4],
@@ -866,83 +905,21 @@
     },
     {
       "link": [2, 7],
-      "name": "G-Mode Overload PLMs with Grapple",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2, 5, 6],
-          "mode": "any",
-          "artificialMorph": false
-        }},
-        "Grapple",
-        "h_canNavigateUnderwater",
-        "canSnailClimb",
-        {"or": [
-          "Gravity",
-          "h_canMaxHeightSpringBallJump",
-          {"and": [
-            "HiJump",
-            {"or": [
-              "canCrouchJump",
-              "canDownGrab"
-            ]}
-          ]}
-        ]}
-      ]
-    },
-    {
-      "link": [2, 7],
-      "name": "G-Mode Morph Overload PLMs - Bomb the Speed Blocks",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2, 5, 6],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        "Gravity",
-        "h_canArtificialMorphIBJ"
-      ]
-    },
-    {
-      "link": [2, 7],
-      "name": "G-Mode Overload PLMs - Bomb the Speed Blocks",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2, 5, 6],
-          "mode": "any",
-          "artificialMorph": false
-        }},
-        "h_canUseMorphBombs",
-        "h_canNavigateUnderwater",
-        "canSnailClimb",
-        {"or": [
-          "Gravity",
-          "h_canMaxHeightSpringBallJump",
-          {"and": [
-            "HiJump",
-            {"or": [
-              "canCrouchJump",
-              "canDownGrab"
-            ]}
-          ]}
-        ]}
-      ]
-    },
-    {
-      "link": [2, 7],
       "name": "G-Mode Overload PLMs - PB the Items (To the Items)",
       "notable": true,
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2, 5, 6],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "direct",
-          "artificialMorph": false
-        }},
+          "morphed": false
+        }
+      },
+      "requires": [
         {"or": [
           {"itemNotCollectedAtNode": 7},
           {"itemNotCollectedAtNode": 8}
         ]},
-        "Morph",
-        {"ammo": {"type": "PowerBomb", "count": 2}},
+        "h_canUsePowerBombs",
+        "h_canUsePowerBombs",
         "h_canNavigateUnderwater",
         "canSnailClimb",
         {"or": [
@@ -969,18 +946,20 @@
       "link": [2, 7],
       "name": "G-Mode Morph Overload PLMs - PB the Items (To the Items)",
       "notable": true,
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2, 5, 6],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "direct",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           {"itemNotCollectedAtNode": 7},
           {"itemNotCollectedAtNode": 8}
         ]},
-        "SpringBall",
-        {"ammo": {"type": "PowerBomb", "count": 2}},
+        "h_canArtificialMorphSpringBall",
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
         "h_canNavigateUnderwater",
         "canSnailClimb",
         {"or": [
@@ -1076,6 +1055,7 @@
       },
       "requires": [
         "canWaterShineCharge",
+        "canShinechargeMovement",
         {"canShineCharge": {
           "usedTiles": 33,
           "openEnd": 2
@@ -1084,34 +1064,66 @@
       ]
     },
     {
-      "link": [3, 4],
-      "name": "Base",
+      "link": [2, 9],
+      "name": "Suitless Shinespark, Low Run Speed",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 0.4375
+        }
+      },
       "requires": [
-        "h_canNavigateUnderwater"
-      ]
+        "canWaterShineCharge",
+        "canShinechargeMovementComplex",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"shinespark": {"frames": 34, "excessFrames": 3}}
+      ],
+      "note": "Start running next to the transition (But at least 1 pixel away) so that Samus has very low run speed.",
+      "devNote": "Starting with low run speed is less obvious than trying to shortcharge."
     },
     {
-      "link": [4, 2],
-      "name": "Base",
+      "link": [2, 10],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 11],
+      "name": "G-Mode Overload PLMs with Grapple",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "Grapple",
+        "h_canNavigateUnderwater"
+      ],
+      "note": "Overload PLMs using the Grapple Blocks."
+    },
+    {
+      "link": [3, 2],
+      "name": "Gravity",
       "requires": [
         "Gravity",
         {"or": [
           "SpaceJump",
           "canPlayInSand",
-          {"canShineCharge": {
-            "usedTiles": 20,
-            "openEnd": 2,
-            "steepDownTiles": 1,
-            "steepUpTiles": 1,
-            "gentleDownTiles": 5,
-            "gentleUpTiles": 5
-          }},
           "h_canUseSpringBall"
         ]}
       ]
     },
     {
-      "link": [4, 2],
+      "link": [3, 2],
       "name": "Suitless",
       "requires": [
         "canSuitlessMaridia",
@@ -1123,33 +1135,18 @@
       ]
     },
     {
-      "link": [4, 3],
-      "name": "Base",
-      "requires": [
-        "Gravity",
-        {"or": [
-          "SpaceJump",
-          "canPlayInSand",
-          {"canShineCharge": {
-            "usedTiles": 32,
-            "openEnd": 1
-          }},
-          "h_canUseSpringBall"
-        ]}
-      ]
+      "link": [3, 3],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
     },
     {
-      "link": [4, 3],
-      "name": "Suitless",
+      "link": [3, 4],
+      "name": "Base",
       "requires": [
-        "canSuitlessMaridia",
-        {"or": [
-          {"and": [
-            "HiJump",
-            "h_canUseSpringBall"
-          ]},
-          "canPlayInSand"
-        ]}
+        "h_canNavigateUnderwater"
       ]
     },
     {
@@ -1170,6 +1167,14 @@
     },
     {
       "link": [4, 4],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [4, 4],
       "name": "Leave Shinecharged",
       "requires": [
         "Gravity",
@@ -1186,34 +1191,15 @@
     },
     {
       "link": [5, 1],
-      "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [5],
-          "mode": "any",
-          "artificialMorph": true
-        }},
-        {"or": [
-          {"and": [
-            "Gravity",
-            "h_canArtificialMorphIBJ"
-          ]},
-          {"and": [
-            {"ammo": {"type": "PowerBomb", "count": 1}},
-            "SpringBall",
-            {"or": [
-              "Gravity",
-              "HiJump",
-              "canUseEnemies"
-            ]}
-          ]},
-          {"and": [
-            "Bombs",
-            "HiJump",
-            "SpringBall",
-            "canSnailClimb"
-          ]}
-        ]}
+      "name": "Grapple Teleport Below Bomb Blocks",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [],
+      "note": [
+        "Hold Grapple through the transition and then immediately release it to teleport below the Bomb blocks."
       ]
     },
     {
@@ -1237,16 +1223,26 @@
       "name": "Leave Shinecharged",
       "requires": [
         "Gravity",
-        {"canShineCharge": {
-          "usedTiles": 20,
-          "openEnd": 2
-        }}
+        {"or": [
+          {"canShineCharge": {
+            "usedTiles": 20,
+            "openEnd": 2
+          }},
+          {"and": [
+            "canEnemyExtendRunway",
+            {"canShineCharge": {
+              "usedTiles": 21,
+              "openEnd": 2
+            }}
+          ]}
+        ]}
       ],
       "exitCondition": {
         "leaveShinecharged": {
           "framesRemaining": 60
         }
-      }
+      },
+      "devNote": "It is possible, although not overly useful, to extend the runway here using a snail."
     },
     {
       "link": [5, 5],
@@ -1254,6 +1250,30 @@
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [5, 5],
+      "name": "G-Mode Setup - Get Hit By Yard",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "devNote": [
+        "Requires no items or tech if you step on a Snail - canUseEnemies is necessary for G-Mode Setup."
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Yard",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
     },
     {
       "link": [5, 7],
@@ -1274,12 +1294,104 @@
       "name": "Shinespark",
       "requires": [
         "Gravity",
-        {"canShineCharge": {
-          "usedTiles": 20,
-          "openEnd": 2
-        }},
+        {"or": [
+          {"canShineCharge": {
+            "usedTiles": 20,
+            "openEnd": 2
+          }},
+          {"and": [
+            "canEnemyExtendRunway",
+            {"canShineCharge": {
+              "usedTiles": 21,
+              "openEnd": 2
+            }}
+          ]}
+        ]},
         {"shinespark": {"frames": 25}}
+      ],
+      "devNote": [
+        "It is possible, although not overly useful, to extend the runway here using a snail.",
+        "FIXME: It is possible to use a snail here and in Shaktool's room to extend the runway at the door.",
+        "This can be useful when short charging, but can not be used to leave running, as running on the snail does not work."
       ]
+    },
+    {
+      "link": [5, 7],
+      "name": "G-Mode Overload PLMs - PB the Items (To the Items)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        }
+      },
+      "requires": [
+        {"or": [
+          {"itemNotCollectedAtNode": 7},
+          {"itemNotCollectedAtNode": 8}
+        ]},
+        "h_canUsePowerBombs",
+        "h_canUsePowerBombs",
+        "h_canNavigateUnderwater",
+        "canSnailClimb",
+        {"or": [
+          "Gravity",
+          "h_canMaxHeightSpringBallJump",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canCrouchJump",
+              "canDownGrab"
+            ]}
+          ]}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Aqueduct G-Mode Overload PLMs - PB the Items",
+      "note": [
+        "PLMs can be overloaded in direct G-Mode with a single Power Bomb if both items are still there and 2 PBs if only one item is.",
+        "There is a row of tiles that works, just above and to the left of the right door.",
+        "The row is one tile higher than the horizontal pipe that is part of the door frame, spanning from the left to one tile away from the right wall."
+      ],
+      "devNote": "This does not include canRiskPermanentLossOfAccess, as it is only worth doing this strat if the items are there."
+    },
+    {
+      "link": [5, 7],
+      "name": "G-Mode Morph Overload PLMs - PB the Items (To the Items)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          {"itemNotCollectedAtNode": 7},
+          {"itemNotCollectedAtNode": 8}
+        ]},
+        "h_canArtificialMorphSpringBall",
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
+        "h_canNavigateUnderwater",
+        "canSnailClimb",
+        {"or": [
+          "Gravity",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canCrouchJump",
+              "canDownGrab"
+            ]}
+          ]}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Aqueduct G-Mode Overload PLMs - PB the Items",
+      "note": [
+        "PLMs can be overloaded in direct G-Mode with a single Power Bomb if both items are still there and 2 PBs if only one item is.",
+        "There is a row of tiles that works, just above and to the left of the right door.",
+        "The row is one tile higher than the horizontal pipe that is part of the door frame, spanning from the left to one tile away from the right wall."
+      ],
+      "devNote": "This does not include canRiskPermanentLossOfAccess, as it is only worth doing this strat if the items are there."
     },
     {
       "link": [5, 8],
@@ -1293,25 +1405,105 @@
       "note": "Climb up 1 screen."
     },
     {
-      "link": [6, 1],
+      "link": [5, 9],
+      "name": "Grapple Teleport (from Red Brinstar Firefleas)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [5, 9],
+      "name": "Grapple Teleport (from Moat)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [],
+      "note": "Press down immediately after teleporting, in order to get above the bomb blocks."
+    },
+    {
+      "link": [5, 10],
       "name": "G-Mode Morph",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [6],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
-          {"ammo": {"type": "PowerBomb", "count": 1}},
+          "h_canArtificialMorphSpringBall",
+          "Morph",
           {"and": [
-            "Bombs",
-            {"or": [
-              "Gravity",
-              "SpringBall"
-            ]}
+            "Gravity",
+            "h_canArtificialMorphIBJ"
           ]}
         ]}
       ]
+    },
+    {
+      "link": [5, 11],
+      "name": "G-Mode Morph Overload PLMs - Bomb the Speed Blocks",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphBombs",
+        {"or": [
+          "h_canArtificialMorphSpringBall",
+          "Morph",
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [5, 11],
+      "name": "G-Mode Overload PLMs with Grapple",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "Grapple",
+        "h_canNavigateUnderwater"
+      ],
+      "note": "Overload PLMs using the Grapple Blocks."
+    },
+    {
+      "link": [6, 1],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        {"or": [
+          "h_canArtificialMorphPowerBomb",
+          {"and": [
+            "h_canArtificialMorphBombs",
+            {"or": [
+              "Gravity",
+              "h_canArtificialMorphSpringBall"
+            ]}
+          ]}
+        ]}
+      ],
+      "devNote": "FIXME: This is doable with just Bombs and entering on the left side."
     },
     {
       "link": [6, 5],
@@ -1319,10 +1511,12 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 35
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "Gravity",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 78, "excessFrames": 16}}
       ]
     },
@@ -1332,17 +1526,156 @@
       "entranceCondition": {
         "comeInShinecharged": {
           "framesRequired": 55
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [
         "canSuitlessMaridia",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 99, "excessFrames": 29}}
       ]
+    },
+    {
+      "link": [6, 6],
+      "name": "G-Mode Setup - Snail Platform",
+      "notable": false,
+      "requires": [
+        "canUpwardGModeSetup",
+        "h_canNavigateUnderwater",
+        "canTwoTileSqueeze"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "The two snails together can setup G-Mode on either side of the door."
+      ]
+    },
+    {
+      "link": [6, 6],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Yard",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {},
+      "devNote": "Requires entry on either side of the doorway, but not the center."
+    },
+    {
+      "link": [6, 7],
+      "name": "G-Mode Overload PLMs - PB the Items (To the Items)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        },
+        "comesThroughToilet": "no"        
+      },
+      "requires": [
+        {"or": [
+          {"itemNotCollectedAtNode": 7},
+          {"itemNotCollectedAtNode": 8}
+        ]},
+        "h_canUsePowerBombs",
+        "h_canUsePowerBombs",
+        "h_canNavigateUnderwater",
+        "canSnailClimb",
+        {"or": [
+          "Gravity",
+          "h_canMaxHeightSpringBallJump",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canCrouchJump",
+              "canDownGrab"
+            ]}
+          ]}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Aqueduct G-Mode Overload PLMs - PB the Items",
+      "note": [
+        "PLMs can be overloaded in direct G-Mode with a single Power Bomb if both items are still there and 2 PBs if only one item is.",
+        "There is a row of tiles that works, just above and to the left of the right door.",
+        "The row is one tile higher than the horizontal pipe that is part of the door frame, spanning from the left to one tile away from the right wall."
+      ],
+      "devNote": "This does not include canRiskPermanentLossOfAccess, as it is only worth doing this strat if the items are there."
+    },
+    {
+      "link": [6, 7],
+      "name": "G-Mode Morph Overload PLMs - PB the Items (To the Items)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": true
+        },
+        "comesThroughToilet": "no"
+      },
+      "requires": [
+        {"or": [
+          {"itemNotCollectedAtNode": 7},
+          {"itemNotCollectedAtNode": 8}
+        ]},
+        "h_canArtificialMorphSpringBall",
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
+        "h_canNavigateUnderwater",
+        "canSnailClimb",
+        {"or": [
+          "Gravity",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canCrouchJump",
+              "canDownGrab"
+            ]}
+          ]}
+        ]}
+      ],
+      "reusableRoomwideNotable": "Aqueduct G-Mode Overload PLMs - PB the Items",
+      "note": [
+        "PLMs can be overloaded in direct G-Mode with a single Power Bomb if both items are still there and 2 PBs if only one item is.",
+        "There is a row of tiles that works, just above and to the left of the right door.",
+        "The row is one tile higher than the horizontal pipe that is part of the door frame, spanning from the left to one tile away from the right wall."
+      ],
+      "devNote": "This does not include canRiskPermanentLossOfAccess, as it is only worth doing this strat if the items are there."
     },
     {
       "link": [6, 9],
       "name": "Base",
       "requires": []
+    },
+    {
+      "link": [6, 10],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": []
+    },
+    {
+      "link": [6, 11],
+      "name": "G-Mode Overload PLMs with Grapple",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "Grapple",
+        "h_canNavigateUnderwater"
+      ],
+      "note": "Overload PLMs using the Grapple Blocks."
     },
     {
       "link": [7, 8],
@@ -1398,6 +1731,20 @@
       ]
     },
     {
+      "link": [9, 1],
+      "name": "G-Mode Setup - Get Hit By Yard, from Above",
+      "notable": false,
+      "requires": [
+        "h_canDestroyBombWalls"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
+    },
+    {
       "link": [9, 2],
       "name": "Base",
       "requires": []
@@ -1424,7 +1771,11 @@
       "requires": [
         "Gravity",
         "canLateralMidAirMorph",
-        "canCarefulJump"
+        "canCarefulJump",
+        {"or": [
+          "canTrickyJump",
+          "canSpringBallBounce"
+        ]}
       ]
     },
     {
@@ -1433,8 +1784,17 @@
       "requires": [
         "canSuitlessMaridia",
         "canStationaryLateralMidAirMorph",
-        "canSpringBallJumpMidAir",
+        "canTrickySpringBallJump",
         "canResetFallSpeed"
+      ]
+    },
+    {
+      "link": [9, 5],
+      "name": "Spring Fling",
+      "requires": [
+        "canSuitlessMaridia",
+        "h_canSpringFling",
+        "canTrickySpringBallJump"
       ]
     },
     {
@@ -1461,9 +1821,9 @@
       "name": "Aqueduct Top Door Crouch Jump",
       "requires": [
         "canCrouchJump",
-        "canCarefulJump"
+        "canTrickyJump"
       ],
-      "note": "Crouch on the ledge to the left where Samus is mostly hanging off, jump then move over quickly without spin jumping."
+      "note": "Crouch on rightmost pixel of the ledge to the left of the door, jump then move over quickly without spin jumping."
     },
     {
       "link": [9, 9],
@@ -1471,6 +1831,113 @@
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [10, 1],
+      "name": "Overload PLMs - Bomb the Speed Blocks, To the Middle Left Door",
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ]
+    },
+    {
+      "link": [10, 2],
+      "name": "Break the Power Bomb Blocks",
+      "requires": [
+        "h_canArtificialMorphPowerBomb"
+      ],
+      "clearsObstacles": ["A"],
+      "note": "Place a Power Bomb, then exit G-Mode to break the blocks."
+    },
+    {
+      "link": [10, 7],
+      "name": "Overload PLMs - Bomb the Speed Blocks, To the Top Right Items",
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ]
+    },
+    {
+      "link": [10, 11],
+      "name": "Overload PLMs - Bomb the Speed Blocks",
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ]
+    },
+    {
+      "link": [10, 11],
+      "name": "Overload PLMs - Bomb the Speed Blocks",
+      "requires": [
+        "h_canUseMorphBombs",
+        {"or": [
+          "canSnailClimb",
+          "Gravity",
+          "HiJump"
+        ]}
+      ],
+      "note": "Bomb the Speed blocks by the right door."
+    },
+    {
+      "link": [10, 11],
+      "name": "Overload PLMs - Morphed Suitless Snail Climb",
+      "requires": [
+        "h_canArtificialMorphBombs",
+        "HiJump",
+        "h_canArtificialMorphSpringBall",
+        "canSnailClimb"
+      ]
+    },
+    {
+      "link": [10, 11],
+      "name": "Overload PLMs - Morphed Suitless Snail Climb, No Jump Assist",
+      "requires": [
+        "h_canArtificialMorphBombs",
+        "h_canArtificialMorphSpringBall",
+        "canSnailClimb",
+        "canTrickyJump"
+      ],
+      "note": [
+        "It is barely possible to start a snail climb with just Spring Ball.",
+        "Get a snail positioned such that it is on the bottom of an overhang above, and sticking out a bit to be usable as a platform.",
+        "Use Spring Ball to jump and press against the snail for the maximum possible duration, in order to gain enough height to get onto it."
+      ]
+    },
+    {
+      "link": [11, 1],
+      "name": "G-Mode Overloaded PLMs Through the Bomb Blocks",
+      "requires": [
+        {"or": [
+          "canSnailClimb",
+          {"and": [
+            "Gravity",
+            {"or": [
+              "SpaceJump",
+              "canConsecutiveWalljump"
+            ]}
+          ]}
+        ]}
+      ],
+      "note": "After PLMs are overloaded, climb to the top left door and fall through the Bomb Blocks."
+    },
+    {
+      "link": [11, 7],
+      "name": "G-Mode Overloaded PLMs Through the Speed Blocks",
+      "requires": [
+        "canSnailClimb",
+        {"or": [
+          "Gravity",
+          "h_canMaxHeightSpringBallJump",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canCrouchJump",
+              "canDownGrab"
+            ]}
+          ]}
+        ]}
+      ],
+      "note": "After PLMs are overloaded, use a snail to help climb to the top right items."
     }
   ]
 }

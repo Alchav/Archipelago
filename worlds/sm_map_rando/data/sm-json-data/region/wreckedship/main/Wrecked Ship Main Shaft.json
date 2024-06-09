@@ -185,6 +185,7 @@
       "to": [
         {"id": 2},
         {"id": 4},
+        {"id": 5},
         {"id": 6},
         {"id": 8}
       ]
@@ -213,6 +214,7 @@
     {
       "from": 5,
       "to": [
+        {"id": 2},
         {"id": 3},
         {"id": 4},
         {"id": 5},
@@ -333,6 +335,22 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave With Runway - Frozen Atomic",
+      "requires": [
+        "f_DefeatedPhantoon",
+        "h_canFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 8,
+          "openEnd": 0
+        }
+      },
+      "note": "Position and freeze an Atomic to extend the runway. Maintain a half-tile gap between the runway to extend it as far as possible.",
+      "devNote": "It could be possible to freeze a Covern in its place, but it seems very difficult to position."
+    },
+    {
+      "link": [2, 2],
       "name": "G-Mode Setup - Get Hit By Covern or Atomic",
       "notable": false,
       "requires": [],
@@ -358,6 +376,90 @@
       "link": [2, 4],
       "name": "Base",
       "requires": []
+    },
+    {
+      "link": [2, 4],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 5,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 115
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 70
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 21}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 5],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 5,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 5
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 6],
@@ -416,7 +518,8 @@
           "length": 14,
           "openEnd": 0
         }
-      }
+      },
+      "devNote": "FIXME: It may be possible to extend this runway with a frozen Atomic or Covern."
     },
     {
       "link": [3, 3],
@@ -572,6 +675,25 @@
     },
     {
       "link": [3, 7],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
+      "requires": [
+        "canMoonfall",
+        "canOffScreenMovement"
+      ],
+      "note": [
+        "Moonfall twice, on the right or left side of the shot blocks.",
+        "This will put Samus inside of shotblocks, which can be cleared by shooting.",
+        "If on the left side, perform two more moonfalls.",
+        "The camera will be misaligned after the door transition."
+      ]
+    },
+    {
+      "link": [3, 7],
       "name": "Atomic Ice Moonfall Door Lock Skip",
       "requires": [
         "f_DefeatedPhantoon",
@@ -646,7 +768,7 @@
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump",
           {"and": [
-            "SpringBall",
+            "h_canArtificialMorphSpringBall",
             "HiJump"
           ]}
         ]},
@@ -656,6 +778,36 @@
         "Use the camera scroll blocks just right of the bomb blocks, in order to overload PLMs and go through them.",
         "Exit g-mode and travel to the item and back while off screen."
       ]
+    },
+    {
+      "link": [3, 8],
+      "name": "Wrecked Ship Main Shaft Spooky Missiles Temporary Blue with Frozen Enemy Runway",
+      "notable": true,
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "f_DefeatedPhantoon",
+          {"and": [
+            "SpaceJump",
+            "h_canTrickyFrozenEnemyRunway"
+          ]}
+        ]},
+        "canSlowShortCharge",
+        {"canShineCharge": {
+          "usedTiles": 14,
+          "openEnd": 0,
+          "steepUpTiles": 3
+        }},
+        "canTemporaryBlue",
+        "Morph"
+      ],
+      "note": [
+        "Use a frozen Atomic or Covern to extend the runway in front of the Spooky Missiles bomb block, then use temporary blue into a morph ball bounce to break it.",
+        "Position the enemy horizontally centered in the hole to extend the runway all the way to the wall.",
+        "Positioning a Covern is tricky. One way to set this up is with Space Jump.",
+        "Perform Space Jumps half way between the desired Covern position and the ceiling until the Covern spawns in the correct position."
+      ],
+      "devNote": "FIXME: There may be other ways to set up the Covern positioning without Space Jump."
     },
     {
       "link": [4, 1],
@@ -668,6 +820,94 @@
       "requires": []
     },
     {
+      "link": [4, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged (Full Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 12,
+          "openEnd": 0,
+          "steepDownTiles": 7
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 80
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [4, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged (Short Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 5,
+          "openEnd": 1,
+          "steepDownTiles": 3
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 115
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [4, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 70
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [4, 2],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        {"shinespark": {
+          "frames": 21
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
       "link": [4, 4],
       "name": "Leave with Runway",
       "requires": [],
@@ -678,6 +918,29 @@
           "steepUpTiles": 7
         }
       }
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Runway - Frozen Atomic or Covern",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "f_DefeatedPhantoon",
+          "h_canTrickyFrozenEnemyRunway"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 14,
+          "openEnd": 0,
+          "steepUpTiles": 7
+        }
+      },
+      "note": [
+        "Lure an Atomic or get a Covern to spawn to slightly extend the runway.",
+        "Positioning a Covern is a bit tricky. Consecutive wall jump or Space Jump in place above the gap but not quite at the ceiling,",
+        "or perform full height jumps to sometimes get the Covern to spawn in position. A crouch shot may help freeze the Coven when it is in position."
+      ]
     },
     {
       "link": [4, 4],
@@ -734,6 +997,50 @@
       "requires": []
     },
     {
+      "link": [4, 5],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 12,
+          "openEnd": 0,
+          "steepDownTiles": 7
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 75
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [4, 5],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 150
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
       "link": [4, 6],
       "name": "G-mode Morph Overload PLMs",
       "entranceCondition": {
@@ -780,6 +1087,25 @@
       ]
     },
     {
+      "link": [5, 2],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 155
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 17}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
       "link": [5, 3],
       "name": "Base",
       "requires": []
@@ -788,6 +1114,25 @@
       "link": [5, 4],
       "name": "Base",
       "requires": []
+    },
+    {
+      "link": [5, 4],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 155
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 2}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [5, 4],
@@ -819,6 +1164,35 @@
           "steepUpTiles": 6
         }
       }
+    },
+    {
+      "link": [5, 5],
+      "name": "Leave With Runway - Frozen Atomic or Covern",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "f_DefeatedPhantoon",
+          {"and": [
+            "SpaceJump",
+            "h_canTrickyFrozenEnemyRunway"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 14,
+          "openEnd": 0,
+          "steepUpTiles": 6
+        }
+      },
+      "note": [
+        "Lure an Atomic or get a Covern to spawn to extend the runway.",
+        "Position the enemy horizontally centered in the hole to extend the runway all the way to the wall.",
+        "Positioning a Covern is tricky. One way to set this up is with Space Jump.",
+        "Align Samus left against the tile in the ceiling to align the Covern horizontally, then perform short Space Jumps half way between",
+        "the desired Covern position and the ceiling until the Covern spawns in the correct position."
+      ],
+      "devNote": "FIXME: There may be other ways to set up the Covern positioning without Space Jump."
     },
     {
       "link": [5, 5],
@@ -854,6 +1228,87 @@
       },
       "requires": [],
       "note": "Use the camera scroll blocks just left of the bomb blocks, in order to overload PLMs and go through them."
+    },
+    {
+      "link": [5, 8],
+      "name": "Temporary Blue (In-Room)",
+      "requires": [
+        "canTemporaryBlue",
+        "canLateralMidAirMorph",
+        {"or": [
+          {"canShineCharge": {
+            "usedTiles": 11,
+            "openEnd": 2,
+            "steepUpTiles": 3
+          }},
+          {"and": [
+            "f_DefeatedPhantoon",
+            "h_canFrozenEnemyRunway",
+            {"canShineCharge": {
+              "usedTiles": 13,
+              "openEnd": 1,
+              "steepUpTiles": 3
+            }}
+          ]}
+         ]}
+      ],
+      "clearsObstacles": ["C"],
+      "note": [
+        "Shinecharging up the stairs gives a longer effective runway than shinecharging down them.",
+        "A frozen Atomic (or Covern) can be used for more runway."
+      ],
+      "devNote": "There is 1/2 a unusable tile in this runway."
+    },
+    {
+      "link": [5, 8],
+      "name": "Temporary Blue Chain (In-Room)",
+      "requires": [
+        "canChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"or": [
+          {"and": [
+            "can4HighMidAirMorph",
+            {"doorUnlockedAtNode": 5},
+            {"canShineCharge": {
+              "usedTiles": 11,
+              "openEnd": 2,
+              "steepUpTiles": 7
+            }}
+          ]},
+          {"and": [
+            "f_DefeatedPhantoon",
+            "h_canFrozenEnemyRunway",
+            "can4HighMidAirMorph",
+            {"doorUnlockedAtNode": 5},
+            {"canShineCharge": {
+              "usedTiles": 13,
+              "openEnd": 1,
+              "steepUpTiles": 7
+            }}
+          ]},
+          {"canShineCharge": {
+            "usedTiles": 10,
+            "openEnd": 2,
+            "steepUpTiles": 7
+          }},
+          {"and": [
+            "f_DefeatedPhantoon",
+            "h_canFrozenEnemyRunway",
+            {"canShineCharge": {
+              "usedTiles": 12,
+              "openEnd": 1,
+              "steepUpTiles": 7
+            }}
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["C"],
+      "note": [
+        "Shinecharging up the stairs gives a longer effective runway than shinecharging down them.",
+        "Bounce down the stairs to make movement simpler.",
+        "A frozen Atomic (or Covern) can be used for more runway."
+      ],
+      "devNote": "There is 1/2 a unusable tile in this runway."
     },
     {
       "link": [5, 8],
@@ -1004,9 +1459,19 @@
       "name": "Blocks Already Broken",
       "requires": [
         "Morph",
-        {"obstaclesCleared": ["B"]}
+        {"obstaclesCleared": ["B"]},
+        {"or": [
+          {"and": [
+            "canCarefulJump",
+            "canDisableEquipment"
+          ]},
+          "h_canUseSpringBall"
+        ]}
       ],
-      "note": "Crouch Jump then Morph from the stairs or run and jump then Morph with no movement assists."
+      "note": [
+        "If Spring Ball is unavailable, then either crouch jump and morph from the stairs, or run and jump into morph from the right of the stairs.",
+        "If you have HiJump, it must be disabled."
+      ]
     },
     {
       "link": [7, 3],
@@ -1024,10 +1489,20 @@
         {"or": [
           "Wave",
           "Spazer"
+        ]},
+        {"or": [
+          {"and": [
+            "canCarefulJump",
+            "canDisableEquipment"
+          ]},
+          "h_canUseSpringBall"
         ]}
       ],
       "clearsObstacles": ["B"],
-      "note": "Crouch Jump then Morph from the stairs or run and jump then Morph with no movement assists."
+      "note": [
+        "If Spring Ball is unavailable, then either crouch jump and morph from the stairs, or run and jump into morph from the right of the stairs.",
+        "If you have HiJump, it must be disabled."
+      ]
     },
     {
       "link": [7, 3],
@@ -1043,7 +1518,7 @@
     },
     {
       "link": [7, 3],
-      "name": "Partial Covern Ice Clip",
+      "name": "Wrecked Ship Main Shaft Partial Covern Ice Clip",
       "notable": true,
       "requires": [
         "Morph",
@@ -1059,34 +1534,90 @@
       ]
     },
     {
+      "link": [7, 3],
+      "name": "R-Mode Standup to Shoot the Shot Blocks",
+      "entranceCondition": {
+        "comeInWithRMode": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "Morph",
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess",
+        {"or": [
+          "canBePatient",
+          "Plasma"
+        ]}
+      ],
+      "clearsObstacles": ["B"],
+      "note":  [
+        "In R-Mode, kill the Coverns until there is Energy in Samus's Reserves. Get into the Morph tunnel and go to the far left.",
+        "Wait for Coverns to damage Samus down until Reserves trigger, forcing a stand up and enabling her to shoot the shot blocks and escape."
+      ]
+    },
+    {
       "link": [7, 7],
       "name": "Coverns and Atomics Farm (Power Off)",
       "requires": [
+        {"not": "f_DefeatedPhantoon"},
         "canRiskPermanentLossOfAccess",
         {"or": [
           "Ice",
           "Wave",
           "Spazer",
           "Plasma",
-          "h_canUseMorphBombs"
+          {"and": [
+            "h_canUseMorphBombs",
+            "ScrewAttack"
+          ]}
         ]},
+        {"resetRoom": {
+          "nodes": [7],
+          "mustStayPut": false
+        }},
         {"refill": ["Energy", "Missile", "Super"]}
       ],
       "note": [
         "To shoot the Atomics with Ice or Plasma, crouch near the edge of the glass and shoot forward;",
         "angled shots downwards also work but from a tile further back."
+      ],
+      "devNote": [
+        "Killing the Coverns with any of these options can be done on a single cycle.",
+        "Screw Attack can kill the Coverns quickly, but can't kill the Atomics. Bombs can kill the Atimics easily, but not the Coverns.",
+        "FIXME: Should this require another tech? canRiskPermanentLossOfAccess is a pretty high-level requirement."
       ]
+    },
+    {
+      "link": [7, 7],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
     },
     {
       "link": [7, 7],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "no"
       },
       "requires": [
         {"shinespark": {"frames": 2, "excessFrames": 2}}
       ],
       "note": "Enter on the left side of the doorway to reduce the amount of energy used.",
+      "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
+    },
+    {
+      "link": [7, 7],
+      "name": "Shinespark (through Toilet)",
+      "entranceCondition": {
+        "comeInWithSpark": {},
+        "comesThroughToilet": "yes"
+      },
+      "requires": [
+        {"shinespark": {"frames": 9, "excessFrames": 9}}
+      ],
       "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
     },
     {
@@ -1180,7 +1711,7 @@
         {"not": "f_DefeatedPhantoon"},
         "canRiskPermanentLossOfAccess",
         "canTemporaryBlue",
-        "can3HighMidAirMorph",
+        "can4HighMidAirMorph",
         "canSpringBallBounce",
         {"canShineCharge": {
           "usedTiles": 16,

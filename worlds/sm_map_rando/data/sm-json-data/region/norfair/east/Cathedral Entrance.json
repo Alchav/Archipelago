@@ -83,13 +83,16 @@
       "from": 1,
       "to": [
         {"id": 1},
-        {"id": 3}
+        {"id": 3},
+        {"id": 5}
       ]
     },
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
+        {"id": 3},
         {"id": 5}
       ]
     },
@@ -129,6 +132,17 @@
       ]
     }
   ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Cathedral Entrance 10 Power Bomb Crystal Flash",
+      "note": [
+        "Use a Sm. Dessgeega to collect a Power Bomb, to be able to perform a Crystal Flash with a capacity of only 10 Power Bombs.",
+        "Normalized whole-room movement can be used to manipulate the Sm. Dessgeegas, to be able to do this strat reliably without heat protection.",
+        "For details, see the individual strats, as the specific technique depends on whether entering from the left or right side of the room."
+      ]
+
+    }
+  ],
   "strats": [
     {
       "link": [1, 1],
@@ -152,8 +166,73 @@
       "link": [1, 3],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 150}
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Shinespark (Come In Shinecharged)",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 100
+        }
+      },
+      "requires": [
+        "canShinechargeMovement",
+        "canHorizontalShinespark",
+        {"heatFrames": 155},
+        {"shinespark": {"frames": 54, "excessFrames": 15}},
+        {"heatFrames": 105}
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Cathedral Entrance 10 Power Bomb Crystal Flash",
+      "notable": true,
+      "reusableRoomwideNotable": "Cathedral Entrance 10 Power Bomb Crystal Flash",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 0.0,
+          "maxTiles": 0.0625,
+          "speedBooster": false
+        }
+      },
+      "requires": [
+        "canPrepareForNextRoom",
+        {"heatFrames": 570},
+        "h_can10PowerBombCrystalFlash"
+      ],
+      "note": [
+        "Normalized movement through the room can be used to manipulate the Sm. Dessgeegas and do this strat reliably without heat protection.",
+        "The following is one way to do this; other approaches may also be possible.",
+        "Before entering the room, damage down to between 127 and 159 energy, and unequip Speed Booster if it is collected.",
+        "Position one pixel away from the door in the previous room.",
+        "Hold angle-down (and optionally dash), enter the door transition, then hold shot while continuing to hold forward, angle-down, and dash.",
+        "The shot block will be destroyed by the buffered shot.",
+        "Continue holding right and dash to run under both Sm. Dessgeegas.",
+        "After running under the second one, stop for a moment to prevent it from scrolling off camera.",
+        "Morph, roll all the way against the right wall and quickly lay a Power Bomb.",
+        "Move slightly to the left to avoid being bounced by the Power Bomb explosion.",
+        "As the Sm. Dessgeega approaches, roll under it to the left to avoid being hit.",
+        "Roll back to the right to collect its Power Bomb drop (which should be a ground level) and return to where the Power Bomb was laid, in time to perform the Crystal Flash inputs."
+      ],
+      "devNote": [
+        "The heat frames include about a half second of leniency to position in the previous room in case it is also heated.",
+        "FIXME: Find some way to properly express being above health bomb range, though it shouldn't be a serious problem here.",
+        "Without heat protection, this is already accounted for by the heatFrames (though this is a bit hacky).",
+        "With heat protection, it should be possible to farm a bit to get out of health bomb range."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 45}
       ]
     },
     {
@@ -175,18 +254,68 @@
       ]
     },
     {
+      "link": [2, 3],
+      "name": "Shinespark (Come In Shinecharged)",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 105
+        }
+      },
+      "requires": [
+        "canShinechargeMovement",
+        "canHorizontalShinespark",
+        {"heatFrames": 195},
+        {"shinespark": {"frames": 58, "excessFrames": 0}},
+        {"heatFrames": 105}
+      ]
+    },
+    {
       "link": [2, 5],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 150}
+      ]
+    },
+    {
+      "link": [2, 5],
+      "name": "Cathedral Entrance 10 Power Bomb Crystal Flash",
+      "notable": true,
+      "reusableRoomwideNotable": "Cathedral Entrance 10 Power Bomb Crystal Flash",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 0.0,
+          "maxTiles": 0.0625,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "canPrepareForNextRoom",
+        {"heatFrames": 420},
+        "h_can10PowerBombCrystalFlash"
+      ],
+      "note": [
+        "A normalized entrance to the room can be used to manipulate the Sm. Dessgeegas and do this strat reliably without heat protection.",
+        "The following is one way to do this; other approaches may also be possible.",
+        "Before entering the room, damage down to between 90 and 125 energy.",
+        "Position one pixel away from the door in the previous room.",
+        "Enter the door transition (with or without holding dash), then hold dash and left until falling off the platform.",
+        "Turn around and hold right, landing in the corner.",
+        "Morph and lay a Power Bomb.",
+        "Move slightly to the left to avoid being bounced by the Power Bomb explosion.",
+        "As the Sm. Dessgeega approaches, roll under it to the left to avoid being hit.",
+        "Roll back to the right to collect its Power Bomb drop (which should be a ground level) and return to where the Power Bomb was laid, in time to perform the Crystal Flash inputs."
+      ],
+      "devNote": [
+        "The heat frames include about a half second of leniency to position in the previous room in case it is also heated.",
+        "FIXME: Find some way to properly express being above health bomb range, though it shouldn't be a serious problem here.",
+        "Without heat protection, this is already accounted for by the heatFrames (though this is a bit hacky).",
+        "With heat protection, it should be possible to farm a bit to get out of health bomb range."
       ]
     },
     {
       "link": [3, 1],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canBombThings",
         {"heatFrames": 450}
       ],
@@ -196,7 +325,6 @@
       "link": [3, 1],
       "name": "Base with Spring Ball",
       "requires": [
-        "h_canNavigateHeatRooms",
         "h_canUseSpringBall",
         {"heatFrames": 375}
       ]
@@ -205,7 +333,6 @@
       "link": [3, 1],
       "name": "Sova Boost",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canNeutralDamageBoost",
         "Morph",
         {"enemyDamage": {
@@ -233,7 +360,6 @@
       "link": [3, 1],
       "name": "Up from Below",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           "canPreciseWalljump",
           "SpaceJump",
@@ -253,7 +379,6 @@
       "name": "Cathedral Entrance Left Door Frozen Sova Step",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canUseFrozenEnemies",
         "canTrickyJump",
         "canCameraManip",
@@ -272,7 +397,6 @@
       "link": [3, 2],
       "name": "Frozen Sova",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canUseFrozenEnemies",
         {"heatFrames": 950}
       ]
@@ -282,7 +406,6 @@
       "name": "Cathedral Entrance Sova Morph Only Boost",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canInsaneWalljump",
         "Morph",
         "canNeutralDamageBoost",
@@ -341,7 +464,6 @@
       "link": [3, 4],
       "name": "Plasma Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Plasma",
         {"heatFrames": 100}
       ]
@@ -350,7 +472,6 @@
       "link": [3, 4],
       "name": "Screw Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         "ScrewAttack",
         {"heatFrames": 100}
       ]
@@ -359,7 +480,6 @@
       "link": [3, 4],
       "name": "Ammo Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"enemyKill": {
           "enemies": [["Sm. Dessgeega", "Sm. Dessgeega"]],
           "explicitWeapons": ["Missile", "Super"]
@@ -371,7 +491,6 @@
       "link": [3, 4],
       "name": "Intermediate Beam Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           "Wave",
           "Spazer"
@@ -383,7 +502,6 @@
       "link": [3, 4],
       "name": "Power Beam Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 350}
       ]
     },
@@ -391,7 +509,6 @@
       "link": [3, 5],
       "name": "Tank a Hit",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 150},
         {"enemyDamage": {
           "enemy": "Sm. Dessgeega",
@@ -404,7 +521,6 @@
       "link": [3, 5],
       "name": "Mockball Through",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canMockball",
         {"heatFrames": 100}
       ]
@@ -413,7 +529,6 @@
       "link": [4, 1],
       "name": "Shinespark",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"canShineCharge": {
           "usedTiles": 33,
           "openEnd": 2
@@ -430,7 +545,6 @@
       "link": [4, 1],
       "name": "Shinespark With Plasma",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Plasma",
         {"canShineCharge": {
           "usedTiles": 33,
@@ -452,7 +566,6 @@
       "link": [4, 1],
       "name": "Cathedral Entrance Hero Shot Shinespark",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canHeroShot",
         {"canShineCharge": {
           "usedTiles": 33,
@@ -474,7 +587,6 @@
       "name": "Cathedral Entrance Speedjump (Right to Left)",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyDashJump",
         {"heatFrames": 150}
       ],
@@ -507,6 +619,11 @@
           "framesRemaining": 35
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 240}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 40}]}
+      ],
       "note": "Kill the enemies, break the shot block, then use the bottom to charge a spark. Quickly climb up before the block respawns, and continue through the left door."
     },
     {
@@ -532,13 +649,17 @@
           "framesRemaining": 25
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 500}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 180}]}
+      ],
       "note": "Kill the enemies, then use the bottom to charge a spark. Shoot the shot block from the ground and follow it up so that it breaks, and continue through the left door."
     },
     {
       "link": [4, 2],
       "name": "Shinespark",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canWalljump",
         "canShinechargeMovement",
         {"canShineCharge": {
@@ -557,7 +678,6 @@
       "name": "Cathedral Entrance Speedjump (Left to Right)",
       "notable": true,
       "requires": [
-        "h_canNavigateHeatRooms",
         "canTrickyDashJump",
         "canWalljump",
         {"heatFrames": 150}
@@ -585,6 +705,11 @@
           "framesRemaining": 60
         }
       },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 180}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 120}]}
+      ],
       "note": "Kill the enemies and use the bottom to charge a spark. Quickly climb then spark through the right door."
     },
     {
@@ -610,7 +735,6 @@
       "link": [5, 2],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           {"and": [
             "HiJump",
@@ -627,7 +751,6 @@
       "link": [5, 2],
       "name": "Move Assist Leave with Runway",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           {"and": [
             "HiJump",
@@ -644,7 +767,12 @@
           "length": 5,
           "openEnd": 0
         }
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+      ]
     },
     {
       "link": [5, 2],
@@ -690,7 +818,6 @@
       "link": [5, 3],
       "name": "Base",
       "requires": [
-        "h_canNavigateHeatRooms",
         "canDodgeWhileShooting",
         {"heatFrames": 350}
       ]
@@ -699,7 +826,6 @@
       "link": [5, 3],
       "name": "Tank a Hit",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 160},
         {"enemyDamage": {
           "enemy": "Sm. Dessgeega",
@@ -712,7 +838,6 @@
       "link": [5, 4],
       "name": "Plasma Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         "Plasma",
         {"heatFrames": 100}
       ]
@@ -721,7 +846,6 @@
       "link": [5, 4],
       "name": "Screw Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         "ScrewAttack",
         {"heatFrames": 100}
       ]
@@ -730,7 +854,6 @@
       "link": [5, 4],
       "name": "Ammo Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"enemyKill": {
           "enemies": [["Sm. Dessgeega", "Sm. Dessgeega"]],
           "explicitWeapons": ["Missile", "Super"]
@@ -742,7 +865,6 @@
       "link": [5, 4],
       "name": "Intermediate Beam Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           "Wave",
           "Spazer"
@@ -754,7 +876,6 @@
       "link": [5, 4],
       "name": "Power Beam Kill",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 350}
       ]
     }

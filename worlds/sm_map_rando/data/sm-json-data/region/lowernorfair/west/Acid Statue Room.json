@@ -15,25 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019846",
-      "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Acid Statue Room Top Right Door (to Main Hall)",
-          "length": 1,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 50}
-              ]
-            }
-          ],
-          "usableComingIn": false,
-          "openEnd": 1
-        }
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -48,23 +30,6 @@
             "Technically it is acid if entering from node 1 and the statue hasn't been cleared, but that doesn't seem worth modeling.",
             "The acid is not there regardless when entering from node 2."
           ]
-        }
-      ],
-      "runways": [
-        {
-          "name": "Base Runway - Acid Statue Room Bottom Right Door (to Golden Torizo)",
-          "length": 3,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canNavigateHeatRooms",
-                {"heatFrames": 75}
-              ]
-            }
-          ],
-          "openEnd": 1
         }
       ]
     },
@@ -83,8 +48,8 @@
               "name": "Base",
               "notable": false,
               "requires": [
-                "h_canNavigateHeatRooms",
                 "h_canActivateAcidChozo",
+                {"obstaclesNotCleared": ["A"]},
                 "h_canUsePowerBombs",
                 {"heatFrames": 1000}
               ]
@@ -106,6 +71,14 @@
       "name": "Bottom Junction Right of Morph Tunnel",
       "nodeType": "junction",
       "nodeSubType": "junction"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "A",
+      "name": "Camera Broken",
+      "obstacleType": "abstract",
+      "note": "Represents being off-camera in the top part of the room."
     }
   ],
   "enemies": [
@@ -139,6 +112,7 @@
       "from": 2,
       "to": [
         {"id": 2},
+        {"id": 3},
         {"id": 5}
       ]
     },
@@ -172,6 +146,17 @@
     }
   ],
   "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 2,
+          "openEnd": 1
+        }
+      }
+    },
     {
       "link": [1, 1],
       "name": "Crystal Flash",
@@ -209,14 +194,29 @@
     {
       "link": [1, 3],
       "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {}
+      },
       "requires": [
         "h_canNavigateHeatRooms",
-        {"canComeInCharged": {
-          "framesRemaining": 0,
-          "fromNode": 1
-        }},
         {"heatFrames": 125},
         {"shinespark": {"frames": 36}}
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "SpringFling over the acid",
+      "requires": [
+        "canSpringFling",
+        "canDisableEquipment",
+        "SpeedBooster",
+        "canTrickyJump",
+        "canLateralMidAirMorph",
+        {"heatFrames": 210}
+      ],
+      "note": [
+        "Begin with SpeedBooster unequipped, and run&jump over the acid into an airball.",
+        "Once Samus begins falling, equip SpringBall and SpeedBooster to safely land on the other side near the statue."
       ]
     },
     {
@@ -251,7 +251,7 @@
           "canSpringBallJumpMidAir",
           "canGravityJump",
           {"and": [
-            "canIBJ",
+            "h_canIBJ",
             {"acidFrames": 1050},
             {"heatFrames": 1050}
           ]}
@@ -301,6 +301,52 @@
       ]
     },
     {
+      "link": [1, 3],
+      "name": "Grapple Teleport Crystal Flash (from Red Brinstar Firefleas)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 220},
+        "h_canCrystalFlash",
+        {"heatFrames": 20},
+        "canOffScreenMovement"
+      ],
+      "clearsObstacles": ["A"],
+      "note": [
+        "Grapple teleporting here will spawn Samus inside the wall behind the Acid Chozo statue.",
+        "To escape, perform a Crystal Flash to stand up, then morph and roll out to the right.",
+        "Samus will be visible but off-camera, making the movement tricky.",
+        "While off camera, the Chozo hand will not function (i.e., will not trigger the acid lowering cutscene)."
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Grapple Teleport Power Bomb (from Moat)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [
+        "h_canUsePowerBombs",
+        {"heatFrames": 220},
+        "canOffScreenMovement"
+      ],
+      "clearsObstacles": ["A"],
+      "note": [
+        "After teleporting, press down to retract Grapple.",
+        "Samus will be inside the Power Bomb blocks behind the Acid Chozo statue hand.",
+        "Use a Power Bomb, wait to begin falling, then hold right to roll out under the hand.",
+        "Samus will be visible but off-camera, making the movement tricky.",
+        "Holding right too early after laying the Power Bomb will cause Samus to get stuck inside the Chozo hand;",
+        "in this case, Samus can get out by unmorphing, remorphing, and rolling to the right on top of the hand.",
+        "While off camera, the Chozo hand will not function (i.e., will not trigger the acid lowering cutscene)."
+      ]
+    },
+    {
       "link": [1, 4],
       "name": "Base",
       "requires": [
@@ -311,9 +357,66 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
         "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Grapple Teleport Crystal Flash (from Red Brinstar Firefleas)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 220},
+        "h_canCrystalFlash",
+        {"heatFrames": 20},
+        "canOffScreenMovement"
+      ],
+      "clearsObstacles": ["A"],
+      "note": [
+        "Grapple teleporting here will spawn Samus inside the wall behind the Acid Chozo statue.",
+        "To escape, perform a Crystal Flash to stand up, then morph and roll out to the right.",
+        "Samus will be visible but off-camera, making the movement tricky.",
+        "While off camera, the Chozo hand will not function (i.e., will not trigger the acid lowering cutscene)."
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Grapple Teleport Power Bomb (from Moat)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [
+        "h_canUsePowerBombs",
+        {"heatFrames": 220},
+        "canOffScreenMovement"
+      ],
+      "clearsObstacles": ["A"],
+      "note": [
+        "After teleporting, press down to retract Grapple.",
+        "Samus will be inside the Power Bomb blocks behind the Acid Chozo statue hand.",
+        "Use a Power Bomb, wait to begin falling, then hold right to roll out under the hand.",
+        "Samus will be visible but off-camera, making the movement tricky.",
+        "Holding right too early after laying the Power Bomb will cause Samus to get stuck inside the Chozo hand;",
+        "in this case, Samus can get out by unmorphing, remorphing, and rolling to the right on top of the hand.",
+        "While off camera, the Chozo hand will not function (i.e., will not trigger the acid lowering cutscene)."
       ]
     },
     {
@@ -375,12 +478,11 @@
     {
       "link": [2, 5],
       "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {}
+      },
       "requires": [
         "h_canNavigateHeatRooms",
-        {"canComeInCharged": {
-          "framesRemaining": 0,
-          "fromNode": 2
-        }},
         {"heatFrames": 125},
         {"shinespark": {"frames": 41, "excessFrames": 6}}
       ]

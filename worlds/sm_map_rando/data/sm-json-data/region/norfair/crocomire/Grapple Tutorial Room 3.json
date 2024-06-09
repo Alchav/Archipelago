@@ -73,6 +73,7 @@
       "from": 1,
       "to": [
         {"id": 1},
+        {"id": 2},
         {"id": 3},
         {"id": 4}
       ]
@@ -80,6 +81,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3}
       ]
@@ -113,9 +115,69 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Gamet",
+      "requires": [
+        "h_canNavigateUnderwater",
+        {"or": [
+          "h_canTrickyFrozenEnemyRunway",
+          {"and": [
+            "h_canFrozenEnemyRunway",
+            "Morph"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Lure the Gamets up out of the water. It may be helpful to freeze them on the ascent to prevent them from separating and moving horizontally.",
+        "Positioning is much easier with Morph; simply morph on the runway before they start separating.",
+        "Freeze a Gamet while there is a half-tile gap between it and the runway in order to extend it as much as possible."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Gamet Farm",
       "requires": [
         {"refill": ["Energy", "Missile", "Super", "PowerBomb"]}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Leave With Runway - Frozen Gamet",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "canTrickyJump",
+        {"or": [
+          "h_canTrickyFrozenEnemyRunway",
+          {"and": [
+            "h_canFrozenEnemyRunway",
+            "Morph"
+          ]}
+        ]},
+        {"or": [
+          {"ammo": {"type": "Super", "count": 1}},
+          {"obstaclesCleared": ["A"]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 9,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Lure the Geemers up out of the water. It may be helpful to freeze them on the ascent to prevent them from separating and moving horizontally.",
+        "At the top, position a Gamet flush with the central runway. Positioning is much easier with Morph; simply morph on the runway before they start separating.",
+        "Freeze the Gamet before it begins moving horizontally, and it will be able to turn to the right.",
+        "Use it as a frozen platform to cross both bodies of water.",
+        "Lure the Gamet to the right and freeze it while there is a half-tile gap between it and the runway in order to extend it as much as possible."
       ]
     },
     {
@@ -130,7 +192,7 @@
     },
     {
       "link": [1, 3],
-      "name": "Enter Building Shinespark",
+      "name": "Shinespark, Come in Shinecharging",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 3,
@@ -138,6 +200,7 @@
         }
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 54, "excessFrames": 1}}
       ]
     },
@@ -160,7 +223,7 @@
       "notable": true,
       "requires": [
         "h_canNavigateUnderwater",
-        "canCarefulJump",
+        "canTrickyJump",
         "canHorizontalDamageBoost",
         {"enemyDamage": {
           "enemy": "Gamet",
@@ -303,11 +366,19 @@
       "requires": [
         "canSuitlessMaridia",
         "HiJump",
-        "canSpringBallJumpMidAir",
-        "canCrouchJump",
-        "canTrickyJump"
+        "h_canMaxHeightSpringBallJump"
       ],
       "note": "Wait for the water to be rising and perform a max height SpringBall Jump."
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -474,7 +545,11 @@
         "canTrickyJump",
         {"or": [
           "canLateralMidAirMorph",
-          "canPreciseWalljump"
+          "canInsaneWalljump",
+          {"and": [
+            "SpeedBooster",
+            "canPreciseWalljump"
+          ]}
         ]}
       ],
       "note": [
@@ -485,12 +560,21 @@
     },
     {
       "link": [4, 3],
+      "name": "SpringFling",
+      "requires": [
+        "canCarefulJump",
+        "canLateralMidAirMorph",
+        "canSpringFling",
+        "SpeedBooster"
+      ]
+    },
+    {
+      "link": [4, 3],
       "name": "Suitless Double SpringBall Jump",
       "requires": [
         "canSuitlessMaridia",
-        "HiJump",
         "canTrickyJump",
-        "canDoubleSpringBallJumpMidAir"
+        "h_canDoubleSpringBallJumpWithHiJump"
       ],
       "note": "Jump when the water level is at its lowest."
     }

@@ -14,17 +14,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018f8e",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Zero",
-            "notable": false,
-            "requires": [],
-            "note": "The timing to get hit by these guys is a bit tighter, since they are so slow. Buffering their movement with x-ray can help."
-          }
-        ]}
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -39,6 +29,13 @@
       "name": "Dry Platform Junction",
       "nodeType": "junction",
       "nodeSubType": "junction"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "A",
+      "name": "Speed blocks",
+      "obstacleType": "inanimate"
     }
   ],
   "enemies": [
@@ -101,6 +98,19 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Caterpillar",
+      "requires": [
+        "h_canFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
       "name": "Leave Shinecharged (Gravity)",
       "requires": [
         "Gravity",
@@ -109,7 +119,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 120
+          "framesRemaining": 145
         }
       }
     },
@@ -133,12 +143,25 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Zero",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "The timing to get hit by these guys is a bit tighter, since they are so slow. Buffering their movement with x-ray can help."
+      ]
+    },
+    {
       "link": [1, 2],
       "name": "Base",
       "requires": [
         "Gravity",
         "SpeedBooster"
-      ]
+      ],
+      "clearsObstacles": ["A"]
     },
     {
       "link": [1, 2],
@@ -149,11 +172,13 @@
         }
       },
       "requires": [
+        "canHorizontalShinespark",
         {"shinespark": {
           "frames": 155,
           "excessFrames": 10
         }}
-      ]
+      ],
+      "clearsObstacles": ["A"]
     },
     {
       "link": [1, 2],
@@ -170,6 +195,23 @@
       "note": [
         "Roll through the whole room, breaking the speedblocks.",
         "The fish enemies will die but some puyos will remain."
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [1, 2],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [],
+      "devNote": [
+        "This strat has limited usefulness since you will be stuck behind the speed blocks.",
+        "Potentially it could be useful if you could use a flash suit to get out (though this is not yet logic);",
+        "for example, the item could be an Energy Tank and you could need its refill in order to spark out (rather than sparking in).",
+        "It also could be useful if the game were modified to allow retaining items after resetting."
       ]
     },
     {
@@ -196,7 +238,7 @@
         {"or": [
           "canBombJumpWaterEscape",
           {"and": [
-            "SpringBall",
+            "h_canUseSpringBall",
             "h_canJumpIntoIBJ"
           ]}
         ]}
@@ -228,8 +270,9 @@
     {
       "link": [2, 1],
       "name": "Base",
-      "requires": [],
-      "note": "Speed blocks are ignored here because it's impossible to reach node 2 without breaking them."
+      "requires": [
+        {"obstaclesCleared": ["A"]}
+      ]
     },
     {
       "link": [3, 1],
@@ -250,6 +293,12 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {
+          "types": ["ammo"],
+          "requires": []
+        }
+      ],
       "note": "Charge a spark on the dry platform, and jump into a mid-air spark across the room and through the door."
     },
     {
@@ -268,6 +317,12 @@
       "exitCondition": {
         "leaveWithSpark": {}
       },
+      "unlocksDoors": [
+        {
+          "types": ["ammo"],
+          "requires": []
+        }
+      ],
       "note": "Charge a spark going left, then build speed and jump far to the right into a mid-air spark across the room and through the door."
     },
     {
@@ -279,6 +334,7 @@
           "openEnd": 1
         }},
         "canShinechargeMovement",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 72, "excessFrames": 10}}
       ],
       "note": [

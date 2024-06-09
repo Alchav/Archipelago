@@ -82,12 +82,14 @@
                 {"or": [
                   {"and": [
                     "Missile",
-                    "Morph"
+                    "Morph",
+                    "canAwakenZebes"
                   ]},
                   "h_AllItemsSpawned"
                 ]}
               ],
-              "note": "Item doesn't spawn unless Samus has Morph and Missiles, even if Zebes is awake."
+              "note": "Item doesn't spawn unless Samus has Morph and Missiles, even if Zebes is awake.",
+              "devNote": "canAwakenZebes is included to indicate the knowledge for how to spawn the item, the tech's description discusses this item as well."
             }
           ]
         }
@@ -226,7 +228,7 @@
         }
       },
       "requires": [
-        "Bombs"
+        "h_canArtificialMorphBombs"
       ],
       "clearsObstacles": ["A"],
       "note": [
@@ -245,7 +247,7 @@
         }
       },
       "requires": [
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+        "h_canArtificialMorphPowerBomb"
       ],
       "clearsObstacles": ["A"],
       "note": "Lay a Power Bomb to break the bomb blocks leading down to the item, then use X-ray to cancel G-mode, to clear the blocks."
@@ -320,7 +322,7 @@
       },
       "requires": [
         "canTemporaryBlue",
-        "canCarefulJump",
+        "canInsaneJump",
         {"or": [
           "canChainTemporaryBlue",
           {"and": [
@@ -331,7 +333,6 @@
           {"and": [
             "canBlueSpaceJump",
             "canMockball",
-            "canTrickyJump",
             "canSlowShortCharge"
           ]}
         ]}
@@ -386,9 +387,11 @@
       },
       "requires": [
         "h_canArtificialMorphBombHorizontally",
-        {"ammo": {"type": "PowerBomb", "count": 3}},
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
         {"or": [
-          {"ammo": {"type": "PowerBomb", "count": 1}},
+          "h_canArtificialMorphPowerBomb",
           "canTrickyJump"
         ]}
       ],
@@ -410,8 +413,8 @@
         }
       },
       "requires": [
-        "SpringBall",
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+        "h_canArtificialMorphSpringBall",
+        "h_canArtificialMorphPowerBomb"
       ],
       "clearsObstacles": ["A"],
       "note": [

@@ -96,7 +96,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 120
+          "framesRemaining": 135
         }
       }
     },
@@ -234,17 +234,19 @@
           "framesRemaining": 120
         }
       },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "note": "Coming from the left only requires SpeedBooster to kill all the Pirates."
     },
     {
       "link": [1, 2],
       "name": "G-Mode Morph PB Pirate Kill",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump"
@@ -256,17 +258,20 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph PB Pirate Hitbox",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump"
         ]},
-        {"ammo": {"type": "PowerBomb", "count": 3}},
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
         "canHitbox"
       ],
       "note": "IBJ or spring ball bomb jump to avoid the wall jump. Using a total of 3 PBs will allow Samus to roll through the bottom 4 pirates."
@@ -274,12 +279,13 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph Pirate Tank",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           "h_canArtificialMorphIBJ",
           "h_canArtificialMorphSpringBallBombJump"
@@ -295,12 +301,13 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph Overload Speed Blocks",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         "h_canArtificialMorphIBJ",
         {"or": [
           "h_canArtificialMorphCeilingBombJump",
@@ -428,6 +435,18 @@
         }
       },
       "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "requires": [
+        "canMoonfall"
+      ]
     },
     {
       "link": [2, 2],

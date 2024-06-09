@@ -44,6 +44,12 @@
         },
         {"id": 2}
       ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 2}
+      ]
     }
   ],
   "strats": [
@@ -72,7 +78,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [],
       "exitCondition": {
@@ -89,7 +96,8 @@
         "comeInWithGMode": {
           "mode": "any",
           "morphed": true
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [],
       "exitCondition": {
@@ -97,6 +105,14 @@
           "morphed": true
         }
       }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
     }
   ]
 }

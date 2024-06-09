@@ -14,21 +14,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018c6a",
-      "doorEnvironments": [{"physics": "air"}],
-      "runways": [
-        {
-          "name": "Base Runway - Crateria Super Room Top Left Door (to Climb Top)",
-          "length": 5,
-          "strats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": []
-            }
-          ],
-          "openEnd": 1
-        }
-      ]
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -243,7 +229,7 @@
           "h_canArtificialMorphDiagonalBombJump",
           "h_canArtificialMorphCeilingBombJump",
           {"and": [
-            "SpringBall",
+            "h_canArtificialMorphSpringBall",
             {"spikeHits": 3},
             {"or": [
               "h_canArtificialMorphBombHorizontally",
@@ -293,7 +279,28 @@
         "comeInWithSpark": {}
       },
       "requires": [
-        {"shinespark": {"frames": 65}}
+        {"shinespark": {"frames": 65, "excessFrames": 6}}
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Shinespark, Come in Shinecharging",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canHorizontalShinespark",
+        {"or": [
+          {"shinespark": {"frames": 56, "excessFrames": 6}},
+          {"and": [
+            "canShinechargeMovement",
+            "canMidairShinespark",
+            {"shinespark": {"frames": 41, "excessFrames": 4}}
+          ]}
+        ]}
       ]
     },
     {
@@ -316,10 +323,10 @@
         }
       },
       "requires": [
-        "Bombs",
+        "h_canArtificialMorphBombs",
         {"or": [
           {"and": [
-            "SpringBall",
+            "h_canArtificialMorphSpringBall",
             {"spikeHits": 3},
             {"or": [
               "h_canArtificialMorphBombHorizontally",
@@ -395,10 +402,11 @@
       "requires": [
         {"itemNotCollectedAtNode": 3},
         "canRiskPermanentLossOfAccess",
-        {"ammo": {"type": "PowerBomb", "count": 2}},
+        "h_canArtificialMorphPowerBomb",
+        "h_canArtificialMorphPowerBomb",
         {"or": [
           {"and": [
-            "SpringBall",
+            "h_canArtificialMorphSpringBall",
             {"spikeHits": 3},
             {"or": [
               "h_canArtificialMorphBombHorizontally",
@@ -455,11 +463,8 @@
         "canCarefulJump",
         "canSpringBallBounce",
         {"or": [
-          "canTrickyJump",
-          {"canShineCharge": {
-            "usedTiles": 22,
-            "openEnd": 1
-          }}
+          "canTrickyDashJump",
+          "canChainTemporaryBlue"
         ]},
         {"spikeHits": 1}
       ],
@@ -532,28 +537,7 @@
         "canSpeedKeep",
         "canCarefulJump",
         "canSlowShortCharge",
-        "can3HighMidAirMorph",
-        {"spikeHits": 1},
-        "canSpeedball"
-      ],
-      "note": [
-        "Bounce into the spikes and use a SpeedKeep to run on spikes to setup for a speedball towards the item.",
-        "Bouncing on the platform near the door saves a spike hit.",
-        "Or a DamageBoost SpeedKeep could be used instead of a Spike SpeedKeep with enough runspeed."
-      ]
-    },
-    {
-      "link": [1, 6],
-      "name": "SpeedKeep for Temporary Blue, Bounce on Runway",
-      "requires": [
-        "canSpeedKeep",
-        "canCarefulJump",
-        "can3HighMidAirMorph",
-        {"canComeInCharged": {
-          "framesRemaining": 180,
-          "fromNode": 1,
-          "unusableTiles": 13
-        }},
+        "can4HighMidAirMorph",
         {"spikeHits": 1},
         "canSpeedball"
       ],
@@ -659,6 +643,20 @@
       ]
     },
     {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      },
+      "requires": [],
+      "note": [
+        "Samus will enter the room grappled to a spike block below.",
+        "Release Grapple quickly after entering, then aim up and grapple onto a Grapple block on the ceiling to avoid taking spike damage."
+      ]
+    },
+    {
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -688,6 +686,32 @@
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Kill The Boyons",
+      "requires": [
+        {"or": [
+          {"enemyKill": {
+            "enemies": [["Boyon", "Boyon", "Boyon", "Boyon"]],
+            "excludedWeapons": ["Bombs", "PseudoScrew"]
+          }},
+          {"and": [
+            "canBePatient",
+            "h_canUseMorphBombs"
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "type": "contact",
+              "hits": 16
+            }},
+            "canCarefulJump",
+            "canPseudoScrew"
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
     },
     {
       "link": [2, 3],
@@ -745,12 +769,7 @@
           "openEnd": 2
         }},
         {"shinespark": {"frames": 130, "excessFrames": 6}},
-        {"or": [
-          {"enemyKill": {
-            "enemies": [["Boyon", "Boyon", "Boyon", "Boyon"]]
-          }},
-          {"obstaclesCleared": ["A"]}
-        ]}
+        {"obstaclesCleared": ["A"]}
       ],
       "clearsObstacles": ["A"],
       "note": [
@@ -760,17 +779,32 @@
     },
     {
       "link": [2, 3],
-      "name": "Crateria Supers BlueSuit Jump",
+      "name": "Screw Attack Jump",
       "requires": [
         "canCarefulJump",
         "canShinechargeMovement",
+        "ScrewAttack",
         {"canShineCharge": {
           "usedTiles": 33,
           "openEnd": 2
         }},
         {"shinespark": {"frames": 130, "excessFrames": 6}}
       ],
-      "note": "Involves charging a spark running left, then getting blue suit running right to jump through the Boyons."
+      "note": "Store a Shinespark and then jump through the Boyons using Screw Attack."
+    },
+    {
+      "link": [2, 3],
+      "name": "BlueSuit Jump through Boyons",
+      "requires": [
+        "canCarefulJump",
+        "canShinechargeMovementComplex",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"shinespark": {"frames": 130, "excessFrames": 6}}
+      ],
+      "note": "Charge a Shinespark running left, then get blue suit speed by running back to the right to jump through the Boyons."
     },
     {
       "link": [2, 3],
@@ -857,21 +891,35 @@
       "link": [2, 5],
       "name": "Take Boyon Damage",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Boyon",
-          "hits": 1,
-          "type": "contact"
-        }},
         {"or": [
-          {"enemyDamage": {
-            "enemy": "Boyon",
-            "hits": 1,
-            "type": "contact"
-          }},
-          "canCarefulJump"
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "hits": 3,
+              "type": "contact"
+            }},
+            "Gravity",
+            {"acidFrames": 30}
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "hits": 2,
+              "type": "contact"
+            }},
+            "canCarefulJump"
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "hits": 1,
+              "type": "contact"
+            }},
+            "canTrickyJump"
+          ]}
         ]}
       ],
-      "note": "Take damage before attempting to jump through to avoid falling in the acid."
+      "note": "Intentionally take damage before attempting to jump through to avoid falling in the acid."
     },
     {
       "link": [2, 5],
@@ -888,20 +936,11 @@
     },
     {
       "link": [2, 5],
-      "name": "Kill The Boyons",
-      "requires": [
-        {"enemyKill": {
-          "enemies": [["Boyon", "Boyon", "Boyon", "Boyon"]]
-        }}
-      ],
-      "clearsObstacles": ["A"]
-    },
-    {
-      "link": [2, 5],
       "name": "Jump Under Boyons",
       "requires": [
-        "canTrickyJump"
-      ]
+        "canInsaneJump"
+      ],
+      "devNote": "It's not really insane jump difficult, but that is where you think about needing to avoid the damage.  And failing the jump is still very punishing due to falling into the acid."
     },
     {
       "link": [3, 4],
@@ -1010,21 +1049,35 @@
       "link": [5, 2],
       "name": "Take Boyon Damage",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Boyon",
-          "hits": 1,
-          "type": "contact"
-        }},
         {"or": [
-          {"enemyDamage": {
-            "enemy": "Boyon",
-            "hits": 1,
-            "type": "contact"
-          }},
-          "canCarefulJump"
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "hits": 3,
+              "type": "contact"
+            }},
+            "Gravity",
+            {"acidFrames": 30}
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "hits": 2,
+              "type": "contact"
+            }},
+            "canCarefulJump"
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Boyon",
+              "hits": 1,
+              "type": "contact"
+            }},
+            "canTrickyJump"
+          ]}
         ]}
       ],
-      "note": "Take damage before attempting to jump through to avoid falling in the acid."
+      "note": "Intentionally take damage before attempting to jump through to avoid falling in the acid."
     },
     {
       "link": [5, 2],
@@ -1043,9 +1096,16 @@
       "link": [5, 2],
       "name": "Kill The Boyons",
       "requires": [
-        {"enemyKill": {
-          "enemies": [["Boyon", "Boyon", "Boyon", "Boyon"]]
-        }}
+        {"or": [
+          {"enemyKill": {
+            "enemies": [["Boyon", "Boyon", "Boyon", "Boyon"]],
+            "excludedWeapons": ["Bombs", "PseudoScrew"]
+          }},
+          {"and": [
+            "canBePatient",
+            "h_canUseMorphBombs"
+          ]}
+        ]}
       ],
       "clearsObstacles": ["A"]
     },
@@ -1053,8 +1113,9 @@
       "link": [5, 2],
       "name": "Jump Under Boyons",
       "requires": [
-        "canTrickyJump"
-      ]
+        "canInsaneJump"
+      ],
+      "devNote": "It's not really insane jump difficult, but that is where you think about needing to avoid the damage.  And failing the jump is still very punishing due to falling into the acid."
     },
     {
       "link": [6, 3],

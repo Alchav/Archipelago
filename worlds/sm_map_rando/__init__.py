@@ -15,6 +15,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, TextIO, TypedDict
 
 from BaseClasses import LocationProgressType, Region, Entrance, Location, MultiWorld, Item, ItemClassification, CollectionState, Tutorial
 from Fill import fill_restrictive
+from Utils import snes_to_pc
 from worlds.AutoWorld import World, AutoLogicRegister, WebWorld
 from worlds.generic.Rules import set_rule, add_rule, add_item_rule
 
@@ -25,7 +26,7 @@ from .ips import IPS_Patch
 from .Client import SMMRSNIClient
 from importlib.metadata import version, PackageNotFoundError
 
-required_pysmmaprando_version = "0.103.1"
+required_pysmmaprando_version = "0.111.2"
 
 class WrongVersionError(Exception):
     pass
@@ -33,7 +34,8 @@ class WrongVersionError(Exception):
 try:
     if version("pysmmaprando") != required_pysmmaprando_version:
         raise WrongVersionError
-    from pysmmaprando import create_gamedata, APRandomizer, APCollectionState, patch_rom, Options as Pysmmr_options
+    from pysmmaprando import create_gamedata, APRandomizer, APCollectionState, patch_rom, Item as Pysmmr_items, Options as Pysmmr_options
+    from pysmmaprando import ControllerButton, ControllerConfig, CustomizeSettings, MusicSettings, PaletteTheme, ShakingSetting, TileTheme
 
 # required for APWorld distribution outside official AP releases as stated at https://docs.python.org/3/library/zipimport.html:
 # ZIP import of dynamic modules (.pyd, .so) is disallowed.
@@ -58,12 +60,18 @@ except (ImportError, WrongVersionError, PackageNotFoundError) as e:
         import requests
         import zipfile
         import io
+        import glob
+        import shutil
+        dirs_to_delete = glob.glob(f"{os.path.dirname(sys.executable)}/lib/pysmmaprando-*.dist-info")
+        for dir in dirs_to_delete:
+            shutil. rmtree(dir)
         with requests.get(map_rando_lib_file) as r:
             r.raise_for_status()
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall(f"{os.path.dirname(sys.executable)}/lib")
             
-    from pysmmaprando import create_gamedata, APRandomizer, APCollectionState, patch_rom, Options as Pysmmr_options
+    from pysmmaprando import create_gamedata, APRandomizer, APCollectionState, patch_rom, Item as Pysmmr_items, Options as Pysmmr_options
+    from pysmmaprando import ControllerButton, ControllerConfig, CustomizeSettings, MusicSettings, PaletteTheme, ShakingSetting, TileTheme
 
 def GetAPWorldPath():
     filename = sys.modules[__name__].__file__
@@ -155,6 +163,8 @@ class SMMapRandoWorld(World):
         154 : "Maridia"
     }
 
+    nothing_item_id = 22
+
     web = SMMapRandoWeb()
 
     required_client_version = (0, 4, 4)
@@ -179,10 +189,28 @@ class SMMapRandoWorld(World):
     """
 
     def generate_early(self):
+        item_pool = self.options.custom_item_pool.default
+        if self.options.item_pool.value == self.options.item_pool.option_Reduced:
+            item_pool = self.options.custom_item_pool.reduced
+        elif self.options.item_pool.value == self.options.item_pool.option_Custom:
+            item_pool = self.options.custom_item_pool.value
+
+        item_mapping = {
+            "ETank": Pysmmr_items.ETank,
+            "Missile": Pysmmr_items.Missile,
+            "Super": Pysmmr_items.Super,
+            "PowerBomb": Pysmmr_items.PowerBomb,
+            "ReserveTank": Pysmmr_items.ReserveTank
+                        }
+        pysmmr_item_pool = [(item_mapping[key], value) for key, value in item_pool.items()]
+
         options = Pysmmr_options(self.options.preset.value,
                           list(self.options.techs.value),
                           list(self.options.strats.value),
+                          pysmmr_item_pool,
                           self.options.shinespark_tiles.value,
+                          self.options.heated_shinespark_tiles.value,
+                          self.options.shinecharge_leniency_frames.value,
                           self.options.resource_multiplier.value / 100,
                           self.options.gate_glitch_leniency.value,
                           self.options.door_stuck_leniency.value,
@@ -190,8 +218,9 @@ class SMMapRandoWorld(World):
                           self.options.draygon_proficiency.value / 100,
                           self.options.ridley_proficiency.value / 100,
                           self.options.botwoon_proficiency.value / 100,
+                          self.options.mother_brain_proficiency.value / 100,
                           self.options.escape_timer_multiplier.value / 100,
-                          self.options.randomized_start.value == 1,
+                          self.options.start_location_mode.value,
                           self.options.save_animals.value,
                           self.options.early_save.value == 1,
                           self.options.objectives.value,
@@ -204,6 +233,7 @@ class SMMapRandoWorld(World):
                           self.options.escape_refill.value == 1,
                           self.options.escape_movement_items.value == 1,
                           self.options.mark_map_stations.value == 1,
+                          self.options.room_outline_revealed.value == 1,
                           self.options.transition_letters.value == 1,
                           self.options.item_markers.value,
                           self.options.item_dots_disappear.value == 1,
@@ -218,8 +248,9 @@ class SMMapRandoWorld(World):
                           self.options.momentum_conservation.value == 1,
                           self.options.wall_jump.value,
                           self.options.etank_refill.value,
-                          self.options.maps_revealed.value == 1,
+                          self.options.maps_revealed.value,
                           self.options.map_layout.value,
+                          self.options.energy_free_shinesparks.value == 1,
                           self.options.ultra_low_qol.value == 1,
                           "", #skill_assumptions_preset
                           "", #item_progression_preset
@@ -329,12 +360,31 @@ class SMMapRandoWorld(World):
         for idx, type_count in enumerate(self.map_rando.randomizer.initial_items_remaining):
             for item_count in range(type_count):
                 minor_count = [
-                    3, # etanks
-                    3, # missiles
-                    2, # supers
-                    2  # powerbomb
+                    14,# etanks       // 0
+                    2, # missiles     // 1
+                    2, # supers       // 2
+                    1, # powerbomb    // 3
+                    1, # Bombs        // 4
+                    1, # Charge       // 5
+                    1, # Ice          // 6
+                    1, # HiJump       // 7
+                    1, # SpeedBooster // 8
+                    1, # Wave         // 9
+                    1, # Spazer       // 10
+                    1, # SpringBall   // 11
+                    1, # Varia        // 12
+                    1, # Gravity      // 13
+                    1, # XRayScope    // 14
+                    1, # Plasma       // 15
+                    1, # Grapple      // 16
+                    1, # SpaceJump    // 17
+                    1, # ScrewAttack  // 18
+                    1, # Morph        // 19
+                    4, # ReserveTank  // 20
+                    1, # WallJump     // 21
+                    0  # Nothing      // 22
                 ]
-                is_progression = item_count == 0 if idx > 3 else (item_count < minor_count[idx])
+                is_progression = item_count < minor_count[idx]
                 mr_item = SMMRItem(SMMapRandoWorld.item_id_to_name[items_start_id + idx], 
                             ItemClassification.progression if is_progression else ItemClassification.filler, 
                             items_start_id + idx, 
@@ -353,7 +403,7 @@ class SMMapRandoWorld(World):
         
     def set_rules(self):
         chozo_regions = [   
-                            self.multiworld.get_region("Bowling Alley Bowling Chozo Statue", self.player), 
+                            self.multiworld.get_region("Bowling Alley Bowling Chozo Statue (unlocked)", self.player), 
                             self.multiworld.get_region("Bomb Torizo Room Bomb Torizo (unlocked)", self.player)
                         ]
         pirates_regions = [ 
@@ -398,7 +448,7 @@ class SMMapRandoWorld(World):
         return SMMRItem(name, ItemClassification.progression, self.item_name_to_id[name], player=self.player)
 
     def get_filler_item_name(self) -> str:
-        pass
+        return "Missile"
 
     def getWordArray(self, w: int) -> List[int]:
         """ little-endian convert a 16-bit number to an array of numbers <= 255 each """
@@ -479,10 +529,81 @@ class SMMapRandoWorld(World):
                             get_area_name(SMMapRandoWorld.location_name_to_id[loc.name] - locations_start_id) if loc.player == self.player else 
                             self.multiworld.get_player_name(loc.player) + " world" #+ itemloc.loc.name
                         ) 
-                    for sphere_idx, sphere in enumerate(spheres) for loc in sphere if loc.item.player == self.player and not loc.item.name.startswith("f_")
+                    for sphere_idx, sphere in enumerate(spheres) for loc in sphere if loc.item.player == self.player and not loc.item.name.startswith("f_") and loc.item.name != "Nothing"
                     ]
+        
+        controller_mapping_string = {
+                                        "X": ControllerButton.X, 
+                                        "Y": ControllerButton.Y,  
+                                        "A": ControllerButton.A,  
+                                        "B": ControllerButton.B, 
+                                        "L": ControllerButton.L,  
+                                        "R": ControllerButton.R, 
+                                        "Select": ControllerButton.Select, 
+                                        "Start": ControllerButton.Start, 
+                                        "Up": ControllerButton.Up, 
+                                        "Down": ControllerButton.Down, 
+                                        "Left": ControllerButton.Left, 
+                                        "Right": ControllerButton.Right,
+                                     }
+        controller_mapping_int = {
+                                    int(ControllerButton.X): ControllerButton.X, 
+                                    int(ControllerButton.Y): ControllerButton.Y,  
+                                    int(ControllerButton.A): ControllerButton.A,  
+                                    int(ControllerButton.B): ControllerButton.B, 
+                                    int(ControllerButton.L): ControllerButton.L,  
+                                    int(ControllerButton.R): ControllerButton.R, 
+                                    int(ControllerButton.Select): ControllerButton.Select, 
+                                    int(ControllerButton.Start): ControllerButton.Start, 
+                                    int(ControllerButton.Up): ControllerButton.Up, 
+                                    int(ControllerButton.Down): ControllerButton.Down, 
+                                    int(ControllerButton.Left): ControllerButton.Left, 
+                                    int(ControllerButton.Right): ControllerButton.Right, 
+                                }
+        music_settings_mapping = {
+                                    0: MusicSettings.Vanilla,
+                                    1: MusicSettings.AreaThemed,
+                                    2: MusicSettings.Disabled
+                                  }
+        tile_theme_mapping = { 
+                                0: TileTheme.Vanilla,
+                                1: TileTheme.Scrambled,
+                                2: TileTheme.OuterCrateria,
+                                3: TileTheme.InnerCrateria,
+                                4: TileTheme.GreenBrinstar,
+                                5: TileTheme.UpperNorfair,
+                                6: TileTheme.WreckedShip,
+                                7: TileTheme.WestMaridia,
+                            }
+        shaking_settings_mapping = {
+                                    0: ShakingSetting.Vanilla,
+                                    1: ShakingSetting.Reduced,
+                                    2: ShakingSetting.Disabled
+                                  }
 
-        patched_rom_bytes = patch_rom(get_base_rom_path(), self.map_rando, items, self.multiworld.state.smmrcs[self.player].randomization_state, summary)
+        controller_config = ControllerConfig(
+                controller_mapping_int[self.options.shot.value],
+                controller_mapping_int[self.options.jump.value],
+                controller_mapping_int[self.options.dash.value],
+                controller_mapping_int[self.options.item_select.value],
+                controller_mapping_int[self.options.item_cancel.value],
+                controller_mapping_int[self.options.angle_up.value],
+                controller_mapping_int[self.options.angle_down.value],
+                [controller_mapping_string[button] for button in self.options.spin_lock_buttons.value],
+                [controller_mapping_string[button] for button in self.options.quick_reload_buttons.value],
+                self.options.moonwalk.value == 1)
+        customize_settings = CustomizeSettings(
+                None,
+                (self.options.etank_color_red.value // 8, self.options.etank_color_green.value // 8, self.options.etank_color_blue.value // 8),
+                self.options.reserve_hud_style.value == 1,
+                self.options.vanilla_screw_attack_animation.value == 1,
+                PaletteTheme.Vanilla if self.options.palette_theme.value == 0 else PaletteTheme.AreaThemed,
+                tile_theme_mapping[self.options.tile_theme.value],
+                music_settings_mapping[self.options.music.value],
+                self.options.disable_beeping.value == 1,
+                shaking_settings_mapping[self.options.shaking.value],
+                controller_config)
+        patched_rom_bytes = patch_rom(get_base_rom_path(), self.map_rando, items, self.multiworld.state.smmrcs[self.player].randomization_state, summary, customize_settings)
         #patched_rom_bytes = None
         #with open(get_base_rom_path(), "rb") as stream:
         #    patched_rom_bytes = stream.read()
@@ -539,11 +660,14 @@ class SMMapRandoWorld(World):
         multiWorldLocations: List[ByteEdit] = []
         multiWorldItems: List[ByteEdit] = []
         idx = 0
-        vanillaItemTypesCount = 22
+        vanillaItemTypesCount = 23
+        locations_nothing = bytearray(20)
         for itemLoc in self.multiworld.get_locations():
             if itemLoc.player == self.player and not itemLoc.name.startswith("f_"):
                 # item to place in this SMMR world: write full item data to tables
                 if isinstance(itemLoc.item, SMMRItem) and itemLoc.item.code < items_start_id + vanillaItemTypesCount:
+                    if itemLoc.item.code == items_start_id + self.nothing_item_id:
+                        locations_nothing[(itemLoc.address - locations_start_id)//8] |= 1 << (itemLoc.address % 8)
                     itemId = itemLoc.item.code - items_start_id
                 else:
                     itemId = self.item_name_to_id['ArchipelagoItem'] - items_start_id + idx
@@ -607,6 +731,12 @@ class SMMapRandoWorld(World):
             "values": self.getWordArray(self.player)
         }]
 
+        location_nothing: List[ByteEdit] = [{
+            "sym": symbols["locations_nothing"],
+            "offset": 0,
+            "values": locations_nothing
+        }]
+
         patchDict = {   'MultiWorldLocations': multiWorldLocations,
                         'MultiWorldItems': multiWorldItems,
                         'offworldSprites': offworldSprites,
@@ -614,7 +744,8 @@ class SMMapRandoWorld(World):
                         'remoteItem': remoteItem,
                         'ownPlayerId': ownPlayerId,
                         'playerNameData':  playerNameData,
-                        'playerIdData':  playerIdData}
+                        'playerIdData':  playerIdData,
+                        'location_nothing': location_nothing}
 
         # convert an array of symbolic byte_edit dicts like {"sym": symobj, "offset": 0, "values": [1, 0]}
         # to a single rom patch dict like {0x438c: [1, 0], 0xa4a5: [0, 0, 0]}
@@ -638,35 +769,34 @@ class SMMapRandoWorld(World):
         # clients should read from 0x7FC0, the location of the rom title in the SNES header.
         patches.append(IPS_Patch({0x007FC0 : self.romName}))
 
-        startItemROMAddressBase = symbols["start_item_data_major"]["offset_within_rom_file"]
-
-        # array for each item:
-        #  offset within ROM table "start_item_data_major" of this item"s info (starting status)
+        # array for each item: (must match Map Rando's new_game_extra.asm !initial_X addresses)
+        #  offset within ROM of this item"s info (starting status)
         #  item bitmask or amount per pickup (BVOB = base value or bitmask),
-        #  offset within ROM table "start_item_data_major" of this item"s info (starting maximum/starting collected items)
+        #  offset within ROM of this item"s info (starting maximum/starting collected items)
+        #  
         #                                 current  BVOB   max
         #                                 -------  ----   ---
-        startItemROMDict = {"ETank":        [ 0x8, 0x64,  0xA],
-                            "Missile":      [ 0xC,  0x5,  0xE],
-                            "Super":        [0x10,  0x5, 0x12],
-                            "PowerBomb":    [0x14,  0x5, 0x16],
-                            "ReserveTank":  [0x1A, 0x64, 0x18],
-                            "Morph":        [ 0x2,  0x4,  0x0],
-                            "Bombs":        [ 0x3, 0x10,  0x1],
-                            "SpringBall":   [ 0x2,  0x2,  0x0],
-                            "HiJump":       [ 0x3,  0x1,  0x1],
-                            "Varia":        [ 0x2,  0x1,  0x0],
-                            "Gravity":      [ 0x2, 0x20,  0x0],
-                            "SpeedBooster": [ 0x3, 0x20,  0x1],
-                            "SpaceJump":    [ 0x3,  0x2,  0x1],
-                            "ScrewAttack":  [ 0x2,  0x8,  0x0],
-                            "Charge":       [ 0x7, 0x10,  0x5],
-                            "Ice":          [ 0x6,  0x2,  0x4],
-                            "Wave":         [ 0x6,  0x1,  0x4],
-                            "Spazer":       [ 0x6,  0x4,  0x4],
-                            "Plasma":       [ 0x6,  0x8,  0x4],
-                            "Grapple":      [ 0x3, 0x40,  0x1],
-                            "XRayScope":    [ 0x3, 0x80,  0x1]
+        startItemROMDict = {"ETank":        [ snes_to_pc(0xB5FE52), 0x64, snes_to_pc(0xB5FE54)],
+                            "Missile":      [ snes_to_pc(0xB5FE5C),  0x5, snes_to_pc(0xB5FE5E)],
+                            "Super":        [ snes_to_pc(0xB5FE60),  0x5, snes_to_pc(0xB5FE62)],
+                            "PowerBomb":    [ snes_to_pc(0xB5FE64),  0x5, snes_to_pc(0xB5FE66)],
+                            "ReserveTank":  [ snes_to_pc(0xB5FE56), 0x64, snes_to_pc(0xB5FE58)],
+                            "Morph":        [ snes_to_pc(0xB5FE04),  0x4, snes_to_pc(0xB5FE06)],
+                            "Bombs":        [ snes_to_pc(0xB5FE05), 0x10, snes_to_pc(0xB5FE07)],
+                            "SpringBall":   [ snes_to_pc(0xB5FE04),  0x2, snes_to_pc(0xB5FE06)],
+                            "HiJump":       [ snes_to_pc(0xB5FE05),  0x1, snes_to_pc(0xB5FE07)],
+                            "Varia":        [ snes_to_pc(0xB5FE04),  0x1, snes_to_pc(0xB5FE06)],
+                            "Gravity":      [ snes_to_pc(0xB5FE04), 0x20, snes_to_pc(0xB5FE06)],
+                            "SpeedBooster": [ snes_to_pc(0xB5FE05), 0x20, snes_to_pc(0xB5FE07)],
+                            "SpaceJump":    [ snes_to_pc(0xB5FE05),  0x2, snes_to_pc(0xB5FE07)],
+                            "ScrewAttack":  [ snes_to_pc(0xB5FE04),  0x8, snes_to_pc(0xB5FE06)],
+                            "Charge":       [ snes_to_pc(0xB5FE09), 0x10, snes_to_pc(0xB5FE0B)],
+                            "Ice":          [ snes_to_pc(0xB5FE08),  0x2, snes_to_pc(0xB5FE0A)],
+                            "Wave":         [ snes_to_pc(0xB5FE08),  0x1, snes_to_pc(0xB5FE0A)],
+                            "Spazer":       [ snes_to_pc(0xB5FE08),  0x4, snes_to_pc(0xB5FE0A)],
+                            "Plasma":       [ snes_to_pc(0xB5FE08),  0x8, snes_to_pc(0xB5FE0A)],
+                            "Grapple":      [ snes_to_pc(0xB5FE05), 0x40, snes_to_pc(0xB5FE07)],
+                            "XRayScope":    [ snes_to_pc(0xB5FE05), 0x80, snes_to_pc(0xB5FE07)]
 
         # BVOB = base value or bitmask
                             }
@@ -681,33 +811,33 @@ class SMMapRandoWorld(World):
             if item == "Plasma": hasPlasma = True
             if (item in ["ETank", "Missile", "Super", "PowerBomb", "Reserve"]):
                 (currentValue, amountPerItem, maxValue) = startItemROMDict[item]
-                if (startItemROMAddressBase + currentValue) in mergedData:
-                    mergedData[startItemROMAddressBase + currentValue] += amountPerItem
-                    mergedData[startItemROMAddressBase + maxValue] += amountPerItem
+                if currentValue in mergedData:
+                    mergedData[currentValue] += amountPerItem
+                    mergedData[maxValue] += amountPerItem
                 else:
-                    mergedData[startItemROMAddressBase + currentValue] = amountPerItem
-                    mergedData[startItemROMAddressBase + maxValue] = amountPerItem
+                    mergedData[currentValue] = amountPerItem
+                    mergedData[maxValue] = amountPerItem
             else:
                 (collected, bitmask, equipped) = startItemROMDict[item]
-                if (startItemROMAddressBase + collected) in mergedData:
-                    mergedData[startItemROMAddressBase + collected] |= bitmask
-                    mergedData[startItemROMAddressBase + equipped] |= bitmask
+                if collected in mergedData:
+                    mergedData[collected] |= bitmask
+                    mergedData[equipped] |= bitmask
                 else:
-                    mergedData[startItemROMAddressBase + collected] = bitmask
-                    mergedData[startItemROMAddressBase + equipped] = bitmask
+                    mergedData[collected] = bitmask
+                    mergedData[equipped] = bitmask
 
         if hasETank:
             # we are overwriting the starting energy, so add up the E from 99 (normal starting energy) rather than from 0
-            mergedData[startItemROMAddressBase + 0x8] += 99
-            mergedData[startItemROMAddressBase + 0xA] += 99
+            mergedData[snes_to_pc(0xB5FE52)] += 99
+            mergedData[snes_to_pc(0xB5FE54)] += 99
 
         if hasSpazer and hasPlasma:
             # de-equip spazer.
             # otherwise, firing the unintended spazer+plasma combo would cause massive game glitches and crashes
-            mergedData[startItemROMAddressBase + 0x4] &= ~0x4
+            mergedData[snes_to_pc(0xB5FE0A)] &= ~0x4
 
         for key, value in mergedData.items():
-            if (key - startItemROMAddressBase > 7):
+            if (key > snes_to_pc(0xB5FE0B)):
                 [w0, w1] = self.getWordArray(value)
                 mergedData[key] = [w0, w1]
             else:
@@ -777,7 +907,14 @@ class SMMapRandoWorld(World):
             multidata["connect_names"][new_name] = multidata["connect_names"][self.multiworld.player_name[self.player]]
 
     def fill_slot_data(self): 
-        slot_data = {}      
+        slot_data = {}
+        if not self.multiworld.is_race:
+            locations_nothing = [itemLoc.address - locations_start_id 
+                                for itemLoc in self.locations.values()
+                                if itemLoc.address is not None and itemLoc.player == self.player and itemLoc.item.code == items_start_id + self.nothing_item_id ]
+        
+            slot_data["locations_nothing"] = locations_nothing
+                
         return slot_data
     
     
@@ -813,6 +950,7 @@ class SMMRRegion(Region):
         r_regions = set()
         if state.stale[self.player]:
             local_world = self.multiworld.worlds[self.player]
+            defeated_mother_brain_flag_id = local_world.item_name_to_id["f_DefeatedMotherBrain"] - items_start_id - len(local_world.gamedata.item_isv)
             rrp = state.reachable_regions[self.player]
             state.stale[self.player] = False
             (bi_reachability, f_reachability, r_reachability, f_traverse, r_traverse) = local_world.map_rando.update_reachability(state.smmrcs[self.player].randomization_state, local_world.debug)
@@ -833,6 +971,13 @@ class SMMRRegion(Region):
                             rrp.add(local_world.region_dict[local_world.flag_id_to_region_dict[event] + local_world.vertex_cnt])
                 if (f_reachability[i]):
                     f_regions.add(local_world.region_dict[i])
+                    # special case for f_DefeatedMotherBrain as it cant be reverse reachable
+                    event_src = local_world.events_connections.get(local_world.region_map_reverse[i], None)
+                    if (event_src != None):
+                        for event in event_src:
+                            if event == defeated_mother_brain_flag_id:
+                                rrp.add(local_world.region_dict[local_world.flag_id_to_region_dict[defeated_mother_brain_flag_id] + local_world.vertex_cnt])
+
                 if (r_reachability[i]):
                     r_regions.add(local_world.region_dict[i])
             #state.update_reachable_regions(self.player)

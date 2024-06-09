@@ -143,6 +143,32 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave With Runway - Frozen Zoa",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "h_canTrickyFrozenEnemyRunway",
+          {"enemyDamage": {
+            "enemy": "Zoa",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Freeze the Zoa just a few pixels higher than it would be if Samus was standing next to the farm.",
+        "Dodge and freeze the other Zoas, or tank a hit then kill them and don't collect their drops.",
+        "Maintain a half-tile runway between the frozen Zoa and the runway in order to extend it as much as possible."
+      ]
+    },
+    {
+      "link": [1, 1],
       "name": "Zoa Farm",
       "requires": [
         {"refill": ["Energy", "Missile", "Super"]}
@@ -262,6 +288,49 @@
       ]
     },
     {
+      "link": [1, 2],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true,
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true,
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      }
+    },
+    {
       "link": [2, 1],
       "name": "Base",
       "requires": [
@@ -350,7 +419,7 @@
       ],
       "note": [
         "Only requires a runway of approximately 0.5 tiles in the adjacent room.",
-        "Bomb boost through the doorway and hold right."
+        "Bomb boost through the doorway and hold left."
       ]
     },
     {
@@ -363,6 +432,32 @@
           "openEnd": 1
         }
       }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway - Frozen Zoa",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "h_canTrickyFrozenEnemyRunway",
+          {"enemyDamage": {
+            "enemy": "Zoa",
+            "type": "contact",
+            "hits": 1
+          }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "note": [
+        "Freeze the Zoa just a few pixels higher than it would be if Samus was standing next to the farm.",
+        "Dodge and freeze the other Zoas, or tank a hit then kill them and don't collect their drops.",
+        "Maintain a half-tile runway between the frozen Zoa and the runway in order to extend it as much as possible."
+      ]
     },
     {
       "link": [2, 2],

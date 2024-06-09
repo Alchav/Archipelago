@@ -78,13 +78,32 @@
     },
     {
       "link": [1, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 65
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canShinechargeMovement"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      }
+    },
+    {
+      "link": [1, 2],
       "name": "Carry G-Mode Down Elevator",
       "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
           "morphed": false
-        }
+        },
+        "comesThroughToilet": "any"
       },
       "requires": [],
       "exitCondition": {
@@ -97,6 +116,27 @@
       "link": [2, 1],
       "name": "Base",
       "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 85
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [2, 2],

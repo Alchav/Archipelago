@@ -20,7 +20,7 @@
       "id": 2,
       "name": "Item",
       "nodeType": "item",
-      "nodeSubType": "chozo",
+      "nodeSubType": "visible",
       "nodeItem": "ETank",
       "nodeAddress": "0x7C337",
       "locks": [
@@ -209,33 +209,99 @@
     },
     {
       "link": [1, 2],
-      "name": "Shinespark",
+      "name": "Come In With Shinespark",
       "entranceCondition": {
         "comeInWithSpark": {}
       },
       "requires": [
         {"shinespark": {"frames": 59, "excessFrames": 7}}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Come In Shinecharged (Power Off)",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 100
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 33, "excessFrames": 7}},
+        {"not": "f_DefeatedPhantoon"},
+        {"or": [
+          "canRiskPermanentLossOfAccess",
+          "canCarefulJump"          
+        ]}
       ],
-      "devNote": "FIXME: Add come in charged strats that use fewer Shinespark frames."
+      "note": [
+        "Jump as far as possible before activating the spark, while sparking high enough to crash into the Chozo statue's hand."
+      ],
+      "devNote": [
+        "If power is on, then this strat may not quite work because the water can interfere with the runway for the jump.",
+        "But in that case, platforming is possible as a relatively free alternative."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Come In Shinecharging (Power Off)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 7,
+          "openEnd": 0,
+          "steepDownTiles": 2
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 33, "excessFrames": 7}},
+        {"or": [
+          "canRiskPermanentLossOfAccess",
+          "canCarefulJump"          
+        ]}
+      ],
+      "note": [
+        "Gain a shinecharge while entering the room.",
+        "Run back to the door, and then run left and jump as far as possible before activating the spark, while sparking high enough to crash into the Chozo statue's hand."
+      ],
+      "devNote": [
+        "If power is on, then this strat may not quite work because the water can interfere with the runway.",
+        "But in that case, platforming is possible as a relatively free alternative."
+      ]
     },
     {
       "link": [1, 2],
       "name": "Precise Grapple",
       "requires": [
-        "canPreciseGrapple"
+        "canPreciseGrapple",
+        "canTrickyJump",
+        {"or": [
+          "canInsaneJump",
+          {"and": [
+            "canLateralMidAirMorph",
+            {"thornHits": 5}
+          ]}
+        ]}
       ],
-      "note": "Fling Samus from the first set of grapple blocks to the second set without falling. Requires precise timing."
+      "note": [
+        "Fling Samus from the first set of grapple blocks to the second set without falling. Requires precise timing.",
+        "It can help to perform a lateral mid-air morph and unmorph."
+      ]
     },
     {
       "link": [1, 2],
       "name": "Ceiling Bomb Jump",
       "requires": [
-        "h_canCeilingBombJump"
+        "h_canCeilingBombJump",
+        "canLongCeilingBombJump",
+        "canBePatient"
       ]
     },
     {
       "link": [1, 2],
-      "name": "Phantoon is Alive Walljump",
+      "name": "Phantoon is Alive Wall Jump",
       "requires": [
         {"thornHits": 1},
         "canIframeSpikeJump",
@@ -272,6 +338,16 @@
     },
     {
       "link": [1, 2],
+      "name": "Phantoon is Alive, IBJ From Spikes",
+      "requires": [
+        "h_IBJFromThorns",
+        {"not": "f_DefeatedPhantoon"}
+      ],
+      "note": "In the spike pit, near the left wall, jump into an IBJ to climb out.",
+      "devNote": "The h_IBJFromThorns requires canCarefulJump. There is no loss of access, because with that it is possible to get across with or without f_DefeatedPhantoon."
+    },
+    {
+      "link": [1, 2],
       "name": "G-mode Morph Ceiling Bomb Jump",
       "entranceCondition": {
         "comeInWithGMode": {
@@ -280,9 +356,22 @@
         }
       },
       "requires": [
-        "h_canArtificialMorphCeilingBombJump"
+        "h_canArtificialMorphCeilingBombJump",
+        "canLongCeilingBombJump",
+        "canBePatient"
       ],
       "clearsObstacles": ["A"]
+    },
+    {
+      "link": [1, 2],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [],
+      "note": "After teleporting, press down to retract Grapple, to prevent getting stuck inside the Chozo statue."
     },
     {
       "link": [2, 1],
@@ -309,7 +398,8 @@
       "link": [2, 1],
       "name": "Precise Grapple",
       "requires": [
-        "canPreciseGrapple"
+        "canPreciseGrapple",
+        "canTrickyJump"
       ],
       "note": "Fling Samus from the first set of grapple blocks to the second set without falling. Requires precise timing."
     },
@@ -317,7 +407,9 @@
       "link": [2, 1],
       "name": "Ceiling Bomb Jump",
       "requires": [
-        "h_canCeilingBombJump"
+        "h_canCeilingBombJump",
+        "canLongCeilingBombJump",
+        "canBePatient"
       ]
     },
     {
@@ -325,9 +417,12 @@
       "name": "G-mode Morph Ceiling Bomb Jump",
       "requires": [
         "h_canArtificialMorphCeilingBombJump",
+        "canLongCeilingBombJump",
+        "canBeVeryPatient",
         {"obstaclesCleared": ["A"]}
       ],
-      "note": "Touch the item while remaining in artificial morph. Ceiling bomb jump back to the right, then use x-ray to cancel g-mode and obtain the item."
+      "note": "Touch the item while remaining in artificial morph. Ceiling bomb jump back to the right, then use x-ray to cancel g-mode and obtain the item.",
+      "devNote": "This strat alone would only require canBePatient, but it is only possible after Ceiling Bomb Jumping there, so it would be a combined 4 minutes."
     }
   ]
 }

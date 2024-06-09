@@ -83,6 +83,19 @@
       "requires": []
     },
     {
+      "link": [1, 2],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
+      "requires": [
+        "canMoonfall"
+      ],
+      "bypassesDoorShell": true
+    },
+    {
       "link": [2, 1],
       "name": "Base",
       "requires": []
@@ -108,9 +121,18 @@
     },
     {
       "link": [2, 2],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 2],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 4, "excessFrames": 4}}

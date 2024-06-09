@@ -133,7 +133,6 @@
       "link": [1, 2],
       "name": "Platforming",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"or": [
           {"and": [
             "canTrickyJump",
@@ -153,7 +152,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "Morph",
         {"enemyDamage": {
           "enemy": "Sova",
@@ -180,7 +178,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "canSpeedball",
         "canSlowShortCharge",
         {"heatFrames": 360}
@@ -201,7 +198,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "canMidairShinespark",
         {"heatFrames": 210},
         {"shinespark": {"frames": 90, "excessFrames": 5}}
@@ -220,7 +216,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "canMidairShinespark",
         {"heatFrames": 205},
         {"shinespark": {"frames": 92, "excessFrames": 5}}
@@ -234,10 +229,11 @@
       "link": [1, 2],
       "name": "Enter Shinesparking",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {
+          "position": "top"
+        }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "canMidairShinespark",
         {"heatFrames": 195},
         {"shinespark": {"frames": 95, "excessFrames": 5}}
@@ -310,7 +306,9 @@
       "link": [2, 1],
       "name": "Enter Shinesparking",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {
+          "position": "top"
+        }
       },
       "requires": [
         "canMidairShinespark",
@@ -326,7 +324,6 @@
       "link": [2, 1],
       "name": "Platforming",
       "requires": [
-        "h_canNavigateHeatRooms",
         {"heatFrames": 540},
         {"or": [
           "canTrickyJump",
@@ -345,7 +342,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "Gravity",
         {"enemyDamage": {
           "enemy": "Dragon",
@@ -371,7 +367,6 @@
         }
       },
       "requires": [
-        "h_canNavigateHeatRooms",
         "Gravity",
         "canTrickyJump",
         "canMockball",
@@ -384,6 +379,18 @@
         {"lavaFrames": 240}
       ],
       "note": "Jump to the first long platform then use a the full platform to jump and mockball through the lava."
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 50}
+      ]
     },
     {
       "link": [2, 2],

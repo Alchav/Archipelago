@@ -23,30 +23,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a774",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {
-          "knockback": false,
-          "strats": [
-            {
-              "name": "Get Hit By Mochtroid",
-              "notable": false,
-              "requires": [
-                "h_canNavigateUnderwater",
-                {"or": [
-                  {"and": [
-                    "h_canCrouchJumpDownGrab",
-                    "canCarefulJump"
-                  ]},
-                  "HiJump",
-                  "Gravity",
-                  "canSpringBallJumpMidAir"
-                ]}
-              ]
-            }
-          ]
-        }
-      ]
+      "doorEnvironments": [{"physics": "water"}]
     }
   ],
   "enemies": [
@@ -160,9 +137,18 @@
     },
     {
       "link": [1, 1],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [1, 1],
       "name": "Shinespark",
       "entranceCondition": {
-        "comeInWithSpark": {}
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
       },
       "requires": [
         {"shinespark": {"frames": 8, "excessFrames": 8}}
@@ -240,7 +226,16 @@
       "name": "Suitless CF Clip (Left to Right)",
       "requires": [
         "h_canJumpIntoCrystalFlashClip",
-        "canSuitlessMaridia"
+        "canSuitlessMaridia",
+        {"or": [
+          "HiJump",
+          "canSpringBallJumpMidAir",
+          {"and": [
+            "h_canCrouchJumpDownGrab",
+            "canCarefulJump"
+          ]},
+          "canUseFrozenEnemies"
+        ]}
       ],
       "note": [
         "Find the crumble blocks and crystal flash mid-air, just below them.",
@@ -271,6 +266,7 @@
         "canCarefulJump",
         "Wave",
         "canShinechargeMovementComplex",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 75, "excessFrames": 8}}
       ],
       "reusableRoomwideNotable": "Botwoon Hallway Reverse Shinespark",
@@ -294,6 +290,7 @@
         "canWaterShineCharge",
         "Wave",
         "canShinechargeMovementComplex",
+        "canHorizontalShinespark",
         {"shinespark": {"frames": 75, "excessFrames": 8}}
       ],
       "reusableRoomwideNotable": "Botwoon Hallway Reverse Shinespark",
@@ -315,7 +312,7 @@
         {"or": [
           {"and": [
             "h_canCrouchJumpDownGrab",
-            "canCarefulJump"
+            "canTrickyJump"
           ]},
           "HiJump",
           "Gravity",
@@ -348,7 +345,16 @@
       "name": "Suitless CF Clip (Right to Left)",
       "requires": [
         "h_canJumpIntoCrystalFlashClip",
-        "canSuitlessMaridia"
+        "canSuitlessMaridia",
+        {"or": [
+          {"and": [
+            "h_canCrouchJumpDownGrab",
+            "canTrickyJump"
+          ]},
+          "HiJump",
+          "Gravity",
+          "canSpringBallJumpMidAir"
+        ]}
       ],
       "note": [
         "Find the crumble blocks and crystal flash mid-air, just below them.",
@@ -356,6 +362,16 @@
         "Hold down as the CF ends to break the non-respawning crumble blocks.",
         "This is for the much harder version, without Gravity and Bombs."
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -367,6 +383,21 @@
           "openEnd": 1
         }
       }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway - Frozen Mochtroid",
+      "requires": [
+        "h_canFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      },
+      "note": "Lure the Mochtroid into the pit and freeze it, then wait for it on the ledge and freeze it when it is in position.",
+      "devNote": "This just assumes 1 extra runway tile, although it is possible to add 1.5 with a decent lure."
     },
     {
       "link": [2, 2],
@@ -391,6 +422,28 @@
       "requires": [
         "h_canCrystalFlash"
       ]
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [
+        "h_canNavigateUnderwater",
+        {"or": [
+          {"and": [
+            "h_canCrouchJumpDownGrab",
+            "canTrickyJump"
+          ]},
+          "HiJump",
+          "Gravity",
+          "canSpringBallJumpMidAir"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
     }
   ]
 }

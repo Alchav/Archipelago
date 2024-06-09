@@ -123,7 +123,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 120
+          "framesRemaining": 140
         }
       }
     },
@@ -284,16 +284,14 @@
     {
       "link": [1, 2],
       "name": "G-Mode Morph Bomb Kill",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
-        {"or": [
-          "Bombs",
-          {"ammo": {"type": "PowerBomb", "count": 1}}
-        ]}
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphBombThings"
       ],
       "note": [
         "Wait for the pirates to move as far right as possible in order to kill them all with a single Power Bomb.",
@@ -390,20 +388,21 @@
     {
       "link": [2, 1],
       "name": "G-Mode Morph Bomb Kill",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
-        "Bombs",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphBombs",
         {"enemyDamage": {
           "enemy": "Mini-Kraid",
           "type": "spike",
           "hits": 1
         }}
       ],
-      "note": "Kill all of the enemies with bombs. Samus will take a Baby Kraid spike hit while rolling through the invisible projectiles."
+      "note": "Kill all of the enemies with Bombs. Samus will take a Baby Kraid spike hit while rolling through the invisible projectiles."
     },
     {
       "link": [2, 2],
@@ -462,7 +461,7 @@
       ],
       "exitCondition": {
         "leaveShinecharged": {
-          "framesRemaining": 120
+          "framesRemaining": 135
         }
       }
     },

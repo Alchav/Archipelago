@@ -15,26 +15,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a8c4",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Shaktool",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Shaktool",
-            "type": "contact",
-            "hits": 1
-          }}
-        ],
-        "note": "This takes 1 min 40 sec if Shaktool is done digging."
-      }
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 2,
@@ -42,56 +23,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a8d0",
-      "doorEnvironments": [{"physics": "air"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Shaktool",
-            "notable": false,
-            "requires": [
-              "f_ShaktoolDoneDigging"
-            ]
-          },
-          {
-            "name": "Get Hit By Yard (Snail)",
-            "notable": false,
-            "requires": [
-              "h_ShaktoolCameraFix"
-            ],
-            "note": "Shoot a Snail (Yard) to make it chase Samus."
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"or": [
-            {"and": [
-              {"enemyDamage": {
-                "enemy": "Shaktool",
-                "type": "contact",
-                "hits": 1
-              }},
-              "f_ShaktoolDoneDigging"
-            ]},
-            {"and": [
-              {"enemyDamage": {
-                "enemy": "Yard",
-                "type": "contact",
-                "hits": 1
-              }},
-              "h_ShaktoolCameraFix",
-              {"or": [
-                {"ammo": {"type": "Super", "count": 1}},
-                {"and": [
-                  "canSpecialBeamAttack",
-                  {"ammo": {"type": "PowerBomb", "count": 1}}
-                ]}
-              ]}
-            ]}
-          ]}
-        ],
-        "note": "Wait for Shaktool. If Shaktool's camera is fixed it is possible without Shaktool using a Yard (Snail): a Super or any SBA can trigger a Yard to attack."
-      }
+      "doorEnvironments": [{"physics": "air"}]
     },
     {
       "id": 3,
@@ -129,6 +61,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3}
       ]
@@ -198,6 +131,35 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Shaktool",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Shaktool",
+          "type": "contact",
+          "hits": 1
+        }},
+        {"or": [
+          "canBePatient",
+          {"and": [
+            "canRiskPermanentLossOfAccess",
+            {"not": "f_ShaktoolDoneDigging"}
+          ]}
+        ]}
+      ],
+      "gModeRegainMobility": {},
+      "note": "This takes 1 min 40 sec if Shaktool is done digging."
+    },
+    {
       "link": [1, 3],
       "name": "Base",
       "requires": [
@@ -209,15 +171,26 @@
     },
     {
       "link": [1, 3],
-      "name": "G-Mode PB",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "name": "G-Mode Morph Power Bomb",
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphPowerBomb"
       ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -275,6 +248,62 @@
       ]
     },
     {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Shaktool",
+      "notable": false,
+      "requires": [
+        "f_ShaktoolDoneDigging"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Yard (Snail)",
+      "notable": false,
+      "requires": [
+        "h_ShaktoolCameraFix"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": "Shoot a Snail to make it chase Samus."
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"or": [
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Shaktool",
+              "type": "contact",
+              "hits": 1
+            }},
+            "f_ShaktoolDoneDigging"
+          ]},
+          {"and": [
+            {"enemyDamage": {
+              "enemy": "Yard",
+              "type": "contact",
+              "hits": 1
+            }},
+            "h_ShaktoolCameraFix",
+            {"or": [
+              {"ammo": {"type": "Super", "count": 1}},
+              {"and": [
+                "canSpecialBeamAttack",
+                {"ammo": {"type": "PowerBomb", "count": 1}}
+              ]}
+            ]}
+          ]}
+        ]}
+      ],
+      "gModeRegainMobility": {},
+      "note": "Wait for Shaktool. If Shaktool's camera is fixed it is possible without Shaktool, by using a Snail (Yard): a Super or any SBA can trigger a Yard to attack."
+    },
+    {
       "link": [2, 3],
       "name": "Base",
       "requires": [
@@ -291,7 +320,8 @@
     },
     {
       "link": [2, 3],
-      "name": "Reverse Shaktool",
+      "name": "Shaktool Room Reverse",
+      "notable": true,
       "requires": [
         "h_canUsePowerBombs"
       ],
@@ -301,20 +331,21 @@
       "link": [2, 3],
       "name": "G-Mode Morph Reverse Shaktool",
       "notable": true,
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "any",
-          "artificialMorph": true
-        }},
+          "morphed": true
+        }
+      },
+      "requires": [
         {"or": [
           {"and": [
             "Gravity",
             "h_canArtificialMorphIBJ"
           ]},
-          "SpringBall"
+          "h_canArtificialMorphSpringBall"
         ]},
-        {"ammo": {"type": "PowerBomb", "count": 1}}
+        "h_canArtificialMorphPowerBomb"
       ],
       "note": [
         "The Snails will dig through the sand without showing any visual difference. Each block they pass through gets closer to overloading PLMs.",

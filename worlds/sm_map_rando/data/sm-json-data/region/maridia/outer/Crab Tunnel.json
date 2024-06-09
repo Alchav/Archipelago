@@ -14,25 +14,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a414",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Sciser",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Sciser",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      "doorEnvironments": [{"physics": "water"}]
     },
     {
       "id": 2,
@@ -40,25 +22,7 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a420",
-      "doorEnvironments": [{"physics": "water"}],
-      "leaveWithGModeSetup": [
-        {"strats": [
-          {
-            "name": "Get Hit By Sciser",
-            "notable": false,
-            "requires": []
-          }
-        ]}
-      ],
-      "gModeImmobile": {
-        "requires": [
-          {"enemyDamage": {
-            "enemy": "Sciser",
-            "type": "contact",
-            "hits": 1
-          }}
-        ]
-      }
+      "doorEnvironments": [{"physics": "water"}]
     }
   ],
   "obstacles": [
@@ -142,13 +106,41 @@
       },
       "requires": [
         "canSuitlessMaridia",
-        "canShinechargeMovement",
+        "canShinechargeMovementComplex",
         "canStutterWaterShineCharge",
-        {"shinespark": {"frames": 9}}
+        {"shinespark": {"frames": 3}}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
-      }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Suitless Stutter Shinecharge, Return Shinecharged",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 2
+        }
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        "canShinechargeMovementTricky",
+        "canStutterWaterShineCharge"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 10
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
       "link": [1, 1],
@@ -170,6 +162,27 @@
       ]
     },
     {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Sciser",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Sciser",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
       "link": [1, 2],
       "name": "Base",
       "requires": [
@@ -183,13 +196,13 @@
     {
       "link": [1, 2],
       "name": "Indirect G-Mode Gate Despawn",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [1],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "indirect",
-          "artificialMorph": false
-        }}
-      ],
+          "morphed": false
+        }
+      },
+      "requires": [],
       "note": "The gate will not spawn in indirect g-mode, and can be freely passed."
     },
     {
@@ -214,9 +227,27 @@
           "framesRemaining": 70
         }
       },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
       "note": [
         "Requires a very precise stutter where Samus is moving slow enough while near the gate, so she can shoot it and it is fully open before she collides with it.",
         "A runway in the adjacent room of 2 tiles works best - with a longer runway, Samus will be moving too fast."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": [],
+      "clearsObstacles": ["A"],
+      "note": [
+        "Samus will teleport inside of the gate, causing it to open."
       ]
     },
     {
@@ -233,14 +264,24 @@
     {
       "link": [2, 1],
       "name": "Indirect G-Mode Gate Despawn",
-      "requires": [
-        {"comeInWithGMode": {
-          "fromNodes": [2],
+      "entranceCondition": {
+        "comeInWithGMode": {
           "mode": "indirect",
-          "artificialMorph": false
-        }}
-      ],
+          "morphed": false
+        }
+      },
+      "requires": [],
       "note": "The gate will not spawn in indirect g-mode, and can be freely passed."
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
     },
     {
       "link": [2, 2],
@@ -249,6 +290,19 @@
       "exitCondition": {
         "leaveWithRunway": {
           "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway - Frozen Sciser",
+      "requires": [
+        "h_canFrozenEnemyRunway"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
           "openEnd": 1
         }
       }
@@ -288,6 +342,27 @@
           "framesRemaining": 120
         }
       }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Sciser",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Sciser",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
     }
   ]
 }

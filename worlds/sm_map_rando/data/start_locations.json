@@ -883,7 +883,7 @@
     {
         "name": "Single Chamber Left",
         "room_id": 103,
-        "node_id": 1,
+        "node_id": 4,
         "x": 12.5,
         "y": 26,
         "requires": ["canHeatRun", {"heatFrames": 40}]
@@ -1708,7 +1708,7 @@
         "name": "East Sand Hole",
         "room_id": 208,
         "node_id": 2,
-        "door_load_node_id": 1,
+        "door_load_node_id": 2,
         "x": 25,
         "y": 11
     },
@@ -2094,7 +2094,7 @@
     {
         "name": "Statues Room Bottom",
         "room_id": 27,
-        "node_id": 1,
+        "node_id": 2,
         "x": 8,
         "y": 21,
         "camera_offset_y": -4
@@ -2256,7 +2256,14 @@
         "camera_offset_x": 2,
         "camera_offset_y": -6,
         "requires": [
-            "canPreciseWalljump"
+            {"or": [
+                "canPreciseWalljump",
+                {"and": [
+                    "h_canBackIntoCorner",
+                    "canInsaneJump",
+                    "canDownGrab"
+                ]}
+            ]}
         ]
     },
     {
@@ -2434,7 +2441,7 @@
         "name": "West Sand Hole",
         "room_id": 209,
         "node_id": 2,
-        "door_load_node_id": 1,
+        "door_load_node_id": 2,
         "x": 17,
         "y": 12,
         "camera_offset_x": -6,

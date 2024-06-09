@@ -57,12 +57,20 @@
           "lockType": "bossFight",
           "unlockStrats": [
             {
-              "name": "Back-Side Botwoon Fight: Gravity, Charge, Wave",
+              "name": "Back-Side Botwoon Fight - Gravity, Charge, Wave",
               "notable": true,
               "requires": [
                 "Gravity",
                 "Charge",
-                "Wave"
+                "Wave",
+                {"or": [
+                  "canDodgeWhileShooting",
+                  {"enemyDamage": {
+                    "enemy": "Botwoon 1",
+                    "type": "acid",
+                    "hits": 2
+                  }}
+                ]}
               ],
               "reusableRoomwideNotable": "Back-Side Botwoon Fight with Charge and Wave",
               "note": [
@@ -71,12 +79,21 @@
               ]
             },
             {
-              "name": "Back-Side Botwoon Fight: Suitless, Charge, Wave",
+              "name": "Back-Side Botwoon Fight - Suitless, Charge, Wave",
               "notable": true,
               "requires": [
                 "canSuitlessMaridia",
                 "Charge",
-                "Wave"
+                "Wave",
+                "canDodgeWhileShooting",
+                {"or": [
+                  "Morph",
+                  {"enemyDamage": {
+                    "enemy": "Botwoon 1",
+                    "type": "acid",
+                    "hits": 2
+                  }}
+                ]}
               ],
               "reusableRoomwideNotable": "Back-Side Botwoon Fight with Charge and Wave",
               "note": [
@@ -157,7 +174,7 @@
               "notable": true,
               "requires": [
                 "h_canNavigateUnderwater",
-                "canBeVeryPatient",
+                "canBeExtremelyPatient",
                 {"enemyKill": {
                   "enemies": [
                     ["Reverse Botwoon 1"],
@@ -261,6 +278,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 4}
       ]
@@ -327,6 +345,16 @@
     {
       "link": [1, 3],
       "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
       "requires": []
     },
     {
