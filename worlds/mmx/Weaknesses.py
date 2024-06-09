@@ -107,7 +107,7 @@ damage_templates = {
         0x80,0x80,0x80,0x7F,0x80,0x01
     ],
     "Allow Upgraded Buster": [
-        0x80,0x80,0x80,0x03,0x20,0x00,0x80,0x80,
+        0x80,0x80,0x03,0x80,0x20,0x00,0x80,0x80,
         0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
         0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
         0x80,0x80,0x80,0x7F,0x80,0x01
@@ -221,6 +221,7 @@ boss_weakness_data = {
 
 boss_excluded_weapons = {
     "Sting Chameleon": [
+        "Charged Shotgun Ice",
     ],
     "Storm Eagle": [
     ],
@@ -244,6 +245,7 @@ boss_excluded_weapons = {
     "Bospider": [
     ],
     "Rangda Bangda": [
+        "Charged Shotgun Ice",
     ],
     "D-Rex": [
     ],
@@ -274,7 +276,7 @@ weapons = {
     ],
     "Rolling Shield": [
         [[ItemName.rolling_shield], 0x09, WEAKNESS_UNCHARGED_DMG],
-        [[ItemName.rolling_shield], 0x12, WEAKNESS_CHARGED_DMG+2],
+        [[ItemName.rolling_shield], 0x12, WEAKNESS_CHARGED_DMG+1],
     ],
     "Fire Wave": [
         [[ItemName.fire_wave], 0x0A, WEAKNESS_UNCHARGED_DMG],

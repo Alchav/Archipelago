@@ -110,6 +110,7 @@ class MMXSNIClient(SNIClient):
         snes_buffered_write(ctx, WRAM_START + 0x00BAA, bytes([0x0C]))
         snes_buffered_write(ctx, WRAM_START + 0x00C12, bytes([0x0C]))
         snes_buffered_write(ctx, WRAM_START + 0x00BAB, bytes([0x00]))
+        snes_buffered_write(ctx, WRAM_START + 0x00BD7, bytes([0x08]))
 
         await snes_flush_writes(ctx)
 
@@ -481,12 +482,14 @@ class MMXSNIClient(SNIClient):
         if menu_state is None:
             self.game_state = False
             self.energy_link_enabled = False
+            ctx.current_level_value = 42
             ctx.item_queue = []
             return
     
         if game_state[0] == 0:
             self.game_state = False
             ctx.item_queue = []
+            ctx.current_level_value = 42
             return
         
         validation = await snes_read(ctx, MMX_VALIDATION_CHECK, 0x2)
@@ -597,6 +600,34 @@ class MMXSNIClient(SNIClient):
             snes_logger.info(
                 f'New Check: {location} ({len(ctx.locations_checked)}/{len(ctx.missing_locations) + len(ctx.checked_locations)})')
             await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": [new_check_id]}])
+
+        # Send Current Room for Tracker
+        current_level = int.from_bytes(await snes_read(ctx, MMX_LEVEL_INDEX, 0x1), "little")
+
+        if game_state[0] == 0x00 or \
+           (game_state[0] == 0x02 and menu_state[0] != 0x04):
+            current_level = -1
+
+        if ctx.current_level_value != (current_level + 1):
+            ctx.current_level_value = current_level + 1
+
+            # Send level id data to tracker
+            await ctx.send_msgs(
+                [
+                    {
+                        "cmd": "Set",
+                        "key": f"mmx1_level_id_{ctx.team}_{ctx.slot}",
+                        "default": 0,
+                        "want_reply": False,
+                        "operations": [
+                            {
+                                "operation": "replace",
+                                "value": ctx.current_level_value,
+                            }
+                        ],
+                    }
+                ]
+            )
 
         recv_count = await snes_read(ctx, MMX_RECV_INDEX, 2)
         if recv_count is None:

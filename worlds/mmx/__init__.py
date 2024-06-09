@@ -65,6 +65,17 @@ class MMXWorld(World):
     location_name_to_id = all_locations
     item_name_groups = item_groups
     location_name_groups = location_groups
+    hint_blacklist = {
+        LocationName.armored_armadillo_clear,
+        LocationName.chill_penguin_clear,
+        LocationName.boomer_kuwanger_clear,
+        LocationName.sting_chameleon_clear,
+        LocationName.storm_eagle_clear,
+        LocationName.flame_mammoth_clear,
+        LocationName.spark_mandrill_clear,
+        LocationName.launch_octopus_clear,
+        LocationName.intro_completed,
+    }
 
     def __init__(self, multiworld: MultiWorld, player: int):
         self.rom_name_available_event = threading.Event()
@@ -302,6 +313,7 @@ class MMXWorld(World):
             0x10: "Spark Mandrill",
             0x11: "Launch Octopus",
             0x12: "Flame Mammoth",
+            0x17: "Thunder Slimer",
             0x1E: "D-Rex",
             0x13: "Velguarder",
             0x1F: "Sigma",
