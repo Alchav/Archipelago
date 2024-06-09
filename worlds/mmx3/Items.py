@@ -70,6 +70,11 @@ junk_table = {
     ItemName.life:          ItemData(0xBD0034, False),
 }
 
+junk_weapons_table = {
+    ItemName.small_weapon:  ItemData(0xBD0032, False),
+    ItemName.large_weapon:  ItemData(0xBD0033, False),
+}
+
 item_groups = {
     "Weapons": {
         ItemName.frost_shield,

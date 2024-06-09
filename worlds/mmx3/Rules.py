@@ -1,7 +1,105 @@
 from worlds.generic.Rules import add_rule, set_rule
 
-from . import MMX3World
+from . import MMX3World, item_groups
 from .Names import LocationName, ItemName, RegionName, EventName
+
+mavericks = [
+    "Blizzard Buffalo",
+    "Toxic Seahorse",
+    "Tunnel Rhino",
+    "Volt Catfish",
+    "Crush Crawfish",
+    "Neon Tiger",
+    "Gravity Beetle",
+    "Blast Hornet",
+]
+
+bosses = {
+    "Blizzard Buffalo": [
+        f"{RegionName.blizzard_buffalo_after_bit_byte} -> {RegionName.blizzard_buffalo_boss}",
+        LocationName.doppler_lab_3_blizzard_buffalo,
+        EventName.blizzard_buffalo_rematch
+    ],
+    "Toxic Seahorse": [
+        f"{RegionName.toxic_seahorse_dam} -> {RegionName.toxic_seahorse_boss}",
+        LocationName.doppler_lab_3_toxic_seahorse,
+        EventName.toxic_seahorse_rematch
+    ],
+    "Tunnel Rhino": [
+        f"{RegionName.tunnel_rhino_climbing} -> {RegionName.tunnel_rhino_boss}",
+        LocationName.doppler_lab_3_tunnel_rhino,
+        EventName.tunnel_rhino_rematch
+    ],
+    "Volt Catfish": [
+        f"{RegionName.volt_catfish_inside} -> {RegionName.volt_catfish_boss}",
+        LocationName.doppler_lab_3_volt_catfish,
+        EventName.volt_catfish_rematch
+    ],
+    "Crush Crawfish": [
+        f"{RegionName.crush_crawfish_inside} -> {RegionName.crush_crawfish_boss}",
+        LocationName.doppler_lab_3_crush_crawfish,
+        EventName.crush_crawfish_rematch
+    ],
+    "Neon Tiger": [
+        f"{RegionName.neon_tiger_hill} -> {RegionName.neon_tiger_boss}",
+        LocationName.doppler_lab_3_neon_tiger,
+        EventName.neon_tiger_rematch
+    ],
+    "Gravity Beetle": [
+        f"{RegionName.gravity_beetle_inside} -> {RegionName.gravity_beetle_boss}",
+        LocationName.doppler_lab_3_gravity_beetle,
+        EventName.gravity_beetle_rematch,
+    ],
+    "Blast Hornet": [
+        f"{RegionName.blast_hornet_bit_byte} -> {RegionName.blast_hornet_boss}",
+        LocationName.doppler_lab_3_blast_hornet,
+        EventName.blast_hornet_rematch
+    ],
+    "Bit": [
+        LocationName.bit_defeat
+    ],
+    "Byte": [
+        LocationName.byte_defeat
+    ],
+    "Hotareeca": [
+        f"{RegionName.toxic_seahorse_underwater} -> {RegionName.toxic_seahorse_hootareca}"
+    ],
+    "Hell Crusher": [
+        f"{RegionName.tunnel_rhino_wall_jump} -> {RegionName.tunnel_rhino_hell_crusher}",
+    ],
+    "Worm Seeker-R": [
+        f"{RegionName.neon_tiger_start} -> {RegionName.neon_tiger_worm}",
+    ],
+    "Shurikein": [
+        f"{RegionName.blast_hornet_conveyors} -> {RegionName.blast_hornet_shurikein}",
+    ],
+    "Vile": [
+        f"{RegionName.vile_before} -> {RegionName.vile_boss}",
+    ],
+    "Press Disposer": [
+        LocationName.doppler_lab_1_boss,
+        EventName.dr_doppler_lab_1_clear
+    ],
+    "Godkarmachine": [
+        LocationName.doppler_lab_1_boss,
+        EventName.dr_doppler_lab_1_clear
+    ],
+    "Dr. Doppler's Lab 2 Boss": [
+        LocationName.doppler_lab_2_boss,
+        EventName.dr_doppler_lab_2_clear
+    ],
+    "Doppler": [
+        LocationName.doppler_lab_3_boss,
+        EventName.dr_doppler_lab_3_clear
+    ],
+    "Sigma": [
+        f"{RegionName.dr_doppler_lab_3_boss} -> {RegionName.dr_doppler_lab_4}"
+    ],
+    "Kaiser Sigma": [
+        f"{RegionName.dr_doppler_lab_3_boss} -> {RegionName.dr_doppler_lab_4}"
+    ]
+}
+
 
 def set_rules(world: MMX3World):
     player = world.player
@@ -29,66 +127,77 @@ def set_rules(world: MMX3World):
              lambda state: state.has(ItemName.stage_blast_hornet, player))
 
     # Doppler Lab entrance rules
-    doppler_open = world.options.doppler_open
+    doppler_open = world.options.doppler_open.value
     entrance = multiworld.get_entrance(f"{RegionName.intro_stage} -> {RegionName.dr_doppler_lab}", player)
 
-    if doppler_open == "multiworld":
+    if len(doppler_open) == 0:
         set_rule(entrance, lambda state: state.has(ItemName.stage_doppler_lab, player))
-    if doppler_open in ("medals", "all") and world.options.doppler_medal_count.value > 0:
-        add_rule(entrance, lambda state: state.has(ItemName.maverick_medal, player, world.options.doppler_medal_count.value))
-    if doppler_open in ("weapons", "all") and world.options.doppler_weapon_count.value > 0:
-        add_rule(entrance, lambda state: state.has_group("Weapons", player, world.options.doppler_weapon_count.value))
-    if doppler_open in ("armor_upgrades", "all") and world.options.doppler_upgrade_count.value > 0:
-        add_rule(entrance, lambda state: state.has_group("Armor Upgrades", player, world.options.doppler_upgrade_count.value))
-    if doppler_open in ("heart_tanks", "all") and world.options.doppler_heart_tank_count.value > 0:
-        add_rule(entrance, lambda state: state.has(ItemName.heart_tank, player, world.options.doppler_heart_tank_count.value))
-    if doppler_open in ("sub_tanks", "all") and world.options.doppler_sub_tank_count.value > 0:
-        add_rule(entrance, lambda state: state.has(ItemName.sub_tank, player, world.options.doppler_sub_tank_count.value))
+    else:
+        if "Medals" in doppler_open and world.options.doppler_medal_count.value > 0:
+            add_rule(entrance, lambda state: state.has(ItemName.maverick_medal, player, world.options.doppler_medal_count.value))
+        if "Weapons" in doppler_open and world.options.doppler_weapon_count.value > 0:
+            add_rule(entrance, lambda state: state.has_group("Weapons", player, world.options.doppler_weapon_count.value))
+        if "Armor Upgrades" in doppler_open and world.options.doppler_upgrade_count.value > 0:
+            add_rule(entrance, lambda state: state.has_group("Armor Upgrades", player, world.options.doppler_upgrade_count.value))
+        if "Heart Tanks" in doppler_open and world.options.doppler_heart_tank_count.value > 0:
+            add_rule(entrance, lambda state: state.has(ItemName.heart_tank, player, world.options.doppler_heart_tank_count.value))
+        if "Sub Tanks" in doppler_open and world.options.doppler_sub_tank_count.value > 0:
+            add_rule(entrance, lambda state: state.has(ItemName.sub_tank, player, world.options.doppler_sub_tank_count.value))
 
     if world.options.logic_vile_required.value:
         add_rule(entrance, lambda state: state.has(EventName.vile_defeated, player))
 
     # Doppler Lab level rules
-    set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_1} -> {RegionName.dr_doppler_lab_2}", player),
-             lambda state: state.has(EventName.dr_doppler_lab_1_clear, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_2} -> {RegionName.dr_doppler_lab_3}", player),
-             lambda state: state.has(EventName.dr_doppler_lab_2_clear, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_3_boss} -> {RegionName.dr_doppler_lab_4}", player),
-             lambda state: state.has(EventName.dr_doppler_lab_3_clear, player))
-
+    if world.options.doppler_all_labs:
+        set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_3_boss} -> {RegionName.dr_doppler_lab_4}", player),
+                 lambda state: (
+                     state.has(EventName.dr_doppler_lab_1_clear, player) and 
+                     state.has(EventName.dr_doppler_lab_2_clear, player) and 
+                     state.has(EventName.dr_doppler_lab_3_clear, player)
+                    ))
+    else:
+        set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_1} -> {RegionName.dr_doppler_lab_2}", player),
+                 lambda state: state.has(EventName.dr_doppler_lab_1_clear, player))
+        set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_2} -> {RegionName.dr_doppler_lab_3}", player),
+                 lambda state: state.has(EventName.dr_doppler_lab_2_clear, player))
+        set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_3_boss} -> {RegionName.dr_doppler_lab_4}", player),
+                 lambda state: state.has(EventName.dr_doppler_lab_3_clear, player))
+        
     # Set Boss rematch rules
-    set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_3_rematches} -> {RegionName.dr_doppler_lab_3_boss}", player),
-             lambda state: state.has(EventName.boss_rematch_clear, player, world.options.doppler_lab_3_boss_rematch_count.value))
+    if world.options.doppler_lab_3_boss_rematch_count.value > 0:
+        set_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_3_rematches} -> {RegionName.dr_doppler_lab_3_boss}", player),
+                lambda state: state.has(EventName.boss_rematch_clear, player, world.options.doppler_lab_3_boss_rematch_count.value))
     
     # Vile entrance rules
-    vile_open = world.options.vile_open
+    vile_open = world.options.vile_open.value
     entrance_blizzard = multiworld.get_entrance(f"{RegionName.blizzard_buffalo_start} -> {RegionName.vile}", player)
     entrance_volt = multiworld.get_entrance(f"{RegionName.volt_catfish_start} -> {RegionName.vile}", player)
     entrance_crush = multiworld.get_entrance(f"{RegionName.crush_crawfish_start} -> {RegionName.vile}", player)
-    if vile_open == "multiworld":
+    if len(vile_open) == 0:
         set_rule(entrance_blizzard, lambda state: state.has(ItemName.stage_vile, player))
         set_rule(entrance_volt, lambda state: state.has(ItemName.stage_vile, player))
         set_rule(entrance_crush, lambda state: state.has(ItemName.stage_vile, player))
-    if vile_open in ("medals", "all") and world.options.vile_medal_count.value > 0:
-        add_rule(entrance_blizzard, lambda state: state.has(ItemName.maverick_medal, player, world.options.vile_medal_count.value))
-        add_rule(entrance_volt, lambda state: state.has(ItemName.maverick_medal, player, world.options.vile_medal_count.value))
-        add_rule(entrance_crush, lambda state: state.has(ItemName.maverick_medal, player, world.options.vile_medal_count.value))
-    if vile_open in ("weapons", "all") and world.options.vile_weapon_count.value > 0:
-        add_rule(entrance_blizzard, lambda state: state.has_group("Weapons", player, world.options.vile_weapon_count.value))
-        add_rule(entrance_volt, lambda state: state.has_group("Weapons", player, world.options.vile_weapon_count.value))
-        add_rule(entrance_crush, lambda state: state.has_group("Weapons", player, world.options.vile_weapon_count.value))
-    if vile_open in ("armor_upgrades", "all") and world.options.vile_upgrade_count.value > 0:
-        add_rule(entrance_blizzard, lambda state: state.has_group("Armor Upgrades", player, world.options.vile_upgrade_count.value))
-        add_rule(entrance_volt, lambda state: state.has_group("Armor Upgrades", player, world.options.vile_upgrade_count.value))
-        add_rule(entrance_crush, lambda state: state.has_group("Armor Upgrades", player, world.options.vile_upgrade_count.value))
-    if vile_open in ("heart_tanks", "all") and world.options.vile_heart_tank_count.value > 0:
-        add_rule(entrance_blizzard, lambda state: state.has(ItemName.heart_tank, player, world.options.vile_heart_tank_count.value))
-        add_rule(entrance_volt, lambda state: state.has(ItemName.heart_tank, player, world.options.vile_heart_tank_count.value))
-        add_rule(entrance_crush, lambda state: state.has(ItemName.heart_tank, player, world.options.vile_heart_tank_count.value))
-    if vile_open in ("sub_tanks", "all") and world.options.vile_sub_tank_count.value > 0:
-        add_rule(entrance_blizzard, lambda state: state.has(ItemName.sub_tank, player, world.options.vile_sub_tank_count.value))
-        add_rule(entrance_volt, lambda state: state.has(ItemName.sub_tank, player, world.options.vile_sub_tank_count.value))
-        add_rule(entrance_crush, lambda state: state.has(ItemName.sub_tank, player, world.options.vile_sub_tank_count.value))
+    else:
+        if "Medals" in vile_open and world.options.vile_medal_count.value > 0:
+            add_rule(entrance_blizzard, lambda state: state.has(ItemName.maverick_medal, player, world.options.vile_medal_count.value))
+            add_rule(entrance_volt, lambda state: state.has(ItemName.maverick_medal, player, world.options.vile_medal_count.value))
+            add_rule(entrance_crush, lambda state: state.has(ItemName.maverick_medal, player, world.options.vile_medal_count.value))
+        if "Weapons" in vile_open and world.options.vile_weapon_count.value > 0:
+            add_rule(entrance_blizzard, lambda state: state.has_group("Weapons", player, world.options.vile_weapon_count.value))
+            add_rule(entrance_volt, lambda state: state.has_group("Weapons", player, world.options.vile_weapon_count.value))
+            add_rule(entrance_crush, lambda state: state.has_group("Weapons", player, world.options.vile_weapon_count.value))
+        if "Armor Upgrades" in vile_open and world.options.vile_upgrade_count.value > 0:
+            add_rule(entrance_blizzard, lambda state: state.has_group("Armor Upgrades", player, world.options.vile_upgrade_count.value))
+            add_rule(entrance_volt, lambda state: state.has_group("Armor Upgrades", player, world.options.vile_upgrade_count.value))
+            add_rule(entrance_crush, lambda state: state.has_group("Armor Upgrades", player, world.options.vile_upgrade_count.value))
+        if "Heart Tanks" in vile_open and world.options.vile_heart_tank_count.value > 0:
+            add_rule(entrance_blizzard, lambda state: state.has(ItemName.heart_tank, player, world.options.vile_heart_tank_count.value))
+            add_rule(entrance_volt, lambda state: state.has(ItemName.heart_tank, player, world.options.vile_heart_tank_count.value))
+            add_rule(entrance_crush, lambda state: state.has(ItemName.heart_tank, player, world.options.vile_heart_tank_count.value))
+        if "Sub Tanks" in vile_open and world.options.vile_sub_tank_count.value > 0:
+            add_rule(entrance_blizzard, lambda state: state.has(ItemName.sub_tank, player, world.options.vile_sub_tank_count.value))
+            add_rule(entrance_volt, lambda state: state.has(ItemName.sub_tank, player, world.options.vile_sub_tank_count.value))
+            add_rule(entrance_crush, lambda state: state.has(ItemName.sub_tank, player, world.options.vile_sub_tank_count.value))
 
     # Bit & Byte arena entrance rules
     set_rule(multiworld.get_entrance(f"{RegionName.blast_hornet_bit_byte} -> {RegionName.bit_byte}", player), 
@@ -211,218 +320,54 @@ def set_rules(world: MMX3World):
     set_rule(multiworld.get_location(LocationName.blast_hornet_helmet, player),
              lambda state: (
                 state.has(ItemName.third_armor_legs, player, 2) or
-                state.has(ItemName.ride_hawk, player)
+                (
+                    state.has(ItemName.third_armor_legs, player, 1) and
+                    state.has(ItemName.ride_hawk, player)
+                )
              ))
     
     # Handle bosses weakness
-    if world.options.logic_boss_weakness.value:
+    if world.options.logic_boss_weakness.value or world.options.boss_weakness_strictness.value >= 2:
         add_boss_weakness_logic(world)
 
-    # Z-Saber logic
-    if world.options.logic_z_saber != "not_required":
-        add_z_saber_logic(world)
-        
     # Handle pickupsanity logic
     if world.options.pickupsanity.value:
         add_pickupsanity_logic(world)
 
 
-def add_boss_weakness_logic(world):
+def add_boss_weakness_logic(world: MMX3World):
     player = world.player
     multiworld = world.multiworld
+    jammed_buster = world.options.jammed_buster.value
 
-    # Set Blizzard Buffalo rules
-    set_rule(multiworld.get_entrance(f"{RegionName.blizzard_buffalo_after_bit_byte} -> {RegionName.blizzard_buffalo_boss}", player),
-             lambda state: state.has(ItemName.parasitic_bomb, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.blizzard_buffalo_after_bit_byte} -> {RegionName.blizzard_buffalo_boss}", player),
-             lambda state: state.has(ItemName.parasitic_bomb, player))
+    if world.options.doppler_lab_3_boss_rematch_count.value == 0:
+        for boss in mavericks:
+            bosses[boss].pop()
+            bosses[boss].pop()
 
-    # Set Toxic Seahorse rules
-    set_rule(multiworld.get_entrance(f"{RegionName.toxic_seahorse_dam} -> {RegionName.toxic_seahorse_boss}", player),
-             lambda state: state.has(ItemName.frost_shield, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.toxic_seahorse_dam} -> {RegionName.toxic_seahorse_boss}", player),
-             lambda state: state.has(ItemName.frost_shield, player))
-    
-    # Set Tunnel Rhino rules
-    set_rule(multiworld.get_entrance(f"{RegionName.tunnel_rhino_climbing} -> {RegionName.tunnel_rhino_boss}", player),
-             lambda state: state.has(ItemName.acid_burst, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.tunnel_rhino_climbing} -> {RegionName.tunnel_rhino_boss}", player),
-             lambda state: state.has(ItemName.acid_burst, player))
-    
-    # Set Volt Catfish rules
-    set_rule(multiworld.get_entrance(f"{RegionName.volt_catfish_inside} -> {RegionName.volt_catfish_boss}", player),
-             lambda state: state.has(ItemName.tornado_fang, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.volt_catfish_inside} -> {RegionName.volt_catfish_boss}", player),
-             lambda state: state.has(ItemName.tornado_fang, player))
-    
-    # Set Crush Crawfish rules
-    set_rule(multiworld.get_entrance(f"{RegionName.crush_crawfish_inside} -> {RegionName.crush_crawfish_boss}", player),
-             lambda state: state.has(ItemName.triad_thunder, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.crush_crawfish_inside} -> {RegionName.crush_crawfish_boss}", player),
-             lambda state: state.has(ItemName.triad_thunder, player))
-    
-    # Set Neon Tiger rules
-    set_rule(multiworld.get_entrance(f"{RegionName.neon_tiger_hill} -> {RegionName.neon_tiger_boss}", player),
-             lambda state: state.has(ItemName.spinning_blade, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.neon_tiger_hill} -> {RegionName.neon_tiger_boss}", player),
-             lambda state: state.has(ItemName.spinning_blade, player))
-    
-    # Set Gravity Beetle rules
-    set_rule(multiworld.get_entrance(f"{RegionName.gravity_beetle_inside} -> {RegionName.gravity_beetle_boss}", player),
-             lambda state: state.has(ItemName.ray_splasher, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.gravity_beetle_inside} -> {RegionName.gravity_beetle_boss}", player),
-             lambda state: state.has(ItemName.ray_splasher, player))
-    
-    # Set Blast Hornet rules
-    set_rule(multiworld.get_entrance(f"{RegionName.blast_hornet_bit_byte} -> {RegionName.blast_hornet_boss}", player),
-             lambda state: state.has(ItemName.gravity_well, player))
-    set_rule(multiworld.get_entrance(f"{RegionName.blast_hornet_bit_byte} -> {RegionName.blast_hornet_boss}", player),
-             lambda state: state.has(ItemName.gravity_well, player)) 
-    
-    # Set maverick rematch rules
-    if world.options.doppler_lab_3_boss_rematch_count.value != 0:
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_blizzard_buffalo, player),
-                lambda state: state.has(ItemName.parasitic_bomb, player))
-        set_rule(multiworld.get_location(EventName.blizzard_buffalo_rematch, player),
-                lambda state: state.has(ItemName.parasitic_bomb, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_toxic_seahorse, player),
-                lambda state: state.has(ItemName.frost_shield, player))
-        set_rule(multiworld.get_location(EventName.toxic_seahorse_rematch, player),
-                lambda state: state.has(ItemName.frost_shield, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_tunnel_rhino, player),
-                lambda state: state.has(ItemName.acid_burst, player))
-        set_rule(multiworld.get_location(EventName.tunnel_rhino_rematch, player),
-                lambda state: state.has(ItemName.acid_burst, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_volt_catfish, player),
-                lambda state: state.has(ItemName.tornado_fang, player))
-        set_rule(multiworld.get_location(EventName.volt_catfish_rematch, player),
-                lambda state: state.has(ItemName.tornado_fang, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_crush_crawfish, player),
-                lambda state: state.has(ItemName.triad_thunder, player))
-        set_rule(multiworld.get_location(EventName.crush_crawfish_rematch, player),
-                lambda state: state.has(ItemName.triad_thunder, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_neon_tiger, player),
-                lambda state: state.has(ItemName.spinning_blade, player))
-        set_rule(multiworld.get_location(EventName.neon_tiger_rematch, player),
-                lambda state: state.has(ItemName.spinning_blade, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_gravity_beetle, player), 
-                lambda state: state.has(ItemName.ray_splasher, player))
-        set_rule(multiworld.get_location(EventName.gravity_beetle_rematch, player),
-                lambda state: state.has(ItemName.ray_splasher, player))
-        set_rule(multiworld.get_location(LocationName.doppler_lab_3_blast_hornet, player), 
-                lambda state: state.has(ItemName.gravity_well, player))
-        set_rule(multiworld.get_location(EventName.blast_hornet_rematch, player),
-                lambda state: state.has(ItemName.gravity_well, player))
-    
-    # Set Bit rules
-    add_rule(multiworld.get_location(LocationName.bit_defeat, player), 
-             lambda state: (
-                state.has(ItemName.frost_shield, player) or
-                state.has(ItemName.triad_thunder, player)
-             ))
-    
-    # Set Byte rules
-    add_rule(multiworld.get_location(LocationName.byte_defeat, player),
-             lambda state: (
-                state.has(ItemName.tornado_fang, player) or
-                state.has(ItemName.ray_splasher, player)
-             ))
-
-    # Set Vile rules
-    add_rule(multiworld.get_entrance(f"{RegionName.vile_before} -> {RegionName.vile_boss}", player),
-             lambda state: (
-                state.has(ItemName.spinning_blade, player) or
-                state.has(ItemName.ray_splasher, player)
-             ))
-
-    # Set Press Disposer rules
-    add_rule(multiworld.get_location(EventName.dr_doppler_lab_1_clear, player),
-                lambda state: (
-                state.has(ItemName.tornado_fang, player) or
-                state.has(ItemName.ray_splasher, player)
-            ))
-    add_rule(multiworld.get_location(LocationName.doppler_lab_1_boss, player),
-                lambda state: (
-                state.has(ItemName.tornado_fang, player) or
-                state.has(ItemName.ray_splasher, player)
-            ))
-    # Set Godkarmachine O' Inary rules
-    add_rule(multiworld.get_location(EventName.dr_doppler_lab_1_clear, player),
-                lambda state: state.has(ItemName.ray_splasher, player))
-    add_rule(multiworld.get_location(LocationName.doppler_lab_1_boss, player),
-                lambda state: state.has(ItemName.ray_splasher, player))
-
-    if world.options.doppler_lab_2_boss == "volt_kurageil":
-        # Set Volt Kurageil rules
-        add_rule(multiworld.get_location(EventName.dr_doppler_lab_2_clear, player),
-                 lambda state: (
-                    state.has(ItemName.frost_shield, player) or
-                    state.has(ItemName.triad_thunder, player)
-                 ))
-        add_rule(multiworld.get_location(LocationName.doppler_lab_2_boss, player),
-                 lambda state: (
-                    state.has(ItemName.frost_shield, player) or
-                    state.has(ItemName.triad_thunder, player)
-                 ))
-    elif world.options.doppler_lab_2_boss == "vile":
-        # Set Vile rematch rules
-        add_rule(multiworld.get_location(EventName.dr_doppler_lab_2_clear, player),
-                 lambda state: (
-                    (
-                        state.has(ItemName.parasitic_bomb, player) or 
-                        state.has(ItemName.tornado_fang, player)
-                    ) and (
-                        state.has(ItemName.spinning_blade, player) or
-                        state.has(ItemName.ray_splasher, player)
-                    )
-                 ))
-        add_rule(multiworld.get_location(LocationName.doppler_lab_2_boss, player),
-                 lambda state: (
-                    (
-                        state.has(ItemName.parasitic_bomb, player) or 
-                        state.has(ItemName.tornado_fang, player)
-                    ) and (
-                        state.has(ItemName.spinning_blade, player) or
-                        state.has(ItemName.ray_splasher, player)
-                    )
-                 ))
-        
-    # Set Dr. Doppler rules
-    add_rule(multiworld.get_location(LocationName.doppler_lab_3_boss, player),
-             lambda state: state.has(ItemName.acid_burst, player))
-    add_rule(multiworld.get_location(EventName.dr_doppler_lab_3_clear, player),
-             lambda state: state.has(ItemName.acid_burst, player))
-    # Set Sigma rules
-    set_rule(multiworld.get_location(LocationName.doppler_lab_3_boss, player),
-             lambda state: (
-                state.has(ItemName.spinning_blade, player) or 
-                state.has(ItemName.frost_shield, player)
-             ))
+    for boss, regions in bosses.items():
+        weaknesses = world.boss_weaknesses[boss]
+        for weakness in weaknesses:
+            if weakness[0] is None:
+                continue
+            weakness = weakness[0]
+            for region in regions:
+                ruleset = {}
+                if "Check Charge" in weakness[0]:
+                    ruleset[ItemName.third_armor_arms] = jammed_buster + int(weakness[0][-1:]) - 1
+                else:
+                    ruleset[weakness[0]] = 1
+                if len(weakness) != 1:
+                    ruleset[weakness[1]] = 1
+                if "->" in region:
+                    add_rule(multiworld.get_entrance(region, player),
+                             lambda state, ruleset=ruleset: state.has_all_counts(ruleset, player))
+                else:
+                    add_rule(multiworld.get_location(region, player),
+                             lambda state, ruleset=ruleset: state.has_all_counts(ruleset, player))
 
 
-def add_z_saber_logic(world):
-    player = world.player
-    multiworld = world.multiworld
-
-    logic_z_saber = world.options.logic_z_saber
-    if logic_z_saber == 0:
-        add_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab} -> {RegionName.dr_doppler_lab_1}", player),
-                 lambda state: state.has(ItemName.z_saber, player))
-    elif logic_z_saber == 1:
-        add_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_1} -> {RegionName.dr_doppler_lab_2}", player), 
-                 lambda state: state.has(ItemName.z_saber, player))
-    elif logic_z_saber == 2:
-        add_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_2} -> {RegionName.dr_doppler_lab_3}", player), 
-                 lambda state: state.has(ItemName.z_saber, player))
-    elif logic_z_saber == 3:
-        add_rule(multiworld.get_location(LocationName.doppler_lab_3_boss, player), 
-                 lambda state: state.has(ItemName.z_saber, player))
-    elif logic_z_saber == 4:
-        add_rule(multiworld.get_entrance(f"{RegionName.dr_doppler_lab_3_boss} -> {RegionName.dr_doppler_lab_4}", player), 
-                 lambda state: state.has(ItemName.z_saber, player))
-
-
-def add_pickupsanity_logic(world):
+def add_pickupsanity_logic(world: MMX3World):
     player = world.player
     multiworld = world.multiworld
 
