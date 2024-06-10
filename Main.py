@@ -455,7 +455,10 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             output_file_futures.append(pool.submit(write_multidata))
             if not check_accessibility_task.result():
                 if not multiworld.can_beat_game():
-                    raise Exception("Game appears as unbeatable. Aborting.")
+                    state = multiworld.state.copy()
+                    beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
+
+                    raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
                 else:
                     logger.warning("Location Accessibility requirements not fulfilled.")
 

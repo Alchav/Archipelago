@@ -459,6 +459,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     usefulitempool: typing.List[Item] = []
     filleritempool: typing.List[Item] = []
 
+    all_state = multiworld.get_all_state(False)
+    if not multiworld.can_beat_game(all_state):
+        beaten_games = {player: multiworld.has_beaten_game(all_state, player) for player in multiworld.player_ids}
+        breakpoint()
+
     for item in itempool:
         if item.advancement:
             progitempool.append(item)
@@ -738,13 +743,20 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     for i, sphere in enumerate(spheres):
         for player in game_spheres:
             if [loc for loc in sphere if loc.player == player]:
-                game_spheres[player] = i
+                game_spheres[player] += 1
 
-    for player in game_spheres:
-        try:
-            logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
-        except Exception:
-            pass
+    # for player in game_spheres:
+    #     try:
+    #         logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
+    #     except Exception:
+    #         pass
+
+    if not multiworld.can_beat_game():
+        state = multiworld.state.copy()
+        state.sweep_for_events()
+        beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
+
+        raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
 
     for sphere in spheres:
         sphere_list = list(sphere)

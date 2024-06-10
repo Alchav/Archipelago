@@ -164,6 +164,7 @@ def call_single(multiworld: "MultiWorld", method_name: str, player: int, *args: 
         ret = _timed_call(method, *args, multiworld=multiworld, player=player)
     except Exception as e:
         message = f"Exception in {method} for player {player}, named {multiworld.player_name[player]}."
+        breakpoint()
         if sys.version_info >= (3, 11, 0):
             e.add_note(message)  # PEP 678
         else:
