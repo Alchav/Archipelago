@@ -125,7 +125,7 @@ def launch():
         await ctx.exit_event.wait()
         await ctx.shutdown()
 
-    Utils.init_logging("BizHawkClient", exception_logger="Client")
+    Utils.init_logging("BingoClient", exception_logger="Client")
     import colorama
     colorama.init()
     asyncio.run(main())

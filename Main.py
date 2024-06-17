@@ -456,6 +456,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             if not check_accessibility_task.result():
                 if not multiworld.can_beat_game():
                     state = multiworld.state.copy()
+                    state.sweep_for_events()
                     beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
 
                     raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")

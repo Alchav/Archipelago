@@ -11,6 +11,55 @@ from Options import Accessibility
 from worlds.AutoWorld import call_all
 from worlds.generic.Rules import add_item_rule, add_rule
 
+def swappable(multiworld, loc):
+    from worlds.papermario.data.ItemList import progression_miscitems
+    if not isinstance(loc.address, int):
+        return False
+    if loc.item.name in multiworld.local_items[loc.player]:
+        return False
+    if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
+        return False
+    if "SSS Merluvlee's House Merlow's Badges" in loc.name:
+         return False
+    if loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name):
+        return False
+    return True
+
+
+def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None):
+    state = CollectionState(multiworld)
+    locations = set(multiworld.get_filled_locations())
+    beaten_games = set()
+    i = 1
+    while locations:
+        reachable_locations = {location for location in locations if location.can_reach(state)}
+        old_reachable_locations = None
+        while old_reachable_locations != reachable_locations:
+            old_reachable_locations = reachable_locations.copy()
+            reachable_events = {location for location in reachable_locations if location.address is None or location.item.name == "Token"}
+            for location in reachable_events:
+                state.collect(location.item, True, location)
+            locations -= reachable_events
+            reachable_locations = {location for location in locations if location.can_reach(state)}
+        old_beaten_games = beaten_games.copy()
+        beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
+        new_beaten_games = beaten_games - old_beaten_games
+        for player in new_beaten_games:
+            if beaten_game_spheres:
+                beaten_game_spheres[player] = i
+            logging.info(f"{i} - {new_beaten_games}")
+        i += 1
+        if not reachable_locations:
+            if locations:
+                yield locations  # unreachable locations
+            break
+        else:
+            yield {loc for loc in reachable_locations}  # if loc.player not in beaten_games}
+
+        for location in reachable_locations:
+            if location.item.advancement:
+                state.collect(location.item, True, location)
+        locations -= reachable_locations
 
 class FillError(RuntimeError):
     pass
@@ -247,6 +296,8 @@ def remaining_fill(multiworld: MultiWorld,
             # try swapping this item with previously placed items
 
             for (i, location) in enumerate(placements):
+                if location.player != item_to_place.player:
+                    continue
                 placed_item = location.item
                 # Unplaceable items can sometimes be swapped infinitely. Limit the
                 # number of times we will swap an individual item to prevent this
@@ -606,51 +657,16 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         logging.info_data = {"items": items_counter, "locations": locations_counter}
         logging.info(f"Per-Player counts: {logging.info_data})")
 
-    for player, world in multiworld.worlds.items():
-        if player % 2:
-            continue
-        menu = multiworld.get_region("Menu", player)
-        rule = multiworld.completion_condition[player-1]
-        for location in menu.locations:
-            add_rule(location, rule)
-        for entrance in menu.exits:
-            add_rule(entrance, rule)
 
-
-    beaten_game_spheres = {}
-    def get_item_spheres():
-        state = CollectionState(multiworld)
-        locations = set(multiworld.get_filled_locations())
-        beaten_games = set()
-        i = 1
-        while locations:
-            reachable_locations = {location for location in locations if location.can_reach(state)}
-            old_reachable_locations = None
-            while old_reachable_locations != reachable_locations:
-                old_reachable_locations = reachable_locations.copy()
-                reachable_events = {location for location in reachable_locations if location.address is None}
-                for location in reachable_events:
-                    state.collect(location.item, True, location)
-                locations -= reachable_events
-                reachable_locations = {location for location in locations if location.can_reach(state)}
-            old_beaten_games = beaten_games.copy()
-            beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
-            new_beaten_games = beaten_games - old_beaten_games
-            for player in new_beaten_games:
-                beaten_game_spheres[player] = i
-                logging.info(f"{i} - {new_beaten_games}")
-            i += 1
-            if not reachable_locations:
-                if locations:
-                    yield locations  # unreachable locations
-                break
-            else:
-                yield {loc for loc in reachable_locations} # if loc.player not in beaten_games}
-
-            for location in reachable_locations:
-                if location.item.advancement:
-                    state.collect(location.item, True, location)
-            locations -= reachable_locations
+    # for player, world in multiworld.worlds.items():
+    #     if player % 2:
+    #         continue
+    #     menu = multiworld.get_region("Menu", player)
+    #     rule = multiworld.completion_condition[player-1]
+    #     for location in menu.locations:
+    #         add_rule(location, rule)
+    #     for entrance in menu.exits:
+    #         add_rule(entrance, rule)
 
 
     def iclass(i: Item):
@@ -668,6 +684,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     or "Key" in i.name or "Traveling Merchant: " in i.name):
                 return 2
             else:
+                if not multiworld.random.randint(0, 4):
+                    return 2
                 return 1
         # if game == "Starcraft 2":
         #     return 1
@@ -686,9 +704,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 2
         return 1
 
-    from worlds.papermario.data.ItemList import progression_miscitems
 
-    spheres = list(get_item_spheres())
+    beaten_game_spheres = {}
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
 
 
     pseudo_prog_items = [
@@ -737,7 +755,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
                 location.item = item
     beaten_game_spheres = {}
-    spheres = list(get_item_spheres())
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
 
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
     for i, sphere in enumerate(spheres):
@@ -764,9 +782,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         multiworld.random.shuffle(sphere_list)
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
-            if (isinstance(loc.address, int) and loc.item.name not in multiworld.local_items[loc.player] and not (
-                    loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems)
-                    and "SSS Merluvlee's House Merlow's Badges" not in loc.name) and not (loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name)):
+            if swappable(multiworld, loc):
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
@@ -784,7 +800,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                             loc.item, loc2.item = loc2.item, loc.item
                             break
 
-    multiworld.post_fill = True
+    # multiworld.post_fill = True
 
     sc2_worlds = multiworld.get_game_worlds("Starcraft 2")
     if not sc2_worlds:

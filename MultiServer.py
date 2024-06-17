@@ -995,7 +995,7 @@ def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
                       ) -> typing.List[str]:
         checked = state[team, slot]
         player_locations = self[slot]
-        return sorted([item_names[player_locations[location_id][0]] + f" ({ctx.games[player_locations[location_id][1]]})" + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
+        return sorted([f"{item_names[ctx.slot_info[player_locations[location_id][1]].game][player_locations[location_id][0]]}" + f" ({ctx.games[player_locations[location_id][1]]})" + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
                        location_id in player_locations if
                        location_id not in checked])
     return g(ctx.locations, ctx.location_checks, team, slot, ctx.er_hint_data, ctx.item_names)
@@ -1731,10 +1731,10 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
 
             #player in ctx.client_game_state and ctx.client_game_state[player] == ClientStatus.CLIENT_GOAL
 
-            if slot % 2 == 0:
-                dependant = (team, slot - 1)
-                if dependant not in ctx.client_game_state or ctx.client_game_state[dependant] != ClientStatus.CLIENT_GOAL:
-                    errors.add("InvalidGame")
+            # if slot % 2 == 0:
+            #     dependant = (team, slot - 1)
+            #     if dependant not in ctx.client_game_state or ctx.client_game_state[dependant] != ClientStatus.CLIENT_GOAL:
+            #         errors.add("InvalidGame")
 
         # only exact version match allowed
         if ctx.compatibility == 0 and args['version'] != version_tuple:
