@@ -53,6 +53,7 @@ class GrindLogic(BaseLogic[Union[GrindLogicMixin, HasLogicMixin, ReceivedLogicMi
 
     @cache_self1
     def can_grind_item(self, quantity: int) -> StardewRule:
+        return self.logic.true_
         if quantity <= MIN_ITEMS:
             return self.logic.true_
 
