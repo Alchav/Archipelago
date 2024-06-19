@@ -763,11 +763,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if [loc for loc in sphere if loc.player == player]:
                 game_spheres[player] += 1
 
-    # for player in game_spheres:
-    #     try:
-    #         logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
-    #     except Exception:
-    #         pass
+    for player in game_spheres:
+        try:
+            logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
+        except Exception:
+            pass
 
     if not multiworld.can_beat_game():
         state = multiworld.state.copy()
