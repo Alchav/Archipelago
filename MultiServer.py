@@ -1731,10 +1731,10 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
 
             #player in ctx.client_game_state and ctx.client_game_state[player] == ClientStatus.CLIENT_GOAL
 
-            # if slot % 2 == 0:
-            #     dependant = (team, slot - 1)
-            #     if dependant not in ctx.client_game_state or ctx.client_game_state[dependant] != ClientStatus.CLIENT_GOAL:
-            #         errors.add("InvalidGame")
+            if slot % 2 == 0:
+                dependent = (team, slot - 1)
+                if dependent not in ctx.client_game_state or ctx.client_game_state[dependent] != ClientStatus.CLIENT_GOAL:
+                    errors.add("InvalidGame")
 
         # only exact version match allowed
         if ctx.compatibility == 0 and args['version'] != version_tuple:
