@@ -1300,6 +1300,49 @@ class ClientMessageProcessor(CommonCommandProcessor):
 
         return self.ctx.commandprocessor(command)
 
+    def _cmd_sphere(self, player=None):
+        spheres = {}
+        spheres_checked = {}
+        if player:
+            player = str(player)
+            player = self.ctx.player_name_lookup[player][1]
+        else:
+            player = self.client.slot
+        lowest_sphere = 0
+        highest_sphere = 0
+        for location in self.ctx.locations[player]:
+            if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                sphere = -1
+            else:
+                sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                if lowest_sphere:
+                    lowest_sphere = min(sphere, lowest_sphere)
+                else:
+                    lowest_sphere = sphere
+                highest_sphere = max(sphere, highest_sphere)
+            if sphere not in spheres:
+                spheres[sphere] = []
+                spheres_checked[sphere] = []
+            spheres[sphere].append(location)
+            if location in self.ctx.location_checks[(0, player)]:
+                spheres_checked[sphere].append(location)
+        for i in list(range(lowest_sphere, highest_sphere + 1)) + [-1]:
+            try:
+                if len(spheres[i]) == len(spheres_checked[i]):
+                    continue
+                else:
+                    game = self.ctx.slot_info[player].game
+                    names = [f"{self.ctx.location_names[game][location]} at {self.ctx.er_hint_data[player][location]}"
+                             for location in spheres[i] if location not in spheres_checked[i]]
+                    texts = [f'Missing: {name}' for name in names]
+                    self.output_multiple(texts)
+                    break
+            except KeyError:
+                continue
+        else:
+            text = "None left"
+            self.output(text)
+
     def _cmd_spheres(self, player=None):
         if player and (player.isdigit() or player == "-1"):
             sphere = int(player)
