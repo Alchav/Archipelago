@@ -251,8 +251,6 @@ class OOTBIJMQWTWorld(OOTWorld):
     location_name_to_id = OOTWorld.location_name_to_id
     web = OOTWorld.web
 
-    data_version = OOTWorld.data_version
-
     required_client_version = OOTWorld.required_client_version
 
     item_name_groups = OOTWorld.item_name_groups
@@ -361,7 +359,7 @@ class OOTBIJMQWTWorld(OOTWorld):
             pool_size += 1
 
         while len(item_pool) < pool_size:
-            item_pool += self.multiworld.random.sample(extrapool, min(pool_size - len(item_pool), len(extrapool)))
+            item_pool += self.random.sample(extrapool, min(pool_size - len(item_pool), len(extrapool)))
 
         for item in self.multiworld.precollected_items[self.player]:
             self.starting_items[item.name] += 1
@@ -413,7 +411,7 @@ class OOTBIJMQWTWorld(OOTWorld):
             c1.replaces = c2
         if multiworld.shuffle_warp_songs[world.player]:
             connectors = warp_song_connectors.copy()
-            multiworld.random.shuffle(connectors)
+            self.random.shuffle(connectors)
             destinations = warp_song_destinations.copy()
             if multiworld.start_mode[world.player] != "guard_house":
                 destinations.append("Market Entrance -> Market Guard House")
@@ -453,7 +451,7 @@ class OOTBIJMQWTWorld(OOTWorld):
             c1.replaces = c2
 
         if multiworld.start_mode[world.player] != "iron_boots":
-            if multiworld.boss_key_location[world.player].value < 2 or multiworld.random.randint(0, 7) < 5:
+            if multiworld.boss_key_location[world.player].value < 2 or self.random.randint(0, 7) < 5:
                 multiworld.early_items[world.player]["Iron Boots"] = 1
                 if "fewer tunic requirements" in multiworld.logic_tricks[world.player]:
                     multiworld.early_items[world.player]["Zora Tunic"] = 1
