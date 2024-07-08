@@ -800,8 +800,10 @@ class CollectionState():
             changed = True
 
         self.stale[item.player] = True
-        if item.player % 2:
-            self.stale[item.player+1] = True
+        if item.game == "Archipelago":
+            self.stale[item.code] = True
+        # if item.player % 2:
+        #     self.stale[item.player+1] = True
 
         if changed and not event:
             self.sweep_for_events()

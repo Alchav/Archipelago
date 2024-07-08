@@ -658,15 +658,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         logging.info(f"Per-Player counts: {logging.info_data})")
 
 
-    # for player, world in multiworld.worlds.items():
-    #     if player % 2:
-    #         continue
-    #     menu = multiworld.get_region("Menu", player)
-    #     rule = multiworld.completion_condition[player-1]
-    #     for location in menu.locations:
-    #         add_rule(location, rule)
-    #     for entrance in menu.exits:
-    #         add_rule(entrance, rule)
 
 
     def iclass(i: Item):
@@ -705,9 +696,77 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         return 1
 
 
+    spheres = list(get_item_spheres(multiworld))
+
+    game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
+    for i, sphere in enumerate(spheres):
+        for player in game_spheres:
+            if [loc for loc in sphere if loc.player == player]:
+                game_spheres[player] += 1
+    player_names = [(player_name[0], player_name[1]) for player_name in multiworld.player_name.items()]
+    multiworld.random.shuffle(player_names)
+    playable_games = [player for player in player_names if f"Unlock {player[1]}" in multiworld.worlds[1].options.start_inventory]
+    player_names = [player_name for player_name in player_names if player_name not in playable_games]
+    highest_sphere = 0
+    for player in playable_games:
+        highest_sphere = max(highest_sphere, game_spheres[player[0]])
+    while True:
+        new_player_names = []
+        end_list_player_names = []
+        for i, player in enumerate(player_names):
+            if game_spheres[player[0]] - i < highest_sphere:
+                new_player_names.append(player)
+            else:
+                end_list_player_names.append(player)
+        if new_player_names + end_list_player_names == player_names:
+            if len(end_list_player_names) > 1:
+                end_list_player_names.sort(key=lambda p: game_spheres[p[0]])
+            player_names = new_player_names + end_list_player_names
+            break
+        else:
+            player_names = new_player_names + end_list_player_names
+
+    starting_spheres = {}
+    player_names_copy = None
+    while True:
+        if player_names_copy == player_names:
+            for i, (player, player_name) in enumerate(player_names):
+                starting_spheres[player] = i
+            break
+        player_names_copy = player_names.copy()
+        for player, player_name in player_names:
+            sphere_to_place = (highest_sphere - game_spheres[player]) + 1
+            if sphere_to_place > 0:
+                starting_spheres[player] = sphere_to_place
+        player_names = [player for player in player_names if player[0] not in starting_spheres]
+
+
+
+    for player, world in multiworld.worlds.items():
+        if player == 1:
+            continue
+        menu = multiworld.get_region("Menu", player)
+        rule = lambda state, p=player: state.has(f"Unlock {multiworld.player_name[p]}", 1)
+        for location in menu.locations:
+            add_rule(location, rule)
+        for entrance in menu.exits:
+            add_rule(entrance, rule)
+
+
+    for i, sphere in enumerate(get_item_spheres(multiworld)):
+        filler_sphere = sorted([location for location in sphere if location.address and not location.item.advancement])
+        for player, sphere_check in starting_spheres.items():
+            if sphere_check == i:
+                location = multiworld.random.choice(filler_sphere)
+                multiworld.push_precollected(location.item)
+                location.item.location = None
+                location.item = multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player_name]}")
+                location.item.location = location
+
+
+
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
-
 
     pseudo_prog_items = [
         {
@@ -754,6 +813,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             for item, location in zip(items, locations):
                 logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
                 location.item = item
+
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
 
