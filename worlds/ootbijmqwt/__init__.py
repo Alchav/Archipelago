@@ -516,3 +516,12 @@ class OOTBIJMQWTWorld(OOTWorld):
             # this gets undone because of the triforce setting, it's needed to be "dungeons" so that gift from sages
             # is not disabled.
             multiworld.worlds[world.player].shuffle_ganon_bosskey = "dungeons"
+
+    def fill_slot_data(self):
+        self.collectible_flags_available.wait()
+
+        slot_data = {
+            'collectible_override_flags': self.collectible_override_flags,
+            'collectible_flag_offsets': self.collectible_flag_offsets
+        }
+        return slot_data
