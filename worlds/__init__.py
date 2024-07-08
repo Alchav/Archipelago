@@ -120,7 +120,9 @@ for folder in (folder for folder in (user_folder, local_folder) if folder):
 # import all submodules to trigger AutoWorldRegister
 world_sources.sort()
 for world_source in world_sources:
-    world_source.load()
+    # if world_source.path == "marioland2": #not in ("lingo", "sm_map_rando.apworld", "ffmq"): #== "dlcquest":
+    if "Web" not in sys.argv[0] or "sm_map_rando" not in world_source.path:
+        world_source.load()
 
 # Build the data package for each game.
 from .AutoWorld import AutoWorldRegister
