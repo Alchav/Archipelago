@@ -26,7 +26,7 @@ def swappable(multiworld, loc):
     return True
 
 
-def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None):
+def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_unreachables=True):
     state = CollectionState(multiworld)
     locations = set(multiworld.get_filled_locations())
     beaten_games = set()
@@ -50,7 +50,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None):
             logging.info(f"{i} - {new_beaten_games}")
         i += 1
         if not reachable_locations:
-            if locations:
+            if locations and return_unreachables:
                 yield locations  # unreachable locations
             break
         else:
@@ -351,15 +351,18 @@ def remaining_fill(multiworld: MultiWorld,
                 logging.debug(f"Moved {item} to start_inventory to prevent fill failure.")
                 multiworld.push_precollected(item)
                 last_batch.append(multiworld.worlds[item.player].create_filler())
-            remaining_fill(multiworld, locations, unplaced_items, name + " Start Inventory Retry")
+            remaining_fill(multiworld, locations, last_batch, name + " Start Inventory Retry")
         else:
-            raise FillError(f"No more spots to place {len(unplaced_items)} items. Remaining locations are invalid.\n"
-                            f"Unplaced items:\n"
-                            f"{', '.join(str(item) for item in unplaced_items)}\n"
-                            f"Unfilled locations:\n"
-                            f"{', '.join(str(location) for location in locations)}\n"
-                            f"Already placed {len(placements)}:\n"
-                            f"{', '.join(str(place) for place in placements)}")
+            logging.warning(f"Couldn't place {unplaced_items} in {locations}, doing it anyways")
+            for item, location in zip(unplaced_items, locations):
+                multiworld.push_item(location, item)
+            # raise FillError(f"No more spots to place {len(unplaced_items)} items. Remaining locations are invalid.\n"
+            #                 f"Unplaced items:\n"
+            #                 f"{', '.join(str(item) for item in unplaced_items)}\n"
+            #                 f"Unfilled locations:\n"
+            #                 f"{', '.join(str(location) for location in locations)}\n"
+            #                 f"Already placed {len(placements)}:\n"
+            #                 f"{', '.join(str(place) for place in placements)}")
 
     itempool.extend(unplaced_items)
 
@@ -696,7 +699,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         return 1
 
 
-    spheres = list(get_item_spheres(multiworld))
+    spheres = list(get_item_spheres(multiworld, return_unreachables=False))
 
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
     for i, sphere in enumerate(spheres):
@@ -705,47 +708,59 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 game_spheres[player] += 1
     player_names = [(player_name[0], player_name[1]) for player_name in multiworld.player_name.items()]
     multiworld.random.shuffle(player_names)
-    playable_games = [player for player in player_names if f"Unlock {player[1]}" in multiworld.worlds[1].options.start_inventory]
+    playable_games = [player for player in player_names if player[1] in multiworld.worlds[1].options.start_games]
     player_names = [player_name for player_name in player_names if player_name not in playable_games]
     highest_sphere = 0
     for player in playable_games:
         highest_sphere = max(highest_sphere, game_spheres[player[0]])
+    print(f"Highest initial sphere: {highest_sphere}")
     while True:
+        print("Sort attempt begin")
         new_player_names = []
         end_list_player_names = []
         for i, player in enumerate(player_names):
             if game_spheres[player[0]] - i < highest_sphere:
+                print(f"{player[1]} fits")
                 new_player_names.append(player)
+                highest_sphere += 1
             else:
+                print(f"{player[1]} pushed to end of list")
                 end_list_player_names.append(player)
         if new_player_names + end_list_player_names == player_names:
             if len(end_list_player_names) > 1:
                 end_list_player_names.sort(key=lambda p: game_spheres[p[0]])
+                print(f"{end_list_player_names} pushed to end of list, could not fit")
             player_names = new_player_names + end_list_player_names
             break
         else:
             player_names = new_player_names + end_list_player_names
+    print(f"Highest final sphere: {highest_sphere}")
 
     starting_spheres = {}
     player_names_copy = None
     while True:
         if player_names_copy == player_names:
             for i, (player, player_name) in enumerate(player_names):
+                print(f"{player_name} forced to early sphere: {i}")
                 starting_spheres[player] = i
             break
         player_names_copy = player_names.copy()
         for player, player_name in player_names:
-            sphere_to_place = (highest_sphere - game_spheres[player]) + 1
+            sphere_to_place = (highest_sphere - game_spheres[player])
             if sphere_to_place > 0:
                 starting_spheres[player] = sphere_to_place
+                print(f"{player_name} sphere to place: {sphere_to_place}")
         player_names = [player for player in player_names if player[0] not in starting_spheres]
 
 
-
+    print("adding rule")
     for player, world in multiworld.worlds.items():
         if player == 1:
             continue
-        menu = multiworld.get_region("Menu", player)
+        try:
+            menu = multiworld.get_region("Menu", player)
+        except KeyError:
+            continue
         rule = lambda state, p=player: state.has(f"Unlock {multiworld.player_name[p]}", 1)
         for location in menu.locations:
             add_rule(location, rule)
@@ -755,64 +770,69 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     for i, sphere in enumerate(get_item_spheres(multiworld)):
         filler_sphere = sorted([location for location in sphere if location.address and not location.item.advancement])
+        if not filler_sphere:
+            filler_sphere = sorted([location for location in sphere if location.address and location.item.classification != ItemClassification.progression])
+            if not filler_sphere:
+                filler_sphere = sorted([location for location in sphere if location.address])
         for player, sphere_check in starting_spheres.items():
             if sphere_check == i:
                 location = multiworld.random.choice(filler_sphere)
                 multiworld.push_precollected(location.item)
                 location.item.location = None
-                location.item = multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player_name]}")
+                print(f"Placing Unlock for {multiworld.player_name[player]} in {location.name} displacing {location.item.name}")
+                location.item = multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}")
                 location.item.location = location
 
 
 
-    beaten_game_spheres = {}
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
-
-    pseudo_prog_items = [
-        {
-            "Game": "Paper Mario",
-            "Items": ["Koot Koopa Legends", "Koot Tape", "Luigi Autograph", "Koot Empty Wallet", "Merluvlee Autograph",
-                      "Koot Old Photo", "Koot Glasses", "Koot Package", "Koot Red Jar"]
-        },
-        {
-            "Game": "The Legend of Zelda",
-            "Items": ["Boomerang", "Magical Boomerang"]
-        },
-        {
-            "Game": "The Legend of Zelda",
-            "Items": ["Blue Ring", "Red Ring"]
-        },
-        {
-            "Game": "The Legend of Zelda",
-            "Items": ["Sword", "White Sword", "Magical Sword"]
-        },
-        {
-            "Game": "The Legend of Zelda",
-            "Items": ["Bow", "Arrow", "Silver Arrow"]
-        },
-        {
-            "Game": "The Legend of Zelda",
-            "Items": ["Small Key", "Magical Key"]
-        },
-        {
-            "Game": "Super Metroid Map Rando",
-            "Items": ["Morph", "Bombs"]
-        },
-    ]
-    for chain in pseudo_prog_items:
-        player_chains = {player: [] for player in multiworld.get_game_players(chain["Game"])}
-        if not player_chains:
-            continue
-        for sphere in spheres:
-            for location in sphere:
-                if location.item.game == chain["Game"] and location.item.name in chain["Items"]:
-                    player_chains[location.item.player].append(location)
-        for player, locations in player_chains.items():
-            items = [location.item for location in locations]
-            items.sort(key=lambda i: chain["Items"].index(i.name))
-            for item, location in zip(items, locations):
-                logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
-                location.item = item
+    # beaten_game_spheres = {}
+    # spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
+    #
+    # pseudo_prog_items = [
+    #     {
+    #         "Game": "Paper Mario",
+    #         "Items": ["Koot Koopa Legends", "Koot Tape", "Luigi Autograph", "Koot Empty Wallet", "Merluvlee Autograph",
+    #                   "Koot Old Photo", "Koot Glasses", "Koot Package", "Koot Red Jar"]
+    #     },
+    #     {
+    #         "Game": "The Legend of Zelda",
+    #         "Items": ["Boomerang", "Magical Boomerang"]
+    #     },
+    #     {
+    #         "Game": "The Legend of Zelda",
+    #         "Items": ["Blue Ring", "Red Ring"]
+    #     },
+    #     {
+    #         "Game": "The Legend of Zelda",
+    #         "Items": ["Sword", "White Sword", "Magical Sword"]
+    #     },
+    #     {
+    #         "Game": "The Legend of Zelda",
+    #         "Items": ["Bow", "Arrow", "Silver Arrow"]
+    #     },
+    #     {
+    #         "Game": "The Legend of Zelda",
+    #         "Items": ["Small Key", "Magical Key"]
+    #     },
+    #     {
+    #         "Game": "Super Metroid Map Rando",
+    #         "Items": ["Morph", "Bombs"]
+    #     },
+    # ]
+    # for chain in pseudo_prog_items:
+    #     player_chains = {player: [] for player in multiworld.get_game_players(chain["Game"])}
+    #     if not player_chains:
+    #         continue
+    #     for sphere in spheres:
+    #         for location in sphere:
+    #             if location.item.game == chain["Game"] and location.item.name in chain["Items"]:
+    #                 player_chains[location.item.player].append(location)
+    #     for player, locations in player_chains.items():
+    #         items = [location.item for location in locations]
+    #         items.sort(key=lambda i: chain["Items"].index(i.name))
+    #         for item, location in zip(items, locations):
+    #             logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
+    #             location.item = item
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres))

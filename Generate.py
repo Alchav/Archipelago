@@ -205,7 +205,7 @@ def main(args=None):
                     erargs.name[player] = handle_name(erargs.name[player], player, name_counter)
 
                     player += 1
-            except Exception as e:
+            except KeyError as e:
                 raise ValueError(f"File {path} is invalid. Please fix your yaml.") from e
         else:
             raise RuntimeError(f'No weights specified for player {player}')
