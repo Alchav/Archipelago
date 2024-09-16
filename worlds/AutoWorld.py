@@ -149,7 +149,7 @@ def _timed_call(method: Callable[..., Any], *args: Any,
     start = time.perf_counter()
     ret = method(*args)
     taken = time.perf_counter() - start
-    if taken > 1.0:
+    if True: #taken > 1.0:
         if player and multiworld:
             perf_logger.info(f"Took {taken:.4f} seconds in {method.__qualname__} for player {player}, "
                              f"named {multiworld.player_name[player]}.")
@@ -164,6 +164,7 @@ def call_single(multiworld: "MultiWorld", method_name: str, player: int, *args: 
         ret = _timed_call(method, *args, multiworld=multiworld, player=player)
     except Exception as e:
         message = f"Exception in {method} for player {player}, named {multiworld.player_name[player]}."
+        breakpoint()
         if sys.version_info >= (3, 11, 0):
             e.add_note(message)  # PEP 678
         else:
@@ -195,7 +196,10 @@ def call_stage(multiworld: "MultiWorld", method_name: str, *args: Any) -> None:
     for world_type in sorted(world_types, key=lambda world: world.__name__):
         stage_callable = getattr(world_type, f"stage_{method_name}", None)
         if stage_callable:
-            _timed_call(stage_callable, multiworld, *args)
+            try:
+                _timed_call(stage_callable, multiworld, *args)
+            except Exception as e:
+                breakpoint()
 
 
 class WebWorld(metaclass=WebWorldRegister):

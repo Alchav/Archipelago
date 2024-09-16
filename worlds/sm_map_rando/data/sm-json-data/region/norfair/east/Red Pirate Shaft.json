@@ -1,0 +1,179 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 118,
+  "name": "Red Pirate Shaft",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7B139",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Bottom Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x00197fe",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Top Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x00197f2",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Red Pirate Shaft Geemers",
+      "enemyName": "Geemer (grey)",
+      "quantity": 4,
+      "homeNodes": [1]
+    },
+    {
+      "id": "e2",
+      "groupName": "Red Pirate Shaft Pirates",
+      "enemyName": "Red Space Pirate (standing)",
+      "quantity": 3,
+      "homeNodes": [1]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [1, 1],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        {"shinespark": {"frames": 40, "excessFrames": 40}}
+      ],
+      "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Red Space Pirate (standing)",
+          "hits": 1,
+          "type": "contact"
+        }}
+      ],
+      "note": [
+        "Wait for the pirates to step towards the wall then jump on their platform. Shoot them to momentarily prevent them from shooting lasers.",
+        "This strat assumes getting hit once. Note that the Geemers do much less damage than the Pirates"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Avoid the Enemies",
+      "requires": [
+        "canCarefulJump"
+      ],
+      "note": "Wait for the pirates to step towards the wall then jump on their platform. Shoot them to momentarily prevent them from shooting lasers."
+    },
+    {
+      "link": [1, 2],
+      "name": "Kill the Pirates",
+      "requires": [
+        {"enemyKill": {
+          "enemies": [
+            ["Red Space Pirate (standing)"],
+            [
+              "Red Space Pirate (standing)",
+              "Red Space Pirate (standing)"
+            ]
+          ]
+        }}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {},
+        "comesThroughToilet": "no"
+      },
+      "requires": [
+        {"shinespark": {"frames": 40, "excessFrames": 6}}
+      ],
+      "note": "Enter on the either side of the doorway to make it to the top."
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway - Frozen Geemer",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "Plasma",
+        {"ammo": {"type": "Super", "count": 1}}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      },
+      "note": "Knock a Geemer off with a Super then follow it back to the top. Grey Geemers can only be frozen with Plasma."
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    }
+  ]
+}

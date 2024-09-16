@@ -1,0 +1,658 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 122,
+  "name": "Crocomire's Room",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "Crocomire",
+  "playable": true,
+  "roomEnvironments": [{"heated": false}],
+  "roomAddress": "0x7A98D",
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x00193de",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Top Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x00193ea",
+      "doorEnvironments": [{"physics": "air"}],
+      "spawnAt": 5,
+      "locks": [
+        {
+          "name": "Crocomire Room Grey Lock (to Crocomire Speedway)",
+          "lockType": "gameFlag",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "f_DefeatedCrocomire"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Item",
+      "nodeType": "item",
+      "nodeSubType": "visible",
+      "nodeItem": "ETank",
+      "nodeAddress": "0x78BA4"
+    },
+    {
+      "id": 4,
+      "name": "Crocomire",
+      "nodeType": "event",
+      "nodeSubType": "boss",
+      "locks": [
+        {
+          "name": "Crocomire Fight",
+          "lockType": "bossFight",
+          "unlockStrats": [
+            {
+              "name": "Charge",
+              "notable": false,
+              "requires": [
+                "Charge",
+                {"or": [
+                  "canDodgeWhileShooting",
+                  {"enemyDamage": {
+                    "enemy": "Crocomire",
+                    "type": "contact",
+                    "hits": 5
+                  }}
+                ]}
+              ]
+            },
+            {
+              "name": "Missiles",
+              "notable": false,
+              "requires": [
+                {"ammo": {"type": "Missile", "count": 50}}
+              ],
+              "devNote": "Some farming will still be useful, but without dodging efficiently, many of the drops will be energy."
+            },
+            {
+              "name": "Farm Missiles",
+              "notable": false,
+              "requires": [
+                "canDodgeWhileShooting",
+                {"or": [
+                  {"ammo": {"type": "Missile", "count": 2}},
+                  {"ammo": {"type": "Super", "count": 2}}
+                ]},
+                {"or": [
+                  "canTrickyJump",
+                  {"ammo": {"type": "Missile", "count": 25}}
+                ]},
+                {"resourceCapacity": [{"type": "Missile", "count": 10}]}
+              ],
+              "note": "Farming requires somewhat careful dodging in order to minimize energy drops.",
+              "devNote": [
+                "Crocomire does not have a farming phase until he has been hit twice.",
+                "It is possible to get to the farming phase with 1 PB, but sometimes Croc will just rush Samus into the spikes without ever having farm phases, so it is ignored here."
+              ]
+            },
+            {
+              "name": "Supers",
+              "notable": false,
+              "requires": [
+                {"ammo": {"type": "Super", "count": 8}},
+                {"or": [
+                  "canDodgeWhileShooting",
+                  {"ammo": {"type": "Super", "count": 5}}
+                ]},
+                {"or": [
+                  "canTrickyJump",
+                  {"ammo": {"type": "Super", "count": 2}}
+                ]}
+              ],
+              "note": [
+                "While Crocomire's farmables may drop Supers, the rate is too low to rely on.",
+                "If you run out, Croc will most likely push you into the spikes.",
+                "It takes 8 Supers to kill croc if you don't let it move forward."
+              ]
+            },
+            {
+              "name": "Crocomire with 5 Missiles",
+              "notable": true,
+              "requires": [
+                "canDodgeWhileShooting",
+                "canBeVeryPatient",
+                {"or": [
+                  {"ammo": {"type": "Missile", "count": 2}},
+                  {"ammo": {"type": "Super", "count": 2}}
+                ]},
+                {"resourceCapacity": [{"type": "Missile", "count": 5}]}
+              ],
+              "note": [
+                "This can be a very long fight if Crocomire is stingy with the farming phases.",
+                "Farming requires careful dodging in order to minimize energy drops. Delay grabbing all of the drops until necessary to reduce the chance of running out of ammo."
+              ],
+              "devNote": [
+                "This strat is notable, not because it's harder than its required tech, but because its tedious, RNG heavy, and players might not want to encounter it.",
+                "Crocomire does not have a farming phase until he has been hit twice.",
+                "It is possible to get to the farming phase with 1 PB, but sometimes Croc will just rush Samus into the spikes without ever having farm phases, so it is ignored here."
+              ]
+            }
+          ]
+        }
+      ],
+      "yields": ["f_DefeatedCrocomire"]
+    },
+    {
+      "id": 5,
+      "name": "Central Junction",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    },
+    {
+      "id": 6,
+      "name": "Junction Behind Crocomire",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Crocomire",
+      "enemyName": "Crocomire",
+      "quantity": 1,
+      "homeNodes": [4],
+      "stopSpawn": ["f_DefeatedCrocomire"]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 2},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 3},
+        {"id": 6}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 5},
+        {"id": 6}
+      ]
+    },
+    {
+      "from": 5,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 4},
+        {"id": 5}
+      ]
+    },
+    {
+      "from": 6,
+      "to": [
+        {"id": 3},
+        {"id": 4}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [
+        {"or": [
+          "h_CrocomireCameraFix",
+          "f_DefeatedCrocomire"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave ShineCharged, Croc Alive",
+      "requires": [
+        "h_CrocomireCameraFix",
+        {"canShineCharge": {
+          "usedTiles": 14,
+          "openEnd": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 45
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "f_DefeatedCrocomire",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 60
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "Base",
+      "requires": [
+        "f_DefeatedCrocomire"
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Door Frame Below",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithDoorFrameBelow": {
+          "height": 2
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Platform Below",
+      "requires": [
+        "f_DefeatedCrocomire"
+      ],
+      "exitCondition": {
+        "leaveWithPlatformBelow": {
+          "height": 10,
+          "leftPosition": -38.5,
+          "rightPosition": 41.5
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Platform Below - Crocomire Alive",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithPlatformBelow": {
+          "height": 10,
+          "leftPosition": -21,
+          "rightPosition": 11.5
+        }
+      }
+    },
+    {
+      "link": [2, 5],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [3, 6],
+      "name": "Base",
+      "requires": [
+        "f_DefeatedCrocomire",
+        {"or": [
+          "SpaceJump",
+          "Grapple"
+        ]}
+      ]
+    },
+    {
+      "link": [3, 6],
+      "name": "Gravity Acid",
+      "requires": [
+        "f_DefeatedCrocomire",
+        "Gravity",
+        {"acidFrames": 40}
+      ]
+    },
+    {
+      "link": [3, 6],
+      "name": "Acid Bath",
+      "requires": [
+        "f_DefeatedCrocomire",
+        {"acidFrames": 100}
+      ]
+    },
+    {
+      "link": [3, 6],
+      "name": "Tricky Spring Ball Jumps",
+      "requires": [
+        "canTrickySpringBallJump",
+        "canTrickyJump",
+        "canLateralMidAirMorph",
+        {"acidFrames": 55}
+      ]
+    },
+    {
+      "link": [3, 6],
+      "name": "Ceiling Bomb Jump",
+      "requires": [
+        "h_canCeilingBombJump",
+        "canLongCeilingBombJump",
+        "canBePatient"
+      ]
+    },
+    {
+      "link": [4, 5],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 6],
+      "name": "Base",
+      "requires": [
+        "f_DefeatedCrocomire"
+      ]
+    },
+    {
+      "link": [5, 1],
+      "name": "Base",
+      "requires": [
+        "f_DefeatedCrocomire"
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          "SpeedBooster",
+          "HiJump",
+          "h_canFly",
+          "canWalljump",
+          "canSpringBallJumpMidAir"
+        ]}
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Leave Shinecharged with Walljump",
+      "requires": [
+        "canWalljump",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          "f_DefeatedCrocomire",
+          {"canShineCharge": {
+            "usedTiles": 22,
+            "openEnd": 1
+          }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 130
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": "Get a normal height jump by not pressing run while SpeedBooster is equipped, as the Shinespark is stored."
+    },
+    {
+      "link": [5, 2],
+      "name": "Leave Shinecharged with Speedy Jump",
+      "requires": [
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          "f_DefeatedCrocomire",
+          {"canShineCharge": {
+            "usedTiles": 31,
+            "openEnd": 0
+          }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 80
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Leave Shinecharged with HiJump",
+      "requires": [
+        "HiJump",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          "f_DefeatedCrocomire",
+          {"canShineCharge": {
+            "usedTiles": 22,
+            "openEnd": 1
+          }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 140
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Leave Shinecharged with Spacejump",
+      "requires": [
+        "SpaceJump",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          "f_DefeatedCrocomire",
+          {"canShineCharge": {
+            "usedTiles": 22,
+            "openEnd": 1
+          }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 100
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
+    },
+    {
+      "link": [5, 2],
+      "name": "Leave Sparking",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          "f_DefeatedCrocomire",
+          {"canShineCharge": {
+            "usedTiles": 31,
+            "openEnd": 0
+          }}
+        ]},
+        {"shinespark": {"frames": 9}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
+    },
+    {
+      "link": [5, 4],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [5, 5],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          "SpaceJump",
+          "Grapple"
+        ]}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Gravity Acid",
+      "requires": [
+        "Gravity",
+        {"acidFrames": 20},
+        {"or": [
+          "canWalljump",
+          {"acidFrames": 10}
+        ]}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Acid Bath Wall Jump",
+      "requires": [
+        "canWalljump",
+        {"acidFrames": 45}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Airball Wall Jump",
+      "requires": [
+        "canLateralMidAirMorph",
+        "canWalljump",
+        {"acidFrames": 35}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Airball Spring Ball Jump",
+      "requires": [
+        "canLateralMidAirMorph",
+        "canTrickySpringBallJump",
+        {"acidFrames": 25}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Shinespark",
+      "requires": [
+        "canMidairShinespark",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          {"shinespark": {"frames": 45, "excessFrames": 5}},
+          {"and": [
+            "canShinechargeMovementComplex",
+            {"shinespark": {"frames": 5}}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Speedjump Wall Jump",
+      "requires": [
+        "SpeedBooster",
+        "canTrickyJump",
+        "canWalljump"
+      ],
+      "note": "With a precise enough jump, it's possible to avoid acid damage without a shinespark."
+    },
+    {
+      "link": [6, 3],
+      "name": "Insane Speedy Airball",
+      "requires": [
+        "SpeedBooster",
+        "canInsaneJump",
+        "canLateralMidAirMorph"
+      ],
+      "note": "With a precise enough jump and a quick airball, it's possible to avoid acid damage without a shinespark or wall jump."
+    },
+    {
+      "link": [6, 3],
+      "name": "Ceiling Bomb Jump",
+      "requires": [
+        "h_canCeilingBombJump",
+        "canLongCeilingBombJump",
+        "canBePatient"
+      ]
+    },
+    {
+      "link": [6, 4],
+      "name": "Base",
+      "requires": []
+    }
+  ]
+}

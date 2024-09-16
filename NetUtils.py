@@ -397,34 +397,35 @@ class _LocationStore(dict, typing.MutableMapping[int, typing.Dict[int, typing.Tu
                 location_id in self[slot] if
                 location_id not in checked]
 
-    def get_remaining(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int
-                      ) -> typing.List[typing.Tuple[int, int]]:
+    def get_remaining(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int, hint_data, item_names
+                      ) -> typing.List[str]:
         checked = state[team, slot]
         player_locations = self[slot]
-        return sorted([(player_locations[location_id][1], player_locations[location_id][0]) for
-                        location_id in player_locations if
-                        location_id not in checked])
+        return sorted([item_names[player_locations[location_id][0]] + (f" at {hint_data[slot[location_id]]}" if hint_data[slot][location_id] else "") for
+                       location_id in player_locations if
+                       location_id not in checked])  # and "Unreachable" not in hint_data[slot][location_id]])
 
 
-if typing.TYPE_CHECKING:  # type-check with pure python implementation until we have a typing stub
-    LocationStore = _LocationStore
-else:
-    try:
-        from _speedups import LocationStore
-        import _speedups
-        import os.path
-        if os.path.isfile("_speedups.pyx") and os.path.getctime(_speedups.__file__) < os.path.getctime("_speedups.pyx"):
-            warnings.warn(f"{_speedups.__file__} outdated! "
-                          f"Please rebuild with `cythonize -b -i _speedups.pyx` or delete it!")
-    except ImportError:
-        try:
-            import pyximport
-            pyximport.install()
-        except ImportError:
-            pyximport = None
-        try:
-            from _speedups import LocationStore
-        except ImportError:
-            warnings.warn("_speedups not available. Falling back to pure python LocationStore. "
-                          "Install a matching C++ compiler for your platform to compile _speedups.")
-            LocationStore = _LocationStore
+LocationStore = _LocationStore
+# if typing.TYPE_CHECKING:  # type-check with pure python implementation until we have a typing stub
+#     LocationStore = _LocationStore
+# else:
+#     # try:
+#     #     # from _speedups import LocationStore
+#     #     # import _speedups
+#     #     import os.path
+#     #     if os.path.isfile("_speedups.pyx") and os.path.getctime(_speedups.__file__) < os.path.getctime("_speedups.pyx"):
+#     #         warnings.warn(f"{_speedups.__file__} outdated! "
+#     #                       f"Please rebuild with `cythonize -b -i _speedups.pyx` or delete it!")
+#     # except ImportError:
+#     try:
+#         import pyximport
+#         pyximport.install()
+#     except ImportError:
+#         pyximport = None
+#     try:
+#         from _speedups import LocationStore
+#     except ImportError:
+#         warnings.warn("_speedups not available. Falling back to pure python LocationStore. "
+#                       "Install a matching C++ compiler for your platform to compile _speedups.")
+#         LocationStore = _LocationStore

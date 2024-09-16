@@ -1,0 +1,1966 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 10,
+  "name": "Parlor and Alcatraz",
+  "area": "Crateria",
+  "subarea": "Central",
+  "playable": true,
+  "roomAddress": "0x792FD",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Top Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001895e",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Parlor Top Left Escape Lock (to Terminator)",
+          "lockType": "escapeFunnel",
+          "lock": ["f_ZebesSetAblaze"],
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "never"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Middle Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001899a",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Parlor Middle Left Escape Lock (to Save)",
+          "lockType": "escapeFunnel",
+          "lock": ["f_ZebesSetAblaze"],
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "never"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Bottom Left Horizontal Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x00189a6",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Parlor Bottom Left Escape Lock (to Final Missile Bombway)",
+          "lockType": "escapeFunnel",
+          "lock": ["f_ZebesSetAblaze"],
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "never"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Top Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001896a",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 5,
+      "name": "Alcatraz Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0018982",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 6,
+      "name": "Bottom Right Door (On the Left Shaft)",
+      "nodeType": "door",
+      "nodeSubType": "red",
+      "nodeAddress": "0x0018976",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Parlor Bottom Right Red Lock (to Pre-Map)",
+          "lockType": "coloredDoor",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canOpenRedDoors"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Parlor Bottom Right Escape Lock (to Pre-Map)",
+          "lockType": "escapeFunnel",
+          "lock": ["f_ZebesSetAblaze"],
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "never"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Bottom Left Vertical Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001898e",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Parlor Bottom Escape Lock (to Climb)",
+          "lockType": "escapeFunnel",
+          "lock": ["f_ZebesSetAblaze"],
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "never"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Central Junction",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Alcatraz Ripper",
+      "enemyName": "Ripper",
+      "quantity": 1,
+      "homeNodes": [5],
+      "spawn": ["f_ZebesAwake"],
+      "stopSpawn": ["f_ZebesSetAblaze"]
+    },
+    {
+      "id": "e2",
+      "groupName": "Parlor Ripper",
+      "enemyName": "Ripper",
+      "quantity": 1,
+      "homeNodes": [8],
+      "spawn": ["f_ZebesAwake"],
+      "stopSpawn": ["f_ZebesSetAblaze"]
+    },
+    {
+      "id": "e3",
+      "groupName": "Parlor Skrees",
+      "enemyName": "Skree",
+      "quantity": 3,
+      "homeNodes": [8],
+      "spawn": ["f_ZebesAwake"],
+      "stopSpawn": ["f_ZebesSetAblaze"]
+    },
+    {
+      "id": "e4",
+      "groupName": "Parlor Geemers",
+      "enemyName": "Geemer (blue)",
+      "quantity": 11,
+      "homeNodes": [8],
+      "spawn": ["f_ZebesAwake"],
+      "stopSpawn": ["f_ZebesSetAblaze"]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {
+          "id": 2,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 1 -> 8 -> 2."
+        },
+        {
+          "id": 5,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 1 -> 8 -> 5."
+        },
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {
+          "id": 1,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 2 -> 8 -> 1."
+        },
+        {"id": 2},
+        {"id": 3},
+        {
+          "id": 5,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 2 -> 8 -> 5."
+        },
+        {"id": 6},
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 5},
+        {"id": 6},
+        {"id": 7},
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 1},
+        {
+          "id": 2,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 4 -> 8 -> 2."
+        },
+        {"id": 4},
+        {
+          "id": 5,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 4 -> 8 -> 5."
+        },
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 5,
+      "to": [
+        {
+          "id": 1,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 5 -> 8 -> 1."
+        },
+        {
+          "id": 2,
+          "note": "This link is only for G-mode strats bypassing the junction. Other strats should go 5 -> 8 -> 2."
+        },
+        {"id": 5},
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 6,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 5},
+        {"id": 7},
+        {"id": 6},
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 7,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 5},
+        {"id": 6},
+        {"id": 7},
+        {"id": 8}
+      ]
+    },
+    {
+      "from": 8,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 4},
+        {"id": 5},
+        {"id": 6},
+        {"id": 7},
+        {"id": 8}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 14,
+          "openEnd": 0,
+          "steepUpTiles": 2,
+          "steepDownTiles": 2
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway, Broken Wall",
+      "requires": [
+        "h_canDestroyBombWalls"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 22,
+          "openEnd": 0,
+          "steepUpTiles": 4,
+          "steepDownTiles": 2
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway, Come in with Speed to Break the Wall",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 13,
+          "openEnd": 0,
+          "steepUpTiles": 2,
+          "steepDownTiles": 2
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 22,
+          "openEnd": 0,
+          "steepUpTiles": 4,
+          "steepDownTiles": 2
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Bomb the Blocks and Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake",
+        "h_canDestroyBombWalls"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Destroy the bomb wall to open a path for the Geemer to hit Samus through the transition.",
+        "If using a PB be careful not to kill the Geemer. Place the PB far left, next to the door, as the Geemer is leaving the flat part of the ceiling."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Speed Through the Blocks then Get Hit By Geemer",
+      "notable": false,
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 13,
+          "openEnd": 0,
+          "steepUpTiles": 2,
+          "steepDownTiles": 2
+        }
+      },
+      "requires": [
+        "h_ZebesIsAwake",
+        "canCarefulJump",
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3,
+          "openEnd": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "From the left, break the bomb blocks with blue speed from the neighboring room.",
+        "After the blocks respawn and the Geemer is near, destroy them again using blue speed from the right.",
+        "This opens a path for the Geemer to hit Samus through the transition."
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Shinespark Through the Blocks then Get Hit By Geemer",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithSpark": {}
+      },
+      "requires": [
+        "h_ZebesIsAwake",
+        {"shinespark": {"frames": 67, "excessFrames": 42}},
+        "canCarefulJump",
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3,
+          "openEnd": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "From the left, break the bomb blocks by shinesparking from the neighboring room.",
+        "After the blocks respawn and the Geemer is near, destroy them again using blue speed from the right.",
+        "This opens a path for the Geemer to hit Samus through the transition."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode Morph through Terminator Bomb Blocks into Save",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canOffScreenMovement"
+      ],
+      "note": [
+        "There are scroll PLMs one tile to the left of the Terminator bomb blocks which can be used to overload PLMs.",
+        "The bomb blocks then become air and can be passed through.",
+        "Go down to the Save door by falling and moving back and forth in the right places.",
+        "Once you start going down you will be off-screen."
+      ]
+    },
+    {
+      "link": [1, 5],
+      "name": "G-Mode Morph through Terminator Bomb Blocks into Alcatraz",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          "h_canArtificialMorphMovement",
+          "h_canArtificialMorphBombHorizontally",
+          {"and": [
+            "canNeutralDamageBoost",
+            "h_ZebesIsAwake",
+            {"enemyDamage": {
+              "enemy": "Geemer (blue)",
+              "type": "contact",
+              "hits": 1
+            }}
+          ]}
+        ]}
+      ],
+      "note": [
+        "There are scroll PLMs one tile to the left of the bomb blocks which can be used to overload PLMs.",
+        "The bomb blocks then become air and can be passed through.",
+        "Use Bombs, SpringBall, or a Geemer damage boost to get across the gap without unmorphing.",
+        "To survive a Geemer hit, you will need Varia or Gravity or to come in with more than 4 energy (e.g. by coming in with indirect G-mode after leaving with G-mode immobile)."
+      ]
+    },
+    {
+      "link": [1, 8],
+      "name": "Base",
+      "requires": [
+        "h_canDestroyBombWalls"
+      ]
+    },
+    {
+      "link": [1, 8],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {}
+      },
+      "requires": [
+        {"shinespark": {"frames": 67, "excessFrames": 42}}
+      ]
+    },
+    {
+      "link": [1, 8],
+      "name": "SpeedBooster",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 13,
+          "openEnd": 0,
+          "steepUpTiles": 2,
+          "steepDownTiles": 2
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [1, 8],
+      "name": "G-Mode through Terminator Bomb Blocks (from Left)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "note": [
+        "There are scroll PLMs one tile to the left of the bomb blocks which can be used to overload PLMs.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "G-Mode Morph through Terminator Bomb Blocks (from Save)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [],
+      "note": [
+        "Use G-Mode Morph to pass through the tunnel as you enter the room.",
+        "Then unmorph and get up to the top of the room normally.",
+        "There are scroll PLMs at the two-tile gap as you approach the Terminator bomb blocks, which can be used to overload PLMs.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Wait 75 seconds for a global Geemer, or use a Super to grab a closer one."
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "h_ZebesIsAwake"
+      ],
+      "gModeRegainMobility": {},
+      "note": "Wait 75 seconds for a global Geemer."
+    },
+    {
+      "link": [2, 3],
+      "name": "Leave With Spark (Come In Shinecharged)",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 170
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shinespark": {
+          "frames": 6
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 5],
+      "name": "G-Mode Morph into Alcatraz (from Save)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": [
+        "Use G-Mode Morph to pass through the tunnel as you enter the room.",
+        "Use Bombs or SpringBall to navigate to Alcatraz without unmorphing."
+      ]
+    },
+    {
+      "link": [2, 6],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 150
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [2, 8],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [2, 8],
+      "name": "Parlor X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithDoorStuckSetup": {}
+      },
+      "requires": [
+        "canXRayClimb"
+      ],
+      "note": "This is a short climb of only a few tiles."
+    },
+    {
+      "link": [2, 8],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
+      "requires": [],
+      "note": "Moonfall to become stuck in the ground, then moonfall again to clip fully through the floor."
+    },
+    {
+      "link": [2, 8],
+      "name": "G-Mode Morph out of Save",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [3, 1],
+      "name": "G-Mode through Terminator Bomb Blocks (from Right)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "note": [
+        "There are scroll PLMs throughout the room, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": [],
+      "note": [
+        "If entering the transition too deeply, Samus may end up stuck slightly inside the Bomb blocks and the floor.",
+        "This can be avoided by tapping up to retract Grapple (pulling Samus left and down), quickly releasing Grapple, and then jumping to clip up through the floor.",
+        "If Morph is available, rolling out to the left is also an option."
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 160
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        "HiJump"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "G-Mode Morph into Save",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": "Use Bombs or SpringBall to navigate with artificial morph without unmorphing."
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1,
+          "steepUpTiles": 1
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave With Runway - Frozen Geemer",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "h_ZebesIsAwake"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1,
+          "steepUpTiles": 1
+        }
+      },
+      "note": "There is a Geemer just below the door that only moves while on camera."
+    },
+    {
+      "link": [3, 3],
+      "name": "G-Mode Setup - Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": "There is a Geemer just below the door that only moves while on camera."
+    },
+    {
+      "link": [3, 3],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "h_ZebesIsAwake",
+        "canBePatient"
+      ],
+      "gModeRegainMobility": {},
+      "note": "Wait 90 seconds for a global Geemer."
+    },
+    {
+      "link": [3, 5],
+      "name": "G-Mode Morph into Alcatraz",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": "Use Bombs or SpringBall to navigate with artificial morph without unmorphing."
+    },
+    {
+      "link": [3, 6],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 110
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [3, 7],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 123
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": ["never"]}],
+      "note": [
+        "Immediately after running off the ledge, turn back and press against the ledge, aim down, and shoot open the door.",
+        "Move left to avoid the floating platform, then hold right against the floating platform to make it over to the door."
+      ]
+    },
+    {
+      "link": [3, 8],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 1],
+      "name": "G-Mode through Terminator Bomb Blocks (from Right)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "note": [
+        "There are scroll PLMs throughout the room, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [4, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [4, 2],
+      "name": "G-Mode Morph into Save (from Landing Site)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canOffScreenMovement",
+        {"or": [
+          "h_canArtificialMorphMovement",
+          "h_canArtificialMorphBombHorizontally"
+        ]}
+      ],
+      "note": [
+        "A single Power Bomb, placed precisely and as early as possible, can get you over the Geemers and onto the ledge above Alcatraz without taking a hit.",
+        "Alternatively Bombs or SpringBall can be used.",
+        "Go down to the Save door by just falling and moving back and forth in the right places.",
+        "Once you start going down you will be off-screen."
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 12,
+          "openEnd": 0,
+          "steepUpTiles": 2
+        }
+      }
+    },
+    {
+      "link": [4, 4],
+      "name": "G-Mode Setup - Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [4, 4],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "h_ZebesIsAwake"
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [4, 5],
+      "name": "G-Mode Morph into Alcatraz (from Landing Site)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          "h_canArtificialMorphMovement",
+          "h_canArtificialMorphPowerBomb",
+          {"enemyDamage": {
+            "enemy": "Geemer (blue)",
+            "type": "contact",
+            "hits": 1
+          }},
+          "h_ZebesNotAwake"
+        ]}
+      ],
+      "note": [
+        "There are scroll PLMs one tile to the right of the bomb blocks which can be used to overload PLMs, turning the bomb blocks to air.",
+        "However, if Zebes is awake, two Geemers block the way.",
+        "With a regular G-mode setup and no suits, a single Geemer hit would kill Samus.",
+        "The Geemer hits can be avoided with Bombs or SpringBall.",
+        "Alternatively, a Power Bomb, placed precisely and as early as possible, can be used to jump onto the ledge and go around to the left entrance to Alcatraz (necessary since the Power Bomb blast will render the bomb blocks solid, unable to be turned to air).",
+        "A Geemer hit can also be tanked by having Varia or Gravity or by coming in with higher energy (e.g. with G-mode immobile)."
+      ]
+    },
+    {
+      "link": [4, 8],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [5, 1],
+      "name": "G-Mode Morph through Terminator Blocks (from Alcatraz)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canOffScreenMovement",
+        "h_canArtificialMorphMovement"
+      ],
+      "note": [
+        "Use Bombs or SpringBall to navigate with artificial morph without unmorphing.",
+        "There are scroll PLMs next to the bomb blocks and on the ledge below the Alcatraz exit, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through.",
+        "You will need to briefly navigate off-screen while to the right of Alcatraz before coming back left."
+      ]
+    },
+    {
+      "link": [5, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [5, 2],
+      "name": "G-Mode Morph through Parlor Save Morph Tunnel (from Alcatraz)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canOffScreenMovement",
+        "h_canArtificialMorphMovement"
+      ],
+      "note": [
+        "Use Bombs or SpringBall to navigate with artificial morph without unmorphing.",
+        "There are scroll PLMs next to the bomb blocks and on the ledge below the Alcatraz exit, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through.",
+        "You will need to briefly navigate off-screen while to the right of Alcatraz before coming back left, and while going down the left shaft."
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 11,
+          "openEnd": 0,
+          "steepDownTiles": 2
+        }
+      }
+    },
+    {
+      "link": [5, 5],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "G-Mode Setup - Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBeVeryPatient",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "It takes approximately 3.5 minutes for a global Geemer to reach this location,",
+        "but this can be reduced by using a Super between 19 and 33 seconds after entering the room, to make a Geemer fall and take a shorter path."
+      ]
+    },
+    {
+      "link": [5, 5],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBeVeryPatient",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]}
+      ],
+      "gModeRegainMobility": {},
+      "note": [
+        "It takes approximately 3.5 minutes for a global Geemer to reach this location.",
+        "If using a Super, fire between 19 and 33 seconds after entering the room, then wait approximately 30 more seconds to be hit."
+      ],
+      "devNote": "FIXME: Should manipulating global enemies off screen be a tech?"
+    },
+    {
+      "link": [5, 8],
+      "name": "Base",
+      "requires": [
+        "h_canBombThings"
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Alcatraz Escape",
+      "notable": true,
+      "requires": [
+        "canPreciseWalljump",
+        "canWallJumpInstantMorph",
+        {"or": [
+          "HiJump",
+          "canConsecutiveWalljump"
+        ]}
+      ],
+      "note": "Wall jump up and midair morph to get out without needing to break the bomb blocks to the right."
+    },
+    {
+      "link": [5, 8],
+      "name": "Space Jump Alcatraz Escape",
+      "requires": [
+        "Morph",
+        "SpaceJump"
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Tricky Spring Ball Jump",
+      "requires": [
+        "canTrickySpringBallJump",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Run and spin jump into a spring ball jump, starting from the floating platform."
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Tricky Dash Jump",
+      "requires": [
+        "HiJump",
+        "Morph",
+        "canTrickyDashJump"
+      ],
+      "note": [
+        "The wall above can be used to align to a good starting position for the running jump."
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Frozen Geemer Alcatraz Escape",
+      "requires": [
+        "h_ZebesIsAwake",
+        "Morph",
+        "canTrickyUseFrozenEnemies",
+        {"or": [
+          "canBeVeryPatient",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]},
+        {"or": [
+          "canTrickyJump",
+          {"and": [
+            "canCarefulJump",
+            {"ammo": {"type": "Super", "count": 1}}
+          ]}
+        ]}
+      ],
+      "note": [
+        "Wait 3 minutes for a global Geemer to waddle over, or shoot a Super 20 to 30 seconds after entering the room to knock it off the ceiling and save a lot of time.",
+        "Freeze the Geemer as it turns onto the middle slope of the left wall to escape - it helps to freeze the geemer from below.",
+        "Alternatively, use a Super to knock it off the wall and freeze it mid-air."
+      ],
+      "devNote": "This is only really useful without wall jumps."
+    },
+    {
+      "link": [5, 8],
+      "name": "Alcatraz Escape with Grapple X-Ray Ceiling Clip",
+      "notable": true,
+      "requires": [
+        "h_ZebesIsAwake",
+        "canBePatient",
+        {"or": [
+          "canBeVeryPatient",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]},
+        "canPreciseCeilingClip",
+        "canTrickyUseFrozenEnemies",
+        "canUseGrapple",
+        "canXRayStandUp"
+      ],
+      "note": [
+        "Wait for a global Geemer to make the long trip along the map, or shoot a Super 20 to 30 seconds after entering the room to knock it off the ceiling and save a lot of time.",
+        "Freeze it just after it starts climbing the bomb blocks.",
+        "Spin-jump above it, which will put Samus into a forced crouch where X-Ray cannot be used.",
+        "Use Grapple to kill a a second Geemer, restoring the ability to use X-Ray.",
+        "Use X-Ray to stand up, then jump up through the ceiling."
+      ],
+      "devNote": [
+        "Morph could also be used instead of Grapple, but with Morph there is an easier strat that goes up through the tunnel to the left."
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Alcatraz Escape with HiJump Ceiling Clip",
+      "notable": true,
+      "requires": [
+        "HiJump",
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBeVeryPatient",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]},
+        "canPreciseCeilingClip",
+        "canTrickyUseFrozenEnemies",
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "canInsaneJump"
+      ],
+      "note": [
+        "Wait for a global Geemer to make the long trip along the map, or shoot a Super 20 to 30 seconds after entering the room to knock it off the ceiling and save a lot of time.",
+        "Hold right against the bomb blocks, take damage from the Geemer, jump, aim-down, and shoot the Geemer shortly before landing.",
+        "Samus should end up standing on the ground with the Geemer frozen on the wall slightly above the ground (overlapping Samus' hitbox).",
+        "Facing the bomb blocks and pressed against them, jump while holding down (but not crouched) and then press forward at a precise time to break the aim-down pose.",
+        "If successful, Samus will clip up through the ceiling.",
+        "This can be attempted several times before the Geemer thaws."
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Alcatraz Escape G-Mode Crystal Flash Then Forced Standup",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_ZebesIsAwake",
+        "canBeVeryPatient",
+        {"ammo": {"type": "Super", "count": 3}},
+        "h_canArtificialMorphCrystalFlash",
+        "canPauseAbuse",
+        {"autoReserveTrigger": {}},
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "note": [
+        "Enter with direct G-Mode artificial morph, and perform a Crystal Flash to refill reserve energy.",
+        "Do this all the way to the left, to prevent the Geemer from being destroyed by the lingering light orb.",
+        "Wait for a global Geemer to make the long trip along the map, or shoot a Super 20 to 30 seconds after entering the room to knock it off the ceiling and save a lot of time.",
+        "Either way, after the Geemer comes down into Alcatraz, shoot a Super to knock it off the ledge to make it bypass the light orb.",
+        "Damage down until one Geemer hit away from running out of energy.",
+        "If Samus has at least one Energy Tank, it will take longer to damage down, in which case an additional Super can be used to knock the Geemer onto the floating platform, to allow unlimited time for damaging down.",
+        "A final Super can be used to knock the Geemer off the floating platform.",
+        "Set reserves to manual, stand next to the bomb blocks, and wait for the Geemer to approach.",
+        "Just before taking a hit, press pause.",
+        "During the fade-out, hold forward to land quickly after knockback.",
+        "At a precise moment just before the pause hits, jump and aim down; the aim-down can be buffered before jumping, e.g. by rolling from forward to down through a diagonal input.",
+        "Set reserves to auto, then unpause while continuing to hold jump.",
+        "If successful, the forced stand-up will occur close to the ceiling and while Samus still has upward momentum, allowing Samus to clip through."
+      ],
+      "devNote": "FIXME: A version of this strat could be added with canRiskPermanentLossOfAccess requiring fewer Supers and time, if Samus has no tanks."
+    },
+    {
+      "link": [5, 8],
+      "name": "G-Mode Morph Alcatraz Escape",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": [
+        "Use Bombs or SpringBall to navigate with artificial morph without unmorphing.",
+        "There are scroll PLMs next to the bomb blocks and on the ledge below the Alcatraz exit, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [5, 8],
+      "name": "Alcatraz Escape Double Damage Boost",
+      "notable": true,
+      "requires": [
+        "h_ZebesIsAwake",
+        "HiJump",
+        "Morph",
+        {"or": [
+          "canBeVeryPatient",
+          {"ammo": {"type": "Super", "count": 1}}
+        ]},
+        "canCrouchJump",
+        "canInsaneJump",
+        "canPauseAbuse",
+        "canNeutralDamageBoost",
+        {"autoReserveTrigger": {"minReserveEnergy": 85}},
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "note": [
+        "Wait 3 minutes for a global Geemer to waddle over, or shoot a Super 20 to 30 seconds after entering the room to knock it off the ceiling and save a lot of time.",
+        "Damage down until Samus is one Geemer hit away from running out of energy, and set reserves to manual.",
+        "Crouch jump at a very precise time and mid-air morph to contact the Geemer at the peak of the jump, pressing pause to be in the fade-out while getting hit and reaching 0 energy.",
+        "Set reserves to auto, unpause, and hold left.",
+        "While reserves are auto-refilling, Samus' i-frames will run out, allowing Samus to be hit by the Geemer again and be boosted high enough to reach the ledge.",
+        "The screen will be black, which can be fixed by pausing and unpausing again."
+      ]
+    },
+    {
+      "link": [6, 1],
+      "name": "G-Mode through Terminator Bomb Blocks (from Right)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "note": [
+        "There are scroll PLMs throughout the room, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [6, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [6, 2],
+      "name": "G-Mode Morph into Save",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": "Use Bombs or SpringBall to navigate with artificial morph without unmorphing."
+    },
+    {
+      "link": [6, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 165
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        "HiJump",
+        "canWalljump"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [6, 3],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 110
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [6, 5],
+      "name": "G-Mode Morph into Alcatraz",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": [
+        "Use Bombs or SpringBall to navigate with artificial morph without unmorphing."
+      ]
+    },
+    {
+      "link": [6, 6],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1,
+          "steepUpTiles": 1
+        }
+      }
+    },
+    {
+      "link": [6, 6],
+      "name": "Leave With Runway - Frozen Geemer",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBePatient",
+          {"ammo": { "type": "Super", "count": 1}}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 5,
+          "openEnd": 1,
+          "steepUpTiles": 1
+        }
+      },
+      "note": "Wait 2 minutes for a global Geemer, or use a Super to grab a closer one."
+    },
+    {
+      "link": [6, 6],
+      "name": "G-Mode Setup - Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBePatient",
+          {"ammo": { "type": "Super", "count": 1 }}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Wait 2 minutes for a global Geemer, or use a Super to grab a closer one."
+      ]
+    },
+    {
+      "link": [6, 6],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBePatient",
+          {"ammo": { "type": "Super", "count": 1 }}
+        ]}
+      ],
+      "gModeRegainMobility": {},
+      "note": "Wait 2 minutes for a global Geemer."
+    },
+    {
+      "link": [6, 7],
+      "name": "Parlor Carry Shinecharge From Right to Bottom",
+      "notable": true,
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 121
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": ["never"]}],
+      "note": [
+        "Walk off the ledge (rather than running off), aim down, and shoot.",
+        "Depending on your momentum coming in, if Zebes is awake you may need to shoot down twice, once to kill the Geemer and once to open the door.",
+        "Press forward against the floating platform to make it through the door."
+      ]
+    },
+    {
+      "link": [6, 8],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [7, 1],
+      "name": "G-Mode through Terminator Bomb Blocks (from Right)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [],
+      "note": [
+        "There are scroll PLMs throughout the room, which will overload PLMs when going through them.",
+        "The bomb blocks then become air and can be passed through."
+      ]
+    },
+    {
+      "link": [7, 2],
+      "name": "G-Mode Morph into Save",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": "Use Bombs or SpringBall to navigate with artificial morph without unmorphing."
+    },
+    {
+      "link": [7, 3],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 135
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "HiJump",
+        "canWalljump",
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [7, 5],
+      "name": "G-Mode Morph into Alcatraz",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "h_canArtificialMorphMovement"
+      ],
+      "note": [
+        "Use Bombs or SpringBall to navigate with artificial morph without unmorphing."
+      ]
+    },
+    {
+      "link": [7, 6],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 135
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "HiJump",
+        "canWalljump",
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "link": [7, 7],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [7, 7],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        {"shinespark": {"frames": 3, "excessFrames": 3}}
+      ],
+      "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
+    },
+    {
+      "link": [7, 7],
+      "name": "Parlor Ice Moonfall Door Lock Skip",
+      "requires": [
+        "h_ZebesIsAwake",
+        {"ammo": {"type": "Super", "count": 1}},
+        "canEnemyStuckMoonfall",
+        "canTrickyUseFrozenEnemies"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Use a Super to bring a Geemer down to the bottom floating platform.",
+        "Freeze this Geemer along with a Geemer on the floor and use them to perform an enemy-stuck moonfall.",
+        "After gaining sufficient speed, move toward the door and clip through the door shell.",
+        "Falling with too much speed can cause Samus to go out of bounds."
+      ]
+    },
+    {
+      "link": [7, 7],
+      "name": "Parlor Ice Moonfall Door Lock Skip Without Supers",
+      "notable": true,
+      "requires": [
+        "h_ZebesIsAwake",
+        "canEnemyStuckMoonfall",
+        "canTrickyUseFrozenEnemies"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Freeze a Geemer on the right of the overhang just below the door to Final Missile Bombway.",
+        "Freeze a second Geemer on the top left of its platform and setup a moonfall between them.",
+        "Fall off the Geemers and clip past the floating platform below, past the door shell, and into the transition.",
+        "This setup is highly precise; if you do not have the right speed you may land on the platform below or the door shell.",
+        "Falling with too much speed can also cause Samus to go out of bounds."
+      ]
+    },
+    {
+      "link": [7, 7],
+      "name": "G-Mode Setup - Parlor Downward G-Mode Setup with Ice",
+      "notable": true,
+      "requires": [
+        "h_ZebesIsAwake",
+        "canEnemyStuckMoonfall",
+        "canTrickyUseFrozenEnemies",
+        "canDownwardGModeSetup"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "note": [
+        "Freeze a Geemer on the bottom of the overhang just below the door to Final Missile Bombway. Freeze a second Geemer on the top left of its platform and setup a moonfall between them.",
+        "Fall off the Geemers and clip into the tile left of the door. Press up to get out of crouch and lose the stored vertical speed (so that X-Ray works). Then turn-around, open the door, and go into the door transition as the third Geemer hits you.",
+        "Falling off the frozen Geemers requires relatively high precision: This setup is a 4 frame window, not too far left, so you can get to the door transition, not too far right such that you enter the transition when falling."
+      ]
+    },
+    {
+      "link": [7, 7],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Geemer (blue)",
+          "type": "contact",
+          "hits": 1
+        }},
+        "h_ZebesIsAwake",
+        {"or": [
+          "canBePatient",
+          {"ammo": { "type": "Super", "count": 1 }}
+        ]}
+      ],
+      "gModeRegainMobility": {},
+      "note": [
+        "Line up with the far right or left side of doorframe in the room below, to be able to not fall back through after entry, as the door remains open.",
+        "Be careful not to fall into the door while being hit by the Geemer."
+      ]
+    },
+    {
+      "link": [7, 8],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [8, 1],
+      "name": "Base",
+      "requires": [
+        "h_canDestroyBombWalls"
+      ]
+    },
+    {
+      "link": [8, 1],
+      "name": "Parlor Quick Charge",
+      "requires": [
+        {"or": [
+          "canCarefulJump",
+          {"and": [
+            "canShinechargeMovement",
+            {"shinespark": {"frames": 2}}
+          ]}
+        ]},
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3,
+          "openEnd": 1
+        }}
+      ],
+      "note": "Break the bomb wall while blue, or spark diagonally next to it.",
+      "devNote": "It is possible to come in the top right door, charge a spark, use a bounce ball, or blue space jump, but this is a bit easier anyway."
+    },
+    {
+      "link": [8, 1],
+      "name": "Parlor Quick Charge, Leave Sparking",
+      "requires": [
+        {"or": [
+          "canCarefulJump",
+          {"and": [
+            "canShinechargeMovement",
+            {"shinespark": {"frames": 2}}
+          ]}
+        ]},
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3,
+          "openEnd": 1
+        }},
+        {"shinespark": {"frames": 28}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": "Break the bomb wall while blue, or spark diagonally next to it. Open the door then charge the spark again and spark through the wall and door.",
+      "devNote": "The canCarefulJump or 2 spark frames could be reduced by having the door already open, but that's probably not worth modeling."
+    },
+    {
+      "link": [8, 1],
+      "name": "Leave with Runway, Broken Wall",
+      "requires": [
+        "h_canDestroyBombWalls"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 22,
+          "openEnd": 0,
+          "steepUpTiles": 4,
+          "steepDownTiles": 2
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
+    },
+    {
+      "link": [8, 1],
+      "name": "Leave with Runway, Short Charge to Break the Wall",
+      "requires": [
+        "canCarefulJump",
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3,
+          "openEnd": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 22,
+          "openEnd": 0,
+          "steepUpTiles": 4,
+          "steepDownTiles": 2
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
+    },
+    {
+      "link": [8, 1],
+      "name": "G-Mode Setup - Power Bomb the Blocks from Below and Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake",
+        "h_canUsePowerBombs"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Place the Power Bomb below the bomb blocks as the Geemer is leaving the flat part of the ceiling to break it and let the Geemer through.",
+        "This opens a path for the Geemer to hit Samus through the transition."
+      ]
+    },
+    {
+      "link": [8, 1],
+      "name": "G-Mode Setup - Speed Through the Blocks then Get Hit By Geemer",
+      "notable": false,
+      "requires": [
+        "h_ZebesIsAwake",
+        "canCarefulJump",
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3,
+          "openEnd": 1
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "After the Geemer is near, destroy the bomb wall using blue speed from the right.",
+        "This opens a path for the Geemer to hit Samus through the transition."
+      ]
+    },
+    {
+      "link": [8, 2],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [8, 3],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [8, 4],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [8, 4],
+      "name": "Leave Shinecharged, Using the Raised Platform",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 2,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 90
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
+    },
+    {
+      "link": [8, 4],
+      "name": "Leave Shinecharged, Using the Left of the Raised Platform",
+      "requires": [
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "openEnd": 1,
+          "steepUpTiles": 3,
+          "steepDownTiles": 3
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 30
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}]
+    },
+    {
+      "link": [8, 5],
+      "name": "Base",
+      "requires": [
+        "Morph"
+      ]
+    },
+    {
+      "link": [8, 6],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [8, 7],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [8, 8],
+      "name": "Geemer Farm",
+      "requires": [
+        "h_ZebesIsAwake",
+        {"resetRoom": {
+          "nodes": [3, 4, 6, 7],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "Missile"]}
+      ],
+      "devNote": "FIXME: Other nodes could be used to reset the room, with additional requirements."
+    },
+    {
+      "link": [8, 8],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    }
+  ]
+}

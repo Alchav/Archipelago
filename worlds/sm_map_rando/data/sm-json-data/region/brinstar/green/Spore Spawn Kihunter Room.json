@@ -1,0 +1,232 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 56,
+  "name": "Spore Spawn Kihunter Room",
+  "area": "Brinstar",
+  "subarea": "Green",
+  "playable": true,
+  "roomAddress": "0x79D9C",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x0018e32",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Spore Spawn Kihunters Left Grey Lock (to Big Pink)",
+          "lockType": "killEnemies",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [],
+              "note": "The enemies can be killed with Power Beam"
+            }
+          ],
+          "yields": ["f_ZebesAwake"],
+          "devNote": "This is unlocked and yielded from killing the enemies, which are free to kill"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Top Right Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x0018e3e",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Spore Spawn Kihunters Right Grey Lock (to Spore Spawn)",
+          "lockType": "killEnemies",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [],
+              "note": "The enemies can be killed with Power Beam"
+            }
+          ],
+          "yields": ["f_ZebesAwake"],
+          "devNote": "This is unlocked and yielded from killing the enemies, which are free to kill"
+        }
+      ]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Spore Spawn Kihunters",
+      "enemyName": "Kihunter (green)",
+      "quantity": 3,
+      "homeNodes": [1, 2]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [
+        {"or": [
+          "canDodgeWhileShooting",
+          "ScrewAttack",
+          "h_hasBeamUpgrade"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        {"or": [
+          "canDodgeWhileShooting",
+          "ScrewAttack",
+          "h_hasBeamUpgrade"
+        ]},
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "openEnd": 0
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 75
+        }
+      },
+      "note": "Store a shinecharge with enough space remaining to run and jump over all the steps with a single jump.",
+      "devNote": "The runway is 32 tiles, but about 7 of those should be used to run after getting the shinecharge."
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Kihunter",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Kihunter (green)",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 2],
+      "name": "Kihunter Ice Clip Door Lock Skip",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        "h_canXRayCeilingClip"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Lure a Kihunter over to the right near the door",
+        "Damage it so that it falls to the ground.",
+        "Freeze it while it hops, and use Morph and X-Ray to stand on top of it and clip up through the door shell."
+      ],
+      "devNote": "This does not appear to be possible without Morph + X-Ray."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 25,
+          "openEnd": 0
+        }},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 70
+        }
+      },
+      "note": "Store a shinecharge with enough space remaining to run and jump over all the steps with a single jump.",
+      "devNote": "The runway is 32 tiles, but about 7 of those should be used to run after getting the shinecharge."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Door Frame Below",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithDoorFrameBelow": {
+          "height": 3
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Platform Below",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithPlatformBelow": {
+          "height": 8,
+          "leftPosition": -4.5,
+          "rightPosition": 6
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {
+          "enemy": "Kihunter (green)",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    }
+  ]
+}

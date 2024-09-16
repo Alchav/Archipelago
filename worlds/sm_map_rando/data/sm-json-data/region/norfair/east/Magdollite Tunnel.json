@@ -1,0 +1,161 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 114,
+  "name": "Magdollite Tunnel",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7AEB4",
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019696",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x00196a2",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Magdollite Tunnel Multiviolas",
+      "enemyName": "Multiviola",
+      "quantity": 2,
+      "homeNodes": [1, 2],
+      "dropRequires": ["h_heatProof"]
+    },
+    {
+      "id": "e2",
+      "groupName": "Magdollite Tunnel Magdollites",
+      "enemyName": "Magdollite",
+      "quantity": 3,
+      "homeNodes": [1, 2],
+      "dropRequires": [
+        "h_heatProof",
+        {"or": [
+          "Gravity",
+          "Grapple"
+        ]}
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Magdollite Farm",
+      "requires": [
+        "h_heatProof",
+        {"refill": ["Energy", "Missile"]}
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        {"heatFrames": 500}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Space Jump",
+      "requires": [
+        "SpaceJump",
+        {"enemyKill": {
+          "enemies": [["Multiviola"]],
+          "explicitWeapons": ["Super", "Missile"]
+        }},
+        {"heatFrames": 300}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": [
+        {"heatFrames": 550}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Space Jump",
+      "requires": [
+        "SpaceJump",
+        {"heatFrames": 350}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 50}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    }
+  ]
+}

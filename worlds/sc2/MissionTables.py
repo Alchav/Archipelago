@@ -122,7 +122,7 @@ class SC2Mission(Enum):
     PHANTOMS_OF_THE_VOID = 44, "Phantoms of the Void", SC2Campaign.HOTS, "Skygeirr Station", SC2Race.ZERG, MissionPools.HARD, "ap_phantoms_of_the_void"
     WITH_FRIENDS_LIKE_THESE = 45, "With Friends Like These", SC2Campaign.HOTS, "Dominion Space", SC2Race.ANY, MissionPools.STARTER, "ap_with_friends_like_these", False
     CONVICTION = 46, "Conviction", SC2Campaign.HOTS, "Dominion Space", SC2Race.ANY, MissionPools.MEDIUM, "ap_conviction", False
-    PLANETFALL = 47, "Planetfall", SC2Campaign.HOTS, "Korhal", SC2Race.ZERG, MissionPools.HARD, "ap_planetfall"
+    PLANETFALL = 47, "Planetfall", SC2Campaign.HOTS, "Korhal", SC2Race.ZERG, MissionPools.MEDIUM, "ap_planetfall"
     DEATH_FROM_ABOVE = 48, "Death From Above", SC2Campaign.HOTS, "Korhal", SC2Race.ZERG, MissionPools.HARD, "ap_death_from_above"
     THE_RECKONING = 49, "The Reckoning", SC2Campaign.HOTS, "Korhal", SC2Race.ZERG, MissionPools.HARD, "ap_the_reckoning"
 
@@ -202,7 +202,6 @@ class FillMission(NamedTuple):
     completion_critical: bool = False  # missions needed to beat game
     or_requirements: bool = False  # true if the requirements should be or-ed instead of and-ed
     removal_priority: int = 0  # how many missions missing from the pool required to remove this mission
-
 
 
 def vanilla_shuffle_order() -> Dict[SC2Campaign, List[FillMission]]:
@@ -386,6 +385,23 @@ def gauntlet_order() -> Dict[SC2Campaign, List[FillMission]]:
         ]
     }
 
+def alchav_order() -> Dict[SC2Campaign, List[FillMission]]:
+    return {
+        SC2Campaign.GLOBAL: [
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "_1"),
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "_2"),
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "_3"),
+            FillMission(MissionPools.EASY, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_4", number=1, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_5", number=2, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_6", number=3, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_7", number=4, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_8", number=5, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_9", number=6, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_10", number=7, or_requirements=True),
+            FillMission(MissionPools.FINAL, [MissionConnection(0), MissionConnection(1), MissionConnection(2)], "_11", number=8, completion_critical=True, or_requirements=True)
+        ]
+    }
+
 
 def mini_gauntlet_order() -> Dict[SC2Campaign, List[FillMission]]:
     return {
@@ -408,14 +424,14 @@ def grid_order() -> Dict[SC2Campaign, List[FillMission]]:
             FillMission(MissionPools.EASY, [MissionConnection(0)], "_2"),
             FillMission(MissionPools.MEDIUM, [MissionConnection(1), MissionConnection(4)], "_2", or_requirements=True),
             FillMission(MissionPools.HARD, [MissionConnection(2), MissionConnection(5), MissionConnection(10), MissionConnection(7)], "_2", or_requirements=True),
-            FillMission(MissionPools.HARD, [MissionConnection(3), MissionConnection(6), MissionConnection(11)], "_2", or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(3), MissionConnection(6), MissionConnection(11)], "_2", or_requirements=True),
             FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(9), MissionConnection(12)], "_3", or_requirements=True),
             FillMission(MissionPools.HARD, [MissionConnection(5), MissionConnection(8), MissionConnection(10), MissionConnection(13)], "_3", or_requirements=True),
-            FillMission(MissionPools.HARD, [MissionConnection(6), MissionConnection(9), MissionConnection(11), MissionConnection(14)], "_3", or_requirements=True),
-            FillMission(MissionPools.HARD, [MissionConnection(7), MissionConnection(10)], "_3", or_requirements=True),
-            FillMission(MissionPools.HARD, [MissionConnection(8), MissionConnection(13)], "_4", or_requirements=True),
-            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(12), MissionConnection(14)], "_4", or_requirements=True),
-            FillMission(MissionPools.HARD, [MissionConnection(10), MissionConnection(13)], "_4", or_requirements=True),
+            FillMission(MissionPools.VERY_HARD, [MissionConnection(6), MissionConnection(9), MissionConnection(11), MissionConnection(14)], "_3", or_requirements=True),
+            FillMission(MissionPools.VERY_HARD, [MissionConnection(7), MissionConnection(10)], "_3", or_requirements=True),
+            FillMission(MissionPools.VERY_HARD, [MissionConnection(8), MissionConnection(13)], "_4", or_requirements=True),
+            FillMission(MissionPools.VERY_HARD, [MissionConnection(9), MissionConnection(12), MissionConnection(14)], "_4", or_requirements=True),
+            FillMission(MissionPools.VERY_HARD, [MissionConnection(10), MissionConnection(13)], "_4", or_requirements=True),
             FillMission(MissionPools.FINAL, [MissionConnection(11), MissionConnection(14)], "_4", or_requirements=True)
         ]
     }
@@ -445,6 +461,30 @@ def tiny_grid_order() -> Dict[SC2Campaign, List[FillMission]]:
         ]
     }
 
+def blitz_2_order() -> Dict[SC2Campaign, List[FillMission]]:
+    return {
+        SC2Campaign.GLOBAL: [
+            FillMission(MissionPools.STARTER, [MissionConnection(-1)], "I"),
+            FillMission(MissionPools.EASY, [MissionConnection(0)], "II"),
+            FillMission(MissionPools.EASY, [MissionConnection(0)], "II"),
+            FillMission(MissionPools.EASY, [MissionConnection(0)], "II"),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(1), MissionConnection(2), MissionConnection(3)], "III", number=3, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(1), MissionConnection(2), MissionConnection(3)], "III", number=3, or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(5)], "IV", or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(5)], "IV", or_requirements=True),
+            FillMission(MissionPools.MEDIUM, [MissionConnection(4), MissionConnection(5)], "IV", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(6), MissionConnection(7), MissionConnection(8)], "V", number=7, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(6), MissionConnection(7), MissionConnection(8)], "V", number=7, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(10)], "VI", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(10)], "VI", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(9), MissionConnection(10)], "VI", or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(11), MissionConnection(12), MissionConnection(13)], "VII", number=12, or_requirements=True),
+            FillMission(MissionPools.HARD, [MissionConnection(11), MissionConnection(12), MissionConnection(13)], "VII", number=12, or_requirements=True),
+            FillMission(MissionPools.FINAL, [MissionConnection(14), MissionConnection(15)], "FINAL", number=14, or_requirements=True)
+        ]
+    }
+
+
 def blitz_order() -> Dict[SC2Campaign, List[FillMission]]:
     return {
         SC2Campaign.GLOBAL: [
@@ -462,6 +502,8 @@ def blitz_order() -> Dict[SC2Campaign, List[FillMission]]:
             FillMission(MissionPools.FINAL, [MissionConnection(0), MissionConnection(1)], "Final", number=5, or_requirements=True)
         ]
     }
+
+
 
 
 mission_orders: List[Callable[[], Dict[SC2Campaign, List[FillMission]]]] = [

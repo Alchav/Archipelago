@@ -1420,8 +1420,16 @@ class Removed(FreeText):
         super().__init__(value)
 
 
+class TokenPercentage(Range):
+    """Percentage chance for each of this game's locations to be swapped out for an Item Dispenser Token"""
+    range_start = 0
+    range_end = 100
+    default = "random"
+
+
 @dataclass
 class PerGameCommonOptions(CommonOptions):
+    token_percentage: TokenPercentage
     local_items: LocalItems
     non_local_items: NonLocalItems
     start_inventory: StartInventory
@@ -1430,6 +1438,7 @@ class PerGameCommonOptions(CommonOptions):
     exclude_locations: ExcludeLocations
     priority_locations: PriorityLocations
     item_links: ItemLinks
+
 
 
 @dataclass

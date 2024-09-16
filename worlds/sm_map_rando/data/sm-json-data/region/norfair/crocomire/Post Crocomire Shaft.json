@@ -1,0 +1,400 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 125,
+  "name": "Post Crocomire Shaft",
+  "area": "Norfair",
+  "subarea": "Upper",
+  "subsubarea": "Crocomire",
+  "playable": true,
+  "roomAddress": "0x7AB07",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Top Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019486",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Bottom Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001949e",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 3,
+      "name": "Bottom Right Door",
+      "nodeType": "door",
+      "nodeSubType": "red",
+      "nodeAddress": "0x0019492",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Post Crocomire Shaft Red Lock (to Cosine Room)",
+          "lockType": "coloredDoor",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canOpenRedDoors"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Top Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001947a",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Post Crocomire Shaft Bottom Violas",
+      "enemyName": "Viola",
+      "quantity": 2,
+      "homeNodes": [2]
+    },
+    {
+      "id": "e2",
+      "groupName": "Post Crocomire Shaft Top Violas",
+      "enemyName": "Viola",
+      "quantity": 2,
+      "homeNodes": [3]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 2},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 2},
+        {"id": 3},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 1},
+        {"id": 3},
+        {"id": 4}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 10,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 4],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [1, 4],
+      "name": "Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 9,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canShinechargeMovement",
+        "canCarefulJump"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 100
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Get a normal height jump by releasing run with SpeedBooster and no HiJump.",
+        "Break spin to reach the transition without a wall jump."
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Viola Ice Moonfall Door Lock Skip",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 1}},
+        "canEnemyStuckMoonfall",
+        "canTrickyUseFrozenEnemies"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Use a Super to bring a Viola down to the floor.",
+        "Freeze it near or on the door, freeze the Viola on the floating platform above it, moonfall between them, and aim down.",
+        "After gaining enough speed, move forward to fall down and clip past the door shell below.",
+        "This one needs relatively little fall speed.",
+        "With too much speed, Samus will land on the door shell instead of passing through."
+      ],
+      "devNote": "It is possible to do this without a Super, using the Violas higher up, but it seems to be extremely precise."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Normally",
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "requires": []
+    },
+    {
+      "link": [2, 2],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        {"shinespark": {"frames": 2, "excessFrames": 2}}
+      ],
+      "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
+    },
+    {
+      "link": [2, 3],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [3, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [3, 2],
+      "name": "Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 50
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Align with the runway while falling to avoid all of the platforms.",
+        "The door can also be opened while falling to save some time."
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Viola Farm",
+      "requires": [
+        {"resetRoom": {
+          "nodes": [2, 3],
+          "mustStayPut": false
+        }},
+        {"refill": ["PowerBomb"]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          "canConsecutiveWalljump",
+          "h_canFly"
+        ]}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 58, "excessFrames": 2}}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Enter with Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 2
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 58, "excessFrames": 2}}
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Viola Ice Climb",
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        {"ammo": {"type": "Super", "count": 1}},
+        "canBePatient"
+      ],
+      "note": "Knock a Viola off of the middle platforms and ride it up the right wall by freezing it with Ice Beam."
+    },
+    {
+      "link": [3, 4],
+      "name": "X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithDoorStuckSetup": {}
+      },
+      "requires": [
+        "canBePatient",
+        "canXRayClimb"
+      ],
+      "note": [
+        "Climb up 3 screens, then perform a turn-around spin jump to the left to reach the platform."
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Viola Ice Clip Door Lock Skip",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 2}},
+        "canTrickyUseFrozenEnemies",
+        "h_canXRayCeilingClip",
+        "canBePatient"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Use a Super to knock a Viola off of the middle platforms and ride it up the right wall by freezing it with Ice Beam.",
+        "Once it reaches the top door, use another Super to knock it off again, and freeze it mid-air.",
+        "Use Morph and X-Ray to stand on top of it and clip up through the door shell above."
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "G-Mode Setup - Frozen Viola",
+      "notable": false,
+      "requires": [
+        "canTrickyUseFrozenEnemies",
+        {"ammo": {"type": "Super", "count": 1}},
+        "h_canUseSpringBall",
+        "canUpwardGModeSetup"
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "Knock a Viola off of its platform and keep it on camera as it climbs to the top of the room."
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [4, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 3],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 4],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Door Frame Below",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithDoorFrameBelow": {
+          "height": 2
+        }
+      }
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Platform Below",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithPlatformBelow": {
+          "height": 9,
+          "leftPosition": -7,
+          "rightPosition": 3.5
+        }
+      }
+    }
+  ]
+}

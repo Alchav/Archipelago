@@ -30,6 +30,7 @@ GrindLogicMixin]]):
 
     @cache_self1
     def can_have_earned_total(self, amount: int) -> StardewRule:
+        return True_()
         if amount < 1000:
             return True_()
 

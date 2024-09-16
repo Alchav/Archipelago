@@ -648,17 +648,17 @@ class Context:
     # rest
 
     def get_hint_cost(self, slot):
-        if self.hint_cost:
-            return max(1, int(self.hint_cost * 0.01 * len(self.locations[slot])))
+        return 1
+        if self.hint_cost: # hint_data[slot][location_id]
+            return max(1, int(self.hint_cost * 0.01 * sum([len([location for location in self.locations[player] if "Unreachable" not in self.er_hint_data[player][location]]) for player in self.slot_info if player in self.locations])))
         return 0
 
     def recheck_hints(self, team: typing.Optional[int] = None, slot: typing.Optional[int] = None):
         for hint_team, hint_slot in self.hints:
-            if (team is None or team == hint_team) and (slot is None or slot == hint_slot):
-                self.hints[hint_team, hint_slot] = {
-                    hint.re_check(self, hint_team) for hint in
-                    self.hints[hint_team, hint_slot]
-                }
+            self.hints[hint_team, hint_slot] = {
+                hint.re_check(self, hint_team) for hint in self.hints[hint_team, hint_slot]
+            }
+            self.hints[hint_team, hint_slot] = {hint for hint in self.hints[hint_team, hint_slot] if not hint.found}
 
     def get_rechecked_hints(self, team: int, slot: int):
         self.recheck_hints(team, slot)
@@ -711,7 +711,7 @@ class Context:
                      recipients: typing.Sequence[int] = None):
         """Send and remember hints."""
         if only_new:
-            hints = [hint for hint in hints if hint not in self.hints[team, hint.finding_player]]
+            hints = [hint for hint in hints if hint not in self.hints[team, hint.finding_player] if hint.location not in self.location_checks[(team, hint.finding_player)]]
         if not hints:
             return
         new_hint_events: typing.Set[int] = set()
@@ -1008,9 +1008,15 @@ def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False):
                 if set(group_players) == group_collected_players:
                     collect_player(ctx, team, group, True)
 
-
-def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[typing.Tuple[int, int]]:
-    return ctx.locations.get_remaining(ctx.location_checks, team, slot)
+def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
+    def g(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int, hint_data, item_names
+                      ) -> typing.List[str]:
+        checked = state[team, slot]
+        player_locations = self[slot]
+        return sorted([f"{item_names[ctx.slot_info[player_locations[location_id][1]].game][player_locations[location_id][0]]}" + f" ({ctx.games[player_locations[location_id][1]]})" + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
+                       location_id in player_locations if
+                       location_id not in checked])
+    return g(ctx.locations, ctx.location_checks, team, slot, ctx.er_hint_data, ctx.item_names)
 
 
 def send_items_to(ctx: Context, team: int, target_slot: int, *items: NetworkItem):
@@ -1036,7 +1042,7 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
             ctx.logger.info('(Team #%d) %s sent %s to %s (%s)' % (
                 team + 1, ctx.player_names[(team, slot)], ctx.item_names[ctx.slot_info[target_player].game][item_id],
                 ctx.player_names[(team, target_player)], ctx.location_names[ctx.slot_info[slot].game][location]))
-            info_text = json_format_send_event(new_item, target_player)
+            info_text = json_format_send_event(new_item, target_player, ctx.er_hint_data.get(slot, {}).get(new_item.location, ""))
             ctx.broadcast_team(team, [info_text])
 
         ctx.location_checks[team, slot] |= new_locations
@@ -1098,9 +1104,10 @@ def format_hint(ctx: Context, team: int, hint: NetUtils.Hint) -> str:
     return text + (". (found)" if hint.found else ".")
 
 
-def json_format_send_event(net_item: NetworkItem, receiving_player: int):
+def json_format_send_event(net_item: NetworkItem, receiving_player: int, hint):
     parts = []
     NetUtils.add_json_text(parts, net_item.player, type=NetUtils.JSONTypes.player_id)
+
     if net_item.player == receiving_player:
         NetUtils.add_json_text(parts, " found their ")
         NetUtils.add_json_item(parts, net_item.item, net_item.player, net_item.flags)
@@ -1112,6 +1119,8 @@ def json_format_send_event(net_item: NetworkItem, receiving_player: int):
 
     NetUtils.add_json_text(parts, " (")
     NetUtils.add_json_location(parts, net_item.location, net_item.player)
+    if hint:
+        NetUtils.add_json_text(parts, f" at {hint}")
     NetUtils.add_json_text(parts, ")")
 
     return {"cmd": "PrintJSON", "data": parts, "type": "ItemSend",
@@ -1313,6 +1322,84 @@ class ClientMessageProcessor(CommonCommandProcessor):
 
         return self.ctx.commandprocessor(command)
 
+    def _cmd_sphere(self, player=None):
+        spheres = {}
+        spheres_checked = {}
+        if player:
+            player = str(player)
+            player = self.ctx.player_name_lookup[player][1]
+        else:
+            player = self.client.slot
+        lowest_sphere = 0
+        highest_sphere = 0
+        for location in self.ctx.locations[player]:
+            if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                sphere = -1
+            else:
+                sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                if lowest_sphere:
+                    lowest_sphere = min(sphere, lowest_sphere)
+                else:
+                    lowest_sphere = sphere
+                highest_sphere = max(sphere, highest_sphere)
+            if sphere not in spheres:
+                spheres[sphere] = []
+                spheres_checked[sphere] = []
+            spheres[sphere].append(location)
+            if location in self.ctx.location_checks[(0, player)]:
+                spheres_checked[sphere].append(location)
+        for i in list(range(lowest_sphere, highest_sphere + 1)) + [-1]:
+            try:
+                if len(spheres[i]) == len(spheres_checked[i]):
+                    continue
+                else:
+                    game = self.ctx.slot_info[player].game
+                    names = [f"{self.ctx.location_names[game][location]} at {self.ctx.er_hint_data[player][location]}"
+                             for location in spheres[i] if location not in spheres_checked[i]]
+                    texts = [f'Missing: {name}' for name in names]
+                    self.output_multiple(texts)
+                    break
+            except KeyError:
+                continue
+        else:
+            text = "None left"
+            self.output(text)
+
+    def _cmd_spheres(self, player=None):
+        if player and (player.isdigit() or player == "-1"):
+            sphere = int(player)
+            players = {player: 0 for player in self.ctx.er_hint_data.keys()}
+            checked = {player: 0 for player in self.ctx.er_hint_data.keys()}
+            for player in players:
+                for location in self.ctx.locations[player]:
+                    if (self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1] == str(sphere)) or (sphere == -1 and "Unreachable" in self.ctx.er_hint_data[player][location]):
+                        players[player] += 1
+                        if location in self.ctx.location_checks[(0, player)]:
+                            checked[player] += 1
+            self.output_multiple([f"{checked[player]}/{players[player]} Locations Checked in Sphere {sphere} by {self.ctx.player_names[(0, player)]}" for player in players if players[player] > 0])
+        else:
+            if player:
+                player = str(player)
+                players = [self.ctx.player_name_lookup[player][1]]
+            else:
+                players = self.ctx.er_hint_data.keys()
+            spheres = {}
+            spheres_checked = {}
+            for player in players:
+                for location in self.ctx.locations[player]:
+                    if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                        sphere = -1
+                    else:
+                        sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                    if sphere not in spheres:
+                        spheres[sphere] = 0
+                        spheres_checked[sphere] = 0
+                    spheres[sphere] += 1
+                    if location in self.ctx.location_checks[(0, player)]:
+                        spheres_checked[sphere] += 1
+            text = "\n".join(sorted([f"{spheres_checked[sphere]}/{spheres[sphere]} Checked Locations in Sphere {sphere}" for sphere in spheres], key=lambda text: int(text.split(" ")[-1])))
+            self.output(text)
+
     def _cmd_players(self) -> bool:
         """Get information about connected and missing players."""
         if len(self.ctx.player_names) < 10:
@@ -1372,10 +1459,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
     def _cmd_remaining(self) -> bool:
         """List remaining items in your game, but not their location or recipient"""
         if self.ctx.remaining_mode == "enabled":
-            rest_locations = get_remaining(self.ctx, self.client.team, self.client.slot)
-            if rest_locations:
-                self.output("Remaining items: " + ", ".join(self.ctx.item_names[self.ctx.games[slot]][item_id]
-                                                            for slot, item_id in rest_locations))
+            remaining_item_ids = get_remaining(self.ctx, self.client.team, self.client.slot)
+            if remaining_item_ids:
+                self.output_multiple(["Remaining: " + itemn for itemn in remaining_item_ids])
             else:
                 self.output("No remaining items found.")
             return True
@@ -1385,10 +1471,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
             return False
         else:  # is goal
             if self.ctx.client_game_state[self.client.team, self.client.slot] == ClientStatus.CLIENT_GOAL:
-                rest_locations = get_remaining(self.ctx, self.client.team, self.client.slot)
-                if rest_locations:
-                    self.output("Remaining items: " + ", ".join(self.ctx.item_names[self.ctx.games[slot]][item_id]
-                                                                for slot, item_id in rest_locations))
+                remaining_item_ids = get_remaining(self.ctx, self.client.team, self.client.slot)
+                if remaining_item_ids:
+                    self.output_multiple(["Remaining: " + itemn for itemn in remaining_item_ids])
                 else:
                     self.output("No remaining items found.")
                 return True
@@ -1500,9 +1585,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
         if not input_text:
             hints = {hint.re_check(self.ctx, self.client.team) for hint in
                      self.ctx.hints[self.client.team, self.client.slot]}
+            hints = {hint for hint in hints if not hint.found}
             self.ctx.hints[self.client.team, self.client.slot] = hints
             self.ctx.notify_hints(self.client.team, list(hints), recipients=(self.client.slot,))
-            self.output(f"A hint costs {self.ctx.get_hint_cost(self.client.slot)} points. "
+            self.output(f"A hint costs {cost} points. "
                         f"You have {points_available} points.")
             if hints and Utils.version_tuple < (0, 5, 0):
                 self.output("It was recently changed, so that the above hints are only shown to you. "
@@ -1589,7 +1675,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     hint = not_found_hints.pop()
                     hints.append(hint)
                     can_pay -= 1
-                    self.ctx.hints_used[self.client.team, self.client.slot] += 1
+
+                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
+                        self.ctx.hints_used[self.client.team, self.client.slot] += 1
+
 
                 self.ctx.notify_hints(self.client.team, hints)
                 if not_found_hints:
@@ -1647,12 +1736,15 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
 
 
 def get_client_points(ctx: Context, client: Client) -> int:
-    return (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
+    return 5 - ctx.hints_used[client.team, client.slot]
+    checks = len(sum([list(ctx.location_checks[client.team, slot]) for slot in ctx.slot_info], []))
+    return (ctx.location_check_points * checks -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
-    return (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
+    return 5 - ctx.hints_used[team, slot]
+    return (ctx.location_check_points * len([location for location in ctx.location_checks[team, slot] if "Unreachable" not in ctx.er_hint_data[slot][location]]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
 
 
@@ -1680,7 +1772,10 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
         errors = set()
         if ctx.password and args['password'] != ctx.password:
             errors.add('InvalidPassword')
-
+        if args['name'][:20] in ctx.connect_names:
+            args['name'] = args['name'][:20]
+        if args['name'] == "QVAwNDVfMTlfICAgICAxNzIxNzIA":
+            args['name'] = "QVAwNDZfMTlfICAgICAxNzIxNzIA"
         if args['name'] not in ctx.connect_names:
             errors.add('InvalidSlot')
         else:
@@ -1698,6 +1793,17 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
                 client.items_handling = args['items_handling']
             except (ValueError, TypeError):
                 errors.add('InvalidItemsHandling')
+
+            #player in ctx.client_game_state and ctx.client_game_state[player] == ClientStatus.CLIENT_GOAL
+
+            # if slot % 2 == 0:
+            #     dependent = (team, slot - 1)
+            #     if dependent not in ctx.client_game_state or ctx.client_game_state[dependent] != ClientStatus.CLIENT_GOAL:
+            #         errors.add("InvalidGame")
+            bot_items = get_received_items(ctx, client.team, 1, True)
+            if slot not in bot_items:
+                errors.add("InvalidGame")
+
 
         # only exact version match allowed
         if ctx.compatibility == 0 and args['version'] != version_tuple:

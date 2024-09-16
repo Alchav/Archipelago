@@ -1,0 +1,511 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 139,
+  "name": "Metal Pirates Room",
+  "area": "Norfair",
+  "subarea": "Lower",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7B62B",
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x0019a32",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Metal Pirates Grey Lock (to Plowerhouse)",
+          "lockType": "killEnemies",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                {"obstaclesCleared": ["A"]}
+              ]
+            }
+          ],
+          "yields": ["f_ZebesAwake"],
+          "devNote": "The requirements for obstacle A are in a strat at node 2."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x0019a3e",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 3,
+      "name": "Metal Pirates Junction",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "A",
+      "name": "Metal Pirates",
+      "obstacleType": "enemies"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Metal Pirates",
+      "enemyName": "Space Pirate (fighting)",
+      "quantity": 2,
+      "homeNodes": [3],
+      "dropRequires": ["h_heatProof"]
+    }
+  ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Metal Pirates Speed Echoes Kill",
+      "note": [
+        "Use the Echoes created by shinesparking to defeat the Metal Pirates.",
+        "This involves Shineparking into a precise point while also turning the Pirates vulnerable as the echoes reach them."
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3}
+      ]
+    }
+  ],
+  "devNote": "All kill heatframes have been lowered by 250 to adjust for the traversal requirement",
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        {"heatFrames": 10},
+        "h_canHeatedCrystalFlash",
+        {"heatFrames": 10}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Dead Pirates",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 200},
+        {"obstaclesCleared": ["A"]}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Hitbox Through Pirates",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canHitbox",
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "SpeedBooster",
+        "canShinechargeMovement",
+        {"or": [
+          "canHitbox",
+          {"obstaclesCleared": ["A"]}
+        ]},
+        {"heatFrames": 180}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 120
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 180}]
+        },
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 150}]
+        }
+      ],
+      "note": "FIXME: Shorter runway shinecharges could be added from 3."
+    },
+    {
+      "link": [1, 3],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 125}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Dead Pirates",
+      "requires": [
+        {"heatFrames": 200},
+        {"obstaclesCleared": ["A"]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Hitbox Through Pirates",
+      "requires": [
+        "canHitbox",
+        {"heatFrames": 200}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "SpeedBooster",
+        "canShinechargeMovement",
+        {"or": [
+          "canHitbox",
+          {"obstaclesCleared": ["A"]}
+        ]},
+        {"heatFrames": 180}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 120
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["missiles"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 180}]
+        },
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [
+           {"obstaclesCleared": ["A"]},
+           {"heatFrames": 150}]
+        }
+      ],
+      "note": "FIXME: Shorter runway shinecharges could be added from 3."
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        {"heatFrames": 10},
+        "h_canHeatedCrystalFlash",
+        {"heatFrames": 10}
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 125}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 125}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 125}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Charge Plasma Kill",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "Charge",
+        "Plasma",
+        {"or": [
+          {"and": [
+            {"or": [
+              "canDodgeWhileShooting",
+              {"enemyDamage": {
+                "enemy": "Space Pirate (fighting)",
+                "type": "contact",
+                "hits": 2
+              }}
+            ]},
+            {"or": [
+              "Ice",
+              "Wave"
+            ]},
+            {"heatFrames": 700}
+          ]},
+          {"and": [
+            {"or": [
+              "canDodgeWhileShooting",
+              {"enemyDamage": {
+                "enemy": "Space Pirate (fighting)",
+                "type": "contact",
+                "hits": 2
+              }}
+            ]},
+            "Ice",
+            "Wave",
+            {"heatFrames": 450}
+          ]},
+          {"and": [
+            {"or": [
+              "canDodgeWhileShooting",
+              {"enemyDamage": {
+                "enemy": "Space Pirate (fighting)",
+                "type": "contact",
+                "hits": 2
+              }}
+            ]},
+            {"heatFrames": 950}
+          ]},
+          {"and": [
+            "canXRayWaitForIFrames",
+            {"heatFrames": 250}
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [3, 3],
+      "name": "Charge Spazer Kill",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canDodgeWhileShooting",
+        "Charge",
+        "Spazer",
+        {"or": [
+          {"heatFrames": 4400},
+          {"and": [
+            "Ice",
+            {"heatFrames": 3000}
+          ]},
+          {"and": [
+            "Wave",
+            {"heatFrames": 2650}
+          ]},
+          {"and": [
+            "Ice",
+            "Wave",
+            {"heatFrames": 1750}
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [3, 3],
+      "name": "Plasma Kill",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          "canDodgeWhileShooting",
+          {"enemyDamage": {
+            "enemy": "Space Pirate (fighting)",
+            "type": "contact",
+            "hits": 8
+          }}
+        ]},
+        "Plasma",
+        {"heatFrames": 2000}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [3, 3],
+      "name": "Slow Kill",
+      "requires": [
+        "h_heatProof",
+        "canDodgeWhileShooting",
+        "Charge",
+        "Wave"
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [3, 3],
+      "name": "Very Slow Kill",
+      "requires": [
+        "h_heatProof",
+        "canDodgeWhileShooting",
+        {"or": [
+          {"and": [
+            "Spazer",
+            "canBeVeryPatient"
+          ]},
+          {"and": [
+            "Charge",
+            "canBeVeryPatient"
+          ]},
+          {"and": [
+            "Charge",
+            "Ice",
+            "canBePatient"
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"],
+      "note": "Uncharged Spazer does half damage.",
+      "devNote": "This strat is only for uncharged spazer or charge with or without ice"
+    },
+    {
+      "link": [3, 3],
+      "name": "Super Kill",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          "canDodgeWhileShooting",
+          {"enemyDamage": {
+            "enemy": "Space Pirate (fighting)",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]},
+        {"enemyKill": {
+          "enemies": [
+            [
+              "Space Pirate (fighting)",
+              "Space Pirate (fighting)"
+            ]
+          ],
+          "explicitWeapons": ["Super"]
+        }},
+        {"heatFrames": 450}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [3, 3],
+      "name": "Missile Kill",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          "canDodgeWhileShooting",
+          {"enemyDamage": {
+            "enemy": "Space Pirate (fighting)",
+            "type": "contact",
+            "hits": 6
+          }}
+        ]},
+        {"enemyKill": {
+          "enemies": [
+            [
+              "Space Pirate (fighting)",
+              "Space Pirate (fighting)"
+            ]
+          ],
+          "explicitWeapons": ["Missile"]
+        }},
+        {"heatFrames": 2700}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [3, 3],
+      "name": "Metal Pirates Speed Echoes Kill",
+      "notable": true,
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canUseSpeedEchoes",
+        "canHitbox",
+        {"heatFrames": 450},
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"shinespark": {"frames": 18}}
+      ],
+      "clearsObstacles": ["A"],
+      "reusableRoomwideNotable": "Metal Pirates Speed Echoes Kill",
+      "note": [
+        "Use the Echoes created by shinesparking to defeat the Metal Pirates.",
+        "This involves Shineparking into a precise point while also turning the Pirates vulnerable as the echoes reach them."
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Metal Pirates Farm",
+      "requires": [
+        "h_heatProof",
+        "canDodgeWhileShooting",
+        "Plasma",
+        {"refill": ["Energy", "Super"]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Metal Pirates Shinespark Farm",
+      "notable": true,
+      "requires": [
+        "h_heatProof",
+        "canDodgeWhileShooting",
+        "canUseSpeedEchoes",
+        "canHitbox",
+        {"refill": ["Energy", "Super"]}
+      ],
+      "reusableRoomwideNotable": "Metal Pirates Speed Echoes Kill",
+      "note": [
+        "Use the Echoes created by shinesparking to defeat the Metal Pirates.",
+        "This involves Shineparking into a precise point while also turning the Pirates vulnerable as the echoes reach them."
+      ]
+    }
+  ]
+}

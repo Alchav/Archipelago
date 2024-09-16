@@ -183,7 +183,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                 if remaining_items:
                     logger.warning(f"{multiworld.get_player_name(player)}"
                                     f" is trying to remove items from their pool that don't exist: {remaining_items}")
-                    # find all filler we generated for the current player and remove until it matches 
+                    # find all filler we generated for the current player and remove until it matches
                     removables = [item for item in new_items if item.player == player]
                     for _ in range(sum(remaining_items.values())):
                         new_items.remove(removables.pop())
@@ -243,6 +243,50 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             # collect ER hint info
             er_hint_data: Dict[int, Dict[int, str]] = {}
             AutoWorld.call_all(multiworld, 'extend_hint_information', er_hint_data)
+
+            def get_item_spheres():
+                state = CollectionState(multiworld)
+                locations = set(multiworld.get_filled_locations())
+                while locations:
+                    reachable_locations = {location for location in locations if location.can_reach(state)}
+                    old_reachable_locations = None
+                    while old_reachable_locations != reachable_locations:
+                        old_reachable_locations = reachable_locations.copy()
+                        reachable_events = {location for location in reachable_locations if location.address is None}
+                        for location in reachable_events:
+                            state.collect(location.item, True, location)
+                        locations -= reachable_events
+                        reachable_locations = {location for location in locations if location.can_reach(state)}
+                    if not reachable_locations:
+                        if locations:
+                            yield "Unreachable"
+                            yield locations  # unreachable locations
+                        break
+                    else:
+                        yield {loc for loc in reachable_locations if loc.player}
+
+                    for location in reachable_locations:
+                        if location.item.advancement:
+                            state.collect(location.item, True, location)
+                    locations -= reachable_locations
+
+            unr = False
+            for i, sphere in enumerate(get_item_spheres(), 1):
+                if sphere == "Unreachable":
+                    unr = True
+                    continue
+                for location in sphere:
+                    if (not location.address) or type(location.address) != int:
+                        continue
+                    if location.player not in er_hint_data:
+                        er_hint_data[location.player] = {}
+                    if location.address not in er_hint_data[location.player]:
+                        er_hint_data[location.player][location.address] = "Unreachable" if unr else f"Sphere {i}"
+                    else:
+                        t = f"Sphere {i}"
+                        if unr:
+                            t = "Unreachable"
+                        er_hint_data[location.player][location.address] = f"{t} / {er_hint_data[location.player][location.address]}"
 
             def write_multidata():
                 import NetUtils
@@ -347,7 +391,11 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             output_file_futures.append(pool.submit(write_multidata))
             if not check_accessibility_task.result():
                 if not multiworld.can_beat_game():
-                    raise FillError("Game appears as unbeatable. Aborting.", multiworld=multiworld)
+                    state = multiworld.state.copy()
+                    state.sweep_for_events()
+                    beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
+
+                    raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
                 else:
                     logger.warning("Location Accessibility requirements not fulfilled.")
 
@@ -362,7 +410,7 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             multiworld.spoiler.create_playthrough(create_paths=args.spoiler > 2)
 
         if args.spoiler:
-            multiworld.spoiler.to_file(os.path.join(temp_dir, '%s_Spoiler.txt' % outfilebase))
+            multiworld.spoiler.to_file(os.path.join(temp_dir, '%s_Spoiler.txt' % outfilebase), er_hint_data)
 
         zipfilename = output_path(f"AP_{multiworld.seed_name}.zip")
         logger.info(f"Creating final archive at {zipfilename}")

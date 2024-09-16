@@ -69,6 +69,8 @@ class MultiWorld():
     precollected_items: Dict[int, List[Item]]
     state: CollectionState
 
+    post_fill: bool = False
+
     plando_options: PlandoOptions
     early_items: Dict[int, Dict[str, int]]
     local_early_items: Dict[int, Dict[str, int]]
@@ -800,17 +802,17 @@ class CollectionState():
     def sweep_for_advancements(self, locations: Optional[Iterable[Location]] = None) -> None:
         if locations is None:
             locations = self.multiworld.get_filled_locations()
-        reachable_advancements = True
-        # since the loop has a good chance to run more than once, only filter the advancements once
-        locations = {location for location in locations if location.advancement and location not in self.advancements}
-
-        while reachable_advancements:
-            reachable_advancements = {location for location in locations if location.can_reach(self)}
-            locations -= reachable_advancements
-            for advancement in reachable_advancements:
-                self.advancements.add(advancement)
-                assert isinstance(advancement.item, Item), "tried to collect Event with no Item"
-                self.collect(advancement.item, True, advancement)
+        reachable_events = True
+        # since the loop has a good chance to run more than once, only filter the events once
+        locations = {location for location in locations if location.advancement and location not in self.events and
+                     (not location.address)}
+        while reachable_events:
+            reachable_events = {location for location in locations if location.can_reach(self)}
+            locations -= reachable_events
+            for event in reachable_events:
+                self.events.add(event)
+                assert isinstance(event.item, Item), "tried to collect Event with no Item"
+                self.collect(event.item, True, event)
 
     # item name related
     def has(self, item: str, player: int, count: int = 1) -> bool:
@@ -912,6 +914,10 @@ class CollectionState():
         changed = self.multiworld.worlds[item.player].collect(self, item)
 
         self.stale[item.player] = True
+        if item.game == "Archipelago":
+            self.stale[item.code] = True
+        # if item.player % 2:
+        #     self.stale[item.player+1] = True
 
         if changed and not prevent_sweep:
             self.sweep_for_advancements()
@@ -1152,15 +1158,9 @@ class Location:
         self.address = address
         self.parent_region = parent
 
-    def can_fill(self, state: CollectionState, item: Item, check_access: bool = True) -> bool:
-        return ((
-            self.always_allow(state, item)
-            and item.name not in state.multiworld.worlds[item.player].options.non_local_items
-        ) or (
-            (self.progress_type != LocationProgressType.EXCLUDED or not (item.advancement or item.useful))
-            and self.item_rule(item)
-            and (not check_access or self.can_reach(state))
-        ))
+    def can_fill(self, state: CollectionState, item: Item, check_access=True) -> bool:
+        return ((self.always_allow(state, item) and item.name not in state.multiworld.worlds[item.player].options.non_local_items)
+                or (self.item_rule(item) and (not check_access or self.can_reach(state))))
 
     def can_reach(self, state: CollectionState) -> bool:
         # Region.can_reach is just a cache lookup, so placing it first for faster abort on average
@@ -1348,8 +1348,10 @@ class Spoiler:
                     location.item.name, location.item.player, location.name, location.player) for location in
                                                                                sphere_candidates])
                 if any([multiworld.worlds[location.item.player].options.accessibility != 'minimal' for location in sphere_candidates]):
-                    raise RuntimeError(f'Not all progression items reachable ({sphere_candidates}). '
-                                       f'Something went terribly wrong here.')
+                    print(f'Not all progression items reachable ({sphere_candidates}). '
+                          f'Something went terribly wrong here.')
+                    self.unreachables = sphere_candidates
+                    break
                 else:
                     self.unreachables = sphere_candidates
                     break
@@ -1365,7 +1367,7 @@ class Spoiler:
                               location.item.player)
                 old_item = location.item
                 location.item = None
-                if multiworld.can_beat_game(state_cache[num]):
+                if location.address and multiworld.can_beat_game(state_cache[num]):
                     to_delete.add(location)
                     restore_later[location] = old_item
                 else:
@@ -1408,7 +1410,10 @@ class Spoiler:
 
             required_locations -= sphere
             if not sphere:
-                raise RuntimeError(f'Not all required items reachable. Unreachable locations: {required_locations}')
+                if {location for location in required_locations if location.address}:
+                    raise RuntimeError(f'Not all required items reachable. Unreachable locations: {required_locations}')
+                else:
+                    break
 
         # we can finally output our playthrough
         self.playthrough = {"0": sorted([self.multiworld.get_name_string_for_object(item) for item in
@@ -1464,7 +1469,7 @@ class Spoiler:
                         self.paths[str(multiworld.get_region('Inverted Big Bomb Shop', player))] = \
                             get_path(state, multiworld.get_region('Inverted Big Bomb Shop', player))
 
-    def to_file(self, filename: str) -> None:
+    def to_file(self, filename: str, er_hint_data) -> None:
         from itertools import chain
         from worlds import AutoWorld
         from Options import Visibility
@@ -1512,11 +1517,12 @@ class Spoiler:
                 outfile.write("\n\nStarting Items:\n\n")
                 outfile.write("\n".join([item for item in precollected_items]))
 
-            locations = [(str(location), str(location.item) if location.item is not None else "Nothing")
+            locations = [(str(location), str(location.item) if location.item is not None else "Nothing", er_hint_data[location.player][location.address] if isinstance(location.address, int) and location.address in er_hint_data[location.player] else "")
                          for location in self.multiworld.get_locations() if location.show_in_spoiler]
+            locations.sort(key=lambda loc: loc[2].split("/")[0].split(" ")[-1].zfill(2) if loc[2].split("/")[0].split(" ")[-1].isdigit() else "00" if loc[2].split(" ")[-1] == "Unreachable" else "x")
             outfile.write('\n\nLocations:\n\n')
             outfile.write('\n'.join(
-                ['%s: %s' % (location, item) for location, item in locations]))
+                ['%s: %s at %s' % (location, item, hint) for location, item, hint in locations]))
 
             outfile.write('\n\nPlaythrough:\n\n')
             outfile.write('\n'.join(['%s: {\n%s\n}' % (sphere_nr, '\n'.join(

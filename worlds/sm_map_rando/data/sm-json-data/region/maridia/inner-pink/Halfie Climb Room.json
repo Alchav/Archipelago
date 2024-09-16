@@ -1,0 +1,1496 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 187,
+  "name": "Halfie Climb Room",
+  "area": "Maridia",
+  "subarea": "Inner",
+  "subsubarea": "Pink",
+  "playable": true,
+  "roomAddress": "0x7D913",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Top Left Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x001a900",
+      "doorEnvironments": [{"physics": "water"}],
+      "locks": [
+        {
+          "name": "Halfie Climb Grey Lock (to East Cactus Alley)",
+          "lockType": "gameFlag",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "f_DefeatedDraygon"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Bottom Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a8dc",
+      "doorEnvironments": [{"physics": "water"}]
+    },
+    {
+      "id": 3,
+      "name": "Bottom Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a8f4",
+      "doorEnvironments": [{"physics": "water"}]
+    },
+    {
+      "id": 4,
+      "name": "Top Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001a8e8",
+      "doorEnvironments": [{"physics": "air"}]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Halfie Climb Mochtroids",
+      "enemyName": "Mochtroid",
+      "quantity": 3,
+      "homeNodes": [1, 2]
+    },
+    {
+      "id": "e2",
+      "groupName": "Halfie Climb Oums",
+      "enemyName": "Oum",
+      "quantity": 3,
+      "homeNodes": [3]
+    }
+  ],
+  "reusableRoomwideNotable": [
+    {
+      "name": "Halfie Climb Enter with Shinespark from the Bottom Right",
+      "note": [
+        "Quickly shoot out the 3 shot blocks then horizontal spark breaking the speed blocks.",
+        "Wait for the Oums to roll on their own to a place where they can be climbed.",
+        "Do not stand on the Oums when they begin to attack."
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {
+          "id": 4,
+          "devNote": "This link is only for the shinespark, mochtroid climbing or cross room jump. Other strats should go 2 -> 1 -> 4."
+        }
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {
+          "id": 1,
+          "devNote": "This link is only for the shinespark. Other strats should go 3 -> 2 -> 1."
+        },
+        {"id": 2},
+        {"id": 3},
+        {
+          "id": 4,
+          "devNote": "This link is only for the shinespark. Other strats should go 3 -> 2 -> 1 -> 4."
+        }
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 1},
+        {"id": 3},
+        {"id": 4}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 2,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway - Frozen Mochtroid",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "canMochtroidIceClimb",
+          {"and": [
+            "Gravity",
+            {"or": [
+              "SpaceJump",
+              "canWalljump"
+            ]}
+          ]}
+        ]},
+        {"enemyDamage": {
+          "enemy": "Mochtroid",
+          "type": "contact",
+          "hits": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Use a frozen Mochtroid to extend the length of the runway.",
+        "Positioning the Mochtroid can be done by dropping down below then climbing back up with the frozen Mochtroid as a platform.",
+        "Alternatively, freeze the Mochtroid with an angle-down shot while falling below then quickly climb back up."
+      ],
+      "devNote": "There are many other ways to get into position, but they would require manipulating the Mochtroid as much as canMochtroidIceClimb expects."
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [1, 2],
+      "name": "Halfie Climb Stored Moonfall Grapple Door Lock Skip",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "requires": [
+        {"doorUnlockedAtNode": 1},
+        "canGrappleClip"
+      ],
+      "bypassesDoorShell": true,
+      "unlocksDoors": [
+        {"nodeId": 1, "types": ["missiles", "super"], "requires": []},
+        {"nodeId": 1, "types": ["powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Perform a moonfall with stored fall speed to clip into the air space below the door at node 1.",
+        "Land, then grapple the nearest block and release.",
+        "Samus will fall into the door transition, bypassing any lock that may be on the door."
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]},
+          {"and": [
+            "h_canArtificialMorphSpringBall",
+            {"or": [
+              "Gravity",
+              "HiJump"
+            ]}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "SpaceJump",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canSpringBallJumpMidAir",
+              "canWalljump"
+            ]}
+          ]},
+          "canConsecutiveWalljump"
+        ]}
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        "Gravity",
+        {"shinespark": {"frames": 20, "excessFrames": 3}}
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Suitless Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 22, "excessFrames": 5}}
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Grapple",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "Grapple"
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Mochtroid Climb",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "canMochtroidIceClimb"
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Gravity Jump",
+      "requires": [
+        "canGravityJump",
+        "HiJump",
+        "SpeedBooster",
+        "canCarefulJump"
+      ]
+    },
+    {
+      "link": [1, 4],
+      "name": "Break Free",
+      "requires": [
+        "canSuitlessMaridia",
+        "HiJump",
+        {"or": [
+          {"and": [
+            "canSpaceJumpWaterBounce",
+            "canWalljump"
+          ]},
+          "canSpaceJumpWaterEscape"
+        ]}
+      ],
+      "devNote": "FIXME: With a single underwaterwalljump you can break free here, without spacejump."
+    },
+    {
+      "link": [1, 4],
+      "name": "Suitless SpringBall Jump",
+      "requires": [
+        "canSuitlessMaridia",
+        "HiJump",
+        "canTrickyJump",
+        "h_canMaxHeightSpringBallJump",
+        "canStationaryLateralMidAirMorph"
+      ],
+      "note": [
+        "SpringBall jump just as Samus exits the water to reach the distant ledge.",
+        "A Crouch jump makes the SpringBall jump easier, but at the cost of some horizontal movement."
+      ],
+      "devNote": "canStationaryLateralMidAirMorph is not strictly required but better describes the difficulty."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canTrickyJump",
+        {"or": [
+          "canWalljump",
+          "SpaceJump"
+        ]}
+      ],
+      "note": "Requires a runway of 1 tile in the adjacent room. Use Space Jump or a wall jump after getting out of the water."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump (Lenient)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 4
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        {"or": [
+          "canWalljump",
+          "SpaceJump"
+        ]}
+      ],
+      "note": "Assumes a runway of at least 4 tiles in the adjacent room. Use Space Jump or a wall jump after getting out of the water."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with HiJump and SpeedBooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 4
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canTrickyJump",
+        "HiJump"
+      ],
+      "note": "Requires a runway of 4 tile in the adjacent room."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with HiJump and SpeedBooster (Lenient)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 8
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "HiJump"
+      ],
+      "note": "Assumes a runway of 8 tiles in the adjacent room."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with SpeedBooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 21
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of approximately 21 tile in the adjacent room."
+    },
+    {
+      "link": [1, 4],
+      "name": "Cross Room Jump with IBJ",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 1,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "h_canJumpIntoIBJ",
+        {"or": [
+          {"ammo": {"type": "PowerBomb", "count": 1}},
+          {"and": [
+            "h_canCeilingBombJump",
+            {"enemyDamage": {
+              "enemy": "Mochtroid",
+              "type": "contact",
+              "hits": 1
+            }}
+          ]},
+          {"and": [
+            "h_canDoubleBombJump",
+            {"enemyDamage": {
+              "enemy": "Mochtroid",
+              "type": "contact",
+              "hits": 2
+            }}
+          ]}
+        ]},
+        "canCrossRoomJumpIntoWater",
+        "canMomentumConservingTurnaround",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Only requires a runway of approximately 1 tile in the adjacent room.",
+        "Take two Mochtroid hits or kill it using a Power Bomb or 5 Bombs."
+      ],
+      "devNote": "The rhythm for placing 4 Bombs quickly is the main component of ceiling bomb jumps."
+    },
+    {
+      "link": [1, 4],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ],
+      "note": "To avoid the Mochtroids, it is possible to place bombs near them while in the Morph Tunnel below to the right."
+    },
+    {
+      "link": [1, 4],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "link": [1, 4],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true,
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      }
+    },
+    {
+      "link": [1, 4],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true,
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      }
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "h_canFly",
+          "canWalljump",
+          "canGravityJump",
+          {"and": [
+            "HiJump",
+            {"or": [
+              "canSpringBallJumpMidAir",
+              "SpeedBooster"
+            ]}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Suitless Double Spring Ball Jump",
+      "requires": [
+        "canSuitlessMaridia",
+        "canDoubleSpringBallJumpMidAir",
+        "HiJump"
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 30
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 20, "excessFrames": 3}}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "Grapple"
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Mochtroid Climb",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "canMochtroidIceClimb",
+        {"or": [
+          "Gravity",
+          "canDodgeWhileShooting",
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "hits": 2,
+            "type": "contact"
+          }},
+          "Wave",
+          "Spazer",
+          "Plasma",
+          {"and": [
+            "canPrepareForNextRoom",
+            "Charge"
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Halfie Climb X-Ray Climb",
+      "entranceCondition": {
+        "comeInWithDoorStuckSetup": {}
+      },
+      "requires": [
+        "canXRayClimb"
+      ],
+      "note": "Climb up 1 screen."
+    },
+    {
+      "link": [2, 1],
+      "name": "Cross Room Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Only requires a runway of 1 tile in the adjacent room.",
+      "devNote": "This can be done with a shorter runway (closed end) and canMomentumConservingTurnaround, but that type of connection doesn't exist."
+    },
+    {
+      "link": [2, 1],
+      "name": "Suitless Water Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canWaterShineCharge",
+        {"shinespark": {"frames": 20, "excessFrames": 3}}
+      ],
+      "devNote": "This runway length is just an estimate of the worst case scenario for difficulties that can't use canStutterWaterShineCharge."
+    },
+    {
+      "link": [2, 1],
+      "name": "Suitless Stutter Water Shinecharge",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 2.4375
+        }
+      },
+      "requires": [
+        "canStutterWaterShineCharge",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }},
+          {"and": [
+            "canDodgeWhileShooting",
+            {"or": [
+              "Wave",
+              "Spazer",
+              "Plasma",
+              {"ammo": {"type": "Missile","count": 1}},
+              {"ammo": {"type": "Super", "count": 1}}
+            ]}
+          ]}
+        ]},
+        {"shinespark": {"frames": 20, "excessFrames": 3}}
+      ],
+      "note": "Enter the room with a careful amount of momentum where Samus must spend extra time slowing down during the stutter, but must not have much run speed."
+    },
+    {
+      "link": [2, 1],
+      "name": "Halfie Climb Very Deep Stuck X-Ray Climb",
+      "notable": true,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "canXRayClimb"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Enter with G-mode direct, back up to exactly 8 pixels away from the door transition, and activate X-ray to get very deep stuck in the door.",
+        "Climb up a little less than 1 screen, and perform a turnaround buffered spin-jump away from the door to trigger the transition, bypassing any lock on the door.",
+        "Perform the spin-jump when Samus' feet are between about 0.5 and 2 tiles below the bottom of the door."
+      ],
+      "devNote": [
+        "Standing any closer to the door will cause Samus to no longer be stuck in the wall when reaching the air pocket above.",
+        "Standing any further from the door will make it impossible to get a wall-jump check from the transition tiles."
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "X-Ray Climb Grapple Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithDoorStuckSetup": {}
+      },
+      "requires": [
+        "canXRayClimb",
+        "canGrappleClip"
+      ],
+      "bypassesDoorShell": true,
+      "note": [
+        "Perform an X-Ray Climb until you are just above the door into Cacatac Alley.",
+        "Walk left into the gap between pipes, behind the grapple blocks.",
+        "Walk to the left wall, turn around, crouch, grapple the block and release.",
+        "Samus will fall into the door transition.",
+        "The camera does not follow Samus but the pipes are still visually in the same position.  And the camera does not break after the transition."
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 13,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Stutter Water Shinecharge, Leave with Spark",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 2.4375
+        }
+      },
+      "requires": [
+        "canStutterWaterShineCharge",
+        "canShinechargeMovementComplex",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }},
+          {"and": [
+            "canDodgeWhileShooting",
+            {"or": [
+              "Wave",
+              "Spazer",
+              "Plasma",
+              {"ammo": {"type": "Missile","count": 1}},
+              {"ammo": {"type": "Super", "count": 1}}
+            ]}
+          ]}
+        ]},
+        {"or": [
+          {"shinespark": {"frames": 12}},
+          {"and": [
+            "canShinechargeMovementTricky",
+            {"shinespark": {"frames": 3}}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {"types": ["powerbomb"], "requires": ["never"]}
+      ],
+      "note": "Enter the room with a careful amount of momentum where Samus must spend extra time slowing down during the stutter, but must not have much run speed."
+    },
+    {
+      "link": [2, 2],
+      "name": "Mochtroid Farm",
+      "requires": [
+        "Gravity",
+        {"or": [
+          "SpaceJump",
+          "Grapple",
+          "canConsecutiveWalljump"
+        ]},
+        {"or": [
+          "canDodgeWhileShooting",
+          "ScrewAttack",
+          "Wave",
+          "Spazer",
+          "Plasma",
+          "Grapple"
+        ]},
+        {"resetRoom": {
+          "nodes": [1, 2, 4],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "Missile", "Super"]}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
+    },
+    {
+      "link": [2, 3],
+      "name": "Base",
+      "requires": [
+        "Morph",
+        "Gravity"
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Suitless",
+      "requires": [
+        "Morph",
+        "canSuitlessMaridia",
+        {"or": [
+          "canSpringBallJumpMidAir",
+          "HiJump",
+          "canSunkenTileWideWallClimb"
+        ]}
+      ],
+      "note": "Run away from the oums and reclimb after each if jumping over them is difficult."
+    },
+    {
+      "link": [2, 3],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]},
+          {"and": [
+            "h_canArtificialMorphSpringBall",
+            {"or": [
+              "Gravity",
+              "HiJump"
+            ]}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 10
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 38, "excessFrames": 3}}
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Jump with Speedbooster, HiJump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 8
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canDownGrab",
+        "canTrickyJump",
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of 8 tiles in the adjacent room."
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Jump with Speedbooster, HiJump (Lenient)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 9
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Assumes a runway of 9 tiles in the adjacent room."
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Jump with Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 38
+        }
+      },
+      "requires": [
+        "canTrickyJump",
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of 38 tiles in the adjacent room."
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Jump with Spring Ball, HiJump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "HiJump",
+        "canMomentumConservingTurnaround",
+        "canTrickySpringBallJump",
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of 1 tile in the adjacent room."
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Jump with Spring Ball and IBJ",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": false,
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "canTrickySpringBallJump",
+        "h_canJumpIntoIBJ",
+        {"or": [
+          "h_canDoubleBombJump",
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }}
+        ]},
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": [
+        "Requires a runway of 1 tile in the adjacent room.",
+        "Use a spring ball jump after breaking the water, then ibj.",
+        "Take two Mochtroid hits or use a double bomb jump."
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Cross Room Jump with Wall Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": false,
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "canPreciseWalljump",
+        "canTrickyJump",
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": [
+        "Requires a runway of 1 tile in the adjacent room.",
+        "There is just enough room to wall jump after breaking the water."
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Suitless Water Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canWaterShineCharge",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"shinespark": {"frames": 39, "excessFrames": 4}}
+      ],
+      "devNote": "This runway length is just an estimate of the worst case scenario for difficulties that can't use canStutterWaterShineCharge."
+    },
+    {
+      "link": [2, 4],
+      "name": "Suitless Stutter Water Shinecharge",
+      "entranceCondition": {
+        "comeInRunning": {
+          "speedBooster": true,
+          "minTiles": 2.4375
+        }
+      },
+      "requires": [
+        "canStutterWaterShineCharge",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }},
+        {"or": [
+          {"enemyDamage": {
+            "enemy": "Mochtroid",
+            "type": "contact",
+            "hits": 2
+          }},
+          {"and": [
+            "canDodgeWhileShooting",
+            {"or": [
+              "Wave",
+              "Spazer",
+              "Plasma",
+              {"ammo": {"type": "Missile","count": 1}},
+              {"ammo": {"type": "Super", "count": 1}}
+            ]}
+          ]}
+        ]},
+        {"shinespark": {"frames": 39, "excessFrames": 4}}
+      ],
+      "note": "Enter the room with a careful amount of momentum where Samus must spend extra time slowing down during the stutter, but must not have much run speed."
+    },
+    {
+      "link": [2, 4],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ],
+      "note": "To avoid the Mochtroids, it is possible to place bombs near them while in the Morph Tunnel to the right."
+    },
+    {
+      "link": [2, 4],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12], [12, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "link": [2, 4],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true,
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      }
+    },
+    {
+      "link": [2, 4],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true,
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      }
+    },
+    {
+      "link": [3, 1],
+      "name": "Halfie Climb Carry Shinecharge through Morph Tunnel to the Middle",
+      "requires": [
+        "Morph",
+        "Gravity",
+        "canShinechargeMovementComplex",
+        {"or": [
+          {"and": [
+            {"canShineCharge": {
+              "usedTiles": 33,
+              "openEnd": 0
+            }},
+            {"shinespark": {"frames": 20, "excessFrames": 3}}
+          ]},
+          {"and": [
+            "canMidairShinespark",
+            {"canShineCharge": {
+              "usedTiles": 33,
+              "openEnd": 0
+            }},
+            {"shinespark": {"frames": 15, "excessFrames": 3}}
+          ]}
+        ]}
+      ],
+      "note": [
+        "Charge a shinespark below the Oums, near the bottom right door, quickly move through the morph tunnel and spark up left to the middle door.",
+        "This is an alternative to wall jumping."
+      ],
+      "devNote": "Jumping into a diagonal spark saves a little energy from both the jump and hitting the slightly lower ceiling by the door."
+    },
+    {
+      "link": [3, 2],
+      "name": "Base",
+      "requires": [
+        "Morph",
+        "Gravity"
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Suitless With Jump Assist",
+      "requires": [
+        "Morph",
+        "canSuitlessMaridia",
+        {"or": [
+          "canSpringBallJumpMidAir",
+          "HiJump"
+        ]}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Halfie Climb Enter with Shinespark from the Bottom Right",
+      "notable": true,
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 100
+        }
+      },
+      "requires": [
+        "Morph",
+        "canSuitlessMaridia",
+        "canUseEnemies",
+        "canHorizontalShinespark",
+        {"shinespark": {"frames": 91, "excessFrames": 4}}
+      ],
+      "reusableRoomwideNotable": "Halfie Climb Enter with Shinespark from the Bottom Right",
+      "note": [
+        "Quickly shoot out the 3 shot blocks then horizontal spark breaking the speed blocks.",
+        "Wait for the Oums to roll on their own to a place where they can be climbed.",
+        "Do not stand on the Oums when they begin to attack."
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Halfie Climb Enter with Shinespark from the Bottom Right (Conserve Health)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 125
+        }
+      },
+      "requires": [
+        "Morph",
+        "canSuitlessMaridia",
+        "canUseEnemies",
+        "canHorizontalShinespark",
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 70, "excessFrames": 4}}
+      ],
+      "reusableRoomwideNotable": "Halfie Climb Enter with Shinespark from the Bottom Right",
+      "note": [
+        "Quickly shoot out the 3 shot blocks then horizontal spark breaking the speed blocks.",
+        "Jump forward to save some health before Shinesparking",
+        "Wait for the Oums to roll on their own to a place where they can be climbed.",
+        "Do not stand on the Oums when they begin to attack."
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Halfie Climb Enter with Shinespark from the Bottom Right (SpeedBall)",
+      "notable": true,
+      "entranceCondition": {
+        "comeInSpeedballing": {
+          "runway": {
+            "length": 0,
+            "openEnd": 0
+          }
+        }
+      },
+      "requires": [
+        "canSpeedball",
+        "canCrossRoomJumpIntoWater",
+        "canUseEnemies",
+        "canChainTemporaryBlue",
+        "canSlowShortCharge"
+      ],
+      "reusableRoomwideNotable": "Halfie Climb Enter with Shinespark from the Bottom Right",
+      "note": [
+        "Jump into the room and shoot out at least the bottom shotblock.",
+        "Jumping into the top of the door frame at low speeds lines up the shot well.",
+        "Speedball through and unmorph on top of the first set of speedblocks.",
+        "Reposition with a Chain Temporary Blue closer to the remaining speed blocks.",
+        "Jump into the rest of the Speed Blocks clearing a path for the Oums.",
+        "Wait for the Oums to roll on their own to a place where they can be climbed.",
+        "Do not stand on the Oums when they begin to attack."
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]},
+          {"and": [
+            "h_canArtificialMorphSpringBall",
+            {"or": [
+              "Gravity",
+              "HiJump"
+            ]}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "Gravity",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 33,
+          "openEnd": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 120
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Halfie Climb Carry Shinecharge through Morph Tunnel to the Top",
+      "requires": [
+        "Morph",
+        "Gravity",
+        "canShinechargeMovementComplex",
+        {"or": [
+          {"and": [
+            {"canShineCharge": {
+              "usedTiles": 33,
+              "openEnd": 0
+            }},
+            {"shinespark": {"frames": 39, "excessFrames": 4}}
+          ]},
+          {"and": [
+            "canMidairShinespark",
+            {"canShineCharge": {
+              "usedTiles": 33,
+              "openEnd": 0
+            }},
+            {"shinespark": {"frames": 33, "excessFrames": 3}}
+          ]}
+        ]}
+      ],
+      "note": [
+        "Charge a shinespark below the Oums, near the bottom right door, quickly move through the morph tunnel and spark up to the top door.",
+        "This is an alternative to wall jumping."
+      ],
+      "devNote": "Jumping into a diagonal spark saves a little energy from both the jump and hitting the slightly lower ceiling by the door."
+    },
+    {
+      "link": [3, 4],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },
+    {
+      "link": [4, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 3],
+      "name": "G-Mode Morph",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            "Gravity",
+            "h_canArtificialMorphIBJ"
+          ]},
+          {"and": [
+            "h_canArtificialMorphSpringBall",
+            {"or": [
+              "Gravity",
+              "HiJump"
+            ]}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Runway - Frozen Mochtroid",
+      "requires": [
+        "h_canNavigateUnderwater",
+        "h_canFrozenEnemyRunway",
+        {"or": [
+          "canMochtroidIceClimb",
+          {"and": [
+            "Gravity",
+            {"or": [
+              "SpaceJump",
+              "canWalljump"
+            ]}
+          ]}
+        ]},
+        {"enemyDamage": {
+          "enemy": "Mochtroid",
+          "type": "contact",
+          "hits": 2
+        }}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Use a frozen Mochtroid to extend the length of the runway.",
+        "Positioning the Mochtroid can be done by dropping down below then climbing back up with the frozen Mochtroid as a platform.",
+        "Alternatively, freeze the Mochtroid with an angle-down shot while falling below then quickly climb back up."
+      ],
+      "devNote": "There are many other ways to get into position, but they would require manipulating the Mochtroid as much as canMochtroidIceClimb expects."
+    },
+    {
+      "link": [4, 4],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "G-Mode Setup - Get Hit By Mochtroid",
+      "notable": false,
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {
+          "knockback": false
+        }
+      }
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Grapple Teleport (Bottom Position)",
+      "requires": [
+        "Gravity",
+        "canGrappleBombHang",
+        "h_canBombThings"
+      ],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 13]]
+        }
+      },
+      "note": [
+        "Get a boost from a Bomb or Power Bomb while grappled to the second Grapple block below the door.",
+        "Samus will enter a 'glitched grapple hanging' state where Samus' graphics will appear corrupted while swinging with Grapple.",
+        "Press jump to get a good bounce off the wall at the bottom of the swing, making it possible to swing up to the door.",
+        "Pressing right while inside the transition tiles will trigger the transition.",
+        "Continue holding Grapple through the transition to initiate a teleport in the next room.",
+        "The game may lag heavily: if lag persists, it can typically be alleviated by pressing or releasing right;",
+        "avoid pressing left as it will cause the Grapple to detach."
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Leave With Grapple Teleport (Top Position)",
+      "requires": [
+        "Gravity",
+        "canGrappleBombHang",
+        "h_canBombThings"
+      ],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[12, 12]]
+        }
+      },
+      "note": [
+        "Get a boost from a Bomb or Power Bomb while grappled to the top Grapple block below the door.",
+        "Samus will enter a 'glitched grapple hanging' state where Samus' graphics will appear corrupted while swinging with Grapple.",
+        "Press jump to get a good bounce off the wall at the bottom of the swing, making it possible to swing up to the door.",
+        "While swinging up, briefly tap up to retract Grapple to avoid the ceiling, then immediately press down to extend it again while approaching the door.",
+        "Continue holding Grapple through the door transition to initiate a teleport in the next room.",
+        "The game may lag heavily: if lag persists, it can typically be alleviated by pressing or releasing right;",
+        "avoid pressing left as it will cause the Grapple to detach."
+      ]
+    }
+  ]
+}

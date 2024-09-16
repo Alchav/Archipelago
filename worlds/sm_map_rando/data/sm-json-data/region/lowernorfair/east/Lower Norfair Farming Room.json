@@ -1,0 +1,558 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 141,
+  "name": "Lower Norfair Farming Room",
+  "area": "Norfair",
+  "subarea": "Lower",
+  "subsubarea": "East",
+  "playable": true,
+  "roomAddress": "0x7B37A",
+  "roomEnvironments": [{"heated": true}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "eye",
+      "nodeAddress": "0x00198ca",
+      "doorEnvironments": [{"physics": "air"}],
+      "locks": [
+        {
+          "name": "Ridley Eye Lock",
+          "lockType": "coloredDoor",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "h_canOpenEyeDoors",
+                {"heatFrames": 200}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x00198d6",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 3,
+      "name": "Left Farm Junction",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    },
+    {
+      "id": 4,
+      "name": "Right Farm Junction",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Lower Norfair Farming Left Zebbos",
+      "enemyName": "Zebbo",
+      "quantity": 2,
+      "homeNodes": [3],
+      "farmCycles": [
+        {
+          "name": "Turnaround two tiles above spawn",
+          "cycleFrames": 240,
+          "requires": [
+            "h_canNavigateHeatRooms",
+            "h_heatResistant",
+            {"heatFrames": 240}
+          ],
+          "note": "Involves tiny hops to get the drops as well"
+        },
+        {
+          "name": "Grapple turnaround two tiles above spawn",
+          "cycleFrames": 175,
+          "requires": [
+            "h_canNavigateHeatRooms",
+            "canUseGrapple",
+            {"or": [
+              "canTrickyJump",
+              "h_heatResistant"
+            ]},
+            {"heatFrames": 175}
+          ],
+          "devNote": "Gaining health with only Grapple is tricky."
+        }
+      ]
+    },
+    {
+      "id": "e2",
+      "groupName": "Lower Norfair Farming Middle Zebbos",
+      "enemyName": "Zebbo",
+      "quantity": 2,
+      "betweenNodes": [3, 4],
+      "farmCycles": [
+        {
+          "name": "Turnaround two tiles above spawn",
+          "cycleFrames": 240,
+          "requires": [
+            "h_canNavigateHeatRooms",
+            "h_heatResistant",
+            {"heatFrames": 240}
+          ],
+          "note": "Involves tiny hops to get the drops as well"
+        },
+        {
+          "name": "Grapple turnaround two tiles above spawn",
+          "cycleFrames": 175,
+          "requires": [
+            "h_canNavigateHeatRooms",
+            "canUseGrapple",
+            {"or": [
+              "canTrickyJump",
+              "h_heatResistant"
+            ]},
+            {"heatFrames": 175}
+          ],
+          "devNote": "Gaining health with only Grapple is tricky."
+        }
+      ]
+    },
+    {
+      "id": "e3",
+      "groupName": "Lower Norfair Farming Right Zebbos",
+      "enemyName": "Zebbo",
+      "quantity": 2,
+      "homeNodes": [4],
+      "farmCycles": [
+        {
+          "name": "Turnaround two tiles above spawn",
+          "cycleFrames": 240,
+          "requires": [
+            "h_canNavigateHeatRooms",
+            "h_heatResistant",
+            {"heatFrames": 240}
+          ],
+          "note": "Involves tiny hops to get the drops as well"
+        },
+        {
+          "name": "Grapple turnaround two tiles above spawn",
+          "cycleFrames": 175,
+          "requires": [
+            "h_canNavigateHeatRooms",
+            "canUseGrapple",
+            {"or": [
+              "canTrickyJump",
+              "h_heatResistant"
+            ]},
+            {"heatFrames": 175}
+          ],
+          "devNote": "Gaining health with only Grapple is tricky."
+        }
+      ]
+    },
+    {
+      "id": "e4",
+      "groupName": "Lower Norfair Farming Room Left Violas",
+      "enemyName": "Viola",
+      "quantity": 3,
+      "homeNodes": [3],
+      "dropRequires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          "canUseGrapple",
+          "canCarefulJump"
+        ]}
+      ]
+    },
+    {
+      "id": "e5",
+      "groupName": "Lower Norfair Farming Room Right Violas",
+      "enemyName": "Viola",
+      "quantity": 2,
+      "homeNodes": [4],
+      "dropRequires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          "canUseGrapple",
+          "canCarefulJump"
+        ]}
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {
+          "id": 3,
+          "devNote": "FIXME: Add heat-resistant strats later if there is a use case for them."
+        },
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 2},
+        {"id": 3},
+        {
+          "id": 4,
+          "devNote": "FIXME: Add heat-resistant strats later if there is a use case for them."
+        }
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Space Jump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 380}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Space Jump (Come in Jumping)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "minTiles": 5,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        "canPrepareForNextRoom",
+        {"heatFrames": 260}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 15
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 57, "excessFrames": 4}},
+        {"heatFrames": 230}
+      ]
+    },
+    {
+      "link": [1, 3],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 135}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Space Jump",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 320}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Space Jump (Come in Running)",
+      "entranceCondition": {
+        "comeInRunning": {
+          "minTiles": 3,
+          "speedBooster": "any"
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "SpaceJump",
+        {"heatFrames": 260}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 15
+        }
+      },
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canMidairShinespark",
+        {"shinespark": {"frames": 59, "excessFrames": 5}},
+        {"heatFrames": 190}
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": [
+        {"heatFrames": 45}
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ],
+      "note": [
+        "Be careful to avoid damage from the respawning Zebbos.",
+        "They will not spawn if you are close enough to the door."
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Tricky Jumps",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        "canTrickyJump",
+        {"heatFrames": 215}
+      ],
+      "note": "Use the wider platforms to build run speed for jumping farther, faster."
+    },
+    {
+      "link": [2, 4],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 45}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 145}
+      ]
+    },
+    {
+      "link": [3, 1],
+      "name": "Leave With Runway - Frozen Zebbo",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"heatFrames": 1000}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "The Zebbo needs to be 2 pixels higher than where it would be if Samus was standing.",
+        "One setup is to peform a tiny hop just before the right Zebbo starts moving to the left then freeze it after it starts moving left.",
+        "Lure the Zebbo to the left and freeze it again to extend the runway while maintaining a half-tile gap between it and the runway to extend the runway as much as possible.",
+        "With more Energy, it is possible to morph on one of the medium-height pillars to align the Zebbo."
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Heat-proof Zebbo Farm",
+      "requires": [
+        "h_heatProof",
+        {"refill": ["Energy", "Missile", "Super"]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Heat-proof Viola Farm",
+      "requires": [
+        "h_heatProof",
+        {"resetRoom": {
+          "nodes": [1],
+          "mustStayPut": false
+        }},
+        {"refill": ["PowerBomb"]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Very Patient Zebbo and Viola Farm",
+      "requires": [
+        "canPauseAbuse",
+        "Grapple",
+        "canBeVeryPatient",
+        {"resetRoom": {
+          "nodes": [1],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "Super", "PowerBomb"]}
+      ]
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ],
+      "note": "Be careful to avoid damage from the respawning Zebbos."
+    },
+    {
+      "link": [3, 4],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"or": [
+          "canTrickyJump",
+          {"heatFrames": 30}
+        ]},
+        {"heatFrames": 180}
+      ]
+    },
+    {
+      "link": [4, 2],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 60}
+      ]
+    },
+    {
+      "link": [4, 2],
+      "name": "Leave With Runway - Frozen Zebbo",
+      "requires": [
+        "h_canFrozenEnemyRunway",
+        {"heatFrames": 300},
+        {"or": [
+          "canInsaneJump",
+          {"heatFrames": 300}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": [
+        "The Zebbo needs to be 2 pixels higher than where it would be if Samus was standing.",
+        "One setup is to peform a tiny hop just before the left Zebbo starts moving to the right then freeze it after it starts moving right.",
+        "Get onto the runway and freeze the Zebbo again while maintaining a half-tile gap between it and the runway to extend it as much as possible.",
+        "With more Energy, it is possible to morph on one of the medium-height pillars to align the Zebbo.",
+        "With less Energy, it is possible to get the Zebbo into position by only freezing it once -",
+        "after the small hop, jump towards the door and shoot downwards to freeze it in place."
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Base",
+      "requires": [
+        "h_canNavigateHeatRooms",
+        {"heatFrames": 210}
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Heat-proof Zebbo Farm",
+      "requires": [
+        "h_heatProof",
+        {"refill": ["Energy", "Missile", "Super"]}
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Heat-proof Viola Farm",
+      "requires": [
+        "h_heatProof",
+        {"resetRoom": {
+          "nodes": [2],
+          "mustStayPut": false
+        }},
+        {"refill": ["PowerBomb"]}
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Very Patient Zebbo and Viola Farm",
+      "requires": [
+        "canPauseAbuse",
+        "Grapple",
+        "canBeVeryPatient",
+        {"resetRoom": {
+          "nodes": [1],
+          "mustStayPut": false
+        }},
+        {"refill": ["Energy", "Super", "PowerBomb"]}
+      ]
+    },
+    {
+      "link": [4, 4],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canHeatedCrystalFlash"
+      ],
+      "note": "Be careful to avoid damage from the respawning Zebbos."
+    }
+  ]
+}

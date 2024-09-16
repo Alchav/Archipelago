@@ -1,0 +1,498 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 78,
+  "name": "Warehouse Entrance",
+  "area": "Brinstar",
+  "subarea": "Kraid",
+  "playable": true,
+  "roomAddress": "0x7A6A1",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001922e",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 2,
+      "name": "Elevator",
+      "nodeType": "door",
+      "nodeSubType": "elevator",
+      "nodeAddress": "0x0019246"
+    },
+    {
+      "id": 3,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "blue",
+      "nodeAddress": "0x001923a",
+      "doorEnvironments": [{"physics": "air"}]
+    },
+    {
+      "id": 4,
+      "name": "Junction (Right Pit)",
+      "nodeType": "junction",
+      "nodeSubType": "junction"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "A",
+      "name": "Super Block Wall",
+      "obstacleType": "inanimate"
+    }
+  ],
+  "enemies": [],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 1},
+        {"id": 2},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {"id": 3},
+        {"id": 4}
+      ]
+    },
+    {
+      "from": 4,
+      "to": [
+        {"id": 2},
+        {"id": 3}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway, Base",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 14,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Leave With Runway, Super Blocks Cleared",
+      "requires": [
+        {"obstaclesCleared": ["A"]}
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 18,
+          "openEnd": 1
+        }
+      },
+      "note": "All 3 Super blocks must be broken for this longer runway to be usable."
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 13,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 130
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged (Short Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 6,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canStopOnADime",
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 170
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 30
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      }
+    },
+    {
+      "link": [1, 2],
+      "name": "Carry G-Mode Down the Elevator",
+      "notable": false,
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": false
+        }
+      }
+    },
+    {
+      "link": [2, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 1],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 45
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": "auto"
+        }
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": []
+        },
+        {
+          "types": ["missiles", "powerbomb"],
+          "requires": [
+            "never"
+          ]
+        }
+      ]
+    },
+    {
+      "link": [2, 1],
+      "name": "Come in Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 15
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 12}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": []
+        },
+        {
+          "types": ["missiles", "powerbomb"],
+          "requires": [
+            "never"
+          ]
+        }
+      ]
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged (Super Blocks Broken)",
+      "requires": [
+        {"obstaclesCleared": ["A"]},
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 0
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 130
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave Shinecharged",
+      "requires": [
+        {"or": [
+          {"canShineCharge": {
+            "usedTiles": 13,
+            "openEnd": 0
+          }},
+          {"and": [
+            {"doorUnlockedAtNode": 1},
+            {"canShineCharge": {
+              "usedTiles": 14,
+              "openEnd": 0
+            }}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 130
+        }
+      },
+      "unlocksDoors": [
+        {
+          "nodeId": 1,
+          "types": ["ammo"],
+          "requires": []
+        }
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          {"obstaclesCleared": ["A"]},
+          {"ammo": {"type": "Super", "count": 3}}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [2, 4],
+      "name": "Morph",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 1}},
+        "Morph"
+      ]
+    },
+    {
+      "link": [2, 4],
+      "name": "Kraid Entrance Wiggle",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 2}},
+        {"or": [
+          "canXRayTurnaround",
+          "canTurnaroundAimCancel"
+        ]}
+      ],
+      "note": "This strat makes it possible to squeeze through Morphless with just 2 supers."
+    },
+    {
+      "link": [2, 4],
+      "name": "Kraid Entrance Squeeze",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 2}},
+        "canTwoTileSqueeze"
+      ],
+      "note": "Use 2 supers, then squeeze through with a spin jump or down-aim jump."
+    },
+    {
+      "link": [3, 1],
+      "name": "Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[5, 3], [7, 2]]
+        }
+      },
+      "requires": []
+    },    
+    {
+      "link": [3, 3],
+      "name": "Leave With Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 1,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Leave Shinecharged",
+      "requires": [
+        {"canShineCharge": {
+          "usedTiles": 17,
+          "openEnd": 1
+        }},
+        "canShinechargeMovement"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 120
+        }
+      }
+    },
+    {
+      "link": [3, 3],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [3, 4],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [4, 2],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          {"obstaclesCleared": ["A"]},
+          {"ammo": {"type": "Super", "count": 3}}
+        ]}
+      ],
+      "clearsObstacles": ["A"]
+    },
+    {
+      "link": [4, 2],
+      "name": "Morph",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 1}},
+        "Morph"
+      ]
+    },
+    {
+      "link": [4, 2],
+      "name": "Kraid Exit Wiggle",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 2}},
+        "canXRayTurnaround"
+      ],
+      "note": "Shoot out the bottom two super blocks and crouch-wiggle through."
+    },
+    {
+      "link": [4, 2],
+      "name": "Kraid Exit Squeeze",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 2}},
+        "canTwoTileSqueeze"
+      ],
+      "note": "Use 2 supers, then squeeze through with a spin jump or down-aim jump."
+    },
+    {
+      "link": [4, 3],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          "h_canFly",
+          "HiJump"
+        ]}
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Jump Over the Pit",
+      "requires": [
+        {"obstaclesCleared": ["A"]},
+        "canCarefulJump"
+      ],
+      "note": "Break all 3 super blocks to build enough run speed to jump over the pit."
+    },
+    {
+      "link": [4, 3],
+      "name": "Kraid Entrance Walljump",
+      "requires": [
+        "canPreciseWalljump",
+        "canDisableEquipment"
+      ],
+      "note": "It's much easier without Speedbooster equipped.",
+      "devNote": "With Speedbooster and without canDisableEquipment, the player would use the canTrickyDashJump strat."
+    },
+    {
+      "link": [4, 3],
+      "name": "Kraid Entrance Speedjump",
+      "requires": [
+        "canTrickyDashJump"
+      ],
+      "note": [
+        "Run along the bottom of the pit to build speed for a speedy jump.",
+        "Only run 7.5 tiles left to right. If done optimally, no wall jump is required."
+      ]
+    },
+    {
+      "link": [4, 3],
+      "name": "Spring Ball",
+      "requires": [
+        {"or": [
+          "h_canSpringBallBombJump",
+          "canSpringBallJumpMidAir",
+          {"and": [
+            "canMockball",
+            "h_canUseSpringBall"
+          ]}
+        ]}
+      ],
+      "note": "Use Springball as a movement item to reach the Kraid Mouth ledge by jumping from the elevator runway, or by jumping from below.",
+      "devNote": "By reaching 4, the super wall has been broken enough to fit in morph."
+    },
+    {
+      "link": [4, 3],
+      "name": "Warehouse Entrance Arm Pump Jump",
+      "notable": true,
+      "requires": [
+        "h_canBackIntoCorner",
+        "canInsaneJump",
+        "canDownGrab"
+      ],
+      "note": [
+        "Back up against the wall of the single-tile ledge.",
+        "Run forward, perform a single arm pump, and jump on the last possible frame.",
+        "Aim down just before reaching the platform.",
+        "The arm pump can be performed by pressing shot, or by pressing an angle button (but not releasing it until after the jump)."
+      ]
+    }
+  ]
+}

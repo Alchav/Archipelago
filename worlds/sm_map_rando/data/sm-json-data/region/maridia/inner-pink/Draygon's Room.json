@@ -1,0 +1,556 @@
+{
+  "$schema": "../../../schema/m3-room.schema.json",
+  "id": 193,
+  "name": "Draygon's Room",
+  "area": "Maridia",
+  "subarea": "Inner",
+  "subsubarea": "Pink",
+  "playable": true,
+  "roomAddress": "0x7DA60",
+  "roomEnvironments": [{"heated": false}],
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Left Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x001a978",
+      "doorEnvironments": [{"physics": "water"}],
+      "locks": [
+        {
+          "name": "Draygon Left Grey Lock (to Space Jump)",
+          "lockType": "gameFlag",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "f_DefeatedDraygon"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Right Door",
+      "nodeType": "door",
+      "nodeSubType": "grey",
+      "nodeAddress": "0x001a96c",
+      "doorEnvironments": [{"physics": "water"}],
+      "locks": [
+        {
+          "name": "Draygon Right Grey Lock (to Precious Room)",
+          "lockType": "gameFlag",
+          "unlockStrats": [
+            {
+              "name": "Base",
+              "notable": false,
+              "requires": [
+                "f_DefeatedDraygon"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Draygon",
+      "nodeType": "event",
+      "nodeSubType": "boss",
+      "locks": [
+        {
+          "name": "Draygon Fight",
+          "lockType": "bossFight",
+          "unlockStrats": [
+            {
+              "name": "Draygon Grapple Kill",
+              "notable": true,
+              "requires": [
+                "h_canNavigateUnderwater",
+                "canUseGrapple",
+                {"draygonElectricityFrames": 240},
+                {"enemyDamage": {
+                  "enemy": "Draygon",
+                  "type": "contact",
+                  "hits": 5
+                }}
+              ],
+              "note": [
+                "Kill Draygon by grappling to the top left turret.",
+                "Number of Draygon hits seems to vary, taking a worst case guess at 5."
+              ]
+            },
+            {
+              "name": "Draygon Grapple Quick Kill",
+              "notable": true,
+              "requires": [
+                "h_canNavigateUnderwater",
+                "canPreciseGrapple",
+                "h_canBreakOneDraygonTurret",
+                {"draygonElectricityFrames": 240}
+              ],
+              "note": [
+                "Kill Draygon by grappling to a bottom turret as you get grabbed.",
+                "Avoids taking all the hits from Draygon."
+              ]
+            },
+            {
+              "name": "Draygon Shinespark Kill",
+              "notable": true,
+              "requires": [
+                "Gravity",
+                "canMidairShinespark",
+                "canShinechargeMovementComplex",
+                {"or": [
+                  "canShinechargeMovementTricky",
+                  "h_canBreakThreeDraygonTurrets"
+                ]},
+                {"canShineCharge": {
+                  "usedTiles": 22,
+                  "openEnd": 0
+                }},
+                {"enemyDamage": {
+                  "enemy": "Draygon",
+                  "type": "contact",
+                  "hits": 2
+                }},
+                {"or": [
+                  "HiJump",
+                  {"enemyDamage": {
+                    "enemy": "Draygon",
+                    "type": "contact",
+                    "hits": 1
+                  }}
+                ]},
+                {"shinespark": {"frames": 150}}
+              ],
+              "note": [
+                "Shinecharge in-room, then horizontally spark through Draygon multiple times.",
+                "It takes 3 Shinesparks if that is the only source of damage onto Draygon.",
+                "Be careful of taking damage at the end of a Shinespark when near walls and on the killing Shinespark."
+              ],
+              "devNote": "150 frames is an approximate sum of all required shinesparks."
+            },
+            {
+              "name": "Gravity Draygon",
+              "notable": false,
+              "requires": [
+                "Gravity",
+                {"enemyKill": {
+                  "enemies": [["Draygon"]],
+                  "farmableAmmo": ["Missile", "Super"]
+                }}
+              ]
+            },
+            {
+              "name": "Suitless Draygon",
+              "notable": true,
+              "requires": [
+                "canSuitlessMaridia",
+                "Morph",
+                "h_canBreakThreeDraygonTurrets",
+                {"enemyKill": {
+                  "enemies": [["Draygon"]],
+                  "farmableAmmo": ["Missile", "Super"]
+                }}
+              ],
+              "note": "Fight Draygon without gravity, but with morph.",
+              "devNote": "This will require coming into the fight with ammo to kill the turrets. Although that ammo could instead be farmed in the fight."
+            }
+          ]
+        }
+      ],
+      "yields": ["f_DefeatedDraygon"]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Draygon",
+      "enemyName": "Draygon",
+      "quantity": 1,
+      "homeNodes": [3],
+      "stopSpawn": ["f_DefeatedDraygon"]
+    }
+  ],
+  "links": [
+    {
+      "from": 1,
+      "to": [
+        {"id": 1},
+        {
+          "id": 2,
+          "devNote": "All other strats should go 1 -> 3 -> 2."
+        },
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 2,
+      "to": [
+        {"id": 2},
+        {"id": 3}
+      ]
+    },
+    {
+      "from": 3,
+      "to": [
+        {"id": 1},
+        {"id": 2}
+      ]
+    }
+  ],
+  "strats": [
+    {
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 3,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        {"or": [
+          "f_DefeatedDraygon",
+          "h_canBreakOneDraygonTurret"
+        ]},
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"not": "f_DefeatedDraygon"},
+        "canRiskPermanentLossOfAccess",
+        {"enemyDamage": {
+          "enemy": "Draygon",
+          "type": "contact",
+          "hits": 1
+        }}
+      ],
+      "gModeRegainMobility": {}
+    },
+    {
+      "link": [1, 2],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 50
+        }
+      },
+      "requires": [
+        "Gravity",
+        {"shinespark": {"frames": 25}}
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Suitless shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {
+          "framesRequired": 90
+        }
+      },
+      "requires": [
+        "canSuitlessMaridia",
+        {"shinespark": {"frames": 25}}
+      ],
+      "note": "Takes more time to setup than with Gravity, but you can spark from a bit further out because of the water physics."
+    },
+    {
+      "link": [1, 2],
+      "name": "Cross Room Jump (Lenient)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 2.4375
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater"
+      ],
+      "note": "Requires a runway of at least 3 tiles (with no open end) in the adjacent room."
+    },
+    {
+      "link": [1, 2],
+      "name": "Cross Room Jump (Speed Booster Off)",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": false,
+          "minTiles": 1.4375
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Requires a runway of at least 2 tiles (with no open end) in the adjacent room.",
+        "Jump as late as possible to avoid the ledge hanging over the door."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Cross Room Jump",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 2
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Requires a runway of at least 2 tiles in the adjacent room.",
+        "Jump as late as possible to avoid the ledge hanging over the door."
+      ],
+      "devNote": "This can be done with a slightly shorter runway (closed end), with a down grab, but that setup doesn't exist."
+    },
+    {
+      "link": [1, 2],
+      "name": "Cross Room Jump with Speedbooster",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": true,
+          "minTiles": 0.4375
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canTrickyDashJump"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "Cross Room Jump with Air Ball",
+      "entranceCondition": {
+        "comeInJumping": {
+          "speedBooster": "any",
+          "minTiles": 1
+        }
+      },
+      "requires": [
+        "canCrossRoomJumpIntoWater",
+        "canLateralMidAirMorph",
+        "canTrickyJump"
+      ],
+      "note": [
+        "Requires an air ball and a runway of only 1 tile in the adjacent room.",
+        "Aim to morph on contact with the ceiling to slide accross it for extra distance."
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode Morph (Draygon Defeated)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "f_DefeatedDraygon",
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ]
+    },
+    {
+      "link": [1, 2],
+      "name": "G-Mode Morph (Draygon Alive)",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true,
+          "mobility": "mobile"
+        }
+      },
+      "requires": [
+        "Gravity",
+        "h_canArtificialMorphIBJ"
+      ],
+      "note": "There is enough time to IBJ to the top door before Draygon appears."
+    },
+    {
+      "link": [1, 3],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [2, 2],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 6,
+          "openEnd": 1
+        }
+      }
+    },
+    {
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "f_DefeatedDraygon",
+        "h_canCrystalFlash"
+      ]
+    },
+    {
+      "link": [2, 3],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [3, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "link": [3, 1],
+      "name": "Leave Shinecharged",
+      "requires": [
+        "Gravity",
+        "canShinechargeMovement",
+        {"canShineCharge": {
+          "usedTiles": 22,
+          "openEnd": 0
+        }}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {
+          "framesRemaining": 80
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Base",
+      "requires": [
+        "Gravity",
+        "h_canFly"
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Gravity Jump",
+      "requires": [
+        "Gravity",
+        "canGravityJump"
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Spring Ball Jump",
+      "requires": [
+        "Gravity",
+        "HiJump",
+        "canSpringBallJumpMidAir"
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Speedjump",
+      "requires": [
+        "Gravity",
+        "HiJump",
+        "SpeedBooster",
+        {"or": [
+          "canWalljump",
+          "canTrickyDashJump"
+        ]}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Draygon HiJumpless Speedjump",
+      "requires": [
+        "Gravity",
+        "canTrickyDashJump",
+        "canPreciseWalljump"
+      ],
+      "note": [
+        "There is a very precise speed where the HiJumpless speedjump is doable.",
+        "Starting against the left wall, jump just to the left of the rightmost pipe sticking out of the ground."
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Draygon Springwall",
+      "requires": [
+        "Gravity",
+        "canSpringwall",
+        "canTrickySpringBallJump",
+        {"resetRoom": {
+          "nodes": [1]
+        }}
+      ],
+      "devNote": "The turret cannot be broken."
+    },
+    {
+      "link": [3, 2],
+      "name": "In-Room Shinespark",
+      "requires": [
+        "Gravity",
+        {"canShineCharge": {
+          "usedTiles": 22,
+          "openEnd": 1
+        }},
+        {"or": [
+          {"shinespark": {"frames": 26, "excessFrames": 5}},
+          {"and": [
+            "canMidairShinespark",
+            {"shinespark": {"frames": 20, "excessFrames": 4}}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "link": [3, 2],
+      "name": "Draygon Turret Grapple Jump",
+      "notable": true,
+      "requires": [
+        "canSuitlessMaridia",
+        "canGrappleJump",
+        {"draygonElectricityFrames": 60},
+        "h_canBreakOneDraygonTurret"
+      ],
+      "note": "Performing a grapple jump off of a Draygon turret. Usually done by bouncing off the wall for momentum."
+    },
+    {
+      "link": [3, 2],
+      "name": "Draygon Shinespark out the Right with a Gravity Jump",
+      "notable": true,
+      "requires": [
+        "canGravityJump",
+        "canShinechargeMovementComplex",
+        "canMidairShinespark",
+        {"canShineCharge": {
+          "usedTiles": 20,
+          "openEnd": 1
+        }},
+        {"shinespark": {"frames": 14}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["ammo"], "requires": []}
+      ],
+      "note": "Charge a shinespark in the bottom of Draygon's room, then Gravity jump up in order to shinespark out of the right door."
+    }
+  ]
+}
