@@ -804,13 +804,12 @@ class CollectionState():
             locations = self.multiworld.get_filled_locations()
         reachable_events = True
         # since the loop has a good chance to run more than once, only filter the events once
-        locations = {location for location in locations if location.advancement and location not in self.events and
-                     (not location.address)}
+        locations = {location for location in locations if location.advancement and location not in self.advancements}
         while reachable_events:
             reachable_events = {location for location in locations if location.can_reach(self)}
             locations -= reachable_events
             for event in reachable_events:
-                self.events.add(event)
+                self.advancements.add(event)
                 assert isinstance(event.item, Item), "tried to collect Event with no Item"
                 self.collect(event.item, True, event)
 
@@ -914,7 +913,7 @@ class CollectionState():
         changed = self.multiworld.worlds[item.player].collect(self, item)
 
         self.stale[item.player] = True
-        if item.game == "Archipelago":
+        if item.game == "AlchapelaBot":
             self.stale[item.code] = True
         # if item.player % 2:
         #     self.stale[item.player+1] = True

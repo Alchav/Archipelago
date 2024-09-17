@@ -255,15 +255,15 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
                 if all_state_base.has("Triforce", player):
                     all_state_base.remove(multiworld.worlds[player].create_item("Triforce"))
 
-            for (player, key_drop_shuffle) in multiworld.key_drop_shuffle.items():
-                if not key_drop_shuffle and player not in multiworld.groups:
-                    for key_loc in key_drop_data:
-                        key_data = key_drop_data[key_loc]
-                        all_state_base.remove(item_factory(key_data[3], multiworld.worlds[player]))
-                        loc = multiworld.get_location(key_loc, player)
-
-                        if loc in all_state_base.advancements:
-                            all_state_base.advancements.remove(loc)
+            # for (player, key_drop_shuffle) in multiworld.key_drop_shuffle.items():
+            #     if not key_drop_shuffle and player not in multiworld.groups:
+            #         for key_loc in key_drop_data:
+            #             key_data = key_drop_data[key_loc]
+            #             all_state_base.remove(item_factory(key_data[3], multiworld.worlds[player]))
+            #             loc = multiworld.get_location(key_loc, player)
+            #
+            #             if loc in all_state_base.advancements:
+            #                 all_state_base.advancements.remove(loc)
             fill_restrictive(multiworld, all_state_base, locations, in_dungeon_items, lock=True, allow_excluded=True,
                              name="LttP Dungeon Items")
 
