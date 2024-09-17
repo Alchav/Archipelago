@@ -261,13 +261,15 @@ class PaperMarioWorld(World):
             self.options.total_power_stars.value = 0
         else:
             if self.options.total_power_stars < self.options.star_way_power_stars:
-                raise ValueError(
-                    f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]})'s total_power_stars must "
-                    f"be set to more than star_way_power_stars.")
+                self.options.total_power_stars.value = self.options.star_way_power_stars.value
+                # raise ValueError(
+                #     f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]})'s total_power_stars must "
+                #     f"be set to more than star_way_power_stars.")
             if self.options.total_power_stars < self.options.star_beam_power_stars:
-                raise ValueError(
-                    f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]})'s total_power_stars must "
-                    f"be set to more than star_way_power_stars.")
+                self.options.total_power_stars.value = self.options.star_beam_power_stars.value
+                # raise ValueError(
+                #     f"Paper Mario: {self.player} ({self.multiworld.player_name[self.player]})'s total_power_stars must "
+                #     f"be set to more than star_way_power_stars.")
 
         # determine what blocks are what, shuffling if needed and setting them up to be used as locations
         if not self.placed_blocks:
@@ -413,7 +415,7 @@ class PaperMarioWorld(World):
         # remove internal event locations that are not going to exist in this seed
         all_state = self.get_state_with_complete_itempool()
         all_locations = self.get_locations()
-        all_state.sweep_for_events(locations=all_locations)
+        all_state.sweep_for_advancements(locations=all_locations)
         reachable = self.multiworld.get_reachable_locations(all_state, self.player)
         unreachable = [loc for loc in all_locations if
                        loc.internal and loc.event and loc.locked and loc not in reachable]
@@ -567,7 +569,7 @@ class PaperMarioWorld(World):
             state = base_state.copy()
             for item in self.get_pre_fill_items():
                 self.collect(state, item)
-            state.sweep_for_events(locations=self.get_locations())
+            state.sweep_for_advancements(locations=self.get_locations())
             return state
 
         # Prefill required replenishable items, local key items depending on settings
@@ -578,7 +580,7 @@ class PaperMarioWorld(World):
         state = CollectionState(self.multiworld)
         for item in self.itempool:
             self.collect(state, item)
-        state.sweep_for_events(locations=self.get_locations())
+        state.sweep_for_advancements(locations=self.get_locations())
 
         # place progression items that are also consumables in locations that are replenishable
         replenish_locations = [name for name, data in location_table.items() if data[0] in replenishing_itemlocations]
@@ -685,7 +687,7 @@ class PaperMarioWorld(World):
         if item.name == "3x Star Pieces":
             state.prog_items[self.player]["Star Piece"] += 3
         # Quizmo star pieces are events that can exist in multiple places, format "StarPiece_MAC_1"
-        elif item.name.startswith("StarPiece_") and state.prog_items[self.player][item.name] == 1:
+        elif item.name.startswith("StarPiece_") and state.prog_items[self.player][item.name] == 0:
             state.prog_items[self.player]["Star Piece"] += 1
         return super().collect(state, item)
 
