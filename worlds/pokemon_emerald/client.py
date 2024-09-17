@@ -51,6 +51,13 @@ TRACKER_EVENT_FLAGS = [
     "FLAG_OMIT_DIVE_FROM_STEVEN_LETTER",                # Steven gives Dive HM (clears seafloor cavern grunt)
     "FLAG_IS_CHAMPION",
     "FLAG_PURCHASED_HARBOR_MAIL",
+    "FLAG_REGI_DOORS_OPENED",
+    "FLAG_RETURNED_DEVON_GOODS",
+    "FLAG_DOCK_REJECTED_DEVON_GOODS",
+    "FLAG_DEFEATED_EVIL_TEAM_MT_CHIMNEY",
+    "FLAG_WINGULL_SENT_ON_ERRAND",
+    "FLAG_WINGULL_DELIVERED_MAIL",
+    "FLAG_MET_PRETTY_PETAL_SHOP_OWNER",
 ]
 EVENT_FLAG_MAP = {data.constants[flag_name]: flag_name for flag_name in TRACKER_EVENT_FLAGS}
 
@@ -84,10 +91,15 @@ KEY_LOCATION_FLAGS = [
     "NPC_GIFT_RECEIVED_OLD_ROD",
     "NPC_GIFT_RECEIVED_GOOD_ROD",
     "NPC_GIFT_RECEIVED_SUPER_ROD",
+    "NPC_GIFT_RECEIVED_EON_TICKET",
+    "NPC_GIFT_RECEIVED_AURORA_TICKET",
+    "NPC_GIFT_RECEIVED_MYSTIC_TICKET",
+    "NPC_GIFT_RECEIVED_OLD_SEA_MAP",
 ]
 KEY_LOCATION_FLAG_MAP = {data.locations[location_name].flag: location_name for location_name in KEY_LOCATION_FLAGS}
 
-LEGENDARY_NAMES = {
+# .lower() keys for backward compatibility between 0.4.5 and 0.4.6
+LEGENDARY_NAMES = {k.lower(): v for k, v in {
     "Groudon": "GROUDON",
     "Kyogre": "KYOGRE",
     "Rayquaza": "RAYQUAZA",
@@ -100,7 +112,7 @@ LEGENDARY_NAMES = {
     "Deoxys": "DEOXYS",
     "Ho-Oh": "HO_OH",
     "Lugia": "LUGIA",
-}
+}.items()}
 
 DEFEATED_LEGENDARY_FLAG_MAP = {data.constants[f"FLAG_DEFEATED_{name}"]: name for name in LEGENDARY_NAMES.values()}
 CAUGHT_LEGENDARY_FLAG_MAP = {data.constants[f"FLAG_CAUGHT_{name}"]: name for name in LEGENDARY_NAMES.values()}
@@ -110,6 +122,7 @@ class PokemonEmeraldClient(BizHawkClient):
     game = "Pokemon Emerald"
     system = "GBA"
     patch_suffix = ".apemerald"
+
     local_checked_locations: Set[int]
     local_set_events: Dict[str, bool]
     local_found_key_items: Dict[str, bool]
@@ -125,8 +138,9 @@ class PokemonEmeraldClient(BizHawkClient):
     previous_death_link: float
     ignore_next_death_link: bool
 
-    def __init__(self) -> None:
-        super().__init__()
+    current_map: Optional[int]
+
+    def initialize_client(self):
         self.local_checked_locations = set()
         self.local_set_events = {}
         self.local_found_key_items = {}
@@ -138,6 +152,7 @@ class PokemonEmeraldClient(BizHawkClient):
         self.death_counter = None
         self.previous_death_link = 0
         self.ignore_next_death_link = False
+        self.current_map = None
 
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
         from CommonClient import logger
@@ -167,9 +182,7 @@ class PokemonEmeraldClient(BizHawkClient):
         ctx.want_slot_data = True
         ctx.watcher_timeout = 0.125
 
-        self.death_counter = None
-        self.previous_death_link = 0
-        self.ignore_next_death_link = False
+        self.initialize_client()
 
         return True
 
@@ -198,6 +211,13 @@ class PokemonEmeraldClient(BizHawkClient):
                 "items_handling": ctx.items_handling
             }]))
 
+            # Need to make sure items handling updates and we get the correct list of received items
+            # before continuing. Otherwise we might give some duplicate items and skip others.
+            # Should patch remote_items option value into the ROM in the future to guarantee we get the
+            # right item list before entering this part of the code
+            await asyncio.sleep(0.75)
+            return
+
         try:
             guards: Dict[str, Tuple[int, bytes, str]] = {}
 
@@ -224,6 +244,7 @@ class PokemonEmeraldClient(BizHawkClient):
             sb1_address = int.from_bytes(guards["SAVE BLOCK 1"][1], "little")
             sb2_address = int.from_bytes(guards["SAVE BLOCK 2"][1], "little")
 
+            await self.handle_tracker_info(ctx, guards)
             await self.handle_death_link(ctx, guards)
             await self.handle_received_items(ctx, guards)
             await self.handle_wonder_trade(ctx, guards)
@@ -311,7 +332,7 @@ class PokemonEmeraldClient(BizHawkClient):
 
                 num_caught = 0
                 for legendary, is_caught in caught_legendaries.items():
-                    if is_caught and legendary in [LEGENDARY_NAMES[name] for name in ctx.slot_data["allowed_legendary_hunt_encounters"]]:
+                    if is_caught and legendary in [LEGENDARY_NAMES[name.lower()] for name in ctx.slot_data["allowed_legendary_hunt_encounters"]]:
                         num_caught += 1
 
                 if num_caught >= ctx.slot_data["legendary_hunt_count"]:
@@ -384,6 +405,30 @@ class PokemonEmeraldClient(BizHawkClient):
             # Exit handler and return to main loop to reconnect
             pass
 
+    async def handle_tracker_info(self, ctx: "BizHawkClientContext", guards: Dict[str, Tuple[int, bytes, str]]) -> None:
+        # Current map
+        sb1_address = int.from_bytes(guards["SAVE BLOCK 1"][1], "little")
+
+        read_result = await bizhawk.guarded_read(
+            ctx.bizhawk_ctx,
+            [(sb1_address + 0x4, 2, "System Bus")],
+            [guards["SAVE BLOCK 1"]]
+        )
+        if read_result is None:  # Save block moved
+            return
+
+        current_map = int.from_bytes(read_result[0], "big")
+        if current_map != self.current_map:
+            self.current_map = current_map
+            await ctx.send_msgs([{
+                "cmd": "Bounce",
+                "slots": [ctx.slot],
+                "data": {
+                    "type": "MapUpdate",
+                    "mapId": current_map,
+                },
+            }])
+
     async def handle_death_link(self, ctx: "BizHawkClientContext", guards: Dict[str, Tuple[int, bytes, str]]) -> None:
         """
         Checks whether the player has died while connected and sends a death link if so. Queues a death link in the game
@@ -433,7 +478,7 @@ class PokemonEmeraldClient(BizHawkClient):
                     self.death_counter = times_whited_out
                 elif times_whited_out > self.death_counter:
                     await ctx.send_death(f"{ctx.player_names[ctx.slot]} is out of usable POKéMON! "
-                                        f"{ctx.player_names[ctx.slot]} whited out!")
+                                         f"{ctx.player_names[ctx.slot]} whited out!")
                     self.ignore_next_death_link = True
                     self.death_counter = times_whited_out
 
