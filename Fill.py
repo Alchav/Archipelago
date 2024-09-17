@@ -27,11 +27,13 @@ def swappable(multiworld, loc):
 
 
 def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_unreachables=True):
+    print("Running get_item_spheres")
     state = CollectionState(multiworld)
     locations = set(multiworld.get_filled_locations())
     beaten_games = set()
     i = 1
     while locations:
+        print(f"Sphere {i}")
         reachable_locations = {location for location in locations if location.can_reach(state)}
         old_reachable_locations = None
         while old_reachable_locations != reachable_locations:
@@ -47,7 +49,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         for player in new_beaten_games:
             if beaten_game_spheres:
                 beaten_game_spheres[player] = i
-            logging.info(f"{i} - {new_beaten_games}")
+            # logging.info(f"{i} - {new_beaten_games}")
         i += 1
         if not reachable_locations:
             if locations and return_unreachables:
@@ -752,10 +754,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             break
         player_names_copy = player_names.copy()
         for player, player_name in player_names:
-            sphere_to_place = (highest_sphere - game_spheres[player])
+            sphere_to_place = (highest_sphere - game_spheres[player]) + 1
             if sphere_to_place > 0:
                 starting_spheres[player] = sphere_to_place
                 print(f"{player_name} sphere to place: {sphere_to_place}")
+                print(f"Game's spheres: {game_spheres[player]}")
+                print(f"New highest sphere: {game_spheres[player] + sphere_to_place}")
+                highest_sphere += 1
         player_names = [player for player in player_names if player[0] not in starting_spheres]
 
 
@@ -773,21 +778,30 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         for entrance in menu.exits:
             add_rule(entrance, rule)
 
-
-    for i, sphere in enumerate(get_item_spheres(multiworld)):
-        filler_sphere = sorted([location for location in sphere if location.address and not location.item.advancement])
+    # add_order = [player for player in multiworld.player_ids if multiworld.player_name[player] not in multiworld.worlds[1].options.start_games]
+    # add_order.sort(key=lambda p: starting_spheres[p])
+    for player, starting_sphere in starting_spheres.items():
+        spheres = [s for s in get_item_spheres(multiworld, return_unreachables=False)]
+        print(f"Highest sphere: {len(spheres)}")
+        print(f"Adding {multiworld.player_name[player]} with {game_spheres[player]} spheres")
+        print(f"Placing item in Sphere {starting_sphere}, should bring to Sphere {starting_sphere + game_spheres[player]}")
+        # for i, sphere in enumerate(spheres, start=1):
+        sphere = spheres[starting_sphere]
+        filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and not location.item.advancement])
         if not filler_sphere:
-            filler_sphere = sorted([location for location in sphere if location.address and location.item.classification != ItemClassification.progression])
+            filler_sphere = sorted([location for location in sphere if location.address and location.item.classification != ItemClassification.progression and swappable(multiworld, location)])
             if not filler_sphere:
-                filler_sphere = sorted([location for location in sphere if location.address])
-        for player, sphere_check in starting_spheres.items():
-            if sphere_check == i:
-                location = multiworld.random.choice(filler_sphere)
-                multiworld.push_precollected(location.item)
-                location.item.location = None
-                print(f"Placing Unlock for {multiworld.player_name[player]} in {location.name} displacing {location.item.name}")
-                location.item = multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}")
-                location.item.location = location
+                filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location)])
+        # for player, sphere_check in starting_spheres.items():
+        location = multiworld.random.choice(filler_sphere)
+        multiworld.push_precollected(location.item)
+        location.item.location = None
+        print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {player} ~ {location.name} displacing {location.item.name}")
+        multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
+        # location.item =
+        # location.item.location = location
+            # print(f"didn't reach sphere {starting_spheres[player]} for {multiworld.player_name[player]}")
+            # breakpoint()
 
 
 
@@ -857,7 +871,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     if not multiworld.can_beat_game():
         state = multiworld.state.copy()
-        state.sweep_for_events()
+        state.sweep_for_advancements()
         beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
 
         raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
@@ -888,27 +902,27 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # multiworld.post_fill = True
 
-    sc2_worlds = multiworld.get_game_worlds("Starcraft 2")
-    if not sc2_worlds:
-        return
-    world = sc2_worlds[0]
-    sc2_items = world.filtered_items
-    sc2_items += [world.create_item("Additional Starting Supply") for _ in range(20)]
-    sc2_items += [world.create_item("Additional Starting Minerals") for _ in range(20)]
-    sc2_items += [world.create_item("Additional Starting Vespene") for _ in range(20)]
-
-    locs = list(multiworld.get_locations())
-    multiworld.random.shuffle(locs)
-    for location in locs:
-        if not sc2_items:
-            break
-        if location.address:
-            if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
-                    or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
-                    or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
-                                              "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up",
-                                              "Deku Seeds (30)", "Mystery")):
-                location.item = sc2_items.pop()
+    # sc2_worlds = multiworld.get_game_worlds("Starcraft 2")
+    # if not sc2_worlds:
+    #     return
+    # world = sc2_worlds[0]
+    # sc2_items = world.filtered_items
+    # sc2_items += [world.create_item("Additional Starting Supply") for _ in range(20)]
+    # sc2_items += [world.create_item("Additional Starting Minerals") for _ in range(20)]
+    # sc2_items += [world.create_item("Additional Starting Vespene") for _ in range(20)]
+    #
+    # locs = list(multiworld.get_locations())
+    # multiworld.random.shuffle(locs)
+    # for location in locs:
+    #     if not sc2_items:
+    #         break
+    #     if location.address:
+    #         if location.item.classification == ItemClassification.filler and (location.item.game == "Super Mario World"
+    #                 or (location.item.game == "Super Mario Land 2" and "Coin" in location.item.name)
+    #                 or location.item.name in ("Rupee (1)", "Arrows (5)", "Bombs (5)", "Recovery Heart", "Mystery"
+    #                                           "Cure Potion", "Heal Potion", "Refresher", "1-Up", "2-Up", "3-Up",
+    #                                           "Deku Seeds (30)", "Mystery")):
+    #             location.item = sc2_items.pop()
 
 
 def flood_items(multiworld: MultiWorld) -> None:

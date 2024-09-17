@@ -32,4 +32,8 @@ class AlchapelaBotWorld(World):
             self.multiworld.push_precollected(self.create_item(f"Unlock {starting_game}"))
 
     def create_item(self, name):
-        return Item(name, ItemClassification.progression, self.item_name_to_id[name], self.player)
+        return UnlockItem(name, ItemClassification.progression, self.item_name_to_id[name], self.player)
+
+
+class UnlockItem(Item):
+    game = "AlchapelaBot"

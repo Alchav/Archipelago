@@ -1800,7 +1800,7 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
             #     dependent = (team, slot - 1)
             #     if dependent not in ctx.client_game_state or ctx.client_game_state[dependent] != ClientStatus.CLIENT_GOAL:
             #         errors.add("InvalidGame")
-            bot_items = get_received_items(ctx, client.team, 1, True)
+            bot_items = [item.item for item in get_received_items(ctx, team, 1, True) + get_start_inventory(ctx, 1, True)]
             if slot not in bot_items:
                 errors.add("InvalidGame")
 

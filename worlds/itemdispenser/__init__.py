@@ -21,6 +21,7 @@ class ItemDispenser(World):
     location_name_to_id = {"Item 1": 1}
 
     def post_fill(self):
+        all_state = self.multiworld.get_all_state(use_cache=False)
         i = 0
         menu = Region("Menu", self.player, self.multiworld)
         self.multiworld.regions.append(menu)
@@ -32,7 +33,10 @@ class ItemDispenser(World):
                     continue
                 if not swappable(self.multiworld, location):
                     continue
-                if location.progress_type == LocationProgressType.DEFAULT and self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
+                if not location.can_reach(all_state):
+                    #always tokenize unreachables
+                    pass
+                elif location.progress_type == LocationProgressType.DEFAULT and self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
                     continue
                 i += 1
                 loc_name = f"Item {i}"
