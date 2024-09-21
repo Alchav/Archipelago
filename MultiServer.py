@@ -647,19 +647,30 @@ class Context:
 
     # rest
 
+    # def get_hint_cost(self, slot):
+    #     return 1
+    #     if self.hint_cost: # hint_data[slot][location_id]
+    #         return max(1, int(self.hint_cost * 0.01 * sum([len([location for location in self.locations[player] if "Unreachable" not in self.er_hint_data[player][location]]) for player in self.slot_info if player in self.locations])))
+    #     return 0
+    #
+    # def recheck_hints(self, team: typing.Optional[int] = None, slot: typing.Optional[int] = None):
+    #     for hint_team, hint_slot in self.hints:
+    #         self.hints[hint_team, hint_slot] = {
+    #             hint.re_check(self, hint_team) for hint in self.hints[hint_team, hint_slot]
+    #         }
+    #         self.hints[hint_team, hint_slot] = {hint for hint in self.hints[hint_team, hint_slot] if not hint.found}
     def get_hint_cost(self, slot):
-        return 1
-        if self.hint_cost: # hint_data[slot][location_id]
-            return max(1, int(self.hint_cost * 0.01 * sum([len([location for location in self.locations[player] if "Unreachable" not in self.er_hint_data[player][location]]) for player in self.slot_info if player in self.locations])))
+        if self.hint_cost:
+            return max(1, int(self.hint_cost * 0.01 * len(self.locations[slot])))
         return 0
 
     def recheck_hints(self, team: typing.Optional[int] = None, slot: typing.Optional[int] = None):
         for hint_team, hint_slot in self.hints:
-            self.hints[hint_team, hint_slot] = {
-                hint.re_check(self, hint_team) for hint in self.hints[hint_team, hint_slot]
-            }
-            self.hints[hint_team, hint_slot] = {hint for hint in self.hints[hint_team, hint_slot] if not hint.found}
-
+            if (team is None or team == hint_team) and (slot is None or slot == hint_slot):
+                self.hints[hint_team, hint_slot] = {
+                    hint.re_check(self, hint_team) for hint in
+                    self.hints[hint_team, hint_slot]
+                }
     def get_rechecked_hints(self, team: int, slot: int):
         self.recheck_hints(team, slot)
         return self.hints[team, slot]
@@ -1735,18 +1746,26 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
     return ctx.locations.get_missing(ctx.location_checks, team, slot)
 
 
+# def get_client_points(ctx: Context, client: Client) -> int:
+#     return 5 - ctx.hints_used[client.team, client.slot]
+#     checks = len(sum([list(ctx.location_checks[client.team, slot]) for slot in ctx.slot_info], []))
+#     return (ctx.location_check_points * checks -
+#             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
+#
+#
+# def get_slot_points(ctx: Context, team: int, slot: int) -> int:
+#     return 5 - ctx.hints_used[team, slot]
+#     return (ctx.location_check_points * len([location for location in ctx.location_checks[team, slot] if "Unreachable" not in ctx.er_hint_data[slot][location]]) -
+#             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
+
 def get_client_points(ctx: Context, client: Client) -> int:
-    return 5 - ctx.hints_used[client.team, client.slot]
-    checks = len(sum([list(ctx.location_checks[client.team, slot]) for slot in ctx.slot_info], []))
-    return (ctx.location_check_points * checks -
+    return (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
-    return 5 - ctx.hints_used[team, slot]
-    return (ctx.location_check_points * len([location for location in ctx.location_checks[team, slot] if "Unreachable" not in ctx.er_hint_data[slot][location]]) -
+    return (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
-
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):
     try:
@@ -1774,8 +1793,6 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
             errors.add('InvalidPassword')
         if args['name'][:20] in ctx.connect_names:
             args['name'] = args['name'][:20]
-        if args['name'] == "QVAwNDVfMTlfICAgICAxNzIxNzIA":
-            args['name'] = "QVAwNDZfMTlfICAgICAxNzIxNzIA"
         if args['name'] not in ctx.connect_names:
             errors.add('InvalidSlot')
         else:
