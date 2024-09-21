@@ -445,7 +445,7 @@ class Factorio(World):
         valid_pool = sorted(science_pack_pools[self.multiworld.max_science_pack[self.player].get_max_pack()] & valid_ingredients)
         self.multiworld.random.shuffle(valid_pool)
         self.custom_recipes = {"rocket-part": Recipe("rocket-part", original_rocket_part.category,
-                                                     {valid_pool[x]: 10 for x in range(3 + ingredients_offset)},
+                                                     {valid_pool[x]: 1 for x in range(3 + ingredients_offset)},
                                                      original_rocket_part.products,
                                                      original_rocket_part.energy)}
 
