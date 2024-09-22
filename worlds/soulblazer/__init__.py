@@ -236,11 +236,11 @@ class SoulBlazerWorld(World):
         slot_data = dict()
         slot_data["gem_data"] = {
             f"{item.code}:{item.location.address}:{item.location.player}": item.operand_for_id
-            for item in self.gem_items
+            for item in self.gem_items if item.location
         }
         slot_data["exp_data"] = {
             f"{item.code}:{item.location.address}:{item.location.player}": item.operand_for_id
-            for item in self.exp_items
+            for item in self.exp_items if item.location
         }
         for option_name in (
             attr.name
