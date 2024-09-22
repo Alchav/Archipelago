@@ -721,6 +721,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     highest_sphere = 0
     for player in playable_games:
         highest_sphere = max(highest_sphere, game_spheres[player[0]])
+    starting_highest_sphere = highest_sphere
     print(f"Highest initial sphere: {highest_sphere}")
     while True:
         print("Sort attempt begin")
@@ -743,6 +744,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         else:
             player_names = new_player_names + end_list_player_names
     print(f"Highest final sphere: {highest_sphere}")
+
+    highest_sphere = starting_highest_sphere
 
     starting_spheres = {}
     player_names_copy = None
