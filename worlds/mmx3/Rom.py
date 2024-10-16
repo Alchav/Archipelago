@@ -212,7 +212,7 @@ class MMX3ProcedurePatch(APProcedurePatch, APTokenMixin):
     def write_byte(self, offset, value):
         self.write_token(APTokenTypes.WRITE, offset, value.to_bytes(1, "little"))
 
-    def write_bytes(self, offset, value: Iterable[int]):
+    def write_bytes(self, offset, value):
         self.write_token(APTokenTypes.WRITE, offset, bytes(value))
 
 

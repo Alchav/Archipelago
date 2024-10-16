@@ -9,8 +9,7 @@ class IDClientContext(CommonContext):
 
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
-        self.cards = None
-        self.send_locations = False
+        self.tokens = 0
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:
@@ -36,11 +35,9 @@ async def id_loop(ctx):
             except asyncio.TimeoutError:
                 pass
             ctx.watcher_event.clear()
-
-            if len(ctx.items_received) > len(ctx.checked_locations):
+            if len(ctx.items_received) > ctx.tokens:
                 await ctx.send_msgs([{"cmd": "LocationChecks",
-                                      "locations": list(range(len(ctx.checked_locations) + 1,
-                                                              len(ctx.items_received) + 1))}])
+                                      "locations": list(range(1, len(ctx.items_received) + 1))}])
     except Exception as e:
         breakpoint()
 

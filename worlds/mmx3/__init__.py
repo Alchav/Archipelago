@@ -371,7 +371,7 @@ class MMX3World(World):
             spoiler_handle.writelines(f"{boss + ':':<30s}{weaknesses}\n")
 
 
-    def extend_hint_information(self, hint_data: typing.Dict[int, typing.Dict[int, str]]):
+    def extend_hint_information(self, hint_data):
         boss_to_id = {
             0x202: "Blast Hornet",
             0x203: "Shurikein",

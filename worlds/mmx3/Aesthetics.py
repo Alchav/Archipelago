@@ -193,7 +193,7 @@ player_palettes = {
     ],
 }
 
-def get_palette_bytes(palette: Dict[str, List]) -> bytearray:
+def get_palette_bytes(palette) -> bytearray:
     output_data = bytearray()
     for hexcol in palette:
         if hexcol.startswith("$"):
