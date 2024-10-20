@@ -1,6 +1,8 @@
+from dataclasses import dataclass
+
 from typing import Dict
 
-from Options import Choice, Option, Toggle, StartInventoryPool, DeathLink
+from Options import Choice, Option, Toggle, StartInventoryPool, DeathLink, PerGameCommonOptions
 
 
 #class HardMode(Toggle):
@@ -29,8 +31,16 @@ class LogicDifficulty(Choice):
     """Set the logic difficulty used when generating."""
     display_name = "Logic Difficulty"
     option_easy = 0
+    #option_normal = 1
+    #option_obscure_glitchless = 2
+    #option_glitched = 3
     option_no_logic = 4
     default = 0
+
+
+class Swordless(Toggle):
+    """Start the game without a sword, and shuffle an extra Progressive Sword into the pool."""
+    display_name = "Swordless"
 
 
 class ShuffleSwamphouseReward(Toggle):
@@ -61,12 +71,13 @@ class Fairysanity(Toggle):
     display_name = "Fairysanity"
 
 
-mmr_options: Dict[str, type(Option)] = {
-    "start_inventory_from_pool": StartInventoryPool,
-    "logic_difficulty": LogicDifficulty,
-    "shuffle_swamphouse_reward": ShuffleSwamphouseReward,
-    "skullsanity": Skullsanity,
-    "shuffle_great_fairy_rewards": ShuffleGreatFairyRewards,
-    "fairysanity": Fairysanity,
-    "death_link": DeathLink
-}
+@dataclass
+class MMROptions(PerGameCommonOptions):
+    start_inventory_from_pool: StartInventoryPool
+    logic_difficulty: LogicDifficulty
+    swordless: Swordless
+    shuffle_swamphouse_reward: ShuffleSwamphouseReward
+    skullsanity: Skullsanity
+    shuffle_great_fairy_rewards: ShuffleGreatFairyRewards
+    fairysanity: Fairysanity
+    death_link: DeathLink

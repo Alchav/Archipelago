@@ -17,8 +17,11 @@ def has_bombchus(state, player):
 def has_explosives(state, player):
     return state.has("Progressive Bomb Bag", player) or has_bombchus(state, player)
 
+def has_hard_projectiles(state, player):
+    return state.has("Progressive Bow", player) or state.has("Zora Mask", player) or state.has("Hookshot", player)
+
 def has_projectiles(state, player):
-    return state.has("Progressive Bow", player) or (state.has("Deku Mask", player) and state.has("Progressive Magic Upgrade", player)) or state.has("Zora Mask", player) or state.has("Hookshot", player)
+    return (state.has("Deku Mask", player) and state.has("Progressive Magic Upgrade", player)) or has_hard_projectiles(state, player)
 
 def can_smack_hard(state, player):
     return state.has("Progressive Sword", player) or state.has("Fierce Deity's Mask", player) or state.has("Great Fairy Sword", player) or state.has("Goron Mask", player) or state.has("Zora Mask", player)
@@ -70,7 +73,7 @@ def get_region_rules(player):
         "Clock Town -> The Moon":
             lambda state: state.has("Ocarina of Time", player) and state.has("Oath to Order", player) and state.has("Odolwa's Remains", player) and state.has("Goht's Remains", player) and state.has("Gyorg's Remains", player) and state.has("Twinmold's Remains", player),
         "Southern Swamp -> Southern Swamp (Deku Palace)":
-            lambda state: state.has("Bottle of Red Potion", player) or (has_projectiles(state, player) and state.has("Deku Mask", player)), # or state.has("Pictograph Box", player)
+            lambda state: state.has("Bottle of Red Potion", player) or (has_hard_projectiles(state, player) and state.has("Deku Mask", player)), # or state.has("Pictograph Box", player)
         "Southern Swamp (Deku Palace) -> Swamphouse":
             lambda state: state.has("Deku Mask", player) and can_use_fire_arrows(state, player),
         "Southern Swamp (Deku Palace) -> Deku Palace":
@@ -143,7 +146,7 @@ def get_location_rules(player):
             lambda state: state.has("Progressive Bow", player) or state.has("Progressive Bomb Bag", player) or has_bombchus(state, player),
         "East Clock Town Honey and Darling All Days":
             lambda state: state.has("Progressive Bow", player) and state.has("Progressive Bomb Bag", player) and has_bombchus(state, player),
-        "East Clock Town Treasure Game Chest":
+        "East Clock Town Treasure Game Chest (Goron)":
             lambda state: state.has("Goron Mask", player),
         "East Clock Town Sewer Chest":
             lambda state: state.can_reach("Clock Town Hide-and-Seek", 'Location', player) and has_explosives(state, player),

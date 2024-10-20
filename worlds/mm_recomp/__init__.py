@@ -5,7 +5,7 @@ from BaseClasses import Region, Tutorial
 from worlds.AutoWorld import WebWorld, World
 from .Items import MMRItem, item_data_table, item_table, code_to_item_table
 from .Locations import MMRLocation, location_data_table, location_table, code_to_location_table, locked_locations
-from .Options import mmr_options
+from .Options import MMROptions
 from .Regions import region_data_table, get_exit
 from .Rules import *
 
@@ -31,7 +31,8 @@ class MMRWorld(World):
     game = "Majora's Mask Recompiled"
     data_version = 1
     web = MMRWebWorld()
-    option_definitions = mmr_options
+    options_dataclass = MMROptions
+    options = MMROptions
     location_name_to_id = location_table
     item_name_to_id = item_table
 
@@ -57,7 +58,9 @@ class MMRWorld(World):
 
         mw.push_precollected(self.create_item("Ocarina of Time"))
         mw.push_precollected(self.create_item("Song of Time"))
-        mw.push_precollected(self.create_item("Progressive Sword"))
+
+        if self.options.swordless.value:
+            mw.itempool.append(self.create_item("Progressive Sword"))
 
     def create_regions(self) -> None:
         player = self.player
@@ -119,6 +122,9 @@ class MMRWorld(World):
             mw.get_location("Woodfall Temple Final Room Right Upper Platform SF", player).place_locked_item(self.create_item("Stray Fairy (Woodfall)"))
             mw.get_location("Woodfall Temple Final Room Left Upper Platform SF", player).place_locked_item(self.create_item("Stray Fairy (Woodfall)"))
             mw.get_location("Woodfall Temple Final Room Bubble SF", player).place_locked_item(self.create_item("Stray Fairy (Woodfall)"))
+
+        if not self.options.swordless.value:
+            mw.get_location("Link's Inventory (Kokiri Sword)", player).place_locked_item(self.create_item("Progressive Sword"))
 
         # TODO: check options to see what player starts with
         mw.get_location("Top of Clock Tower (Ocarina of Time)", player).place_locked_item(self.create_item(self.get_filler_item_name()))

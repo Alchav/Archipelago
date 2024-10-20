@@ -63,14 +63,9 @@ item_data_table: Dict[str, MMRItemData] = {
     ),
     "Heart Container": MMRItemData(
         code=0x3476942000000D,
-        type=ItemClassification.useful,
-        num_exist=12
-        #num_exist=4
-    ),
-    "Heart Container (Filler)": MMRItemData(
-        code=0x3476942000000D,
         type=ItemClassification.filler,
-        num_exist=2
+        num_exist=14
+        #num_exist=4
     ),
     "Swamp Skulltula Token": MMRItemData(
         code=0x34769420000052,
@@ -246,7 +241,6 @@ item_data_table: Dict[str, MMRItemData] = {
         code=0x34769420000037,
         type=ItemClassification.progression,
         num_exist=2
-        #num_exist=3
     ),
     "Great Fairy Sword": MMRItemData(
         code=0x3476942000003B,
