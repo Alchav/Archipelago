@@ -15,6 +15,10 @@ class MMRLocationData(NamedTuple):
 
 
 location_data_table: Dict[str, MMRLocationData] = {
+    "Link's Inventory (Kokiri Sword)": MMRLocationData(
+        region="Clock Town",
+        address=0x34769420000037
+    ),
     "Keaton Quiz": MMRLocationData(
         region="Clock Town",
         address=0x3476942007028C
@@ -91,7 +95,7 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Clock Town",
         address=0x347694200700B5
     ),
-    "East Clock Town Treasure Game Chest": MMRLocationData(
+    "East Clock Town Treasure Game Chest (Goron)": MMRLocationData(
         region="Clock Town",
         address=0x34769420061700
     ),
