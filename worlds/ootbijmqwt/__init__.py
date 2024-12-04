@@ -1,6 +1,7 @@
 from worlds.oot import OOTWorld, OOTCollectionState
+from worlds.oot.Options import OoTOptions
 from worlds.oot.LocationList import set_drop_location_names
-from Options import Choice, Toggle, Range
+from Options import Choice, Toggle, Range, PerGameCommonOptions, dataclass
 from BaseClasses import ItemClassification, LocationProgressType, CollectionState
 import logging
 
@@ -227,25 +228,39 @@ for i, function in enumerate(CollectionState.additional_init_functions):
 else:
     raise Exception("OOTBIJMQWT failed to inject CollectionState init_mixin function")
 
+@dataclass
+class OOTBIJMQWTOptions(PerGameCommonOptions):
+    start_mode: StartMode
+    shuffle_warp_songs: WarpSongs
+    boss: Boss
+    boss_key_location: BossKeyOption
+    tokens_in_pool: TokensInPool
+    local_tokens: LocalTokens
+    enable_scarecrow: EnableScarecrow
+    max_health: MaxHealth
+    logic_fewer_tunic_requirements: LogicFewerTunicRequirements
+    logic_water_mq_central_pillar: LogicWaterMQCentralPillarWithFireArrows
+    logic_water_mq_locked_gs: LogicWaterTempleMQNorthBasementGSWithoutSmallKey
+    logic_lab_diving: LogicLakeHyliaLabDive
+    logic_water_dragon_jump_dive: LogicWaterDragonJumpDive
+    logic_water_north_basement_ledge_jump: LogicWaterTempleNorthBasementLedgewWithPreciseJump
+    logic_dc_hammer_floor: LogicDodongosCavernSmashtheBossLobbyFloor
+    logic_lens_bongo: LogicBongoBongoWithoutLensOfTruth
+
+
+for option_name, option_class in OoTOptions.__annotations__.items():
+    if option_name in default_options:
+        OOTBIJMQWTOptions.__annotations__[option_name] = type(option_class.__name__,
+                                                              option_class.__bases__,
+                                                              dict(option_class.__dict__))
+        OOTBIJMQWTOptions.__annotations__[option_name].options = \
+            {x: y for x, y in OOTBIJMQWTOptions.__annotations__[option_name].options.items()
+             if y == OOTBIJMQWTOptions.__annotations__[option_name].default}
 
 class OOTBIJMQWTWorld(OOTWorld):
     game: str = "Ocarina of Time but it's just Master Quest Water Temple"
-    oot_options = OOTWorld.option_definitions.copy()
-    for option in (default_options + list(set_options.keys())):
-        del oot_options[option]
-    option_definitions = {"start_mode": StartMode, "shuffle_warp_songs": WarpSongs, "boss": Boss,
-                          "boss_key_location": BossKeyOption, "tokens_in_pool": TokensInPool,
-                          "local_tokens": LocalTokens, "enable_scarecrow": EnableScarecrow, "max_health": MaxHealth,
-                          "logic_fewer_tunic_requirements": LogicFewerTunicRequirements,
-                          "logic_water_mq_central_pillar": LogicWaterMQCentralPillarWithFireArrows,
-                          "logic_water_mq_locked_gs": LogicWaterTempleMQNorthBasementGSWithoutSmallKey,
-                          "logic_lab_diving": LogicLakeHyliaLabDive,
-                          "logic_water_dragon_jump_dive": LogicWaterDragonJumpDive,
-                          "logic_water_north_basement_ledge_jump": LogicWaterTempleNorthBasementLedgewWithPreciseJump,
-                          "logic_dc_hammer_floor": LogicDodongosCavernSmashtheBossLobbyFloor,
-                          "logic_lens_bongo": LogicBongoBongoWithoutLensOfTruth,
-                          **oot_options}
 
+    options_dataclass = OOTBIJMQWTOptions
     topology_present: bool = False
     item_name_to_id = OOTWorld.item_name_to_id
     location_name_to_id = OOTWorld.location_name_to_id
