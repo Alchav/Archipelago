@@ -47,6 +47,24 @@ data.raw["rocket-silo"]["rocket-silo"].fluid_boxes = {
 }
 data.raw["rocket-silo"]["rocket-silo"].fluid_boxes_off_when_no_fluid_recipe = true
 
+lab_copy = table.deepcopy(data.raw.lab["lab"])
+lab_copy["inputs"] = {"archipelago"}
+lab_copy["name"] = "fake-ap-lab"
+
+data:extend({
+  lab_copy,
+  {
+    type = "tool",
+    name = "archipelago",
+    localised_name = "Archipelago",
+    localised_description = "This technology must be unlocked via a location check from the multiworld.",
+    icon = "__{{ mod_name }}__/graphics/icons/ap.png",
+    icon_size = 128,
+    stack_size = 1,
+    durability = 1
+  }
+})
+
 {%- for recipe_name, recipe in custom_recipes.items() %}
 data.raw["recipe"]["{{recipe_name}}"].category = "{{recipe.category}}"
 data.raw["recipe"]["{{recipe_name}}"].ingredients = {{ dict_to_recipe(recipe.ingredients, liquids) }}
@@ -162,6 +180,13 @@ data.raw["ammo"]["artillery-shell"].stack_size = 10
 {# each randomized tech gets set to be invisible, with new nodes added that trigger those #}
 {%- for original_tech_name in base_tech_table -%}
 technologies["{{ original_tech_name }}"].hidden = true
+technologies["{{ original_tech_name }}"].research_trigger = nil
+technologies["{{ original_tech_name }}"].unit =
+{
+  count = 1,
+  ingredients = {% raw %}{{"archipelago", 1}}{% endraw %},
+  time = 30
+}
 {% endfor %}
 {%- for location, item in locations %}
 {#- the tech researched by the local player #}
