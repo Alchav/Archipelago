@@ -15,7 +15,7 @@ def swappable(multiworld, loc):
     from worlds.papermario.data.ItemList import progression_miscitems
     if not isinstance(loc.address, int):
         return False
-    if loc.item.name in multiworld.local_items[loc.player]:
+    if loc.item.name in multiworld.worlds[loc.player].options.local_items:
         return False
     if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
         return False
@@ -620,7 +620,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                              swap=False, name="Progression", single_player_placement=multiworld.players == 1)
         elif panic_method == "start_inventory":
             fill_restrictive(multiworld, multiworld.state, defaultlocations, progitempool, swap=False,
-                             allow_partial=True, name="Progression", single_player_placement=single_player)
+                             allow_partial=True, name="Progression", single_player_placement=multiworld.players == 1)
             if progitempool:
                 for item in progitempool:
                     logging.info(f"Moved {item} to start_inventory to prevent fill failure.")
@@ -780,14 +780,18 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if player == 1:
             continue
         try:
-            menu = multiworld.get_region("Menu", player)
+            menu = multiworld.get_region(world.origin_region_name, player)
         except KeyError:
             continue
         rule = lambda state, p=player: state.has(f"Unlock {multiworld.player_name[p]}", 1)
-        for location in menu.locations:
-            add_rule(location, rule)
-        for entrance in menu.exits:
-            add_rule(entrance, rule)
+        if multiworld.worlds[player].game in ("Ocarina of Time",):
+            for location in multiworld.get_locations(player):
+                add_rule(location, rule)
+        else:
+            for location in menu.locations:
+                add_rule(location, rule)
+            for entrance in menu.exits:
+                add_rule(entrance, rule)
 
     # add_order = [player for player in multiworld.player_ids if multiworld.player_name[player] not in multiworld.worlds[1].options.start_games]
     # add_order.sort(key=lambda p: starting_spheres[p])
@@ -884,7 +888,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         state = multiworld.state.copy()
         state.sweep_for_advancements()
         beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
-
         raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
 
     for sphere in spheres:

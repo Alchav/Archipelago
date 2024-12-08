@@ -15,6 +15,7 @@ else:
 
 
 def locality_needed(world: MultiWorld) -> bool:
+    return True
     for player in world.player_ids:
         if world.local_items[player].value:
             return True
