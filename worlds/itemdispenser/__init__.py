@@ -29,15 +29,16 @@ class ItemDispenser(World):
             sphere = sorted(sphere)
             self.random.shuffle(sphere)
             for location in sphere:
-                if location.progress_type == LocationProgressType.PRIORITY:
-                    continue
-                if not swappable(self.multiworld, location):
-                    continue
-                if not location.can_reach(all_state):
-                    #always tokenize unreachables
-                    pass
-                elif location.progress_type == LocationProgressType.DEFAULT and self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
-                    continue
+                if location.item.player != 1:
+                    if location.progress_type == LocationProgressType.PRIORITY:
+                        continue
+                    if not swappable(self.multiworld, location):
+                        continue
+                    if not location.can_reach(all_state):
+                        #always tokenize unreachables
+                        continue
+                    elif location.progress_type == LocationProgressType.DEFAULT and self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
+                        continue
                 i += 1
                 loc_name = f"Item {i}"
                 self.location_name_to_id[loc_name] = i

@@ -890,13 +890,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
         raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
 
-    for sphere in spheres:
+    for sphere_n, sphere in enumerate(spheres, 1):
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
-            if swappable(multiworld, loc):
+            if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
