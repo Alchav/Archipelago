@@ -13,6 +13,8 @@ from worlds.generic.Rules import add_item_rule, add_rule
 
 def swappable(multiworld, loc):
     from worlds.papermario.data.ItemList import progression_miscitems
+    if loc.locked:
+        return False
     if not isinstance(loc.address, int):
         return False
     if loc.item.name in multiworld.worlds[loc.player].options.local_items:
@@ -33,7 +35,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
     beaten_games = set()
     i = 1
     while locations:
-        print(f"Sphere {i}")
+        # print(f"Sphere {i}")
         reachable_locations = {location for location in locations if location.can_reach(state)}
         old_reachable_locations = None
         while old_reachable_locations != reachable_locations:
@@ -47,9 +49,9 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
         new_beaten_games = beaten_games - old_beaten_games
         for player in new_beaten_games:
-            if beaten_game_spheres:
+            if beaten_game_spheres is not None:
                 beaten_game_spheres[player] = i
-            # logging.info(f"{i} - {new_beaten_games}")
+            logging.info(f"{i} - {new_beaten_games}")
         i += 1
         if not reachable_locations:
             if locations and return_unreachables:
@@ -595,7 +597,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     if prioritylocations:
         # "priority fill"
         fill_restrictive(multiworld, multiworld.state, prioritylocations, progitempool,
-                         single_player_placement=multiworld.players == 1, swap=False, on_place=mark_for_locking,
+                         single_player_placement=multiworld.players == 1, swap=False, on_place=mark_for_locking, allow_partial=True,
                          name="Priority")
         # accessibility_corrections(multiworld, multiworld.state, prioritylocations, progitempool)
         defaultlocations = prioritylocations + defaultlocations
@@ -714,14 +716,20 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 2
         return 1
 
+    option = "b" # beaten game spheres
 
-    spheres = list(get_item_spheres(multiworld, return_unreachables=False))
+    beaten_game_spheres = {}
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
 
-    game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
-    for i, sphere in enumerate(spheres):
-        for player in game_spheres:
-            if [loc for loc in sphere if loc.player == player]:
-                game_spheres[player] += 1
+    if option == "b":
+        game_spheres = beaten_game_spheres
+    else:
+        game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
+        for i, sphere in enumerate(spheres):
+            for player in game_spheres:
+                if [loc for loc in sphere if loc.player == player]:
+                    game_spheres[player] += 1
+
     player_names = [(player_name[0], player_name[1]) for player_name in multiworld.player_name.items()]
     multiworld.random.shuffle(player_names)
     playable_games = [player for player in player_names if player[1] in multiworld.worlds[1].options.start_games]
@@ -736,7 +744,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         new_player_names = []
         end_list_player_names = []
         for i, player in enumerate(player_names):
-            if game_spheres[player[0]] - i < highest_sphere:
+            if option == "g" and game_spheres[player[0]] - i < highest_sphere:
                 print(f"{player[1]} fits")
                 new_player_names.append(player)
                 highest_sphere += 1
@@ -795,7 +803,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # add_order = [player for player in multiworld.player_ids if multiworld.player_name[player] not in multiworld.worlds[1].options.start_games]
     # add_order.sort(key=lambda p: starting_spheres[p])
-    for player, starting_sphere in starting_spheres.items():
+    starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items()]
+    starting_spheres_list.sort(key=lambda i: i[1])
+    for player, starting_sphere in starting_spheres_list:
         spheres = [s for s in get_item_spheres(multiworld, return_unreachables=False)]
         print(f"Highest sphere: {len(spheres)}")
         print(f"Adding {multiworld.player_name[player]} with {game_spheres[player]} spheres")
@@ -811,7 +821,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         location = multiworld.random.choice(filler_sphere)
         multiworld.push_precollected(location.item)
         location.item.location = None
-        print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {player} ~ {location.name} displacing {location.item.name}")
+        print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing {location.item.name}")
         multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
         # location.item =
         # location.item.location = location
@@ -870,7 +880,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #             location.item = item
 
     beaten_game_spheres = {}
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres))
 
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
     for i, sphere in enumerate(spheres):
@@ -898,6 +908,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         for loc in sphere_list:
             if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
                 sphere_t[iclass(loc.item)].append(loc)
+
+            elif beaten_game_spheres[loc.player] <= sphere_n:
+                print(f"not swapping {loc.name} - {loc.item}")
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
                 if a.item_rule(b.item) and b.item_rule(a.item):
