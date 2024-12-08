@@ -11,7 +11,7 @@ from .Rules import *
 
 
 class MMRWebWorld(WebWorld):
-    theme = "partyTime"
+    # ~ theme = "partyTime"
     
     setup_en = Tutorial(
         tutorial_name="Start Guide",
@@ -96,7 +96,7 @@ class MMRWorld(World):
             for i in range(0, 31):
                 if i == 3:
                     continue
-                mw.get_location(code_to_location_table[0x34769420062700 | i], player).place_locked_item(self.create_item("Swamp Skulltula Token"))
+                mw.get_location(code_to_location_table[0x3469420062700 | i], player).place_locked_item(self.create_item("Swamp Skulltula Token"))
                 
 
         if not self.options.shuffle_great_fairy_rewards.value:
@@ -123,12 +123,15 @@ class MMRWorld(World):
             mw.get_location("Woodfall Temple Final Room Left Upper Platform SF", player).place_locked_item(self.create_item("Stray Fairy (Woodfall)"))
             mw.get_location("Woodfall Temple Final Room Bubble SF", player).place_locked_item(self.create_item("Stray Fairy (Woodfall)"))
 
-        if not self.options.swordless.value:
-            mw.get_location("Link's Inventory (Kokiri Sword)", player).place_locked_item(self.create_item("Progressive Sword"))
+        sword_location = mw.get_location("Link's Inventory (Kokiri Sword)", player)
+        if self.options.swordless.value:
+            sword_location.item_rule = lambda item: item.name != "Progressive Sword"
+        else:
+            sword_location.place_locked_item(self.create_item("Progressive Sword"))
 
         # TODO: check options to see what player starts with
-        mw.get_location("Top of Clock Tower (Ocarina of Time)", player).place_locked_item(self.create_item(self.get_filler_item_name()))
-        mw.get_location("Top of Clock Tower (Song of Time)", player).place_locked_item(self.create_item(self.get_filler_item_name()))
+        # ~ mw.get_location("Top of Clock Tower (Ocarina of Time)", player).place_locked_item(self.create_item(self.get_filler_item_name()))
+        # ~ mw.get_location("Top of Clock Tower (Song of Time)", player).place_locked_item(self.create_item(self.get_filler_item_name()))
 
     def get_filler_item_name(self) -> str:
         return "Purple Rupee"
@@ -151,6 +154,8 @@ class MMRWorld(World):
         location_rules = get_location_rules(player)
         for location in mw.get_locations(player):
             name = location.name
+            if name == "Swamp Spider House Reward" and self.options.skullsanity.value == 2:
+                continue
             if name in location_rules and location_data_table[name].can_create(self.options):
                 location.access_rule = location_rules[name]
 
