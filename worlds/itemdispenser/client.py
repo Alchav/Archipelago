@@ -35,9 +35,11 @@ async def id_loop(ctx):
             except asyncio.TimeoutError:
                 pass
             ctx.watcher_event.clear()
-            if len(ctx.items_received) > ctx.tokens:
+            tokens = sum((item.item for item in ctx.items_received))
+            if tokens > ctx.tokens:
                 await ctx.send_msgs([{"cmd": "LocationChecks",
-                                      "locations": list(range(1, len(ctx.items_received) + 1))}])
+                                      "locations": list(range(1, tokens + 1))}])
+
     except Exception as e:
         breakpoint()
 

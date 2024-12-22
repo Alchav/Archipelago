@@ -40,7 +40,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         old_reachable_locations = None
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
-            reachable_events = {location for location in reachable_locations if location.address is None or location.item.name == "Token"}
+            reachable_events = {location for location in reachable_locations if location.address is None or location.item.game == "Item Dispenser"}
             for location in reachable_events:
                 state.collect(location.item, True, location)
             locations -= reachable_events
@@ -792,7 +792,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         except KeyError:
             continue
         rule = lambda state, p=player: state.has(f"Unlock {multiworld.player_name[p]}", 1)
-        if multiworld.worlds[player].game in ("Ocarina of Time",):
+        if multiworld.worlds[player].game in ("Ocarina of Time", "Super Metroid Map Rando"):
             for location in multiworld.get_locations(player):
                 add_rule(location, rule)
         else:
@@ -812,6 +812,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         print(f"Placing item in Sphere {starting_sphere}, should bring to Sphere {starting_sphere + game_spheres[player]}")
         # for i, sphere in enumerate(spheres, start=1):
         sphere = spheres[starting_sphere]
+
         filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and not location.item.advancement])
         if not filler_sphere:
             filler_sphere = sorted([location for location in sphere if location.address and location.item.classification != ItemClassification.progression and swappable(multiworld, location)])
@@ -819,7 +820,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location)])
         # for player, sphere_check in starting_spheres.items():
         location = multiworld.random.choice(filler_sphere)
-        multiworld.push_precollected(location.item)
+        # multiworld.push_precollected(location.item)
+        if starting_sphere not in multiworld.worlds[2].displaced_items:
+            multiworld.worlds[2].displaced_items[starting_sphere] = []
+        multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
         location.item.location = None
         print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing {location.item.name}")
         multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))

@@ -15,42 +15,72 @@ component = Component("Item Dispenser Client", "IDClient", component_type=Type.C
 components.append(component)
 
 
+def token_logic(state, world, count):
+    # tokens = 0
+    # for item, i in world.item_name_to_id.items():
+    #     tokens += (state.count(item, world.player) * i)
+    tokens = sum((state.count(item, world.player) * i) for item, i in world.item_name_to_id.items())
+    return tokens >= count
+
+
 class ItemDispenser(World):
     game = "Item Dispenser"
-    item_name_to_id = {"Token": 1}
-    location_name_to_id = {"Item 1": 1}
+    item_name_to_id = {f"{n} Token{'s' if n != 1 else ''}": n for n in range(1, 11)}
+    location_name_to_id = {"1 Token": 1}
+
+    def __init__(self, multiworld, player: int):
+        super().__init__(multiworld, player)
+        self.displaced_items = {}
 
     def post_fill(self):
-        all_state = self.multiworld.get_all_state(use_cache=False)
+        # all_state = self.multiworld.get_all_state(use_cache=False)
+        state = self.multiworld.state.copy()
+        state.sweep_for_advancements()
         i = 0
         menu = Region("Menu", self.player, self.multiworld)
         self.multiworld.regions.append(menu)
-        for sphere in list(get_item_spheres(self.multiworld)):
+        for sphere_num, sphere in enumerate(list(get_item_spheres(self.multiworld))):
             sphere = sorted(sphere)
             self.random.shuffle(sphere)
             for location in sphere:
+                unreachable = False
                 if location.item.player != 1:
                     if location.progress_type == LocationProgressType.PRIORITY:
                         continue
                     if not swappable(self.multiworld, location):
                         continue
-                    if not location.can_reach(all_state):
-                        #always tokenize unreachables
-                        continue
+                    if not location.can_reach(state):
+                        unreachable = True
                     elif location.progress_type == LocationProgressType.DEFAULT and self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
                         continue
-                i += 1
-                loc_name = f"Item {i}"
+                if unreachable:
+                    increment = 1
+                elif location.item.excludable:
+                    increment = int(self.random.triangular(2, 5, 2))
+                elif location.item.classification in (ItemClassification.progression_skip_balancing, ItemClassification.useful):
+                    increment = int(self.random.triangular(2, 7, 2))
+                else:
+                    increment = int(self.random.triangular(2, 10, 2))
+                i += increment
+                loc_name = f"{i} Token{'s' if i != 1 else ''}"
+                print(f"{i} Token{'s' if i != 1 else ''}")
                 self.location_name_to_id[loc_name] = i
                 new_location = IDLocation(self.player, loc_name, i, menu)
                 menu.locations.append(new_location)
                 new_location.item = location.item
                 new_location.item.location = new_location
-                new_item = IDItem("Token", ItemClassification.progression_skip_balancing, 1, self.player)
+                if location.item.game == "AlchapelaBot":
+                    new_location_2 = IDLocation(self.player, f"{i-1} Token{'s' if i != 1 else ''}", i-1, menu)
+                    new_location_2.place_locked_item(self.displaced_items[sphere_num].pop())
+                    new_location_2.access_rule = lambda state, count=i-1: token_logic(state, self, count)
+                    new_location_2.parent_region = menu
+                    menu.locations.append(new_location_2)
+                new_item = IDItem(f"{increment} Token{'s' if i != 1 else ''}", ItemClassification.progression_skip_balancing, increment, self.player)
                 location.item = None
                 location.place_locked_item(new_item)
-                new_location.access_rule = lambda state, count=i: state.has("Token", self.player, count)
+                new_location.access_rule = lambda state, count=i: token_logic(state, self, count)
                 new_location.parent_region = menu
+        assert not any(self.displaced_items.values())
 
 
 class IDLocation(Location):
