@@ -39,10 +39,16 @@ class ItemDispenser(World):
         i = 0
         menu = Region("Menu", self.player, self.multiworld)
         self.multiworld.regions.append(menu)
+        active_games = set()
+        extra_items_to_place = []
         for sphere_num, sphere in enumerate(list(get_item_spheres(self.multiworld))):
+            extra_items_to_place += [item for item in self.multiworld.extra_items if item.player in active_games]
+            self.multiworld.extra_items = [item for item in self.multiworld.extra_items if item not in extra_items_to_place]
+            self.random.shuffle(extra_items_to_place)
             sphere = sorted(sphere)
             self.random.shuffle(sphere)
             for location in sphere:
+                active_games.add(location.player)
                 unreachable = False
                 if location.item.player != 1:
                     if location.progress_type == LocationProgressType.PRIORITY:
@@ -72,6 +78,12 @@ class ItemDispenser(World):
                 if location.item.game == "AlchapelaBot":
                     new_location_2 = IDLocation(self.player, f"{i-1} Token{'s' if i != 1 else ''}", i-1, menu)
                     new_location_2.place_locked_item(self.displaced_items[sphere_num].pop())
+                    new_location_2.access_rule = lambda state, count=i-1: token_logic(state, self, count)
+                    new_location_2.parent_region = menu
+                    menu.locations.append(new_location_2)
+                elif extra_items_to_place:
+                    new_location_2 = IDLocation(self.player, f"{i-1} Token{'s' if i != 1 else ''}", i-1, menu)
+                    new_location_2.place_locked_item(extra_items_to_place.pop())
                     new_location_2.access_rule = lambda state, count=i-1: token_logic(state, self, count)
                     new_location_2.parent_region = menu
                     menu.locations.append(new_location_2)

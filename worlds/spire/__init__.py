@@ -48,6 +48,19 @@ class SpireWorld(World):
 
         self.multiworld.itempool += pool
 
+        extra_items = []
+        for _ in range(10):
+            extra_items.append(SpireItem("Boss Relic", self.player))
+        for _ in range(50):
+            extra_items.append(SpireItem("Relic", self.player))
+        for _ in range(10):
+            extra_items.append(SpireItem("Rare Card Draw", self.player))
+        for _ in range(50):
+            extra_items.append(SpireItem("Card Draw", self.player))
+        for item in extra_items:
+            item.classification = ItemClassification.useful
+        self.multiworld.extra_items += extra_items
+
         # Pair up our event locations with our event items
         for event, item in event_item_pairs.items():
             event_item = SpireItem(item, self.player)

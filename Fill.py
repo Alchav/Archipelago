@@ -678,8 +678,12 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         logging.info_data = {"items": items_counter, "locations": locations_counter}
         logging.info(f"Per-Player counts: {logging.info_data})")
 
-
-
+    for location in multiworld.get_locations():
+        old_rule = location.access_rule
+        location.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: world.completion_condition(state) or rule(state)
+    for entrance in multiworld.get_entrances():
+        old_rule = entrance.access_rule
+        entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: world.completion_condition(state) or rule(state)
 
     def iclass(i: Item):
         game = i.game
@@ -716,7 +720,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 2
         return 1
 
-    option = "b" # beaten game spheres
+    option = "a" # beaten game spheres
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))

@@ -161,6 +161,7 @@ class MultiWorld():
         self.local_early_items = {player: {} for player in self.player_ids}
         self.indirect_connections = {}
         self.start_inventory_from_pool: Dict[int, Options.StartInventoryPool] = {}
+        self.extra_items = []
 
         for player in range(1, players + 1):
             def set_player_attr(attr: str, val) -> None:
