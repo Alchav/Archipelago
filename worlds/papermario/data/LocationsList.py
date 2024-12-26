@@ -754,6 +754,14 @@ gear_locations = [
 ]
 
 
+dojo_location_order = [
+    "TT Gate District Dojo: Chan",
+    "TT Gate District Dojo: Lee",
+    "TT Gate District Dojo: Master 1",
+    "TT Gate District Dojo: Master 2",
+    "TT Gate District Dojo: Master 3"
+]
+
 missable_locations = [
     "MR Mt Rugged 1 Hurting Whacka",  # Item can stop spawning
     # "SSS Merluvlee's House Merlow's Badges 1",  # Merlow's badge shop requires all star pieces to complete
