@@ -680,10 +680,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     for location in multiworld.get_locations():
         old_rule = location.access_rule
-        location.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: world.completion_condition(state) or rule(state)
+        location.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[location.player](state) or rule(state)
     for entrance in multiworld.get_entrances():
         old_rule = entrance.access_rule
-        entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: world.completion_condition(state) or rule(state)
+        entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[entrance.player](state) or rule(state)
 
     def iclass(i: Item):
         game = i.game
