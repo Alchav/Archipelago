@@ -30,6 +30,7 @@ class AlchapelaBotWorld(World):
             self.item_id_to_name[player] = f"Unlock {player_name}"
         for starting_game in self.options.start_games.value:
             self.multiworld.push_precollected(self.create_item(f"Unlock {starting_game}"))
+        self.item_name_groups["Everything"] = set(self.item_name_to_id.keys())
 
     def create_item(self, name):
         return UnlockItem(name, ItemClassification.progression, self.item_name_to_id[name], self.player)
