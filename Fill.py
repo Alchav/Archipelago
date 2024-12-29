@@ -21,6 +21,8 @@ def swappable(multiworld, loc):
         return False
     if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
         return False
+    if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
+        return False
     if "SSS Merluvlee's House Merlow's Badges" in loc.name:
          return False
     if loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name):
@@ -678,12 +680,12 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         logging.info_data = {"items": items_counter, "locations": locations_counter}
         logging.info(f"Per-Player counts: {logging.info_data})")
 
-    for location in multiworld.get_locations():
-        old_rule = location.access_rule
-        location.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[location.player](state) or rule(state)
-    for entrance in multiworld.get_entrances():
-        old_rule = entrance.access_rule
-        entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[entrance.player](state) or rule(state)
+    # for location in multiworld.get_locations():
+    #     old_rule = location.access_rule
+    #     location.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[location.player](state) or rule(state)
+    # for entrance in multiworld.get_entrances():
+    #     old_rule = entrance.access_rule
+    #     entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[entrance.player](state) or rule(state)
 
     def iclass(i: Item):
         game = i.game
@@ -720,7 +722,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 2
         return 1
 
-    option = "a" # beaten game spheres
+    option = "b"  # g: total spheres, b: beaten game spheres
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
@@ -748,7 +750,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         new_player_names = []
         end_list_player_names = []
         for i, player in enumerate(player_names):
-            if option == "g" and game_spheres[player[0]] - i < highest_sphere:
+            if game_spheres[player[0]] - i < highest_sphere:
                 print(f"{player[1]} fits")
                 new_player_names.append(player)
                 highest_sphere += 1
@@ -802,8 +804,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         else:
             for location in menu.locations:
                 add_rule(location, rule)
-            for entrance in menu.exits:
-                add_rule(entrance, rule)
+        for entrance in menu.exits:
+            add_rule(entrance, rule)
 
     # add_order = [player for player in multiworld.player_ids if multiworld.player_name[player] not in multiworld.worlds[1].options.start_games]
     # add_order.sort(key=lambda p: starting_spheres[p])
@@ -813,9 +815,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         spheres = [s for s in get_item_spheres(multiworld, return_unreachables=False)]
         print(f"Highest sphere: {len(spheres)}")
         print(f"Adding {multiworld.player_name[player]} with {game_spheres[player]} spheres")
-        print(f"Placing item in Sphere {starting_sphere}, should bring to Sphere {starting_sphere + game_spheres[player]}")
+        print(f"Placing {multiworld.player_name[player]} unlock item in Sphere {starting_sphere}, should bring to Sphere {starting_sphere + game_spheres[player]}")
         # for i, sphere in enumerate(spheres, start=1):
-        sphere = spheres[starting_sphere]
+        sphere = spheres[starting_sphere - 1]
 
         filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and not location.item.advancement])
         if not filler_sphere:

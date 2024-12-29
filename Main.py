@@ -268,9 +268,6 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
 
             unr = False
             for i, sphere in enumerate(get_item_spheres(multiworld), 1):
-                if sphere == "Unreachable":
-                    unr = True
-                    continue
                 for location in sphere:
                     if (not location.address) or type(location.address) != int:
                         continue
