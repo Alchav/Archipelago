@@ -67,6 +67,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
                 state.collect(location.item, True, location)
         locations -= reachable_locations
 
+
 class FillError(RuntimeError):
     def __init__(self, *args: typing.Union[str, typing.Any], **kwargs) -> None:
         if "multiworld" in kwargs and isinstance(args[0], str):
@@ -126,6 +127,8 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
             # grab one item per player
             items_to_place = [items.pop()
                               for items in reachable_items.values() if items]
+            items_to_place += [items.pop()
+                              for items in reachable_items.values() if items and items[0].game == "Stardew Valley"]
         else:
             next_player = multiworld.random.choice([player for player, items in reachable_items.items() if items])
             items_to_place = []
@@ -908,7 +911,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         state = multiworld.state.copy()
         state.sweep_for_advancements()
         beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
-        raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+        # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+        breakpoint()
 
     for sphere_n, sphere in enumerate(spheres, 1):
         sphere_list = list(sphere)

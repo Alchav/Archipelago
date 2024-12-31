@@ -18,7 +18,7 @@ class SpireLogic(LogicMixin):
 
 
 def set_rules(world: MultiWorld, player: int):
-
+    return
     # Act 1 Card Draws
     set_rule(world.get_location("Card Draw 1", player), lambda state: True)
     set_rule(world.get_location("Card Draw 2", player), lambda state: state._spire_has_items(player, 1))

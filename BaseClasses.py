@@ -961,6 +961,8 @@ class CollectionState():
         self.stale[item.player] = True
         if item.game == "AlchapelaBot":
             self.stale[item.code] = True
+            if self.multiworld.worlds[item.code].game == "Ocarina of Time":
+                self._oot_stale[item.code] = True
         # if item.player % 2:
         #     self.stale[item.player+1] = True
 
