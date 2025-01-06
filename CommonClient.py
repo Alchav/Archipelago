@@ -1047,7 +1047,7 @@ def run_as_textclient(*args):
         tags = CommonContext.tags | {"TextOnly"}
         game = ""  # empty matches any game since 0.3.2
         items_handling = 0b111  # receive all items for /received
-        want_slot_data = False  # Can't use game specific slot_data
+        want_slot_data = True  # Can't use game specific slot_data
 
         async def server_auth(self, password_requested: bool = False):
             if password_requested and not self.password:

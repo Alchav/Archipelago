@@ -51,15 +51,17 @@ class ItemDispenser(World):
                 raise Exception("No possible open item dispenser locations")
 
         beaten_game_spheres = {}
+        unreachable = False
         for sphere_num, sphere in enumerate(list(get_item_spheres(self.multiworld, beaten_game_spheres)), start=1):
             extra_items_to_place += [item for item in self.multiworld.extra_items if item.player in active_games]
             self.multiworld.extra_items = [item for item in self.multiworld.extra_items if item not in extra_items_to_place]
             self.random.shuffle(extra_items_to_place)
             sphere = sorted(sphere)
             self.random.shuffle(sphere)
+            if not sphere:
+                unreachable = True
             for location in sphere:
                 active_games.add(location.player)
-                unreachable = False
                 if location.item.player != 1:
                     if beaten_game_spheres[location.player] <= sphere_num:
                         continue
@@ -67,8 +69,6 @@ class ItemDispenser(World):
                         continue
                     if not swappable(self.multiworld, location):
                         continue
-                    if not location.can_reach(state):
-                        unreachable = True
                     elif self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
                         continue
                 if unreachable:

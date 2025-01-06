@@ -270,9 +270,16 @@ lua_minor = tonumber(lua_minor)
 if lua_major > 5 or (lua_major == 5 and lua_minor >= 3) then
     require("lua_5_3_compat")
 end
-
+package.path = package.path .. ";./?.lua"
 local base64 = require("base64")
+print("loading socket")
 local socket = require("socket")
+
+print("Socket module loaded, type:", type(socket))
+print("Package loaded entry for 'socket':", package.loaded["socket"])
+if socket == nil then
+    print("nil")
+end
 local json = require("json")
 
 local SOCKET_PORT_FIRST = 43055
@@ -532,7 +539,7 @@ function initialize_server ()
     local port = SOCKET_PORT_FIRST
     local res = nil
 
-    server, err = socket.socket.tcp4()
+    server, err = socket.tcp4()
     while res == nil and port <= SOCKET_PORT_LAST do
         res, err = server:bind("localhost", port)
         if res == nil and err ~= "address already in use" then
@@ -566,7 +573,7 @@ function main ()
             initialize_server()
         end
 
-        current_time = socket.socket.gettime()
+        current_time = socket.gettime()
         timeout_timer = timeout_timer - (current_time - prev_time)
         message_timer = message_timer - (current_time - prev_time)
         prev_time = current_time

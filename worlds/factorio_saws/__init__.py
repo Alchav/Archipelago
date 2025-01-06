@@ -523,7 +523,6 @@ class Factorio(World):
                                                      {valid_pool[x]: 10 for x in range(3 + ingredients_offset)},
                                                      original_rocket_part.products,
                                                      original_rocket_part.energy)}
-
         categories = ["metallurgy", "organic", "electromagnetics"]
         self.random.shuffle(categories)
 

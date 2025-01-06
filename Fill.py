@@ -40,12 +40,18 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         # print(f"Sphere {i}")
         reachable_locations = {location for location in locations if location.can_reach(state)}
         old_reachable_locations = None
+        sphere_reachable_tokens = set()
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
-            reachable_events = {location for location in reachable_locations if location.address is None or location.item.game == "Item Dispenser"}
+            reachable_events = {location for location in reachable_locations if location.address is None}
+            reachable_tokens = {location for location in reachable_locations if location.item.game == "Item Dispenser"}
             for location in reachable_events:
                 state.collect(location.item, True, location)
+            for location in reachable_tokens:
+                state.collect(location.item, True, location)
             locations -= reachable_events
+            sphere_reachable_tokens.update(reachable_tokens)
+            locations -= reachable_tokens
             reachable_locations = {location for location in locations if location.can_reach(state)}
         old_beaten_games = beaten_games.copy()
         beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
@@ -57,10 +63,13 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         i += 1
         if not reachable_locations:
             if locations and return_unreachables:
+                yield []
                 yield locations  # unreachable locations
             break
         else:
-            yield {loc for loc in reachable_locations}  # if loc.player not in beaten_games}
+            yield_locs = reachable_locations.copy()
+            yield_locs.update(sphere_reachable_tokens)
+            yield yield_locs
 
         for location in reachable_locations:
             if location.item.advancement:
@@ -893,7 +902,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #             location.item = item
 
     beaten_game_spheres = {}
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres))
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
 
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
     for i, sphere in enumerate(spheres):
@@ -912,6 +921,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         state.sweep_for_advancements()
         beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
         # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+        breakpoint()
+
+    if not multiworld.fulfills_accessibility():
         breakpoint()
 
     for sphere_n, sphere in enumerate(spheres, 1):

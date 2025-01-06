@@ -267,19 +267,19 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             #         locations -= reachable_locations
 
             unr = False
-            state = multiworld.state.copy()
-            state.sweep_for_advancements()
             for i, sphere in enumerate(get_item_spheres(multiworld), 1):
+                if not sphere:
+                    unr = True
                 for location in sphere:
                     if (not location.address) or type(location.address) != int:
                         continue
                     if location.player not in er_hint_data:
                         er_hint_data[location.player] = {}
                     if location.address not in er_hint_data[location.player]:
-                        er_hint_data[location.player][location.address] = "Unreachable" if not state.can_reach(location) else f"Sphere {i}"
+                        er_hint_data[location.player][location.address] = "Unreachable" if unr else f"Sphere {i}"
                     else:
                         t = f"Sphere {i}"
-                        if not state.can_reach(location):
+                        if unr:
                             t = "Unreachable"
                         er_hint_data[location.player][location.address] = f"{t} / {er_hint_data[location.player][location.address]}"
 
