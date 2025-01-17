@@ -1403,6 +1403,8 @@ class ClientMessageProcessor(CommonCommandProcessor):
         for location in self.ctx.locations[player]:
             if "Unreachable" in self.ctx.er_hint_data[player][location]:
                 sphere = -1
+            elif "Excluded" in self.ctx.er_hint_data[player][location]:
+                sphere = -2
             else:
                 sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
                 if lowest_sphere:
@@ -1434,13 +1436,13 @@ class ClientMessageProcessor(CommonCommandProcessor):
             self.output(text)
 
     def _cmd_spheres(self, player=None):
-        if player and (player.isdigit() or player == "-1"):
+        if player and (player.isdigit() or player in ("-1", "-2")):
             sphere = int(player)
             players = {player: 0 for player in self.ctx.er_hint_data.keys()}
             checked = {player: 0 for player in self.ctx.er_hint_data.keys()}
             for player in players:
                 for location in self.ctx.locations[player]:
-                    if (self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1] == str(sphere)) or (sphere == -1 and "Unreachable" in self.ctx.er_hint_data[player][location]):
+                    if (self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1] == str(sphere)) or (sphere == -1 and "Unreachable" in self.ctx.er_hint_data[player][location]) or (sphere == -2 and "Excluded" in self.ctx.er_hint_data[player][location]):
                         players[player] += 1
                         if location in self.ctx.location_checks[(0, player)]:
                             checked[player] += 1
@@ -1457,6 +1459,8 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 for location in self.ctx.locations[player]:
                     if "Unreachable" in self.ctx.er_hint_data[player][location]:
                         sphere = -1
+                    elif "Excluded" in  self.ctx.er_hint_data[player][location]:
+                        sphere = -2
                     else:
                         sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
                     if sphere not in spheres:
