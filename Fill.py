@@ -17,12 +17,15 @@ def swappable(multiworld, loc):
         return False
     if not isinstance(loc.address, int):
         return False
-    if loc.item.name in multiworld.worlds[loc.player].options.local_items:
-        return False
-    if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
-        return False
-    if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
-        return False
+    if loc.item:
+        if loc.item.trap and loc.item.game != "Super Mario Land 2":
+            return False
+        if loc.item.name in multiworld.worlds[loc.player].options.local_items:
+            return False
+        if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
+            return False
+        if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
+            return False
     if "SSS Merluvlee's House Merlow's Badges" in loc.name:
          return False
     if loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name):
@@ -946,12 +949,12 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                         logging.info(f"{a.name} cannot accept {b.item.name}")
                     if not b.item_rule(a.item):
                         logging.info(f"{b.name} cannot accept {a.item.name}")
-            for loc in t:
-                if loc.player == loc.item.player and loc.item.name in multiworld.worlds[loc.player].options.non_local_items.value:
-                    for loc2 in t:
-                        if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
-                            loc.item, loc2.item = loc2.item, loc.item
-                            break
+            # for loc in t:
+            #     if loc.player == loc.item.player and loc.item.name in multiworld.worlds[loc.player].options.non_local_items.value:
+            #         for loc2 in t:
+            #             if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
+            #                 loc.item, loc2.item = loc2.item, loc.item
+            #                 break
 
     # multiworld.post_fill = True
 

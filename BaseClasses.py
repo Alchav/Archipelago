@@ -1211,7 +1211,7 @@ class Location:
         self.parent_region = parent
 
     def can_fill(self, state: CollectionState, item: Item, check_access=True) -> bool:
-        return ((self.always_allow(state, item) and item.name not in state.multiworld.worlds[item.player].options.non_local_items)
+        return ((self.always_allow(state, item)) # and item.name not in state.multiworld.worlds[item.player].options.non_local_items)
                 or (self.item_rule(item) and (not check_access or self.can_reach(state))))
 
     def can_reach(self, state: CollectionState) -> bool:
