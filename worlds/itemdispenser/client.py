@@ -1,5 +1,5 @@
 import asyncio
-from CommonClient import CommonContext, get_base_parser, server_loop, logger, gui_enabled
+from CommonClient import CommonContext, get_base_parser, server_loop, logger, gui_enabled, ClientStatus
 import Utils
 
 
@@ -39,6 +39,9 @@ async def id_loop(ctx):
             if tokens > ctx.tokens:
                 await ctx.send_msgs([{"cmd": "LocationChecks",
                                       "locations": list(range(1, tokens + 1))}])
+            if len(ctx.checked_locations) == len(ctx.server_locations) and not ctx.finished_game:
+                ctx.finished_game = True
+                await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
 
     except Exception as e:
         breakpoint()
