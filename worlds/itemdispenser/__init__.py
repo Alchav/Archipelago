@@ -34,7 +34,7 @@ class ItemDispenser(World):
 
     def post_fill(self):
         token_rates = {player: (len({loc for loc in self.multiworld.get_locations(player) if swappable(self.multiworld, loc)})
-                                * self.multiworld.worlds[player].options.token_percentage.value / 100) for player in self.multiworld.player_ids}
+                                * self.multiworld.worlds[player].options.token_percentage.value / 100) for player in self.multiworld.player_ids if player > 2}
         highest_token_rate = max(token_rates.values())
         token_rates = {player: int(101 - ((100 / highest_token_rate) * token_rate)) for player, token_rate in token_rates.items()}
         # all_state = self.multiworld.get_all_state(use_cache=False)
@@ -79,9 +79,12 @@ class ItemDispenser(World):
                             continue
                         elif self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
                             continue
-                increment = max(1, int(self.random.triangular((token_rates[location.player] * 0.75),
-                                                              int(token_rates[location.player] * 1.25),
-                                                              token_rates[location.player])))
+                if location.item:
+                    increment = max(1, int(self.random.triangular((token_rates[location.player] * 0.75),
+                                                                  int(token_rates[location.player] * 1.25),
+                                                                  token_rates[location.player])))
+                else:
+                    increment = 1
 
                 i += increment
                 if location.item:
@@ -94,10 +97,7 @@ class ItemDispenser(World):
                     new_location.item.location = new_location
                     new_location.access_rule = lambda state, count=i: token_logic(state, self, count)
                     new_location.parent_region = menu
-                    location.item = None
-                    new_item = IDItem(f"{increment} Token{'s' if i != 1 else ''}", ItemClassification.progression_skip_balancing, increment, self.player)
-                    location.place_locked_item(new_item)
-                    if location.item.game == "AlchapelaBot":
+                    if location.item.game == "AlchapelaBot" and self.displaced_items[sphere_num]:
                         i2 = last_available_loc(i-1)
                         loc_name_2 = f"{i2} Token{'s' if i2 != 1 else ''}"
                         new_location_2 = IDLocation(self.player, loc_name_2, i2, menu)
@@ -123,6 +123,9 @@ class ItemDispenser(World):
                     new_location.parent_region = menu
                     menu.locations.append(new_location)
                     self.location_name_to_id[loc_name] = i
+                location.item = None
+                new_item = IDItem(f"{increment} Token{'s' if increment != 1 else ''}", ItemClassification.progression_skip_balancing, increment, self.player)
+                location.place_locked_item(new_item)
         assert not any(self.displaced_items.values())
 
 

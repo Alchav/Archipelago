@@ -718,6 +718,10 @@ def get_pool_core(world):
     for item, maximum in item_difficulty_max[world.item_pool_value].items():
         replace_max_item(pool, item, maximum, world.random)
 
+    rmv_items = [item for item, weight in junk_pool_base] + ['Recovery Heart', 'Bombs (20)', 'Arrows (30)', "Ice Trap"]
+    rmv_items.remove("Rupees (50)")
+    pool = [item for item in pool if item not in rmv_items or not world.random.randint(0, 10)]
+
     # world.distribution.alter_pool(world, pool)
 
     # Make sure our pending_junk_pool is empty. If not, remove some random junk here.

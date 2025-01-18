@@ -13,19 +13,20 @@ from worlds.generic.Rules import add_item_rule, add_rule
 
 def swappable(multiworld, loc):
     from worlds.papermario.data.ItemList import progression_miscitems
+    if not loc.item:
+        return True
     if loc.locked:
         return False
     if not isinstance(loc.address, int):
         return False
-    if loc.item:
-        if loc.item.trap and loc.item.game != "Super Mario Land 2":
-            return False
-        if loc.item.name in multiworld.worlds[loc.player].options.local_items:
-            return False
-        if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
-            return False
-        if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
-            return False
+    if loc.item.trap and loc.item.game != "Super Mario Land 2":
+        return False
+    if loc.item.name in multiworld.worlds[loc.player].options.local_items:
+        return False
+    if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
+        return False
+    if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
+        return False
     if "SSS Merluvlee's House Merlow's Badges" in loc.name:
          return False
     if loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name):
@@ -36,7 +37,7 @@ def swappable(multiworld, loc):
 def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_unreachables=True):
     print("Running get_item_spheres")
     state = CollectionState(multiworld)
-    locations = set(multiworld.get_filled_locations())
+    locations = set(multiworld.get_locations())
     beaten_games = set()
     i = 1
     while locations:
@@ -47,11 +48,13 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_tokens = {location for location in reachable_locations if location.item.game == "Item Dispenser"}
+            reachable_tokens = {location for location in reachable_locations if location.item and location.item.game == "Item Dispenser"}
             for location in reachable_events:
-                state.collect(location.item, True, location)
+                if location.item:
+                  state.collect(location.item, True, location)
             for location in reachable_tokens:
-                state.collect(location.item, True, location)
+                if location.item:
+                    state.collect(location.item, True, location)
             locations -= reachable_events
             sphere_reachable_tokens.update(reachable_tokens)
             locations -= reachable_tokens
@@ -75,7 +78,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
             yield yield_locs
 
         for location in reachable_locations:
-            if location.item.advancement:
+            if location.item and location.item.advancement:
                 state.collect(location.item, True, location)
         locations -= reachable_locations
 
@@ -609,11 +612,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         locations[loc.progress_type].append(loc)
 
     prioritylocations = locations[LocationProgressType.PRIORITY]
-    defaultlocations = locations[LocationProgressType.DEFAULT] + locations[LocationProgressType.EXCLUDED]
-    # excludedlocations = locations[LocationProgressType.EXCLUDED]
+    defaultlocations = locations[LocationProgressType.DEFAULT]
+    excludedlocations = locations[LocationProgressType.EXCLUDED]
 
-    for location in locations[LocationProgressType.EXCLUDED]:
-        add_rule(location, lambda state: state.multiworld.post_fill)
+    # for location in locations[LocationProgressType.EXCLUDED]:
+    #     add_rule(location, lambda state: False)
 
     # can't lock due to accessibility corrections touching things, so we remember which ones got placed and lock later
     lock_later = []
@@ -681,8 +684,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     filleritempool.sort(key=lambda i: i.trap)
 
-    # remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded",
-    #                move_unplaceable_to_start_inventory=panic_method=="start_inventory")
+    remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded",
+                   move_unplaceable_to_start_inventory=panic_method=="start_inventory")
 
     # if excludedlocations:
     #     raise FillError(
@@ -692,14 +695,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     restitempool = filleritempool + usefulitempool
 
-    multiworld.post_fill = True
+    # multiworld.post_fill = True
     remaining_fill(multiworld, defaultlocations, restitempool,
                    move_unplaceable_to_start_inventory=panic_method=="start_inventory")
 
     unplaced = restitempool
     unfilled = defaultlocations
 
-    if unplaced or unfilled:
+    if unplaced:
         logging.warning(
             f"Unplaced items({len(unplaced)}): {unplaced} - Unfilled Locations({len(unfilled)}): {unfilled}")
         items_counter = Counter(location.item.player for location in multiworld.get_filled_locations())
@@ -716,6 +719,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #     entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[entrance.player](state) or rule(state)
 
     def iclass(i: Item):
+        if i is None:
+            return 0
         game = i.game
         if game == "Generic":
             game = multiworld.worlds[i.player].game
@@ -730,7 +735,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     or "Key" in i.name or "Traveling Merchant: " in i.name):
                 return 2
             else:
-                if not multiworld.random.randint(0, 4):
+                if not multiworld.random.randint(0, 3):
                     return 2
                 return 1
         # if game == "Starcraft 2":
@@ -847,9 +852,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # for i, sphere in enumerate(spheres, start=1):
         sphere = spheres[starting_sphere - 1]
 
-        filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and not location.item.advancement])
+        filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
         if not filler_sphere:
-            filler_sphere = sorted([location for location in sphere if location.address and location.item.classification != ItemClassification.progression and swappable(multiworld, location)])
+            filler_sphere = sorted([location for location in sphere if location.address and (not location.item or location.item.classification != ItemClassification.progression) and swappable(multiworld, location)])
             if not filler_sphere:
                 filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location)])
         # for player, sphere_check in starting_spheres.items():
@@ -857,9 +862,12 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # multiworld.push_precollected(location.item)
         if starting_sphere not in multiworld.worlds[2].displaced_items:
             multiworld.worlds[2].displaced_items[starting_sphere] = []
-        multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
-        location.item.location = None
-        print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing {location.item.name}")
+        if location.item:
+            multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
+            location.item.location = None
+            print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing {location.item.name}")
+        else:
+            print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing nothing")
         multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
         # location.item =
         # location.item.location = location
@@ -993,25 +1001,25 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #                                           "Deku Seeds (30)", "Mystery")):
     #             location.item = sc2_items.pop()
 
-        more_locations = locations_counter - items_counter
-        more_items = items_counter - locations_counter
-        for player in multiworld.player_ids:
-            if more_locations[player]:
-                logging.error(
-                    f"Player {multiworld.get_player_name(player)} had {more_locations[player]} more locations than items.")
-            elif more_items[player]:
-                logging.warning(
-                    f"Player {multiworld.get_player_name(player)} had {more_items[player]} more items than locations.")
-        if unfilled:
-            raise FillError(
-                f"Unable to fill all locations.\n" +
-                f"Unfilled locations({len(unfilled)}): {unfilled}"
-            )
-        else:
-            logging.warning(
-                f"Unable to place all items.\n" +
-                f"Unplaced items({len(unplaced)}): {unplaced}"
-            )
+        # more_locations = locations_counter - items_counter
+        # more_items = items_counter - locations_counter
+        # for player in multiworld.player_ids:
+        #     if more_locations[player]:
+        #         logging.error(
+        #             f"Player {multiworld.get_player_name(player)} had {more_locations[player]} more locations than items.")
+        #     elif more_items[player]:
+        #         logging.warning(
+        #             f"Player {multiworld.get_player_name(player)} had {more_items[player]} more items than locations.")
+        # if unfilled:
+        #     raise FillError(
+        #         f"Unable to fill all locations.\n" +
+        #         f"Unfilled locations({len(unfilled)}): {unfilled}"
+        #     )
+        # else:
+        #     logging.warning(
+        #         f"Unable to place all items.\n" +
+        #         f"Unplaced items({len(unplaced)}): {unplaced}"
+        #     )
 
 
 def flood_items(multiworld: MultiWorld) -> None:

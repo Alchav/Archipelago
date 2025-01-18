@@ -675,7 +675,7 @@ def create_archaeology_items(item_factory: StardewItemFactory, options: StardewV
 def create_filler_festival_rewards(item_factory: StardewItemFactory, options: StardewValleyOptions) -> List[Item]:
     if options.festival_locations == FestivalLocations.option_disabled:
         return []
-
+    return []
     return [item_factory(item) for item in items_by_group[Group.FESTIVAL] if
             item.classification == ItemClassification.filler]
 
@@ -776,23 +776,23 @@ def fill_with_resource_packs_and_traps(item_factory: StardewItemFactory, options
                         if Group.MAXIMUM_ONE not in filler_pack.groups or
                         (filler_pack.name not in [priority_item.name for priority_item in
                                                   priority_filler_items] and filler_pack.name not in items_already_added_names)]
-
-    while required_resource_pack > 0:
-        resource_pack = random.choice(all_filler_packs)
-        exactly_2 = Group.EXACTLY_TWO in resource_pack.groups
-        while exactly_2 and required_resource_pack == 1:
-            resource_pack = random.choice(all_filler_packs)
-            exactly_2 = Group.EXACTLY_TWO in resource_pack.groups
-        classification = ItemClassification.useful if resource_pack.classification == ItemClassification.progression else resource_pack.classification
-        items.append(item_factory(resource_pack, classification))
-        required_resource_pack -= 1
-        if exactly_2:
-            items.append(item_factory(resource_pack, classification))
-            required_resource_pack -= 1
-        if exactly_2 or Group.MAXIMUM_ONE in resource_pack.groups:
-            all_filler_packs.remove(resource_pack)
-
     return items
+    # while required_resource_pack > 0:
+    #     resource_pack = random.choice(all_filler_packs)
+    #     exactly_2 = Group.EXACTLY_TWO in resource_pack.groups
+    #     while exactly_2 and required_resource_pack == 1:
+    #         resource_pack = random.choice(all_filler_packs)
+    #         exactly_2 = Group.EXACTLY_TWO in resource_pack.groups
+    #     classification = ItemClassification.useful if resource_pack.classification == ItemClassification.progression else resource_pack.classification
+    #     items.append(item_factory(resource_pack, classification))
+    #     required_resource_pack -= 1
+    #     if exactly_2:
+    #         items.append(item_factory(resource_pack, classification))
+    #         required_resource_pack -= 1
+    #     if exactly_2 or Group.MAXIMUM_ONE in resource_pack.groups:
+    #         all_filler_packs.remove(resource_pack)
+    #
+    # return items
 
 
 def filter_deprecated_items(items: List[ItemData]) -> List[ItemData]:
