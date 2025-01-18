@@ -5,6 +5,5 @@ pymongo
 chardet
 requests
 markdown
-javascripthon
 pyaes
 
