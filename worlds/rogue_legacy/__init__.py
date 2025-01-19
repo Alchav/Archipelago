@@ -190,7 +190,7 @@ class RLWorld(World):
             "challenge_herodotus":        bool(self.get_setting("herodotus")),
             "require_bosses":             bool(self.get_setting("fountain_door_requirement") != "fountain_pieces"),
             "fountain_piece_requirement": self.fountain_piece_requirement,
-            "death_link":                 False,
+            "death_link":                 "disabled",
         }
 
         return slot_data
