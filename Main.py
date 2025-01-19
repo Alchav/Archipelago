@@ -265,9 +265,9 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
             #             if location.item.advancement:
             #                 state.collect(location.item, True, location)
             #         locations -= reachable_locations
-
+            spheres = list(get_item_spheres(multiworld))
             unr = False
-            for i, sphere in enumerate(get_item_spheres(multiworld), 1):
+            for i, sphere in enumerate(spheres, 1):
                 if not sphere:
                     unr = True
                 for location in sphere:
@@ -354,8 +354,9 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
 
                 # get spheres -> filter address==None -> skip empty
                 spheres: List[Dict[int, Set[int]]] = []
-                for sphere in multiworld.get_sendable_spheres():
+                for sphere in spheres:
                     current_sphere: Dict[int, Set[int]] = collections.defaultdict(set)
+                    sphere_location: Location
                     for sphere_location in sphere:
                         current_sphere[sphere_location.player].add(sphere_location.address)
 
