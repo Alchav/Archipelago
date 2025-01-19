@@ -53,9 +53,9 @@ class SpireWorld(World):
             extra_items.append(SpireItem("Boss Relic", self.player))
         for _ in range(60):
             extra_items.append(SpireItem("Relic", self.player))
-        for _ in range(30):
+        for _ in range(15):
             extra_items.append(SpireItem("Rare Card Draw", self.player))
-        for _ in range(30):
+        for _ in range(15):
             extra_items.append(SpireItem("Card Draw", self.player))
         for item in extra_items:
             item.classification = ItemClassification.useful
