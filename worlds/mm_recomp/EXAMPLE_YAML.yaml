@@ -32,7 +32,7 @@ description: Default Majora's Mask Recompiled Template
 
 game: Majora's Mask Recompiled
 requires:
-  version: 0.5.0 # Version of Archipelago required for this yaml to work as expected.
+  version: 0.5.1 # Version of Archipelago required for this yaml to work as expected.
 
 Majora's Mask Recompiled:
   # Game Options
@@ -54,17 +54,58 @@ Majora's Mask Recompiled:
   accessibility:
     # Set rules for reachability of your items/locations.
     # 
-    # - **Locations:** ensure everything can be reached and acquired.
-    # - **Items:** ensure all logically relevant items can be acquired.
-    # - **Minimal:** ensure what is needed to reach your goal can be acquired.
-    locations: 0
-    items: 50
+    # **Full:** ensure everything can be reached and acquired.
+    # 
+    # **Minimal:** ensure what is needed to reach your goal can be acquired.
+    full: 50
     minimal: 0
 
   logic_difficulty:
     # Set the logic difficulty used when generating.
     easy: 50
     no_logic: 0
+
+  camc:
+    # Set whether chest appearance matches contents.
+    'false': 0
+    'true': 50
+
+  swordless:
+    # Start the game without a sword, and shuffle an extra Progressive Sword into the pool.
+    'false': 50
+    'true': 0
+
+  shieldless:
+    # Start the game without a shield, and shuffle an extra Progressive Shield into the pool.
+    'false': 50
+    'true': 0
+
+  starting_hearts:
+    # The number of heart quarters Link starts with.
+    # If less than 12, extra heart items will be shuffled into the pool to accommodate.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 4
+    # Maximum value is 12
+    12: 50
+    random: 0
+    random-low: 0
+    random-high: 0
+
+  starting_hearts_are_containers_or_pieces:
+    # Choose whether Link's starting hearts are shuffled into the pool as Heart Containers (plus the remainder as Heart Pieces) or as all Heart Pieces.
+    containers: 50
+    pieces: 0
+
+  shuffle_boss_remains:
+    # Choose whether to shuffle the Boss Remains received after beating a boss at the end of a dungeon.
+    #
+    # vanilla: Boss Remains are placed in their vanilla locations.
+    # anything: Any item can be given by any of the Boss Remains, and Boss Remains can be found anywhere in any world.
+    # bosses: Boss Remains are shuffled amongst themselves as the rewards for defeating bosses.
+    vanila: 0
+    anywhere: 50
+    bosses: 0
 
   shuffle_swamphouse_reward:
     # Choose whether to shuffle the Mask of Truth given at the end of the Southern Swamphouse.
@@ -91,8 +132,31 @@ Majora's Mask Recompiled:
     'false': 50
     'true': 0
 
+  start_with_consumables:
+    # Choose whether to start with basic consumables (99 rupees, 10 deku sticks, 20 deku nuts).
+    'false': 50
+    'true': 0
+
+  permanent_chateau_romani:
+    # Choose whether the Chateau Romani stays even after a reset.
+    'false': 50
+    'true': 0
+
+  reset_with_inverted_time:
+    # Choose whether time starts out inverted at Day 1, even after a reset.
+    'false': 50
+    'true': 0
+
+  receive_filled_wallets:
+    # Choose whether you receive wallets pre-filled (not including the starting wallet).
+    'false': 50
+    'true': 0
+
+  link_tunic_color:
+    [30, 105, 27]
+
   death_link:
-    # When you die, everyone dies. Of course the reverse is true too.
+    # When you die, everyone who enabled death link dies. Of course, the reverse is true too.
     'false': 50
     'true': 0
 

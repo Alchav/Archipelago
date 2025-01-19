@@ -14,10 +14,64 @@ class MMRLocationData(NamedTuple):
     locked_item: Optional[str] = None
 
 
+def can_create_heart_location(shp, c_or_p, loc_index):
+    if c_or_p == 0:
+        starting_containers = int(shp/4) - 1
+        starting_pieces = shp % 4
+        shuffled_containers = int((12 - shp)/4)
+        shuffled_pieces = (12 - shp) % 4
+        return starting_containers + starting_pieces + shuffled_containers + shuffled_pieces >= loc_index
+    else:
+        return True
+
 location_data_table: Dict[str, MMRLocationData] = {
     "Link's Inventory (Kokiri Sword)": MMRLocationData(
         region="Clock Town",
         address=0x3469420000037
+    ),
+    "Link's Inventory (Hero's Shield)": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420000032
+    ),
+    "Link's Inventory (Heart Item #1)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0000,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 1)
+    ),
+    "Link's Inventory (Heart Item #2)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0001,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 2)
+    ),
+    "Link's Inventory (Heart Item #3)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0002,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 3)
+    ),
+    "Link's Inventory (Heart Item #4)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0003,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 4)
+    ),
+    "Link's Inventory (Heart Item #5)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0004,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 5)
+    ),
+    "Link's Inventory (Heart Item #6)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0005,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 6)
+    ),
+    "Link's Inventory (Heart Item #7)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0006,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 7)
+    ),
+    "Link's Inventory (Heart Item #8)": MMRLocationData(
+        region="Clock Town",
+        address=0x34694200D0007,
+        can_create=lambda options: can_create_heart_location(options.starting_hearts.value, options.starting_hearts_are_containers_or_pieces.value, 8)
     ),
     "Keaton Quiz": MMRLocationData(
         region="Clock Town",
@@ -59,6 +113,14 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Clock Town",
         address=0x34694200000A1
     ),
+    "South Clock Town Moon's Tear Trade": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420000097
+    ),
+    "South Clock Town Clock Tower Freestanding HP": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420056F0A
+    ),
     "South Clock Town Corner Chest": MMRLocationData(
         region="Clock Town",
         address=0x3469420066F00
@@ -99,11 +161,11 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Clock Town",
         address=0x3469420061700
     ),
-    "East Clock Town Sewer Chest": MMRLocationData(
+    "Bomber's Hideout Chest": MMRLocationData(
         region="Clock Town",
         address=0x3469420062900
     ),
-    "East Clock Town Astral Observatory": MMRLocationData(
+    "Bomber's Hideout Astral Observatory": MMRLocationData(
         region="Clock Town",
         address=0x3469420000096
     ),
@@ -130,6 +192,10 @@ location_data_table: Dict[str, MMRLocationData] = {
     "North Clock Town Great Fairy Reward (Has Transformation Mask)": MMRLocationData(
         region="Clock Town",
         address=0x3469420000086
+    ),
+    "West Clock Town Lottery Any Day": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420080239
     ),
     "West Clock Town Swordsman Expert Course": MMRLocationData(
         region="Clock Town",
@@ -158,14 +224,6 @@ location_data_table: Dict[str, MMRLocationData] = {
     "West Clock Town Priority Mail to Postman": MMRLocationData(
         region="Clock Town",
         address=0x3469420000084
-    ),
-    "Moon's Tear Trade": MMRLocationData(
-        region="Clock Town",
-        address=0x3469420000097
-    ),
-    "Moon's Tear Trade Freestanding HP": MMRLocationData(
-        region="Clock Town",
-        address=0x3469420056F0A
     ),
     "Top of Clock Tower (Ocarina of Time)": MMRLocationData(
         region="Clock Town",
@@ -258,18 +316,6 @@ location_data_table: Dict[str, MMRLocationData] = {
     "Termina Moon's Tear Scrub HP": MMRLocationData(
         region="Termina Field",
         address=0x346942007024C
-    ),
-    "Milk Road Gorman Ranch Race": MMRLocationData(
-        region="Gorman Brothers Track",
-        address=0x3469420000081
-    ),
-    "Romani Ranch Grog": MMRLocationData(
-        region="Romani Ranch",
-        address=0x346942000007F
-    ),
-    "Romani Ranch Helping Cremia": MMRLocationData(
-        region="Romani Ranch",
-        address=0x3469420000082
     ),
     "Road to Swamp Tree HP": MMRLocationData(
         region="Southern Swamp",
@@ -609,10 +655,10 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Mountain Village",
         address=0x3469420000079
     ),
-    "Mountain Village Feeding Freezing Goron": MMRLocationData(
-        region="Mountain Village",
-        address=0x3469420000088
-    ),
+    # ~ "Mountain Village Feeding Freezing Goron": MMRLocationData(
+        # ~ region="Mountain Village",
+        # ~ address=0x3469420000088
+    # ~ ),
     "Twin Islands Spring Underwater Cave Chest": MMRLocationData(
         region="Twin Islands",
         address=0x3469420065E00
@@ -657,7 +703,11 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Path to Snowhead",
         address=0x3469420055B08
     ),
-    "Snowhead Temple Elevator Room Upper Chest": MMRLocationData(
+    "Snowhead Great Fairy Reward": MMRLocationData(
+        region="Snowhead Temple",
+        address=0x3469420030002
+    ),
+    "Snowhead Temple Elevator Room Invisible Platform Chest": MMRLocationData(
         region="Snowhead Temple",
         address=0x3469420062113
     ),
@@ -685,7 +735,7 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Snowhead Temple",
         address=0x346942001212C
     ),
-    "Snowhead Temple Snowman Bubble SF": MMRLocationData(
+    "Snowhead Temple Snowmen Bubble SF": MMRLocationData(
         region="Snowhead Temple",
         address=0x346942001212B
     ),
@@ -721,11 +771,11 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Snowhead Temple",
         address=0x3469420062115
     ),
-    "Snowhead Temple Grey Door Center Chest": MMRLocationData(
+    "Snowhead Temple Light Blue Door Center Chest": MMRLocationData(
         region="Snowhead Temple",
         address=0x346942006211C
     ),
-    "Snowhead Temple Grey Door Upper Chest": MMRLocationData(
+    "Snowhead Temple Light Blue Door Upper Chest": MMRLocationData(
         region="Snowhead Temple",
         address=0x3469420062119
     ),
@@ -753,15 +803,31 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Snowhead Temple",
         address=0x3469420000056
     ),
+    "Milk Road Gorman Ranch Race": MMRLocationData(
+        region="Gorman Brothers Track",
+        address=0x3469420000081
+    ),
+    "Romani Ranch Grog": MMRLocationData(
+        region="Romani Ranch",
+        address=0x346942000007F
+    ),
     "Romani Ranch Doggy Racetrack Rooftop Chest": MMRLocationData(
         region="Romani Ranch",
         address=0x3469420064100
     ),
-    "Great Bay Dying Zora": MMRLocationData(
+    "Romani Ranch Doggy Race": MMRLocationData(
+        region="Romani Ranch",
+        address=0x3469420070117
+    ),
+    # ~ "Romani Ranch Helping Cremia": MMRLocationData(
+        # ~ region="Romani Ranch",
+        # ~ address=0x3469420000082
+    # ~ ),
+    "Great Bay Healing Zora": MMRLocationData(
         region="Great Bay",
         address=0x346942000007A
     ),
-    "Great Bay Coast Behind Fishermans Hut Grotto Chest": MMRLocationData(
+    "Great Bay Behind Fishermans Hut Grotto Chest": MMRLocationData(
         region="Great Bay",
         address=0x3469420060717
     ),
@@ -789,6 +855,10 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Zora Cape",
         address=0x3469420060715
     ),
+    "Great Bay Great Fairy Reward": MMRLocationData(
+        region="Zora Cape",
+        address=0x3469420030003
+    ),
     "Zora Hall Goron Scrub Trade": MMRLocationData(
         region="Zora Hall",
         address=0x346942000009A
@@ -797,7 +867,11 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Zora Hall",
         address=0x3469420054C1E
     ),
-    "Pirates' Fortress Sewers HP": MMRLocationData(
+    "Zora Hall Piano Zora Song": MMRLocationData(
+        region="Zora Hall",
+        address=0x3469420070241
+    ),
+    "Pirates' Fortress Sewers Cage HP": MMRLocationData(
         region="Pirates' Fortress Sewers",
         address=0x346942005230C
     ),
@@ -833,7 +907,7 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Pirates' Fortress Sewers",
         address=0x3469420062303
     ),
-    "Pirates' Fortress Hub Chest": MMRLocationData(
+    "Pirates' Fortress Hub Lower Chest": MMRLocationData(
         region="Pirates' Fortress Sewers",
         address=0x3469420061400
     ),
@@ -853,9 +927,163 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Pinnacle Rock",
         address=0x3469420062501
     ),
+    "Ocean Spider House Ramp Upper Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006280C,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Ramp Lower Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006280D,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Lobby Ceiling Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006280F,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Rafter Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062806,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Open Pot #1 Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062818,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Open Pot #2 Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062817,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Wall Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006281D,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Library Top Bookcase Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062804,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Library Passage Behind Bookcase Front Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006281C,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Library Passage Behind Bookcase Rear Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062815,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Libary Painting #1 Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062814,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Library Painting #2 Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062802,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Library Rafter Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062808,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Library Bookshelf Hole Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062803,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Downstairs Rafter Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062805,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Downstairs Open Pot Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006281B,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Downstairs Behind Staircase Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006281E,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Downstairs Crate Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006280B,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House First Room Downstairs Wall Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006280E,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Dining Room Open Pot Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062819,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Dining Room Painting Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062813,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Dining Room Ceiling Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062807,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Dining Room Chandelier #1 Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062810,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Dining Room Chandelier #2 Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062811,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Dining Room Chandelier #3 Token ": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062812,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Storage Room Web Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062809,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Storage Room North Wall Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062801,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Storage Room Crate Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420062816,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Storage Room Hidden Hole Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006280A,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
+    "Ocean Spider House Storage Room Ceiling Pot Token": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x346942006281A,
+        can_create=lambda options: options.skullsanity.value != 2
+    ),
     "Ocean Spider House Coloured Mask Sequence HP": MMRLocationData(
         region="Ocean Spider House",
         address=0x3469420062800
+    ),
+    "Ocean Spider House Reward": MMRLocationData(
+        region="Ocean Spider House",
+        address=0x3469420000009
     ),
     "Great Bay Temple Pot At Bottom Of Blender SF": MMRLocationData(
         region="Great Bay Temple",
@@ -873,7 +1101,7 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Great Bay Temple",
         address=0x346942001491C
     ),
-    "Great Bay Temple Red-Green Pipe First Room SF": MMRLocationData(
+    "Great Bay Temple Red-Green Pipe First Room Pot SF": MMRLocationData(
         region="Great Bay Temple",
         address=0x346942001491E
     ),
@@ -1001,13 +1229,17 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Secret Shrine",
         address=0x3469420060714
     ),
-    "Canyon Deku Trade Freestanding HP": MMRLocationData(
+    "Ikana Canyon Zora Trade Freestanding HP": MMRLocationData(
         region="Ikana Canyon",
         address=0x346942005131E
     ),
     "Ikana Canyon Music Box Mummy": MMRLocationData(
         region="Ikana Canyon",
         address=0x3469420000087
+    ),
+    "Stone Tower Great Fairy Reward": MMRLocationData(
+        region="Ikana Canyon",
+        address=0x3469420000010
     ),
     "Ikana Well Final Chest": MMRLocationData(
         region="Beneath the Well",
@@ -1025,10 +1257,10 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Ikana Castle",
         address=0x3469420051D0A
     ),
-   # ~"Ikana Castle King Song" MMRLocationData(
-     #  ~ region="Ikana Castle",
-      # ~ address=0x34694200xxxx
-    ),
+    # ~ "Ikana Castle King Song" MMRLocationData(
+        # ~ region="Ikana Castle",
+        # ~ address=0x34694200xxxx
+    # ~ ),
     # ~ "Stone Tower Temple 1F Bridge Room Underwater Switch Chest Glitched": MMRLocationData(
         # ~ region="Stone Tower Temple",
         # ~ address=0x346942006160E
