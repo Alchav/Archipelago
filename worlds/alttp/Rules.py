@@ -922,7 +922,7 @@ def fake_flipper_rules(world, player):
         set_rule(world.get_entrance('Dark Lake Hylia Ledge Drop', player), lambda state: True)
         set_rule(world.get_entrance('East Dark World Pier', player), lambda state: True)
         #qirn jump
-        set_rule(world.get_entrance('East Dark World River Pier', player), lambda state: True)
+        set_rule(world.get_entrance('East Dark World River Pier', player), lambda state: can_use_bombs(state, player))
     else:
         set_rule(world.get_entrance('Zoras River', player), lambda state: True)
         set_rule(world.get_entrance('Lake Hylia Central Island Pier', player), lambda state: True)
@@ -931,7 +931,7 @@ def fake_flipper_rules(world, player):
         set_rule(world.get_entrance('Dark Lake Hylia Teleporter', player), lambda state: state.has('Moon Pearl', player))
         set_rule(world.get_entrance('Dark Lake Hylia Ledge Drop', player), lambda state: state.has('Moon Pearl', player))
         #qirn jump
-        set_rule(world.get_entrance('East Dark World River Pier', player), lambda state: state.has('Moon Pearl', player))
+        set_rule(world.get_entrance('East Dark World River Pier', player), lambda state: state.has('Moon Pearl', player) and can_use_bombs(state, player))
 
 
 def bomb_jump_requirements(multiworld, player):

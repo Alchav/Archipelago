@@ -107,10 +107,10 @@ class MMRWorld(World):
             mw.get_location("Snowhead Temple Goht's Remains", player).place_locked_item(self.create_item("Goht's Remains"))
             mw.get_location("Great Bay Temple Gyorg's Remains", player).place_locked_item(self.create_item("Gyorg's Remains"))
             mw.get_location("Stone Tower Temple Inverted Twinmold's Remains", player).place_locked_item(self.create_item("Twinmold's Remains"))
-
+        
         if self.options.shuffle_boss_remains.value == 2:
             remains_list = ["Odolwa's Remains", "Goht's Remains", "Gyorg's Remains", "Twinmold's Remains"]
-
+            
             mw.get_location("Woodfall Temple Odolwa's Remains", player).place_locked_item(self.create_item(remains_list.pop(self.random.randint(0, 3))))
             mw.get_location("Snowhead Temple Goht's Remains", player).place_locked_item(self.create_item(remains_list.pop(self.random.randint(0, 2))))
             mw.get_location("Great Bay Temple Gyorg's Remains", player).place_locked_item(self.create_item(remains_list.pop(self.random.randint(0, 1))))
