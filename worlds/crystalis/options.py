@@ -19,7 +19,7 @@ class RandomizeMaps(Toggle):
 
 
 class ShuffleAreas(Toggle):
-    """NOT IMPLEMENTED YET: Shuffles some or all area connections."""
+    """Shuffles some or all area connections."""
     display_name = "Shuffle areas (Wa)"
     visibility = Visibility.none
 
@@ -30,7 +30,7 @@ class ShuffleAreas(Toggle):
 
 
 class ShuffleHouseEntrances(Toggle):
-    """NOT IMPLEMENTED YET: Shuffles all the house entrances, as well as a handful of other things, like the
+    """Shuffles all the house entrances, as well as a handful of other things, like the
     palace/fortress-type entrances at the top of several towns, and standalone houses.
     """
     display_name = "Shuffle house entrances (Wh)"
