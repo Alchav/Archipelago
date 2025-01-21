@@ -9,6 +9,10 @@ CRYSTALIS_APWORLD_VERSION = "1.0.0"
 BOSS_NAMES: List[str] = ["Giant Insect", "Vampire 2", "Kelbesque 1", "Sabera 1", "Mado 1", "Kelbesque 2", "Sabera 2",
                          "Mado 2", "Karmine"]
 ELEMENTS: List[str] = ["Wind", "Fire", "Water", "Thunder"]
+WALL_NAMES: List[str] = ["Zebu Cave", "East Cave", "Sealed Cave", "Mt Sabre West", "Mt Sabre North", "Waterfall Cave",
+                         "Fog Lamp Cave", "Kirisa Plant Cave", "Evil Spirit Island", "Mt Hydra",
+                         "Goa Fortress - Entrance", "Goa Fortress Basement", "Goa Fortress - Sabera Item",
+                         "Goa Fortress - Sabera Boss", "Goa Fortress - Mado 2", "Goa Fortress - Karmine 5"]
 
 
 def convert_text_to_elem_int(text: str) -> int:

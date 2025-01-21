@@ -226,18 +226,18 @@ class CrystalisWorld(World):
 
 
         #walls first
-        wall_names: List[str] = ["Zebu Cave", "East Cave", "Sealed Cave", "Mt Sabre West", "Mt Sabre North",
-                                 "Waterfall Cave", "Fog Lamp Cave", "Kirisa Plant Cave", "Evil Spirit Island",
-                                 "Mt Hydra", "Goa Fortress - Entrance", "Goa Fortress Basement",
-                                 "Goa Fortress - Sabera Item", "Goa Fortress - Sabera Boss", "Goa Fortress - Mado 2",
-                                 "Goa Fortress - Karmine 5"]
-        wall_weaknesses: List[str]
+
+        wall_weaknesses: List[str] = []
         if self.options.randomize_wall_elements:
-            wall_weaknesses = [self.random.choice(ELEMENTS) for _ in range(len(wall_names))]
+            for wall_name in WALL_NAMES:
+                if wall_name in self.options.wall_element_plando.value:
+                    wall_weaknesses.append(self.options.wall_element_plando.value[wall_name])
+                else:
+                    wall_weaknesses.append(self.random.choice(ELEMENTS))
         else:
             wall_weaknesses = ["Fire", "Wind", "Wind", "Fire", "Fire", "Fire", "Wind", "Wind", "Wind", "Wind",
                                "Thunder", "Thunder", "Thunder", "Thunder", "Thunder", "Thunder"]
-        wall_map: Dict[str, str] = dict(zip(wall_names, wall_weaknesses))
+        wall_map: Dict[str, str] = dict(zip(WALL_NAMES, wall_weaknesses))
         #then key item names
         key_item_names: Dict[str, str] = self.unidentify_items()
         #then trade-ins

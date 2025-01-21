@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from Options import Choice, Toggle, PerGameCommonOptions, DeathLink, DeathLinkMixin, OptionGroup, StartInventoryPool, \
     Visibility, PlandoConnections, OptionDict
 from .regions import entrances_data, SHUFFLE_GROUPING
-from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES
+from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES, WALL_NAMES
 from schema import And, Schema, Optional
 
 # World Options
@@ -771,6 +771,20 @@ class PlandoBossWeaknesses(OptionDict):
         })
 
 
+class PlandoWallElements(OptionDict):
+    """Allows defining what elements the walls of the game are vulnerable to. If a wall is not specified in the list,
+    then its weakness is chosen randomly, as it normally would be. This option only does anything when
+    randomize_wall_elements is set to true. Generate a spoiler log with randomize_wall_elements on for a list of valid
+    wall names, or see WALL_NAMES in types.py in the GitHub repository."""
+    valid_keys = frozenset(WALL_NAMES)
+    display_name = "Wall Element Plando"
+    schema = Schema({
+        Optional(name): And(str, lambda elem: elem.capitalize() in ELEMENTS,
+                            error="Invalid element in wall_element_plando")
+            for name in WALL_NAMES
+        })
+
+
 crystalis_option_groups = [
     OptionGroup('World Options', [
         RandomizeMaps,
@@ -847,7 +861,8 @@ crystalis_option_groups = [
     ]),
     OptionGroup('Plando', [
         CrystalisPlandoConnections,
-        PlandoBossWeaknesses
+        PlandoBossWeaknesses,
+        PlandoWallElements
     ])
 ]
 
@@ -920,3 +935,4 @@ class CrystalisOptions(PerGameCommonOptions, DeathLinkMixin):
     start_inventory_from_pool: StartInventoryPool
     plando_connections: CrystalisPlandoConnections
     boss_weakness_plando: PlandoBossWeaknesses
+    wall_element_plando: PlandoWallElements
