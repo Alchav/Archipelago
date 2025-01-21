@@ -6,26 +6,13 @@ from typing import List, Dict, Optional, Tuple
 
 CRYSTALIS_BASE_ID: int = 2241000
 CRYSTALIS_APWORLD_VERSION = "1.0.0"
+BOSS_NAMES: List[str] = ["Giant Insect", "Vampire 2", "Kelbesque 1", "Sabera 1", "Mado 1", "Kelbesque 2", "Sabera 2",
+                         "Mado 2", "Karmine"]
+ELEMENTS: List[str] = ["Wind", "Fire", "Water", "Thunder"]
 
 
-class CrystalisElementEnum(IntEnum):
-    WIND = 0
-    FIRE = 1
-    WATER = 2
-    THUNDER = 3
-
-
-def convert_text_to_elem_enum(text: str):
-    if text == "Wind":
-        return CrystalisElementEnum.WIND
-    if text == "Fire":
-        return CrystalisElementEnum.FIRE
-    if text == "Water":
-        return CrystalisElementEnum.WATER
-    if text == "Thunder":
-        return CrystalisElementEnum.THUNDER
-    logging.warning("Unregonized element: " + text)
-    return CrystalisElementEnum.WIND
+def convert_text_to_elem_int(text: str) -> int:
+    return ELEMENTS.index(text)
 
 
 class CrystalisItemCategoryEnum(IntEnum):

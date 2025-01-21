@@ -9,7 +9,7 @@ from worlds.AutoWorld import World
 from .items import items_data
 from .options import CrystalisOptions
 from .regions import regions_data, entrances_data, HOUSE_SHUFFLE_TYPES, AREA_SHUFFLE_TYPES
-from .types import CrystalisShuffleData, convert_text_to_elem_enum, CrystalisEntranceTypeEnum
+from .types import CrystalisShuffleData, convert_text_to_elem_int, CrystalisEntranceTypeEnum
 
 
 DEBUG: bool = False
@@ -91,22 +91,21 @@ def generate_statue_hint(world: World) -> str:
 def convert_shuffle_data(shuffle_data: CrystalisShuffleData, options: CrystalisOptions) -> Dict[str, Any]:
     wall_map: Dict[str, int] = {}
     for wall, elem in shuffle_data.wall_map.items():
-        elem_enum = convert_text_to_elem_enum(elem)
-        wall_map[wall] = elem_enum.value
+        wall_map[wall] = convert_text_to_elem_int(elem)
     key_item_names: Dict[str, str] = shuffle_data.key_item_names
     trade_in_map: Dict[str, str] = {}
     for recipient, trade in shuffle_data.trade_in_map.items():
         if recipient != "Rage" and recipient != "Tornel":
             trade_in_map[trade] = recipient
-    tornel_trade: int = convert_text_to_elem_enum(shuffle_data.trade_in_map["Tornel"]).value * 2 + 6
+    tornel_trade: int = convert_text_to_elem_int(shuffle_data.trade_in_map["Tornel"]) * 2 + 6
     rage_trade: int = items_data[shuffle_data.trade_in_map["Rage"]].rom_id
     boss_weaknesses: Dict[str, int] = {}
     for boss, weakness in shuffle_data.boss_reqs.items():
         boss_id = BOSS_IDS[boss]
         if boss == "Giant Insect" or boss == "Vampire 2":
-            boss_weaknesses[str(boss_id)] = 1 << convert_text_to_elem_enum(weakness).value
+            boss_weaknesses[str(boss_id)] = 1 << convert_text_to_elem_int(weakness)
         else:
-            boss_weaknesses[str(boss_id)] = ~(1 << convert_text_to_elem_enum(weakness).value) & 15
+            boss_weaknesses[str(boss_id)] = ~(1 << convert_text_to_elem_int(weakness)) & 15
     gbc_cave_exits: List[int]
     if len(shuffle_data.gbc_cave_exits) >= 2:
         possible_gbc_cave_exits: List[str] = ["Cordel Plains - Main", "Lime Valley", "Goa Valley", "Desert 2"]

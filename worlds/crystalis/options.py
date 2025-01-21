@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from Options import Choice, Toggle, PerGameCommonOptions, DeathLink, DeathLinkMixin, OptionGroup, StartInventoryPool, \
-    Visibility, PlandoConnections
-from .regions import entrances_data, GBC_CAVE_NAMES, SHUFFLE_GROUPING
-from .types import CrystalisEntranceTypeEnum
+    Visibility, PlandoConnections, OptionDict
+from .regions import entrances_data, SHUFFLE_GROUPING
+from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES
+from schema import And, Schema, Optional
 
 # World Options
 class RandomizeMaps(Toggle):
@@ -756,6 +757,20 @@ class CrystalisPlandoConnections(PlandoConnections):
         return entrances_data[entrance].entrance_type in SHUFFLE_GROUPING[entrances_data[exit].entrance_type]
 
 
+class PlandoBossWeaknesses(OptionDict):
+    """Allows defining what elements the bosses of the game are vulnerable to. Note that for Vampire 2 and Giant Insect,
+     this element corresponds to what element the boss is immune to, while for the Tetrarchs, this element corresponds
+     to the element the boss is weak to. If a boss is not specified in the list, then its weakness is chosen randomly,
+     as it normally would be. This option only does anything when randomize_monster_weaknesses is set to true."""
+    valid_keys = frozenset(BOSS_NAMES)
+    display_name = "Boss Weakness Plando"
+    schema = Schema({
+        Optional(name): And(str, lambda elem: elem.capitalize() in ELEMENTS,
+                            error="Invalid element in boss_weakness_plando")
+            for name in BOSS_NAMES
+        })
+
+
 crystalis_option_groups = [
     OptionGroup('World Options', [
         RandomizeMaps,
@@ -831,7 +846,8 @@ crystalis_option_groups = [
         AudibleWallCues,
     ]),
     OptionGroup('Plando', [
-        CrystalisPlandoConnections
+        CrystalisPlandoConnections,
+        PlandoBossWeaknesses
     ])
 ]
 
@@ -903,3 +919,4 @@ class CrystalisOptions(PerGameCommonOptions, DeathLinkMixin):
     #Misc Archipelago Only options
     start_inventory_from_pool: StartInventoryPool
     plando_connections: CrystalisPlandoConnections
+    boss_weakness_plando: PlandoBossWeaknesses

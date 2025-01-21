@@ -231,10 +231,9 @@ class CrystalisWorld(World):
                                  "Mt Hydra", "Goa Fortress - Entrance", "Goa Fortress Basement",
                                  "Goa Fortress - Sabera Item", "Goa Fortress - Sabera Boss", "Goa Fortress - Mado 2",
                                  "Goa Fortress - Karmine 5"]
-        elements = ["Wind", "Fire", "Water", "Thunder"]
         wall_weaknesses: List[str]
         if self.options.randomize_wall_elements:
-            wall_weaknesses = [self.random.choice(elements) for i in range(len(wall_names))]
+            wall_weaknesses = [self.random.choice(ELEMENTS) for _ in range(len(wall_names))]
         else:
             wall_weaknesses = ["Fire", "Wind", "Wind", "Fire", "Fire", "Fire", "Wind", "Wind", "Wind", "Wind",
                                "Thunder", "Thunder", "Thunder", "Thunder", "Thunder", "Thunder"]
@@ -249,20 +248,22 @@ class CrystalisWorld(World):
             self.random.shuffle(trade_in_items)
         trade_in_map: Dict[str, str] = dict(zip(trade_in_targets, trade_in_items))
         if self.options.randomize_tradeins:
-            trade_in_map["Tornel"] = self.random.choice(elements)
-            trade_in_map["Rage"] = "Sword of " + self.random.choice(elements)
+            trade_in_map["Tornel"] = self.random.choice(ELEMENTS)
+            trade_in_map["Rage"] = "Sword of " + self.random.choice(ELEMENTS)
         else:
             trade_in_map["Tornel"] = "Wind"
             trade_in_map["Rage"] = "Sword of Water"
         #bosses!
-        boss_names: List[str] = ["Giant Insect", "Vampire 2", "Kelbesque 1", "Sabera 1", "Mado 1", "Kelbesque 2",
-                                 "Sabera 2", "Mado 2", "Karmine"]
-        boss_weaknesses: List[str]
+        boss_weaknesses: List[str] = []
         if self.options.randomize_monster_weaknesses:
-            boss_weaknesses = [self.random.choice(elements) for i in range(len(boss_names))]
+            for name in BOSS_NAMES:
+                if name in self.options.boss_weakness_plando.value:
+                    boss_weaknesses.append(self.options.boss_weakness_plando.value[name])
+                else:
+                    boss_weaknesses.append(self.random.choice(ELEMENTS))
         else:
             boss_weaknesses = ["Wind", "Fire", "Wind", "Fire", "Water", "Wind", "Fire", "Water", "Thunder"]
-        boss_reqs: Dict[str, str] = dict(zip(boss_names, boss_weaknesses))
+        boss_reqs: Dict[str, str] = dict(zip(BOSS_NAMES, boss_weaknesses))
         gbc_cave_exits: List[str] = []
         if self.options.vanilla_maps == self.options.vanilla_maps.option_GBC_cave:
             possible_gbc_cave_exits = ["Cordel Plains - Main", "Lime Valley", "Goa Valley", "Desert 2"]
