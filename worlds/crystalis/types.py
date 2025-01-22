@@ -13,6 +13,7 @@ WALL_NAMES: List[str] = ["Zebu Cave", "East Cave", "Sealed Cave", "Mt Sabre West
                          "Fog Lamp Cave", "Kirisa Plant Cave", "Evil Spirit Island", "Mt Hydra",
                          "Goa Fortress - Entrance", "Goa Fortress Basement", "Goa Fortress - Sabera Item",
                          "Goa Fortress - Sabera Boss", "Goa Fortress - Mado 2", "Goa Fortress - Karmine 5"]
+TRADE_IN_NPCS: List[str] = ["Akahana", "Aryllis", "Fisherman", "Kensu", "Slimed Kensu"]
 
 
 def convert_text_to_elem_int(text: str) -> int:

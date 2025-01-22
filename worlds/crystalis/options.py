@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from Options import Choice, Toggle, PerGameCommonOptions, DeathLink, DeathLinkMixin, OptionGroup, StartInventoryPool, \
     Visibility, PlandoConnections, OptionDict
 from .regions import entrances_data, SHUFFLE_GROUPING
-from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES, WALL_NAMES
+from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES, WALL_NAMES, TRADE_IN_NPCS
+from .items import items_data
 from schema import And, Schema, Optional
 
 # World Options
@@ -785,6 +786,28 @@ class PlandoWallElements(OptionDict):
         })
 
 
+class PlandoTradeIns(OptionDict):
+    """Allows defining what NPC accepts what item. If one of the trade-in NPCs is not specified, it is randomized as
+    normal from among the non-plandoed options. Format is \"NPC Name\": \"Trade-in Name\". Valid NPC names are Akahana,
+    Aryllis, Fisherman, Kensu, and Slimed Kensu. Valid item names are Statue of Onyx, Fog Lamp, Love Pendant, Kirisa
+    Plant, and Ivory Statue. Does nothing if randomize_tradeins is false."""
+    def validate(data: dict[str, str]) -> bool:
+        return len(data) == len(set(data.values()))
+    schema = Schema(And({
+        Optional(name): And(str, lambda item_name: item_name in frozenset([item_data.name for item_data in
+                                                                           items_data.values() if item_data.default_count > 0
+                                                                           and "Trade-in" in item_data.groups]),
+                            error="Invalid trade-in item in trade_in_plando")
+        for name in TRADE_IN_NPCS
+    } | {
+        Optional("Tornel"): And(str, lambda elem: elem.capitalize() in ELEMENTS,
+                            error="Invalid element for Tornel in trade_in_plando"),
+        Optional("Rage"): And(str, lambda sword: sword.startswith("Sword of ") and
+                                                 sword.removeprefix("Sword of ").capitalize() in ELEMENTS,
+                            error="Invalid sword for Rage in trade_in_plando")
+    }, And(validate, error="Duplicate Trade-In item found; each trade-in item can only be used once.")))
+
+
 crystalis_option_groups = [
     OptionGroup('World Options', [
         RandomizeMaps,
@@ -862,7 +885,8 @@ crystalis_option_groups = [
     OptionGroup('Plando', [
         CrystalisPlandoConnections,
         PlandoBossWeaknesses,
-        PlandoWallElements
+        PlandoWallElements,
+        PlandoTradeIns
     ])
 ]
 
@@ -936,3 +960,4 @@ class CrystalisOptions(PerGameCommonOptions, DeathLinkMixin):
     plando_connections: CrystalisPlandoConnections
     boss_weakness_plando: PlandoBossWeaknesses
     wall_element_plando: PlandoWallElements
+    trade_in_plando: PlandoTradeIns

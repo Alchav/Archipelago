@@ -241,15 +241,30 @@ class CrystalisWorld(World):
         #then key item names
         key_item_names: Dict[str, str] = self.unidentify_items()
         #then trade-ins
-        trade_in_targets = ["Akahana", "Aryllis", "Fisherman", "Kensu", "Slimed Kensu"]
+        trade_in_npcs = TRADE_IN_NPCS.copy()
         trade_in_items = [key_item_names["Statue of Onyx"], "Kirisa Plant", key_item_names["Fog Lamp"],
                           "Love Pendant", key_item_names["Ivory Statue"]]
+        trade_in_map: Dict[str, str] = {}
         if self.options.randomize_tradeins:
+            for npc, trade_in in self.options.trade_in_plando.value.items():
+                if trade_in in key_item_names:
+                    trade_in_map[npc] = key_item_names[trade_in]
+                    trade_in_items.remove(key_item_names[trade_in])
+                    trade_in_npcs.remove(npc)
+                else:
+                    trade_in_map[npc] = trade_in
+                    if trade_in in trade_in_items:
+                        trade_in_items.remove(trade_in)
+                        trade_in_npcs.remove(npc)
             self.random.shuffle(trade_in_items)
-        trade_in_map: Dict[str, str] = dict(zip(trade_in_targets, trade_in_items))
+            trade_in_map.update(dict(zip(trade_in_npcs, trade_in_items)))
+        else:
+            trade_in_map = dict(zip(trade_in_npcs, trade_in_items))
         if self.options.randomize_tradeins:
-            trade_in_map["Tornel"] = self.random.choice(ELEMENTS)
-            trade_in_map["Rage"] = "Sword of " + self.random.choice(ELEMENTS)
+            if "Tornel" not in trade_in_map:
+                trade_in_map["Tornel"] = self.random.choice(ELEMENTS)
+            if "Rage" not in trade_in_map:
+                trade_in_map["Rage"] = "Sword of " + self.random.choice(ELEMENTS)
         else:
             trade_in_map["Tornel"] = "Wind"
             trade_in_map["Rage"] = "Sword of Water"
