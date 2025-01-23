@@ -2,9 +2,11 @@ from dataclasses import dataclass
 from Options import Choice, Toggle, PerGameCommonOptions, DeathLink, DeathLinkMixin, OptionGroup, StartInventoryPool, \
     Visibility, PlandoConnections, OptionDict
 from .regions import entrances_data, SHUFFLE_GROUPING
-from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES, WALL_NAMES, TRADE_IN_NPCS
+from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES, WALL_NAMES, TRADE_IN_NPCS, SHOP_INVENTORIES, \
+    CrystalisItemCategoryEnum
 from .items import items_data
 from schema import And, Schema, Optional
+from typing import List
 
 # World Options
 class RandomizeMaps(Toggle):
@@ -864,6 +866,29 @@ class PlandoKeyItemNames(OptionDict):
         for orig_item_data in items_data.values() if "Flute" in orig_item_data.groups and orig_item_data.default_count > 0
     }, And(validate, error="Duplicate key item name found; each key item name can only be used once.")))
 
+
+# helper function for validation of PlandoShopInventories
+def validate_shop_inventory(data: List[str]) -> bool:
+    if len(data) > 4:
+        return False
+    for item in data:
+        if item not in items_data or items_data[item].category != CrystalisItemCategoryEnum.FILLER or \
+                "Consumable" not in items_data[item].groups:
+            return False
+    return True
+
+
+class PlandoShopInventories(OptionDict):
+    """Allows defining what each item shop has available for purchase. Format is \"<town name> Item Shop\": [\"<item
+    name 1>\", \"<item name 2>\", ...]. Does nothing if vanilla_shops is true. Shops you plando will sell exactly the
+    items you specify. Other shops will be shuffled among themselves. At least one non-Shyron shop must sell Medical
+    Herbs, and at least one non-Shyron shop must sell Warp Boots."""
+
+    schema = Schema({
+        Optional(shop_name): And(list[str], validate_shop_inventory) for shop_name in SHOP_INVENTORIES.keys()
+    }, error="Invalid shop inventory in option shop_inventory_plando.")
+
+
 crystalis_option_groups = [
     OptionGroup('World Options', [
         RandomizeMaps,
@@ -943,7 +968,8 @@ crystalis_option_groups = [
         PlandoBossWeaknesses,
         PlandoWallElements,
         PlandoTradeIns,
-        PlandoKeyItemNames
+        PlandoKeyItemNames,
+        PlandoShopInventories
     ])
 ]
 
@@ -1019,3 +1045,4 @@ class CrystalisOptions(PerGameCommonOptions, DeathLinkMixin):
     wall_element_plando: PlandoWallElements
     trade_in_plando: PlandoTradeIns
     key_item_name_plando: PlandoKeyItemNames
+    shop_inventory_plando: PlandoShopInventories

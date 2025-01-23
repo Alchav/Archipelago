@@ -14,6 +14,19 @@ WALL_NAMES: List[str] = ["Zebu Cave", "East Cave", "Sealed Cave", "Mt Sabre West
                          "Goa Fortress - Entrance", "Goa Fortress Basement", "Goa Fortress - Sabera Item",
                          "Goa Fortress - Sabera Boss", "Goa Fortress - Mado 2", "Goa Fortress - Karmine 5"]
 TRADE_IN_NPCS: List[str] = ["Akahana", "Aryllis", "Fisherman", "Kensu", "Slimed Kensu"]
+SHOP_INVENTORIES: Dict[str, List[str]] = {
+            "Leaf Item Shop":     ["Medical Herb", "Antidote", "Warp Boots"],
+            "Brynmaer Item Shop": ["Medical Herb", "Antidote", "Warp Boots"],
+            "Oak Item Shop":      ["Medical Herb", "Antidote", "Fruit of Power"],
+            "Nadare's Item Shop": ["Medical Herb", "Antidote", "Fruit of Power", "Warp Boots"],
+            "Amazones Item Shop": ["Warp Boots", "Lysis Plant", "Fruit of Power"],
+            "Portoa Item Shop":   ["Medical Herb", "Warp Boots", "Lysis Plant", "Fruit of Lime"],
+            "Joel Item Shop":     ["Medical Herb", "Antidote", "Fruit of Power"],
+            "Swan Item Shop":     ["Medical Herb", "Antidote", "Fruit of Power", "Warp Boots"],
+            "Goa Item Shop":      ["Medical Herb", "Antidote", "Lysis Plant", "Warp Boots"],
+            "Shyron Item Shop":   ["Medical Herb", "Antidote", "Fruit of Lime", "Magic Ring"],
+            "Sahara Item Shop":   ["Antidote", "Magic Ring", "Fruit of Repun", "Warp Boots"]
+        }
 
 
 def convert_text_to_elem_int(text: str) -> int:

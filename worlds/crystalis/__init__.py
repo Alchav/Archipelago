@@ -96,11 +96,12 @@ class CrystalisWorld(World):
                 else:
                     add_color_to_mm2(item.name, convert_enum_to_palette(item.palette))
 
-
-
     def randomize_shop_inventories(self, starting_inventories: Dict[str, List[str]]) -> Dict[str, List[str]]:
-        total_inventory: Dict[str, int] = {}
         shuffled_shops: Dict[str, List[str]] = {}
+        for shop, inventory in self.options.shop_inventory_plando.value.items():
+            shuffled_shops[shop] = inventory
+            del starting_inventories[shop]
+        total_inventory: Dict[str, int] = {}
         unfilled_shops: List[str] = list(starting_inventories.keys())
         self.random.shuffle(unfilled_shops)
         for shop, inventory in starting_inventories.items():
@@ -110,21 +111,21 @@ class CrystalisWorld(World):
                     total_inventory[stock] = total_inventory[stock] + 1
                 else:
                     total_inventory[stock] = 1
-        #while we have inventory to put into shops
-        while len(total_inventory) > 0 and len(unfilled_shops) > 0:
+        # while we have inventory to put into shops
+        while total_inventory and unfilled_shops:
             filled_a_shop: bool = False
-            #go through the list of items
+            # go through the list of items
             out_of_stock: List[str] = []
             for stock, count in total_inventory.items():
-                #if there are as many copies (or more) of this item as there are shops remaining
+                # if there are as many copies (or more) of this item as there are shops remaining
                 if count >= len(unfilled_shops):
                     if count > len(unfilled_shops):
                         logging.warning(f"Not enough unfilled shops to place {stock}, placing {len(unfilled_shops)}")
-                    #we need to add one to every remaining shop
+                    # we need to add one to every remaining shop
                     filled_shops: List[str] = []
                     for shop_to_fill in unfilled_shops:
                         shuffled_shops[shop_to_fill].append(stock)
-                        #check to see if the shop is now full
+                        # check to see if the shop is now full
                         if len(shuffled_shops[shop_to_fill]) == 4:
                             filled_shops.append(shop_to_fill)
                     filled_a_shop = True
@@ -134,9 +135,9 @@ class CrystalisWorld(World):
             for stock in out_of_stock:
                 total_inventory.pop(stock)
             if filled_a_shop:
-                #go back to the top of the while loop in case more items need to be forced
+                # go back to the top of the while loop in case more items need to be forced
                 continue
-            #if we made it here, pick a specific shop to fill with random unique stock
+            # if we made it here, pick a specific shop to fill with random unique stock
             shop_to_fill: str = unfilled_shops.pop()
             existing_inventory: List[str] = shuffled_shops[shop_to_fill]
             fill_count: int = min(len(total_inventory), 4-len(existing_inventory))
@@ -146,10 +147,26 @@ class CrystalisWorld(World):
                 if total_inventory[stock] == 0:
                     total_inventory.pop(stock)
             shuffled_shops[shop_to_fill] = existing_inventory + new_inventory
-        if len(total_inventory) > 0:
-            #if we somehow didn't place every item, log a warning
+        if total_inventory:
+            # if we somehow didn't place every item, log a warning
             logging.warning("Filled all shops without placing all stock!")
             logging.warning(f"Shop inventories: {str(shuffled_shops)}")
+        found_buyable_herbs: bool = False
+        found_buyable_boots: bool = False
+        for shop, inventory in shuffled_shops.items():
+            if shop == "Shyron Item Shop":
+                # Shyron Item Shop is unreliable because of the Shyron Massacre
+                continue
+            if not found_buyable_boots and "Warp Boots" in inventory:
+                found_buyable_boots = True
+            if not found_buyable_herbs and "Medical Herb" in inventory:
+                found_buyable_herbs = True
+            if found_buyable_herbs and found_buyable_boots:
+                break
+        else:
+            raise ValueError("Crystalis: unable to reliably buy either Warp Boots or Medical Herbs for player "
+                             f"{self.player_name}. This will only happen with shop_inventory_plando, so revise that "
+                             f"option.")
         return shuffled_shops
 
     def generate_early(self) -> None:
@@ -288,19 +305,7 @@ class CrystalisWorld(World):
             thunder_warp = self.random.choice(towns)
         elif self.options.thunder_warp != self.options.thunder_warp.option_none:
             thunder_warp = self.options.thunder_warp.get_option_name(self.options.thunder_warp.value)
-        shop_inventories = {
-            "Leaf Item Shop":     ["Medical Herb", "Antidote", "Warp Boots"],
-            "Brynmaer Item Shop": ["Medical Herb", "Antidote", "Warp Boots"],
-            "Oak Item Shop":      ["Medical Herb", "Antidote", "Fruit of Power"],
-            "Nadare's Item Shop": ["Medical Herb", "Antidote", "Fruit of Power", "Warp Boots"],
-            "Amazones Item Shop": ["Warp Boots", "Lysis Plant", "Fruit of Power"],
-            "Portoa Item Shop":   ["Medical Herb", "Warp Boots", "Lysis Plant", "Fruit of Lime"],
-            "Joel Item Shop":     ["Medical Herb", "Antidote", "Fruit of Power"],
-            "Swan Item Shop":     ["Medical Herb", "Antidote", "Fruit of Power", "Warp Boots"],
-            "Goa Item Shop":      ["Medical Herb", "Antidote", "Lysis Plant", "Warp Boots"],
-            "Shyron Item Shop":   ["Medical Herb", "Antidote", "Fruit of Lime", "Magic Ring"],
-            "Sahara Item Shop":   ["Antidote", "Magic Ring", "Fruit of Repun", "Warp Boots"]
-        }
+        shop_inventories: Dict[str, List[str]] = SHOP_INVENTORIES.copy()
         if not self.options.vanilla_shops:
             shop_inventories = self.randomize_shop_inventories(shop_inventories)
         # wildwarps
