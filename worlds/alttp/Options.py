@@ -140,6 +140,16 @@ class TriforcePiecesExtra(Range):
     default = 10
 
 
+class FluteActivation(Choice):
+    """Determines whether the flute must be activated in the light world, in the dark world, or is pre-activated.
+    Auto will set it to Dark World if Mode is set to Inverted, otherwise Light World."""
+    display_name = "Flute Activation"
+    option_light_world = 0
+    option_dark_world = 1
+    option_auto = 2
+    option_activated = 3
+
+
 class OpenPyramid(Choice):
     """Determines whether the hole at the top of pyramid is open.
     Goal will open the pyramid if the goal requires you to kill Ganon, without needing to kill Agahnim 2.
@@ -753,6 +763,7 @@ class ALTTPOptions(PerGameCommonOptions):
     glitches_required: GlitchesRequired
     dark_room_logic: DarkRoomLogic
     open_pyramid: OpenPyramid
+    flute_activation: FluteActivation
     crystals_needed_for_gt: CrystalsTower
     crystals_needed_for_ganon: CrystalsGanon
     triforce_pieces_mode: TriforcePiecesMode

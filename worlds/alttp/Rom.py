@@ -974,6 +974,15 @@ def patch_rom(world: MultiWorld, rom: LocalRom, player: int, enemized: bool):
     elif world.mode[player] == 'standard':
         rom.write_byte(0x180032, 0x00)  # standard mode
 
+    if world.flute_activation[player] == "dark_world" or (world.flute_activation[player] == "auto"
+                                                          and world.mode[player] == "inverted"):
+        rom.write_byte(0xDC21D, 0x6B)  # inverted mode flute activation (skip weathervane overlay)
+        rom.write_bytes(0x48DB3, [0xF8, 0x01])  # inverted mode (bird X)
+        rom.write_byte(0x48D5E, 0x01)  # inverted mode (rock X)
+        rom.write_bytes(0x48CC1 + 36, bytes([0xF8] * 12))  # (rock X)
+        rom.write_int16(snes_to_pc(0x02E8D5), 0x07C8)
+        rom.write_int16(snes_to_pc(0x02E8F7), 0x01F8)
+
     uncle_location = world.get_location('Link\'s Uncle', player)
     if uncle_location.item is None or uncle_location.item.name not in ['Master Sword', 'Tempered Sword',
                                                                        'Fighter Sword', 'Golden Sword',
@@ -2605,14 +2614,8 @@ def set_inverted_mode(world, player, rom):
     rom.write_byte(snes_to_pc(0x05AF79), 0xF0)
     rom.write_byte(snes_to_pc(0x0DB3C5), 0xC6)
     rom.write_byte(snes_to_pc(0x07A3F4), 0xF0)  # duck
-    rom.write_byte(0xDC21D, 0x6B)  # inverted mode flute activation (skip weathervane overlay)
-    rom.write_bytes(0x48DB3, [0xF8, 0x01])  # inverted mode (bird X)
-    rom.write_byte(0x48D5E, 0x01)  # inverted mode (rock X)
-    rom.write_bytes(0x48CC1 + 36, bytes([0xF8] * 12))  # (rock X)
     rom.write_int16s(snes_to_pc(0x02E849),
                      [0x0043, 0x0056, 0x0058, 0x006C, 0x006F, 0x0070, 0x007B, 0x007F, 0x001B])  # dw flute
-    rom.write_int16(snes_to_pc(0x02E8D5), 0x07C8)
-    rom.write_int16(snes_to_pc(0x02E8F7), 0x01F8)
     rom.write_byte(snes_to_pc(0x08D40C), 0xD0)  # morph proof
     # the following bytes should only be written in vanilla
     # or they'll overwrite the randomizer's shuffles

@@ -17,7 +17,7 @@ from .Regions import key_drop_data
 # This file sets the item pools for various modes. Timed modes and triforce hunt are enforced first, and then extra items are specified per mode to fill in the remaining space.
 # Some basic items that various modes require are placed here, including pendants and crystals. Medallion requirements for the two relevant entrances are also decided.
 
-alwaysitems = ['Bombos', 'Book of Mudora', 'Cane of Somaria', 'Ether', 'Fire Rod', 'Flippers', 'Flute', 'Hammer',
+alwaysitems = ['Bombos', 'Book of Mudora', 'Cane of Somaria', 'Ether', 'Fire Rod', 'Flippers', 'Hammer',
                'Hookshot', 'Ice Rod', 'Lamp',
                'Cape', 'Magic Powder', 'Mushroom', 'Pegasus Boots', 'Quake', 'Shovel', 'Bug Catching Net',
                'Cane of Byrna', 'Blue Boomerang', 'Red Boomerang']
@@ -269,6 +269,8 @@ def generate_itempool(world):
     ]
     for location_name, event_name in event_pairs:
         location = multiworld.get_location(location_name, player)
+        if location_name == "Flute Activation Spot" and multiworld.flute_activation[player] == "activated":
+            event_name = "Nothing"
         event = item_factory(event_name, world)
         multiworld.push_item(location, event, False)
         location.locked = True
@@ -596,6 +598,7 @@ def get_pool_core(world, player: int):
 
     diff = difficulties[difficulty]
     pool.extend(diff.alwaysitems)
+    pool.append("Activated Flute" if world.flute_activation[player] == "activated" else "Flute")
 
     def place_item(loc, item):
         assert loc not in placed_items, "cannot place item twice"

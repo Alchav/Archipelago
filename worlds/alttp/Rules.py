@@ -608,7 +608,8 @@ def global_rules(multiworld: MultiWorld, player: int):
         add_rule(ganon, lambda state: has_crystals(state, state.multiworld.crystals_needed_for_ganon[player], player))
     set_rule(multiworld.get_entrance('Ganon Drop', player), lambda state: has_beam_sword(state, player))  # need to damage ganon to get tiles to drop
 
-    set_rule(multiworld.get_location('Flute Activation Spot', player), lambda state: state.has('Flute', player))
+    if multiworld.flute_activation[player] != "activated":
+        set_rule(multiworld.get_location('Flute Activation Spot', player), lambda state: state.has('Flute', player))
 
 
 def default_rules(world, player):
