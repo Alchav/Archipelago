@@ -266,7 +266,7 @@ class CrystalisWorld(World):
         else:
             trade_in_map["Tornel"] = "Wind"
             trade_in_map["Rage"] = "Sword of Water"
-        #bosses!
+        # bosses!
         boss_weaknesses: List[str] = []
         if self.options.randomize_monster_weaknesses:
             for name in BOSS_NAMES:
@@ -282,12 +282,12 @@ class CrystalisWorld(World):
             possible_gbc_cave_exits = ["Cordel Plains - Main", "Lime Valley", "Goa Valley", "Desert 2"]
             gbc_cave_exits = self.random.sample(possible_gbc_cave_exits, k=2)
         thunder_warp: str = ""
-        if self.options.thunder_warp == self.options.thunder_warp.option_vanilla:
-            thunder_warp = "Shyron"
-        elif self.options.thunder_warp == self.options.thunder_warp.option_shuffled:
-            towns = ["Leaf", "Brynmaer", "Oak", "Nadare's", "Portoa", "Amazones", "Joel", "Zombie Town", "Swan",
-                     "Shyron", "Goa", "Sahara"]
+        towns = ["Leaf", "Brynmaer", "Oak", "Nadare's", "Portoa", "Amazones", "Joel", "Zombie Town", "Swan", "Shyron",
+                 "Goa", "Sahara"]
+        if self.options.thunder_warp == self.options.thunder_warp.option_shuffled:
             thunder_warp = self.random.choice(towns)
+        elif self.options.thunder_warp != self.options.thunder_warp.option_none:
+            thunder_warp = self.options.thunder_warp.get_option_name(self.options.thunder_warp.value)
         shop_inventories = {
             "Leaf Item Shop":     ["Medical Herb", "Antidote", "Warp Boots"],
             "Brynmaer Item Shop": ["Medical Herb", "Antidote", "Warp Boots"],
@@ -303,7 +303,7 @@ class CrystalisWorld(World):
         }
         if not self.options.vanilla_shops:
             shop_inventories = self.randomize_shop_inventories(shop_inventories)
-        #wildwarps
+        # wildwarps
         wildwarps: List[int] = []
         if self.options.vanilla_wild_warp:
             #this technically has some tweaks over true vanilla - no Leaf warp (to leave room for a Mezame warp)
@@ -317,7 +317,7 @@ class CrystalisWorld(World):
             warp_count = self.random.randint(WARP_MINIMUM, WARP_MAXIMUM)
             wildwarps = self.random.sample(list(valid_wildwarps), k=warp_count)
         wildwarps.append(0) #always have a warp for Mezame Shrine at the end
-        #shuffle goa if necessary
+        # shuffle goa if necessary
         goa_connection_map: Dict[str, str]
         if self.options.shuffle_goa:
             goa_connection_map = self.shuffle_goa()

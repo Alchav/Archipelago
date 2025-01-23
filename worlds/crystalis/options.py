@@ -155,18 +155,35 @@ class ThunderWarp(Choice):
     """Determines where the player is warped to when receiving the Sword of Thunder.
     Shuffled: The Sword of Thunder will warp you to a random town.
     None: The Sword of Thunder won't warp you. (Rt)
-    Vanilla: The Sword of Thunder will warp you to Shyron. (R!t)
+    <town name>: The Sword of Thunder will warp you to the chosen town.
     """
     display_name = "Sword of Thunder warp"
     option_shuffled = 0
     option_none = 1
-    option_vanilla = 2
+    option_leaf = 2
+    option_brynmaer = 3
+    option_oak = 4
+    option_nadares = 5
+    option_portoa = 6
+    option_amazones = 7
+    option_joel = 8
+    option_zombie_town = 9
+    option_swan = 10
+    option_shyron = 11
+    option_goa = 12
+    option_sahara = 13
+    alias_vanilla = option_shyron
 
+    @classmethod
+    def get_option_name(cls, value: int) -> str:
+        if value == cls.option_nadares:
+            return "Nadare's"
+        return super().get_option_name(value)
 
     def flag_name(self) -> (str, str):
         if self == self.option_none:
             return "R", "t"
-        elif self == self.option_vanilla:
+        elif self == self.option_shyron:
             return "R", "!t"
         return "", ""
 
@@ -638,7 +655,7 @@ class VanillaMaps(Choice):
 
     @classmethod
     def get_option_name(cls, value: int) -> str:
-        if value == 0:
+        if value == cls.option_GBC_cave:
             return "GBC Cave"
         return super().get_option_name(value)
 
