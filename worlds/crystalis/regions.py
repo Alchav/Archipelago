@@ -377,8 +377,7 @@ def shuffle_goa(self) -> Dict[str, str]:
     return connection_map
 
 
-# this will get changed to a new multiworld step later, but for now put it here
-def generate_basic(self):
+def connect_entrances(self):
     if self.options.shuffle_houses:
         # a couple of house entrances share icons with each other, so manually shuffle those to make sure the entrances
         # that share an icon lead to the same place

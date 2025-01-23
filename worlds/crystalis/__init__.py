@@ -5,7 +5,7 @@ from BaseClasses import Tutorial, MultiWorld, Entrance
 from Utils import VersionException
 from .items import CrystalisItem, items_data, unidentify_items, create_item, create_items
 from .locations import CrystalisLocation, create_location_from_location_data
-from .regions import regions_data, create_regions, shuffle_goa, generate_basic, entrances_data, HOUSE_SHUFFLE_TYPES, \
+from .regions import regions_data, create_regions, shuffle_goa, connect_entrances, entrances_data, HOUSE_SHUFFLE_TYPES, \
     AREA_SHUFFLE_TYPES
 from .options import CrystalisOptions, crystalis_option_groups
 from .types import *
@@ -56,7 +56,7 @@ class CrystalisWorld(World):
     shuffle_goa = shuffle_goa
     create_item = create_item
     create_items = create_items
-    generate_basic = generate_basic
+    connect_entrances = connect_entrances
     write_spoiler_header = write_spoiler_header
     web = CrystalisWeb()
     shared_icon_houses: List[Tuple[Entrance, Entrance]]

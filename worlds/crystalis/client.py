@@ -148,7 +148,7 @@ class CrystalisClient(BizHawkClient):
                                     locations_to_send.append(location_id)
                                     ctx.locations_checked.add(location_id)
 
-                            if len(locations_to_send) > 0:
+                            if locations_to_send:
                                 await ctx.send_msgs([{
                                         "cmd": "LocationChecks",
                                         "locations": list(locations_to_send)
