@@ -85,25 +85,65 @@ def unidentify_items(self) -> Dict[str, str]:
     all_key_items: List[str] = keys + flutes + lamps + statues + bows
     if not self.options.unidentified_key_items:
         return dict(zip(all_key_items, all_key_items))
+    basic_key_options: List[str] = basic_key_names.copy()
+    basic_flute_options: List[str] = basic_flute_names.copy()
+    basic_lamp_options: List[str] = basic_lamp_names.copy()
+    basic_statue_options: List[str] = basic_statue_names.copy()
+    basic_bow_options: List[str] = basic_bow_names.copy()
+    all_key_options: List[str] = all_key_names.copy()
+    all_flute_options: List[str] = all_flute_names.copy()
+    all_lamp_options: List[str] = all_lamp_names.copy()
+    all_statue_options: List[str] = all_statue_names.copy()
+    all_bow_options: List[str] = all_bow_names.copy()
+    key_item_map: Dict[str, str] = {}
+    for original_item_name, new_item_name in self.options.key_item_name_plando.value.items():
+        key_item_map[original_item_name] = new_item_name
+        if original_item_name in keys:
+            keys.remove(original_item_name)
+            all_key_options.remove(new_item_name)
+            if new_item_name in basic_key_options:
+                basic_key_options.remove(new_item_name)
+        elif original_item_name in flutes:
+            flutes.remove(original_item_name)
+            all_flute_options.remove(new_item_name)
+            if new_item_name in basic_flute_options:
+                basic_flute_options.remove(new_item_name)
+        elif original_item_name in lamps:
+            lamps.remove(original_item_name)
+            all_lamp_options.remove(new_item_name)
+            if new_item_name in basic_lamp_options:
+                basic_lamp_options.remove(new_item_name)
+        elif original_item_name in statues:
+            statues.remove(original_item_name)
+            all_statue_options.remove(new_item_name)
+            if new_item_name in basic_statue_options:
+                basic_statue_options.remove(new_item_name)
+        elif original_item_name in bows:
+            bows.remove(original_item_name)
+            all_bow_options.remove(new_item_name)
+            if new_item_name in basic_bow_options:
+                basic_bow_options.remove(new_item_name)
+    # need to rebuild the overall list
+    all_key_items = keys + flutes + lamps + statues + bows
     key_choices: List[str]
     flute_choices: List[str]
     lamp_choices: List[str]
     statue_choices: List[str]
     bow_choices: List[str]
     if self.options.no_community_jokes:
-        key_choices = self.random.sample(basic_key_names, k=len(keys))
-        flute_choices = self.random.sample(basic_flute_names, k=len(flutes))
-        lamp_choices = self.random.sample(basic_lamp_names, k=len(lamps))
-        statue_choices = self.random.sample(basic_statue_names, k=len(statues))
-        bow_choices = self.random.sample(basic_bow_names, k=len(bows))
+        key_choices = self.random.sample(basic_key_options, k=len(keys))
+        flute_choices = self.random.sample(basic_flute_options, k=len(flutes))
+        lamp_choices = self.random.sample(basic_lamp_options, k=len(lamps))
+        statue_choices = self.random.sample(basic_statue_options, k=len(statues))
+        bow_choices = self.random.sample(basic_bow_options, k=len(bows))
     else:
-        key_choices = self.random.sample(all_key_names, k=len(keys))
-        flute_choices = self.random.sample(all_flute_names, k=len(flutes))
-        lamp_choices = self.random.sample(all_lamp_names, k=len(lamps))
-        statue_choices = self.random.sample(all_statue_names, k=len(statues))
-        bow_choices = self.random.sample(all_bow_names, k=len(bows))
+        key_choices = self.random.sample(all_key_options, k=len(keys))
+        flute_choices = self.random.sample(all_flute_options, k=len(flutes))
+        lamp_choices = self.random.sample(all_lamp_options, k=len(lamps))
+        statue_choices = self.random.sample(all_statue_options, k=len(statues))
+        bow_choices = self.random.sample(all_bow_options, k=len(bows))
     all_choices: List[str] = key_choices + flute_choices + lamp_choices + statue_choices + bow_choices
-    return dict(zip(all_key_items, all_choices))
+    return dict(zip(all_key_items, all_choices)) | key_item_map
 
 
 def create_item(self, name: str) -> "Item":

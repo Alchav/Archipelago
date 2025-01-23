@@ -222,11 +222,9 @@ class CrystalisWorld(World):
                                                          shuffle_dict["gbc_cave_exits"], shuffle_dict["thunder_warp"],
                                                          shuffle_dict["shop_inventories"], shuffle_dict["wildwarps"],
                                                          shuffle_dict["goa_connection_map"], shuffle_dict["er_pairings"])
-                return #bail early, we don't need the rest of this lmao
+                return # bail early, we don't need the rest of this lmao
 
-
-        #walls first
-
+        # walls first
         wall_weaknesses: List[str] = []
         if self.options.randomize_wall_elements:
             for wall_name in WALL_NAMES:
@@ -238,9 +236,9 @@ class CrystalisWorld(World):
             wall_weaknesses = ["Fire", "Wind", "Wind", "Fire", "Fire", "Fire", "Wind", "Wind", "Wind", "Wind",
                                "Thunder", "Thunder", "Thunder", "Thunder", "Thunder", "Thunder"]
         wall_map: Dict[str, str] = dict(zip(WALL_NAMES, wall_weaknesses))
-        #then key item names
+        # then key item names
         key_item_names: Dict[str, str] = self.unidentify_items()
-        #then trade-ins
+        # then trade-ins
         trade_in_npcs = TRADE_IN_NPCS.copy()
         trade_in_items = [key_item_names["Statue of Onyx"], "Kirisa Plant", key_item_names["Fog Lamp"],
                           "Love Pendant", key_item_names["Ivory Statue"]]

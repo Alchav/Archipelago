@@ -808,6 +808,45 @@ class PlandoTradeIns(OptionDict):
     }, And(validate, error="Duplicate Trade-In item found; each trade-in item can only be used once.")))
 
 
+class PlandoKeyItemNames(OptionDict):
+    """Allows defining names of unidentified key items, within the limits of the datapackage. Format is \"Original
+    Name\": \"New Name\". Works on Bows, Keys, Lamps, Statues, and Flutes. Does nothing if unidentified_key_items is set
+    to false."""
+    def validate(data: dict[str, str]) -> bool:
+        return len(data) == len(set(data.values()))
+
+    schema = Schema(And({
+        Optional(orig_item_data.name): And(str, lambda item_name: item_name in frozenset([item_data.name for item_data in
+                                                                                          items_data.values() if
+                                                                                          "Bow" in item_data.groups]),
+                            error="Invalid key item name in key_item_name_plando")
+        for orig_item_data in items_data.values() if "Bow" in orig_item_data.groups and orig_item_data.default_count > 0
+    } | {
+        Optional(orig_item_data.name): And(str, lambda item_name: item_name in frozenset([item_data.name for item_data in
+                                                                                          items_data.values() if
+                                                                                          "Key" in item_data.groups]),
+                            error="Invalid key item name in key_item_name_plando")
+        for orig_item_data in items_data.values() if "Key" in orig_item_data.groups and orig_item_data.default_count > 0
+    } | {
+        Optional(orig_item_data.name): And(str, lambda item_name: item_name in frozenset([item_data.name for item_data in
+                                                                                          items_data.values() if
+                                                                                          "Lamp" in item_data.groups]),
+                            error="Invalid key item name in key_item_name_plando")
+        for orig_item_data in items_data.values() if "Lamp" in orig_item_data.groups and orig_item_data.default_count > 0
+    } | {
+        Optional(orig_item_data.name): And(str, lambda item_name: item_name in frozenset([item_data.name for item_data in
+                                                                                          items_data.values() if
+                                                                                          "Statue" in item_data.groups]),
+                            error="Invalid key item name in key_item_name_plando")
+        for orig_item_data in items_data.values() if "Statue" in orig_item_data.groups and orig_item_data.default_count > 0
+    } | {
+        Optional(orig_item_data.name): And(str, lambda item_name: item_name in frozenset([item_data.name for item_data in
+                                                                                          items_data.values() if
+                                                                                          "Flute" in item_data.groups]),
+                            error="Invalid key item name in key_item_name_plando")
+        for orig_item_data in items_data.values() if "Flute" in orig_item_data.groups and orig_item_data.default_count > 0
+    }, And(validate, error="Duplicate key item name found; each key item name can only be used once.")))
+
 crystalis_option_groups = [
     OptionGroup('World Options', [
         RandomizeMaps,
@@ -886,7 +925,8 @@ crystalis_option_groups = [
         CrystalisPlandoConnections,
         PlandoBossWeaknesses,
         PlandoWallElements,
-        PlandoTradeIns
+        PlandoTradeIns,
+        PlandoKeyItemNames
     ])
 ]
 
@@ -961,3 +1001,4 @@ class CrystalisOptions(PerGameCommonOptions, DeathLinkMixin):
     boss_weakness_plando: PlandoBossWeaknesses
     wall_element_plando: PlandoWallElements
     trade_in_plando: PlandoTradeIns
+    key_item_name_plando: PlandoKeyItemNames
