@@ -2,6 +2,7 @@ from typing import Mapping, Any, Set
 from dataclasses import asdict
 
 from BaseClasses import Tutorial, MultiWorld, Entrance
+from Options import OptionError
 from Utils import VersionException
 from .items import CrystalisItem, items_data, unidentify_items, create_item, create_items
 from .locations import CrystalisLocation, create_location_from_location_data
@@ -311,17 +312,35 @@ class CrystalisWorld(World):
         # wildwarps
         wildwarps: List[int] = []
         if self.options.vanilla_wild_warp:
-            #this technically has some tweaks over true vanilla - no Leaf warp (to leave room for a Mezame warp)
-            #and replace Portoa Waterway with ESI's entrance (because Portoa Waterway's spawn is pointless).
+            # this technically has some tweaks over true vanilla - no Leaf warp (to leave room for a Mezame warp)
+            # and replace Portoa Waterway with ESI's entrance (because Portoa Waterway's spawn is pointless).
             wildwarps = [0x03, 0x04, 0x14, 0x1a, 0x20, 0x40, 0x42, 0x60, 0x69, 0x72, 0x78, 0x7c, 0x90, 0xa8, 0x98]
         elif self.options.randomize_wild_warp:
             valid_wildwarps: List[int] = list(self.wild_warp_id_to_region.keys())
+            warp_count: int = 0
             if self.options.vanilla_maps != self.options.vanilla_maps.option_GBC_cave:
                 for id in regions_data["GBC Cave - Main"].wildwarpIds:
                     valid_wildwarps.remove(id)
-            warp_count = self.random.randint(WARP_MINIMUM, WARP_MAXIMUM)
-            wildwarps = self.random.sample(list(valid_wildwarps), k=warp_count)
-        wildwarps.append(0) #always have a warp for Mezame Shrine at the end
+            if self.options.wild_warp_plando.value:
+                if len(self.options.wild_warp_plando.value) > WARP_MAXIMUM:
+                    raise OptionError(f"Crystalis - too many warp locations in wild_warp_plando for player "
+                                      f"{self.player_name}")
+                for screen_name in self.options.wild_warp_plando.value:
+                    if screen_name == "Any":
+                        warp_count += 1
+                    else:
+                        warp_id: int = SCREEN_NAMES_TO_IDS[screen_name]
+                        if warp_id in valid_wildwarps:
+                            valid_wildwarps.remove(warp_id)
+                            wildwarps.append(warp_id)
+                        else:
+                            raise OptionError(f"Crystalis - invalid screen name in wild_warp_plando for player "
+                                              f"{self.player_name}: {screen_name}")
+            else:
+                warp_count = self.random.randint(WARP_MINIMUM, WARP_MAXIMUM)
+            if warp_count:
+                wildwarps.extend(self.random.sample(list(valid_wildwarps), k=warp_count))
+        wildwarps.append(0) # always have a warp for Mezame Shrine at the end
         # shuffle goa if necessary
         goa_connection_map: Dict[str, str]
         if self.options.shuffle_goa:
@@ -363,13 +382,11 @@ class CrystalisWorld(World):
                                                  thunder_warp, shop_inventories, wildwarps, goa_connection_map,
                                                  er_pairings)
 
-
     def get_filler_item_name(self) -> str:
         return "Medical Herb"
 
-
     def fill_slot_data(self) -> Mapping[str, Any]:
-        #get logic relevant options for tracker purposes
+        # get logic relevant options for tracker purposes
         slot_data: Dict[str, Any] = self.options.as_dict("randomize_maps", "shuffle_areas", "shuffle_houses",
                                                          "randomize_tradeins", "unidentified_key_items",
                                                          "randomize_wall_elements", "shuffle_goa",
@@ -385,7 +402,7 @@ class CrystalisWorld(World):
                                                          "gas_mask_not_guaranteed", "charge_shots_only",
                                                          "dont_buff_bonus_items", "vanilla_maps", "vanilla_wild_warp",
                                                          "death_link")
-        #get shuffle data for tracker purposes, UT regen, and ids for unidentified items
+        # get shuffle data for tracker purposes, UT regen, and ids for unidentified items
         slot_data["shuffle_data"] = asdict(self.shuffle_data)
         slot_data["version"] = CRYSTALIS_APWORLD_VERSION
         return slot_data

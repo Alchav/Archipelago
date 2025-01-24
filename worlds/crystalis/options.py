@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from Options import Choice, Toggle, PerGameCommonOptions, DeathLink, DeathLinkMixin, OptionGroup, StartInventoryPool, \
-    Visibility, PlandoConnections, OptionDict
+    Visibility, PlandoConnections, OptionDict, OptionList
 from .regions import entrances_data, SHUFFLE_GROUPING
 from .types import CrystalisEntranceTypeEnum, ELEMENTS, BOSS_NAMES, WALL_NAMES, TRADE_IN_NPCS, SHOP_INVENTORIES, \
-    CrystalisItemCategoryEnum
+    CrystalisItemCategoryEnum, SCREEN_NAMES_TO_IDS
 from .items import items_data
 from schema import And, Schema, Optional
 from typing import List
@@ -25,7 +25,6 @@ class RandomizeMaps(Toggle):
 class ShuffleAreas(Toggle):
     """Shuffles some or all area connections."""
     display_name = "Shuffle areas (Wa)"
-    visibility = Visibility.none
 
     def flag_name(self) -> (str, str):
         if self:
@@ -38,7 +37,6 @@ class ShuffleHouseEntrances(Toggle):
     palace/fortress-type entrances at the top of several towns, and standalone houses.
     """
     display_name = "Shuffle house entrances (Wh)"
-    visibility = Visibility.none
 
     def flag_name(self) -> (str, str):
         if self:
@@ -889,6 +887,15 @@ class PlandoShopInventories(OptionDict):
     }, error="Invalid shop inventory in option shop_inventory_plando.")
 
 
+class PlandoWildWarp(OptionList):
+    """Allows defining what screens can be wild warped to, along with how many wild warps are available. The list may
+    be anywhere from 1 to 15 entries long, where each entry is either a screen name or \"Any\". Any means that slot will
+    be randomly filled in from among the valid remaining screens. If left empty, wild warps will be completely random,
+    as usual. Only does something if randomize_wild_warp is true and vanilla_wild_warp is disabled. For a full list of
+    screen names, look at worlds/crystalis/types.py for SCREEN_NAMES_TO_IDS."""
+    valid_keys = frozenset(SCREEN_NAMES_TO_IDS.keys()) | {"Any"}
+
+
 crystalis_option_groups = [
     OptionGroup('World Options', [
         RandomizeMaps,
@@ -969,7 +976,8 @@ crystalis_option_groups = [
         PlandoWallElements,
         PlandoTradeIns,
         PlandoKeyItemNames,
-        PlandoShopInventories
+        PlandoShopInventories,
+        PlandoWildWarp
     ])
 ]
 
@@ -1046,3 +1054,4 @@ class CrystalisOptions(PerGameCommonOptions, DeathLinkMixin):
     trade_in_plando: PlandoTradeIns
     key_item_name_plando: PlandoKeyItemNames
     shop_inventory_plando: PlandoShopInventories
+    wild_warp_plando: PlandoWildWarp
