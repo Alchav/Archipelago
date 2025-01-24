@@ -1,11 +1,12 @@
 import logging
 from dataclasses import dataclass
 from BaseClasses import ItemClassification
+from Utils import Version
 from enum import IntEnum
 from typing import List, Dict, Optional, Tuple
 
 CRYSTALIS_BASE_ID: int = 2241000
-CRYSTALIS_APWORLD_VERSION = "1.0.0"
+CRYSTALIS_APWORLD_VERSION: Version = Version(2, 0, 0)
 BOSS_NAMES: List[str] = ["Giant Insect", "Vampire 2", "Kelbesque 1", "Sabera 1", "Mado 1", "Kelbesque 2", "Sabera 2",
                          "Mado 2", "Karmine"]
 ELEMENTS: List[str] = ["Wind", "Fire", "Water", "Thunder"]

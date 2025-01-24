@@ -3,7 +3,7 @@ from dataclasses import asdict
 
 from BaseClasses import Tutorial, MultiWorld, Entrance
 from Options import OptionError
-from Utils import VersionException
+from Utils import VersionException, tuplize_version
 from .items import CrystalisItem, items_data, unidentify_items, create_item, create_items
 from .locations import CrystalisLocation, create_location_from_location_data
 from .regions import regions_data, create_regions, shuffle_goa, connect_entrances, entrances_data, HOUSE_SHUFFLE_TYPES, \
@@ -44,7 +44,6 @@ class CrystalisWorld(World):
     1990 NES action role-playing game.
     """
 
-
     game = "Crystalis"
     options_dataclass = CrystalisOptions
     options: CrystalisOptions
@@ -66,7 +65,7 @@ class CrystalisWorld(World):
     cave_entrances: List[Tuple[Entrance, Entrance]]
     cave_exits: List[Tuple[Entrance, Entrance]]
 
-    #this will get filled out later, while creating regions
+    # this will get filled out later, while creating regions
     locations_data: List[CrystalisLocationData]
     location_name_to_id = {}
     wild_warp_id_to_region: Dict[int, str] = {}
@@ -192,14 +191,17 @@ class CrystalisWorld(World):
         if hasattr(self.multiworld, "re_gen_passthrough"):
             if "Crystalis" in self.multiworld.re_gen_passthrough:
                 passthrough = self.multiworld.re_gen_passthrough["Crystalis"]
-                if "version" not in passthrough.keys():
+                if "version" not in passthrough:
                     err_string = f"Crystalis APWorld version mismatch. Multiworld generated without versioning; " \
-                                 f"local install using {CRYSTALIS_APWORLD_VERSION}"
+                                 f"local install using {CRYSTALIS_APWORLD_VERSION.as_simple_string()}"
                     raise VersionException(err_string)
-                elif passthrough["version"] != CRYSTALIS_APWORLD_VERSION:
-                    err_string = f"Crystalis APWorld version mismatch. Multiworld generated with " \
-                                 f"{passthrough['version']}; local install using {CRYSTALIS_APWORLD_VERSION}"
-                    raise VersionException(err_string)
+                else:
+                    generator_version: Version = tuplize_version(passthrough["version"])
+                    if generator_version.major != CRYSTALIS_APWORLD_VERSION.major:
+                        err_string = f"Crystalis APWorld version mismatch. Multiworld generated with " \
+                                     f"{passthrough['version']}; local install using " \
+                                     f"{CRYSTALIS_APWORLD_VERSION.as_simple_string()}"
+                        raise VersionException(err_string)
                 self.options.randomize_maps.value = passthrough["randomize_maps"]
                 self.options.shuffle_areas.value = passthrough["shuffle_areas"]
                 self.options.shuffle_houses.value = passthrough["shuffle_houses"]
@@ -404,7 +406,7 @@ class CrystalisWorld(World):
                                                          "death_link")
         # get shuffle data for tracker purposes, UT regen, and ids for unidentified items
         slot_data["shuffle_data"] = asdict(self.shuffle_data)
-        slot_data["version"] = CRYSTALIS_APWORLD_VERSION
+        slot_data["version"] = CRYSTALIS_APWORLD_VERSION.as_simple_string()
         return slot_data
 
     @staticmethod

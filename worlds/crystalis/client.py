@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, List, Dict, Tuple
 from time import time
 
 from NetUtils import ClientStatus, NetworkItem
-from Utils import async_start, VersionException
+from Utils import async_start, VersionException, Version, tuplize_version
 
 import worlds._bizhawk as bizhawk
 from worlds._bizhawk.client import BizHawkClient
@@ -86,14 +86,17 @@ class CrystalisClient(BizHawkClient):
     def on_package(self, ctx: "BizHawkClientContext", cmd: str, args: dict) -> None:
         if cmd == "Connected":
             # slot_data should be set now
-            if "version" not in ctx.slot_data.keys():
+            if "version" not in ctx.slot_data:
                 err_string = f"Crystalis APWorld version mismatch. Multiworld generated without versioning; " \
-                             f"local install using {CRYSTALIS_APWORLD_VERSION}"
+                             f"local install using {CRYSTALIS_APWORLD_VERSION.as_simple_string()}"
                 raise VersionException(err_string)
-            elif ctx.slot_data["version"] != CRYSTALIS_APWORLD_VERSION:
-                err_string = f"Crystalis APWorld version mismatch. Multiworld generated with " \
-                             f"{ctx.slot_data['version']}; local install using {CRYSTALIS_APWORLD_VERSION}"
-                raise VersionException(err_string)
+            else:
+                generator_version: Version = tuplize_version(ctx.slot_data["version"])
+                if generator_version.major != CRYSTALIS_APWORLD_VERSION.major:
+                    err_string = f"Crystalis APWorld version mismatch. Multiworld generated with " \
+                                 f"{ctx.slot_data['version']}; local install using " \
+                                 f"{CRYSTALIS_APWORLD_VERSION.as_simple_string()}"
+                    raise VersionException(err_string)
             key_item_names: Dict[str, str] = ctx.slot_data["shuffle_data"]["key_item_names"]
             for original_name, new_name in key_item_names.items():
                 # want to map the new item's AP ID to the original item's in-game ID.
