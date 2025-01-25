@@ -54,7 +54,8 @@ def generate_flag_string(options: CrystalisOptions) -> str:
 def generate_statue_hint(world: World) -> str:
     # To mimic how hint generation works in the stand-alone randomizer,
     # this hint will look through the Kirisa Plant Cave and Fog Lamp Cave
-    # locations, report the furthest away progression item if one exists,
+    # locations, report the furthest away proguseful item if one exists,
+    # otherwise report the furthest away progression item if one exists,
     # otherwise report the furthest away useful item if one exists,
     # otherwise report nothing.
     # Gather the locations in question, first
@@ -68,7 +69,15 @@ def generate_statue_hint(world: World) -> str:
     lime_hint_locations: Iterable[Location] = [fog_lamp_fourth_location, kirisa_plant_meadow_location,
                                                kirisa_plant_cave_location, fog_lamp_third_location,
                                                fog_lamp_second_location, fog_lamp_first_location]
-    # search for progression
+    # search for proguseful
+    for proguseful_location in lime_hint_locations:
+        item: Optional[Item] = proguseful_location.item
+        if item is None:
+            logging.warning(f"Empty location during generate_output! {proguseful_location.name}")
+            continue
+        elif item.classification & ItemClassification.progression and item.classification & ItemClassification.useful:
+            return item.name
+    # if we get here, there was no proguseful, so search for progression
     for prog_location in lime_hint_locations:
         item: Optional[Item] = prog_location.item
         if item is None:
@@ -76,7 +85,7 @@ def generate_statue_hint(world: World) -> str:
             continue
         elif item.classification & ItemClassification.progression:
             return item.name
-    #if we get here, there was no progression, so search for useful
+    # if we get here, there was no progression, so search for useful
     for useful_location in lime_hint_locations:
         item: Optional[Item] = useful_location.item
         if item is None:
@@ -84,7 +93,7 @@ def generate_statue_hint(world: World) -> str:
             continue
         elif item.classification & ItemClassification.useful:
             return item.name
-    #if we get here, it's all junk; return an empty string and let the patcher handle it
+    # if we get here, it's all junk; return an empty string and let the patcher handle it
     return ""
 
 

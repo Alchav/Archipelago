@@ -214,20 +214,23 @@ class CrystalisItemCategoryEnum(IntEnum):
     USEFUL = 2
     CONDITIONAL = 3
     TRAP = 4
+    PROGUSEFUL = 5
 
 
 def convert_enum_to_item_classification(enum: CrystalisItemCategoryEnum) -> ItemClassification:
     if enum == CrystalisItemCategoryEnum.FILLER:
         return ItemClassification.filler
-    if enum ==  CrystalisItemCategoryEnum.PROGRESSION:
+    if enum == CrystalisItemCategoryEnum.PROGRESSION:
         return ItemClassification.progression
-    if enum ==  CrystalisItemCategoryEnum.USEFUL:
+    if enum == CrystalisItemCategoryEnum.USEFUL:
         return ItemClassification.useful
-    if enum ==  CrystalisItemCategoryEnum.CONDITIONAL:
+    if enum == CrystalisItemCategoryEnum.CONDITIONAL:
         logging.warning("Unhandled conditional progression item in Crystalis. Defaulting to progression.")
         return ItemClassification.progression
-    if enum ==  CrystalisItemCategoryEnum.TRAP:
+    if enum == CrystalisItemCategoryEnum.TRAP:
         return ItemClassification.trap
+    if enum == CrystalisItemCategoryEnum.PROGUSEFUL:
+        return ItemClassification.progression | ItemClassification.progression
     raise ValueError(f"Crystalis: Unrecognized value in convert_enum_to_item_classification: {enum}")
     return ItemClassification.filler
 

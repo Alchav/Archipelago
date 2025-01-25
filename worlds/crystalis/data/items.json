@@ -13,7 +13,7 @@
       "Wind"
     ],
     "palette": 0,
-    "category": 1,
+    "category": 5,
     "notes": ""
   },
   "Sword of Fire": {
@@ -30,7 +30,7 @@
       "Fire"
     ],
     "palette": 1,
-    "category": 1,
+    "category": 5,
     "notes": ""
   },
   "Sword of Water": {
@@ -47,7 +47,7 @@
       "Water"
     ],
     "palette": 2,
-    "category": 1,
+    "category": 5,
     "notes": ""
   },
   "Sword of Thunder": {
@@ -64,7 +64,7 @@
       "Thunder"
     ],
     "palette": 3,
-    "category": 1,
+    "category": 5,
     "notes": ""
   },
   "Orb of Wind": {
@@ -1037,7 +1037,7 @@
       "Magic"
     ],
     "palette": 6,
-    "category": 1,
+    "category": 5,
     "notes": ""
   },
   "Mimic": {
@@ -5454,6 +5454,23 @@
     "groups": [
       "Key Item",
       "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "justchris Trophy": {
+    "name": "justchris Trophy",
+    "rom_id": 255,
+    "ap_id_offset": 323,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
     ],
     "palette": 9,
     "category": 1,
