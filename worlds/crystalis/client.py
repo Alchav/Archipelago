@@ -37,6 +37,22 @@ GAME_MODE_DYNA_DEFEATED: int = 0x1E
 MAIN_LOOP_GAME: int = 1
 
 
+def cmd_deathlink(self: "BizHawkClientCommandProcessor") -> None:
+    """Toggle DeathLink on or off."""
+    from CommonClient import logger
+    if self.ctx.game != "Crystalis":
+        logger.warning(f"Somehow running a Crystalis command handler while playing a different game: {self.ctx.game}")
+        return
+    else:
+        if "DeathLink" in self.ctx.tags:
+            async_start(self.ctx.update_death_link(False))
+            logger.info("Death Link is now disabled.")
+        else:
+            async_start(self.ctx.update_death_link(True))
+            logger.info("Death Link is now enabled.")
+
+
+
 
 class CrystalisClient(BizHawkClient):
     game = "Crystalis"
@@ -51,7 +67,6 @@ class CrystalisClient(BizHawkClient):
     pending_death_link: bool = False
     is_dying: bool = False
     last_death_link: float = time()
-
 
     def __init__(self):
         super().__init__()
@@ -81,6 +96,7 @@ class CrystalisClient(BizHawkClient):
         ctx.game = self.game
         ctx.items_handling = 0b111
         ctx.want_slot_data = True
+        ctx.command_processor.commands["deathlink"] = cmd_deathlink
         return True
 
     def on_package(self, ctx: "BizHawkClientContext", cmd: str, args: dict) -> None:
