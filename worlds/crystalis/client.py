@@ -11,7 +11,7 @@ from .regions import regions_data
 from .types import CRYSTALIS_BASE_ID, CRYSTALIS_APWORLD_VERSION
 
 if TYPE_CHECKING:
-    from worlds._bizhawk.context import BizHawkClientContext
+    from worlds._bizhawk.context import BizHawkClientContext, BizHawkClientCommandProcessor
 
 LOCATION_FLAGS_ADDR = 0x64A0
 ITEM_FLAGS_ADDR = 0x64C0
