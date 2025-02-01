@@ -29,6 +29,7 @@
 *.archipelago
 *.apsave
 *.puml
+*.lnk
 *.BIN
 
 setups
@@ -207,3 +208,6 @@ worlds/tracker.apworld
 !/worlds/ff4fe/FreeEnterpriseForAP/FreeEnt/*.bin
 /data/ff4fe/harp
 /data/ff4fe/zsprite
+
+#EarthBound GFX files
+!worlds/earthbound/src/*.bin
