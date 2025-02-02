@@ -48,6 +48,9 @@
 # Clique
 /worlds/clique/ @ThePhar
 
+# Crystalis
+/worlds/crystalis/ @Ars_Ignis
+
 # Dark Souls III
 /worlds/dark_souls_3/ @Marechal-L @nex3
 
@@ -132,6 +135,9 @@
 
 # Noita
 /worlds/noita/ @ScipioWright @heinermann
+
+# Old School Runescape
+/worlds/osrs @digiholic
 
 # Old School Runescape
 /worlds/osrs @digiholic

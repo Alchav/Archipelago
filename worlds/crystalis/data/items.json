@@ -1,0 +1,5479 @@
+{
+  "Sword of Wind": {
+    "name": "Sword of Wind",
+    "rom_id": 0,
+    "ap_id_offset": 0,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Sword",
+      "Wind"
+    ],
+    "palette": 0,
+    "category": 5,
+    "notes": ""
+  },
+  "Sword of Fire": {
+    "name": "Sword of Fire",
+    "rom_id": 1,
+    "ap_id_offset": 1,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Sword",
+      "Fire"
+    ],
+    "palette": 1,
+    "category": 5,
+    "notes": ""
+  },
+  "Sword of Water": {
+    "name": "Sword of Water",
+    "rom_id": 2,
+    "ap_id_offset": 2,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Sword",
+      "Water"
+    ],
+    "palette": 2,
+    "category": 5,
+    "notes": ""
+  },
+  "Sword of Thunder": {
+    "name": "Sword of Thunder",
+    "rom_id": 3,
+    "ap_id_offset": 3,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Sword",
+      "Thunder"
+    ],
+    "palette": 3,
+    "category": 5,
+    "notes": ""
+  },
+  "Orb of Wind": {
+    "name": "Orb of Wind",
+    "rom_id": 5,
+    "ap_id_offset": 4,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Wind Upgrades",
+      "Wind"
+    ],
+    "palette": 0,
+    "category": 1,
+    "notes": ""
+  },
+  "Tornado Bracelet": {
+    "name": "Tornado Bracelet",
+    "rom_id": 6,
+    "ap_id_offset": 5,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Wind Upgrades",
+      "Wind"
+    ],
+    "palette": 0,
+    "category": 1,
+    "notes": ""
+  },
+  "Orb of Fire": {
+    "name": "Orb of Fire",
+    "rom_id": 7,
+    "ap_id_offset": 6,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Fire Upgrades",
+      "Fire"
+    ],
+    "palette": 1,
+    "category": 3,
+    "notes": "Downgrade to Useful if easy walls and hard combat and non-random trade-ins"
+  },
+  "Flame Bracelet": {
+    "name": "Flame Bracelet",
+    "rom_id": 8,
+    "ap_id_offset": 7,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Fire Upgrades",
+      "Fire"
+    ],
+    "palette": 1,
+    "category": 3,
+    "notes": "Downgrade to Useful if easy walls and hard combat and non-random trade-ins"
+  },
+  "Orb of Water": {
+    "name": "Orb of Water",
+    "rom_id": 9,
+    "ap_id_offset": 8,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Water Upgrades",
+      "Water"
+    ],
+    "palette": 2,
+    "category": 3,
+    "notes": "Downgrade to Useful if easy walls and hard combat and non-random trade-ins"
+  },
+  "Blizzard Bracelet": {
+    "name": "Blizzard Bracelet",
+    "rom_id": 10,
+    "ap_id_offset": 9,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Water Upgrades",
+      "Water"
+    ],
+    "palette": 2,
+    "category": 3,
+    "notes": "Downgrade to Useful if easy walls and hard combat and non-random trade-ins"
+  },
+  "Orb of Thunder": {
+    "name": "Orb of Thunder",
+    "rom_id": 11,
+    "ap_id_offset": 10,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Thunder Upgrades",
+      "Thunder"
+    ],
+    "palette": 3,
+    "category": 3,
+    "notes": "Downgrade to Useful if easy walls and hard combat and non-random trade-ins"
+  },
+  "Storm Bracelet": {
+    "name": "Storm Bracelet",
+    "rom_id": 12,
+    "ap_id_offset": 11,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Thunder Upgrades",
+      "Thunder"
+    ],
+    "palette": 3,
+    "category": 3,
+    "notes": "Downgrade to Useful if easy walls and hard combat and non-random trade-ins"
+  },
+  "Mirrored Shield": {
+    "name": "Mirrored Shield",
+    "rom_id": 16,
+    "ap_id_offset": 12,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Shield"
+    ],
+    "palette": 2,
+    "category": 2,
+    "notes": ""
+  },
+  "Sacred Shield": {
+    "name": "Sacred Shield",
+    "rom_id": 18,
+    "ap_id_offset": 13,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Shield"
+    ],
+    "palette": 0,
+    "category": 2,
+    "notes": ""
+  },
+  "Psycho Shield": {
+    "name": "Psycho Shield",
+    "rom_id": 20,
+    "ap_id_offset": 14,
+    "unique": true,
+    "losable": true,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Shield"
+    ],
+    "palette": 1,
+    "category": 2,
+    "notes": ""
+  },
+  "Battle Armor": {
+    "name": "Battle Armor",
+    "rom_id": 27,
+    "ap_id_offset": 15,
+    "unique": true,
+    "losable": true,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Armor"
+    ],
+    "palette": 0,
+    "category": 2,
+    "notes": ""
+  },
+  "Psycho Armor": {
+    "name": "Psycho Armor",
+    "rom_id": 28,
+    "ap_id_offset": 16,
+    "unique": true,
+    "losable": true,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Armor"
+    ],
+    "palette": 1,
+    "category": 2,
+    "notes": ""
+  },
+  "Medical Herb": {
+    "name": "Medical Herb",
+    "rom_id": 29,
+    "ap_id_offset": 17,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 6,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 4,
+    "category": 0,
+    "notes": ""
+  },
+  "Antidote": {
+    "name": "Antidote",
+    "rom_id": 30,
+    "ap_id_offset": 18,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 4,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 7,
+    "category": 0,
+    "notes": ""
+  },
+  "Lysis Plant": {
+    "name": "Lysis Plant",
+    "rom_id": 31,
+    "ap_id_offset": 19,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 3,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 5,
+    "category": 0,
+    "notes": ""
+  },
+  "Fruit of Lime": {
+    "name": "Fruit of Lime",
+    "rom_id": 32,
+    "ap_id_offset": 20,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 4,
+    "category": 0,
+    "notes": ""
+  },
+  "Fruit of Power": {
+    "name": "Fruit of Power",
+    "rom_id": 33,
+    "ap_id_offset": 21,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 5,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 5,
+    "category": 0,
+    "notes": ""
+  },
+  "Magic Ring": {
+    "name": "Magic Ring",
+    "rom_id": 34,
+    "ap_id_offset": 22,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 9,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 7,
+    "category": 0,
+    "notes": ""
+  },
+  "Fruit of Repun": {
+    "name": "Fruit of Repun",
+    "rom_id": 35,
+    "ap_id_offset": 23,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 2,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 6,
+    "category": 0,
+    "notes": ""
+  },
+  "Warp Boots": {
+    "name": "Warp Boots",
+    "rom_id": 36,
+    "ap_id_offset": 24,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 3,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 6,
+    "category": 0,
+    "notes": ""
+  },
+  "Statue of Onyx": {
+    "name": "Statue of Onyx",
+    "rom_id": 37,
+    "ap_id_offset": 25,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Trade-in",
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Opel Statue": {
+    "name": "Opel Statue",
+    "rom_id": 38,
+    "ap_id_offset": 26,
+    "unique": false,
+    "losable": true,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 3,
+    "groups": [
+      "Consumable"
+    ],
+    "palette": 4,
+    "category": 2,
+    "notes": ""
+  },
+  "Insect Flute": {
+    "name": "Insect Flute",
+    "rom_id": 39,
+    "ap_id_offset": 27,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": ""
+  },
+  "Flute of Lime": {
+    "name": "Flute of Lime",
+    "rom_id": 40,
+    "ap_id_offset": 28,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Gas Mask": {
+    "name": "Gas Mask",
+    "rom_id": 41,
+    "ap_id_offset": 29,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": "Only used if Vb is on"
+  },
+  "Hazmat Suit": {
+    "name": "Hazmat Suit",
+    "rom_id": 41,
+    "ap_id_offset": 30,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": "Only used if Vb is off"
+  },
+  "Power Ring": {
+    "name": "Power Ring",
+    "rom_id": 42,
+    "ap_id_offset": 31,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 5,
+    "category": 2,
+    "notes": ""
+  },
+  "Warrior Ring": {
+    "name": "Warrior Ring",
+    "rom_id": 43,
+    "ap_id_offset": 32,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 6,
+    "category": 2,
+    "notes": ""
+  },
+  "Iron Necklace": {
+    "name": "Iron Necklace",
+    "rom_id": 44,
+    "ap_id_offset": 33,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 4,
+    "category": 2,
+    "notes": ""
+  },
+  "Deo's Pendant": {
+    "name": "Deo's Pendant",
+    "rom_id": 45,
+    "ap_id_offset": 34,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 7,
+    "category": 2,
+    "notes": ""
+  },
+  "Rabbit Boots": {
+    "name": "Rabbit Boots",
+    "rom_id": 46,
+    "ap_id_offset": 35,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Leather Boots": {
+    "name": "Leather Boots",
+    "rom_id": 47,
+    "ap_id_offset": 36,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": "Only used if Vb is on"
+  },
+  "Speed Boots": {
+    "name": "Speed Boots",
+    "rom_id": 47,
+    "ap_id_offset": 37,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": "Only used if Vb is off"
+  },
+  "Shield Ring": {
+    "name": "Shield Ring",
+    "rom_id": 48,
+    "ap_id_offset": 38,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Accessory"
+    ],
+    "palette": 4,
+    "category": 3,
+    "notes": "Upgrade to progression if barrier not guaranteed"
+  },
+  "Alarm Flute": {
+    "name": "Alarm Flute",
+    "rom_id": 49,
+    "ap_id_offset": 39,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 7,
+    "category": 1,
+    "notes": ""
+  },
+  "Windmill Key": {
+    "name": "Windmill Key",
+    "rom_id": 50,
+    "ap_id_offset": 40,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Key to Prison": {
+    "name": "Key to Prison",
+    "rom_id": 51,
+    "ap_id_offset": 41,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Key to Stxy": {
+    "name": "Key to Stxy",
+    "rom_id": 52,
+    "ap_id_offset": 42,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": ""
+  },
+  "Fog Lamp": {
+    "name": "Fog Lamp",
+    "rom_id": 53,
+    "ap_id_offset": 43,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Trade-in",
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 4,
+    "category": 1,
+    "notes": ""
+  },
+  "Shell Flute": {
+    "name": "Shell Flute",
+    "rom_id": 54,
+    "ap_id_offset": 44,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Eye Glasses": {
+    "name": "Eye Glasses",
+    "rom_id": 55,
+    "ap_id_offset": 45,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Broken Statue": {
+    "name": "Broken Statue",
+    "rom_id": 56,
+    "ap_id_offset": 46,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Glowing Lamp": {
+    "name": "Glowing Lamp",
+    "rom_id": 57,
+    "ap_id_offset": 47,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 7,
+    "category": 1,
+    "notes": ""
+  },
+  "Statue of Gold": {
+    "name": "Statue of Gold",
+    "rom_id": 58,
+    "ap_id_offset": 48,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Love Pendant": {
+    "name": "Love Pendant",
+    "rom_id": 59,
+    "ap_id_offset": 49,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Trade-in",
+      "Key Item"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Kirisa Plant": {
+    "name": "Kirisa Plant",
+    "rom_id": 60,
+    "ap_id_offset": 50,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Trade-in",
+      "Key Item"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Ivory Statue": {
+    "name": "Ivory Statue",
+    "rom_id": 61,
+    "ap_id_offset": 51,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Trade-in",
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 7,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Moon": {
+    "name": "Bow of Moon",
+    "rom_id": 62,
+    "ap_id_offset": 52,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 7,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Sun": {
+    "name": "Bow of Sun",
+    "rom_id": 63,
+    "ap_id_offset": 53,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Truth": {
+    "name": "Bow of Truth",
+    "rom_id": 64,
+    "ap_id_offset": 54,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Refresh": {
+    "name": "Refresh",
+    "rom_id": 65,
+    "ap_id_offset": 55,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 6,
+    "category": 3,
+    "notes": "Upgrade to progression if Refresh guaranteed or Barrier not guaranteed or Gas mask not guaranteed."
+  },
+  "Paralysis": {
+    "name": "Paralysis",
+    "rom_id": 66,
+    "ap_id_offset": 56,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Telepathy": {
+    "name": "Telepathy",
+    "rom_id": 67,
+    "ap_id_offset": 57,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 7,
+    "category": 1,
+    "notes": ""
+  },
+  "Teleport": {
+    "name": "Teleport",
+    "rom_id": 68,
+    "ap_id_offset": 58,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 7,
+    "category": 1,
+    "notes": ""
+  },
+  "Recover": {
+    "name": "Recover",
+    "rom_id": 69,
+    "ap_id_offset": 59,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 6,
+    "category": 2,
+    "notes": ""
+  },
+  "Barrier": {
+    "name": "Barrier",
+    "rom_id": 70,
+    "ap_id_offset": 60,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 6,
+    "category": 1,
+    "notes": ""
+  },
+  "Change": {
+    "name": "Change",
+    "rom_id": 71,
+    "ap_id_offset": 61,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 5,
+    "category": 1,
+    "notes": ""
+  },
+  "Flight": {
+    "name": "Flight",
+    "rom_id": 72,
+    "ap_id_offset": 62,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 1,
+    "groups": [
+      "Magic"
+    ],
+    "palette": 6,
+    "category": 5,
+    "notes": ""
+  },
+  "Mimic": {
+    "name": "Mimic",
+    "rom_id": 112,
+    "ap_id_offset": 63,
+    "unique": false,
+    "losable": false,
+    "prevent_loss": false,
+    "community": false,
+    "default_count": 12,
+    "groups": [
+      ""
+    ],
+    "palette": 8,
+    "category": 4,
+    "notes": ""
+  },
+  "Random Key": {
+    "name": "Random Key",
+    "rom_id": 255,
+    "ap_id_offset": 64,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Curious Key": {
+    "name": "Curious Key",
+    "rom_id": 255,
+    "ap_id_offset": 65,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bronze Key": {
+    "name": "Bronze Key",
+    "rom_id": 255,
+    "ap_id_offset": 66,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Silver Key": {
+    "name": "Silver Key",
+    "rom_id": 255,
+    "ap_id_offset": 67,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Golden Key": {
+    "name": "Golden Key",
+    "rom_id": 255,
+    "ap_id_offset": 68,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Ancient Key": {
+    "name": "Ancient Key",
+    "rom_id": 255,
+    "ap_id_offset": 69,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Small Key": {
+    "name": "Small Key",
+    "rom_id": 255,
+    "ap_id_offset": 70,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Shiny Key": {
+    "name": "Shiny Key",
+    "rom_id": 255,
+    "ap_id_offset": 71,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Mysterious Key": {
+    "name": "Mysterious Key",
+    "rom_id": 255,
+    "ap_id_offset": 72,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Magic Key": {
+    "name": "Magic Key",
+    "rom_id": 255,
+    "ap_id_offset": 73,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Backdoor Key": {
+    "name": "Backdoor Key",
+    "rom_id": 255,
+    "ap_id_offset": 74,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Skeleton Key": {
+    "name": "Skeleton Key",
+    "rom_id": 255,
+    "ap_id_offset": 75,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Unidentified Key": {
+    "name": "Unidentified Key",
+    "rom_id": 255,
+    "ap_id_offset": 76,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Piano Key": {
+    "name": "Piano Key",
+    "rom_id": 255,
+    "ap_id_offset": 77,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Encryption Key": {
+    "name": "Encryption Key",
+    "rom_id": 255,
+    "ap_id_offset": 78,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Private Key": {
+    "name": "Private Key",
+    "rom_id": 255,
+    "ap_id_offset": 79,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Public Key": {
+    "name": "Public Key",
+    "rom_id": 255,
+    "ap_id_offset": 80,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Secret Key": {
+    "name": "Secret Key",
+    "rom_id": 255,
+    "ap_id_offset": 81,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Cipher Key": {
+    "name": "Cipher Key",
+    "rom_id": 255,
+    "ap_id_offset": 82,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key Card": {
+    "name": "Key Card",
+    "rom_id": 255,
+    "ap_id_offset": 83,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Keyboard": {
+    "name": "Keyboard",
+    "rom_id": 255,
+    "ap_id_offset": 84,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Any Key": {
+    "name": "Any Key",
+    "rom_id": 255,
+    "ap_id_offset": 85,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Ctrl Key": {
+    "name": "Ctrl Key",
+    "rom_id": 255,
+    "ap_id_offset": 86,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Escape Key": {
+    "name": "Escape Key",
+    "rom_id": 255,
+    "ap_id_offset": 87,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Space Bar": {
+    "name": "Space Bar",
+    "rom_id": 255,
+    "ap_id_offset": 88,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Return Key": {
+    "name": "Return Key",
+    "rom_id": 255,
+    "ap_id_offset": 89,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Imaginary Key": {
+    "name": "Imaginary Key",
+    "rom_id": 255,
+    "ap_id_offset": 90,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Giant Key": {
+    "name": "Giant Key",
+    "rom_id": 255,
+    "ap_id_offset": 91,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Out of Key": {
+    "name": "Out of Key",
+    "rom_id": 255,
+    "ap_id_offset": 92,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key of C": {
+    "name": "Key of C",
+    "rom_id": 255,
+    "ap_id_offset": 93,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key of G": {
+    "name": "Key of G",
+    "rom_id": 255,
+    "ap_id_offset": 94,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key of B Flat": {
+    "name": "Key of B Flat",
+    "rom_id": 255,
+    "ap_id_offset": 95,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key of F Sharp": {
+    "name": "Key of F Sharp",
+    "rom_id": 255,
+    "ap_id_offset": 96,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Major Key": {
+    "name": "Major Key",
+    "rom_id": 255,
+    "ap_id_offset": 97,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Minor Key": {
+    "name": "Minor Key",
+    "rom_id": 255,
+    "ap_id_offset": 98,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Lockpick": {
+    "name": "Lockpick",
+    "rom_id": 255,
+    "ap_id_offset": 99,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Transponder Key": {
+    "name": "Transponder Key",
+    "rom_id": 255,
+    "ap_id_offset": 100,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Sharp Key": {
+    "name": "Sharp Key",
+    "rom_id": 255,
+    "ap_id_offset": 101,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Flat Key": {
+    "name": "Flat Key",
+    "rom_id": 255,
+    "ap_id_offset": 102,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Locke and Key": {
+    "name": "Locke and Key",
+    "rom_id": 255,
+    "ap_id_offset": 103,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Cookie": {
+    "name": "Cookie",
+    "rom_id": 255,
+    "ap_id_offset": 104,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Turkey": {
+    "name": "Turkey",
+    "rom_id": 255,
+    "ap_id_offset": 105,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Monkey": {
+    "name": "Monkey",
+    "rom_id": 255,
+    "ap_id_offset": 106,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Donkey": {
+    "name": "Donkey",
+    "rom_id": 255,
+    "ap_id_offset": 107,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Car Key": {
+    "name": "Car Key",
+    "rom_id": 255,
+    "ap_id_offset": 108,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Clock Key": {
+    "name": "Clock Key",
+    "rom_id": 255,
+    "ap_id_offset": 109,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Florida Key": {
+    "name": "Florida Key",
+    "rom_id": 255,
+    "ap_id_offset": 110,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key Lime Pie": {
+    "name": "Key Lime Pie",
+    "rom_id": 255,
+    "ap_id_offset": 111,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Keystone": {
+    "name": "Keystone",
+    "rom_id": 255,
+    "ap_id_offset": 112,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Answer Key": {
+    "name": "Answer Key",
+    "rom_id": 255,
+    "ap_id_offset": 113,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Sticks Key": {
+    "name": "Sticks Key",
+    "rom_id": 255,
+    "ap_id_offset": 114,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key to my Heart": {
+    "name": "Key to my Heart",
+    "rom_id": 255,
+    "ap_id_offset": 115,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Aqui": {
+    "name": "Aqui",
+    "rom_id": 255,
+    "ap_id_offset": 116,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Map Key": {
+    "name": "Map Key",
+    "rom_id": 255,
+    "ap_id_offset": 117,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Key Stone": {
+    "name": "Key Stone",
+    "rom_id": 255,
+    "ap_id_offset": 118,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Key"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Accordion": {
+    "name": "Accordion",
+    "rom_id": 255,
+    "ap_id_offset": 119,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bagpipes": {
+    "name": "Bagpipes",
+    "rom_id": 255,
+    "ap_id_offset": 120,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bugle": {
+    "name": "Bugle",
+    "rom_id": 255,
+    "ap_id_offset": 121,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Harmonica": {
+    "name": "Harmonica",
+    "rom_id": 255,
+    "ap_id_offset": 122,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Metal Flute": {
+    "name": "Metal Flute",
+    "rom_id": 255,
+    "ap_id_offset": 123,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Ocarina": {
+    "name": "Ocarina",
+    "rom_id": 255,
+    "ap_id_offset": 124,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Pan Pipes": {
+    "name": "Pan Pipes",
+    "rom_id": 255,
+    "ap_id_offset": 125,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Piccolo": {
+    "name": "Piccolo",
+    "rom_id": 255,
+    "ap_id_offset": 126,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Random Flute": {
+    "name": "Random Flute",
+    "rom_id": 255,
+    "ap_id_offset": 127,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Recorder": {
+    "name": "Recorder",
+    "rom_id": 255,
+    "ap_id_offset": 128,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tin Whistle": {
+    "name": "Tin Whistle",
+    "rom_id": 255,
+    "ap_id_offset": 129,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Wooden Flute": {
+    "name": "Wooden Flute",
+    "rom_id": 255,
+    "ap_id_offset": 130,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bassoon": {
+    "name": "Bassoon",
+    "rom_id": 255,
+    "ap_id_offset": 131,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Cello": {
+    "name": "Cello",
+    "rom_id": 255,
+    "ap_id_offset": 132,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Clarinet": {
+    "name": "Clarinet",
+    "rom_id": 255,
+    "ap_id_offset": 133,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Deku Pipes": {
+    "name": "Deku Pipes",
+    "rom_id": 255,
+    "ap_id_offset": 134,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Didgeridoo": {
+    "name": "Didgeridoo",
+    "rom_id": 255,
+    "ap_id_offset": 135,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Dog Whistle": {
+    "name": "Dog Whistle",
+    "rom_id": 255,
+    "ap_id_offset": 136,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Dragonzord Flute": {
+    "name": "Dragonzord Flute",
+    "rom_id": 255,
+    "ap_id_offset": 137,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Electric Guitar": {
+    "name": "Electric Guitar",
+    "rom_id": 255,
+    "ap_id_offset": 138,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Euphonium": {
+    "name": "Euphonium",
+    "rom_id": 255,
+    "ap_id_offset": 139,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Fairy Ocarina": {
+    "name": "Fairy Ocarina",
+    "rom_id": 255,
+    "ap_id_offset": 140,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Flute of Power": {
+    "name": "Flute of Power",
+    "rom_id": 255,
+    "ap_id_offset": 141,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "French Horn": {
+    "name": "French Horn",
+    "rom_id": 255,
+    "ap_id_offset": 142,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Guitar": {
+    "name": "Guitar",
+    "rom_id": 255,
+    "ap_id_offset": 143,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Harp": {
+    "name": "Harp",
+    "rom_id": 255,
+    "ap_id_offset": 144,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Harpsichord": {
+    "name": "Harpsichord",
+    "rom_id": 255,
+    "ap_id_offset": 145,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Horn of Plenty": {
+    "name": "Horn of Plenty",
+    "rom_id": 255,
+    "ap_id_offset": 146,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Kazoo": {
+    "name": "Kazoo",
+    "rom_id": 255,
+    "ap_id_offset": 147,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Lute": {
+    "name": "Lute",
+    "rom_id": 255,
+    "ap_id_offset": 148,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Magic Whistle": {
+    "name": "Magic Whistle",
+    "rom_id": 255,
+    "ap_id_offset": 149,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Marimba": {
+    "name": "Marimba",
+    "rom_id": 255,
+    "ap_id_offset": 150,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Melodica": {
+    "name": "Melodica",
+    "rom_id": 255,
+    "ap_id_offset": 151,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Moog Synth": {
+    "name": "Moog Synth",
+    "rom_id": 255,
+    "ap_id_offset": 152,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Note Block": {
+    "name": "Note Block",
+    "rom_id": 255,
+    "ap_id_offset": 153,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Oboe": {
+    "name": "Oboe",
+    "rom_id": 255,
+    "ap_id_offset": 154,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Ocarina of Time": {
+    "name": "Ocarina of Time",
+    "rom_id": 255,
+    "ap_id_offset": 155,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Otamatone": {
+    "name": "Otamatone",
+    "rom_id": 255,
+    "ap_id_offset": 156,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Piano": {
+    "name": "Piano",
+    "rom_id": 255,
+    "ap_id_offset": 157,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Pipe Organ": {
+    "name": "Pipe Organ",
+    "rom_id": 255,
+    "ap_id_offset": 158,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Saxophone": {
+    "name": "Saxophone",
+    "rom_id": 255,
+    "ap_id_offset": 159,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Snare Drum": {
+    "name": "Snare Drum",
+    "rom_id": 255,
+    "ap_id_offset": 160,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Sousaphone": {
+    "name": "Sousaphone",
+    "rom_id": 255,
+    "ap_id_offset": 161,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Synthesizer": {
+    "name": "Synthesizer",
+    "rom_id": 255,
+    "ap_id_offset": 162,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tambourine": {
+    "name": "Tambourine",
+    "rom_id": 255,
+    "ap_id_offset": 163,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Theramin": {
+    "name": "Theramin",
+    "rom_id": 255,
+    "ap_id_offset": 164,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tornelsbane": {
+    "name": "Tornelsbane",
+    "rom_id": 255,
+    "ap_id_offset": 165,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Trombone": {
+    "name": "Trombone",
+    "rom_id": 255,
+    "ap_id_offset": 166,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Trumpet": {
+    "name": "Trumpet",
+    "rom_id": 255,
+    "ap_id_offset": 167,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tuba": {
+    "name": "Tuba",
+    "rom_id": 255,
+    "ap_id_offset": 168,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Viola": {
+    "name": "Viola",
+    "rom_id": 255,
+    "ap_id_offset": 169,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Violin": {
+    "name": "Violin",
+    "rom_id": 255,
+    "ap_id_offset": 170,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Vuvuzela": {
+    "name": "Vuvuzela",
+    "rom_id": 255,
+    "ap_id_offset": 171,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Whoopie Cushion": {
+    "name": "Whoopie Cushion",
+    "rom_id": 255,
+    "ap_id_offset": 172,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Xylophone": {
+    "name": "Xylophone",
+    "rom_id": 255,
+    "ap_id_offset": 173,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Flute"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Random Lamp": {
+    "name": "Random Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 174,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bronze Lamp": {
+    "name": "Bronze Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 175,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Silver Lamp": {
+    "name": "Silver Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 176,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Gold Lamp": {
+    "name": "Gold Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 177,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Oil Lamp": {
+    "name": "Oil Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 178,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Magic Lamp": {
+    "name": "Magic Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 179,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Genie Lamp": {
+    "name": "Genie Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 180,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Unidentified Lamp": {
+    "name": "Unidentified Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 181,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Dull Lamp": {
+    "name": "Dull Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 182,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Desk Lamp": {
+    "name": "Desk Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 183,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Shimmering Lamp": {
+    "name": "Shimmering Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 184,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Broken Lamp": {
+    "name": "Broken Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 185,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Brass Lantern": {
+    "name": "Brass Lantern",
+    "rom_id": 255,
+    "ap_id_offset": 186,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Overhead Lamp": {
+    "name": "Overhead Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 187,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Pedestal Lamp": {
+    "name": "Pedestal Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 188,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Incubation Lamp": {
+    "name": "Incubation Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 189,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Halogen Bulb": {
+    "name": "Halogen Bulb",
+    "rom_id": 255,
+    "ap_id_offset": 190,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Incandescent Bulb": {
+    "name": "Incandescent Bulb",
+    "rom_id": 255,
+    "ap_id_offset": 191,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Fluorescent Lamp": {
+    "name": "Fluorescent Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 192,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Ultraviolet Lamp": {
+    "name": "Ultraviolet Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 193,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Heat Lamp": {
+    "name": "Heat Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 194,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Recessed Lighting": {
+    "name": "Recessed Lighting",
+    "rom_id": 255,
+    "ap_id_offset": 195,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Laser Pointer": {
+    "name": "Laser Pointer",
+    "rom_id": 255,
+    "ap_id_offset": 196,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Spotlight": {
+    "name": "Spotlight",
+    "rom_id": 255,
+    "ap_id_offset": 197,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Streetlight": {
+    "name": "Streetlight",
+    "rom_id": 255,
+    "ap_id_offset": 198,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Flashlight": {
+    "name": "Flashlight",
+    "rom_id": 255,
+    "ap_id_offset": 199,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Search Light": {
+    "name": "Search Light",
+    "rom_id": 255,
+    "ap_id_offset": 200,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "LED": {
+    "name": "LED",
+    "rom_id": 255,
+    "ap_id_offset": 201,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Nightlight": {
+    "name": "Nightlight",
+    "rom_id": 255,
+    "ap_id_offset": 202,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Batsignal": {
+    "name": "Batsignal",
+    "rom_id": 255,
+    "ap_id_offset": 203,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Candelabra": {
+    "name": "Candelabra",
+    "rom_id": 255,
+    "ap_id_offset": 204,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Chandelier": {
+    "name": "Chandelier",
+    "rom_id": 255,
+    "ap_id_offset": 205,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Birthday Candle": {
+    "name": "Birthday Candle",
+    "rom_id": 255,
+    "ap_id_offset": 206,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tallow Candle": {
+    "name": "Tallow Candle",
+    "rom_id": 255,
+    "ap_id_offset": 207,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Wax Candle": {
+    "name": "Wax Candle",
+    "rom_id": 255,
+    "ap_id_offset": 208,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Candle": {
+    "name": "Candle",
+    "rom_id": 255,
+    "ap_id_offset": 209,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Red Candle": {
+    "name": "Red Candle",
+    "rom_id": 255,
+    "ap_id_offset": 210,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Blue Candle": {
+    "name": "Blue Candle",
+    "rom_id": 255,
+    "ap_id_offset": 211,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Gas Stove": {
+    "name": "Gas Stove",
+    "rom_id": 255,
+    "ap_id_offset": 212,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Fireplace": {
+    "name": "Fireplace",
+    "rom_id": 255,
+    "ap_id_offset": 213,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Campfire": {
+    "name": "Campfire",
+    "rom_id": 255,
+    "ap_id_offset": 214,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bonfire": {
+    "name": "Bonfire",
+    "rom_id": 255,
+    "ap_id_offset": 215,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tanning Bed": {
+    "name": "Tanning Bed",
+    "rom_id": 255,
+    "ap_id_offset": 216,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bug Zapper": {
+    "name": "Bug Zapper",
+    "rom_id": 255,
+    "ap_id_offset": 217,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "CRT": {
+    "name": "CRT",
+    "rom_id": 255,
+    "ap_id_offset": 218,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Disco Ball": {
+    "name": "Disco Ball",
+    "rom_id": 255,
+    "ap_id_offset": 219,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "The Clapper": {
+    "name": "The Clapper",
+    "rom_id": 255,
+    "ap_id_offset": 220,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Merton": {
+    "name": "Merton",
+    "rom_id": 255,
+    "ap_id_offset": 221,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Gaddlight": {
+    "name": "Gaddlight",
+    "rom_id": 255,
+    "ap_id_offset": 222,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Shroomlight": {
+    "name": "Shroomlight",
+    "rom_id": 255,
+    "ap_id_offset": 223,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Froglight": {
+    "name": "Froglight",
+    "rom_id": 255,
+    "ap_id_offset": 224,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Glowstone": {
+    "name": "Glowstone",
+    "rom_id": 255,
+    "ap_id_offset": 225,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Redstone Lamp": {
+    "name": "Redstone Lamp",
+    "rom_id": 255,
+    "ap_id_offset": 226,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "PrismarineLantern": {
+    "name": "PrismarineLantern",
+    "rom_id": 255,
+    "ap_id_offset": 227,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Soul Campfire": {
+    "name": "Soul Campfire",
+    "rom_id": 255,
+    "ap_id_offset": 228,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Lamp"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Random Statue": {
+    "name": "Random Statue",
+    "rom_id": 255,
+    "ap_id_offset": 229,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Rusty Statue": {
+    "name": "Rusty Statue",
+    "rom_id": 255,
+    "ap_id_offset": 230,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Forbidden Statue": {
+    "name": "Forbidden Statue",
+    "rom_id": 255,
+    "ap_id_offset": 231,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Unidentified Idol": {
+    "name": "Unidentified Idol",
+    "rom_id": 255,
+    "ap_id_offset": 232,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Golden Idol": {
+    "name": "Golden Idol",
+    "rom_id": 255,
+    "ap_id_offset": 233,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Strange Statue": {
+    "name": "Strange Statue",
+    "rom_id": 255,
+    "ap_id_offset": 234,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Glass Statue": {
+    "name": "Glass Statue",
+    "rom_id": 255,
+    "ap_id_offset": 235,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Copper Statue": {
+    "name": "Copper Statue",
+    "rom_id": 255,
+    "ap_id_offset": 236,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "White Statue": {
+    "name": "White Statue",
+    "rom_id": 255,
+    "ap_id_offset": 237,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Invisible Statue": {
+    "name": "Invisible Statue",
+    "rom_id": 255,
+    "ap_id_offset": 238,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Burt Figurine": {
+    "name": "Burt Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 239,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Draygon Figurine": {
+    "name": "Draygon Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 240,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Karmine Figurine": {
+    "name": "Karmine Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 241,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Mado Figurine": {
+    "name": "Mado Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 242,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Sabera Figurine": {
+    "name": "Sabera Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 243,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Kelbesque Figurine": {
+    "name": "Kelbesque Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 244,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Flail Guy Trophy": {
+    "name": "Flail Guy Trophy",
+    "rom_id": 255,
+    "ap_id_offset": 245,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Metroid Amiibo": {
+    "name": "Metroid Amiibo",
+    "rom_id": 255,
+    "ap_id_offset": 246,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Model of Dyna": {
+    "name": "Model of Dyna",
+    "rom_id": 255,
+    "ap_id_offset": 247,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Jeff Peters Statue": {
+    "name": "Jeff Peters Statue",
+    "rom_id": 255,
+    "ap_id_offset": 248,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "M. Toki Statue": {
+    "name": "M. Toki Statue",
+    "rom_id": 255,
+    "ap_id_offset": 249,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Statue of Liberty": {
+    "name": "Statue of Liberty",
+    "rom_id": 255,
+    "ap_id_offset": 250,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Colossus of Rhodes": {
+    "name": "Colossus of Rhodes",
+    "rom_id": 255,
+    "ap_id_offset": 251,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Great Sphynx": {
+    "name": "Great Sphynx",
+    "rom_id": 255,
+    "ap_id_offset": 252,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Olmec Head": {
+    "name": "Olmec Head",
+    "rom_id": 255,
+    "ap_id_offset": 253,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Shakoki Dogu": {
+    "name": "Shakoki Dogu",
+    "rom_id": 255,
+    "ap_id_offset": 254,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Moai": {
+    "name": "Moai",
+    "rom_id": 255,
+    "ap_id_offset": 255,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Venus de Milo": {
+    "name": "Venus de Milo",
+    "rom_id": 255,
+    "ap_id_offset": 256,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "David": {
+    "name": "David",
+    "rom_id": 255,
+    "ap_id_offset": 257,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "The Thinker": {
+    "name": "The Thinker",
+    "rom_id": 255,
+    "ap_id_offset": 258,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Winged Victory": {
+    "name": "Winged Victory",
+    "rom_id": 255,
+    "ap_id_offset": 259,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Terracotta Statue": {
+    "name": "Terracotta Statue",
+    "rom_id": 255,
+    "ap_id_offset": 260,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Gargoyle": {
+    "name": "Gargoyle",
+    "rom_id": 255,
+    "ap_id_offset": 261,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Mattrick Figurine": {
+    "name": "Mattrick Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 262,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Dragondarch Statue": {
+    "name": "Dragondarch Statue",
+    "rom_id": 255,
+    "ap_id_offset": 263,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Overswarm Statue": {
+    "name": "Overswarm Statue",
+    "rom_id": 255,
+    "ap_id_offset": 264,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Trueblue83 Statue": {
+    "name": "Trueblue83 Statue",
+    "rom_id": 255,
+    "ap_id_offset": 265,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "TheAxeMan Idol": {
+    "name": "TheAxeMan Idol",
+    "rom_id": 255,
+    "ap_id_offset": 266,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Acmlm Figurine": {
+    "name": "Acmlm Figurine",
+    "rom_id": 255,
+    "ap_id_offset": 267,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tornel Statue": {
+    "name": "Tornel Statue",
+    "rom_id": 255,
+    "ap_id_offset": 268,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "CodeGorilla Trophy": {
+    "name": "CodeGorilla Trophy",
+    "rom_id": 255,
+    "ap_id_offset": 269,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "SirArchibald Model": {
+    "name": "SirArchibald Model",
+    "rom_id": 255,
+    "ap_id_offset": 270,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "ClaireDiviner Idol": {
+    "name": "ClaireDiviner Idol",
+    "rom_id": 255,
+    "ap_id_offset": 271,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Darkness": {
+    "name": "Bow of Darkness",
+    "rom_id": 255,
+    "ap_id_offset": 272,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Earth": {
+    "name": "Bow of Earth",
+    "rom_id": 255,
+    "ap_id_offset": 273,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Fire": {
+    "name": "Bow of Fire",
+    "rom_id": 255,
+    "ap_id_offset": 274,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Light": {
+    "name": "Bow of Light",
+    "rom_id": 255,
+    "ap_id_offset": 275,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Stars": {
+    "name": "Bow of Stars",
+    "rom_id": 255,
+    "ap_id_offset": 276,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Thunder": {
+    "name": "Bow of Thunder",
+    "rom_id": 255,
+    "ap_id_offset": 277,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Water": {
+    "name": "Bow of Water",
+    "rom_id": 255,
+    "ap_id_offset": 278,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Wind": {
+    "name": "Bow of Wind",
+    "rom_id": 255,
+    "ap_id_offset": 279,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Random Bow": {
+    "name": "Random Bow",
+    "rom_id": 255,
+    "ap_id_offset": 280,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": false,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Arbalest": {
+    "name": "Arbalest",
+    "rom_id": 255,
+    "ap_id_offset": 281,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Autocrossbow": {
+    "name": "Autocrossbow",
+    "rom_id": 255,
+    "ap_id_offset": 282,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Beau Bridges": {
+    "name": "Beau Bridges",
+    "rom_id": 255,
+    "ap_id_offset": 283,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bo Burnham": {
+    "name": "Bo Burnham",
+    "rom_id": 255,
+    "ap_id_offset": 284,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bo Dallas": {
+    "name": "Bo Dallas",
+    "rom_id": 255,
+    "ap_id_offset": 285,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bo Derek": {
+    "name": "Bo Derek",
+    "rom_id": 255,
+    "ap_id_offset": 286,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bo Diddley": {
+    "name": "Bo Diddley",
+    "rom_id": 255,
+    "ap_id_offset": 287,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bo Jackson": {
+    "name": "Bo Jackson",
+    "rom_id": 255,
+    "ap_id_offset": 288,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bo Schembechler": {
+    "name": "Bo Schembechler",
+    "rom_id": 255,
+    "ap_id_offset": 289,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bodacious": {
+    "name": "Bodacious",
+    "rom_id": 255,
+    "ap_id_offset": 290,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bojangles": {
+    "name": "Bojangles",
+    "rom_id": 255,
+    "ap_id_offset": 291,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Botox": {
+    "name": "Botox",
+    "rom_id": 255,
+    "ap_id_offset": 292,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow No!": {
+    "name": "Bow No!",
+    "rom_id": 255,
+    "ap_id_offset": 293,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow Tie": {
+    "name": "Bow Tie",
+    "rom_id": 255,
+    "ap_id_offset": 294,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Death": {
+    "name": "Bow of Death",
+    "rom_id": 255,
+    "ap_id_offset": 295,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Freedom": {
+    "name": "Bow of Freedom",
+    "rom_id": 255,
+    "ap_id_offset": 296,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Lies": {
+    "name": "Bow of Lies",
+    "rom_id": 255,
+    "ap_id_offset": 297,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Bow of Life": {
+    "name": "Bow of Life",
+    "rom_id": 255,
+    "ap_id_offset": 298,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Buriza-Do Kyanon": {
+    "name": "Buriza-Do Kyanon",
+    "rom_id": 255,
+    "ap_id_offset": 299,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Compound Bow": {
+    "name": "Compound Bow",
+    "rom_id": 255,
+    "ap_id_offset": 300,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Crossbow": {
+    "name": "Crossbow",
+    "rom_id": 255,
+    "ap_id_offset": 301,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Cupid's Bow": {
+    "name": "Cupid's Bow",
+    "rom_id": 255,
+    "ap_id_offset": 302,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "David Bowie": {
+    "name": "David Bowie",
+    "rom_id": 255,
+    "ap_id_offset": 303,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Eaglehorn": {
+    "name": "Eaglehorn",
+    "rom_id": 255,
+    "ap_id_offset": 304,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Fire Arrows": {
+    "name": "Fire Arrows",
+    "rom_id": 255,
+    "ap_id_offset": 305,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Golden Bow": {
+    "name": "Golden Bow",
+    "rom_id": 255,
+    "ap_id_offset": 306,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Hair Bow": {
+    "name": "Hair Bow",
+    "rom_id": 255,
+    "ap_id_offset": 307,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Ice Arrows": {
+    "name": "Ice Arrows",
+    "rom_id": 255,
+    "ap_id_offset": 308,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "JBowe": {
+    "name": "JBowe",
+    "rom_id": 255,
+    "ap_id_offset": 309,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "KLINGSBO": {
+    "name": "KLINGSBO",
+    "rom_id": 255,
+    "ap_id_offset": 310,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "LILLABO": {
+    "name": "LILLABO",
+    "rom_id": 255,
+    "ap_id_offset": 311,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Long Bow": {
+    "name": "Long Bow",
+    "rom_id": 255,
+    "ap_id_offset": 312,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Rainbow": {
+    "name": "Rainbow",
+    "rom_id": 255,
+    "ap_id_offset": 313,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Recurve Bow": {
+    "name": "Recurve Bow",
+    "rom_id": 255,
+    "ap_id_offset": 314,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "SVALBO": {
+    "name": "SVALBO",
+    "rom_id": 255,
+    "ap_id_offset": 315,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Silver Arrows": {
+    "name": "Silver Arrows",
+    "rom_id": 255,
+    "ap_id_offset": 316,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Slingshot": {
+    "name": "Slingshot",
+    "rom_id": 255,
+    "ap_id_offset": 317,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Tae Bo": {
+    "name": "Tae Bo",
+    "rom_id": 255,
+    "ap_id_offset": 318,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Unidentified Bow": {
+    "name": "Unidentified Bow",
+    "rom_id": 255,
+    "ap_id_offset": 319,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Violin Bow": {
+    "name": "Violin Bow",
+    "rom_id": 255,
+    "ap_id_offset": 320,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Windforce": {
+    "name": "Windforce",
+    "rom_id": 255,
+    "ap_id_offset": 321,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "Wooden Bow": {
+    "name": "Wooden Bow",
+    "rom_id": 255,
+    "ap_id_offset": 322,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Bow"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  },
+  "justchris Trophy": {
+    "name": "justchris Trophy",
+    "rom_id": 255,
+    "ap_id_offset": 323,
+    "unique": true,
+    "losable": false,
+    "prevent_loss": true,
+    "community": true,
+    "default_count": 0,
+    "groups": [
+      "Key Item",
+      "Statue"
+    ],
+    "palette": 9,
+    "category": 1,
+    "notes": ""
+  }
+}
