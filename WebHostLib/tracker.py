@@ -138,7 +138,8 @@ class TrackerData:
     @_cache_results
     def get_player_hints(self, team: int, player: int) -> Set[Hint]:
         """Retrieves a set of all hints relevant for a particular player."""
-        return self._multisave.get("hints", {}).get((team, player), set())
+        hints = self._multisave.get("hints", {}).get((team, player), set())
+        return {hint for hint in hints if not hint.found}
 
     @_cache_results
     def get_player_last_activity(self, team: int, player: int) -> Optional[datetime.timedelta]:
