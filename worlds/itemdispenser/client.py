@@ -38,8 +38,8 @@ async def id_loop(ctx):
             tokens = sum((item.item for item in ctx.items_received))
             if tokens > ctx.tokens:
                 await ctx.send_msgs([{"cmd": "LocationChecks",
-                                      "locations": list(range(1, tokens + 1))}])
-            if len(ctx.checked_locations) == len(ctx.server_locations) and not ctx.finished_game:
+                                      "locations": [loc for loc in list(range(1, tokens + 1)) if loc in ctx.server_locations]}])
+            if len(ctx.server_locations) and (len(ctx.checked_locations) == len(ctx.server_locations)) and not ctx.finished_game:
                 ctx.finished_game = True
                 await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
 

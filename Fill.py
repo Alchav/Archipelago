@@ -41,24 +41,6 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
     beaten_games = set()
     i = 1
     while locations:
-        # print(f"Sphere {i}")
-        reachable_locations = {location for location in locations if location.can_reach(state)}
-        old_reachable_locations = None
-        sphere_reachable_tokens = set()
-        while old_reachable_locations != reachable_locations:
-            old_reachable_locations = reachable_locations.copy()
-            reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_tokens = {location for location in reachable_locations if location.item and location.item.game == "Item Dispenser"}
-            for location in reachable_events:
-                if location.item:
-                  state.collect(location.item, True, location)
-            for location in reachable_tokens:
-                if location.item:
-                    state.collect(location.item, True, location)
-            locations -= reachable_events
-            sphere_reachable_tokens.update(reachable_tokens)
-            locations -= reachable_tokens
-            reachable_locations = {location for location in locations if location.can_reach(state)}
         old_beaten_games = beaten_games.copy()
         beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
         new_beaten_games = beaten_games - old_beaten_games
@@ -66,7 +48,28 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
             if beaten_game_spheres is not None:
                 beaten_game_spheres[player] = i
             logging.info(f"{i} - {new_beaten_games}")
+
         i += 1
+
+        # print(f"Sphere {i}")
+        reachable_locations = {location for location in locations if location.can_reach(state)}
+        old_reachable_locations = None
+        sphere_reachable_locked = set()
+        while old_reachable_locations != reachable_locations:
+            old_reachable_locations = reachable_locations.copy()
+            reachable_events = {location for location in reachable_locations if location.address is None}
+            reachable_locked = {location for location in reachable_locations if location.item and location.item.game == "Item Dispenser" or location.locked}
+            for location in reachable_events:
+                if location.item:
+                  state.collect(location.item, True, location)
+            for location in reachable_locked:
+                if location.item:
+                    state.collect(location.item, True, location)
+            locations -= reachable_events
+            sphere_reachable_locked.update(reachable_locked)
+            locations -= reachable_locked
+            reachable_locations = {location for location in locations if location.can_reach(state)}
+
         if not reachable_locations:
             if locations and return_unreachables:
                 yield []
@@ -74,7 +77,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
             break
         else:
             yield_locs = reachable_locations.copy()
-            yield_locs.update(sphere_reachable_tokens)
+            yield_locs.update(sphere_reachable_locked)
             yield yield_locs
 
         for location in reachable_locations:
@@ -958,9 +961,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         for loc in sphere_list:
             if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
                 sphere_t[iclass(loc.item)].append(loc)
-
-            elif beaten_game_spheres[loc.player] <= sphere_n:
-                print(f"not swapping {loc.name} - {loc.item}")
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
                 if a.item_rule(b.item) and b.item_rule(a.item):

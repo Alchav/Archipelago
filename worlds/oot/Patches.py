@@ -2098,7 +2098,7 @@ def patch_rom(world, rom):
                 if location.item.game == 'Ocarina of Time':
                     item = read_rom_item(rom, location.item.index)
                 else:
-                    item = read_rom_item(rom, AP_PROGRESSION if location.item.advancement else AP_JUNK)
+                    item = read_rom_item(rom, AP_JUNK)
             else:
                 looks_like_index = get_override_entry(world, location)[5]
                 item = read_rom_item(rom, looks_like_index)
@@ -2114,7 +2114,7 @@ def patch_rom(world, rom):
                 if location.item.game == 'Ocarina of Time':
                     item = read_rom_item(rom, location.item.index)
                 else:
-                    item = read_rom_item(rom, AP_PROGRESSION if location.item.advancement else AP_JUNK)
+                    item = read_rom_item(rom, AP_JUNK)
             else:
                 looks_like_index = get_override_entry(world, location)[5]
                 item = read_rom_item(rom, looks_like_index)
@@ -2132,7 +2132,7 @@ def patch_rom(world, rom):
                 if location.item.game == 'Ocarina of Time':
                     item = read_rom_item(rom, location.item.index)
                 else:
-                    item = read_rom_item(rom, AP_PROGRESSION if location.item.advancement else AP_JUNK)
+                    item = read_rom_item(rom, AP_JUNK)
             else:
                 looks_like_index = get_override_entry(world, location)[5]
                 item = read_rom_item(rom, looks_like_index)
@@ -2457,10 +2457,10 @@ def get_override_entry(ootworld, location):
     player_id = 0 if ootworld.player == location.item.player else min(location.item.player, 255)
     if location.item.game != 'Ocarina of Time': 
         # This is an AP sendable. It's guaranteed to not be None. 
-        if location.item.advancement:
-            item_id = AP_PROGRESSION
-        else:
-            item_id = AP_JUNK
+        # if location.item.advancement:
+        #     item_id = AP_PROGRESSION
+        # else:
+        item_id = AP_JUNK
     else: 
         item_id = location.item.index
         if None in [scene, default, item_id]:
@@ -2750,7 +2750,7 @@ def place_shop_items(rom, world, shop_items, messages, locations, init_shop_id=F
                 else:
                     rom_item = read_rom_item(rom, item_display.index)
             else:
-                display_index = AP_PROGRESSION if location.item.advancement else AP_JUNK
+                display_index = AP_JUNK
                 rom_item = read_rom_item(rom, display_index)
 
             shop_objs.add(rom_item['object_id'])
