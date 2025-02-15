@@ -73,6 +73,11 @@ class Sims4World(World):
 
         self.multiworld.itempool += pool
 
+        for item_name in self.multiworld.random.choices(sorted(filler_set), k=25):
+            item = self.create_item(item_name)
+            item.classification = item.classification
+            self.multiworld.extra_items.append(item)
+
     def create_region(self, name: str, locations=None, exits=None):
         ret = Region(name, self.player, self.multiworld)
         if locations:

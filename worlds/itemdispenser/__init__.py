@@ -68,6 +68,8 @@ class ItemDispenser(World):
                 if location.item and location.item.player != 1:
                     if location.player == location.item.player and location.item.name in self.multiworld.worlds[location.item.player].options.non_local_items.value:
                         pass
+                    elif location.item.name == "Nothing":
+                        pass
                     else:
                         if beaten_game_spheres[location.player] < sphere_num:
                             continue
@@ -101,7 +103,7 @@ class ItemDispenser(World):
                     increment = max(min(round(self.random.triangular(1, 100, token_rates[location.player])), 100), 1)
                     skipped_sphere_locs += list(range(i+1, i+increment))
                     i += increment
-                    if location.item:
+                    if location.item and location.item.name != "Nothing":
                         add_location(location.item, i)
                     else:
                         skipped_sphere_locs.append(i)

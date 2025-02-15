@@ -365,20 +365,20 @@ class MultiWorld():
             itemcount = len(self.itempool)
             self.itempool = new_itempool
 
-            while itemcount > len(self.itempool):
-                items_to_add = []
-                for player in group["players"]:
-                    if group["link_replacement"]:
-                        item_player = group_id
-                    else:
-                        item_player = player
-                    if group["replacement_items"][player]:
-                        items_to_add.append(AutoWorld.call_single(self, "create_item", item_player,
-                            group["replacement_items"][player]))
-                    else:
-                        items_to_add.append(AutoWorld.call_single(self, "create_filler", item_player))
-                self.random.shuffle(items_to_add)
-                self.itempool.extend(items_to_add[:itemcount - len(self.itempool)])
+            # while itemcount > len(self.itempool):
+            #     items_to_add = []
+            #     for player in group["players"]:
+            #         if group["link_replacement"]:
+            #             item_player = group_id
+            #         else:
+            #             item_player = player
+            #         if group["replacement_items"][player]:
+            #             items_to_add.append(AutoWorld.call_single(self, "create_item", item_player,
+            #                 group["replacement_items"][player]))
+            #         else:
+            #             items_to_add.append(AutoWorld.call_single(self, "create_filler", item_player))
+            #     self.random.shuffle(items_to_add)
+            #     self.itempool.extend(items_to_add[:itemcount - len(self.itempool)])
 
     def secure(self):
         self.random = ThreadBarrierProxy(secrets.SystemRandom())
@@ -478,7 +478,11 @@ class MultiWorld():
         return self.worlds[player].create_item(item_name)
 
     def push_precollected(self, item: Item):
-        self.precollected_items[item.player].append(item)
+        if item.player in self.groups:
+            for player in self.groups[item.player]['players']:
+                self.precollected_items[player].append(item)
+        else:
+            self.precollected_items[item.player].append(item)
         self.state.collect(item, True)
 
     def push_item(self, location: Location, item: Item, collect: bool = True):

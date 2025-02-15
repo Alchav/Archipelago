@@ -1133,6 +1133,8 @@ class OOTWorld(World):
 
             if item_hint_players:  # loop once over all locations to gather major items. Check oot locations for barren/woth if needed
                 for loc in multiworld.get_locations():
+                    if not loc.item:
+                        continue
                     player = loc.item.player
                     autoworld = multiworld.worlds[player]
                     if ((player in item_hint_players and (autoworld.is_major_item(loc.item) or loc.item.name in autoworld.item_added_hint_types['item']))

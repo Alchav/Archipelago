@@ -38,18 +38,12 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
     print("Running get_item_spheres")
     state = CollectionState(multiworld)
     locations = set(multiworld.get_locations())
-    beaten_games = set()
+    beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
     i = 1
-    while locations:
-        old_beaten_games = beaten_games.copy()
-        beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
-        new_beaten_games = beaten_games - old_beaten_games
-        for player in new_beaten_games:
-            if beaten_game_spheres is not None:
+    if beaten_game_spheres is not None:
+        for player in beaten_games:
                 beaten_game_spheres[player] = i
-            logging.info(f"{i} - {new_beaten_games}")
-
-        i += 1
+    while locations:
 
         # print(f"Sphere {i}")
         reachable_locations = {location for location in locations if location.can_reach(state)}
@@ -58,7 +52,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_locked = {location for location in reachable_locations if location.item and location.item.game == "Item Dispenser" or location.locked}
+            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game == "Item Dispenser" or location.locked)}
             for location in reachable_events:
                 if location.item:
                   state.collect(location.item, True, location)
@@ -84,6 +78,15 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
             if location.item and location.item.advancement:
                 state.collect(location.item, True, location)
         locations -= reachable_locations
+
+        i += 1
+        old_beaten_games = beaten_games.copy()
+        beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
+        new_beaten_games = beaten_games - old_beaten_games
+        if beaten_game_spheres is not None:
+            for player in new_beaten_games:
+                    beaten_game_spheres[player] = i
+            # logging.info(f"{i} - {new_beaten_games}")
 
 
 class FillError(RuntimeError):
@@ -772,7 +775,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 if [loc for loc in sphere if loc.player == player]:
                     game_spheres[player] += 1
 
-    player_names = [(player_name[0], player_name[1]) for player_name in multiworld.player_name.items()]
+    player_names = [(player_name[0], player_name[1]) for player_name in multiworld.player_name.items() if player_name[0] not in multiworld.groups]
     multiworld.random.shuffle(player_names)
     playable_games = [player for player in player_names if player[1] in multiworld.worlds[1].options.start_games]
     player_names = [player_name for player_name in player_names if player_name not in playable_games]
@@ -815,7 +818,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             break
         player_names_copy = player_names.copy()
         for player, player_name in player_names:
-            sphere_to_place = (highest_sphere - game_spheres[player]) + 1
+            sphere_to_place = (highest_sphere - game_spheres[player]) + 2
             if sphere_to_place > 0:
                 starting_spheres[player] = sphere_to_place
                 print(f"{player_name} sphere to place: {sphere_to_place}")
@@ -827,7 +830,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     print("adding rule")
     for player, world in multiworld.worlds.items():
-        if player == 1:
+        if player == 1 or player in multiworld.groups:
             continue
         try:
             menu = multiworld.get_region(world.origin_region_name, player)
