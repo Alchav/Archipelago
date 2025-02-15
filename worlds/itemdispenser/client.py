@@ -1,11 +1,15 @@
 import asyncio
-from CommonClient import CommonContext, get_base_parser, server_loop, logger, gui_enabled, ClientStatus
+from CommonClient import CommonContext, get_base_parser, server_loop, logger, gui_enabled, ClientStatus, ClientCommandProcessor
 import Utils
 
+class IDClientCmd(ClientCommandProcessor):
+    def _cmd_tokens(self):
+        logger.info(f"{self.ctx.tokens} tokens")
 
 class IDClientContext(CommonContext):
     game = "Item Dispenser"
     items_handling = 0b111
+    command_processor = IDClientCmd
 
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
@@ -39,6 +43,8 @@ async def id_loop(ctx):
             if tokens > ctx.tokens:
                 await ctx.send_msgs([{"cmd": "LocationChecks",
                                       "locations": [loc for loc in list(range(1, tokens + 1)) if loc in ctx.server_locations]}])
+                ctx.tokens = tokens
+                logger.info(f"{ctx.tokens} tokens")
             if len(ctx.server_locations) and (len(ctx.checked_locations) == len(ctx.server_locations)) and not ctx.finished_game:
                 ctx.finished_game = True
                 await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
