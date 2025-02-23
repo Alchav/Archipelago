@@ -7,6 +7,8 @@ import io
 import pkgutil
 from collections import deque
 
+from natsort import natsorted
+
 assert "kivy" not in sys.modules, "kvui should be imported before kivy for frozen compatibility"
 
 if sys.platform == "win32":
@@ -884,7 +886,8 @@ class HintLog(RecycleView):
                 },
             })
 
-        data.sort(key=self.hint_sorter, reverse=self.reversed)
+        # data.sort(key=self.hint_sorter, reverse=self.reversed)
+        data = natsorted(data, key=self.hint_sorter, reverse=self.reversed)
         for i in range(0, len(data), 2):
             data[i]["striped"] = True
         data.insert(0, self.header)
