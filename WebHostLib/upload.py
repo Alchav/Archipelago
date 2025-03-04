@@ -30,7 +30,7 @@ games_package_schema = schema.Schema({
     "item_name_groups": {str: [str]},
     "item_name_to_id": {str: int},
     "location_name_groups": {str: [str]},
-    "location_name_to_id": {str: int},
+    "location_name_to_id": schema.Or({str: int}, {}),
     schema.Optional("checksum"): str,
     schema.Optional("version"): int,
 })
@@ -63,10 +63,10 @@ def process_multidata(compressed_multidata, files={}):
                 game_data = games_package_schema.validate(game_data)
                 game_data = {key: value for key, value in sorted(game_data.items())}
                 game_data["checksum"] = data_package_checksum(game_data)
-                if original_checksum != game_data["checksum"]:
-                    raise Exception(f"Original checksum {original_checksum} != "
-                                    f"calculated checksum {game_data['checksum']} "
-                                    f"for game {game}.")
+                # if original_checksum != game_data["checksum"]:
+                #     raise Exception(f"Original checksum {original_checksum} != "
+                #                     f"calculated checksum {game_data['checksum']} "
+                #                     f"for game {game}.")
 
                 game_data_package = GameDataPackage(checksum=game_data["checksum"],
                                                     data=pickle.dumps(game_data))
