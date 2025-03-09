@@ -52,7 +52,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_locked = {location for location in reachable_locations if location.address and location.item and location.player == location.item.player and (location.item.game == "Item Dispenser" or location.locked)}
+            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game == "Item Dispenser" or (location.player == location.item.player and location.locked))}
             for location in reachable_events:
                 if location.item:
                   state.collect(location.item, True, location)
@@ -732,7 +732,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             game = multiworld.worlds[i.player].game
         if i.classification == ItemClassification.trap and game != "Super Mario Land 2":
             return 0
-        if i.classification == ItemClassification.progression and game == "Stardew Valley":
+        if game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful:
+            return multiworld.random.randint(1, 2)
+        if i.classification == ItemClassification.progression and game == "The Sims 4":
+            return multiworld.random.randint(2, 3)
+        elif i.classification == ItemClassification.progression and game == "Stardew Valley":
             if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
                            "Progressive Barn", "Progressive Fishing Rod", "Progressive Pickaxe", "Bridge Repair",
                            "Bus Repair", "Desert Obelisk", "Island Obelisk", "Dark Talisman", "Beach Bridge",
@@ -741,9 +745,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     or "Key" in i.name or "Traveling Merchant: " in i.name):
                 return 3
             else:
-                if not multiworld.random.randint(0, 1):
-                    return 3
-                return 2
+                return multiworld.random.randint(2, 3)
         # if game == "Starcraft 2":
         #     return 1
         # elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
@@ -975,7 +977,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         multiworld.random.shuffle(sphere_list)
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
-            if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
+            if swappable(multiworld, loc): # and beaten_game_spheres[loc.player] > sphere_n:
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
