@@ -1474,7 +1474,8 @@ def patch_rom(world: MultiWorld, rom: LocalRom, player: int, enemized: bool):
                 equip[0x36C] = min(equip[0x36C] + 0x08, 0xA0)
                 equip[0x36D] = min(equip[0x36D] + 0x08, 0xA0)
         else:
-            raise RuntimeError(f'Unsupported item in starting equipment: {item.name}')
+            # raise RuntimeError(f'Unsupported item in starting equipment: {item.name}')
+            pass
 
     equip[0x343] = min(equip[0x343], starting_max_bombs)
     rom.write_byte(0x180034, starting_max_bombs)

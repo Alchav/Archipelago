@@ -804,7 +804,7 @@ class SMMapRandoWorld(World):
         hasETank = False
         hasSpazer = False
         hasPlasma = False
-        self.startItems = [variaItem for item in self.multiworld.precollected_items[self.player] for variaItem in self.item_name_to_id.keys() if variaItem == item.name]
+        self.startItems = [variaItem for item in self.multiworld.precollected_items[self.player] for variaItem in startItemROMDict if variaItem == item.name]
 
         for startItem in self.startItems:
             item = startItem

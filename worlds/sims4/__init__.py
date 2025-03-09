@@ -47,6 +47,8 @@ class Sims4World(World):
     The Sims 4 is the fourth installment in The Sims franchise. Like the previous games in the series,
     The Sims 4 focuses on creating and controlling a neighborhood of virtual people, called "Sims".
     """
+    def get_filler_item_name(self) -> str:
+        return self.random.choice(["2000 Simoleons", "5000 Simoleons", "Career Performance Boost"])
 
     def create_item(self, name: str) -> Item:
         item_id: int = self.item_name_to_id[name]

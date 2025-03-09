@@ -78,6 +78,9 @@ class HatInTimeWorld(World):
         self.nyakuza_thug_items: Dict[str, int] = {}
         self.badge_seller_count: int = 0
 
+    def get_filler_item_name(self) -> str:
+        return self.random.choice(["25 Pons", "50 Pons", "100 Pons", "Health Pon", "Random Cosmetic"])
+
     def generate_early(self):
         adjust_options(self)
 
