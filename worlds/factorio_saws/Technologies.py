@@ -353,6 +353,9 @@ def recursively_get_unlocking_technologies(ingredient_name, _done=None, unlock_f
     for recipe in recipes:
         current_technologies |= unlock_func(recipe, _done)
 
+    if technology_table["uranium-processing"] in current_technologies:
+        current_technologies.add(technology_table["uranium-mining"])
+
     return current_technologies
 
 
