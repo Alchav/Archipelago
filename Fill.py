@@ -52,7 +52,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game == "Item Dispenser" or location.locked)}
+            reachable_locked = {location for location in reachable_locations if location.address and location.item and location.player == location.item.player and (location.item.game == "Item Dispenser" or location.locked)}
             for location in reachable_events:
                 if location.item:
                   state.collect(location.item, True, location)
@@ -726,7 +726,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     def iclass(i: Item):
         if i is None:
-            return 0
+            return 1
         game = i.game
         if game == "Generic":
             game = multiworld.worlds[i.player].game
@@ -739,11 +739,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                            "Greenhouse", "Glittering Boulder Removed", "Minecarts Repair", "Progressive Movie Theater",
                            "Progressive Season")
                     or "Key" in i.name or "Traveling Merchant: " in i.name):
-                return 2
+                return 3
             else:
-                if not multiworld.random.randint(0, 3):
-                    return 2
-                return 1
+                if not multiworld.random.randint(0, 1):
+                    return 3
+                return 2
         # if game == "Starcraft 2":
         #     return 1
         # elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
@@ -758,6 +758,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         #     return multiworld.random.randint(1, 2)
         # breakpoint()
         if i.classification == ItemClassification.progression and i.classification != ItemClassification.progression_skip_balancing:
+            return 3
+        if i.classification in (ItemClassification.progression_skip_balancing, ItemClassification.useful):
             return 2
         return 1
 
@@ -871,9 +873,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
         filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
         if not filler_sphere:
-            filler_sphere = sorted([location for location in sphere if location.address and (not location.item or location.item.classification != ItemClassification.progression) and swappable(multiworld, location)])
+            filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
             if not filler_sphere:
-                filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location)])
+                breakpoint()
         # for player, sphere_check in starting_spheres.items():
         location = multiworld.random.choice(filler_sphere)
         # multiworld.push_precollected(location.item)
@@ -882,9 +884,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if location.item:
             multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
             location.item.location = None
-            print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing {location.item.name}")
+            print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing {location.item.name}")
         else:
-            print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} displacing nothing")
+            print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing nothing")
         multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
         # location.item =
         # location.item.location = location
@@ -977,9 +979,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
-                if a.item_rule(b.item) and b.item_rule(a.item):
+                if ((not b.item) or a.item_rule(b.item)) and ((not a.item) or b.item_rule(a.item)):
                     a.item, b.item = b.item, a.item
-                else:
+                elif a.item and b.item:
                     if not a.item_rule(b.item):
                         logging.info(f"{a.name} cannot accept {b.item.name}")
                     if not b.item_rule(a.item):

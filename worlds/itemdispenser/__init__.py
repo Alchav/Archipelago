@@ -20,6 +20,13 @@ def token_logic(state, world, count):
     return tokens >= count
 
 
+allowed_filler_games = {
+    "Secret of Evermore", "Super Mario 64", "Crystalis", "DOOM 1993", "DOOM II", "Final Fantasy Mystic Quest",
+    "A Hat in Time", "Pokemon Red and Blue", "The Sims 4", "Jigsaw", "Majora's Mask Recompiled", "Paper Mario",
+    "A Link to the Past", "Final Fantasy IV Free Enterprise", "Mega Man X3", "Super Mario World"
+}
+
+
 class ItemDispenser(World):
     game = "Item Dispenser"
     item_name_to_id = {f"{n} Token{'s' if n != 1 else ''}": n for n in range(1, 100)}
@@ -71,8 +78,8 @@ class ItemDispenser(World):
                     elif location.item.name == "Nothing":
                         pass
                     else:
-                        if beaten_game_spheres[location.player] < sphere_num:
-                            continue
+                        # if beaten_game_spheres[location.player] < sphere_num:
+                        #     continue
                         if location.progress_type != LocationProgressType.DEFAULT:
                             continue
                         if not swappable(self.multiworld, location):
@@ -117,6 +124,13 @@ class ItemDispenser(World):
             old_skipped_sphere_locs.sort(key=lambda i: -i)
             while old_skipped_sphere_locs and extra_items_to_place:
                 add_location(extra_items_to_place.pop(), old_skipped_sphere_locs.pop())
+
+            allowed_games = [player for player in active_games if
+                             self.multiworld.worlds[player].game in allowed_filler_games]
+            if allowed_games:
+                while len(old_skipped_sphere_locs) > 50:
+                    game = self.random.choice(allowed_games)
+                    add_location(self.multiworld.worlds[game].create_filler(), old_skipped_sphere_locs.pop())
 
         assert not extra_items_to_place
         del skipped_sphere_locs
