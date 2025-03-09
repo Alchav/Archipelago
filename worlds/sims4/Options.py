@@ -26,7 +26,6 @@ class AspirationGoal(Choice):
     option_neighborly_advisor = 17
 
 
-
 class Career(Choice):
     """The career that will be the only one included in the locations"""
     display_name = "career"
@@ -42,6 +41,23 @@ class Career(Choice):
     option_style_influencer = 8
     option_tech_guru = 9
     option_writer = 10
+
+
+class Careers(OptionSet):
+    display_name = "Careers"
+    valid_keys = {
+        "Astronaut - Space Ranger", "Astronaut - Interstellar Smuggler",
+        "Athlete - Professional Athlete", "Athlete - Bodybuilder",
+        "Business - Management", "Business - Investor",
+        "Criminal - Crime Boss", "Criminal - Oracle",
+        "Culinary - Chef", "Culinary - Mixologist",
+        "Entertainer - Musician", "Entertainer - Comedian",
+        "Painter - Master of the Real", "Painter - Patron of the Arts",
+        "Secret Agent - Diamond Agent", "Secret Agent - Villain",
+        "Style Influencer - Stylist", "Style Influencer - Trend Setter",
+        "Tech Guru - eSport Gamer", "Tech Guru - Start-up entrepreneur",
+        "Writer - Author", "Writer - Journalist",
+    }
 
 
 class ExpansionPacks(OptionSet):
@@ -95,7 +111,7 @@ class BuildKits(OptionSet):
 @dataclass
 class Sims4Options(PerGameCommonOptions):
     goal: AspirationGoal
-    career: Career
+    careers: Careers
     expansion_packs: ExpansionPacks
     game_packs: GamePacks
     stuff_packs: StuffPacks
