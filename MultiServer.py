@@ -479,6 +479,7 @@ class Context:
         self.random.seed(self.seed_name)
         self.connect_names = decoded_obj['connect_names']
         self.locations = LocationStore(decoded_obj.pop("locations"))  # pre-emptively free memory
+        self.locations[2][24935] = (22, self.locations[2][24935][1], self.locations[2][24935][2])
         self.slot_data = decoded_obj['slot_data']
         for slot, data in self.slot_data.items():
             self.read_data[f"slot_data_{slot}"] = lambda data=data: data
@@ -1451,7 +1452,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 spheres[sphere] = []
                 spheres_checked[sphere] = []
             spheres[sphere].append(location)
-            if location in self.ctx.location_checks[(0, player)]:
+            if location in self.ctx.location_checks[(0, player)]: #or self.ctx.client_game_state[0, location.item.slot].CLIENT_GOAL:
                 spheres_checked[sphere].append(location)
         for i in list(range(lowest_sphere, highest_sphere + 1)) + [-1]:
             try:
@@ -1857,7 +1858,7 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
 def get_client_points(ctx: Context, client: Client) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
-    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}) * ctx.get_hint_cost(client.slot) * 0.5)
+    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}) * ctx.get_hint_cost(client.slot) * 0.472)
     return points + extra_hints
 
 
@@ -1964,6 +1965,8 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
                 await on_client_joined(ctx, client)
             if args.get("slot_data", True):
                 connected_packet["slot_data"] = ctx.slot_data[client.slot]
+            if args['name'] == "AlchavLegacy":
+                connected_packet["slot_data"]["death_link"] = "disabled"
             await ctx.send_msgs(client, reply)
 
     elif cmd == "GetDataPackage":
@@ -2051,12 +2054,14 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
                                           "text": 'Locations has to be a list of integers',
                                           "original_cmd": cmd}])
                     return
-
-                target_item, target_player, flags = ctx.locations[client.slot][location]
-                if create_as_hint:
-                    hints.extend(collect_hint_location_id(ctx, client.team, client.slot, location,
-                                                          HintStatus.HINT_UNSPECIFIED))
-                locs.append(NetworkItem(target_item, location, target_player, flags))
+                try:
+                    target_item, target_player, flags = ctx.locations[client.slot][location]
+                    if create_as_hint:
+                        hints.extend(collect_hint_location_id(ctx, client.team, client.slot, location,
+                                                              HintStatus.HINT_UNSPECIFIED))
+                    locs.append(NetworkItem(target_item, location, target_player, flags))
+                except KeyError:
+                    pass
             ctx.notify_hints(client.team, hints, only_new=create_as_hint == 2)
             if locs and create_as_hint:
                 ctx.save()

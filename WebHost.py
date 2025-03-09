@@ -74,24 +74,25 @@ def create_ordered_tutorials_file() -> typing.List[typing.Dict[str, typing.Any]]
         # copy files from world's docs folder to the generated folder
         target_path = os.path.join(base_target_path, get_file_safe_name(game))
         os.makedirs(target_path, exist_ok=True)
+        try:
+            if world.zip_path:
+                zipfile_path = world.zip_path
 
-        if world.zip_path:
-            zipfile_path = world.zip_path
+                assert os.path.isfile(zipfile_path), f"{zipfile_path} is not a valid file(path)."
+                assert zipfile.is_zipfile(zipfile_path), f"{zipfile_path} is not a valid zipfile."
 
-            assert os.path.isfile(zipfile_path), f"{zipfile_path} is not a valid file(path)."
-            assert zipfile.is_zipfile(zipfile_path), f"{zipfile_path} is not a valid zipfile."
-
-            with zipfile.ZipFile(zipfile_path) as zf:
-                for zfile in zf.infolist():
-                    if not zfile.is_dir() and "/docs/" in zfile.filename:
-                        zfile.filename = os.path.basename(zfile.filename)
-                        zf.extract(zfile, target_path)
-        else:
-            source_path = Utils.local_path(os.path.dirname(world.__file__), "docs")
-            files = os.listdir(source_path)
-            for file in files:
-                shutil.copyfile(Utils.local_path(source_path, file), Utils.local_path(target_path, file))
-
+                with zipfile.ZipFile(zipfile_path) as zf:
+                    for zfile in zf.infolist():
+                        if not zfile.is_dir() and "/docs/" in zfile.filename:
+                            zfile.filename = os.path.basename(zfile.filename)
+                            zf.extract(zfile, target_path)
+            else:
+                source_path = Utils.local_path(os.path.dirname(world.__file__), "docs")
+                files = os.listdir(source_path)
+                for file in files:
+                    shutil.copyfile(Utils.local_path(source_path, file), Utils.local_path(target_path, file))
+        except FileNotFoundError:
+            continue
         # build a json tutorial dict per game
         game_data = {'gameTitle': game, 'tutorials': []}
         for tutorial in world.web.tutorials:
