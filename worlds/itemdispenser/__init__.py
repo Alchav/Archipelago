@@ -77,7 +77,7 @@ class ItemDispenser(World):
                             continue
                         if not swappable(self.multiworld, location):
                             continue
-                        elif self.multiworld.worlds[location.player].options.token_percentage < self.random.randint(1, 100):
+                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 5) < self.random.randint(1, 10000):
                             continue
                 sphere_locations.append(location)
                 if location.player not in sphere_num_locations:
@@ -97,10 +97,10 @@ class ItemDispenser(World):
                 new_location.locked = True
             if sphere_locations:
                 highest_count = max(sphere_num_locations.values())
-                token_rates = {player: 100 - ((100 / highest_count) * value) for player, value in sphere_num_locations.items()}
+                token_rates = {player: 10 - ((10 / highest_count) * value) for player, value in sphere_num_locations.items()}
                 self.random.shuffle(sphere_locations)
                 for location in sphere_locations:
-                    increment = max(min(round(self.random.triangular(1, 100, token_rates[location.player])), 100), 1)
+                    increment = max(min(round(self.random.triangular(1, 100, token_rates[location.player])), 10), 1)
                     skipped_sphere_locs += list(range(i+1, i+increment))
                     i += increment
                     if location.item and location.item.name != "Nothing":

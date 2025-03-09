@@ -1444,7 +1444,7 @@ class TokenPercentage(Range):
     """Percentage chance for each of this game's locations to be swapped out for an Item Dispenser Token"""
     range_start = 0
     range_end = 100
-    default = 25
+    default = 15
 
 
 @dataclass

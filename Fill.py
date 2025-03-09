@@ -761,11 +761,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 2
         return 1
 
-    option = "b"  # g: total spheres, b: beaten game spheres
+    option = "e"  # g: total spheres, b: beaten game spheres
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
-
+    starting_spheres = {}
     if option == "b":
         game_spheres = beaten_game_spheres
     else:
@@ -780,52 +780,63 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     playable_games = [player for player in player_names if player[1] in multiworld.worlds[1].options.start_games]
     player_names = [player_name for player_name in player_names if player_name not in playable_games]
     highest_sphere = 0
-    for player in playable_games:
-        highest_sphere = max(highest_sphere, game_spheres[player[0]])
-    starting_highest_sphere = highest_sphere
-    print(f"Highest initial sphere: {highest_sphere}")
-    while True:
-        print("Sort attempt begin")
-        new_player_names = []
-        end_list_player_names = []
-        for i, player in enumerate(player_names):
-            if game_spheres[player[0]] - i < highest_sphere:
-                print(f"{player[1]} fits")
-                new_player_names.append(player)
-                highest_sphere += 1
+    if option == "e":
+        for player in player_names:
+            highest_sphere = max(highest_sphere, game_spheres[player[0]])
+        for player in player_names:
+            if game_spheres[player[0]] == highest_sphere:
+                playable_games.append(player)
+                multiworld.push_precollected(multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player[0]]}"))
+        for player in player_names:
+            if player not in playable_games:
+                starting_spheres[player[0]] = highest_sphere - game_spheres[player[0]]
+    else:
+        for player in playable_games:
+            highest_sphere = max(highest_sphere, game_spheres[player[0]])
+        starting_highest_sphere = highest_sphere
+
+        print(f"Highest initial sphere: {highest_sphere}")
+        while True:
+            print("Sort attempt begin")
+            new_player_names = []
+            end_list_player_names = []
+            for i, player in enumerate(player_names):
+                if game_spheres[player[0]] - i < highest_sphere:
+                    print(f"{player[1]} fits")
+                    new_player_names.append(player)
+                    highest_sphere += 1
+                else:
+                    print(f"{player[1]} pushed to end of list")
+                    end_list_player_names.append(player)
+            if new_player_names + end_list_player_names == player_names:
+                if len(end_list_player_names) > 1:
+                    end_list_player_names.sort(key=lambda p: game_spheres[p[0]])
+                    print(f"{end_list_player_names} pushed to end of list, could not fit")
+                player_names = new_player_names + end_list_player_names
+                break
             else:
-                print(f"{player[1]} pushed to end of list")
-                end_list_player_names.append(player)
-        if new_player_names + end_list_player_names == player_names:
-            if len(end_list_player_names) > 1:
-                end_list_player_names.sort(key=lambda p: game_spheres[p[0]])
-                print(f"{end_list_player_names} pushed to end of list, could not fit")
-            player_names = new_player_names + end_list_player_names
-            break
-        else:
-            player_names = new_player_names + end_list_player_names
-    print(f"Highest final sphere: {highest_sphere}")
+                player_names = new_player_names + end_list_player_names
+        print(f"Highest final sphere: {highest_sphere}")
 
-    highest_sphere = starting_highest_sphere
+        highest_sphere = starting_highest_sphere
 
-    starting_spheres = {}
-    player_names_copy = None
-    while True:
-        if player_names_copy == player_names:
-            for i, (player, player_name) in enumerate(player_names):
-                print(f"{player_name} forced to early sphere: {i}")
-                starting_spheres[player] = i
-            break
-        player_names_copy = player_names.copy()
-        for player, player_name in player_names:
-            sphere_to_place = (highest_sphere - game_spheres[player]) + 2
-            if sphere_to_place > 0:
-                starting_spheres[player] = sphere_to_place
-                print(f"{player_name} sphere to place: {sphere_to_place}")
-                print(f"Game's spheres: {game_spheres[player]}")
-                print(f"New highest sphere: {game_spheres[player] + sphere_to_place}")
-                highest_sphere += 1
-        player_names = [player for player in player_names if player[0] not in starting_spheres]
+        player_names_copy = None
+        while True:
+            if player_names_copy == player_names:
+                for i, (player, player_name) in enumerate(player_names):
+                    print(f"{player_name} forced to early sphere: {i}")
+                    starting_spheres[player] = i
+                break
+            player_names_copy = player_names.copy()
+            for player, player_name in player_names:
+                sphere_to_place = (highest_sphere - game_spheres[player]) + 2
+                if sphere_to_place > 0:
+                    starting_spheres[player] = sphere_to_place
+                    print(f"{player_name} sphere to place: {sphere_to_place}")
+                    print(f"Game's spheres: {game_spheres[player]}")
+                    print(f"New highest sphere: {game_spheres[player] + sphere_to_place}")
+                    highest_sphere += 1
+            player_names = [player for player in player_names if player[0] not in starting_spheres]
 
 
     print("adding rule")
