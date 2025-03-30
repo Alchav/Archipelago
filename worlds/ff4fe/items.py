@@ -46,7 +46,7 @@ for item in itemscsv.create_view():
         item_classification = ItemClassification.progression if item.spoilername != "DkMatter" \
             else ItemClassification.progression_skip_balancing
     # Spoon is, though...but it doesn't unlock anything.
-    elif item.spoilername == "Spoon" or ((int(item.tier) > 4) if item.tier.isdecimal() else False):
+    elif item.spoilername == "Spoon" or ((int(item.tier) > 5) if item.tier.isdecimal() else False):
         item_classification = ItemClassification.useful
     item_price = int(item.price, 10) if item.price != '' else 0
     new_item = ItemData(item.spoilername, item_classification, item_tier, int(item.code, 16), item_price)

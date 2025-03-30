@@ -256,7 +256,7 @@ class SMMapRandoWorld(World):
                           "", #item_progression_preset
                           self.options.quality_of_life.value,
                           )
-        for tries in range(5):
+        for tries in range(10):
             try:
                 self.map_rando = APRandomizer(SMMapRandoWorld.gamedata, options, self.multiworld.random.randint(1, sys.maxsize)) # self.multiworld.seed // 10)
                 break

@@ -278,6 +278,8 @@ def main(args, seed=None, baked_server_options: Optional[Dict[str, object]] = No
                         er_hint_data[location.player] = {}
                     if location.name in multiworld.worlds[location.player].options.exclude_locations.value:
                         sphere_text = "Excluded"
+                    elif location.name in multiworld.worlds[location.player].options.start_location_hints.value and not location.item.advancement:
+                        sphere_text = "Excluded"
                     else:
                         sphere_text = "Unreachable" if unr else f"Sphere {i}"
                     if location.address not in er_hint_data[location.player]:

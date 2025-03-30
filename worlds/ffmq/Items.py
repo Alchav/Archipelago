@@ -1,7 +1,7 @@
 from BaseClasses import ItemClassification, Item
 
-fillers = {"Cure Potion": 61, "Heal Potion": 52, "Refresher": 17, "Seed": 2, "Bomb Refill": 19,
-           "Projectile Refill": 50}
+fillers = {"Cure Potion": 1, "Heal Potion": 1, "Refresher": 1, "Seed": 2, "Bomb Refill": 19,
+           "Projectile Refill": 35}
 
 
 class ItemData:
@@ -40,10 +40,10 @@ item_table = {
     "Cure Book": ItemData(21, ItemClassification.useful, ["Spells"]),
     "Heal Book": ItemData(22, ItemClassification.useful, ["Spells"]),
     "Life Book": ItemData(23, ItemClassification.useful, ["Spells"]),
-    "Quake Book": ItemData(24, ItemClassification.useful, ["Spells"]),
-    "Blizzard Book": ItemData(25, ItemClassification.useful, ["Spells"]),
-    "Fire Book": ItemData(26, ItemClassification.useful, ["Spells"]),
-    "Aero Book": ItemData(27, ItemClassification.useful, ["Spells"]),
+    "Quake Book": ItemData(24, ItemClassification.filler, ["Spells"]),
+    "Blizzard Book": ItemData(25, ItemClassification.filler, ["Spells"]),
+    "Fire Book": ItemData(26, ItemClassification.filler, ["Spells"]),
+    "Aero Book": ItemData(27, ItemClassification.filler, ["Spells"]),
     "Thunder Seal": ItemData(28, ItemClassification.useful, ["Spells"]),
     "White Seal": ItemData(29, ItemClassification.useful, ["Spells"]),
     "Meteor Seal": ItemData(30, ItemClassification.useful, ["Spells"]),

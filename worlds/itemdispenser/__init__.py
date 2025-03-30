@@ -22,8 +22,8 @@ def token_logic(state, world, count):
 
 allowed_filler_games = {
     "Secret of Evermore", "Super Mario 64", "Crystalis", "DOOM 1993", "DOOM II", "Final Fantasy Mystic Quest",
-    "A Hat in Time", "Pokemon Red and Blue", "The Sims 4", "Jigsaw", "Majora's Mask Recompiled", "Paper Mario",
-    "A Link to the Past", "Final Fantasy IV Free Enterprise", "Mega Man X3", "Super Mario World"
+    "A Hat in Time", "Pokemon Red and Blue", "The Sims 4", "Jigsaw", "Majora's Mask Recompiled",
+    "A Link to the Past", "Mega Man X3", "Super Mario World"
 }
 
 
@@ -84,7 +84,7 @@ class ItemDispenser(World):
                             continue
                         if not swappable(self.multiworld, location):
                             continue
-                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 5) < self.random.randint(1, 10000):
+                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 25) < self.random.randint(1, 10000):
                             continue
                 sphere_locations.append(location)
                 if location.player not in sphere_num_locations:
@@ -107,7 +107,8 @@ class ItemDispenser(World):
                 token_rates = {player: 10 - ((10 / highest_count) * value) for player, value in sphere_num_locations.items()}
                 self.random.shuffle(sphere_locations)
                 for location in sphere_locations:
-                    increment = max(min(round(self.random.triangular(1, 100, token_rates[location.player])), 10), 1)
+                    increment = max(min(round(self.random.triangular(1, 10, token_rates[location.player])), 10), 1)
+                    increment = min(increment, max(min(round(self.random.triangular(1, 10, token_rates[location.player])), 10), 1))
                     skipped_sphere_locs += list(range(i+1, i+increment))
                     i += increment
                     if location.item and location.item.name != "Nothing":

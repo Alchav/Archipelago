@@ -11,7 +11,7 @@ from Options import Accessibility
 from worlds.AutoWorld import call_all
 from worlds.generic.Rules import add_item_rule, add_rule
 
-def swappable(multiworld, loc):
+def swappable(multiworld, loc, within_local=False):
     from worlds.papermario.data.ItemList import progression_miscitems
     if not loc.item:
         return True
@@ -21,7 +21,7 @@ def swappable(multiworld, loc):
         return False
     if loc.item.trap and loc.item.game != "Super Mario Land 2":
         return False
-    if loc.item.name in multiworld.worlds[loc.player].options.local_items:
+    if (not within_local) and loc.item.name in multiworld.worlds[loc.player].options.local_items:
         return False
     if loc.progress_type == LocationProgressType.EXCLUDED:
         return False
@@ -37,7 +37,7 @@ def swappable(multiworld, loc):
 
 
 def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_unreachables=True):
-    print("Running get_item_spheres")
+    #print("Running get_item_spheres")
     state = CollectionState(multiworld)
     locations = set(multiworld.get_locations())
     beaten_games = {player for player in multiworld.player_ids if multiworld.has_beaten_game(state, player)}
@@ -689,6 +689,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     del mark_for_locking, lock_later
 
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
+
+    compress_spheres(multiworld, 5)
 
     filleritempool.sort(key=lambda i: i.trap)
 
@@ -1529,3 +1531,47 @@ def distribute_planned(multiworld: MultiWorld) -> None:
         except Exception as e:
             raise Exception(
                 f"Error running plando for player {player} ({multiworld.player_name[player]})") from e
+
+
+def compress_spheres(multiworld, max_sphere):
+    def gen_spheres():
+        spheres = []
+        for sphere in get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False):
+            sphere = sorted(sphere)
+            multiworld.random.shuffle(sphere)
+            spheres.append(sphere)
+        return spheres
+    spheres = gen_spheres()
+    i = 0
+    while len(spheres) > max_sphere:
+        active_games_x = {location.item.player for location in spheres[max_sphere] if location.item and location.advancement}
+        i += 1
+        print(f"compress sphere loop {i}. Number of spheres: {len(spheres)}")
+        for n, sphere in enumerate(spheres, start=1):
+            active_games = active_games_x.copy()
+            if n >= max_sphere:
+                sphere = sorted(sphere)
+                for location in sphere:
+                    if not active_games:
+                        break
+                    if (swappable(multiworld, location, within_local=True) and location.item and location.item.advancement and
+                            (location.item.player in active_games or multiworld.random.randint(40, 140) < i)):
+                        if location.item.player in active_games:
+                            active_games.remove(location.item.player)
+                        new_sphere = multiworld.random.randint(0, n-1)
+                        for new_sphere in range(new_sphere, -1, -1):
+                            if new_sphere == 0:
+                                # print(f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")
+                                multiworld.push_precollected(location.item)
+                                location.item = None
+                                break
+                            for new_location in spheres[new_sphere]:
+                                if new_location.item is None and new_location.player == location.player and new_location.item_rule(location.item) and new_location.progress_type != LocationProgressType.EXCLUDED:
+                                    new_location.item = location.item
+                                    new_location.item.location = new_location
+                                    location.item = None
+                                    break
+                            else:
+                                continue
+                            break
+        spheres = gen_spheres()

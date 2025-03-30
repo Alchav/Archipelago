@@ -10,7 +10,7 @@ from .Bosses import BossFactory, Boss
 from .Items import item_factory
 from .Regions import lookup_boss_drops, key_drop_data
 from .Options import small_key_shuffle
-
+import logging
 if typing.TYPE_CHECKING:
     from .SubClasses import ALttPLocation, ALttPItem
     from . import ALTTPWorld
@@ -265,7 +265,12 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
             #             if loc in all_state_base.advancements:
             #                 all_state_base.advancements.remove(loc)
             fill_restrictive(multiworld, all_state_base, locations, in_dungeon_items, lock=True, allow_excluded=True,
+                             allow_partial=True,
                              name="LttP Dungeon Items")
+            for item in in_dungeon_items:
+                    logging.info(f"Moved {item} to start_inventory to prevent fill failure.")
+                    multiworld.push_precollected(item)
+                    # filleritempool.append(multiworld.worlds[item.player].create_filler())
 
 
 dungeon_music_addresses = {'Eastern Palace - Prize': [0x1559A],

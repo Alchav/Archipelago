@@ -108,7 +108,7 @@ class SM64World(World):
 
     def create_items(self):
         # 1Up Mushrooms
-        self.multiworld.itempool += [self.create_item("1Up Mushroom") for i in range(0,self.filler_count)]
+        # self.multiworld.itempool += [self.create_item("1Up Mushroom") for i in range(0,self.filler_count)]
         # Power Stars
         star_range = self.number_of_stars
         # Vanilla 100 Coin stars have to removed from the pool if other max star increasing options are active.
