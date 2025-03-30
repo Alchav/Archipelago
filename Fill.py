@@ -23,6 +23,8 @@ def swappable(multiworld, loc):
         return False
     if loc.item.name in multiworld.worlds[loc.player].options.local_items:
         return False
+    if loc.progress_type == LocationProgressType.EXCLUDED:
+        return False
     if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
         return False
     if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
