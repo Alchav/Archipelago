@@ -479,7 +479,6 @@ class Context:
         self.random.seed(self.seed_name)
         self.connect_names = decoded_obj['connect_names']
         self.locations = LocationStore(decoded_obj.pop("locations"))  # pre-emptively free memory
-        self.locations[2][24935] = (22, self.locations[2][24935][1], self.locations[2][24935][2])
         self.slot_data = decoded_obj['slot_data']
         for slot, data in self.slot_data.items():
             self.read_data[f"slot_data_{slot}"] = lambda data=data: data
@@ -1035,9 +1034,11 @@ def update_checked_locations(ctx: Context, team: int, slot: int):
                   [{"cmd": "RoomUpdate", "checked_locations": get_checked_checks(ctx, team, slot)}])
 
 
-def release_player(ctx: Context, team: int, slot: int):
+def release_player(ctx: Context, team: int, slot: int, tokens=False):
     """register any locations that are in the multidata"""
     all_locations = set(ctx.locations[slot])
+    if tokens:
+        all_locations = {loc for loc in all_locations if ctx.locations[slot][loc][1] == 2}
     ctx.broadcast_text_all("%s (Team #%d) has released all remaining items from their world."
                            % (ctx.player_names[(team, slot)], team + 1),
                            {"type": "Release", "team": team, "slot": slot})
@@ -1069,6 +1070,12 @@ def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
                       ) -> typing.List[str]:
         checked = state[team, slot]
         player_locations = self[slot]
+        hints = []
+        for location in player_locations:
+            if location not in checked and (bool(player_locations[location][2] & ItemClassification.progression) or bool(player_locations[location][2] & ItemClassification.useful)):
+                hints += collect_hint_location_id(ctx, team, slot, location, HintStatus.HINT_UNSPECIFIED)
+
+        ctx.notify_hints(team, hints)
         return sorted([f"{ctx.location_names[ctx.games[slot]][location_id]}: {item_names[ctx.slot_info[player_locations[location_id][1]].game][player_locations[location_id][0]]}" + f" for {ctx.player_names[(0, player_locations[location_id][1])]}" + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
                        location_id in player_locations if
                        location_id not in checked])
@@ -1537,6 +1544,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
             return False
         else:  # is auto or goal
             if self.ctx.client_game_state[self.client.team, self.client.slot] == ClientStatus.CLIENT_GOAL:
+
+                if self.ctx.release_mode == "tokens":
+                    release_player(self.ctx, self.client.team, self.client.slot, tokens=True)
+                    return True
                 release_player(self.ctx, self.client.team, self.client.slot)
                 return True
             else:
@@ -1784,7 +1795,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     hints.append(hint)
                     can_pay -= 1
 
-                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
+                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location] and hint.finding_player != 2:
                         self.ctx.hints_used[self.client.team, self.client.slot] += 1
 
 
@@ -2490,6 +2501,8 @@ class ServerCommandProcessor(CommonCommandProcessor):
                 return None if input_text.lower() in {"null", "none", '""', "''"} else input_text
         elif value_type == str and option_name.endswith("mode"):
             valid_values = {"goal", "enabled", "disabled"}
+            if option_name == "release_mode":
+                valid_values.add("tokens")
             valid_values.update(("auto", "auto_enabled") if option_name != "remaining_mode" else [])
             if option_value.lower() not in valid_values:
                 self.output(f"Unrecognized {option_name} value '{option_value}', known: {', '.join(valid_values)}")
@@ -2556,7 +2569,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--hint_cost', default=defaults["hint_cost"], type=int)
     parser.add_argument('--disable_item_cheat', default=defaults["disable_item_cheat"], action='store_true')
     parser.add_argument('--release_mode', default=defaults["release_mode"], nargs='?',
-                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled"], help='''\
+                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "tokens"], help='''\
                              Select !release Accessibility. (default: %(default)s)
                              auto:     Automatic "release" on goal completion
                              enabled:  !release is always available
