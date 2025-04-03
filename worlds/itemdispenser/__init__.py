@@ -1,3 +1,5 @@
+from typing import Mapping, Any
+
 from BaseClasses import Location, Item, ItemClassification, Region, LocationProgressType
 from worlds.AutoWorld import World
 from Fill import get_item_spheres, swappable
@@ -35,6 +37,10 @@ class ItemDispenser(World):
     def __init__(self, multiworld, player: int):
         super().__init__(multiworld, player)
         self.displaced_items = {}
+        self.max_reachable = 0
+
+    def fill_slot_data(self) -> Mapping[str, Any]:
+        return {"max_reachable": self.max_reachable}
 
     def post_fill(self):
         state = self.multiworld.state.copy()
@@ -70,7 +76,7 @@ class ItemDispenser(World):
             skipped_sphere_locs = []
             if not sphere:
                 unreachable = True
-                break # no unreachable
+                #break # no unreachable
             for location in sphere:
                 if location.item and location.item.player != 1:
                     if location.player == location.item.player and location.item.name in self.multiworld.worlds[location.item.player].options.non_local_items.value:
@@ -84,7 +90,7 @@ class ItemDispenser(World):
                             continue
                         if not swappable(self.multiworld, location):
                             continue
-                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 25) < self.random.randint(1, 10000):
+                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 25) < self.random.randint(1, 10000) or unreachable:
                             continue
                 sphere_locations.append(location)
                 if location.player not in sphere_num_locations:
@@ -107,10 +113,15 @@ class ItemDispenser(World):
                 token_rates = {player: 10 - ((10 / highest_count) * value) for player, value in sphere_num_locations.items()}
                 self.random.shuffle(sphere_locations)
                 for location in sphere_locations:
-                    increment = max(min(round(self.random.triangular(1, 10, token_rates[location.player])), 10), 1)
-                    increment = min(increment, max(min(round(self.random.triangular(1, 10, token_rates[location.player])), 10), 1))
+                    if unreachable:
+                        increment = 1
+                    else:
+                        increment = max(min(round(self.random.triangular(1, 10, token_rates[location.player])), 10), 1)
+                        increment = min(increment, max(min(round(self.random.triangular(1, 10, token_rates[location.player])), 10), 1))
                     skipped_sphere_locs += list(range(i+1, i+increment))
                     i += increment
+                    if not unreachable:
+                        self.max_reachable = i
                     if location.item and location.item.name != "Nothing":
                         add_location(location.item, i)
                     else:
@@ -133,6 +144,8 @@ class ItemDispenser(World):
                     game = self.random.choice(allowed_games)
                     add_location(self.multiworld.worlds[game].create_filler(), old_skipped_sphere_locs.pop())
 
+        l = self.multiworld.get_unfilled_locations()
+        breakpoint()
         assert not extra_items_to_place
         del skipped_sphere_locs
         del old_skipped_sphere_locs

@@ -14,6 +14,7 @@ class IDClientContext(CommonContext):
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
         self.tokens = 0
+        self.slot_data = {}
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:
@@ -30,6 +31,9 @@ class IDClientContext(CommonContext):
         self.ui = IDManager(self)
         self.ui_task = asyncio.create_task(self.ui.async_run(), name="UI")
 
+    def on_package(self, cmd: str, args: dict):
+        if cmd == "Connected":
+            self.slot_data = args.get("slot_data", {})
 
 async def id_loop(ctx):
     try:
@@ -45,9 +49,10 @@ async def id_loop(ctx):
                                       "locations": [loc for loc in list(range(1, tokens + 1)) if loc in ctx.server_locations]}])
                 ctx.tokens = tokens
                 logger.info(f"{ctx.tokens} tokens")
-            if len(ctx.server_locations) and (len(ctx.checked_locations) == len(ctx.server_locations)) and not ctx.finished_game:
-                ctx.finished_game = True
-                await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
+            if ctx.slot_data:
+                if (len(ctx.checked_locations) >= ctx.slot_data["max_reachable"]) and not ctx.finished_game:
+                    ctx.finished_game = True
+                    await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
 
     except Exception as e:
         breakpoint()

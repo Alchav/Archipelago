@@ -151,6 +151,8 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
             items_to_place = [items.pop()
                               for items in reachable_items.values() if items]
             items_to_place += [items.pop()
+                              for items in reachable_items.values() if items]
+            items_to_place += [items.pop()
                               for items in reachable_items.values() if items and items[0].game == "Stardew Valley"]
         else:
             next_player = multiworld.random.choice([player for player, items in reachable_items.items() if items])
@@ -404,12 +406,12 @@ def remaining_fill(multiworld: MultiWorld,
         #
         # There are leftover unplaceable items and locations that won't accept them
         if move_unplaceable_to_start_inventory:
-            last_batch = []
+            # last_batch = []
             for item in unplaced_items:
                 logging.debug(f"Moved {item} to start_inventory to prevent fill failure.")
                 multiworld.push_precollected(item)
-                last_batch.append(multiworld.worlds[item.player].create_filler())
-            remaining_fill(multiworld, locations, last_batch, name + " Start Inventory Retry")
+            #     last_batch.append(multiworld.worlds[item.player].create_filler())
+            # remaining_fill(multiworld, locations, last_batch, name + " Start Inventory Retry")
         else:
             logging.warning(f"Couldn't place {unplaced_items} in {locations}, doing it anyways")
             for item, location in zip(unplaced_items, locations):
@@ -667,7 +669,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 for item in progitempool:
                     logging.info(f"Moved {item} to start_inventory to prevent fill failure.")
                     multiworld.push_precollected(item)
-                    filleritempool.append(multiworld.worlds[item.player].create_filler())
+                    # filleritempool.append(multiworld.worlds[item.player].create_filler())
                 logging.warning(f"{len(progitempool)} items moved to start inventory,"
                                 f" due to failure in Progression fill step.")
                 progitempool[:] = []
@@ -692,10 +694,18 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     compress_spheres(multiworld, 5)
 
+    defaultlocations = []
+    excludedlocations = []
+
+    for location in multiworld.get_unfilled_locations():
+        if location.progress_type == LocationProgressType.EXCLUDED:
+            excludedlocations.append(location)
+        else:
+            defaultlocations.append(location)
+
     filleritempool.sort(key=lambda i: i.trap)
 
-    remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded",
-                   move_unplaceable_to_start_inventory=panic_method=="start_inventory")
+    remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded")
 
     # if excludedlocations:
     #     raise FillError(
@@ -961,7 +971,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         try:
             logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
         except Exception:
-            pass
+            breakpoint()
 
     if not multiworld.can_beat_game():
         state = multiworld.state.copy()
@@ -979,7 +989,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         multiworld.random.shuffle(sphere_list)
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
-            if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
+            # release game:
+            #            if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
+            if swappable(multiworld, loc) and not location.locked:
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
             for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
@@ -1544,7 +1556,7 @@ def compress_spheres(multiworld, max_sphere):
     spheres = gen_spheres()
     i = 0
     while len(spheres) > max_sphere:
-        active_games_x = {location.item.player for location in spheres[max_sphere] if location.item and location.advancement}
+        active_games_x = {location.player for location in spheres[max_sphere]}
         i += 1
         print(f"compress sphere loop {i}. Number of spheres: {len(spheres)}")
         for n, sphere in enumerate(spheres, start=1):
@@ -1574,4 +1586,5 @@ def compress_spheres(multiworld, max_sphere):
                             else:
                                 continue
                             break
-        spheres = gen_spheres()
+        if i % 2 == 0:
+            spheres = gen_spheres()

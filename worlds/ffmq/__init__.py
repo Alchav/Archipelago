@@ -181,12 +181,13 @@ class FFMQWorld(World):
             multidata["connect_names"][new_name] = payload
 
     def get_filler_item_name(self):
-        r = self.multiworld.random.randint(0, 201)
+        r = self.multiworld.random.randint(0, sum(fillers.values()))
         for item, count in fillers.items():
             r -= count
             r -= fillers[item]
             if r <= 0:
                 return item
+        return "Cure Potion"
 
     def extend_hint_information(self, hint_data):
         hint_data[self.player] = {}
