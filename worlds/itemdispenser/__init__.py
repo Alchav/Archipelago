@@ -92,7 +92,7 @@ class ItemDispenser(World):
                             continue
                         if not swappable(self.multiworld, location):
                             continue
-                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 25) < self.random.randint(1, 10000) or unreachable:
+                        elif self.multiworld.worlds[location.player].options.token_percentage * (100 if location.item.advancement else 25) < self.random.randint(1, 10000):
                             continue
                 sphere_locations.append(location)
                 if location.player not in sphere_num_locations:
