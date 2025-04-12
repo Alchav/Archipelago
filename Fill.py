@@ -54,7 +54,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_locked = {location for location in reachable_locations if location.address and location.item and location.player == location.item.player and (location.item.game == "Item Dispenser" or location.locked)}
+            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game == "Item Dispenser" or (location.player == location.item.player and location.locked))}
             for location in reachable_events:
                 if location.item:
                   state.collect(location.item, True, location)
@@ -398,7 +398,7 @@ def remaining_fill(multiworld: MultiWorld,
     if total > 1000:
         _log_fill_progress(name, placed, total)
 
-    if unplaced_items and locations:
+    if unplaced_items and locations and name != "Remaining Excluded":
         # while unplaced_items and locations:
         #     multiworld.push_item(locations.pop(), unplaced_items.pop(), False)
         # return
@@ -1573,7 +1573,7 @@ def compress_spheres(multiworld, max_sphere):
                         new_sphere = multiworld.random.randint(0, n-1)
                         for new_sphere in range(new_sphere, -1, -1):
                             if new_sphere == 0:
-                                # print(f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")
+                                print(f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")
                                 multiworld.push_precollected(location.item)
                                 location.item = None
                                 break
