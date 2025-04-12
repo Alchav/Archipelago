@@ -246,12 +246,19 @@ class JigsawWorld(World):
                 #     n = 2
                 # else:
                 #     n = 1
-                if pieces_left < 2:
-                    n = 1
-                elif pieces_left < 5:
-                    n = self.random.choice((1, 2))
-                else:
-                    n = self.random.choice((2, 5))
+                v = [1]
+                if pieces_left > 4:
+                    v.append(2)
+                if pieces_left > 10:
+                    v.append(5)
+                if pieces_left > 20:
+                    v.append(10)
+                if pieces_left > 50:
+                    v.append(25)
+                if pieces_left > 500:
+                    v.append(100)
+
+                n = self.random.choice(v)
                 self.pool_pieces.append(f"{str(n) + ' ' if n > 1 else ''}Puzzle Piece{'s' if n > 1 else ''}")
                 number_of_locations_left -= 1
                 pieces_left -= n

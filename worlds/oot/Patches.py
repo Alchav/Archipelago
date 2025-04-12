@@ -2098,7 +2098,7 @@ def patch_rom(world, rom):
                 if location.item.game == 'Ocarina of Time':
                     item = read_rom_item(rom, location.item.index)
                 else:
-                    item = read_rom_item(rom, AP_JUNK)
+                    item = read_rom_item(rom, AP_PROGRESSION if location.item.advancement else AP_JUNK)
             else:
                 looks_like_index = get_override_entry(world, location)[5]
                 item = read_rom_item(rom, looks_like_index)

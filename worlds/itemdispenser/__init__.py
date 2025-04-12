@@ -78,11 +78,13 @@ class ItemDispenser(World):
                 unreachable = True
                 #break # no unreachable
             for location in sphere:
+                if not location.item:
+                    self.multiworld.push_item(location, self.multiworld.worlds[1].create_item("Nothing"))
                 if location.item and location.item.player != 1:
                     if location.player == location.item.player and location.item.name in self.multiworld.worlds[location.item.player].options.non_local_items.value:
                         pass
-                    elif location.item.name == "Nothing":
-                        pass
+                    # elif location.item.name == "Nothing":
+                    #     pass
                     else:
                         # if beaten_game_spheres[location.player] < sphere_num:
                         #     continue

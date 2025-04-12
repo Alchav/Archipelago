@@ -36,7 +36,7 @@ class AlchapelaBotWorld(World):
         self.item_name_groups["Everything"] = set(self.item_name_to_id.keys())
 
     def create_item(self, name):
-        return UnlockItem(name, ItemClassification.progression if "Unlock" in name else ItemClassification.useful, self.item_name_to_id[name], self.player)
+        return UnlockItem(name, ItemClassification.filler if name == "Nothing" else ItemClassification.progression if "Unlock" in name else ItemClassification.useful, -1 if name == "Nothing" else self.item_name_to_id[name], self.player)
 
 
 class UnlockItem(Item):
