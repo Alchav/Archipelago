@@ -999,7 +999,7 @@ class CollectionState():
         changed = self.multiworld.worlds[item.player].collect(self, item)
 
         self.stale[item.player] = True
-        if item.game == "AlchapelaBot" and -1 < item.code < 1000:
+        if item.game == "AlchapelaBot" and 0 < item.code < 1000:
             self.stale[item.code] = True
             if self.multiworld.worlds[item.code].game == "Ocarina of Time":
                 self._oot_stale[item.code] = True

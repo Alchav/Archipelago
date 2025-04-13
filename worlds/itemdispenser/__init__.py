@@ -25,7 +25,7 @@ def token_logic(state, world, count):
 allowed_filler_games = {
     "Secret of Evermore", "Super Mario 64", "Crystalis", "DOOM 1993", "DOOM II", "Final Fantasy Mystic Quest",
     "A Hat in Time", "Pokemon Red and Blue", "The Sims 4", "Jigsaw", "Majora's Mask Recompiled",
-    "A Link to the Past", "Mega Man X3", "Super Mario World"
+    "A Link to the Past", "Super Mario World", "Final Fantasy V"
 }
 
 
@@ -80,11 +80,12 @@ class ItemDispenser(World):
             for location in sphere:
                 if not location.item:
                     self.multiworld.push_item(location, self.multiworld.worlds[1].create_item("Nothing"))
+                    continue
                 if location.item and location.item.player != 1:
                     if location.player == location.item.player and location.item.name in self.multiworld.worlds[location.item.player].options.non_local_items.value:
                         pass
-                    # elif location.item.name == "Nothing":
-                    #     pass
+                    elif location.item.name == "Nothing":
+                        continue
                     else:
                         # if beaten_game_spheres[location.player] < sphere_num:
                         #     continue
@@ -124,6 +125,7 @@ class ItemDispenser(World):
                     i += increment
                     if not unreachable:
                         self.max_reachable = i
+                    print(i)
                     if location.item and location.item.name != "Nothing":
                         add_location(location.item, i)
                     else:

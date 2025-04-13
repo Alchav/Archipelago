@@ -24,6 +24,7 @@ class AlchapelaBotWorld(World):
     options: AlchapelaOptions
 
     def generate_early(self):
+        self.item_name_to_id["Nothing"] = 100000
         self.multiworld.player_types[self.player] = SlotType.spectator  # mark as spectator
         for player, player_name in self.multiworld.player_name.items():
             self.item_name_to_id[f"Unlock {player_name}"] = player
@@ -36,7 +37,7 @@ class AlchapelaBotWorld(World):
         self.item_name_groups["Everything"] = set(self.item_name_to_id.keys())
 
     def create_item(self, name):
-        return UnlockItem(name, ItemClassification.filler if name == "Nothing" else ItemClassification.progression if "Unlock" in name else ItemClassification.useful, -1 if name == "Nothing" else self.item_name_to_id[name], self.player)
+        return UnlockItem(name, ItemClassification.filler if name == "Nothing" else ItemClassification.progression if "Unlock" in name else ItemClassification.useful, self.item_name_to_id[name], self.player)
 
 
 class UnlockItem(Item):
