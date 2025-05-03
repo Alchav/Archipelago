@@ -73,7 +73,7 @@ def create_itempool(world: "HatInTimeWorld") -> List[Item]:
 
         itempool += create_multiple_items(world, name, item_frequencies.get(name, 1), item_type)
 
-    # itempool += create_junk_items(world, get_total_locations(world) - len(itempool))
+    itempool += create_junk_items(world, get_total_locations(world) - len(itempool))
     return itempool
 
 
@@ -291,8 +291,8 @@ junk_weights = {
     "25 Pons": 50,
     "50 Pons": 25,
     "100 Pons": 10,
-    "Health Pon": 35,
-    "Random Cosmetic": 35,
+    "Health Pon": 1,
+    "Random Cosmetic": 1,
 }
 
 item_table = {
