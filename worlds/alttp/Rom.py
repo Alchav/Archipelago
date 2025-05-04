@@ -1514,7 +1514,7 @@ def patch_rom(world: MultiWorld, rom: LocalRom, player: int, enemized: bool):
                               (0x02 if 'bombs' in local_world.escape_assist else 0x00) |
                               (0x04 if 'magic' in local_world.escape_assist else 0x00)))  # Escape assist
 
-    if world.master_keys[player] :
+    if world.worlds[player].options.master_keys:
         rom.write_byte(0x186FFE, 0x01)
 
     if local_world.options.goal in ['pedestal', 'triforce_hunt', 'local_triforce_hunt']:

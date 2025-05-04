@@ -277,8 +277,19 @@ class JigsawWorld(World):
         max_locs = min(self.npieces - 2,  self.options.maximum_number_of_real_items.value)
         self.pieces_per_location = max((pieces_left + max_locs - 1) // max_locs, self.options.minimum_number_of_pieces_per_real_item.value)     
         self.number_of_locations = (pieces_left + self.pieces_per_location - 1) // self.pieces_per_location
-        self.pool_pieces = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
-                
+
+        self.pool_pieces = []
+        pcs = self.number_of_locations * self.pieces_per_location
+        while pcs:
+            s = self.pieces_per_location
+            while self.random.randint(0, 3) == 3 and s < 500:
+                s = s + 1
+            s = min(pcs, s)
+            self.pool_pieces.append(f"{s} Puzzle Piece{'s' if s > 1 else ''}")
+            pcs -= s
+
+        # self.pool_pieces = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
+
         pieces_from_start = len(self.precollected_pieces)
         
         while pieces_from_start > 0:
@@ -288,8 +299,7 @@ class JigsawWorld(World):
                 n = pieces_from_start
             self.multiworld.push_precollected(self.create_item(f"{n} Puzzle Piece{'s' if n > 1 else ''}"))
             pieces_from_start -= n
-            
-            
+
     def create_items(self):
         self.multiworld.itempool += [self.create_item(name) for name in self.pool_pieces]
 
@@ -373,7 +383,7 @@ class JigsawWorld(World):
         
         if self.options.enable_forced_local_filler_items.value:
             for i, loc in enumerate(filler_locations):
-                self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(filler_encouragements[i]))
+                self.multiworld.push_item(self.multiworld.get_location(f"Merge {loc} times", self.player), self.create_item(filler_encouragements[i]))
         
         # Change the victory location to an event and place the Victory item there.
         victory_location_name = f"Merge {self.npieces - 1} times"
@@ -389,10 +399,10 @@ class JigsawWorld(World):
         menu.exits.append(connection)
         connection.connect(board)
         self.multiworld.regions += [menu, board]
-        
+
 
     def get_filler_item_name(self) -> str:
-        return "Squawks"
+        return self.random.choice(encouragements)
 
     def create_item(self, name: str) -> Item:
         item_data = item_table[name]

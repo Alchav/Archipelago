@@ -560,6 +560,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     itempool = sorted(multiworld.itempool)
     multiworld.random.shuffle(itempool)
 
+    for player in multiworld.player_name:
+        n = len([loc for loc in fill_locations if loc.player == player]) - len([item for item in itempool if item.player == player])
+        if n:
+            print(f"{player}: {n}")
+
     for player, ei in multiworld.early_items.items():
         for item, count in ei.items():
             if item in multiworld.local_early_items[player]:
@@ -692,7 +697,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
-    compress_spheres(multiworld, 5)
+    compress_spheres(multiworld, 6)
 
     defaultlocations = []
     excludedlocations = []
@@ -777,7 +782,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 2
         return 1
 
-    option = "e"  # g: total spheres, b: beaten game spheres
+    option = "r"  # g: total spheres, b: beaten game spheres
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
@@ -796,7 +801,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     playable_games = [player for player in player_names if player[1] in multiworld.worlds[1].options.start_games]
     player_names = [player_name for player_name in player_names if player_name not in playable_games]
     highest_sphere = 0
-    if option == "e":
+    if option in ("e", "r"):
         for player in player_names:
             highest_sphere = max(highest_sphere, game_spheres[player[0]])
         for player in player_names:
@@ -806,6 +811,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         for player in player_names:
             if player not in playable_games:
                 starting_spheres[player[0]] = highest_sphere - game_spheres[player[0]]
+                if option == "r":
+                    starting_spheres[player[0]] = multiworld.random.randint(1, starting_spheres[player[0]])
+
     else:
         for player in playable_games:
             highest_sphere = max(highest_sphere, game_spheres[player[0]])
@@ -885,18 +893,21 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # for i, sphere in enumerate(spheres, start=1):
         sphere = spheres[starting_sphere - 1]
 
-        filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
+        filler_sphere = sorted([location for location in sphere if location.address and not location.item])
         if not filler_sphere:
-            filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
+            filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
             if not filler_sphere:
-                breakpoint()
+                filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
+                if not filler_sphere:
+                    breakpoint()
         # for player, sphere_check in starting_spheres.items():
         location = multiworld.random.choice(filler_sphere)
         # multiworld.push_precollected(location.item)
-        if starting_sphere not in multiworld.worlds[2].displaced_items:
-            multiworld.worlds[2].displaced_items[starting_sphere] = []
+        # if starting_sphere not in multiworld.worlds[2].displaced_items:
+        #     multiworld.worlds[2].displaced_items[starting_sphere] = []
         if location.item:
-            multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
+            # multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
+            multiworld.push_precollected(location.item)
             location.item.location = None
             print(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing {location.item.name}")
         else:

@@ -4,6 +4,11 @@ from NetUtils import SlotType
 from Options import PerGameCommonOptions, OptionList
 from dataclasses import dataclass
 
+allowed_filler_games = {
+    "Secret of Evermore", "Super Mario 64", "Crystalis", "DOOM 1993", "DOOM II", "Final Fantasy Mystic Quest",
+    "A Hat in Time", "Pokemon Red and Blue", "The Sims 4", "Jigsaw", "Majora's Mask Recompiled",
+    "A Link to the Past", "Super Mario World", "Final Fantasy V", "AlchapelaBot"
+}
 
 class StartGames(OptionList):
     """Starting games"""
@@ -36,9 +41,17 @@ class AlchapelaBotWorld(World):
             self.multiworld.push_precollected(self.create_item(f"Unlock {starting_game}"))
         self.item_name_groups["Everything"] = set(self.item_name_to_id.keys())
 
+    def post_fill(self) -> None:
+        allowed_filler_slots = [player for player in self.multiworld.player_ids if self.multiworld.worlds[player].game in allowed_filler_games]
+        for location in self.multiworld.get_unfilled_locations():
+            player = self.random.choice(allowed_filler_slots)
+            self.multiworld.push_item(location, self.multiworld.worlds[player].create_filler())
+
     def create_item(self, name):
         return UnlockItem(name, ItemClassification.filler if name == "Nothing" else ItemClassification.progression if "Unlock" in name else ItemClassification.useful, self.item_name_to_id[name], self.player)
 
+    def get_filler_item_name(self) -> str:
+        return "Nothing"
 
 class UnlockItem(Item):
     game = "AlchapelaBot"

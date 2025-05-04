@@ -716,7 +716,7 @@ class SMWorld(World):
         hasETank = False
         hasSpazer = False
         hasPlasma = False
-        for startItem in self.startItems:
+        for startItem in [variaItem for item in self.multiworld.precollected_items[self.player] for variaItem in ItemManager.Items.values() if variaItem.Name == item.name]:
             item = startItem.Type
             if item == "ETank": hasETank = True
             if item == "Spazer": hasSpazer = True

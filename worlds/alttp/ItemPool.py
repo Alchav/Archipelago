@@ -335,7 +335,7 @@ def generate_itempool(world):
                 item.code = 0x65  # Progressive Bow (Alt)
                 break
 
-    if multiworld.master_keys[player] and multiworld.small_key_shuffle[player] == "universal":
+    if multiworld.worlds[player].options.master_keys and multiworld.worlds[player].options.small_key_shuffle == "universal":
         for item in items:
             if item.name == "Small Key (Universal)":
                 item.classification = ItemClassification.progression
@@ -347,7 +347,7 @@ def generate_itempool(world):
     world.treasure_hunt_required = treasure_hunt_required % 999
     world.treasure_hunt_total = treasure_hunt_total
 
-    if multiworld.master_keys[player]:
+    if multiworld.worlds[player].options.master_keys:
         items_to_add = 60 if multiworld.small_key_shuffle[player] == "universal" else 48
         # add replacement items for the keys removed from the dungeon item pool
         multiworld.itempool += [item_factory(GetBeemizerItem(multiworld, player, world.get_filler_item_name()), world)
@@ -702,8 +702,8 @@ def get_pool_core(world, player: int):
     if retro_bow:
         replace = {'Single Arrow', 'Arrows (10)', 'Arrow Upgrade (+5)', 'Arrow Upgrade (+10)', 'Arrow Upgrade (70)'}
         pool = ['Rupees (5)' if item in replace else item for item in pool]
-    if world.small_key_shuffle[player] == small_key_shuffle.option_universal:
-        if world.master_keys[player]:
+    if world.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
+        if world.worlds[player].options.master_keys:
             if mode == 'standard':
                 # This is a silly choice of options, but if they really want...
                 key_locations = ["Link's House", "Secret Passage", "Hyrule Castle - Map Guard Key Drop"]
