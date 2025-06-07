@@ -80,6 +80,11 @@ Majora's Mask Recompiled:
     'false': 50
     'true': 0
 
+  start_with_soaring:
+    # Start the game with Song of Soaring.
+    'false': 0
+    'true': 50
+
   starting_hearts:
     # The number of heart quarters Link starts with.
     # If less than 12, extra heart items will be shuffled into the pool to accommodate.
@@ -97,14 +102,20 @@ Majora's Mask Recompiled:
     containers: 50
     pieces: 0
 
+  shuffle_regional_maps:
+    # Choose whether to shuffle every regional map from Tingle.
+    vanilla: 0
+    starting: 50
+    anywhere: 0
+
   shuffle_boss_remains:
     # Choose whether to shuffle the Boss Remains received after beating a boss at the end of a dungeon.
     #
     # vanilla: Boss Remains are placed in their vanilla locations.
     # anything: Any item can be given by any of the Boss Remains, and Boss Remains can be found anywhere in any world.
     # bosses: Boss Remains are shuffled amongst themselves as the rewards for defeating bosses.
-    vanila: 0
-    anywhere: 50
+    vanila: 50
+    anywhere: 0
     bosses: 0
 
   shuffle_swamphouse_reward:
@@ -122,6 +133,27 @@ Majora's Mask Recompiled:
     anything: 0
     ignore: 0
 
+  shopsanity:
+    # Choose whether shops and their items are shuffled into the pool.
+    # This includes Trading Post, Bomb Shop, Goron Shop, and Zora Shop, along with the Gorman Ranch and Milk Bar purchases.
+    #
+    # vanilla: Shop items are not shuffled.
+    # enabled: Every item in shops are shuffled, with alternate shops sharing the same items.
+    # advanced: Every single item in shops are shuffled, including the alternate Night Trading Post and Spring Goron Shop. Also adds an extra Heart Piece to Spring Goron Village.
+    vanilla: 50
+    enabled: 0
+    advanced: 0
+
+  scrubsanity:
+    # Choose whether to shuffle Business Scrub purchases.
+    'false': 50
+    'true': 0
+
+  cowsanity:
+    # Choose whether to shuffle Cows.
+    'false': 50
+    'true': 0
+
   shuffle_great_fairy_rewards:
     # Choose whether to shuffle Great Fairy rewards.
     'false': 50
@@ -134,23 +166,41 @@ Majora's Mask Recompiled:
 
   start_with_consumables:
     # Choose whether to start with basic consumables (99 rupees, 10 deku sticks, 20 deku nuts).
-    'false': 50
-    'true': 0
+    'false': 0
+    'true': 50
 
   permanent_chateau_romani:
     # Choose whether the Chateau Romani stays even after a reset.
-    'false': 50
-    'true': 0
+    'false': 0
+    'true': 50
 
-  reset_with_inverted_time:
-    # Choose whether time starts out inverted at Day 1, even after a reset.
+  start_with_inverted_time:
+    # Choose whether time starts out inverted at Day 1.
     'false': 50
     'true': 0
 
   receive_filled_wallets:
     # Choose whether you receive wallets pre-filled (not including the starting wallet).
-    'false': 50
-    'true': 0
+    'false': 0
+    'true': 50
+
+  damage_multiplier:
+    # Adjust the amount of damage taken.
+    half: 0
+    normal: 50
+    double: 0
+    quad: 0
+    ohko: 0
+  
+  death_behavior:
+    # Change what happens when you die.
+    #
+    # vanilla: The normal death cutscene plays when you die.
+    # fast: The death cutscene is massively sped up.
+    # moon_crash: Triggers a moon crash and restarts the current cycle.
+    vanilla: 50
+    fast: 0
+    moon_crash: 0
 
   link_tunic_color:
     [30, 105, 27]

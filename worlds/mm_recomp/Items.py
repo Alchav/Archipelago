@@ -32,7 +32,7 @@ item_data_table: Dict[str, MMRItemData] = {
         can_create=lambda options: options.shuffle_great_fairy_rewards.value
     ),
     "Double Defense": MMRItemData(
-        code=0x3469420000073,
+        code=0x3469420020003,
         type=ItemClassification.useful,
         can_create=lambda options: options.shuffle_great_fairy_rewards.value
     ),
@@ -125,7 +125,8 @@ item_data_table: Dict[str, MMRItemData] = {
     ),
     "Song of Soaring": MMRItemData(
         code=0x346942004006A,
-        type=ItemClassification.progression
+        type=ItemClassification.progression,
+        can_create=lambda options: options.start_with_soaring.value == 0
     ),
     "Song of Storms": MMRItemData(
         code=0x346942004006B,
@@ -245,6 +246,10 @@ item_data_table: Dict[str, MMRItemData] = {
         code=0x34694200000A1,
         type=ItemClassification.progression
     ),
+    "Bottle of Milk": MMRItemData(
+        code=0x3469420000060,
+        type=ItemClassification.progression
+    ),
     "Bottle of Chateau Romani": MMRItemData(
         code=0x346942000006F,
         type=ItemClassification.progression
@@ -308,6 +313,36 @@ item_data_table: Dict[str, MMRItemData] = {
         # ~ code=0x346942000005D,
         # ~ type=ItemClassification.progression
     # ~ ),
+    "Clock Town Map": MMRItemData(
+        code=0x34694200000B4,
+        type=ItemClassification.useful,
+        can_create=lambda options: options.shuffle_regional_maps.value != 1
+    ),
+    "Woodfall Map": MMRItemData(
+        code=0x34694200000B5,
+        type=ItemClassification.useful,
+        can_create=lambda options: options.shuffle_regional_maps.value != 1
+    ),
+    "Snowhead Map": MMRItemData(
+        code=0x34694200000B6,
+        type=ItemClassification.useful,
+        can_create=lambda options: options.shuffle_regional_maps.value != 1
+    ),
+    "Romani Ranch Map": MMRItemData(
+        code=0x34694200000B7,
+        type=ItemClassification.useful,
+        can_create=lambda options: options.shuffle_regional_maps.value != 1
+    ),
+    "Great Bay Map": MMRItemData(
+        code=0x34694200000B8,
+        type=ItemClassification.useful,
+        can_create=lambda options: options.shuffle_regional_maps.value != 1
+    ),
+    "Stone Tower Map": MMRItemData(
+        code=0x34694200000B9,
+        type=ItemClassification.useful,
+        can_create=lambda options: options.shuffle_regional_maps.value != 1
+    ),
     "Stray Fairy (Woodfall)": MMRItemData(
         code=0x3469420010000,
         type=ItemClassification.progression,
@@ -317,17 +352,20 @@ item_data_table: Dict[str, MMRItemData] = {
     "Stray Fairy (Snowhead)": MMRItemData(
         code=0x3469420010001,
         type=ItemClassification.progression,
-        num_exist=15
+        num_exist=15,
+        can_create=lambda options: options.fairysanity.value
     ),
     "Stray Fairy (Great Bay)": MMRItemData(
         code=0x3469420010002,
         type=ItemClassification.progression,
-        num_exist=15
+        num_exist=15,
+        can_create=lambda options: options.fairysanity.value
     ),
     "Stray Fairy (Stone Tower)": MMRItemData(
         code=0x3469420010003,
         type=ItemClassification.progression,
-        num_exist=15
+        num_exist=15,
+        can_create=lambda options: options.fairysanity.value
     ),
     "Small Key (Woodfall)": MMRItemData(
         code=0x3469420090078,
@@ -445,23 +483,28 @@ item_data_table: Dict[str, MMRItemData] = {
     "Blue Rupee": MMRItemData(
         code=0x3469420000002,
         type=ItemClassification.filler,
-        num_exist=2
+        num_exist=6
     ),
     "Red Rupee": MMRItemData(
         code=0x3469420000004,
         type=ItemClassification.filler,
-        num_exist=29
+        num_exist=46
         # ~ num_exist=29
     ),
     "Purple Rupee": MMRItemData(
         code=0x3469420000005,
         type=ItemClassification.filler,
-        num_exist=8
+        num_exist=9
     ),
     "Silver Rupee": MMRItemData(
         code=0x3469420000006,
         type=ItemClassification.useful,
-        num_exist=9
+        num_exist=10
+    ),
+    "Gold Rupee": MMRItemData(
+        code=0x3469420000007,
+        type=ItemClassification.filler,
+        num_exist=1
     ),
     "Victory": MMRItemData(
         type=ItemClassification.progression,
