@@ -238,10 +238,10 @@ def create_items(self) -> None:
 
     precollected_item_names = [item.name for item in self.multiworld.precollected_items[self.player]]
 
+    skipped_one_filler_item = False
+
     def add_item(item_name):
         if item_name in ["Steel Armor", "Sky Fragment"] or "Progressive" in item_name:
-            return
-        if item_name.lower().replace(" ", "_") == self.options.starting_weapon.current_key:
             return
         if item_name == "Sky Coin":
             if self.options.sky_coin_mode == "shattered_sky_coin":
@@ -253,8 +253,12 @@ def create_items(self) -> None:
                 return
 
         def check_precollected():
+            nonlocal skipped_one_filler_item
             if item_name in precollected_item_names:
-                items.append(self.create_filler())
+                if skipped_one_filler_item:
+                    items.append(self.create_filler())
+                else:
+                    skipped_one_filler_item = True
                 precollected_item_names.remove(item_name)
                 return True
             return False
