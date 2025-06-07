@@ -1574,7 +1574,7 @@ def compress_spheres(multiworld, max_sphere):
                             (location.item.player in active_games or multiworld.random.randint(40, 140) < i)):
                         if location.item.player in active_games:
                             active_games.remove(location.item.player)
-                        new_sphere = multiworld.random.randint(0, n-1)
+                        new_sphere = multiworld.random.randint(1, n-1)
                         for new_sphere in range(new_sphere, -1, -1):
                             if new_sphere == 0:
                                 print(f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")
@@ -1590,5 +1590,5 @@ def compress_spheres(multiworld, max_sphere):
                             else:
                                 continue
                             break
-        if i % 2 == 0:
+        if i % 3 != 2:
             spheres = gen_spheres()
