@@ -10,8 +10,8 @@ from .items import item_table
 from .text import encode_text
 from .pokemon import set_mon_palettes
 from .regions import PokemonRBWarp, map_ids, town_map_coords
-from .rock_tunnel import randomize_rock_tunnel
 from .rom_addresses import rom_addresses
+from .music import randomize_map_music
 
 if typing.TYPE_CHECKING:
     from . import PokemonRedBlueWorld
@@ -342,19 +342,18 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
                 write_bytes(rom_addresses["Town_Map_Coords"] + (map_coord_entry * 4) + 1, (y << 4) | x)
             write_bytes(rom_addresses["Town_Map_Order"] + map_order_entry, map_ids[map_name])
 
-    if not world.options.key_items_only:
-        for i, gym_leader in enumerate(("Pewter Gym - Brock TM", "Cerulean Gym - Misty TM",
-                                        "Vermilion Gym - Lt. Surge TM", "Celadon Gym - Erika TM",
-                                        "Fuchsia Gym - Koga TM", "Saffron Gym - Sabrina TM",
-                                        "Cinnabar Gym - Blaine TM", "Viridian Gym - Giovanni TM")):
-            item_name = world.multiworld.get_location(gym_leader, world.player).item.name
-            if item_name.startswith("TM"):
-                try:
-                    tm = int(item_name[2:4])
-                    move = poke_data.moves[world.local_tms[tm - 1]]["id"]
-                    write_bytes(rom_addresses["Gym_Leader_Moves"] + (2 * i), move)
-                except KeyError:
-                    pass
+    for i, gym_leader in enumerate(("Pewter Gym - Brock TM", "Cerulean Gym - Misty TM",
+                                    "Vermilion Gym - Lt. Surge TM", "Celadon Gym - Erika TM",
+                                    "Fuchsia Gym - Koga TM", "Saffron Gym - Sabrina TM",
+                                    "Cinnabar Gym - Blaine TM", "Viridian Gym - Giovanni TM")):
+        item_name = world.multiworld.get_location(gym_leader, world.player).item.name
+        if item_name.startswith("TM"):
+            try:
+                tm = int(item_name[2:4])
+                move = poke_data.moves[world.local_tms[tm - 1]]["id"]
+                write_bytes(rom_addresses["Gym_Leader_Moves"] + (2 * i), move)
+            except KeyError:
+                pass
 
     def set_trade_mon(address, loc):
         mon = world.multiworld.get_location(loc, world.player).item.name
@@ -449,7 +448,12 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
     write_bytes(rom_addresses["Trainer_Screen_Total_Key_Items"], encode_text(str(world.total_key_items), length=2))
 
     write_bytes(rom_addresses["Option_Viridian_Gym_Badges"], world.options.viridian_gym_condition.value)
+
     write_bytes(rom_addresses["Option_EXP_Modifier"], world.options.exp_modifier.value)
+    if not world.options.split_exp:
+        write_bytes(rom_addresses["Option_No_Split_EXP_A"], [0, 0, 20])  # nop, nop, jr nz
+        write_bytes(rom_addresses["Option_No_Split_EXP_B"], [0, 0, 0])  # nop, nop, nop
+
     if not world.options.require_item_finder:
         write_bytes(rom_addresses["Option_Itemfinder"], 0)  # nop
     if world.options.extra_strength_boulders:
@@ -594,6 +598,8 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
 
     set_mon_palettes(world, patch)
 
+    randomize_map_music(world, write_bytes)
+
     for move_data in world.local_move_data.values():
         if move_data["id"] == 0:
             continue
@@ -606,14 +612,13 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
     write_bytes(rom_addresses["TM_Moves"], TM_IDs)
 
     if world.options.randomize_rock_tunnel:
-        seed = randomize_rock_tunnel(patch, world.random)
-        write_bytes(rom_addresses["Text_Rock_Tunnel_Sign"], encode_text(f"SEED: <LINE>{seed}"))
+        # seed = randomize_rock_tunnel(patch, world.random)
+        write_bytes(rom_addresses["Text_Rock_Tunnel_Sign"], encode_text(f"SEED: <LINE>{world.rock_tunnel_seed}"))
+        patch.write_token(APTokenTypes.WRITE, rom_addresses["Map_Rock_Tunnel1F"], world.rock_tunnel_1f_data)
+        patch.write_token(APTokenTypes.WRITE, rom_addresses["Map_Rock_TunnelB1F"], world.rock_tunnel_b1f_data)
 
     mons = [mon["id"] for mon in poke_data.pokemon_data.values()]
     world.random.shuffle(mons)
-    write_bytes(rom_addresses["Title_Mon_First"], mons.pop())
-    for mon in range(0, 16):
-        write_bytes(rom_addresses["Title_Mons"] + mon, mons.pop())
     if world.options.game_version.value:
         mons.sort(key=lambda mon: 0 if mon == world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name
                   else 1 if mon == world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name else
@@ -622,6 +627,10 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
         mons.sort(key=lambda mon: 0 if mon == world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name
                   else 1 if mon == world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name else
                   2 if mon == world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name else 3)
+    write_bytes(rom_addresses["Title_Mon_First"], mons.pop())
+    for mon in range(0, 16):
+        write_bytes(rom_addresses["Title_Mons"] + mon, mons.pop())
+
     write_bytes(rom_addresses["Title_Seed"], encode_text(world.multiworld.seed_name[-20:], 20, True))
 
     slot_name = world.multiworld.player_name[world.player]
@@ -638,6 +647,17 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
         write_bytes(rom_addresses["Skip_Rival_Name"], 0)
     else:
         write_bytes(rom_addresses["Rival_Name"], world.rival_name)
+
+    options_byte = world.options.text_speed.value
+    options_byte |= world.options.archipelago_item_text.value << 4
+    options_byte |= world.options.auto_run.value << 5
+    options_byte |= world.options.battle_style.value << 6
+    options_byte |= world.options.battle_animations.value << 7
+    write_bytes(rom_addresses["Options"], options_byte)
+
+    if world.options.text_speed.value == 0:
+        # Otherwise, holding A or B would slow down text
+        write_bytes(rom_addresses["Option_Remove_Text_Delay"], [0, 0, 0])
 
     write_bytes(0xFF00, 2)  # client compatibility version
     rom_name = bytearray(f"AP{Utils.__version__.replace('.', '')[0:3]}_{world.player}_{world.multiworld.seed:11}\0",
