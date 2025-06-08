@@ -209,6 +209,16 @@ def launch(exe, in_terminal=False):
             return
     subprocess.Popen(exe)
 
+def create_shortcut(button, component: Component):
+    from pyshortcuts import make_shortcut
+    script = sys.argv[0]
+    wkdir = Utils.local_path()
+
+    script = f"{script} \"{component.display_name}\""
+    make_shortcut(script, name=f"Archipelago {component.display_name}", icon=local_path("data", "icon.ico"),
+                  startmenu=False, terminal=False, working_dir=wkdir)
+    button.menu.dismiss()
+
 
 def create_shortcut(button: Any, component: Component) -> None:
     from pyshortcuts import make_shortcut
@@ -357,6 +367,9 @@ def run_gui(launch_components: list[Component], args: Any) -> None:
                 self.button_layout.layout.add_widget(card)
 
         def build(self):
+            from kvui import MDButton, MDButtonIcon, MDButtonText
+            from kivymd.uix.navigationdrawer import MDNavigationDrawerDivider
+
             self.top_screen = Builder.load_file(Utils.local_path("data/launcher.kv"))
             self.grid = self.top_screen.ids.grid
             self.navigation = self.top_screen.ids.navigation
@@ -364,6 +377,45 @@ def run_gui(launch_components: list[Component], args: Any) -> None:
             self.search_box = self.top_screen.ids.search_box
             self.set_colors()
             self.top_screen.md_bg_color = self.theme_cls.backgroundColor
+
+            # handle menu
+            menu_icons = {
+                "Client": "controller",
+                "Tool": "desktop-classic",
+                "Adjuster": "wrench",
+                "Misc": "dots-horizontal-circle-outline"
+            }
+
+            def filter_clients(caller):
+                self._refresh_components(caller.type)
+
+            all_item = MDButton(
+                MDButtonIcon(icon="asterisk"),
+                MDButtonText(text="All"),
+                style="text"
+            )
+            all_item.type = (Type.CLIENT, Type.TOOL, Type.ADJUSTER, Type.MISC)
+            all_item.bind(on_release=filter_clients)
+            self.navigation.add_widget(all_item)
+            for type in (Type.CLIENT, Type.TOOL, Type.ADJUSTER, Type.MISC):
+                name = str(type).rsplit(".")[1].title()
+                item = MDButton(
+                    MDButtonIcon(icon=menu_icons[name]),
+                    MDButtonText(text=name),
+                    style="text"
+                )
+                item.type = (type,)
+                item.bind(on_release=filter_clients)
+                self.navigation.add_widget(item)
+            favorite_item = MDButton(
+                MDButtonIcon(icon="star"),
+                MDButtonText(text="Favorites"),
+                style="text"
+            )
+            favorite_item.type = ("favorites",)
+            favorite_item.bind(on_release=filter_clients)
+            self.navigation.add_widget(favorite_item)
+            self.navigation.add_widget(MDNavigationDrawerDivider())
 
             global refresh_components
             refresh_components = self._refresh_components
@@ -405,6 +457,15 @@ def run_gui(launch_components: list[Component], args: Any) -> None:
                 run_component(component, file)
             else:
                 logging.warning(f"unable to identify component for {filename}")
+
+        def _on_keyboard(self, window: Window, key: int, scancode: int, codepoint: str, modifier: list[str]):
+            # Activate search as soon as we start typing, no matter if we are focused on the search box or not.
+            # Focus first, then capture the first character we type, otherwise it gets swallowed and lost.
+            # Limit text input to ASCII non-control characters (space bar to tilde).
+            if not self.search_box.focus:
+                self.search_box.focus = True
+                if key in range(32, 126):
+                    self.search_box.text += codepoint
 
         def _on_keyboard(self, window: Window, key: int, scancode: int, codepoint: str, modifier: list[str]):
             # Activate search as soon as we start typing, no matter if we are focused on the search box or not.

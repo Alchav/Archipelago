@@ -1,24 +1,24 @@
-
 from worlds.LauncherComponents import Component, components, Type, launch_subprocess, icon_paths
 from settings import Group, Bool, UserFolderPath, _world_settings_name_cache
-from typing import Dict, Optional, List, Any, Union, ClassVar, NamedTuple
+from typing import Any, ClassVar, NamedTuple, Callable
 from worlds.AutoWorld import World
 from BaseClasses import CollectionState
 from collections import Counter
 
+
 def launch_client(*args):
-    import sys
+    from worlds.LauncherComponents import launch
     from .TrackerClient import launch as TCMain
-    if not sys.stdout or "--nogui" not in sys.argv:
-        launch_subprocess(TCMain, name="Universal Tracker client", args=args)
-    else:
-        TCMain(*args)
+    launch(TCMain, name="Universal Tracker client", args=args)
+
 
 class CurrentTrackerState(NamedTuple):
     all_items: Counter
     prog_items: Counter
-    events: List[str]
+    glitched_items: Counter
+    events: list[str]
     state: CollectionState
+
 
 class TrackerSettings(Group):
     class TrackerPlayersPath(UserFolderPath):
@@ -32,11 +32,15 @@ class TrackerSettings(Group):
 
     class HideExcluded(Bool):
         """Have the UT tab ignore excluded locations"""
+    
+    class UseSplitMapIcons(Bool):
+        """Use split icons rather then mixed for the UT map tab"""
 
     player_files_path: TrackerPlayersPath = TrackerPlayersPath("Players")
-    include_region_name: Union[RegionNameBool, bool] = False
-    include_location_name: Union[LocationNameBool, bool] = True
-    hide_excluded_locations: Union[HideExcluded, bool] = False
+    include_region_name: RegionNameBool | bool = False
+    include_location_name: LocationNameBool | bool = True
+    hide_excluded_locations: HideExcluded | bool = False
+    use_split_map_icons: UseSplitMapIcons | bool = True
 
 
 class TrackerWorld(World):
@@ -53,32 +57,70 @@ class TrackerWorld(World):
 class UTMapTabData:
     """The holding class for all the poptracker integration values"""
 
-    map_page_folder:str
+    map_page_folder: str
     """The name of the folder within the .apworld that contains the poptracker pack"""
 
-    map_page_maps:List[str]
+    map_page_maps: list[str]
     """The relative paths within the map_page_folder of the map.json"""
 
-    map_page_locations:List[str]
+    map_page_locations: list[str]
     """The relative paths within the map_page_folder of the location.json"""
 
-    def __init__(self, map_page_folder:str="", map_page_maps:Union[List[str],str]="", map_page_locations:Union[List[str],str]=""):
-        self.map_page_folder=map_page_folder
-        if isinstance(map_page_maps,str):
+    map_page_setting_key: str
+    """Data storage key used to determine which page should be loaded"""
+
+    map_page_index: Callable[[Any], int]
+    """Function that gets called to map the data storage string to the map index"""
+
+    external_pack_key: str
+    """Settings key to get the path reference of the poptracker pack on user's filesystem"""
+
+    poptracker_name_mapping: dict[str, int]
+    """Mapping from [poptracker name : datapackage location id] """
+
+    location_setting_key: str
+    """Data storage key used to determine where to place the location indicator"""
+
+    location_icon_coords: Callable[[int, Any], tuple[int,int,str]|None]
+    """Function used to convert between the map and the value in data storage into coords (or none to hide it) the return is [x, y, override path string]"""
+
+    def __init__(
+            self, player_id, team_id, map_page_folder: str = "", map_page_maps: list[str] | str = "",
+            map_page_locations: list[str] | str = "", map_page_setting_key: str | None = None,
+            map_page_index: Callable[[Any], int] | None = None, external_pack_key: str = "",
+            poptracker_name_mapping: dict[str, int] | None = None,
+            location_setting_key: str|None = None,
+            location_icon_coords: Callable[[int, Any], tuple[int,int]|None]= None, **kwargs):
+        self.map_page_folder = map_page_folder
+        if isinstance(map_page_maps, str):
             self.map_page_maps = [map_page_maps]
         else:
             self.map_page_maps = map_page_maps
-        if isinstance(map_page_locations,str):
+        if isinstance(map_page_locations, str):
             self.map_page_locations = [map_page_locations]
         else:
             self.map_page_locations = map_page_locations
-        pass
+        self.map_page_setting_key = map_page_setting_key
+        if isinstance(self.map_page_setting_key, str):
+            self.map_page_setting_key = self.map_page_setting_key.format(player=player_id, team=team_id)
+        if map_page_index and callable(map_page_index):
+            self.map_page_index = map_page_index
+        else:
+            self.map_page_index = lambda _: 0
+        if poptracker_name_mapping:
+            self.poptracker_name_mapping = poptracker_name_mapping
+        else:
+            self.poptracker_name_mapping = {}
+        self.external_pack_key = external_pack_key
+        self.location_setting_key = location_setting_key
+        if isinstance(self.location_setting_key, str):
+            self.location_setting_key = self.location_setting_key.format(player=player_id, team=team_id)
+        print(self.location_setting_key)
+        if location_icon_coords and callable(location_icon_coords):
+            self.location_icon_coords = location_icon_coords
+        else:
+            self.location_icon_coords = lambda _,__: None
 
-    def map_page_index(self, data: Dict[str, Any]) -> int:
-        """Function used to fetch the map index that should be loaded,
-          it will be passed in the data storage (eventually)
-          Right now it should just return 0"""
-        return 0
 
 icon_paths["ut_ico"] = f"ap:{__name__}/icon.png"
 components.append(Component("Universal Tracker", None, func=launch_client, component_type=Type.CLIENT, icon="ut_ico"))

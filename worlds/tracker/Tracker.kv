@@ -49,11 +49,46 @@
                 #close transformations in after canvas so all objects get transformed
                 PopMatrix:
 
-
+<UTTextColor>:
+    in_logic: "20ff20"
+    out_of_logic: "cf1010"
+    glitched: "ffff20"
+    collected: "3F3F3F"
+    collected_light: "FFFFFF"
+    in_logic_glitched: "afff20"
+    out_of_logic_glitched: "ef5500"
+    mixed_logic: "ff9f20"
+    hinted:"3040ff"
+    hinted_in_logic:"20ffff"
+    hinted_out_of_logic:"c010ff"
+    hinted_glitched:"ff9f20"
+    excluded: "CFCFCF"
 
 <ApAsyncImage>:
 
-<ApLocation>:
+<ApLocationIcon>:
+    id: location_icon
+    source: app.iconSource
+    size: (0,0)
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+    canvas.before:
+        PushMatrix:
+        Rotate:
+            origin: location_icon.center
+            angle: 180
+            axis: 1, 0, 0
+        Translate:
+            xy: (-location_icon.norm_image_size[0]/2,location_icon.norm_image_size[1]/2)
+    canvas.after:
+        #close transformations in after canvas so all objects get transformed
+        PopMatrix:
+
+<TrackerTooltip>:
+    pos_hint: {}
+
+<ApLocationMixed>:
+    text: "Server:"
+    size_hint_x: None
     size: (app.loc_size, app.loc_size)
     canvas:
         Color:
@@ -66,3 +101,34 @@
         Rectangle:
             pos: self.x-self.width/2, self.y-self.height/2
             size: self.size
+
+<ApLocationSplit>:
+    text: "Server:"
+    size_hint_x: None
+    size: (app.loc_size, app.loc_size)
+    color_2: (1, 0, 0)
+    color_4: (1, 1, 0)
+    color_1: (0, 1, 0)
+    color_3: (0, 0, 1)
+    canvas:
+        Color:
+            rgb: 0,0,0 
+        Rectangle:
+            pos: self.x - app.loc_border-self.width/2, self.y - app.loc_border-self.height/2
+            size: self.width + (app.loc_border * 2), self.height + (app.loc_border * 2)
+        Color:
+            rgb: self.color_1
+        Triangle:
+            points: self.x, self.y, self.x - (self.width / 2), self.y + (self.height /2), self.x + (self.width / 2), self.y + (self.height /2)
+        Color:
+            rgb: self.color_3
+        Triangle:
+            points: self.x, self.y, self.x + (self.width / 2), self.y - (self.height /2), self.x + (self.width / 2), self.y + (self.height /2)
+        Color:
+            rgb: self.color_2
+        Triangle:
+            points: self.x, self.y, self.x - (self.width / 2), self.y - (self.height /2), self.x + (self.width / 2), self.y - (self.height /2)
+        Color:
+            rgb: self.color_4
+        Triangle:
+            points: self.x, self.y, self.x - (self.width / 2), self.y - (self.height /2), self.x - (self.width / 2), self.y + (self.height /2)
