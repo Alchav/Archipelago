@@ -24,6 +24,8 @@ def can_create_heart_location(shp, c_or_p, loc_index):
     else:
         return True
 
+prices_ints = []
+
 location_data_table: Dict[str, MMRLocationData] = {
     "Link's Inventory (Kokiri Sword)": MMRLocationData(
         region="Clock Town",
@@ -188,34 +190,45 @@ location_data_table: Dict[str, MMRLocationData] = {
         address=0x3469420090017,
         can_create=lambda options: options.shopsanity.value != 0
     ),
-    "Bomb Bag Purchase": MMRLocationData(
+    "Clock Town Bomb Shop Item 3 (Stop Thief)": MMRLocationData(
         region="Clock Town",
         address=0x3469420090018,
         can_create=lambda options: options.shopsanity.value != 0
     ),
+    "Clock Town Bomb Shop Powder Keg Goron": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420024234,
+        can_create=lambda options: options.shopsanity.value != 0
+    ),
     "Curiosity Shop Blue Rupee Trade": MMRLocationData(
         region="Clock Town",
-        address=0x346942007C402
+        address=0x346942007C402,
+        can_create=lambda options: options.shopsanity.value == 2
     ),
     "Curiosity Shop Red Rupee Trade": MMRLocationData(
         region="Clock Town",
-        address=0x346942007C404
+        address=0x346942007C404,
+        can_create=lambda options: options.shopsanity.value == 2
     ),
     "Curiosity Shop Purple Rupee Trade": MMRLocationData(
         region="Clock Town",
-        address=0x346942007C405
+        address=0x346942007C405,
+        can_create=lambda options: options.shopsanity.value == 2
     ),
     "Curiosity Shop Gold Rupee Trade": MMRLocationData(
         region="Clock Town",
-        address=0x346942007C407
+        address=0x346942007C407,
+        can_create=lambda options: options.shopsanity.value == 2
     ),
     "Curiosity Shop Night 3 (Stop Thief)": MMRLocationData(
         region="Clock Town",
-        address=0x3469420090013
+        address=0x3469420090013,
+        can_create=lambda options: options.shopsanity.value != 0
     ),
     "Curiosity Shop Night 3 Thief Stolen Item": MMRLocationData(
         region="Clock Town",
-        address=0x3469420090015
+        address=0x3469420090015,
+        can_create=lambda options: options.shopsanity.value != 0
     ),
     "Laundry Pool Stray Fairy (Clock Town)": MMRLocationData(
         region="Clock Town",
@@ -281,9 +294,21 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Clock Town",
         address=0x34694200700B5
     ),
+    "East Clock Town Treasure Game Chest (Human)": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420061705
+    ),
+    "East Clock Town Treasure Game Chest (Deku)": MMRLocationData(
+        region="Clock Town",
+        address=0x346942006172A
+    ),
     "East Clock Town Treasure Game Chest (Goron)": MMRLocationData(
         region="Clock Town",
-        address=0x3469420061700
+        address=0x346942006170C
+    ),
+    "East Clock Town Treasure Game Chest (Zora)": MMRLocationData(
+        region="Clock Town",
+        address=0x3469420061704
     ),
     "Bomber's Hideout Chest": MMRLocationData(
         region="Clock Town",
@@ -412,23 +437,23 @@ location_data_table: Dict[str, MMRLocationData] = {
         address=0x34694200000B4
     ),
     "Tingle Woodfall Map Purchase": MMRLocationData(
-        region="Southern Swamp",
+        region="Clock Town",
         address=0x34694200000B5
     ),
     "Tingle Snowhead Map Purchase": MMRLocationData(
-        region="Twin Islands",
+        region="Clock Town",
         address=0x34694200000B6
     ),
     "Tingle Romani Ranch Map Purchase": MMRLocationData(
-        region="Milk Road",
+        region="Clock Town",
         address=0x34694200000B7
     ),
     "Tingle Great Bay Map Purchase": MMRLocationData(
-        region="Great Bay",
+        region="Clock Town",
         address=0x34694200000B8
     ),
     "Tingle Stone Tower Map Purchase": MMRLocationData(
-        region="Ikana Canyon",
+        region="Clock Town",
         address=0x34694200000B9
     ),
     "Termina Stump Chest": MMRLocationData(
@@ -859,6 +884,14 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Mountain Village",
         address=0x3469420000088
     ),
+    "Mountain Village Smithy Upgrade": MMRLocationData(
+        region="Mountain Village",
+        address=0x3469420000038
+    ),
+    "Mountain Village Smithy Gold Dust Upgrade": MMRLocationData(
+        region="Mountain Village",
+        address=0x3469420000039
+    ),
     "Don Gero Mask Frog Song HP": MMRLocationData(
         region="Mountain Village",
         address=0x3469420070022
@@ -882,6 +915,10 @@ location_data_table: Dict[str, MMRLocationData] = {
     "Twin Islands Hot Water Grotto Chest": MMRLocationData(
         region="Twin Islands",
         address=0x3469420060702
+    ),
+    "Goron Racetrack Prize": MMRLocationData(
+        region="Twin Islands",
+        address=0x346942000006A
     ),
     "Goron Village Lens Cave Rock Chest": MMRLocationData(
         region="Goron Village",
@@ -942,10 +979,14 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Goron Village",
         address=0x3469420054D1E
     ),
-    "Goron Village Deku Trade Freestanding HP (Spring)": MMRLocationData(
+    # "Goron Village Deku Trade Freestanding HP (Spring)": MMRLocationData(
+    #     region="Goron Village",
+    #     address=0x346942005481E,
+    #     can_create=lambda options: options.shopsanity.value == 2
+    # ),
+    "Powder Keg Goron Reward": MMRLocationData(
         region="Goron Village",
-        address=0x346942005481E,
-        can_create=lambda options: options.shopsanity.value == 2
+        address=0x3469420000034
     ),
     "Path to Snowhead Grotto Chest": MMRLocationData(
         region="Path to Snowhead",
@@ -1161,21 +1202,29 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Zora Cape",
         address=0x3469420060715
     ),
+    "Beaver Bros. Race Bottle Reward": MMRLocationData(
+        region="Zora Cape",
+        address=0x346942009018D
+    ),
+    "Beaver Bros. Race HP": MMRLocationData(
+        region="Zora Cape",
+        address=0x346942007018D
+    ),
     "Great Bay Great Fairy Reward": MMRLocationData(
         region="Zora Cape",
         address=0x3469420030003
     ),
-    "Zora Hall Shop 1": MMRLocationData(
+    "Zora Hall Shop Item 1": MMRLocationData(
         region="Zora Hall",
         address=0x346942009001B,
         can_create=lambda options: options.shopsanity.value != 0
     ),
-    "Zora Hall Shop 2": MMRLocationData(
+    "Zora Hall Shop Item 2": MMRLocationData(
         region="Zora Hall",
         address=0x346942009001C,
         can_create=lambda options: options.shopsanity.value != 0
     ),
-    "Zora Hall Shop 3": MMRLocationData(
+    "Zora Hall Shop Item 3": MMRLocationData(
         region="Zora Hall",
         address=0x346942009001D,
         can_create=lambda options: options.shopsanity.value != 0
@@ -1264,6 +1313,10 @@ location_data_table: Dict[str, MMRLocationData] = {
     "Pinnacle Rock Lower Eel Chest": MMRLocationData(
         region="Pinnacle Rock",
         address=0x3469420062501
+    ),
+    "Pinnacle Rock HP": MMRLocationData(
+        region="Pinnacle Rock",
+        address=0x3469420070205
     ),
     "Ocean Spider House Ramp Upper Token": MMRLocationData(
         region="Ocean Spider House",
@@ -1535,6 +1588,10 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Ikana Graveyard",
         address=0x34694200000A2
     ),
+    "Graveyard Day 2 Dampe Bats": MMRLocationData(
+        region="Ikana Graveyard",
+        address=0x34694200043CA
+    ),
     "Graveyard Day 2 Iron Knuckle Chest": MMRLocationData(
         region="Ikana Graveyard",
         address=0x3469420060C00
@@ -1576,6 +1633,10 @@ location_data_table: Dict[str, MMRLocationData] = {
         address=0x346942009015D,
         can_create=lambda options: options.scrubsanity.value
     ),
+    "Ikana Canyon Zora Scrub Trade": MMRLocationData(
+        region="Ikana Canyon",
+        address=0x3469420001307
+    ),
     "Ikana Canyon Zora Trade Freestanding HP": MMRLocationData(
         region="Ikana Canyon",
         address=0x346942005131E
@@ -1613,10 +1674,10 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Ikana Castle",
         address=0x3469420051D0A
     ),
-    # ~ "Ikana Castle King Song" MMRLocationData(
-        # ~ region="Ikana Castle",
-        # ~ address=0x34694200xxxx
-    # ~ ),
+    "Ikana Castle King Song": MMRLocationData(
+        region="Ikana Castle",
+        address=0x3469420040064
+    ),
     # ~ "Stone Tower Temple 1F Bridge Room Underwater Switch Chest Glitched": MMRLocationData(
         # ~ region="Stone Tower Temple",
         # ~ address=0x346942006160E
@@ -1697,7 +1758,7 @@ location_data_table: Dict[str, MMRLocationData] = {
         region="Stone Tower Temple",
         address=0x346942006160C
     ),
-    "Stone Tower Temple Inverted Entrance Room Sun Face": MMRLocationData(
+    "Stone Tower Temple Inverted Entrance Room Sun Face Chest": MMRLocationData(
         region="Stone Tower Temple (Inverted)",
         address=0x3469420061810
     ),
@@ -1736,6 +1797,10 @@ location_data_table: Dict[str, MMRLocationData] = {
     "Stone Tower Temple Inverted Twinmold's Remains": MMRLocationData(
         region="Stone Tower Temple (Inverted)",
         address=0x3469420000058
+    ),
+    "Oath to Order": MMRLocationData(
+        region="Clock Town", # there isn't really a set location for this
+        address=0x3469420040065
     ),
     "Moon Deku Trial HP": MMRLocationData(
         region="The Moon",

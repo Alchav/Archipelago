@@ -8,12 +8,29 @@ from Options import Choice, Option, DefaultOnToggle, Toggle, Range, OptionList, 
 class LogicDifficulty(Choice):
     """Set the logic difficulty used when generating."""
     display_name = "Logic Difficulty"
-    option_easy = 0
+    # ~ option_easy = 0
     option_normal = 1
     #option_obscure_glitchless = 2
     #option_glitched = 3
     option_no_logic = 4
-    default = 0
+    # ~ alias_baby = option_easy
+    default = 1
+
+
+class MajoraRemainsRequired(Range):
+    """Set the amount of boss remains required to fight Majora."""
+    display_name = "Majora Boss Remains Required"
+    range_start = 0
+    range_end = 4
+    default = 4
+
+
+class MoonRemainsRequired(Range):
+    """Set the amount of boss remains required to reach the Moon after playing Oath to Order."""
+    display_name = "Moon Boss Remains Required"
+    range_start = 0
+    range_end = 4
+    default = 4
 
 
 class CAMC(DefaultOnToggle):
@@ -52,6 +69,7 @@ class StartingHeartsAreContainersOrPieces(Choice):
     option_pieces = 1
     default = 0
 
+
 class ShuffleRegionalMaps(Choice):
     """Choose whether to shuffle every regional map from Tingle."""
     display_name = "Shuffle Regional Maps"
@@ -74,8 +92,14 @@ class ShuffleBossRemains(Choice):
     default = 0
 
 
-class ShuffleSwamphouseReward(Toggle):
-    """Choose whether to shuffle the Mask of Truth given at the end of the Southern Swamphouse."""
+class BossWarpsWithRemains(DefaultOnToggle):
+    """Choose whether to retain the vanilla ability to warp the boss of dungeons by having their vanilla remains.
+    Getting the remains check for a dungeon will open its warp regardless."""
+    display_name = "Warp to Bosses Using Remains"
+
+
+class ShuffleSpiderHouseReward(Toggle):
+    """Choose whether to shuffle the Mask of Truth given at the end of the Southern Spider House and the Wallet Upgrade at the end of the Ocean Spider House."""
     display_name = "Shuffle Swamphouse Reward"
 
 
@@ -98,17 +122,35 @@ class Shopsanity(Choice):
     
     vanilla: Shop items are not shuffled.
     enabled: Every item in shops are shuffled, with alternate shops sharing the same items.
-    advanced: Every single item in shops are shuffled, including the alternate Night Trading Post and Spring Goron Shop. Also adds an extra Heart Piece to Spring Goron Village."""
+    advanced: Every single item in shops are shuffled, including the alternate Night Trading Post and Spring Goron Shop."""
     display_name = "Shopsanity"
     option_vanilla = 0
     option_enabled = 1
     option_advanced = 2
     default = 0
 
-
 class Scrubsanity(Toggle):
     """Choose whether to shuffle Business Scrub purchases."""
     display_name = "Shuffle Business Scrub Purchases"
+
+class ShopPrices(Choice):
+    """Choose how expensive shop items are.
+    These only apply to the main shops of the game.
+    This has no effect if shopsanity is disabled.
+    
+    vanilla: Shop items have their normal prices.
+    free: All shop items are free and cost 0 Rupees.
+    cheap: Shop items vary in price but can all be purchased with the starting wallet.
+    expensive: Shop items vary in price but may require the Adult's Wallet. No shop items will require the Giant's Wallet.
+    offensive: Shop items vary in price but may require the Adult's Wallet and sometimes even the Giant's Wallet."""
+    display_name = "Shop Prices"
+    option_vanilla = 0
+    option_free = 1
+    option_cheap = 2
+    option_expensive = 3
+    option_offensive = 4
+    default = 0
+
 
 class Cowsanity(Toggle):
     """Choose whether to shuffle Cows."""
@@ -118,6 +160,11 @@ class Cowsanity(Toggle):
 class ShuffleGreatFairyRewards(Toggle):
     """Choose whether to shuffle Great Fairy rewards."""
     display_name = "Shuffle Great Fairy Rewards"
+
+
+class Keysanity(Toggle):
+    """Choose whether Small Keys are shuffled into the pool."""
+    display_name = "Keysanity"
 
 
 class Fairysanity(Toggle):
@@ -145,6 +192,14 @@ class ReceiveFilledWallets(DefaultOnToggle):
     display_name = "Receive Filled Wallets"
 
 
+class MagicIsATrap(Toggle):
+    """Set whether to preserve the vanilla bug where you are able to use certain magic items and abilities without magic.
+    Once you receive magic, those items and abilities will begin to reduce magic normally.
+    
+    (No logical implications)"""
+    display_name = "Magic Is a Trap"
+
+
 class DamageMultiplier(Choice):
     """Adjust the amount of damage taken."""
     display_name = "Damage Multiplier"
@@ -164,7 +219,8 @@ class DeathBehavior(Choice):
     display_name = "Death Behavior"
     option_vanilla = 0
     option_fast = 1
-    option_moon_crash = 2
+    option_instant = 2
+    option_moon_crash = 3
     default = 0
 
 
@@ -178,6 +234,8 @@ class LinkTunicColor(OptionList):
 class MMROptions(PerGameCommonOptions):
     start_inventory_from_pool: StartInventoryPool
     logic_difficulty: LogicDifficulty
+    majora_remains_required: MajoraRemainsRequired
+    moon_remains_required: MoonRemainsRequired
     camc: CAMC
     swordless: Swordless
     shieldless: Shieldless
@@ -186,17 +244,21 @@ class MMROptions(PerGameCommonOptions):
     starting_hearts_are_containers_or_pieces: StartingHeartsAreContainersOrPieces
     shuffle_regional_maps: ShuffleRegionalMaps
     shuffle_boss_remains: ShuffleBossRemains
-    shuffle_swamphouse_reward: ShuffleSwamphouseReward
+    remains_allow_boss_warps: BossWarpsWithRemains
+    shuffle_spiderhouse_reward: ShuffleSpiderHouseReward
     skullsanity: Skullsanity
     shopsanity: Shopsanity
     scrubsanity: Scrubsanity
+    shop_prices: ShopPrices
     cowsanity: Cowsanity
     shuffle_great_fairy_rewards: ShuffleGreatFairyRewards
+    keysanity: Keysanity
     fairysanity: Fairysanity
     start_with_consumables: StartWithConsumables
     permanent_chateau_romani: PermanentChateauRomani
     start_with_inverted_time: StartWithInvertedTime
     receive_filled_wallets: ReceiveFilledWallets
+    magic_is_a_trap: MagicIsATrap
     damage_multiplier: DamageMultiplier
     death_behavior: DeathBehavior
     death_link: DeathLink

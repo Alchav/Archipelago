@@ -36,6 +36,10 @@ item_data_table: Dict[str, MMRItemData] = {
         type=ItemClassification.useful,
         can_create=lambda options: options.shuffle_great_fairy_rewards.value
     ),
+    "Bomber's Notebook": MMRItemData(
+        code=0x3469420000050,
+        type=ItemClassification.useful
+    ),
     "Moon's Tear": MMRItemData(
         code=0x3469420000096,
         type=ItemClassification.progression
@@ -88,7 +92,7 @@ item_data_table: Dict[str, MMRItemData] = {
     "Progressive Wallet": MMRItemData(
         code=0x3469420000008,
         type=ItemClassification.progression,
-        num_exist=2
+        num_exist=1
     ),
     "Sonata of Awakening": MMRItemData(
         code=0x3469420040061,
@@ -208,7 +212,7 @@ item_data_table: Dict[str, MMRItemData] = {
     "Mask of Truth": MMRItemData(
         code=0x346942000008A,
         type=ItemClassification.progression,
-        can_create=lambda options: options.shuffle_swamphouse_reward.value
+        can_create=lambda options: options.shuffle_spiderhouse_reward.value
     ),
     "Stone Mask": MMRItemData(
         code=0x346942000008B,
@@ -245,6 +249,11 @@ item_data_table: Dict[str, MMRItemData] = {
     "Priority Mail": MMRItemData(
         code=0x34694200000A1,
         type=ItemClassification.progression
+    ),
+    "Bottle": MMRItemData(
+        code=0x346942000005A,
+        type=ItemClassification.progression,
+        num_exist=2
     ),
     "Bottle of Milk": MMRItemData(
         code=0x3469420000060,
@@ -316,32 +325,32 @@ item_data_table: Dict[str, MMRItemData] = {
     "Clock Town Map": MMRItemData(
         code=0x34694200000B4,
         type=ItemClassification.useful,
-        can_create=lambda options: options.shuffle_regional_maps.value != 1
+        can_create=lambda options: options.shuffle_regional_maps.value == 2
     ),
     "Woodfall Map": MMRItemData(
         code=0x34694200000B5,
         type=ItemClassification.useful,
-        can_create=lambda options: options.shuffle_regional_maps.value != 1
+        can_create=lambda options: options.shuffle_regional_maps.value == 2
     ),
     "Snowhead Map": MMRItemData(
         code=0x34694200000B6,
         type=ItemClassification.useful,
-        can_create=lambda options: options.shuffle_regional_maps.value != 1
+        can_create=lambda options: options.shuffle_regional_maps.value == 2
     ),
     "Romani Ranch Map": MMRItemData(
         code=0x34694200000B7,
         type=ItemClassification.useful,
-        can_create=lambda options: options.shuffle_regional_maps.value != 1
+        can_create=lambda options: options.shuffle_regional_maps.value == 2
     ),
     "Great Bay Map": MMRItemData(
         code=0x34694200000B8,
         type=ItemClassification.useful,
-        can_create=lambda options: options.shuffle_regional_maps.value != 1
+        can_create=lambda options: options.shuffle_regional_maps.value == 2
     ),
     "Stone Tower Map": MMRItemData(
         code=0x34694200000B9,
         type=ItemClassification.useful,
-        can_create=lambda options: options.shuffle_regional_maps.value != 1
+        can_create=lambda options: options.shuffle_regional_maps.value == 2
     ),
     "Stray Fairy (Woodfall)": MMRItemData(
         code=0x3469420010000,
@@ -370,22 +379,26 @@ item_data_table: Dict[str, MMRItemData] = {
     "Small Key (Woodfall)": MMRItemData(
         code=0x3469420090078,
         type=ItemClassification.progression,
-        num_exist=1
+        num_exist=1,
+        can_create=lambda options: options.keysanity.value
     ),
     "Small Key (Snowhead)": MMRItemData(
         code=0x3469420090178,
         type=ItemClassification.progression,
-        num_exist=3
+        num_exist=3,
+        can_create=lambda options: options.keysanity.value
     ),
     "Small Key (Great Bay)": MMRItemData(
         code=0x3469420090278,
         type=ItemClassification.progression,
-        num_exist=1
+        num_exist=1,
+        can_create=lambda options: options.keysanity.value
     ),
     "Small Key (Stone Tower)": MMRItemData(
         code=0x3469420090378,
         type=ItemClassification.progression,
-        num_exist=4
+        num_exist=4,
+        can_create=lambda options: options.keysanity.value
     ),
     "Dungeon Map (Woodfall)": MMRItemData(
         code=0x3469420090076,
@@ -465,36 +478,45 @@ item_data_table: Dict[str, MMRItemData] = {
         type=ItemClassification.filler,
         num_exist=1
     ),
+    "Progressive Bombchu Bag": MMRItemData(
+        code=0x3469420000054,
+        type=ItemClassification.progression,
+        num_exist=3
+    ),
     "Bombchu (1)": MMRItemData(
         code=0x3469420000036,
         type=ItemClassification.progression,
-        num_exist=4
+        num_exist=4,
+        can_create=lambda options: False
     ),
     "Bombchu (5)": MMRItemData(
         code=0x346942000003A,
         type=ItemClassification.progression,
-        num_exist=2
+        num_exist=2,
+        can_create=lambda options: False
     ),
     "Bombchu (10)": MMRItemData(
         code=0x346942000001A,
         type=ItemClassification.progression,
-        num_exist=2
+        num_exist=2,
+        can_create=lambda options: False
     ),
     "Blue Rupee": MMRItemData(
         code=0x3469420000002,
         type=ItemClassification.filler,
-        num_exist=6
+        num_exist=14
+        # ~ num_exist=6
     ),
     "Red Rupee": MMRItemData(
         code=0x3469420000004,
         type=ItemClassification.filler,
-        num_exist=46
+        num_exist=45
         # ~ num_exist=29
     ),
     "Purple Rupee": MMRItemData(
         code=0x3469420000005,
         type=ItemClassification.filler,
-        num_exist=9
+        num_exist=11
     ),
     "Silver Rupee": MMRItemData(
         code=0x3469420000006,
@@ -503,8 +525,8 @@ item_data_table: Dict[str, MMRItemData] = {
     ),
     "Gold Rupee": MMRItemData(
         code=0x3469420000007,
-        type=ItemClassification.filler,
-        num_exist=1
+        type=ItemClassification.useful,
+        num_exist=2
     ),
     "Victory": MMRItemData(
         type=ItemClassification.progression,
