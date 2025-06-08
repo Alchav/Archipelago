@@ -233,6 +233,14 @@ class WitnessPlayerItems:
         """
         Returns the ids of all door items that exist in the pool.
         """
+        output: List[int] = []
+
+        for item_name, item_data in self.item_data.items():
+            if not isinstance(item_data.definition, DoorItemDefinition):
+                continue
+
+            output += [int(hex_string, 16) for hex_string in item_data.definition.panel_id_hexes
+                       if hex_string not in self._logic.FORBIDDEN_DOORS]
 
         return [
             cast_not_none(item_data.ap_code) for item_data in self.item_data.values()
