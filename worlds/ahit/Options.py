@@ -81,6 +81,8 @@ def adjust_options(world: "HatInTimeWorld"):
 
 
 def get_total_time_pieces(world: "HatInTimeWorld") -> int:
+
+    return 5
     count: int = 40
     if world.is_dlc1():
         count += 6

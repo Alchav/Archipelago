@@ -24,6 +24,8 @@ def create_itempool(world: "HatInTimeWorld") -> List[Item]:
     for name in item_table.keys():
         if name == "Yarn":
             continue
+        if name == "Badge Pin":
+            continue
 
         if not item_dlc_enabled(world, name):
             continue
@@ -73,7 +75,7 @@ def create_itempool(world: "HatInTimeWorld") -> List[Item]:
 
         itempool += create_multiple_items(world, name, item_frequencies.get(name, 1), item_type)
 
-    itempool += create_junk_items(world, get_total_locations(world) - len(itempool))
+    # itempool += create_junk_items(world, get_total_locations(world) - len(itempool))
     return itempool
 
 
