@@ -305,9 +305,9 @@ class JigsawWorld(World):
             
     def create_items(self):
         self.multiworld.itempool += [self.create_item(name) for name in self.pool_pieces]
-        if self.options.placement_of_fillers == PlacementOfFillers.option_global:
-            for i in range(self.filler_items_in_pool):
-                self.multiworld.itempool.append(self.create_item(self.filler_encouragements[i]))
+        # if self.options.placement_of_fillers == PlacementOfFillers.option_global:
+        #     for i in range(self.filler_items_in_pool):
+        #         self.multiworld.itempool.append(self.create_item(self.filler_encouragements[i]))
         if self.npieces >= 10:
             if self.options.fake_pieces.value == 1:
                 self.multiworld.itempool.append(self.create_item("1 Fake Puzzle Piece"))
@@ -401,15 +401,15 @@ class JigsawWorld(World):
             # loc.nmerges is the number of merges for that location. So "Merge 4 times" has nmerges equal to 4
             loc.access_rule = lambda state, count=loc.nmerges: state.has("pcs", self.player, self.pieces_needed_per_merge[count])
         
-        ###
-        if self.options.placement_of_fillers == PlacementOfFillers.option_local_only and self.options.enable_forced_local_filler_items.value:
-            for i, loc in enumerate(filler_locations):
-                self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
-        ###
-        if self.options.placement_of_fillers == PlacementOfFillers.option_global:
-            self.filler_items_in_pool = int(self.options.percentage_of_fillers_globally.value / 100 * len(filler_locations))
-            for i, loc in enumerate(filler_locations[int(self.filler_items_in_pool):]):
-                self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
+        # ###
+        # if self.options.placement_of_fillers == PlacementOfFillers.option_local_only and self.options.enable_forced_local_filler_items.value:
+        #     for i, loc in enumerate(filler_locations):
+        #         self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
+        # ###
+        # if self.options.placement_of_fillers == PlacementOfFillers.option_global:
+        #     self.filler_items_in_pool = int(self.options.percentage_of_fillers_globally.value / 100 * len(filler_locations))
+        #     for i, loc in enumerate(filler_locations[int(self.filler_items_in_pool):]):
+        #         self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
 
         
         # Change the victory location to an event and place the Victory item there.
