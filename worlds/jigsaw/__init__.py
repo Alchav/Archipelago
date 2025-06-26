@@ -392,7 +392,7 @@ class JigsawWorld(World):
                 for i in filler_locations
             ]
             # Generate a list of filler_locations random samples from the list encouragements
-            self.filler_encouragements = self.random.choices(encouragements, k=len(filler_locations))
+            self.filler_encouragements = [] #self.random.choices(encouragements, k=len(filler_locations))
                 
         board.locations = all_locations
 

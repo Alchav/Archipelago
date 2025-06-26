@@ -29,6 +29,11 @@ class SlowReleaseContext(TrackerGameContext):
                 goal_location = random.choice(self.locations_available)
                 logger.info(f"Going for {self.location_names.lookup_in_game(goal_location)}")
                 await asyncio.sleep(self.time_per)
+                try:
+                    if self.can_beat_game and not self.finished_game:
+                        await self.send_msgs([{"cmd": "StatusUpdate", "status": 30}])
+                except AttributeError:
+                    pass
                 await self.check_locations([goal_location])
                 await asyncio.sleep(0.1)
             else:

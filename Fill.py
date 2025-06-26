@@ -719,7 +719,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
     player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
-    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players) or not location.item) and not location.locked]
+    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
     hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=1)
     for loc, player in zip(swap_out_locations, hint_point_items):
         new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
