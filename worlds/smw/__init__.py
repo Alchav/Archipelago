@@ -201,7 +201,7 @@ class SMWWorld(World):
 
         junk_pool = [self.create_item(self.random.choice(junk_weights)) for _ in range(junk_count)]
         
-        itempool += junk_pool
+        # itempool += junk_pool
 
         boss_location_names = [LocationName.yoshis_island_koopaling, LocationName.donut_plains_koopaling, LocationName.vanilla_dome_koopaling,
                                LocationName.twin_bridges_koopaling, LocationName.forest_koopaling, LocationName.chocolate_koopaling,
