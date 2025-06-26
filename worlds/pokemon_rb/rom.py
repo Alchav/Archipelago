@@ -417,9 +417,7 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
                     encode_text("<LINE>Gee, I have the<CONT>worst caffeine<CONT>headache though."
                                 "<PARA>Oh wait there,<LINE>the road's closed.<DONE>"))
 
-        write_bytes(rom_addresses["Tea_Key_Item_A"], 0x28)  #  jr .z
-        write_bytes(rom_addresses["Tea_Key_Item_B"], 0x28)  #  jr .z
-        write_bytes(rom_addresses["Tea_Key_Item_C"], 0x28)  #  jr .z
+        write_bytes(rom_addresses["Tea_Key_Item"], 0x28)  #  jr .z
 
     write_bytes(rom_addresses["Fossils_Needed_For_Second_Item"], world.options.second_fossil_check_condition.value)
 
@@ -499,7 +497,7 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
     write_bytes(rom_addresses["Text_Badges_Needed"],
                 encode_text(str(world.options.elite_four_badges_condition.value))[0])
     write_bytes(rom_addresses["Text_Magikarp_Salesman"],
-                encode_text(" ".join(world.multiworld.get_location("Route 4 Pokemon Center - Pokemon For Sale", world.player).item.name.upper().split()[1:])))
+                encode_text(world.multiworld.get_location("Route 4 Pokemon Center - Pokemon For Sale", world.player).item.name.upper()))
 
     if world.options.badges_needed_for_hm_moves.value == 0:
         for hm_move in poke_data.hm_moves:
@@ -580,12 +578,12 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
                       "Awakening", "Burn Heal", "Ice Heal", "Paralyze Heal", "Full Heal", "Repel", "Super Repel",
                       "Max Repel", "Escape Rope"]
         shop_data = [0xFE, len(inventory)]
-        shop_data += [item_table[item].id - 172000000 for item in inventory]
+        shop_data += [item_table[item].id for item in inventory]
         shop_data.append(0xFF)
         for shop in range(1, 11):
             write_bytes(rom_addresses[f"Shop{shop}"], shop_data)
     if world.options.stonesanity:
-        write_bytes(rom_addresses["Shop_Stones"], [0xFE, 1, item_table["Poke Doll"].id - 172000000, 0xFF])
+        write_bytes(rom_addresses["Shop_Stones"], [0xFE, 1, item_table["Poke Doll"].id, 0xFF])
 
     price = str(world.options.master_ball_price.value).zfill(6)
     price = [int(price[:2], 16), int(price[2:4], 16), int(price[4:], 16)]
@@ -594,7 +592,9 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
     from collections import Counter
     start_inventory = Counter(item.code for item in reversed(world.multiworld.precollected_items[world.player]))
     for item, value in start_inventory.items():
-        write_bytes(rom_addresses["Start_Inventory"] + item - 172000000, min(value, 255))
+        if item > 255:
+            item -= 256
+        write_bytes(rom_addresses["Start_Inventory"] + item, min(value, 255))
 
     set_mon_palettes(world, patch)
 
@@ -671,6 +671,11 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
 
     write_quizzes(world, patch)
 
+    if "WTW" in world.options.debug_options.value:
+        write_bytes(rom_addresses["Debug_WTW"], 0x18)
+    if "SelectInvFull" in world.options.debug_options.value:
+        write_bytes(rom_addresses["Debug_SelectInvFull"], [0, 0])
+
     for location in world.multiworld.get_locations(world.player):
         if location.party_data:
             for party in location.party_data:
@@ -709,7 +714,7 @@ def generate_output(world: "PokemonRedBlueWorld", output_directory: str):
                     elif " ".join(location.item.name.split()[1:]) in poke_data.pokemon_data.keys():
                         write_bytes(address, poke_data.pokemon_data[" ".join(location.item.name.split()[1:])]["id"])
                     else:
-                        item_id = world.item_name_to_id[location.item.name] - 172000000
+                        item_id = world.item_name_to_id[location.item.name]
                         if item_id > 255:
                             item_id -= 256
                         write_bytes(address, item_id)
