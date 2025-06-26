@@ -690,7 +690,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
-    compress_spheres(multiworld, 6)
+    # compress_spheres(multiworld, 6)
 
     defaultlocations = []
     excludedlocations = []
@@ -717,6 +717,15 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     remaining_fill(multiworld, defaultlocations, restitempool,
                    move_unplaceable_to_start_inventory=panic_method=="start_inventory")
 
+    auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
+    player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
+    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players) or not location.item) and not location.locked]
+    hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=1)
+    for loc, player in zip(swap_out_locations, hint_point_items):
+        new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
+        loc.item = new_item
+        new_item.location = loc
+
     unplaced = restitempool
     unfilled = defaultlocations
 
@@ -742,6 +751,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         game = i.game
         if game == "Generic":
             game = multiworld.worlds[i.player].game
+        if (not i.advancement) and "Auto" in multiworld.player_name[i.player]:
+            return 0
         if i.classification == ItemClassification.trap and game != "Super Mario Land 2":
             return 0
         if i.classification == ItemClassification.progression and game == "Stardew Valley":

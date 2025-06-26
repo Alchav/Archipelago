@@ -245,6 +245,7 @@ class TrackerGameContext(CommonContext):
             super().__init__(server_address, password)
         self.items_handling = ITEMS_HANDLING
         self.locations_available = []
+        self.can_beat_game = False
         self.glitched_locations = []
         self.datapackage = []
         self.multiworld: MultiWorld = None
@@ -1163,6 +1164,11 @@ def updateTracker(ctx: TrackerGameContext) -> CurrentTrackerState:
     events = [location.item.name for location in state.advancements if location.player == ctx.player_id]
 
     ctx.locations_available = locations
+
+    # if ctx.multiworld.can_beat_game(state, ctx.player_id):
+    if ctx.multiworld.completion_condition[ctx.player_id](state):
+        ctx.can_beat_game = True
+
     glitches_item_name = getattr(ctx.multiworld.worlds[ctx.player_id],"glitches_item_name","")
     if glitches_item_name:
         try:

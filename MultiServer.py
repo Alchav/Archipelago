@@ -1878,14 +1878,14 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
 def get_client_points(ctx: Context, client: Client) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
-    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}) * ctx.get_hint_cost(client.slot) * 0.472)
+    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}))# * ctx.get_hint_cost(client.slot) * 0.472)
     return points + extra_hints
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
-    extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 1000}) * ctx.get_hint_cost(slot) * 0.5)
+    extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 1000}))# * ctx.get_hint_cost(slot) * 0.5)
     return points + extra_hints
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):

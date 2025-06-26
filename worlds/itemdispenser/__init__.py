@@ -65,7 +65,7 @@ class ItemDispenser(World):
 
             for player in sphere_slots:
                 active_games.add(player)
-                extra_items_to_place.append(self.multiworld.worlds[1].create_item(f"{self.multiworld.player_name[player]} Hint Points"))
+                extra_items_to_place.append(self.multiworld.worlds[1].create_item(f"{self.multiworld.player_name[player]} Hint Point"))
 
             self.random.shuffle(extra_items_to_place)
 
