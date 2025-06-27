@@ -974,7 +974,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #             location.item = item
 
     beaten_game_spheres = {}
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
 
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
     for i, sphere in enumerate(spheres):
