@@ -348,7 +348,7 @@ def generate_itempool(world):
     world.treasure_hunt_total = treasure_hunt_total
 
     if multiworld.worlds[player].options.master_keys:
-        items_to_add = 60 if multiworld.small_key_shuffle[player] == "universal" else 48
+        items_to_add = 60 if multiworld.worlds[player].options.small_key_shuffle == "universal" else 48
         # add replacement items for the keys removed from the dungeon item pool
         multiworld.itempool += [item_factory(GetBeemizerItem(multiworld, player, world.get_filler_item_name()), world)
                                 for _ in range(items_to_add)]
