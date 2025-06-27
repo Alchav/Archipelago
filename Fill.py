@@ -401,6 +401,7 @@ def remaining_fill(multiworld: MultiWorld,
             for item in unplaced_items:
                 logging.debug(f"Moved {item} to start_inventory to prevent fill failure.")
                 multiworld.push_precollected(item)
+            unplaced_items = []
             #     last_batch.append(multiworld.worlds[item.player].create_filler())
             # remaining_fill(multiworld, locations, last_batch, name + " Start Inventory Retry")
         else:
@@ -690,7 +691,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
-    # compress_spheres(multiworld, 6)
+    compress_spheres(multiworld, 20)
 
     defaultlocations = []
     excludedlocations = []
@@ -717,14 +718,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     remaining_fill(multiworld, defaultlocations, restitempool,
                    move_unplaceable_to_start_inventory=panic_method=="start_inventory")
 
-    auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
-    player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
-    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
-    hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=1)
-    for loc, player in zip(swap_out_locations, hint_point_items):
-        new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
-        loc.item = new_item
-        new_item.location = loc
+
 
     unplaced = restitempool
     unfilled = defaultlocations
@@ -732,11 +726,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     if unplaced:
         logging.warning(
             f"Unplaced items({len(unplaced)}): {unplaced} - Unfilled Locations({len(unfilled)}): {unfilled}")
+        logging.warning("Unplaced items")
         items_counter = Counter(location.item.player for location in multiworld.get_filled_locations())
         locations_counter = Counter(location.player for location in multiworld.get_locations())
         items_counter.update(item.player for item in unplaced)
         logging.info_data = {"items": items_counter, "locations": locations_counter}
         logging.info(f"Per-Player counts: {logging.info_data})")
+
 
     # for location in multiworld.get_locations():
     #     old_rule = location.access_rule
@@ -904,8 +900,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
                 if not filler_sphere:
                     breakpoint()
+        multiworld.random.shuffle(filler_sphere)
+        filler_sphere.sort(key=lambda i: "Auto" not in multiworld.player_name[i.player])
         # for player, sphere_check in starting_spheres.items():
-        location = multiworld.random.choice(filler_sphere)
+        # location = multiworld.random.choice(filler_sphere)
+        location = filler_sphere[0]
         # multiworld.push_precollected(location.item)
         # if starting_sphere not in multiworld.worlds[2].displaced_items:
         #     multiworld.worlds[2].displaced_items[starting_sphere] = []
@@ -972,6 +971,15 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #         for item, location in zip(items, locations):
     #             logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
     #             location.item = item
+
+    auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
+    player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
+    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
+    hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=len(swap_out_locations))
+    for loc, player in zip(swap_out_locations, hint_point_items):
+        new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
+        loc.item = new_item
+        new_item.location = loc
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
