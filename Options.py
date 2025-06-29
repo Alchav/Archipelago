@@ -828,20 +828,20 @@ class VerifyKeys(metaclass=FreezeValidKeys):
             for loc_name in self.value:
                 new_value |= world.location_name_groups.get(loc_name, {loc_name})
             self.value = new_value
-        if self.verify_item_name:
-            for item_name in self.value:
-                if item_name not in world.item_names:
-                    picks = get_fuzzy_results(item_name, world.item_names, limit=1)
-                    raise Exception(f"Item '{item_name}' from option '{self}' "
-                                    f"is not a valid item name from '{world.game}'. "
-                                    f"Did you mean '{picks[0][0]}' ({picks[0][1]}% sure)")
-        elif self.verify_location_name:
-            for location_name in self.value:
-                if location_name not in world.location_names:
-                    picks = get_fuzzy_results(location_name, world.location_names, limit=1)
-                    raise Exception(f"Location '{location_name}' from option '{self}' "
-                                    f"is not a valid location name from '{world.game}'. "
-                                    f"Did you mean '{picks[0][0]}' ({picks[0][1]}% sure)")
+        # if self.verify_item_name:
+        #     for item_name in self.value:
+        #         if item_name not in world.item_names:
+        #             picks = get_fuzzy_results(item_name, world.item_names, limit=1)
+        #             raise Exception(f"Item '{item_name}' from option '{self}' "
+        #                             f"is not a valid item name from '{world.game}'. "
+        #                             f"Did you mean '{picks[0][0]}' ({picks[0][1]}% sure)")
+        # elif self.verify_location_name:
+        #     for location_name in self.value:
+        #         if location_name not in world.location_names:
+        #             picks = get_fuzzy_results(location_name, world.location_names, limit=1)
+        #             raise Exception(f"Location '{location_name}' from option '{self}' "
+        #                             f"is not a valid location name from '{world.game}'. "
+        #                             f"Did you mean '{picks[0][0]}' ({picks[0][1]}% sure)")
 
     def __iter__(self) -> typing.Iterator[typing.Any]:
         return self.value.__iter__()
