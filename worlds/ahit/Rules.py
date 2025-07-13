@@ -183,6 +183,7 @@ def set_rules(world: "HatInTimeWorld"):
 
     for i, chapter in enumerate(chapter_list):
         world.chapter_timepiece_costs[chapter] = i + 1
+        continue
         min_range: int = lowest_cost + (cost_increment * i)
         if min_range >= highest_cost:
             min_range = highest_cost-1

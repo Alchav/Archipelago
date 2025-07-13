@@ -635,6 +635,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         lock_later.append(location)
 
     progitempool.sort(key=lambda i: i.classification != ItemClassification.progression_skip_balancing)
+
+    prioritylocations.sort(key=lambda loc: loc.can_reach(multiworld.state))
+    defaultlocations.sort(key=lambda loc: loc.can_reach(multiworld.state))
+
     if prioritylocations:
         # "priority fill"
         fill_restrictive(multiworld, multiworld.state, prioritylocations, progitempool,
@@ -691,6 +695,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
+    # longify_spheres(multiworld)
     compress_spheres(multiworld, 20)
 
     defaultlocations = []
@@ -1568,6 +1573,19 @@ def distribute_planned_blocks(multiworld: MultiWorld, plando_blocks: list[Plando
         except Exception as e:
             raise Exception(
                 f"Error running plando for player {player} ({multiworld.player_name[player]})") from e
+
+
+# def longify_spheres(multiworld):
+#     spheres = get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False)
+#     for sphere in spheres:
+#         sphere = sorted(sphere)
+#         sphere = [loc for loc in sphere if loc.advancement]
+#         multiworld.random.shuffle(sphere)
+#         for location in sphere:
+#             item = location.item
+#             location.item = None
+#             new_spheres = get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False)
+
 
 
 def compress_spheres(multiworld, max_sphere):

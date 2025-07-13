@@ -173,6 +173,10 @@ class TerrariaWorld(World):
             items.append("Reward: Coins")
             item_count += 1
 
+        for item in random_rewards:
+            # self.multiworld.push_precollected(self.create_item(item))
+            items.append(item)
+
         self.ter_items = items
         self.ter_locations = locations
 
@@ -195,12 +199,15 @@ class TerrariaWorld(World):
     def create_item(self, item: str) -> TerrariaItem:
         if item in progression:
             classification = ItemClassification.progression
+        elif "Reward" in item:
+            classification = ItemClassification.useful
         else:
             classification = ItemClassification.filler
 
         return TerrariaItem(item, classification, item_name_to_id[item], self.player)
 
     def create_items(self) -> None:
+        items = []
         for item in self.ter_items:
             if (rule_index := rule_indices.get(item)) is not None:
                 rule = rules[rule_index]
@@ -210,8 +217,9 @@ class TerrariaWorld(World):
                     continue
             else:
                 name = item
+            items.append(self.create_item(name))
 
-            self.multiworld.itempool.append(self.create_item(name))
+
 
         locked_items = {}
 
@@ -231,6 +239,16 @@ class TerrariaWorld(World):
             locked_items[location] = self.create_item(item)
         for location, item in locked_items.items():
             self.multiworld.get_location(location, self.player).place_locked_item(item)
+
+        num_locs = len(self.multiworld.get_unfilled_locations(self.player))
+        if len(items) > num_locs:
+            for item in reversed(items):
+                if item.filler:
+                    self.multiworld.push_precollected(item)
+                    items.remove(item)
+                    if len(items) == num_locs:
+                        break
+        self.multiworld.itempool += items
 
     def check_condition(self, state, condition: Condition) -> bool:
         if condition.type == COND_ITEM:

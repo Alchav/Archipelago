@@ -114,7 +114,7 @@ class AHITContext(CommonContext):
 
                 # Only put our player info in there as we actually need it
                 json["players"] = [me]
-            if DEBUG:
+            if True:
                 print(json)
             self.connected_msg = encode([json])
             if self.awaiting_info:
