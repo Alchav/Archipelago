@@ -754,6 +754,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             game = multiworld.worlds[i.player].game
         if (not i.advancement) and "Auto" in multiworld.player_name[i.player]:
             return 0
+        if i.classification == ItemClassification.useful and game == "Terraria":
+            return 3
         if i.classification == ItemClassification.trap and game != "Super Mario Land 2":
             return 0
         if i.classification == ItemClassification.progression and game == "Stardew Valley":

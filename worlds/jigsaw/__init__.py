@@ -293,7 +293,7 @@ class JigsawWorld(World):
                 while b == a:
                     b = self.random.randint(0, len(self.pool_pieces) - 1)
                 if self.pool_pieces[a] + self.pool_pieces[b] > 2:
-                    n = self.random.randint(1, self.pool_pieces[a] + self.pool_pieces[b])
+                    n = self.random.randint(1, self.pool_pieces[a] + self.pool_pieces[b] - 1)
                     self.pool_pieces[a], self.pool_pieces[b] = n, self.pool_pieces[a] + self.pool_pieces[b] - n
 
         self.pool_pieces = [f"{p} Puzzle Piece{'s' if p > 1 else ''}" for p in self.pool_pieces]

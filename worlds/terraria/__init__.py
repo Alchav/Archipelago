@@ -57,6 +57,14 @@ class TerrariaWorld(World):
     item_name_to_id = item_name_to_id
     location_name_to_id = location_name_to_id
 
+    location_name_groups = {}
+    for rule in rules:
+        if rule.name in location_name_to_id:
+            for flag in rule.flags:
+                if flag not in location_name_groups:
+                    location_name_groups[flag] = []
+                location_name_groups[flag].append(rule.name)
+
     calamity = False
     getfixedboi = False
 
