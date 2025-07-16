@@ -285,8 +285,19 @@ class JigsawWorld(World):
         
         self.pieces_per_location = max((pieces_left + max_locs - 1) // max_locs, self.options.minimum_number_of_pieces_per_real_item.value)     
         self.number_of_locations = (pieces_left + self.pieces_per_location - 1) // self.pieces_per_location
-        self.pool_pieces = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
-                                
+
+        self.pool_pieces = [self.pieces_per_location] * self.number_of_locations
+        for _ in range(3):
+            for a in range(len(self.pool_pieces)):
+                b = self.random.randint(0, len(self.pool_pieces) - 1)
+                while b == a:
+                    b = self.random.randint(0, len(self.pool_pieces) - 1)
+                if self.pool_pieces[a] + self.pool_pieces[b] > 2:
+                    n = self.random.randint(1, self.pool_pieces[a] + self.pool_pieces[b])
+                    self.pool_pieces[a], self.pool_pieces[b] = n, self.pool_pieces[a] + self.pool_pieces[b] - n
+
+        self.pool_pieces = [f"{p} Puzzle Piece{'s' if p > 1 else ''}" for p in self.pool_pieces]
+
         pieces_from_start = len(self.precollected_pieces)
         
         while pieces_from_start > 0:
