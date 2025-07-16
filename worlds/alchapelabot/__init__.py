@@ -48,7 +48,7 @@ class AlchapelaBotWorld(World):
             self.multiworld.push_item(location, self.multiworld.worlds[player].create_filler())
 
     def create_item(self, name):
-        return UnlockItem(name, ItemClassification.filler if name == "Nothing" else ItemClassification.progression if "Unlock" in name else ItemClassification.useful, self.item_name_to_id[name], self.player)
+        return UnlockItem(name, ItemClassification.progression if "Unlock" in name else ItemClassification.filler, self.item_name_to_id[name], self.player)
 
     def get_filler_item_name(self) -> str:
         return "Nothing"

@@ -696,7 +696,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
     # longify_spheres(multiworld)
-    compress_spheres(multiworld, 20)
+    compress_spheres(multiworld, 10)
 
     defaultlocations = []
     excludedlocations = []
@@ -980,7 +980,35 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
     player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
     swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
-    hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=len(swap_out_locations))
+    # hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=len(swap_out_locations))
+
+    # Convert weights to exact counts
+    counts = {p: round(w / sum(player_weights.values()) * len(swap_out_locations)) for p, w in player_weights.items()}
+
+    # Adjust for rounding errors
+    while sum(counts.values()) != len(swap_out_locations):
+        diff = len(swap_out_locations) - sum(counts.values())
+        key = max(counts, key=lambda p: (player_weights[p] / sum(player_weights.values())) - (
+                    counts[p] / len(swap_out_locations))) if diff > 0 else min(counts, key=lambda p: (counts[p] / len(
+            swap_out_locations)) - (player_weights[p] / sum(player_weights.values())))
+        counts[key] += 1 if diff > 0 else -1
+
+    # Build list
+    hint_point_items = [p for p, c in counts.items() for _ in range(c)]
+    multiworld.random.shuffle(hint_point_items)
+
+    multiworld.hint_ratio = sum(player_weights.values()) / len(hint_point_items)
+
+    for player in player_weights:
+        player_locs = [loc for loc in swap_out_locations if loc.player == player]
+        while player_locs and player in hint_point_items:
+            hint_point_items.remove(player)
+            loc = player_locs.pop()
+            swap_out_locations.remove(loc)
+            new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
+            loc.item = new_item
+            new_item.location = loc
+
     for loc, player in zip(swap_out_locations, hint_point_items):
         new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
         loc.item = new_item
