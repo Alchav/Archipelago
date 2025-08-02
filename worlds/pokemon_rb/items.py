@@ -8,7 +8,6 @@ class ItemData:
         self.classification = classification
         self.id = item_id
 
-
 item_table = {
     "Master Ball": ItemData(1, ItemClassification.useful, ["Consumables", "Poke Balls"]),
     "Ultra Ball": ItemData(2, ItemClassification.filler, ["Consumables", "Poke Balls"]),
