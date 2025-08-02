@@ -249,6 +249,7 @@ class TerrariaWorld(World):
             self.multiworld.get_location(location, self.player).place_locked_item(item)
 
         num_locs = len(self.multiworld.get_unfilled_locations(self.player))
+        num_locs = 0
         if len(items) > num_locs:
             for item in reversed(items):
                 if item.filler:
