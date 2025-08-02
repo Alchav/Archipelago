@@ -399,8 +399,8 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
 
             # retrieve exceptions via .result() if they occurred.
             for i, future in enumerate(concurrent.futures.as_completed(output_file_futures), start=1):
-                if i % 10 == 0 or i == len(output_file_futures):
-                    logger.info(f'Generating output files ({i}/{len(output_file_futures)}).')
+                # if i % 10 == 0 or i == len(output_file_futures):
+                logger.info(f'Generating output files ({i}/{len(output_file_futures)}).')
                 future.result()
 
         if args.spoiler > 1:

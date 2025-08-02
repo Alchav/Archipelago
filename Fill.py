@@ -696,7 +696,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
     # longify_spheres(multiworld)
-    compress_spheres(multiworld, 10)
+    compress_spheres(multiworld, 15)
 
     defaultlocations = []
     excludedlocations = []
@@ -869,10 +869,17 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     highest_sphere += 1
             player_names = [player for player in player_names if player[0] not in starting_spheres]
 
+    for player in playable_games:
+        starting_spheres[player[0]] = 0
+
     for group in multiworld.groups.values():
-        earliest_start = min([start for player, start in starting_spheres.items() if player in group])
-        for player in group:
+        earliest_start = min([start for player, start in starting_spheres.items() if player in group["players"]])
+        for player in group["players"]:
+            if earliest_start == 0 != starting_spheres[player]:
+                multiworld.push_precollected(multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
+
             starting_spheres[player] = earliest_start
+
 
     print("adding rule")
     for player, world in multiworld.worlds.items():
@@ -894,7 +901,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # add_order = [player for player in multiworld.player_ids if multiworld.player_name[player] not in multiworld.worlds[1].options.start_games]
     # add_order.sort(key=lambda p: starting_spheres[p])
-    starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items()]
+    starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items() if starting_sphere > 0]
     starting_spheres_list.sort(key=lambda i: i[1])
     for player, starting_sphere in starting_spheres_list:
         spheres = [s for s in get_item_spheres(multiworld, return_unreachables=False)]
@@ -904,7 +911,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # for i, sphere in enumerate(spheres, start=1):
         sphere = spheres[starting_sphere - 1]
 
-        filler_sphere = sorted([location for location in sphere if location.address and not location.item])
+        # filler_sphere = sorted([location for location in sphere if location.address and not location.item])
+        filler_sphere = None
         if not filler_sphere:
             filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
             if not filler_sphere:
@@ -1645,7 +1653,7 @@ def compress_spheres(multiworld, max_sphere):
         print(f"compress sphere loop {i}. Number of spheres: {len(spheres)}")
         for n, sphere in enumerate(spheres, start=1):
             active_games = active_games_x.copy()
-            if n >= max_sphere:
+            if n >= max_sphere - 1:
                 sphere = sorted(sphere)
                 for location in sphere:
                     if not active_games:
