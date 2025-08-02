@@ -869,6 +869,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     highest_sphere += 1
             player_names = [player for player in player_names if player[0] not in starting_spheres]
 
+    for group in multiworld.groups.values():
+        earliest_start = min([start for player, start in starting_spheres.items() if player in group])
+        for player in group:
+            starting_spheres[player] = earliest_start
 
     print("adding rule")
     for player, world in multiworld.worlds.items():
@@ -979,10 +983,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #             logging.info(f"loc: {location.name} - swapping {item.name} into {location.name}")
     #             location.item = item
 
+    weighted = False
+
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
-    player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
+    if weighted:
+        player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
+    else:
+        player_weights = {pid: 1 for pid in multiworld.player_ids if len([loc for loc in multiworld.get_locations(pid) if loc.address])}
     swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
-    # hint_point_items = multiworld.random.choices(list(player_weights.keys()), weights=list(player_weights.values()), k=len(swap_out_locations))
 
     # Convert weights to exact counts
     counts = {p: round(w / sum(player_weights.values()) * len(swap_out_locations)) for p, w in player_weights.items()}
