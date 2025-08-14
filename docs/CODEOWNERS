@@ -48,12 +48,6 @@
 # Civilization VI
 /worlds/civ6/ @hesto2
 
-# Clique
-/worlds/clique/ @ThePhar
-
-# Crystalis
-/worlds/crystalis/ @Ars_Ignis
-
 # Dark Souls III
 /worlds/dark_souls_3/ @Marechal-L @nex3
 
@@ -68,9 +62,6 @@
 
 # DOOM II
 /worlds/doom_ii/ @Daivuk @KScl
-
-# EarthBound
-/worlds/earthbound/ @PinkSwitch
 
 # Factorio
 /worlds/factorio/ @Berserker66
@@ -142,11 +133,11 @@
 # Old School Runescape
 /worlds/osrs @digiholic
 
-# Old School Runescape
-/worlds/osrs @digiholic
-
 # Overcooked! 2
 /worlds/overcooked2/ @toasterparty
+
+# Paint
+/worlds/paint/ @MarioManTAW
 
 # Pokemon Emerald
 /worlds/pokemon_emerald/ @Zunawe
@@ -156,9 +147,6 @@
 
 # Raft
 /worlds/raft/ @SunnyBat
-
-# Rogue Legacy
-/worlds/rogue_legacy/ @ThePhar
 
 # Risk of Rain 2
 /worlds/ror2/ @kindasneaki
@@ -199,12 +187,6 @@
 # Secret of Evermore
 /worlds/soe/ @black-sliver
 
-# Slay the Spire
-/worlds/spire/ @KonoTyran
-
-# Spelunker
-/worlds/spelunker/ @PinkSwitch
-
 # Stardew Valley
 /worlds/stardew_valley/ @agilbert1412
 
@@ -218,7 +200,7 @@
 /worlds/timespinner/ @Jarno458
 
 # The Legend of Zelda (1)
-/worlds/tloz/ @Rosalie-A @t3hf1gm3nt
+/worlds/tloz/ @Rosalie-A
 
 # TUNIC
 /worlds/tunic/ @silent-destroyer @ScipioWright
@@ -249,10 +231,6 @@
 
 # Zillion
 /worlds/zillion/ @beauxq
-
-# Zork Grand Inquisitor
-/worlds/zork_grand_inquisitor/ @nbrochu
-
 
 ## Active Unmaintained Worlds
 

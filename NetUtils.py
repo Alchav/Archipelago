@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 import typing
 import enum
 import warnings
@@ -83,7 +84,7 @@ class NetworkSlot(typing.NamedTuple):
     name: str
     game: str
     type: SlotType
-    group_members: typing.Union[typing.List[int], typing.Tuple] = ()  # only populated if type == group
+    group_members: Sequence[int] = ()  # only populated if type == group
 
 
 class NetworkItem(typing.NamedTuple):
@@ -104,6 +105,27 @@ def _scan_for_TypedTuples(obj: typing.Any) -> typing.Any:
     if isinstance(obj, dict):
         return {key: _scan_for_TypedTuples(value) for key, value in obj.items()}
     return obj
+
+
+_base_types = str | int | bool | float | None | tuple["_base_types", ...] | dict["_base_types", "base_types"]
+
+
+def convert_to_base_types(obj: typing.Any) -> _base_types:
+    if isinstance(obj, (tuple, list, set, frozenset)):
+        return tuple(convert_to_base_types(o) for o in obj)
+    elif isinstance(obj, dict):
+        return {convert_to_base_types(key): convert_to_base_types(value) for key, value in obj.items()}
+    elif obj is None or type(obj) in (str, int, float, bool):
+        return obj
+    # unwrap simple types to their base, such as StrEnum
+    elif isinstance(obj, str):
+        return str(obj)
+    elif isinstance(obj, int):
+        return int(obj)
+    elif isinstance(obj, float):
+        return float(obj)
+    else:
+        raise Exception(f"Cannot handle {type(obj)}")
 
 
 _encode = JSONEncoder(
@@ -450,26 +472,61 @@ class _LocationStore(dict, typing.MutableMapping[int, typing.Dict[int, typing.Tu
                        location_id not in checked])  # and "Unreachable" not in hint_data[slot][location_id]])
 
 
+class MinimumVersions(typing.TypedDict):
+    server: tuple[int, int, int]
+    clients: dict[int, tuple[int, int, int]]
+
+
+class GamesPackage(typing.TypedDict, total=False):
+    item_name_groups: dict[str, list[str]]
+    item_name_to_id: dict[str, int]
+    location_name_groups: dict[str, list[str]]
+    location_name_to_id: dict[str, int]
+    checksum: str
+
+
+class DataPackage(typing.TypedDict):
+    games: dict[str, GamesPackage]
+
+
+class MultiData(typing.TypedDict):
+    slot_data: dict[int, Mapping[str, typing.Any]]
+    slot_info: dict[int, NetworkSlot]
+    connect_names: dict[str, tuple[int, int]]
+    locations: dict[int, dict[int, tuple[int, int, int]]]
+    checks_in_area: dict[int, dict[str, int | list[int]]]
+    server_options: dict[str, object]
+    er_hint_data: dict[int, dict[int, str]]
+    precollected_items: dict[int, list[int]]
+    precollected_hints: dict[int, set[Hint]]
+    version: tuple[int, int, int]
+    tags: list[str]
+    minimum_versions: MinimumVersions
+    seed_name: str
+    spheres: list[dict[int, set[int]]]
+    datapackage: dict[str, GamesPackage]
+    race_mode: int
+
+
+#if typing.TYPE_CHECKING:  # type-check with pure python implementation until we have a typing stub
 LocationStore = _LocationStore
-# if typing.TYPE_CHECKING:  # type-check with pure python implementation until we have a typing stub
-#     LocationStore = _LocationStore
 # else:
-#     # try:
-#     #     # from _speedups import LocationStore
-#     #     # import _speedups
-#     #     import os.path
-#     #     if os.path.isfile("_speedups.pyx") and os.path.getctime(_speedups.__file__) < os.path.getctime("_speedups.pyx"):
-#     #         warnings.warn(f"{_speedups.__file__} outdated! "
-#     #                       f"Please rebuild with `cythonize -b -i _speedups.pyx` or delete it!")
-#     # except ImportError:
-#     try:
-#         import pyximport
-#         pyximport.install()
-#     except ImportError:
-#         pyximport = None
 #     try:
 #         from _speedups import LocationStore
+#         import _speedups
+#         import os.path
+#         if os.path.isfile("_speedups.pyx") and os.path.getctime(_speedups.__file__) < os.path.getctime("_speedups.pyx"):
+#             warnings.warn(f"{_speedups.__file__} outdated! "
+#                           f"Please rebuild with `cythonize -b -i _speedups.pyx` or delete it!")
 #     except ImportError:
-#         warnings.warn("_speedups not available. Falling back to pure python LocationStore. "
-#                       "Install a matching C++ compiler for your platform to compile _speedups.")
-#         LocationStore = _LocationStore
+#         try:
+#             import pyximport
+#             pyximport.install()
+#         except ImportError:
+#             pyximport = None
+#         try:
+#             from _speedups import LocationStore
+#         except ImportError:
+#             warnings.warn("_speedups not available. Falling back to pure python LocationStore. "
+#                           "Install a matching C++ compiler for your platform to compile _speedups.")
+#             LocationStore = _LocationStore

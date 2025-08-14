@@ -2,7 +2,7 @@
 from typing import cast
 
 from .. import WitnessWorld
-from ..test import WitnessMultiworldTestBase, WitnessTestBase
+from ..test.bases import WitnessMultiworldTestBase, WitnessTestBase
 
 
 class TestIndividualDoors(WitnessTestBase):
