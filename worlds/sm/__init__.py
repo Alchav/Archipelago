@@ -151,8 +151,8 @@ class SMWorld(World):
                     itemPool.remove(item)
 
         missingPool = 109 - len(itemPool)
-        for i in range(missingPool):
-            itemPool.append(ItemManager.Items['Nothing'])
+        # for i in range(missingPool):
+        #     itemPool.append(ItemManager.Items['Nothing'])
         
         # Generate item pool
         pool = []

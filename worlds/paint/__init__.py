@@ -79,8 +79,8 @@ class PaintWorld(World):
                 items_to_create += [self.random.choice(deathlink_traps)]
             else:
                 items_to_create += [self.random.choice(traps)]
-        while len(items_to_create) < to_fill:
-            items_to_create += ["Additional Palette Color"]
+        # while len(items_to_create) < to_fill:
+        #     items_to_create += ["Additional Palette Color"]
         self.multiworld.itempool += [self.create_item(item) for item in items_to_create]
 
     def create_regions(self) -> None:

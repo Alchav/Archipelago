@@ -364,7 +364,7 @@ def remaining_fill(multiworld: MultiWorld,
         spot_to_fill: typing.Optional[Location] = None
 
         for i, location in enumerate(locations):
-            if (location.player == item_to_place.player or (item_to_place.player in multiworld.groups and location.player in multiworld.groups[location.player]['players'])) and location_can_fill_item(location, item_to_place):
+            if (location.player == item_to_place.player or (item_to_place.player in multiworld.groups and location.player in multiworld.groups[item_to_place.player]['players'])) and location_can_fill_item(location, item_to_place):
                 # popping by index is faster than removing by content,
                 spot_to_fill = locations.pop(i)
                 # skipping a scan for the element
@@ -679,6 +679,19 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     defaultlocations.sort(key=lambda loc: loc.can_reach(multiworld.state))
 
     if prioritylocations:
+        for player in multiworld.player_ids:
+            pcount = len([loc for loc in prioritylocations if loc.player == player])
+            icount = len([i for i in progitempool if i.player == player])
+            if icount < pcount:
+                for _ in range(pcount - icount):
+                    for location in prioritylocations:
+                        if location.player == player:
+                            logging.info(f"Removing {location} from prioritylocations")
+                            prioritylocations.remove(location)
+                            defaultlocations.append(location)
+                            break
+
+
         regular_progression = []
         deprioritized_progression = []
         for item in progitempool:
@@ -691,7 +704,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # try without deprioritized items in the mix at all. This means they need to be collected into state first.
         priority_fill_state = sweep_from_pool(multiworld.state, deprioritized_progression)
         fill_restrictive(multiworld, priority_fill_state, prioritylocations, regular_progression,
-                         single_player_placement=single_player, swap=False, on_place=mark_for_locking,
+                         single_player_placement=True, swap=False, on_place=mark_for_locking,
                          name="Priority", one_item_per_player=True, allow_partial=True)
 
         if prioritylocations and regular_progression:
@@ -699,7 +712,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             # deprioritized items are still not in the mix, so they need to be collected into state first.
             priority_retry_state = sweep_from_pool(multiworld.state, deprioritized_progression)
             fill_restrictive(multiworld, priority_retry_state, prioritylocations, regular_progression,
-                             single_player_placement=single_player, swap=False, on_place=mark_for_locking,
+                             single_player_placement=True, swap=False, on_place=mark_for_locking,
                              name="Priority Retry", one_item_per_player=False, allow_partial=True)
 
         if prioritylocations and deprioritized_progression:
@@ -708,7 +721,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             # Since we're leaving out the remaining regular progression now, we need to collect it into state first.
             priority_retry_2_state = sweep_from_pool(multiworld.state, regular_progression)
             fill_restrictive(multiworld, priority_retry_2_state, prioritylocations, deprioritized_progression,
-                             single_player_placement=single_player, swap=False, on_place=mark_for_locking,
+                             single_player_placement=True, swap=False, on_place=mark_for_locking,
                              name="Priority Retry 2", one_item_per_player=True, allow_partial=True)
 
         if prioritylocations and deprioritized_progression:
@@ -716,7 +729,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             # Since we're leaving out the remaining regular progression now, we need to collect it into state first.
             priority_retry_3_state = sweep_from_pool(multiworld.state, regular_progression)
             fill_restrictive(multiworld, priority_retry_3_state, prioritylocations, deprioritized_progression,
-                             single_player_placement=single_player, swap=False, on_place=mark_for_locking,
+                             single_player_placement=True, swap=False, on_place=mark_for_locking,
                              name="Priority Retry 3", one_item_per_player=False)
 
         # restore original order of progitempool
