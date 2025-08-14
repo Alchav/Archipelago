@@ -336,7 +336,7 @@ def remaining_fill(multiworld: MultiWorld,
         spot_to_fill: typing.Optional[Location] = None
 
         for i, location in enumerate(locations):
-            if (location.player == item_to_place.player or (location.player in multiworld.groups and item_to_place.player in multiworld.groups[location.player]['players'])) and location_can_fill_item(location, item_to_place):
+            if (location.player == item_to_place.player or (item_to_place.player in multiworld.groups and item_to_place.player in multiworld.groups[location.player]['players'])) and location_can_fill_item(location, item_to_place):
                 # popping by index is faster than removing by content,
                 spot_to_fill = locations.pop(i)
                 # skipping a scan for the element

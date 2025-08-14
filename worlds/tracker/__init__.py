@@ -1,24 +1,47 @@
 from worlds.LauncherComponents import Component, components, Type, launch_subprocess, icon_paths
 from settings import Group, Bool, UserFolderPath, _world_settings_name_cache
-from typing import Any, ClassVar, NamedTuple, Callable
+from typing import Any, ClassVar, NamedTuple, Callable,Optional
 from worlds.AutoWorld import World
-from BaseClasses import CollectionState
+from BaseClasses import CollectionState,Entrance
 from collections import Counter
-
+from enum import Enum
 
 def launch_client(*args):
+    from Utils import messagebox, version_tuple
+    if version_tuple < (0, 6, 2):
+        from CommonClient import gui_enabled
+        if gui_enabled:
+            messagebox("Failure", "Running incompatible version of AP; either downgrade UT or upgrade AP", True)
+        else:
+            print("Running incompatible version of AP; either downgrade UT or upgrade AP")
+        return
+
     from worlds.LauncherComponents import launch
     from .TrackerClient import launch as TCMain
     launch(TCMain, name="Universal Tracker client", args=args)
 
+UT_VERSION = "v0.2.13"
 
 class CurrentTrackerState(NamedTuple):
     all_items: Counter
     prog_items: Counter
-    glitched_items: Counter
+    glitched_locations: list[str]
     events: list[str]
-    state: CollectionState
+    in_logic_locations: list[str]
+    in_logic_regions: list[str]
+    unconnected_entrances: list[Entrance]
+    readable_locations: list[str]
+    hinted_locations: list
+    state: Optional[CollectionState]
 
+    @staticmethod
+    def init_empty_state() -> "CurrentTrackerState":
+        return CurrentTrackerState(Counter(),Counter(),[],[],[],[],[],[],[],None)
+
+class DeferredEntranceMode(Enum):
+    forced = "on"
+    default = "default"
+    disabled = "off"
 
 class TrackerSettings(Group):
     class TrackerPlayersPath(UserFolderPath):

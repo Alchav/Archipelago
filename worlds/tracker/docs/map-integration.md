@@ -114,7 +114,7 @@ poptracker_name_mapping: dict[str,int] = {
     "Secret Gathering Place/Holy Cross Chest" : 123456,
 }
 ```
-![Example of poptracker with group and location name](image.png)
+![Example of poptracker with group and location name](image.jpg)
 
 Locations will first check if they match a key in the mapping before the literal name matching allowing for some locations to be mapped, while others are just simple matching
 

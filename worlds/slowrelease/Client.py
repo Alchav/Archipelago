@@ -21,19 +21,20 @@ class SlowReleaseContext(TrackerGameContext):
     async def autoplayer(self):
         print("Autoplayer")
         inbk = False
-        while not self.player_id:
+        while not self.tracker_core.player_id:
             await asyncio.sleep(1)
         while True:
-            if len(self.locations_available) > 0:
+            try:
+                if self.tracker_core.can_beat_game and not self.finished_game:
+                    await self.send_msgs([{"cmd": "StatusUpdate", "status": 30}])
+            except AttributeError:
+                pass
+            if len(self.tracker_core.locations_available) > 0:
                 inbk = False
-                goal_location = random.choice(self.locations_available)
+                goal_location = random.choice(self.tracker_core.locations_available)
                 logger.info(f"Going for {self.location_names.lookup_in_game(goal_location)}")
                 await asyncio.sleep(self.time_per)
-                try:
-                    if self.can_beat_game and not self.finished_game:
-                        await self.send_msgs([{"cmd": "StatusUpdate", "status": 30}])
-                except AttributeError:
-                    pass
+
                 await self.check_locations([goal_location])
                 await asyncio.sleep(0.1)
             else:
