@@ -678,6 +678,7 @@ class Context:
 
     def get_hint_cost(self, slot):
         if self.hint_cost:
+            return self.hint_cost
             return max(1, int(self.hint_cost * 0.01 * len(self.locations[slot])))
         return 0
 
@@ -1806,8 +1807,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     hints.append(hint)
                     can_pay -= 1
 
-                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location] and hint.finding_player != 2:
+                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
                         self.ctx.hints_used[self.client.team, self.client.slot] += 1
+                        self.output(f"Spent hint points. Hints used: {self.ctx.hints_used[self.client.team, self.client.slot]}")
 
 
                 self.ctx.notify_hints(self.client.team, hints)
@@ -1869,14 +1871,14 @@ def get_client_points(ctx: Context, client: Client) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
     extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}))# * ctx.get_hint_cost(client.slot) * 0.472)
-    return extra_hints
+    return extra_hints - (ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
     extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 1000}))# * ctx.get_hint_cost(slot) * 0.5)
-    return extra_hints
+    return extra_hints - (ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):
     try:

@@ -38,7 +38,10 @@ class AlchapelaBotWorld(World):
             self.item_id_to_name[player + 1000] = f"{player_name} Hint Point"
             self.options.start_hints.value.add(f"Unlock {player_name}")
         for starting_game in self.options.start_games.value:
-            self.multiworld.push_precollected(self.create_item(f"Unlock {starting_game}"))
+            try:
+                self.multiworld.push_precollected(self.create_item(f"Unlock {starting_game}"))
+            except Exception:
+                pass
         self.item_name_groups["Everything"] = set(self.item_name_to_id.keys())
 
     def post_fill(self) -> None:

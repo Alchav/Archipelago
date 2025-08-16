@@ -320,9 +320,11 @@ class TrackerGameContext(CommonContext):
         if hasattr(self, "tracker_hinted_locs_label"):
             self.tracker_hinted_locs_label.text = f"Hinted: [color={get_ut_color('hinted_in_logic')}]{len(updateTracker_ret.hinted_locations)}[/color]"
 
-        if self.tracker_core.multiworld.completion_condition[self.tracker_core.player_id](updateTracker_ret.state):
-            self.tracker_core.can_beat_game = True
-
+        try:
+            if self.tracker_core.multiworld.completion_condition[self.tracker_core.player_id](updateTracker_ret.state):
+                self.tracker_core.can_beat_game = True
+        except Exception as e:
+            pass
         return updateTracker_ret
 
     def load_pack(self):
