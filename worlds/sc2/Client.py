@@ -1405,6 +1405,8 @@ def initialize_blank_mission_dict(location_table: typing.Dict[SC2Campaign, typin
 
 
 def check_game_install_path() -> bool:
+    os.environ["SC2PATH"] = "/home/alchav/Games/battlenet/drive_c/Program Files (x86)/StarCraft II/StarCraft II.exe"
+    return
     # First thing: go to the default location for ExecuteInfo.
     # An exception for Windows is included because it's very difficult to find ~\Documents if the user moved it.
     if is_windows:
@@ -1420,7 +1422,7 @@ def check_game_install_path() -> bool:
         einfo = str(documentspath / Path("StarCraft II\\ExecuteInfo.txt"))
     else:
         einfo = str(bot.paths.get_home() / Path(bot.paths.USERPATH[bot.paths.PF]))
-
+    #einfo = "/home/alchav/Documents/StarCraft II/ExecuteInfo.txt"
     # Check if the file exists.
     if os.path.isfile(einfo):
 

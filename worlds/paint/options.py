@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Range, PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Visibility
+from Options import Range, PerGameCommonOptions, StartInventoryPool, Toggle, Choice, Visibility, ItemsAccessibility
 
 
 class LogicPercent(Range):
@@ -95,6 +95,7 @@ class DeathLink(Toggle):
 
 @dataclass
 class PaintOptions(PerGameCommonOptions):
+    accessibility: ItemsAccessibility
     logic_percent: LogicPercent
     goal_percent: GoalPercent
     half_percent_checks: HalfPercentChecks

@@ -113,10 +113,13 @@ class PaintWorld(World):
 
 
 def location_exists_with_options(world: PaintWorld, location: int):
-    l = location % 198600
-    return l <= world.options.logic_percent * 4 and (l % 4 == 0 or
-                                                    (l > world.options.half_percent_checks * 4 and l % 2 == 0) or
-                                                    l > world.options.quarter_percent_checks * 4)
+    if world.options.accessibility == "full":
+        l = location % 198600
+        return l <= world.options.logic_percent * 4 and (l % 4 == 0 or
+                                                        (l > world.options.half_percent_checks * 4 and l % 2 == 0) or
+                                                        l > world.options.quarter_percent_checks * 4)
+    else:
+        return True
 
 
 class PaintState(LogicMixin):

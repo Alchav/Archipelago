@@ -1,7 +1,6 @@
 from pathlib import Path
 from loguru import logger
 
-
 def is_submodule(path):
     if path.is_file():
         return path.suffix == ".py" and path.stem != "__init__"

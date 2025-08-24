@@ -41,7 +41,7 @@ class CoinSanityRange(NamedRange):
     In the worst case, it is 1500+ checks for a single coin"""
     internal_name = "coinbundlequantity"
     display_name = "Coin Bundle Quantity"
-    range_start = 1
+    range_start = -1
     range_end = 100
     default = 20
     special_range_names = {
