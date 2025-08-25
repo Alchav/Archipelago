@@ -176,9 +176,12 @@ class FF4FEWorld(World):
                 item_pool.remove("None")
         if self.options.NoEarnedCharacters:
             for location in locations.earned_character_locations:
-                character_locations.remove(location)
-                self.get_location(location).place_locked_item(self.create_item("None"))
-                item_pool.remove("None")
+                try:
+                    character_locations.remove(location)
+                    self.get_location(location).place_locked_item(self.create_item("None"))
+                    item_pool.remove("None")
+                except ValueError:
+                    pass
 
         restricted_character_allow_locations = sorted(set(character_locations) - set(locations.restricted_character_locations))
         restricted_character_forbid_locations = sorted(set(character_locations) - set(restricted_character_allow_locations))
