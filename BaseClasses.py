@@ -1865,7 +1865,7 @@ class Spoiler:
             outfile.write(
                 'Archipelago Version %s  -  Seed: %s\n\n' % (
                     Utils.__version__, self.multiworld.seed))
-            outfile.write(f"Hint Ratio:                      {self.multiworld.hint_ratio}")
+            outfile.write(f"Hint Ratio:                      {self.multiworld.hint_ratio}\n")
             outfile.write('Filling Algorithm:               %s\n' % self.multiworld.algorithm)
             outfile.write('Players:                         %d\n' % self.multiworld.players)
             outfile.write(f'Plando Options:                  {self.multiworld.plando_options}\n')
@@ -1901,7 +1901,7 @@ class Spoiler:
 
             locations = [(str(location), str(location.item) if location.item is not None else "Nothing", er_hint_data[location.player][location.address] if isinstance(location.address, int) and location.address in er_hint_data[location.player] else "")
                          for location in self.multiworld.get_locations() if location.show_in_spoiler]
-            locations.sort(key=lambda loc: loc[2].split("/")[0].split(" ")[-1].zfill(2) if loc[2].split("/")[0].split(" ")[-1].isdigit() else "00" if loc[2].split(" ")[-1] == "Unreachable" else "x")
+            locations.sort(key=lambda loc: loc[2])
             outfile.write('\n\nLocations:\n\n')
             outfile.write('\n'.join(
                 ['%s: %s at %s' % (location, item, hint) for location, item, hint in locations]))

@@ -1639,6 +1639,13 @@ class Removed(FreeText):
         super().__init__(value)
 
 
+class HintCount(Range):
+    """How many hints total the game will get"""
+    range_start = 0
+    range_end = 30
+    default = 10
+
+
 class TokenPercentage(Range):
     """Percentage chance for each of this game's locations to be swapped out for an Item Dispenser Token"""
     range_start = 0
@@ -1648,6 +1655,7 @@ class TokenPercentage(Range):
 
 @dataclass
 class PerGameCommonOptions(CommonOptions):
+    hint_count: HintCount
     token_percentage: TokenPercentage
     local_items: LocalItems
     non_local_items: NonLocalItems

@@ -1135,13 +1135,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             #                 loc.item, loc2.item = loc2.item, loc.item
             #                 break
 
-    weighted = False
 
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
-    if weighted:
-        player_weights = {pid: len([loc for loc in multiworld.get_locations(pid) if loc.address]) for pid in multiworld.player_ids}
-    else:
-        player_weights = {pid: 1 for pid in multiworld.player_ids if len([loc for loc in multiworld.get_locations(pid) if loc.address])}
+
+    player_weights = {pid: multiworld.worlds[pid].options.hint_count.value for pid in multiworld.player_ids if len([loc for loc in multiworld.get_locations(pid) if loc.address])}
     swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
 
     # Convert weights to exact counts
@@ -1158,8 +1155,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # Build list
     hint_point_items = [p for p, c in counts.items() for _ in range(c)]
     multiworld.random.shuffle(hint_point_items)
+    multiworld.random.shuffle(swap_out_locations)
 
-    multiworld.hint_ratio = sum(player_weights.values()) / len(hint_point_items)
+    multiworld.hint_ratio = sum(counts.values()) / len(hint_point_items)
 
     for player in player_weights:
         player_locs = [loc for loc in swap_out_locations if loc.player == player]

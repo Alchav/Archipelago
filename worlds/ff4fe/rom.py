@@ -62,7 +62,6 @@ special_flag_key_items = {
 }
 
 airship_flyable_flag = (0xF51286, 0b11111011)
-drill_attached_flag = (0xF51287, 0b00100000)
 
 def get_base_rom_as_bytes() -> bytes:
     with open(get_settings().ff4fe_options.rom_file, "rb") as infile:

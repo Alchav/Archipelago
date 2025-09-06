@@ -1,7 +1,7 @@
 import pkgutil
 
 import Utils
-import lark
+from . import lark
 from . import consts
 import os
 

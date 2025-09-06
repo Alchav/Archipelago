@@ -98,7 +98,7 @@ class PassEnabled(Toggle):
 class UsefulPercentage(Range):
     """The percentage of useful high tier items in the pool as opposed to filler low tier items."""
     display_name = "Useful Item Percentage"
-    range_start = 25
+    range_start = 0
     range_end = 100
     default = 35
 

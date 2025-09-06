@@ -2,7 +2,7 @@ import os,inspect
 import pathlib
 import pkgutil
 
-import lark
+from . import lark
 import Utils
 
 _ROOT_FAMILY = "__"

@@ -1,6 +1,6 @@
 from . import compile_common
 from . import ff4struct
-import lark
+from . import lark
 
 def process_mapgrid_block(block, rom, env):
     params_tree = compile_common.parse(block['parameters'], 'map', 'mapgrid_block_params')

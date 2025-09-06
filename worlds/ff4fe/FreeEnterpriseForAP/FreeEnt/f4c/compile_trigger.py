@@ -1,6 +1,6 @@
 from . import compile_common
 from . import ff4struct
-import lark
+from . import lark
 
 class TriggerProcessor(lark.Transformer):
     def __init__(self, trigger):

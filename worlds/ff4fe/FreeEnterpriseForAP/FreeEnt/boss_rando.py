@@ -682,7 +682,7 @@ def apply(env):
             if total_xp == 0:
                 scaled_xp = int(ref_xp / total_qty)
             else:
-                scaled_xp = int(math.ceil(monster['xp'] / total_xp * ref_xp))
+                scaled_xp = int(math.ceil(monster['xp'] / total_xp * ref_xp)/2)
 
             if total_gp == 0:
                 scaled_gp = int(ref_gp / total_qty)

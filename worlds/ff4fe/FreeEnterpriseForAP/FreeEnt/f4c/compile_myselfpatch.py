@@ -9,7 +9,7 @@ import Utils
 
 try:
     from . import ff4struct
-    import lark
+    from . import lark
 except ImportError:
     import ff4struct
     import lark

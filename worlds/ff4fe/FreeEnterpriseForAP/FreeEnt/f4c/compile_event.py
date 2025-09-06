@@ -1,4 +1,4 @@
-import lark
+from . import lark
 from . import event_common
 from . import compile_common
 from . import consts

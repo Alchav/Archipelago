@@ -11,9 +11,9 @@ if sys.platform in ("win32", "darwin") and sys.version_info < (3, 11, 9):
 elif sys.platform in ("win32", "darwin") and sys.version_info < (3, 11, 13):
     # There are known security issues, but no easy way to install fixed versions on Windows for testing.
     warnings.warn(f"Python Version {sys.version_info} has security issues. Don't use in production.")
-elif sys.version_info < (3, 11, 0):
-    # Other platforms may get security backports instead of micro updates, so the number is unreliable.
-    raise RuntimeError(f"Incompatible Python Version found: {sys.version_info}. 3.11.0+ is supported.")
+# elif sys.version_info < (3, 11, 0):
+#     # Other platforms may get security backports instead of micro updates, so the number is unreliable.
+#     raise RuntimeError(f"Incompatible Python Version found: {sys.version_info}. 3.11.0+ is supported.")
 
 # don't run update if environment is frozen/compiled or if not the parent process (skip in subprocess)
 _skip_update = bool(

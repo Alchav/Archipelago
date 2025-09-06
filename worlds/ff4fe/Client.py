@@ -385,11 +385,6 @@ class FF4FEClient(SNIClient):
                     # Which is bad.
                     hook_received_value = hook_received_value & Rom.airship_flyable_flag[1]
                     snes_buffered_write(ctx, flag_byte, bytes([hook_received_value]))
-                    drill_attached_data = await snes_read(ctx, Rom.drill_attached_flag[0], 1)
-                    if drill_attached_data is None:
-                        return
-                    drill_attached_value = drill_attached_data[0]
-                    snes_buffered_write(ctx, Rom.drill_attached_flag[0], bytes([drill_attached_value | Rom.drill_attached_flag[1]]))
                 elif key_items_flag_byte is None:
                     flag_bit = Rom.special_flag_key_items[key_item][1]
                     key_item_received_data = await snes_read(ctx, flag_byte, 1)
