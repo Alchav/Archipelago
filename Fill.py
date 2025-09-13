@@ -874,11 +874,16 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # elif i.classification == ItemClassification.progression:
         #     return multiworld.random.randint(1, 2)
         # breakpoint()
-        if i.classification == ItemClassification.progression and i.classification != ItemClassification.progression_skip_balancing:
-            return 3
-        if i.classification in (ItemClassification.progression_skip_balancing, ItemClassification.useful):
+        if i.classification == ItemClassification.useful:
             return 2
-        return 1
+        elif i.classification == ItemClassification.progression_skip_balancing:
+            if not multiworld.random.randint(0, 4):
+                return 3
+            return 2
+        else:
+            if i.classification == ItemClassification.progression:
+                return 3
+            return 1
 
     option = "r"  # g: total spheres, b: beaten game spheres
 
@@ -1752,7 +1757,7 @@ def compress_spheres(multiworld, max_sphere):
                             (location.item.player in active_games or multiworld.random.randint(40, 140) < i)):
                         if location.item.player in active_games:
                             active_games.remove(location.item.player)
-                        new_sphere = multiworld.random.randint(1, n-1)
+                        new_sphere = multiworld.random.randint(multiworld.random.randint(1, n-1), n-1)
                         for new_sphere in range(new_sphere, -1, -1):
                             if new_sphere == 0:
                                 print(f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")

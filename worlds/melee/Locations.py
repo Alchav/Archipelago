@@ -770,9 +770,9 @@ def get_locations(world: "SSBMWorld") -> List[LocationData]:
             LocationData("Any Melee", "Bonus - Mew Catcher", 0xCE),
             LocationData("Any Melee", "Bonus - Celebi Catcher", 0xCF)]
 
-        if world.options.hard_modes_clear:
-            location_table += [
-            LocationData("Any Main 1-P", "Bonus - Very Hard Clear", 0xF1),
-            ]
+        # if world.options.hard_modes_clear:
+        #     location_table += [
+        #     LocationData("Any Main 1-P", "Bonus - Very Hard Clear", 0xF1),
+        #     ]
 
     return location_table

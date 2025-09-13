@@ -20,7 +20,7 @@ class JigsawItem(Item):
 
 item_table = {
     f"{i} Puzzle Piece{'s' if i > 1 else ''}": ItemData(234782000 + (i - 1), 
-        ItemClassification.progression if i >= 25 else ItemClassification.progression_skip_balancing)
+        ItemClassification.progression if i >= 5 else ItemClassification.progression_skip_balancing)
     for i in range(1, 501)
 }
 
