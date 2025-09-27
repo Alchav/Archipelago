@@ -787,7 +787,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
     # longify_spheres(multiworld)
-    compress_spheres(multiworld, 15)
+    sphere_max = 15
+    breakpoint()
+    compress_spheres(multiworld, sphere_max)
 
     defaultlocations = []
     excludedlocations = []
@@ -1144,7 +1146,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
 
     player_weights = {pid: multiworld.worlds[pid].options.hint_count.value for pid in multiworld.player_ids if len([loc for loc in multiworld.get_locations(pid) if loc.address])}
-    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement) or not location.item) and not location.locked]
+    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement and location.item.name != "SilverArrows") or not location.item) and not location.locked]
 
     # Convert weights to exact counts
     counts = {p: round(w / sum(player_weights.values()) * len(swap_out_locations)) for p, w in player_weights.items()}
@@ -1703,7 +1705,7 @@ def distribute_planned_blocks(multiworld: MultiWorld, plando_blocks: list[Plando
             allstate = multiworld.get_all_state(False)
             mincount = placement.count["min"]
             allowed_margin = len(item_candidates) - mincount
-            fill_restrictive(multiworld, allstate, candidates, item_candidates, lock=True,
+            fill_restrictive(multiworld, allstate, candidates, item_candidates, lock=False,
                              allow_partial=True, name="Plando Main Fill")
 
             if len(item_candidates) > allowed_margin:

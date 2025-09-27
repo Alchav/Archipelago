@@ -138,7 +138,7 @@ def set_location_rules(world: "SSBMWorld") -> None:
     good_hr_characters = {"Ganondorf", "Yoshi", "Jigglypuff", "Roy"} #Can get over 1,400
     decent_hr_characters = {"Dr. Mario"} #Can get over 1,326 casually
 
-    good_combo_char = {"Kirby", "Fox", "Pichu", "Pikachu", "Zelda"}
+    good_combo_char = {"Kirby", "Fox", "Pichu", "Pikachu", "Zelda", "Yoshi", "Falco"}
     decent_combo_char = {"Yoshi", "Falco"}
 
     event_chars = {"Mario", "Donkey Kong", "Ness", "Yoshi", "Kirby", "Samus", "Link", "Bowser", "Falco", "Captain Falcon", "Young Link", "Luigi", "Jigglypuff", "Marth", "Fox", "Mr. Game & Watch"}
@@ -232,10 +232,15 @@ def set_location_rules(world: "SSBMWorld") -> None:
     set_rule(world.multiworld.get_location("Training Mode - 10-Hit Combo", player), lambda state: state.has_any(decent_combo_char, player) and state.has("Bowser", player))
     set_rule(world.multiworld.get_location("Training Mode - 20-Hit Combo", player), lambda state: state.has_any(good_combo_char, player) and state.has("Bowser", player))
 
+    set_rule(world.multiworld.get_location("Multi Man Melee - Cruel Melee 5 KO's", player), lambda state: state.has("Pikachu", player))
+    set_rule(world.multiworld.get_location("Multi Man Melee - 15 Minute Melee Clear", player), lambda state: state.has("Donkey Kong", player))
+    set_rule(world.multiworld.get_location("Multi Man Melee - 100 Man Melee Sub 4 Minutes", player), lambda state: state.has("Donkey Kong", player))
+    set_rule(world.multiworld.get_location("Multi Man Melee - Endless Melee 100 KO's", player), lambda state: state.has("Donkey Kong", player))
+
     set_rule(world.multiworld.get_location("Home-Run Contest - 16,404 Ft. Combined", player), lambda state: state.has_group_unique("Characters", player, 16))
     #set_rule(world.multiworld.get_location("Home-Run Contest - 984 Ft.", player), lambda state: state.has("????", player)) expect everyone to get at least 1K
-    set_rule(world.multiworld.get_location("Home-Run Contest - 1,312 Ft.", player), lambda state: state.has_any(decent_hr_characters, player) or state.has_any(good_hr_characters, player))
-    set_rule(world.multiworld.get_location("Home-Run Contest - 1,476 Ft.", player), lambda state: state.has_any(good_hr_characters, player))
+    set_rule(world.multiworld.get_location("Home-Run Contest - 1,312 Ft.", player), lambda state: state.has("Roy", player))
+    set_rule(world.multiworld.get_location("Home-Run Contest - 1,476 Ft.", player), lambda state: state.has("Roy", player))
 
     set_rule(world.multiworld.get_location("Game - All Stages + Secret Characters", player), lambda state: state.has_group_unique("Stages", player, 11) and state.has_all(secret_characters, player))
     set_rule(world.multiworld.get_location("Game - Unlock Luigi, Jigglypuff, Mewtwo, Mr. Game & Watch, and Marth", player), lambda state: state.has_all({

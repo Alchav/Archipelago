@@ -507,8 +507,8 @@ def get_locations(world: "SSBMWorld") -> List[LocationData]:
 
     if world.options.enable_annoying_multiman_checks:
         location_table += [
-        LocationData("Multi-Man Melee", "15 Minute Melee Clear", 0x1A0),
-        LocationData("Multi-Man Melee", "Cruel Melee 5 KO's", 0x1A2)]
+        LocationData("Multi-Man Melee", "Multi Man Melee - 15 Minute Melee Clear", 0x1A0),
+        LocationData("Multi-Man Melee", "Multi Man Melee - Cruel Melee 5 KO's", 0x1A2)]
 
 
     if world.options.bonus_checks:
@@ -770,9 +770,9 @@ def get_locations(world: "SSBMWorld") -> List[LocationData]:
             LocationData("Any Melee", "Bonus - Mew Catcher", 0xCE),
             LocationData("Any Melee", "Bonus - Celebi Catcher", 0xCF)]
 
-        # if world.options.hard_modes_clear:
-        #     location_table += [
-        #     LocationData("Any Main 1-P", "Bonus - Very Hard Clear", 0xF1),
-        #     ]
+        if world.options.hard_modes_clear:
+            location_table += [
+            LocationData("Any Main 1-P", "Bonus - Very Hard Clear", 0xF1),
+            ]
 
     return location_table

@@ -1,8 +1,5 @@
-import logging
 from dataclasses import dataclass
 from typing import Dict, Any, TYPE_CHECKING
-
-from decimal import Decimal, ROUND_HALF_UP
 
 from Options import DefaultOnToggle, Toggle, StartInventoryPool, Choice, Range, TextChoice, PlandoConnections, \
                      PerGameCommonOptions, OptionGroup, Removed, Visibility, NamedRange
@@ -49,6 +46,7 @@ class LuteTablatures(NamedRange):
     This sets the number required to play the Lute and open the path in the Temple of Fiends.
     Set to 0 to disable this feature.
     If the required number is higher than 0, the Lute is in your starting inventory.
+    The Item description will reveal the required number.
     """
     internal_name = "lute_tablatures"
     display_name = "Lute Tablatures"
@@ -64,7 +62,8 @@ class LuteTablatures(NamedRange):
 
 class CrystalsRequired(Range):
     """
-    Set the number of Crystals that must be restored so the Dark Orb can be destroyed.
+    Set the number of Crystals that must be restored so the Black Orb can be destroyed.
+    Talking to the Black Orb will reveal the required number.
     """
     internal_name = "crystals_required"
     display_name = "Crystals Required"
@@ -79,6 +78,51 @@ class ShuffleTrialsMaze(DefaultOnToggle):
     """
     internal_name = "shuffle_trials_maze"
     display_name = "Shuffle Trials' Maze"
+
+class ShuffleOverworld(Toggle):
+    """
+    Shuffle all Overworld entrances, except the Towns.
+
+    NOTE: The Princess won't teleport you to Cornelia Castle when this is enabled.
+    """
+    internal_name = "shuffle_overworld"
+    display_name = "Shuffle Overworld"
+    default = False
+
+class ShuffleEntrances(Choice):
+    """
+    Shuffle all non-Overworld entrances.
+
+    No Shuffle: Entrances stay the same.
+    Dungeon Internal: Only shuffle the Dungeons' entrances, and keep them inside their respective dungeon.
+    Dungeon Mixed: Only shuffle the Dungeons' entrances amongst all dungeons.
+    All: Shuffle all locations' entrances except Towns.
+    """
+    internal_name = "shuffle_entrances"
+    display_name = "Shuffle Entrances"
+    option_no_shuffle = 0
+    option_dungeon_internal = 1
+    option_dungeon_mixed = 2
+    option_all = 3
+    default = 0
+
+class ShuffleTowns(Choice):
+    """
+    Shuffle all Town entrances, except Cornelia; if Early Progression is set to Bikke's Ship, Pravoka is also excluded.
+    No Shuffle: Entrances stay the same.
+    Between Towns: Towns are shuffled only amongst themselves.
+    Shallow Shuffle: If Overworld or Entrances are shuffled, Towns will be included with them, but will always be
+    on the first floor of any location.
+    Deep Shuffle: If Overworld or Entrances are shuffled, Towns will be included with them and can end up
+    at any floor inside a location.
+    """
+    internal_name = "shuffle_towns"
+    display_name = "Shuffle Towns"
+    option_no_shuffle = 0
+    option_shuffle_between_towns = 1
+    option_mixed_shuffle_shallow = 2
+    option_mixed_shuffle_deep = 3
+    default = 0
 
 class EarlyProgression(Choice):
     """
@@ -239,6 +283,9 @@ class FF1pixelOptions(PerGameCommonOptions):
     dungeon_encounter_rate: DungeonEncounterRate
     overworld_encounter_rate: OverworldEncounterRate
     shuffle_trials_maze: ShuffleTrialsMaze
+    shuffle_overworld: ShuffleOverworld
+    shuffle_entrances: ShuffleEntrances
+    shuffle_towns: ShuffleTowns
     early_progression: EarlyProgression
     northern_docks: NorthernDocks
     xp_boost: ExperienceBoost
@@ -257,6 +304,9 @@ grouped_options = [
         CrystalsRequired
     ]),
     OptionGroup("Map Options", [
+        ShuffleOverworld,
+        ShuffleEntrances,
+        ShuffleTowns,
         ShuffleTrialsMaze,
         EarlyProgression,
         NorthernDocks
@@ -285,6 +335,9 @@ presets = {
         "crystals_required": 4,
         "shuffle_trials_maze": True,
         "early_progression": 0,
+        "shuffle_overworld": False,
+        "shuffle_entrances": 0,
+        "shuffle_towns": 0,
         "northern_docks": False,
         "nerf_chaos": True,
         "boss_minions": 0,

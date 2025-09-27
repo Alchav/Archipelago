@@ -1,14 +1,16 @@
-from dataclasses import fields
-from typing import Dict, List, Any, Tuple, Type, TypedDict, ClassVar, Union, Set, TextIO
-from logging import warning
-from BaseClasses import Region, Location, Item, Tutorial, ItemClassification, MultiWorld, CollectionState
+from typing import Dict, List, Any, NamedTuple, TextIO
+from BaseClasses import Region, Location, Item, Tutorial, ItemClassification, EntranceType, Entrance, MultiWorld
+from worlds.AutoWorld import WebWorld, World
 from .items import item_name_to_id, item_table, item_name_groups
 from .locations import location_table, standard_location_name_to_id, event_table, location_name_groups
 from .rules import set_location_rules, set_region_rules
-from .regions import ff1pr_regions
+from .regions import base_regions, overworld_regions, location_regions
 from .options import FF1pixelOptions, grouped_options, presets
-from worlds.AutoWorld import WebWorld, World
-from Options import PerGameCommonOptions
+from .entrances import global_entrances, EntranceData, EntGroup
+from .ef_shuffle import shuffle_entrances
+from .data import itemnames
+from .spoiler import generate_entrances_spoiler
+from Utils import visualize_regions
 
 GAME_NAME: str = "FF1 Pixel Remaster"
 
@@ -51,6 +53,8 @@ class FF1pixelWorld(World):
     location_name_to_id = standard_location_name_to_id.copy()
 
     items_to_ignore: List[int] = []
+    result_entrances: Dict[str, str] = {}
+    region_dict: Dict[str, Dict[str, str]] = {}
 
     spawn_airship = False
     spawn_ship = False
@@ -89,7 +93,7 @@ class FF1pixelWorld(World):
         ff1pr_items: List[FF1pixelItem] = []
         items_made: int = 0
 
-        items_to_create: Dict[str, int] = {item: data.quantity_in_item_pool for item, data in item_table.items()}
+        items_to_create: Dict[str, int] = {item: item_data.quantity_in_item_pool for item, item_data in item_table.items()}
         available_filler: List[str] = [filler for filler in items_to_create if items_to_create[filler] > 0 and
                                        item_table[filler].classification == ItemClassification.filler]
 
@@ -130,14 +134,28 @@ class FF1pixelWorld(World):
         self.multiworld.itempool += ff1pr_items
 
     def create_regions(self) -> None:
-        for region_name in ff1pr_regions:
+        for region_name in base_regions:
             region = Region(region_name, self.player, self.multiworld)
             self.multiworld.regions.append(region)
 
-        for region_name, exits in ff1pr_regions.items():
-            region = self.get_region(region_name)
-            #print(region_name)
-            region.add_exits(exits)
+        region = self.get_region("Menu")
+        region.add_exits(["Overworld"])
+
+        for region_name in overworld_regions:
+            region = Region(region_name, self.player, self.multiworld)
+            self.region_dict[region_name] = {}
+            self.multiworld.regions.append(region)
+
+        region = self.get_region("Overworld")
+        region.add_exits(overworld_regions)
+
+        for region_name in location_regions:
+            region = Region(region_name, self.player, self.multiworld)
+            self.region_dict[region_name] = {}
+            self.multiworld.regions.append(region)
+
+        # Shuffle Entrances
+        shuffle_entrances(self)
 
         for location_name, location_id in self.location_name_to_id.items():
             #print(location_name)
@@ -159,36 +177,27 @@ class FF1pixelWorld(World):
         filler_list = list(self.item_name_groups["Fillers"])
         return self.random.choice(filler_list)
 
+    @classmethod
+    def stage_fill_hook(cls, multiworld: MultiWorld, progitempool, usefulitempool, filleritempool, fill_locations):
+        progitempool.sort(
+                key=lambda item: 1 if (itemnames.lute_tablature in item.name and item.game == GAME_NAME) else 0)
+
+    def write_spoiler(self, spoiler_handle: TextIO) -> None:
+        if self.options.shuffle_towns > 0 or \
+            self.options.shuffle_overworld or \
+            self.options.shuffle_entrances > 0:
+            spoiler_text = generate_entrances_spoiler(self)
+            spoiler_handle.writelines(f"\nFF1 Pixel Remaster entrances layout for {self.multiworld.player_name[self.player]}\n")
+            spoiler_handle.writelines(spoiler_text)
+
     def fill_slot_data(self) -> Dict[str, Any]:
-        options_list = options.presets["Starter"].keys()
+        options_list = presets["Starter"].keys()
         slot_data: Dict[str, Any] = {
             "items_to_ignore": self.items_to_ignore,
             "spawn_airship": self.spawn_airship,
             "spawn_ship": self.spawn_ship,
+            "result_entrances": self.result_entrances,
             **self.options.as_dict(*options_list)
-        }
-
-        dummy_slot_data: Dict[str, Any] = {
-            "shuffle_gear_shops": self.options.shuffle_gear_shops.value,
-            "shuffle_spells": self.options.shuffle_spells.value,
-            "job_promotion": self.options.job_promotion.value,
-            "lute_tablatures": self.options.lute_tablatures.value,
-            "crystals_required": self.options.crystals_required.value,
-            "shuffle_trials_maze": self.options.shuffle_trials_maze.value,
-            "early_progression": self.options.early_progression.value,
-            "northern_docks": self.options.northern_docks.value,
-            "nerf_chaos": self.options.nerf_chaos.value,
-            "boss_minions": self.options.boss_minions.value,
-            "monster_parties": self.options.monster_parties.value,
-            "monsters_cap": self.options.monsters_cap.value,
-            "dungeon_encounter_rate": self.options.dungeon_encounter_rate.value,
-            "overworld_encounter_rate": self.options.overworld_encounter_rate.value,
-            "xp_boost": self.options.xp_boost.value,
-            "gil_boost": self.options.gil_boost.value,
-            "boost_menu": self.options.boost_menu.value,
-            "spawn_airship": self.spawn_airship,
-            "spawn_ship": self.spawn_ship,
-            "items_to_ignore": self.items_to_ignore
         }
 
         return slot_data

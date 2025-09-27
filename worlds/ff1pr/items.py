@@ -1,7 +1,5 @@
-from itertools import groupby
 from typing import Dict, List, Set, NamedTuple, Optional
 from BaseClasses import ItemClassification as IC
-
 
 class FF1pixelItemData(NamedTuple):
     classification: IC
