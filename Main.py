@@ -367,6 +367,8 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
                     if current_sphere:
                         spheres.append(dict(current_sphere))
 
+                baked_server_options["hint_cost"] = multiworld.hint_ratio
+                baked_server_options["hint_location_cost"] = multiworld.hint_location_ratio
                 multidata: NetUtils.MultiData | bytes = {
                     "slot_data": slot_data,
                     "slot_info": slot_info,

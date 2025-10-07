@@ -31,6 +31,7 @@ def get_meta(options_source: dict, race: bool = False) -> dict[str, list[str] | 
 
     server_options = {
         "hint_cost": int(options_source.get("hint_cost", ServerOptions.hint_cost)),
+        "hint_location_cost": int(options_source.get("hint_location_cost", ServerOptions.hint_location_cost)),
         "release_mode": str(options_source.get("release_mode", ServerOptions.release_mode)),
         "remaining_mode": str(options_source.get("remaining_mode", ServerOptions.remaining_mode)),
         "collect_mode": str(options_source.get("collect_mode", ServerOptions.collect_mode)),

@@ -543,9 +543,12 @@ class ServerOptions(Group):
 
     class HintCost(int):
         """
-        Relative point cost to receive a hint via !hint for players
-        so for example hint_cost: 20 would mean that for every 20% of available checks, you get the ability to hint,
-        for a total of 5
+        Point cost to receive a hint via !hint for players
+        """
+
+    class HintLocationCost(int):
+        """
+        Relative point cost to receive a hint via !hint_location for players
         """
 
     class ReleaseMode(str):
@@ -610,6 +613,7 @@ class ServerOptions(Group):
     disable_item_cheat: DisableItemCheat | bool = False
     location_check_points: LocationCheckPoints = LocationCheckPoints(1)
     hint_cost: HintCost = HintCost(10)
+    hint_location_cost: HintLocationCost = HintCost(10)
     release_mode: ReleaseMode = ReleaseMode("auto")
     collect_mode: CollectMode = CollectMode("auto")
     remaining_mode: RemainingMode = RemainingMode("goal")

@@ -787,8 +787,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
     # longify_spheres(multiworld)
-    sphere_max = 15
-    breakpoint()
+    sphere_max = 150
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=None))
+    games_per_sphere = [{multiworld.player_name[location.player] for location in sphere} for sphere in spheres]
+    # breakpoint()
     compress_spheres(multiworld, sphere_max)
 
     defaultlocations = []
@@ -887,7 +889,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 return 3
             return 1
 
-    option = "r"  # g: total spheres, b: beaten game spheres
+    option = "o"  # g: total spheres, b: beaten game spheres
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
@@ -906,6 +908,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     playable_games = [player for player in player_names if player[1] in multiworld.worlds[1].options.start_games]
     player_names = [player_name for player_name in player_names if player_name not in playable_games]
     highest_sphere = 0
+    for player in playable_games:
+        # I added this later. watch for issues
+        highest_sphere = max(highest_sphere, game_spheres[player[0]])
     if option in ("e", "r"):
         for player in player_names:
             highest_sphere = max(highest_sphere, game_spheres[player[0]])
@@ -918,7 +923,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 starting_spheres[player[0]] = highest_sphere - game_spheres[player[0]]
                 if option == "r":
                     starting_spheres[player[0]] = multiworld.random.randint(1, starting_spheres[player[0]])
-
+    elif option == "o":
+        for player in player_names:
+            starting_spheres[player[0]] = highest_sphere
+            highest_sphere += game_spheres[player[0]]
     else:
         for player in playable_games:
             highest_sphere = max(highest_sphere, game_spheres[player[0]])
@@ -1009,8 +1017,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # for i, sphere in enumerate(spheres, start=1):
         sphere = spheres[starting_sphere - 1]
 
-        # filler_sphere = sorted([location for location in sphere if location.address and not location.item])
-        filler_sphere = None
+        filler_sphere = sorted([location for location in sphere if location.address and not location.item])
+        # filler_sphere = None
         if not filler_sphere:
             filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
             if not filler_sphere:
@@ -1104,7 +1112,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         try:
             logging.info(multiworld.player_name[player] + f": {game_spheres[player]} total, {beaten_game_spheres[player]} beaten")
         except Exception:
-            breakpoint()
+            # breakpoint()
+            logging.info(f"didn't find sphere count for player {player}")
 
     if not multiworld.can_beat_game():
         state = multiworld.state.copy()
@@ -1142,44 +1151,137 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             #                 loc.item, loc2.item = loc2.item, loc.item
             #                 break
 
-
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
 
-    player_weights = {pid: multiworld.worlds[pid].options.hint_count.value for pid in multiworld.player_ids if len([loc for loc in multiworld.get_locations(pid) if loc.address])}
-    swap_out_locations = [location for location in multiworld.get_locations() if ((location.item and location.item.player in auto_players and not location.advancement and location.item.name != "SilverArrows") or not location.item) and not location.locked]
+    # players with at least one real location
+    eligible_players = {
+        pid for pid in multiworld.player_ids
+        if any(loc.address for loc in multiworld.get_locations(pid))
+    }
 
-    # Convert weights to exact counts
-    counts = {p: round(w / sum(player_weights.values()) * len(swap_out_locations)) for p, w in player_weights.items()}
+    player_weights = {
+        pid: multiworld.worlds[pid].options.hint_count.value
+        for pid in eligible_players
+    }
+    player_location_weights = {
+        pid: multiworld.worlds[pid].options.hint_location_count.value
+        for pid in eligible_players
+    }
 
-    # Adjust for rounding errors
-    while sum(counts.values()) != len(swap_out_locations):
-        diff = len(swap_out_locations) - sum(counts.values())
-        key = max(counts, key=lambda p: (player_weights[p] / sum(player_weights.values())) - (
-                    counts[p] / len(swap_out_locations))) if diff > 0 else min(counts, key=lambda p: (counts[p] / len(
-            swap_out_locations)) - (player_weights[p] / sum(player_weights.values())))
-        counts[key] += 1 if diff > 0 else -1
+    swap_out_locations = [
+        location for location in multiworld.get_locations()
+        if (
+                   (
+                           location.item
+                           and location.item.player in auto_players
+                           and not location.advancement
+                           and location.item.name != "SilverArrows"
+                   )
+                   or not location.item
+           )
+           and not location.locked
+    ]
+    # swap_out_locations = multiworld.random.sample(swap_out_locations, len(swap_out_locations) // 2)
+    total_slots = len(swap_out_locations)
 
-    # Build list
-    hint_point_items = [p for p, c in counts.items() for _ in range(c)]
-    multiworld.random.shuffle(hint_point_items)
+    # Build combined weight map over (kind, player)
+    # kind is "hint" or "loc"
+    weights = {}
+    for p in eligible_players:
+        w_hint = player_weights.get(p, 0)
+        w_loc = player_location_weights.get(p, 0)
+        if w_hint > 0:
+            weights[("hint", p)] = w_hint
+        if w_loc > 0:
+            weights[("loc", p)] = w_loc
+
+    def apportion(weight_map, slots):
+        """Largest remainder method over arbitrary keys."""
+        total_w = sum(weight_map.values())
+        if slots <= 0 or total_w <= 0:
+            return {k: 0 for k in weight_map}
+        exact = {k: (w / total_w) * slots for k, w in weight_map.items()}
+        base = {k: int(exact[k] // 1) for k in weight_map}
+        remaining = slots - sum(base.values())
+        # Sort by largest fractional remainder, then by higher weight to break ties, then by key for stability
+        order = sorted(
+            weight_map.keys(),
+            key=lambda k: (exact[k] - base[k], weight_map[k], str(k)),
+            reverse=True,
+        )
+        for k in order[:max(0, remaining)]:
+            base[k] += 1
+        # If we somehow overshot (shouldn't happen), trim the smallest remainders
+        if remaining < 0:
+            over = -remaining
+            order_small = sorted(
+                weight_map.keys(),
+                key=lambda k: (exact[k] - base[k], weight_map[k], str(k)),
+            )
+            for k in order_small[:over]:
+                base[k] = max(0, base[k] - 1)
+        return base
+
+    counts_by_kind_player = apportion(weights, total_slots)
+
+    # Build flat item list of (kind, player) repeated by count
+    items = []
+    for (kind, p), c in counts_by_kind_player.items():
+        items.extend([(kind, p)] * c)
+
+    # Shuffle for randomness
+    multiworld.random.shuffle(items)
     multiworld.random.shuffle(swap_out_locations)
 
-    multiworld.hint_ratio = sum(counts.values()) / len(hint_point_items)
-
-    for player in player_weights:
+    # Prefer placing a player's own items (both kinds) in their own locations first
+    players_in_items = {p for (_, p) in items}
+    for player in players_in_items:
         player_locs = [loc for loc in swap_out_locations if loc.player == player]
-        while player_locs and player in hint_point_items:
-            hint_point_items.remove(player)
+        while player_locs and any(p == player for (_, p) in items):
+            # take the first occurrence of this player's item (either kind)
+            idx = next(i for i, (_kind, p) in enumerate(items) if p == player)
+            kind, _ = items.pop(idx)
             loc = player_locs.pop()
             swap_out_locations.remove(loc)
-            new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
+
+            item_name = (
+                f"{multiworld.player_name[player]} Hint Location Point"
+                if kind == "loc"
+                else f"{multiworld.player_name[player]} Hint Point"
+            )
+            new_item = multiworld.worlds[1].create_item(item_name)
             loc.item = new_item
             new_item.location = loc
 
-    for loc, player in zip(swap_out_locations, hint_point_items):
-        new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[player]} Hint Point")
+    # Fill remaining locations with remaining items
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=True))
+    loc_to_sphere = {loc: i for i, sphere in enumerate(spheres) for loc in sphere if loc in swap_out_locations}
+    player_ranges = {}
+    sphere_items = [[] for _ in range(len(spheres))]
+    for p in eligible_players:
+        player_locs = [loc for loc in loc_to_sphere if loc.player == p]
+        if player_locs:
+            idxs = [loc_to_sphere[loc] for loc in player_locs]
+            player_ranges[p] = (min(idxs), max(idxs))
+            player_items = [item for item in items if item[1] == p]
+            items = [item for item in items if item not in player_items]
+            while player_items:
+                for s in range(min(idxs), max(idxs) + 1):
+                    sphere_items[s].append(player_items.pop())
+    for sphere in sphere_items:
+        multiworld.random.shuffle(sphere)
+    ordered_items = sum(sphere_items, [])
+    swap_out_locations.sort(key=lambda l: loc_to_sphere[l])
+    for loc, item in zip(swap_out_locations, ordered_items):
+        new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[item[1]]} Hint{' Location' if item[0] == 'loc' else ''} Point")
         loc.item = new_item
         new_item.location = loc
+
+
+    breakpoint()
+    multiworld.hint_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "hint") // max(1, sum(player_weights.values()))))
+    multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
+
     # multiworld.post_fill = True
 
     # sc2_worlds = multiworld.get_game_worlds("Starcraft 2")

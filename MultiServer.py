@@ -173,6 +173,7 @@ class Context:
     loader = staticmethod(decode)
 
     simple_options = {"hint_cost": int,
+                      "hint_location_cost": int,
                       "location_check_points": int,
                       "server_password": str,
                       "password": str,
@@ -187,6 +188,7 @@ class Context:
     locations: LocationStore  # typing.Dict[int, typing.Dict[int, typing.Tuple[int, int, int]]]
     location_checks: typing.Dict[typing.Tuple[int, int], typing.Set[int]]
     hints_used: typing.Dict[typing.Tuple[int, int], int]
+    hint_locations_used: typing.Dict[typing.Tuple[int, int], int]
     groups: typing.Dict[int, typing.Set[int]]
     save_version = 2
     stored_data: typing.Dict[str, object]
@@ -207,7 +209,7 @@ class Context:
     logger: logging.Logger
 
     def __init__(self, host: str, port: int, server_password: str, password: str, location_check_points: int,
-                 hint_cost: int, item_cheat: bool, release_mode: str = "disabled", collect_mode="disabled",
+                 hint_cost: int, hint_location_cost: int, item_cheat: bool, release_mode: str = "disabled", collect_mode="disabled",
                  remaining_mode: str = "disabled", auto_shutdown: typing.SupportsFloat = 0, compatibility: int = 2,
                  log_network: bool = False, logger: logging.Logger = logging.getLogger()):
         self.logger = logger
@@ -236,8 +238,10 @@ class Context:
         self.name_aliases: typing.Dict[team_slot, str] = {}
         self.location_checks = collections.defaultdict(set)
         self.hint_cost = hint_cost
+        self.hint_location_cost = hint_location_cost
         self.location_check_points = location_check_points
         self.hints_used = collections.defaultdict(int)
+        self.hint_locations_used = collections.defaultdict(int)
         self.hints: typing.Dict[team_slot, typing.Set[Hint]] = collections.defaultdict(set)
         self.release_mode: str = release_mode
         self.remaining_mode: str = remaining_mode
@@ -612,6 +616,7 @@ class Context:
             "connect_names": self.connect_names,
             "received_items": self.received_items,
             "hints_used": dict(self.hints_used),
+            "hint_locations_used": dict(self.hints_used),
             "hints": dict(self.hints),
             "location_checks": dict(self.location_checks),
             "name_aliases": self.name_aliases,
@@ -623,7 +628,8 @@ class Context:
             "random_state": self.random.getstate(),
             "group_collected": dict(self.group_collected),
             "stored_data": self.stored_data,
-            "game_options": {"hint_cost": self.hint_cost, "location_check_points": self.location_check_points,
+            "game_options": {"hint_cost": self.hint_cost, "hint_location_cost": self.hint_location_cost,
+                             "location_check_points": self.location_check_points,
                              "server_password": self.server_password, "password": self.password,
                              "release_mode": self.release_mode,
                              "remaining_mode": self.remaining_mode, "collect_mode": self.collect_mode,
@@ -640,6 +646,7 @@ class Context:
             raise Exception("This savegame is newer than the server.")
         self.received_items = savedata["received_items"]
         self.hints_used.update(savedata["hints_used"])
+        self.hint_locations_used.update(savedata["hint_locations_used"])
         self.hints.update(savedata["hints"])
 
         self.name_aliases.update(savedata["name_aliases"])
@@ -655,6 +662,7 @@ class Context:
 
         if "game_options" in savedata:
             self.hint_cost = savedata["game_options"]["hint_cost"]
+            self.hint_location_cost = savedata["game_options"]["hint_location_cost"]
             self.location_check_points = savedata["game_options"]["location_check_points"]
             self.server_password = savedata["game_options"]["server_password"]
             self.password = savedata["game_options"]["password"]
@@ -679,6 +687,12 @@ class Context:
     def get_hint_cost(self, slot):
         if self.hint_cost:
             return self.hint_cost
+            return max(1, int(self.hint_cost * 0.01 * len(self.locations[slot])))
+        return 0
+
+    def get_hint_location_cost(self, slot):
+        if self.hint_location_cost:
+            return self.hint_location_cost
             return max(1, int(self.hint_cost * 0.01 * len(self.locations[slot])))
         return 0
 
@@ -820,7 +834,8 @@ class Context:
         self.on_changed_hints(team, slot)
         self.broadcast(self.clients[team][slot], [{
             "cmd": "RoomUpdate",
-            "hint_points": get_slot_points(self, team, slot)
+            "hint_points": get_slot_points(self, team, slot),
+            "hint_location_points": get_slot_location_points(self, team, slot)
         }])
 
     def on_changed_hints(self, team: int, slot: int):
@@ -889,6 +904,7 @@ async def on_client_connected(ctx: Context, client: Client):
         'generator_version': ctx.generator_version,
         'permissions': get_permissions(ctx),
         'hint_cost': ctx.hint_cost,
+        'hint_location_cost': ctx.hint_location_cost,
         'location_check_points': ctx.location_check_points,
         'datapackage_checksums': {game: game_data["checksum"] for game, game_data
                                   in ctx.gamespackage.items() if game in games and "checksum" in game_data},
@@ -1141,6 +1157,7 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
         ctx.broadcast(ctx.clients[team][slot], [{
             "cmd": "RoomUpdate",
             "hint_points": get_slot_points(ctx, team, slot),
+            "hint_location_points": get_slot_location_points(ctx, team, slot),
             "checked_locations": new_locations,  # send back new checks only
         }])
         updated_slots: typing.Set[tuple[int, int]] = set()
@@ -1710,8 +1727,14 @@ class ClientMessageProcessor(CommonCommandProcessor):
             return False
 
     def get_hints(self, input_text: str, for_location: bool = False) -> bool:
-        points_available = get_client_points(self.ctx, self.client)
-        cost = self.ctx.get_hint_cost(self.client.slot)
+        if for_location:
+            points_available = get_client_location_points(self.ctx, self.client)
+        else:
+            points_available = get_client_points(self.ctx, self.client)
+        if for_location:
+            cost = self.ctx.get_hint_location_cost(self.client.slot)
+        else:
+            cost = self.ctx.get_hint_cost(self.client.slot)
         auto_status = HintStatus.HINT_UNSPECIFIED if for_location else HintStatus.HINT_PRIORITY
         if not input_text:
             hints = {hint.re_check(self.ctx, self.client.team) for hint in
@@ -1719,8 +1742,12 @@ class ClientMessageProcessor(CommonCommandProcessor):
             hints = {hint for hint in hints if not hint.found}
             self.ctx.hints[self.client.team, self.client.slot] = hints
             self.ctx.notify_hints(self.client.team, list(hints), recipients=(self.client.slot,))
-            self.output(f"A hint costs {cost} points. "
-                        f"You have {points_available} points.")
+            if for_location:
+                self.output(f"A hint location costs {cost} points. "
+                            f"You have {points_available} points.")
+            else:
+                self.output(f"A hint costs {cost} points. "
+                            f"You have {points_available} points.")
             if hints and Utils.version_tuple < (0, 5, 0):
                 self.output("It was recently changed, so that the above hints are only shown to you. "
                             "If you meant to alert another player of an above hint, "
@@ -1808,25 +1835,32 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     can_pay -= 1
 
                     if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
-                        self.ctx.hints_used[self.client.team, self.client.slot] += 1
-                        self.output(f"Spent hint points. Hints used: {self.ctx.hints_used[self.client.team, self.client.slot]}")
+                        if for_location:
+                            self.ctx.hint_locations_used[self.client.team, self.client.slot] += 1
+                            self.output(f"Spent hint location points. Hint locations used: {self.ctx.hint_locations_used[self.client.team, self.client.slot]}")
+                        else:
+                            self.ctx.hints_used[self.client.team, self.client.slot] += 1
+                            self.output(f"Spent hint points. Hints used: {self.ctx.hints_used[self.client.team, self.client.slot]}")
 
 
                 self.ctx.notify_hints(self.client.team, hints)
                 if not_found_hints:
-                    points_available = get_client_points(self.ctx, self.client)
+                    if for_location:
+                        points_available = get_client_location_points(self.ctx, self.client)
+                    else:
+                        points_available = get_client_points(self.ctx, self.client)
                     if hints and cost and int((points_available // cost) == 0):
                         self.output(
                             f"There may be more hintables, however, you cannot afford to pay for any more. "
                             f" You have {points_available} and need at least "
-                            f"{self.ctx.get_hint_cost(self.client.slot)}.")
+                            f"{cost}.")
                     elif hints:
                         self.output(
                             "There may be more hintables, you can rerun the command to find more.")
                     else:
                         self.output(f"You can't afford the hint. "
                                     f"You have {points_available} points and need at least "
-                                    f"{self.ctx.get_hint_cost(self.client.slot)}.")
+                                    f"{cost}.")
                 self.ctx.save()
                 return True
 
@@ -1841,7 +1875,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
             else:
                 self.output(f"You can't afford the hint. "
                             f"You have {points_available} points and need at least "
-                            f"{self.ctx.get_hint_cost(self.client.slot)}.")
+                            f"{cost}.")
             return False
 
     @mark_raw
@@ -1874,11 +1908,25 @@ def get_client_points(ctx: Context, client: Client) -> int:
     return extra_hints - (ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
+def get_client_location_points(ctx: Context, client: Client) -> int:
+    points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
+            ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
+    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 10000}))# * ctx.get_hint_cost(client.slot) * 0.472)
+    return extra_hints - (ctx.get_hint_location_cost(client.slot) * ctx.hint_locations_used[client.team, client.slot])
+
+
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
     extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 1000}))# * ctx.get_hint_cost(slot) * 0.5)
-    return extra_hints - (ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
+    return extra_hints - (ctx.get_hint_location_cost(slot) * ctx.hints_used[team, slot])
+
+
+def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
+    points = (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
+            ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
+    extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 10000}))# * ctx.get_hint_cost(slot) * 0.5)
+    return extra_hints - (ctx.get_hint_location_cost(slot) * ctx.hint_locations_used[team, slot])
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):
     try:
@@ -1965,6 +2013,7 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
                 "checked_locations": get_checked_checks(ctx, team, slot),
                 "slot_info": ctx.slot_info,
                 "hint_points": get_slot_points(ctx, team, slot),
+                "hint_location_points": get_slot_location_points(ctx, team, slot),
             }
             reply = [connected_packet]
             start_inventory = get_start_inventory(ctx, slot, client.remote_start_inventory)
@@ -2558,7 +2607,7 @@ class ServerCommandProcessor(CommonCommandProcessor):
         self.output(f"Set option {option_name} to {getattr(self.ctx, option_name)}")
         if option_name in {"release_mode", "remaining_mode", "collect_mode"}:
             self.ctx.broadcast_all([{"cmd": "RoomUpdate", 'permissions': get_permissions(self.ctx)}])
-        elif option_name in {"hint_cost", "location_check_points"}:
+        elif option_name in {"hint_cost", "hint_location_cost", "location_check_points"}:
             self.ctx.broadcast_all([{"cmd": "RoomUpdate", option_name: getattr(self.ctx, option_name)}])
         return True
 
@@ -2615,6 +2664,7 @@ def parse_args() -> argparse.Namespace:
                         default=defaults["logtime"], action='store_true')
     parser.add_argument('--location_check_points', default=defaults["location_check_points"], type=int)
     parser.add_argument('--hint_cost', default=defaults["hint_cost"], type=int)
+    parser.add_argument('--hint_location_cost', default=defaults["hint_location_cost"], type=int)
     parser.add_argument('--disable_item_cheat', default=defaults["disable_item_cheat"], action='store_true')
     parser.add_argument('--release_mode', default=defaults["release_mode"], nargs='?',
                         choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "tokens"], help='''\
@@ -2698,7 +2748,7 @@ async def main(args: argparse.Namespace):
                        add_timestamp=args.logtime)
 
     ctx = Context(args.host, args.port, args.server_password, args.password, args.location_check_points,
-                  args.hint_cost, not args.disable_item_cheat, args.release_mode, args.collect_mode,
+                  args.hint_cost, args.hint_location_cost, not args.disable_item_cheat, args.release_mode, args.collect_mode,
                   args.remaining_mode,
                   args.auto_shutdown, args.compatibility, args.log_network)
     data_filename = args.multidata

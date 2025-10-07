@@ -81,6 +81,7 @@ class MultiWorld():
 
     post_fill: bool = False
     hint_ratio: float
+    hint_location_ratio: float
     plando_options: PlandoOptions
     early_items: Dict[int, Dict[str, int]]
     local_early_items: Dict[int, Dict[str, int]]
@@ -1866,6 +1867,7 @@ class Spoiler:
                 'Archipelago Version %s  -  Seed: %s\n\n' % (
                     Utils.__version__, self.multiworld.seed))
             outfile.write(f"Hint Ratio:                      {self.multiworld.hint_ratio}\n")
+            outfile.write(f"Hint Location Ratio:                      {self.multiworld.hint_location_ratio}\n")
             outfile.write('Filling Algorithm:               %s\n' % self.multiworld.algorithm)
             outfile.write('Players:                         %d\n' % self.multiworld.players)
             outfile.write(f'Plando Options:                  {self.multiworld.plando_options}\n')
