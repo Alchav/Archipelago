@@ -924,9 +924,19 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 if option == "r":
                     starting_spheres[player[0]] = multiworld.random.randint(1, starting_spheres[player[0]])
     elif option == "o":
-        for player in player_names:
-            starting_spheres[player[0]] = highest_sphere
-            highest_sphere += game_spheres[player[0]]
+        from Options import Owner
+        owner_groups = [[player for player in multiworld.player_ids if multiworld.worlds[player].options.owner == owner] for owner in Owner.name_lookup]
+        for owner_group in owner_groups:
+            if not owner_group:
+                continue
+            multiworld.random.shuffle(owner_group)
+            starting_player = owner_group.pop()
+            playable_games.append((starting_player, multiworld.player_name[starting_player]))
+            multiworld.push_precollected(multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[starting_player]}"))
+            owner_highest_sphere = game_spheres[starting_player]
+            for player in owner_group:
+                starting_spheres[player] = owner_highest_sphere
+                owner_highest_sphere += game_spheres[player]
     else:
         for player in playable_games:
             highest_sphere = max(highest_sphere, game_spheres[player[0]])
@@ -1150,6 +1160,41 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             #             if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
             #                 loc.item, loc2.item = loc2.item, loc.item
             #                 break
+
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
+    ordered_spheres = []
+    for sphere in spheres:
+        sphere = list(sphere)
+        sphere.sort(key=lambda l: f"{l.player}{l.name}")
+        multiworld.random.shuffle(sphere)
+        sphere.sort(key=lambda l: 10 if not l.item or l.item.classification == ItemClassification.filler else l.item.classification)
+        ordered_spheres.append(sphere)
+        for location in [loc for loc in sphere if loc.item and "Unlock " in loc.item.name and loc.item.player == 1]:
+            if multiworld.worlds[location.item.code].options.owner.value != multiworld.worlds[location.player].options.owner.value:
+                for new_location in sphere:
+                    if not new_location.locked and multiworld.worlds[location.item.code].options.owner.value == multiworld.worlds[new_location.player].options.owner.value:
+                        location.item, new_location.item = new_location.item, location.item
+                        if location.item:
+                            location.item.location = location
+                        new_location.item.location = new_location
+                        logging.info(f"Swapped {new_location.item} from {location} to {new_location}")
+                        break
+                else:
+                    logging.info(f"Unable to place {location.item} in owner's sphere")
+                    breakpoint()
+            else:
+                logging.info(f"{location.item} already in owner's sphere at {location}")
+
+    # for sphere in reversed(spheres):
+    player_start_items = sum(multiworld.precollected_items.values(), [])
+    multiworld.random.shuffle(player_start_items)
+    for item in player_start_items:
+        if item.game == "Final Fantasy Mystic Quest" and item.name in ("Progressive Sword", "Progressive Axe",
+                "Progressive Claw", "Progressive Bomb", "Steel Sword", "Bomb", "Cat Claw", "Axe"):
+            continue
+        if item.game == "Stardew Valley" and item.name in ("Winter", "Fall", "Summer", "Spring"):
+            continue
+
 
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
 

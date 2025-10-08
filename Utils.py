@@ -594,7 +594,7 @@ def init_logging(name: str, loglevel: typing.Union[str, int] = logging.INFO,
 
         handle_exception._wrapped = True
 
-        sys.excepthook = handle_exception
+        # sys.excepthook = handle_exception
 
     def _cleanup():
         for file in os.scandir(log_folder):

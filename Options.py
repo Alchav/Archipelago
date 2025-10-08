@@ -1639,6 +1639,26 @@ class Removed(FreeText):
         super().__init__(value)
 
 
+class Owner(TextChoice):
+    # def __init__(self, value: str):
+    #     if value == self.option_Undefined:
+    #         raise OptionError("Undefined owner.")
+    #     super().__init__(value)
+    """Owner of the games slot. A = Alchav, B = AvBW, J = Jrackhen, L = Alyssa, X = Auto/AlchapelaBot. J after means Jigsaw"""
+    display_name = "Owner"
+    option_A = 0
+    option_AJ = 1
+    option_B = 2
+    option_BJ = 3
+    option_J = 4
+    option_JJ = 5
+    option_L = 6
+    option_LJ = 7
+    option_X = 8
+    option_Undefined = 9
+    default = 9
+
+
 class HintCount(Range):
     """How many hints total the game will get"""
     range_start = 0
@@ -1662,6 +1682,7 @@ class TokenPercentage(Range):
 
 @dataclass
 class PerGameCommonOptions(CommonOptions):
+    owner: Owner
     hint_count: HintCount
     hint_location_count: HintLocationCount
     token_percentage: TokenPercentage
