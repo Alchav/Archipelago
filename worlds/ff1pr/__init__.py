@@ -9,7 +9,7 @@ from .options import FF1pixelOptions, grouped_options, presets
 from .entrances import global_entrances, EntranceData, EntGroup
 from .ef_shuffle import shuffle_entrances
 from .data import itemnames
-from .spoiler import generate_entrances_spoiler
+from .spoiler import generate_entrance_hints_and_spoiler
 from Utils import visualize_regions
 
 GAME_NAME: str = "FF1 Pixel Remaster"
@@ -56,8 +56,12 @@ class FF1pixelWorld(World):
     result_entrances: Dict[str, str] = {}
     region_dict: Dict[str, Dict[str, str]] = {}
 
-    spawn_airship = False
-    spawn_ship = False
+    def __init__(self, multiworld: MultiWorld, player: int):
+        super().__init__(multiworld, player)
+        self.spawn_airship = False
+        self.spawn_ship = False
+        self.hint_data = {}
+        self.spoiler_text = ""
 
     def generate_early(self) -> None:
         if self.options.start_inventory.value.get("Airship", 0) > 0:
@@ -169,6 +173,11 @@ class FF1pixelWorld(World):
             location = FF1pixelLocation(self.player, location_name, None, region)
             region.locations.append(location)
 
+        if self.options.shuffle_towns > 0 or \
+                self.options.shuffle_overworld or \
+                self.options.shuffle_entrances > 0:
+            self.hint_data, self.spoiler_text = generate_entrance_hints_and_spoiler(self)
+
     def set_rules(self) -> None:
         set_region_rules(self)
         set_location_rules(self)
@@ -182,13 +191,14 @@ class FF1pixelWorld(World):
         progitempool.sort(
                 key=lambda item: 1 if (itemnames.lute_tablature in item.name and item.game == GAME_NAME) else 0)
 
+    def extend_hint_information(self, hint_data):
+        if self.hint_data:
+            hint_data[self.player] = self.hint_data
+
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
-        if self.options.shuffle_towns > 0 or \
-            self.options.shuffle_overworld or \
-            self.options.shuffle_entrances > 0:
-            spoiler_text = generate_entrances_spoiler(self)
+        if self.spoiler_text:
             spoiler_handle.writelines(f"\nFF1 Pixel Remaster entrances layout for {self.multiworld.player_name[self.player]}\n")
-            spoiler_handle.writelines(spoiler_text)
+            spoiler_handle.writelines(self.spoiler_text)
 
     def fill_slot_data(self) -> Dict[str, Any]:
         options_list = presets["Starter"].keys()
