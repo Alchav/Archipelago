@@ -1465,11 +1465,13 @@ class ClientMessageProcessor(CommonCommandProcessor):
     def _cmd_sphere(self, player=None):
         spheres = {}
         spheres_checked = {}
+        sphere_hinted_locations = {}
         if player:
             player = str(player)
             player = self.ctx.player_name_lookup[player][1]
         else:
             player = self.client.slot
+        hinted_locations = [hint.location for hint in self.ctx.hints[(0, player)]]
         lowest_sphere = 0
         highest_sphere = 0
         for location in self.ctx.locations[player]:
@@ -1487,12 +1489,16 @@ class ClientMessageProcessor(CommonCommandProcessor):
             if sphere not in spheres:
                 spheres[sphere] = []
                 spheres_checked[sphere] = []
+            if sphere not in sphere_hinted_locations:
+                sphere_hinted_locations[sphere] = []
             spheres[sphere].append(location)
             if location in self.ctx.location_checks[(0, player)]: #or self.ctx.client_game_state[0, location.item.slot].CLIENT_GOAL:
                 spheres_checked[sphere].append(location)
+            if location in hinted_locations:
+                sphere_hinted_locations[sphere].append(location)
         for i in list(range(lowest_sphere, highest_sphere + 1)) + [-1]:
             try:
-                if len(spheres[i]) == len(spheres_checked[i]):
+                if len(spheres[i]) == len(set(spheres_checked[i] + sphere_hinted_locations[i])):
                     continue
                 else:
                     game = self.ctx.slot_info[player].game
