@@ -2,7 +2,7 @@ from BaseClasses import Location, Region, Item, ItemClassification, LocationProg
 from worlds.AutoWorld import World, WebWorld
 num_bytes = 1
 import logging
-logging.getLogger().setLevel(logging.DEBUG)
+# logging.getLogger().setLevel(logging.DEBUG)
 # logging.basicConfig(level=logging.DEBUG)
 def get_set_bits(value: int) -> list[str]:
     result = []

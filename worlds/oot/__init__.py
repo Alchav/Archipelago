@@ -1237,8 +1237,10 @@ class OOTWorld(World):
             item_id = self.item_name_to_id.get(item_name, None)
             if item_id is None:
                 continue
-            multidata["precollected_items"][self.player].remove(item_id)
-
+            try:
+                multidata["precollected_items"][self.player].remove(item_id)
+            except:
+                pass
         # If skip child zelda, push item onto autotracker
         if self.shuffle_child_trade == 'skip_child_zelda':
             impa_item_id = self.item_name_to_id.get(self.get_location('Song from Impa').item.name, None)

@@ -132,9 +132,9 @@ class Factorio(World):
         craftsanity_pool = [craft for craft in craftsanity_locations
                             if self.options.silo != Silo.option_spawn
                             or craft not in ["Craft rocket-silo", "Craft cargo-landing-pad"]]
-        craftsanity_count = min(self.options.craftsanity.value, len(craftsanity_pool), location_count - 10)
+        craftsanity_count = min(self.options.craftsanity.value, len(craftsanity_pool))#, location_count - 10)
 
-        location_count -= craftsanity_count
+        location_count = 67 #-= craftsanity_count
 
         for pack in sorted(self.options.max_science_pack.get_allowed_packs()):
             location_pool.extend(location_pools[pack])
@@ -518,7 +518,7 @@ class Factorio(World):
                             & valid_ingredients)
         self.random.shuffle(valid_pool)
         self.custom_recipes = {"rocket-part": Recipe("rocket-part", original_rocket_part.category,
-                                                     {valid_pool[x]: 10 for x in range(3 + ingredients_offset)},
+                                                     {valid_pool[x]: 1 for x in range(3 + ingredients_offset)},
                                                      original_rocket_part.products,
                                                      original_rocket_part.energy)}
 

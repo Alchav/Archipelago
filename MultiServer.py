@@ -1911,6 +1911,7 @@ def get_client_points(ctx: Context, client: Client) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
     extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}))# * ctx.get_hint_cost(client.slot) * 0.472)
+    extra_hints *= 2 if ctx.client_game_state[client.team, client.slot] == ClientStatus.CLIENT_GOAL else 1
     return extra_hints - (ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
@@ -1918,6 +1919,7 @@ def get_client_location_points(ctx: Context, client: Client) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
             ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
     extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 10000}))# * ctx.get_hint_cost(client.slot) * 0.472)
+    extra_hints *= 2 if ctx.client_game_state[client.team, client.slot] == ClientStatus.CLIENT_GOAL else 1
     return extra_hints - (ctx.get_hint_location_cost(client.slot) * ctx.hint_locations_used[client.team, client.slot])
 
 
@@ -1925,6 +1927,7 @@ def get_slot_points(ctx: Context, team: int, slot: int) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
     extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 1000}))# * ctx.get_hint_cost(slot) * 0.5)
+    extra_hints *= 2 if ctx.client_game_state[team, slot] == ClientStatus.CLIENT_GOAL else 1
     return extra_hints - (ctx.get_hint_location_cost(slot) * ctx.hints_used[team, slot])
 
 
@@ -1932,6 +1935,7 @@ def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     points = (ctx.location_check_points * len(ctx.location_checks[team, slot]) -
             ctx.get_hint_cost(slot) * ctx.hints_used[team, slot])
     extra_hints = round(len({item for item in ctx.received_items[(team, 1, True)] if item.item == slot + 10000}))# * ctx.get_hint_cost(slot) * 0.5)
+    extra_hints *= 2 if ctx.client_game_state[team, slot] == ClientStatus.CLIENT_GOAL else 1
     return extra_hints - (ctx.get_hint_location_cost(slot) * ctx.hint_locations_used[team, slot])
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):

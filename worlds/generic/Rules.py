@@ -95,6 +95,7 @@ def exclusion_rules(multiworld: MultiWorld, player: int, exclude_locations: typi
                 location.progress_type = LocationProgressType.EXCLUDED
             else:
                 logging.warning(f"Unable to exclude location {loc_name} in player {player}'s world.")
+            add_item_rule(location, lambda i: i.excludable)
 
 
 def set_rule(spot: typing.Union["BaseClasses.Location", "BaseClasses.Entrance"], rule: CollectionRule):

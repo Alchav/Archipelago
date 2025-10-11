@@ -406,7 +406,8 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
                     state.sweep_for_advancements()
                     beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
 
-                    raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+                    # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+                    breakpoint()
                 else:
                     logger.warning("Location Accessibility requirements not fulfilled.")
 
