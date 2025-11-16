@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import typing
+import Utils
 from queue import Queue
 
 import factorio_rcon
@@ -70,9 +71,10 @@ class FactorioContext(CommonContext):
     mod_version: Version = Version(0, 0, 0)
 
     def __init__(self, server_address, password, filter_item_sends: bool, bridge_chat_out: bool,
-                 rcon_port: int, rcon_password: str, server_settings_path: str | None,
+                 rcon_port: int, rcon_password: str, server_settings_path: str | None, config_file,
                  factorio_server_args: tuple[str, ...]):
         super(FactorioContext, self).__init__(server_address, password)
+        self.config_file = config_file
         self.send_index: int = 0
         self.rcon_client = None
         self.awaiting_bridge = False
@@ -139,9 +141,11 @@ class FactorioContext(CommonContext):
                 "--rcon-port", str(self.rcon_port),
                 "--rcon-password", self.rcon_password,
                 "--server-settings", self.server_settings_path,
+                "--config", self.config_file
                 *self.additional_factorio_server_args)
         else:
             return ("--rcon-port", str(self.rcon_port), "--rcon-password", self.rcon_password,
+                    "--config", self.config_file,
                     *self.additional_factorio_server_args)
 
     @property
@@ -324,6 +328,7 @@ def stream_factorio_output(pipe, queue, process):
 async def factorio_server_watcher(ctx: FactorioContext):
     savegame_name = os.path.abspath(os.path.join(ctx.write_data_path, "saves", "Archipelago", ctx.savegame_name))
     if not os.path.exists(savegame_name):
+        config_file = Utils.user_path('factorio', 'config', 'apconfig.ini')
         logger.info(f"Creating savegame {savegame_name}")
         subprocess.run((
             executable, "--create", savegame_name, "--preset", "archipelago"
@@ -548,7 +553,12 @@ def launch(*new_args: str):
     parser.add_argument('--rcon-port', default='24242', type=int, help='Port to use to communicate with Factorio')
     parser.add_argument('--rcon-password', help='Password to authenticate with RCON.')
     parser.add_argument('--server-settings', help='Factorio server settings configuration file.')
-
+    config_file = Utils.user_path('factorio', 'config', 'apconfig.ini')
+    if not os.path.exists(config_file):
+        os.makedirs(os.path.dirname(config_file), exist_ok=True)
+        with open(config_file, 'w') as f:
+            f.write(f"[path]\nread-data=__PATH__system-read-data__\nwrite-data={Utils.user_path('factorio')}")
+    parser.add_argument('--config', default=config_file)
     args, rest = parser.parse_known_args(args=new_args)
     rcon_port = args.rcon_port
     rcon_password = args.rcon_password if args.rcon_password else ''.join(
@@ -567,6 +577,9 @@ def launch(*new_args: str):
 
     if not os.path.exists(os.path.dirname(executable)):
         raise FileNotFoundError(f"Path {os.path.dirname(executable)} does not exist or could not be accessed.")
+    if os.path.isdir(executable) and os.path.exists(os.path.join(executable, "Contents", "MacOS", "factorio")):
+        # user entered the .App bundle, let's find the executable
+        executable = os.path.join(executable, "Contents", "MacOS", "factorio")
     if os.path.isdir(executable):  # user entered a path to a directory, let's find the executable therein
         executable = os.path.join(executable, "factorio")
     if not os.path.isfile(executable):
@@ -578,6 +591,6 @@ def launch(*new_args: str):
     asyncio.run(main(lambda: FactorioContext(
         args.connect, args.password,
         initial_filter_item_sends, initial_bridge_chat_out,
-        rcon_port, rcon_password, server_settings, rest
+        rcon_port, rcon_password, server_settings, config_file, rest
     )))
     colorama.deinit()

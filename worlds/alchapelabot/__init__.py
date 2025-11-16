@@ -38,7 +38,7 @@ class AlchapelaBotWorld(World):
             self.item_name_to_id[f"{player_name} Hint Location Point"] = player + 10000
             self.item_id_to_name[player + 1000] = f"{player_name} Hint Point"
             self.item_id_to_name[player + 10000] = f"{player_name} Hint Location Point"
-            self.options.start_hints.value.add(f"Unlock {player_name}")
+            # self.options.start_hints.value.add(f"Unlock {player_name}")
         for starting_game in self.options.start_games.value:
             try:
                 self.multiworld.push_precollected(self.create_item(f"Unlock {starting_game}"))
