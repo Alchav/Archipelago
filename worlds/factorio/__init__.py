@@ -132,16 +132,24 @@ class Factorio(World):
         craftsanity_pool = [craft for craft in craftsanity_locations
                             if self.options.silo != Silo.option_spawn
                             or craft not in ["Craft rocket-silo", "Craft cargo-landing-pad"]]
-        craftsanity_count = min(self.options.craftsanity.value, len(craftsanity_pool))#, location_count - 10)
+        # Ensure at least 2 science pack locations for automation and logistics, and 1 more for rocket-silo
+        # if it is not pre-spawned
+        craftsanity_count = min(self.options.craftsanity.value, len(craftsanity_pool),
+                                location_count - 2 if self.options.silo == Silo.option_spawn else 3)
 
-        location_count = 67 #-= craftsanity_count
+        location_count -= craftsanity_count
 
         for pack in sorted(self.options.max_science_pack.get_allowed_packs()):
             location_pool.extend(location_pools[pack])
         try:
+            # Ensure there are two "AP-1-" locations for automation and logistics, and one max science pack location
+            # for rocket-silo if it is not pre-spawned
+            max_science_pack_number = len(self.options.max_science_pack.get_allowed_packs())
             science_location_names = None
-            while not science_location_names or len([location for location in science_location_names
-                                                     if location.startswith("AP-1-")]) < 2:
+            while (not science_location_names or
+                   len([location for location in science_location_names if location.startswith("AP-1-")]) < 2
+                    or (self.options.silo != Silo.option_spawn and len([location for location in science_location_names
+                            if location.startswith(f"AP-{max_science_pack_number}")]) < 1)):
                 science_location_names = random.sample(location_pool, location_count)
             craftsanity_location_names = random.sample(craftsanity_pool, craftsanity_count)
 
@@ -270,8 +278,6 @@ class Factorio(World):
                 else:
                     raise Exception(
                         f"No recipe found for {location.crafted_item} for Craftsanity for player {self.player}")
-            if location.crafted_item != recipe.name:
-                print(location.crafted_item + ": " + recipe.name)
             location.access_rule = lambda state, recipe=recipe: \
                 state.has_all({technology.name for technology in recipe.recursive_unlocking_technologies}, player)
 
@@ -289,10 +295,11 @@ class Factorio(World):
             silo_recipe = self.get_recipe("rocket-silo")
             cargo_pad_recipe = self.get_recipe("cargo-landing-pad")
         part_recipe = self.custom_recipes["rocket-part"]
-        satellite_recipe = None
-        if self.options.goal == Goal.option_satellite:
-            satellite_recipe = self.get_recipe("satellite")
-        victory_tech_names = get_rocket_requirements(silo_recipe, part_recipe, satellite_recipe, cargo_pad_recipe)
+        satellite_recipe = self.get_recipe("satellite")
+        victory_tech_names = get_rocket_requirements(
+            silo_recipe, part_recipe,
+            satellite_recipe if self.options.goal == Goal.option_satellite else None,
+            cargo_pad_recipe)
         if self.options.silo == Silo.option_spawn:
             victory_tech_names -= {"rocket-silo"}
         else:
@@ -518,7 +525,7 @@ class Factorio(World):
                             & valid_ingredients)
         self.random.shuffle(valid_pool)
         self.custom_recipes = {"rocket-part": Recipe("rocket-part", original_rocket_part.category,
-                                                     {valid_pool[x]: 1 for x in range(3 + ingredients_offset)},
+                                                     {valid_pool[x]: 10 for x in range(3 + ingredients_offset)},
                                                      original_rocket_part.products,
                                                      original_rocket_part.energy)}
 
@@ -565,7 +572,8 @@ class Factorio(World):
         needed_recipes = self.options.max_science_pack.get_allowed_packs() | {"rocket-part"}
         if self.options.silo != Silo.option_spawn:
             needed_recipes |= {"rocket-silo", "cargo-landing-pad"}
-        if self.options.goal.value == Goal.option_satellite:
+        if (self.options.goal.value == Goal.option_satellite
+                or "Craft satellite" in self.multiworld.regions.location_cache[self.player]):
             needed_recipes |= {"satellite"}
 
         needed_items = {location.crafted_item for location in self.craftsanity_locations}
