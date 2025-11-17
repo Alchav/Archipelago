@@ -362,15 +362,15 @@ progressive_incs = set()
 for tech_name in tech_table:
     if tech_name.endswith("-1"):
         progressive_rows[tech_name] = []
-    elif tech_name[-2] == "-" and tech_name[-1] in string.digits:
+    elif tech_name[-1] in string.digits and tech_name[-2] in string.digits + "-":
         progressive_incs.add(tech_name)
 
 for root, progressive in progressive_rows.items():
-    seeking = root[:-1] + str(int(root[-1]) + 1)
+    seeking = root.rsplit("-", 1)[0] + "-" + str(int(root.rsplit("-", 1)[1]) + 1)
     while seeking in progressive_incs:
         progressive.append(seeking)
         progressive_incs.remove(seeking)
-        seeking = seeking[:-1] + str(int(seeking[-1]) + 1)
+        seeking = seeking.rsplit("-", 1)[0] + "-" + str(int(seeking.rsplit("-", 1)[1]) + 1)
 
 # make root entry the progressive name
 for old_name in set(progressive_rows):
@@ -415,6 +415,7 @@ progressive_rows["progressive-turret"] = ("gun-turret", "laser-turret")
 progressive_rows["progressive-flamethrower"] = ("flamethrower",)  # leaving out flammables, as they do nothing
 progressive_rows["progressive-personal-roboport-equipment"] = ("personal-roboport-equipment",
                                                                "personal-roboport-mk2-equipment")
+progressive_rows["progressive-beacon"] = ("effect-transmission",)
 
 sorted_rows = sorted(progressive_rows)
 
@@ -423,6 +424,7 @@ source_target_mapping: Dict[str, str] = {
     "progressive-braking-force": "progressive-train-network",
     "progressive-inserter-capacity-bonus": "progressive-inserter",
     "progressive-refined-flammables": "progressive-flamethrower",
+    "progressive-beacon-distribution": "progressive-beacon",
 }
 
 for source, target in source_target_mapping.items():

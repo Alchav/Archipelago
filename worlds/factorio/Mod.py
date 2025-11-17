@@ -38,7 +38,8 @@ base_info = {
     "factorio_version": "2.0",
     "dependencies": [
         "base >= 2.0.28",
-        "? quality >= 2.0.28",
+        "quality >= 2.0.28",
+        "elevated-rails >= 2.0.28",
         "! space-age",
         "? science-not-invited",
         "? factory-levels"
