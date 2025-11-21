@@ -315,7 +315,7 @@ def get_public_ipv6() -> str:
 
 
 def get_options() -> Settings:
-    deprecate("Utils.get_options() is deprecated. Use the settings API instead.")
+    # deprecate("Utils.get_options() is deprecated. Use the settings API instead.")
     return get_settings()
 
 

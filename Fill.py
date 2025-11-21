@@ -810,7 +810,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         else:
             defaultlocations.append(location)
 
-    filleritempool.sort(key=lambda i: i.trap)
+    # filleritempool.sort(key=lambda i: i.trap)
 
     remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded")
 
@@ -855,6 +855,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         game = i.game
         if game == "Generic":
             game = multiworld.worlds[i.player].game
+        if game == "Factorio" and i.classification == ItemClassification.filler:
+            return multiworld.random.randint(1, 2)
         if (not i.advancement) and "Auto" in multiworld.player_name[i.player]:
             return 0
         if item.player == 1 and item.name.startswith("Unlock "):

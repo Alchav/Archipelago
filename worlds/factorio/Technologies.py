@@ -234,6 +234,8 @@ for resource_name, resource_data in resources_future.result().items():
 del resources_future
 
 for recipe_name, recipe_data in raw_recipes.items():
+    if "-recycling" in recipe_name:
+        continue
     # example:
     # "accumulator":{"ingredients":{"iron-plate":2,"battery":5},"products":{"accumulator":1},"category":"crafting"}
     # FIXME: add mining?
@@ -416,6 +418,7 @@ progressive_rows["progressive-flamethrower"] = ("flamethrower",)  # leaving out 
 progressive_rows["progressive-personal-roboport-equipment"] = ("personal-roboport-equipment",
                                                                "personal-roboport-mk2-equipment")
 progressive_rows["progressive-beacon"] = ("effect-transmission",)
+
 
 sorted_rows = sorted(progressive_rows)
 
