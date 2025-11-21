@@ -198,6 +198,8 @@ for recipe_name, recipe in pairs(data.raw.recipe) do
           }
         },
         prerequisites = prerequisites,
+        hidden = true,
+        hidden_in_factoriopedia = true
         unit = {
           count = count,
           ingredients = {
@@ -222,6 +224,25 @@ for level = 1, 30 do
         icons = util.technology_icon_constant_movement_speed("__base__/graphics/technology/effect-transmission.png"),
 --         infer_icon = false,
         effects = {{type = "beacon-distribution", modifier = 0.1}},
+        upgrade = true,
+        unit = {
+            count = 1,
+            time = 60,
+            ingredients = {
+                {"automation-science-pack", 1}
+            }
+        }
+    }
+    data.raw.technology["research-productivity-" .. level] = {
+        type = "technology",
+        name = "research-productivity-" .. level,
+        icons = util.technology_icon_constant_productivity("__base__/graphics/technology/research-speed.png"),
+--         infer_icon = false,
+        effects =     {
+            type = "laboratory-productivity",
+            modifier = 0.10
+          },
+        },
         upgrade = true,
         unit = {
             count = 1,
