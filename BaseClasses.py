@@ -571,7 +571,9 @@ class MultiWorld():
 
     def can_beat_game(self,
                       starting_state: Optional[CollectionState] = None,
-                      locations: Optional[Iterable[Location]] = None) -> bool:
+                      locations: Optional[Iterable[Location]] = None, bp=False) -> bool:
+        if bp:
+            breakpoint()
         if starting_state:
             if self.has_beaten_game(starting_state):
                 return True
@@ -756,7 +758,9 @@ class CollectionState():
             for item in items:
                 self.collect(item, True)
 
-    def update_reachable_regions(self, player: int):
+    def update_reachable_regions(self, player: int, bp=False):
+        if bp:
+            breakpoint()
         self.stale[player] = False
         world: AutoWorld.World = self.multiworld.worlds[player]
         reachable_regions = self.reachable_regions[player]
@@ -1761,20 +1765,22 @@ class Spoiler:
         # second phase, sphere 0
         removed_precollected: List[Item] = []
 
-        for precollected_items in multiworld.precollected_items.values():
-            # The list of items is mutated by removing one item at a time to determine if each item is required to beat
-            # the game, and re-adding that item if it was required, so a copy needs to be made before iterating.
-            for item in precollected_items.copy():
-                if not item.advancement:
-                    continue
-                logging.debug('Checking if %s (Player %d) is required to beat the game.', item.name, item.player)
-                precollected_items.remove(item)
-                multiworld.state.remove(item)
-                if not multiworld.can_beat_game(multiworld.state, required_locations):
-                    # Add the item back into `precollected_items` and collect it into `multiworld.state`.
-                    multiworld.push_precollected(item)
-                else:
-                    removed_precollected.append(item)
+        # for precollected_items in multiworld.precollected_items.values():
+        #     # The list of items is mutated by removing one item at a time to determine if each item is required to beat
+        #     # the game, and re-adding that item if it was required, so a copy needs to be made before iterating.
+        #     for item in precollected_items.copy():
+        #         if "Unlock" in item.name or not item.advancement:
+        #             continue
+        #         logging.debug('Checking if %s (Player %d) is required to beat the game.', item.name, item.player)
+        #         precollected_items.remove(item)
+        #         multiworld.state.reachable_regions[item.player] = set()
+        #         multiworld.state.blocked_connections[item.player] = set()
+        #         multiworld.state.stale[item.player] = True
+        #         if not multiworld.can_beat_game(multiworld.state, required_locations, bp=item.name == "Unlock AlchavMelee"):
+        #             # Add the item back into `precollected_items` and collect it into `multiworld.state`.
+        #             multiworld.push_precollected(item)
+        #         else:
+        #             removed_precollected.append(item)
 
         # we are now down to just the required progress items in collection_spheres. Unfortunately
         # the previous pruning stage could potentially have made certain items dependant on others
@@ -1799,7 +1805,8 @@ class Spoiler:
             required_locations -= sphere
             if not sphere:
                 if {location for location in required_locations if location.address}:
-                    raise RuntimeError(f'Not all required items reachable. Unreachable locations: {required_locations}')
+                    x = {loc: loc.item for loc in required_locations}
+                    raise RuntimeError(f'Not all required items reachable. Unreachable locations: {x}')
                 else:
                     break
 

@@ -232,8 +232,8 @@ def set_location_rules(world: "SSBMWorld") -> None:
     set_rule(world.multiworld.get_location("Training Mode - 10-Hit Combo", player), lambda state: state.has_any(decent_combo_char, player) and state.has("Bowser", player))
     set_rule(world.multiworld.get_location("Training Mode - 20-Hit Combo", player), lambda state: state.has_any(good_combo_char, player) and state.has("Bowser", player))
 
-    set_rule(world.multiworld.get_location("Multi Man Melee - Cruel Melee 5 KO's", player), lambda state: state.has("Pikachu", player))
-    set_rule(world.multiworld.get_location("Multi Man Melee - 15 Minute Melee Clear", player), lambda state: state.has("Donkey Kong", player))
+    # set_rule(world.multiworld.get_location("Multi Man Melee - Cruel Melee 5 KO's", player), lambda state: state.has("Pikachu", player))
+    # set_rule(world.multiworld.get_location("Multi Man Melee - 15 Minute Melee Clear", player), lambda state: state.has("Donkey Kong", player))
     set_rule(world.multiworld.get_location("Multi Man Melee - 100 Man Melee Sub 4 Minutes", player), lambda state: state.has("Donkey Kong", player))
     set_rule(world.multiworld.get_location("Multi Man Melee - Endless Melee 100 KO's", player), lambda state: state.has("Donkey Kong", player))
 
