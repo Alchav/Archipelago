@@ -1133,7 +1133,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
 
     beaten_game_spheres = {}
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
+    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
 
     game_spheres = {player_id: 0 for player_id in multiworld.player_ids}
     for i, sphere in enumerate(spheres):
@@ -1158,10 +1158,32 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     if not multiworld.fulfills_accessibility():
         breakpoint()
 
+    unreachable = False
+    shared_spheres = {player: {} for player in multiworld.player_ids}
     for sphere_n, sphere in enumerate(spheres, 1):
+        if not sphere:
+            unreachable = True
+            continue
+
         sphere_list = list(sphere)
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
+        if unreachable:
+            while sphere:
+                a = sphere.pop()
+                for b in [location for location in sphere if location.player in shared_spheres[a.player]]:
+                    if ((not b.item) or a.item_rule(b.item)) and ((not a.item) or b.item_rule(a.item)):
+                        a.item, b.item = b.item, a.item
+                        sphere.remove(b)
+                        logging.info(f"Swapped unreachable {a} with {b}")
+                        break
+                    else:
+                        continue
+                else:
+                    logging.info(f"Couldn't swap {a} for player {a.player}")
+        player_spheres = {loc.player for loc in sphere}
+        for player in player_spheres:
+            shared_spheres[player] |= player_spheres
         sphere_t = [[], [], [], [], [], []]
         for loc in sphere_list:
             # release game:
