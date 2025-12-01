@@ -2,7 +2,7 @@ local productivity_overlay_icon = {
   icon = "__core__/graphics/icons/technology/effect-constant/effect-constant-recipe-productivity.png",
   icon_size = 64
 }
-
+local hide = true
 local technologies = {}
 local enabled_or_tech_recipes = {}
 
@@ -122,7 +122,7 @@ end
 ----------------------------------------------------------------
 -- Generate technologies
 ----------------------------------------------------------------
-
+all_recipes = {}
 for recipe_name, recipe in pairs(data.raw.recipe) do
   local process = true
 
@@ -173,7 +173,8 @@ for recipe_name, recipe in pairs(data.raw.recipe) do
   end
 
   if process then
-    for level = 1, 30 do
+    all_recipes[#all_recipes + 1] = recipe_name
+    for level = 1, 3 do
       local tech_name = recipe_name .. "-productivity-" .. level
 
       local icons = table.deepcopy(base_icons)
@@ -194,12 +195,12 @@ for recipe_name, recipe in pairs(data.raw.recipe) do
           {
             type = "change-recipe-productivity",
             recipe = recipe_name,
-            change = 0.1
+            change = 0.5
           }
         },
         prerequisites = prerequisites,
-        hidden = true,
-        hidden_in_factoriopedia = true
+        hidden = hide,
+        hidden_in_factoriopedia = hide,
         unit = {
           count = count,
           ingredients = {
@@ -217,6 +218,32 @@ for recipe_name, recipe in pairs(data.raw.recipe) do
   end
 end
 data:extend(technologies)
+universal_effects = {}
+for i, recipe_name in ipairs(all_recipes) do
+    table.insert(universal_effects, {type = "change-recipe-productivity", recipe = recipe_name, change = 0.01})
+end
+
+for level = 1, 150 do
+   data.raw.technology["universal-productivity-" .. level] = {
+        type = "technology",
+        name = "universal-productivity-" .. level,
+        icons = {productivity_overlay_icon},
+        effects = universal_effects,
+        prerequisites = prerequisites,
+        hidden = hide,
+        hidden_in_factoriopedia = hide,
+        unit = {
+          count = 1000,
+          ingredients = {
+            {"automation-science-pack", 1}
+            -- add more packs here if you want
+          },
+          time = 60
+        },
+        upgrade = true,
+        order = "z[universal-productivity-" .. level .. "]-" .. string.format("%02d", level),
+   }
+end
 for level = 1, 30 do
     data.raw.technology["beacon-distribution-" .. level] = {
         type = "technology",
@@ -239,6 +266,7 @@ for level = 1, 30 do
         icons = util.technology_icon_constant_productivity("__base__/graphics/technology/research-speed.png"),
 --         infer_icon = false,
         effects =     {
+            {
             type = "laboratory-productivity",
             modifier = 0.10
           },
