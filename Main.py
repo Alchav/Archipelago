@@ -377,6 +377,7 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
                 multidata: NetUtils.MultiData = {
                     "slot_data": slot_data,
                     "slot_info": slot_info,
+                    "owners": {player: multiworld.worlds[player].options.owner.value for player in multiworld.player_ids},
                     "connect_names": {name: (0, player) for player, name in multiworld.player_name.items()},
                     "locations": locations_data,
                     "checks_in_area": checks_in_area,

@@ -578,22 +578,22 @@ def init_logging(name: str, loglevel: typing.Union[str, int] = logging.INFO,
         if hasattr(sys.stdout, "reconfigure"):
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-    # Relay unhandled exceptions to logger.
-    if not getattr(sys.excepthook, "_wrapped", False):  # skip if already modified
-        orig_hook = sys.excepthook
-
-        def handle_exception(exc_type, exc_value, exc_traceback):
-            if issubclass(exc_type, KeyboardInterrupt):
-                sys.__excepthook__(exc_type, exc_value, exc_traceback)
-                return
-            logging.getLogger(exception_logger).exception("Uncaught exception",
-                                                          exc_info=(exc_type, exc_value, exc_traceback),
-                                                          extra={"NoStream": exception_logger is None})
-            return orig_hook(exc_type, exc_value, exc_traceback)
-
-        handle_exception._wrapped = True
-
-        # sys.excepthook = handle_exception
+    # # Relay unhandled exceptions to logger.
+    # if not getattr(sys.excepthook, "_wrapped", False):  # skip if already modified
+    #     orig_hook = sys.excepthook
+    #
+    #     def handle_exception(exc_type, exc_value, exc_traceback):
+    #         if issubclass(exc_type, KeyboardInterrupt):
+    #             sys.__excepthook__(exc_type, exc_value, exc_traceback)
+    #             return
+    #         logging.getLogger(exception_logger).exception("Uncaught exception",
+    #                                                       exc_info=(exc_type, exc_value, exc_traceback),
+    #                                                       extra={"NoStream": exception_logger is None})
+    #         return orig_hook(exc_type, exc_value, exc_traceback)
+    #
+    #     handle_exception._wrapped = True
+    #
+    #     sys.excepthook = handle_exception
 
     def _cleanup():
         for file in os.scandir(log_folder):

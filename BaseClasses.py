@@ -91,6 +91,8 @@ class MultiWorld():
     completion_condition: Dict[int, Callable[[CollectionState], bool]]
     indirect_connections: Dict[Region, Set[Entrance]]
     exclude_locations: Dict[int, Options.ExcludeLocations]
+    ool_locations: Dict[int, Options.OOLLocations]
+    owner: Dict[int, Options.Owner]
     priority_locations: Dict[int, Options.PriorityLocations]
     start_inventory: Dict[int, Options.StartInventory]
     start_hints: Dict[int, Options.StartHints]

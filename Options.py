@@ -1418,6 +1418,12 @@ class StartLocationHints(LocationSet):
     rich_text_doc = True
 
 
+class OOLLocations(LocationSet):
+    """Prevent these locations from having a required item."""
+    display_name = "Out of Logic Locations"
+    rich_text_doc = True
+
+
 class ExcludeLocations(LocationSet):
     """Prevent these locations from having an important item."""
     display_name = "Excluded Locations"
@@ -1699,6 +1705,7 @@ class PerGameCommonOptions(CommonOptions):
     start_inventory: StartInventory
     start_hints: StartHints
     start_location_hints: StartLocationHints
+    ool_locations: OOLLocations
     exclude_locations: ExcludeLocations
     priority_locations: PriorityLocations
     item_links: ItemLinks
@@ -1722,7 +1729,7 @@ class OptionGroup(typing.NamedTuple):
 
 
 item_and_loc_options = [LocalItems, NonLocalItems, StartInventory, StartInventoryPool, StartHints,
-                        StartLocationHints, ExcludeLocations, PriorityLocations, ItemLinks, PlandoItems]
+                        StartLocationHints, OOLLocations, ExcludeLocations, PriorityLocations, ItemLinks, PlandoItems]
 """
 Options that are always populated in "Item & Location Options" Option Group. Cannot be moved to another group.
 If desired, a custom "Item & Location Options" Option Group can be defined, but only for adding additional options to

@@ -575,6 +575,8 @@ class Context:
         # sorted access spheres
         self.spheres = decoded_obj.get("spheres", [])
 
+        self.owners = decoded_obj.get("owners", [])
+
     # saving
 
     def save(self, now=False) -> bool:

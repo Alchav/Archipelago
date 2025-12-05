@@ -1159,7 +1159,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         breakpoint()
 
     unreachable = False
-    shared_spheres = {player: {} for player in multiworld.player_ids}
+    shared_spheres = {player: set() for player in multiworld.player_ids}
     for sphere_n, sphere in enumerate(spheres, 1):
         if not sphere:
             unreachable = True
