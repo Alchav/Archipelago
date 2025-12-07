@@ -696,6 +696,8 @@ def handle_location_item_info(patch: WaffleProcedurePatch, world: "WaffleWorld")
     midway_point_info = bytearray([0x00 for _ in range(96)])
     locations = world.multiworld.get_filled_locations(world.player)
     for location in locations:
+        if not location.address:
+            continue
         classification = 0
         if ItemClassification.progression in location.item.classification or ItemClassification.trap in location.item.classification:
             classification = 2

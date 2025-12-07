@@ -98,9 +98,9 @@ class WaffleWorld(World):
             self.options.percentage_of_yoshi_eggs.value = 90
             valid_loc_count = int(self.count_locations()/10) 
             egg_count = min(self.count_egg_locations() + self.options.yoshi_egg_count.value, 255)
-            if valid_loc_count < egg_count:
-                raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
-                                f"Please set less Yoshi Eggs your YAML file or DON'T use minimal accessibility.")
+            # if valid_loc_count < egg_count:
+            #     raise OptionError(f"{self.player_name} has a very weird combination of settings that will result in a failed generation.\n"
+            #                     f"Please set less Yoshi Eggs your YAML file or DON'T use minimal accessibility.")
             
         # Enforce disabling DeathLink for now
         if self.options.death_link:
@@ -404,8 +404,10 @@ class WaffleWorld(World):
 
         if self.options.goal == Goal.option_yoshi_house:
             self.multiworld.get_location(LocationName.yoshis_house, self.player).place_locked_item(self.create_item(ItemName.victory))
+            self.multiworld.get_location(LocationName.yoshis_house, self.player).address = None
         else:
             self.multiworld.get_location(LocationName.bowser, self.player).place_locked_item(self.create_item(ItemName.victory))
+            self.multiworld.get_location(LocationName.bowser, self.player).address = None
 
         junk_count = total_required_locations - len(itempool)
         trap_weights = []

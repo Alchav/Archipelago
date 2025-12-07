@@ -991,7 +991,8 @@ class OptionSet(Option[typing.Set[str]], VerifyKeys):
         return cls.from_text(str(data))
 
     def get_option_name(self, value):
-        return ", ".join(sorted(value))
+        v = sorted([i for i in value if type(i) == str])
+        return ", ".join(v)
 
     def __contains__(self, item):
         return item in self.value

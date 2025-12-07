@@ -1354,7 +1354,15 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     multiworld.random.shuffle(swap_out_locations)
 
     for location, item in zip(swap_out_locations, items):
-        location.item = item
+        # item_name = (
+        #     f"{multiworld.player_name[player]} Hint Location Point"
+        #     if kind == "loc"
+        #     else f"{multiworld.player_name[player]} Hint Point"
+        # )
+        item_name = multiworld.worlds[1].item_id_to_name[(10000 if kind == "loc" else 1000) + multiworld.worlds[player].options.owner.value]
+        new_item = multiworld.worlds[1].create_item(item_name)
+        location.item = new_item
+        new_item.location = location
 
     # # Prefer placing a player's own items (both kinds) in their own locations first
     # players_in_items = {p for (_, p) in items}
