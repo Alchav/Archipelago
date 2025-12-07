@@ -1592,7 +1592,7 @@ class ItemClassification(IntFlag):
 
 class Item:
     game: str = "Generic"
-    __slots__ = ("name", "classification", "code", "player", "location")
+    __slots__ = ("name", "classification", "code", "player", "location", "hint")
     name: str
     classification: ItemClassification
     code: Optional[int]
@@ -1606,6 +1606,7 @@ class Item:
         self.player = player
         self.code = code
         self.location = None
+        self.hint = False
 
     @property
     def hint_text(self) -> str:

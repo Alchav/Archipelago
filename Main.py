@@ -80,13 +80,20 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
     for player in multiworld.player_ids:
         for item_name, count in multiworld.worlds[player].options.start_inventory.value.items():
             for _ in range(count):
-                multiworld.push_precollected(multiworld.create_item(item_name, player))
+                item = multiworld.create_item(item_name, player)
+                item.hint = True
+                multiworld.push_precollected(item)
 
         for item_name, count in getattr(multiworld.worlds[player].options,
                                         "start_inventory_from_pool",
                                         StartInventoryPool({})).value.items():
             for _ in range(count):
-                multiworld.push_precollected(multiworld.create_item(item_name, player))
+                item = multiworld.create_item(item_name, player)
+                if item.game == "Factorio":
+                    from BaseClasses import ItemClassification
+                    item.classification = ItemClassification.progression
+                item.hint = True
+                multiworld.push_precollected(item)
             # remove from_pool items also from early items handling, as starting is plenty early.
             early = multiworld.early_items[player].get(item_name, 0)
             if early:
@@ -351,6 +358,8 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
                             precollect_hint(location, auto_status)
                         elif any([location.item.name in multiworld.worlds[player].options.start_hints
                                   for player in multiworld.groups.get(location.item.player, {}).get("players", [])]):
+                            precollect_hint(location, auto_status)
+                        elif location.item.hint:
                             precollect_hint(location, auto_status)
 
                 # embedded data package

@@ -1,3 +1,324 @@
+-- data-final-fixes.lua
+local util = require("util")
+
+local technologies = data.raw.technology
+local recipes = data.raw.recipe
+
+local techs_to_delete = {}
+local dont_delete = {}  -- <--- NEW
+
+-- === Helpers ===============================================================
+
+-- Find any prototype with this name that has an icon/icons
+local function find_prototype_with_icon(name)
+  if not name then return nil end
+  for _, proto_group in pairs(data.raw) do
+    local proto = proto_group[name]
+    if proto and (proto.icon or proto.icons) then
+      return proto
+    end
+  end
+  return nil
+end
+
+-- Copy icon/icons/icon_size/icon_mipmaps from src to dest
+local function copy_icon_from_prototype(dest, src)
+  if src.icons then
+    dest.icons = util.table.deepcopy(src.icons)
+    dest.icon = nil
+    dest.icon_size = nil
+    dest.icon_mipmaps = nil
+  else
+    dest.icons = nil
+    dest.icon = src.icon
+    dest.icon_size = src.icon_size
+    dest.icon_mipmaps = src.icon_mipmaps
+  end
+end
+
+-- Choose an icon for the new tech from recipe or its main product
+local function assign_icon_from_recipe_or_product(new_tech, recipe, fallback_icon_proto, tech_name)
+  -- 1) Recipe has its own icon/icons
+  if recipe.icons or recipe.icon then
+    copy_icon_from_prototype(new_tech, recipe)
+    return
+  end
+
+  -- 2) Try main product / results / result
+  local product_name = nil
+
+  if recipe.main_product then
+    if type(recipe.main_product) == "string" then
+      product_name = recipe.main_product
+    elseif type(recipe.main_product) == "table" and recipe.main_product.name then
+      product_name = recipe.main_product.name
+    end
+  end
+
+  if not product_name and recipe.result then
+    product_name = recipe.result
+  end
+
+  if not product_name and recipe.results and #recipe.results > 0 then
+    local first = recipe.results[1]
+    if type(first) == "table" then
+      product_name = first.name or first[1]
+    else
+      -- results can also be {"item-name", amount}
+      product_name = first
+    end
+  end
+
+  if product_name then
+    local product_proto = find_prototype_with_icon(product_name)
+    if product_proto then
+      copy_icon_from_prototype(new_tech, product_proto)
+      return
+    else
+      log("Could not find prototype with icon for product '" ..
+          tostring(product_name) .. "' from recipe '" ..
+          tostring(recipe.name) .. "' (tech '" .. tostring(tech_name) .. "').")
+    end
+  else
+    log("No product_name found for recipe '" ..
+        tostring(recipe.name) .. "' (tech '" .. tostring(tech_name) .. "').")
+  end
+
+  -- 3) Fallback: keep the original tech icon so we don't break the prototype
+  if fallback_icon_proto then
+    copy_icon_from_prototype(new_tech, fallback_icon_proto)
+  else
+    log("No icon available for new tech from recipe '" ..
+        tostring(recipe.name) .. "' (tech '" .. tostring(tech_name) .. "').")
+  end
+end
+
+-- Set of recipes that should also unlock circuit network
+local circuit_network_recipes = {
+  ["arithmetic-combinator"]   = true,
+  ["decider-combinator"]      = true,
+  ["constant-combinator"]     = true,
+  ["power-switch"]            = true,
+  ["programmable-speaker"]    = true,
+  ["display-panel"]           = true,
+}
+
+-- Add special effects based on recipe name
+local function apply_special_effects(new_tech, recipe_name)
+  -- construction-robot: {type = "create-ghost-on-entity-death", modifier = true}
+  if recipe_name == "construction-robot" then
+    table.insert(new_tech.effects, {
+      type = "create-ghost-on-entity-death",
+      modifier = true
+    })
+  end
+
+  -- rail-ramp : {type = "rail-planner-allow-elevated-rails", modifier = true}
+  if recipe_name == "rail-ramp" then
+    table.insert(new_tech.effects, {
+        type = "rail-planner-allow-elevated-rails",
+        modifier = true
+    })
+  end
+
+  -- logistic-robot:
+  -- {type = "character-logistic-requests", modifier = true}
+  -- {type = "character-logistic-trash-slots", modifier = 30}
+  if recipe_name == "logistic-robot" then
+    table.insert(new_tech.effects, {
+      type = "character-logistic-requests",
+      modifier = true
+    })
+    table.insert(new_tech.effects, {
+      type = "character-logistic-trash-slots",
+      modifier = 30
+    })
+  end
+
+  -- requester-chest: {type = "vehicle-logistics", modifier = true}
+  if recipe_name == "requester-chest" then
+    table.insert(new_tech.effects, {
+      type = "vehicle-logistics",
+      modifier = true
+    })
+  end
+
+  -- circuit network unlock
+  if circuit_network_recipes[recipe_name] then
+    -- avoid duplicate unlock-circuit-network if already present for some reason
+    local already = false
+    for _, eff in ipairs(new_tech.effects) do
+      if eff.type == "unlock-circuit-network" then
+        already = true
+        break
+      end
+    end
+    if not already then
+      table.insert(new_tech.effects, {
+        type = "unlock-circuit-network",
+        modifier = true
+      })
+    end
+  end
+end
+
+-- === Main tech splitting pass ==============================================
+
+for tech_name, tech in pairs(technologies) do
+  local effects = tech.effects
+  local unlock_effects = {}
+  local has_other_effects = false
+
+  if effects then
+    for _, effect in pairs(effects) do
+      if effect.type == "unlock-recipe" then
+        table.insert(unlock_effects, effect)
+      else
+        has_other_effects = true
+      end
+    end
+  end
+
+  local unlock_count = #unlock_effects
+
+  if tech_name == "rocket-silo" then
+    tech.effects = {{type = "unlock-recipe", recipe = "rocket-silo"},{type = "unlock-recipe", recipe = "rocket-part"}}
+    -- Never delete rocket-silo in the cleanup pass
+    dont_delete["rocket-silo"] = true
+  end
+  if unlock_count < 2 then
+    -- Case 1: 0 or 1 unlock-recipe effect → just remove prerequisites
+
+    tech.prerequisites = nil
+
+  elseif unlock_count >= 2 then
+    -- Case 2: multiple unlock-recipe effects (excluding rocket-part on rocket-silo)
+    if has_other_effects then
+      log("Tech '" .. tech_name ..
+          "' has multiple unlock-recipe effects AND other effects; needs special handling.")
+    end
+
+    -- NEW: detect if this tech has a recipe with the same name as the tech
+    local tech_name_matches_recipe = false
+    for _, unlock in ipairs(unlock_effects) do
+      if unlock.recipe == tech_name then
+        tech_name_matches_recipe = true
+        break
+      end
+    end
+    if tech_name_matches_recipe then
+      dont_delete[tech_name] = true
+    end
+
+    -- Capture original icon as a fallback if recipe/item lookup fails
+    local original_icon_proto = {
+      icon = tech.icon,
+      icons = tech.icons,
+      icon_size = tech.icon_size,
+      icon_mipmaps = tech.icon_mipmaps
+    }
+
+    local base = util.table.deepcopy(tech)
+    base.effects = nil
+    base.prerequisites = nil
+
+    for _, unlock in ipairs(unlock_effects) do
+      local recipe_name = unlock.recipe
+      if recipe_name ~= "rocket-part" then
+          local recipe = recipes[recipe_name]
+
+          if not recipe then
+            log("Recipe '" .. tostring(recipe_name) ..
+                "' from tech '" .. tech_name .. "' not found; skipping.")
+          else
+            local new = util.table.deepcopy(base)
+
+            new.name = recipe_name
+            new.localised_name =
+              {recipe_name}
+
+            assign_icon_from_recipe_or_product(new, recipe, original_icon_proto, tech_name)
+
+            new.effects = {
+              {
+                type = "unlock-recipe",
+                recipe = recipe_name
+              }
+            }
+
+            apply_special_effects(new, recipe_name)
+            new.prerequisites = nil
+
+            data:extend({ new })
+          end
+      end
+    end
+
+    table.insert(techs_to_delete, tech_name)
+  else
+    tech.prerequisites = nil
+  end
+end
+
+-- === Remove original multi-unlock techs ====================================
+
+for _, tech_name in ipairs(techs_to_delete) do
+  if not dont_delete[tech_name] then  -- <--- NEW CHECK
+    if tech_name == "circuit-network" then
+      data.raw.technology[tech_name].effects = {
+        {type = "unlock-circuit-network", modifier = true}
+      }
+      data.raw.technology[tech_name].prerequisites = {}
+    else
+      data.raw.technology[tech_name] = nil
+    end
+  end
+end
+
+-- Clean up prerequisites that point at deleted techs
+local removed_lookup = {}
+for _, name in ipairs(techs_to_delete) do
+  if not dont_delete[name] then      -- <--- NEW CHECK
+    removed_lookup[name] = true
+  end
+end
+
+for _, tech in pairs(data.raw.technology) do
+  if tech.prerequisites then
+    local new_prereqs = {}
+    for _, pre in ipairs(tech.prerequisites) do
+      if not removed_lookup[pre] then
+        table.insert(new_prereqs, pre)
+      end
+    end
+    if #new_prereqs == 0 then
+      tech.prerequisites = nil
+    else
+      tech.prerequisites = new_prereqs
+    end
+  end
+end
+
+-- === Shortcut fixups =======================================================
+
+if data.raw.shortcut then
+  for _, shortcut in pairs(data.raw.shortcut) do
+    local tech = shortcut.technology_to_unlock
+    if tech == "construction-robotics" then
+      shortcut.technology_to_unlock = "construction-robot"
+    elseif tech == "electronics" then
+      shortcut.technology_to_unlock = "copper-cable"
+    elseif tech == "artillery" then
+      shortcut.technology_to_unlock = "artillery-shell"
+    end
+  end
+end
+
+data.raw["tips-and-tricks-item"] = {}
+data.raw["research-achievement"]["eco-unfriendly"].technology = "basic-oil-processing"
+
+data.raw.technology["rocket-silo"].effects = {{type = "unlock-recipe", recipe = "rocket-silo"},{type = "unlock-recipe", recipe = "rocket-part"}}
+
 local productivity_overlay_icon = {
   icon = "__core__/graphics/icons/technology/effect-constant/effect-constant-recipe-productivity.png",
   icon_size = 64
@@ -292,7 +613,7 @@ for level = 1, 30 do
                 modifier = 0.1
               }
             },
-            prerequisites = {"mining-productivity-2", "production-science-pack", "utility-science-pack"},
+--             prerequisites = {"mining-productivity-2", "production-science-pack", "utility-science-pack"},
             unit =
             {
               count = 1000,
@@ -317,7 +638,7 @@ for level = 1, 30 do
                 modifier = 25
               }
             },
-            prerequisites = {"follower-robot-count-4", "space-science-pack"},
+--             prerequisites = {"follower-robot-count-4", "space-science-pack"},
             unit =
             {
               ingredients =
@@ -342,7 +663,7 @@ for level = 1, 30 do
                 modifier = 0.65
               }
             },
-            prerequisites = {"worker-robots-speed-5", "space-science-pack"},
+--             prerequisites = {"worker-robots-speed-5", "space-science-pack"},
             unit =
             {
               count = 1000,
@@ -383,7 +704,7 @@ for level = 1, 30 do
                 modifier = 1
               }
             },
-            prerequisites = {"physical-projectile-damage-6", "space-science-pack"},
+--             prerequisites = {"physical-projectile-damage-6", "space-science-pack"},
             unit =
             {
               count = 1000,
@@ -417,7 +738,7 @@ for level = 1, 30 do
                 modifier = 0.2
               }
             },
-            prerequisites = {"stronger-explosives-6", "space-science-pack"},
+--             prerequisites = {"stronger-explosives-6", "space-science-pack"},
             unit =
             {
               count = 1000,
@@ -446,7 +767,7 @@ for level = 1, 30 do
                 modifier = 0.2
               }
             },
-            prerequisites = {"refined-flammables-6", "space-science-pack"},
+--             prerequisites = {"refined-flammables-6", "space-science-pack"},
             unit =
             {
               count = 1000,
@@ -480,7 +801,7 @@ for level = 1, 30 do
                 modifier = 0.3
               }
             },
-            prerequisites = {"laser-weapons-damage-6", "space-science-pack"},
+--             prerequisites = {"laser-weapons-damage-6", "space-science-pack"},
             unit =
             {
               count = 1000,
@@ -504,7 +825,7 @@ for level = 1, 30 do
             modifier = 0.3
           }
         },
-        prerequisites = {"artillery", "space-science-pack"},
+--         prerequisites = {"space-science-pack"},
         unit =
         {
           count = 1000,
@@ -529,7 +850,7 @@ for level = 1, 30 do
             modifier = 1
           }
         },
-        prerequisites = {"artillery", "space-science-pack"},
+--         prerequisites = {"space-science-pack"},
         unit =
         {
           count = 1000,

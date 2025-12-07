@@ -21,7 +21,7 @@ import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, logger, server_loop, gui_enabled, get_base_parser
 from MultiServer import mark_raw
 from NetUtils import ClientStatus, NetworkItem, JSONtoTextParser, JSONMessagePart
-from Utils import async_start, get_file_safe_name
+from Utils import async_start, get_file_safe_name, user_path
 
 
 def check_stdin() -> None:
@@ -307,6 +307,7 @@ async def factorio_server_watcher(ctx: FactorioContext):
     savegame_name = os.path.abspath(os.path.join(ctx.write_data_path, "saves", "Archipelago", ctx.savegame_name))
     if not os.path.exists(savegame_name):
         logger.info(f"Creating savegame {savegame_name}")
+        breakpoint()
         subprocess.run((
             executable, "--create", savegame_name, "--preset", "archipelago"
         ))

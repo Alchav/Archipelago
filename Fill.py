@@ -1063,10 +1063,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
                 if not filler_sphere:
                     # breakpoint()
-                    filler_sphere = sphere
+                    filler_sphere = sorted(sphere)
                     logging.info("no filler sphere")
         multiworld.random.shuffle(filler_sphere)
-        filler_sphere.sort(key=lambda i: "Auto" not in multiworld.player_name[i.player])
+        filler_sphere.sort(key=lambda i: multiworld.worlds[i.player].options.owner == "Auto")
+        filler_sphere.sort(key=lambda i: multiworld.worlds[i.player].options.owner == multiworld.worlds[player].options.owner)
         # for player, sphere_check in starting_spheres.items():
         # location = multiworld.random.choice(filler_sphere)
         location = filler_sphere[0]
@@ -1352,53 +1353,56 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     multiworld.random.shuffle(items)
     multiworld.random.shuffle(swap_out_locations)
 
-    # Prefer placing a player's own items (both kinds) in their own locations first
-    players_in_items = {p for (_, p) in items}
-    for player in players_in_items:
-        player_locs = [loc for loc in swap_out_locations if loc.player == player]
-        while player_locs and any(p == player for (_, p) in items):
-            # take the first occurrence of this player's item (either kind)
-            idx = next(i for i, (_kind, p) in enumerate(items) if p == player)
-            kind, _ = items.pop(idx)
-            loc = player_locs.pop()
-            swap_out_locations.remove(loc)
+    for location, item in zip(swap_out_locations, items):
+        location.item = item
 
-            # item_name = (
-            #     f"{multiworld.player_name[player]} Hint Location Point"
-            #     if kind == "loc"
-            #     else f"{multiworld.player_name[player]} Hint Point"
-            # )
-            player_owner = multiworld.worlds[player].options.owner.value
-            item_name = multiworld.worlds[1].item_id_to_name[(10000 if kind == "loc" else 1000) + player_owner]
-            new_item = multiworld.worlds[1].create_item(item_name)
-            loc.item = new_item
-            new_item.location = loc
-
-    # Fill remaining locations with remaining items
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=True))
-    loc_to_sphere = {loc: i for i, sphere in enumerate(spheres) for loc in sphere}
-    player_ranges = {}
-    sphere_items = [[] for _ in range(len(spheres))]
-    for p in eligible_players:
-        player_locs = [loc for loc in loc_to_sphere if loc.player == p]
-        if player_locs:
-            idxs = [loc_to_sphere[loc] for loc in player_locs]
-            player_ranges[p] = (min(idxs), max(idxs))
-            player_items = [item for item in items if item[1] == p]
-            items = [item for item in items if item not in player_items]
-            while player_items:
-                for s in range(min(idxs), max(idxs) + 1):
-                    if not player_items:
-                        break
-                    sphere_items[s].append(player_items.pop())
-    for sphere in sphere_items:
-        multiworld.random.shuffle(sphere)
-    ordered_items = sum(sphere_items, [])
-    swap_out_locations.sort(key=lambda l: loc_to_sphere[l])
-    for loc, item in zip(swap_out_locations, ordered_items):
-        new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[item[1]]} Hint{' Location' if item[0] == 'loc' else ''} Point")
-        loc.item = new_item
-        new_item.location = loc
+    # # Prefer placing a player's own items (both kinds) in their own locations first
+    # players_in_items = {p for (_, p) in items}
+    # for player in players_in_items:
+    #     player_locs = [loc for loc in swap_out_locations if loc.player == player]
+    #     while player_locs and any(p == player for (_, p) in items):
+    #         # take the first occurrence of this player's item (either kind)
+    #         player_owner = multiworld.worlds[player].options.owner.value
+    #         idx = next(i for i, (_kind, p) in enumerate(items) if multiworld.worlds[p].options.owner.value == player_owner)
+    #         kind, _ = items.pop(idx)
+    #         loc = player_locs.pop()
+    #         swap_out_locations.remove(loc)
+    #
+    #         # item_name = (
+    #         #     f"{multiworld.player_name[player]} Hint Location Point"
+    #         #     if kind == "loc"
+    #         #     else f"{multiworld.player_name[player]} Hint Point"
+    #         # )
+    #         item_name = multiworld.worlds[1].item_id_to_name[(10000 if kind == "loc" else 1000) + player_owner]
+    #         new_item = multiworld.worlds[1].create_item(item_name)
+    #         loc.item = new_item
+    #         new_item.location = loc
+    #
+    # # Fill remaining locations with remaining items
+    # spheres = list(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=True))
+    # loc_to_sphere = {loc: i for i, sphere in enumerate(spheres) for loc in sphere}
+    # player_ranges = {}
+    # sphere_items = [[] for _ in range(len(spheres))]
+    # for p in eligible_players:
+    #     player_locs = [loc for loc in loc_to_sphere if loc.player == p]
+    #     if player_locs:
+    #         idxs = [loc_to_sphere[loc] for loc in player_locs]
+    #         player_ranges[p] = (min(idxs), max(idxs))
+    #         player_items = [item for item in items if item[1] == p]
+    #         items = [item for item in items if item not in player_items]
+    #         while player_items:
+    #             for s in range(min(idxs), max(idxs) + 1):
+    #                 if not player_items:
+    #                     break
+    #                 sphere_items[s].append(player_items.pop())
+    # for sphere in sphere_items:
+    #     multiworld.random.shuffle(sphere)
+    # ordered_items = sum(sphere_items, [])
+    # swap_out_locations.sort(key=lambda l: loc_to_sphere[l])
+    # for loc, item in zip(swap_out_locations, ordered_items):
+    #     new_item = multiworld.worlds[1].create_item(f"{multiworld.player_name[item[1]]} Hint{' Location' if item[0] == 'loc' else ''} Point")
+    #     loc.item = new_item
+    #     new_item.location = loc
 
     check_no_skips(multiworld, starting_spheres)
 

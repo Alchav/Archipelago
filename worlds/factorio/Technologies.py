@@ -42,7 +42,7 @@ start_unlocked_recipes = {
     "copper-cable",
     "lab",
     "electronic-circuit",
-    "electric-mining-drill",
+    # "electric-mining-drill",
     "pipe",
     "pipe-to-ground",
 }
@@ -258,6 +258,7 @@ for name, categories in machines_future.result().items():
     machines[name] = machine
 
 # add electric mining drill as a crafting machine to resolve basic-solid (mining)
+machines["burner-mining-drill"] = Machine("burner-mining-drill", {"basic-solid"})
 machines["electric-mining-drill"] = Machine("electric-mining-drill", {"basic-solid"})
 machines["pumpjack"] = Machine("pumpjack", {"basic-fluid"})
 machines["assembling-machine-1"].categories.add("crafting-with-fluid")  # mod enables this
@@ -398,36 +399,44 @@ for root in base_starts:
 progressive_rows["progressive-science-pack"] = tuple(Options.MaxSciencePack.get_ordered_science_packs())[1:]
 
 # manual progressive
-progressive_rows["progressive-processing"] = (
-    "steel-processing",
-    "oil-processing", "sulfur-processing", "advanced-oil-processing", "coal-liquefaction",
-    "uranium-processing", "kovarex-enrichment-process", "nuclear-fuel-reprocessing")
-progressive_rows["progressive-rocketry"] = ("rocketry", "explosive-rocketry", "atomic-bomb")
+# progressive_rows["progressive-processing"] = (
+#     "steel-processing",
+#     "oil-processing", "sulfur-processing", "advanced-oil-processing", "coal-liquefaction",
+#     "uranium-processing", "kovarex-enrichment-process", "nuclear-fuel-reprocessing")
+progressive_rows["progressive-rocketry"] = ("rocket-launcher", "rocket", "explosive-rocketry", "atomic-bomb")
 progressive_rows["progressive-vehicle"] = ("automobilism", "tank", "spidertron")
-progressive_rows["progressive-fluid-handling"] = ("fluid-handling", "fluid-wagon")
-progressive_rows["progressive-train-network"] = ("railway", "automated-rail-transportation")
+# progressive_rows["progressive-fluid-handling"] = ("fluid-handling", "fluid-wagon")
+# progressive_rows["progressive-train-network"] = ("railway", "automated-rail-transportation")
 progressive_rows["progressive-engine"] = ("engine", "electric-engine")
 progressive_rows["progressive-armor"] = ("heavy-armor", "modular-armor", "power-armor", "power-armor-mk2")
 progressive_rows["progressive-personal-battery"] = ("battery-equipment", "battery-mk2-equipment")
 progressive_rows["progressive-energy-shield"] = ("energy-shield-equipment", "energy-shield-mk2-equipment")
 progressive_rows["progressive-wall"] = ("stone-wall", "gate")
 progressive_rows["progressive-follower"] = ("defender", "distractor", "destroyer")
-progressive_rows["progressive-inserter"] = ("fast-inserter", "bulk-inserter")
+progressive_rows["progressive-inserter"] = ("long-handed-inserter", "fast-inserter", "bulk-inserter")
+progressive_rows["progressive-underground-belt"] = ("underground-belt", "fast-underground-belt", "express-underground-belt")
+progressive_rows["progressive-splitter"] = ("splitter", "fast-splitter", "express-splitter")
+progressive_rows["progressive-transport-belt"] = ("fast-transport-belt", "express-transport-belt")
 progressive_rows["progressive-turret"] = ("gun-turret", "laser-turret")
 progressive_rows["progressive-flamethrower"] = ("flamethrower",)  # leaving out flammables, as they do nothing
 progressive_rows["progressive-personal-roboport-equipment"] = ("personal-roboport-equipment",
                                                                "personal-roboport-mk2-equipment")
-progressive_rows["progressive-beacon"] = ("effect-transmission",)
+# progressive_rows["progressive-beacon"] = ("effect-transmission",)
+progressive_rows["progressive-automation"] = ("assembling-machine-1","automation-2","automation-3")
+progressive_rows["progressive-electric-energy-distribution"] = ("medium-electric-pole","big-electric-pole","electric-energy-distribution-2")
+progressive_rows["progressive-uranium"] = ("uranium-mining", "uranium-processing", "kovarex-enrichment-process", "uranium-fuel-cell", "nuclear-fuel-reprocessing")
+progressive_rows["progressive-fuel"] = ("solid-fuel-from-petroleum-gas", "solid-fuel-from-light-oil", "solid-fuel-from-heavy-oil", "rocket-fuel", "nuclear-fuel")
+
 
 
 sorted_rows = sorted(progressive_rows)
 
 # integrate into
 source_target_mapping: Dict[str, str] = {
-    "progressive-braking-force": "progressive-train-network",
+    # "progressive-braking-force": "progressive-train-network",
     "progressive-inserter-capacity-bonus": "progressive-inserter",
     "progressive-refined-flammables": "progressive-flamethrower",
-    "progressive-beacon-distribution": "progressive-beacon",
+    # "progressive-beacon-distribution": "progressive-beacon",
 }
 
 for source, target in source_target_mapping.items():
@@ -504,9 +513,12 @@ def get_science_pack_pools() -> Dict[str, Set[str]]:
     for science_pack in Options.MaxSciencePack.get_ordered_science_packs():
         current = science_pack_pools[science_pack] = set()
         for name, recipe in recipes.items():
+            pass
             if (science_pack != "automation-science-pack" or not recipe.recursive_unlocking_technologies) \
                     and get_estimated_difficulty(recipe) < current_difficulty:
                 current |= set(recipe.products)
+            elif get_estimated_difficulty(recipe) > current_difficulty:
+                pass
 
         if science_pack == "automation-science-pack":
             # Can't handcraft automation science if fluids end up in its recipe, making the seed impossible.

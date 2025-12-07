@@ -56,7 +56,7 @@ data.raw["recipe"]["{{recipe_name}}"].ingredients = {{ dict_to_recipe(recipe.ing
 local technologies = data.raw["technology"]
 local new_tree_copy
 
-local template_tech = table.deepcopy(technologies["automation"])
+local template_tech = table.deepcopy(technologies["automation-2"])
 {#-  ensure the copy unlocks nothing #}
 template_tech.unlocks = {}
 template_tech.upgrade = false
