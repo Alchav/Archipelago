@@ -1658,19 +1658,25 @@ class Owner(TextChoice):
         if value == self.option_Undefined:
             raise OptionError("Undefined owner.")
         super().__init__(value)
-    """Owner of the games slot. A = Alchav, B = AvBW, J = Jrackhen, L = Alyssa, X = Auto/AlchapelaBot. J after means Jigsaw"""
+    """Owner of the games slot. J means Jigsaw"""
     display_name = "Owner"
-    option_A = 0
-    option_AJ = 1
-    option_B = 2
-    option_BJ = 3
-    option_J = 4
-    option_JJ = 5
-    option_L = 6
-    option_LJ = 7
-    option_X = 8
+    option_Alchav = 0
+    option_AlchavJ = 1
+    option_AvBW = 2
+    option_AvBWJ = 3
+    option_Jack = 4
+    option_JackJ = 5
+    option_Alyssa = 6
+    option_AlyssaJ = 7
+    option_Auto = 8
     option_Undefined = 9
     default = 9
+
+
+class Order(Range):
+    range_start = 0
+    range_end = 100
+    default = 50
 
 
 class HintCount(Range):
@@ -1697,6 +1703,7 @@ class TokenPercentage(Range):
 @dataclass
 class PerGameCommonOptions(CommonOptions):
     owner: Owner
+    order: Order
     hint_count: HintCount
     hint_location_count: HintLocationCount
     token_percentage: TokenPercentage

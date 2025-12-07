@@ -70,7 +70,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         if not reachable_locations:
             if locations and return_unreachables:
                 yield []
-                yield locations  # unreachable locations
+                yield [loc for loc in locations if loc.address]  # unreachable locations
             break
         else:
             yield_locs = reachable_locations.copy()
@@ -592,7 +592,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         f"{[(item.location, item) for item in multiworld.itempool if item.location is not None]}"
     )
 
+
     fill_locations = sorted(multiworld.get_unfilled_locations())
+
+    for location in fill_locations:
+        if location.name in multiworld.worlds[location.player].options.ool_locations:
+            location.access_rule = lambda state: False
+
     multiworld.random.shuffle(fill_locations)
     # get items to distribute
     itempool = sorted(multiworld.itempool)
@@ -943,7 +949,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if not owner_group:
                 continue
             multiworld.random.shuffle(owner_group)
-            owner_group.sort(key=lambda p: multiworld.player_name[p].endswith("2"))
+            # owner_group.sort(key=lambda p: multiworld.player_name[p].endswith("2"))
+            owner_group.sort(key=lambda p: multiworld.worlds[p].options.order.value)
             starting_player = owner_group[0]
             playable_games.append((starting_player, multiworld.player_name[starting_player]))
             multiworld.push_precollected(multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[starting_player]}"))
@@ -1356,11 +1363,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             loc = player_locs.pop()
             swap_out_locations.remove(loc)
 
-            item_name = (
-                f"{multiworld.player_name[player]} Hint Location Point"
-                if kind == "loc"
-                else f"{multiworld.player_name[player]} Hint Point"
-            )
+            # item_name = (
+            #     f"{multiworld.player_name[player]} Hint Location Point"
+            #     if kind == "loc"
+            #     else f"{multiworld.player_name[player]} Hint Point"
+            # )
+            player_owner = multiworld.worlds[player].options.owner.value
+            item_name = multiworld.worlds[1].item_id_to_name[(10000 if kind == "loc" else 1000) + player_owner]
             new_item = multiworld.worlds[1].create_item(item_name)
             loc.item = new_item
             new_item.location = loc
