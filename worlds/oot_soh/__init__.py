@@ -147,8 +147,12 @@ class SohWorld(World):
             self.vanilla_progressive_skulltula_count = progressive_skulltula_count
 
         if self.using_ut:
-            self.vanilla_progressive_skulltula_count = self.passthrough["vanilla_progressive_skulltula_count"]
-            self.randomized_progressive_skulltula_count = self.passthrough["randomized_progressive_skulltula_count"]
+            try:
+                self.vanilla_progressive_skulltula_count = self.passthrough["vanilla_progressive_skulltula_count"]
+                self.randomized_progressive_skulltula_count = self.passthrough["randomized_progressive_skulltula_count"]
+            except KeyError:
+                pass
+
 
     def create_regions(self) -> None:
         create_regions_and_locations(self)
