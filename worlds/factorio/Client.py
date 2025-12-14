@@ -353,7 +353,6 @@ async def factorio_server_watcher(ctx: FactorioContext):
     if not os.path.exists(savegame_name):
         config_file = Utils.user_path('factorio', 'config', 'apconfig.ini')
         logger.info(f"Creating savegame {savegame_name}")
-        breakpoint()
         result = subprocess.run((
             executable, "--create", savegame_name, "--preset", "archipelago"
         ))

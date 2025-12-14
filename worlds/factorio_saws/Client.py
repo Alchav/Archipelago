@@ -307,7 +307,6 @@ async def factorio_server_watcher(ctx: FactorioContext):
     savegame_name = os.path.abspath(os.path.join(ctx.write_data_path, "saves", "Archipelago", ctx.savegame_name))
     if not os.path.exists(savegame_name):
         logger.info(f"Creating savegame {savegame_name}")
-        breakpoint()
         subprocess.run((
             executable, "--create", savegame_name, "--preset", "archipelago"
         ))
