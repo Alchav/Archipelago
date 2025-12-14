@@ -1049,7 +1049,7 @@ class Mods(OptionSet):
     visibility = Visibility.all & ~Visibility.simple_ui
     internal_name = "mods"
     display_name = "Mods"
-    valid_keys = all_mods
+    valid_keys = enabled_mods
     # In tests, we keep even the disabled mods active, because we expect some of them to eventually get updated for SV 1.6
     # In that case, we want to maintain content and logic for them, and therefore keep testing them
     if 'unittest' in sys.modules.keys() or 'pytest' in sys.modules.keys():
