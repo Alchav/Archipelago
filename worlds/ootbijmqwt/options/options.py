@@ -1,14 +1,10 @@
-import typing
-import random
-from dataclasses import dataclass
-from Options import Option, DefaultOnToggle, Toggle, Range, OptionSet, DeathLink, PlandoConnections, \
-    PerGameCommonOptions, OptionGroup, Visibility, Choice
-from worlds.oot.ColorSFXOptions import *
-from worlds.oot.EntranceShuffle import entrance_shuffle_table
+from Options import Visibility
 from worlds.oot.Options import *
+
 
 class FakeChoice(Choice):
     visibility = Visibility.none
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return other.value == self.value
@@ -55,11 +51,12 @@ class FakeChoice(Choice):
             other = self.options[other]
         return super(Choice, self).__ge__(other)
 
+
 class StartMode(Choice):
     """Determines how, if at all, you can reach sphere 1 locations.
     iron_boots starts you with Iron Boots and, if fewer_tunic_requirements is off, Zora Tunic.
     guard_house starts you in the Market Guard House with 7 pots to open. If warp_songs is off, you can return
-    to the Guard House by exiting the Water Temple into the Gold Skulltula House, then exiting it..
+    to the Guard House by exiting the Water Temple into the Gold Skulltula House, then exiting it.
     burger_king starts you with nothing. No sphere 1 for you. We'll break all the rules. I won't tell if you won't.
     If every player in the multiworld has burger_king selected, one player may be changed to guard_house."""
     option_burger_king = 0
@@ -177,6 +174,7 @@ class LogicDodongosCavernSmashtheBossLobbyFloor(Toggle):
     can be destroyed with Hammer if hit in the very center."""
     display_name = "Logic: Dodongo's Cavern Smash the Boss Lobby Floor"
 
+
 class MQAccessibility(Choice):
     """
     Set rules for reachability of your items/locations.
@@ -192,12 +190,6 @@ class MQAccessibility(Choice):
     alias_none = 2
     alias_locations = 1
     default = 1
-
-
-    ################################
-
-
-
 
 
 class Logic(FakeChoice):
@@ -241,8 +233,6 @@ class Trials(Range):
     visibility = Visibility.none
     range_start = 0
     range_end = 6
-
-
 
 
 class StartingAge(FakeChoice):
@@ -335,7 +325,6 @@ class MQDungeonCount(Range):
     range_end = 0
     default = 0
     visibility = Visibility.none
-
 
 
 class BridgeStones(Range):
@@ -462,7 +451,6 @@ class ShuffleFrogRupees(Toggle):
     visibility = Visibility.none
 
 
-
 class ShuffleMapCompass(FakeChoice):
     visibility = Visibility.none
     option_keysanity = 7
@@ -556,7 +544,6 @@ class KeyRingList(OptionSet):
     }
 
 
-
 class SkipEscape(DefaultOnToggle):
     visibility = Visibility.none
 
@@ -615,11 +602,8 @@ class FAETorchCount(Range):
     default = 1
 
 
-
-
 class InvisibleChests(Toggle):
     visibility = Visibility.none
-
 
 
 class Hints(FakeChoice):
@@ -637,13 +621,9 @@ class HintDistribution(FakeChoice):
     default = 9
 
 
-
-
-
 class StartingToD(FakeChoice):
     visibility = Visibility.none
     option_default = 0
-
 
 
 class BlueFireArrows(Toggle):
@@ -658,7 +638,6 @@ class RupeeStart(Toggle):
     visibility = Visibility.none
 
 
-
 class ItemPoolValue(FakeChoice):
     option_balanced = 1
     default = 1
@@ -668,12 +647,9 @@ class IceTraps(FakeChoice):
     option_off = 0
 
 
-
 class AdultTradeStart(FakeChoice):
     option_claim_check = 9
     default = 9
-
-
 
 
 class LogicTricks(OptionSet):
@@ -685,6 +661,17 @@ class OoTPlandoConnections(PlandoConnections):
     entrances = set([connection[1][0] for connection in entrance_shuffle_table])
     exits = set([connection[2][0] for connection in entrance_shuffle_table if len(connection) > 2])
     visibility = Visibility.none
+
+
+class boomerang_trail_color_inner(FakeChoice):
+    option_yellow = 3
+    default = 3
+
+
+class boomerang_trail_color_outer(FakeChoice):
+
+    option_match_inner = 13
+    default = 13
 
 @dataclass
 class OOTBIJMQWTOptions(PerGameCommonOptions):

@@ -5,7 +5,7 @@ from Options import Choice, Toggle, Range, PerGameCommonOptions, dataclass
 from BaseClasses import ItemClassification, LocationProgressType, CollectionState
 from settings import get_settings
 import logging
-from .options import OOTBIJMQWTOptions
+from .options.options import OOTBIJMQWTOptions
 
 warp_song_connectors = [
     "Nocturne of Shadow Warp -> Graveyard Warp Pad Region", "Minuet of Forest Warp -> Sacred Forest Meadow",
@@ -29,7 +29,6 @@ connections = [
 ]
 
 boss_rooms = {
-    "queen_gohma": ("Deku Tree Boss Door -> Queen Gohma Boss Room", "Queen Gohma Boss Room -> Deku Tree Boss Door"),
     "king_dodongo": ("Dodongos Cavern Boss Door -> King Dodongo Boss Room", "King Dodongo Boss Room -> Dodongos Cavern Boss Door"),
     "phantom_ganon": ("Forest Temple Boss Door -> Phantom Ganon Boss Room", "Phantom Ganon Boss Room -> Forest Temple Boss Door"),
     "volvagia": ("Fire Temple Boss Door -> Volvagia Boss Room", "Volvagia Boss Room -> Fire Temple Boss Door"),
@@ -81,19 +80,9 @@ else:
     raise Exception("OOTBIJMQWT failed to inject CollectionState init_mixin function")
 
 
-
-
-# for option_name, option_class in OoTOptions.__annotations__.items():
-#     if option_name in default_options:
-#         OOTBIJMQWTOptions.__annotations__[option_name] = type(option_class.__name__,
-#                                                               option_class.__bases__,
-#                                                               dict(option_class.__dict__))
-#         OOTBIJMQWTOptions.__annotations__[option_name].options = \
-#             {x: y for x, y in OOTBIJMQWTOptions.__annotations__[option_name].options.items()
-#              if y == OOTBIJMQWTOptions.__annotations__[option_name].default}
-
 class OOTBIJMQWTWeb(OOTWeb):
     option_groups = []
+
 
 class OOTBIJMQWTWorld(OOTWorld):
     game: str = "Ocarina of Time but it's just Master Quest Water Temple"
@@ -110,15 +99,8 @@ class OOTBIJMQWTWorld(OOTWorld):
 
     web = OOTBIJMQWTWeb()
 
-    def assert_generate(self):
-        for option_name, option_class in OoTOptions.__annotations__.items():
-            if option_name in default_options:
-                pass
-
     @classmethod
     def stage_assert_generate(cls, multiworld):
-        setattr(multiworld, "mix_entrance_pools", {})
-
         if get_settings().generator.panic_method != "start_inventory" and set(multiworld.game.values()) == OOTBIJMQWTWorld.game:
             # every player is playing OOTBIJMQWT, panic method is not start inventory
             options = [multiworld.worlds[i].options.start_mode for i in multiworld.player_ids]
@@ -129,24 +111,6 @@ class OOTBIJMQWTWorld(OOTWorld):
         for world in multiworld.get_game_worlds("Ocarina of Time but it's just Master Quest Water Temple"):
             multiworld.worlds[world.player].game = "Ocarina of Time"
             multiworld.game[world.player] = "Ocarina of Time"
-            # for option in default_options:
-            #     try:
-            #         optiondict = getattr(multiworld, option)
-            #     except AttributeError:
-            #         optiondict = {}
-            #         setattr(multiworld, option, optiondict)
-            #     optionobj = OOTWorld.option_definitions[option]
-            #     optiondict[world.player] = optionobj(optionobj.default)
-            # for option in set_options.keys():
-            #     try:
-            #         optiondict = getattr(multiworld, option)
-            #     except AttributeError:
-            #         optiondict = {}
-            #         setattr(multiworld, option, optiondict)
-            #     optionobj = OOTWorld.option_definitions[option]
-            #     optiondict[world.player] = optionobj(optionobj.from_any(set_options[option]))
-            #     if isinstance(set_options[option], int):
-            #         optiondict[world.player].value = set_options[option]
             world = multiworld.worlds[world.player]
             if world.options.local_tokens:
                 world.options.local_items.value.add("Gold Skulltula Token")
@@ -174,7 +138,8 @@ class OOTBIJMQWTWorld(OOTWorld):
             item_pool += ["Bottle with Red Potion", "Bottle with Green Potion", "Bottle with Blue Potion",
                           "Bottle with Fairy"]
         else:
-            item_pool += ["Bottle with Big Poe"] * 4
+            item_pool += ["Bottle with Big Poe", "Bottle with Blue Potion", "Bottle with Fairy"]
+            item_pool.append(self.random.choice(["Bottle with Red Potion", "Bottle with Green Potion"]))
 
         token_count = max(self.options.tokens_in_pool.value,
                           [0, 0, 10, 20, 30, 40, 50][self.options.boss_key_location])
@@ -254,6 +219,10 @@ class OOTBIJMQWTWorld(OOTWorld):
                 entrance.shuffled = True
                 entrance.replaces = entrance
         set_rules(self)
+
+        if self.options.warp_songs:
+            # ensure access to repeatable money
+            multiworld.get_location("LH Adult Fishing", self.player).access_rule = lambda state: state.can_reach("Market Guard House", "Region", self.player)
 
         boss_room_door = boss_rooms[self.options.boss.current_key]
 
