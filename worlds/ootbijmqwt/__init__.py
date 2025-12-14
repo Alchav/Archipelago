@@ -1,7 +1,5 @@
 from worlds.oot import OOTWorld, OOTCollectionState, OOTWeb
-from worlds.oot.Options import OoTOptions
 from worlds.oot.LocationList import set_drop_location_names
-from Options import Choice, Toggle, Range, PerGameCommonOptions, dataclass
 from BaseClasses import ItemClassification, LocationProgressType, CollectionState
 from settings import get_settings
 import logging
