@@ -1177,18 +1177,19 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         sphere_list.sort()
         multiworld.random.shuffle(sphere_list)
         if unreachable:
-            while sphere:
-                a = sphere.pop()
-                for b in [location for location in sphere if location.player in shared_spheres[a.player]]:
+            while sphere_list:
+                a = sphere_list.pop()
+                for b in [location for location in sphere_list if location.player in shared_spheres[a.player] and location.player != a.player]:
                     if ((not b.item) or a.item_rule(b.item)) and ((not a.item) or b.item_rule(a.item)):
                         a.item, b.item = b.item, a.item
-                        sphere.remove(b)
+                        sphere_list.remove(b)
                         logging.info(f"Swapped unreachable {a} with {b}")
                         break
                     else:
                         continue
                 else:
                     logging.info(f"Couldn't swap {a} for player {a.player}")
+            break
         player_spheres = {loc.player for loc in sphere}
         for player in player_spheres:
             shared_spheres[player] |= player_spheres
@@ -1199,7 +1200,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if swappable(multiworld, loc) and not loc.locked:
                 sphere_t[iclass(loc.item)].append(loc)
         for t in sphere_t[1:]:
-            for a, b in zip(t[len(t) // 2:], t[:len(t) // 2]):
+            while t:
+                a = t.pop()
+                if not t:
+                    break
+                for b in t:
+                    if b.player != a.player:
+                        break
                 if ((not b.item) or a.item_rule(b.item)) and ((not a.item) or b.item_rule(a.item)):
                     a.item, b.item = b.item, a.item
                 elif a.item and b.item:
@@ -1207,6 +1214,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                         logging.info(f"{a.name} cannot accept {b.item.name}")
                     if not b.item_rule(a.item):
                         logging.info(f"{b.name} cannot accept {a.item.name}")
+                t.remove(b)
             # for loc in t:
             #     if loc.player == loc.item.player and loc.item.name in multiworld.worlds[loc.player].options.non_local_items.value:
             #         for loc2 in t:
@@ -1355,11 +1363,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     for location, item in zip(swap_out_locations, items):
         # item_name = (
-        #     f"{multiworld.player_name[player]} Hint Location Point"
-        #     if kind == "loc"
-        #     else f"{multiworld.player_name[player]} Hint Point"
+        #     f"{multiworld.player_name[item[1]]} Hint Location Point"
+        #     if item[0] == "loc"
+        #     else f"{multiworld.player_name[item[1]]} Hint Point"
         # )
-        item_name = multiworld.worlds[1].item_id_to_name[(10000 if kind == "loc" else 1000) + multiworld.worlds[player].options.owner.value]
+        item_name = multiworld.worlds[1].item_id_to_name[
+            (10000 if item[0] == "loc" else 1000) + multiworld.worlds[item[1]].options.owner.value]
+
         new_item = multiworld.worlds[1].create_item(item_name)
         location.item = new_item
         new_item.location = location
