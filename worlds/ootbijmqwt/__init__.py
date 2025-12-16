@@ -38,12 +38,14 @@ boss_rooms = {
 
 option_pool_size = ((136, 149), (128, 145))
 
-always_pool = ["Progressive Hookshot", "Magic Meter", "Ocarina", "Small Key (Water Temple)", "Progressive Scale"] * 2
+always_pool = ["Progressive Hookshot", "Ocarina", "Small Key (Water Temple)", "Progressive Scale"] * 2
 always_pool += ["Progressive Strength Upgrade"] * 3
 always_pool += ["Song of Time", "Zeldas Lullaby", "Fire Arrows", "Bow", "Ice Arrows", "Light Arrows",
                 "Bomb Bag", "Double Defense", "Dins Fire", 'Megaton Hammer', "Lens of Truth",
-                "Biggoron Sword", "Hover Boots", "Nayrus Love", "Farores Wind",  "Map (Water Temple)",
+                "Biggoron Sword", "Hover Boots", "Magic Meter", "Farores Wind",  "Map (Water Temple)",
                 "Compass (Water Temple)", "Goron Tunic", "Deku Nut Capacity", "Hylian Shield", "Mirror Shield"]
+
+start_ib_bonks_ohko_start_items = ["Magic Meter", "Nayrus Love"]
 
 filler = ["Hylian Shield", "Ice Arrows", "Light Arrows"]
 
@@ -99,7 +101,7 @@ class OOTBIJMQWTWorld(OOTWorld):
 
     @classmethod
     def stage_assert_generate(cls, multiworld):
-        if get_settings().generator.panic_method != "start_inventory" and set(multiworld.game.values()) == OOTBIJMQWTWorld.game:
+        if get_settings().generator.panic_method != "start_inventory" and set(multiworld.game.values()) == {OOTBIJMQWTWorld.game}:
             # every player is playing OOTBIJMQWT, panic method is not start inventory
             options = [multiworld.worlds[i].options.start_mode for i in multiworld.player_ids]
             if len(set(options)) == 1 and options[0] == "burger_king":
@@ -151,7 +153,7 @@ class OOTBIJMQWTWorld(OOTWorld):
         else:
             pool_size -= 1
             r = self.options.boss_key_location.value * 10
-            for i in range(r, 50, 10):
+            for i in range(r, 60, 10):
                 self.multiworld.get_location(f"Kak {i} Gold Skulltula Reward", self.player).progress_type = LocationProgressType.EXCLUDED
 
         if self.options.start_mode == "iron_boots":
@@ -160,9 +162,15 @@ class OOTBIJMQWTWorld(OOTWorld):
                 self.multiworld.push_precollected(self.create_item("Zora Tunic"))
             else:
                 item_pool.append("Zora Tunic")
+            if self.options.deadly_bonks == "ohko":
+                for item in start_ib_bonks_ohko_start_items:
+                    self.multiworld.push_precollected(self.create_item(item))
+            else:
+                item_pool += start_ib_bonks_ohko_start_items
         else:
             item_pool.append("Iron Boots")
             item_pool.append("Zora Tunic")
+            item_pool += start_ib_bonks_ohko_start_items
 
         for i in (20, 30, 40, 50):
             if token_count < i:
@@ -218,7 +226,7 @@ class OOTBIJMQWTWorld(OOTWorld):
                 entrance.replaces = entrance
         set_rules(self)
 
-        if self.options.warp_songs:
+        if self.options.shuffle_warp_songs:
             # ensure access to repeatable money
             multiworld.get_location("LH Adult Fishing", self.player).access_rule = lambda state: state.can_reach("Market Guard House", "Region", self.player)
 

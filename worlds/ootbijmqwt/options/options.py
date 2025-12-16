@@ -241,8 +241,9 @@ class StartingAge(FakeChoice):
 
 
 class InteriorEntrances(FakeChoice):
-    option_all = 2
-    default = 2
+    # option_all = 2
+    default = 0
+    option_off = 0
 
 
 class GrottoEntrances(Toggle):
@@ -673,6 +674,22 @@ class boomerang_trail_color_outer(FakeChoice):
     option_match_inner = 13
     default = 13
 
+
+class DeadlyBonks(DeadlyBonks):
+    """Bonking on a wall or object will hurt Link. "Normal" is a half heart of damage.
+    If Start Mode is set to "Iron Boots" and Deadly Bonks is set to "ohko", you will also start with Nayru's Love and
+    a Magic Meter."""
+
+
+class ConsumableStart(ConsumableStart):
+    """Start the game with full Deku Nuts."""
+
+
+class WarpSongsFake(Toggle):
+    default = 1
+    visibility = Visibility.none
+
+
 @dataclass
 class OOTBIJMQWTOptions(PerGameCommonOptions):
     start_mode: StartMode
@@ -710,7 +727,7 @@ class OOTBIJMQWTOptions(PerGameCommonOptions):
     shuffle_dungeon_entrances: DungeonEntrances
     shuffle_overworld_entrances: OverworldEntrances
     owl_drops: OwlDrops
-    warp_songs: WarpSongs
+    warp_songs: WarpSongsFake
     spawn_positions: SpawnPositions
     shuffle_bosses: BossEntrances
     triforce_hunt: TriforceHunt
