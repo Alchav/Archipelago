@@ -217,12 +217,13 @@ class WaffleWorld(World):
 
 
     def set_rules(self):
-        WaffleBasicRules(self).set_smw_rules()
+        rules = WaffleBasicRules(self)
+        rules.set_smw_rules()
 
         if self.using_ut:
             game_difficulty = self.options.game_logic_difficulty.value
             if game_difficulty != 2:
-                WaffleBasicRules(self).set_glitched_rules(2)
+                rules.set_glitched_rules(2)
 
         return     
         # Debug
@@ -467,6 +468,8 @@ class WaffleWorld(World):
 
 
     def count_locations(self):
+        from . import Locations
+
         total_required_locations = 96
         if self.options.dragon_coin_checks:
             total_required_locations += len(Locations.dragon_coin_location_table.keys())
