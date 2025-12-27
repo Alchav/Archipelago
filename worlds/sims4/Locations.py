@@ -1,19 +1,19 @@
-import typing
-from typing import Dict, NamedTuple, Optional
+from typing import NamedTuple, TypedDict, Optional
 
 from BaseClasses import Location
+
 from .Names import SkillNames, CareerNames, AspirationNames
 
 
 class Sims4Location(Location):
     game: str = "The Sims 4"
 
-    def __init__(self, player: int, name: str, address: typing.Optional[int], parent):
+    def __init__(self, player: int, name: str, address: Optional[int], parent):
         super().__init__(player, name, address, parent)
         self.event = not address
 
 
-class Sims4LocationDict(typing.TypedDict, total=False):
+class Sims4LocationDict(TypedDict, total=False):
     name: str
     category: str
     expansion: str
@@ -24,7 +24,7 @@ class Sims4LocationData(NamedTuple):
     code: Optional[int] = None
 
 
-skill_locations_table: Dict[int, Sims4LocationDict] = {
+skill_locations_table: dict[int, Sims4LocationDict] = {
     0x73341002: {'name': f"{SkillNames.base_skill_comedy} 2",
                  'category': "Skills",
                  'expansion': "base"},

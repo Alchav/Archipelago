@@ -3,8 +3,8 @@
 ## Required Software
 - [Archipelago](https://github.com/ArchipelagoMW/Archipelago/releases/latest)
 - [The Sims 4](https://store.steampowered.com/app/1222670/The_Sims_4/)
-- [sims4.apworld](https://github.com/meaomeaomeaoo/Archipelago/releases)
-- [The .ts4script and the .package files](https://github.com/meaomeaomeaoo/Sims4ArchipelagoMod/releases)
+- [sims4.apworld](https://github.com/Simsipelago/Archipelago/releases/latest)
+- [The .ts4script and the .package files](https://github.com/Simsipelago/Sims4ArchipelagoMod/releases/latest)
 - [The mod files from Sims 4 community library](https://github.com/ColonolNutty/Sims4CommunityLibrary/releases)
 
 ## Instillation

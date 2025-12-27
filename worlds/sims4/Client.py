@@ -4,27 +4,31 @@ import asyncio
 import json
 import os
 import urllib.parse
+from pathlib import Path
 
 import Utils
-from CommonClient import ClientCommandProcessor, gui_enabled, get_base_parser, CommonContext, server_loop, logger, ClientStatus
+from CommonClient import ClientCommandProcessor, gui_enabled, get_base_parser, server_loop, logger, ClientStatus
 from MultiServer import mark_raw
 
-from pathlib import Path
+tracker_loaded = False
+try:
+    from worlds.tracker.TrackerClient import TrackerGameContext as SuperContext
+    tracker_loaded = True
+except ModuleNotFoundError:
+    from CommonClient import CommonContext as SuperContext
 
 from . import Sims4World
 
 # Gets the sims 4 mods folder
 
-if Sims4World.settings.mods_folder.exists():
-    mod_data_path = Path(Sims4World.settings.mods_folder) / "mod_data" / "s4ap"
+mods_folder_str = str(Sims4World.settings.mods_folder).replace(r"\_", "\u00A0")
 
+mods_folder_path = Path(mods_folder_str)
 
-# documents_path = Path.home() / "Documents"
-#
-# mod_data_path = documents_path / "Electronic Arts" / "The Sims 4" / "Mods" / "mod_data" / "s4ap"
+if mods_folder_path.exists():
+    mod_data_path = mods_folder_path / "mod_data" / "s4ap"
 
 # reads and prints json files
-
 
 def print_json(obj: object, name: str, ctx: SimsContext):
     full_path = os.path.join(mod_data_path, name)
@@ -86,7 +90,7 @@ class SimsCommandProcessor(ClientCommandProcessor):
             self.output('no path inputed')
         elif os.path.exists(os.path.join(p, 'mod_data', 's4ap')):
             self.output('Sims 4 mods folder found')
-            mod_data_path = p
+            mod_data_path = os.path.join(p, 'mod_data', 's4ap')
         else:
             self.ctx.gui_error(title='Sims 4 mods folder not found',
                                text=f'Make sure the file path you inputed is correct.')
@@ -94,35 +98,77 @@ class SimsCommandProcessor(ClientCommandProcessor):
                 f'Could not find mod_data folder\nif the path you inputed is correct make sure you have enabled script mods in the sims 4 and run the game \nPath: {p}')
 
 
-class SimsContext(CommonContext):
+class SimsContext(SuperContext):
     game = 'The Sims 4'
     command_processor = SimsCommandProcessor
     items_handling = 0b111
     want_slot_data = True
+    tags = {"AP"}
 
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
         self.syncing = False
         self.goal = None
         self.career = None
+        self.version: str | None = None
 
-    def run_gui(self):
-        """Import kivy UI system and start running it as self.ui_task."""
-        from kvui import GameManager
-
-        class S4Manager(GameManager):
-            logging_pairs = [
-                ("Client", "Archipelago")
-            ]
-            base_title = "Archipelago The Sims 4 Client"
-
-        self.ui = S4Manager(self)
-        self.ui_task = asyncio.create_task(self.ui.async_run(), name="UI")
+    def make_gui(self):
+        ui = super().make_gui()
+        ui.base_title = "Archipelago The Sims 4 Client"
+        return ui
 
     def on_package(self, cmd: str, args: dict):
+        super().on_package(cmd, args)
         if cmd == "Connected":
             self.goal = args["slot_data"]["goal"]
             self.career = args["slot_data"]["career"]
+            self.version = args["slot_data"].get("version")
+
+            if self.version is not None:
+                from .Version import VERSION, Sims4Version
+
+                slot_version_tuple = Sims4Version.str_to_tuple(self.version)
+
+                # compare major version mismatch
+                if Sims4Version.does_major_version_mismatch(slot_version_tuple, VERSION):
+                    self.gui_error(
+                        title="Version mismatch",
+                        text=f"This server is running Sims 4 AP {self.version}, "
+                             f"but your client is {Sims4Version.tuple_to_str(VERSION)}.\n"
+                             f"Please update your client."
+                    )
+                    Utils.async_start(self.disconnect(False))
+                    return
+
+                # disallow RCs when client is not RC
+                client_is_rc = Sims4Version.is_rc(VERSION)
+                slot_is_rc = Sims4Version.is_rc(slot_version_tuple)
+                if client_is_rc != slot_is_rc:
+                    self.gui_error(
+                        title="Incompatible version",
+                        text=f"This slot was generated using a release candidate ({self.version}).\n"
+                             f"Your client is {Sims4Version.tuple_to_str(VERSION)}.\n"
+                             f"Please install the same version of the APWorld to connect."
+                    )
+                    Utils.async_start(self.disconnect(False))
+                    return
+
+                # if both are RC, check exact suffix match
+                if all([client_is_rc, slot_is_rc]) and slot_version_tuple[3] != VERSION[3]:
+                    self.gui_error(
+                        title="Incompatible RC version",
+                        text=f"This slot was generated using {self.version}.\n"
+                             f"Your client is {Sims4Version.tuple_to_str(VERSION)}.\n"
+                             f"Please install the exact same RC build to connect."
+                    )
+                    Utils.async_start(self.disconnect(False))
+                    return
+            else:
+                from CommonClient import logger
+                # Older APWorlds don't have the version string
+                logger.info("Warning: slot data has no version information; compatibility not checked.")
+
+
             url = urllib.parse.urlparse(self.server_address)
             payload = {
                 'cmd': "Connected",
@@ -131,7 +177,8 @@ class SimsContext(CommonContext):
                 'name': self.slot_info[self.slot].name,
                 'seed_name': self.seed_name,
                 'goal': self.goal,
-                'career': self.career
+                'career': self.career,
+                'slot': self.slot
             }
             print_json(payload, 'connection_status.json', self)
 
@@ -170,7 +217,7 @@ async def game_watcher(ctx: SimsContext):
             json_data = load_json('locations_cached.json')
             if json_data is not None:
                 if "Locations" in json_data and json_data["Locations"] is not None and json_data["Seed"] == ctx.seed_name:
-                    locations_to_remove = []
+                    # locations_to_remove = []
                     for data in json_data["Locations"]:
                         for location_id in ctx.missing_locations:
                             location_current_name = ctx.location_names.lookup_in_game(location_id)
@@ -181,11 +228,11 @@ async def game_watcher(ctx: SimsContext):
                                     ctx.finished_game = True
                                 await SimsContext.send_msgs(ctx,
                                                             [{"cmd": "LocationChecks", "locations": [location_id]}])
-                                locations_to_remove.append(data)
+                                # locations_to_remove.append(data)
                                 break
-                    for loc in locations_to_remove:
-                        json_data["Locations"].remove(loc)
-                        print_json(json_data, 'locations_cached.json', ctx)
+                    # for loc in locations_to_remove:
+                    #     json_data["Locations"].remove(loc)
+                    #     print_json(json_data, 'locations_cached.json', ctx)
             json_data = load_json('sync.json')
             if json_data is not None:
                 if json_data:
@@ -203,6 +250,8 @@ def main():
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="ServerLoop")
         watcher_task = asyncio.create_task(game_watcher(ctx), name="GameWatcher")
 
+        if tracker_loaded:
+            ctx.run_generator()
         if gui_enabled:
             ctx.run_gui()
         ctx.run_cli()
