@@ -38,8 +38,8 @@ global_entrances: List[EntranceData] = [
     EntranceData(entnames.overworld_western_keep, regnames.innersea_region, entnames.western_keep_entrance, regnames.western_keep, EntGroup.OverworldDungeon, entnames.overworld_western_keep, True),
     EntranceData(entnames.overworld_marsh_cave, regnames.innersea_region, entnames.marsh_cave_b1_entrance, regnames.marsh_cave_b1, EntGroup.OverworldDungeon, entnames.overworld_marsh_cave),
     EntranceData(entnames.overworld_cavern_of_earth, regnames.melmond_region, entnames.cavern_of_earth_b1_center_stairs, regnames.cavern_of_earth_b1, EntGroup.OverworldDungeon, entnames.overworld_cavern_of_earth),
-    EntranceData(entnames.overworld_giants_cavern_west, regnames.melmond_region, entnames.giants_cavern_west_entrance, regnames.giants_cavern, EntGroup.OverworldDungeon, entnames.overworld_giants_cavern_west, True),
-    EntranceData(entnames.overworld_giants_cavern_east, regnames.sage_region, entnames.giants_cavern_east_entrance, regnames.giants_cavern, EntGroup.OverworldDungeon, entnames.overworld_giants_cavern_east, True),
+    EntranceData(entnames.overworld_giants_cavern_east, regnames.melmond_region, entnames.giants_cavern_east_entrance, regnames.giants_cavern, EntGroup.OverworldDungeon, entnames.overworld_giants_cavern_east, True),
+    EntranceData(entnames.overworld_giants_cavern_west, regnames.sage_region, entnames.giants_cavern_west_entrance, regnames.giants_cavern, EntGroup.OverworldDungeon, entnames.overworld_giants_cavern_west, True),
     EntranceData(entnames.overworld_sages_cave, regnames.sage_region, entnames.sages_cave_entrance, regnames.sages_cave, EntGroup.OverworldDungeon, entnames.overworld_sages_cave, True),
     EntranceData(entnames.overworld_mount_gulg, regnames.gulg_region, entnames.mount_gulg_b1_right_stairs, regnames.mount_gulg_b1, EntGroup.OverworldDungeon, entnames.overworld_mount_gulg),
     EntranceData(entnames.overworld_cavern_of_ice, regnames.ice_region, entnames.cavern_of_ice_b1_entrance_top_stairs, regnames.cavern_of_ice_b1_entrance, EntGroup.OverworldDungeon, entnames.overworld_cavern_of_ice),
@@ -176,7 +176,7 @@ split_regions: List[str] = [
 ]
 titan_regions: Dict[str, List[str]] = {
     regnames.innersea_region: [entnames.overworld_cornelia, entnames.overworld_chaos_shrine, entnames.overworld_matoyas_cave, entnames.overworld_pravoka, entnames.overworld_mount_duergar, entnames.overworld_western_keep, entnames.overworld_marsh_cave, entnames.overworld_elfheim, entnames.overworld_elven_castle, entnames.overworld_crescent_lake, entnames.overworld_mount_gulg, entnames.overworld_cavern_of_ice],
-    regnames.pravoka_region: [entnames.overworld_melmond, entnames.overworld_cavern_of_earth, entnames.overworld_giants_cavern_east],
+    regnames.melmond_region: [entnames.overworld_melmond, entnames.overworld_cavern_of_earth, entnames.overworld_giants_cavern_east],
     regnames.sage_region: [entnames.overworld_sages_cave, entnames.overworld_giants_cavern_west],
     regnames.onrac_region: [entnames.overworld_onrac, entnames.overworld_caravan, entnames.overworld_waterfall],
     regnames.bahamuts_island: [entnames.overworld_dragon_caves_bahamut, entnames.overworld_dragon_caves_top]
