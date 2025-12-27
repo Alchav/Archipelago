@@ -100,7 +100,7 @@ sims4_regions = {
 
 sims4_careers = {
     # Astronaut
-    "Astronaut - Space Ranger": [
+    "astronaut": (
         CareerNames.base_career_astronaut_2,
         CareerNames.base_career_astronaut_3,
         CareerNames.base_career_astronaut_4,
@@ -110,23 +110,13 @@ sims4_careers = {
 
         CareerNames.base_career_astronaut_8A,
         CareerNames.base_career_astronaut_9A,
-        CareerNames.base_career_astronaut_10A,
-    ],
-
-    "Astronaut - Interstellar Smuggler": [
-        CareerNames.base_career_astronaut_2,
-        CareerNames.base_career_astronaut_3,
-        CareerNames.base_career_astronaut_4,
-        CareerNames.base_career_astronaut_5,
-        CareerNames.base_career_astronaut_6,
-        CareerNames.base_career_astronaut_7,
-
         CareerNames.base_career_astronaut_8B,
         CareerNames.base_career_astronaut_9B,
+        CareerNames.base_career_astronaut_10A,
         CareerNames.base_career_astronaut_10B
-    ],
+    ),
     # Athlete
-    "Athlete - Professional Athlete": [
+    "athlete": (
         CareerNames.base_career_athlete_2,
         CareerNames.base_career_athlete_3,
         CareerNames.base_career_athlete_4,
@@ -136,22 +126,16 @@ sims4_careers = {
         CareerNames.base_career_athlete_7A,
         CareerNames.base_career_athlete_8A,
         CareerNames.base_career_athlete_9A,
-        CareerNames.base_career_athlete_10A,
-    ],
-    "Athlete - Bodybuilder": [
-        CareerNames.base_career_athlete_2,
-        CareerNames.base_career_athlete_3,
-        CareerNames.base_career_athlete_4,
-
         CareerNames.base_career_athlete_5B,
         CareerNames.base_career_athlete_6B,
         CareerNames.base_career_athlete_7B,
         CareerNames.base_career_athlete_8B,
         CareerNames.base_career_athlete_9B,
+        CareerNames.base_career_athlete_10A,
         CareerNames.base_career_athlete_10B
-    ],
+    ),
     # Business
-    "Business - Management": [
+    "business": (
         CareerNames.base_career_business_2,
         CareerNames.base_career_business_3,
         CareerNames.base_career_business_4,
@@ -161,22 +145,14 @@ sims4_careers = {
         CareerNames.base_career_business_7A,
         CareerNames.base_career_business_8A,
         CareerNames.base_career_business_9A,
-        CareerNames.base_career_business_10A,
-    ],
-    "Business - Investor": [
-        CareerNames.base_career_business_2,
-        CareerNames.base_career_business_3,
-        CareerNames.base_career_business_4,
-        CareerNames.base_career_business_5,
-        CareerNames.base_career_business_6,
-
         CareerNames.base_career_business_7B,
         CareerNames.base_career_business_8B,
         CareerNames.base_career_business_9B,
+        CareerNames.base_career_business_10A,
         CareerNames.base_career_business_10B
-    ],
+    ),
     # Criminal
-    "Criminal - Crime Boss": [
+    "criminal": (
         CareerNames.base_career_criminal_2,
         CareerNames.base_career_criminal_3,
         CareerNames.base_career_criminal_4,
@@ -186,23 +162,15 @@ sims4_careers = {
         CareerNames.base_career_criminal_7A,
         CareerNames.base_career_criminal_8A,
         CareerNames.base_career_criminal_9A,
-        CareerNames.base_career_criminal_10A,
-
-    ],
-    "Criminal - Oracle": [
-        CareerNames.base_career_criminal_2,
-        CareerNames.base_career_criminal_3,
-        CareerNames.base_career_criminal_4,
-        CareerNames.base_career_criminal_5,
-
         CareerNames.base_career_criminal_6B,
         CareerNames.base_career_criminal_7B,
         CareerNames.base_career_criminal_8B,
         CareerNames.base_career_criminal_9B,
+        CareerNames.base_career_criminal_10A,
         CareerNames.base_career_criminal_10B
-    ],
+    ),
     # Culinary
-    "Culinary - Chef": [
+    "culinary": (
         CareerNames.base_career_culinary_2,
         CareerNames.base_career_culinary_3,
         CareerNames.base_career_culinary_4,
@@ -212,23 +180,15 @@ sims4_careers = {
         CareerNames.base_career_culinary_7A,
         CareerNames.base_career_culinary_8A,
         CareerNames.base_career_culinary_9A,
-        CareerNames.base_career_culinary_10A,
-
-    ],
-    "Culinary - Mixologist": [
-        CareerNames.base_career_culinary_2,
-        CareerNames.base_career_culinary_3,
-        CareerNames.base_career_culinary_4,
-        CareerNames.base_career_culinary_5,
-
         CareerNames.base_career_culinary_6B,
         CareerNames.base_career_culinary_7B,
         CareerNames.base_career_culinary_8B,
         CareerNames.base_career_culinary_9B,
+        CareerNames.base_career_culinary_10A,
         CareerNames.base_career_culinary_10B
-    ],
+    ),
     # Entertainer
-    "Entertainer - Musician": [
+    "entertainer": (
         CareerNames.base_career_entertainer_2,
         CareerNames.base_career_entertainer_3,
         CareerNames.base_career_entertainer_4,
@@ -238,22 +198,15 @@ sims4_careers = {
         CareerNames.base_career_entertainer_7A,
         CareerNames.base_career_entertainer_8A,
         CareerNames.base_career_entertainer_9A,
-        CareerNames.base_career_entertainer_10A,
-
-    ],
-    "Entertainer - Comedian": [
-        CareerNames.base_career_entertainer_2,
-        CareerNames.base_career_entertainer_3,
-        CareerNames.base_career_entertainer_4,
-
         CareerNames.base_career_entertainer_5B,
         CareerNames.base_career_entertainer_6B,
         CareerNames.base_career_entertainer_7B,
         CareerNames.base_career_entertainer_8B,
         CareerNames.base_career_entertainer_9B,
+        CareerNames.base_career_entertainer_10A,
         CareerNames.base_career_entertainer_10B
-    ],
-    "Painter - Master of the Real": [
+    ),
+    "painter": (
         # Painter
         CareerNames.base_career_painter_2,
         CareerNames.base_career_painter_3,
@@ -264,22 +217,13 @@ sims4_careers = {
         CareerNames.base_career_painter_7A,
         CareerNames.base_career_painter_8A,
         CareerNames.base_career_painter_9A,
-        CareerNames.base_career_painter_10A,
-
-    ],
-    "Painter - Patron of the Arts": [
-        CareerNames.base_career_painter_2,
-        CareerNames.base_career_painter_3,
-        CareerNames.base_career_painter_4,
-        CareerNames.base_career_painter_5,
-        CareerNames.base_career_painter_6,
-
         CareerNames.base_career_painter_7B,
         CareerNames.base_career_painter_8B,
         CareerNames.base_career_painter_9B,
+        CareerNames.base_career_painter_10A,
         CareerNames.base_career_painter_10B
-    ],
-    "Secret Agent - Diamond Agent": [
+    ),
+    "secret_agent": (
         # Secret Agent
         CareerNames.base_career_secret_agent_2,
         CareerNames.base_career_secret_agent_3,
@@ -290,23 +234,14 @@ sims4_careers = {
 
         CareerNames.base_career_secret_agent_8A,
         CareerNames.base_career_secret_agent_9A,
-        CareerNames.base_career_secret_agent_10A,
-    ],
-    "Secret Agent - Villain": [
-        CareerNames.base_career_secret_agent_2,
-        CareerNames.base_career_secret_agent_3,
-        CareerNames.base_career_secret_agent_4,
-        CareerNames.base_career_secret_agent_5,
-        CareerNames.base_career_secret_agent_6,
-        CareerNames.base_career_secret_agent_7,
-
         CareerNames.base_career_secret_agent_8B,
         CareerNames.base_career_secret_agent_9B,
         CareerNames.base_career_secret_agent_10B,
+        CareerNames.base_career_secret_agent_10A,
         CareerNames.base_career_secret_agent_11B
-    ],
+    ),
     # Style Influencer
-    "Style Influencer - Stylist": [
+    "style_influencer": (
         CareerNames.base_career_style_influencer_2,
         CareerNames.base_career_style_influencer_3,
         CareerNames.base_career_style_influencer_4,
@@ -316,22 +251,15 @@ sims4_careers = {
         CareerNames.base_career_style_influencer_7A,
         CareerNames.base_career_style_influencer_8A,
         CareerNames.base_career_style_influencer_9A,
-        CareerNames.base_career_style_influencer_10A,
-    ],
-    "Style Influencer - Trend Setter": [
-        CareerNames.base_career_style_influencer_2,
-        CareerNames.base_career_style_influencer_3,
-        CareerNames.base_career_style_influencer_4,
-        CareerNames.base_career_style_influencer_5,
-
         CareerNames.base_career_style_influencer_6B,
         CareerNames.base_career_style_influencer_7B,
         CareerNames.base_career_style_influencer_8B,
         CareerNames.base_career_style_influencer_9B,
+        CareerNames.base_career_style_influencer_10A,
         CareerNames.base_career_style_influencer_10B
-    ],
+    ),
     # Tech Guru
-    "Tech Guru - eSport Gamer": [
+    "tech_guru": (
         CareerNames.base_career_tech_guru_2,
         CareerNames.base_career_tech_guru_3,
         CareerNames.base_career_tech_guru_4,
@@ -341,22 +269,14 @@ sims4_careers = {
         CareerNames.base_career_tech_guru_7A,
         CareerNames.base_career_tech_guru_8A,
         CareerNames.base_career_tech_guru_9A,
-        CareerNames.base_career_tech_guru_10A,
-    ],
-    "Tech Guru - Start-up entrepreneur": [
-        CareerNames.base_career_tech_guru_2,
-        CareerNames.base_career_tech_guru_3,
-        CareerNames.base_career_tech_guru_4,
-        CareerNames.base_career_tech_guru_5,
-        CareerNames.base_career_tech_guru_6,
-
         CareerNames.base_career_tech_guru_7B,
         CareerNames.base_career_tech_guru_8B,
         CareerNames.base_career_tech_guru_9B,
+        CareerNames.base_career_tech_guru_10A,
         CareerNames.base_career_tech_guru_10B
-    ],
+    ),
     # Writer
-    "Writer - Author": [
+    "writer": (
         CareerNames.base_career_writer_2,
         CareerNames.base_career_writer_3,
         CareerNames.base_career_writer_4,
@@ -366,128 +286,121 @@ sims4_careers = {
         CareerNames.base_career_writer_7A,
         CareerNames.base_career_writer_8A,
         CareerNames.base_career_writer_9A,
-        CareerNames.base_career_writer_10A,
-    ],
-    "Writer - Journalist": [
-        CareerNames.base_career_writer_2,
-        CareerNames.base_career_writer_3,
-        CareerNames.base_career_writer_4,
-        CareerNames.base_career_writer_5,
-
         CareerNames.base_career_writer_6B,
         CareerNames.base_career_writer_7B,
         CareerNames.base_career_writer_8B,
         CareerNames.base_career_writer_9B,
+        CareerNames.base_career_writer_10A,
         CareerNames.base_career_writer_10B
-    ]
+    )
 }
 
 sims4_aspiration_milestones = {
-    "bodybuilder": [
+    "bodybuilder": (
         AspirationNames.base_aspiration_basic_trainer,
         AspirationNames.base_aspiration_exercise_demon,
         AspirationNames.base_aspiration_fit_to_a_t,
         AspirationNames.base_aspiration_bodybuilder,
-    ],
-    "painter_extraordinaire": [
+    ),
+    "painter_extraordinaire": (
         AspirationNames.base_aspiration_ill_at_easel,
         AspirationNames.base_aspiration_fine_artist,
         AspirationNames.base_aspiration_brushing_with_greatness,
         AspirationNames.base_aspiration_painter_extraordinaire,
-    ],
-    "bestselling_author": [
+    ),
+    "bestselling_author": (
         AspirationNames.base_aspiration_fledgelinguist,
         AspirationNames.base_aspiration_competent_wordsmith,
         AspirationNames.base_aspiration_novelest_novelist,
         AspirationNames.base_aspiration_bestselling_author,
-    ],
-    "musical_genius": [
+    ),
+    "musical_genius": (
         AspirationNames.base_aspiration_tone_deaf,
         AspirationNames.base_aspiration_fine_tuned,
         AspirationNames.base_aspiration_harmonious,
         AspirationNames.base_aspiration_musical_genius,
-    ],
-    "public_enemy": [
+    ),
+    "public_enemy": (
         AspirationNames.base_aspiration_mostly_harmless,
         AspirationNames.base_aspiration_neighborhood_nuisance,
         AspirationNames.base_aspiration_criminal_mind,
         AspirationNames.base_aspiration_public_enemy,
-    ],
-    "chief_of_mischief": [
+    ),
+    "chief_of_mischief": (
         AspirationNames.base_aspiration_mostly_harmless,
         AspirationNames.base_aspiration_artful_trickster,
         AspirationNames.base_aspiration_professional_prankster,
         AspirationNames.base_aspiration_chief_of_mischief,
-    ],
-    "master_chef": [
+    ),
+    "master_chef": (
         AspirationNames.base_aspiration_aluminum_chef,
         AspirationNames.base_aspiration_captain_cook,
         AspirationNames.base_aspiration_culinary_artist,
         AspirationNames.base_aspiration_master_chef,
-    ],
-    "master_mixologist": [
+    ),
+    "master_mixologist": (
         AspirationNames.base_aspiration_bar_tenderfoot,
         AspirationNames.base_aspiration_electric_mixer,
         AspirationNames.base_aspiration_beverage_boss,
         AspirationNames.base_aspiration_master_mixologist
-    ],
-    "renaissance_sim": [
+    ),
+    "renaissance_sim": (
         AspirationNames.base_aspiration_prudent_student,
         AspirationNames.base_aspiration_jack_of_some_trades,
         AspirationNames.base_aspiration_pantologist,
         AspirationNames.base_aspiration_renaissance_sim
-    ],
-    "nerd_brain": [
+    ),
+    "nerd_brain": (
         AspirationNames.base_aspiration_prudent_student,
         AspirationNames.base_aspiration_erudite,
         AspirationNames.base_aspiration_rocket_scientist,
         AspirationNames.base_aspiration_nerd_brain,
-    ],
-    "computer_whiz": [
+    ),
+    "computer_whiz": (
         AspirationNames.base_aspiration_with_the_program,
         AspirationNames.base_aspiration_technically_adept,
         AspirationNames.base_aspiration_computer_geek,
         AspirationNames.base_aspiration_computer_whiz,
-    ],
-    "serial_romantic": [
+    ),
+    "serial_romantic": (
         AspirationNames.base_aspiration_amore_amateur,
         AspirationNames.base_aspiration_up_to_date,
         AspirationNames.base_aspiration_romance_juggler,
         AspirationNames.base_aspiration_serial_romantic,
-    ],
-    "freelance_botanist": [
+    ),
+    "freelance_botanist": (
         AspirationNames.base_aspiration_naturewalker,
         AspirationNames.base_aspiration_garden_variety,
         AspirationNames.base_aspiration_nature_nurturer,
         AspirationNames.base_aspiration_freelance_botanist,
-    ],
-    "the_curator": [
+    ),
+    "the_curator": (
         AspirationNames.base_aspiration_out_and_about,
         AspirationNames.base_aspiration_gatherer,
         AspirationNames.base_aspiration_treasure_hunter,
         AspirationNames.base_aspiration_the_curator,
-    ],
-    "angling_ace": [
+    ),
+    "angling_ace": (
         AspirationNames.base_aspiration_fish_out_of_water,
         AspirationNames.base_aspiration_hooked,
         AspirationNames.base_aspiration_reel_smart,
         AspirationNames.base_aspiration_angling_ace,
-    ],
-    "joke_star": [
+    ),
+    "joke_star": (
         AspirationNames.base_aspiration_practical_joker,
         AspirationNames.base_aspiration_standup_startup,
         AspirationNames.base_aspiration_funny,
         AspirationNames.base_aspiration_joke_star,
-    ],
-    "friend_of_the_world": [
+    ),
+    "friend_of_the_world": (
         AspirationNames.base_aspiration_new_in_town,
         AspirationNames.base_aspiration_well_liked,
         AspirationNames.base_aspiration_super_friend,
         AspirationNames.base_aspiration_friend_of_the_world,
-    ],
-    "neighborly_advisor": [
+    ),
+    "neighborly_advisor": (
         AspirationNames.base_aspiration_neighborly_advisor,
-    ]
+    )
 }
 
 sims4_skill_dependencies = {
