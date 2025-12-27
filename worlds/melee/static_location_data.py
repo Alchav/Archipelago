@@ -91,7 +91,7 @@ location_ids = {
     "Bonus - Rock Climber": 0x5B,
     "Bonus - Edge Hog": 0x5C,
     "Bonus - Cliffhanger": 0x5D,
-    "Bonus - Sacrifical KO": 0x5E,
+    "Bonus - Sacrificial KO": 0x5E,
     "Bonus - Avenger KO": 0x5F,
     "Bonus - Double KO": 0x60,
     "Bonus - Triple KO": 0x61,
@@ -671,8 +671,9 @@ location_ids = {
     "Multi Man Melee - Mewtwo 10-Man": 0x288,
     "Multi Man Melee - Mr. Game & Watch 10-Man": 0x289,
     "Multi Man Melee - Marth 10-Man": 0x28A,
-    "Multi Man Melee - Roy 10-Man": 0x28B
+    "Multi Man Melee - Roy 10-Man": 0x28B,
 
+    **{f"{i} Bonus{"es" if i > 1 else ""}": i + 0x28F for i in range(1, 247)}
     #"Event Match Milestone - 6 Events Clear": 0xF7,
     #"Event Match Milestone - 10 Events Clear": 0xF8,
     #"Event Match Milestone - 16 Events Clear": 0xF9,

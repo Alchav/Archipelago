@@ -347,9 +347,12 @@ class SSBMClient(CommonContext):
         auth_id = auth_id.decode("ascii").rstrip("\x00")
 
         if auth_id == auth:  #Authenticate we're in the same room so savestates don't override checks
+            num_bonus_checks = 0
             for location, (entry, bit) in bonus_checks.items():
                 if location not in self.locations_checked and bonus_table[entry] & bit:
                     new_checks.append(location)
+                    num_bonus_checks += 1
+                    new_checks.append(0x290 + num_bonus_checks)
 
             for location in trophy_checks:
                 check_id = location_ids[location]

@@ -1,7 +1,10 @@
 from worlds.generic.Rules import set_rule
+from .static_location_data import location_ids
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import SSBMWorld
+
+bonus_names = [loc for loc in location_ids.keys() if "Bonus -" in loc]
 
 adventure_trophies = {
     "Mario (Smash Trophy)",
@@ -118,6 +121,8 @@ everyone_besides_gamewatch = {
     "Roy"
 }
 
+def can_get_bonuses(state, player, num):
+    return sum([state.can_reach(bonus, "Location", player) for bonus in bonus_names]) >= num
 
 def set_location_rules(world: "SSBMWorld") -> None:
     player = world.player
@@ -358,6 +363,9 @@ def set_location_rules(world: "SSBMWorld") -> None:
 
 
     if world.options.bonus_checks:
+        for i in range(1, 0xF7):
+            set_rule(world.multiworld.get_location(f"{i} Bonus{"es" if i > 1 else ""}", player), lambda state, i=i: can_get_bonuses(state, player, i))
+
         set_rule(world.multiworld.get_location("Bonus - Meteor Smash", player), lambda state: state.has_any(can_meteor, player))
                                                                                                             
         set_rule(world.multiworld.get_location("Bonus - Meteor Clear", player), lambda state: state.has_any(can_meteor, player))
