@@ -460,13 +460,30 @@ class SMZ3World(World):
 
     def generate_output(self, output_directory: str):
         try:
-            patcher = TotalSMZ3Patch(self.smz3World,
-                                     [world.smz3World for key, world in self.multiworld.worlds.items() if isinstance(world, SMZ3World) and hasattr(world, "smz3World")],
-                                     self.multiworld.seed_name,
-                                     self.multiworld.seed,
-                                     self.local_random,
-                                     {v: k for k, v in self.multiworld.player_name.items()},
-                                     next(iter(loc.player for loc in self.multiworld.get_locations() if (loc.item.name == "SilverArrows" and loc.item.player == self.player))))
+            silver_owner = next(
+                (
+                    loc.player
+                    for loc in self.multiworld.get_locations()
+                    if loc.item
+                       and loc.item.name == "SilverArrows"
+                       and loc.item.player == self.player
+                ),
+                self.player
+            )
+
+            patcher = TotalSMZ3Patch(
+                self.smz3World,
+                [
+                    world.smz3World
+                    for key, world in self.multiworld.worlds.items()
+                    if isinstance(world, SMZ3World) and hasattr(world, "smz3World")
+                ],
+                self.multiworld.seed_name,
+                self.multiworld.seed,
+                self.local_random,
+                {v: k for k, v in self.multiworld.player_name.items()},
+                silver_owner
+            )
             patches = patcher.Create(self.smz3World.Config)
             patches.update(self.apply_sm_custom_sprite())
             patches.update(self.apply_item_names())

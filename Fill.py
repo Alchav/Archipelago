@@ -625,7 +625,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     all_state = multiworld.get_all_state(False)
     if not multiworld.can_beat_game(all_state):
         beaten_games = {player: multiworld.has_beaten_game(all_state, player) for player in multiworld.player_ids}
-        breakpoint()
+        # breakpoint()
 
     for item in itempool:
         if item.advancement:

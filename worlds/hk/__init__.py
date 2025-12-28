@@ -488,15 +488,15 @@ class HKWorld(World):
         elif goal == Goal.option_radiance:
             multiworld.completion_condition[player] = lambda state: _hk_can_beat_radiance(state, player)
         elif goal == Goal.option_godhome:
-            multiworld.completion_condition[player] = lambda state: state.count("Defeated_Pantheon_5", player)
+            multiworld.completion_condition[player] = lambda state: state.has("Defeated_Pantheon_5", player)
         elif goal == Goal.option_godhome_flower:
-            multiworld.completion_condition[player] = lambda state: state.count("Godhome_Flower_Quest", player)
+            multiworld.completion_condition[player] = lambda state: state.has("Godhome_Flower_Quest", player)
         elif goal == Goal.option_grub_hunt:
             multiworld.completion_condition[player] = lambda state: self.can_grub_goal(state)
         else:
             # Any goal
             multiworld.completion_condition[player] = lambda state: _hk_siblings_ending(state, player) and \
-                _hk_can_beat_radiance(state, player) and state.count("Godhome_Flower_Quest", player) and \
+                _hk_can_beat_radiance(state, player) and state.has("Godhome_Flower_Quest", player) and \
                 self.can_grub_goal(state)
 
         set_rules(self)

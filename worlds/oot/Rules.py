@@ -18,7 +18,7 @@ class OOTLogic(LogicMixin):
         # Separate stale state for OOTRegion.can_reach() to use because CollectionState.update_reachable_regions() sets
         # `self.state[player] = False` for all players without updating OOT's age region accessibility.
         self._oot_stale = {player: True for player, world in parent.worlds.items()
-                           if parent.worlds[player].game == "Ocarina of Time"}
+                           if parent.worlds[player].game == "Ocarina of Time" or parent.worlds[player].game == "Ocarina of Time but it's just Master Quest Water Temple"}
 
     def _oot_has_stones(self, count, player): 
         return self.has_group("stones", player, count)
