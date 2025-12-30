@@ -15,6 +15,6 @@ export SC2PATH="/home/alchav/Games/battlenet/drive_c/Program Files (x86)/StarCra
 # If PATH_TO_ARCHIPELAGO is not set, this defaults to the directory containing
 # this script file.
 #ARCHIPELAGO="$(ls ${PATH_TO_ARCHIPELAGO:-$(dirname $0)}/Archipelago_*.AppImage | sort -r | head -1)"
-/home/alchav/PycharmProjects/Archipelago/venv310/bin/python3.10 Starcraft2Client.py
+/home/alchav/PycharmProjects/Archipelago/venv310/bin/python3.10 Launcher.py "Starcraft 2 Client"
 # Start the Archipelago client
 #$ARCHIPELAGO Starcraft2Client

@@ -929,8 +929,8 @@ def prune_item_pool(world: SC2World, item_list: List[FilterItem]) -> List[Starcr
         pool.append(ap_item)
 
     fill_pool_with_kerrigan_levels(world, pool)
-    filtered_pool = filter_items(world, world.location_cache, pool)
-    return filtered_pool
+    # filtered_pool = filter_items(world, world.location_cache, pool)
+    return pool
 
 
 def item_list_contains_parent(world: SC2World, item_data: ItemData, item_name_list: List[str]) -> bool:
