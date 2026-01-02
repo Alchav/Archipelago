@@ -439,7 +439,7 @@ class YachtDiceWorld(World):
         location_table = ini_locations(
             self.goal_score,
             self.max_score,
-            self.number_of_locations,
+            1000, # self.number_of_locations,
             self.difficulty,
             self.skip_early_locations,
             self.multiworld.players,
