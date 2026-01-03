@@ -396,13 +396,13 @@ class YachtDiceWorld(World):
             already_items = len(self.itempool) + 1
             self.itempool += ["Bonus Point"] * min(self.number_of_locations - already_items, 10)
 
-        # add some encouragements filler-items if there is still room
-        already_items = len(self.itempool) + 1
-        self.itempool += ["Encouragement"] * min(self.number_of_locations - already_items, 5)
-
-        # add some fun facts filler-items if there is still room
-        already_items = len(self.itempool) + 1
-        self.itempool += ["Fun Fact"] * min(self.number_of_locations - already_items, 5)
+        # # add some encouragements filler-items if there is still room
+        # already_items = len(self.itempool) + 1
+        # self.itempool += ["Encouragement"] * min(self.number_of_locations - already_items, 5)
+        #
+        # # add some fun facts filler-items if there is still room
+        # already_items = len(self.itempool) + 1
+        # self.itempool += ["Fun Fact"] * min(self.number_of_locations - already_items, 5)
 
         # finally, add some "Good RNG" and "Bad RNG" items to complete the item pool
         # these items are filler and do not do anything.
@@ -411,9 +411,9 @@ class YachtDiceWorld(World):
 
         p = 1.1 - 0.25 * self.difficulty
         already_items = len(self.itempool) + 1
-        self.itempool += self.random.choices(
-            ["Good RNG", "Bad RNG"], weights=[p, 1 - p], k=self.number_of_locations - already_items
-        )
+        # self.itempool += self.random.choices(
+        #     ["Good RNG", "Bad RNG"], weights=[p, 1 - p], k=self.number_of_locations - already_items
+        # )
 
         # we are done adding items. Now because of the last step, number of items should be number of locations
         already_items = len(self.itempool) + 1
