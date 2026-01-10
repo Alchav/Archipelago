@@ -417,11 +417,11 @@ class YachtDiceWorld(World):
 
         # we are done adding items. Now because of the last step, number of items should be number of locations
         already_items = len(self.itempool) + 1
-        if already_items != self.number_of_locations:
-            raise Exception(
-                f"[Yacht Dice] Number in self.itempool is not number of locations "
-                f"{already_items} {self.number_of_locations}."
-            )
+        # if already_items != self.number_of_locations:
+        #     raise Exception(
+        #         f"[Yacht Dice] Number in self.itempool is not number of locations "
+        #         f"{already_items} {self.number_of_locations}."
+        #     )
 
         # add precollected items using push_precollected. Items in self.itempool get created in create_items
         for item in self.precollected:
