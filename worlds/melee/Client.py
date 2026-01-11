@@ -353,8 +353,8 @@ class SSBMClient(CommonContext):
                     if location not in self.locations_checked:
                         new_checks.append(location)
                     num_bonus_checks += 1
-                    if 0x290 + num_bonus_checks not in self.locations_checked:
-                        new_checks.append(0x290 + num_bonus_checks)
+                    if 0x28F + num_bonus_checks not in self.locations_checked:
+                        new_checks.append(0x28F + num_bonus_checks)
 
             for location in trophy_checks:
                 check_id = location_ids[location]
