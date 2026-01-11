@@ -1288,11 +1288,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     }
 
     player_weights = {
-        pid: multiworld.worlds[pid].options.hint_count.value
+        pid: 50 #multiworld.worlds[pid].options.hint_count.value
         for pid in eligible_players
     }
     player_location_weights = {
-        pid: multiworld.worlds[pid].options.hint_location_count.value
+        pid: 50 #multiworld.worlds[pid].options.hint_location_count.value
         for pid in eligible_players
     }
 
