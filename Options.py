@@ -1727,9 +1727,9 @@ class TokenPercentage(Range):
 class PerGameCommonOptions(CommonOptions):
     owner: Owner
     order: Order
-    hint_count: HintCount
-    hint_location_count: HintLocationCount
-    token_percentage: TokenPercentage
+    # hint_count: HintCount
+    # hint_location_count: HintLocationCount
+    # token_percentage: TokenPercentage
     local_items: LocalItems
     non_local_items: NonLocalItems
     start_inventory: StartInventory
