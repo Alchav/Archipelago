@@ -1,4 +1,97 @@
-<img width="777" height="181" alt="SoH_AP_Logo" src="https://github.com/user-attachments/assets/3e40eaaa-02ce-432e-b830-7e5ef48cfe9f" />
+# [Archipelago](https://archipelago.gg) ![Discord Shield](https://discordapp.com/api/guilds/731205301247803413/widget.png?style=shield) | [Install](https://github.com/ArchipelagoMW/Archipelago/releases)
+
+Archipelago provides a generic framework for developing multiworld capability for game randomizers. In all cases,
+presently, Archipelago is also the randomizer itself.
+
+Currently, the following games are supported:
+
+* The Legend of Zelda: A Link to the Past
+* Factorio
+* Subnautica
+* Risk of Rain 2
+* The Legend of Zelda: Ocarina of Time
+* Timespinner
+* Super Metroid
+* Secret of Evermore
+* Final Fantasy
+* VVVVVV
+* Raft
+* Super Mario 64
+* Meritous
+* Super Metroid/Link to the Past combo randomizer (SMZ3)
+* ChecksFinder
+* Hollow Knight
+* The Witness
+* Sonic Adventure 2: Battle
+* Starcraft 2
+* Donkey Kong Country 3
+* Dark Souls 3
+* Super Mario World
+* Pokémon Red and Blue
+* Hylics 2
+* Overcooked! 2
+* Zillion
+* Lufia II Ancient Cave
+* Blasphemous
+* Wargroove
+* Stardew Valley
+* The Legend of Zelda
+* The Messenger
+* Kingdom Hearts 2
+* The Legend of Zelda: Link's Awakening DX
+* Adventure
+* DLC Quest
+* Noita
+* Undertale
+* Bumper Stickers
+* Mega Man Battle Network 3: Blue Version
+* Muse Dash
+* DOOM 1993
+* Terraria
+* Lingo
+* Pokémon Emerald
+* DOOM II
+* Shivers
+* Heretic
+* Landstalker: The Treasures of King Nole
+* Final Fantasy Mystic Quest
+* TUNIC
+* Kirby's Dream Land 3
+* Celeste 64
+* Castlevania 64
+* A Short Hike
+* Yoshi's Island
+* Mario & Luigi: Superstar Saga
+* Bomb Rush Cyberfunk
+* Aquaria
+* Yu-Gi-Oh! Ultimate Masters: World Championship Tournament 2006
+* A Hat in Time
+* Old School Runescape
+* Kingdom Hearts 1
+* Mega Man 2
+* Yacht Dice
+* Faxanadu
+* Saving Princess
+* Castlevania: Circle of the Moon
+* Inscryption
+* Civilization VI
+* The Legend of Zelda: The Wind Waker
+* Jak and Daxter: The Precursor Legacy
+* Super Mario Land 2: 6 Golden Coins
+* shapez
+* Paint
+* Celeste (Open World)
+* Choo-Choo Charles
+* APQuest
+
+For setup and instructions check out our [tutorials page](https://archipelago.gg/tutorial/).
+Downloads can be found at [Releases](https://github.com/ArchipelagoMW/Archipelago/releases), including compiled
+windows binaries.
+
+## History
+
+Archipelago is built upon a strong legacy of brilliant hobbyists. We want to honor that legacy by showing it here.
+The repositories which Archipelago is built upon, inspired by, or otherwise owes its gratitude to are:
 
 # Ship of Harkinian + Archipelago
 
