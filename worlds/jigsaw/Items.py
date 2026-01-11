@@ -20,13 +20,15 @@ class JigsawItem(Item):
 
 item_table = {
     f"{i} Puzzle Piece{'s' if i > 1 else ''}": ItemData(234782000 + (i - 1), 
-        ItemClassification.progression if i >= 5 else ItemClassification.progression_skip_balancing)
+        ItemClassification.progression if i >= 25 else ItemClassification.progression_skip_balancing)
     for i in range(1, 501)
 }
 
-item_table["1 Fake Puzzle Piece"] = ItemData(234785000 + (1 - 1), ItemClassification.trap)
-item_table["Rotate Trap"] = ItemData(234786000 + (1 - 1), ItemClassification.trap)
-item_table["Swap Trap"] = ItemData(234787000 + (1 - 1), ItemClassification.trap)
+for i in range(1, 501):
+    item_table[f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}"] = ItemData(234785000 + (i - 1), ItemClassification.trap)
+for i in range(1, 11):
+    item_table[f"{i} Rotate Trap{'s' if i > 1 else ''}"] = ItemData(234786000 + (i - 1), ItemClassification.trap)
+    item_table[f"{i} Swap Trap{'s' if i > 1 else ''}"] = ItemData(234787000 + (i - 1), ItemClassification.trap)
 
 encouragements = [
     "Good job!", "Wowza!", "You rock!", "Nailed it!", "Heck yes!",
@@ -60,5 +62,9 @@ for i, phrase in enumerate(encouragements):
 
 
 item_groups = {
-    "Puzzle Pieces": [key for key in item_table.keys() if "Puzzle Piece" in key]
+    "Puzzle Pieces": [f"{i} Puzzle Piece{'s' if i > 1 else ''}" for i in range(1, 501)],
+    "Fake Puzzle Pieces": [f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}" for i in range(1, 501)],
+    "Traps": [f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}" for i in range(1, 501)] +
+              [f"{i} Rotate Trap{'s' if i > 1 else ''}" for i in range(1, 11)] +
+              [f"{i} Swap Trap{'s' if i > 1 else ''}" for i in range(1, 11)],
 }
