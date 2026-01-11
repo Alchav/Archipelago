@@ -3,22 +3,21 @@ import pkgutil
 
 from typing import Any, List, ClassVar
 
-from BaseClasses import CollectionState, Item, Tutorial, ItemClassification
+from BaseClasses import CollectionState, Item, Tutorial
 from worlds.AutoWorld import WebWorld, World
 from .Items import SohItem, item_data_table, item_table, item_name_groups, progressive_items
-from .Locations import location_table, location_name_groups, token_amounts
+from .Locations import location_table, location_name_groups
 from .Options import SohOptions, soh_option_groups
 from .Regions import create_regions_and_locations, place_locked_items, dungeon_reward_item_mapping
 from .Enums import *
 from .ItemPool import create_item_pool, create_filler_item_pool, create_triforce_pieces, get_filler_item
 from . import RegionAgeAccess
-from .ShopItems import fill_shop_items, generate_scrub_prices, generate_merchant_prices, set_price_rules, all_shop_locations
+from .ShopItems import fill_shop_items, generate_scrub_prices, set_price_rules, all_shop_locations
 from Fill import fill_restrictive
 from .Presets import oot_soh_options_presets
 from .UniversalTracker import setup_options_from_slot_data
 from settings import Group, Bool
 from Options import OptionError
-from .LogicHelpers import wallet_capacities
 
 import logging
 logger = logging.getLogger("SOH_OOT")
@@ -67,7 +66,6 @@ class SohWorld(World):
     location_name_groups = location_name_groups
 
     # Universal Tracker stuff, does not do anything in normal gen
-    glitches_item_name = Items.GLITCHED
     using_ut: bool  # so we can check if we're using UT only once
     passthrough: dict[str, Any]  # slot data that got passed through
     ut_can_gen_without_yaml = True  # class var that tells it to ignore the player yaml
@@ -79,10 +77,7 @@ class SohWorld(World):
         self.shop_prices = dict[str, int]()
         self.shop_vanilla_items = dict[str, str]()
         self.scrub_prices = dict[str, int]()
-        self.merchant_prices = dict[str, int]()
         self.triforce_pieces_required: int = 0
-        self.vanilla_progressive_skulltula_count: int = 0
-        self.randomized_progressive_skulltula_count: int = 0
 
         apworld_manifest = orjson.loads(pkgutil.get_data(
             __name__, "archipelago.json").decode("utf-8"))
@@ -103,12 +98,6 @@ class SohWorld(World):
         if self.options.door_of_time.value == 0 and self.options.shuffle_dungeon_rewards.value == 0:
             self.options.starting_age.value = 0
 
-        # Check if Tycoon Wallet is shuffled and if price settings are above what Giants Wallet can hold. Max/Min Prices need to be adjusted to fit in Giants Wallet.
-        if not self.options.shuffle_tycoon_wallet.value:
-            for option in (self.options.shuffle_shops_minimum_price, self.options.shuffle_shops_maximum_price, self.options.shuffle_scrubs_minimum_price, self.options.shuffle_scrubs_maximum_price, self.options.shuffle_merchants_minimum_price, self.options.shuffle_merchants_maximum_price):
-                if option.value > wallet_capacities[Items.GIANT_WALLET]:
-                    option.value = wallet_capacities[Items.GIANT_WALLET]
-
         # If maximum price is below minimum, set max to minimum.
         if self.options.shuffle_shops_minimum_price.value > self.options.shuffle_shops_maximum_price.value:
             self.options.shuffle_shops_maximum_price.value = self.options.shuffle_shops_minimum_price.value
@@ -116,49 +105,10 @@ class SohWorld(World):
         if self.options.shuffle_scrubs_minimum_price.value > self.options.shuffle_scrubs_maximum_price.value:
             self.options.shuffle_scrubs_maximum_price.value = self.options.shuffle_scrubs_minimum_price.value
 
-        if self.options.shuffle_merchants_minimum_price.value > self.options.shuffle_merchants_maximum_price.value:
-            self.options.shuffle_merchants_maximum_price.value = self.options.shuffle_merchants_minimum_price.value 
-
-
-        # Figure out how many Skulltula tokens need to be progressive
-        # Max amount from KAK turn ins
-        turn_in_amount: int = 0
-        
-        if self.options.shuffle_100_gs_reward:
-            turn_in_amount = 100 
-        else:
-            for location, amount in token_amounts.items():
-                if location not in self.options.exclude_locations:
-                    turn_in_amount = amount
-                    break
-
-        progressive_skulltula_count: int = max(self.options.rainbow_bridge_skull_tokens_required.value if self.options.rainbow_bridge.value == 6 else 0, self.options.ganons_castle_boss_key_skull_tokens_required.value if self.options.ganons_castle_boss_key.value == 7 else 0, turn_in_amount)
-
-
-        if self.options.shuffle_skull_tokens:
-            self.randomized_progressive_skulltula_count = progressive_skulltula_count
-        
-            if self.options.shuffle_skull_tokens == "dungeon":
-                self.vanilla_progressive_skulltula_count = max(self.randomized_progressive_skulltula_count - TokenCounts.OVERWORLD.value, 0)
-            
-            if self.options.shuffle_skull_tokens == "overworld":
-                self.vanilla_progressive_skulltula_count = max(self.randomized_progressive_skulltula_count - TokenCounts.DUNGEON.value, 0)
-        else:
-            self.vanilla_progressive_skulltula_count = progressive_skulltula_count
-
-        if self.using_ut:
-            try:
-                self.vanilla_progressive_skulltula_count = self.passthrough["vanilla_progressive_skulltula_count"]
-                self.randomized_progressive_skulltula_count = self.passthrough["randomized_progressive_skulltula_count"]
-            except KeyError:
-                pass
-
-
     def create_regions(self) -> None:
         create_regions_and_locations(self)
         place_locked_items(self)
         generate_scrub_prices(self)
-        generate_merchant_prices(self)
         for location in self.get_locations():
             location.name = str(location.name)
         for region in self.get_regions():
@@ -170,9 +120,9 @@ class SohWorld(World):
             for location in self.get_locations():
                 location.access_rule = lambda state: True
 
-    def create_item(self, name: str, create_as_event: bool = False, classification: ItemClassification = None) -> SohItem:
+    def create_item(self, name: str, create_as_event: bool = False) -> SohItem:
         item_entry = Items(name)
-        return SohItem(str(name), item_data_table[item_entry].classification if classification == None else classification,
+        return SohItem(str(name), item_data_table[item_entry].classification,
                        None if create_as_event else item_data_table[item_entry].item_id, self.player)
 
     def get_filler_item_name(self) -> str:
@@ -200,6 +150,35 @@ class SohWorld(World):
 
         create_filler_item_pool(self)
 
+    def set_rules(self) -> None:
+        if self.options.true_no_logic:
+            return
+
+        # Completion condition.
+        self.multiworld.completion_condition[self.player] = lambda state: state.has(
+            Events.GAME_COMPLETED.value, self.player)
+
+        # UT doesn't run pre_fill, so we're doing this here instead
+        if self.using_ut:
+            self.shop_prices = self.passthrough["shop_prices"]
+            self.shop_vanilla_items = self.passthrough["shop_vanilla_items"]
+            set_price_rules(self)
+
+    def get_pre_fill_items(self) -> List["Item"]:
+        pre_fill_items = []
+
+        if self.options.shuffle_dungeon_rewards == "dungeons":
+            dungeon_reward_items = [self.create_item(
+                item.value) for item in dungeon_reward_item_mapping.values()]
+            pre_fill_items.extend(dungeon_reward_items)
+
+        for region, shop in all_shop_locations:
+            for slot, item in shop.items():
+                pre_fill_items.append(self.create_item(item))
+
+        return pre_fill_items
+
+    def pre_fill(self):
         # Prefill Dungeon Rewards. Need to collect the item pool and vanilla shop items before doing so.
         if self.options.shuffle_dungeon_rewards == "dungeons":
             # Create a filled copy of the state so the multiworld can place the dungeon rewards using logic
@@ -215,7 +194,7 @@ class SohWorld(World):
                                         for location in dungeon_reward_item_mapping.keys()]
             dungeon_reward_items = [self.create_item(
                 item.value) for item in dungeon_reward_item_mapping.values()]
-            self.random.shuffle(dungeon_reward_items)
+            self.multiworld.random.shuffle(dungeon_reward_items)
 
             # Place dungeon rewards
             fill_restrictive(self.multiworld, prefill_state, dungeon_reward_locations,
@@ -223,15 +202,11 @@ class SohWorld(World):
 
         fill_shop_items(self)
 
-        set_price_rules(self)
-
-    def set_rules(self) -> None:
-        if self.options.true_no_logic:
+        # if UT ever does start running pre_fill, this will stop it from overwriting the shop price rules
+        if self.using_ut or self.options.true_no_logic:
             return
 
-        # Completion condition.
-        self.multiworld.completion_condition[self.player] = lambda state: state.has(
-            Events.GAME_COMPLETED.value, self.player)
+        set_price_rules(self)
 
     def collect(self, state: CollectionState, item: Item) -> bool:
         changed = super().collect(state, item)
@@ -324,7 +299,6 @@ class SohWorld(World):
             "shuffle_fish": self.options.shuffle_fish.value,
             "shuffle_scrubs": self.options.shuffle_scrubs.value,
             "scrub_prices": self.scrub_prices,
-            "merchant_prices": self.merchant_prices,
             "shuffle_beehives": self.options.shuffle_beehives.value,
             "shuffle_cows": self.options.shuffle_cows.value,
             "shuffle_pots": self.options.shuffle_pots.value,
@@ -368,6 +342,4 @@ class SohWorld(World):
             "ice_trap_filler_replacement": self.options.ice_trap_filler_replacement.value,
             "no_logic": self.options.true_no_logic.value,
             "apworld_version": self.apworld_version,
-            "enable_all_tricks": self.options.enable_all_tricks.value,
-            "tricks_in_logic": self.options.tricks_in_logic.value
         }

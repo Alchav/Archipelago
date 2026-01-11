@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from Options import Choice, Toggle, DefaultOnToggle, Range, PerGameCommonOptions, StartInventoryPool, Visibility, OptionGroup, OptionSet
-from .Enums import Tricks
+from Options import Choice, Toggle, DefaultOnToggle, Range, PerGameCommonOptions, StartInventoryPool, Visibility, OptionGroup
 
 
 class ClosedForest(Choice):
@@ -56,10 +55,11 @@ class ZorasFountain(Choice):
 class SleepingWaterfall(Choice):
     """
     Closed:
-    Sleeping Waterfall obstructs the entrance to Zora's Domain. Zelda's Lullaby must be played in order to open it.
+    Sleeping Waterfall obstructs the entrance to Zora's Domain. Zelda's Lullaby must be played in order to open
+    it (but only once; then it stays open in both time periods).
 
     Open: 
-    Sleeping Waterfall is always open. Link may always enter Zora's Domain and Zelda's Lullaby is not required to enter Zora's Domain.
+    Sleeping Waterfall is always open. Link may always enter Zora's Domain.
     """
     display_name = "Sleeping Waterfall"
     option_closed = 0
@@ -90,8 +90,8 @@ class FortressCarpenters(Choice):
     Sets the state of the carpenters captured by Gerudo in Gerudo Fortress, and with it the number of guards that spawn.
     Normal - All 4 carpenters are required to be saved.
     Fast - Only the bottom left carpenter requires rescuing.
-    Free - The bridge is repaired from the start, and Nabooru cannot spawn.
-    Only Normal is compatible with the Gerudo Fortress Key Ring.
+    Free - The bridge is repaired from the start, and Nabooru cannot spawn. If the Gerudo Membership Card isn't shuffled, you start with it.
+    Only Normal is compatible with Gerudo Fortress Key Rings.
     """
     display_name = "Fortress Carpenters"
     option_normal = 0
@@ -383,18 +383,11 @@ class ShuffleFish(Choice):
     default = 0
 
 
-class ShuffleScrubs(Choice):
+class ShuffleScrubs(Toggle):
     """
-    Shuffles Deku Scrub merchants in the game.
-    Off - Scrubs will not be shuffled. The 3 Scrubs that give one-time items in the vanilla game (POH, Deku Nut capacity, and Deku Stick capacity) will not spawn.
-    One-Time Only - Only the 3 Scrubs that give one-time items in the vanilla game are shuffled.
-    All- All Scrubs are shuffled.
+    Shuffles all Deku Scrub merchants in the game.
     """
     display_name = "Shuffle Scrubs"
-    option_off = 0
-    option_one_time_only = 1
-    option_all = 2
-    default = 0
 
 
 class ShuffleScrubsMinimumPrice(Range):
@@ -489,27 +482,6 @@ class ShuffleMerchants(Choice):
     option_all_but_beans = 2
     option_all = 3
     default = 0
-
-
-class ShuffleMerchantsMinimumPrice(Range):
-    """
-    If Shuffle Merchants is on, set their minimum price. Final price will be rounded down to multiples of 5.
-    """
-    display_name = "Shuffle Merchants Minimum Price"
-    range_start = 0
-    range_end = 999
-    default = 10
-
-
-class ShuffleMerchantsMaximumPrice(Range):
-    """
-    If Shuffle Merchants is on, set their maximum price. Final price will be rounded down to multiples of 5.
-    If this is set below the minimum, this option will be set to whatever the minimum is set to.
-    """
-    display_name = "Shuffle Merchants Maximum Price"
-    range_start = 0
-    range_end = 999
-    default = 90
 
 
 class ShuffleFrogSongRupees(Toggle):
@@ -864,30 +836,6 @@ class TrueNoLogic(Toggle):
     visibility = Visibility.spoiler
 
 
-class EnableAllTricks(Toggle):
-    """
-    Bypass the individual trick or glitch selections below and enable all of them.
-    """
-    display_name = "Enable All Tricks and Glitches"
-
-
-class TricksInLogic(OptionSet):
-    display_name = "Tricks in Logic"
-    valid_keys = [str(trick) for trick in Tricks]
-    __doc__ = ("Define what tricks or glitches are considered in logic. "
-               "For more information on what each trick does, check the Ship of Harkinian "
-               "Randomizer -> Seed Settings -> Tricks/Glitches settings.\n"
-               "Trick names: "
-               f"{', '.join(valid_keys)}")
-
-
-class ShuffleTycoonWallet(Toggle):
-    """
-    Enabling this adds an extra Progressive Wallet to the pool and adds a new 999 capacity tier after Giants Wallet.
-    """
-    display_name = "Shuffle Tycoon Wallet"
-
-
 @dataclass
 class SohOptions(PerGameCommonOptions):
     closed_forest: ClosedForest
@@ -934,8 +882,6 @@ class SohOptions(PerGameCommonOptions):
     shuffle_crates: ShuffleCrates
     shuffle_trees: ShuffleTrees
     shuffle_merchants: ShuffleMerchants
-    shuffle_merchants_minimum_price: ShuffleMerchantsMinimumPrice
-    shuffle_merchants_maximum_price: ShuffleMerchantsMaximumPrice
     shuffle_frog_song_rupees: ShuffleFrogSongRupees
     shuffle_adult_trade_items: ShuffleAdultTradeItems
     shuffle_boss_souls: ShuffleBossSouls
@@ -973,9 +919,6 @@ class SohOptions(PerGameCommonOptions):
     ice_trap_count: IceTrapCount
     ice_trap_filler_replacement: IceTrapFillerReplacement
     true_no_logic: TrueNoLogic
-    shuffle_tycoon_wallet: ShuffleTycoonWallet
-    tricks_in_logic: TricksInLogic
-    enable_all_tricks: EnableAllTricks
 
 
 soh_option_groups = [
@@ -987,8 +930,6 @@ soh_option_groups = [
         SleepingWaterfall,
         JabuJabu,
         LockOverworldDoors,
-        EnableAllTricks,
-        TricksInLogic
     ]),
     OptionGroup("World Settings", [
         StartingAge,
@@ -1023,7 +964,7 @@ soh_option_groups = [
         # Shuffle Kokiri Sword
         ShuffleMasterSword,
         ShuffleChildsWallet,
-        ShuffleTycoonWallet,
+        # Include Tycoon Wallet
         # Shuffle Ocarinas
         ShuffleOcarinaButtons,
         ShuffleSwim,
@@ -1050,8 +991,7 @@ soh_option_groups = [
         ShuffleCrates,
         ShuffleTrees,
         ShuffleMerchants,
-        ShuffleMerchantsMinimumPrice,
-        ShuffleMerchantsMaximumPrice,
+        # Merchant prices
         ShuffleFrogSongRupees,
         ShuffleAdultTradeItems,
         Shuffle100GSReward,
