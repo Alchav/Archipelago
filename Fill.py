@@ -639,6 +639,12 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     call_all(multiworld, "fill_hook", progitempool, usefulitempool, filleritempool, fill_locations)
 
+    player_start_items = [item for item in sum(multiworld.precollected_items.values(), []) if
+                          item.player > 1 and item.code]
+
+    for item in player_start_items:
+        item.hint = True
+
     # sdv_locs = [loc for loc in fill_locations if loc.game == "Stardew Valley"]
     # sdv_items = [item for item in progitempool if item.game == "Stardew Valley"]# and item.name != "Stardrop"]
     # multiworld.itempool = [item for item in multiworld.itempool if item.game != "Stardew Valley"]# or item.name == "Stardrop"]
@@ -1282,18 +1288,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
 
     # players with at least one real location
-    eligible_players = {
-        pid for pid in multiworld.player_ids
-        if any(loc.address for loc in multiworld.get_locations(pid))
-    }
 
-    player_weights = {
-        pid: 50 #multiworld.worlds[pid].options.hint_count.value
-        for pid in eligible_players
-    }
-    player_location_weights = {
-        pid: 50 #multiworld.worlds[pid].options.hint_location_count.value
-        for pid in eligible_players
+    hint_weights = {
+        a: b for a, b in multiworld.worlds[1].options.hint_count.value.items()
     }
 
     swap_out_locations = [
@@ -1314,14 +1311,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # Build combined weight map over (kind, player)
     # kind is "hint" or "loc"
-    weights = {}
-    for p in eligible_players:
-        w_hint = player_weights.get(p, 0)
-        w_loc = player_location_weights.get(p, 0)
-        if w_hint > 0:
-            weights[("hint", p)] = w_hint
-        if w_loc > 0:
-            weights[("loc", p)] = w_loc
+    # weights = {}
+    # for p in hint_weights:
+    #     w_hint = player_weights.get(p, 0)
+    #     w_loc = player_location_weights.get(p, 0)
+    #     if w_hint > 0:
+    #         weights[("hint", p)] = w_hint
+    #     if w_loc > 0:
+    #         weights[("loc", p)] = w_loc
 
     def apportion(weight_map, slots):
         """Largest remainder method over arbitrary keys."""
@@ -1350,25 +1347,25 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 base[k] = max(0, base[k] - 1)
         return base
 
-    counts_by_kind_player = apportion(weights, total_slots)
+    counts_by_kind_player = apportion(hint_weights, total_slots)
 
     # Build flat item list of (kind, player) repeated by count
     items = []
-    for (kind, p), c in counts_by_kind_player.items():
-        items.extend([(kind, p)] * c)
+    for i, c in counts_by_kind_player.items():
+        items.extend([f"{i} Point"] * c)
 
     # Shuffle for randomness
     multiworld.random.shuffle(items)
     multiworld.random.shuffle(swap_out_locations)
 
-    for location, item in zip(swap_out_locations, items):
+    for location, item_name in zip(swap_out_locations, items):
         # item_name = (
         #     f"{multiworld.player_name[item[1]]} Hint Location Point"
         #     if item[0] == "loc"
         #     else f"{multiworld.player_name[item[1]]} Hint Point"
         # )
-        item_name = multiworld.worlds[1].item_id_to_name[
-            (10000 if item[0] == "loc" else 1000) + multiworld.worlds[item[1]].options.owner.value]
+        # item_name = multiworld.worlds[1].item_id_to_name[
+        #     (10000 if item[0] == "loc" else 1000) + multiworld.worlds[item[1]].options.owner.value]
 
         new_item = multiworld.worlds[1].create_item(item_name)
         location.item = new_item
@@ -1424,8 +1421,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     check_no_skips(multiworld, starting_spheres)
 
-    multiworld.hint_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "hint") // max(1, sum(player_weights.values()))))
-    multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
+    multiworld.hint_ratio = max(1, (sum(c for k, c in counts_by_kind_player.items() if k == "hint") // max(1, sum(hint_weights.values()))))
+    # multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
 
     # multiworld.post_fill = True
 

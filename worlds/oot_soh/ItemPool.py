@@ -270,7 +270,7 @@ def create_filler_item_pool(world: "SohWorld") -> None:
 
     # Add junk items to fill remaining locations
     world.multiworld.itempool += [world.create_item(
-        get_filler_item(world)) for _ in range(filler_item_count)]
+        get_filler_item(world)) for _ in range(filler_item_count // 2)]
 
 
 def get_open_location_count(world: "SohWorld") -> int:

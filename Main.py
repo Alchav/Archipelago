@@ -386,7 +386,7 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
                         spheres.append(dict(current_sphere))
 
                 baked_server_options["hint_cost"] = multiworld.hint_ratio
-                baked_server_options["hint_location_cost"] = multiworld.hint_location_ratio
+                baked_server_options["hint_location_cost"] = multiworld.hint_ratio
                 multidata: NetUtils.MultiData = {
                     "slot_data": slot_data,
                     "slot_info": slot_info,

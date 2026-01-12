@@ -1880,7 +1880,7 @@ class Spoiler:
                 'Archipelago Version %s  -  Seed: %s\n\n' % (
                     Utils.__version__, self.multiworld.seed))
             outfile.write(f"Hint Ratio:                      {self.multiworld.hint_ratio}\n")
-            outfile.write(f"Hint Location Ratio:                      {self.multiworld.hint_location_ratio}\n")
+            outfile.write(f"Hint Location Ratio:                      {self.multiworld.hint_ratio}\n")
             outfile.write('Filling Algorithm:               %s\n' % self.multiworld.algorithm)
             outfile.write('Players:                         %d\n' % self.multiworld.players)
             if self.multiworld.players > 1:
