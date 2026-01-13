@@ -17,6 +17,7 @@ class JigsawItem(Item):
         self.player = player
         self.code = code
         self.location = None
+        self.hint = False
 
 item_table = {
     f"{i} Puzzle Piece{'s' if i > 1 else ''}": ItemData(234782000 + (i - 1), 

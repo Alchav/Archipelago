@@ -1693,6 +1693,8 @@ class Owner(TextChoice):
     option_AlyssaJ = 7
     option_Auto = 8
     option_Undefined = 9
+    option_Ophilla = 10
+    option_AlchavValley = 11
     default = 9
 
 

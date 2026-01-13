@@ -400,8 +400,8 @@ class JigsawWorld(World):
 
     def create_items(self):
         self.multiworld.itempool += [self.create_item(name) for name in self.pool_contents]
-        for i in range(self.filler_items_in_pool):
-            self.multiworld.itempool.append(self.create_item(self.filler_encouragements[i]))
+        # for i in range(self.filler_items_in_pool):
+        #     self.multiworld.itempool.append(self.create_item(self.filler_encouragements[i]))
                 
 
     def create_regions(self):        
@@ -477,7 +477,7 @@ class JigsawWorld(World):
         
 
         ###
-        if self.options.add_fillers:
+        if self.options.add_fillers or True:
             all_locations += [
                 JigsawLocation(self.player, f"Merge {i} times", 234782000+i, i, board)
                 for i in filler_locations
@@ -496,8 +496,8 @@ class JigsawWorld(World):
         self.filler_items_in_pool = 0
         if self.options.add_fillers:
             self.filler_items_in_pool = int(self.options.percentage_fillers_itempool.value / 100 * len(filler_locations))
-            for i, loc in enumerate(filler_locations[int(self.filler_items_in_pool):]):
-                self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
+            # for i, loc in enumerate(filler_locations[int(self.filler_items_in_pool):]):
+            #     self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
 
         
         # Change the victory location to an event and place the Victory item there.

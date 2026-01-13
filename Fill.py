@@ -1268,18 +1268,19 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if item.game == "Super Metroid":
             continue
         i = starting_spheres[item.player]
-        for i in range(i, 0, -1):
-            for location in spheres[i-1]:
-                if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto") and not location.item.advancement))
-                        and location.item_rule(item)):
-                    logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, starting sphere is {starting_spheres[item.player]}")
-                    location.item = item
-                    multiworld.precollected_items[item.player].remove(item)
-                    item.location = location
-                    break
-            else:
-                continue
-            break
+        earlier_spheres = [loc for sphere in spheres[:i] for loc in sphere]
+        if item.hint:
+            multiworld.random.shuffle(earlier_spheres)
+        else:
+            earlier_spheres = list(reversed(earlier_spheres))
+        for location in earlier_spheres:
+            if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto") and not location.item.advancement))
+                    and location.item_rule(item)):
+                logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, starting sphere is {starting_spheres[item.player]}")
+                location.item = item
+                multiworld.precollected_items[item.player].remove(item)
+                item.location = location
+                break
         else:
             logging.info(f"Can't move {item} out of start inventory")
 
