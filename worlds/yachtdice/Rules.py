@@ -55,11 +55,14 @@ def extract_progression(state, player, frags_per_dice, frags_per_roll, allowed_c
     number_of_fixed_mults = state.count("Fixed Score Multiplier", player)
     number_of_step_mults = state.count("Step Score Multiplier", player)
 
-    categories = [
-        Category(category_name, state.count(category_name, player))
-        for category_name in allowed_categories
-        if state.count(category_name, player)  # want all categories that have count >= 1
-    ]
+    try:
+        categories = [
+            Category(category_name, state.count(category_name, player))
+            for category_name in allowed_categories
+            if state.count(category_name, player)  # want all categories that have count >= 1
+        ]
+    except Exception as e:
+        breakpoint()
 
     extra_points_in_logic = state.count("1 Point", player)
     extra_points_in_logic += state.count("10 Points", player) * 10
@@ -145,6 +148,25 @@ def dice_simulation_strings(categories, num_dice, num_rolls, fixed_mult, step_mu
 
         # Return the last value if percentile is higher than all probabilities
         return sorted_values[-1]
+
+    if diff == 5:
+        score = 0
+        for j, category in enumerate(categories):
+            max_base = max(
+                yacht_weights[
+                    category.name,
+                    min(8, num_dice),
+                    min(8, num_rolls)
+                ].keys(),
+                default=0
+            )
+
+            cat_mult = 2 ** (category.quantity - 1)
+            mult = (1 + fixed_mult + step_mult * j) * cat_mult
+            score += int(max_base * mult)
+
+        yachtdice_cache[player][tup] = score
+        return score
 
     # parameters for logic.
     # perc_return is, per difficulty, the percentages of total score it returns (it averages out the values)

@@ -33,6 +33,7 @@ def ini_locations(goal_score, max_score, number_of_locations, dif, skip_early_lo
     function that loads in all locations necessary for the game, so based on options.
     will make sure that goal_score and max_score are included locations
     """
+    return {f"{score} score": LocData(starting_index + score, "Board", score) for score in range(number_of_locations)}
     scaling = 2  # parameter that determines how many low-score location there are.
     # need more low-score locations or lower difficulties:
     if dif == 1:
@@ -76,4 +77,4 @@ def ini_locations(goal_score, max_score, number_of_locations, dif, skip_early_lo
 
 
 # we need to run this function to initialize all scores from 1 to 1000, even though not all are used
-all_locations = all_locations_fun(1000)
+all_locations = all_locations_fun(10000)

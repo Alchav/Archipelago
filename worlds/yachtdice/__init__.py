@@ -324,9 +324,9 @@ class YachtDiceWorld(World):
         )
 
         # if we overshoot, remove items until you get below 1000, then return the last removed item
-        if score_in_logic > 1000:
+        if score_in_logic > self.options.score_for_goal:
             removed_item = ""
-            while score_in_logic > 1000:
+            while score_in_logic > self.options.score_for_goal:
                 removed_item = self.itempool.pop()
                 score_in_logic = dice_simulation_fill_pool(
                     self.itempool + self.precollected,
@@ -339,7 +339,7 @@ class YachtDiceWorld(World):
             self.itempool.append(removed_item)
         else:
             # Keep adding items until a score of 1000 is in logic
-            while score_in_logic < 1000:
+            while score_in_logic < self.options.score_for_goal:
                 item_to_add = get_item_to_add(weights, extra_points_added, step_score_multipliers_added)
                 self.itempool.append(item_to_add)
                 if item_to_add == "1 Point":
@@ -358,12 +358,22 @@ class YachtDiceWorld(World):
                         self.player,
                     )
 
+        self.number_of_locations = dice_simulation_fill_pool(
+            self.itempool + self.precollected,
+            self.frags_per_dice,
+            self.frags_per_roll,
+            self.possible_categories,
+            self.difficulty if self.options.accessibility == "full" else 5,
+            self.player,
+        )
+
+
         # count the number of locations in the game.
         already_items = len(self.itempool) + 1  # +1 because of Victory item
 
         # We need to add more filler/useful items if there are many items in the pool to guarantee successful generation
         extra_locations_needed += (already_items - 45) // 15
-        self.number_of_locations = already_items + extra_locations_needed
+        # self.number_of_locations = already_items + extra_locations_needed
 
         # From here, we will count the number of items in the self.itempool, and add useful/filler items to the pool,
         # making sure not to exceed the number of locations.
@@ -439,7 +449,7 @@ class YachtDiceWorld(World):
         location_table = ini_locations(
             self.goal_score,
             self.max_score,
-            1000, # self.number_of_locations,
+            self.number_of_locations,
             self.difficulty,
             self.skip_early_locations,
             self.multiworld.players,
