@@ -15,7 +15,10 @@ from .Output import generate_output
 from .Options import FFMQOptions
 from .Client import FFMQClient
 import zlib
-import msgpack
+try:
+    import msgpack
+except ImportError:
+    msgpack = None
 
 # removed until lists are supported
 # class FFMQSettings(settings.Group):
@@ -100,7 +103,13 @@ class FFMQWorld(World):
                 if hasattr(self.options, key):
                     getattr(self.options, key).value = value
                 elif key == "rooms":
-                    self.rooms = msgpack.unpackb(zlib.decompress(base64.b64decode(value)), raw=False)
+                    if type(value) is list:
+                        self.rooms = value
+                    else:
+                        if msgpack:
+                            self.rooms = msgpack.unpackb(zlib.decompress(base64.b64decode(value)), raw=False)
+                        else:
+                            raise Exception("Unable to unpack map shuffle data from server without msgpack installed")
 
     @classmethod
     def stage_generate_early(cls, multiworld):
@@ -273,8 +282,11 @@ class FFMQWorld(World):
     def fill_slot_data(self):
         ret = self.options.as_dict("logic", "sky_coin_mode", "shattered_sky_coin_quantity", "map_shuffle")
         if self.rooms != rooms:
-            compressed_rooms = base64.b64encode(zlib.compress(msgpack.packb(self.rooms, use_bin_type=True))).decode("ascii")
-            ret["rooms"] = compressed_rooms
+            if msgpack:
+                compressed_rooms = base64.b64encode(zlib.compress(msgpack.packb(self.rooms, use_bin_type=True))).decode("ascii")
+                ret["rooms"] = compressed_rooms
+            else:
+                ret["rooms"] = self.rooms
         else:
             ret["rooms"] = None
         return ret
