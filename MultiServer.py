@@ -814,6 +814,7 @@ class Context:
     def notify_hints(self, team: int, hints: typing.List[Hint], only_new: bool = False,
                      persist_even_if_found: bool = False, recipients: typing.Sequence[int] = None):
         """Send and remember hints."""
+        hints = [hint for hint in hints if not hint.found]
         if only_new:
             hints = [hint for hint in hints if hint not in self.hints[team, hint.finding_player] if hint.location not in self.location_checks[(team, hint.finding_player)]]
         if not hints:

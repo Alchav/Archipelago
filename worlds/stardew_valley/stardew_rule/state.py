@@ -87,6 +87,7 @@ class Reach(BaseStardewRule):
 
 class HasProgressionPercent(Received):
     def __init__(self, player: int, percent: int):
+        percent = 0
         super().__init__(Event.received_progression_percent, player, percent, event=True)
 
     def __post_init__(self):

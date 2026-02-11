@@ -32,7 +32,7 @@ class PetLogic(BaseLogic):
         assert hearts >= 0, "You can't have negative hearts with a pet."
         if hearts == 0:
             return True_()
-
+        hearts = 0
         points = hearts * 200
         points_per_month = 12 * 14
         points_per_water_month = 18 * 14

@@ -905,8 +905,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if i.classification == ItemClassification.useful:
             return 2
         elif i.classification == ItemClassification.progression_skip_balancing:
-            if not multiworld.random.randint(0, 4):
+            if not multiworld.random.randint(0, 24 if i.game == "Jigsaw" else 4):
                 return 3
+            if i.game == "Jigsaw":
+                return multiworld.random.randint(1, 2)
             return 2
         else:
             if i.classification == ItemClassification.progression:
@@ -2002,7 +2004,10 @@ def compress_owner_spheres(multiworld):
                 spheres_per_owner[owner] += spheres_per_game[player]
         highest_sphere = max([i for i in spheres_per_owner.values()])
         if not max_sphere:
-            max_sphere = min([i for o, i in spheres_per_owner.items() if i and not o % 2])
+            x = [i for o, i in spheres_per_owner.items() if i and not o % 2]
+            if not x:
+                x = [i for o, i in spheres_per_owner.items() if i]
+            max_sphere = min(x)
             logging.info(f"Max sphere: {max_sphere}")
         logging.info(f"Highest sphere: {highest_sphere}")
         owners_above_max_sphere = [owner for owner in owner_groups if spheres_per_owner[owner] > max_sphere]

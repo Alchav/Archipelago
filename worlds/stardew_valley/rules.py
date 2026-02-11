@@ -1180,8 +1180,16 @@ def set_friendsanity_rules(logic: StardewLogic, rule_collector: StardewRuleColle
 
     for villager in content.villagers.values():
         for heart in content.features.friendsanity.get_randomized_hearts(villager):
-            rule = logic.relationship.can_earn_relationship(villager.name, heart)
             location_name = friendsanity.to_location_name(villager.name, heart)
+            if not villager.bachelor:
+                heart = 0
+            elif heart < 9:
+                heart = 0
+            elif heart < 11:
+                heart = 9
+            else:
+                heart = 11
+            rule = logic.relationship.can_earn_relationship(villager.name, heart)
             rule_collector.set_location_rule(location_name, rule)
 
     for heart in content.features.friendsanity.get_pet_randomized_hearts():

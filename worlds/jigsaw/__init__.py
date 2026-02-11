@@ -346,14 +346,16 @@ class JigsawWorld(World):
         
         self.pieces_per_location = max((pieces_left + locs_pieces - 1) // locs_pieces, self.options.minimum_number_of_pieces_per_bundle.value)   
         self.number_of_locations = (pieces_left + self.pieces_per_location - 1) // self.pieces_per_location
-        self.pool_contents = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
+        pcs = [0] * self.number_of_locations
+        for i in range(pieces_left):
+            pcs[self.random.randint(0, len(pcs) - 1)] += 1
+        self.pool_contents = [f"{piece_count} Puzzle Piece{'s' if piece_count > 1 else ''}" for piece_count in pcs if piece_count > 0]
                                 
         pieces_from_start = len(self.precollected_pieces)
         
         while pieces_from_start > 0:
-            if pieces_from_start >= 500:
-                n = 500
-            else:
+            n = self.random.randint(1, 5)
+            if pieces_from_start < n:
                 n = pieces_from_start
             self.multiworld.push_precollected(self.create_item(f"{n} Puzzle Piece{'s' if n > 1 else ''}"))
             pieces_from_start -= n

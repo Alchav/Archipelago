@@ -98,11 +98,22 @@ class RelationshipLogic(BaseLogic):
         assert hearts >= 0, f"Can't have a negative hearts with {npc}."
 
         villager = self.content.villagers.get(npc)
+
         if villager is None:
             return false_
 
         if hearts == 0:
             return true_
+
+        # if not villager.bachelor:
+        #     hearts = 0
+        # elif hearts < 8:
+        #     hearts = 0
+        # elif hearts < 10:
+        #     hearts = 8
+        # else:
+        #     hearts = 10
+
 
         heart_steps = self.content.features.friendsanity.get_randomized_hearts(villager)
         if not heart_steps or hearts > heart_steps[-1]:  # Hearts are sorted, bigger is the last one.
@@ -167,8 +178,8 @@ class RelationshipLogic(BaseLogic):
         if villager is None:
             return false_
 
-        if hearts == 0:
-            return True_()
+        # if hearts == 0:
+        #     return True_()
 
         rules = [self.logic.relationship.can_meet(npc)]
 
@@ -181,11 +192,11 @@ class RelationshipLogic(BaseLogic):
                 previous_heart = max(hearts - heart_size, 0)
                 rules.append(self.logic.relationship.has_hearts(npc, previous_heart))
 
-        if hearts > 2 or hearts > heart_size:
-            rules.append(self.logic.season.has(villager.birthday))
+        # if hearts > 2 or hearts > heart_size:
+        #     rules.append(self.logic.season.has(villager.birthday))
 
-        if villager.birthday == Generic.any:
-            rules.append(self.logic.season.has_all() | self.logic.time.has_year_three)  # push logic back for any birthday-less villager
+        # if villager.birthday == Generic.any:
+        #     rules.append(self.logic.season.has_all() | self.logic.time.has_year_three)  # push logic back for any birthday-less villager
 
         if villager.bachelor:
             if hearts > 10:
