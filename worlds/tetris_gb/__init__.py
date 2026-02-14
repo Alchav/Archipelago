@@ -4,6 +4,7 @@ from . import client
 from .locations import score_locations, location_name_to_id
 from .items import items, item_name_to_id
 
+
 class TetrisGBWorld(World):
     game = "Tetris"
     location_name_to_id = location_name_to_id
@@ -16,7 +17,6 @@ class TetrisGBWorld(World):
         self.speed_decreases = 20
         self.speed_increases = 20
         self.score_multipliers = 20
-
 
     def create_regions(self):
         regions = []
@@ -54,8 +54,10 @@ class TetrisGBWorld(World):
     def create_item(self, item):
         return TetrisItem(item, items[item], self.item_name_to_id[item], self.player)
 
+
 class TetrisLocation(Location):
     game = "Tetris"
+
 
 class TetrisItem(Item):
     game = "Tetris"
