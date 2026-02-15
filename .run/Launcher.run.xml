@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build APWorld" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="Launcher" type="PythonConfigurationType" factoryName="Python" singleton="false">
     <module name="Archipelago" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
