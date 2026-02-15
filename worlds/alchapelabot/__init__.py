@@ -31,7 +31,7 @@ class AlchapelaBotWorld(World):
     topology_present = False
     item_name_to_id = {
         "Alchav Hint Point": 1000,
-        "Alchav Dice Hint Point": 1001,
+        "Alchav Alt Hint Point": 1001,
         "AvBW Hint Point": 1002,
         "AvBW Jigsaw Hint Point": 1003,
         "Jack Hint Point": 1004,
@@ -39,10 +39,10 @@ class AlchapelaBotWorld(World):
         "Alyssa Hint Point": 1006,
         "Alyssa Jigsaw Hint Point": 1007,
         "Auto Hint Point": 1008,
-        "Ophilla Hint Point": 1009,
-        "Alchav Valley Hint Point": 1010,
+        "Ophilla Hint Point": 1010,
+        "Alchav Valley Hint Point": 1011,
         "Alchav Hint Location Point": 10000,
-        "Alchav Dice Hint Location Point": 10001,
+        "Alchav Alt Hint Location Point": 10001,
         "AvBW Hint Location Point": 10002,
         "AvBW Jigsaw Hint Location Point": 10003,
         "Jack Hint Location Point": 10004,
@@ -50,8 +50,8 @@ class AlchapelaBotWorld(World):
         "Alyssa Hint Location Point": 10006,
         "Alyssa Jigsaw Hint Location Point": 10007,
         "Auto Hint Location Point": 10008,
-        "Ophilla Hint Location Point": 10009,
-        "Alchav Valley Hint Location Point": 10010,
+        "Ophilla Hint Location Point": 10010,
+        "Alchav Valley Hint Location Point": 10011,
         "Nothing": 100000
     }
 

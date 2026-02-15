@@ -1134,6 +1134,8 @@ class CollectionState():
             self.stale[item.code] = True
             if self.multiworld.worlds[item.code].game == "Ocarina of Time":
                 self._oot_stale[item.code] = True
+            elif self.multiworld.worlds[item.code].game == "Ship of Harkinian":
+                self._soh_stale[item.code] = True
         # if item.player % 2:
         #     self.stale[item.player+1] = True
 
