@@ -56,17 +56,25 @@ class TetrisClient(BizHawkClient):
         items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
         if data["patched"][0] == 172:
             if ctx.auth:
-                data_writes = []
+                hide_next_piece = False
+                if "Hide Next Piece" in items_received:
+                    hide_next_piece = True
+                if "Show Next Piece" in items_received:
+                    hide_next_piece = False
+                if items_received.count("Toggle Next Piece") % 2:
+                    hide_next_piece = True
+
+                data_writes = [
+                    (0xc0de, [0x01] if hide_next_piece else [0x00], "System Bus"),
+                    (0xc210, [0x80] if hide_next_piece else [0x00], "System Bus"),
+                    (0x1fc6, [min(255, items_received.count("Score Multiplier"))], "ROM"),
+                    (0x1afb, [min(255, ctx.slot_data["starting_speed"] + items_received.count(
+                        "Decrease Speed") - items_received.count("Increase Speed"))], "ROM")
+                ]
                 if data["mode"][0] == 0 and not data["demo"][0]:
 
                     await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(range(1, int(score / 100) + 1))}])
 
-                    data_writes += [
-                        (0xc0de, [0x01] if "Hide Next Piece" in items_received else [0x00], "System Bus"),
-                        (0xc210, [0x80] if "Hide Next Piece" in items_received else [0x00], "System Bus"),
-                        (0x1fc6, [items_received.count("Score Multiplier")], "ROM"),
-                        (0x1afb, [ctx.slot_data["starting_speed"] + items_received.count("Decrease Speed") - items_received.count("Increase Speed")], "ROM")
-                    ]
                     if self.garbage_hole_shuffles_given < items_received.count("Shuffle Garbage Line Hole"):
                         self.garbage_hole_shuffles_given += 1
                         data_writes.append(
@@ -88,7 +96,7 @@ class TetrisClient(BizHawkClient):
                         (0xC400, shuffle_garbage_line(), "System Bus")
                     ]
                 success = await write(ctx.bizhawk_ctx, data_writes)
-        elif data["mode"][0] == 7:
+        elif data["mode"][0] in (7, 37):
             await write(ctx.bizhawk_ctx, PATCH)
             self.patched = True
             logger.info("Tetris game successfully patched.")
@@ -102,6 +110,7 @@ class TetrisClient(BizHawkClient):
             if self.garbage_lines_given is None:
                 items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
                 self.garbage_lines_given = items_received.count("Garbage Line")
+
 
 def shuffle_garbage_line():
     garbage_line = ([0x28] * 9) + [0x2F]

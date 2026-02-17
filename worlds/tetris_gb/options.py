@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import Range, NamedRange, PerGameCommonOptions
+from Options import Range, NamedRange, Choice, PerGameCommonOptions
 
 
 class LocationCount(Range):
@@ -40,13 +40,8 @@ class SpeedOption(NamedRange):
 class StartingSpeed(SpeedOption):
     """Starting speed level. You can set this value numerically, in which case the value chosen is the number of frames
     between the piece falling one line, so a lower number is faster."""
+    display_name = "Starting Speed"
     default = 33
-
-
-class MaximumSpeed(SpeedOption):
-    """The maximum possible speed level. You can set this value numerically, in which case the value chosen is the
-    number of frames between the piece falling one line, so a lower number is faster."""
-    default = 10
 
 
 class TargetSpeed(SpeedOption):
@@ -54,21 +49,45 @@ class TargetSpeed(SpeedOption):
     higher than Starting Speed, but if it is higher than Maximum Speed, it will be set to the same as Maximum Speed.
     You can set this value numerically, in which case the value chosen is thenumber of frames between the piece falling
     one line, so a lower number is faster."""
-    default = 53
+    display_name = "Target Speed"
+    default = 11
+
+
+class MaximumSpeed(SpeedOption):
+    """The maximum possible speed level. You can set this value numerically, in which case the value chosen is the
+    number of frames between the piece falling one line, so a lower number is faster."""
+    display_name = "Maximum Speed"
+    default = 7
 
 
 class ScoreMultipliers(Range):
     """Number of score multipliers for line clears in the item pool. In the vanilla game, line clear scores are
     multiplied by your current level. Here, it will be increased only by these items."""
-    range_start = 10
+    display_name = "Score Multipliers"
+    range_start = 15
     range_end = 40
     default = 30
+
+
+class NextPieceDisplay(Choice):
+    """Enable or Disable displaying the next piece.
+    Enabled to Disabled: A single trap item permanently hides the next piece display.
+    Disabled to Enabled: The next piece display starts disabled but is enabled permanently by a single item.
+    Toggles: A number of items are added to the item pool that toggle the next piece display."""
+    display_name = "Next Piece Display"
+    option_enabled = 0
+    option_disabled = 1
+    option_enabled_to_disabled = 2
+    option_disabled_to_enabled = 3
+    option_toggles = 4
+    default = 0
 
 
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
     location_count: LocationCount
     starting_speed: StartingSpeed
-    maximum_speed: MaximumSpeed
     target_speed: TargetSpeed
+    maximum_speed: MaximumSpeed
     score_multipliers: ScoreMultipliers
+    next_piece_display: NextPieceDisplay

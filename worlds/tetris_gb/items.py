@@ -4,6 +4,8 @@ items = {
     "Score Multiplier": ItemClassification.progression,
     "Decrease Speed": ItemClassification.progression | ItemClassification.useful,
     "Increase Speed": ItemClassification.trap,
+    "Toggle Next Piece": ItemClassification.trap | ItemClassification.useful,
+    "Show Next Piece": ItemClassification.useful,
     "Hide Next Piece": ItemClassification.trap,
     "Garbage Line": ItemClassification.trap,
     "Shuffle Garbage Line Hole": ItemClassification.trap

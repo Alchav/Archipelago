@@ -62,11 +62,24 @@ class TetrisGBWorld(World):
         )
 
     def create_items(self):
-        item_pool = [self.create_item("Hide Next Piece")]
+        item_pool = []
+        if self.options.next_piece_display == "disabled":
+            self.multiworld.push_precollected(self.create_item("Hide Next Piece"))
+        elif self.options.next_piece_display == "disabled_to_enabled":
+            self.multiworld.push_precollected(self.create_item("Hide Next Piece"))
+            item_pool.append(self.create_item("Show Next Piece"))
+        elif self.options.next_piece_display == "enabled_to_disabled":
+            item_pool.append(self.create_item("Hide Next Piece"))
+
         item_pool += [self.create_item("Score Multiplier") for _ in range(self.options.score_multipliers.value)]
         item_pool += [self.create_item("Decrease Speed") for _ in range(self.speed_decreases)]
         item_pool += [self.create_item("Increase Speed") for _ in range(self.speed_increases)]
-        item_pool += [self.create_item(item) for item in self.random.choices(["Garbage Line", "Shuffle Garbage Line Hole"], weights=[50, 1], k=len(self.multiworld.get_unfilled_locations(self.player)) - len(item_pool))]
+
+        item_pool += [self.create_item(item) for item in self.random.choices(
+            ["Garbage Line", "Shuffle Garbage Line Hole", "Toggle Next Piece"],
+            weights=[15, 1, 1 if self.options.next_piece_display == "toggles" else 0],
+            k=len(self.multiworld.get_unfilled_locations(self.player)) - len(item_pool))]
+
         self.multiworld.itempool += item_pool
 
     def create_item(self, item):
