@@ -88,6 +88,13 @@ class TetrisClient(BizHawkClient):
                             if success:
                                 self.garbage_lines_given += lines - data["active_garbage_lines"][0]
                                 logger.info(f"Sent {items_received.count("Garbage Line") - self.garbage_lines_given} garbage lines, had: {data["active_garbage_lines"][0]}, total now: {lines}")
+                elif data["mode"][0] == 48:
+                    await ctx.send_msgs([{
+                        "cmd": "StatusUpdate",
+                        "status": ClientStatus.CLIENT_GOAL
+                    }])
+                    ctx.finished_game = True
+
                 else:
                     self.garbage_lines_given = items_received.count("Garbage Line")
                     self.garbage_hole_shuffles_given = items_received.count("Shuffle Garbage Line Hole")
