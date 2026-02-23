@@ -56,6 +56,8 @@ class TetrisGBWorld(World):
         self.multiworld.regions += regions
 
     def set_rules(self):
+
+
         self.multiworld.completion_condition[self.player] = lambda state: (
                 state.has("Decrease Speed", self.player, self.speed_decreases)
                 and state.has("Score Multiplier", self.player, self.options.score_multipliers.value)
@@ -75,12 +77,29 @@ class TetrisGBWorld(World):
         item_pool += [self.create_item("Decrease Speed") for _ in range(self.speed_decreases)]
         item_pool += [self.create_item("Increase Speed") for _ in range(self.speed_increases)]
 
-        item_pool += [self.create_item(item) for item in self.random.choices(
-            ["Garbage Line", "Shuffle Garbage Line Hole", "Toggle Next Piece"],
-            weights=[15, 1, 1 if self.options.next_piece_display == "toggles" else 0],
+        filler_weight_options = ["row_clear_weight", "garbage_line_weight", "shuffle_garbage_line_hole_weight",
+                                 "random_inputs_weight", "wall_trap_weight", "toggle_next_piece_weight",
+                                 "instant_lock_weight"]
+
+        filler_weights = {option: getattr(self.options, option).value for option in filler_weight_options}
+
+        if self.options.next_piece_display != "toggles":
+            filler_weights["toggle_next_piece_weight"] = 0
+
+        fillers = [item for item in self.random.choices(
+            list(filler_weights.keys()),
+            weights=list(filler_weights.values()),
             k=len(self.multiworld.get_unfilled_locations(self.player)) - len(item_pool))]
 
+        item_pool += [self.create_item(getattr(self.options, option).get_item(self.random)) for option in fillers]
+
         self.multiworld.itempool += item_pool
+
+    @classmethod
+    def stage_post_fill(cls, multiworld):
+        for location in multiworld.get_locations():
+            if location.item.game == cls.game and location.item.classification == ItemClassification.trap:
+                location.locked = True
 
     def create_item(self, item):
         return TetrisItem(item, items[item], self.item_name_to_id[item], self.player)

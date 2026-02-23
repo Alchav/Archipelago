@@ -4,8 +4,8 @@ from Options import Range, NamedRange, Choice, PerGameCommonOptions
 
 class LocationCount(Range):
     """The number of location checks. More locations means more trap items for you!"""
-    range_start = 150
-    range_end = 1500
+    range_start = 200
+    range_end = 2000
     default = 300
 
 
@@ -83,6 +83,89 @@ class NextPieceDisplay(Choice):
     default = 0
 
 
+class FillerWeights(Range):
+    auto_display_name = True
+    range_start = 0
+    range_end = 100
+
+
+class RowClearWeight(FillerWeights):
+    """Weight of Row Clear items in the item pool.
+    These cause a particular row to clear as if it had been filled in completely, the next time you connect a piece."""
+    default = 32
+
+    @staticmethod
+    def get_item(random):
+        return random.choice([f"Clear Row {i}" for i in range(1, 17)])
+
+
+class GarbageLineWeight(FillerWeights):
+    """Weight of Garbage Line traps in the item pool.
+    These create a line of 9 blocks and one empty tile that come up from the bottom of the screen and push all existing
+    pieces upward, the next time you connect a piece."""
+    range_start = 1
+    default = 64
+
+    @staticmethod
+    def get_item(random):
+        return "Garbage Line"
+
+
+class ShuffleGarbageLineHoleWeight(FillerWeights):
+    """Weight of Shuffle Garbage Line Hole traps in the item pool.
+    These randomly change which tile will be empty when Garbage Lines are generated."""
+    default = 8
+
+    @staticmethod
+    def get_item(random):
+        return "Shuffle Garbage Line Hole"
+
+
+class RandomInputsWeight(FillerWeights):
+    """Weight of Random Input traps in the item pool.
+    These cause a loss of control of the game as random buttons register every frame.
+    Trap lengths range from 1 frame to 4 seconds."""
+    default = 32
+
+    @staticmethod
+    def get_item(random):
+        return random.choices(["1 Frame of Random Inputs", "1 Second of Random Inputs", "2 Seconds of Random Inputs",
+                               "3 Seconds of Random Inputs", "4 Seconds of Random Inputs"],
+                              k=1, weights=[16, 8, 4, 2, 1])[0]
+
+
+class WallTrapWeight(FillerWeights):
+    """Weight of Wall Trap items in the item pool.
+    These warp your active piece into the left or right wall and instantly connect them, which may or may not result
+    in tiles hanging out into the game area."""
+    default = 32
+
+    @staticmethod
+    def get_item(random):
+        return random.choice(["Active Piece Gets Stuck in the Left Wall", "Active Piece Gets Stuck in the Right Wall"])
+
+
+class InstantlyLockActivePieceWeight(FillerWeights):
+    """Weight of "Instantly Lock Active Piece" items in the item pool.
+    These cause your active piece to instantly lock in piece as if there are blocks underneath it, whether there are
+    or not."""
+    default = 4
+
+    @staticmethod
+    def get_item(random):
+        return "Instantly Lock Active Piece"
+
+
+class ToggleNextPieceWeight(FillerWeights):
+    """Weight of Toggle Next Piece trap items in the item pool. Only in effect if Next Piece Display is set to Toggles.
+    These toggle the visibility of the next piece display. Select does not toggle it in Archipelago."""
+    default = 4
+
+    @staticmethod
+    def get_item(random):
+        return "Toggle Next Piece"
+
+
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
     location_count: LocationCount
@@ -91,3 +174,10 @@ class TetrisOptions(PerGameCommonOptions):
     maximum_speed: MaximumSpeed
     score_multipliers: ScoreMultipliers
     next_piece_display: NextPieceDisplay
+    row_clear_weight: RowClearWeight
+    garbage_line_weight: GarbageLineWeight
+    shuffle_garbage_line_hole_weight: ShuffleGarbageLineHoleWeight
+    random_inputs_weight: RandomInputsWeight
+    instant_lock_weight: InstantlyLockActivePieceWeight
+    wall_trap_weight: WallTrapWeight
+    toggle_next_piece_weight: ToggleNextPieceWeight

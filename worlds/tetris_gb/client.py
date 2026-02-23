@@ -1,6 +1,5 @@
-import base64
 import logging
-import time
+
 import random
 
 from NetUtils import ClientStatus
@@ -19,7 +18,19 @@ DATA_LOCATIONS = {
     "score": (0xc0a0, 3),
     "patched": (0x014C, 1),
     "demo": (0xffe4, 1),
-    "active_garbage_lines": (0xFFD3, 1)
+    "active_garbage_lines": (0xFFD3, 1),
+    "input_trap": (0xcc00, 1),
+}
+
+input_traps = {
+    "1 Frame of Random Inputs", "1 Second of Random Inputs", "2 Seconds of Random Inputs", "3 Seconds of Random Inputs"
+}
+
+wall_traps = {
+    "Active Piece Gets Stuck in the Left Wall", "Active Piece Gets Stuck in the Right Wall"
+}
+clear_row_items = {
+    f"Clear Row {i}" for i in range(1, 17)
 }
 
 
@@ -30,6 +41,10 @@ class TetrisClient(BizHawkClient):
     def __init__(self):
         self.patched = None
         self.garbage_lines_given = None
+        self.input_traps_given = None
+        self.wall_traps_given = None
+        self.lock_traps_given = None
+        self.clear_rows_given = None
         self.garbage_hole_shuffles_given = 0
         super().__init__()
 
@@ -45,8 +60,7 @@ class TetrisClient(BizHawkClient):
         return False
 
     async def game_watcher(self, ctx):
-        if not ctx.slot_data:
-            return
+
         data = await read(ctx.bizhawk_ctx, [(loc_data[0], loc_data[1], "System Bus")
                                             for loc_data in DATA_LOCATIONS.values()])
         data = {data_set_name: data_name for data_set_name, data_name in zip(DATA_LOCATIONS.keys(), data)}
@@ -54,8 +68,20 @@ class TetrisClient(BizHawkClient):
         score = int(data["score"][::-1].hex())
 
         items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
+
+        if self.garbage_lines_given is None:
+            self.garbage_lines_given = items_received.count("Garbage Line")
+        if self.input_traps_given is None:
+            self.input_traps_given = len([item for item in items_received if item in input_traps])
+        if self.wall_traps_given is None:
+            self.wall_traps_given = len([item for item in items_received if item in wall_traps])
+        if self.lock_traps_given is None:
+            self.lock_traps_given = items_received.count("Instantly Lock Active Piece")
+        if self.clear_rows_given is None:
+            self.clear_rows_given = len([item for item in items_received if item in clear_row_items])
+
         if data["patched"][0] == 172:
-            if ctx.auth:
+            if ctx.auth and ctx.slot_data:
                 hide_next_piece = False
                 if "Hide Next Piece" in items_received:
                     hide_next_piece = True
@@ -63,13 +89,14 @@ class TetrisClient(BizHawkClient):
                     hide_next_piece = False
                 if items_received.count("Toggle Next Piece") % 2:
                     hide_next_piece = True
-
+                speed = min(255, ctx.slot_data["starting_speed"] + items_received.count(
+                        "Decrease Speed") - items_received.count("Increase Speed"))
                 data_writes = [
                     (0xc0de, [0x01] if hide_next_piece else [0x00], "System Bus"),
                     (0xc210, [0x80] if hide_next_piece else [0x00], "System Bus"),
                     (0x1fc6, [min(255, items_received.count("Score Multiplier"))], "ROM"),
-                    (0x1afb, [min(255, ctx.slot_data["starting_speed"] + items_received.count(
-                        "Decrease Speed") - items_received.count("Increase Speed"))], "ROM")
+                    (0x1afb, [speed], "ROM"),
+                    (0xffa9, [speed], "System Bus")
                 ]
                 if data["mode"][0] == 0 and not data["demo"][0]:
 
@@ -88,7 +115,47 @@ class TetrisClient(BizHawkClient):
                             if success:
                                 self.garbage_lines_given += lines - data["active_garbage_lines"][0]
                                 logger.info(f"Sent {items_received.count("Garbage Line") - self.garbage_lines_given} garbage lines, had: {data["active_garbage_lines"][0]}, total now: {lines}")
-                elif data["mode"][0] == 48:
+                    all_input_traps = [item for item in items_received if item in input_traps]
+                    if self.input_traps_given < len(all_input_traps):
+                        input_trap_value = data["input_trap"][0]
+                        while input_trap_value < 255 and self.input_traps_given < len(all_input_traps):
+                            next_trap = all_input_traps[self.input_traps_given]
+                            self.input_traps_given += 1
+                            input_trap_value += (1 if next_trap == "1 Frame of Random Inputs"
+                                                 else 60 if next_trap == "1 Second of Random Inputs"
+                                                 else 120 if next_trap == "2 Seconds of Random Inputs"
+                                                 else 180 if next_trap == "3 Seconds of Random Inputs"
+                                                 else 240 if next_trap == "4 Seconds of Random Inputs"
+                                                 else None)
+                        input_trap_value = min(255, input_trap_value)
+                        data_writes.append(
+                            (0xCC00, [input_trap_value], "System Bus")
+                        )
+                    all_wall_traps = [item for item in items_received if item in wall_traps]
+                    if self.wall_traps_given < len(all_wall_traps):
+                        next_trap = all_wall_traps[self.wall_traps_given]
+                        piece_x = (0x17 if next_trap == "Active Piece Gets Stuck in the Left Wall"
+                                   else 0x6F if next_trap == "Active Piece Gets Stuck in the Right Wall"
+                                   else None)
+                        success = await guarded_write(ctx.bizhawk_ctx, [(0xC202, [piece_x], "System Bus"),
+                            (0xFF99, [0], "System Bus")], [(0xC200, [0], "System Bus")])
+                        if success:
+                            self.wall_traps_given += 1
+                    if self.lock_traps_given < len([item for item in items_received
+                                                    if item == "Instantly Lock Active Piece"]):
+
+                        success = await guarded_write(ctx.bizhawk_ctx, [(0xCC11, [1], "System Bus"),
+                            (0xFF99, [0], "System Bus")], [(0xC200, [0], "System Bus")])
+                        if success:
+                            self.lock_traps_given += 1
+                    all_row_clears = [item for item in items_received if item in clear_row_items]
+                    if self.clear_rows_given < len(all_row_clears):
+                        rows_to_clear = {int(i.split(" ")[-1]) for i in all_row_clears[self.clear_rows_given:]}
+                        data_writes += [
+                            (0xCC00 + i, [1], "System Bus") for i in rows_to_clear
+                        ]
+                        self.clear_rows_given = len(all_row_clears)
+                elif data["mode"][0] == 48 and score >= 200000:
                     await ctx.send_msgs([{
                         "cmd": "StatusUpdate",
                         "status": ClientStatus.CLIENT_GOAL
@@ -98,25 +165,29 @@ class TetrisClient(BizHawkClient):
                 else:
                     self.garbage_lines_given = items_received.count("Garbage Line")
                     self.garbage_hole_shuffles_given = items_received.count("Shuffle Garbage Line Hole")
-
+                    self.lock_traps_given = items_received.count("Instantly Lock Active Piece")
+                    self.input_traps_given = len([item for item in items_received if item in input_traps])
+                    self.wall_traps_given = len([item for item in items_received if item in wall_traps])
                     data_writes += [
                         (0xC400, shuffle_garbage_line(), "System Bus")
                     ]
                 success = await write(ctx.bizhawk_ctx, data_writes)
-        elif data["mode"][0] in (7, 37):
+        elif data["mode"][0] == 37:
             await write(ctx.bizhawk_ctx, PATCH)
             self.patched = True
             logger.info("Tetris game successfully patched.")
         elif data["patched"][0] < 42:
-            logger.info("Return to the title screen to patch your Tetris game.")
+            logger.info("Reset your game to patch Tetris.")
             await write(ctx.bizhawk_ctx, [(0x014C, [42], "ROM")])
 
-    def on_package(self, ctx, cmd: str, args: dict):
-        super().on_package(ctx, cmd, args)
-        if cmd == 'ReceivedItems':
-            if self.garbage_lines_given is None:
-                items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
-                self.garbage_lines_given = items_received.count("Garbage Line")
+    # def on_package(self, ctx, cmd: str, args: dict):
+    #     super().on_package(ctx, cmd, args)
+    #     if cmd == 'ReceivedItems':
+    #         self.scrap_sync_items(ctx)
+    #
+    # def scrap_sync_items(self, ctx):
+    #     items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
+
 
 
 def shuffle_garbage_line():
