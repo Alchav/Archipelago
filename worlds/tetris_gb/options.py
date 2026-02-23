@@ -158,7 +158,7 @@ class InstantlyLockActivePieceWeight(FillerWeights):
 
 class ToggleNextPieceWeight(FillerWeights):
     """Weight of Toggle Next Piece trap items in the item pool. Only in effect if Next Piece Display is set to Toggles.
-    These toggle the visibility of the next piece display. Select does not toggle it in Archipelago."""
+    These toggle the visibility of the next piece display. Pressing select does not toggle it in Archipelago."""
     default = 4
 
     @staticmethod

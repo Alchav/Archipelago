@@ -13,8 +13,6 @@ class TetrisGBWorld(World):
     location_name_to_id = location_name_to_id
     item_name_to_id = item_name_to_id
 
-    origin_region_name: str = "Sphere 1"
-
     options_dataclass = TetrisOptions
     options: TetrisOptions
 
@@ -22,6 +20,7 @@ class TetrisGBWorld(World):
         super().__init__(multiworld, player)
         self.speed_decreases = 0
         self.speed_increases = 0
+        self.filler_weights = None
 
     def generate_early(self):
         starting_speed = self.options.starting_speed.value
@@ -30,33 +29,33 @@ class TetrisGBWorld(World):
         self.speed_increases = starting_speed - maximum_speed
         self.speed_decreases = target_speed - maximum_speed
 
+        filler_weight_options = ["row_clear_weight", "garbage_line_weight", "shuffle_garbage_line_hole_weight",
+                                 "random_inputs_weight", "wall_trap_weight", "toggle_next_piece_weight",
+                                 "instant_lock_weight"]
+
+        self.filler_weights = {option: getattr(self.options, option).value for option in filler_weight_options}
+
+        if self.options.next_piece_display != "toggles":
+            self.filler_weights["toggle_next_piece_weight"] = 0
+
     def create_regions(self):
 
         locs = list(range(1, len(location_name_to_id) + 1))
 
         locations_used = [int(i * len(locs) / self.options.location_count.value) for i in range(1, self.options.location_count.value + 1)]
 
-        regions = []
-        total_spheres = max(self.speed_decreases, self.options.score_multipliers.value) + 1
+        menu_region = Region("Menu", self.player, self.multiworld)
 
-        locs_per_sphere = len(locations_used) / total_spheres
-        for n in range(1, total_spheres + 1):
-            sphere_region = Region(f"Sphere {n}", self.player, self.multiworld)
-            for i in range(int(locs_per_sphere * (n - 1)), int(locs_per_sphere * n)):
-                if i > len(locations_used) - 1:
-                    break
-                sphere_region.locations.append(TetrisLocation(self.player, self.location_id_to_name[locations_used[i]], locations_used[i], sphere_region))
-            regions.append(sphere_region)
-        for i, region in enumerate(regions):
-            if i < len(regions) - 1:
-                region.connect(regions[i + 1], f"Sphere {i} to {i + 1}",
-                               rule=lambda state, sphere=i + 1: state.has("Decrease Speed", self.player, int((self.speed_decreases / total_spheres) * sphere))
-                               and state.has("Score Multiplier", self.player, int((self.options.score_multipliers.value / total_spheres) * sphere))
-                               )
-        self.multiworld.regions += regions
+        for i, score in enumerate(locations_used, start=1):
+            location = TetrisLocation(self.player, self.location_id_to_name[score], score, menu_region)
+            # print(f"{i}: requires {int((self.speed_decreases / len(locations_used)) * i)} Decrease Speed, {int((self.options.score_multipliers.value / len(locations_used)) * i)} Score Multiplier")
+            location.access_rule = lambda state, i=i+1: (state.has("Decrease Speed", self.player, int((self.speed_decreases / len(locations_used)) * i))
+                                   and state.has("Score Multiplier", self.player, int((self.options.score_multipliers.value / len(locations_used)) * i)))
+            menu_region.locations.append(location)
+
+        self.multiworld.regions.append(menu_region)
 
     def set_rules(self):
-
 
         self.multiworld.completion_condition[self.player] = lambda state: (
                 state.has("Decrease Speed", self.player, self.speed_decreases)
@@ -77,18 +76,9 @@ class TetrisGBWorld(World):
         item_pool += [self.create_item("Decrease Speed") for _ in range(self.speed_decreases)]
         item_pool += [self.create_item("Increase Speed") for _ in range(self.speed_increases)]
 
-        filler_weight_options = ["row_clear_weight", "garbage_line_weight", "shuffle_garbage_line_hole_weight",
-                                 "random_inputs_weight", "wall_trap_weight", "toggle_next_piece_weight",
-                                 "instant_lock_weight"]
-
-        filler_weights = {option: getattr(self.options, option).value for option in filler_weight_options}
-
-        if self.options.next_piece_display != "toggles":
-            filler_weights["toggle_next_piece_weight"] = 0
-
         fillers = [item for item in self.random.choices(
-            list(filler_weights.keys()),
-            weights=list(filler_weights.values()),
+            list(self.filler_weights.keys()),
+            weights=list(self.filler_weights.values()),
             k=len(self.multiworld.get_unfilled_locations(self.player)) - len(item_pool))]
 
         item_pool += [self.create_item(getattr(self.options, option).get_item(self.random)) for option in fillers]
@@ -100,6 +90,11 @@ class TetrisGBWorld(World):
         for location in multiworld.get_locations():
             if location.item.game == cls.game and location.item.classification == ItemClassification.trap:
                 location.locked = True
+
+    def get_filler_item_name(self):
+        return getattr(self.options, self.random.choices(list(self.filler_weights.keys()),
+                                                         weights=list(self.filler_weights.values()),
+                                                         k=1)[0]).get_item(self.random)
 
     def create_item(self, item):
         return TetrisItem(item, items[item], self.item_name_to_id[item], self.player)
