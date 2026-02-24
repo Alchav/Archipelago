@@ -18,7 +18,8 @@ items = {
     "Active Piece Gets Stuck in the Left Wall": ItemClassification.trap,
     "Active Piece Gets Stuck in the Right Wall": ItemClassification.trap,
     "Instantly Lock Active Piece": ItemClassification.trap,
-    **{f"Clear Row {i}": ItemClassification.filler for i in range(17)}
+    **{f"Clear Row {i}": ItemClassification.filler for i in range(17)},
+    "Clear All Rows": ItemClassification.useful
 }
 
 item_name_to_id = {item: code for code, item in enumerate(items.keys(), start=1)}

@@ -30,7 +30,8 @@ wall_traps = {
     "Active Piece Gets Stuck in the Left Wall", "Active Piece Gets Stuck in the Right Wall"
 }
 clear_row_items = {
-    f"Clear Row {i}" for i in range(1, 17)
+    "Clear All Rows",
+    *{f"Clear Row {i}" for i in range(1, 17)}
 }
 
 
@@ -89,18 +90,34 @@ class TetrisClient(BizHawkClient):
                     hide_next_piece = False
                 if items_received.count("Toggle Next Piece") % 2:
                     hide_next_piece = True
-                speed = min(255, ctx.slot_data["starting_speed"] + items_received.count(
+                speed = min(99, ctx.slot_data["starting_speed"] + items_received.count(
                         "Decrease Speed") - items_received.count("Increase Speed"))
+                speed_bcd = list(map(int, f"{speed:02d}"))
+                score_multipliers = min(99, items_received.count("Score Multiplier"))
+                score_multipliers_bcd = list(map(int, f"{score_multipliers:02d}"))
                 data_writes = [
                     (0xc0de, [0x01] if hide_next_piece else [0x00], "System Bus"),
                     (0xc210, [0x80] if hide_next_piece else [0x00], "System Bus"),
-                    (0x1fc6, [min(255, items_received.count("Score Multiplier"))], "ROM"),
+                    (0x1fc6, [score_multipliers], "ROM"),
                     (0x1afb, [speed], "ROM"),
-                    (0xffa9, [speed], "System Bus")
+                    (0xffa9, [speed], "System Bus"),
+                    (0xff9e, speed_bcd, "System Bus"),
                 ]
                 if data["mode"][0] == 0 and not data["demo"][0]:
 
                     await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(range(1, int(score / 100) + 1))}])
+
+                    if speed_bcd[0] == 0:
+                        speed_bcd[0] = 0x2F
+                    if score_multipliers_bcd[0] == 0:
+                        score_multipliers_bcd[0] = 0x2F
+
+                    data_writes += [
+                        (0x9950, speed_bcd, "System Bus"),  # main game vram
+                        (0x9d50, speed_bcd, "System Bus"),  # pause screen vram
+                        (0x98f0, score_multipliers_bcd, "System Bus"),  # main game vram
+                        (0x9cf0, score_multipliers_bcd, "System Bus"),  # pause screen vram
+                    ]
 
                     if self.garbage_hole_shuffles_given < items_received.count("Shuffle Garbage Line Hole"):
                         self.garbage_hole_shuffles_given += 1
@@ -145,17 +162,20 @@ class TetrisClient(BizHawkClient):
                                                     if item == "Instantly Lock Active Piece"]):
 
                         success = await guarded_write(ctx.bizhawk_ctx, [(0xCC11, [1], "System Bus"),
-                            (0xFF99, [0], "System Bus")], [(0xC200, [0], "System Bus")])
+                                                                        (0xFF99, [0], "System Bus")],
+                                                      [(0xC200, [0], "System Bus")])
                         if success:
                             self.lock_traps_given += 1
                     all_row_clears = [item for item in items_received if item in clear_row_items]
                     if self.clear_rows_given < len(all_row_clears):
-                        rows_to_clear = {int(i.split(" ")[-1]) for i in all_row_clears[self.clear_rows_given:]}
+                        rows_to_clear = {"All" if i == "Clear All Rows" else int(i.split(" ")[-1]) for i in all_row_clears[self.clear_rows_given:]}
+                        if "All" in rows_to_clear:
+                            rows_to_clear = range(1, 17)
                         data_writes += [
                             (0xCC00 + i, [1], "System Bus") for i in rows_to_clear
                         ]
                         self.clear_rows_given = len(all_row_clears)
-                elif data["mode"][0] == 48 and score >= 200000:
+                elif data["mode"][0] in range(47, 51) and score >= 200000:
                     await ctx.send_msgs([{
                         "cmd": "StatusUpdate",
                         "status": ClientStatus.CLIENT_GOAL
@@ -173,7 +193,7 @@ class TetrisClient(BizHawkClient):
                     ]
                 success = await write(ctx.bizhawk_ctx, data_writes)
         elif data["mode"][0] == 37:
-            await write(ctx.bizhawk_ctx, PATCH)
+            await write(ctx.bizhawk_ctx, PATCH + (0xC400, shuffle_garbage_line(), "System Bus"))
             self.patched = True
             logger.info("Tetris game successfully patched.")
         elif data["patched"][0] < 42:

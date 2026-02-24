@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import Range, NamedRange, Choice, PerGameCommonOptions
+from Options import Range, NamedRange, Choice, PerGameCommonOptions, NonLocalItems
 
 
 class LocationCount(Range):
@@ -50,7 +50,7 @@ class TargetSpeed(SpeedOption):
     You can set this value numerically, in which case the value chosen is thenumber of frames between the piece falling
     one line, so a lower number is faster."""
     display_name = "Target Speed"
-    default = 11
+    default = 10
 
 
 class MaximumSpeed(SpeedOption):
@@ -65,8 +65,8 @@ class ScoreMultipliers(Range):
     multiplied by your current level. Here, it will be increased only by these items."""
     display_name = "Score Multipliers"
     range_start = 15
-    range_end = 40
-    default = 30
+    range_end = 50
+    default = 40
 
 
 class NextPieceDisplay(Choice):
@@ -96,7 +96,17 @@ class RowClearWeight(FillerWeights):
 
     @staticmethod
     def get_item(random):
-        return random.choice([f"Clear Row {i}" for i in range(1, 17)])
+        return random.choices([f"Clear Row {i}" for i in range(1, 17)], k=1, weights=range(20, 4, -1))[0]
+
+
+class ClearAllRowsWeight(FillerWeights):
+    """Weight of Clear All Rows items in the item pool.
+    These cause the entire game area to clear out the next time you connect a piece."""
+    default = 4
+
+    @staticmethod
+    def get_item(random):
+        return "Clear All Rows"
 
 
 class GarbageLineWeight(FillerWeights):
@@ -166,6 +176,12 @@ class ToggleNextPieceWeight(FillerWeights):
         return "Toggle Next Piece"
 
 
+class TetrisNonLocalItems(NonLocalItems):
+    default = frozenset({"Garbage Line", "1 Frame of Random Inputs", "1 Second of Random Inputs",
+                         "2 Seconds of Random Inputs", "3 Seconds of Random Inputs", "4 Seconds of Random Inputs",
+                         "Instantly Lock Active Piece", "Active Piece Gets Stuck in the Left Wall",
+                         "Active Piece Gets Stuck in the Right Wall"})
+
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
     location_count: LocationCount
@@ -175,9 +191,11 @@ class TetrisOptions(PerGameCommonOptions):
     score_multipliers: ScoreMultipliers
     next_piece_display: NextPieceDisplay
     row_clear_weight: RowClearWeight
+    clear_all_rows_weight: ClearAllRowsWeight
     garbage_line_weight: GarbageLineWeight
     shuffle_garbage_line_hole_weight: ShuffleGarbageLineHoleWeight
     random_inputs_weight: RandomInputsWeight
     instant_lock_weight: InstantlyLockActivePieceWeight
     wall_trap_weight: WallTrapWeight
     toggle_next_piece_weight: ToggleNextPieceWeight
+    non_local_items: TetrisNonLocalItems

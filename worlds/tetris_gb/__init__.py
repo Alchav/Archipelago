@@ -29,9 +29,9 @@ class TetrisGBWorld(World):
         self.speed_increases = starting_speed - maximum_speed
         self.speed_decreases = target_speed - maximum_speed
 
-        filler_weight_options = ["row_clear_weight", "garbage_line_weight", "shuffle_garbage_line_hole_weight",
-                                 "random_inputs_weight", "wall_trap_weight", "toggle_next_piece_weight",
-                                 "instant_lock_weight"]
+        filler_weight_options = ["row_clear_weight", "clear_all_rows_weight", "garbage_line_weight",
+                                 "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
+                                 "toggle_next_piece_weight", "instant_lock_weight"]
 
         self.filler_weights = {option: getattr(self.options, option).value for option in filler_weight_options}
 
@@ -48,7 +48,6 @@ class TetrisGBWorld(World):
 
         for i, score in enumerate(locations_used, start=1):
             location = TetrisLocation(self.player, self.location_id_to_name[score], score, menu_region)
-            # print(f"{i}: requires {int((self.speed_decreases / len(locations_used)) * i)} Decrease Speed, {int((self.options.score_multipliers.value / len(locations_used)) * i)} Score Multiplier")
             location.access_rule = lambda state, i=i+1: (state.has("Decrease Speed", self.player, int((self.speed_decreases / len(locations_used)) * i))
                                    and state.has("Score Multiplier", self.player, int((self.options.score_multipliers.value / len(locations_used)) * i)))
             menu_region.locations.append(location)
