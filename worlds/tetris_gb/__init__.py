@@ -29,7 +29,7 @@ class TetrisGBWorld(World):
         self.speed_increases = starting_speed - maximum_speed
         self.speed_decreases = target_speed - maximum_speed
 
-        filler_weight_options = ["row_clear_weight", "clear_all_rows_weight", "garbage_line_weight",
+        filler_weight_options = ["clear_random_row_weight", "garbage_line_weight",
                                  "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
                                  "toggle_next_piece_weight", "instant_lock_weight"]
 

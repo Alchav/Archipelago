@@ -20,6 +20,8 @@ DATA_LOCATIONS = {
     "demo": (0xffe4, 1),
     "active_garbage_lines": (0xFFD3, 1),
     "input_trap": (0xcc00, 1),
+    "line_clears": (0xcc01, 16),
+    "game_board": (0xc840, 512)
 }
 
 input_traps = {
@@ -28,10 +30,6 @@ input_traps = {
 
 wall_traps = {
     "Active Piece Gets Stuck in the Left Wall", "Active Piece Gets Stuck in the Right Wall"
-}
-clear_row_items = {
-    "Clear All Rows",
-    *{f"Clear Row {i}" for i in range(1, 17)}
 }
 
 
@@ -70,19 +68,19 @@ class TetrisClient(BizHawkClient):
 
         items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
 
-        if self.garbage_lines_given is None:
-            self.garbage_lines_given = items_received.count("Garbage Line")
-        if self.input_traps_given is None:
-            self.input_traps_given = len([item for item in items_received if item in input_traps])
-        if self.wall_traps_given is None:
-            self.wall_traps_given = len([item for item in items_received if item in wall_traps])
-        if self.lock_traps_given is None:
-            self.lock_traps_given = items_received.count("Instantly Lock Active Piece")
-        if self.clear_rows_given is None:
-            self.clear_rows_given = len([item for item in items_received if item in clear_row_items])
+        if ctx.auth and ctx.slot_data:
+            if self.garbage_lines_given is None:
+                self.garbage_lines_given = items_received.count("Garbage Line")
+            if self.input_traps_given is None:
+                self.input_traps_given = len([item for item in items_received if item in input_traps])
+            if self.wall_traps_given is None:
+                self.wall_traps_given = len([item for item in items_received if item in wall_traps])
+            if self.lock_traps_given is None:
+                self.lock_traps_given = items_received.count("Instantly Lock Active Piece")
+            if self.clear_rows_given is None:
+                self.clear_rows_given = items_received.count("Clear Random Row")
 
-        if data["patched"][0] == 172:
-            if ctx.auth and ctx.slot_data:
+            if data["patched"][0] == 172:
                 hide_next_piece = False
                 if "Hide Next Piece" in items_received:
                     hide_next_piece = True
@@ -166,15 +164,24 @@ class TetrisClient(BizHawkClient):
                                                       [(0xC200, [0], "System Bus")])
                         if success:
                             self.lock_traps_given += 1
-                    all_row_clears = [item for item in items_received if item in clear_row_items]
-                    if self.clear_rows_given < len(all_row_clears):
-                        rows_to_clear = {"All" if i == "Clear All Rows" else int(i.split(" ")[-1]) for i in all_row_clears[self.clear_rows_given:]}
-                        if "All" in rows_to_clear:
-                            rows_to_clear = range(1, 17)
-                        data_writes += [
-                            (0xCC00 + i, [1], "System Bus") for i in rows_to_clear
+                    clear_rows = items_received.count("Clear Random Row")
+                    num_rows_to_clear = min(10 - sum(data["line_clears"]), clear_rows - self.clear_rows_given)
+                    if num_rows_to_clear > 0:
+                        print(f"lines already clearing: {data['line_clears']} aka {[i for i in data['line_clears']]}")
+                        print(f"num_rows_to_clear: {num_rows_to_clear}")
+                        rows_with_pieces = [
+                            r for r in range(0, 16)
+                            if any(v != 0x2F for v in data["game_board"][(15-r) * 32 + 2: (15-r) * 32 + 12])
                         ]
-                        self.clear_rows_given = len(all_row_clears)
+                        print(f"rows_with_pieces: {rows_with_pieces}")
+                        rows = [i for i in range(0, 16) if not data["line_clears"][i]]
+                        print(f"rows: {rows}")
+                        rows.sort(key=lambda i: random.randint(0, 99) if i in rows_with_pieces else 100)
+                        print(f"sorted rows: {rows}")
+                        rows_to_clear = rows[:num_rows_to_clear]
+                        print(f"rows to clear (sliced): {rows_to_clear}")
+                        data_writes += [(0xCC01 + i, [1], "System Bus") for i in rows_to_clear]
+                        self.clear_rows_given += len(rows_to_clear)
                 elif data["mode"][0] in range(47, 51) and score >= 200000:
                     await ctx.send_msgs([{
                         "cmd": "StatusUpdate",
@@ -193,7 +200,7 @@ class TetrisClient(BizHawkClient):
                     ]
                 success = await write(ctx.bizhawk_ctx, data_writes)
         elif data["mode"][0] == 37:
-            await write(ctx.bizhawk_ctx, PATCH + (0xC400, shuffle_garbage_line(), "System Bus"))
+            await write(ctx.bizhawk_ctx, PATCH + [(0xC400, shuffle_garbage_line(), "System Bus")])
             self.patched = True
             logger.info("Tetris game successfully patched.")
         elif data["patched"][0] < 42:
@@ -204,7 +211,7 @@ class TetrisClient(BizHawkClient):
     #     super().on_package(ctx, cmd, args)
     #     if cmd == 'ReceivedItems':
     #         self.scrap_sync_items(ctx)
-    #
+
     # def scrap_sync_items(self, ctx):
     #     items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
 

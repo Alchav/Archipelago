@@ -90,23 +90,13 @@ class FillerWeights(Range):
 
 
 class RowClearWeight(FillerWeights):
-    """Weight of Row Clear items in the item pool.
-    These cause a particular row to clear as if it had been filled in completely, the next time you connect a piece."""
+    """Weight of Clear Random Row items in the item pool.
+    These cause a random row to clear as if it had been filled in completely, the next time you connect a piece."""
     default = 32
 
     @staticmethod
     def get_item(random):
-        return random.choices([f"Clear Row {i}" for i in range(1, 17)], k=1, weights=range(20, 4, -1))[0]
-
-
-class ClearAllRowsWeight(FillerWeights):
-    """Weight of Clear All Rows items in the item pool.
-    These cause the entire game area to clear out the next time you connect a piece."""
-    default = 4
-
-    @staticmethod
-    def get_item(random):
-        return "Clear All Rows"
+        return "Clear Random Row"
 
 
 class GarbageLineWeight(FillerWeights):
@@ -190,8 +180,7 @@ class TetrisOptions(PerGameCommonOptions):
     maximum_speed: MaximumSpeed
     score_multipliers: ScoreMultipliers
     next_piece_display: NextPieceDisplay
-    row_clear_weight: RowClearWeight
-    clear_all_rows_weight: ClearAllRowsWeight
+    clear_random_row_weight: RowClearWeight
     garbage_line_weight: GarbageLineWeight
     shuffle_garbage_line_hole_weight: ShuffleGarbageLineHoleWeight
     random_inputs_weight: RandomInputsWeight
