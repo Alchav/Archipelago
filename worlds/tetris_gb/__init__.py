@@ -40,7 +40,9 @@ class TetrisGBWorld(World):
 
     def create_regions(self):
 
-        locs = list(range(1, len(location_name_to_id) + 1))
+        # locs = list(range(1, len(location_name_to_id) + 1))
+
+        locs = list(range(1, min(19999, round(self.options.goal_score / 50) + 1)))
 
         locations_used = [int(i * len(locs) / self.options.location_count.value) for i in range(1, self.options.location_count.value + 1)]
 
@@ -99,7 +101,10 @@ class TetrisGBWorld(World):
         return TetrisItem(item, items[item], self.item_name_to_id[item], self.player)
 
     def fill_slot_data(self):
-        return {"starting_speed": self.options.starting_speed.value}
+        return {
+            "starting_speed": self.options.starting_speed.value,
+            "goal": self.options.goal_score.value,
+        }
 
 
 class TetrisLocation(Location):

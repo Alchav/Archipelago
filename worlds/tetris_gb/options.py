@@ -2,10 +2,20 @@ from dataclasses import dataclass
 from Options import Range, NamedRange, Choice, PerGameCommonOptions, NonLocalItems
 
 
+class GoalScore(Range):
+    """The score you must reach to trigger the rocket launch sequence upon game over,
+    which completes the game in Archipelago."""
+    display_name = "Goal Score"
+    range_start = 100000
+    default = 200000
+    range_end = 999999
+
+
 class LocationCount(Range):
     """The number of location checks. More locations means more filler items, including your chosen traps!
     Each check requires reaching a specific score.
     The score thresholds for each check will be spread out up to your end goal of 200,000 points."""
+    display_name = "Location Count"
     range_start = 200
     range_end = 2000
     default = 300
@@ -67,7 +77,7 @@ class ScoreMultipliers(Range):
     multiplied by your current level. Here, it will be increased only by these items."""
     display_name = "Score Multipliers"
     range_start = 15
-    range_end = 50
+    range_end = 99
     default = 40
 
 
@@ -86,14 +96,14 @@ class NextPieceDisplay(Choice):
 
 
 class FillerWeights(Range):
-    auto_display_name = True
     range_start = 0
     range_end = 100
 
 
 class RowClearWeight(FillerWeights):
-    """Weight of Clear Random Row items in the item pool.
+    """Weight of "Clear Random Row" items in the item pool.
     These cause a random row to clear as if it had been filled in completely, the next time you connect a piece."""
+    display_name = "Clear Random Row Weight"
     default = 32
 
     @staticmethod
@@ -105,7 +115,7 @@ class GarbageLineWeight(FillerWeights):
     """Weight of Garbage Line traps in the item pool.
     These create a line of 9 blocks and one empty tile that come up from the bottom of the screen and push all existing
     pieces upward, the next time you connect a piece."""
-    range_start = 1
+    display_name = "Garbage Line Weight"
     default = 64
 
     @staticmethod
@@ -116,6 +126,7 @@ class GarbageLineWeight(FillerWeights):
 class ShuffleGarbageLineHoleWeight(FillerWeights):
     """Weight of Shuffle Garbage Line Hole traps in the item pool.
     These randomly change which tile will be empty when Garbage Lines are generated."""
+    display_name = "Shuffle Garbage Line Hole Weight"
     default = 8
 
     @staticmethod
@@ -127,6 +138,7 @@ class RandomInputsWeight(FillerWeights):
     """Weight of Random Input traps in the item pool.
     These cause a loss of control of the game as random buttons register every frame.
     Trap lengths range from 1 frame to 4 seconds."""
+    display_name = "Random Inputs Weight"
     default = 16
 
     @staticmethod
@@ -140,6 +152,7 @@ class WallTrapWeight(FillerWeights):
     """Weight of Wall Trap items in the item pool.
     These warp your active piece into the left or right wall and instantly connect them, which may or may not result
     in tiles hanging out into the game area."""
+    display_name = "Wall Trap Weight"
     default = 32
 
     @staticmethod
@@ -151,6 +164,7 @@ class InstantlyLockActivePieceWeight(FillerWeights):
     """Weight of "Instantly Lock Active Piece" items in the item pool.
     These cause your active piece to instantly lock in piece as if there are blocks underneath it, whether there are
     or not."""
+    display_name = "Instantl Lock Weight"
     default = 4
 
     @staticmethod
@@ -163,7 +177,8 @@ class IllusoryPieceWeight(FillerWeights):
     These trap items cause the next piece you connect to be an illusion. Future pieces will fall right through it.
     They will disappear the next time you clear a line. These will be more troublesome if you are paying less attention
     to your incoming items!"""
-    default = 0
+    display_name = "Illusory Piece Weight"
+    default = 4
 
     @staticmethod
     def get_item(random):
@@ -173,6 +188,7 @@ class IllusoryPieceWeight(FillerWeights):
 class ToggleNextPieceWeight(FillerWeights):
     """Weight of Toggle Next Piece trap items in the item pool. Only in effect if Next Piece Display is set to Toggles.
     These toggle the visibility of the next piece display. Pressing select does not toggle it in Archipelago."""
+    display_name = "Toggle Next Piece Weight"
     default = 4
 
     @staticmethod
@@ -189,6 +205,7 @@ class TetrisNonLocalItems(NonLocalItems):
 
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
+    goal_score: GoalScore
     location_count: LocationCount
     starting_speed: StartingSpeed
     target_speed: TargetSpeed

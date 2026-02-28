@@ -103,7 +103,9 @@ class TetrisClient(BizHawkClient):
                 ]
                 if data["mode"][0] == 0:
 
-                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(range(1, int(score / 100) + 1))}])
+                    location_checks = list(range(1, int(score / 50) + 1))
+                    if len(ctx.locations_checked) != len(location_checks):
+                        await ctx.send_msgs([{"cmd": "LocationChecks", "locations": location_checks}])
 
                     if speed_bcd[0] == 0:
                         speed_bcd[0] = 0x2F
@@ -116,6 +118,11 @@ class TetrisClient(BizHawkClient):
                         (0x98f0, score_multipliers_bcd, "System Bus"),  # main game vram
                         (0x9cf0, score_multipliers_bcd, "System Bus"),  # pause screen vram
                     ]
+
+                    if score > ctx.slot_data["goal"]:
+                        data_writes += [
+                            (0xcc13, [1], "System Bus")
+                        ]
 
                     if self.garbage_hole_shuffles_given < items_received.count("Shuffle Garbage Line Hole"):
                         self.garbage_hole_shuffles_given += 1
@@ -180,7 +187,7 @@ class TetrisClient(BizHawkClient):
                         rows_to_clear = rows[:num_rows_to_clear]
                         data_writes += [(0xCC01 + i, [1], "System Bus") for i in rows_to_clear]
                         self.clear_rows_given += len(rows_to_clear)
-                elif data["mode"][0] in range(47, 51) and score >= 200000:
+                elif data["mode"][0] in range(46, 52) and score >= ctx.slot_data["goal"]:
                     await ctx.send_msgs([{
                         "cmd": "StatusUpdate",
                         "status": ClientStatus.CLIENT_GOAL
@@ -197,22 +204,20 @@ class TetrisClient(BizHawkClient):
                         (0xC400, shuffle_garbage_line(), "System Bus")
                     ]
                 success = await write(ctx.bizhawk_ctx, data_writes)
-        elif data["mode"][0] == 37 and not data["patched"[0]] >= 42:
+        elif data["mode"][0] == 37 and data["patched"][0] < 172:
             await write(ctx.bizhawk_ctx, PATCH + [(0xC400, shuffle_garbage_line(), "System Bus")])
             self.patched = True
             logger.info("Tetris game successfully patched.")
         elif data["patched"][0] < 42:
             logger.info("Reset your game to patch Tetris.")
             await write(ctx.bizhawk_ctx, [(0x014C, [42], "ROM")])
-
-    # def on_package(self, ctx, cmd: str, args: dict):
-    #     super().on_package(ctx, cmd, args)
-    #     if cmd == 'ReceivedItems':
-    #         self.scrap_sync_items(ctx)
-
-    # def scrap_sync_items(self, ctx):
-    #     items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
-
+        if not self.patched:
+            await write(ctx.bizhawk_ctx,
+                        [
+                            (0x9800 + (i * 32), [0x1B, 0x0E, 0x1C, 0x0E, 0x1D, 0x2F, 0x1D, 0x18, 0x2F, 0x19, 0x0A, 0x1D,
+                                                 0x0C, 0x11, 0x2F, 0x10, 0x0A, 0x16, 0x0E, 0x24], "System Bus")
+                            for i in range(0, 18)
+                        ])
 
 
 def shuffle_garbage_line():
