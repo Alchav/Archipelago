@@ -38,7 +38,6 @@ class TetrisClient(BizHawkClient):
     game = "Tetris"
 
     def __init__(self):
-        self.patched = None
         self.garbage_lines_given = None
         self.input_traps_given = None
         self.lock_traps_given = None
@@ -53,7 +52,6 @@ class TetrisClient(BizHawkClient):
             ctx.game = self.game
             ctx.items_handling = 0b111
             ctx.want_slot_data = True
-            self.patched = None
 
             return True
         return False
@@ -100,6 +98,7 @@ class TetrisClient(BizHawkClient):
                     (0x1afb, [speed], "ROM"),
                     (0xffa9, [speed], "System Bus"),
                     (0xff9e, speed_bcd, "System Bus"),
+                    (0x04b5, [0xC8], "ROM")  # enable proceeding from menu
                 ]
                 if data["mode"][0] == 0:
 
@@ -119,7 +118,7 @@ class TetrisClient(BizHawkClient):
                         (0x9cf0, score_multipliers_bcd, "System Bus"),  # pause screen vram
                     ]
 
-                    if score > ctx.slot_data["goal"]:
+                    if score >= ctx.slot_data["goal"]:
                         data_writes += [
                             (0xcc13, [1], "System Bus")
                         ]
@@ -206,12 +205,11 @@ class TetrisClient(BizHawkClient):
                 success = await write(ctx.bizhawk_ctx, data_writes)
         elif data["mode"][0] == 37 and data["patched"][0] < 172:
             await write(ctx.bizhawk_ctx, PATCH + [(0xC400, shuffle_garbage_line(), "System Bus")])
-            self.patched = True
             logger.info("Tetris game successfully patched.")
         elif data["patched"][0] < 42:
             logger.info("Reset your game to patch Tetris.")
             await write(ctx.bizhawk_ctx, [(0x014C, [42], "ROM")])
-        if not self.patched:
+        if data["patched"][0] < 172:
             await write(ctx.bizhawk_ctx,
                         [
                             (0x9800 + (i * 32), [0x1B, 0x0E, 0x1C, 0x0E, 0x1D, 0x2F, 0x1D, 0x18, 0x2F, 0x19, 0x0A, 0x1D,
