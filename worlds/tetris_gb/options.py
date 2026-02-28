@@ -3,7 +3,9 @@ from Options import Range, NamedRange, Choice, PerGameCommonOptions, NonLocalIte
 
 
 class LocationCount(Range):
-    """The number of location checks. More locations means more trap items for you!"""
+    """The number of location checks. More locations means more filler items, including your chosen traps!
+    Each check requires reaching a specific score.
+    The score thresholds for each check will be spread out up to your end goal of 200,000 points."""
     range_start = 200
     range_end = 2000
     default = 300
@@ -125,7 +127,7 @@ class RandomInputsWeight(FillerWeights):
     """Weight of Random Input traps in the item pool.
     These cause a loss of control of the game as random buttons register every frame.
     Trap lengths range from 1 frame to 4 seconds."""
-    default = 32
+    default = 16
 
     @staticmethod
     def get_item(random):
@@ -156,6 +158,18 @@ class InstantlyLockActivePieceWeight(FillerWeights):
         return "Instantly Lock Active Piece"
 
 
+class IllusoryPieceWeight(FillerWeights):
+    """Weight of Illusory Piece trap items in the item pool.
+    These trap items cause the next piece you connect to be an illusion. Future pieces will fall right through it.
+    They will disappear the next time you clear a line. These will be more troublesome if you are paying less attention
+    to your incoming items!"""
+    default = 0
+
+    @staticmethod
+    def get_item(random):
+        return "Active Piece is an Illusion"
+
+
 class ToggleNextPieceWeight(FillerWeights):
     """Weight of Toggle Next Piece trap items in the item pool. Only in effect if Next Piece Display is set to Toggles.
     These toggle the visibility of the next piece display. Pressing select does not toggle it in Archipelago."""
@@ -167,10 +181,11 @@ class ToggleNextPieceWeight(FillerWeights):
 
 
 class TetrisNonLocalItems(NonLocalItems):
+
     default = frozenset({"Garbage Line", "1 Frame of Random Inputs", "1 Second of Random Inputs",
                          "2 Seconds of Random Inputs", "3 Seconds of Random Inputs", "4 Seconds of Random Inputs",
                          "Instantly Lock Active Piece", "Active Piece Gets Stuck in the Left Wall",
-                         "Active Piece Gets Stuck in the Right Wall"})
+                         "Active Piece Gets Stuck in the Right Wall", "Clear Random Row"})
 
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
@@ -186,5 +201,6 @@ class TetrisOptions(PerGameCommonOptions):
     random_inputs_weight: RandomInputsWeight
     instant_lock_weight: InstantlyLockActivePieceWeight
     wall_trap_weight: WallTrapWeight
+    illusory_piece_weight: IllusoryPieceWeight
     toggle_next_piece_weight: ToggleNextPieceWeight
     non_local_items: TetrisNonLocalItems

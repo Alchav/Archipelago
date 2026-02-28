@@ -18,21 +18,8 @@ items = {
     "Active Piece Gets Stuck in the Left Wall": ItemClassification.trap,
     "Active Piece Gets Stuck in the Right Wall": ItemClassification.trap,
     "Instantly Lock Active Piece": ItemClassification.trap,
+    "Active Piece is an Illusion": ItemClassification.trap,
     "Clear Random Row": ItemClassification.filler
 }
 
 item_name_to_id = {item: code for code, item in enumerate(items.keys(), start=1)}
-
-# trap_weights = {
-#     "Garbage Line": 64,
-#     "Shuffle Garbage Line Hole": 8,
-#     "1 Frame of Random Inputs": 16,
-#     "1 Second of Random Inputs": 8,
-#     "2 Seconds of Random Inputs": 4,
-#     "3 Seconds of Random Inputs": 2,
-#     "4 Seconds of Random Inputs": 1,
-#     "Active Piece Gets Stuck in the Left Wall": 16,
-#     "Active Piece Gets Stuck in the Right Wall": 16,
-#     "Toggle Next Piece": 4
-#
-# }
