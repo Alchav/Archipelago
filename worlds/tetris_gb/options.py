@@ -197,7 +197,7 @@ class ToggleNextPieceWeight(FillerWeights):
 
 
 class TetrisNonLocalItems(NonLocalItems):
-
+    __doc__ = NonLocalItems.__doc__
     default = frozenset({"Garbage Line", "1 Frame of Random Inputs", "1 Second of Random Inputs",
                          "2 Seconds of Random Inputs", "3 Seconds of Random Inputs", "4 Seconds of Random Inputs",
                          "Instantly Lock Active Piece", "Active Piece Gets Stuck in the Left Wall",

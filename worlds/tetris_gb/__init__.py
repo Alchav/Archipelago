@@ -7,6 +7,23 @@ from .locations import score_locations, location_name_to_id
 from .items import items, item_name_to_id
 from .options import TetrisOptions
 
+filler_weight_options = ["clear_random_row_weight", "garbage_line_weight",
+                         "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
+                         "toggle_next_piece_weight", "instant_lock_weight"]
+
+
+class TetrisWebWorld(WebWorld):
+    setup_en = Tutorial(
+        "Multiworld Setup Guide",
+        "A guide to playing Tetris for Gameboy with Archipelago.",
+        "English",
+        "setup_en.md",
+        "setup/en",
+        ["Alchav"]
+    )
+
+    tutorials = [setup_en]
+
 
 class TetrisGBWorld(World):
     game = "Tetris"
@@ -16,11 +33,13 @@ class TetrisGBWorld(World):
     options_dataclass = TetrisOptions
     options: TetrisOptions
 
+    web = TetrisWebWorld()
+
     def __init__(self, multiworld, player: int):
         super().__init__(multiworld, player)
         self.speed_decreases = 0
         self.speed_increases = 0
-        self.filler_weights = None
+        self.filler_weights = {option: 1 for option in filler_weight_options}
 
     def generate_early(self):
         starting_speed = self.options.starting_speed.value
@@ -28,10 +47,6 @@ class TetrisGBWorld(World):
         target_speed = max(self.options.target_speed.value, maximum_speed)
         self.speed_increases = starting_speed - maximum_speed
         self.speed_decreases = target_speed - maximum_speed
-
-        filler_weight_options = ["clear_random_row_weight", "garbage_line_weight",
-                                 "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
-                                 "toggle_next_piece_weight", "instant_lock_weight"]
 
         self.filler_weights = {option: getattr(self.options, option).value for option in filler_weight_options}
 
