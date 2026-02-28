@@ -135,7 +135,6 @@ class TetrisClient(BizHawkClient):
                                                           [(0xFFD3, [data["active_garbage_lines"][0]], "System Bus")])
                             if success:
                                 self.garbage_lines_given += lines - data["active_garbage_lines"][0]
-                                logger.info(f"Sent {items_received.count("Garbage Line") - self.garbage_lines_given} garbage lines, had: {data["active_garbage_lines"][0]}, total now: {lines}")
                     if self.ghost_pieces_given < items_received.count("Active Piece is an Illusion"):
                         success = await guarded_write(ctx.bizhawk_ctx, [(0xCC12, [4], "System Bus")],
                                                       [(0xCC12, [0], "System Bus")])
