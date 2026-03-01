@@ -104,7 +104,7 @@ class RowClearWeight(FillerWeights):
     """Weight of "Clear Random Row" items in the item pool.
     These cause a random row to clear as if it had been filled in completely, the next time you connect a piece."""
     display_name = "Clear Random Row Weight"
-    default = 32
+    default = 24
 
     @staticmethod
     def get_item(random):
@@ -116,7 +116,7 @@ class GarbageLineWeight(FillerWeights):
     These create a line of 9 blocks and one empty tile that come up from the bottom of the screen and push all existing
     pieces upward, the next time you connect a piece."""
     display_name = "Garbage Line Weight"
-    default = 64
+    default = 32
 
     @staticmethod
     def get_item(random):
@@ -127,7 +127,7 @@ class ShuffleGarbageLineHoleWeight(FillerWeights):
     """Weight of Shuffle Garbage Line Hole traps in the item pool.
     These randomly change which tile will be empty when Garbage Lines are generated."""
     display_name = "Shuffle Garbage Line Hole Weight"
-    default = 8
+    default = 4
 
     @staticmethod
     def get_item(random):
@@ -139,7 +139,7 @@ class RandomInputsWeight(FillerWeights):
     These cause a loss of control of the game as random buttons register every frame.
     Trap lengths range from 1 frame to 4 seconds."""
     display_name = "Random Inputs Weight"
-    default = 16
+    default = 4
 
     @staticmethod
     def get_item(random):
@@ -153,7 +153,7 @@ class WallTrapWeight(FillerWeights):
     These warp your active piece into the left or right wall and instantly connect them, which may or may not result
     in tiles hanging out into the game area."""
     display_name = "Wall Trap Weight"
-    default = 32
+    default = 16
 
     @staticmethod
     def get_item(random):
@@ -165,7 +165,7 @@ class InstantlyLockActivePieceWeight(FillerWeights):
     These cause your active piece to instantly lock in piece as if there are blocks underneath it, whether there are
     or not."""
     display_name = "Instantl Lock Weight"
-    default = 4
+    default = 1
 
     @staticmethod
     def get_item(random):
@@ -178,7 +178,7 @@ class IllusoryPieceWeight(FillerWeights):
     They will disappear the next time you clear a line. These will be more troublesome if you are paying less attention
     to your incoming items!"""
     display_name = "Illusory Piece Weight"
-    default = 4
+    default = 8
 
     @staticmethod
     def get_item(random):
@@ -189,7 +189,7 @@ class ToggleNextPieceWeight(FillerWeights):
     """Weight of Toggle Next Piece trap items in the item pool. Only in effect if Next Piece Display is set to Toggles.
     These toggle the visibility of the next piece display. Pressing select does not toggle it in Archipelago."""
     display_name = "Toggle Next Piece Weight"
-    default = 4
+    default = 1
 
     @staticmethod
     def get_item(random):
