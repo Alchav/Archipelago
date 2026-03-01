@@ -7,9 +7,9 @@ from .locations import score_locations, location_name_to_id
 from .items import items, item_name_to_id
 from .options import TetrisOptions
 
-filler_weight_options = ["clear_random_row_weight", "garbage_line_weight",
+filler_weight_options = ["clear_random_row_weight", "garbage_line_weight", "illusory_piece_weight",
                          "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
-                         "toggle_next_piece_weight", "instant_lock_weight"]
+                         "toggle_next_piece_weight", "instant_lock_weight", ]
 
 
 class TetrisWebWorld(WebWorld):
