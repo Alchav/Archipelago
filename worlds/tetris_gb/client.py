@@ -98,7 +98,7 @@ class TetrisClient(BizHawkClient):
                     (0x1afb, [speed], "ROM"),
                     (0xffa9, [speed], "System Bus"),
                     (0xff9e, speed_bcd, "System Bus"),
-                    (0x04b5, [0xC8], "ROM")  # enable proceeding from menu
+                    (0x04b5, [0xC8], "ROM")  # enable proceeding from title screen
                 ]
                 if data["mode"][0] == 0:
 
@@ -123,18 +123,40 @@ class TetrisClient(BizHawkClient):
                             (0xcc13, [1], "System Bus")
                         ]
 
+                    # an option, maybe?
+                    # cancel_outs = min(items_received.count("Garbage Line") - self.garbage_lines_given,
+                    #                   items_received.count("Clear Random Row") - self.clear_rows_given)
+                    # self.garbage_lines_given += cancel_outs
+                    # self.clear_rows_given += cancel_outs
+                    active_garbage_lines = data["active_garbage_lines"][0]
+                    if self.garbage_lines_given < items_received.count("Garbage Line"):
+                        new_lines = min(7, (items_received.count("Garbage Line") + active_garbage_lines) - self.garbage_lines_given)
+                        if new_lines > data["active_garbage_lines"][0]:
+                            success = await guarded_write(ctx.bizhawk_ctx, [(0xFFD3, [new_lines], "System Bus"),
+                                                                            (0xCC01, [0] * 10, "System Bus")],
+                                                          [(0xFFD3, [active_garbage_lines], "System Bus")])
+                            if success:
+                                self.garbage_lines_given += new_lines - data["active_garbage_lines"][0]
+                                self.clear_rows_given -= sum(data["line_clears"])
+                                active_garbage_lines = new_lines
+                    if not active_garbage_lines:
+                        clear_rows = items_received.count("Clear Random Row")
+                        num_rows_to_clear = min(10 - sum(data["line_clears"]), clear_rows - self.clear_rows_given)
+                        if num_rows_to_clear > 0:
+                            rows_with_pieces = [
+                                r for r in range(0, 16)
+                                if any(v != 0x2F for v in data["game_board"][(15-r) * 32 + 2: (15-r) * 32 + 12])
+                            ]
+                            rows = [i for i in range(0, 16) if not data["line_clears"][i]]
+                            rows.sort(key=lambda i: random.randint(0, 99) if i in rows_with_pieces else 100)
+                            rows_to_clear = rows[:num_rows_to_clear]
+                            data_writes += [(0xCC01 + i, [1], "System Bus") for i in rows_to_clear]
+                            self.clear_rows_given += len(rows_to_clear)
                     if self.garbage_hole_shuffles_given < items_received.count("Shuffle Garbage Line Hole"):
                         self.garbage_hole_shuffles_given += 1
                         data_writes.append(
                             (0xC400, shuffle_garbage_line(), "System Bus")
                         )
-                    if self.garbage_lines_given < items_received.count("Garbage Line"):
-                        lines = min(7, (items_received.count("Garbage Line") + data["active_garbage_lines"][0]) - self.garbage_lines_given)
-                        if lines > data["active_garbage_lines"][0]:
-                            success = await guarded_write(ctx.bizhawk_ctx, [(0xFFD3, [lines], "System Bus")],
-                                                          [(0xFFD3, [data["active_garbage_lines"][0]], "System Bus")])
-                            if success:
-                                self.garbage_lines_given += lines - data["active_garbage_lines"][0]
                     if self.ghost_pieces_given < items_received.count("Active Piece is an Illusion"):
                         success = await guarded_write(ctx.bizhawk_ctx, [(0xCC12, [4], "System Bus")],
                                                       [(0xCC12, [0], "System Bus")])
@@ -173,18 +195,6 @@ class TetrisClient(BizHawkClient):
                                 (0xFF99, [0], "System Bus")], [(0xC200, [0], "System Bus")])
                             if success:
                                 self.lock_traps_given += 1
-                    clear_rows = items_received.count("Clear Random Row")
-                    num_rows_to_clear = min(10 - sum(data["line_clears"]), clear_rows - self.clear_rows_given)
-                    if num_rows_to_clear > 0:
-                        rows_with_pieces = [
-                            r for r in range(0, 16)
-                            if any(v != 0x2F for v in data["game_board"][(15-r) * 32 + 2: (15-r) * 32 + 12])
-                        ]
-                        rows = [i for i in range(0, 16) if not data["line_clears"][i]]
-                        rows.sort(key=lambda i: random.randint(0, 99) if i in rows_with_pieces else 100)
-                        rows_to_clear = rows[:num_rows_to_clear]
-                        data_writes += [(0xCC01 + i, [1], "System Bus") for i in rows_to_clear]
-                        self.clear_rows_given += len(rows_to_clear)
                 elif data["mode"][0] in range(46, 52) and score >= ctx.slot_data["goal"]:
                     await ctx.send_msgs([{
                         "cmd": "StatusUpdate",
@@ -199,16 +209,17 @@ class TetrisClient(BizHawkClient):
                     self.input_traps_given = len([item for item in items_received if item in input_traps])
                     self.lock_traps_given = len([item for item in items_received if item in lock_traps])
                     data_writes += [
-                        (0xC400, shuffle_garbage_line(), "System Bus")
+                        (0xC400, shuffle_garbage_line(), "System Bus"),
+                        (0xCC00, [0] * 12, "System Bus")
                     ]
                 success = await write(ctx.bizhawk_ctx, data_writes)
-        elif data["mode"][0] == 37 and data["patched"][0] < 172:
+        if data["mode"][0] == 37 and data["patched"][0] < 172:
             await write(ctx.bizhawk_ctx, PATCH + [(0xC400, shuffle_garbage_line(), "System Bus")])
             logger.info("Tetris game successfully patched.")
-        elif data["patched"][0] < 42:
-            logger.info("Reset your game to patch Tetris.")
-            await write(ctx.bizhawk_ctx, [(0x014C, [42], "ROM")])
-        if data["patched"][0] < 172:
+        elif data["patched"][0] < 172:
+            if data["patched"][0] < 42:
+                logger.info("Reset your game to patch Tetris.")
+                await write(ctx.bizhawk_ctx, [(0x014C, [42], "ROM")])
             await write(ctx.bizhawk_ctx,
                         [
                             (0x9800 + (i * 32), [0x1B, 0x0E, 0x1C, 0x0E, 0x1D, 0x2F, 0x1D, 0x18, 0x2F, 0x19, 0x0A, 0x1D,

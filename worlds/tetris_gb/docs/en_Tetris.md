@@ -20,7 +20,7 @@ falling one line. The speed level is shown in-game in the "SPEED" box.
 Additional items based on yaml options:
 
 - Clear Random Row: chooses a random row to be treated as though it were filled, so that the next time you connect a
-piece, that line will clear.
+piece, that line will clear. Clear Random Row items will not trigger until all queued Garbage Lines have triggered.
 - Garbage Line: A line of 9 blocks and one randomly placed hole rises from the bottom.
 - Shuffle Garbage Line Hole: Reshuffles the location of the empty spot on future Garbage Lines.
 - Random Inputs: For 1 Frame, 1 Second, 2 Seconds, or 3 Seconds, the game will ignore your inputs and generate random
