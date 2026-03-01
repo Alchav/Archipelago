@@ -51,11 +51,10 @@ class TetrisGBWorld(World):
         self.filler_weights = {option: getattr(self.options, option).value for option in filler_weight_options}
 
         if self.options.next_piece_display != "toggles":
-            self.filler_weights["toggle_next_piece_weight"] = 0
+            del self.filler_weights["toggle_next_piece_weight"]
+
 
     def create_regions(self):
-
-        # locs = list(range(1, len(location_name_to_id) + 1))
 
         locs = list(range(1, min(19999, round(self.options.goal_score / 50) + 1)))
 
@@ -92,9 +91,13 @@ class TetrisGBWorld(World):
         item_pool += [self.create_item("Decrease Speed") for _ in range(self.speed_decreases)]
         item_pool += [self.create_item("Increase Speed") for _ in range(self.speed_increases)]
 
+        filler_weights = list(self.filler_weights.values())
+        if not sum(filler_weights):
+            filler_weights = [1] * len(filler_weights)
+
         fillers = [item for item in self.random.choices(
             list(self.filler_weights.keys()),
-            weights=list(self.filler_weights.values()),
+            weights=filler_weights,
             k=len(self.multiworld.get_unfilled_locations(self.player)) - len(item_pool))]
 
         item_pool += [self.create_item(getattr(self.options, option).get_item(self.random)) for option in fillers]
@@ -103,6 +106,8 @@ class TetrisGBWorld(World):
 
     @classmethod
     def stage_post_fill(cls, multiworld):
+        # Traps are an important part of the concept for this apworld.
+        # We wouldn't want progression balancing to push them all out of the early spheres, now would we?
         for location in multiworld.get_locations():
             if location.item.game == cls.game and location.item.classification == ItemClassification.trap:
                 location.locked = True
