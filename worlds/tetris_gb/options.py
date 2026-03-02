@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import Range, NamedRange, Choice, PerGameCommonOptions, NonLocalItems
+from Options import Range, NamedRange, Choice, PerGameCommonOptions, NonLocalItems, Toggle
 
 
 class GoalScore(Range):
@@ -77,7 +77,7 @@ class ScoreMultipliers(Range):
     multiplied by your current level. Here, it will be increased only by these items."""
     display_name = "Score Multipliers"
     range_start = 15
-    range_end = 99
+    range_end = 250
     default = 40
 
 
@@ -100,15 +100,40 @@ class FillerWeights(Range):
     range_end = 100
 
 
-class RowClearWeight(FillerWeights):
-    """Weight of "Clear Random Row" items in the item pool.
-    These cause a random row to clear as if it had been filled in completely, the next time you connect a piece."""
-    display_name = "Clear Random Row Weight"
+class MaxSimultaneousRandomLineClears(Range):
+    """The maximum number of "Clear Random Line" items that will trigger at once. Allowing 4 of them to trigger at
+    once, depending on your other options, may lead to a large number of Tetris' triggering when another player's game
+    is released or a large number of items are otherwise sent out, which could cause your game to finish abruptly."""
+    display_name = "Max Simultaneous Random Line Clears"
+    range_start = 1
+    range_end = 4
+    default = 1
+
+
+class MaxSimultaneousGarbageLines(Range):
+    """The maximum number of "Garbage Line" items that will trigger at once."""
+    display_name = "Max Simultaneous Random Line Clears"
+    range_start = 1
+    range_end = 4
+    default = 4
+
+
+class RandomLineClearsAndGarbageLinesCancelEachOtherOut(Toggle):
+    """When you receive Clear Random Line and Garbage Lines at the same time, have them cancel each other out, and
+    trigger neither?"""
+    display_name = "Random Line Clears and Garbage Lines Cancel Each Other Out"
+    default = True
+
+
+class LineClearWeight(FillerWeights):
+    """Weight of "Clear Random Line" items in the item pool.
+    These cause a random line to clear as if it had been filled in completely, the next time you connect a piece."""
+    display_name = "Clear Random Line Weight"
     default = 24
 
     @staticmethod
     def get_item(random):
-        return "Clear Random Row"
+        return "Clear Random Line"
 
 
 class GarbageLineWeight(FillerWeights):
@@ -190,6 +215,7 @@ class ToggleNextPieceWeight(FillerWeights):
     These toggle the visibility of the next piece display. Pressing select does not toggle it in Archipelago."""
     display_name = "Toggle Next Piece Weight"
     default = 1
+    range_start = 1
 
     @staticmethod
     def get_item(random):
@@ -201,7 +227,7 @@ class TetrisNonLocalItems(NonLocalItems):
     default = frozenset({"Garbage Line", "1 Frame of Random Inputs", "1 Second of Random Inputs",
                          "2 Seconds of Random Inputs", "3 Seconds of Random Inputs", "4 Seconds of Random Inputs",
                          "Instantly Lock Active Piece", "Active Piece Gets Stuck in the Left Wall",
-                         "Active Piece Gets Stuck in the Right Wall", "Clear Random Row"})
+                         "Active Piece Gets Stuck in the Right Wall", "Clear Random Line"})
 
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
@@ -212,8 +238,11 @@ class TetrisOptions(PerGameCommonOptions):
     maximum_speed: MaximumSpeed
     score_multipliers: ScoreMultipliers
     next_piece_display: NextPieceDisplay
-    clear_random_row_weight: RowClearWeight
+    clear_random_line_weight: LineClearWeight
+    max_simultaneous_clear_random_lines: MaxSimultaneousRandomLineClears
     garbage_line_weight: GarbageLineWeight
+    max_simultaneous_garbage_lines: MaxSimultaneousGarbageLines
+    clear_random_lines_and_garbage_lines_cancel_each_other_out: RandomLineClearsAndGarbageLinesCancelEachOtherOut
     shuffle_garbage_line_hole_weight: ShuffleGarbageLineHoleWeight
     random_inputs_weight: RandomInputsWeight
     instant_lock_weight: InstantlyLockActivePieceWeight

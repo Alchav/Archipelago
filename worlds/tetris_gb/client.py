@@ -41,7 +41,7 @@ class TetrisClient(BizHawkClient):
         self.garbage_lines_given = None
         self.input_traps_given = None
         self.lock_traps_given = None
-        self.clear_rows_given = None
+        self.clear_lines_given = None
         self.ghost_pieces_given = None
         self.garbage_hole_shuffles_given = 0
         super().__init__()
@@ -75,8 +75,8 @@ class TetrisClient(BizHawkClient):
                 self.input_traps_given = len([item for item in items_received if item in input_traps])
             if self.lock_traps_given is None:
                 self.lock_traps_given = len([item for item in items_received if item in lock_traps])
-            if self.clear_rows_given is None:
-                self.clear_rows_given = items_received.count("Clear Random Row")
+            if self.clear_lines_given is None:
+                self.clear_lines_given = items_received.count("Clear Random Line")
 
             if data["patched"][0] == 172:
                 hide_next_piece = False
@@ -89,8 +89,12 @@ class TetrisClient(BizHawkClient):
                 speed = min(99, ctx.slot_data["starting_speed"] + items_received.count(
                         "Decrease Speed") - items_received.count("Increase Speed"))
                 speed_bcd = list(map(int, f"{speed:02d}"))
-                score_multipliers = min(99, items_received.count("Score Multiplier"))
-                score_multipliers_bcd = list(map(int, f"{score_multipliers:02d}"))
+                score_multipliers = min(255,
+                                        items_received.count("Score Multiplier")
+                                        + (items_received.count("Score Multiplier x2") * 2)
+                                        + (items_received.count("Score Multiplier x3") * 3)
+                                        )
+                score_multipliers_bcd = list(map(int, f"{score_multipliers:03d}"))
                 data_writes = [
                     (0xc0de, [0x01] if hide_next_piece else [0x00], "System Bus"),
                     (0xc210, [0x80] if hide_next_piece else [0x00], "System Bus"),
@@ -108,14 +112,15 @@ class TetrisClient(BizHawkClient):
 
                     if speed_bcd[0] == 0:
                         speed_bcd[0] = 0x2F
-                    if score_multipliers_bcd[0] == 0:
-                        score_multipliers_bcd[0] = 0x2F
+                    for i in range(0, 2):
+                        if score_multipliers_bcd[i] == 0:
+                            score_multipliers_bcd[i] = 0x2F
 
                     data_writes += [
                         (0x9950, speed_bcd, "System Bus"),  # main game vram
                         (0x9d50, speed_bcd, "System Bus"),  # pause screen vram
-                        (0x98f0, score_multipliers_bcd, "System Bus"),  # main game vram
-                        (0x9cf0, score_multipliers_bcd, "System Bus"),  # pause screen vram
+                        (0x98ef, score_multipliers_bcd, "System Bus"),  # main game vram
+                        (0x9cef, score_multipliers_bcd, "System Bus"),  # pause screen vram
                     ]
 
                     if score >= ctx.slot_data["goal"]:
@@ -123,35 +128,36 @@ class TetrisClient(BizHawkClient):
                             (0xcc13, [1], "System Bus")
                         ]
 
-                    # an option, maybe?
-                    # cancel_outs = min(items_received.count("Garbage Line") - self.garbage_lines_given,
-                    #                   items_received.count("Clear Random Row") - self.clear_rows_given)
-                    # self.garbage_lines_given += cancel_outs
-                    # self.clear_rows_given += cancel_outs
+                    if ctx.slot_data["cancel_outs"]:
+                        cancel_outs = min(items_received.count("Garbage Line") - self.garbage_lines_given,
+                                          items_received.count("Clear Random Line") - self.clear_lines_given)
+                        self.garbage_lines_given += cancel_outs
+                        self.clear_lines_given += cancel_outs
                     active_garbage_lines = data["active_garbage_lines"][0]
                     if self.garbage_lines_given < items_received.count("Garbage Line"):
-                        new_lines = min(7, (items_received.count("Garbage Line") + active_garbage_lines) - self.garbage_lines_given)
+                        new_lines = min(ctx.slot_data["max_garbage"], (items_received.count("Garbage Line") + active_garbage_lines) - self.garbage_lines_given)
                         if new_lines > data["active_garbage_lines"][0]:
                             success = await guarded_write(ctx.bizhawk_ctx, [(0xFFD3, [new_lines], "System Bus"),
                                                                             (0xCC01, [0] * 10, "System Bus")],
                                                           [(0xFFD3, [active_garbage_lines], "System Bus")])
                             if success:
                                 self.garbage_lines_given += new_lines - data["active_garbage_lines"][0]
-                                self.clear_rows_given -= sum(data["line_clears"])
+                                self.clear_lines_given -= sum(data["line_clears"])
                                 active_garbage_lines = new_lines
                     if not active_garbage_lines:
-                        clear_rows = items_received.count("Clear Random Row")
-                        num_rows_to_clear = min(10 - sum(data["line_clears"]), clear_rows - self.clear_rows_given)
-                        if num_rows_to_clear > 0:
-                            rows_with_pieces = [
+                        clear_lines = items_received.count("Clear Random Line")
+                        num_lines_to_clear = min(ctx.slot_data["max_clears"] - sum(data["line_clears"]),
+                                                clear_lines - self.clear_lines_given)
+                        if num_lines_to_clear > 0:
+                            lines_with_pieces = [
                                 r for r in range(0, 16)
                                 if any(v != 0x2F for v in data["game_board"][(15-r) * 32 + 2: (15-r) * 32 + 12])
                             ]
-                            rows = [i for i in range(0, 16) if not data["line_clears"][i]]
-                            rows.sort(key=lambda i: random.randint(0, 99) if i in rows_with_pieces else 100)
-                            rows_to_clear = rows[:num_rows_to_clear]
-                            data_writes += [(0xCC01 + i, [1], "System Bus") for i in rows_to_clear]
-                            self.clear_rows_given += len(rows_to_clear)
+                            lines = [i for i in range(0, 16) if not data["line_clears"][i]]
+                            lines.sort(key=lambda i: random.randint(0, 99) if i in lines_with_pieces else 100)
+                            lines_to_clear = lines[:num_lines_to_clear]
+                            data_writes += [(0xCC01 + i, [1], "System Bus") for i in lines_to_clear]
+                            self.clear_lines_given += len(lines_to_clear)
                     if self.garbage_hole_shuffles_given < items_received.count("Shuffle Garbage Line Hole"):
                         self.garbage_hole_shuffles_given += 1
                         data_writes.append(

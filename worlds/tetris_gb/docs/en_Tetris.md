@@ -19,8 +19,8 @@ falling one line. The speed level is shown in-game in the "SPEED" box.
 
 Additional items based on yaml options:
 
-- Clear Random Row: chooses a random row to be treated as though it were filled, so that the next time you connect a
-piece, that line will clear. Clear Random Row items will not trigger until all queued Garbage Lines have triggered.
+- Clear Random Line: chooses a random line to be treated as though it were filled, so that the next time you connect a
+piece, that line will clear. Clear Random Line items will not trigger until all queued Garbage Lines have triggered.
 - Garbage Line: A line of 9 blocks and one randomly placed hole rises from the bottom.
 - Shuffle Garbage Line Hole: Reshuffles the location of the empty spot on future Garbage Lines.
 - Random Inputs: For 1 Frame, 1 Second, 2 Seconds, or 3 Seconds, the game will ignore your inputs and generate random
@@ -30,8 +30,8 @@ below. Better hope your piece isn't up at the top of the game area when you get 
 - Active Piece Gets Stuck in the Left/Right Wall: Your active piece is warped into the left or right wall and instantly
 lock in place. Some tiles may end up hanging out into the game area.
 - Active Piece is an Illusion: The next piece you connect is illusory. It will appear to connect but your future pieces
-will pass right through it, and it will disappear next time you clear a row. These will be more troublesome if you are
-paying less attention to your incoming items!
+will pass right through it, and it will disappear next time you clear a line or a garbage line triggers. These will be
+more troublesome if you are paying less attention to your incoming items!
 - Show Next Piece, Hide Next Piece, Toggle Next Piece: Permanently show, hide, or toggle the Next Piece display.
 
 ## When the player receives an item, what happens?

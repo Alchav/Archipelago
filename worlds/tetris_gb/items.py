@@ -2,6 +2,8 @@ from BaseClasses import ItemClassification
 
 items = {
     "Score Multiplier": ItemClassification.progression,
+    "Score Multiplier x2": ItemClassification.progression,
+    "Score Multiplier x3": ItemClassification.progression,
     "Decrease Speed": ItemClassification.progression | ItemClassification.useful,
     "Increase Speed": ItemClassification.trap,
     "Toggle Next Piece": ItemClassification.trap | ItemClassification.useful,
@@ -19,7 +21,7 @@ items = {
     "Active Piece Gets Stuck in the Right Wall": ItemClassification.trap,
     "Instantly Lock Active Piece": ItemClassification.trap,
     "Active Piece is an Illusion": ItemClassification.trap,
-    "Clear Random Row": ItemClassification.filler
+    "Clear Random Line": ItemClassification.filler
 }
 
 item_name_to_id = {item: code for code, item in enumerate(items.keys(), start=1)}
