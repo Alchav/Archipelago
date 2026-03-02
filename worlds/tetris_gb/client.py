@@ -128,7 +128,7 @@ class TetrisClient(BizHawkClient):
                             (0xcc13, [1], "System Bus")
                         ]
 
-                    if ctx.slot_data["cancel_outs"]:
+                    if ctx.slot_data["cancel_out"]:
                         cancel_outs = min(items_received.count("Garbage Line") - self.garbage_lines_given,
                                           items_received.count("Clear Random Line") - self.clear_lines_given)
                         self.garbage_lines_given += cancel_outs
