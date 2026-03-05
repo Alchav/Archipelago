@@ -16,7 +16,6 @@ items = {
     "2 Seconds of Random Inputs": ItemClassification.trap,
     "3 Seconds of Random Inputs": ItemClassification.trap,
     "4 Seconds of Random Inputs": ItemClassification.trap,
-    "Active Piece Locks Instantly": ItemClassification.trap,
     "Active Piece Gets Stuck in the Left Wall": ItemClassification.trap,
     "Active Piece Gets Stuck in the Right Wall": ItemClassification.trap,
     "Instantly Lock Active Piece": ItemClassification.trap,
