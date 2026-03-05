@@ -115,6 +115,8 @@ class TetrisClient(BizHawkClient):
                     for i in range(0, 2):
                         if score_multipliers_bcd[i] == 0:
                             score_multipliers_bcd[i] = 0x2F
+                        else:
+                            break
 
                     data_writes += [
                         (0x9950, speed_bcd, "System Bus"),  # main game vram
