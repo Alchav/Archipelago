@@ -29,7 +29,7 @@ input_traps = {
 
 lock_traps = {
     "Active Piece Gets Stuck in the Left Wall", "Active Piece Gets Stuck in the Right Wall",
-    "Active Piece Locks Instantly"
+    "Instantly Lock Active Piece"
 }
 
 
