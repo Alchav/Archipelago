@@ -86,8 +86,8 @@ class TetrisClient(BizHawkClient):
                     hide_next_piece = False
                 if items_received.count("Toggle Next Piece") % 2:
                     hide_next_piece = True
-                speed = min(99, ctx.slot_data["starting_speed"] + items_received.count(
-                        "Decrease Speed") - items_received.count("Increase Speed"))
+                speed = max(3, min(99, ctx.slot_data["starting_speed"] + items_received.count(
+                        "Decrease Speed") - items_received.count("Increase Speed")))
                 speed_bcd = list(map(int, f"{speed:02d}"))
                 score_multipliers = min(255,
                                         items_received.count("Score Multiplier")
