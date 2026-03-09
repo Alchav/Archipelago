@@ -56,7 +56,7 @@ class TetrisGBWorld(World):
     def create_regions(self):
 
 
-        locs = list(range(1, min(19999, round(self.options.goal_score / 50) + 1)))
+        locs = list(range(1, min(20000, round(self.options.goal_score / 50) + 1)))
 
         locations_used = [int(i * len(locs) / self.options.location_count.value) for i in range(1, self.options.location_count.value + 1)]
 
