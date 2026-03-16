@@ -207,3 +207,4 @@ worlds/tracker.apworld
 
 #EarthBound GFX files
 !worlds/earthbound/src/*.bin
+/fuzz_output/
