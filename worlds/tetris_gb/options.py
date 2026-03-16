@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import Range, NamedRange, Choice, PerGameCommonOptions, NonLocalItems, Toggle
+from Options import Range, NamedRange, Choice, PerGameCommonOptions, Toggle, Visibility
 
 
 class GoalScore(Range):
@@ -19,6 +19,19 @@ class LocationCount(Range):
     range_start = 200
     range_end = 2000
     default = 300
+
+
+class OverclockedLocationCount(NamedRange):
+    """If set, this overrides the normal Location Count option, allowing for a higher location count. However, this
+    will fail generation if set to higher than Goal Score * 50"""
+    display_name = "Overclocked Location Count"
+    visibility = Visibility.spoiler
+    range_start = 200
+    range_end = 19999
+    default = 0
+    special_range_names = {
+        "disabled": 0
+    }
 
 
 class SpeedOption(NamedRange):
@@ -222,17 +235,11 @@ class ToggleNextPieceWeight(FillerWeights):
         return "Toggle Next Piece"
 
 
-class TetrisNonLocalItems(NonLocalItems):
-    __doc__ = NonLocalItems.__doc__
-    default = frozenset({"Garbage Line", "1 Frame of Random Inputs", "1 Second of Random Inputs",
-                         "2 Seconds of Random Inputs", "3 Seconds of Random Inputs", "4 Seconds of Random Inputs",
-                         "Instantly Lock Active Piece", "Active Piece Gets Stuck in the Left Wall",
-                         "Active Piece Gets Stuck in the Right Wall", "Clear Random Line"})
-
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
     goal_score: GoalScore
     location_count: LocationCount
+    overclocked_location_count: OverclockedLocationCount
     starting_speed: StartingSpeed
     target_speed: TargetSpeed
     maximum_speed: MaximumSpeed
@@ -249,4 +256,3 @@ class TetrisOptions(PerGameCommonOptions):
     wall_trap_weight: WallTrapWeight
     illusory_piece_weight: IllusoryPieceWeight
     toggle_next_piece_weight: ToggleNextPieceWeight
-    non_local_items: TetrisNonLocalItems

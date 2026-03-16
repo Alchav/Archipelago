@@ -1,5 +1,6 @@
 from typing import Mapping, Any
 
+from Options import OptionError
 from BaseClasses import Item, Tutorial, ItemClassification, Region, Location, Item
 from ..AutoWorld import World, WebWorld
 from . import client
@@ -39,9 +40,17 @@ class TetrisGBWorld(World):
         super().__init__(multiworld, player)
         self.speed_decreases = 0
         self.speed_increases = 0
+        self.location_count = 0
         self.filler_weights = {option: 1 for option in filler_weight_options}
 
     def generate_early(self):
+        if self.options.overclocked_location_count > 0:
+            self.location_count = self.options.overclocked_location_count.value
+            if self.location_count > round(self.options.goal_score / 50):
+                raise OptionError(f"Overclocked Location Count set too high for Goal Score for player {self.player}")
+        else:
+            self.location_count = self.options.location_count.value
+
         starting_speed = self.options.starting_speed.value
         maximum_speed = self.options.maximum_speed.value
         target_speed = max(self.options.target_speed.value, maximum_speed)
@@ -55,10 +64,9 @@ class TetrisGBWorld(World):
 
     def create_regions(self):
 
-
         locs = list(range(1, min(20000, round(self.options.goal_score / 50) + 1)))
 
-        locations_used = [int(i * len(locs) / self.options.location_count.value) for i in range(1, self.options.location_count.value + 1)]
+        locations_used = [int(i * len(locs) / self.location_count) for i in range(1, self.location_count + 1)]
 
         menu_region = Region("Menu", self.player, self.multiworld)
 
