@@ -50,7 +50,7 @@ class TetrisClient(BizHawkClient):
     async def validate_rom(self, ctx):
         game_name, version = await read(ctx.bizhawk_ctx, [(0x134, 12, "ROM"), (DATA_LOCATIONS["patched"][0], 1, "ROM")])
         if game_name == b"TETRIS\00\00\00\00\00\00":
-            if version[0] == b"\00":
+            if version[0] == 0:
                 logger.warning("Incorrect Tetris version! Ensure you are using the worldwide Rev A ROM!")
                 return False
             ctx.game = self.game
