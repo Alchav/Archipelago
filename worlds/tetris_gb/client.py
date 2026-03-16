@@ -44,15 +44,19 @@ class TetrisClient(BizHawkClient):
         self.clear_lines_given = None
         self.ghost_pieces_given = None
         self.garbage_hole_shuffles_given = 0
+        self.check_countdown = 0
         super().__init__()
 
     async def validate_rom(self, ctx):
-        game_name = await read(ctx.bizhawk_ctx, [(0x134, 12, "ROM")])
-        if game_name[0] == b"TETRIS\00\00\00\00\00\00":
+        game_name, version = await read(ctx.bizhawk_ctx, [(0x134, 12, "ROM"), (DATA_LOCATIONS["patched"][0], 1, "ROM")])
+        if game_name == b"TETRIS\00\00\00\00\00\00":
+            if version[0] == b"\00":
+                logger.warning("Incorrect Tetris version! Ensure you are using the worldwide Rev A ROM!")
+                return False
             ctx.game = self.game
             ctx.items_handling = 0b111
             ctx.want_slot_data = True
-
+            ctx.watcher_timeout = 0.25
             return True
         return False
 
@@ -105,10 +109,16 @@ class TetrisClient(BizHawkClient):
                     (0x04b5, [0xC8], "ROM")  # enable proceeding from title screen
                 ]
                 if data["mode"][0] == 0:
-
-                    location_checks = list(range(1, int(score / 50) + 1))
-                    if len(ctx.locations_checked) != len(location_checks):
-                        await ctx.send_msgs([{"cmd": "LocationChecks", "locations": location_checks}])
+                    location_checks = [i for i in range(1, int(score / 50) + 1) if i in ctx.server_locations]
+                    ctx.locations_checked |= set(location_checks)
+                    if self.check_countdown:
+                        self.check_countdown -= 1
+                        if not self.check_countdown:
+                            if len(ctx.checked_locations) < len(location_checks):
+                                check = location_checks[len(ctx.checked_locations)]
+                                await ctx.send_msgs([{"cmd": "LocationChecks", "locations": [check]}])
+                    if not self.check_countdown:
+                        self.check_countdown = random.randint(1, 11)
 
                     if speed_bcd[0] == 0:
                         speed_bcd[0] = 0x2F
@@ -204,13 +214,13 @@ class TetrisClient(BizHawkClient):
                             if success:
                                 self.lock_traps_given += 1
                 elif data["mode"][0] in range(46, 52) and score >= ctx.slot_data["goal"]:
-                    await ctx.send_msgs([{
-                        "cmd": "StatusUpdate",
-                        "status": ClientStatus.CLIENT_GOAL
-                    }])
+                    await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL},
+                                         {"cmd": "LocationChecks", "locations": list(ctx.locations_checked)}])
                     ctx.finished_game = True
 
                 else:
+                    if len(ctx.locations_checked) != len(ctx.checked_locations):
+                        await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(ctx.locations_checked)}])
                     self.garbage_lines_given = items_received.count("Garbage Line")
                     self.garbage_hole_shuffles_given = items_received.count("Shuffle Garbage Line Hole")
                     self.lock_traps_given = items_received.count("Instantly Lock Active Piece")
