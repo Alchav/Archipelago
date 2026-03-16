@@ -1,12 +1,13 @@
-from typing import Mapping, Any
-
 from Options import OptionError
 from BaseClasses import Item, Tutorial, ItemClassification, Region, Location, Item
 from ..AutoWorld import World, WebWorld
+
 from . import client
 from .locations import score_locations, location_name_to_id
 from .items import items, item_name_to_id
 from .options import TetrisOptions
+
+version = (0, 0)
 
 filler_weight_options = ["clear_random_line_weight", "garbage_line_weight", "illusory_piece_weight",
                          "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
@@ -175,6 +176,7 @@ class TetrisGBWorld(World):
             "max_garbage": self.options.max_simultaneous_garbage_lines.value,
             "max_clears": self.options.max_simultaneous_clear_random_lines.value,
             "goal": self.options.goal_score.value,
+            "version": version
         }
 
 

@@ -71,6 +71,13 @@ class TetrisClient(BizHawkClient):
         items_received = [list(items.keys())[item.item - 1] for item in ctx.items_received]
 
         if ctx.auth and ctx.slot_data:
+            from . import version
+            if ctx.slot_data["version"][0] > version[0]:
+                logger.error("Your Tetris apworld is outdated and incompatible with the server’s Tetris apworld. "
+                             "Please update your Tetris apworld to the latest version before connecting. ")
+                await ctx.disconnect()
+                return
+
             if self.garbage_lines_given is None:
                 self.garbage_lines_given = items_received.count("Garbage Line")
             if self.ghost_pieces_given is None:
