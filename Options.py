@@ -1694,7 +1694,7 @@ class Owner(TextChoice):
     option_Auto = 8
     option_Undefined = 9
     option_Ophilla = 10
-    option_AlchavValley = 11
+    option_Factorio = 11
     default = 9
 
 

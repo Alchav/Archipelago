@@ -40,7 +40,7 @@ class AlchapelaBotWorld(World):
         "Alyssa Jigsaw Hint Point": 1007,
         "Auto Hint Point": 1008,
         "Ophilla Hint Point": 1010,
-        "Alchav Valley Hint Point": 1011,
+        "Factorio Hint Point": 1011,
         "Alchav Hint Location Point": 10000,
         "Alchav Alt Hint Location Point": 10001,
         "AvBW Hint Location Point": 10002,
@@ -51,7 +51,7 @@ class AlchapelaBotWorld(World):
         "Alyssa Jigsaw Hint Location Point": 10007,
         "Auto Hint Location Point": 10008,
         "Ophilla Hint Location Point": 10010,
-        "Alchav Valley Hint Location Point": 10011,
+        "Factorio Hint Location Point": 10011,
         "Nothing": 100000
     }
 
