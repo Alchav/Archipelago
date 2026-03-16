@@ -109,16 +109,26 @@ class TetrisClient(BizHawkClient):
                     (0x04b5, [0xC8], "ROM")  # enable proceeding from title screen
                 ]
                 if data["mode"][0] == 0:
-                    location_checks = [i for i in range(1, int(score / 50) + 1) if i in ctx.server_locations]
-                    ctx.locations_checked |= set(location_checks)
-                    if self.check_countdown:
-                        self.check_countdown -= 1
-                        if not self.check_countdown:
-                            if len(ctx.checked_locations) < len(location_checks):
-                                check = location_checks[len(ctx.checked_locations)]
-                                await ctx.send_msgs([{"cmd": "LocationChecks", "locations": [check]}])
-                    if not self.check_countdown:
-                        self.check_countdown = random.randint(1, 11)
+                    location_checks = {i for i in range(1, score // 50 + 1) if i in ctx.server_locations}
+                    ctx.locations_checked |= location_checks
+                    pending_checks = sorted(ctx.locations_checked - ctx.checked_locations)
+
+                    if data["mode"][0] == 0:
+                        if pending_checks:
+                            if self.check_countdown <= 0:
+                                self.check_countdown = random.randint(1, 11)
+                            else:
+                                self.check_countdown -= 1
+                                if self.check_countdown <= 0:
+                                    check = pending_checks[0]
+                                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": [check]}])
+                                    self.check_countdown = random.randint(1, 11)
+                        else:
+                            self.check_countdown = 0
+                    else:
+                        if pending_checks:
+                            await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(pending_checks)}])
+                        self.check_countdown = 0
 
                     if speed_bcd[0] == 0:
                         speed_bcd[0] = 0x2F
