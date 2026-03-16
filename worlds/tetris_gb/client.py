@@ -233,9 +233,10 @@ class TetrisClient(BizHawkClient):
                         await ctx.send_msgs([{"cmd": "LocationChecks", "locations": list(ctx.locations_checked)}])
                     self.garbage_lines_given = items_received.count("Garbage Line")
                     self.garbage_hole_shuffles_given = items_received.count("Shuffle Garbage Line Hole")
-                    self.lock_traps_given = items_received.count("Instantly Lock Active Piece")
                     self.input_traps_given = len([item for item in items_received if item in input_traps])
                     self.lock_traps_given = len([item for item in items_received if item in lock_traps])
+                    self.clear_lines_given = items_received.count("Clear Random Line")
+                    self.ghost_pieces_given = items_received.count("Active Piece is an Illusion")
                     data_writes += [
                         (0xC400, shuffle_garbage_line(), "System Bus"),
                         (0xCC00, [0] * 12, "System Bus")
