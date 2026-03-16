@@ -338,6 +338,7 @@ class MMRWorld(World):
         # ~ mw.get_location("Top of Clock Tower (Song of Time)", player).place_locked_item(self.create_item(self.get_filler_item_name()))
 
     def create_and_add_filler_items(self, count: int = 1):
+        return
         for i in range(count):
             self.multiworld.itempool.append(self.create_item(self.get_filler_item_name()))
 
