@@ -270,12 +270,12 @@ def create_item_pool(world: "SohWorld") -> None:
 
     # Infinite Upgrades
     if world.options.infinite_upgrades == "progressive":
-        items_to_create[Items.PROGRESSIVE_BOMB_BAG] += 1
-        items_to_create[Items.PROGRESSIVE_BOW] += 1
-        items_to_create[Items.PROGRESSIVE_NUT_CAPACITY] += 1
-        items_to_create[Items.PROGRESSIVE_SLINGSHOT] += 1
+        # items_to_create[Items.PROGRESSIVE_BOMB_BAG] += 1
+        # items_to_create[Items.PROGRESSIVE_BOW] += 1
+        # items_to_create[Items.PROGRESSIVE_NUT_CAPACITY] += 1
+        # items_to_create[Items.PROGRESSIVE_SLINGSHOT] += 1
         items_to_create[Items.PROGRESSIVE_STICK_CAPACITY] += 1
-        items_to_create[Items.PROGRESSIVE_MAGIC_METER] += 1
+        # items_to_create[Items.PROGRESSIVE_MAGIC_METER] += 1
         items_to_create[Items.PROGRESSIVE_WALLET] += 1
         if world.options.bombchu_bag == "progressive_bags":
             items_to_create[Items.BOMBCHU_BAG] += 1
@@ -473,12 +473,12 @@ def create_item_pool(world: "SohWorld") -> None:
             items_to_create[Items.NAYRUS_LOVE] = 0
             items_to_create[Items.DOUBLE_DEFENSE] = 0
 
-            items_to_create[Items.PROGRESSIVE_BOW] -= 1
-            items_to_create[Items.PROGRESSIVE_SLINGSHOT] -= 1
-            items_to_create[Items.PROGRESSIVE_BOMB_BAG] -= 1
-            items_to_create[Items.PROGRESSIVE_MAGIC_METER] -= 1
+            # items_to_create[Items.PROGRESSIVE_BOW] -= 1
+            # items_to_create[Items.PROGRESSIVE_SLINGSHOT] -= 1
+            # items_to_create[Items.PROGRESSIVE_BOMB_BAG] -= 1
+            # items_to_create[Items.PROGRESSIVE_MAGIC_METER] -= 1
             items_to_create[Items.PROGRESSIVE_STICK_CAPACITY] -= 1
-            items_to_create[Items.PROGRESSIVE_NUT_CAPACITY] -= 1
+            # items_to_create[Items.PROGRESSIVE_NUT_CAPACITY] -= 1
 
         elif world.options.item_pool == "minimal":
             if world.options.bombchu_bag == "single_bag":
@@ -491,12 +491,12 @@ def create_item_pool(world: "SohWorld") -> None:
             items_to_create[Items.NAYRUS_LOVE] = 0
             items_to_create[Items.DOUBLE_DEFENSE] = 0
 
-            items_to_create[Items.PROGRESSIVE_BOW] -= 2
-            items_to_create[Items.PROGRESSIVE_SLINGSHOT] -= 2
-            items_to_create[Items.PROGRESSIVE_BOMB_BAG] -= 2
-            items_to_create[Items.PROGRESSIVE_MAGIC_METER] -= 1
+            # items_to_create[Items.PROGRESSIVE_BOW] -= 2
+            # items_to_create[Items.PROGRESSIVE_SLINGSHOT] -= 2
+            # items_to_create[Items.PROGRESSIVE_BOMB_BAG] -= 2
+            # items_to_create[Items.PROGRESSIVE_MAGIC_METER] -= 1
             items_to_create[Items.PROGRESSIVE_STICK_CAPACITY] -= 2
-            items_to_create[Items.PROGRESSIVE_NUT_CAPACITY] -= 2
+            # items_to_create[Items.PROGRESSIVE_NUT_CAPACITY] -= 2
 
     # Add Golden Skulltula Tokens as progressive if necessary
     if world.randomized_progressive_skulltula_count > 0:
