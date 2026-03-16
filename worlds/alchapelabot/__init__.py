@@ -41,6 +41,7 @@ class AlchapelaBotWorld(World):
         "Auto Hint Point": 1008,
         "Ophilla Hint Point": 1010,
         "Factorio Hint Point": 1011,
+        "Alchav Tetris Hint Point": 1012,
         "Alchav Hint Location Point": 10000,
         "Alchav Alt Hint Location Point": 10001,
         "AvBW Hint Location Point": 10002,
@@ -52,6 +53,7 @@ class AlchapelaBotWorld(World):
         "Auto Hint Location Point": 10008,
         "Ophilla Hint Location Point": 10010,
         "Factorio Hint Location Point": 10011,
+        "Alchav Tetris Location Hint Point": 10012,
         "Nothing": 100000
     }
 

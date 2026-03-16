@@ -20,8 +20,10 @@ def swappable(multiworld, loc, within_local=False):
         return False
     if not isinstance(loc.address, int):
         return False
-    if loc.item.trap and loc.item.game != "Super Mario Land 2":
-        return False
+    # if loc.item.trap:
+    #     if loc.item.game ==
+    #     if loc.item.game != "Super Mario Land 2":
+    #         return False
     if (not within_local) and loc.item.name in multiworld.worlds[loc.player].options.local_items:
         return False
     if loc.progress_type == LocationProgressType.EXCLUDED:
@@ -869,13 +871,19 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             game = multiworld.worlds[i.player].game
         if game == "Factorio" and i.classification == ItemClassification.filler:
             return multiworld.random.randint(1, 2)
+        if game == "Tetris" and i.name == "Clear Random Line":
+            return 0
         if (not i.advancement) and "Auto" in multiworld.player_name[i.player]:
             return 0
         if item.player == 1 and item.name.startswith("Unlock "):
             return 0
         if i.classification == ItemClassification.useful and game == "Terraria":
             return 3
-        if i.classification == ItemClassification.trap and game != "Super Mario Land 2":
+        if i.classification == ItemClassification.trap:
+            if game == "Super Mario Land 2":
+                return 1
+            if game == "Tetris" and i.name == "Increase Speed":
+                return 1
             return 0
         if i.classification == ItemClassification.progression and game == "Stardew Valley":
             if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
