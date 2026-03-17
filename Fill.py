@@ -874,6 +874,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 return 1
             if game == "Tetris" and i.name == "Increase Speed":
                 return 1
+            if game == "Jigsaw":
+                return 1
             return 0
         if i.classification == ItemClassification.progression and game == "Stardew Valley":
             if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
