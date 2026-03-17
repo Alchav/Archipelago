@@ -594,7 +594,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         f"{[(item.location, item) for item in multiworld.itempool if item.location is not None]}"
     )
 
-
     fill_locations = sorted(multiworld.get_unfilled_locations())
 
     for location in fill_locations:
@@ -815,28 +814,19 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # compress_spheres(multiworld, sphere_max)
     compress_owner_spheres(multiworld)
 
-    defaultlocations = []
-    excludedlocations = []
-
-    for location in multiworld.get_unfilled_locations():
-        if location.progress_type == LocationProgressType.EXCLUDED:
-            excludedlocations.append(location)
-        else:
-            defaultlocations.append(location)
-
-    # filleritempool.sort(key=lambda i: i.trap)
+    # defaultlocations = []
+    # excludedlocations = []
+    #
+    # for location in multiworld.get_unfilled_locations():
+    #     if location.progress_type == LocationProgressType.EXCLUDED:
+    #         excludedlocations.append(location)
+    #     else:
+    #         defaultlocations.append(location)
 
     remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded")
 
-    # if excludedlocations:
-    #     raise FillError(
-    #         f"Not enough filler items for excluded locations. "
-    #         f"There are {len(excludedlocations)} more excluded locations than filler or trap items."
-    #     )
-
     restitempool = filleritempool + usefulitempool
 
-    # multiworld.post_fill = True
     remaining_fill(multiworld, defaultlocations, restitempool,
                    move_unplaceable_to_start_inventory=panic_method=="start_inventory")
 
