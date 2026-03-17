@@ -235,6 +235,16 @@ class ToggleNextPieceWeight(FillerWeights):
         return "Toggle Next Piece"
 
 
+class NothingWeight(FillerWeights):
+    """Just for our multiworlds, the weight for no item at all."""
+    display_name = "Nothing Weight"
+    default = 0
+
+    @staticmethod
+    def get_item(random):
+        return None
+
+
 @dataclass
 class TetrisOptions(PerGameCommonOptions):
     goal_score: GoalScore
@@ -256,3 +266,4 @@ class TetrisOptions(PerGameCommonOptions):
     wall_trap_weight: WallTrapWeight
     illusory_piece_weight: IllusoryPieceWeight
     toggle_next_piece_weight: ToggleNextPieceWeight
+    nothing_weight: NothingWeight

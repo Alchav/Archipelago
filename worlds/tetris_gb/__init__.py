@@ -11,7 +11,7 @@ version = (0, 0)
 
 filler_weight_options = ["clear_random_line_weight", "garbage_line_weight", "illusory_piece_weight",
                          "shuffle_garbage_line_hole_weight", "random_inputs_weight", "wall_trap_weight",
-                         "toggle_next_piece_weight", "instant_lock_weight", ]
+                         "toggle_next_piece_weight", "instant_lock_weight", "nothing_weight"]
 
 
 class TetrisWebWorld(WebWorld):
@@ -147,7 +147,7 @@ class TetrisGBWorld(World):
         fillers = [item for item in self.random.choices(
             list(self.filler_weights.keys()),
             weights=filler_weights,
-            k=location_count - len(item_pool))]
+            k=location_count - len(item_pool)) if item]
 
         item_pool += [self.create_item(getattr(self.options, option).get_item(self.random)) for option in fillers]
 
@@ -162,9 +162,12 @@ class TetrisGBWorld(World):
                 location.locked = True
 
     def get_filler_item_name(self):
-        return getattr(self.options, self.random.choices(list(self.filler_weights.keys()),
-                                                         weights=list(self.filler_weights.values()),
-                                                         k=1)[0]).get_item(self.random)
+        i = None
+        while i is None:
+            i = getattr(self.options, self.random.choices(list(self.filler_weights.keys()),
+                                                          weights=list(self.filler_weights.values()),
+                                                          k=1)[0]).get_item(self.random)
+        return i
 
     def create_item(self, item):
         return TetrisItem(item, items[item], self.item_name_to_id[item], self.player)
