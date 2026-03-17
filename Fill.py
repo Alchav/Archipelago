@@ -1271,9 +1271,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             continue
         if item.game == "Super Metroid":
             continue
+        if item.hint and player_to_owner[item.player] in (Owner.option_AvBW, Owner.option_AvBWJ):
+            continue
         i = starting_spheres[item.player]
         earlier_spheres = [loc for sphere in spheres[:i] for loc in sphere]
-        if item.hint:
+        if False and item.hint:
             multiworld.random.shuffle(earlier_spheres)
         else:
             earlier_spheres = list(reversed(earlier_spheres))
