@@ -1428,7 +1428,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     check_no_skips(multiworld, starting_spheres)
 
-    multiworld.hint_ratio = max(1, (sum(c for k, c in counts_by_kind_player.items() if k == "hint") // max(1, sum(hint_weights.values()))))
+    multiworld.hint_ratio = sum(counts_by_kind_player.values()) // max(1, sum(hint_weights.values()))
     # multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
 
     # multiworld.post_fill = True
