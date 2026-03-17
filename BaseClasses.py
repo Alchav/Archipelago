@@ -1879,6 +1879,10 @@ class Spoiler:
                 outfile.write(f"{display_name + ':':33}{res.current_option_name}\n")
 
         with open(filename, 'w', encoding="utf-8-sig") as outfile:
+            for owner, players in self.multiworld.owner_groups.items():
+                text = " > ".join([self.multiworld.player_name[player] for player in players]) + "\n"
+                if ">" in text:
+                    outfile.write(text)
             outfile.write(
                 'Archipelago Version %s  -  Seed: %s\n\n' % (
                     Utils.__version__, self.multiworld.seed))

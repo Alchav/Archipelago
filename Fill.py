@@ -1048,6 +1048,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     for owner, group in owner_groups.items():
         for player in group:
             player_to_owner[player] = owner
+
+    multiworld.owner_groups = owner_groups
     starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items() if starting_sphere > 0]
     starting_spheres_list.sort(key=lambda i: i[1])
     for player, starting_sphere in starting_spheres_list:
