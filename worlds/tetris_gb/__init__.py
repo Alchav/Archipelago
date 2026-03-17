@@ -147,9 +147,9 @@ class TetrisGBWorld(World):
         fillers = [item for item in self.random.choices(
             list(self.filler_weights.keys()),
             weights=filler_weights,
-            k=location_count - len(item_pool)) if item]
+            k=location_count - len(item_pool))]
 
-        item_pool += [self.create_item(getattr(self.options, option).get_item(self.random)) for option in fillers]
+        item_pool += [self.create_item(getattr(self.options, option).get_item(self.random)) for option in fillers if option != "nothing_weight"]
 
         self.multiworld.itempool += item_pool
 
