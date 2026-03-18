@@ -905,9 +905,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if i.classification == ItemClassification.useful:
             return 2
         elif i.classification == ItemClassification.progression_skip_balancing:
-            if not multiworld.random.randint(0, 24 if i.game == "Jigsaw" else 4):
+            if not multiworld.random.randint(0, 24 if i.game == "Jigsaw" else 16 if i.game == "Tetris" else 4):
                 return 3
-            if i.game == "Jigsaw":
+            if i.game in ("Jigsaw", "Tetris"):
                 return multiworld.random.randint(1, 2)
             return 2
         else:
