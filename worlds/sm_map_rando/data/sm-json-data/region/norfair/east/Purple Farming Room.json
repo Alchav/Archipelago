@@ -5,9 +5,11 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "East",
-  "playable": true,
   "roomAddress": "0x7B051",
   "roomEnvironments": [{"heated": true}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,13 +17,20 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001979e",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
       "name": "Gamet Farm Junction",
       "nodeType": "junction",
-      "nodeSubType": "junction"
+      "nodeSubType": "junction",
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [
@@ -30,22 +39,14 @@
       "groupName": "Purple Farming Room Gamets",
       "enemyName": "Gamet",
       "quantity": 5,
-      "homeNodes": [2],
-      "farmCycles": [
-        {
-          "name": "Crouch over Gamets",
-          "cycleFrames": 120,
-          "requires": [
-            {"heatFrames": 120}
-          ]
-        }
-      ]
+      "homeNodes": [2]
     }
   ],
   "links": [
     {
       "from": 1,
       "to": [
+        {"id": 1},
         {"id": 2}
       ]
     },
@@ -59,6 +60,19 @@
   ],
   "strats": [
     {
+      "id": 5,
+      "link": [1, 1],
+      "name": "Leave with Runway",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 4,
+          "openEnd": 0
+        }
+      }
+    },
+    {
+      "id": 1,
       "link": [1, 2],
       "name": "Base",
       "requires": [
@@ -66,6 +80,7 @@
       ]
     },
     {
+      "id": 2,
       "link": [2, 1],
       "name": "Base",
       "requires": [
@@ -73,33 +88,70 @@
       ]
     },
     {
+      "id": 3,
       "link": [2, 1],
       "name": "Leave with Runway",
-      "requires": [],
+      "requires": [
+        "h_runOverRespawningEnemies",
+        {"heatFrames": 0}
+      ],
       "exitCondition": {
         "leaveWithRunway": {
           "length": 13,
           "openEnd": 0,
-          "gentleDownTiles": 3,
-          "gentleUpTiles": 1
+          "gentleUpTiles": 1,
+          "gentleDownTiles": 3
         }
       },
-      "unlocksDoors": [
-        {"types": ["ammo"], "requires": []}
-      ],
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
       "note": "Involves leaving some drops hanging after killing the Gamets so they don't respawn.",
       "devNote": "Health drops are collected while using this runway, offsetting any heat frames used to get into position."
     },
     {
+      "id": 6,
+      "link": [2, 1],
+      "name": "G-Mode Setup - Get Hit By Gamet",
+      "requires": [
+        {"heatFrames": 220}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 7,
+      "link": [2, 2],
+      "name": "Approach Farm",
+      "requires": [
+        {"or": [
+          {"and": [
+            {"heatFrames": 0},
+            "canPauseAbuse"
+          ]},
+          {"heatFrames": 50}
+        ]},
+        {"partialRefill": {"type": "RegularEnergy", "limit": 50}}
+      ],
+      "flashSuitChecked": true,
+      "note": "Regain some energy in order to use the Gamet Farm."
+    },
+    {
+      "id": 4,
       "link": [2, 2],
       "name": "Gamet Farm",
       "requires": [
-        {"or": [
-          "canPauseAbuse",
-          {"heatFrames": 50}
-        ]},
-        {"refill": ["Energy", "Missile", "Super", "PowerBomb"]}
-      ]
+        {"simpleHeatFrames": 100},
+        {"heatFrames": 20},
+        {"simpleCycleFrames": 100},
+        {"cycleFrames": 20}
+      ],
+      "farmCycleDrops": [{"enemy": "Gamet", "count": 5}],
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 8,
+  "nextNotableId": 1
 }

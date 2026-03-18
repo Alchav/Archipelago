@@ -4,56 +4,37 @@
   "name": "Ceres Ridley's Room",
   "area": "Ceres Station",
   "subarea": "Ceres Station",
-  "playable": true,
   "roomAddress": "0x7E0B5",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
       "name": "Left Door",
       "nodeType": "door",
-      "nodeSubType": "grey",
+      "nodeSubType": "gray",
       "nodeAddress": "0x001abb8",
+      "doorOrientation": "left",
       "doorEnvironments": [{"physics": "air"}],
       "locks": [
         {
-          "name": "Ceres Ridley Room Grey Lock (to 58 Escape)",
+          "name": "Ceres Ridley Room Gray Lock (to 58 Escape)",
           "lockType": "gameFlag",
           "unlockStrats": [
             {
               "name": "Base",
-              "notable": false,
               "requires": [
                 "f_DefeatedCeresRidley"
               ]
             }
           ]
         }
-      ]
-    },
-    {
-      "id": 2,
-      "name": "Ceres Ridley",
-      "nodeType": "event",
-      "nodeSubType": "boss",
-      "locks": [
-        {
-          "name": "Ceres Ridley Fight",
-          "lockType": "bossFight",
-          "unlockStrats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                {"energyAtMost": 29}
-              ],
-              "note": "Just taking damage is enough to finish the fight."
-            }
-          ],
-          "note": "It's also possible to get through this fight without losing energy, but it is pointless, difficult, and very time-consuming."
-        }
       ],
-      "yields": ["f_DefeatedCeresRidley"]
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [
@@ -62,7 +43,7 @@
       "groupName": "Ceres Ridley",
       "enemyName": "Ceres Ridley",
       "quantity": 1,
-      "homeNodes": [2],
+      "homeNodes": [1],
       "stopSpawn": ["f_DefeatedCeresRidley"]
     }
   ],
@@ -70,19 +51,13 @@
     {
       "from": 1,
       "to": [
-        {"id": 1},
-        {"id": 2}
-      ]
-    },
-    {
-      "from": 2,
-      "to": [
         {"id": 1}
       ]
     }
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave With Runway",
       "requires": [],
@@ -94,14 +69,45 @@
       }
     },
     {
-      "link": [1, 2],
-      "name": "Base",
-      "requires": []
+      "id": 2,
+      "link": [1, 1],
+      "name": "Power Bomb the Door",
+      "requires": [
+        "h_usePowerBomb"
+      ],
+      "bypassesDoorShell": true
     },
     {
-      "link": [2, 1],
-      "name": "Base",
-      "requires": []
+      "id": 3,
+      "link": [1, 1],
+      "name": "Leave With Runway, Power Bomb the Door",
+      "requires": [
+        "h_usePowerBomb"
+      ],
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 2,
+          "openEnd": 1
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 6,
+      "link": [1, 1],
+      "name": "Ceres Ridley",
+      "requires": [
+        {"resourceAtMost": [{"type": "RegularEnergy", "count": 29}]}
+      ],
+      "setsFlags": ["f_DefeatedCeresRidley"],
+      "note": "Just taking damage is enough to finish the fight.",
+      "devNote": [
+        "It is possible to finish the fight with more Reserve Energy.",
+        "It's also possible to get through this fight without losing energy, but it is pointless, difficult, and very time-consuming."
+      ]
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 7,
+  "nextNotableId": 1
 }

@@ -5,22 +5,32 @@
   "area": "Maridia",
   "subarea": "Inner",
   "subsubarea": "Yellow",
-  "playable": true,
   "roomAddress": "0x7D86E",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
       "name": "Top Sand Entrance",
       "nodeType": "entrance",
-      "nodeSubType": "sandpit"
+      "nodeSubType": "sandpit",
+      "doorOrientation": "up",
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
       "name": "Bottom Sand Exit",
       "nodeType": "exit",
       "nodeSubType": "sandpit",
-      "nodeAddress": "0x001a8a0"
+      "nodeAddress": "0x001a8a0",
+      "doorOrientation": "down",
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [
@@ -54,26 +64,45 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
       ],
-      "gModeRegainMobility": {}
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
     },
     {
+      "id": 2,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 6,
+      "link": [1, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canShinechargeMovementTricky",
+        {"shineChargeFrames": 135}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "flashSuitChecked": true,
+      "note": [
+        "If in a falling state (as opposed to jumping), spin jump off the bottom ledge in order to be able to mid-air spark in the room below."
+      ]
+    },
+    {
+      "id": 3,
       "link": [1, 2],
       "name": "G-Mode",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -81,17 +110,23 @@
         },
         "comesThroughToilet": "any"
       },
-      "requires": [],
+      "requires": [
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
+        ]}
+      ],
       "exitCondition": {
         "leaveWithGMode": {
           "morphed": false
         }
-      }
+      },
+      "flashSuitChecked": true
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "G-Mode Morph",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -99,20 +134,30 @@
         },
         "comesThroughToilet": "any"
       },
-      "requires": [],
+      "requires": [
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
+        ]}
+      ],
       "exitCondition": {
         "leaveWithGMode": {
           "morphed": true
         }
-      }
+      },
+      "flashSuitChecked": true
     },
     {
+      "id": 5,
       "link": [2, 2],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 7,
+  "nextNotableId": 1
 }

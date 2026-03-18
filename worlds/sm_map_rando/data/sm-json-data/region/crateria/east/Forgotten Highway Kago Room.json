@@ -4,9 +4,14 @@
   "name": "Forgotten Highway Kago Room",
   "area": "Crateria",
   "subarea": "East",
-  "playable": true,
   "roomAddress": "0x79552",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1],
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +19,14 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018a7e",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2],
+        [1],
+        [1],
+        [1]
+      ]
     },
     {
       "id": 2,
@@ -22,7 +34,14 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018a8a",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "down",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1],
+        [2],
+        [2],
+        [2]
+      ]
     }
   ],
   "enemies": [
@@ -52,6 +71,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -65,42 +85,79 @@
       }
     },
     {
+      "id": 9,
       "link": [1, 1],
       "name": "Kago Farm",
       "requires": [
-        {"resetRoom": {
-          "nodes": [1, 2],
-          "mustStayPut": false
-        }},
-        {"refill": ["Energy", "Missile", "Super", "PowerBomb"]}
-      ]
+        {"or": [
+          {"and": [
+            {"resetRoom": {"nodes": [1]}},
+            {"cycleFrames": 1230}
+          ]},
+          {"and": [
+            {"resetRoom": {"nodes": [2]}},
+            {"cycleFrames": 1710}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Kago", "count": 2}]
     },
     {
+      "id": 3,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 5,
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 10,
+          "openEnd": 1,
+          "steepUpTiles": 2,
+          "steepDownTiles": 1
+        }
+      },
+      "requires": [
+        "canLongChainTemporaryBlue",
+        "canXRayTurnaround"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "any"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 6,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 7,
       "link": [2, 2],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     },
     {
+      "id": 8,
       "link": [2, 2],
       "name": "Shinespark",
       "entranceCondition": {
@@ -113,5 +170,8 @@
       "note": "Enter on the left side of the doorway to reduce the amount of energy used.",
       "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 10,
+  "nextNotableId": 1
 }

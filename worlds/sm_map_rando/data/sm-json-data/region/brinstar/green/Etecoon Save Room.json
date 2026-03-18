@@ -4,9 +4,11 @@
   "name": "Etecoon Save Room",
   "area": "Brinstar",
   "subarea": "Green",
-  "playable": true,
   "roomAddress": "0x7A22A",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,14 +16,21 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019012",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
       "name": "Save Station",
-      "utility": ["save"],
       "nodeType": "utility",
-      "nodeSubType": "save"
+      "nodeSubType": "save",
+      "utility": ["save"],
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [],
@@ -42,32 +51,43 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave With Runway",
+      "requires": [],
       "exitCondition": {
         "leaveWithRunway": {
           "length": 4,
           "openEnd": 1
         }
       },
-      "requires": []
+      "flashSuitChecked": true
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
-      "requires": []
+      "requires": [],
+      "flashSuitChecked": true
     },
     {
+      "id": 4,
       "link": [2, 1],
       "name": "Base",
-      "requires": []
+      "requires": [],
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 5,
+  "nextNotableId": 1
 }

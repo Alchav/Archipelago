@@ -5,9 +5,13 @@
   "area": "Maridia",
   "subarea": "Inner",
   "subsubarea": "Green",
-  "playable": true,
   "roomAddress": "0x7D69A",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,14 +19,15 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a7b0",
+      "doorOrientation": "left",
       "doorEnvironments": [{"physics": "water"}],
-      "note": "The center door that is accessible from the puyo side",
-      "twinDoorAddresses": [
-        {
-          "roomAddress": "0x7D646",
-          "doorAddress": "0x001a7a4"
-        }
-      ]
+      "twinDoorAddresses": [{"roomAddress": "0x7D646", "doorAddress": "0x001a7a4"}],
+      "mapTileMask": [
+        [1],
+        [1],
+        [2]
+      ],
+      "note": "The center door that is accessible from the puyo side"
     },
     {
       "id": 2,
@@ -30,19 +35,25 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a7bc",
+      "doorOrientation": "right",
       "doorEnvironments": [{"physics": "water"}],
-      "twinDoorAddresses": [
-        {
-          "roomAddress": "0x7D646",
-          "doorAddress": "0x001a798"
-        }
+      "twinDoorAddresses": [{"roomAddress": "0x7D646", "doorAddress": "0x001a798"}],
+      "mapTileMask": [
+        [2],
+        [2],
+        [1]
       ]
     },
     {
       "id": 3,
       "name": "Junction Below Right Door",
       "nodeType": "junction",
-      "nodeSubType": "junction"
+      "nodeSubType": "junction",
+      "mapTileMask": [
+        [1],
+        [2],
+        [2]
+      ]
     }
   ],
   "enemies": [
@@ -68,16 +79,6 @@
       "homeNodes": [1]
     }
   ],
-  "reusableRoomwideNotable": [
-    {
-      "name": "East Pants Room Puyo Clip",
-      "note": [
-        "Freeze a Puyo at the correct height for clipping through the tile high ceiling, with Gravity Suit equipped.",
-        "With Morph and X-Ray, freeze the Puyo at standing-shot height and then jump on top of it with a spinjump before morphing, unmorphing, and using X-Ray to standup and clip.",
-        "Otherwise, freeze it on the first frame of it's jump animation for the right height."
-      ]
-    }
-  ],
   "links": [
     {
       "from": 1,
@@ -89,6 +90,7 @@
     {
       "from": 2,
       "to": [
+        {"id": 1},
         {"id": 2},
         {"id": 3}
       ]
@@ -103,6 +105,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -114,49 +117,72 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Puyo Farm",
       "requires": [
         "canDodgeWhileShooting",
-        {"resetRoom": {
-          "nodes": [1],
-          "mustStayPut": false
-        }},
-        {"refill": ["Energy", "Missile", "PowerBomb"]}
+        {"resetRoom": {"nodes": [1]}},
+        {"or": [
+          {"and": [
+            "Grapple",
+            {"cycleFrames": 200}
+          ]},
+          {"and": [
+            "Gravity",
+            "ScrewAttack",
+            {"cycleFrames": 200}
+          ]},
+          {"and": [
+            {"or": [
+              "Plasma",
+              "Wave",
+              "Spazer"
+            ]},
+            {"cycleFrames": 330}
+          ]},
+          {"cycleFrames": 360}
+        ]}
       ],
-      "note": "Stand (don't crouch) next to the door and shoot diagonally down into the sand until the puyos are killed."
-    },
-    {
-      "link": [1, 1],
-      "name": "Crystal Flash",
-      "requires": [
-        "h_canCrystalFlash"
+      "farmCycleDrops": [{"enemy": "Puyo", "count": 2}],
+      "note": "Stand (don't crouch) next to the door and shoot diagonally down into the sand until the Puyos are killed.",
+      "devNote": [
+        "One or both of the Puyos above the shot block could also be farmed, but it doesn't seem worth modeling."
       ]
     },
     {
+      "id": 3,
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 4,
       "link": [1, 1],
       "name": "G-Mode Setup - Get Hit By Puyo",
-      "notable": false,
       "requires": [],
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
+      "flashSuitChecked": true,
       "devNote": "This can only be useful if the door does not connect to the Pants Room."
     },
     {
+      "id": 5,
       "link": [1, 1],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Puyo",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}}
       ],
       "gModeRegainMobility": {},
+      "flashSuitChecked": true,
       "devNote": "This can only be useful if the door does not connect to the Pants Room."
     },
     {
+      "id": 6,
       "link": [1, 3],
       "name": "Base",
       "requires": [
@@ -164,6 +190,7 @@
       ]
     },
     {
+      "id": 7,
       "link": [1, 3],
       "name": "Suitless Base",
       "requires": [
@@ -171,40 +198,38 @@
         "HiJump",
         {"or": [
           "canSpringBallJumpMidAir",
-          "h_canCrouchJumpDownGrab",
+          "h_crouchJumpDownGrab",
           "canUseFrozenEnemies"
         ]}
       ]
     },
     {
+      "id": 8,
       "link": [1, 3],
       "name": "Max Height SpringBall Jump",
       "requires": [
         "canSuitlessMaridia",
-        "h_canMaxHeightSpringBallJump",
+        "h_maxHeightSpringBallJump",
         {"or": [
           "can4HighMidAirMorph",
           "canStationaryLateralMidAirMorph",
           {"and": [
             "canNeutralDamageBoost",
-            {"enemyDamage": {
-              "enemy": "Puyo",
-              "type": "contact",
-              "hits": 2
-            }}
+            {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 2}}
           ]}
         ]}
       ],
       "note": "It is recommended to shoot the ceiling block immediately upon room entry to bring one of the Puyos down so that it will not be a problem later."
     },
     {
+      "id": 9,
       "link": [1, 3],
       "name": "Suitless Frozen Puyo",
       "requires": [
         "canSuitlessMaridia",
         "canTrickyUseFrozenEnemies",
         {"or": [
-          "h_canCrouchJumpDownGrab",
+          "h_crouchJumpDownGrab",
           "canTwoTileSqueeze",
           "Morph"
         ]}
@@ -216,6 +241,7 @@
       ]
     },
     {
+      "id": 10,
       "link": [1, 3],
       "name": "Jump into Respawning Block",
       "requires": [
@@ -225,6 +251,7 @@
       ]
     },
     {
+      "id": 11,
       "link": [1, 3],
       "name": "SpringBall Jump into Respawning Block",
       "requires": [
@@ -240,6 +267,7 @@
       "note": "It is recommended to shoot the ceiling block immediately upon room entry to bring one of the Puyos down so that it will not be a problem later."
     },
     {
+      "id": 12,
       "link": [1, 3],
       "name": "Cross Room Gravity Jump",
       "entranceCondition": {
@@ -268,6 +296,72 @@
       ]
     },
     {
+      "id": 26,
+      "link": [1, 3],
+      "name": "Use Flash Suit",
+      "requires": [
+        "canPlayInSand",
+        {"useFlashSuit": {}},
+        {"shinespark": {"frames": 11, "excessFrames": 1}}
+      ],
+      "note": "Cross the sand, then spark up left."
+    },
+    {
+      "id": 27,
+      "link": [2, 1],
+      "name": "Come In Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 6.5,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "Gravity",
+        "canShinechargeMovementTricky",
+        "canDownBack",
+        {"shineChargeFrames": 130}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 13,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[2, 34]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 14,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[2, 34]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[2, 34]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 15,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -279,100 +373,257 @@
       }
     },
     {
+      "id": 29,
       "link": [2, 2],
-      "name": "Crystal Flash",
+      "name": "Puyo Farm (1 Puyo)",
       "requires": [
-        "h_canCrystalFlash"
+        {"resetRoom": {"nodes": [2]}},
+        {"or": [
+          {"and": [
+            "Gravity",
+            {"or": [
+              {"and": [
+                "Plasma",
+                {"cycleFrames": 85}
+              ]},
+              {"and": [
+                "Grapple",
+                {"cycleFrames": 95}
+              ]},
+              {"and": [
+                "ScrewAttack",
+                {"cycleFrames": 105}
+              ]},
+              {"and": [
+                "Wave",
+                {"cycleFrames": 110}
+              ]},
+              {"and": [
+                "Spazer",
+                {"cycleFrames": 125}
+              ]},
+              {"cycleFrames": 155}
+            ]}
+          ]},
+          {"and": [
+            "canSuitlessMaridia",
+            {"or": [
+              {"and": [
+                "Grapple",
+                {"cycleFrames": 135}
+              ]},
+              {"and": [
+                {"or": [
+                  "Plasma",
+                  "Wave"
+                ]},
+                {"cycleFrames": 175}
+              ]},
+              {"and": [
+                "Spazer",
+                {"cycleFrames": 185}
+              ]},
+              {"and": [
+                "canDodgeWhileShooting",
+                {"cycleFrames": 220}
+              ]}
+            ]}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Puyo", "count": 1}]
+    },
+    {
+      "id": 30,
+      "link": [2, 2],
+      "name": "Puyo Farm (3 Puyos)",
+      "requires": [
+        {"resetRoom": {"nodes": [2]}},
+        {"or": [
+          {"and": [
+            "Gravity",
+            {"or": [
+              {"and": [
+                "Plasma",
+                {"cycleFrames": 230}
+              ]},
+              {"and": [
+                "Grapple",
+                {"cycleFrames": 270}
+              ]},
+              {"and": [
+                "Wave",
+                {"cycleFrames": 300}
+              ]},
+              {"and": [
+                "Spazer",
+                {"cycleFrames": 330}
+              ]},
+              {"and": [
+                "canDodgeWhileShooting",
+                {"cycleFrames": 650}
+              ]}
+            ]}
+          ]},
+          {"and": [
+            "canSuitlessMaridia",
+            "canDodgeWhileShooting",
+            {"or": [
+              "h_crouchJumpDownGrab",
+              "HiJump"
+            ]},
+            {"or": [
+              {"and": [
+                "Grapple",
+                {"cycleFrames": 530}
+              ]},
+              {"cycleFrames": 890}
+            ]}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Puyo", "count": 3}],
+      "devNote": [
+        "More Puyos could be farmed at the bottom of the room, but it doesn't seem worth modeling."
       ]
     },
     {
+      "id": 16,
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 17,
       "link": [2, 2],
       "name": "G-Mode Setup - Get Hit By Puyo",
-      "notable": false,
       "requires": [],
       "exitCondition": {
         "leaveWithGModeSetup": {}
-      }
+      },
+      "flashSuitChecked": true
     },
     {
+      "id": 18,
       "link": [2, 2],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Puyo",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}}
       ],
-      "gModeRegainMobility": {}
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
     },
     {
+      "id": 19,
       "link": [2, 3],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 20,
       "link": [3, 1],
       "name": "Base",
       "requires": [
         {"or": [
-          "h_canNavigateUnderwater",
-          {"enemyDamage": {
-            "enemy": "Puyo",
-            "type": "contact",
-            "hits": 1
-          }}
+          "h_navigateUnderwater",
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}}
         ]}
       ]
     },
     {
+      "id": 21,
       "link": [3, 2],
-      "name": "East Pants Room Puyo Clip with Morph and X-Ray",
-      "notable": true,
+      "name": "Puyo Clip with Morph and X-Ray",
       "requires": [
+        {"notable": "Puyo Clip"},
         "Gravity",
-        "h_canXRayCeilingClip",
-        "canTrickyUseFrozenEnemies",
+        "h_XRayMorphIceClip",
         {"or": [
           "canTrickyJump",
-          {"enemyDamage": {
-            "enemy": "Puyo",
-            "type": "contact",
-            "hits": 2
-          }}
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 2}}
+        ]},
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}},
+          "Wave",
+          "canPreciseGrapple"
         ]}
       ],
-      "reusableRoomwideNotable": "East Pants Room Puyo Clip",
+      "flashSuitChecked": true,
       "note": [
         "Freeze the Puyo at standing-shot height and then jump on top of it with a spinjump before morphing, unmorphing, and using X-Ray to standup and clip.",
         "Standing on a side of the room and shooting forward will freeze the Puyo at the correct height."
       ]
     },
     {
+      "id": 28,
       "link": [3, 2],
-      "name": "East Pants Room Puyo Clip Precise Freeze",
-      "notable": true,
+      "name": "Suitless Puyo Clip with Morph and X-Ray",
       "requires": [
-        "Gravity",
-        "canPreciseCeilingClip",
-        "canTrickyUseFrozenEnemies"
+        {"notable": "Puyo Clip"},
+        "h_XRayMorphIceClip",
+        "canTrickyJump",
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 2}}
+        ]},
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}},
+          "Wave",
+          "canPreciseGrapple"
+        ]}
       ],
-      "note": "Freeze the puyo at the start of its jump animation, on the right frame."
+      "flashSuitChecked": true,
+      "note": [
+        "Freeze the Puyo at standing-shot height and then jump on top of it with a spinjump before morphing, unmorphing, and using X-Ray to standup and clip.",
+        "Standing on a side of the room and shooting forward will freeze the Puyo at the correct height."
+      ]
     },
     {
+      "id": 22,
       "link": [3, 2],
-      "name": "East Pants Room Suitless Puyo Clip",
-      "notable": true,
+      "name": "Puyo Clip Precise Freeze",
       "requires": [
-        "canSuitlessMaridia",
-        "h_canNonTrivialCeilingClip",
-        "canTrickyUseFrozenEnemies",
-        {"enemyDamage": {
-          "enemy": "Puyo",
-          "type": "contact",
-          "hits": 8
-        }}
+        {"notable": "Puyo Clip Precise Freeze"},
+        "Gravity",
+        "h_preciseIceClip",
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}},
+          "Wave",
+          "canPreciseGrapple"
+        ]}
       ],
+      "flashSuitChecked": true,
+      "note": "Freeze the Puyo at the start of its jump animation, on the right frame."
+    },
+    {
+      "id": 23,
+      "link": [3, 2],
+      "name": "Suitless Puyo Clip",
+      "requires": [
+        {"notable": "Suitless Puyo Clip"},
+        "canSuitlessMaridia",
+        "h_highPixelIceClip",
+        {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 2}},
+        {"or": [
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 6}},
+          {"and": [
+            "canBePatient",
+            {"resetRoom": {"nodes": [1]}}
+          ]}
+        ]},
+        {"or": [
+          {"enemyDamage": {"enemy": "Puyo", "type": "contact", "hits": 1}},
+          "Wave",
+          "canPreciseGrapple"
+        ]}
+      ],
+      "flashSuitChecked": true,
       "note": [
         "Positioning the Puyo requires it to perform a big jump then start falling with a frame perfect freeze.",
         "One possible setup stands on the left tile of the right side and lets the puyo jump up taking a contact hit.",
@@ -380,30 +631,63 @@
         "Clip onto the puyo by doing an aim down jump and switching to a forward diagonal at the right time."
       ],
       "devNote": [
-        "1 hit per attempt, 7 for leniency.",
-        "FIXME: leniencies should be moved to helpers or some central location."
+        "1 hit per attempt, 7 for leniency, which is reduced if Samus can reset the room and farm the Puyos.",
+        "FIXME: leniencies should be moved to helpers or some central location.",
+        "FIXME: There is a normalized setup which can be described and most or all of the leniency can be removed."
       ]
     },
     {
+      "id": 24,
       "link": [3, 2],
       "name": "Crystal Flash Clip with Bombs",
       "requires": [
-        "h_canBombIntoCrystalFlashClip",
+        "h_bombIntoCrystalFlashClip",
         "Gravity"
       ],
+      "flashSuitChecked": true,
       "note": "Clip below the crumble blocks on the left side.  Hold down after clipping to break them."
     },
     {
+      "id": 25,
       "link": [3, 2],
       "name": "Suitless Crystal Flash Clip",
       "requires": [
-        "h_canJumpIntoCrystalFlashClip",
+        "h_jumpIntoCrystalFlashClip",
         "canSuitlessMaridia"
       ],
+      "flashSuitChecked": true,
       "note": [
         "Place a PB up against the crumble blocks, then jump and midair morph into that same position at the end of the explosion while holding CF inputs.",
         "Immediately after the CF, hold down to break the crumble blocks."
       ]
     }
-  ]
+  ],
+  "notables": [
+    {
+      "id": 1,
+      "name": "Puyo Clip",
+      "note": [
+        "Freeze a Puyo at the correct height for clipping through the tile high ceiling, with Gravity Suit equipped.",
+        "With Morph and X-Ray, freeze the Puyo at standing-shot height and then jump on top of it with a spinjump before morphing, unmorphing, and using X-Ray to standup and clip.",
+        "Otherwise, freeze it on the first frame of it's jump animation for the right height."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Puyo Clip Precise Freeze",
+      "note": "Freeze the Puyo at the start of its jump animation, on the right frame."
+    },
+    {
+      "id": 3,
+      "name": "Suitless Puyo Clip",
+      "note": [
+        "Positioning the Puyo requires it to perform a big jump then start falling with a frame perfect freeze.",
+        "One possible setup stands on the left tile of the right side and lets the puyo jump up taking a contact hit.",
+        "Then so long as the puyo isn't on the very edge, it will do a big jump.",
+        "Clip onto the puyo by doing an aim down jump and switching to a forward diagonal at the right time."
+      ]
+    }
+  ],
+  "nextStratId": 31,
+  "nextNotableId": 4
 }

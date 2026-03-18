@@ -4,9 +4,11 @@
   "name": "Lower Mushrooms",
   "area": "Crateria",
   "subarea": "West",
-  "playable": true,
   "roomAddress": "0x79969",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1, 1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018c22",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2, 2, 2, 1]
+      ]
     },
     {
       "id": 2,
@@ -22,7 +28,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018c16",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1, 1, 1, 2]
+      ]
     }
   ],
   "enemies": [
@@ -59,6 +69,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -70,40 +81,44 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Kago Farm",
       "requires": [
-        {"resetRoom": {
-          "nodes": [1, 2],
-          "mustStayPut": false
-        }},
-        {"refill": ["Energy", "Missile", "Super", "PowerBomb"]}
-      ]
+        {"resetRoom": {"nodes": [1, 2]}},
+        {"cycleFrames": 1200}
+      ],
+      "farmCycleDrops": [{"enemy": "Kago", "count": 2}]
     },
     {
+      "id": 3,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 4,
       "link": [1, 1],
       "name": "G-Mode Setup - Get hit by Geemer",
-      "notable": false,
       "requires": [
         {"ammo": {"type": "Super", "count": 1}}
       ],
       "exitCondition": {
         "leaveWithGModeSetup": {}
-      }
+      },
+      "flashSuitChecked": true
     },
     {
+      "id": 5,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 6,
       "link": [1, 2],
       "name": "Transition with Stored Fall Speed",
       "entranceCondition": {
@@ -120,9 +135,11 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 7,
       "link": [1, 2],
       "name": "Transition with Stored Fall Speed (more speed)",
       "entranceCondition": {
@@ -139,14 +156,17 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 8,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 9,
       "link": [2, 1],
       "name": "Transition with Stored Fall Speed",
       "entranceCondition": {
@@ -163,9 +183,11 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 10,
       "link": [2, 1],
       "name": "Transition with Stored Fall Speed (more speed)",
       "entranceCondition": {
@@ -182,9 +204,57 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 11,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12], [3, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 12,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 13,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 14,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -196,15 +266,19 @@
       }
     },
     {
+      "id": 15,
       "link": [2, 2],
       "name": "G-Mode Setup - Get hit by Geemer",
-      "notable": false,
       "requires": [
         {"ammo": {"type": "Super", "count": 1}}
       ],
       "exitCondition": {
         "leaveWithGModeSetup": {}
-      }
+      },
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 17,
+  "nextNotableId": 1
 }

@@ -19,4 +19,4 @@ def create_big_file(input_dir, output_file, index_file):
         json.dump(index, index_file)
 
 if __name__ == '__main__':  
-    create_big_file('data\patches\mosaic', 'mosaic_patches.bin', 'mosaic_patches.json')
+    create_big_file('data\patches\mosaic', 'mosaic_patches.data', 'mosaic_patches_map.json')

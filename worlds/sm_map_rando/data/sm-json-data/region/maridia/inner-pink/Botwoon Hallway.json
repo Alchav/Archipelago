@@ -5,9 +5,11 @@
   "area": "Maridia",
   "subarea": "Inner",
   "subsubarea": "Pink",
-  "playable": true,
   "roomAddress": "0x7D617",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1, 1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +17,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a768",
-      "doorEnvironments": [{"physics": "water"}]
+      "doorOrientation": "down",
+      "doorEnvironments": [{"physics": "water"}],
+      "mapTileMask": [
+        [2, 2, 1, 1]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +29,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a774",
-      "doorEnvironments": [{"physics": "water"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "water"}],
+      "mapTileMask": [
+        [1, 1, 2, 2]
+      ]
     }
   ],
   "enemies": [
@@ -39,14 +49,7 @@
       "groupName": "Botwoon Hallway Middle Mochtroid",
       "enemyName": "Mochtroid",
       "quantity": 1,
-      "betweenNodes": [1, 2],
-      "dropRequires": [
-        {"or": [
-          "Morph",
-          "Grapple"
-        ]}
-      ],
-      "note": "It's stuck in a prison and you need morph to enter."
+      "betweenNodes": [1, 2]
     },
     {
       "id": "e3",
@@ -61,23 +64,6 @@
       "enemyName": "Puyo",
       "quantity": 2,
       "betweenNodes": [1, 2]
-    }
-  ],
-  "reusableRoomwideNotable": [
-    {
-      "name": "Botwoon Hallway Mochtroid Ice Clip",
-      "note": [
-        "Crouch under the crumble blocks while aiming upward, using both angle buttons then freeze the Mochtroid while it is on Samus.",
-        "Jump onto the Mochtroid by quickly pressing down after jumping, when on it, press up to stand then jump through the ceiling."
-      ]
-    },
-    {
-      "name": "Botwoon Hallway Reverse Shinespark",
-      "note": [
-        "Quickly move next to the first set of speed blocks at the left end of the hole.",
-        "Shoot a Wave shot, then just before it goes off screen, horizontally spark to the left to get through all the shot and speed blocks.",
-        "A spin jump may be used to move horizontally into place much quicker."
-      ]
     }
   ],
   "links": [
@@ -98,11 +84,13 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Mochtroid Ice Moonfall Door Lock Skip",
       "requires": [
         "Gravity",
         "canEnemyStuckMoonfall",
+        "canFreeFallClip",
         "canTrickyUseFrozenEnemies"
       ],
       "bypassesDoorShell": true,
@@ -114,36 +102,111 @@
       ]
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Mochtroid Farm",
       "requires": [
-        {"resetRoom": {
-          "nodes": [1],
-          "mustStayPut": false
-        }},
+        {"resetRoom": {"nodes": [1]}},
         {"or": [
-          "canDodgeWhileShooting",
-          "Wave",
-          "Spazer",
-          "Plasma",
-          "Grapple",
           {"and": [
-            "ScrewAttack",
-            "Gravity"
+            "Gravity",
+            {"or": [
+              {"and": [
+                {"or": [
+                  "Grapple",
+                  "Plasma",
+                  "Wave",
+                  "Spazer",
+                  "ScrewAttack"
+                ]},
+                {"cycleFrames": 160}
+              ]},
+              {"and": [
+                "canPseudoScrew",
+                {"cycleFrames": 210}
+              ]},
+              {"and": [
+                "canDodgeWhileShooting",
+                {"cycleFrames": 300}
+              ]}
+            ]}
+          ]},
+          {"and": [
+            "Grapple",
+            {"cycleFrames": 180}
+          ]},
+          {"and": [
+            {"or": [
+              "Plasma",
+              "Wave",
+              "Spazer"
+            ]},
+            {"cycleFrames": 240}
+          ]},
+          {"and": [
+            "canDodgeWhileShooting",
+            {"cycleFrames": 360}
           ]}
-        ]},
-        {"refill": ["Energy", "Missile", "Super"]}
-      ]
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Mochtroid", "count": 2}]
     },
     {
+      "id": 37,
+      "link": [1, 1],
+      "name": "Puyo Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [1]}},
+        {"or": [
+          {"and": [
+            "Gravity",
+            {"or": [
+              {"and": [
+                {"or": [
+                  "Plasma",
+                  "Wave",
+                  "Spazer"
+                ]},
+                {"cycleFrames": 720}
+              ]},
+              {"and": [
+                "Grapple",
+                {"cycleFrames": 770}
+              ]},
+              {"and": [
+                "ScrewAttack",
+                {"cycleFrames": 770}
+              ]},
+              {"and": [
+                "canDodgeWhileShooting",
+                {"cycleFrames": 1020}
+              ]}
+            ]}
+          ]},
+          {"and": [
+            "HiJump",
+            {"cycleFrames": 1650}
+          ]},
+          {"and": [
+            "canTrickyJump",
+            "h_crouchJumpDownGrab",
+            {"cycleFrames": 2280}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Puyo", "count": 2}]
+    },
+    {
+      "id": 3,
       "link": [1, 1],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     },
     {
+      "id": 4,
       "link": [1, 1],
       "name": "Shinespark",
       "entranceCondition": {
@@ -156,64 +219,161 @@
       "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
     },
     {
+      "id": 5,
       "link": [1, 1],
-      "name": "Leave Charged",
+      "name": "Leave Shinecharged",
       "requires": [
         "canShinechargeMovement",
         "Gravity",
-        {"canShineCharge": {
-          "usedTiles": 33,
-          "openEnd": 2
-        }}
+        "h_shinechargeMaxRunway",
+        {"shineChargeFrames": 70}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 85
-        }
+        "leaveShinecharged": {}
       },
+      "flashSuitChecked": true,
       "note": [
         "Break all of the speed and shot blocks and open the door. Charge a shinespark, ending under the last vertical pipes.",
         "Carefully jump over the next pipe and through the doorway."
       ]
     },
     {
+      "id": 6,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 7,
       "link": [1, 2],
       "name": "Base",
       "requires": [
         "Gravity",
-        "SpeedBooster"
+        "h_getBlueSpeedMaxRunway"
       ]
     },
     {
+      "id": 8,
       "link": [1, 2],
-      "name": "Botwoon Hallway Mochtroid Clip (Left to Right)",
-      "notable": true,
+      "name": "Mochtroid Ice Clip (Left to Right)",
       "requires": [
-        "h_canNavigateUnderwater",
-        "canCeilingClip",
-        "canUseFrozenEnemies"
+        {"notable": "Mochtroid Ice Clip"},
+        "h_navigateUnderwater",
+        "canUseFrozenEnemies",
+        {"disableEquipment": "Gravity"},
+        {"or": [
+          "canTrickyJump",
+          {"and": [
+            "canDodgeWhileShooting",
+            {"enemyDamage": {"enemy": "Mochtroid", "type": "contact", "hits": 1}}
+          ]},
+          {"enemyDamage": {"enemy": "Mochtroid", "type": "contact", "hits": 2}}
+        ]}
       ],
-      "reusableRoomwideNotable": "Botwoon Hallway Mochtroid Ice Clip",
       "note": [
-        "Crouch under the crumble blocks while aiming upward, using both angle buttons then freeze the Mochtroid while it is on Samus.",
-        "Jump onto the Mochtroid by quickly pressing down after jumping, when on it, press up to stand then jump through the ceiling.",
+        "Crouch under the crumble blocks. Holding both angle buttons to aim upward, freeze the Mochtroid while it is on Samus.",
+        "Jump onto the Mochtroid by quickly pressing down after jumping. When on it, press up to stand then jump through the ceiling.",
         "With no jump assists, use a frozen Mochtroid as a platform to get to the ledge above the door."
+      ],
+      "devNote": "The canCeilingClip was left out, because this is easier than all other clips, and can instead be a notable in a lower difficulty."
+    },
+    {
+      "id": 9,
+      "link": [1, 2],
+      "name": "Temporary Blue Chain",
+      "entranceCondition": {
+        "comeInWithTemporaryBlue": {
+          "direction": "right"
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        {"or": [
+          "HiJump",
+          "canTrickySpringBallJump",
+          "canInsaneJump"
+        ]},
+        {"or": [
+          {"and": [
+            "canSpringBallBounce",
+            {"or": [
+              {"ammo": {"type": "PowerBomb", "count": 2}},
+              {"and": [
+                "canLongChainTemporaryBlue",
+                "can4HighMidAirMorph"
+              ]}
+            ]}
+          ]},
+          {"and": [
+            "canLongChainTemporaryBlue",
+            "canStationaryLateralMidAirMorph",
+            "can4HighMidAirMorph",
+            "canBeVeryPatient"
+          ]}
+        ]}
+      ],
+      "note": [
+        "Chain temporary blue across the room in order to break the Speed blocks.",
+        "If available, bouncing using Spring Ball can help speed this up significantly.",
+        "If two Power Bombs are also available, they can be used to break the shot blocks along the way without needing to stop bouncing."
       ]
     },
     {
+      "id": 10,
+      "link": [1, 2],
+      "name": "Temporary Blue Chain (X-Ray Turnaround)",
+      "entranceCondition": {
+        "comeInWithTemporaryBlue": {
+          "direction": "left"
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"or": [
+          "HiJump",
+          "canTrickySpringBallJump",
+          "canInsaneJump"
+        ]},
+        {"or": [
+          {"and": [
+            "canSpringBallBounce",
+            {"or": [
+              {"ammo": {"type": "PowerBomb", "count": 2}},
+              {"and": [
+                "canLongChainTemporaryBlue",
+                "can4HighMidAirMorph"
+              ]}
+            ]}
+          ]},
+          {"and": [
+            "canLongChainTemporaryBlue",
+            "canStationaryLateralMidAirMorph",
+            "can4HighMidAirMorph",
+            "canBeVeryPatient"
+          ]}
+        ]}
+      ],
+      "note": [
+        "Chain temporary blue across the room in order to break the Speed blocks.",
+        "If available, bouncing using Spring Ball can help speed this up significantly.",
+        "If two Power Bombs are also available, they can be used to break the shot blocks along the way without needing to stop bouncing."
+      ]
+    },
+    {
+      "id": 11,
       "link": [1, 2],
       "name": "CF Clip with Bombs (Left to Right)",
       "requires": [
-        "h_canBombIntoCrystalFlashClip",
+        "h_bombIntoCrystalFlashClip",
         "Gravity"
       ],
+      "flashSuitChecked": true,
       "note": [
         "Find the crumble blocks and crystal flash mid-air, just below them.",
         "They are on the far right of the ceiling of the bottom right pathway.",
@@ -222,21 +382,23 @@
       ]
     },
     {
+      "id": 12,
       "link": [1, 2],
       "name": "Suitless CF Clip (Left to Right)",
       "requires": [
-        "h_canJumpIntoCrystalFlashClip",
+        "h_jumpIntoCrystalFlashClip",
         "canSuitlessMaridia",
         {"or": [
           "HiJump",
           "canSpringBallJumpMidAir",
           {"and": [
-            "h_canCrouchJumpDownGrab",
+            "h_crouchJumpDownGrab",
             "canCarefulJump"
           ]},
           "canUseFrozenEnemies"
         ]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Find the crumble blocks and crystal flash mid-air, just below them.",
         "They are on the far right of the ceiling of the bottom right pathway.",
@@ -245,23 +407,49 @@
       ]
     },
     {
+      "id": 33,
+      "link": [1, 2],
+      "name": "Use Flash Suit",
+      "requires": [
+        {"or": [
+          "HiJump",
+          "canSpringBallJumpMidAir",
+          "Gravity",
+          "h_crouchJumpDownGrab",
+          {"and": [
+            "h_underwaterCrouchJumpWithFlashSuit",
+            "canDownGrab"
+          ]}
+        ]},
+        {"useFlashSuit": {}},
+        {"or": [
+          {"shinespark": {"frames": 20, "excessFrames": 11}},
+          {"and": [
+            "Gravity",
+            {"shinespark": {"frames": 18, "excessFrames": 9}}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "id": 13,
       "link": [2, 1],
       "name": "Base",
       "requires": [
         "Gravity",
-        "SpeedBooster"
+        "h_getBlueSpeedMaxRunway"
       ]
     },
     {
+      "id": 14,
       "link": [2, 1],
-      "name": "Botwoon Hallway Reverse Shinespark, Come in Shinecharged",
-      "notable": true,
+      "name": "Reverse Shinespark, Come in Shinecharged",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 120
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 120},
+        {"notable": "Reverse Shinespark"},
         "canSuitlessMaridia",
         "canCarefulJump",
         "Wave",
@@ -269,7 +457,7 @@
         "canHorizontalShinespark",
         {"shinespark": {"frames": 75, "excessFrames": 8}}
       ],
-      "reusableRoomwideNotable": "Botwoon Hallway Reverse Shinespark",
+      "flashSuitChecked": true,
       "note": [
         "Quickly move next to the first set of speed blocks at the left end of the hole.",
         "Shoot a Wave shot, then just before it goes off screen, horizontally spark to the left to get through all the shot and speed blocks.",
@@ -277,9 +465,9 @@
       ]
     },
     {
+      "id": 15,
       "link": [2, 1],
-      "name": "Botwoon Hallway Reverse Shinespark, Come in Shinecharging",
-      "notable": true,
+      "name": "Reverse Shinespark, Come in Shinecharging",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 2,
@@ -287,13 +475,13 @@
         }
       },
       "requires": [
+        {"notable": "Reverse Shinespark"},
         "canWaterShineCharge",
         "Wave",
         "canShinechargeMovementComplex",
         "canHorizontalShinespark",
         {"shinespark": {"frames": 75, "excessFrames": 8}}
       ],
-      "reusableRoomwideNotable": "Botwoon Hallway Reverse Shinespark",
       "note": [
         "Quickly move next to the first set of speed blocks at the left end of the hole.",
         "Shoot a Wave shot, then just before it goes off screen, horizontally spark to the left to get through all the shot and speed blocks.",
@@ -302,37 +490,105 @@
       "devNote": "The number of usable tiles in room is dependent upon the length of the shinecharge; 2 unusable tiles seems to be reasonable."
     },
     {
+      "id": 16,
       "link": [2, 1],
-      "name": "Botwoon Hallway Mochtroid Clip (Right to Left)",
-      "notable": true,
+      "name": "Mochtroid Ice Clip (With Jump Assist)",
       "requires": [
-        "h_canNavigateUnderwater",
-        "canCeilingClip",
+        {"notable": "Mochtroid Ice Clip"},
+        "h_navigateUnderwater",
         "canUseFrozenEnemies",
         {"or": [
-          {"and": [
-            "h_canCrouchJumpDownGrab",
-            "canTrickyJump"
-          ]},
           "HiJump",
           "Gravity",
-          "canSpringBallJumpMidAir"
+          "canTrickySpringBallJump"
+        ]},
+        {"disableEquipment": "Gravity"},
+        {"or": [
+          "canTrickyJump",
+          {"and": [
+            "canDodgeWhileShooting",
+            {"enemyDamage": {"enemy": "Mochtroid", "type": "contact", "hits": 1}}
+          ]},
+          {"enemyDamage": {"enemy": "Mochtroid", "type": "contact", "hits": 2}}
         ]}
       ],
-      "reusableRoomwideNotable": "Botwoon Hallway Mochtroid Ice Clip",
       "note": [
-        "Crouch under the crumble blocks while aiming upward, using both angle buttons then freeze the Mochtroid while it is on Samus.",
-        "Jump onto the Mochtroid by quickly pressing down after jumping, when on it, press up to stand then jump through the ceiling.",
-        "With no jump assists, use a frozen Mochtroid as a platform to get to the ledge above the door."
+        "Crouch under the crumble blocks. Holding both angle buttons to aim upward, freeze the Mochtroid while it is on Samus.",
+        "Jump onto the Mochtroid by quickly pressing down after jumping. When on it, press up to stand then jump through the ceiling.",
+        "Use the middle section of pipes as a platform to reach the top level, above the Mochtroid."
+      ],
+      "devNote": "The canCeilingClip was left out, because this is easier than all other clips, and can instead be a notable in a lower difficulty."
+    },
+    {
+      "id": 36,
+      "link": [2, 1],
+      "name": "Mochtroid Ice Clip, Crouch Jump (Morph Turnaround Setup)",
+      "requires": [
+        {"notable": "Mochtroid Ice Clip"},
+        "canCeilingClip",
+        "canUseFrozenEnemies",
+        "canMorphTurnaround",
+        {"or": [
+          "h_crouchJumpDownGrab",
+          {"and": [
+            "h_underwaterCrouchJumpWithFlashSuit",
+            "canDownGrab"
+          ]}
+        ]},
+        {"or": [
+          "canTrickyJump",
+          {"enemyDamage": {"enemy": "Mochtroid", "type": "contact", "hits": 1}}
+        ]}
+      ],
+      "note": [
+        "Use the middle section of pipes as a platform to reach the top level, above the Mochtroid.",
+        "A crouch jump and down grab is enough if the jump begins on the rightmost 75% of the rightmost pixel.",
+        "Getting into this position can be made easier with a morph turnaround:",
+        "Spin jump out, turn left then quickly break spin (i.e. with a shot or angle button), morph and press against the upper left wall, then briefly tap left on the descent to land on the edge.",
+        "Then perform a morph turnaround by pressing right for a very short time to face right without moving.",
+        "Unmorph and jump to the right by pressing right immediately after jumping (on the same frame or up to 5 frames later), and down grab on the upper right ledge.",
+        "With the Mochtroid, crouch under the crumble blocks to the left. Holding both angle buttons to aim upward, freeze the Mochtroid while it is on Samus.",
+        "Jump onto the Mochtroid by quickly pressing down after jumping. When on it, press up to stand then jump through the ceiling."
       ]
     },
     {
+      "id": 34,
+      "link": [2, 1],
+      "name": "Mochtroid Ice Clip, Crouch Jump (Morphless)",
+      "requires": [
+        {"notable": "Mochtroid Ice Clip"},
+        "canCeilingClip",
+        "canUseFrozenEnemies",
+        "canTrickyJump",
+        {"or": [
+          "h_crouchJumpDownGrab",
+          {"and": [
+            "h_underwaterCrouchJumpWithFlashSuit",
+            "canDownGrab"
+          ]}
+        ]}
+      ],
+      "note": [
+        "Use the middle section of pipes as a platform to reach the top level, above the Mochtroid.",
+        "A crouch jump and down grab is enough if the jump begins on the rightmost 75% of the rightmost pixel.",
+        "Getting into this position can be done by moonwalking to a certain pixel and then turning around to the right to end on the right-most pixel.",
+        "With random subpixels, Samus will fall off 25% of the time when turning around to the right.",
+        "If Samus starts on the correct pixel and does not fall off when turning around, then she is guaranteed to be on subpixels that will work for the jump.",
+        "Crouch jump, pressing right immediately after jumping (on the same frame or up to 5 frames later), then down grab on the upper right ledge.",
+        "Alternatively, moonwalking onto the correct pixel one frame at a time, stopping as soon as it is reached, can guarantee that Samus will not fall when turning around.",
+        "With the Mochtroid, crouch under the crumble blocks. Holding both angle buttons to aim upward, freeze the Mochtroid while it is on Samus.",
+        "Jump onto the Mochtroid by quickly pressing down after jumping. When on it, press up to stand then jump through the ceiling."
+      ]
+    },
+    {
+      "id": 17,
       "link": [2, 1],
       "name": "CF Clip with Bombs (Right to Left)",
       "requires": [
-        "h_canBombIntoCrystalFlashClip",
+        "h_bombIntoCrystalFlashClip",
         "Gravity"
       ],
+      "flashSuitChecked": true,
       "note": [
         "Find the crumble blocks and crystal flash mid-air, just below them.",
         "They are on the far left of the ceiling of the middle left pathway.",
@@ -341,14 +597,15 @@
       ]
     },
     {
+      "id": 18,
       "link": [2, 1],
       "name": "Suitless CF Clip (Right to Left)",
       "requires": [
-        "h_canJumpIntoCrystalFlashClip",
+        "h_jumpIntoCrystalFlashClip",
         "canSuitlessMaridia",
         {"or": [
           {"and": [
-            "h_canCrouchJumpDownGrab",
+            "h_crouchJumpDownGrab",
             "canTrickyJump"
           ]},
           "HiJump",
@@ -356,6 +613,7 @@
           "canSpringBallJumpMidAir"
         ]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Find the crumble blocks and crystal flash mid-air, just below them.",
         "They are on the far left of the ceiling of the middle left pathway.",
@@ -364,16 +622,97 @@
       ]
     },
     {
+      "id": 19,
+      "link": [2, 1],
+      "name": "Temporary Blue Chain",
+      "entranceCondition": {
+        "comeInWithTemporaryBlue": {}
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canStationaryLateralMidAirMorph",
+        {"or": [
+          {"and": [
+            "canSpringBallBounce",
+            {"or": [
+              {"ammo": {"type": "PowerBomb", "count": 2}},
+              {"and": [
+                "canLongChainTemporaryBlue",
+                "can4HighMidAirMorph"
+              ]}
+            ]}
+          ]},
+          {"and": [
+            "canLongChainTemporaryBlue",
+            "can4HighMidAirMorph",
+            "canBeVeryPatient"
+          ]}
+        ]}
+      ],
+      "note": [
+        "Chain temporary blue across the room in order to break the Speed blocks.",
+        "If available, bouncing using Spring Ball can help speed this up significantly.",
+        "If two Power Bombs are also available, they can be used to break the shot blocks along the way without needing to stop bouncing;",
+        "the first Power Bomb must be placed at a specific time, about 1 tile to the left of the first set of Speed blocks;",
+        "the second Power Bomb should be placed as early as possible after coming off cooldown."
+      ]
+    },
+    {
+      "id": 20,
+      "link": [2, 1],
+      "name": "Temporary Blue Chain, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 1,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canLongChainTemporaryBlue",
+        "canStationaryLateralMidAirMorph",
+        "canSpringBallBounce",
+        "canSpringBallJumpMidAir",
+        "can4HighMidAirMorph"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "left"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Chain temporary blue across the room in order to break the Speed blocks, using Spring Ball to speed up the process.",
+        "If two Power Bombs are also available, they can be used to break the shot blocks along the way without needing to stop bouncing;",
+        "the first Power Bomb must be placed at a specific time, about 1 tile to the left of the first set of Speed blocks;",
+        "the second Power Bomb should be placed as early as possible after coming off cooldown."
+      ],
+      "devNote": [
+        "The slower version of this strat (with HiJump instead of Spring Ball) is not included;",
+        "it could require too much patience, considering that the chain continues into the next room."
+      ]
+    },
+    {
+      "id": 21,
       "link": [2, 1],
       "name": "Grapple Teleport",
       "entranceCondition": {
         "comeInWithGrappleTeleport": {
-          "blockPositions": [[5, 3], [7, 2]]
+          "blockPositions": [[5, 3], [7, 2], [3, 12], [3, 13]]
         }
       },
       "requires": []
     },
     {
+      "id": 35,
+      "link": [2, 1],
+      "name": "Use Flash Suit",
+      "requires": [
+        {"useFlashSuit": {}},
+        {"shinespark": {"frames": 1, "excessFrames": 1}}
+      ]
+    },
+    {
+      "id": 22,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -385,10 +724,11 @@
       }
     },
     {
+      "id": 23,
       "link": [2, 2],
       "name": "Leave With Runway - Frozen Mochtroid",
       "requires": [
-        "h_canFrozenEnemyRunway"
+        "h_frozenEnemyRunway"
       ],
       "exitCondition": {
         "leaveWithRunway": {
@@ -400,38 +740,220 @@
       "devNote": "This just assumes 1 extra runway tile, although it is possible to add 1.5 with a decent lure."
     },
     {
+      "id": 24,
       "link": [2, 2],
-      "name": "Leave Charged",
+      "name": "Leave Shinecharged",
       "requires": [
         "canShinechargeMovement",
         "Gravity",
-        {"canShineCharge": {
-          "usedTiles": 33,
-          "openEnd": 2
-        }}
+        "h_shinechargeMaxRunway",
+        {"shineChargeFrames": 55}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 120
+        "leaveShinecharged": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 25,
+      "link": [2, 2],
+      "name": "Leave Spinning (Short Runway Across Gap, Space Jump)",
+      "requires": [
+        "Gravity",
+        "SpaceJump"
+      ],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 6,
+            "openEnd": 2
+          }
         }
       }
     },
     {
+      "id": 26,
       "link": [2, 2],
-      "name": "Crystal Flash",
+      "name": "Leave Spinning (Long Runway Below, Space Jump)",
       "requires": [
-        "h_canCrystalFlash"
+        "Gravity",
+        "SpaceJump",
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 42,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 27,
+      "link": [2, 2],
+      "name": "Leave With Mockball (Short Runway Across Gap)",
+      "requires": [
+        "Gravity"
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 6,
+            "openEnd": 2
+          },
+          "landingRunway": {
+            "length": 5,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 28,
+      "link": [2, 2],
+      "name": "Leave With Mockball (Long Runway Below)",
+      "requires": [
+        "Gravity",
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 42,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 4,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 29,
+      "link": [2, 2],
+      "name": "Leave Space Jumping (Short Runway Across Gap)",
+      "requires": [
+        "Gravity"
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 6,
+            "openEnd": 2
+          }
+        }
+      }
+    },
+    {
+      "id": 30,
+      "link": [2, 2],
+      "name": "Leave Space Jumping (Long Runway Below)",
+      "requires": [
+        "Gravity",
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 42,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 38,
+      "link": [2, 2],
+      "name": "Mochtroid and Puyo Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [2]}},
+        {"or": [
+          {"and": [
+            "Gravity",
+            {"or": [
+              {"and": [
+                "Plasma",
+                {"cycleFrames": 720}
+              ]},
+              {"and": [
+                "Wave",
+                {"cycleFrames": 760}
+              ]},
+              {"and": [
+                "Spazer",
+                {"cycleFrames": 785}
+              ]},
+              {"and": [
+                "Grapple",
+                {"cycleFrames": 800}
+              ]},
+              {"and": [
+                "ScrewAttack",
+                {"cycleFrames": 820}
+              ]},
+              {"and": [
+                "canDodgeWhileShooting",
+                {"cycleFrames": 1060}
+              ]}
+            ]},
+            {"or": [
+              "canWalljump",
+              "h_crouchJumpDownGrab",
+              {"cycleFrames": 150}
+            ]}
+          ]},
+          {"and": [
+            {"or": [
+              {"and": [
+                {"or": [
+                  "Plasma",
+                  "Wave",
+                  "Spazer",
+                  "Grapple"
+                ]},
+                {"cycleFrames": 1710}
+              ]},
+              {"and": [
+                "canDodgeWhileShooting",
+                {"cycleFrames": 2010}
+              ]}
+            ]},
+            {"or": [
+              "HiJump",
+              {"and": [
+                "canTrickyJump",
+                "h_crouchJumpDownGrab",
+                {"cycleFrames": 315}
+              ]}
+            ]}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [
+        {"enemy": "Mochtroid", "count": 1},
+        {"enemy": "Puyo", "count": 2}
       ]
     },
     {
+      "id": 31,
+      "link": [2, 2],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 32,
       "link": [2, 2],
       "name": "G-Mode Setup - Get Hit By Mochtroid",
-      "notable": false,
       "requires": [
-        "h_canNavigateUnderwater",
+        "h_navigateUnderwater",
         {"or": [
           {"and": [
-            "h_canCrouchJumpDownGrab",
+            "h_crouchJumpDownGrab",
             "canTrickyJump"
           ]},
           "HiJump",
@@ -443,7 +965,29 @@
         "leaveWithGModeSetup": {
           "knockback": false
         }
-      }
+      },
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [
+    {
+      "id": 1,
+      "name": "Mochtroid Ice Clip",
+      "note": [
+        "Crouch under the crumble blocks. Holding both angle buttons to aim upward, freeze the Mochtroid while it is on Samus.",
+        "Jump onto the Mochtroid by quickly pressing down after jumping. When on it, press up to stand then jump through the ceiling."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Reverse Shinespark",
+      "note": [
+        "Quickly move next to the first set of speed blocks at the left end of the hole.",
+        "Shoot a Wave shot, then just before it goes off screen, horizontally spark to the left to get through all the shot and speed blocks.",
+        "A spin jump may be used to move horizontally into place much quicker."
+      ]
+    }
+  ],
+  "nextStratId": 39,
+  "nextNotableId": 3
 }

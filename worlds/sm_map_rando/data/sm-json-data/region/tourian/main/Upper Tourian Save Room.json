@@ -4,9 +4,11 @@
   "name": "Upper Tourian Save Room",
   "area": "Tourian",
   "subarea": "Main",
-  "playable": true,
   "roomAddress": "0x7DF1B",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,14 +16,21 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001ab40",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
       "name": "Save Station",
-      "utility": ["save"],
       "nodeType": "utility",
-      "nodeSubType": "save"
+      "nodeSubType": "save",
+      "utility": ["save"],
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [],
@@ -42,6 +51,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -53,21 +63,28 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 4,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 5,
+  "nextNotableId": 1
 }

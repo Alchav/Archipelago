@@ -5,9 +5,11 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "Crocomire",
-  "playable": true,
   "roomAddress": "0x7AADE",
   "roomEnvironments": [{"heated": true}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +17,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001946e",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +29,10 @@
       "nodeType": "item",
       "nodeSubType": "visible",
       "nodeItem": "PowerBomb",
-      "nodeAddress": "0x78C04"
+      "nodeAddress": "0x78C04",
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [],
@@ -44,6 +53,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -55,13 +65,34 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canHeatedCrystalFlash"
-      ]
+        "h_heatedCrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 6,
+      "link": [1, 1],
+      "name": "G-Mode, Remote Acquire Item",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "canComplexGMode",
+        "h_heatedDirectGModeLeaveSameDoor"
+      ],
+      "collectsItems": [2],
+      "flashSuitChecked": true,
+      "devNote": "An indirect option could be added to just get to the item without heat damage, but that would require very unusual room layouts and isn't worth the effort."
+    },
+    {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": [
@@ -69,6 +100,7 @@
       ]
     },
     {
+      "id": 4,
       "link": [2, 1],
       "name": "Base",
       "requires": [
@@ -76,6 +108,7 @@
       ]
     },
     {
+      "id": 5,
       "link": [2, 1],
       "name": "Leave with Runway",
       "requires": [
@@ -88,10 +121,19 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 7,
+  "nextNotableId": 1
 }

@@ -5,9 +5,11 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "East",
-  "playable": true,
   "roomAddress": "0x7AD1B",
   "roomEnvironments": [{"heated": true}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +17,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00195be",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +29,10 @@
       "nodeType": "item",
       "nodeSubType": "chozo",
       "nodeItem": "SpeedBooster",
-      "nodeAddress": "0x78C82"
+      "nodeAddress": "0x78C82",
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [],
@@ -44,6 +53,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -55,32 +65,44 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canHeatedCrystalFlash"
-      ]
+        "h_heatedCrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": [
         {"heatFrames": 80}
-      ]
+      ],
+      "devNote": "There is no G-Mode strat added here, as it would require immobile and indirect to have enough energy and would only save a few frames."
     },
     {
+      "id": 4,
       "link": [2, 1],
       "name": "Base",
       "requires": [
         {"heatFrames": 80}
       ],
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 20}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 20}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 50}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 50}]
+        }
       ]
     },
     {
+      "id": 5,
       "link": [2, 1],
       "name": "Leave with Runway",
       "requires": [
@@ -93,10 +115,19 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 30}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 30}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 6,
+  "nextNotableId": 1
 }

@@ -5,8 +5,20 @@
   "area": "Maridia",
   "subarea": "Inner",
   "subsubarea": "Pink",
-  "playable": false,
   "roomAddress": "0x7D408",
+  "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1],
+    [1],
+    [1],
+    [1],
+    [1],
+    [1],
+    [1],
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +26,24 @@
       "nodeType": "door",
       "nodeSubType": "vertical",
       "nodeAddress": "0x001a60c",
-      "spawnAt": 2
+      "doorOrientation": "up",
+      "doorEnvironments": [{"physics": "air"}],
+      "useImplicitLeaveNormally": false,
+      "useImplicitComeInNormally": false,
+      "useImplicitCarryGModeBackThrough": false,
+      "useImplicitCarryGModeMorphBackThrough": false,
+      "mapTileMask": [
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -22,23 +51,82 @@
       "nodeType": "door",
       "nodeSubType": "vertical",
       "nodeAddress": "0x001a600",
-      "spawnAt": 1
+      "doorOrientation": "down",
+      "doorEnvironments": [{"physics": "air"}],
+      "useImplicitLeaveNormally": false,
+      "useImplicitComeInNormally": false,
+      "useImplicitCarryGModeBackThrough": false,
+      "useImplicitCarryGModeMorphBackThrough": false,
+      "mapTileMask": [
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2],
+        [2]
+      ]
     }
   ],
   "links": [
     {
       "from": 1,
-      "to": []
+      "to": [
+        {"id": 2}
+      ]
     },
     {
       "from": 2,
-      "to": []
+      "to": [
+        {"id": 1}
+      ]
     }
   ],
+  "strats": [
+    {
+      "id": 1,
+      "link": [1, 2],
+      "name": "Base",
+      "entranceCondition": {
+        "comeInNormally": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": ["never"]}],
+      "flashSuitChecked": true,
+      "devNote": "These doors can't be locked and 'comesThroughToilet' doesn't make sense unless this room was chained together."
+    },
+    {
+      "id": 2,
+      "link": [2, 1],
+      "name": "Base",
+      "entranceCondition": {
+        "comeInNormally": {},
+        "comesThroughToilet": "any"
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": ["never"]}],
+      "flashSuitChecked": true,
+      "devNote": "These doors can't be locked and 'comesThroughToilet' doesn't make sense unless this room was chained together."
+    }
+  ],
+  "notables": [],
+  "nextStratId": 3,
+  "nextNotableId": 1,
   "note": "This is the vertical pipe that connects Plasma Spark Room and Oasis. Visually it looks like a portion of Aqueduct and Botwoon Hallway (and surroundings).",
   "devNote": [
-    "There are no links because Samus can't move freely between the nodes.",
-    "Traversal through the room happens via each node's spawnAt property, placing Samus at the other end of the room with no option but to leave."
-  ],
-  "strats": []
+    "Samus can't move freely between the nodes.",
+    "Traversal through the room happens by placing Samus at the other end of the room with no option but to leave.",
+    "The Toilet doesn't work normally with G-mode. On entry, Reserves are triggered, but Samus cannot use X-Ray.",
+    "Weird things happen if Reserves are still filling when Samus reaches the end of the Toilet ride."
+  ]
 }

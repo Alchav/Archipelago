@@ -5,9 +5,13 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "East",
-  "playable": true,
   "roomAddress": "0x7AEDF",
   "roomEnvironments": [{"heated": true}],
+  "mapTileMask": [
+    [1],
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +19,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00196ae",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "up",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2],
+        [1],
+        [1]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +33,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00196c6",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1],
+        [2],
+        [1]
+      ]
     },
     {
       "id": 3,
@@ -31,7 +47,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00196ba",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1],
+        [1],
+        [2]
+      ]
     }
   ],
   "enemies": [],
@@ -40,7 +62,8 @@
       "from": 1,
       "to": [
         {"id": 1},
-        {"id": 2}
+        {"id": 2},
+        {"id": 3}
       ]
     },
     {
@@ -62,16 +85,19 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
         {"heatFrames": 10},
-        "h_canHeatedCrystalFlash",
+        "h_heatedCrystalFlash",
         {"heatFrames": 40}
       ],
+      "flashSuitChecked": true,
       "devNote": "The extra heat frames are for moving between the door and the platform."
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Leave With Door Frame Below",
       "requires": [
@@ -84,6 +110,7 @@
       }
     },
     {
+      "id": 3,
       "link": [1, 1],
       "name": "Leave With Platform Below",
       "requires": [
@@ -98,16 +125,70 @@
       }
     },
     {
+      "id": 4,
+      "link": [1, 1],
+      "name": "Carry G-Mode Back Up",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": false
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": false
+        }
+      },
+      "bypassesDoorShell": "free",
+      "flashSuitChecked": true
+    },
+    {
+      "id": 5,
+      "link": [1, 1],
+      "name": "Carry G-Mode Morph Back Up",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": true
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        {"or": [
+          "h_artificialMorphIBJ",
+          "h_artificialMorphSpringBallBombJump",
+          {"and": [
+            "HiJump",
+            "h_artificialMorphSpringBall"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithGMode": {
+          "morphed": true
+        }
+      },
+      "bypassesDoorShell": "free",
+      "flashSuitChecked": true
+    },
+    {
+      "id": 6,
       "link": [1, 2],
       "name": "Base",
       "requires": [
         {"heatFrames": 120}
       ],
       "unlocksDoors": [
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 7,
       "link": [1, 2],
       "name": "Leave with Runway",
       "requires": [
@@ -120,44 +201,49 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 8,
       "link": [1, 2],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 115
-        },
+        "comeInShinecharged": {},
         "comesThroughToilet": "any"
       },
       "requires": [
+        {"shineChargeFrames": 115},
         "canShinechargeMovementComplex",
         {"heatFrames": 115}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 9,
       "link": [1, 2],
       "name": "Enter Shinecharged and Leave Shinesparking",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 100
-        },
+        "comeInShinecharged": {},
         "comesThroughToilet": "any"
       },
       "requires": [
+        {"shineChargeFrames": 100},
         "canShinechargeMovementComplex",
         {"heatFrames": 120},
         {"shinespark": {"frames": 5}}
@@ -168,9 +254,43 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 52,
+      "link": [1, 2],
+      "name": "G-Mode",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "h_heatedGModeOffCameraDoor"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 53,
+      "link": [1, 3],
+      "name": "G-Mode",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        },
+        "comesThroughToilet": "any"
+      },
+      "requires": [
+        "h_heatedGModeOffCameraDoor"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 10,
       "link": [2, 1],
       "name": "Base",
       "requires": [
@@ -178,6 +298,7 @@
       ]
     },
     {
+      "id": 11,
       "link": [2, 1],
       "name": "HiJump",
       "requires": [
@@ -186,6 +307,7 @@
       ]
     },
     {
+      "id": 12,
       "link": [2, 1],
       "name": "Leave With Door Frame Below",
       "requires": [
@@ -197,12 +319,19 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
       ]
     },
     {
+      "id": 13,
       "link": [2, 1],
       "name": "Leave With Platform Below",
       "requires": [
@@ -216,12 +345,19 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
       ]
     },
     {
+      "id": 14,
       "link": [2, 1],
       "name": "Leave With Platform Below (HiJump)",
       "requires": [
@@ -236,35 +372,41 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
       ]
     },
     {
+      "id": 15,
       "link": [2, 1],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 140
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 140},
         "canShinechargeMovementComplex",
         "HiJump",
         {"heatFrames": 140}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 16,
       "link": [2, 1],
       "name": "Leave Shinecharged",
       "entranceCondition": {
@@ -276,19 +418,20 @@
       "requires": [
         "canShinechargeMovementComplex",
         "HiJump",
-        {"heatFrames": 150}
+        {"heatFrames": 150},
+        {"shineChargeFrames": 145}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 35
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 17,
       "link": [2, 1],
       "name": "Leave Shinesparking",
       "entranceCondition": {
@@ -311,6 +454,55 @@
       ]
     },
     {
+      "id": 46,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"heatFrames": 360},
+        {"or": [
+          "canXRayCancelShinecharge",
+          {"heatFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "any"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super", "powerbomb"], "requires": []},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "link": [2, 1],
+      "name": "G-Mode",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "h_heatedGMode",
+        {"heatFrames": 40}
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 18,
       "link": [2, 1],
       "name": "Grapple Teleport (from Red Brinstar Firefleas)",
       "entranceCondition": {
@@ -331,6 +523,7 @@
       ]
     },
     {
+      "id": 19,
       "link": [2, 1],
       "name": "Grapple Teleport (from Moat)",
       "entranceCondition": {
@@ -343,6 +536,7 @@
       ]
     },
     {
+      "id": 20,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -354,23 +548,30 @@
       }
     },
     {
+      "id": 21,
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
-        "h_canHeatedCrystalFlash"
-      ]
+        "h_heatedCrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 22,
       "link": [2, 3],
       "name": "Base",
       "requires": [
         {"heatFrames": 120}
       ],
       "unlocksDoors": [
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 23,
       "link": [2, 3],
       "name": "Leave with Runway",
       "requires": [
@@ -383,33 +584,39 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 24,
       "link": [2, 3],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 125
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 125},
         {"heatFrames": 125}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 25,
       "link": [2, 3],
       "name": "Come In Shinecharging, Leave Shinecharged",
       "entranceCondition": {
@@ -419,27 +626,27 @@
         }
       },
       "requires": [
-        {"heatFrames": 115}
+        {"heatFrames": 115},
+        {"shineChargeFrames": 105}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 75
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 26,
       "link": [2, 3],
       "name": "Come In Shinecharged, Leave Shinesparking",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 110
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 110},
         {"shinespark": {"frames": 5}},
         {"heatFrames": 120}
       ],
@@ -449,9 +656,136 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 47,
+      "link": [2, 3],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"heatFrames": 290},
+        {"or": [
+          "canXRayCancelShinecharge",
+          {"heatFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super", "powerbomb"], "requires": []},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        }
       ]
     },
     {
+      "id": 55,
+      "link": [2, 3],
+      "name": "G-Mode",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "h_heatedGModeOpenDifferentDoor"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 48,
+      "link": [3, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue (Short Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 8,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canLongChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"heatFrames": 590},
+        {"or": [
+          "canXRayCancelShinecharge",
+          {"heatFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "any"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super", "powerbomb"], "requires": []},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "link": [3, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue (Full Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 11,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canLongChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"heatFrames": 710},
+        {"or": [
+          "canXRayCancelShinecharge",
+          {"heatFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "any"
+        }
+      },
+      "unlocksDoors": [
+        {"types": ["super", "powerbomb"], "requires": []},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "link": [3, 1],
+      "name": "G-Mode",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "h_heatedGMode",
+        {"heatFrames": 40}
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 27,
       "link": [3, 1],
       "name": "Grapple Teleport (from Red Brinstar Firefleas)",
       "entranceCondition": {
@@ -469,6 +803,7 @@
       ]
     },
     {
+      "id": 28,
       "link": [3, 1],
       "name": "Grapple Teleport (from Moat)",
       "entranceCondition": {
@@ -481,16 +816,21 @@
       ]
     },
     {
+      "id": 29,
       "link": [3, 2],
       "name": "Base",
       "requires": [
         {"heatFrames": 145}
       ],
       "unlocksDoors": [
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 30,
       "link": [3, 2],
       "name": "HiJump",
       "requires": [
@@ -498,10 +838,14 @@
         {"heatFrames": 120}
       ],
       "unlocksDoors": [
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 31,
       "link": [3, 2],
       "name": "Very Deep Stuck X-Ray Climb",
       "entranceCondition": {
@@ -511,16 +855,19 @@
         }
       },
       "requires": [
+        "canComplexGMode",
         "h_heatProof",
         "canXRayClimb"
       ],
       "bypassesDoorShell": true,
+      "flashSuitChecked": true,
       "note": [
         "Enter with G-mode direct, back up to between 1 and 6 pixels from the door transition, and activate X-ray to get very deep stuck in the door.",
         "Climb up 1 screen, and perform a turnaround buffered spin-jump away from the door to trigger the transition, bypassing any lock on the door."
       ]
     },
     {
+      "id": 32,
       "link": [3, 2],
       "name": "Leave with Runway",
       "requires": [
@@ -533,65 +880,69 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 60}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 33,
       "link": [3, 2],
       "name": "Carry Shinecharge (HiJump)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 115
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 115},
         "HiJump",
         "canShinechargeMovementComplex",
         {"heatFrames": 115}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 34,
       "link": [3, 2],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 140
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 140},
         "canShinechargeMovementComplex",
         {"heatFrames": 140}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 35,
       "link": [3, 2],
       "name": "Come in Shinecharged, Leave With Spark (HiJump)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 90
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 90},
         "HiJump",
         "canShinechargeMovementComplex",
         {"heatFrames": 125},
@@ -603,17 +954,18 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 36,
       "link": [3, 2],
       "name": "Come in Shinecharged, Leave With Spark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 125
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 125},
         "HiJump",
         "canShinechargeMovementComplex",
         {"heatFrames": 155},
@@ -625,9 +977,11 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 37,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave Shinecharged (Full Runway, HiJump)",
       "entranceCondition": {
@@ -638,19 +992,20 @@
       },
       "requires": [
         "canShinechargeMovementComplex",
-        {"heatFrames": 175}
+        {"heatFrames": 175},
+        {"shineChargeFrames": 140}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 40
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
-    },    
+      ],
+      "flashSuitChecked": true
+    },
     {
+      "id": 38,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave Shinecharged (Medium Runway, HiJump)",
       "entranceCondition": {
@@ -661,19 +1016,20 @@
       },
       "requires": [
         "canShinechargeMovementComplex",
-        {"heatFrames": 140}
+        {"heatFrames": 140},
+        {"shineChargeFrames": 120}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 60
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
-    },    
+      ],
+      "flashSuitChecked": true
+    },
     {
+      "id": 39,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave Shinecharged (Short Runway, HiJump)",
       "entranceCondition": {
@@ -684,19 +1040,20 @@
       },
       "requires": [
         "canShinechargeMovementComplex",
-        {"heatFrames": 115}
+        {"heatFrames": 115},
+        {"shineChargeFrames": 110}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 70
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
-    },    
+      ],
+      "flashSuitChecked": true
+    },
     {
+      "id": 40,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave Shinecharged (Full Runway)",
       "entranceCondition": {
@@ -707,19 +1064,20 @@
       },
       "requires": [
         "canShinechargeMovementTricky",
-        {"heatFrames": 205}
+        {"heatFrames": 205},
+        {"shineChargeFrames": 170}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 10
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 41,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave Shinecharged (Medium Runway)",
       "entranceCondition": {
@@ -730,19 +1088,20 @@
       },
       "requires": [
         "canShinechargeMovementComplex",
-        {"heatFrames": 165}
+        {"heatFrames": 165},
+        {"shineChargeFrames": 145}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 35
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 42,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave Shinecharged (Short Runway)",
       "entranceCondition": {
@@ -753,19 +1112,20 @@
       },
       "requires": [
         "canShinechargeMovementComplex",
-        {"heatFrames": 140}
+        {"heatFrames": 140},
+        {"shineChargeFrames": 135}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 45
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 43,
       "link": [3, 2],
       "name": "Come in Shinecharging, Leave With Spark (Full Runway)",
       "entranceCondition": {
@@ -792,6 +1152,82 @@
       ]
     },
     {
+      "id": 50,
+      "link": [3, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue (Short Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 8,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"heatFrames": 390},
+        {"or": [
+          "canXRayCancelShinecharge",
+          {"heatFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super", "powerbomb"], "requires": []},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "link": [3, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue (Full Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 11,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canXRayTurnaround",
+        {"heatFrames": 490},
+        {"or": [
+          "canXRayCancelShinecharge",
+          {"heatFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super", "powerbomb"], "requires": []},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "link": [3, 2],
+      "name": "G-Mode",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "h_heatedGModeOpenDifferentDoor"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 44,
       "link": [3, 3],
       "name": "Leave with Runway",
       "requires": [],
@@ -803,11 +1239,16 @@
       }
     },
     {
+      "id": 45,
       "link": [3, 3],
       "name": "Crystal Flash",
       "requires": [
-        "h_canHeatedCrystalFlash"
-      ]
+        "h_heatedCrystalFlash"
+      ],
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 58,
+  "nextNotableId": 1
 }

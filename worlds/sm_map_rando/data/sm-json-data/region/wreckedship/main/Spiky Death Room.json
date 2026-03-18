@@ -4,9 +4,11 @@
   "name": "Spiky Death Room",
   "area": "Wrecked Ship",
   "subarea": "Main",
-  "playable": true,
   "roomAddress": "0x7CB8B",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a24c",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2, 1]
+      ]
     },
     {
       "id": 2,
@@ -22,10 +28,22 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a258",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1, 2]
+      ]
     }
   ],
-  "enemies": [],
+  "enemies": [
+    {
+      "id": "e1",
+      "groupName": "Spiky Death Room Kzans",
+      "enemyName": "Kzan",
+      "quantity": 5,
+      "betweenNodes": [1, 2]
+    }
+  ],
   "links": [
     {
       "from": 1,
@@ -44,6 +62,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -55,44 +74,208 @@
       }
     },
     {
+      "id": 41,
+      "link": [1, 1],
+      "name": "Leave With Side Platform",
+      "requires": [
+        {"or": [
+          {"and": [
+            "Gravity",
+            "canTrickyDodgeEnemies"
+          ]},
+          {"and": [
+            {"not": "f_DefeatedPhantoon"},
+            "canRiskPermanentLossOfAccess"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSidePlatform": {
+          "height": 3,
+          "runway": {
+            "length": 4,
+            "openEnd": 0
+          },
+          "obstruction": [1, 0]
+        }
+      },
+      "devNote": ["Max extra run speed $0.F."]
+    },
+    {
+      "id": 2,
       "link": [1, 1],
       "name": "Leave Shinecharged, X-Mode",
       "requires": [
         "f_DefeatedPhantoon",
-        "h_canXMode",
+        "canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
         "Gravity",
-        {"canShineCharge": {
-          "usedTiles": 33,
-          "openEnd": 2
-        }},
-        "canShinechargeMovement"
+        "h_shinechargeMaxRunway",
+        "canShinechargeMovement",
+        {"shineChargeFrames": 100}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 80
-        }
+        "leaveShinecharged": {}
       },
+      "flashSuitChecked": true,
       "note": "Jumping from the door and bouncing on the platform enemy works pretty well.",
       "devNote": "Two spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
     },
     {
+      "id": 3,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 4,
+      "link": [1, 1],
+      "name": "Leave Spinning (Power Off, Space Jump)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess",
+        "SpaceJump"
+      ],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "link": [1, 1],
+      "name": "Leave With Mockball (Power Off)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "link": [1, 1],
+      "name": "Leave With Spring Ball Bounce (Power Off)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "link": [1, 1],
+      "name": "Leave Space Jumping (Power Off)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          }
+        }
+      }
+    },
+    {
+      "id": 13,
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          {"and": [
+            {"spikeHits": 3},
+            {"enemyDamage": {"enemy": "Kzan", "type": "contact", "hits": 1}}
+          ]},
+          {"and": [
+            "h_navigateUnderwater",
+            "canCarefulJump",
+            {"spikeHits": 2},
+            {"or": [
+              "Gravity",
+              "Morph",
+              "SpaceJump",
+              {"spikeHits": 1}
+            ]}
+          ]},
+          {"and": [
+            "h_navigateUnderwater",
+            "canDodgeWhileShooting",
+            {"or": [
+              "Gravity",
+              "Morph",
+              "SpaceJump",
+              {"spikeHits": 2}
+            ]}
+          ]}
+        ]}
       ]
     },
     {
+      "id": 39,
+      "link": [1, 2],
+      "name": "Space Jump",
+      "requires": [
+        "SpaceJump",
+        {"or": [
+          "canDodgeWhileShooting",
+          {"and": [
+            "canCarefulJump",
+            {"spikeHits": 2}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "id": 14,
+      "link": [1, 2],
+      "name": "Naked Traversal (Left to Right)",
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickyJump"
+      ]
+    },
+    {
+      "id": 8,
       "link": [1, 2],
       "name": "Hero Shot Shinespark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 85
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 85},
         "Gravity",
         "canShinechargeMovementTricky",
         "canHeroShot",
@@ -106,6 +289,7 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Land on the first spike platform, and use it to run and jump far enough through the room to trigger the fourth spike platform to fall.",
         "Fire a shot mid-air and activate the shinespark wind-up.",
@@ -116,14 +300,14 @@
       ]
     },
     {
+      "id": 9,
       "link": [1, 2],
       "name": "Hero Shot Shinespark (Power Off)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 70
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 70},
         {"not": "f_DefeatedPhantoon"},
         "canRiskPermanentLossOfAccess",
         "canShinechargeMovementTricky",
@@ -138,6 +322,7 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Land on the floor, then jump and fire a shot mid-air and activate the shinespark wind-up.",
         "Wait until the shot is at a specific position before sparking.",
@@ -147,6 +332,7 @@
       ]
     },
     {
+      "id": 10,
       "link": [1, 2],
       "name": "Leave With Shinespark (Power Off)",
       "entranceCondition": {
@@ -171,6 +357,7 @@
       ]
     },
     {
+      "id": 11,
       "link": [1, 2],
       "name": "Leave With Shinespark (Power Off, Fast Movement)",
       "entranceCondition": {
@@ -195,6 +382,7 @@
       ]
     },
     {
+      "id": 12,
       "link": [1, 2],
       "name": "Unpowered",
       "requires": [
@@ -203,34 +391,94 @@
       ]
     },
     {
+      "id": 16,
       "link": [1, 2],
-      "name": "Base",
+      "name": "Leave With Mockball",
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
       "requires": [
-        "canSuitlessMaridia",
-        {"spikeHits": 2}
-      ]
-    },
-    {
-      "link": [1, 2],
-      "name": "Naked Spiky Death Room (Left to Right)",
-      "requires": [
-        "canSuitlessMaridia",
-        "canCarefulJump"
-      ]
-    },
-    {
-      "link": [1, 2],
-      "name": "Passage With Assist",
-      "requires": [
-        {"or": [
-          "Morph",
-          "Gravity",
-          "canSpaceJumpWaterBounce"
-        ]}
+        "canTrickyJump"
       ],
-      "devNote": "The room is considerably more forgiving with Morph, Gravity, or Space Jump so this is there as an alternate strat."
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          }
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter the room from the left to get the Kzans onto the correct cycle.",
+        "Jump onto the Kzan second closest to the right door as it descends.",
+        "Position on its left side, then run and jump immediately after Samus crosses above the water line, mockballing onto the door frame ledge."
+      ],
+      "devNote": "Entering from the left is not technically required, but it is more tricky otherwise."
     },
     {
+      "id": 17,
+      "link": [1, 2],
+      "name": "Leave With Spring Ball Bounce",
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter the room from the left to get the Kzans onto the correct cycle.",
+        "Jump onto the Kzan second closest to the right door as it descends.",
+        "Position on its left side, then run and jump immediately after Samus crosses above the water line, bouncing on the door frame ledge."
+      ],
+      "devNote": "Entering from the left is not technically required, but it is more tricky otherwise."
+    },
+    {
+      "id": 18,
+      "link": [1, 2],
+      "name": "Leave Space Jumping",
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 3,
+            "openEnd": 1
+          }
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter the room from the left to get the Kzans onto the correct cycle.",
+        "Jump onto the Kzan second closest to the right door as it descends.",
+        "Position on its left side, then run and jump immediately after Samus crosses above the water line, bouncing on the door frame ledge."
+      ],
+      "devNote": "Entering from the left is not technically required, but it is more tricky otherwise."
+    },
+    {
+      "id": 19,
       "link": [2, 1],
       "name": "Unpowered",
       "requires": [
@@ -239,42 +487,72 @@
       ]
     },
     {
+      "id": 20,
       "link": [2, 1],
       "name": "Base",
       "requires": [
-        "canSuitlessMaridia",
-        {"spikeHits": 2}
-      ]
-    },
-    {
-      "link": [2, 1],
-      "name": "Naked Spiky Death Room (Right to Left)",
-      "requires": [
-        "canSuitlessMaridia",
-        "canCarefulJump"
-      ]
-    },
-    {
-      "link": [2, 1],
-      "name": "Passage With Assist",
-      "requires": [
         {"or": [
-          "Morph",
-          "Gravity",
-          "canSpaceJumpWaterBounce"
+          {"and": [
+            {"spikeHits": 3},
+            {"enemyDamage": {"enemy": "Kzan", "type": "contact", "hits": 1}}
+          ]},
+          {"and": [
+            "h_navigateUnderwater",
+            "canCarefulJump",
+            {"spikeHits": 2},
+            {"or": [
+              "Gravity",
+              "Morph",
+              "SpaceJump",
+              {"spikeHits": 1}
+            ]}
+          ]},
+          {"and": [
+            "h_navigateUnderwater",
+            "canDodgeWhileShooting",
+            {"or": [
+              "Gravity",
+              "Morph",
+              "SpaceJump",
+              {"spikeHits": 2}
+            ]}
+          ]}
         ]}
-      ],
-      "devNote": "The room is considerably more forgiving with Morph, Gravity, or Space Jump so this is there as an alternate strat."
+      ]
     },
     {
+      "id": 40,
+      "link": [2, 1],
+      "name": "Space Jump",
+      "requires": [
+        "SpaceJump",
+        {"or": [
+          "canDodgeWhileShooting",
+          {"and": [
+            "canCarefulJump",
+            {"spikeHits": 2}
+          ]}
+        ]}
+      ]
+    },
+    {
+      "id": 21,
+      "link": [2, 1],
+      "name": "Naked Traversal (Right to Left)",
+      "requires": [
+        "canSuitlessMaridia",
+        "canTrickyJump"
+      ]
+    },
+    {
+      "id": 23,
       "link": [2, 1],
       "name": "Hero Shot Shinespark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 115
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 115},
         "Gravity",
         "canShinechargeMovementTricky",
         "canHeroShot",
@@ -290,6 +568,7 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Wait for the first spike platform to fall, jump onto it, and use it to run and jump far enough through the room to trigger the fourth spike platform to fall.",
         "Fire a shot mid-air and activate the shinespark wind-up.",
@@ -300,14 +579,14 @@
       ]
     },
     {
+      "id": 24,
       "link": [2, 1],
       "name": "Hero Shot Shinespark (Power Off)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 70
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 70},
         {"not": "f_DefeatedPhantoon"},
         "canRiskPermanentLossOfAccess",
         "canShinechargeMovementTricky",
@@ -322,6 +601,7 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Land on the floor, then jump and fire a shot mid-air and activate the shinespark wind-up.",
         "Wait until the shot is at a specific position before sparking.",
@@ -331,6 +611,7 @@
       ]
     },
     {
+      "id": 25,
       "link": [2, 1],
       "name": "Leave With Shinespark (Power Off)",
       "entranceCondition": {
@@ -355,6 +636,7 @@
       ]
     },
     {
+      "id": 26,
       "link": [2, 1],
       "name": "Leave With Shinespark (Power Off, Fast Movement)",
       "entranceCondition": {
@@ -379,6 +661,123 @@
       ]
     },
     {
+      "id": 27,
+      "link": [2, 1],
+      "name": "Leave With Mockball",
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          }
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter the room from the right to get the Kzans onto the correct cycle.",
+        "Jump onto the Kzan second closest to the left door as it descends.",
+        "Position on its right side, then run and jump immediately after Samus crosses above the water line, mockballing onto the door frame ledge."
+      ],
+      "devNote": "Entering from the right is not technically required, but it is more tricky otherwise."
+    },
+    {
+      "id": 28,
+      "link": [2, 1],
+      "name": "Leave With Spring Ball Bounce",
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter the room from the right to get the Kzans onto the correct cycle.",
+        "Jump onto the Kzan second closest to the left door as it descends.",
+        "Position on its right side, then run and jump immediately after Samus crosses above the water line, bouncing on the door frame ledge."
+      ],
+      "devNote": "Entering from the right is not technically required, but it is more tricky otherwise."
+    },
+    {
+      "id": 29,
+      "link": [2, 1],
+      "name": "Leave Space Jumping",
+      "entranceCondition": {
+        "comeInNormally": {}
+      },
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 3,
+            "openEnd": 1
+          }
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Enter the room from the right to get the Kzans onto the correct cycle.",
+        "Jump onto the Kzan second closest to the left door as it descends.",
+        "Position on its right side, then run and jump immediately after Samus crosses above the water line, bouncing on the door frame ledge."
+      ],
+      "devNote": "Entering from the right is not technically required, but it is more tricky otherwise."
+    },
+    {
+      "id": 30,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 31,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 32,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -390,34 +789,143 @@
       }
     },
     {
+      "id": 42,
+      "link": [2, 2],
+      "name": "Leave With Side Platform",
+      "requires": [
+        {"or": [
+          {"and": [
+            "Gravity",
+            "canTrickyDodgeEnemies"
+          ]},
+          {"and": [
+            {"not": "f_DefeatedPhantoon"},
+            "canRiskPermanentLossOfAccess"
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSidePlatform": {
+          "height": 3,
+          "runway": {
+            "length": 4,
+            "openEnd": 0
+          },
+          "obstruction": [1, 0]
+        }
+      },
+      "devNote": ["Max extra run speed $0.F."]
+    },
+    {
+      "id": 33,
       "link": [2, 2],
       "name": "Leave Shinecharged, X-Mode",
       "requires": [
         "f_DefeatedPhantoon",
-        "h_canXMode",
+        "canXMode",
         "h_XModeSpikeHit",
         "h_XModeSpikeHit",
         "Gravity",
-        {"canShineCharge": {
-          "usedTiles": 33,
-          "openEnd": 2
-        }},
-        "canShinechargeMovement"
+        "h_shinechargeMaxRunway",
+        "canShinechargeMovement",
+        {"shineChargeFrames": 100}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 80
-        }
+        "leaveShinecharged": {}
       },
+      "flashSuitChecked": true,
       "note": "Jumping from the door and bouncing on the platform enemy works pretty well.",
       "devNote": "Two spike hits are expected per attempt (with any additional leniency hits being multiplied by this amount)."
     },
     {
+      "id": 34,
+      "link": [2, 2],
+      "name": "Leave Spinning (Power Off, Space Jump)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess",
+        "SpaceJump"
+      ],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          }
+        }
+      }
+    },
+    {
+      "id": 35,
+      "link": [2, 2],
+      "name": "Leave With Mockball (Power Off)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 36,
+      "link": [2, 2],
+      "name": "Leave With Spring Ball Bounce (Power Off)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      }
+    },
+    {
+      "id": 37,
+      "link": [2, 2],
+      "name": "Leave Space Jumping (Power Off)",
+      "requires": [
+        {"not": "f_DefeatedPhantoon"},
+        "canRiskPermanentLossOfAccess"
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 2
+          }
+        }
+      }
+    },
+    {
+      "id": 38,
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 43,
+  "nextNotableId": 1
 }

@@ -4,9 +4,12 @@
   "name": "Metroid Room 2",
   "area": "Tourian",
   "subarea": "Main",
-  "playable": true,
   "roomAddress": "0x7DB31",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,38 +17,40 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a9c0",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2],
+        [1]
+      ]
     },
     {
       "id": 2,
       "name": "Bottom Right Door",
       "nodeType": "door",
-      "nodeSubType": "grey",
+      "nodeSubType": "gray",
       "nodeAddress": "0x001a9cc",
+      "doorOrientation": "right",
       "doorEnvironments": [{"physics": "air"}],
       "locks": [
         {
-          "name": "Metroid Room 2 Grey Lock (to Metroid Room 3)",
+          "name": "Metroid Room 2 Gray Lock (to Metroid Room 3)",
           "lockType": "killEnemies",
           "unlockStrats": [
             {
               "name": "Base",
-              "notable": false,
               "requires": [
-                {"obstaclesCleared": ["A"]}
+                "f_KilledMetroidRoom2"
               ]
             }
           ],
-          "yields": ["f_KilledMetroidRoom2", "f_ZebesAwake"]
+          "yields": ["f_ZebesAwake"]
         }
+      ],
+      "mapTileMask": [
+        [1],
+        [2]
       ]
-    }
-  ],
-  "obstacles": [
-    {
-      "id": "A",
-      "name": "Two Metroids",
-      "obstacleType": "enemies"
     }
   ],
   "enemies": [
@@ -83,6 +88,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -94,10 +100,11 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Leave With Runway - Frozen Rinka",
       "requires": [
-        "h_canTrickyFrozenEnemyRunway"
+        "h_trickyFrozenEnemyRunway"
       ],
       "exitCondition": {
         "leaveWithRunway": {
@@ -112,27 +119,96 @@
       ]
     },
     {
+      "id": 3,
       "link": [1, 1],
-      "name": "G-Mode Setup - Get Hit By Rinka",
-      "notable": false,
-      "requires": [],
+      "name": "Leave Spinning",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
       "exitCondition": {
-        "leaveWithGModeSetup": {}
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 1
+          }
+        }
       }
     },
     {
+      "id": 4,
+      "link": [1, 1],
+      "name": "Leave With Mockball",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "link": [1, 1],
+      "name": "Leave With Spring Ball Bounce",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 0
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Rinka",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 7,
       "link": [1, 1],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Rinka",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Rinka", "type": "contact", "hits": 1}}
       ],
-      "gModeRegainMobility": {}
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
     },
     {
+      "id": 8,
       "link": [1, 1],
       "name": "G-Mode Morph Power Bomb Metroid Kill",
       "entranceCondition": {
@@ -143,25 +219,27 @@
       },
       "requires": [
         "canMetroidAvoid",
-        "h_canArtificialMorphPowerBomb",
-        "h_canArtificialMorphPowerBomb",
-        "h_canArtificialMorphPowerBomb"
+        "h_artificialMorphPowerBomb",
+        "h_artificialMorphPowerBomb",
+        "h_artificialMorphPowerBomb"
       ],
-      "clearsObstacles": ["A"],
+      "setsFlags": ["f_KilledMetroidRoom2"],
+      "flashSuitChecked": true,
       "note": [
         "This is easiest by staying on the top floating platform with the two Metroids stuck below it.",
         "Note that it is necessary to exit G-Mode before exiting the room in order for the Metroids to remain killed."
       ]
     },
     {
+      "id": 9,
       "link": [1, 2],
       "name": "Already Cleared",
       "requires": [
         "f_KilledMetroidRoom2"
-      ],
-      "clearsObstacles": ["A"]
+      ]
     },
     {
+      "id": 10,
       "link": [1, 2],
       "name": "Ammo Kill",
       "requires": [
@@ -171,37 +249,40 @@
           "explicitWeapons": ["Super", "Missile"]
         }}
       ],
-      "clearsObstacles": ["A"]
+      "setsFlags": ["f_KilledMetroidRoom2"]
     },
     {
+      "id": 11,
       "link": [1, 2],
       "name": "Tank and PB Kill",
       "requires": [
         {"enemyKill": {
           "enemies": [["Metroid", "Metroid"]],
-          "excludedWeapons": ["Super", "Missile"]
+          "explicitWeapons": ["PowerBomb"]
         }},
         {"metroidFrames": 96}
       ],
-      "clearsObstacles": ["A"]
+      "setsFlags": ["f_KilledMetroidRoom2"]
     },
     {
+      "id": 12,
       "link": [1, 2],
-      "name": "Metroid Room 2 PB Dodge Kill",
+      "name": "Power Bomb Dodge Kill",
       "requires": [
         {"enemyKill": {
           "enemies": [["Metroid", "Metroid"]],
-          "excludedWeapons": ["Super", "Missile"]
+          "explicitWeapons": ["PowerBomb"]
         }},
         {"or": [
           "canMetroidAvoid",
           "canCameraManip"
         ]}
       ],
-      "clearsObstacles": ["A"],
+      "setsFlags": ["f_KilledMetroidRoom2"],
       "note": "An easy way is once Samus is on the top platform, jump and aim down to lower the camera, then place 3 PBs."
     },
     {
+      "id": 13,
       "link": [1, 2],
       "name": "Ice Evade",
       "requires": [
@@ -209,6 +290,7 @@
       ]
     },
     {
+      "id": 14,
       "link": [1, 2],
       "name": "Screw Evade",
       "requires": [
@@ -223,6 +305,7 @@
       ]
     },
     {
+      "id": 15,
       "link": [1, 2],
       "name": "Harder Evade",
       "requires": [
@@ -230,6 +313,7 @@
       ]
     },
     {
+      "id": 16,
       "link": [1, 2],
       "name": "Tank the Damage",
       "requires": [
@@ -237,6 +321,7 @@
       ]
     },
     {
+      "id": 17,
       "link": [1, 2],
       "name": "Come In Shinecharging, Leave Shinecharged (Shortcut)",
       "entranceCondition": {
@@ -250,19 +335,25 @@
         {"or": [
           "canMoonfall",
           "Morph"
-        ]}
+        ]},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          {"metroidFrames": 25}
+        ]},
+        {"shineChargeFrames": 130}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 50
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["powerbomb"], "requires": []},
         {"types": ["missiles", "super"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true,
+      "devNote": "FIXME: refine this and add a canTwoTileSqueeze option."
     },
     {
+      "id": 18,
       "link": [1, 2],
       "name": "Come In Shinecharging, Leave With Spark (Long Way Around)",
       "entranceCondition": {
@@ -273,7 +364,11 @@
       },
       "requires": [
         "canShinechargeMovementTricky",
-        {"shinespark": {"frames": 7}}
+        {"shinespark": {"frames": 7}},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -284,41 +379,62 @@
       ]
     },
     {
+      "id": 19,
       "link": [1, 2],
       "name": "Carry Shinecharge (Shortcut)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 140
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 140},
         "canShinechargeMovementTricky",
         {"or": [
           "canMoonfall",
-          "Morph"
+          "Morph",
+          "canTwoTileSqueeze"
+        ]},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          {"metroidFrames": 100},
+          {"and": [
+            "canInsaneJump",
+            "canTrickyDodgeEnemies",
+            {"metroidFrames": 10}
+          ]}
         ]}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["powerbomb"], "requires": []},
         {"types": ["missiles", "super"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "If Metroids are alive, minimizing damage from them requires tricky movement to manipulate them:",
+        "the moonfalling option must be done starting from almost a tile to the left of the opening;",
+        "likewise, the morphing option should soft-morph about a tile to the left of the opening."
+      ],
+      "devNote": [
+        "FIXME: Unmorphing and downbacking through the gap can leave with more frames remaining but is more difficult."
       ]
     },
     {
+      "id": 20,
       "link": [1, 2],
       "name": "Come In Shinecharged, Leave With Spark (Long Way Around)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 102
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 102},
         "canShinechargeMovementTricky",
-        {"shinespark": {"frames": 22}}
+        {"shinespark": {"frames": 22}},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -326,17 +442,41 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 21,
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "f_KilledMetroidRoom2",
+        "canXRayTurnaround",
+        "canLongChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": "Use X-ray immediately after shinecharging, in order to be able to dodge the Rinkas.",
+      "devNote": "Doing this with Metroids alive is technically possible but seems really bad."
+    },
+    {
+      "id": 22,
       "link": [2, 1],
       "name": "Already Cleared",
       "requires": [
         "f_KilledMetroidRoom2"
-      ],
-      "clearsObstacles": ["A"]
+      ]
     },
     {
+      "id": 23,
       "link": [2, 1],
       "name": "Ammo Kill",
       "requires": [
@@ -346,42 +486,48 @@
           "explicitWeapons": ["Super", "Missile"]
         }}
       ],
-      "clearsObstacles": ["A"]
+      "setsFlags": ["f_KilledMetroidRoom2"]
     },
     {
+      "id": 24,
       "link": [2, 1],
       "name": "Tank and PB Kill",
       "requires": [
         {"enemyKill": {
           "enemies": [["Metroid", "Metroid"]],
-          "excludedWeapons": ["Super", "Missile"]
+          "explicitWeapons": ["PowerBomb"]
         }},
-        {"metroidFrames": 96}
+        {"metroidFrames": 400}
       ],
-      "clearsObstacles": ["A"]
+      "setsFlags": ["f_KilledMetroidRoom2"]
     },
     {
+      "id": 25,
       "link": [2, 1],
-      "name": "Metroid Room 2 PB Dodge Kill (Bottom to Top)",
-      "notable": true,
+      "name": "Power Bomb Dodge Kill (Bottom to Top)",
       "requires": [
+        {"notable": "Power Bomb Dodge Kill (Bottom to Top)"},
         {"enemyKill": {
           "enemies": [["Metroid", "Metroid"]],
-          "excludedWeapons": ["Super", "Missile"]
+          "explicitWeapons": ["PowerBomb"]
         }},
         "canMetroidAvoid"
       ],
-      "clearsObstacles": ["A"],
+      "setsFlags": ["f_KilledMetroidRoom2"],
       "note": "Kill the two Metroids with Power Bombs while avoiding damage."
     },
     {
+      "id": 26,
       "link": [2, 1],
       "name": "Ice Evade",
       "requires": [
-        "Ice"
-      ]
+        "Ice",
+        "canDodgeWhileShooting"
+      ],
+      "note": "Shoot the Metroids on entry, shooting one horizontally and the other diagonally."
     },
     {
+      "id": 27,
       "link": [2, 1],
       "name": "Screw Evade",
       "requires": [
@@ -400,25 +546,28 @@
       "note": "Use ScrewAttack or a PseudoScrew to prevent Metroids from attaching to Samus."
     },
     {
+      "id": 28,
       "link": [2, 1],
-      "name": "Metroid Room 2 Bottom Door Metroid Avoid",
-      "notable": true,
+      "name": "Bottom Door Metroid Avoid",
       "requires": [
+        {"notable": "Bottom Door Metroid Avoid"},
         "canMetroidAvoid"
       ],
       "note": [
         "Buffer a spinjump towards the door to jump over the top metroid and land on the middle platform.",
-        "Metroids can knocked with Beam shots to clear a path."
+        "Metroids can be knocked with Beam shots to clear a path."
       ]
     },
     {
+      "id": 29,
       "link": [2, 1],
       "name": "Tank the Damage",
       "requires": [
-        {"metroidFrames": 80}
+        {"metroidFrames": 180}
       ]
     },
     {
+      "id": 30,
       "link": [2, 1],
       "name": "Very Deep Stuck X-Ray Climb With Immobile",
       "entranceCondition": {
@@ -429,15 +578,13 @@
         }
       },
       "requires": [
+        "canComplexGMode",
         "f_KilledMetroidRoom2",
-        {"enemyDamage": {
-          "enemy": "Rinka",
-          "type": "contact",
-          "hits": 1
-        }},
+        {"enemyDamage": {"enemy": "Rinka", "type": "contact", "hits": 1}},
         "canXRayClimb"
       ],
       "bypassesDoorShell": true,
+      "flashSuitChecked": true,
       "note": [
         "Enter immobile with G-mode direct, with the Metroids having been killed previously.",
         "Take a Rinka hit to regain mobility.",
@@ -453,6 +600,7 @@
       ]
     },
     {
+      "id": 31,
       "link": [2, 1],
       "name": "Very Deep Stuck X-Ray Climb With Ice",
       "entranceCondition": {
@@ -462,10 +610,12 @@
         }
       },
       "requires": [
+        "canComplexGMode",
         "Ice",
         "canXRayClimb"
       ],
       "bypassesDoorShell": true,
+      "flashSuitChecked": true,
       "note": [
         "Enter with G-mode direct, and quickly freeze the Metroids (if still alive) and Rinkas.",
         "Back up to between 1 and 6 pixels from the door transition, and activate X-ray to get very deep stuck in the door.",
@@ -474,6 +624,7 @@
       ]
     },
     {
+      "id": 32,
       "link": [2, 1],
       "name": "Very Deep Stuck X-Ray Climb With Crystal Flash",
       "entranceCondition": {
@@ -483,16 +634,14 @@
         }
       },
       "requires": [
-        "h_canCrystalFlash",
+        "canComplexGMode",
+        "h_CrystalFlash",
         {"autoReserveTrigger": {}},
         "canXRayClimb",
-        {"enemyDamage": {
-          "enemy": "Rinka",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Rinka", "type": "contact", "hits": 1}}
       ],
       "bypassesDoorShell": true,
+      "flashSuitChecked": true,
       "note": [
         "Enter with G-mode direct, using artificial morph to avoid the Metroids if they are still alive.",
         "Go to the top of the room and Crystal Flash, with the Metroids stuck below (if alive).",
@@ -505,18 +654,19 @@
       ]
     },
     {
+      "id": 33,
       "link": [2, 1],
-      "name": "Come in Shinecharged, Leave With Spark (Morph)",
+      "name": "Come in Shinecharging, Leave With Spark (Left Side)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 125
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
         }
       },
       "requires": [
-        "canWalljump",
-        "Morph",
         "canShinechargeMovementComplex",
-        {"shinespark": {"frames": 8}}
+        {"shinespark": {"frames": 7}},
+        "f_KilledMetroidRoom2"
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -525,51 +675,318 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
+      "note": [
+        "Not pressing dash will make the platforming easier, unless HiJump is also equipped."
+      ],
+      "devNote": [
+        "FIXME: Add variations for tanking the Metroid damage (taking into account how they can block the shot to open the door)"
+      ]
+    },
+    {
+      "id": 34,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave Shinecharged (HiJump)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        "HiJump",
+        "canCarefulJump",
+        {"or": [
+          "f_KilledMetroidRoom2",
+          {"and": [
+            "canMetroidAvoid",
+            "canShinechargeMovementTricky"
+          ]}
+        ]},
+        {"shineChargeFrames": 130}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": ["Spinjump into the opening below the top door."],
+      "devNote": [
+        "FIXME: Add variations for tanking the Metroid damage (taking into account how they can block the shot to open the door)"
+      ]
+    },
+    {
+      "id": 35,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave Shinecharged (Morph)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        "canWallJumpInstantMorph",
+        "f_KilledMetroidRoom2",
+        {"shineChargeFrames": 150}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Wall jump up the right wall and either mid-air morph to fit through the gap below the top door.",
+        "Alternatively use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing."
+      ],
+      "devNote": [
+        "FIXME: Add variations for tanking the Metroid damage (taking into account how they can block the shot to open the door)"
+      ]
+    },
+    {
+      "id": 36,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave Shinecharged (Wiggle)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canWalljump",
+        "canMidairWiggle",
+        "canShinechargeMovementTricky",
+        "f_KilledMetroidRoom2",
+        {"shineChargeFrames": 130}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing."
+      ],
+      "devNote": [
+        "FIXME: Add variations for tanking the Metroid damage (taking into account how they can block the shot to open the door)"
+      ]
+    },
+    {
+      "id": 56,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave Shinecharged (Left Side, Tricky Dash Jump)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 0,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        {"shineChargeFrames": 170},
+        "canTrickyDashJump",
+        "canShinechargeMovementTricky",
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "ScrewAttack",
+          {"metroidFrames": 160}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": [
+            {"or": [
+              "f_KilledMetroidRoom2",
+              "ScrewAttack"
+            ]}
+          ]
+        },
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Go up the left side of the room to make it out the top door with a few shinecharge frames remaining."
+      ],
+      "detailNote": [
+        "Avoid getting more than 2.75 tiles of run speed on the lower platform (or Speed Booster will shorten Samus' jump):",
+        "either release run early, or do a big initial jump to land in the middle of the lower platform before starting to run."
+      ]
+    },
+    {
+      "id": 37,
+      "link": [2, 1],
+      "name": "Carry Shinecharge (HiJump)",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 105},
+        "HiJump",
+        "canCarefulJump",
+        "canShinechargeMovementComplex",
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": ["Spinjump into the opening below the top door."]
+    },
+    {
+      "id": 38,
+      "link": [2, 1],
+      "name": "Carry Shinecharge (Morph)",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 140},
+        "canWallJumpInstantMorph",
+        "canShinechargeMovementComplex",
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Wall jump up the right wall and either mid-air morph to fit through the gap below the top door.",
+        "Alternatively use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing."
+      ]
+    },
+    {
+      "id": 39,
+      "link": [2, 1],
+      "name": "Carry Shinecharge (Wiggle)",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 120},
+        "canWalljump",
+        "canMidairWiggle",
+        "canShinechargeMovementTricky",
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Wall jump up the right wall and use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing."
+      ]
+    },
+    {
+      "id": 40,
+      "link": [2, 1],
+      "name": "Come in Shinecharged, Leave With Spark (HiJump)",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 80},
+        "HiJump",
+        "canCarefulJump",
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 6}},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": ["Spinjump into the opening below the top door."]
+    },
+    {
+      "id": 41,
+      "link": [2, 1],
+      "name": "Come in Shinecharged, Leave With Spark (Morph)",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 110},
+        "canWallJumpInstantMorph",
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 5}},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
       "note": [
         "Wall jump up the right wall and either mid-air morph to fit through the gap below the top door.",
         "Alternatively use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing.",
         "Shoot the door open and spark out."
       ]
-    }, 
+    },
     {
-      "link": [2, 1],
-      "name": "Carry Shinecharge (Wiggle)",
-      "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 135
-        }
-      },
-      "requires": [
-        "canWalljump",
-        "canMidairWiggle",
-        "canShinechargeMovementTricky",
-        {"shinespark": {"frames": 5}}
-      ],
-      "exitCondition": {
-        "leaveWithSpark": {}
-      },
-      "unlocksDoors": [
-        {"types": ["super"], "requires": []},
-        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ],
-      "note": [
-        "Wall jump up the right wall and use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing.",
-        "Shoot the door open and spark out."
-      ]
-    }, 
-    {
+      "id": 42,
       "link": [2, 1],
       "name": "Come in Shinecharged, Leave With Spark (Wiggle)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 105
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 105},
         "canWalljump",
         "canMidairWiggle",
         "canShinechargeMovementTricky",
-        {"shinespark": {"frames": 5}}
+        {"shinespark": {"frames": 5}},
+        {"or": [
+          "f_KilledMetroidRoom2",
+          "canMetroidAvoid"
+        ]}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -578,12 +995,95 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Wall jump up the right wall and use a mid-air wiggle to reduce the height of Samus' hitbox after the walljump, to be able to fit through the gap without morphing.",
         "Shoot the door open and spark out."
       ]
-    }, 
+    },
     {
+      "id": 57,
+      "link": [2, 1],
+      "name": "Come in Shinecharged, Leave With Spark (Left Side, Tricky Dash Jump)",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 130},
+        "canTrickyDashJump",
+        "canShinechargeMovementTricky",
+        {"or": [
+          {"and": [
+            {"or": [
+              "f_KilledMetroidRoom2",
+              "ScrewAttack",
+              {"and": [
+                {"metroidFrames": 145},
+                {"or": [
+                  "Plasma",
+                  "Wave",
+                  {"ammo": {"type": "Missile", "count": 1}}
+                ]}
+              ]}
+            ]},
+            {"shinespark": {"frames": 13}}
+          ]},
+          {"and": [
+            {"metroidFrames": 150},
+            {"shineChargeFrames": 10},
+            {"shinespark": {"frames": 7}}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": [
+            {"or": [
+              "f_KilledMetroidRoom2",
+              "ScrewAttack"
+            ]}
+          ]
+        },
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Go up the left side of the room and spark out the top door.",
+        "If tanking Metroid damage, then the Metroid can block the shot to open the door;",
+        "to avoid this, either jump toward the door with dash speed or use Plasma, Wave, or a Missile."
+      ],
+      "detailNote": [
+        "Do a big initial jump to land in the middle of the lower platform,",
+        "and jump before running more than 2.75 tiles, to avoid a Speed Booster dropoff in jump height."
+      ]
+    },
+    {
+      "id": 43,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "f_KilledMetroidRoom2",
+        "canXRayTurnaround",
+        "canLongChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": "Use X-ray immediately after shinecharging, in order to be able to dodge the Rinkas."
+    },
+    {
+      "id": 44,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [
@@ -591,11 +1091,7 @@
           "f_KilledMetroidRoom2",
           "Ice",
           {"and": [
-            {"enemyDamage": {
-              "enemy": "Rinka",
-              "type": "contact",
-              "hits": 1
-            }},
+            {"enemyDamage": {"enemy": "Rinka", "type": "contact", "hits": 1}},
             {"metroidFrames": 22}
           ]}
         ]}
@@ -609,10 +1105,11 @@
       "devNote": "FIXME: Is it worth adding a method with avoiding the Metroids?"
     },
     {
+      "id": 45,
       "link": [2, 2],
       "name": "Leave With Runway - Frozen Rinka",
       "requires": [
-        "h_canTrickyFrozenEnemyRunway"
+        "h_trickyFrozenEnemyRunway"
       ],
       "exitCondition": {
         "leaveWithRunway": {
@@ -627,26 +1124,142 @@
       ]
     },
     {
+      "id": 55,
+      "link": [2, 2],
+      "name": "Leave With Side Platform",
+      "requires": [
+        "SpeedBooster",
+        {"or": [
+          "canMetroidAvoid",
+          "f_KilledMetroidRoom2"
+        ]},
+        "canInsaneJump",
+        "canMomentumConservingMorph"
+      ],
+      "exitCondition": {
+        "leaveWithSidePlatform": {
+          "height": 3,
+          "runway": {
+            "length": 11,
+            "openEnd": 0
+          },
+          "obstruction": [3, 0]
+        }
+      },
+      "devNote": [
+        "Max extra run speed $2.6",
+        "This strat is included for completeness, though it apparently doesn't have any applications."
+      ]
+    },
+    {
+      "id": 46,
+      "link": [2, 2],
+      "name": "Leave Spinning",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 8,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 47,
+      "link": [2, 2],
+      "name": "Leave With Mockball",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 8,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 2,
+            "openEnd": 1
+          }
+        }
+      },
+      "devNote": "There is 1 unusable landing tile here; at low speeds (earlier jump) it could be used but wouldn't serve a purpose."
+    },
+    {
+      "id": 48,
+      "link": [2, 2],
+      "name": "Leave With Spring Ball Bounce",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 8,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      }
+    },
+    {
+      "id": 49,
+      "link": [2, 2],
+      "name": "Leave Space Jumping",
+      "requires": [
+        {"or": [
+          "canMetroidAvoid",
+          "Ice",
+          "f_KilledMetroidRoom2"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 5,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 50,
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
-        {"obstaclesCleared": ["A"]},
-        "h_canCrystalFlash",
-        {"enemyDamage": {
-          "enemy": "Rinka",
-          "type": "contact",
-          "hits": 1
-        }}
+        "f_KilledMetroidRoom2",
+        "h_CrystalFlash",
+        {"enemyDamage": {"enemy": "Rinka", "type": "contact", "hits": 1}}
       ],
+      "flashSuitChecked": true,
       "note": [
         "To avoid heavy Rinka damage, you must perform the Crystal Flash on a specific tile: on the third floor tile from the left wall.",
         "Lay the Power Bomb immediately after destroying both Rinkas."
       ]
     },
     {
+      "id": 51,
       "link": [2, 2],
       "name": "G-Mode Setup - Get Hit By Rinka",
-      "notable": false,
       "requires": [
         {"or": [
           "canMetroidAvoid",
@@ -658,14 +1271,14 @@
       "exitCondition": {
         "leaveWithGModeSetup": {}
       },
-      "note": [
-        "If the Metroids are alive, lure them off screen."
-      ]
+      "flashSuitChecked": true,
+      "note": ["If the Metroids are alive, lure them off screen."],
+      "devNote": "There could be another strat for a Metroid or Rinka, that doesn't have canMetroidAvoid or canRiskPermanentLossOfAccess, but canMetroidAvoid isn't too difficult for this level."
     },
     {
+      "id": 52,
       "link": [2, 2],
       "name": "G-Mode Setup - Get Hit By Metroid",
-      "notable": false,
       "requires": [
         {"not": "f_KilledMetroidRoom2"},
         "canRiskPermanentLossOfAccess"
@@ -674,26 +1287,26 @@
         "leaveWithGModeSetup": {
           "knockback": false
         }
-      }
+      },
+      "flashSuitChecked": true
     },
     {
+      "id": 53,
       "link": [2, 2],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Rinka",
-          "type": "contact",
-          "hits": 1
-        }},
+        {"enemyDamage": {"enemy": "Rinka", "type": "contact", "hits": 1}},
         {"or": [
           "f_KilledMetroidRoom2",
           {"metroidFrames": 120}
         ]}
       ],
       "gModeRegainMobility": {},
+      "flashSuitChecked": true,
       "note": "If alive, the Metroids do 90 damage before the Rinka hits."
     },
     {
+      "id": 54,
       "link": [2, 2],
       "name": "G-Mode Morph Power Bomb Metroid Kill",
       "entranceCondition": {
@@ -705,18 +1318,62 @@
       },
       "requires": [
         "canMetroidAvoid",
-        "h_canArtificialMorphSpringBall",
-        "h_canArtificialMorphPowerBomb",
-        "h_canArtificialMorphPowerBomb",
-        "h_canArtificialMorphPowerBomb"
+        "canTrickyDodgeEnemies",
+        "h_artificialMorphSpringBall",
+        "h_artificialMorphPowerBomb",
+        "h_artificialMorphPowerBomb",
+        "h_artificialMorphPowerBomb"
       ],
-      "clearsObstacles": ["A"],
+      "setsFlags": ["f_KilledMetroidRoom2"],
+      "flashSuitChecked": true,
       "note": [
         "Quickly artificial morph and roll off to the bottom before being grabbed by the Metroids.",
         "This is much easier in indirect artificial morph.",
         "Note that it is necessary to exit G-Mode before exiting the room in order for the Metroids to remain killed."
       ],
       "devNote": "FIXME: This can be done in immobile, but probably never matters, since it will require so much energy."
+    },
+    {
+      "id": 58,
+      "link": [2, 2],
+      "name": "Direct G-Mode Morph Crystal Flash Light Orb Metroid Kill",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "direct",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "canMetroidAvoid",
+        "canTrickyGMode",
+        "h_artificialMorphCrystalFlash",
+        {"autoReserveTrigger": {}}
+      ],
+      "setsFlags": ["f_KilledMetroidRoom2"],
+      "flashSuitChecked": true,
+      "note": [
+        "On entry, wait until the Rinka starts to spawn then quickly roll off into the bottom right corner and Crystal Flash before the Metroids get there.",
+        "Note that it is necessary to exit G-Mode before exiting the room in order for the Metroids to remain killed.",
+        "To do this, trigger Reserves on a Rinka above, or first damage down with some of the Metroids before killing them.",
+        "To minimize damage taken, lure a Rinka away from its spawner before touching it to prevent multiple hits during the auto Reserve trigger."
+      ]
     }
-  ]
+  ],
+  "notables": [
+    {
+      "id": 1,
+      "name": "Power Bomb Dodge Kill (Bottom to Top)",
+      "note": "Kill the two Metroids with Power Bombs while avoiding damage."
+    },
+    {
+      "id": 2,
+      "name": "Bottom Door Metroid Avoid",
+      "note": [
+        "Buffer a spinjump towards the door to jump over the top metroid and land on the middle platform.",
+        "Metroids can be knocked with Beam shots to clear a path."
+      ]
+    }
+  ],
+  "nextStratId": 59,
+  "nextNotableId": 3
 }

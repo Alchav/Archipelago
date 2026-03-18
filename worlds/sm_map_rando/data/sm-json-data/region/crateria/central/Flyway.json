@@ -4,9 +4,11 @@
   "name": "Flyway",
   "area": "Crateria",
   "subarea": "Central",
-  "playable": true,
   "roomAddress": "0x79879",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018bb6",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2, 2, 1]
+      ]
     },
     {
       "id": 2,
@@ -22,6 +28,7 @@
       "nodeType": "door",
       "nodeSubType": "red",
       "nodeAddress": "0x0018bc2",
+      "doorOrientation": "right",
       "doorEnvironments": [{"physics": "air"}],
       "locks": [
         {
@@ -30,10 +37,9 @@
           "unlockStrats": [
             {
               "name": "Base",
-              "notable": false,
               "requires": [
                 {"or": [
-                  "h_canOpenRedDoors",
+                  "h_openRedDoor",
                   "f_ZebesSetAblaze"
                 ]}
               ],
@@ -41,6 +47,9 @@
             }
           ]
         }
+      ],
+      "mapTileMask": [
+        [1, 1, 2]
       ]
     }
   ],
@@ -72,6 +81,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -83,59 +93,251 @@
       }
     },
     {
+      "id": 24,
+      "link": [1, 1],
+      "name": "Leave With Side Platform",
+      "requires": [
+        "SpeedBooster",
+        {"or": [
+          "canMomentumConservingMorph",
+          "canInsaneJump"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSidePlatform": {
+          "height": 3,
+          "runway": {
+            "length": 38,
+            "openEnd": 0
+          },
+          "obstruction": [5, 2]
+        }
+      },
+      "note": [
+        "Leaving with upward momentum is possible in three ways:",
+        "1) Most easily, with a momentum-conserving morph against the ceiling through the transition,",
+        "2) With a momentum-conserving turnaround through the transition, or",
+        "3) Jumping specifically with a extra run speed $5.2 or $5.3 and aiming down through the transition.",
+        "For the first two methods, back into the corner at the start of runway."
+      ],
+      "devNote": [
+        "Max extra run speed $6.5.",
+        "Using the full runway, the momentum-conserving morph has a 4-frame window for the jump,",
+        "and between a 2-frame and 5-frame window for the morph depending on the jump timing (with later jumps giving a bigger window for the morph);",
+        "these windows can be more narrow depending on what is required in the next room.",
+        "The momentum-conserving turnaround has a 2-frame window for the jump,",
+        "and either a 3-frame or 5-frame for the turnaround (with the last-frame jump giving the larger window for the turnaround);",
+        "again the windows can be more narrow depending on what is required in the next room.",
+        "The aim-down method requires specific positioning to ensure Samus barely clears the door ledge with a frame-perfect jump."
+      ]
+    },
+    {
+      "id": 2,
       "link": [1, 1],
       "name": "Leave Shinecharged",
       "requires": [
         "canShinechargeMovement",
-        {"canShineCharge": {
-          "usedTiles": 33,
-          "openEnd": 2
-        }}
+        {"canShineCharge": {"usedTiles": 37, "openEnd": 0}},
+        {"shineChargeFrames": 60}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 120
+        "leaveShinecharged": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 3,
+      "link": [1, 1],
+      "name": "Leave Spinning",
+      "requires": [],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 37,
+            "openEnd": 0
+          }
         }
       }
     },
     {
+      "id": 4,
       "link": [1, 1],
-      "name": "Mellow Farm",
-      "requires": [
-        {"resetRoom": {
-          "nodes": [1, 2],
-          "mustStayPut": false
-        }},
-        {"refill": ["Energy", "Missile"]}
-      ]
-    },
-    {
-      "link": [1, 1],
-      "name": "Crystal Flash",
-      "requires": [
-        "h_canCrystalFlash"
-      ]
-    },
-    {
-      "link": [1, 1],
-      "name": "G-Mode Setup - Get Hit By Mellow",
-      "notable": false,
+      "name": "Leave With Mockball",
       "requires": [],
       "exitCondition": {
-        "leaveWithGModeSetup": {}
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 35,
+            "openEnd": 0
+          },
+          "landingRunway": {
+            "length": 3,
+            "openEnd": 1
+          }
+        }
       }
     },
     {
+      "id": 5,
+      "link": [1, 1],
+      "name": "Leave With Spring Ball Bounce",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 31,
+            "openEnd": 0
+          },
+          "landingRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "link": [1, 1],
+      "name": "Leave Space Jumping",
+      "requires": [],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 27,
+            "openEnd": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "link": [1, 1],
+      "name": "Leave With Temporary Blue",
+      "requires": [
+        {"canShineCharge": {"usedTiles": 37, "openEnd": 0}},
+        "canChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 8,
+      "link": [1, 1],
+      "name": "Mellow Farm",
+      "requires": [
+        {"or": [
+          {"resetRoom": {"nodes": [1]}},
+          {"and": [
+            {"resetRoom": {"nodes": [2]}},
+            {"cycleFrames": 50}
+          ]}
+        ]},
+        {"or": [
+          {"and": [
+            {"or": [
+              "ScrewAttack",
+              "Plasma"
+            ]},
+            {"cycleFrames": 420}
+          ]},
+          {"and": [
+            {"or": [
+              "canDodgeWhileShooting",
+              "Spazer",
+              "Wave"
+            ]},
+            {"cycleFrames": 610}
+          ]},
+          {"and": [
+            {"cycleFrames": 800},
+            {"enemyDamage": {"enemy": "Mellow", "type": "contact", "hits": 2}}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Mellow", "count": 12}]
+    },
+    {
+      "id": 9,
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 10,
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Mellow",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 11,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 12,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 13,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12], [3, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 14,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 15,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 16,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -147,29 +349,150 @@
       }
     },
     {
+      "id": 25,
+      "link": [2, 2],
+      "name": "Leave With Side Platform",
+      "requires": [
+        "SpeedBooster",
+        {"or": [
+          "canMomentumConservingMorph",
+          "canInsaneJump"
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSidePlatform": {
+          "height": 3,
+          "runway": {
+            "length": 38,
+            "openEnd": 0
+          },
+          "obstruction": [3, 0]
+        }
+      },
+      "note": [
+        "Leaving with upward momentum is possible in three ways:",
+        "1) Most easily, with a momentum-conserving morph against the ceiling through the transition,",
+        "2) With a momentum-conserving turnaround through the transition, or",
+        "3) Jumping specifically with a extra run speed $5.2 or $5.3 and aiming down through the transition.",
+        "For the first two methods, avoid backing into the corner at the start of runway;",
+        "instead press against it and turn around, to put Samus into a better position.",
+        "An even better position is obtained by backing up an additional 8 to 12 pixels from the runway start",
+        "(again, pressing forward into the corner, not backing into it),",
+        "or equivalently, pressing and releasing an angle button 4 to 6 times to arm pump while running."
+      ],
+      "devNote": [
+        "Max extra run speed $6.1.",
+        "Using the full runway (either backing into the corner or turning around from it), the momentum-conserving morph has a 5-frame window for the jump,",
+        "and either a 2-frame window or 3-frame window for the morph depending on the jump timing;",
+        "these windows can be more narrow depending on what is required in the next room.",
+        "The momentum-conserving turnaround requires a frame-perfect (last-frame) jump and a frame-perfect turnaround.",
+        "The aim-down method requires specific positioning to ensure Samus barely clears the door ledge with a frame-perfect jump."
+      ]
+    },
+    {
+      "id": 17,
       "link": [2, 2],
       "name": "Leave Shinecharged",
       "requires": [
         "canShinechargeMovement",
-        {"canShineCharge": {
-          "usedTiles": 33,
-          "openEnd": 2
-        }}
+        {"canShineCharge": {"usedTiles": 36, "openEnd": 1}},
+        {"shineChargeFrames": 40}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 140
+        "leaveShinecharged": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 18,
+      "link": [2, 2],
+      "name": "Leave Spinning",
+      "requires": [],
+      "exitCondition": {
+        "leaveSpinning": {
+          "remoteRunway": {
+            "length": 35,
+            "openEnd": 0
+          }
         }
       }
     },
     {
+      "id": 19,
+      "link": [2, 2],
+      "name": "Leave With Mockball",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 35,
+            "openEnd": 0
+          },
+          "landingRunway": {
+            "length": 3,
+            "openEnd": 1
+          }
+        }
+      }
+    },
+    {
+      "id": 20,
+      "link": [2, 2],
+      "name": "Leave With Spring Ball Bounce",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 31,
+            "openEnd": 0
+          },
+          "landingRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      }
+    },
+    {
+      "id": 21,
+      "link": [2, 2],
+      "name": "Leave Space Jumping",
+      "requires": [],
+      "exitCondition": {
+        "leaveSpaceJumping": {
+          "remoteRunway": {
+            "length": 27,
+            "openEnd": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 22,
+      "link": [2, 2],
+      "name": "Leave With Temporary Blue",
+      "requires": [
+        {"canShineCharge": {"usedTiles": 37, "openEnd": 0}},
+        "canChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 23,
       "link": [2, 2],
       "name": "G-Mode Setup - Get Hit By Mellow",
-      "notable": false,
       "requires": [],
       "exitCondition": {
         "leaveWithGModeSetup": {}
-      }
+      },
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 26,
+  "nextNotableId": 1
 }

@@ -5,23 +5,36 @@
   "area": "Maridia",
   "subarea": "Inner",
   "subsubarea": "Pink",
-  "playable": true,
   "roomAddress": "0x7D54D",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
       "name": "Top Sand Entrance",
       "nodeType": "entrance",
       "nodeSubType": "sandpit",
-      "nodeAddress": "0x001a6d8"
+      "nodeAddress": "0x001a6d8",
+      "doorOrientation": "up",
+      "mapTileMask": [
+        [2],
+        [1]
+      ]
     },
     {
       "id": 2,
       "name": "Bottom Sand Exit",
       "nodeType": "exit",
       "nodeSubType": "sandpit",
-      "nodeAddress": "0x001a6e4"
+      "nodeAddress": "0x001a6e4",
+      "doorOrientation": "down",
+      "mapTileMask": [
+        [1],
+        [2]
+      ]
     }
   ],
   "enemies": [
@@ -50,34 +63,35 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
+        "h_CrystalFlash"
       ],
+      "flashSuitChecked": true,
       "devNote": "A 10 Power Bomb Crystal Flash strat may also be possible here, but it seems tricky to ensure that health-bomb won't interfere."
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
       ],
-      "gModeRegainMobility": {}
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "G-Mode",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -85,17 +99,24 @@
         },
         "comesThroughToilet": "any"
       },
-      "requires": [],
+      "requires": [
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
+        ]}
+      ],
       "exitCondition": {
         "leaveWithGMode": {
           "morphed": false
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": "Samus will fall quickly. Fall through the room slightly right of center to avoid the Bulls."
     },
     {
+      "id": 5,
       "link": [1, 2],
       "name": "G-Mode Morph",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -103,20 +124,31 @@
         },
         "comesThroughToilet": "any"
       },
-      "requires": [],
+      "requires": [
+        {"or": [
+          "canTrickyDodgeEnemies",
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
+        ]}
+      ],
       "exitCondition": {
         "leaveWithGMode": {
           "morphed": true
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": "Samus will fall quickly. Fall through the room slightly right of center to avoid the Bulls."
     },
     {
+      "id": 6,
       "link": [2, 2],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 7,
+  "nextNotableId": 1
 }

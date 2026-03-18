@@ -4,9 +4,11 @@
   "name": "Forgotten Highway Elbow",
   "area": "Crateria",
   "subarea": "East",
-  "playable": true,
   "roomAddress": "0x795A8",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018aa2",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -22,21 +28,10 @@
       "nodeType": "door",
       "nodeSubType": "yellow",
       "nodeAddress": "0x0018aba",
+      "doorOrientation": "down",
       "doorEnvironments": [{"physics": "air"}],
-      "locks": [
-        {
-          "name": "Forgotten Highway Elbow Yellow Lock (to Elevator)",
-          "lockType": "coloredDoor",
-          "unlockStrats": [
-            {
-              "name": "Base",
-              "notable": false,
-              "requires": [
-                "h_canOpenYellowDoors"
-              ]
-            }
-          ]
-        }
+      "mapTileMask": [
+        [2]
       ]
     }
   ],
@@ -59,6 +54,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -70,96 +66,165 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 54
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 54},
         "canShinechargeMovement"
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 11,
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shineChargeFrames": 55}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 5,
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "left"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 12,
+      "link": [1, 2],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
+      "requires": [
+        "canMoonfall"
+      ],
+      "bypassesDoorShell": true,
+      "flashSuitChecked": true,
+      "note": [
+        "Enter the room with enough stored fall speed to clip through 2 tiles.",
+        "Perform a moonfall right-to-left near the edge of the ledge, to reach the slope below.",
+        "Then moonfall again from on top of the door, to clip down through it."
+      ],
+      "detailNote": [
+        "If moonfalling from the very edge, Samus will clip down into the floor below the slope, and Grapple can be used to stand back up.",
+        "Alternatively, moonfall slightly further from the edge, to clip down below the ledge, ending up flush with the top of the slope;",
+        "in this case, be careful to release left quickly after initiating the moonfall, to avoid tripping on the slope;",
+        "it is safest to stand up by holding right, then moonwalk while traversing the slope.",
+        "Performing the final moonfall while over the edge of door can be useful to avoid carrying stored fall speed into the next room."
       ]
     },
     {
+      "id": 6,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 7,
       "link": [2, 1],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 60
-        },
+        "comeInShinecharged": {},
         "comesThroughToilet": "no"
       },
       "requires": [
+        {"shineChargeFrames": 60},
         "canShinechargeMovement"
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 8,
       "link": [2, 1],
       "name": "Carry Shinecharge (through Toilet)",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 65
-        },
+        "comeInShinecharged": {},
         "comesThroughToilet": "yes"
       },
       "requires": [
+        {"shineChargeFrames": 65},
         "canShinechargeMovement"
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 9,
       "link": [2, 2],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     },
     {
+      "id": 10,
       "link": [2, 2],
       "name": "Shinespark",
       "entranceCondition": {
@@ -171,5 +236,8 @@
       ],
       "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 13,
+  "nextNotableId": 1
 }

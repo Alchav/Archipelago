@@ -4,9 +4,11 @@
   "name": "Homing Geemer Room",
   "area": "Crateria",
   "subarea": "East",
-  "playable": true,
   "roomAddress": "0x7968F",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018b26",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -22,7 +28,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018b32",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     }
   ],
   "enemies": [],
@@ -44,6 +54,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -55,6 +66,7 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Leave with Runway, Open Both Doors",
       "requires": [
@@ -69,18 +81,34 @@
       "unlocksDoors": [{"nodeId": 2, "types": ["ammo"], "requires": []}]
     },
     {
+      "id": 20,
+      "link": [1, 1],
+      "name": "Homing Geemer Farm",
+      "requires": [
+        "canUseGrapple",
+        "canTrickyJump",
+        {"cycleFrames": 150}
+      ],
+      "farmCycleDrops": [{"enemy": "Geemer (orange)", "count": 1}],
+      "note": ["Jump, aim up, and fire Grapple mid-air to clip the beam through the ceiling."]
+    },
+    {
+      "id": 3,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 5,
       "link": [1, 2],
       "name": "Come in Shinecharging, Leave Shinecharged",
       "entranceCondition": {
@@ -89,29 +117,28 @@
           "openEnd": 0
         }
       },
-      "requires": [],
+      "requires": [
+        {"shineChargeFrames": 20}
+      ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 160
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 6,
       "link": [1, 2],
       "name": "Come In Shinecharged, Leave With Spark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 10
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
-        {"shinespark": {
-          "frames": 21
-        }}
+        {"shineChargeFrames": 10},
+        {"shinespark": {"frames": 21}}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -119,28 +146,47 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 7,
       "link": [1, 2],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 55
-        }
+        "comeInShinecharged": {}
       },
-      "requires": [],
+      "requires": [
+        {"shineChargeFrames": 55}
+      ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 8,
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 12,
+          "openEnd": 0
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 9,
       "link": [1, 2],
       "name": "Transition with Stored Fall Speed",
       "entranceCondition": {
@@ -157,9 +203,11 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 10,
       "link": [1, 2],
       "name": "Transition with Stored Fall Speed (more speed)",
       "entranceCondition": {
@@ -176,14 +224,17 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 11,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 12,
       "link": [2, 1],
       "name": "Come in Shinecharging, Leave Shinecharged",
       "entranceCondition": {
@@ -192,29 +243,28 @@
           "openEnd": 0
         }
       },
-      "requires": [],
+      "requires": [
+        {"shineChargeFrames": 20}
+      ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 160
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 13,
       "link": [2, 1],
       "name": "Come In Shinecharged, Leave With Spark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 10
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
-        {"shinespark": {
-          "frames": 21
-        }}
+        {"shineChargeFrames": 10},
+        {"shinespark": {"frames": 21}}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -222,28 +272,47 @@
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 14,
       "link": [2, 1],
       "name": "Carry Shinecharge",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 55
-        }
+        "comeInShinecharged": {}
       },
-      "requires": [],
+      "requires": [
+        {"shineChargeFrames": 55}
+      ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": "auto"
-        }
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 15,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 12,
+          "openEnd": 0
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 16,
       "link": [2, 1],
       "name": "Transition with Stored Fall Speed",
       "entranceCondition": {
@@ -260,9 +329,11 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 17,
       "link": [2, 1],
       "name": "Transition with Stored Fall Speed (more speed)",
       "entranceCondition": {
@@ -279,9 +350,11 @@
       "unlocksDoors": [
         {"types": ["missiles", "super"], "requires": []},
         {"types": ["powerbomb"], "requires": ["never"]}
-      ]
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 18,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -293,6 +366,7 @@
       }
     },
     {
+      "id": 19,
       "link": [2, 2],
       "name": "Leave with Runway, Open Both Doors",
       "requires": [
@@ -306,5 +380,8 @@
       },
       "unlocksDoors": [{"nodeId": 1, "types": ["ammo"], "requires": []}]
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 21,
+  "nextNotableId": 1
 }

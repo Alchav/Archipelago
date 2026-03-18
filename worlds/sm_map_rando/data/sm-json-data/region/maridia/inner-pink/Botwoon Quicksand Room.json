@@ -5,41 +5,62 @@
   "area": "Maridia",
   "subarea": "Inner",
   "subsubarea": "Pink",
-  "playable": true,
   "roomAddress": "0x7D898",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
       "name": "Top Left Sand Entrance",
       "nodeType": "entrance",
-      "nodeSubType": "sandpit"
+      "nodeSubType": "sandpit",
+      "doorOrientation": "up",
+      "mapTileMask": [
+        [2, 1]
+      ]
     },
     {
       "id": 2,
       "name": "Bottom Left Sand Exit",
       "nodeType": "exit",
       "nodeSubType": "sandpit",
-      "nodeAddress": "0x001a8ac"
+      "nodeAddress": "0x001a8ac",
+      "doorOrientation": "down",
+      "mapTileMask": [
+        [2, 1]
+      ]
     },
     {
       "id": 3,
       "name": "Top Right Sand Entrance",
       "nodeType": "entrance",
-      "nodeSubType": "sandpit"
+      "nodeSubType": "sandpit",
+      "doorOrientation": "up",
+      "mapTileMask": [
+        [1, 2]
+      ]
     },
     {
       "id": 4,
       "name": "Bottom Right Sand Exit",
       "nodeType": "exit",
       "nodeSubType": "sandpit",
-      "nodeAddress": "0x001a8b8"
+      "nodeAddress": "0x001a8b8",
+      "doorOrientation": "down",
+      "mapTileMask": [
+        [1, 2]
+      ]
     },
     {
       "id": 5,
       "name": "Hidden Morph Tunnel Junction",
       "nodeType": "junction",
-      "nodeSubType": "junction"
+      "nodeSubType": "junction",
+      "mapTileMask": [
+        [2, 2]
+      ]
     }
   ],
   "enemies": [
@@ -93,26 +114,25 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
       ],
-      "gModeRegainMobility": {}
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
     },
     {
+      "id": 2,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "G-Mode",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -125,12 +145,14 @@
         "leaveWithGMode": {
           "morphed": false
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": "Samus falls so quickly that it is unlikely that the Bulls will cause any problem."
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "G-Mode Morph",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -143,12 +165,14 @@
         "leaveWithGMode": {
           "morphed": true
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": "Samus falls so quickly that it is unlikely that the Bulls will cause any problem."
     },
     {
+      "id": 5,
       "link": [1, 4],
       "name": "G-Mode Morph, Through the Hidden Tunnel",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -157,71 +181,76 @@
         "comesThroughToilet": "any"
       },
       "requires": [
+        "canComplexGMode",
+        "canInsaneJump",
         {"or": [
-          {"enemyDamage": {
-            "enemy": "Bull",
-            "type": "contact",
-            "hits": 1
-          }},
-          "h_canArtificialMorphPowerBomb"
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}},
+          {"and": [
+            "h_artificialMorphPowerBomb",
+            {"or": [
+              "h_additionalBomb",
+              "h_artificialMorphMovement"
+            ]}
+          ]}
         ]}
       ],
       "exitCondition": {
         "leaveWithGMode": {
           "morphed": true
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": [
+        "Enter the room on the right side and land on the ledge just below the hidden tunnel then Power Bomb boost to get into the tunnel and kil the Bulls.",
+        "Alternatively, enter the room near the right with a bit of right momentum and land directly in the tunnel while taking a Bull hit."
+      ],
+      "devNote": [
+        "This room does not have water, so Samus can be boosted by bomb boosts without Gravity after PLMs are overloaded.",
+        "It is possible to do this with 1 Power Bomb, but it is very precise and significantly depends on room entry."
+      ]
     },
     {
+      "id": 6,
       "link": [1, 5],
-      "name": "Base",
+      "name": "Pass Through Hidden Tunnel",
       "entranceCondition": {
         "comeInNormally": {},
         "comesThroughToilet": "no"
       },
       "requires": [
-        "Morph",
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }},
+        {"notable": "Pass Through Hidden Tunnel"},
+        "canPrepareForNextRoom",
+        "can4HighMidAirMorph",
+        {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}},
         {"or": [
-          "canPrepareForNextRoom",
-          "canCarefulJump"
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}},
+          "h_usePowerBomb"
         ]}
+      ],
+      "note": [
+        "If the room above has a narrow sand exit, then spin jump through the transition pressing against the wall,",
+        "continue holding right to reach the wall above the tunnel,",
+        "then perform a tight mid-air morph and hold right to pass through the tunnel.",
+        "If Samus falls below the tunnel, even to the ledge just below, it will no longer be possible to reach."
+      ],
+      "devNote": [
+        "FIXME: Depending on the room above, the 'can4HighMidAirMorph' requirement might be unnecessary.",
+        "FIXME: Entering through the Toilet can be possible with a lateral mid-air and enough run speed from an air room above."
       ]
     },
     {
-      "link": [1, 5],
-      "name": "Pass Through Toilet",
-      "entranceCondition": {
-        "comeInNormally": {},
-        "comesThroughToilet": "any"
-      },
-      "requires": [
-        "canLateralMidAirMorph",
-        "canPrepareForNextRoom",
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }}
-      ],
-      "note": "Mid Air Morph before reaching the door transition, and without hitting a wall, in order to drift into the Morph tunnel quickly enough."
-    },
-    {
+      "id": 8,
       "link": [2, 2],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     },
     {
+      "id": 9,
       "link": [3, 2],
       "name": "G-Mode Morph, Through the Hidden Tunnel",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -230,42 +259,54 @@
         "comesThroughToilet": "any"
       },
       "requires": [
+        "canComplexGMode",
+        "canInsaneJump",
         {"or": [
-          {"enemyDamage": {
-            "enemy": "Bull",
-            "type": "contact",
-            "hits": 1
-          }},
-          "h_canArtificialMorphPowerBomb"
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}},
+          {"and": [
+            "h_artificialMorphPowerBomb",
+            {"or": [
+              "h_additionalBomb",
+              "h_artificialMorphMovement"
+            ]}
+          ]}
         ]}
       ],
       "exitCondition": {
         "leaveWithGMode": {
           "morphed": true
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": [
+        "Enter the room on the left side and land on the ledge just below the hidden tunnel then Power Bomb boost to get into the tunnel and kil the Bulls.",
+        "Alternatively, enter the room near the left with a bit of left momentum and land directly in the tunnel while taking a Bull hit."
+      ],
+      "devNote": [
+        "This room does not have water, so Samus can be boosted by bomb boosts without Gravity after PLMs are overloaded.",
+        "It is possible to do this with 1 Power Bomb, but it is very precise and significantly depends on room entry."
+      ]
     },
     {
+      "id": 10,
       "link": [3, 3],
       "name": "G-Mode Regain Mobility",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}}
       ],
-      "gModeRegainMobility": {}
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
     },
     {
+      "id": 11,
       "link": [3, 4],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 12,
       "link": [3, 4],
       "name": "G-Mode",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -278,12 +319,14 @@
         "leaveWithGMode": {
           "morphed": false
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": "Samus falls so quickly that it is unlikely that the Bulls will cause any problem."
     },
     {
+      "id": 13,
       "link": [3, 4],
       "name": "G-Mode Morph",
-      "notable": false,
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -296,55 +339,50 @@
         "leaveWithGMode": {
           "morphed": true
         }
-      }
+      },
+      "flashSuitChecked": true,
+      "note": "Samus falls so quickly that it is unlikely that the Bulls will cause any problem."
     },
     {
+      "id": 14,
       "link": [3, 5],
-      "name": "Base",
+      "name": "Pass Through Hidden Tunnel",
       "entranceCondition": {
         "comeInNormally": {},
         "comesThroughToilet": "no"
       },
       "requires": [
-        "Morph",
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }},
+        {"notable": "Pass Through Hidden Tunnel"},
+        "canPrepareForNextRoom",
+        "can4HighMidAirMorph",
+        {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}},
         {"or": [
-          "canPrepareForNextRoom",
-          "canCarefulJump"
+          {"enemyDamage": {"enemy": "Bull", "type": "contact", "hits": 1}},
+          "h_usePowerBomb"
         ]}
+      ],
+      "note": [
+        "If the room above has a narrow sand exit, then spin jump through the transition pressing against the wall,",
+        "continue holding left to reach the wall above the tunnel,",
+        "then perform a tight mid-air morph and hold left to pass through the tunnel.",
+        "If Samus falls below the tunnel, even to the ledge just below, it will no longer be possible to reach."
+      ],
+      "devNote": [
+        "FIXME: Depending on the room above, the 'can4HighMidAirMorph' requirement might be unnecessary.",
+        "FIXME: Entering through the Toilet can be possible with a lateral mid-air and enough run speed from an air room above."
       ]
     },
     {
-      "link": [3, 5],
-      "name": "Pass Through Toilet",
-      "entranceCondition": {
-        "comeInNormally": {},
-        "comesThroughToilet": "any"
-      },
-      "requires": [
-        "canLateralMidAirMorph",
-        "canPrepareForNextRoom",
-        {"enemyDamage": {
-          "enemy": "Bull",
-          "type": "contact",
-          "hits": 1
-        }}
-      ],
-      "note": "Mid Air Morph before reaching the door transition, and without hitting a wall, in order to drift into the Morph tunnel quickly enough."
-    },
-    {
+      "id": 16,
       "link": [4, 4],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     },
     {
+      "id": 17,
       "link": [5, 2],
       "name": "Base",
       "requires": [
@@ -352,6 +390,7 @@
       ]
     },
     {
+      "id": 18,
       "link": [5, 4],
       "name": "Base",
       "requires": [
@@ -359,11 +398,25 @@
       ]
     },
     {
+      "id": 19,
       "link": [5, 5],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    }
+  ],
+  "notables": [
+    {
+      "id": 1,
+      "name": "Pass Through Hidden Tunnel",
+      "note": [
+        "Enter the room in a prepared way to pass through the hidden tunnel, which may require tricky movement to reach.",
+        "If Samus falls below the tunnel, even to the ledge just below, it will no longer be possible to reach."
       ]
     }
-  ]
+  ],
+  "nextStratId": 20,
+  "nextNotableId": 2
 }

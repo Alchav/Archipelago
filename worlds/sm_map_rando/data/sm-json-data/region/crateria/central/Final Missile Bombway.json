@@ -4,9 +4,11 @@
   "name": "Final Missile Bombway",
   "area": "Crateria",
   "subarea": "Central",
-  "playable": true,
   "roomAddress": "0x79A44",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018c82",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2, 1]
+      ]
     },
     {
       "id": 2,
@@ -22,7 +28,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0018c8e",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1, 2]
+      ]
     }
   ],
   "enemies": [],
@@ -44,6 +54,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -55,23 +66,30 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": [
-        "Morph"
+        {"or": [
+          "canMidAirMorph",
+          "h_useSpringBall",
+          "h_bombThings"
+        ]}
       ]
     },
     {
+      "id": 4,
       "link": [1, 2],
-      "name": "Final Missile Bombway Shinespark",
-      "notable": true,
+      "name": "Shinespark",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 2,
@@ -79,8 +97,9 @@
         }
       },
       "requires": [
-        "Morph",
+        "canMidAirMorph",
         "canShinechargeMovementTricky",
+        {"shineChargeFrames": 175},
         {"shinespark": {"frames": 7}}
       ],
       "exitCondition": {
@@ -96,13 +115,69 @@
       "devNote": "There doesn't appear to be enough time to spark out in a 'top' position."
     },
     {
-      "link": [2, 1],
-      "name": "Base",
+      "id": 17,
+      "link": [1, 2],
+      "name": "Come in Speedballing, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInSpeedballing": {
+          "runway": {
+            "length": 3,
+            "openEnd": 0
+          },
+          "maxExtraRunSpeed": "$3.8"
+        }
+      },
       "requires": [
-        "h_canBombThings"
+        "canChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "devNote": [
+        "Higher speeds could work, up to at least about $4.4, but with greater difficulty."
       ]
     },
     {
+      "id": 18,
+      "link": [1, 2],
+      "name": "Come in Shinecharging, Leave With Temporary Blue (Spring Ball Bounce)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canSpringBallBounce",
+        "canInsaneJump"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Unmorph immediately after exiting the tunnel while still descending, to continue chaining temporary blue.",
+        "The frame window for the unmorph depends on the alignment of Samus' bounces;",
+        "in the worst case where Samus bounces upward while exiting, this method will unavoidably fail."
+      ],
+      "devNote": [
+        "FIXME: The canInsaneJump is for difficulty placement for the unmorph while exiting the tunnel;",
+        "it may be better to introduce a specific tech for this?",
+        "Doing a 'canPauseRemorphTemporaryBlue' is technically an alternative, but it seems to be significantly harder."
+      ]
+    },
+    {
+      "id": 5,
+      "link": [2, 1],
+      "name": "Base",
+      "requires": [
+        "h_bombThings"
+      ]
+    },
+    {
+      "id": 6,
       "link": [2, 1],
       "name": "Speedball",
       "entranceCondition": {
@@ -116,8 +191,33 @@
       "requires": []
     },
     {
+      "id": 19,
       "link": [2, 1],
-      "name": "Temporary Blue Bounce",
+      "name": "Come in Speedballing, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInSpeedballing": {
+          "runway": {
+            "length": 3,
+            "openEnd": 0
+          },
+          "maxExtraRunSpeed": "$3.8"
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "devNote": [
+        "Higher speeds could work, up to at least about $4.4, but with greater difficulty."
+      ]
+    },
+    {
+      "id": 7,
+      "link": [2, 1],
+      "name": "Temporary Blue Bounce (Come in Shinecharging)",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 2,
@@ -128,11 +228,69 @@
         "canTemporaryBlue",
         "canSpringBallBounce"
       ],
+      "flashSuitChecked": true,
       "devNote": "There is 1 unusable tile in this runway."
     },
     {
+      "id": 8,
       "link": [2, 1],
-      "name": "G-mode Morph with Bombs",
+      "name": "Temporary Blue Bounce (Come in With Blue Spring Ball Bounce)",
+      "entranceCondition": {
+        "comeInWithBlueSpringBallBounce": {
+          "movementType": "controlled"
+        }
+      },
+      "requires": [
+        "canInsaneJump"
+      ]
+    },
+    {
+      "id": 9,
+      "link": [2, 1],
+      "name": "Temporary Blue Bounce (Come in With Temporary Blue)",
+      "entranceCondition": {
+        "comeInWithTemporaryBlue": {}
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canSpringBallBounce"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 20,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue (Spring Ball Bounce)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 2,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue",
+        "canSpringBallBounce",
+        "canInsaneJump"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {}
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "note": [
+        "Unmorph immediately after exiting the tunnel while still descending, to continue chaining temporary blue.",
+        "The frame window for the unmorph depends on the alignment of Samus' bounces;",
+        "in the worst case where Samus bounces upward while exiting, this method will unavoidably fail."
+      ],
+      "devNote": [
+        "FIXME: The canInsaneJump is for difficulty placement for the unmorph while exiting the tunnel;",
+        "it may be better to introduce a specific tech for this?",
+        "Doing a 'canPauseRemorphTemporaryBlue' is technically an alternative, but it seems to be significantly harder."
+      ]
+    },
+    {
+      "id": 10,
+      "link": [2, 1],
+      "name": "G-Mode Morph with Bombs",
       "entranceCondition": {
         "comeInWithGMode": {
           "mode": "any",
@@ -140,11 +298,13 @@
         }
       },
       "requires": [
-        "h_canArtificialMorphBombs"
+        "h_artificialMorphBombs"
       ],
+      "flashSuitChecked": true,
       "note": "Repeatedly bomb the crumble blocks until the PLMs are overloaded."
     },
     {
+      "id": 11,
       "link": [2, 1],
       "name": "Grapple Teleport",
       "entranceCondition": {
@@ -155,6 +315,53 @@
       "requires": []
     },
     {
+      "id": 12,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12], [3, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 13,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 14,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 15,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -166,11 +373,16 @@
       }
     },
     {
+      "id": 16,
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 21,
+  "nextNotableId": 2
 }

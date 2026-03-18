@@ -1,5 +1,6 @@
 [
     {
+        "room_id": 7,
         "name": "The Moat",
         "area": 0,
         "rom_address": 497151,
@@ -18,6 +19,7 @@
         "heated": false
     },
     {
+        "room_id": 8,
         "name": "Landing Site",
         "area": 0,
         "rom_address": 496120,
@@ -40,12 +42,14 @@
             [4, [[6, 2], [7, 2], [8, 2], [6, 3], [7, 3], [8, 3], [6, 4], [7, 4], [8, 4]]],
             [5, [[3, 3], [4, 3], [5, 3], [3, 4], [4, 4], [5, 4], [6, 4]]],
             [6, [[4, 4]]],
-            [7, [[2, 2], [2, 3], [2, 4]]]
+            [7, [[2, 2], [2, 3], [2, 4]]],
+            [8, [[3, 3], [4, 3], [5, 3], [3, 4], [4, 4], [5, 4], [6, 4]]]
         ],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 9,
         "name": "Crateria Tube",
         "area": 0,
         "rom_address": 497108,
@@ -64,6 +68,7 @@
         "heated": false
     },
     {
+        "room_id": 10,
         "name": "Parlor And Alcatraz",
         "area": 0,
         "rom_address": 496381,
@@ -96,6 +101,7 @@
         "heated": false
     },
     {
+        "room_id": 11,
         "name": "Climb",
         "area": 0,
         "rom_address": 497338,
@@ -117,6 +123,7 @@
         "heated": false
     },
     {
+        "room_id": 12,
         "name": "Pit Room",
         "area": 0,
         "rom_address": 497500,
@@ -135,6 +142,7 @@
         "heated": false
     },
     {
+        "room_id": 13,
         "name": "Flyway",
         "area": 0,
         "rom_address": 497785,
@@ -153,6 +161,7 @@
         "heated": false
     },
     {
+        "room_id": 14,
         "name": "Pre-Map Flyway",
         "area": 0,
         "rom_address": 497890,
@@ -171,6 +180,7 @@
         "heated": false
     },
     {
+        "room_id": 15,
         "name": "Crateria Map Room",
         "area": 0,
         "rom_address": 498068,
@@ -186,6 +196,7 @@
         "heated": false
     },
     {
+        "room_id": 16,
         "name": "Crateria Save Room",
         "area": 0,
         "rom_address": 496597,
@@ -201,6 +212,7 @@
         "heated": false
     },
     {
+        "room_id": 17,
         "name": "The Final Missile",
         "area": 0,
         "rom_address": 498320,
@@ -216,6 +228,7 @@
         "heated": false
     },
     {
+        "room_id": 18,
         "name": "Final Missile Bombway",
         "area": 0,
         "rom_address": 498244,
@@ -234,6 +247,7 @@
         "heated": false
     },
     {
+        "room_id": 19,
         "name": "Bomb Torizo Room",
         "area": 0,
         "rom_address": 497668,
@@ -244,11 +258,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 0, "y": 0, "addr": 492548}],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]], [3, [[0, 0]]], [4, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 20,
         "name": "Terminator Room",
         "area": 0,
         "rom_address": 497933,
@@ -267,6 +282,7 @@
         "heated": false
     },
     {
+        "room_id": 21,
         "name": "Green Pirates Shaft",
         "area": 0,
         "rom_address": 498109,
@@ -282,11 +298,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[0, 1]],
         "items": [{"x": 0, "y": 1, "addr": 492650}, {"x": 0, "y": 1, "addr": 492644}],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 4], [0, 5]]], [3, [[0, 6]]], [4, [[0, 6]]], [5, [[0, 1]]], [6, [[0, 1]]], [8, [[0, 1]]], [9, [[0, 2], [0, 3]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 4], [0, 5]]], [3, [[0, 6]]], [4, [[0, 6]]], [5, [[0, 1]]], [6, [[0, 1]]], [8, [[0, 1]]], [9, [[0, 2], [0, 3]]], [10, [[0, 4], [0, 5]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 22,
         "name": "Lower Mushrooms",
         "area": 0,
         "rom_address": 498025,
@@ -305,6 +322,7 @@
         "heated": false
     },
     {
+        "room_id": 23,
         "name": "Green Brinstar Elevator Room",
         "area": 0,
         "rom_address": 497976,
@@ -323,6 +341,7 @@
         "heated": false
     },
     {
+        "room_id": 24,
         "name": "Crateria Kihunter Room",
         "area": 0,
         "rom_address": 496780,
@@ -342,6 +361,7 @@
         "heated": false
     },
     {
+        "room_id": 26,
         "name": "Statues Hallway",
         "area": 0,
         "rom_address": 501229,
@@ -360,6 +380,7 @@
         "heated": false
     },
     {
+        "room_id": 25,
         "name": "Red Brinstar Elevator Room",
         "area": 0,
         "rom_address": 497194,
@@ -378,6 +399,7 @@
         "heated": false
     },
     {
+        "room_id": 306,
         "name": "Blue Brinstar Elevator Room",
         "area": 0,
         "rom_address": 497589,
@@ -396,6 +418,7 @@
         "heated": false
     },
     {
+        "room_id": 27,
         "name": "Statues Room",
         "area": 0,
         "rom_address": 501354,
@@ -409,11 +432,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1], [0, 2], [0, 3], [0, 4]]], [3, [[0, 0]]], [4, [[0, 1]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1], [0, 2], [0, 3], [0, 4]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 28,
         "name": "Crateria Power Bomb Room",
         "area": 0,
         "rom_address": 496554,
@@ -429,6 +453,7 @@
         "heated": false
     },
     {
+        "room_id": 29,
         "name": "Crateria Super Room",
         "area": 0,
         "rom_address": 498169,
@@ -442,11 +467,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [{"x": 3, "y": 0, "addr": 492664}],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 7], [1, 7], [2, 7]]], [3, [[3, 0]]], [4, [[1, 0], [2, 0]]], [5, [[3, 7], [3, 6], [3, 5], [3, 4], [3, 3], [3, 2], [3, 1]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 7], [1, 7], [2, 7]]], [3, [[3, 0]]], [4, [[1, 0], [2, 0]]], [5, [[3, 7], [3, 6], [3, 5], [3, 4], [3, 3], [3, 2], [3, 1]]], [6, [[3, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 30,
         "name": "Gauntlet Entrance",
         "area": 0,
         "rom_address": 496307,
@@ -465,6 +491,7 @@
         "heated": false
     },
     {
+        "room_id": 31,
         "name": "Gauntlet Energy Tank Room",
         "area": 0,
         "rom_address": 497243,
@@ -483,6 +510,7 @@
         "heated": false
     },
     {
+        "room_id": 32,
         "name": "West Ocean",
         "area": 0,
         "rom_address": 496638,
@@ -509,17 +537,23 @@
             [4, [[5, 3]]],
             [5, [[6, 4], [7, 4]]],
             [6, [[1, 2], [2, 2]]],
+            [7, [[5, 2]]],
+            [8, [[5, 2]]],
             [9, [[0, 0], [1, 0], [2, 0], [3, 0]]],
             [10, [[0, 2]]],
             [11, [[0, 5], [1, 5]]],
             [12, [[4, 0], [5, 0], [6, 0], [7, 0], [0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1]]],
             [13, [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [2, 5], [3, 5], [4, 5], [5, 5], [6, 5], [7, 5]]],
-            [14, [[0, 2]]]
+            [14, [[0, 2]]],
+            [15, [[0, 4]]],
+            [16, [[0, 4]]],
+            [17, [[0, 4]]]
         ],
         "twin_node_tiles": [[1, [[5, 2]]], [2, [[5, 2]]]],
         "heated": false
     },
     {
+        "room_id": 33,
         "name": "Bowling Alley Path",
         "area": 0,
         "rom_address": 496737,
@@ -538,6 +572,7 @@
         "heated": false
     },
     {
+        "room_id": 34,
         "name": "East Ocean",
         "area": 0,
         "rom_address": 496893,
@@ -556,6 +591,7 @@
         "heated": false
     },
     {
+        "room_id": 35,
         "name": "Forgotten Highway Kago Room",
         "area": 0,
         "rom_address": 496978,
@@ -574,6 +610,7 @@
         "heated": false
     },
     {
+        "room_id": 36,
         "name": "Crab Maze",
         "area": 0,
         "rom_address": 497021,
@@ -592,6 +629,7 @@
         "heated": false
     },
     {
+        "room_id": 37,
         "name": "Forgotten Highway Elevator",
         "area": 0,
         "rom_address": 496844,
@@ -610,6 +648,7 @@
         "heated": false
     },
     {
+        "room_id": 305,
         "name": "Forgotten Highway Elbow",
         "area": 0,
         "rom_address": 497064,
@@ -628,6 +667,7 @@
         "heated": false
     },
     {
+        "room_id": 66,
         "name": "Red Tower",
         "area": 1,
         "rom_address": 500307,
@@ -644,11 +684,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 4], [0, 5], [0, 6]]], [2, [[0, 6]]], [3, [[0, 9]]], [4, [[0, 9]]], [5, [[0, 0]]], [6, [[0, 7]]], [7, [[0, 8]]], [8, [[0, 9]]], [9, [[0, 1], [0, 2], [0, 3]]]],
+        "node_tiles": [[1, [[0, 4], [0, 5], [0, 6]]], [2, [[0, 6]]], [3, [[0, 9]]], [4, [[0, 9]]], [5, [[0, 0]]], [6, [[0, 7]]], [7, [[0, 8], [0, 9]]], [9, [[0, 1], [0, 2], [0, 3]]], [10, [[0, 4]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 67,
         "name": "Red Brinstar Fireflea Room",
         "area": 1,
         "rom_address": 500371,
@@ -662,11 +703,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0]]], [2, [[3, 0], [4, 0], [4, 1], [5, 0], [5, 1], [6, 0], [7, 0]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0], [2, 0], [3, 0]]], [2, [[4, 0], [4, 1], [5, 0], [5, 1], [6, 0], [7, 0]]], [3, [[3, 0]]], [4, [[0, 1], [1, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 68,
         "name": "X-Ray Scope Room",
         "area": 1,
         "rom_address": 500430,
@@ -682,6 +724,7 @@
         "heated": false
     },
     {
+        "room_id": 69,
         "name": "Bat Room",
         "area": 1,
         "rom_address": 500701,
@@ -700,6 +743,7 @@
         "heated": false
     },
     {
+        "room_id": 70,
         "name": "Below Spazer",
         "area": 1,
         "rom_address": 500744,
@@ -719,6 +763,7 @@
         "heated": false
     },
     {
+        "room_id": 71,
         "name": "Spazer Room",
         "area": 1,
         "rom_address": 500807,
@@ -734,6 +779,7 @@
         "heated": false
     },
     {
+        "room_id": 74,
         "name": "Hellway",
         "area": 1,
         "rom_address": 500471,
@@ -752,6 +798,7 @@
         "heated": false
     },
     {
+        "room_id": 75,
         "name": "Caterpillar Room",
         "area": 1,
         "rom_address": 500514,
@@ -769,11 +816,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [],
-        "node_tiles": [[1, [[0, 3]]], [2, [[0, 5]]], [3, [[0, 6], [0, 7]]], [4, [[0, 4]]], [5, [[1, 3], [2, 3]]], [6, [[0, 0], [0, 1], [0, 2]]]],
+        "node_tiles": [[1, [[0, 3]]], [2, [[0, 5]]], [3, [[0, 6], [0, 7]]], [4, [[0, 4]]], [5, [[1, 3], [2, 3]]], [6, [[0, 0], [0, 1], [0, 2]]], [7, [[1, 3], [2, 3]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 76,
         "name": "Alpha Power Bomb Room",
         "area": 1,
         "rom_address": 500654,
@@ -789,6 +837,7 @@
         "heated": false
     },
     {
+        "room_id": 77,
         "name": "Beta Power Bomb Room",
         "area": 1,
         "rom_address": 500604,
@@ -799,11 +848,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 0, "y": 1, "addr": 493770}],
-        "node_tiles": [[1, [[1, 0]]], [2, [[0, 1]]], [3, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[0, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 320,
         "name": "Caterpillar Save Room",
         "area": 1,
         "rom_address": 501556,
@@ -819,6 +869,7 @@
         "heated": false
     },
     {
+        "room_id": 319,
         "name": "Sloaters Refill",
         "area": 1,
         "rom_address": 501272,
@@ -834,6 +885,7 @@
         "heated": false
     },
     {
+        "room_id": 38,
         "name": "Morph Ball Room",
         "area": 1,
         "rom_address": 499359,
@@ -848,11 +900,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 4, "y": 2, "addr": 493278}, {"x": 2, "y": 2, "addr": 493388}],
-        "node_tiles": [[1, [[0, 2], [1, 2]]], [2, [[5, 2], [5, 1], [5, 0]]], [3, [[6, 2], [7, 2]]], [4, [[4, 2]]], [5, [[2, 2], [3, 2]]], [6, [[1, 2]]]],
+        "node_tiles": [[1, [[0, 2], [1, 2]]], [2, [[5, 2], [5, 1], [5, 0]]], [3, [[6, 2], [7, 2]]], [4, [[4, 2]]], [5, [[2, 2], [3, 2]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 39,
         "name": "Construction Zone",
         "area": 1,
         "rom_address": 499473,
@@ -872,6 +925,7 @@
         "heated": false
     },
     {
+        "room_id": 40,
         "name": "First Missile Room",
         "area": 1,
         "rom_address": 499975,
@@ -887,6 +941,7 @@
         "heated": false
     },
     {
+        "room_id": 41,
         "name": "Blue Brinstar Energy Tank Room",
         "area": 1,
         "rom_address": 499556,
@@ -900,11 +955,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 1, "y": 2, "addr": 493470}, {"x": 2, "y": 2, "addr": 493464}],
-        "node_tiles": [[1, [[0, 2], [1, 2]]], [2, [[2, 0]]], [3, [[1, 2]]], [4, [[2, 2], [2, 1]]]],
+        "node_tiles": [[1, [[0, 2], [1, 2]]], [2, [[2, 0]]], [3, [[1, 2]]], [4, [[2, 2], [2, 1]]], [5, [[0, 2], [1, 2], [2, 2]]], [6, [[0, 2], [1, 2], [2, 2]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 42,
         "name": "Blue Brinstar Boulder Room",
         "area": 1,
         "rom_address": 500141,
@@ -918,11 +974,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[1, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[1, 0]]], [3, [[1, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 43,
         "name": "Billy Mays Room",
         "area": 1,
         "rom_address": 500184,
@@ -938,6 +995,7 @@
         "heated": false
     },
     {
+        "room_id": 44,
         "name": "Green Brinstar Main Shaft",
         "area": 1,
         "rom_address": 498393,
@@ -980,6 +1038,7 @@
         "heated": false
     },
     {
+        "room_id": 45,
         "name": "Early Supers Room",
         "area": 1,
         "rom_address": 498632,
@@ -993,11 +1052,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 1, "y": 1, "addr": 492824}, {"x": 0, "y": 0, "addr": 492830}],
-        "node_tiles": [[1, [[0, 1]]], [2, [[2, 1]]], [3, [[1, 1]]], [4, [[0, 0], [1, 0], [2, 0]]], [5, [[1, 1]]]],
+        "node_tiles": [[1, [[0, 1]]], [2, [[2, 1]]], [3, [[1, 1]]], [4, [[0, 0], [1, 0], [2, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 46,
         "name": "Brinstar Reserve Tank Room",
         "area": 1,
         "rom_address": 498695,
@@ -1013,6 +1073,7 @@
         "heated": false
     },
     {
+        "room_id": 47,
         "name": "Brinstar Pre-Map Room",
         "area": 1,
         "rom_address": 498589,
@@ -1031,6 +1092,7 @@
         "heated": false
     },
     {
+        "room_id": 48,
         "name": "Brinstar Map Room",
         "area": 1,
         "rom_address": 498741,
@@ -1046,6 +1108,7 @@
         "heated": false
     },
     {
+        "room_id": 49,
         "name": "Green Brinstar Fireflea Room",
         "area": 1,
         "rom_address": 498782,
@@ -1064,6 +1127,7 @@
         "heated": false
     },
     {
+        "room_id": 316,
         "name": "Green Brinstar Missile Refill",
         "area": 1,
         "rom_address": 498825,
@@ -1079,6 +1143,7 @@
         "heated": false
     },
     {
+        "room_id": 314,
         "name": "Green Brinstar Main Shaft Save Room",
         "area": 1,
         "rom_address": 500225,
@@ -1094,6 +1159,7 @@
         "heated": false
     },
     {
+        "room_id": 315,
         "name": "Etecoon Save Room",
         "area": 1,
         "rom_address": 500266,
@@ -1109,6 +1175,7 @@
         "heated": false
     },
     {
+        "room_id": 50,
         "name": "Green Brinstar Beetom Room",
         "area": 1,
         "rom_address": 499685,
@@ -1127,6 +1194,7 @@
         "heated": false
     },
     {
+        "room_id": 51,
         "name": "Etecoon Energy Tank Room",
         "area": 1,
         "rom_address": 499729,
@@ -1147,6 +1215,7 @@
         "heated": false
     },
     {
+        "room_id": 52,
         "name": "Etecoon Super Room",
         "area": 1,
         "rom_address": 499793,
@@ -1162,6 +1231,7 @@
         "heated": false
     },
     {
+        "room_id": 54,
         "name": "Green Hill Zone",
         "area": 1,
         "rom_address": 499282,
@@ -1176,11 +1246,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 3, "y": 1, "addr": 493174}],
-        "node_tiles": [[1, [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2], [3, 2], [4, 2], [4, 3], [5, 2], [5, 3]]], [2, [[1, 0]]], [3, [[6, 3], [7, 3]]], [4, [[3, 1]]]],
+        "node_tiles": [[1, [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2], [3, 2], [4, 2], [4, 3], [5, 2], [5, 3]]], [2, [[1, 0]]], [3, [[6, 3], [7, 3]]], [4, [[3, 1]]], [5, [[2, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 55,
         "name": "Noob Bridge",
         "area": 1,
         "rom_address": 499642,
@@ -1199,6 +1270,7 @@
         "heated": false
     },
     {
+        "room_id": 56,
         "name": "Spore Spawn Kihunter Room",
         "area": 1,
         "rom_address": 499100,
@@ -1217,6 +1289,7 @@
         "heated": false
     },
     {
+        "room_id": 57,
         "name": "Spore Spawn Room",
         "area": 1,
         "rom_address": 499143,
@@ -1230,11 +1303,12 @@
         "durable_part_connections": [[1, 0]],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[0, 2]]], [3, [[0, 2]]]],
+        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[0, 2]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 58,
         "name": "Dachora Room",
         "area": 1,
         "rom_address": 498867,
@@ -1254,6 +1328,7 @@
         "heated": false
     },
     {
+        "room_id": 317,
         "name": "Dachora Energy Refill",
         "area": 1,
         "rom_address": 499835,
@@ -1269,6 +1344,7 @@
         "heated": false
     },
     {
+        "room_id": 59,
         "name": "Big Pink",
         "area": 1,
         "rom_address": 498969,
@@ -1303,12 +1379,13 @@
             [11, [[2, 6]]],
             [12, [[2, 7]]],
             [13, [[2, 0], [3, 0], [2, 1], [3, 1], [2, 2], [3, 2], [2, 3], [3, 3], [2, 4], [3, 4], [2, 5], [3, 5], [2, 6]]],
-            [14, [[2, 4]]]
+            [15, [[3, 6]]]
         ],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 318,
         "name": "Big Pink Save Room",
         "area": 1,
         "rom_address": 500100,
@@ -1324,6 +1401,7 @@
         "heated": false
     },
     {
+        "room_id": 60,
         "name": "Pink Brinstar Power Bomb Room",
         "area": 1,
         "rom_address": 499217,
@@ -1342,6 +1420,7 @@
         "heated": false
     },
     {
+        "room_id": 61,
         "name": "Pink Brinstar Hopper Room",
         "area": 1,
         "rom_address": 500016,
@@ -1355,11 +1434,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[1, 0], [1, 1]]]],
+        "node_tiles": [[1, [[0, 1]]], [2, [[1, 0], [1, 1]]], [3, [[0, 0]]], [4, [[0, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 62,
         "name": "Hopper Energy Tank Room",
         "area": 1,
         "rom_address": 500059,
@@ -1375,6 +1455,7 @@
         "heated": false
     },
     {
+        "room_id": 63,
         "name": "Spore Spawn Super Room",
         "area": 1,
         "rom_address": 498523,
@@ -1393,6 +1474,7 @@
         "heated": false
     },
     {
+        "room_id": 64,
         "name": "Spore Spawn Farming Room",
         "area": 1,
         "rom_address": 499876,
@@ -1411,6 +1493,7 @@
         "heated": false
     },
     {
+        "room_id": 65,
         "name": "Waterway Energy Tank Room",
         "area": 1,
         "rom_address": 499922,
@@ -1421,11 +1504,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 0, "y": 0, "addr": 493562}],
-        "node_tiles": [[1, [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0]]], [2, [[0, 0]]]],
+        "node_tiles": [[1, [[3, 0], [4, 0], [5, 0], [6, 0]]], [2, [[0, 0], [1, 0], [2, 0]]], [3, [[1, 0], [2, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 78,
         "name": "Warehouse Entrance",
         "area": 1,
         "rom_address": 501409,
@@ -1445,6 +1529,7 @@
         "heated": false
     },
     {
+        "room_id": 79,
         "name": "Warehouse Zeela Room",
         "area": 1,
         "rom_address": 500849,
@@ -1464,6 +1549,7 @@
         "heated": false
     },
     {
+        "room_id": 80,
         "name": "Warehouse Energy Tank Room",
         "area": 1,
         "rom_address": 500913,
@@ -1479,6 +1565,7 @@
         "heated": false
     },
     {
+        "room_id": 81,
         "name": "Warehouse Kihunter Room",
         "area": 1,
         "rom_address": 500954,
@@ -1493,11 +1580,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 2, "y": 0, "addr": 494060}],
-        "node_tiles": [[1, [[0, 0], [1, 0], [2, 0]]], [2, [[1, 1]]], [3, [[3, 0]]], [4, [[2, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[1, 1]]], [3, [[3, 0]]], [4, [[2, 0]]], [5, [[1, 0], [2, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 300,
         "name": "Kraid Save Room",
         "area": 1,
         "rom_address": 501515,
@@ -1513,6 +1601,7 @@
         "heated": false
     },
     {
+        "room_id": 82,
         "name": "Baby Kraid Room",
         "area": 1,
         "rom_address": 501025,
@@ -1531,6 +1620,7 @@
         "heated": false
     },
     {
+        "room_id": 83,
         "name": "Kraid Eye Door Room",
         "area": 1,
         "rom_address": 501099,
@@ -1550,6 +1640,7 @@
         "heated": false
     },
     {
+        "room_id": 301,
         "name": "Kraid Recharge Station",
         "area": 1,
         "rom_address": 501313,
@@ -1565,6 +1656,7 @@
         "heated": false
     },
     {
+        "room_id": 84,
         "name": "Kraid Room",
         "area": 1,
         "rom_address": 501151,
@@ -1578,11 +1670,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 1]]], [2, [[1, 1]]], [3, [[0, 0], [1, 0], [0, 1], [1, 1]]]],
+        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[1, 0], [1, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 85,
         "name": "Varia Suit Room",
         "area": 1,
         "rom_address": 501474,
@@ -1598,6 +1691,7 @@
         "heated": false
     },
     {
+        "room_id": 169,
         "name": "West Glass Tube Tunnel",
         "area": 4,
         "rom_address": 511828,
@@ -1616,6 +1710,7 @@
         "heated": false
     },
     {
+        "room_id": 200,
         "name": "Boyon Gate Hall",
         "area": 4,
         "rom_address": 511872,
@@ -1635,6 +1730,7 @@
         "heated": false
     },
     {
+        "room_id": 170,
         "name": "Glass Tunnel",
         "area": 4,
         "rom_address": 511739,
@@ -1650,11 +1746,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 1]]], [2, [[0, 2]]], [3, [[0, 1]]], [4, [[0, 0]]], [5, [[0, 1]]], [6, [[0, 0], [0, 1]]], [7, [[0, 1]]]],
+        "node_tiles": [[1, [[0, 1]]], [2, [[0, 2]]], [3, [[0, 1]]], [4, [[0, 0]]], [5, [[0, 1]]], [6, [[0, 0], [0, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 171,
         "name": "Glass Tunnel Save Room",
         "area": 4,
         "rom_address": 511698,
@@ -1670,6 +1767,7 @@
         "heated": false
     },
     {
+        "room_id": 172,
         "name": "Main Street",
         "area": 4,
         "rom_address": 511945,
@@ -1701,6 +1799,7 @@
         "heated": false
     },
     {
+        "room_id": 173,
         "name": "Fish Tank",
         "area": 4,
         "rom_address": 512023,
@@ -1716,20 +1815,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [
-            [1, [[0, 2]]],
-            [2, [[1, 2], [2, 2], [3, 2]]],
-            [3, [[3, 0]]],
-            [4, [[0, 0], [0, 1]]],
-            [5, [[0, 0]]],
-            [6, [[1, 0], [1, 1], [2, 0], [2, 1], [3, 1]]],
-            [7, [[3, 0]]],
-            [8, [[0, 0], [0, 1]]]
-        ],
+        "node_tiles": [[1, [[0, 2]]], [2, [[1, 2], [2, 2], [3, 2]]], [3, [[3, 0]]], [4, [[0, 0], [0, 1]]], [5, [[0, 0]]], [6, [[1, 0], [1, 1], [2, 0], [2, 1], [3, 1]]], [7, [[3, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 174,
         "name": "Mt. Everest",
         "area": 4,
         "rom_address": 512185,
@@ -1758,12 +1849,14 @@
             [8, [[1, 1], [2, 1]]],
             [9, [[2, 0], [3, 0], [2, 1], [3, 1]]],
             [10, [[4, 1], [5, 1]]],
-            [11, [[0, 1], [1, 0], [1, 1]]]
+            [11, [[0, 1], [1, 0], [1, 1]]],
+            [12, [[1, 2]]]
         ],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 175,
         "name": "Crab Shaft",
         "area": 4,
         "rom_address": 512419,
@@ -1778,11 +1871,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 2]]], [2, [[0, 3], [1, 3]]], [3, [[0, 0], [0, 1]]]],
+        "node_tiles": [[1, [[0, 2]]], [2, [[0, 3], [1, 3]]], [3, [[0, 0]]], [4, [[0, 0], [0, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 176,
         "name": "Crab Tunnel",
         "area": 4,
         "rom_address": 512138,
@@ -1801,6 +1895,7 @@
         "heated": false
     },
     {
+        "room_id": 177,
         "name": "Red Fish Room",
         "area": 4,
         "rom_address": 512260,
@@ -1814,11 +1909,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[2, 0], [2, 1]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[2, 1]]], [3, [[2, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 178,
         "name": "Mama Turtle Room",
         "area": 4,
         "rom_address": 512085,
@@ -1829,11 +1925,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 1, "y": 0, "addr": 509053}, {"x": 2, "y": 1, "addr": 509059}],
-        "node_tiles": [[1, [[0, 3], [1, 3], [2, 3]]], [2, [[1, 0], [2, 0]]], [3, [[1, 1], [2, 1], [1, 2], [2, 2]]]],
+        "node_tiles": [[1, [[0, 3], [1, 3], [2, 3]]], [2, [[1, 0]]], [3, [[2, 1]]], [4, [[1, 2], [2, 2]]], [5, [[1, 1]]], [6, [[2, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 179,
         "name": "Pseudo Plasma Spark Room",
         "area": 4,
         "rom_address": 512477,
@@ -1852,6 +1949,7 @@
         "heated": false
     },
     {
+        "room_id": 180,
         "name": "Northwest Maridia Bug Room",
         "area": 4,
         "rom_address": 512365,
@@ -1865,11 +1963,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [0, 1], [1, 1]]], [2, [[2, 1], [3, 1]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[3, 1]]], [3, [[0, 1], [1, 1], [2, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 181,
         "name": "Watering Hole",
         "area": 4,
         "rom_address": 512315,
@@ -1880,11 +1979,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 0, "y": 2, "addr": 509103}, {"x": 0, "y": 2, "addr": 509109}],
-        "node_tiles": [[1, [[0, 0], [1, 0], [0, 1]]], [2, [[0, 2]]], [3, [[0, 2]]], [4, [[0, 2]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0], [0, 1]]], [2, [[0, 2]]], [3, [[0, 2]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 182,
         "name": "Aqueduct Save Room",
         "area": 4,
         "rom_address": 513893,
@@ -1900,6 +2000,7 @@
         "heated": false
     },
     {
+        "room_id": 183,
         "name": "Aqueduct",
         "area": 4,
         "rom_address": 513447,
@@ -1926,12 +2027,15 @@
             [6, [[0, 0]]],
             [7, [[4, 0]]],
             [8, [[5, 0]]],
-            [9, [[0, 0], [1, 0], [2, 0], [1, 1], [2, 1], [2, 1]]]
+            [9, [[0, 0], [1, 0], [2, 0], [1, 1], [2, 1], [2, 1]]],
+            [10, [[0, 2]]],
+            [11, [[0, 2]]]
         ],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 321,
         "name": "Toilet",
         "area": 4,
         "rom_address": 513032,
@@ -1950,6 +2054,7 @@
         "heated": false
     },
     {
+        "room_id": 184,
         "name": "Botwoon Hallway",
         "area": 4,
         "rom_address": 513559,
@@ -1968,6 +2073,7 @@
         "heated": false
     },
     {
+        "room_id": 185,
         "name": "Botwoon's Room",
         "area": 4,
         "rom_address": 514398,
@@ -1981,11 +2087,12 @@
         "durable_part_connections": [[0, 1]],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[1, 0]]], [3, [[0, 0]]], [4, [[0, 0]]], [5, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[1, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 186,
         "name": "Botwoon Energy Tank Room",
         "area": 4,
         "rom_address": 514020,
@@ -2006,6 +2113,7 @@
         "heated": false
     },
     {
+        "room_id": 187,
         "name": "Halfie Climb Room",
         "area": 4,
         "rom_address": 514323,
@@ -2026,6 +2134,7 @@
         "heated": false
     },
     {
+        "room_id": 188,
         "name": "Maridia Missile Refill Room",
         "area": 4,
         "rom_address": 514117,
@@ -2041,6 +2150,7 @@
         "heated": false
     },
     {
+        "room_id": 189,
         "name": "Colosseum",
         "area": 4,
         "rom_address": 513834,
@@ -2060,6 +2170,7 @@
         "heated": false
     },
     {
+        "room_id": 190,
         "name": "Draygon Save Room",
         "area": 4,
         "rom_address": 514074,
@@ -2073,11 +2184,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]], [3, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 191,
         "name": "Maridia Health Refill Room",
         "area": 4,
         "rom_address": 514516,
@@ -2093,6 +2205,7 @@
         "heated": false
     },
     {
+        "room_id": 192,
         "name": "The Precious Room",
         "area": 4,
         "rom_address": 513935,
@@ -2111,6 +2224,7 @@
         "heated": false
     },
     {
+        "room_id": 193,
         "name": "Draygon's Room",
         "area": 4,
         "rom_address": 514656,
@@ -2124,11 +2238,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 1], [1, 1]]], [2, [[0, 0], [1, 0]]], [3, [[0, 1], [1, 1]]]],
+        "node_tiles": [[1, [[0, 1], [1, 1]]], [2, [[0, 0], [1, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 194,
         "name": "Space Jump Room",
         "area": 4,
         "rom_address": 514474,
@@ -2144,6 +2259,7 @@
         "heated": false
     },
     {
+        "room_id": 195,
         "name": "West Cactus Alley Room",
         "area": 4,
         "rom_address": 514558,
@@ -2162,6 +2278,7 @@
         "heated": false
     },
     {
+        "room_id": 196,
         "name": "East Cactus Alley Room",
         "area": 4,
         "rom_address": 514603,
@@ -2175,11 +2292,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[4, 1]]], [3, [[0, 1]]], [4, [[1, 0], [1, 1], [2, 0], [2, 1], [3, 0], [3, 1], [4, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[4, 1]]], [3, [[0, 1]]], [4, [[3, 0], [4, 0]]], [5, [[2, 0], [2, 1], [3, 1]]], [6, [[1, 0], [1, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 197,
         "name": "Plasma Spark Room",
         "area": 4,
         "rom_address": 512832,
@@ -2195,11 +2313,19 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 2], [1, 0], [1, 1], [1, 2], [1, 3]]], [2, [[1, 4], [1, 5], [2, 4], [2, 5], [3, 4], [3, 5]]], [3, [[2, 2], [3, 2], [2, 3], [3, 3]]], [4, [[2, 1]]], [5, [[2, 0]]]],
+        "node_tiles": [
+            [1, [[0, 2], [1, 0], [1, 1], [1, 2], [1, 3]]],
+            [2, [[1, 4], [1, 5], [2, 4], [2, 5], [3, 4], [3, 5]]],
+            [3, [[2, 2], [3, 2], [2, 3], [3, 3]]],
+            [4, [[2, 1]]],
+            [5, [[2, 0]]],
+            [6, [[2, 1]]]
+        ],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 198,
         "name": "Oasis",
         "area": 4,
         "rom_address": 513166,
@@ -2219,6 +2345,7 @@
         "heated": false
     },
     {
+        "room_id": 199,
         "name": "West Sand Hall",
         "area": 4,
         "rom_address": 513121,
@@ -2233,11 +2360,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[2, 0], [3, 0]]], [3, [[1, 0], [2, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[3, 0]]], [3, [[2, 0]]], [4, [[2, 0]]], [5, [[1, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 202,
         "name": "West Sand Hall Tunnel",
         "area": 4,
         "rom_address": 512594,
@@ -2256,6 +2384,7 @@
         "heated": false
     },
     {
+        "room_id": 203,
         "name": "Maridia Map Room",
         "area": 4,
         "rom_address": 512950,
@@ -2271,6 +2400,7 @@
         "heated": false
     },
     {
+        "room_id": 204,
         "name": "Botwoon Quicksand Room",
         "area": 4,
         "rom_address": 514200,
@@ -2291,6 +2421,7 @@
         "heated": false
     },
     {
+        "room_id": 205,
         "name": "Below Botwoon Energy Tank",
         "area": 4,
         "rom_address": 513789,
@@ -2310,6 +2441,7 @@
         "heated": false
     },
     {
+        "room_id": 206,
         "name": "West Aqueduct Quicksand Room",
         "area": 4,
         "rom_address": 513357,
@@ -2328,6 +2460,7 @@
         "heated": false
     },
     {
+        "room_id": 207,
         "name": "East Aqueduct Quicksand Room",
         "area": 4,
         "rom_address": 513402,
@@ -2346,6 +2479,7 @@
         "heated": false
     },
     {
+        "room_id": 208,
         "name": "East Sand Hole",
         "area": 4,
         "rom_address": 513310,
@@ -2359,11 +2493,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [{"x": 0, "y": 0, "addr": 509419}, {"x": 1, "y": 1, "addr": 509425}],
-        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[1, 1]]], [3, [[0, 0]]], [4, [[1, 0]]]],
+        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[1, 1]]], [3, [[0, 0]]], [4, [[1, 0]]], [5, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 209,
         "name": "West Sand Hole",
         "area": 4,
         "rom_address": 513263,
@@ -2382,6 +2517,7 @@
         "heated": false
     },
     {
+        "room_id": 210,
         "name": "East Sand Hall",
         "area": 4,
         "rom_address": 513218,
@@ -2401,6 +2537,7 @@
         "heated": false
     },
     {
+        "room_id": 211,
         "name": "Bug Sand Hole",
         "area": 4,
         "rom_address": 513075,
@@ -2415,11 +2552,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[0, 1]],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]], [3, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]], [3, [[0, 0]]], [4, [[0, 0]]], [5, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 212,
         "name": "Plasma Beach Quicksand Room",
         "area": 4,
         "rom_address": 514158,
@@ -2438,6 +2576,7 @@
         "heated": false
     },
     {
+        "room_id": 213,
         "name": "Butterfly Room",
         "area": 4,
         "rom_address": 513516,
@@ -2457,6 +2596,7 @@
         "heated": false
     },
     {
+        "room_id": 214,
         "name": "Thread The Needle Room",
         "area": 4,
         "rom_address": 512729,
@@ -2475,6 +2615,7 @@
         "heated": false
     },
     {
+        "room_id": 215,
         "name": "Maridia Elevator Room",
         "area": 4,
         "rom_address": 512779,
@@ -2489,11 +2630,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 5]]], [2, [[0, 4]]], [3, [[0, 0], [0, 1], [0, 2], [0, 3]]]],
+        "node_tiles": [[1, [[0, 5]]], [2, [[0, 4]]], [3, [[0, 0], [0, 1], [0, 2], [0, 3]]], [4, [[0, 3]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 216,
         "name": "Forgotten Highway Save Room",
         "area": 4,
         "rom_address": 512991,
@@ -2509,6 +2651,7 @@
         "heated": false
     },
     {
+        "room_id": 217,
         "name": "Kassiuz Room",
         "area": 4,
         "rom_address": 512903,
@@ -2527,6 +2670,7 @@
         "heated": false
     },
     {
+        "room_id": 218,
         "name": "Plasma Tutorial Room",
         "area": 4,
         "rom_address": 512638,
@@ -2545,6 +2689,7 @@
         "heated": false
     },
     {
+        "room_id": 219,
         "name": "Plasma Room",
         "area": 4,
         "rom_address": 512682,
@@ -2560,6 +2705,7 @@
         "heated": false
     },
     {
+        "room_id": 220,
         "name": "Pants Room",
         "area": 4,
         "rom_address": 513606,
@@ -2580,6 +2726,7 @@
         "heated": false
     },
     {
+        "room_id": 222,
         "name": "Shaktool Room",
         "area": 4,
         "rom_address": 514245,
@@ -2593,11 +2740,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[2, 0], [3, 0]]], [3, [[1, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[1, 0], [2, 0], [3, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 223,
         "name": "Spring Ball Room",
         "area": 4,
         "rom_address": 513744,
@@ -2613,6 +2761,7 @@
         "heated": false
     },
     {
+        "room_id": 201,
         "name": "Crab Hole",
         "area": 4,
         "rom_address": 512540,
@@ -2628,11 +2777,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[0, 1]]], [4, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[0, 1]]], [4, [[0, 0]]], [5, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 132,
         "name": "Main Hall",
         "area": 2,
         "rom_address": 504374,
@@ -2647,11 +2797,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 2], [1, 2], [2, 2], [3, 2]]], [2, [[5, 2], [6, 2], [7, 2]]], [3, [[4, 2]]], [4, [[4, 0], [4, 1], [4, 2]]]],
+        "node_tiles": [[1, [[0, 2], [1, 2], [2, 2], [3, 2]]], [2, [[5, 2], [6, 2], [7, 2]]], [4, [[4, 0], [4, 1], [4, 2]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 133,
         "name": "Fast Pillars Setup Room",
         "area": 2,
         "rom_address": 504741,
@@ -2672,6 +2823,7 @@
         "heated": true
     },
     {
+        "room_id": 134,
         "name": "Pillar Room",
         "area": 2,
         "rom_address": 504919,
@@ -2690,6 +2842,7 @@
         "heated": true
     },
     {
+        "room_id": 135,
         "name": "The Worst Room In The Game",
         "area": 2,
         "rom_address": 505005,
@@ -2709,6 +2862,7 @@
         "heated": true
     },
     {
+        "room_id": 136,
         "name": "Amphitheatre",
         "area": 2,
         "rom_address": 505061,
@@ -2727,13 +2881,13 @@
             [2, [[1, 0], [2, 0], [3, 0]]],
             [3, [[1, 2], [2, 2], [3, 2], [1, 3], [2, 3], [3, 3], [1, 4], [2, 4], [3, 4]]],
             [4, [[1, 1], [2, 1], [3, 1]]],
-            [5, [[0, 2], [0, 3], [0, 4]]],
-            [6, [[0, 1]]]
+            [5, [[0, 2], [0, 3], [0, 4]]]
         ],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 137,
         "name": "Red Kihunter Shaft",
         "area": 2,
         "rom_address": 505221,
@@ -2754,6 +2908,7 @@
         "heated": true
     },
     {
+        "room_id": 312,
         "name": "Red Kihunter Shaft Save Room",
         "area": 2,
         "rom_address": 505665,
@@ -2769,6 +2924,7 @@
         "heated": false
     },
     {
+        "room_id": 138,
         "name": "Wasteland",
         "area": 2,
         "rom_address": 505301,
@@ -2782,11 +2938,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 0, "y": 0, "addr": 495808}],
-        "node_tiles": [[1, [[1, 2], [1, 1]]], [2, [[4, 0], [5, 0]]], [3, [[0, 0]]], [4, [[1, 0], [2, 0], [3, 0]]], [5, [[1, 0]]], [6, [[1, 0]]], [7, [[3, 0]]]],
+        "node_tiles": [[1, [[1, 2], [1, 1]]], [2, [[5, 0]]], [3, [[0, 0]]], [4, [[1, 0], [2, 0], [3, 0]]], [5, [[1, 0]]], [6, [[1, 0]]], [7, [[3, 0]]], [8, [[4, 0], [5, 0]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 139,
         "name": "Metal Pirates Room",
         "area": 2,
         "rom_address": 505387,
@@ -2805,6 +2962,7 @@
         "heated": true
     },
     {
+        "room_id": 140,
         "name": "Plowerhouse Room",
         "area": 2,
         "rom_address": 504962,
@@ -2823,6 +2981,7 @@
         "heated": true
     },
     {
+        "room_id": 141,
         "name": "Lower Norfair Farming Room",
         "area": 2,
         "rom_address": 504698,
@@ -2836,11 +2995,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[1, 0], [2, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[2, 0]]], [3, [[1, 0]]], [4, [[2, 0]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 142,
         "name": "Ridley's Room",
         "area": 2,
         "rom_address": 504622,
@@ -2859,6 +3019,7 @@
         "heated": true
     },
     {
+        "room_id": 143,
         "name": "Ridley Tank Room",
         "area": 2,
         "rom_address": 505496,
@@ -2874,6 +3035,7 @@
         "heated": true
     },
     {
+        "room_id": 144,
         "name": "Mickey Mouse Room",
         "area": 2,
         "rom_address": 504842,
@@ -2887,11 +3049,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [{"x": 2, "y": 1, "addr": 495408}],
-        "node_tiles": [[1, [[0, 3]]], [2, [[3, 0]]], [3, [[2, 1]]], [4, [[3, 1]]], [5, [[3, 1]]], [6, [[3, 3], [3, 2]]], [7, [[1, 3], [2, 3]]], [8, [[0, 3]]], [9, [[3, 2]]]],
+        "node_tiles": [[1, [[0, 3]]], [2, [[3, 0]]], [3, [[2, 1]]], [4, [[3, 1]]], [6, [[3, 3], [3, 2]]], [7, [[1, 3], [2, 3]]], [9, [[3, 2]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 145,
         "name": "Lower Norfair Fireflea Room",
         "area": 2,
         "rom_address": 505582,
@@ -2911,6 +3074,7 @@
         "heated": false
     },
     {
+        "room_id": 146,
         "name": "Lower Norfair Spring Ball Maze Room",
         "area": 2,
         "rom_address": 505104,
@@ -2925,11 +3089,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[0, 1]],
         "items": [{"x": 2, "y": 0, "addr": 495562}],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[4, 0]]], [3, [[0, 1], [1, 1]]], [4, [[2, 0]]], [5, [[3, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[4, 0]]], [3, [[1, 1]]], [4, [[2, 0]]], [5, [[3, 0]]], [6, [[1, 0]]], [7, [[0, 1]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 147,
         "name": "Lower Norfair Escape Power Bomb Room",
         "area": 2,
         "rom_address": 505178,
@@ -2948,6 +3113,7 @@
         "heated": true
     },
     {
+        "room_id": 148,
         "name": "Three Musketeers' Room",
         "area": 2,
         "rom_address": 505430,
@@ -2966,6 +3132,7 @@
         "heated": true
     },
     {
+        "room_id": 149,
         "name": "Acid Statue Room",
         "area": 2,
         "rom_address": 504293,
@@ -2984,6 +3151,7 @@
         "heated": true
     },
     {
+        "room_id": 150,
         "name": "Golden Torizo's Room",
         "area": 2,
         "rom_address": 504451,
@@ -2997,11 +3165,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[0, 1]],
         "items": [{"x": 0, "y": 0, "addr": 495214}, {"x": 1, "y": 0, "addr": 495220}],
-        "node_tiles": [[1, [[0, 0]]], [2, [[1, 1]]], [3, [[0, 0]]], [4, [[1, 0]]], [5, [[0, 1], [1, 1]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[1, 1]]], [3, [[0, 0]]], [4, [[1, 0]]], [5, [[0, 1], [1, 1]]], [6, [[0, 1], [1, 1]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 151,
         "name": "Screw Attack Room",
         "area": 2,
         "rom_address": 505537,
@@ -3021,6 +3190,7 @@
         "heated": true
     },
     {
+        "room_id": 152,
         "name": "Golden Torizo Energy Recharge",
         "area": 2,
         "rom_address": 504581,
@@ -3036,6 +3206,7 @@
         "heated": false
     },
     {
+        "room_id": 153,
         "name": "Fast Ripper Room",
         "area": 2,
         "rom_address": 504538,
@@ -3054,6 +3225,7 @@
         "heated": true
     },
     {
+        "room_id": 86,
         "name": "Business Center",
         "area": 2,
         "rom_address": 501726,
@@ -3077,6 +3249,7 @@
         "heated": false
     },
     {
+        "room_id": 87,
         "name": "Norfair Map Room",
         "area": 2,
         "rom_address": 503988,
@@ -3092,6 +3265,7 @@
         "heated": false
     },
     {
+        "room_id": 88,
         "name": "Hi Jump Energy Tank Room",
         "area": 2,
         "rom_address": 502337,
@@ -3105,11 +3279,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 1, "y": 0, "addr": 494572}, {"x": 0, "y": 0, "addr": 494566}],
-        "node_tiles": [[1, [[0, 1]]], [2, [[1, 0]]], [3, [[1, 0]]], [4, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 1]]], [2, [[1, 0]]], [3, [[1, 0]]], [4, [[0, 0]]], [5, [[1, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 89,
         "name": "Hi Jump Boots Room",
         "area": 2,
         "rom_address": 502245,
@@ -3125,6 +3300,7 @@
         "heated": false
     },
     {
+        "room_id": 90,
         "name": "Cathedral Entrance",
         "area": 2,
         "rom_address": 501683,
@@ -3143,6 +3319,7 @@
         "heated": true
     },
     {
+        "room_id": 91,
         "name": "Cathedral",
         "area": 2,
         "rom_address": 501640,
@@ -3161,6 +3338,7 @@
         "heated": true
     },
     {
+        "room_id": 92,
         "name": "Rising Tide",
         "area": 2,
         "rom_address": 503715,
@@ -3179,6 +3357,7 @@
         "heated": true
     },
     {
+        "room_id": 93,
         "name": "Frog Speedway",
         "area": 2,
         "rom_address": 504070,
@@ -3197,6 +3376,7 @@
         "heated": false
     },
     {
+        "room_id": 94,
         "name": "Upper Norfair Farming Room",
         "area": 2,
         "rom_address": 503666,
@@ -3216,6 +3396,7 @@
         "heated": true
     },
     {
+        "room_id": 95,
         "name": "Purple Shaft",
         "area": 2,
         "rom_address": 503519,
@@ -3235,6 +3416,7 @@
         "heated": true
     },
     {
+        "room_id": 96,
         "name": "Purple Farming Room",
         "area": 2,
         "rom_address": 503889,
@@ -3250,6 +3432,7 @@
         "heated": true
     },
     {
+        "room_id": 302,
         "name": "Frog Savestation",
         "area": 2,
         "rom_address": 504167,
@@ -3268,6 +3451,7 @@
         "heated": false
     },
     {
+        "room_id": 97,
         "name": "Bubble Mountain",
         "area": 2,
         "rom_address": 502963,
@@ -3286,11 +3470,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 1, "y": 3, "addr": 494694}],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[0, 2]]], [4, [[0, 3]]], [5, [[0, 3]]], [6, [[1, 1]]], [7, [[1, 0]]], [8, [[1, 3]]], [9, [[0, 1], [0, 2], [1, 2]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[0, 2]]], [4, [[0, 3]]], [5, [[0, 3]]], [6, [[1, 1]]], [7, [[1, 0]]], [8, [[1, 3]]], [9, [[0, 1], [0, 2], [1, 2]]], [10, [[0, 2]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 307,
         "name": "Bubble Mountain Save Room",
         "area": 2,
         "rom_address": 504029,
@@ -3306,6 +3491,7 @@
         "heated": false
     },
     {
+        "room_id": 98,
         "name": "Green Bubbles Missile Room",
         "area": 2,
         "rom_address": 502915,
@@ -3324,6 +3510,7 @@
         "heated": true
     },
     {
+        "room_id": 99,
         "name": "Norfair Reserve Tank Room",
         "area": 2,
         "rom_address": 502874,
@@ -3339,6 +3526,7 @@
         "heated": true
     },
     {
+        "room_id": 100,
         "name": "Bat Cave",
         "area": 2,
         "rom_address": 503930,
@@ -3357,6 +3545,7 @@
         "heated": true
     },
     {
+        "room_id": 101,
         "name": "Speed Booster Hall",
         "area": 2,
         "rom_address": 503024,
@@ -3370,11 +3559,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 11, "y": 1, "addr": 494708}],
-        "node_tiles": [[1, [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1], [4, 0], [4, 1], [5, 0], [5, 1]]], [2, [[6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1], [4, 0], [4, 1], [5, 0], [5, 1]]], [2, [[6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1]]], [3, [[11, 1]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 102,
         "name": "Speed Booster Room",
         "area": 2,
         "rom_address": 503067,
@@ -3390,6 +3580,7 @@
         "heated": true
     },
     {
+        "room_id": 103,
         "name": "Single Chamber",
         "area": 2,
         "rom_address": 503134,
@@ -3406,11 +3597,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 3]]], [3, [[0, 2]]], [4, [[0, 1]]], [5, [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 3]]], [3, [[0, 2]]], [4, [[0, 1]]], [5, [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0]]], [6, [[0, 0], [0, 1]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 104,
         "name": "Double Chamber",
         "area": 2,
         "rom_address": 503213,
@@ -3430,6 +3622,7 @@
         "heated": true
     },
     {
+        "room_id": 105,
         "name": "Wave Beam Room",
         "area": 2,
         "rom_address": 503262,
@@ -3445,6 +3638,7 @@
         "heated": false
     },
     {
+        "room_id": 106,
         "name": "Ice Beam Gate Room",
         "area": 2,
         "rom_address": 501781,
@@ -3460,11 +3654,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[1, 0]],
         "items": [],
-        "node_tiles": [[1, [[3, 0]]], [2, [[3, 2]]], [3, [[0, 3], [1, 3], [2, 3], [3, 3]]], [4, [[4, 2], [5, 2], [6, 2]]], [5, [[3, 2]]], [6, [[3, 0], [3, 1]]]],
+        "node_tiles": [[1, [[3, 0], [3, 1]]], [2, [[3, 2]]], [3, [[0, 3], [1, 3], [2, 3]]], [4, [[4, 2], [5, 2], [6, 2]]], [5, [[3, 2]]], [7, [[3, 3]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 107,
         "name": "Ice Beam Acid Room",
         "area": 2,
         "rom_address": 501597,
@@ -3483,6 +3678,7 @@
         "heated": true
     },
     {
+        "room_id": 108,
         "name": "Ice Beam Snake Room",
         "area": 2,
         "rom_address": 501945,
@@ -3502,6 +3698,7 @@
         "heated": true
     },
     {
+        "room_id": 109,
         "name": "Ice Beam Room",
         "area": 2,
         "rom_address": 501904,
@@ -3517,6 +3714,7 @@
         "heated": false
     },
     {
+        "room_id": 110,
         "name": "Ice Beam Tutorial Room",
         "area": 2,
         "rom_address": 501861,
@@ -3535,6 +3733,7 @@
         "heated": true
     },
     {
+        "room_id": 111,
         "name": "Crumble Shaft",
         "area": 2,
         "rom_address": 502008,
@@ -3553,6 +3752,7 @@
         "heated": true
     },
     {
+        "room_id": 308,
         "name": "Nutella Refill",
         "area": 2,
         "rom_address": 503846,
@@ -3571,6 +3771,7 @@
         "heated": false
     },
     {
+        "room_id": 112,
         "name": "Spiky Acid Snakes Tunnel",
         "area": 2,
         "rom_address": 503803,
@@ -3589,6 +3790,7 @@
         "heated": true
     },
     {
+        "room_id": 113,
         "name": "Kronic Boost Room",
         "area": 2,
         "rom_address": 503412,
@@ -3609,6 +3811,7 @@
         "heated": true
     },
     {
+        "room_id": 114,
         "name": "Magdollite Tunnel",
         "area": 2,
         "rom_address": 503476,
@@ -3627,6 +3830,7 @@
         "heated": true
     },
     {
+        "room_id": 115,
         "name": "Lava Dive Room",
         "area": 2,
         "rom_address": 503572,
@@ -3640,11 +3844,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0], [1, 1]]], [2, [[1, 2], [2, 0], [2, 1], [2, 2], [3, 0], [3, 1]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[2, 0], [3, 0], [3, 1]]], [3, [[1, 0], [1, 1]]], [4, [[1, 1], [1, 2]]], [5, [[2, 1], [2, 2]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 116,
         "name": "Volcano Room",
         "area": 2,
         "rom_address": 503346,
@@ -3663,6 +3868,7 @@
         "heated": true
     },
     {
+        "room_id": 117,
         "name": "Spiky Platforms Tunnel",
         "area": 2,
         "rom_address": 503303,
@@ -3681,6 +3887,7 @@
         "heated": true
     },
     {
+        "room_id": 118,
         "name": "Red Pirate Shaft",
         "area": 2,
         "rom_address": 504121,
@@ -3699,6 +3906,7 @@
         "heated": false
     },
     {
+        "room_id": 119,
         "name": "Acid Snakes Tunnel",
         "area": 2,
         "rom_address": 503758,
@@ -3713,11 +3921,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[3, 0]]], [3, [[2, 0], [3, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[3, 0]]], [3, [[3, 0]]], [4, [[1, 0], [2, 0]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 120,
         "name": "Crocomire Speedway",
         "area": 2,
         "rom_address": 502051,
@@ -3746,6 +3955,7 @@
         "heated": true
     },
     {
+        "room_id": 121,
         "name": "Crocomire Escape",
         "area": 2,
         "rom_address": 502286,
@@ -3764,6 +3974,7 @@
         "heated": true
     },
     {
+        "room_id": 122,
         "name": "Crocomire's Room",
         "area": 2,
         "rom_address": 502157,
@@ -3777,11 +3988,12 @@
         "durable_part_connections": [[1, 0]],
         "transient_part_connections": [],
         "items": [{"x": 7, "y": 0, "addr": 494500}],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[3, 0]]], [3, [[6, 0], [7, 0]]], [4, [[4, 0]]], [5, [[2, 0], [3, 0]]], [6, [[5, 0]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[3, 0]]], [3, [[6, 0], [7, 0]]], [4, [[2, 0], [3, 0], [4, 0], [5, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 123,
         "name": "Post Crocomire Farming Room",
         "area": 2,
         "rom_address": 502402,
@@ -3797,11 +4009,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[1, 1]]], [4, [[1, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[1, 1]]], [4, [[1, 0]]], [6, [[0, 1], [1, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 124,
         "name": "Post Crocomire Power Bomb Room",
         "area": 2,
         "rom_address": 502494,
@@ -3817,6 +4030,7 @@
         "heated": true
     },
     {
+        "room_id": 125,
         "name": "Post Crocomire Shaft",
         "area": 2,
         "rom_address": 502535,
@@ -3837,6 +4051,7 @@
         "heated": false
     },
     {
+        "room_id": 126,
         "name": "Post Crocomire Missile Room",
         "area": 2,
         "rom_address": 502587,
@@ -3852,6 +4067,7 @@
         "heated": false
     },
     {
+        "room_id": 127,
         "name": "Post Crocomire Jump Room",
         "area": 2,
         "rom_address": 502671,
@@ -3869,13 +4085,14 @@
             [1, [[0, 0], [1, 0], [0, 1], [1, 1]]],
             [2, [[5, 2], [6, 2], [7, 2]]],
             [3, [[2, 0], [2, 1], [3, 0], [3, 1], [4, 0], [4, 1]]],
-            [4, [[4, 2]]],
-            [5, [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2]]]
+            [5, [[0, 2], [1, 2], [2, 2], [3, 2], [4, 2]]],
+            [6, [[4, 2], [5, 2]]]
         ],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 128,
         "name": "Grapple Beam Room",
         "area": 2,
         "rom_address": 502827,
@@ -3889,11 +4106,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [{"x": 0, "y": 2, "addr": 494646}],
-        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[0, 2]]], [3, [[0, 2]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 2]]], [3, [[0, 2]]], [4, [[0, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 129,
         "name": "Grapple Tutorial Room 1",
         "area": 2,
         "rom_address": 502784,
@@ -3912,6 +4130,7 @@
         "heated": false
     },
     {
+        "room_id": 130,
         "name": "Grapple Tutorial Room 2",
         "area": 2,
         "rom_address": 502738,
@@ -3930,6 +4149,7 @@
         "heated": false
     },
     {
+        "room_id": 131,
         "name": "Grapple Tutorial Room 3",
         "area": 2,
         "rom_address": 502628,
@@ -3943,11 +4163,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [[0, 1]],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [0, 1], [1, 0], [1, 1], [2, 1]]], [2, [[2, 0]]], [3, [[2, 0]]]],
+        "node_tiles": [[1, [[0, 0], [0, 1]]], [2, [[2, 0]]], [3, [[2, 0]]], [4, [[1, 0], [1, 1], [2, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 303,
         "name": "Crocomire Save Room",
         "area": 2,
         "rom_address": 504210,
@@ -3963,6 +4184,7 @@
         "heated": false
     },
     {
+        "room_id": 311,
         "name": "Post Crocomire Save Room",
         "area": 2,
         "rom_address": 502453,
@@ -3978,6 +4200,7 @@
         "heated": false
     },
     {
+        "room_id": 309,
         "name": "Lower Norfair Elevator",
         "area": 2,
         "rom_address": 503615,
@@ -3992,11 +4215,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]], [3, [[0, 0]]], [4, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]], [4, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": true
     },
     {
+        "room_id": 310,
         "name": "Lower Norfair Elevator Save Room",
         "area": 2,
         "rom_address": 504251,
@@ -4012,6 +4236,7 @@
         "heated": false
     },
     {
+        "room_id": 154,
         "name": "Wrecked Ship Entrance",
         "area": 3,
         "rom_address": 510472,
@@ -4030,6 +4255,7 @@
         "heated": false
     },
     {
+        "room_id": 155,
         "name": "Wrecked Ship Main Shaft",
         "area": 3,
         "rom_address": 510710,
@@ -4053,6 +4279,7 @@
         "heated": false
     },
     {
+        "room_id": 160,
         "name": "Attic",
         "area": 3,
         "rom_address": 510546,
@@ -4072,6 +4299,7 @@
         "heated": false
     },
     {
+        "room_id": 156,
         "name": "Basement",
         "area": 3,
         "rom_address": 511087,
@@ -4091,6 +4319,7 @@
         "heated": false
     },
     {
+        "room_id": 157,
         "name": "Wrecked Ship Map Room",
         "area": 3,
         "rom_address": 511179,
@@ -4106,6 +4335,7 @@
         "heated": false
     },
     {
+        "room_id": 158,
         "name": "Phantoon's Room",
         "area": 3,
         "rom_address": 511251,
@@ -4116,11 +4346,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 0]]]],
+        "node_tiles": [[1, [[0, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 159,
         "name": "Wrecked Ship West Super Room",
         "area": 3,
         "rom_address": 511400,
@@ -4136,6 +4367,7 @@
         "heated": false
     },
     {
+        "room_id": 161,
         "name": "Bowling Alley",
         "area": 3,
         "rom_address": 510350,
@@ -4155,6 +4387,7 @@
         "heated": false
     },
     {
+        "room_id": 162,
         "name": "Gravity Suit Room",
         "area": 3,
         "rom_address": 511552,
@@ -4173,6 +4406,7 @@
         "heated": false
     },
     {
+        "room_id": 163,
         "name": "Wrecked Ship East Super Room",
         "area": 3,
         "rom_address": 511473,
@@ -4188,6 +4422,7 @@
         "heated": false
     },
     {
+        "room_id": 164,
         "name": "Sponge Bath",
         "area": 3,
         "rom_address": 511324,
@@ -4206,6 +4441,7 @@
         "heated": false
     },
     {
+        "room_id": 165,
         "name": "Spiky Death Room",
         "area": 3,
         "rom_address": 510859,
@@ -4224,6 +4460,7 @@
         "heated": false
     },
     {
+        "room_id": 166,
         "name": "Electric Death Room",
         "area": 3,
         "rom_address": 510933,
@@ -4243,6 +4480,7 @@
         "heated": false
     },
     {
+        "room_id": 167,
         "name": "Wrecked Ship Energy Tank Room",
         "area": 3,
         "rom_address": 511015,
@@ -4258,6 +4496,7 @@
         "heated": false
     },
     {
+        "room_id": 168,
         "name": "Assembly Line",
         "area": 3,
         "rom_address": 510638,
@@ -4273,6 +4512,7 @@
         "heated": false
     },
     {
+        "room_id": 304,
         "name": "Wrecked Ship Save Room",
         "area": 3,
         "rom_address": 511626,
@@ -4288,6 +4528,7 @@
         "heated": false
     },
     {
+        "room_id": 224,
         "name": "Tourian First Room",
         "area": 5,
         "rom_address": 514734,
@@ -4307,6 +4548,7 @@
         "heated": false
     },
     {
+        "room_id": 225,
         "name": "Tourian Map Room",
         "area": 5,
         "rom_address": 515867,
@@ -4322,6 +4564,7 @@
         "heated": false
     },
     {
+        "room_id": 226,
         "name": "Metroid Room 1",
         "area": 5,
         "rom_address": 514785,
@@ -4335,11 +4578,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[4, 0], [5, 0]]], [3, [[2, 0], [3, 0]]], [4, [[2, 0], [3, 0]]]],
+        "node_tiles": [[1, [[0, 0], [1, 0]]], [2, [[4, 0], [5, 0]]], [3, [[2, 0], [3, 0]]], [4, [[2, 0], [3, 0]]], [5, [[4, 0], [5, 0]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 227,
         "name": "Metroid Room 2",
         "area": 5,
         "rom_address": 514865,
@@ -4358,6 +4602,7 @@
         "heated": false
     },
     {
+        "room_id": 228,
         "name": "Metroid Room 3",
         "area": 5,
         "rom_address": 514941,
@@ -4376,6 +4621,7 @@
         "heated": false
     },
     {
+        "room_id": 229,
         "name": "Metroid Room 4",
         "area": 5,
         "rom_address": 515021,
@@ -4394,6 +4640,7 @@
         "heated": false
     },
     {
+        "room_id": 230,
         "name": "Blue Hopper Room",
         "area": 5,
         "rom_address": 515097,
@@ -4412,6 +4659,7 @@
         "heated": false
     },
     {
+        "room_id": 231,
         "name": "Dust Torizo Room",
         "area": 5,
         "rom_address": 515173,
@@ -4430,6 +4678,7 @@
         "heated": false
     },
     {
+        "room_id": 232,
         "name": "Big Boy Room",
         "area": 5,
         "rom_address": 515249,
@@ -4448,6 +4697,7 @@
         "heated": false
     },
     {
+        "room_id": 233,
         "name": "Seaweed Room",
         "area": 5,
         "rom_address": 515327,
@@ -4462,11 +4712,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[0, 1]]], [4, [[0, 1]]]],
+        "node_tiles": [[1, [[0, 0]]], [2, [[0, 1]]], [3, [[0, 1]]]],
         "twin_node_tiles": null,
         "heated": false
     },
     {
+        "room_id": 234,
         "name": "Tourian Recharge Room",
         "area": 5,
         "rom_address": 515374,
@@ -4482,6 +4733,7 @@
         "heated": false
     },
     {
+        "room_id": 235,
         "name": "Tourian Eye Door Room",
         "area": 5,
         "rom_address": 515524,
@@ -4500,6 +4752,7 @@
         "heated": false
     },
     {
+        "room_id": 236,
         "name": "Rinka Shaft",
         "area": 5,
         "rom_address": 515571,
@@ -4519,6 +4772,7 @@
         "heated": false
     },
     {
+        "room_id": 237,
         "name": "Lower Tourian Save Room",
         "area": 5,
         "rom_address": 515619,
@@ -4534,6 +4788,7 @@
         "heated": false
     },
     {
+        "room_id": 238,
         "name": "Mother Brain Room",
         "area": 5,
         "rom_address": 515416,
@@ -4552,6 +4807,7 @@
         "heated": false
     },
     {
+        "room_id": 239,
         "name": "Tourian Escape Room 1",
         "area": 5,
         "rom_address": 515661,
@@ -4570,6 +4826,7 @@
         "heated": false
     },
     {
+        "room_id": 240,
         "name": "Tourian Escape Room 2",
         "area": 5,
         "rom_address": 515706,
@@ -4588,6 +4845,7 @@
         "heated": false
     },
     {
+        "room_id": 241,
         "name": "Tourian Escape Room 3",
         "area": 5,
         "rom_address": 515751,
@@ -4606,6 +4864,7 @@
         "heated": false
     },
     {
+        "room_id": 242,
         "name": "Tourian Escape Room 4",
         "area": 5,
         "rom_address": 515806,
@@ -4619,7 +4878,12 @@
         "durable_part_connections": [],
         "transient_part_connections": [],
         "items": [],
-        "node_tiles": [[1, [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]]], [2, [[1, 1], [2, 1], [1, 2], [2, 2], [1, 3], [2, 3], [1, 4], [2, 4], [1, 5], [2, 5]]]],
+        "node_tiles": [
+            [1, [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]]],
+            [2, [[1, 1], [2, 1]]],
+            [3, [[1, 2], [2, 2], [1, 3], [2, 3], [1, 4], [2, 4], [1, 5], [2, 5]]],
+            [4, [[0, 0], [1, 0], [2, 0]]]
+        ],
         "twin_node_tiles": null,
         "heated": false
     }

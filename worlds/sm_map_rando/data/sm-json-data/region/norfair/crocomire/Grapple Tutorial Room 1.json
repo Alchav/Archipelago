@@ -5,9 +5,11 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "Crocomire",
-  "playable": true,
   "roomAddress": "0x7AC00",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +17,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00194fe",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "left",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2, 1]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +29,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001950a",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1, 2]
+      ]
     }
   ],
   "enemies": [],
@@ -45,6 +55,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -56,20 +67,24 @@
       }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 4,
       "link": [1, 2],
-      "name": "Leave Sparking",
+      "name": "Come In Shinecharging, Leave With Spark",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 9,
@@ -77,8 +92,14 @@
         }
       },
       "requires": [
-        "canShinechargeMovement",
-        {"shinespark": {"frames": 11}}
+        "canShinechargeMovementComplex",
+        {"or": [
+          {"shinespark": {"frames": 15, "excessFrames": 0}},
+          {"and": [
+            "canShinechargeMovementTricky",
+            {"shinespark": {"frames": 7, "excessFrames": 0}}
+          ]}
+        ]}
       ],
       "exitCondition": {
         "leaveWithSpark": {}
@@ -87,29 +108,49 @@
         {"types": ["super"], "requires": []},
         {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ],
-      "note": "Build some run speed to jump to the opposite runway to open the door before Shinesparking."
+      "note": [
+        "Build some run speed to jump to the opposite runway to open the door before shinesparking."
+      ]
     },
     {
-      "link": [2, 1],
-      "name": "Base",
-      "requires": []
-    },
-    {
-      "link": [2, 1],
-      "name": "Leave Shinecharged",
+      "id": 11,
+      "link": [1, 2],
+      "name": "Come In Shinecharging, Leave Shinecharged",
       "entranceCondition": {
         "comeInShinecharging": {
-          "length": 7,
-          "openEnd": 0
+          "length": 5,
+          "openEnd": 1
         }
       },
       "requires": [
-        "canShinechargeMovement"
+        "canShinechargeMovementComplex",
+        {"shineChargeFrames": 135}
       ],
       "exitCondition": {
-        "leaveShinecharged": {
-          "framesRemaining": 40
-        }
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Run into the room, using part of the runway to gain a shinecharge.",
+        "Use the remaining runway to gain speed to jump across the room and leave with a shinecharge."
+      ]
+    },
+    {
+      "id": 12,
+      "link": [1, 2],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 130},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
       },
       "unlocksDoors": [
         {"types": ["super"], "requires": []},
@@ -117,6 +158,217 @@
       ]
     },
     {
+      "id": 13,
+      "link": [1, 2],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 60},
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 25, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 14,
+      "link": [1, 2],
+      "name": "Hero Shot Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 40},
+        "canShinechargeMovementTricky",
+        "canHeroShot",
+        {"shinespark": {"frames": 35, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 5,
+      "link": [2, 1],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "id": 15,
+      "link": [2, 1],
+      "name": "Come In Shinecharging, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 8,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"or": [
+          {"shinespark": {"frames": 16, "excessFrames": 0}},
+          {"and": [
+            "canShinechargeMovementTricky",
+            {"shinespark": {"frames": 8, "excessFrames": 0}}
+          ]}
+        ]}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Build some run speed to jump to the opposite runway to open the door before shinesparking."
+      ]
+    },
+    {
+      "id": 16,
+      "link": [2, 1],
+      "name": "Come In Shinecharging, Leave Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shineChargeFrames": 135}
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ],
+      "note": [
+        "Run into the room, using part of the runway to gain a shinecharge.",
+        "Use the remaining runway to gain speed to jump across the room and leave with a shinecharge."
+      ]
+    },
+    {
+      "id": 17,
+      "link": [2, 1],
+      "name": "Carry Shinecharge",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 130},
+        "canShinechargeMovementComplex"
+      ],
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 18,
+      "link": [2, 1],
+      "name": "Come In Shinecharged, Leave With Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 60},
+        "canShinechargeMovementComplex",
+        {"shinespark": {"frames": 26, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 19,
+      "link": [2, 1],
+      "name": "Hero Shot Spark",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 40},
+        "canShinechargeMovementTricky",
+        "canHeroShot",
+        {"shinespark": {"frames": 35, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 7,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12], [3, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 8,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 9,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 10,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -127,5 +379,8 @@
         }
       }
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 20,
+  "nextNotableId": 1
 }

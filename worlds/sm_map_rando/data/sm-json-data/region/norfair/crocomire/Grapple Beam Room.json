@@ -5,9 +5,13 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "Crocomire",
-  "playable": true,
   "roomAddress": "0x7AC2B",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +19,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019522",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2],
+        [1],
+        [1]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +33,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019516",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1],
+        [1],
+        [2]
+      ]
     },
     {
       "id": 3,
@@ -31,20 +47,23 @@
       "nodeType": "item",
       "nodeSubType": "chozo",
       "nodeItem": "Grapple",
-      "nodeAddress": "0x78C36"
+      "nodeAddress": "0x78C36",
+      "mapTileMask": [
+        [1],
+        [1],
+        [2]
+      ]
     },
     {
       "id": 4,
       "name": "Junction at Top Left",
       "nodeType": "junction",
-      "nodeSubType": "junction"
-    }
-  ],
-  "obstacles": [
-    {
-      "id": "A",
-      "name": "Enter Shinecharged for Item Grab and Escape",
-      "obstacleType": "abstract"
+      "nodeSubType": "junction",
+      "mapTileMask": [
+        [1],
+        [2],
+        [1]
+      ]
     }
   ],
   "enemies": [],
@@ -53,7 +72,8 @@
       "from": 1,
       "to": [
         {"id": 1},
-        {"id": 2}
+        {"id": 2},
+        {"id": 3}
       ]
     },
     {
@@ -68,6 +88,7 @@
     {
       "from": 3,
       "to": [
+        {"id": 1},
         {"id": 2}
       ]
     },
@@ -80,6 +101,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -91,43 +113,106 @@
       }
     },
     {
+      "id": 32,
+      "link": [1, 1],
+      "name": "Leave With Side Platform",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithSidePlatform": {
+          "height": 1,
+          "runway": {
+            "length": 1,
+            "openEnd": 1
+          },
+          "obstruction": [1, 0]
+        }
+      },
+      "devNote": "Max extra run speed $0.8"
+    },
+    {
+      "id": 31,
+      "link": [1, 1],
+      "name": "Leave With Grapple Swing",
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleSwing": {
+          "blocks": [{"position": [8, 3], "note": "Closest Grapple block to the door"}]
+        }
+      }
+    },
+    {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 27,
       "link": [1, 2],
-      "name": "Come In Shinecharged for Item Grab and Escape",
+      "name": "Come In Shinecharging, Leave Shinecharged",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 165
+        "comeInShinecharging": {
+          "length": 0,
+          "openEnd": 1
         }
       },
       "requires": [
-        "canShinechargeMovementComplex"
+        "canShinechargeMovementComplex",
+        {"shineChargeFrames": 140}
       ],
-      "clearsObstacles": ["A"]
+      "exitCondition": {
+        "leaveShinecharged": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["super"],
+          "requires": [{"shineChargeFrames": 5}]
+        },
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
     },
     {
+      "id": 4,
+      "link": [1, 3],
+      "name": "Come In Shinecharging, End Shinecharged",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 0,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canShinechargeMovementComplex",
+        {"shineChargeFrames": 135}
+      ],
+      "endsWithShineCharge": true,
+      "flashSuitChecked": true
+    },
+    {
+      "id": 5,
       "link": [2, 1],
       "name": "Base",
       "requires": [
         {"or": [
           "canConsecutiveWalljump",
-          "h_canFly"
+          "SpaceJump",
+          "canLongIBJ"
         ]}
       ]
     },
     {
+      "id": 6,
       "link": [2, 1],
-      "name": "Shinespark",
+      "name": "Come In Shinecharging, Shinespark",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 9,
@@ -139,37 +224,106 @@
       ]
     },
     {
+      "id": 7,
       "link": [2, 1],
-      "name": "Enter Shinecharged Shinespark",
+      "name": "Come In Shinecharged, Shinespark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 13
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 10},
+        {"shinespark": {"frames": 40}}
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 28,
+      "link": [2, 1],
+      "name": "Come In Shinecharging, Leave With Spark (HiJump Wall Climb, Partial Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 5,
+          "openEnd": 0
         }
       },
       "requires": [
-        {"shinespark": {"frames": 40}}
+        "HiJump",
+        "canShinechargeMovementTricky",
+        "canFastWalljumpClimb",
+        {"shinespark": {"frames": 5, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ]
     },
     {
+      "id": 29,
       "link": [2, 1],
-      "name": "Shinespark Escape",
+      "name": "Come In Shinecharging, Leave With Spark (HiJump Wall Climb, Full Runway)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 9,
+          "openEnd": 0
+        }
+      },
       "requires": [
-        {"obstaclesCleared": ["A"]},
-        {"shinespark": {"frames": 40}}
+        "HiJump",
+        "canShinechargeMovementTricky",
+        "canFastWalljumpClimb",
+        "canInsaneJump",
+        {"shinespark": {"frames": 5, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
       ]
     },
     {
+      "id": 30,
+      "link": [2, 1],
+      "name": "Come In Shinecharging, Leave With Spark (Bootless Wall Climb)",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 0,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        "canShinechargeMovementTricky",
+        "canFastWalljumpClimb",
+        "canInsaneJump",
+        {"shinespark": {"frames": 5, "excessFrames": 0}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 9,
       "link": [2, 1],
       "name": "X-Ray Climb",
       "entranceCondition": {
         "comeInWithDoorStuckSetup": {}
       },
       "requires": [
-        "canXRayClimb"
+        "canLongXRayClimb"
       ],
+      "flashSuitChecked": true,
       "note": "Climb up 2 screens."
     },
     {
+      "id": 10,
       "link": [2, 1],
       "name": "Very Deep Stuck X-Ray Climb",
       "entranceCondition": {
@@ -179,15 +333,75 @@
         }
       },
       "requires": [
-        "canXRayClimb"
+        "canComplexGMode",
+        "canLongXRayClimb"
       ],
       "bypassesDoorShell": true,
+      "flashSuitChecked": true,
       "note": [
         "Enter with G-mode direct, back up to between 1 and 6 pixels from the door transition, and activate X-ray to get very deep stuck in the door.",
         "Climb up 2 screens, and perform a turnaround buffered spin-jump away from the door to trigger the transition, bypassing any lock on the door."
       ]
     },
     {
+      "id": 26,
+      "link": [2, 1],
+      "name": "Use Flash Suit",
+      "requires": [
+        {"useFlashSuit": {}},
+        {"shinespark": {"frames": 24, "excessFrames": 5}}
+      ],
+      "flashSuitChecked": true,
+      "note": "From the first platform on the left, spin jump and press against the next platform and spark up right."
+    },
+    {
+      "id": 11,
+      "link": [2, 1],
+      "name": "G-Mode Morph IBJ",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_artificialMorphLongIBJ"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 12,
+      "link": [2, 1],
+      "name": "G-Mode Morph Power Bombs and Spring Ball",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": true
+        }
+      },
+      "requires": [
+        "h_artificialMorphSpringBallBombJump",
+        {"or": [
+          "HiJump",
+          {"and": [
+            "canInsaneJump",
+            "h_artificialMorphResetFallSpeed",
+            {"ammo": {"type": "PowerBomb", "count": 3}}
+          ]}
+        ]}
+      ],
+      "flashSuitChecked": true,
+      "note": [
+        "Get to the top of the room with Spring Ball Bomb Jumps.",
+        "To cross the room, perform a Spring Ball Bomb Jump after hitting the bomb with momentum to get a larger horizontal boost, then unmorph on the descent to reset fall speed."
+      ],
+      "devNote": [
+        "The HiJump strat can only be useful if preserving a blue suit. Leniency isn't included as Samus will likely unmorph.",
+        "FIXME: Hitting the bomb with momentum should probably be a tech."
+      ]
+    },
+    {
+      "id": 13,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -199,29 +413,38 @@
       }
     },
     {
+      "id": 14,
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
-        {"obstaclesNotCleared": ["A"]},
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
-      "link": [2, 2],
-      "name": "Come In Shinecharged for Item Grab and Escape",
+      "id": 15,
+      "link": [2, 3],
+      "name": "Come In Shinecharged, End Shinecharged",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 60
-        }
+        "comeInShinecharged": {}
       },
       "requires": [
+        {"shineChargeFrames": 40},
         "canShinechargeMovementComplex"
       ],
-      "clearsObstacles": ["A"]
+      "endsWithShineCharge": true,
+      "flashSuitChecked": true
     },
     {
-      "link": [2, 2],
-      "name": "Come In Shinecharging for Item Grab and Escape",
+      "id": 18,
+      "link": [2, 3],
+      "name": "Base",
+      "requires": []
+    },
+    {
+      "id": 16,
+      "link": [2, 3],
+      "name": "Come In Shinecharging, End Shinecharged",
       "entranceCondition": {
         "comeInShinecharging": {
           "length": 9,
@@ -229,41 +452,26 @@
         }
       },
       "requires": [
+        {"shineChargeFrames": 5},
         "canShinechargeMovementComplex"
       ],
-      "clearsObstacles": ["A"]
+      "endsWithShineCharge": true
     },
     {
-      "link": [2, 2],
-      "name": "Shinespark Escape",
-      "requires": [
-        {"obstaclesCleared": ["A"]},
-        {"shinespark": {
-          "frames": 6
-        }}
-      ],
-      "exitCondition": {
-        "leaveWithSpark": {}
-      }
-    },
-    {
-      "link": [2, 3],
-      "name": "Base",
-      "requires": []
-    },
-    {
+      "id": 19,
       "link": [2, 4],
       "name": "Base",
       "requires": [
         {"or": [
           "HiJump",
           "canWalljump",
-          "h_canCrouchJumpDownGrab",
+          "h_crouchJumpDownGrab",
           "canSpringBallJumpMidAir"
         ]}
       ]
     },
     {
+      "id": 20,
       "link": [2, 4],
       "name": "Grapple Teleport",
       "entranceCondition": {
@@ -279,11 +487,40 @@
       ]
     },
     {
+      "id": 8,
+      "link": [3, 1],
+      "name": "Start Shinecharged, Shinespark",
+      "startsWithShineCharge": true,
+      "requires": [
+        {"shineChargeFrames": 35},
+        {"shinespark": {"frames": 40}}
+      ]
+    },
+    {
+      "id": 21,
       "link": [3, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 17,
+      "link": [3, 2],
+      "name": "Start Shinecharged, Leave With Spark",
+      "startsWithShineCharge": true,
+      "requires": [
+        {"shineChargeFrames": 25},
+        {"shinespark": {"frames": 6}}
+      ],
+      "exitCondition": {
+        "leaveWithSpark": {}
+      },
+      "unlocksDoors": [
+        {"types": ["super"], "requires": []},
+        {"types": ["missiles", "powerbomb"], "requires": ["never"]}
+      ]
+    },
+    {
+      "id": 22,
       "link": [4, 1],
       "name": "Base",
       "requires": [
@@ -294,6 +531,7 @@
       ]
     },
     {
+      "id": 23,
       "link": [4, 1],
       "name": "HiJump",
       "requires": [
@@ -303,6 +541,7 @@
       "note": "Run and jump from the second-highest platform on the left."
     },
     {
+      "id": 24,
       "link": [4, 1],
       "name": "Spring Ball Jump",
       "requires": [
@@ -312,9 +551,9 @@
         "Starting from the second-highest platform on the left, run and jump into a mid-air Spring Ball jump.",
         "It helps but is not required to then unmorph to reset fall speed."
       ]
-
     },
     {
+      "id": 25,
       "link": [4, 1],
       "name": "Speedy Airball",
       "requires": [
@@ -327,5 +566,8 @@
         "It helps but is not required to moonwalk against the wall to maximize the available runway."
       ]
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 33,
+  "nextNotableId": 1
 }

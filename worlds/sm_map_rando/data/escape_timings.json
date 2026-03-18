@@ -1,5 +1,6 @@
 [
   {
+    "room_id": 7,
     "room_name": "The Moat",
     "timings": [
       {
@@ -55,6 +56,7 @@
     ]
   },
   {
+    "room_id": 8,
     "room_name": "Landing Site",
     "timings": [
       {
@@ -321,6 +323,7 @@
     ]
   },
   {
+    "room_id": 9,
     "room_name": "Crateria Tube",
     "timings": [
       {
@@ -376,6 +379,7 @@
     ]
   },
   {
+    "room_id": 10,
     "room_name": "Parlor and Alcatraz",
     "timings": [
       {
@@ -976,6 +980,7 @@
     ]
   },
   {
+    "room_id": 11,
     "room_name": "Climb",
     "timings": [
       {
@@ -999,8 +1004,15 @@
               "door_idx": 1,
               "node_id": 3
             },
-            "in_game_time": 9.15,
-            "note": "One-tap shinespark"
+            "in_game_time": 15.06,
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 9.15
+              }
+            ]
           },
           {
             "to_door": {
@@ -1036,8 +1048,15 @@
               "door_idx": 4,
               "node_id": 1
             },
-            "in_game_time": 6.24,
-            "note": "One-tap shinespark"
+            "in_game_time": 12.22,
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 6.24
+              }
+            ]
           }
         ]
       },
@@ -1065,7 +1084,9 @@
             "in_game_time": 11.48,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 9.09
               }
             ]
@@ -1083,8 +1104,10 @@
             "in_game_time": 11.22,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
-                "in_game_time": 9.54    
+                "requires": [
+                  "can_moonfall"
+                ],
+                "in_game_time": 9.54
               }
             ]
           },
@@ -1101,7 +1124,9 @@
             "in_game_time": 10.20,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 7.24
               }
             ]
@@ -1153,8 +1178,15 @@
               "door_idx": 1,
               "node_id": 3
             },
-            "in_game_time": 15.36,
-            "note": "One-tap shinespark"
+            "in_game_time": 15.08,
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 13.26
+              }
+            ]
           },
           {
             "to_door": {
@@ -1178,8 +1210,15 @@
               "door_idx": 4,
               "node_id": 1
             },
-            "in_game_time": 12.45,
-            "note": "One-tap shinespark"
+            "in_game_time": 12.27,
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 12.08
+              }
+            ]
           }
         ]
       },
@@ -1216,8 +1255,15 @@
               "door_idx": 1,
               "node_id": 3
             },
-            "in_game_time": 11.24,
-            "note": "One-tap shinespark"
+            "in_game_time": 13.33,
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 9.35
+              }
+            ]
           },
           {
             "to_door": {
@@ -1241,8 +1287,15 @@
               "door_idx": 4,
               "node_id": 1
             },
-            "in_game_time": 8.33,
-            "note": "One-tap shinespark"
+            "in_game_time": 11.16,
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 7.53
+              }
+            ]
           }
         ]
       },
@@ -1270,7 +1323,9 @@
             "in_game_time": 8.40,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 6.02
               }
             ]
@@ -1300,7 +1355,9 @@
             "in_game_time": 8.59,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 6.50
               }
             ]
@@ -1318,7 +1375,9 @@
             "in_game_time": 7.53,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 4.58
               }
             ]
@@ -1328,6 +1387,7 @@
     ]
   },
   {
+    "room_id": 12,
     "room_name": "Pit Room",
     "timings": [
       {
@@ -1383,6 +1443,7 @@
     ]
   },
   {
+    "room_id": 13,
     "room_name": "Flyway",
     "timings": [
       {
@@ -1438,6 +1499,7 @@
     ]
   },
   {
+    "room_id": 14,
     "room_name": "Pre-Map Flyway",
     "timings": [
       {
@@ -1493,6 +1555,7 @@
     ]
   },
   {
+    "room_id": 15,
     "room_name": "Crateria Map Room",
     "timings": [
       {
@@ -1510,6 +1573,7 @@
     ]
   },
   {
+    "room_id": 16,
     "room_name": "Crateria Save Room",
     "timings": [
       {
@@ -1527,6 +1591,7 @@
     ]
   },
   {
+    "room_id": 17,
     "room_name": "The Final Missile",
     "timings": [
       {
@@ -1544,6 +1609,7 @@
     ]
   },
   {
+    "room_id": 18,
     "room_name": "Final Missile Bombway",
     "timings": [
       {
@@ -1599,6 +1665,7 @@
     ]
   },
   {
+    "room_id": 19,
     "room_name": "Bomb Torizo Room",
     "timings": [
       {
@@ -1616,6 +1683,7 @@
     ]
   },
   {
+    "room_id": 20,
     "room_name": "Terminator Room",
     "timings": [
       {
@@ -1671,6 +1739,7 @@
     ]
   },
   {
+    "room_id": 21,
     "room_name": "Green Pirates Shaft",
     "timings": [
       {
@@ -1836,6 +1905,7 @@
     ]
   },
   {
+    "room_id": 22,
     "room_name": "Lower Mushrooms",
     "timings": [
       {
@@ -1861,7 +1931,9 @@
             },
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 2.21
               }
             ],
@@ -1892,7 +1964,9 @@
             },
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 2.21
               }
             ],
@@ -1903,6 +1977,7 @@
     ]
   },
   {
+    "room_id": 23,
     "room_name": "Green Brinstar Elevator Room",
     "timings": [
       {
@@ -1958,6 +2033,7 @@
     ]
   },
   {
+    "room_id": 24,
     "room_name": "Crateria Kihunter Room",
     "timings": [
       {
@@ -2074,6 +2150,7 @@
     ]
   },
   {
+    "room_id": 26,
     "room_name": "Statues Hallway",
     "timings": [
       {
@@ -2129,6 +2206,7 @@
     ]
   },
   {
+    "room_id": 25,
     "room_name": "Red Brinstar Elevator Room",
     "timings": [
       {
@@ -2184,6 +2262,7 @@
     ]
   },
   {
+    "room_id": 306,
     "room_name": "Blue Brinstar Elevator Room",
     "timings": [
       {
@@ -2239,6 +2318,7 @@
     ]
   },
   {
+    "room_id": 27,
     "room_name": "Statues Room",
     "timings": [
       {
@@ -2294,6 +2374,7 @@
     ]
   },
   {
+    "room_id": 28,
     "room_name": "Crateria Power Bomb Room",
     "timings": [
       {
@@ -2311,6 +2392,7 @@
     ]
   },
   {
+    "room_id": 29,
     "room_name": "Crateria Super Room",
     "timings": [
       {
@@ -2346,13 +2428,21 @@
               "door_idx": 0,
               "node_id": 1
             },
-            "in_game_time": 13.41
+            "conditions": [
+              {
+                "requires": [
+                  "can_one_tap_shortcharge"
+                ],
+                "in_game_time": 13.41
+              }
+            ]
           }
         ]
       }
     ]
   },
   {
+    "room_id": 30,
     "room_name": "Gauntlet Entrance",
     "timings": [
       {
@@ -2408,6 +2498,7 @@
     ]
   },
   {
+    "room_id": 31,
     "room_name": "Gauntlet Energy Tank Room",
     "timings": [
       {
@@ -2463,6 +2554,7 @@
     ]
   },
   {
+    "room_id": 32,
     "room_name": "West Ocean",
     "timings": [
       {
@@ -2848,6 +2940,7 @@
     ]
   },
   {
+    "room_id": 33,
     "room_name": "Bowling Alley Path",
     "timings": [
       {
@@ -2903,6 +2996,7 @@
     ]
   },
   {
+    "room_id": 34,
     "room_name": "East Ocean",
     "timings": [
       {
@@ -2958,6 +3052,7 @@
     ]
   },
   {
+    "room_id": 35,
     "room_name": "Forgotten Highway Kago Room",
     "timings": [
       {
@@ -3013,6 +3108,7 @@
     ]
   },
   {
+    "room_id": 36,
     "room_name": "Crab Maze",
     "timings": [
       {
@@ -3068,6 +3164,7 @@
     ]
   },
   {
+    "room_id": 37,
     "room_name": "Forgotten Highway Elevator",
     "timings": [
       {
@@ -3123,6 +3220,7 @@
     ]
   },
   {
+    "room_id": 305,
     "room_name": "Forgotten Highway Elbow",
     "timings": [
       {
@@ -3178,6 +3276,7 @@
     ]
   },
   {
+    "room_id": 66,
     "room_name": "Red Tower",
     "timings": [
       {
@@ -3495,6 +3594,7 @@
     ]
   },
   {
+    "room_id": 67,
     "room_name": "Red Brinstar Fireflea Room",
     "timings": [
       {
@@ -3550,6 +3650,7 @@
     ]
   },
   {
+    "room_id": 68,
     "room_name": "X-Ray Scope Room",
     "timings": [
       {
@@ -3567,6 +3668,7 @@
     ]
   },
   {
+    "room_id": 69,
     "room_name": "Bat Room",
     "timings": [
       {
@@ -3622,6 +3724,7 @@
     ]
   },
   {
+    "room_id": 70,
     "room_name": "Below Spazer",
     "timings": [
       {
@@ -3738,6 +3841,7 @@
     ]
   },
   {
+    "room_id": 71,
     "room_name": "Spazer Room",
     "timings": [
       {
@@ -3755,6 +3859,7 @@
     ]
   },
   {
+    "room_id": 74,
     "room_name": "Hellway",
     "timings": [
       {
@@ -3810,6 +3915,7 @@
     ]
   },
   {
+    "room_id": 75,
     "room_name": "Caterpillar Room",
     "timings": [
       {
@@ -3883,10 +3989,12 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 4.59
               }
-            ]  
+            ]
           }
         ]
       },
@@ -3961,10 +4069,12 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 7.59
               }
-            ]  
+            ]
           }
         ]
       },
@@ -4039,10 +4149,12 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 11.18
               }
-            ]  
+            ]
           }
         ]
       },
@@ -4117,12 +4229,13 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 5.53
               }
-            ]  
+            ]
           }
-
         ]
       },
       {
@@ -4196,11 +4309,13 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 5.32,
                 "note": "Unmorph-remorph to reset fall speed"
               }
-            ]  
+            ]
           }
         ]
       },
@@ -4285,6 +4400,7 @@
     ]
   },
   {
+    "room_id": 76,
     "room_name": "Alpha Power Bomb Room",
     "timings": [
       {
@@ -4302,6 +4418,7 @@
     ]
   },
   {
+    "room_id": 77,
     "room_name": "Beta Power Bomb Room",
     "timings": [
       {
@@ -4319,6 +4436,7 @@
     ]
   },
   {
+    "room_id": 320,
     "room_name": "Caterpillar Save Room",
     "timings": [
       {
@@ -4336,6 +4454,7 @@
     ]
   },
   {
+    "room_id": 319,
     "room_name": "Sloaters Refill",
     "timings": [
       {
@@ -4353,6 +4472,7 @@
     ]
   },
   {
+    "room_id": 38,
     "room_name": "Morph Ball Room",
     "timings": [
       {
@@ -4471,6 +4591,7 @@
     ]
   },
   {
+    "room_id": 39,
     "room_name": "Construction Zone",
     "timings": [
       {
@@ -4587,6 +4708,7 @@
     ]
   },
   {
+    "room_id": 40,
     "room_name": "First Missile Room",
     "timings": [
       {
@@ -4604,6 +4726,7 @@
     ]
   },
   {
+    "room_id": 41,
     "room_name": "Blue Brinstar Energy Tank Room",
     "timings": [
       {
@@ -4660,6 +4783,7 @@
     ]
   },
   {
+    "room_id": 42,
     "room_name": "Blue Brinstar Boulder Room",
     "timings": [
       {
@@ -4715,6 +4839,7 @@
     ]
   },
   {
+    "room_id": 43,
     "room_name": "Billy Mays Room",
     "timings": [
       {
@@ -4732,6 +4857,7 @@
     ]
   },
   {
+    "room_id": 44,
     "room_name": "Green Brinstar Main Shaft",
     "timings": [
       {
@@ -5583,6 +5709,7 @@
     ]
   },
   {
+    "room_id": 45,
     "room_name": "Early Supers Room",
     "timings": [
       {
@@ -5634,7 +5761,9 @@
             "in_game_time": 6.28,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 2.48
               }
             ]
@@ -5644,6 +5773,7 @@
     ]
   },
   {
+    "room_id": 46,
     "room_name": "Brinstar Reserve Tank Room",
     "timings": [
       {
@@ -5661,6 +5791,7 @@
     ]
   },
   {
+    "room_id": 47,
     "room_name": "Brinstar Pre-Map Room",
     "timings": [
       {
@@ -5716,6 +5847,7 @@
     ]
   },
   {
+    "room_id": 48,
     "room_name": "Brinstar Map Room",
     "timings": [
       {
@@ -5733,6 +5865,7 @@
     ]
   },
   {
+    "room_id": 49,
     "room_name": "Green Brinstar Fireflea Room",
     "timings": [
       {
@@ -5788,6 +5921,7 @@
     ]
   },
   {
+    "room_id": 316,
     "room_name": "Green Brinstar Missile Refill Room",
     "timings": [
       {
@@ -5805,6 +5939,7 @@
     ]
   },
   {
+    "room_id": 314,
     "room_name": "Green Brinstar Main Shaft Save Room",
     "timings": [
       {
@@ -5822,6 +5957,7 @@
     ]
   },
   {
+    "room_id": 315,
     "room_name": "Etecoon Save Room",
     "timings": [
       {
@@ -5839,6 +5975,7 @@
     ]
   },
   {
+    "room_id": 50,
     "room_name": "Green Brinstar Beetom Room",
     "timings": [
       {
@@ -5894,6 +6031,7 @@
     ]
   },
   {
+    "room_id": 51,
     "room_name": "Etecoon Energy Tank Room",
     "timings": [
       {
@@ -6047,6 +6185,7 @@
     ]
   },
   {
+    "room_id": 52,
     "room_name": "Etecoon Super Room",
     "timings": [
       {
@@ -6064,6 +6203,7 @@
     ]
   },
   {
+    "room_id": 54,
     "room_name": "Green Hill Zone",
     "timings": [
       {
@@ -6180,6 +6320,7 @@
     ]
   },
   {
+    "room_id": 55,
     "room_name": "Noob Bridge",
     "timings": [
       {
@@ -6235,6 +6376,7 @@
     ]
   },
   {
+    "room_id": 56,
     "room_name": "Spore Spawn Kihunter Room",
     "timings": [
       {
@@ -6290,6 +6432,7 @@
     ]
   },
   {
+    "room_id": 57,
     "room_name": "Spore Spawn Room",
     "timings": [
       {
@@ -6311,7 +6454,7 @@
               "y": 2,
               "part_idx": 1,
               "door_idx": 1,
-              "node_id": 2  
+              "node_id": 2
             },
             "in_game_time": 4.04
           }
@@ -6345,6 +6488,7 @@
     ]
   },
   {
+    "room_id": 58,
     "room_name": "Dachora Room",
     "timings": [
       {
@@ -6461,6 +6605,7 @@
     ]
   },
   {
+    "room_id": 317,
     "room_name": "Dachora Energy Refill Room",
     "timings": [
       {
@@ -6478,6 +6623,7 @@
     ]
   },
   {
+    "room_id": 59,
     "room_name": "Big Pink",
     "timings": [
       {
@@ -6575,7 +6721,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 16.12
               }
             ]
@@ -6677,7 +6825,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 7.43
               }
             ]
@@ -6779,7 +6929,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 8.43
               }
             ]
@@ -6809,7 +6961,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot"],
+                "requires": [
+                  "can_hero_shot"
+                ],
                 "in_game_time": 27.51
               }
             ]
@@ -6826,7 +6980,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot"],
+                "requires": [
+                  "can_hero_shot"
+                ],
                 "in_game_time": 19.39
               }
             ]
@@ -6843,7 +6999,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot"],
+                "requires": [
+                  "can_hero_shot"
+                ],
                 "in_game_time": 20.31
               }
             ]
@@ -6860,7 +7018,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot"],
+                "requires": [
+                  "can_hero_shot"
+                ],
                 "in_game_time": 27.26
               }
             ]
@@ -6877,7 +7037,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot"],
+                "requires": [
+                  "can_hero_shot"
+                ],
                 "in_game_time": 13.36
               }
             ]
@@ -6894,7 +7056,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot"],
+                "requires": [
+                  "can_hero_shot"
+                ],
                 "in_game_time": 12.21
               }
             ]
@@ -6911,7 +7075,10 @@
             },
             "conditions": [
               {
-                "requires": ["can_hero_shot", "can_off_camera_shot"],
+                "requires": [
+                  "can_hero_shot",
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 15.06
               }
             ]
@@ -7013,7 +7180,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 15.38
               }
             ]
@@ -7115,7 +7284,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 4.02
               }
             ]
@@ -7217,7 +7388,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 7.19
               }
             ]
@@ -7331,7 +7504,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_off_camera_shot"],
+                "requires": [
+                  "can_off_camera_shot"
+                ],
                 "in_game_time": 5.51
               }
             ]
@@ -7438,6 +7613,7 @@
     ]
   },
   {
+    "room_id": 318,
     "room_name": "Big Pink Save Room",
     "timings": [
       {
@@ -7455,6 +7631,7 @@
     ]
   },
   {
+    "room_id": 60,
     "room_name": "Pink Brinstar Power Bomb Room",
     "timings": [
       {
@@ -7497,6 +7674,7 @@
     ]
   },
   {
+    "room_id": 61,
     "room_name": "Pink Brinstar Hopper Room",
     "timings": [
       {
@@ -7552,6 +7730,7 @@
     ]
   },
   {
+    "room_id": 62,
     "room_name": "Hopper Energy Tank Room",
     "timings": [
       {
@@ -7569,6 +7748,7 @@
     ]
   },
   {
+    "room_id": 63,
     "room_name": "Spore Spawn Super Room",
     "timings": [
       {
@@ -7612,6 +7792,7 @@
     ]
   },
   {
+    "room_id": 64,
     "room_name": "Spore Spawn Farming Room",
     "timings": [
       {
@@ -7667,6 +7848,7 @@
     ]
   },
   {
+    "room_id": 65,
     "room_name": "Waterway Energy Tank Room",
     "timings": [
       {
@@ -7684,6 +7866,7 @@
     ]
   },
   {
+    "room_id": 78,
     "room_name": "Warehouse Entrance",
     "timings": [
       {
@@ -7800,6 +7983,7 @@
     ]
   },
   {
+    "room_id": 79,
     "room_name": "Warehouse Zeela Room",
     "timings": [
       {
@@ -7916,6 +8100,7 @@
     ]
   },
   {
+    "room_id": 80,
     "room_name": "Warehouse Energy Tank Room",
     "timings": [
       {
@@ -7933,6 +8118,7 @@
     ]
   },
   {
+    "room_id": 81,
     "room_name": "Warehouse Kihunter Room",
     "timings": [
       {
@@ -8049,6 +8235,7 @@
     ]
   },
   {
+    "room_id": 300,
     "room_name": "Warehouse Save Room",
     "timings": [
       {
@@ -8066,6 +8253,7 @@
     ]
   },
   {
+    "room_id": 82,
     "room_name": "Baby Kraid Room",
     "timings": [
       {
@@ -8121,6 +8309,7 @@
     ]
   },
   {
+    "room_id": 83,
     "room_name": "Kraid Eye Door Room",
     "timings": [
       {
@@ -8238,6 +8427,7 @@
     ]
   },
   {
+    "room_id": 301,
     "room_name": "Kraid Recharge Station",
     "timings": [
       {
@@ -8255,6 +8445,7 @@
     ]
   },
   {
+    "room_id": 84,
     "room_name": "Kraid Room",
     "timings": [
       {
@@ -8310,6 +8501,7 @@
     ]
   },
   {
+    "room_id": 85,
     "room_name": "Varia Suit Room",
     "timings": [
       {
@@ -8327,6 +8519,7 @@
     ]
   },
   {
+    "room_id": 169,
     "room_name": "West Tunnel",
     "timings": [
       {
@@ -8382,6 +8575,7 @@
     ]
   },
   {
+    "room_id": 200,
     "room_name": "East Tunnel",
     "timings": [
       {
@@ -8419,7 +8613,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 6.57
               }
             ]
@@ -8461,12 +8657,13 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 7.19
               }
             ]
           }
-
         ]
       },
       {
@@ -8509,6 +8706,7 @@
     ]
   },
   {
+    "room_id": 170,
     "room_name": "Glass Tunnel",
     "timings": [
       {
@@ -8710,6 +8908,7 @@
     ]
   },
   {
+    "room_id": 171,
     "room_name": "Glass Tunnel Save Room",
     "timings": [
       {
@@ -8727,6 +8926,7 @@
     ]
   },
   {
+    "room_id": 172,
     "room_name": "Main Street",
     "timings": [
       {
@@ -8943,6 +9143,7 @@
     ]
   },
   {
+    "room_id": 173,
     "room_name": "Fish Tank",
     "timings": [
       {
@@ -9144,6 +9345,7 @@
     ]
   },
   {
+    "room_id": 174,
     "room_name": "Mt. Everest",
     "timings": [
       {
@@ -9591,6 +9793,7 @@
     ]
   },
   {
+    "room_id": 175,
     "room_name": "Crab Shaft",
     "timings": [
       {
@@ -9707,6 +9910,7 @@
     ]
   },
   {
+    "room_id": 176,
     "room_name": "Crab Tunnel",
     "timings": [
       {
@@ -9757,7 +9961,9 @@
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 4.26
               }
             ]
@@ -9767,6 +9973,7 @@
     ]
   },
   {
+    "room_id": 177,
     "room_name": "Red Fish Room",
     "timings": [
       {
@@ -9823,6 +10030,7 @@
     ]
   },
   {
+    "room_id": 178,
     "room_name": "Mama Turtle Room",
     "timings": [
       {
@@ -9840,6 +10048,7 @@
     ]
   },
   {
+    "room_id": 179,
     "room_name": "Pseudo Plasma Spark Room",
     "timings": [
       {
@@ -9895,6 +10104,7 @@
     ]
   },
   {
+    "room_id": 180,
     "room_name": "Northwest Maridia Bug Room",
     "timings": [
       {
@@ -9950,6 +10160,7 @@
     ]
   },
   {
+    "room_id": 181,
     "room_name": "Watering Hole",
     "timings": [
       {
@@ -9967,6 +10178,7 @@
     ]
   },
   {
+    "room_id": 182,
     "room_name": "Aqueduct Save Room",
     "timings": [
       {
@@ -9984,6 +10196,7 @@
     ]
   },
   {
+    "room_id": 183,
     "room_name": "Aqueduct",
     "timings": [
       {
@@ -10243,7 +10456,9 @@
             "in_game_time": 4.21,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 4.12
               }
             ]
@@ -10313,6 +10528,7 @@
     ]
   },
   {
+    "room_id": 321,
     "room_name": "Toilet",
     "timings": [
       {
@@ -10336,7 +10552,7 @@
               "door_idx": 0,
               "node_id": 2
             },
-            "in_game_time": 0.0,
+            "in_game_time": 0.00,
             "note": "Escape timer is paused during toilet transition"
           }
         ]
@@ -10362,7 +10578,7 @@
               "door_idx": 1,
               "node_id": 1
             },
-            "in_game_time": 0.0,
+            "in_game_time": 0.00,
             "note": "Escape timer is paused during toilet transition"
           }
         ]
@@ -10370,6 +10586,7 @@
     ]
   },
   {
+    "room_id": 184,
     "room_name": "Botwoon Hallway",
     "timings": [
       {
@@ -10425,6 +10642,7 @@
     ]
   },
   {
+    "room_id": 185,
     "room_name": "Botwoon's Room",
     "timings": [
       {
@@ -10474,12 +10692,13 @@
               "node_id": 1
             },
             "in_game_time": 2.28
-          }  
+          }
         ]
       }
     ]
   },
   {
+    "room_id": 186,
     "room_name": "Botwoon Energy Tank Room",
     "timings": [
       {
@@ -10607,6 +10826,7 @@
     ]
   },
   {
+    "room_id": 187,
     "room_name": "Halfie Climb Room",
     "timings": [
       {
@@ -10808,6 +11028,7 @@
     ]
   },
   {
+    "room_id": 188,
     "room_name": "Maridia Missile Refill Room",
     "timings": [
       {
@@ -10825,6 +11046,7 @@
     ]
   },
   {
+    "room_id": 189,
     "room_name": "Colosseum",
     "timings": [
       {
@@ -10941,6 +11163,7 @@
     ]
   },
   {
+    "room_id": 190,
     "room_name": "Draygon Save Room",
     "timings": [
       {
@@ -10996,6 +11219,7 @@
     ]
   },
   {
+    "room_id": 191,
     "room_name": "Maridia Health Refill Room",
     "timings": [
       {
@@ -11013,6 +11237,7 @@
     ]
   },
   {
+    "room_id": 192,
     "room_name": "The Precious Room",
     "timings": [
       {
@@ -11068,6 +11293,7 @@
     ]
   },
   {
+    "room_id": 193,
     "room_name": "Draygon's Room",
     "timings": [
       {
@@ -11123,6 +11349,7 @@
     ]
   },
   {
+    "room_id": 194,
     "room_name": "Space Jump Room",
     "timings": [
       {
@@ -11140,6 +11367,7 @@
     ]
   },
   {
+    "room_id": 195,
     "room_name": "West Cactus Alley Room",
     "timings": [
       {
@@ -11195,6 +11423,7 @@
     ]
   },
   {
+    "room_id": 196,
     "room_name": "East Cactus Alley Room",
     "timings": [
       {
@@ -11250,6 +11479,7 @@
     ]
   },
   {
+    "room_id": 197,
     "room_name": "Plasma Spark Room",
     "timings": [
       {
@@ -11452,6 +11682,7 @@
     ]
   },
   {
+    "room_id": 198,
     "room_name": "Oasis",
     "timings": [
       {
@@ -11568,6 +11799,7 @@
     ]
   },
   {
+    "room_id": 199,
     "room_name": "West Sand Hall",
     "timings": [
       {
@@ -11660,6 +11892,7 @@
     ]
   },
   {
+    "room_id": 202,
     "room_name": "West Sand Hall Tunnel",
     "timings": [
       {
@@ -11715,6 +11948,7 @@
     ]
   },
   {
+    "room_id": 203,
     "room_name": "Maridia Map Room",
     "timings": [
       {
@@ -11732,6 +11966,7 @@
     ]
   },
   {
+    "room_id": 204,
     "room_name": "Botwoon Quicksand Room",
     "timings": [
       {
@@ -11811,6 +12046,7 @@
     ]
   },
   {
+    "room_id": 205,
     "room_name": "Below Botwoon Energy Tank",
     "timings": [
       {
@@ -11878,6 +12114,7 @@
     ]
   },
   {
+    "room_id": 206,
     "room_name": "West Aqueduct Quicksand Room",
     "timings": [
       {
@@ -11921,6 +12158,7 @@
     ]
   },
   {
+    "room_id": 207,
     "room_name": "East Aqueduct Quicksand Room",
     "timings": [
       {
@@ -11964,6 +12202,7 @@
     ]
   },
   {
+    "room_id": 208,
     "room_name": "East Sand Hole",
     "timings": [
       {
@@ -12006,6 +12245,7 @@
     ]
   },
   {
+    "room_id": 209,
     "room_name": "West Sand Hole",
     "timings": [
       {
@@ -12048,6 +12288,7 @@
     ]
   },
   {
+    "room_id": 210,
     "room_name": "East Sand Hall",
     "timings": [
       {
@@ -12140,6 +12381,7 @@
     ]
   },
   {
+    "room_id": 211,
     "room_name": "Bug Sand Hole",
     "timings": [
       {
@@ -12231,6 +12473,7 @@
     ]
   },
   {
+    "room_id": 212,
     "room_name": "Plasma Beach Quicksand Room",
     "timings": [
       {
@@ -12273,6 +12516,7 @@
     ]
   },
   {
+    "room_id": 213,
     "room_name": "Butterfly Room",
     "timings": [
       {
@@ -12365,6 +12609,7 @@
     ]
   },
   {
+    "room_id": 214,
     "room_name": "Thread The Needle Room",
     "timings": [
       {
@@ -12420,6 +12665,7 @@
     ]
   },
   {
+    "room_id": 215,
     "room_name": "Maridia Elevator Room",
     "timings": [
       {
@@ -12536,6 +12782,7 @@
     ]
   },
   {
+    "room_id": 216,
     "room_name": "Forgotten Highway Save Room",
     "timings": [
       {
@@ -12553,6 +12800,7 @@
     ]
   },
   {
+    "room_id": 217,
     "room_name": "Kassiuz Room",
     "timings": [
       {
@@ -12604,7 +12852,9 @@
             "in_game_time": 4.12,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 3.38
               }
             ]
@@ -12614,6 +12864,7 @@
     ]
   },
   {
+    "room_id": 218,
     "room_name": "Plasma Tutorial Room",
     "timings": [
       {
@@ -12640,7 +12891,9 @@
             "in_game_time": 0.57,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 0.42
               }
             ]
@@ -12675,6 +12928,7 @@
     ]
   },
   {
+    "room_id": 219,
     "room_name": "Plasma Room",
     "timings": [
       {
@@ -12692,6 +12946,7 @@
     ]
   },
   {
+    "room_id": 220,
     "room_name": "Pants Room",
     "timings": [
       {
@@ -12771,6 +13026,7 @@
     ]
   },
   {
+    "room_id": 222,
     "room_name": "Shaktool Room",
     "timings": [
       {
@@ -12826,6 +13082,7 @@
     ]
   },
   {
+    "room_id": 223,
     "room_name": "Spring Ball Room",
     "timings": [
       {
@@ -12843,6 +13100,7 @@
     ]
   },
   {
+    "room_id": 201,
     "room_name": "Crab Hole",
     "timings": [
       {
@@ -12915,7 +13173,14 @@
               "door_idx": 0,
               "node_id": 1
             },
-            "in_game_time": 2.58
+            "conditions": [
+              {
+                "requires": [
+                  "can_mid_air_morph"
+                ],
+                "in_game_time": 2.58
+              }
+            ]
           },
           {
             "to_door": {
@@ -12927,7 +13192,14 @@
               "door_idx": 2,
               "node_id": 4
             },
-            "in_game_time": 2.17
+            "conditions": [
+              {
+                "requires": [
+                  "can_mid_air_morph"
+                ],
+                "in_game_time": 2.17
+              }
+            ]
           },
           {
             "to_door": {
@@ -13013,7 +13285,14 @@
               "door_idx": 0,
               "node_id": 1
             },
-            "in_game_time": 2.20
+            "conditions": [
+              {
+                "requires": [
+                  "can_mid_air_morph"
+                ],
+                "in_game_time": 2.20
+              }
+            ]
           },
           {
             "to_door": {
@@ -13037,13 +13316,21 @@
               "door_idx": 2,
               "node_id": 4
             },
-            "in_game_time": 2.37
+            "conditions": [
+              {
+                "requires": [
+                  "can_mid_air_morph"
+                ],
+                "in_game_time": 2.37
+              }
+            ]
           }
         ]
       }
     ]
   },
   {
+    "room_id": 132,
     "room_name": "Main Hall",
     "timings": [
       {
@@ -13160,6 +13447,7 @@
     ]
   },
   {
+    "room_id": 133,
     "room_name": "Fast Pillars Setup Room",
     "timings": [
       {
@@ -13361,6 +13649,7 @@
     ]
   },
   {
+    "room_id": 134,
     "room_name": "Pillar Room",
     "timings": [
       {
@@ -13416,6 +13705,7 @@
     ]
   },
   {
+    "room_id": 135,
     "room_name": "The Worst Room In The Game",
     "timings": [
       {
@@ -13532,6 +13822,7 @@
     ]
   },
   {
+    "room_id": 136,
     "room_name": "Amphitheatre",
     "timings": [
       {
@@ -13578,11 +13869,13 @@
               "y": 1,
               "part_idx": 0,
               "door_idx": 0,
-              "node_id": 1    
+              "node_id": 1
             },
             "conditions": [
               {
-                "requires": ["can_acid_dive"],
+                "requires": [
+                  "can_acid_dive"
+                ],
                 "in_game_time": 9.05
               }
             ]
@@ -13592,6 +13885,7 @@
     ]
   },
   {
+    "room_id": 137,
     "room_name": "Red Kihunter Shaft",
     "timings": [
       {
@@ -13765,7 +14059,9 @@
             "in_game_time": 17.57,
             "conditions": [
               {
-                "requires": ["can_use_power_bombs"],
+                "requires": [
+                  "can_use_power_bombs"
+                ],
                 "in_game_time": 15.18
               }
             ]
@@ -13783,7 +14079,9 @@
             "in_game_time": 17.55,
             "conditions": [
               {
-                "requires": ["can_use_power_bombs"],
+                "requires": [
+                  "can_use_power_bombs"
+                ],
                 "in_game_time": 15.16
               }
             ]
@@ -13801,7 +14099,9 @@
             "in_game_time": 10.49,
             "conditions": [
               {
-                "requires": ["can_use_power_bombs"],
+                "requires": [
+                  "can_use_power_bombs"
+                ],
                 "in_game_time": 8.10
               }
             ]
@@ -13811,6 +14111,7 @@
     ]
   },
   {
+    "room_id": 312,
     "room_name": "Red Kihunter Shaft Save Room",
     "timings": [
       {
@@ -13828,6 +14129,7 @@
     ]
   },
   {
+    "room_id": 138,
     "room_name": "Wasteland",
     "timings": [
       {
@@ -13854,7 +14156,9 @@
             "in_game_time": 15.48,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 11.23
               }
             ],
@@ -13886,11 +14190,15 @@
             "in_game_time": 17.00,
             "conditions": [
               {
-                "requires": ["can_kago"],
+                "requires": [
+                  "can_kago"
+                ],
                 "in_game_time": 14.00
               },
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 11.15
               }
             ]
@@ -13900,6 +14208,7 @@
     ]
   },
   {
+    "room_id": 139,
     "room_name": "Metal Pirates Room",
     "timings": [
       {
@@ -13955,6 +14264,7 @@
     ]
   },
   {
+    "room_id": 140,
     "room_name": "Plowerhouse Room",
     "timings": [
       {
@@ -14010,6 +14320,7 @@
     ]
   },
   {
+    "room_id": 141,
     "room_name": "Lower Norfair Farming Room",
     "timings": [
       {
@@ -14065,6 +14376,7 @@
     ]
   },
   {
+    "room_id": 142,
     "room_name": "Ridley's Room",
     "timings": [
       {
@@ -14120,6 +14432,7 @@
     ]
   },
   {
+    "room_id": 143,
     "room_name": "Ridley Tank Room",
     "timings": [
       {
@@ -14137,6 +14450,7 @@
     ]
   },
   {
+    "room_id": 144,
     "room_name": "Mickey Mouse Room",
     "timings": [
       {
@@ -14179,6 +14493,7 @@
     ]
   },
   {
+    "room_id": 145,
     "room_name": "Lower Norfair Fireflea Room",
     "timings": [
       {
@@ -14295,6 +14610,7 @@
     ]
   },
   {
+    "room_id": 146,
     "room_name": "Lower Norfair Spring Ball Maze Room",
     "timings": [
       {
@@ -14386,6 +14702,7 @@
     ]
   },
   {
+    "room_id": 147,
     "room_name": "Lower Norfair Escape Power Bomb Room",
     "timings": [
       {
@@ -14428,6 +14745,7 @@
     ]
   },
   {
+    "room_id": 148,
     "room_name": "Three Musketeers' Room",
     "timings": [
       {
@@ -14483,6 +14801,7 @@
     ]
   },
   {
+    "room_id": 149,
     "room_name": "Acid Statue Room",
     "timings": [
       {
@@ -14529,7 +14848,7 @@
               "y": 0,
               "part_idx": 0,
               "door_idx": 0,
-              "node_id": 1  
+              "node_id": 1
             },
             "in_game_time": 9.17
           }
@@ -14538,6 +14857,7 @@
     ]
   },
   {
+    "room_id": 150,
     "room_name": "Golden Torizo's Room",
     "timings": [
       {
@@ -14580,6 +14900,7 @@
     ]
   },
   {
+    "room_id": 151,
     "room_name": "Screw Attack Room",
     "timings": [
       {
@@ -14696,6 +15017,7 @@
     ]
   },
   {
+    "room_id": 152,
     "room_name": "Golden Torizo Energy Recharge",
     "timings": [
       {
@@ -14713,6 +15035,7 @@
     ]
   },
   {
+    "room_id": 153,
     "room_name": "Fast Ripper Room",
     "timings": [
       {
@@ -14759,12 +15082,14 @@
               "y": 0,
               "part_idx": 0,
               "door_idx": 0,
-              "node_id": 1    
+              "node_id": 1
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
-                "in_game_time":  3.45
+                "requires": [
+                  "can_reverse_gate"
+                ],
+                "in_game_time": 3.45
               }
             ]
           }
@@ -14773,6 +15098,7 @@
     ]
   },
   {
+    "room_id": 86,
     "room_name": "Business Center",
     "timings": [
       {
@@ -15373,6 +15699,7 @@
     ]
   },
   {
+    "room_id": 87,
     "room_name": "Norfair Map Room",
     "timings": [
       {
@@ -15390,6 +15717,7 @@
     ]
   },
   {
+    "room_id": 88,
     "room_name": "Hi Jump Energy Tank Room",
     "timings": [
       {
@@ -15445,6 +15773,7 @@
     ]
   },
   {
+    "room_id": 89,
     "room_name": "Hi Jump Boots Room",
     "timings": [
       {
@@ -15462,6 +15791,7 @@
     ]
   },
   {
+    "room_id": 90,
     "room_name": "Cathedral Entrance",
     "timings": [
       {
@@ -15517,6 +15847,7 @@
     ]
   },
   {
+    "room_id": 91,
     "room_name": "Cathedral",
     "timings": [
       {
@@ -15572,6 +15903,7 @@
     ]
   },
   {
+    "room_id": 92,
     "room_name": "Rising Tide",
     "timings": [
       {
@@ -15627,6 +15959,7 @@
     ]
   },
   {
+    "room_id": 93,
     "room_name": "Frog Speedway",
     "timings": [
       {
@@ -15682,6 +16015,7 @@
     ]
   },
   {
+    "room_id": 94,
     "room_name": "Upper Norfair Farming Room",
     "timings": [
       {
@@ -15798,6 +16132,7 @@
     ]
   },
   {
+    "room_id": 95,
     "room_name": "Purple Shaft",
     "timings": [
       {
@@ -15914,6 +16249,7 @@
     ]
   },
   {
+    "room_id": 96,
     "room_name": "Purple Farming Room",
     "timings": [
       {
@@ -15931,6 +16267,7 @@
     ]
   },
   {
+    "room_id": 302,
     "room_name": "Frog Savestation",
     "timings": [
       {
@@ -15986,6 +16323,7 @@
     ]
   },
   {
+    "room_id": 97,
     "room_name": "Bubble Mountain",
     "timings": [
       {
@@ -16588,6 +16926,7 @@
     ]
   },
   {
+    "room_id": 307,
     "room_name": "Bubble Mountain Save Room",
     "timings": [
       {
@@ -16605,6 +16944,7 @@
     ]
   },
   {
+    "room_id": 98,
     "room_name": "Green Bubbles Missile Room",
     "timings": [
       {
@@ -16660,6 +17000,7 @@
     ]
   },
   {
+    "room_id": 99,
     "room_name": "Norfair Reserve Tank Room",
     "timings": [
       {
@@ -16677,6 +17018,7 @@
     ]
   },
   {
+    "room_id": 100,
     "room_name": "Bat Cave",
     "timings": [
       {
@@ -16732,6 +17074,7 @@
     ]
   },
   {
+    "room_id": 101,
     "room_name": "Speed Booster Hall",
     "timings": [
       {
@@ -16787,6 +17130,7 @@
     ]
   },
   {
+    "room_id": 102,
     "room_name": "Speed Booster Room",
     "timings": [
       {
@@ -16804,6 +17148,7 @@
     ]
   },
   {
+    "room_id": 103,
     "room_name": "Single Chamber",
     "timings": [
       {
@@ -17066,6 +17411,7 @@
     ]
   },
   {
+    "room_id": 104,
     "room_name": "Double Chamber",
     "timings": [
       {
@@ -17182,6 +17528,7 @@
     ]
   },
   {
+    "room_id": 105,
     "room_name": "Wave Beam Room",
     "timings": [
       {
@@ -17199,6 +17546,7 @@
     ]
   },
   {
+    "room_id": 106,
     "room_name": "Ice Beam Gate Room",
     "timings": [
       {
@@ -17237,7 +17585,9 @@
             "in_game_time": 7.08,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 2.12
               }
             ]
@@ -17280,7 +17630,9 @@
             "in_game_time": 11.51,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 6.29
               }
             ]
@@ -17372,7 +17724,9 @@
             "in_game_time": 8.38,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 4.56
               }
             ]
@@ -17382,6 +17736,7 @@
     ]
   },
   {
+    "room_id": 107,
     "room_name": "Ice Beam Acid Room",
     "timings": [
       {
@@ -17437,6 +17792,7 @@
     ]
   },
   {
+    "room_id": 108,
     "room_name": "Ice Beam Snake Room",
     "timings": [
       {
@@ -17553,6 +17909,7 @@
     ]
   },
   {
+    "room_id": 109,
     "room_name": "Ice Beam Room",
     "timings": [
       {
@@ -17570,6 +17927,7 @@
     ]
   },
   {
+    "room_id": 110,
     "room_name": "Ice Beam Tutorial Room",
     "timings": [
       {
@@ -17625,6 +17983,7 @@
     ]
   },
   {
+    "room_id": 111,
     "room_name": "Crumble Shaft",
     "timings": [
       {
@@ -17680,6 +18039,7 @@
     ]
   },
   {
+    "room_id": 308,
     "room_name": "Nutella Refill",
     "timings": [
       {
@@ -17735,6 +18095,7 @@
     ]
   },
   {
+    "room_id": 112,
     "room_name": "Spiky Acid Snakes Tunnel",
     "timings": [
       {
@@ -17790,6 +18151,7 @@
     ]
   },
   {
+    "room_id": 113,
     "room_name": "Kronic Boost Room",
     "timings": [
       {
@@ -17991,6 +18353,7 @@
     ]
   },
   {
+    "room_id": 114,
     "room_name": "Magdollite Tunnel",
     "timings": [
       {
@@ -18046,6 +18409,7 @@
     ]
   },
   {
+    "room_id": 115,
     "room_name": "Lava Dive Room",
     "timings": [
       {
@@ -18101,6 +18465,7 @@
     ]
   },
   {
+    "room_id": 116,
     "room_name": "Volcano Room",
     "timings": [
       {
@@ -18156,6 +18521,7 @@
     ]
   },
   {
+    "room_id": 117,
     "room_name": "Spiky Platforms Tunnel",
     "timings": [
       {
@@ -18211,6 +18577,7 @@
     ]
   },
   {
+    "room_id": 118,
     "room_name": "Red Pirate Shaft",
     "timings": [
       {
@@ -18267,6 +18634,7 @@
     ]
   },
   {
+    "room_id": 119,
     "room_name": "Acid Snakes Tunnel",
     "timings": [
       {
@@ -18383,6 +18751,7 @@
     ]
   },
   {
+    "room_id": 120,
     "room_name": "Crocomire Speedway",
     "timings": [
       {
@@ -18645,6 +19014,7 @@
     ]
   },
   {
+    "room_id": 121,
     "room_name": "Crocomire Escape",
     "timings": [
       {
@@ -18666,11 +19036,13 @@
               "y": 1,
               "part_idx": 1,
               "door_idx": 1,
-              "node_id": 2    
+              "node_id": 2
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 5.23
               }
             ]
@@ -18705,6 +19077,7 @@
     ]
   },
   {
+    "room_id": 122,
     "room_name": "Crocomire's Room",
     "timings": [
       {
@@ -18726,7 +19099,7 @@
               "y": 0,
               "part_idx": 1,
               "door_idx": 1,
-              "node_id": 2    
+              "node_id": 2
             },
             "in_game_time": 3.45
           }
@@ -18760,6 +19133,7 @@
     ]
   },
   {
+    "room_id": 123,
     "room_name": "Post Crocomire Farming Room",
     "timings": [
       {
@@ -18961,6 +19335,7 @@
     ]
   },
   {
+    "room_id": 124,
     "room_name": "Post Crocomire Power Bomb Room",
     "timings": [
       {
@@ -18978,6 +19353,7 @@
     ]
   },
   {
+    "room_id": 125,
     "room_name": "Post Crocomire Shaft",
     "timings": [
       {
@@ -19004,7 +19380,9 @@
             "in_game_time": 3.37,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 3.03
               }
             ]
@@ -19169,7 +19547,9 @@
             "in_game_time": 3.39,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 3.01
               }
             ]
@@ -19191,6 +19571,7 @@
     ]
   },
   {
+    "room_id": 126,
     "room_name": "Post Crocomire Missile Room",
     "timings": [
       {
@@ -19208,6 +19589,7 @@
     ]
   },
   {
+    "room_id": 127,
     "room_name": "Post Crocomire Jump Room",
     "timings": [
       {
@@ -19263,6 +19645,7 @@
     ]
   },
   {
+    "room_id": 128,
     "room_name": "Grapple Beam Room",
     "timings": [
       {
@@ -19318,6 +19701,7 @@
     ]
   },
   {
+    "room_id": 129,
     "room_name": "Grapple Tutorial Room 1",
     "timings": [
       {
@@ -19373,6 +19757,7 @@
     ]
   },
   {
+    "room_id": 130,
     "room_name": "Grapple Tutorial Room 2",
     "timings": [
       {
@@ -19428,6 +19813,7 @@
     ]
   },
   {
+    "room_id": 131,
     "room_name": "Grapple Tutorial Room 3",
     "timings": [
       {
@@ -19474,11 +19860,13 @@
               "y": 0,
               "part_idx": 0,
               "door_idx": 0,
-              "node_id": 1    
+              "node_id": 1
             },
             "conditions": [
               {
-                "requires": ["can_reverse_gate"],
+                "requires": [
+                  "can_reverse_gate"
+                ],
                 "in_game_time": 4.38
               }
             ]
@@ -19488,6 +19876,7 @@
     ]
   },
   {
+    "room_id": 303,
     "room_name": "Crocomire Save Room",
     "timings": [
       {
@@ -19505,6 +19894,7 @@
     ]
   },
   {
+    "room_id": 311,
     "room_name": "Post Crocomire Save Room",
     "timings": [
       {
@@ -19522,6 +19912,7 @@
     ]
   },
   {
+    "room_id": 309,
     "room_name": "Lower Norfair Elevator",
     "timings": [
       {
@@ -19638,6 +20029,7 @@
     ]
   },
   {
+    "room_id": 310,
     "room_name": "Lower Norfair Elevator Save Room",
     "timings": [
       {
@@ -19655,6 +20047,7 @@
     ]
   },
   {
+    "room_id": 154,
     "room_name": "Wrecked Ship Entrance",
     "timings": [
       {
@@ -19710,6 +20103,7 @@
     ]
   },
   {
+    "room_id": 155,
     "room_name": "Wrecked Ship Main Shaft",
     "timings": [
       {
@@ -20310,6 +20704,7 @@
     ]
   },
   {
+    "room_id": 160,
     "room_name": "Attic",
     "timings": [
       {
@@ -20426,6 +20821,7 @@
     ]
   },
   {
+    "room_id": 156,
     "room_name": "Basement",
     "timings": [
       {
@@ -20452,7 +20848,9 @@
             "in_game_time": 6.01,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 4.27,
                 "note": "Speedball"
               }
@@ -20471,7 +20869,9 @@
             "in_game_time": 2.49,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 2.31
               }
             ]
@@ -20502,7 +20902,9 @@
             "in_game_time": 6.03,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 4.44
               }
             ]
@@ -20520,7 +20922,9 @@
             "in_game_time": 4.46,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 3.51
               }
             ]
@@ -20551,7 +20955,9 @@
             "in_game_time": 2.47,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 2.39
               }
             ]
@@ -20569,7 +20975,9 @@
             "in_game_time": 4.34,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 4.18
               }
             ]
@@ -20579,6 +20987,7 @@
     ]
   },
   {
+    "room_id": 157,
     "room_name": "Wrecked Ship Map Room",
     "timings": [
       {
@@ -20596,6 +21005,7 @@
     ]
   },
   {
+    "room_id": 158,
     "room_name": "Phantoon's Room",
     "timings": [
       {
@@ -20613,6 +21023,7 @@
     ]
   },
   {
+    "room_id": 159,
     "room_name": "Wrecked Ship West Super Room",
     "timings": [
       {
@@ -20630,6 +21041,7 @@
     ]
   },
   {
+    "room_id": 161,
     "room_name": "Bowling Alley",
     "timings": [
       {
@@ -20684,6 +21096,7 @@
     ]
   },
   {
+    "room_id": 162,
     "room_name": "Gravity Suit Room",
     "timings": [
       {
@@ -20739,6 +21152,7 @@
     ]
   },
   {
+    "room_id": 163,
     "room_name": "Wrecked Ship East Super Room",
     "timings": [
       {
@@ -20756,6 +21170,7 @@
     ]
   },
   {
+    "room_id": 164,
     "room_name": "Sponge Bath",
     "timings": [
       {
@@ -20811,6 +21226,7 @@
     ]
   },
   {
+    "room_id": 165,
     "room_name": "Spiky Death Room",
     "timings": [
       {
@@ -20837,7 +21253,9 @@
             "in_game_time": 4.47,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 3.39
               }
             ]
@@ -20868,7 +21286,9 @@
             "in_game_time": 4.40,
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 3.41
               }
             ]
@@ -20878,6 +21298,7 @@
     ]
   },
   {
+    "room_id": 166,
     "room_name": "Electric Death Room",
     "timings": [
       {
@@ -20994,6 +21415,7 @@
     ]
   },
   {
+    "room_id": 167,
     "room_name": "Wrecked Ship Energy Tank Room",
     "timings": [
       {
@@ -21011,6 +21433,7 @@
     ]
   },
   {
+    "room_id": 168,
     "room_name": "Assembly Line",
     "timings": [
       {
@@ -21028,6 +21451,7 @@
     ]
   },
   {
+    "room_id": 304,
     "room_name": "Wrecked Ship Save Room",
     "timings": [
       {
@@ -21045,6 +21469,7 @@
     ]
   },
   {
+    "room_id": 224,
     "room_name": "Tourian First Room",
     "timings": [
       {
@@ -21163,6 +21588,7 @@
     ]
   },
   {
+    "room_id": 225,
     "room_name": "Tourian Map Room",
     "timings": [
       {
@@ -21180,6 +21606,7 @@
     ]
   },
   {
+    "room_id": 226,
     "room_name": "Metroid Room 1",
     "timings": [
       {
@@ -21235,6 +21662,7 @@
     ]
   },
   {
+    "room_id": 227,
     "room_name": "Metroid Room 2",
     "timings": [
       {
@@ -21290,6 +21718,7 @@
     ]
   },
   {
+    "room_id": 228,
     "room_name": "Metroid Room 3",
     "timings": [
       {
@@ -21345,6 +21774,7 @@
     ]
   },
   {
+    "room_id": 229,
     "room_name": "Metroid Room 4",
     "timings": [
       {
@@ -21400,6 +21830,7 @@
     ]
   },
   {
+    "room_id": 230,
     "room_name": "Blue Hopper Room",
     "timings": [
       {
@@ -21455,6 +21886,7 @@
     ]
   },
   {
+    "room_id": 231,
     "room_name": "Dust Torizo Room",
     "timings": [
       {
@@ -21510,6 +21942,7 @@
     ]
   },
   {
+    "room_id": 232,
     "room_name": "Big Boy Room",
     "timings": [
       {
@@ -21562,7 +21995,9 @@
             "note": "No baby skip",
             "conditions": [
               {
-                "requires": ["enemies_cleared"],
+                "requires": [
+                  "enemies_cleared"
+                ],
                 "in_game_time": 4.54
               }
             ]
@@ -21572,6 +22007,7 @@
     ]
   },
   {
+    "room_id": 233,
     "room_name": "Seaweed Room",
     "timings": [
       {
@@ -21688,6 +22124,7 @@
     ]
   },
   {
+    "room_id": 234,
     "room_name": "Tourian Recharge Room",
     "timings": [
       {
@@ -21705,6 +22142,7 @@
     ]
   },
   {
+    "room_id": 235,
     "room_name": "Tourian Eye Door Room",
     "timings": [
       {
@@ -21760,6 +22198,7 @@
     ]
   },
   {
+    "room_id": 236,
     "room_name": "Rinka Shaft",
     "timings": [
       {
@@ -21876,6 +22315,7 @@
     ]
   },
   {
+    "room_id": 237,
     "room_name": "Lower Tourian Save Room",
     "timings": [
       {
@@ -21893,6 +22333,7 @@
     ]
   },
   {
+    "room_id": 238,
     "room_name": "Mother Brain Room",
     "timings": [
       {
@@ -21922,6 +22363,7 @@
     ]
   },
   {
+    "room_id": 239,
     "room_name": "Tourian Escape Room 1",
     "timings": [
       {
@@ -21977,6 +22419,7 @@
     ]
   },
   {
+    "room_id": 240,
     "room_name": "Tourian Escape Room 2",
     "timings": [
       {
@@ -22032,6 +22475,7 @@
     ]
   },
   {
+    "room_id": 241,
     "room_name": "Tourian Escape Room 3",
     "timings": [
       {
@@ -22087,6 +22531,7 @@
     ]
   },
   {
+    "room_id": 242,
     "room_name": "Tourian Escape Room 4",
     "timings": [
       {
@@ -22113,7 +22558,9 @@
             "in_game_time": 19.07,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 18.12
               }
             ]
@@ -22144,7 +22591,9 @@
             "in_game_time": 18.06,
             "conditions": [
               {
-                "requires": ["can_moonfall"],
+                "requires": [
+                  "can_moonfall"
+                ],
                 "in_game_time": 17.34
               }
             ]

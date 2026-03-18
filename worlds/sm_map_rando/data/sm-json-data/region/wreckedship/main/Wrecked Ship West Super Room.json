@@ -4,9 +4,11 @@
   "name": "Wrecked Ship West Super Room",
   "area": "Wrecked Ship",
   "subarea": "Main",
-  "playable": true,
   "roomAddress": "0x7CDA8",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -14,7 +16,11 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001a2e8",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -30,17 +36,19 @@
           "unlockStrats": [
             {
               "name": "Base",
-              "notable": false,
               "requires": [
                 {"or": [
                   "f_DefeatedPhantoon",
-                  "h_AllItemsSpawned"
+                  "h_allItemsSpawned"
                 ]}
               ],
               "note": "The item doesn't spawn until Phantoon is defeated."
             }
           ]
         }
+      ],
+      "mapTileMask": [
+        [2]
       ]
     }
   ],
@@ -62,6 +70,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave with Runway",
       "requires": [],
@@ -73,21 +82,71 @@
       }
     },
     {
+      "id": 2,
+      "link": [1, 1],
+      "name": "Leave With Mockball",
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveWithMockball": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 3,
+            "openEnd": 1
+          }
+        }
+      },
+      "note": "If the power is on, time the jump for when the electricity is inactive."
+    },
+    {
+      "id": 3,
+      "link": [1, 1],
+      "name": "Leave With Spring Ball Bounce",
+      "requires": [
+        "canTrickyJump"
+      ],
+      "exitCondition": {
+        "leaveWithSpringBallBounce": {
+          "remoteRunway": {
+            "length": 4,
+            "openEnd": 1
+          },
+          "landingRunway": {
+            "length": 3,
+            "openEnd": 1
+          },
+          "movementType": "uncontrolled"
+        }
+      },
+      "note": "If the power is on, time the jump for when the electricity is inactive."
+    },
+    {
+      "id": 4,
       "link": [1, 1],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 5,
       "link": [1, 2],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 6,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 7,
+  "nextNotableId": 1
 }

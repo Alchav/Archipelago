@@ -4,33 +4,39 @@
   "name": "Beta Power Bomb Room",
   "area": "Brinstar",
   "subarea": "Red",
-  "playable": true,
   "roomAddress": "0x7A37C",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1, 1],
+    [1, 0]
+  ],
   "nodes": [
     {
       "id": 1,
       "name": "Right Door",
       "nodeType": "door",
-      "nodeSubType": "grey",
+      "nodeSubType": "gray",
       "nodeAddress": "0x00190de",
+      "doorOrientation": "right",
       "doorEnvironments": [{"physics": "air"}],
       "locks": [
         {
-          "name": "Beta Power Bomb Grey Lock (to Caterpillar Room)",
+          "name": "Beta Power Bomb Gray Lock (to Caterpillar Room)",
           "lockType": "killEnemies",
           "unlockStrats": [
             {
               "name": "Base",
-              "notable": false,
               "requires": [
                 {"obstaclesCleared": ["A"]}
-              ],
-              "note": "Killing the Sidehoppers requires going to 3 and back."
+              ]
             }
           ],
           "yields": ["f_ZebesAwake"]
         }
+      ],
+      "mapTileMask": [
+        [2, 2],
+        [1, 0]
       ]
     },
     {
@@ -39,13 +45,11 @@
       "nodeType": "item",
       "nodeSubType": "visible",
       "nodeItem": "PowerBomb",
-      "nodeAddress": "0x788CA"
-    },
-    {
-      "id": 3,
-      "name": "Top Left Junction",
-      "nodeType": "junction",
-      "nodeSubType": "junction"
+      "nodeAddress": "0x788CA",
+      "mapTileMask": [
+        [1, 1],
+        [2, 0]
+      ]
     }
   ],
   "obstacles": [
@@ -66,7 +70,7 @@
       "groupName": "Beta Power Bomb Room Sidehoppers",
       "enemyName": "Sidehopper",
       "quantity": 3,
-      "homeNodes": [1, 3]
+      "homeNodes": [1]
     },
     {
       "id": "e2",
@@ -82,19 +86,11 @@
       "from": 1,
       "to": [
         {"id": 1},
-        {"id": 2},
-        {"id": 3}
+        {"id": 2}
       ]
     },
     {
       "from": 2,
-      "to": [
-        {"id": 2},
-        {"id": 3}
-      ]
-    },
-    {
-      "from": 3,
       "to": [
         {"id": 1},
         {"id": 2}
@@ -103,6 +99,26 @@
   ],
   "strats": [
     {
+      "id": 29,
+      "link": [1, 1],
+      "name": "Gain Flash Suit (Spikesuit)",
+      "requires": [
+        {"obstaclesCleared": ["A"]},
+        {"obstaclesNotCleared": ["B"]},
+        {"canShineCharge": {"usedTiles": 29, "openEnd": 0}},
+        {"thornHits": 4},
+        "h_spikeSuitThornHitLeniency",
+        "canSpikeSuit",
+        {"shinespark": {"frames": 1, "excessFrames": 1}}
+      ],
+      "flashSuitChecked": true,
+      "devNote": [
+        "FIXME: If the Power Bomb blocks are already broken, using a Samus Eater would also be an option;",
+        "A leaveShinecharged strat could also be added for that."
+      ]
+    },
+    {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave With Runway (Power Bomb Blocks Intact)",
       "requires": [
@@ -118,6 +134,7 @@
       "note": "Kill the Sidehoppers without breaking the Power Bomb blocks."
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Leave With Runway (Power Bomb Blocks Partially Broken)",
       "requires": [
@@ -135,101 +152,78 @@
       ]
     },
     {
+      "id": 26,
       "link": [1, 1],
-      "name": "Crystal Flash",
+      "name": "Leave With Runway (Morph Ball Dodge)",
       "requires": [
-        {"obstaclesCleared": ["A"]},
-        "h_canCrystalFlash"
-      ],
-      "clearsObstacles": ["B"]
-    },
-    {
-      "link": [1, 1],
-      "name": "G-Mode Setup - Get Hit By Sidehopper",
-      "notable": false,
-      "requires": [
-        {"obstaclesNotCleared": ["A"]}
+        {"obstaclesNotCleared": ["B"]},
+        "Morph",
+        "canDodgeWhileShooting"
       ],
       "exitCondition": {
-        "leaveWithGModeSetup": {}
-      }
+        "leaveWithRunway": {
+          "length": 17,
+          "openEnd": 1
+        }
+      },
+      "note": [
+        "Open the door in advance, then lure the Sidehoopers to the left corner with Morph.",
+        "The Sidehoppers cannot hit Samus while morphed. Wait for their jumps to be mostly synchronized.",
+        "Roll right as they start a jump, then quickly unmorph and start running right.",
+        "With good timing, Samus should be able to start running a couple tiles left of the leftmost Yapping Maw."
+      ]
     },
     {
+      "id": 27,
       "link": [1, 1],
-      "name": "G-Mode Regain Mobility",
+      "name": "Leave With Runway (Tank the Damage)",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Sidehopper",
-          "type": "contact",
-          "hits": 1
-        }}
+        {"obstaclesNotCleared": ["B"]},
+        "canUseIFrames",
+        {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 1}},
+        {"or": [
+          "Morph",
+          {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 3}}
+        ]}
       ],
-      "gModeRegainMobility": {}
-    },
-    {
-      "link": [1, 2],
-      "name": "Stored Moonfall Clip",
-      "entranceCondition": {
-        "comeInWithStoredFallSpeed": {
-          "fallSpeedInTiles": 1
+      "exitCondition": {
+        "leaveWithRunway": {
+          "length": 29,
+          "openEnd": 0
         }
       },
-      "requires": [
-        "Plasma",
-        "Wave"
-      ],
-      "clearsObstacles": ["A"],
-      "devNote": [
-        "Coming in with blue speed would be an alternative way to get past the hoppers, but this may be tricky to model.",
-        "Other weapon combinations are possible, but not reliable due to movement being limited."
+      "note": [
+        "Open the door in advance, then lure the Sidehoopers to left wall. This is much easier with Morph ball.",
+        "Take a hit, then start running with the i-frames."
       ]
     },
     {
-      "link": [1, 2],
-      "name": "Stored Moonfall Clip (more speed)",
-      "entranceCondition": {
-        "comeInWithStoredFallSpeed": {
-          "fallSpeedInTiles": 2
-        }
-      },
-      "requires": [
-        "Plasma",
-        "Wave"
-      ],
-      "clearsObstacles": ["A"],
-      "devNote": [
-        "Coming in with blue speed would be an alternative way to get past the hoppers, but this may be tricky to model.",
-        "Other weapon combinations are possible, but not reliable due to movement being limited."
-      ]
-    },
-    {
-      "link": [1, 3],
-      "name": "Already Killed",
-      "requires": [
-        {"obstaclesCleared": ["A"]}
-      ]
-    },
-    {
-      "link": [1, 3],
+      "id": 9,
+      "link": [1, 1],
       "name": "Power Beam Sidehopper Kill",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Sidehopper",
-          "type": "contact",
-          "hits": 4
-        }}
+        {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 4}},
+        {"or": [
+          "canDodgeWhileShooting",
+          {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 3}}
+        ]}
       ],
-      "clearsObstacles": ["A"]
+      "clearsObstacles": ["A"],
+      "note": "Crouch near a wall while shooting in order to avoid some Sidehopper hits."
     },
     {
-      "link": [1, 3],
+      "id": 10,
+      "link": [1, 1],
       "name": "Intermediate Weapon Sidehopper Kill",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Sidehopper",
-          "type": "contact",
-          "hits": 2
-        }},
+        {"or": [
+          {"and": [
+            "Morph",
+            "canDodgeWhileShooting"
+          ]},
+          {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 1}}
+        ]},
+        {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 1}},
         {"or": [
           "Spazer",
           "Wave"
@@ -238,14 +232,21 @@
       "clearsObstacles": ["A"]
     },
     {
-      "link": [1, 3],
+      "id": 11,
+      "link": [1, 1],
       "name": "Sidehopper Missile Kill",
       "requires": [
-        {"enemyDamage": {
-          "enemy": "Sidehopper",
-          "type": "contact",
-          "hits": 1
-        }},
+        {"or": [
+          {"and": [
+            "Morph",
+            "canDodgeWhileShooting"
+          ]},
+          {"and": [
+            "canDodgeWhileShooting",
+            {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 1}}
+          ]},
+          {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 2}}
+        ]},
         {"enemyKill": {
           "enemies": [["Sidehopper", "Sidehopper", "Sidehopper"]],
           "explicitWeapons": ["Missile"]
@@ -254,16 +255,29 @@
       "clearsObstacles": ["A"]
     },
     {
-      "link": [1, 3],
+      "id": 12,
+      "link": [1, 1],
       "name": "Morph Power Beam Sidehopper Kill",
       "requires": [
-        "Morph"
+        "Morph",
+        "canDodgeWhileShooting",
+        "canCameraManip",
+        {"or": [
+          "canTrickyJump",
+          {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 2}}
+        ]}
       ],
       "clearsObstacles": ["A"],
-      "note": "The Sidehoppers can't hit a morphed Samus, so they can be picked off damage-free."
+      "note": [
+        "The Sidehoppers can't hit a morphed Samus, making it possible to kill them damage-free.",
+        "Fight them one at a time on one side of the room while the others are offscreen.",
+        "Unmorph, shoot, remorph to do damage wihtout taking hits.",
+        "Place Samus directly under where the Sidehopper will jump from, and aim at where it will jump to."
+      ]
     },
     {
-      "link": [1, 3],
+      "id": 13,
+      "link": [1, 1],
       "name": "PB Sidehopper Kill",
       "requires": [
         {"enemyKill": {
@@ -271,14 +285,11 @@
           "explicitWeapons": ["PowerBomb"]
         }}
       ],
-      "clearsObstacles": ["A", "B"],
-      "devNote": [
-        "This is essentially redundant with the Morph Power Beam kill.",
-        "It wouldn't be redundant if Power Beam were to be taken away, though."
-      ]
+      "clearsObstacles": ["A", "B"]
     },
     {
-      "link": [1, 3],
+      "id": 14,
+      "link": [1, 1],
       "name": "Safe Weapon Sidehopper Kill",
       "requires": [
         {"enemyKill": {
@@ -289,7 +300,23 @@
       "clearsObstacles": ["A"]
     },
     {
-      "link": [1, 3],
+      "id": 15,
+      "link": [1, 1],
+      "name": "Shinespark",
+      "entranceCondition": {
+        "comeInWithSpark": {
+          "position": "top"
+        }
+      },
+      "requires": [
+        {"shinespark": {"frames": 42, "excessFrames": 12}}
+      ],
+      "clearsObstacles": ["A"],
+      "devNote": "Sparking into the room through the middle of the door also works."
+    },
+    {
+      "id": 16,
+      "link": [1, 1],
       "name": "G-Mode Morph Power Bomb",
       "entranceCondition": {
         "comeInWithGMode": {
@@ -298,12 +325,14 @@
         }
       },
       "requires": [
-        "h_canArtificialMorphPowerBomb"
+        "h_artificialMorphPowerBomb"
       ],
-      "clearsObstacles": ["A", "B"]
+      "clearsObstacles": ["A", "B"],
+      "flashSuitChecked": true
     },
     {
-      "link": [1, 3],
+      "id": 17,
+      "link": [1, 1],
       "name": "G-Mode Morph Sidehopper Bomb Kill",
       "entranceCondition": {
         "comeInWithGMode": {
@@ -312,9 +341,10 @@
         }
       },
       "requires": [
-        "h_canArtificialMorphBombs"
+        "h_artificialMorphBombs"
       ],
       "clearsObstacles": ["A"],
+      "flashSuitChecked": true,
       "note": "Samus is safe while morphed and on the ground unless near the door, where the Sidehoppers can jump into the open door and then jump lower",
       "devNote": [
         "This can be done to unlock the door.",
@@ -322,15 +352,196 @@
       ]
     },
     {
-      "link": [2, 2],
-      "name": "Break the Power Bomb Blocks",
+      "id": 30,
+      "link": [1, 1],
+      "name": "Sidehopper Farm",
       "requires": [
-        "h_canUsePowerBombs"
+        {"resetRoom": {"nodes": [1]}},
+        {"or": [
+          {"and": [
+            "ScrewAttack",
+            {"cycleFrames": 240}
+          ]},
+          {"and": [
+            "canDodgeWhileShooting",
+            "Plasma",
+            {"cycleFrames": 380}
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"],
+      "resetsObstacles": ["B"],
+      "farmCycleDrops": [{"enemy": "Sidehopper", "count": 2}]
+    },
+    {
+      "id": 3,
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        {"obstaclesCleared": ["A"]},
+        "h_CrystalFlash"
+      ],
+      "clearsObstacles": ["B"],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 4,
+      "link": [1, 1],
+      "name": "G-Mode Setup - Get Hit By Sidehopper",
+      "requires": [
+        {"obstaclesNotCleared": ["A"]}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "flashSuitChecked": true
+    },
+    {
+      "id": 5,
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"enemyDamage": {"enemy": "Sidehopper", "type": "contact", "hits": 1}}
+      ],
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true
+    },
+    {
+      "id": 25,
+      "link": [1, 2],
+      "name": "Base",
+      "requires": [
+        {"or": [
+          "h_usePowerBomb",
+          {"obstaclesCleared": ["B"]}
+        ]}
       ],
       "clearsObstacles": ["B"]
     },
     {
-      "link": [2, 3],
+      "id": 6,
+      "link": [1, 2],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            "Plasma",
+            "Wave"
+          ]},
+          {"and": [
+            "canInsaneJump",
+            {"or": [
+              "Plasma",
+              {"ammo": {"type": "Super", "count": 6}}
+            ]}
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"],
+      "note": [
+        "Come in with stored fall speed and get past or kill the Sidehoppers without getting hit.",
+        "It is possible to open the door to back up and quickly kill the hoppers, or to run under them and clip without getting hit."
+      ],
+      "devNote": [
+        "Coming in with blue speed would be an alternative way to get past the hoppers, but this may be tricky to model.",
+        "FIXME: It is possible to get past the sidehoppers without killing them and moonfall without getting hit.",
+        "This could then allow Samus to kill them safely with Wave, Morph, etc."
+      ]
+    },
+    {
+      "id": 7,
+      "link": [1, 2],
+      "name": "Stored Moonfall Clip (more speed)",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 2
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            "Plasma",
+            "Wave"
+          ]},
+          {"and": [
+            "canInsaneJump",
+            {"or": [
+              "Plasma",
+              {"ammo": {"type": "Super", "count": 6}}
+            ]}
+          ]}
+        ]}
+      ],
+      "clearsObstacles": ["A"],
+      "note": [
+        "Come in with stored fall speed and get past or kill the Sidehoppers without getting hit.",
+        "It is possible to open the door to back up and quickly kill the hoppers, or to run under them and clip without getting hit."
+      ],
+      "devNote": [
+        "Coming in with blue speed would be an alternative way to get past the hoppers, but this may be tricky to model.",
+        "FIXME: It is possible to get past the sidehoppers and moonfall without getting hit."
+      ]
+    },
+    {
+      "id": 28,
+      "link": [1, 2],
+      "name": "Samus Eater Teleport",
+      "entranceCondition": {
+        "comeInWithSamusEaterTeleport": {
+          "floorPositions": [[15, 13], [1, 13]],
+          "ceilingPositions": []
+        }
+      },
+      "requires": [
+        {"or": [
+          {"and": [
+            {"ammo": {"type": "Super", "count": 1}},
+            "h_useSpringBall",
+            {"thornHits": 4}
+          ]},
+          {"and": [
+            "h_useMorphBombs",
+            {"thornHits": 3},
+            {"samusEaterFrames": 320}
+          ]}
+        ]},
+        {"or": [
+          "canInsaneJump",
+          {"thornHits": 1}
+        ]}
+      ],
+      "note": [
+        "Land in the right side of the third Samus Eater on the floor of Hellway.",
+        "The Samus Eater teleport will result in Samus being placed below the Power Bombs blocks, below the door.",
+        "Use Spring Ball or Bombs to navigate past the thorns, Samus Eaters, and Yapping Maws.",
+        "It can be helpful to use a Super to kill the first Yapping Maw."
+      ]
+    },
+    {
+      "id": 31,
+      "link": [1, 2],
+      "name": "Super Sink",
+      "entranceCondition": {
+        "comeInWithSuperSink": {}
+      },
+      "requires": [
+        "h_useSpringBall",
+        {"thornHits": 3},
+        {"samusEaterFrames": 160}
+      ],
+      "note": [
+        "Enter the room with a super sink, and hold left, in order to clip down through the Power Bomb blocks.",
+        "Use Spring Ball to navigate the thorns and Samus Eaters with limited damage."
+      ]
+    },
+    {
+      "id": 19,
+      "link": [2, 1],
       "name": "Base",
       "requires": [
         {"obstaclesCleared": ["B"]},
@@ -338,22 +549,29 @@
           "HiJump",
           "canWalljump",
           "canSpringBallJumpMidAir",
-          "h_canFly",
+          "SpaceJump",
+          "canIBJ",
           "canSpringBallBombJump"
         ]}
       ]
     },
     {
-      "link": [2, 3],
+      "id": 20,
+      "link": [2, 1],
       "name": "Damage Boost Escape",
       "requires": [
         {"obstaclesCleared": ["B"]},
-        "canHorizontalDamageBoost",
+        "canNeutralDamageBoost",
+        {"or": [
+          "canMidAirMorph",
+          "canCarefulJump"
+        ]},
         {"thornHits": 1}
       ]
     },
     {
-      "link": [2, 3],
+      "id": 21,
+      "link": [2, 1],
       "name": "Tricky Jump Escape",
       "requires": [
         {"obstaclesCleared": ["B"]},
@@ -362,7 +580,8 @@
       "note": "The thorns do not cover the entire blocks above. Jump barely only onto the corner to avoid the damage."
     },
     {
-      "link": [2, 3],
+      "id": 22,
+      "link": [2, 1],
       "name": "Ceiling Clip",
       "requires": [
         "canCeilingClip",
@@ -379,7 +598,7 @@
           ]},
           {"and": [
             "canNeutralDamageBoost",
-            "canIframeSpikeJump",
+            "canUseIFrames",
             {"thornHits": 1}
           ]},
           {"and": [
@@ -388,25 +607,26 @@
           ]}
         ]}
       ],
+      "flashSuitChecked": true,
       "note": [
         "Use the Solid Blocks next to the Samus Eater to clip up through the Power Bomb Blocks.",
-        "Carefully jump around the thorns, use HiJump to jump over them, or walk through them using IFrames."
+        "Carefully jump around the thorns, use HiJump to jump over them, or walk through them using i-frames."
       ]
     },
     {
-      "link": [2, 3],
+      "id": 23,
+      "link": [2, 1],
       "name": "Minimalist Ceiling Clip",
       "requires": [
         "canTrickyJump",
         {"or": [
-          "h_canXRayCeilingClip",
-          {"and": [
-            "canTunnelCrawl",
-            "canPartialFloorClip"
-          ]}
+          "canXRayCeilingClip",
+          "canTunnelCrawl"
         ]},
+        "canPartialFloorClip",
         "canCeilingClip"
       ],
+      "flashSuitChecked": true,
       "note": [
         "Use the Solid Blocks next to the Samus Eater to clip up through the Power Bomb Blocks.",
         "The thorns do not cover the entire blocks above. Jump barely only onto the corner to avoid the damage.",
@@ -415,20 +635,16 @@
       ]
     },
     {
-      "link": [3, 1],
-      "name": "Base",
-      "requires": []
-    },
-    {
-      "link": [3, 2],
-      "name": "Base",
+      "id": 18,
+      "link": [2, 2],
+      "name": "Break the Power Bomb Blocks",
       "requires": [
-        {"or": [
-          "h_canUsePowerBombs",
-          {"obstaclesCleared": ["B"]}
-        ]}
+        "h_usePowerBomb"
       ],
       "clearsObstacles": ["B"]
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 32,
+  "nextNotableId": 1
 }

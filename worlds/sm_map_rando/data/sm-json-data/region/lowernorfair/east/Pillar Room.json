@@ -5,9 +5,11 @@
   "area": "Norfair",
   "subarea": "Lower",
   "subsubarea": "East",
-  "playable": true,
   "roomAddress": "0x7B457",
   "roomEnvironments": [{"heated": true}],
+  "mapTileMask": [
+    [1, 1, 1, 1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,11 +17,16 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x0019942",
+      "doorOrientation": "left",
       "doorEnvironments": [
         {
           "physics": "air",
           "note": "Acid can rise above the door, but it's possible to have air physics."
         }
+      ],
+      "useImplicitDoorUnlocks": false,
+      "mapTileMask": [
+        [2, 2, 1, 1]
       ]
     },
     {
@@ -28,11 +35,16 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x001994e",
+      "doorOrientation": "right",
       "doorEnvironments": [
         {
           "physics": "air",
           "note": "Acid can rise above the door, but it's possible to have air physics."
         }
+      ],
+      "useImplicitDoorUnlocks": false,
+      "mapTileMask": [
+        [1, 1, 2, 2]
       ]
     }
   ],
@@ -42,24 +54,7 @@
       "groupName": "Pillar Room Puromis",
       "enemyName": "Puromi",
       "quantity": 2,
-      "betweenNodes": [1, 2],
-      "dropRequires": ["h_heatProof"]
-    }
-  ],
-  "reusableRoomwideNotable": [
-    {
-      "name": "Lower Norfair Pillar Room with Two Power Bombs",
-      "note": [
-        "Place the Power Bombs as forward as possible in order to only need to use two.",
-        "This makes it more likely to fall in the acid."
-      ]
-    },
-    {
-      "name": "Lower Norfair Pillar Room with Bombs",
-      "note": [
-        "Cross the Pillar Room with Bombs and minimal damage.",
-        "Some acid damage is expected, but any mistakes greatly increases the time spent in acid."
-      ]
+      "betweenNodes": [1, 2]
     }
   ],
   "links": [
@@ -80,6 +75,7 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave With Runway",
       "entranceCondition": {
@@ -93,26 +89,40 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
       ]
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Crystal Flash",
       "entranceCondition": {
         "comeInNormally": {}
       },
       "requires": [
-        "h_canHeatedCrystalFlash",
-        {"resetRoom": {
-          "nodes": [1],
-          "mustStayPut": false
-        }}
-      ]
+        "h_heatedCrystalFlash",
+        {"resetRoom": {"nodes": [1]}}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [], "useImplicitRequires": false}
+      ],
+      "flashSuitChecked": true
     },
     {
+      "id": 3,
       "link": [1, 2],
       "name": "Screw",
       "requires": [
@@ -122,24 +132,48 @@
           {"heatFrames": 60}
         ]},
         {"heatFrames": 490}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 30}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 4,
       "link": [1, 2],
       "name": "Space Screw",
       "requires": [
         "ScrewAttack",
         "SpaceJump",
         {"heatFrames": 380}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 30}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 5,
       "link": [1, 2],
       "name": "Space Screw (Come in Running)",
       "entranceCondition": {
         "comeInRunning": {
-          "minTiles": 2,
-          "speedBooster": "any"
+          "speedBooster": "any",
+          "minTiles": 2
         }
       },
       "requires": [
@@ -147,32 +181,146 @@
         "SpaceJump",
         "canCarefulJump",
         {"heatFrames": 300}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 30}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
       ]
     },
     {
+      "id": 28,
       "link": [1, 2],
-      "name": "Shinespark",
+      "name": "Come In With Spark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 15
+        "comeInWithSpark": {
+          "position": "top"
         }
       },
       "requires": [
-        "canMidairShinespark",
-        {"shinespark": {"frames": 78, "excessFrames": 8}},
-        {"heatFrames": 210}
+        {"heatFrames": 79},
+        {"or": [
+          {"and": [
+            {"shinespark": {"frames": 79, "excessFrames": 5}},
+            {"heatFrames": 105}
+          ]},
+          {"and": [
+            {"shinespark": {"frames": 79, "excessFrames": 15}},
+            {"heatFrames": 165}
+          ]}
+        ]}
       ],
-      "note": "Jump before shinesparking to avoid an early crash.",
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
       "devNote": [
-        "There is a heatframe vs shinespark frame tradeoff here.",
-        "This excessShinesparkFrame count breaks the small pillar near the door at 2"
+        "5 excess frames is the maximum for which it is still be possible to reach the door without running out of energy,",
+        "in the case where the shinespark ends at 29 energy and Samus has no heat protection (or reserves to refill from).",
+        "The alternative with 15 excess frames is mainly useful in the heat-proof case."
       ]
     },
     {
+      "id": 29,
+      "link": [1, 2],
+      "name": "Come In Shinecharging, Shinespark",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 4,
+          "openEnd": 1
+        }
+      },
+      "requires": [
+        {"heatFrames": 150},
+        "canMidairShinespark",
+        {"or": [
+          {"and": [
+            {"shinespark": {"frames": 66, "excessFrames": 5}},
+            {"heatFrames": 105}
+          ]},
+          {"and": [
+            {"shinespark": {"frames": 66, "excessFrames": 15}},
+            {"heatFrames": 165}
+          ]}
+        ]}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
+      "devNote": [
+        "This assumes sparking near the pillars.",
+        "5 excess frames is the maximum for which it is still be possible to reach the door without running out of energy,",
+        "in the case where the shinespark ends at 29 energy and Samus has no heat protection (or reserves to refill from).",
+        "The alternative with 15 excess frames is mainly useful in the heat-proof case."
+      ]
+    },
+    {
+      "id": 30,
+      "link": [1, 2],
+      "name": "Come In Shinecharged, Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        {"shineChargeFrames": 65},
+        {"heatFrames": 135},
+        "canMidairShinespark",
+        {"or": [
+          {"and": [
+            {"shinespark": {"frames": 66, "excessFrames": 5}},
+            {"heatFrames": 105}
+          ]},
+          {"and": [
+            {"shinespark": {"frames": 66, "excessFrames": 15}},
+            {"heatFrames": 165}
+          ]}
+        ]}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
+      "devNote": [
+        "This assumes sparking near the pillars, since sparking near the door is already covered by the comeInWithSpark strat.",
+        "5 excess frames is the maximum for which it is still be possible to reach the door without running out of energy,",
+        "in the case where the shinespark ends at 29 energy and Samus has no heat protection (or reserves to refill from).",
+        "The alternative with 15 excess frames is mainly useful in the heat-proof case."
+      ]
+    },
+    {
+      "id": 7,
       "link": [1, 2],
       "name": "Blue Space Jump",
       "entranceCondition": {
-        "comeInShinecharging": {
+        "comeInGettingBlueSpeed": {
           "length": 4,
           "openEnd": 1
         }
@@ -181,17 +329,29 @@
         "canBlueSpaceJump",
         {"heatFrames": 300}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 30}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
+      ],
       "devNote": [
         "This is considered faster than Space Screw because we can safely assume carried momentum from previous rooms.",
         "The heat frame count is conservative and assumes only the speed of a 4-tap."
       ]
     },
     {
+      "id": 8,
       "link": [1, 2],
-      "name": "Pillar Room with Two Power Bombs (Left to Right)",
-      "notable": true,
+      "name": "Two Power Bombs (Left to Right)",
       "requires": [
-        "Morph",
+        {"notable": "Two Power Bombs"},
+        "canMidAirMorph",
         "canCarefulJump",
         {"ammo": {"type": "PowerBomb", "count": 2}},
         {"or": [
@@ -239,7 +399,23 @@
           {"resourceCapacity": [{"type": "RegularEnergy", "count": 149}]}
         ]}
       ],
-      "reusableRoomwideNotable": "Lower Norfair Pillar Room with Two Power Bombs",
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 15},
+            {"acidFrames": 15}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 30},
+            {"acidFrames": 30}
+          ]
+        }
+      ],
       "note": [
         "Place the PBs next to the pillars in order to only use 2.",
         "Minimize acid by unmorphing high to land back on the jump spot or walljumping before placing the bomb."
@@ -247,20 +423,16 @@
       "devNote": "With Reserves only, canPauseAbuse is used as a proxy for pause abuse or optimal reserve management and character movement."
     },
     {
+      "id": 9,
       "link": [1, 2],
       "name": "Three Power Bombs",
-      "notable": false,
       "requires": [
         "canCarefulJump",
         "Morph",
         {"ammo": {"type": "PowerBomb", "count": 3}},
         {"or": [
           "canTrickyJump",
-          {"enemyDamage": {
-            "enemy": "Puromi",
-            "type": "contact",
-            "hits": 1
-          }}
+          {"enemyDamage": {"enemy": "Puromi", "type": "contact", "hits": 1}}
         ]},
         {"heatFrames": 670},
         {"or": [
@@ -282,6 +454,23 @@
           {"resourceCapacity": [{"type": "RegularEnergy", "count": 149}]}
         ]}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 15},
+            {"acidFrames": 15}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 30},
+            {"acidFrames": 30}
+          ]
+        }
+      ],
       "note": [
         "The power bombs can be placed pretty far from the next pillar in line.",
         "PB1 - Above the mound of dirt on the ground.  PB2 - On pillar 2 (not on the Puromi Fire Snake).  PB3 - Near pillar 5."
@@ -289,17 +478,18 @@
       "devNote": "With Reserves only, canPauseAbuse is used as a proxy for pause abuse or optimal reserve management and character movement."
     },
     {
+      "id": 10,
       "link": [1, 2],
-      "name": "Lower Norfair Pillar Room with Bombs (Left to Right)",
-      "notable": true,
+      "name": "Bombs (Left to Right)",
       "entranceCondition": {
         "comeInRunning": {
-          "minTiles": 1,
-          "speedBooster": "any"
+          "speedBooster": "any",
+          "minTiles": 1
         }
       },
       "requires": [
-        "h_canUseMorphBombs",
+        {"notable": "Bombs"},
+        "h_useMorphBombs",
         "canWallJumpInstantMorph",
         "canInsaneJump",
         "canResetFallSpeed",
@@ -308,43 +498,106 @@
         {"heatFrames": 1320},
         {"acidFrames": 128}
       ],
-      "reusableRoomwideNotable": "Lower Norfair Pillar Room with Bombs",
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 50},
+            {"acidFrames": 50}
+          ]
+        }
+      ],
       "note": [
-        "Cross the Pillar Room with Bombs and minimal damage.",
+        "Cross the room with Bombs and minimal damage.",
         "Some acid damage is expected, but any mistakes greatly increases the time spent in acid."
       ]
     },
     {
+      "id": 11,
       "link": [1, 2],
-      "name": "Lower Norfair Pillar Room with Bombs, no WallJump (Left to Right)",
-      "notable": true,
+      "name": "Bombs, no WallJump (Left to Right)",
       "entranceCondition": {
         "comeInRunning": {
-          "minTiles": 1,
-          "speedBooster": "any"
+          "speedBooster": "any",
+          "minTiles": 1
         }
       },
       "requires": [
-        "h_canUseMorphBombs",
+        {"notable": "Bombs"},
+        "h_useMorphBombs",
         "Gravity",
         "canResetFallSpeed",
         "canJumpIntoIBJ",
         "canSuitlessLavaDive",
-        {"enemyDamage": {
-          "enemy": "Puromi",
-          "type": "contact",
-          "hits": 2
-        }},
+        {"enemyDamage": {"enemy": "Puromi", "type": "contact", "hits": 2}},
         {"heatFrames": 1440},
         {"acidFrames": 725}
       ],
-      "reusableRoomwideNotable": "Lower Norfair Pillar Room with Bombs",
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 15},
+            {"acidFrames": 15}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 50},
+            {"acidFrames": 50}
+          ]
+        }
+      ],
       "note": [
-        "Cross the Pillar Room with Bombs and minimal damage.",
+        "Cross the room with Bombs and minimal damage.",
         "Acid damage is expected, but any mistakes greatly increases the time spent in acid."
       ]
     },
     {
+      "id": 34,
+      "link": [1, 2],
+      "name": "G-Mode, Screw Attack",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "ScrewAttack",
+        {"or": [
+          "SpaceJump",
+          "canTrickyJump"
+        ]},
+        "h_heatedGModeOpenDifferentDoor"
+      ],
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"or": [
+              "SpaceJump",
+              "canInsaneJump",
+              {"acidFrames": 15}
+            ]}
+          ]
+        }
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 12,
       "link": [2, 1],
       "name": "Screw",
       "requires": [
@@ -363,9 +616,21 @@
           ]}
         ]}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 30}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 60}]
+        }
+      ],
       "note": "Wait for the Puromis to pass so that Samus does not land on them."
     },
     {
+      "id": 13,
       "link": [2, 1],
       "name": "Tricky Screw Jumps",
       "requires": [
@@ -385,12 +650,24 @@
           ]}
         ]}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
       "note": [
         "Break spin to leave some blocks intact in order to avoid damage from Puromis.",
         "Avoiding acid damage at the last jump is tricky but possible."
       ]
     },
     {
+      "id": 14,
       "link": [2, 1],
       "name": "Very Tricky Screw Jumps",
       "requires": [
@@ -398,12 +675,24 @@
         "ScrewAttack",
         {"heatFrames": 500}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
       "note": [
         "Break spin to leave some blocks intact in order to avoid damage from Puromis.",
         "Avoiding acid damage at the last jump is tricky but possible."
       ]
     },
     {
+      "id": 15,
       "link": [2, 1],
       "name": "Space Screw",
       "requires": [
@@ -411,13 +700,25 @@
         "SpaceJump",
         {"heatFrames": 350}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 40}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 100}]
+        }
+      ],
       "note": "Break the half pillar near the entrance, then run back to use the longer runway that this opens up."
     },
     {
+      "id": 16,
       "link": [2, 1],
       "name": "Blue Space Jump",
       "entranceCondition": {
-        "comeInShinecharging": {
+        "comeInGettingBlueSpeed": {
           "length": 2,
           "openEnd": 1
         }
@@ -427,32 +728,201 @@
         "canBlueSpaceJump",
         {"heatFrames": 300}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 40}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 100}]
+        }
+      ],
       "devNote": [
         "This is considered faster than Space Screw because we can safely assume carried momentum from previous rooms.",
         "The heat frame count is conservative and assumes only the speed of a 4-tap."
       ]
     },
     {
+      "id": 31,
       "link": [2, 1],
-      "name": "Shinespark",
+      "name": "Come In With Spark",
       "entranceCondition": {
-        "comeInShinecharged": {
-          "framesRequired": 15
+        "comeInWithSpark": {
+          "position": "top"
         }
       },
       "requires": [
-        "canMidairShinespark",
-        {"shinespark": {"frames": 78, "excessFrames": 4}},
-        {"heatFrames": 210}
+        {"heatFrames": 79},
+        {"or": [
+          {"and": [
+            {"shinespark": {"frames": 79, "excessFrames": 5}},
+            {"heatFrames": 105}
+          ]},
+          {"and": [
+            {"shinespark": {"frames": 79, "excessFrames": 16}},
+            "canCarefulJump",
+            {"or": [
+              "canInsaneJump",
+              {"and": [
+                "canTrickyJump",
+                "canWalljump"
+              ]},
+              {"acidFrames": 5}
+            ]},
+            {"heatFrames": 200}
+          ]}
+        ]}
       ],
-      "note": "Jump before shinesparking to avoid an early crash."
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
+      "devNote": [
+        "5 excess frames is the maximum for which it is still be possible to reach the door without running out of energy,",
+        "in the case where the shinespark ends at 29 energy and Samus has no heat protection (or reserves to refill from).",
+        "The alternative with 16 excess frames is mainly useful in the heat-proof case."
+      ]
     },
     {
+      "id": 32,
       "link": [2, 1],
-      "name": "Pillar Room with Two Power Bombs (Right to Left)",
-      "notable": true,
+      "name": "Come In Shinecharging, Shinespark",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 3,
+          "openEnd": 0
+        }
+      },
       "requires": [
-        "Morph",
+        "canShinechargeMovement",
+        "canHorizontalShinespark",
+        {"or": [
+          {"and": [
+            {"heatFrames": 105},
+            {"shinespark": {"frames": 67, "excessFrames": 5}},
+            {"heatFrames": 105}
+          ]},
+          {"and": [
+            {"heatFrames": 165},
+            {"shinespark": {"frames": 67, "excessFrames": 16}},
+            {"or": [
+              {"and": [
+                "canControlShinesparkEnd",
+                {"or": [
+                  "canInsaneJump",
+                  {"and": [
+                    "canTrickyJump",
+                    "canWalljump"
+                  ]}
+                ]}
+              ]},
+              {"and": [
+                {"acidFrames": 10},
+                {"heatFrames": 20},
+                {"or": [
+                  "HiJump",
+                  "canWalljump"
+                ]}
+              ]}
+            ]},
+            {"heatFrames": 200}
+          ]}
+        ]}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
+      "devNote": [
+        "5 excess frames is the maximum for which it is still be possible to reach the door without running out of energy,",
+        "in the case where the shinespark ends at 29 energy and Samus has no heat protection (or reserves to refill from).",
+        "The alternative with 16 excess frames is mainly useful in the heat-proof case."
+      ]
+    },
+    {
+      "id": 33,
+      "link": [2, 1],
+      "name": "Come In Shinecharged, Shinespark",
+      "entranceCondition": {
+        "comeInShinecharged": {}
+      },
+      "requires": [
+        "canShinechargeMovement",
+        "canHorizontalShinespark",
+        {"shineChargeFrames": 65},
+        {"heatFrames": 135},
+        {"or": [
+          {"and": [
+            {"shinespark": {"frames": 67, "excessFrames": 5}},
+            {"heatFrames": 105}
+          ]},
+          {"and": [
+            {"shinespark": {"frames": 67, "excessFrames": 16}},
+            {"or": [
+              {"and": [
+                "canControlShinesparkEnd",
+                {"or": [
+                  "canInsaneJump",
+                  {"and": [
+                    "canTrickyJump",
+                    "canWalljump"
+                  ]}
+                ]}
+              ]},
+              {"and": [
+                {"acidFrames": 10},
+                {"heatFrames": 20},
+                {"or": [
+                  "HiJump",
+                  "canWalljump"
+                ]}
+              ]}
+            ]},
+            {"heatFrames": 200}
+          ]}
+        ]}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
+      ],
+      "devNote": [
+        "This assumes sparking near the pillars, since sparking near the door is already covered by the comeInWithSpark strat.",
+        "5 excess frames is the maximum for which it is still be possible to reach the door without running out of energy,",
+        "in the case where the shinespark ends at 29 energy and Samus has no heat protection (or reserves to refill from).",
+        "The alternative with 16 excess frames is mainly useful in the heat-proof case."
+      ]
+    },
+    {
+      "id": 18,
+      "link": [2, 1],
+      "name": "Two Power Bombs (Right to Left)",
+      "requires": [
+        {"notable": "Two Power Bombs"},
+        "canMidAirMorph",
         {"ammo": {"type": "PowerBomb", "count": 2}},
         "canCarefulJump",
         {"or": [
@@ -483,7 +953,7 @@
             "canLateralMidAirMorph",
             {"heatFrames": 10},
             {"acidFrames": 10}
-           ]},
+          ]},
           {"and": [
             "canPreciseWalljump",
             {"heatFrames": 50},
@@ -506,7 +976,23 @@
           {"resourceCapacity": [{"type": "RegularEnergy", "count": 149}]}
         ]}
       ],
-      "reusableRoomwideNotable": "Lower Norfair Pillar Room with Two Power Bombs",
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 30},
+            {"acidFrames": 20}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 75},
+            {"acidFrames": 58}
+          ]
+        }
+      ],
       "note": [
         "Place the PBs next to the pillars in order to only use 2.",
         "Avoid acid during the first Power Bomb by walljumping before placing the bomb.",
@@ -515,6 +1001,7 @@
       "devNote": "With Reserves only, canPauseAbuse is used as a proxy for pause abuse or optimal reserve management and character movement."
     },
     {
+      "id": 19,
       "link": [2, 1],
       "name": "Three Power Bombs",
       "requires": [
@@ -539,6 +1026,23 @@
           {"resourceCapacity": [{"type": "RegularEnergy", "count": 149}]}
         ]}
       ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 30},
+            {"acidFrames": 20}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 75},
+            {"acidFrames": 58}
+          ]
+        }
+      ],
       "note": [
         "The power bombs can be placed far from the next pillar in line.",
         "PB1 - Near the broken pillar.  PB2 - On the 2nd full pillar.  PB3 - On the 4th full pillar.",
@@ -547,17 +1051,17 @@
       "devNote": "With Reserves only, canPauseAbuse is used as a proxy for pause abuse or optimal reserve management and character movement."
     },
     {
+      "id": 20,
       "link": [2, 1],
-      "name": "Lower Norfair Pillar Room with Bombs (Right to Left)",
-      "notable": true,
+      "name": "Bombs (Right to Left)",
       "entranceCondition": {
         "comeInRunning": {
-          "minTiles": 3,
-          "speedBooster": "any"
+          "speedBooster": "any",
+          "minTiles": 3
         }
       },
       "requires": [
-        "h_canUseMorphBombs",
+        {"notable": "Bombs"},
         "canWallJumpInstantMorph",
         "canInsaneJump",
         "canResetFallSpeed",
@@ -567,43 +1071,66 @@
         {"heatFrames": 1320},
         {"acidFrames": 128}
       ],
-      "reusableRoomwideNotable": "Lower Norfair Pillar Room with Bombs",
+      "unlocksDoors": [
+        {"types": ["missiles", "super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 50},
+            {"acidFrames": 50}
+          ]
+        }
+      ],
       "note": [
-        "Cross the Pillar Room with Bombs and minimal damage.",
+        "Cross the room with Bombs and minimal damage.",
         "Some acid damage is expected, but any mistakes greatly increases the time spent in acid."
       ]
     },
     {
+      "id": 21,
       "link": [2, 1],
-      "name": "Lower Norfair Pillar Room with Bombs, no WallJump (Right to Left)",
-      "notable": true,
+      "name": "Bombs, no WallJump (Right to Left)",
       "entranceCondition": {
         "comeInRunning": {
-          "minTiles": 3,
-          "speedBooster": "any"
+          "speedBooster": "any",
+          "minTiles": 3
         }
       },
       "requires": [
-        "h_canUseMorphBombs",
+        {"notable": "Bombs"},
+        "h_useMorphBombs",
         "Gravity",
         "canResetFallSpeed",
         "canJumpIntoIBJ",
         "canSuitlessLavaDive",
-        {"enemyDamage": {
-          "enemy": "Puromi",
-          "type": "contact",
-          "hits": 2
-        }},
+        {"enemyDamage": {"enemy": "Puromi", "type": "contact", "hits": 2}},
         {"heatFrames": 1440},
         {"acidFrames": 725}
       ],
-      "reusableRoomwideNotable": "Lower Norfair Pillar Room with Bombs",
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 15},
+            {"acidFrames": 15}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 50},
+            {"acidFrames": 50}
+          ]
+        }
+      ],
       "note": [
-        "Cross the Pillar Room with Bombs and minimal damage.",
+        "Cross the room with Bombs and minimal damage.",
         "Acid damage is expected, but any mistakes greatly increases the time spent in acid."
       ]
     },
     {
+      "id": 22,
       "link": [2, 1],
       "name": "Grapple Teleport",
       "entranceCondition": {
@@ -613,9 +1140,116 @@
       },
       "requires": [
         {"heatFrames": 50}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
       ]
     },
     {
+      "id": 23,
+      "link": [2, 1],
+      "name": "Grapple Teleport Door Lock Skip",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12], [3, 13]]
+        }
+      },
+      "requires": [],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 24,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Top Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 12]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 25,
+      "link": [2, 1],
+      "name": "Carry Grapple Teleport (Bottom Position)",
+      "entranceCondition": {
+        "comeInWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "requires": [],
+      "exitCondition": {
+        "leaveWithGrappleTeleport": {
+          "blockPositions": [[3, 13]]
+        }
+      },
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 35,
+      "link": [2, 1],
+      "name": "G-Mode, Screw Attack",
+      "entranceCondition": {
+        "comeInWithGMode": {
+          "mode": "any",
+          "morphed": false
+        }
+      },
+      "requires": [
+        "ScrewAttack",
+        {"or": [
+          "SpaceJump",
+          "canTrickyGMode",
+          {"and": [
+            "canTrickyJump",
+            "canPreciseWalljump",
+            {"acidFrames": 10}
+          ]},
+          {"and": [
+            "canTrickyJump",
+            {"acidFrames": 24}
+          ]}
+        ]},
+        "h_heatedGModeOpenDifferentDoor"
+      ],
+      "exitCondition": {
+        "leaveNormally": {}
+      },
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [
+            {"heatFrames": 50},
+            {"acidFrames": 50}
+          ]
+        },
+        {"types": ["super"], "requires": []},
+        {
+          "types": ["powerbomb"],
+          "requires": [
+            {"heatFrames": 110},
+            {"acidFrames": 110}
+          ]
+        }
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 26,
       "link": [2, 2],
       "name": "Leave With Runway",
       "entranceCondition": {
@@ -629,24 +1263,57 @@
         }
       },
       "unlocksDoors": [
-        {"types": ["missiles"], "requires": [{"heatFrames": 50}]},
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
         {"types": ["super"], "requires": []},
-        {"types": ["powerbomb"], "requires": [{"heatFrames": 110}]}
+        {
+          "types": ["powerbomb"],
+          "requires": [{"heatFrames": 110}]
+        }
       ]
     },
     {
+      "id": 27,
       "link": [2, 2],
       "name": "Crystal Flash",
       "entranceCondition": {
         "comeInNormally": {}
       },
       "requires": [
-        "h_canHeatedCrystalFlash",
-        {"resetRoom": {
-          "nodes": [2],
-          "mustStayPut": false
-        }}
+        "h_heatedCrystalFlash",
+        {"resetRoom": {"nodes": [2]}}
+      ],
+      "unlocksDoors": [
+        {
+          "types": ["missiles"],
+          "requires": [{"heatFrames": 50}]
+        },
+        {"types": ["super"], "requires": []},
+        {"types": ["powerbomb"], "requires": [], "useImplicitRequires": false}
+      ],
+      "flashSuitChecked": true
+    }
+  ],
+  "notables": [
+    {
+      "id": 1,
+      "name": "Two Power Bombs",
+      "note": [
+        "Place the Power Bombs as forward as possible in order to only need to use two.",
+        "This makes it more likely to fall in the acid."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Bombs",
+      "note": [
+        "Cross the room with Bombs and minimal damage.",
+        "Some acid damage is expected, but any mistakes greatly increases the time spent in acid."
       ]
     }
-  ]
+  ],
+  "nextStratId": 36,
+  "nextNotableId": 3
 }

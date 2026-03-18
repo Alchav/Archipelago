@@ -5,9 +5,13 @@
   "area": "Norfair",
   "subarea": "Upper",
   "subsubarea": "East",
-  "playable": true,
   "roomAddress": "0x7B139",
   "roomEnvironments": [{"heated": false}],
+  "mapTileMask": [
+    [1],
+    [1],
+    [1]
+  ],
   "nodes": [
     {
       "id": 1,
@@ -15,7 +19,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00197fe",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "down",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [1],
+        [2],
+        [2]
+      ]
     },
     {
       "id": 2,
@@ -23,7 +33,13 @@
       "nodeType": "door",
       "nodeSubType": "blue",
       "nodeAddress": "0x00197f2",
-      "doorEnvironments": [{"physics": "air"}]
+      "doorOrientation": "right",
+      "doorEnvironments": [{"physics": "air"}],
+      "mapTileMask": [
+        [2],
+        [1],
+        [1]
+      ]
     }
   ],
   "enemies": [
@@ -60,14 +76,16 @@
   ],
   "strats": [
     {
+      "id": 1,
       "link": [1, 1],
       "name": "Leave Normally",
+      "requires": [],
       "exitCondition": {
         "leaveNormally": {}
-      },
-      "requires": []
+      }
     },
     {
+      "id": 2,
       "link": [1, 1],
       "name": "Shinespark",
       "entranceCondition": {
@@ -80,20 +98,119 @@
       "devNote": "This strat is not useful in-room, but can satisfy a strat in the room before with an exit shinespark."
     },
     {
+      "id": 16,
       "link": [1, 1],
-      "name": "Crystal Flash",
+      "name": "Pirate and Geemer Farm",
       "requires": [
-        "h_canCrystalFlash"
+        {"resetRoom": {"nodes": [1]}},
+        {"or": [
+          {"and": [
+            "Plasma",
+            {"cycleFrames": 510}
+          ]},
+          {"and": [
+            "ScrewAttack",
+            {"cycleFrames": 630}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [
+        {"enemy": "Geemer (grey)", "count": 4},
+        {"enemy": "Red Space Pirate (standing)", "count": 3}
       ]
     },
     {
+      "id": 17,
+      "link": [1, 1],
+      "name": "Pirate Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [1]}},
+        {"or": [
+          {"and": [
+            "canPseudoScrew",
+            {"cycleFrames": 480}
+          ]},
+          {"and": [
+            "Ice",
+            {"cycleFrames": 560}
+          ]},
+          {"and": [
+            "Wave",
+            {"cycleFrames": 560}
+          ]},
+          {"and": [
+            "Spazer",
+            {"cycleFrames": 560}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Red Space Pirate (standing)", "count": 3}]
+    },
+    {
+      "id": 18,
+      "link": [1, 1],
+      "name": "Geemer Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [1]}},
+        {"or": [
+          {"and": [
+            "Grapple",
+            {"cycleFrames": 480}
+          ]},
+          {"and": [
+            "h_useMorphBombs",
+            {"cycleFrames": 690}
+          ]}
+        ]},
+        {"or": [
+          "HiJump",
+          {"and": [
+            "canWalljump",
+            {"cycleFrames": 60}
+          ]},
+          {"and": [
+            "SpaceJump",
+            {"cycleFrames": 120}
+          ]},
+          {"and": [
+            "canTrickyJump",
+            {"cycleFrames": 200}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Geemer (grey)", "count": 4}]
+    },
+    {
+      "id": 3,
+      "link": [1, 1],
+      "name": "Crystal Flash",
+      "requires": [
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 4,
+      "link": [1, 1],
+      "name": "G-Mode Regain Mobility",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 1}},
+        {"enemyDamage": {"enemy": "Geemer (grey)", "type": "contact", "hits": 1}}
+      ],
+      "gModeRegainMobility": {},
+      "flashSuitChecked": true,
+      "note": "Use a Super to knock off the Geemer when it is directly above Samus to regain mobility.",
+      "devNote": "FIXME: There is likely a downward G-Mode setup using a Geemer."
+    },
+    {
+      "id": 5,
       "link": [1, 2],
       "name": "Base",
       "requires": [
         {"enemyDamage": {
           "enemy": "Red Space Pirate (standing)",
-          "hits": 1,
-          "type": "contact"
+          "type": "contact",
+          "hits": 1
         }}
       ],
       "note": [
@@ -102,6 +219,7 @@
       ]
     },
     {
+      "id": 6,
       "link": [1, 2],
       "name": "Avoid the Enemies",
       "requires": [
@@ -110,21 +228,20 @@
       "note": "Wait for the pirates to step towards the wall then jump on their platform. Shoot them to momentarily prevent them from shooting lasers."
     },
     {
+      "id": 7,
       "link": [1, 2],
       "name": "Kill the Pirates",
       "requires": [
         {"enemyKill": {
           "enemies": [
             ["Red Space Pirate (standing)"],
-            [
-              "Red Space Pirate (standing)",
-              "Red Space Pirate (standing)"
-            ]
+            ["Red Space Pirate (standing)", "Red Space Pirate (standing)"]
           ]
         }}
       ]
     },
     {
+      "id": 8,
       "link": [1, 2],
       "name": "Shinespark",
       "entranceCondition": {
@@ -137,11 +254,48 @@
       "note": "Enter on the either side of the doorway to make it to the top."
     },
     {
+      "id": 9,
       "link": [2, 1],
       "name": "Base",
       "requires": []
     },
     {
+      "id": 14,
+      "link": [2, 1],
+      "name": "Come in Shinecharging, Leave With Temporary Blue",
+      "entranceCondition": {
+        "comeInShinecharging": {
+          "length": 4,
+          "openEnd": 0
+        }
+      },
+      "requires": [
+        "canChainTemporaryBlue"
+      ],
+      "exitCondition": {
+        "leaveWithTemporaryBlue": {
+          "direction": "left"
+        }
+      },
+      "unlocksDoors": [{"types": ["ammo"], "requires": []}],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 15,
+      "link": [2, 1],
+      "name": "Stored Moonfall Clip",
+      "entranceCondition": {
+        "comeInWithStoredFallSpeed": {
+          "fallSpeedInTiles": 1
+        }
+      },
+      "requires": [
+        "canMoonfall"
+      ],
+      "bypassesDoorShell": true
+    },
+    {
+      "id": 10,
       "link": [2, 2],
       "name": "Leave with Runway",
       "requires": [],
@@ -153,10 +307,11 @@
       }
     },
     {
+      "id": 11,
       "link": [2, 2],
       "name": "Leave With Runway - Frozen Geemer",
       "requires": [
-        "h_canFrozenEnemyRunway",
+        "h_frozenEnemyRunway",
         "Plasma",
         {"ammo": {"type": "Super", "count": 1}}
       ],
@@ -169,11 +324,112 @@
       "note": "Knock a Geemer off with a Super then follow it back to the top. Grey Geemers can only be frozen with Plasma."
     },
     {
+      "id": 19,
+      "link": [2, 2],
+      "name": "Pirate and Geemer Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [2]}},
+        {"or": [
+          {"and": [
+            "Plasma",
+            {"cycleFrames": 540}
+          ]},
+          {"and": [
+            "ScrewAttack",
+            {"cycleFrames": 570}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [
+        {"enemy": "Geemer (grey)", "count": 4},
+        {"enemy": "Red Space Pirate (standing)", "count": 3}
+      ]
+    },
+    {
+      "id": 20,
+      "link": [2, 2],
+      "name": "Geemer Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [2]}},
+        {"or": [
+          {"and": [
+            "Grapple",
+            {"cycleFrames": 440}
+          ]},
+          {"and": [
+            "h_useMorphBombs",
+            {"cycleFrames": 960}
+          ]}
+        ]},
+        {"or": [
+          "HiJump",
+          {"and": [
+            "canWalljump",
+            {"cycleFrames": 60}
+          ]},
+          {"and": [
+            "SpaceJump",
+            {"cycleFrames": 120}
+          ]},
+          {"and": [
+            "canTrickyJump",
+            {"cycleFrames": 200}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Geemer (grey)", "count": 4}]
+    },
+    {
+      "id": 21,
+      "link": [2, 2],
+      "name": "Pirate Farm",
+      "requires": [
+        {"resetRoom": {"nodes": [2]}},
+        {"or": [
+          {"and": [
+            "canPseudoScrew",
+            {"cycleFrames": 570}
+          ]},
+          {"and": [
+            "Ice",
+            {"cycleFrames": 640}
+          ]},
+          {"and": [
+            "Wave",
+            {"cycleFrames": 570}
+          ]},
+          {"and": [
+            "Spazer",
+            {"cycleFrames": 640}
+          ]}
+        ]}
+      ],
+      "farmCycleDrops": [{"enemy": "Red Space Pirate (standing)", "count": 3}]
+    },
+    {
+      "id": 12,
       "link": [2, 2],
       "name": "Crystal Flash",
       "requires": [
-        "h_canCrystalFlash"
-      ]
+        "h_CrystalFlash"
+      ],
+      "flashSuitChecked": true
+    },
+    {
+      "id": 13,
+      "link": [2, 2],
+      "name": "G-Mode Setup - Get Hit By Geemer",
+      "requires": [
+        {"ammo": {"type": "Super", "count": 1}}
+      ],
+      "exitCondition": {
+        "leaveWithGModeSetup": {}
+      },
+      "flashSuitChecked": true,
+      "note": "Use a Super to knock off a Geemer and follow it to the top door."
     }
-  ]
+  ],
+  "notables": [],
+  "nextStratId": 22,
+  "nextNotableId": 1
 }
