@@ -809,19 +809,33 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # longify_spheres(multiworld)
     # sphere_max = 150
 
-
+    def test_beatable():
+        if not multiworld.can_beat_game():
+            state = multiworld.state.copy()
+            state.sweep_for_advancements()
+            beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
+            unbeaten_games = [multiworld.player_name[p] for p in beaten_games if not beaten_games[p]]
+            # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+            breakpoint()
+    test_beatable()
     # breakpoint()
     # compress_spheres(multiworld, sphere_max)
     compress_owner_spheres(multiworld)
 
-    # defaultlocations = []
-    # excludedlocations = []
-    #
-    # for location in multiworld.get_unfilled_locations():
-    #     if location.progress_type == LocationProgressType.EXCLUDED:
-    #         excludedlocations.append(location)
-    #     else:
-    #         defaultlocations.append(location)
+
+    test_beatable()
+
+    defaultlocations = []
+    excludedlocations = []
+
+    for location in multiworld.get_unfilled_locations():
+        if location.progress_type == LocationProgressType.EXCLUDED:
+            excludedlocations.append(location)
+        else:
+            defaultlocations.append(location)
+
+    multiworld.random.shuffle(defaultlocations)
+    multiworld.random.shuffle(excludedlocations)
 
     remaining_fill(multiworld, excludedlocations, filleritempool, "Remaining Excluded")
 
@@ -1025,7 +1039,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
             starting_spheres[player] = earliest_start
 
-
     logging.info("adding rule")
     for player, world in multiworld.worlds.items():
         if player == 1 or player in multiworld.groups:
@@ -1166,12 +1179,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             # breakpoint()
             logging.info(f"didn't find sphere count for player {player}")
 
-    if not multiworld.can_beat_game():
-        state = multiworld.state.copy()
-        state.sweep_for_advancements()
-        beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
-        # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
-        breakpoint()
+    test_beatable()
 
     if not multiworld.fulfills_accessibility():
         breakpoint()
