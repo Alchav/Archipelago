@@ -127,9 +127,9 @@ class TetrisClient(BizHawkClient):
                             else:
                                 self.check_countdown -= 1
                                 if self.check_countdown <= 0:
-                                    check = pending_checks[0]
-                                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": [check]}])
-                                    self.check_countdown = random.randint(1, 11)
+                                    checks = pending_checks[:max(1, len(pending_checks) // 10)]
+                                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": checks}])
+                                    self.check_countdown = random.randint(1, 3)
                         else:
                             self.check_countdown = 0
                     else:
