@@ -1,5 +1,5 @@
 from Options import OptionError
-from BaseClasses import Item, Tutorial, ItemClassification, Region, Location, Item
+from BaseClasses import Item, Tutorial, ItemClassification, Region, Location
 from ..AutoWorld import World, WebWorld
 
 from . import client
