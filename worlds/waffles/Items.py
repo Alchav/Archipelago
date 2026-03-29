@@ -28,7 +28,7 @@ junk_table = {
     ItemName.red_yoshi_inventory:       ItemData(0xBC0045),
     ItemName.blue_yoshi_inventory:      ItemData(0xBC0046),
     ItemName.yellow_yoshi_inventory:    ItemData(0xBC0047),
-    ItemName.trap_repellent:            ItemData(0xBC0048, ItemClassification.useful),
+    ItemName.trap_repellent:            ItemData(0xBC0048),
 }
 
 collectable_table = {
