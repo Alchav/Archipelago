@@ -305,7 +305,7 @@ class SoMWorld(World):
             self.multiworld.push_precollected(self.create_event_reward(caster))
         for item in self.ow.generator.get_items():
             item_id: int = item.id
-            if ItemId.nothing < item_id < ItemId.glove_orb:  # ignore internal-only items
+            if ItemId.nothing <= item_id < ItemId.glove_orb:  # ignore internal-only items
                 continue
             items.append(self._create_item(item_id))
         self.multiworld.itempool += items

@@ -377,6 +377,14 @@ useful_items: frozenset[ItemId] = frozenset(
     (
         ItemId.midge_mallet,
         ItemId.moogle_belt,
+        ItemId.glove_orb,
+        ItemId.boomerang_orb,
+        ItemId.bow_orb,
+        ItemId.sword_orb,
+        ItemId.axe_orb,
+        ItemId.spear_orb,
+        ItemId.whip_orb,
+        ItemId.javelin_orb,
     )
 )
 character_items: frozenset[ItemId] = frozenset(
