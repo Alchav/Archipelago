@@ -541,7 +541,7 @@ class Context:
         self.slot_data = decoded_obj['slot_data']
         for slot, data in self.slot_data.items():
             self.read_data[f"slot_data_{slot}"] = lambda data=data: data
-        self.er_hint_data = {int(player): {int(address): name for address, name in loc_data.items()}
+        self.er_hint_data = {int(player): {int(address): name for address, name in loc_data.items() if address}
                              for player, loc_data in decoded_obj["er_hint_data"].items()}
 
         # load start inventory:
@@ -664,7 +664,7 @@ class Context:
             "connect_names": self.connect_names,
             "received_items": self.received_items,
             "hints_used": dict(self.hints_used),
-            "hint_locations_used": dict(self.hints_used),
+            "hint_locations_used": dict(self.hint_locations_used),
             "hints": dict(self.hints),
             "location_checks": dict(self.location_checks),
             "name_aliases": self.name_aliases,
@@ -1523,6 +1523,27 @@ class ClientMessageProcessor(CommonCommandProcessor):
 
         return self.ctx.commandprocessor(command)
 
+    def _cmd_itempool(self):
+        item_pool = {}
+        remaining_item_pool = {}
+        game = self.ctx.slot_info[self.client.slot].game
+        for player in self.ctx.locations:
+            for location in self.ctx.locations[player]:
+                if self.ctx.locations[player][location][1] == self.client.slot:
+                    item = self.ctx.item_names[game][self.ctx.locations[player][location][0]]
+                    if item in item_pool:
+                        item_pool[item] += 1
+                    else:
+                        item_pool[item] = 1
+                        remaining_item_pool[item] = 0
+                    if location not in self.ctx.location_checks[(0, player)]:
+                        remaining_item_pool[item] += 1
+        sorted_items = sorted(item_pool, key=lambda i: item_pool[i], reverse=True)
+        texts = []
+        for item in sorted_items:
+            texts.append(f"{item}: {item_pool[item]} ({remaining_item_pool[item]} remaining)")
+        self.output_multiple(texts)
+
     def _cmd_sphere(self, player=None):
         spheres = {}
         spheres_checked = {}
@@ -1536,37 +1557,40 @@ class ClientMessageProcessor(CommonCommandProcessor):
         lowest_sphere = 0
         highest_sphere = 0
         for location in self.ctx.locations[player]:
-            if "Unreachable" in self.ctx.er_hint_data[player][location]:
-                sphere = -1
-            elif "Excluded" in self.ctx.er_hint_data[player][location]:
-                sphere = -2
-            else:
-                sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
-                if lowest_sphere:
-                    lowest_sphere = min(sphere, lowest_sphere)
+            try:
+                if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                    sphere = -1
+                elif "Excluded" in self.ctx.er_hint_data[player][location]:
+                    sphere = -2
                 else:
-                    lowest_sphere = sphere
-                highest_sphere = max(sphere, highest_sphere)
-            if sphere not in spheres:
-                spheres[sphere] = []
-                spheres_checked[sphere] = []
-            if sphere not in sphere_hinted_locations:
-                sphere_hinted_locations[sphere] = []
-            spheres[sphere].append(location)
-            if location in self.ctx.location_checks[(0, player)]: #or self.ctx.client_game_state[0, location.item.slot].CLIENT_GOAL:
-                spheres_checked[sphere].append(location)
-            if location in hinted_locations:
-                sphere_hinted_locations[sphere].append(location)
+                    sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                    if lowest_sphere:
+                        lowest_sphere = min(sphere, lowest_sphere)
+                    else:
+                        lowest_sphere = sphere
+                    highest_sphere = max(sphere, highest_sphere)
+                if sphere not in spheres:
+                    spheres[sphere] = []
+                    spheres_checked[sphere] = []
+                if sphere not in sphere_hinted_locations:
+                    sphere_hinted_locations[sphere] = []
+                spheres[sphere].append(location)
+                if location in self.ctx.location_checks[(0, player)]: #or self.ctx.client_game_state[0, location.item.slot].CLIENT_GOAL:
+                    spheres_checked[sphere].append(location)
+                if location in hinted_locations:
+                    sphere_hinted_locations[sphere].append(location)
+            except KeyError:
+                pass
         for i in list(range(lowest_sphere, highest_sphere + 1)) + [-1]:
             try:
+                game = self.ctx.slot_info[player].game
+                names = [f"{self.ctx.location_names[game][location]} at {self.ctx.er_hint_data[player][location]}"
+                         for location in spheres[i] if location not in spheres_checked[i]]
+                texts = [f'Missing: {name}' for name in names]
+                self.output_multiple(texts)
                 if len(spheres[i]) == len(set(spheres_checked[i] + sphere_hinted_locations[i])):
                     continue
                 else:
-                    game = self.ctx.slot_info[player].game
-                    names = [f"{self.ctx.location_names[game][location]} at {self.ctx.er_hint_data[player][location]}"
-                             for location in spheres[i] if location not in spheres_checked[i]]
-                    texts = [f'Missing: {name}' for name in names]
-                    self.output_multiple(texts)
                     break
             except KeyError:
                 continue
@@ -1581,10 +1605,13 @@ class ClientMessageProcessor(CommonCommandProcessor):
             checked = {player: 0 for player in self.ctx.er_hint_data.keys()}
             for player in players:
                 for location in self.ctx.locations[player]:
-                    if (self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1] == str(sphere)) or (sphere == -1 and "Unreachable" in self.ctx.er_hint_data[player][location]) or (sphere == -2 and "Excluded" in self.ctx.er_hint_data[player][location]):
-                        players[player] += 1
-                        if location in self.ctx.location_checks[(0, player)]:
-                            checked[player] += 1
+                    try:
+                        if (self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1] == str(sphere)) or (sphere == -1 and "Unreachable" in self.ctx.er_hint_data[player][location]) or (sphere == -2 and "Excluded" in self.ctx.er_hint_data[player][location]):
+                            players[player] += 1
+                            if location in self.ctx.location_checks[(0, player)]:
+                                checked[player] += 1
+                    except KeyError:
+                        pass
             self.output_multiple([f"{checked[player]}/{players[player]} Locations Checked in Sphere {sphere} by {self.ctx.player_names[(0, player)]}" for player in players if players[player] > 0])
         else:
             if player:
@@ -1596,18 +1623,21 @@ class ClientMessageProcessor(CommonCommandProcessor):
             spheres_checked = {}
             for player in players:
                 for location in self.ctx.locations[player]:
-                    if "Unreachable" in self.ctx.er_hint_data[player][location]:
-                        sphere = -1
-                    elif "Excluded" in  self.ctx.er_hint_data[player][location]:
-                        sphere = -2
-                    else:
-                        sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
-                    if sphere not in spheres:
-                        spheres[sphere] = 0
-                        spheres_checked[sphere] = 0
-                    spheres[sphere] += 1
-                    if location in self.ctx.location_checks[(0, player)]:
-                        spheres_checked[sphere] += 1
+                    try:
+                        if "Unreachable" in self.ctx.er_hint_data[player][location]:
+                            sphere = -1
+                        elif "Excluded" in  self.ctx.er_hint_data[player][location]:
+                            sphere = -2
+                        else:
+                            sphere = int(self.ctx.er_hint_data[player][location].split(" /")[0].split("Sphere ")[-1])
+                        if sphere not in spheres:
+                            spheres[sphere] = 0
+                            spheres_checked[sphere] = 0
+                        spheres[sphere] += 1
+                        if location in self.ctx.location_checks[(0, player)]:
+                            spheres_checked[sphere] += 1
+                    except KeyError:
+                        pass
             text = "\n".join(sorted([f"{spheres_checked[sphere]}/{spheres[sphere]} Checked Locations in Sphere {sphere}" for sphere in spheres], key=lambda text: int(text.split(" ")[-1])))
             self.output(text)
 
@@ -1989,21 +2019,10 @@ def get_missing_checks(ctx: Context, team: int, slot: int) -> typing.List[int]:
 
 def get_client_points(ctx: Context, client: Client) -> int:
     return get_slot_points(ctx, client.team, client.slot)
-    owner = ctx.owners[client.slot]
-    points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
-            ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
-    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 1000}))# * ctx.get_hint_cost(client.slot) * 0.472)
-    extra_hints *= 2 if ctx.client_game_state[client.team, client.slot] == ClientStatus.CLIENT_GOAL else 1
-    return extra_hints - (ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
 
 
 def get_client_location_points(ctx: Context, client: Client) -> int:
     return get_slot_location_points(ctx, client.team, client.slot)
-    points = (ctx.location_check_points * len(ctx.location_checks[client.team, client.slot]) -
-            ctx.get_hint_cost(client.slot) * ctx.hints_used[client.team, client.slot])
-    extra_hints = round(len({item for item in ctx.received_items[(client.team, 1, True)] if item.item == client.slot + 10000}))# * ctx.get_hint_cost(client.slot) * 0.472)
-    extra_hints *= 2 if ctx.client_game_state[client.team, client.slot] == ClientStatus.CLIENT_GOAL else 1
-    return extra_hints - (ctx.get_hint_location_cost(client.slot) * ctx.hint_locations_used[client.team, client.slot])
 
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
@@ -2018,12 +2037,20 @@ def get_slot_points(ctx: Context, team: int, slot: int) -> int:
 
 def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     owner = ctx.owners[slot]
-    extra_hints = round(len([item for item in ctx.received_items[(team, 1, True)] if item.item == owner + 10000]))# * ctx.get_hint_cost(slot) * 0.5)
+    hint_location_cost = ctx.get_hint_location_cost(slot)
+    # logging.info(f"Owner: {owner}")
+    extra_hints = round(len([item for item in ctx.received_items[(team, 1, True)] if item.item == owner + 10000]))
+    # logging.info(f"Hint points: {extra_hints}")
     for slot_ in ctx.owners:
         if ctx.owners[slot_] == owner and ctx.client_game_state[team, slot_] == ClientStatus.CLIENT_GOAL:
-            extra_hints += ctx.get_hint_location_cost(slot)
-    # extra_hints *= 2 if ctx.client_game_state[team, slot] == ClientStatus.CLIENT_GOAL else 1
-    return extra_hints - (ctx.get_hint_location_cost(slot) * sum([ctx.hint_locations_used[team, slot_] for slot_ in ctx.owners if ctx.owners[slot_] == owner]))
+            extra_hints += hint_location_cost
+            # logging.info(f"Game beaten, adding {hint_location_cost}, now {extra_hints}")
+    hint_locations_used = sum([ctx.hint_locations_used[team, slot_] for slot_ in ctx.owners if ctx.owners[slot_] == owner])
+    # logging.info(f"Hint_locations used: {hint_locations_used}")
+    # logging.info(f"Subtracting {hint_locations_used} * {hint_location_cost} = {(hint_location_cost * hint_locations_used)}")
+    total_points = extra_hints - (hint_location_cost * hint_locations_used)
+    # logging.info(f"Total points: {total_points}")
+    return total_points
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):
     try:
@@ -2417,6 +2444,10 @@ class ServerCommandProcessor(CommonCommandProcessor):
 
     def default(self, raw: str):
         self.ctx.broadcast_text_all('[Server]: ' + raw, {"type": "ServerChat", "message": raw})
+
+    # def _cmd_info(self):
+    #     for player in ctx.clients:
+    #
 
     def _cmd_save(self) -> bool:
         """Save current state to multidata"""
