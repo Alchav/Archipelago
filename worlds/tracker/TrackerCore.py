@@ -476,7 +476,7 @@ class TrackerCore():
 
             if self.slot_name in self.launch_multiworld.world_name_lookup:
                 internal_id = self.launch_multiworld.world_name_lookup[self.slot_name]
-                if self.launch_multiworld.worlds[internal_id].game == self.game:
+                if self.launch_multiworld.worlds[internal_id].game == self.game or True:
                     self.multiworld = self.launch_multiworld
                     self.player_id = internal_id
                     self.regen_slots(self.get_current_world(), raw_slot_data)
