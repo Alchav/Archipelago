@@ -882,7 +882,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if item.player == 1 and item.name.startswith("Unlock "):
             return 0
         if i.classification == ItemClassification.useful and game == "Terraria":
-            return 3
+            return multiworld.random.randint(2, 3)
         if i.classification == ItemClassification.trap:
             if game == "Super Mario Land 2":
                 return 1
@@ -891,7 +891,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if game == "Jigsaw":
                 return 1
             return 0
-        if i.classification == ItemClassification.progression and game == "Stardew Valley":
+        if i.classification & ItemClassification.progression and game == "Stardew Valley":
             if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
                            "Progressive Barn", "Progressive Fishing Rod", "Progressive Pickaxe", "Bridge Repair",
                            "Bus Repair", "Desert Obelisk", "Island Obelisk", "Dark Talisman", "Beach Bridge",
@@ -916,17 +916,17 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # elif i.classification == ItemClassification.progression:
         #     return multiworld.random.randint(1, 2)
         # breakpoint()
-        if i.classification == ItemClassification.useful:
-            return 2
-        elif i.classification == ItemClassification.progression_skip_balancing:
+        if i.classification & (ItemClassification.deprioritized | ItemClassification.skip_balancing):
             if not multiworld.random.randint(0, 24 if i.game == "Jigsaw" else 16 if i.game == "Tetris" else 4):
                 return 3
             if i.game in ("Jigsaw", "Tetris"):
                 return multiworld.random.randint(1, 2)
             return 2
         else:
-            if i.classification == ItemClassification.progression:
+            if i.classification & ItemClassification.progression:
                 return 3
+            elif i.classification & ItemClassification.useful:
+                return 2
             return 1
 
     option = "o"  # g: total spheres, b: beaten game spheres
