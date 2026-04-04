@@ -158,25 +158,25 @@ class YachtDiceWorld(World):
                 self.itempool.append(cats[categorylist[index]])
 
         # Also start with one Roll and one Dice
-        self.precollected.append("Dice")
+        self.precollected += ["Dice Fragment"] * self.frags_per_dice
         num_of_dice_to_add = num_of_dice - 1
-        self.precollected.append("Roll")
+        self.precollected += ["Roll Fragment"] * self.frags_per_roll
         num_of_rolls_to_add = num_of_rolls - 1
 
         self.skip_early_locations = False
         if self.options.minimize_extra_items == MinimizeExtraItems.option_yes_please:
-            self.precollected.append("Dice")
-            num_of_dice_to_add -= 1
-            self.precollected.append("Roll")
-            num_of_rolls_to_add -= 1
+            self.precollected += ["Dice Fragment"] * self.frags_per_dice
+            num_of_dice_to_add = num_of_dice - 1
+            self.precollected += ["Roll Fragment"] * self.frags_per_roll
+            num_of_rolls_to_add = num_of_rolls - 1
             self.skip_early_locations = True
 
-        if num_of_dice_to_add > 0:
-            self.itempool.append("Dice")
-            num_of_dice_to_add -= 1
-        if num_of_rolls_to_add > 0:
-            self.itempool.append("Roll")
-            num_of_rolls_to_add -= 1
+        # if num_of_dice_to_add > 0:
+        #     self.itempool.append("Dice")
+        #     num_of_dice_to_add -= 1
+        # if num_of_rolls_to_add > 0:
+        #     self.itempool.append("Roll")
+        #     num_of_rolls_to_add -= 1
 
         # if one fragment per dice, just add "Dice" objects
         if num_of_dice_to_add > 0:
