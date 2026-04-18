@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import typing
+import Utils
 from queue import Queue
 
 import factorio_rcon
@@ -19,7 +20,7 @@ import factorio_rcon
 from CommonClient import ClientCommandProcessor, CommonContext, logger, server_loop, gui_enabled, get_base_parser
 from MultiServer import mark_raw
 from NetUtils import ClientStatus, NetworkItem, JSONtoTextParser, JSONMessagePart
-from Utils import async_start, get_file_safe_name, is_windows, Version, format_SI_prefix, get_text_between
+from Utils import async_start, get_file_safe_name, is_windows, Version, format_SI_prefix, get_text_between, user_path
 from .settings import FactorioSettings
 from settings import get_settings
 from worlds import network_data_package
@@ -64,7 +65,7 @@ class FactorioCommandProcessor(ClientCommandProcessor):
     def _cmd_toggle_chat(self):
         """Toggle sending of chat messages from players on the Factorio server to Archipelago."""
         self.ctx.toggle_bridge_chat_out()
-        
+
     def _cmd_rcon_reconnect(self) -> bool:
         """Reconnect the RCON client if its disconnected."""
         try:
@@ -73,7 +74,8 @@ class FactorioCommandProcessor(ClientCommandProcessor):
                 self.output("RCON Client already connected.")
             return True
         except factorio_rcon.RCONNetworkError:
-            self.ctx.rcon_client = factorio_rcon.RCONClient("localhost", self.ctx.rcon_port, self.ctx.rcon_password, timeout=5)
+            self.ctx.rcon_client = factorio_rcon.RCONClient("localhost", self.ctx.rcon_port, self.ctx.rcon_password,
+                                                            timeout=5)
             self.output("RCON Client successfully reconnected.")
             return True
         return False
@@ -87,10 +89,12 @@ class FactorioContext(CommonContext):
     # updated by spinup server
     mod_version: Version = Version(0, 0, 0)
 
-    def __init__(self, server_address, password, filter_connection_changes: bool, filter_item_sends: bool, bridge_chat_out: bool,
-                 rcon_port: int, rcon_password: str, server_settings_path: str | None,
+    def __init__(self, server_address, password, filter_connection_changes: bool, filter_item_sends: bool,
+                 bridge_chat_out: bool,
+                 rcon_port: int, rcon_password: str, server_settings_path: str | None, config_file,
                  factorio_server_args: tuple[str, ...]):
         super(FactorioContext, self).__init__(server_address, password)
+        self.config_file = config_file
         self.send_index: int = 0
         self.rcon_client = None
         self.awaiting_bridge = False
@@ -146,7 +150,7 @@ class FactorioContext(CommonContext):
 
     @property
     def savegame_name(self) -> str:
-        return get_file_safe_name(f"AP_{self.seed_name}_{self.auth}")+"_Save.zip"
+        return get_file_safe_name(f"AP_{self.seed_name}_{self.auth}") + "_Save.zip"
 
     def print_to_game(self, text):
         self.rcon_client.send_command(f"/ap-print [font=default-large-bold]Archipelago:[/font] "
@@ -159,9 +163,11 @@ class FactorioContext(CommonContext):
                 "--rcon-port", str(self.rcon_port),
                 "--rcon-password", self.rcon_password,
                 "--server-settings", self.server_settings_path,
-                *self.additional_factorio_server_args)
+                "--config", self.config_file
+                * self.additional_factorio_server_args)
         else:
             return ("--rcon-port", str(self.rcon_port), "--rcon-password", self.rcon_password,
+                    "--config", self.config_file,
                     *self.additional_factorio_server_args)
 
     @property
@@ -320,7 +326,8 @@ async def game_watcher(ctx: FactorioContext):
                                 ctx.last_deplete = time.time()
                                 async_start(ctx.send_msgs([{
                                     "cmd": "Set", "key": ctx.energylink_key, "operations":
-                                        [{"operation": "add", "value": int(-ctx.energy_link_increment * in_world_bridges)},
+                                        [{"operation": "add",
+                                          "value": int(-ctx.energy_link_increment * in_world_bridges)},
                                          {"operation": "max", "value": 0}],
                                     "last_deplete": ctx.last_deplete
                                 }]))
@@ -336,7 +343,8 @@ async def game_watcher(ctx: FactorioContext):
                                     ctx.rcon_client.send_command(
                                         f"/ap-energylink -{value}")
                                 except factorio_rcon.RCONNetworkError:
-                                    bridge_logger.warning("RCON Client has unexpectedly lost connection. Please issue /rcon_reconnect.")
+                                    bridge_logger.warning(
+                                        "RCON Client has unexpectedly lost connection. Please issue /rcon_reconnect.")
                                 else:
                                     logger.debug(f"EnergyLink: Sent {format_SI_prefix(value)}J")
 
@@ -366,10 +374,12 @@ def stream_factorio_output(pipe, queue, process):
 async def factorio_server_watcher(ctx: FactorioContext):
     savegame_name = os.path.abspath(os.path.join(ctx.write_data_path, "saves", "Archipelago", ctx.savegame_name))
     if not os.path.exists(savegame_name):
+        config_file = Utils.user_path('factorio', 'config', 'apconfig.ini')
         logger.info(f"Creating savegame {savegame_name}")
-        subprocess.run((
+        result = subprocess.run((
             executable, "--create", savegame_name, "--preset", "archipelago"
         ))
+        factorio_server_logger.info(result.stdout)
     factorio_process = subprocess.Popen((executable, "--start-server", savegame_name,
                                          *ctx.server_args),
                                         stderr=subprocess.PIPE,
@@ -407,7 +417,8 @@ async def factorio_server_watcher(ctx: FactorioContext):
                 elif re.match(r"^[0-9.]+ Script @[^ ]+\.lua:\d+: Player command toggle-ap-send-filter$", msg):
                     factorio_server_logger.debug(msg)
                     ctx.toggle_filter_item_sends()
-                elif re.match(r"^[0-9.]+ Script @[^ ]+\.lua:\d+: Player command toggle-ap-connection-change-filter$", msg):
+                elif re.match(r"^[0-9.]+ Script @[^ ]+\.lua:\d+: Player command toggle-ap-connection-change-filter$",
+                              msg):
                     factorio_server_logger.debug(msg)
                     ctx.toggle_filter_connection_changes()
                 elif re.match(r"^[0-9.]+ Script @[^ ]+\.lua:\d+: Player command toggle-ap-chat$", msg):
@@ -478,7 +489,7 @@ async def get_info(ctx: FactorioContext, rcon_client: factorio_rcon.RCONClient):
 
 
 async def factorio_spinup_server(ctx: FactorioContext) -> bool:
-    savegame_name = os.path.abspath("Archipelago.zip")
+    savegame_name = user_path("factorio", "saves", "Archipelago.zip")
     if not os.path.exists(savegame_name):
         logger.info(f"Creating savegame {savegame_name}")
         subprocess.run((
@@ -587,13 +598,18 @@ def launch(*new_args: str):
     colorama.just_fix_windows_console()
 
     # args handling
-    parser = get_base_parser(description="Optional arguments to Factorio: Space Age Client follow. "
+    parser = get_base_parser(description="Optional arguments to Factorio Client follow. "
                                          "Remaining arguments get passed into bound Factorio instance. "
                                          "Refer to Factorio --help for those.")
     parser.add_argument('--rcon-port', default='24242', type=int, help='Port to use to communicate with Factorio')
     parser.add_argument('--rcon-password', help='Password to authenticate with RCON.')
     parser.add_argument('--server-settings', help='Factorio server settings configuration file.')
-
+    config_file = Utils.user_path('factorio', 'config', 'apconfig.ini')
+    if not os.path.exists(config_file):
+        os.makedirs(os.path.dirname(config_file), exist_ok=True)
+        with open(config_file, 'w') as f:
+            f.write(f"[path]\nread-data=__PATH__system-read-data__\nwrite-data={Utils.user_path('factorio')}")
+    parser.add_argument('--config', default=config_file)
     args, rest = parser.parse_known_args(args=new_args)
     rcon_port = args.rcon_port
     rcon_password = args.rcon_password if args.rcon_password else ''.join(
@@ -613,6 +629,9 @@ def launch(*new_args: str):
 
     if not os.path.exists(os.path.dirname(executable)):
         raise FileNotFoundError(f"Path {os.path.dirname(executable)} does not exist or could not be accessed.")
+    if os.path.isdir(executable) and os.path.exists(os.path.join(executable, "Contents", "MacOS", "factorio")):
+        # user entered the .App bundle, let's find the executable
+        executable = os.path.join(executable, "Contents", "MacOS", "factorio")
     if os.path.isdir(executable):  # user entered a path to a directory, let's find the executable therein
         executable = os.path.join(executable, "factorio")
     if not os.path.isfile(executable):
@@ -624,6 +643,6 @@ def launch(*new_args: str):
     asyncio.run(main(lambda: FactorioContext(
         args.connect, args.password,
         initial_filter_connection_changes, initial_filter_item_sends, initial_bridge_chat_out,
-        rcon_port, rcon_password, server_settings, rest
+        rcon_port, rcon_password, server_settings, config_file, rest
     )))
     colorama.deinit()
