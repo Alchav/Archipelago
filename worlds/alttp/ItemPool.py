@@ -10,7 +10,8 @@ from .Shops import TakeAny, total_shop_slots, set_up_shops, shop_table_by_locati
 from .Bosses import place_bosses
 from .Dungeons import get_dungeon_item_pool_player
 from .EntranceShuffle import connect_entrance
-from .Items import item_factory, GetBeemizerItem, trap_replaceable, item_name_groups
+from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
+                    small_key_name_to_key_ring)
 from .Options import small_key_shuffle, compass_shuffle, big_key_shuffle, map_shuffle, TriforcePiecesMode, LTTPBosses
 from .StateHelpers import has_triforce_pieces, has_melee_weapon
 from .Regions import key_drop_data
@@ -346,6 +347,15 @@ def generate_itempool(world: "ALTTPWorld"):
     dungeon_items = [item for item in get_dungeon_item_pool_player(world)
                      if item.name not in world.dungeon_local_item_names]
 
+    def dungeon_name_for_small_key(small_key_name: str) -> str:
+        dungeon_name = small_key_name.split("(")[1].split(")")[0]
+        if world.options.mode == 'inverted':
+            if dungeon_name == "Agahnims Tower":
+                return "Inverted Agahnims Tower"
+            if dungeon_name == "Ganons Tower":
+                return "Inverted Ganons Tower"
+        return dungeon_name
+
     for key_loc in key_drop_data:
         key_data = key_drop_data[key_loc]
         drop_item = item_factory(key_data[3], world)
@@ -353,12 +363,7 @@ def generate_itempool(world: "ALTTPWorld"):
             if drop_item in dungeon_items:
                 dungeon_items.remove(drop_item)
             else:
-                dungeon = drop_item.name.split("(")[1].split(")")[0]
-                if world.options.mode == 'inverted':
-                    if dungeon == "Agahnims Tower":
-                        dungeon = "Inverted Agahnims Tower"
-                    if dungeon == "Ganons Tower":
-                        dungeon = "Inverted Ganons Tower"
+                dungeon = dungeon_name_for_small_key(drop_item.name)
                 if drop_item in world.dungeons[dungeon].small_keys:
                     world.dungeons[dungeon].small_keys.remove(drop_item)
                 elif world.dungeons[dungeon].big_key is not None and world.dungeons[dungeon].big_key == drop_item:
@@ -370,8 +375,39 @@ def generate_itempool(world: "ALTTPWorld"):
         elif "Small" in key_data[3] and world.options.small_key_shuffle == small_key_shuffle.option_universal:
             # key drop shuffle and universal keys are on. Add universal keys in place of key drop keys.
             multiworld.itempool.append(item_factory(GetBeemizerItem(multiworld, player, 'Small Key (Universal)'), world))
+
+    if world.options.small_key_shuffle != small_key_shuffle.option_universal:
+        for key_ring in key_ring_table:
+            if key_ring.option_name not in world.key_rings:
+                continue
+
+            dungeon = world.dungeons[dungeon_name_for_small_key(key_ring.small_key_name)]
+            remaining_small_keys = [item for item in dungeon.small_keys if item.name == key_ring.small_key_name]
+            if len(remaining_small_keys) <= 1:
+                continue
+
+            for remaining_small_key in remaining_small_keys:
+                if remaining_small_key in dungeon_items:
+                    dungeon_items.remove(remaining_small_key)
+            dungeon.small_keys = [item for item in dungeon.small_keys if item.name != key_ring.small_key_name]
+
+            key_ring_item = item_factory(small_key_name_to_key_ring[key_ring.small_key_name], world)
+            key_ring_item.dungeon = dungeon
+            dungeon.small_keys.append(key_ring_item)
+            if key_ring_item.name not in world.dungeon_local_item_names:
+                dungeon_items.append(key_ring_item)
+
     dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
     multiworld.random.shuffle(dungeon_item_replacements)
+
+    if world.options.small_key_shuffle != small_key_shuffle.option_universal:
+        collapsed_small_keys = sum(
+            max(world.key_ring_data[small_key_name_to_key_ring[key_ring.small_key_name]] - 1, 0)
+            for key_ring in key_ring_table
+            if key_ring.option_name in world.key_rings
+        )
+        for _ in range(collapsed_small_keys):
+            multiworld.itempool.append(item_factory(dungeon_item_replacements.pop(), world))
 
     for x in range(len(dungeon_items)-1, -1, -1):
         item = dungeon_items[x]

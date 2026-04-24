@@ -2,9 +2,10 @@ from dataclasses import dataclass
 
 from BaseClasses import MultiWorld
 from Options import Choice, Range, DeathLink, DefaultOnToggle, FreeText, ItemsAccessibility, PerGameCommonOptions, \
-    PlandoBosses, PlandoConnections, PlandoTexts, Removed, StartInventoryPool, Toggle
+    PlandoBosses, PlandoConnections, PlandoTexts, Removed, StartInventoryPool, Toggle, OptionSet
 from .EntranceShuffle import default_connections, default_dungeon_connections, \
     inverted_default_connections, inverted_default_dungeon_connections
+from .Items import key_ring_option_names
 from .Text import TextTable
 
 
@@ -217,6 +218,24 @@ class key_drop_shuffle(DefaultOnToggle):
     """Shuffle keys found in pots and dropped from killed enemies,
     respects the small key and big key shuffle options."""
     display_name = "Key Drop Shuffle"
+
+
+class KeyRings(Choice):
+    """A key ring grants all dungeon small keys that would otherwise be in the item pool at once.
+    Choose: Use the option "Key Rings List" to choose which dungeons have key rings.
+    All: All eligible dungeons have key rings instead of individual small keys."""
+    display_name = "Key Rings Mode"
+    option_off = 0
+    option_choose = 1
+    option_all = 2
+    option_random_dungeons = 3
+
+
+class KeyRingsList(OptionSet):
+    """With Key Rings set to Choose: select dungeons with key rings rather than individual small keys."""
+    display_name = "Key Rings List"
+    valid_keys = set(key_ring_option_names)
+    default = valid_keys
 
 
 class DungeonCounters(Choice):
@@ -765,6 +784,8 @@ class ALTTPOptions(PerGameCommonOptions):
     big_key_shuffle: big_key_shuffle
     small_key_shuffle: small_key_shuffle
     key_drop_shuffle: key_drop_shuffle
+    key_rings: KeyRings
+    key_rings_list: KeyRingsList
     compass_shuffle: compass_shuffle
     map_shuffle: map_shuffle
     restrict_dungeon_item_on_boss: RestrictBossItem

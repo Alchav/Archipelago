@@ -3,6 +3,7 @@ from typing import Optional, TYPE_CHECKING
 from enum import IntEnum
 
 from BaseClasses import Entrance, Location, Item, ItemClassification, Region, MultiWorld
+from .Items import key_ring_name_to_small_key
 
 if TYPE_CHECKING:
     from .Dungeons import Dungeon
@@ -55,8 +56,12 @@ class ALttPItem(Item):
         return self.type == 'Crystal'
 
     @property
+    def smallkeyring(self) -> bool:
+        return self.type == 'SmallKey' and self.name in key_ring_name_to_small_key
+
+    @property
     def smallkey(self) -> bool:
-        return self.type == 'SmallKey'
+        return self.type == 'SmallKey' and not self.smallkeyring
 
     @property
     def bigkey(self) -> bool:

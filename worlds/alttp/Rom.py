@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "8704fb9b9fa4fad52d4d2f9a95fb5360"
+RANDOMIZERBASEHASH: str = "fb53fe23ed71a1c42c2858a7ae7c43d6"
 ROM_PLAYER_LIMIT: int = 255
 
 import io
@@ -35,7 +35,7 @@ from .Text import KingsReturn_texts, Sanctuary_texts, Kakariko_texts, Blacksmith
     DeathMountain_texts, \
     LostWoods_texts, WishingWell_texts, DesertPalace_texts, MountainTower_texts, LinksHouse_texts, Lumberjacks_texts, \
     SickKid_texts, FluteBoy_texts, Zora_texts, MagicShop_texts, Sahasrahla_names
-from .Items import item_table, item_name_groups, progression_items
+from .Items import item_table, item_name_groups, progression_items, key_ring_table
 from .EntranceShuffle import door_addresses
 from .Options import small_key_shuffle
 
@@ -820,6 +820,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
                     if location.parent_region.dungeon.is_dungeon_item(location.item):
                         if location.item.bigkey:
                             itemid = 0x32
+                        elif location.item.smallkeyring:
+                            itemid = 0xCE
                         elif location.item.smallkey:
                             itemid = 0x24
                         elif location.item.map:
@@ -924,6 +926,12 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
         credits_total += 30 if local_world.options.include_witch_hut else 27
     if local_world.options.shuffle_capacity_upgrades:
         credits_total += 2
+
+    key_ring_bytes = [0] * 16
+    for key_ring in key_ring_table:
+        key_ring_bytes[key_ring.quantity_table_index] = local_world.key_ring_data[key_ring.item_name]
+    key_ring_bytes[1] = key_ring_bytes[0]
+    rom.write_bytes(0x186390, key_ring_bytes)
 
     rom.write_byte(0x187010, credits_total)  # dynamic credits
 
