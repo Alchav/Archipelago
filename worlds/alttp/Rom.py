@@ -1449,6 +1449,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
                 'Small Key (Misery Mire)': [0x383], 'Small Key (Turtle Rock)': [0x388],
                 'Small Key (Ganons Tower)': [0x389],
                 'Small Key (Universal)': [0x38B], 'Small Key (Hyrule Castle)': [0x37C, 0x37D]}
+        key_rings = {key_ring.item_name: (keys[key_ring.small_key_name], local_world.key_ring_data[key_ring.item_name])
+                     for key_ring in key_ring_table}
         bottles = {'Bottle': 2, 'Bottle (Red Potion)': 3, 'Bottle (Green Potion)': 4, 'Bottle (Blue Potion)': 5,
                    'Bottle (Fairy)': 6, 'Bottle (Bee)': 7, 'Bottle (Good Bee)': 8}
         rupees = {'Rupee (1)': 1, 'Rupees (5)': 5, 'Rupees (20)': 20, 'Rupees (50)': 50, 'Rupees (100)': 100,
@@ -1468,6 +1470,10 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
         elif item.name in keys:
             for address in keys[item.name]:
                 equip[address] = min(equip[address] + 1, 99)
+        elif item.name in key_rings:
+            addresses, quantity = key_rings[item.name]
+            for address in addresses:
+                equip[address] = min(equip[address] + quantity, 99)
         elif item.name in bottles:
             if equip[0x34F] < local_world.difficulty_requirements.progressive_bottle_limit:
                 equip[0x35C + equip[0x34F]] = bottles[item.name]
