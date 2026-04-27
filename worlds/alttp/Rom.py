@@ -13,6 +13,7 @@ import json
 import hashlib
 import logging
 import os
+import pkgutil
 import random
 import struct
 import subprocess
@@ -143,8 +144,9 @@ class LocalRom:
                 self.buffer = buffer
                 return
 
-        with open(local_path("data", "basepatch.bsdiff4"), "rb") as f:
-            delta = f.read()
+        delta = pkgutil.get_data(__name__, "basepatch.bsdiff4")
+        if delta is None:
+            raise RuntimeError("Could not load ALttP base patch data.")
 
         buffer = bsdiff4.patch(get_base_rom_bytes(), delta)
         if self.verify(buffer):
