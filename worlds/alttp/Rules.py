@@ -1,6 +1,6 @@
 import collections
 import logging
-from typing import Callable, Iterator, Set, TYPE_CHECKING
+from typing import Callable, Set, TYPE_CHECKING
 
 from Options import ItemsAccessibility
 from BaseClasses import CollectionState, Item, Location, MultiWorld, Region
@@ -9,10 +9,11 @@ from worlds.generic.Rules import (add_item_rule, add_rule, forbid_item,
 
 from . import OverworldGlitchRules
 from .Bosses import GanonDefeatRule
+from .BossPrizeData import boss_prize_locations
 from .Items import item_factory, item_name_groups, item_table, progression_items, small_key_name_to_key_ring
 from .Options import small_key_shuffle
 from .OverworldGlitchRules import overworld_glitches_rules
-from .Regions import LTTPRegionType, location_table
+from .Regions import LTTPRegionType
 from .StateHelpers import (can_extend_magic, can_kill_most_things,
                            can_lift_heavy_rocks, can_lift_rocks,
                            can_melt_things, can_retrieve_tablet,
@@ -222,14 +223,12 @@ def global_rules(multiworld: MultiWorld, player: int):
     world = multiworld.worlds[player]
     # ganon can only carry triforce
     add_item_rule(multiworld.get_location('Ganon', player), lambda item: item.name == 'Triforce' and item.player == player)
-    # dungeon prizes can only be crystals/pendants
-    crystals_and_pendants: Set[str] = \
-        {item for item, item_data in item_table.items() if item_data.type == "Crystal"}
-    prize_locations: Iterator[str] = \
-        (locations for locations, location_data in location_table.items() if location_data[2] == True)
-    for prize_location in prize_locations:
-        add_item_rule(multiworld.get_location(prize_location, player),
-                      lambda item: item.name in crystals_and_pendants and item.player == player)
+    if not world.options.boss_prize_shuffle:
+        crystals_and_pendants: Set[str] = \
+            {item for item, item_data in item_table.items() if item_data.type == "Crystal"}
+        for prize_location in boss_prize_locations:
+            add_item_rule(multiworld.get_location(prize_location, player),
+                          lambda item: item.name in crystals_and_pendants and item.player == player)
     # determines which S&Q locations are available - hide from paths since it isn't an in-game location
     for exit in multiworld.get_region('Menu', player).exits:
         exit.hide_path = True
@@ -246,7 +245,7 @@ def global_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_location('Purple Chest', player),
              lambda state: state.has('Pick Up Purple Chest', player))  # Can S&Q with chest
     set_rule(multiworld.get_location('Ether Tablet', player), lambda state: can_retrieve_tablet(state, player))
-    set_rule(multiworld.get_location('Master Sword Pedestal', player), lambda state: state.has('Red Pendant', player) and state.has('Blue Pendant', player) and state.has('Green Pendant', player))
+    set_rule(multiworld.get_location('Master Sword Pedestal', player), lambda state: state.has('Pendant of Wisdom', player) and state.has('Pendant of Power', player) and state.has('Pendant of Courage', player))
 
     set_rule(multiworld.get_location('Missing Smith', player), lambda state: state.has('Get Frog', player) and state.can_reach('Blacksmiths Hut', 'Region', player))  # Can't S&Q with smith
     set_rule(multiworld.get_location('Blacksmith', player), lambda state: state.has('Return Smith', player))
@@ -264,7 +263,7 @@ def global_rules(multiworld: MultiWorld, player: int):
                       or can_shoot_arrows(state, player) or state.has("Cane of Somaria", player)
                       or has_beam_sword(state, player)))
 
-    set_rule(multiworld.get_location('Sahasrahla', player), lambda state: state.has('Green Pendant', player))
+    set_rule(multiworld.get_location('Sahasrahla', player), lambda state: state.has('Pendant of Courage', player))
 
     set_rule(multiworld.get_location('Aginah\'s Cave', player), lambda state: can_use_bombs(state, player))
     set_rule(multiworld.get_location('Blind\'s Hideout - Top', player), lambda state: can_use_bombs(state, player))
@@ -1372,7 +1371,7 @@ def set_big_bomb_rules(multiworld: MultiWorld, player: int):
                                          'Desert Palace Entrance (South)',
                                          'Checkerboard Cave']
 
-    set_rule(multiworld.get_entrance('Pyramid Fairy', player), lambda state: state.can_reach('East Dark World', 'Region', player) and state.can_reach('Big Bomb Shop', 'Region', player) and state.has('Crystal 5', player) and state.has('Crystal 6', player))
+    set_rule(multiworld.get_entrance('Pyramid Fairy', player), lambda state: state.can_reach('East Dark World', 'Region', player) and state.can_reach('Big Bomb Shop', 'Region', player) and state.has('Crystal (Ice Palace)', player) and state.has('Crystal (Misery Mire)', player))
 
     #crossing peg bridge starting from the southern dark world
     def cross_peg_bridge(state):
@@ -1607,7 +1606,7 @@ def set_inverted_big_bomb_rules(multiworld: MultiWorld, player: int):
                                  'Spectacle Rock Cave (Bottom)']
 
     set_rule(multiworld.get_entrance('Pyramid Fairy', player),
-             lambda state: state.can_reach('East Dark World', 'Region', player) and state.can_reach('Inverted Big Bomb Shop', 'Region', player) and state.has('Crystal 5', player) and state.has('Crystal 6', player))
+             lambda state: state.can_reach('East Dark World', 'Region', player) and state.can_reach('Inverted Big Bomb Shop', 'Region', player) and state.has('Crystal (Ice Palace)', player) and state.has('Crystal (Misery Mire)', player))
 
     # Key for below abbreviations:
     # P = pearl

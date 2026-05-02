@@ -55,15 +55,15 @@ class TestDarkWorld(TestInvertedOWG):
 
             ["Pyramid Fairy - Left", False, []],
             ["Pyramid Fairy - Left", False, [], ['Magic Mirror']],
-            ["Pyramid Fairy - Left", False, [], ['Crystal 5']],
-            ["Pyramid Fairy - Left", False, [], ['Crystal 6']],
-            ["Pyramid Fairy - Left", True, ['Crystal 5', 'Crystal 6', 'Magic Mirror', 'Pegasus Boots']],
+            ["Pyramid Fairy - Left", False, [], ['Crystal (Ice Palace)']],
+            ["Pyramid Fairy - Left", False, [], ['Crystal (Misery Mire)']],
+            ["Pyramid Fairy - Left", True, ['Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Magic Mirror', 'Pegasus Boots']],
 
             ["Pyramid Fairy - Right", False, []],
             ["Pyramid Fairy - Right", False, [], ['Magic Mirror']],
-            ["Pyramid Fairy - Right", False, [], ['Crystal 5']],
-            ["Pyramid Fairy - Right", False, [], ['Crystal 6']],
-            ["Pyramid Fairy - Right", True, ['Crystal 5', 'Crystal 6', 'Magic Mirror', 'Pegasus Boots']],
+            ["Pyramid Fairy - Right", False, [], ['Crystal (Ice Palace)']],
+            ["Pyramid Fairy - Right", False, [], ['Crystal (Misery Mire)']],
+            ["Pyramid Fairy - Right", True, ['Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Magic Mirror', 'Pegasus Boots']],
         ])
 
     def testMireArea(self):

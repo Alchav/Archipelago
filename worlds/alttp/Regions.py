@@ -2,6 +2,7 @@ import collections
 import typing
 
 from BaseClasses import MultiWorld
+from .BossPrizeData import boss_prize_location_table
 from .SubClasses import LTTPEntrance, LTTPRegion, LTTPRegionType
 
 
@@ -741,24 +742,26 @@ location_table: typing.Dict[str,
      'Dark Blacksmith Ruins': (None, None, False, None),
      'Flute Activation Spot': (None, None, False, None),
      'Capacity Upgrade Shop': (None, None, False, None),
-     'Eastern Palace - Prize': ([0x1209D, 0x53EF8, 0x53EF9, 0x180052, 0x18007C, 0xC6FE], None, True, 'Eastern Palace'),
-     'Desert Palace - Prize': ([0x1209E, 0x53F1C, 0x53F1D, 0x180053, 0x180078, 0xC6FF], None, True, 'Desert Palace'),
-     'Tower of Hera - Prize': (
-         [0x120A5, 0x53F0A, 0x53F0B, 0x18005A, 0x18007A, 0xC706], None, True, 'Tower of Hera'),
-     'Palace of Darkness - Prize': (
-         [0x120A1, 0x53F00, 0x53F01, 0x180056, 0x18007D, 0xC702], None, True, 'Palace of Darkness'),
-     'Swamp Palace - Prize': (
-         [0x120A0, 0x53F6C, 0x53F6D, 0x180055, 0x180071, 0xC701], None, True, 'Swamp Palace'),
-     'Thieves\' Town - Prize': (
-         [0x120A6, 0x53F36, 0x53F37, 0x18005B, 0x180077, 0xC707], None, True, 'Thieves\' Town'),
-     'Skull Woods - Prize': (
-         [0x120A3, 0x53F12, 0x53F13, 0x180058, 0x18007B, 0xC704], None, True, 'Skull Woods'),
-     'Ice Palace - Prize': (
-         [0x120A4, 0x53F5A, 0x53F5B, 0x180059, 0x180073, 0xC705], None, True, 'Ice Palace'),
-     'Misery Mire - Prize': (
-         [0x120A2, 0x53F48, 0x53F49, 0x180057, 0x180075, 0xC703], None, True, 'Misery Mire'),
-     'Turtle Rock - Prize': (
-         [0x120A7, 0x53F24, 0x53F25, 0x18005C, 0x180079, 0xC708], None, True, 'Turtle Rock')}
+     'Eastern Palace - Prize': (boss_prize_location_table['Eastern Palace - Prize'].item_address,
+                                boss_prize_location_table['Eastern Palace - Prize'].player_address, True, 'Eastern Palace'),
+     'Desert Palace - Prize': (boss_prize_location_table['Desert Palace - Prize'].item_address,
+                               boss_prize_location_table['Desert Palace - Prize'].player_address, True, 'Desert Palace'),
+     'Tower of Hera - Prize': (boss_prize_location_table['Tower of Hera - Prize'].item_address,
+                               boss_prize_location_table['Tower of Hera - Prize'].player_address, True, 'Tower of Hera'),
+     'Palace of Darkness - Prize': (boss_prize_location_table['Palace of Darkness - Prize'].item_address,
+                                    boss_prize_location_table['Palace of Darkness - Prize'].player_address, True, 'Palace of Darkness'),
+     'Swamp Palace - Prize': (boss_prize_location_table['Swamp Palace - Prize'].item_address,
+                              boss_prize_location_table['Swamp Palace - Prize'].player_address, True, 'Swamp Palace'),
+     'Thieves\' Town - Prize': (boss_prize_location_table['Thieves\' Town - Prize'].item_address,
+                                boss_prize_location_table['Thieves\' Town - Prize'].player_address, True, 'Thieves\' Town'),
+     'Skull Woods - Prize': (boss_prize_location_table['Skull Woods - Prize'].item_address,
+                             boss_prize_location_table['Skull Woods - Prize'].player_address, True, 'Skull Woods'),
+     'Ice Palace - Prize': (boss_prize_location_table['Ice Palace - Prize'].item_address,
+                            boss_prize_location_table['Ice Palace - Prize'].player_address, True, 'Ice Palace'),
+     'Misery Mire - Prize': (boss_prize_location_table['Misery Mire - Prize'].item_address,
+                             boss_prize_location_table['Misery Mire - Prize'].player_address, True, 'Misery Mire'),
+     'Turtle Rock - Prize': (boss_prize_location_table['Turtle Rock - Prize'].item_address,
+                             boss_prize_location_table['Turtle Rock - Prize'].player_address, True, 'Turtle Rock')}
 
 from .Shops import shop_table_by_location_id, shop_table_by_location
 lookup_id_to_name = {data[0]: name for name, data in location_table.items() if type(data[0]) == int}

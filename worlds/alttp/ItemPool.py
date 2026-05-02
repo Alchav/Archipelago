@@ -10,6 +10,7 @@ from .Shops import TakeAny, total_shop_slots, set_up_shops, shop_table_by_locati
 from .Bosses import place_bosses
 from .Dungeons import get_dungeon_item_pool_player
 from .EntranceShuffle import connect_entrance
+from .BossPrizeData import boss_prize_items
 from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
                     small_key_name_to_key_ring)
 from .Options import small_key_shuffle, compass_shuffle, big_key_shuffle, map_shuffle, TriforcePiecesMode, LTTPBosses
@@ -287,6 +288,9 @@ def generate_itempool(world: "ALTTPWorld"):
     else:
         (pool, placed_items, precollected_items, clock_mode, treasure_hunt_required, treasure_hunt_total,
          additional_triforce_pieces) = get_pool_core(multiworld, player)
+
+    if world.options.boss_prize_shuffle:
+        pool.extend(boss_prize_items)
 
     for item in precollected_items:
         multiworld.push_precollected(item_factory(item, world))

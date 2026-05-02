@@ -6,11 +6,11 @@ class TestLightWorld(TestInvertedOWG):
     def testLightWorld(self):
         self.run_location_tests([
             ["Master Sword Pedestal", False, []],
-            ["Master Sword Pedestal", False, [], ['Green Pendant']],
-            ["Master Sword Pedestal", False, [], ['Red Pendant']],
-            ["Master Sword Pedestal", False, [], ['Blue Pendant']],
-            ["Master Sword Pedestal", True, ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Moon Pearl', 'Pegasus Boots']],
-            ["Master Sword Pedestal", True, ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Magic Mirror', 'Pegasus Boots']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Courage']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Wisdom']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Power']],
+            ["Master Sword Pedestal", True, ['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Moon Pearl', 'Pegasus Boots']],
+            ["Master Sword Pedestal", True, ['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Magic Mirror', 'Pegasus Boots']],
 
             ["Link's Uncle", False, []],
             ["Link's Uncle", False, [], ['Moon Pearl']],
@@ -179,11 +179,11 @@ class TestLightWorld(TestInvertedOWG):
             ["Bottle Merchant", True, ['Magic Mirror', 'Pegasus Boots']],
 
             ["Sahasrahla", False, []],
-            ["Sahasrahla", False, [], ['Green Pendant']],
-            ["Sahasrahla", True, ['Green Pendant', 'Magic Mirror', 'Pegasus Boots']],
-            ["Sahasrahla", True, ['Green Pendant', 'Moon Pearl', 'Pegasus Boots']],
-            ["Sahasrahla", True, ['Green Pendant', 'Magic Mirror', 'Pegasus Boots']],
-            ["Sahasrahla", True, ['Green Pendant', 'Progressive Glove', 'Progressive Glove', 'Pegasus Boots']],
+            ["Sahasrahla", False, [], ['Pendant of Courage']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Magic Mirror', 'Pegasus Boots']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Moon Pearl', 'Pegasus Boots']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Magic Mirror', 'Pegasus Boots']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Progressive Glove', 'Progressive Glove', 'Pegasus Boots']],
 
             ["Magic Bat", False, []],
             ["Magic Bat", False, [], ['Magic Powder']],
@@ -317,11 +317,11 @@ class TestLightWorld(TestInvertedOWG):
 
             # Bomb Merchant is not a separate check, and is only used as part of the Pyramid Fairy rules
             # ["Bomb Merchant", False, []],
-            # ["Bomb Merchant", False, [], ['Crystal 5']],
-            # ["Bomb Merchant", False, [], ['Crystal 6']],
-            # ["Bomb Merchant", True, ['Crystal 5', 'Crystal 6', 'Moon Pearl', 'Pegasus Boots']],
-            # ["Bomb Merchant", True, ['Crystal 5', 'Crystal 6', 'Magic Mirror', 'Pegasus Boots']],
-            # ["Bomb Merchant", True, ['Crystal 5', 'Crystal 6', 'Beat Agahnim 1']],
+            # ["Bomb Merchant", False, [], ['Crystal (Ice Palace)']],
+            # ["Bomb Merchant", False, [], ['Crystal (Misery Mire)']],
+            # ["Bomb Merchant", True, ['Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Moon Pearl', 'Pegasus Boots']],
+            # ["Bomb Merchant", True, ['Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Magic Mirror', 'Pegasus Boots']],
+            # ["Bomb Merchant", True, ['Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Beat Agahnim 1']],
 
             ["Ganon", False, []],
         ])

@@ -11,6 +11,7 @@ from NetUtils import ClientStatus, color
 from worlds.AutoSNIClient import SNIClient
 
 from . import Shops, Regions
+from .BossPrizeData import boss_prize_location_checks
 from .Rom import ROM_PLAYER_LIMIT
 
 snes_logger = logging.getLogger("SNES")
@@ -324,6 +325,10 @@ location_table_misc = {'Bottle Merchant': (0x3c9, 0x2),
                        'Hobo': (0x3c9, 0x1)}
 location_table_misc_id = {Regions.lookup_name_to_id[name]: data for name, data in location_table_misc.items()}
 
+location_table_boss_prizes_id = {
+    Regions.lookup_name_to_id[name]: data for name, data in boss_prize_location_checks.items()
+}
+
 
 def should_collect(ctx, location_id: int) -> bool:
     return ctx.allow_collect and location_id not in collect_ignore_locations and location_id in ctx.checked_locations \
@@ -455,6 +460,21 @@ async def track_locations(ctx, roomid, roomdata) -> bool:
                     misc_data[offset - 0x3c6] |= mask
             if misc_data_changed:
                 snes_buffered_write(ctx, SAVEDATA_START + 0x3c6, bytes(misc_data))
+
+    if not ctx.locations_checked.issuperset(location_table_boss_prizes_id):
+        boss_prize_data = await snes_read(ctx, SAVEDATA_START + 0x46B, 2)
+        if boss_prize_data is not None:
+            boss_prize_data = list(boss_prize_data)
+            boss_prize_data_changed = False
+            for location_id, (offset, mask) in location_table_boss_prizes_id.items():
+                assert (0x46B <= offset <= 0x46C)
+                if boss_prize_data[offset - 0x46B] & mask != 0 and location_id not in ctx.locations_checked:
+                    new_check(location_id)
+                if should_collect(ctx, location_id):
+                    boss_prize_data_changed = True
+                    boss_prize_data[offset - 0x46B] |= mask
+            if boss_prize_data_changed:
+                snes_buffered_write(ctx, SAVEDATA_START + 0x46B, bytes(boss_prize_data))
 
     if new_locations:
         # verify rom is still the same:

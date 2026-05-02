@@ -18,7 +18,7 @@ class TestVanillaOWG(TestBase, LTTPTestBase):
         self.multiworld.worlds[1].create_regions()
         self.multiworld.worlds[1].create_items()
         self.multiworld.itempool.extend(get_dungeon_item_pool(self.multiworld))
-        self.multiworld.itempool.extend(item_factory(['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Beat Agahnim 1', 'Beat Agahnim 2', 'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 5', 'Crystal 6', 'Crystal 7'], self.world))
+        self.multiworld.itempool.extend(item_factory(['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Beat Agahnim 1', 'Beat Agahnim 2', 'Crystal (Palace of Darkness)', 'Crystal (Swamp Palace)', 'Crystal (Skull Woods)', "Crystal (Thieves' Town)", 'Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Crystal (Turtle Rock)'], self.world))
         self.multiworld.get_location('Agahnim 1', 1).item = None
         self.multiworld.get_location('Agahnim 2', 1).item = None
         self.multiworld.precollected_items[1].clear()

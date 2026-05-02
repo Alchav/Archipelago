@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "8da94f961b2127029f5f90c4a42bb1ff"
+RANDOMIZERBASEHASH: str = "6c56db52069e970aced3bd492aa6c821"
 ROM_PLAYER_LIMIT: int = 255
 
 import io
@@ -26,6 +26,7 @@ from BaseClasses import CollectionState, Region, Location, MultiWorld
 from Utils import local_path, user_path, int16_as_bytes, int32_as_bytes, snes_to_pc, is_frozen, parse_yaml, read_snes_rom
 
 from .Shops import ShopType, ShopPriceType
+from .BossPrizeData import boss_prize_location_table, legacy_boss_prize_item_data
 from .Dungeons import dungeon_music_addresses
 from .Regions import old_location_address_to_new_location_address, key_drop_data
 from .Text import MultiByteTextMapper, text_addresses, Credits, TextTable
@@ -38,6 +39,7 @@ from .Text import KingsReturn_texts, Sanctuary_texts, Kakariko_texts, Blacksmith
     SickKid_texts, FluteBoy_texts, Zora_texts, MagicShop_texts, Sahasrahla_names
 from .Items import item_table, item_name_groups, progression_items, key_ring_table
 from .EntranceShuffle import door_addresses
+from .Graphics import patch_boss_prize_crystal_sprite
 from .Options import small_key_shuffle
 
 if TYPE_CHECKING:
@@ -809,7 +811,23 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
 
         itemid = location.item.code if location.item is not None else 0x5A
 
-        if not location.crystal:
+        if location.crystal and not local_world.options.boss_prize_shuffle:
+            prize_data = boss_prize_location_table[location.name]
+            for address, value in zip(prize_data.legacy_addresses, legacy_boss_prize_item_data[location.item.name]):
+                rom.write_byte(address, value)
+
+            # patch music
+            music_addresses = dungeon_music_addresses[location.name]
+            if local_world.options.map_shuffle:
+                music = local_random.choice([0x11, 0x16])
+            else:
+                music = 0x11 if 'Pendant' in location.item.name else 0x16
+            for music_address in music_addresses:
+                rom.write_byte(music_address, music)
+
+            continue
+
+        if not location.crystal or local_world.options.boss_prize_shuffle:
 
             if location.item is not None:
                 if not location.native_item:
@@ -841,19 +859,10 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
                         itemid = 0x5A
             location_address = old_location_address_to_new_location_address.get(location.address, location.address)
             rom.write_byte(location_address, itemid)
-        else:
-            # crystals
-            for address, value in zip(location.address, itemid):
-                rom.write_byte(address, value)
 
-            # patch music
-            music_addresses = dungeon_music_addresses[location.name]
-            if local_world.options.map_shuffle:
-                music = local_random.choice([0x11, 0x16])
-            else:
-                music = 0x11 if 'Pendant' in location.item.name else 0x16
-            for music_address in music_addresses:
-                rom.write_byte(music_address, music)
+    rom.write_byte(0x18018E, 0x01 if local_world.options.boss_prize_shuffle else 0x00)
+    if local_world.options.boss_prize_shuffle:
+        patch_boss_prize_crystal_sprite(rom)
 
     if local_world.options.map_shuffle:
         rom.write_byte(0x155C9, local_random.choice([0x11, 0x16]))  # Randomize GT music too with map shuffle
@@ -1404,10 +1413,14 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
                      'Cane of Byrna': (0x351, 1),
                      'Fire Rod': (0x345, 1), 'Ice Rod': (0x346, 1), 'Bombos': (0x347, 1), 'Ether': (0x348, 1),
                      'Quake': (0x349, 1)}
-        or_table = {'Green Pendant': (0x374, 0x04), 'Red Pendant': (0x374, 0x01), 'Blue Pendant': (0x374, 0x02),
-                    'Crystal 1': (0x37A, 0x02), 'Crystal 2': (0x37A, 0x10), 'Crystal 3': (0x37A, 0x40),
-                    'Crystal 4': (0x37A, 0x20),
-                    'Crystal 5': (0x37A, 0x04), 'Crystal 6': (0x37A, 0x01), 'Crystal 7': (0x37A, 0x08),
+        or_table = {'Pendant of Courage': (0x374, 0x04), 'Pendant of Wisdom': (0x374, 0x01), 'Pendant of Power': (0x374, 0x02),
+                    'Crystal (Palace of Darkness)': (0x37A, 0x02),
+                    'Crystal (Swamp Palace)': (0x37A, 0x10),
+                    'Crystal (Skull Woods)': (0x37A, 0x40),
+                    'Crystal (Thieves\' Town)': (0x37A, 0x20),
+                    'Crystal (Ice Palace)': (0x37A, 0x04),
+                    'Crystal (Misery Mire)': (0x37A, 0x01),
+                    'Crystal (Turtle Rock)': (0x37A, 0x08),
                     'Big Key (Eastern Palace)': (0x367, 0x20), 'Compass (Eastern Palace)': (0x365, 0x20),
                     'Map (Eastern Palace)': (0x369, 0x20),
                     'Big Key (Desert Palace)': (0x367, 0x10), 'Compass (Desert Palace)': (0x365, 0x10),
@@ -1618,8 +1631,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
         return 0x0000
 
     rom.write_int16(0x18017A,
-                    get_reveal_bytes('Green Pendant') if local_world.options.map_shuffle else 0x0000)  # Sahasrahla reveal
-    rom.write_int16(0x18017C, get_reveal_bytes('Crystal 5') | get_reveal_bytes('Crystal 6') if local_world.options.map_shuffle else 0x0000)  # Bomb Shop Reveal
+                    get_reveal_bytes('Pendant of Courage') if local_world.options.map_shuffle else 0x0000)  # Sahasrahla reveal
+    rom.write_int16(0x18017C, get_reveal_bytes('Crystal (Ice Palace)') | get_reveal_bytes('Crystal (Misery Mire)') if local_world.options.map_shuffle else 0x0000)  # Bomb Shop Reveal
 
     rom.write_byte(0x180172, 0x01 if local_world.options.small_key_shuffle == small_key_shuffle.option_universal else 0x00)  # universal keys
     rom.write_byte(0x18637E, 0x01 if local_world.options.retro_bow else 0x00)  # Skip quiver in item shops once bought
@@ -2388,7 +2401,7 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
                         multiworld.get_location(location, player).item) + '.'
                     tt[hint_locations.pop(0)] = this_hint
                 elif location == 'Sahasrahla':
-                    this_hint = 'Sahasrahla seeks a green pendant for ' + hint_text(
+                    this_hint = 'Sahasrahla seeks the Pendant of Courage for ' + hint_text(
                         multiworld.get_location(location, player).item) + '.'
                     tt[hint_locations.pop(0)] = this_hint
                 elif location == 'Graveyard Cave':
@@ -2456,13 +2469,13 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
             silverarrow_hint = (' %s?' % hint_text(bow_loc).replace('Ganon\'s', 'my'))
             tt[target] = 'Did you find the silver arrows%s' % silverarrow_hint
 
-    crystal5 = multiworld.find_item('Crystal 5', player)
-    crystal6 = multiworld.find_item('Crystal 6', player)
+    crystal5 = multiworld.find_item('Crystal (Ice Palace)', player)
+    crystal6 = multiworld.find_item('Crystal (Misery Mire)', player)
     tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
         crystal5.hint_text, crystal6.hint_text)
 
-    greenpendant = multiworld.find_item('Green Pendant', player)
-    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom in %s' % greenpendant.hint_text
+    courage_pendant = multiworld.find_item('Pendant of Courage', player)
+    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom in %s' % courage_pendant.hint_text
 
     if multiworld.worlds[player].options.crystals_needed_for_gt == 1:
         tt['sign_ganons_tower'] = 'You need a crystal to enter.'
@@ -2489,7 +2502,7 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
     tt['end_triforce'] = "{NOBORDER}\n" + Triforce_texts[local_random.randint(0, len(Triforce_texts) - 1)]
     tt['bomb_shop_big_bomb'] = BombShop2_texts[local_random.randint(0, len(BombShop2_texts) - 1)]
 
-    # this is what shows after getting the green pendant item in rando
+    # this is what shows after getting the Pendant of Courage item in rando
     tt['sahasrahla_quest_have_master_sword'] = Sahasrahla2_texts[local_random.randint(0, len(Sahasrahla2_texts) - 1)]
     tt['blind_by_the_light'] = Blind_texts[local_random.randint(0, len(Blind_texts) - 1)]
 

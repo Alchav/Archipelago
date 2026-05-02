@@ -6,10 +6,10 @@ class TestLightWorld(TestMinor):
     def testLightWorld(self):
         self.run_location_tests([
             ["Master Sword Pedestal", False, []],
-            ["Master Sword Pedestal", False, [], ['Green Pendant']],
-            ["Master Sword Pedestal", False, [], ['Red Pendant']],
-            ["Master Sword Pedestal", False, [], ['Blue Pendant']],
-            ["Master Sword Pedestal", True, ['Green Pendant', 'Red Pendant', 'Blue Pendant']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Courage']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Wisdom']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Power']],
+            ["Master Sword Pedestal", True, ['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power']],
 
             ["Link's Uncle", True, []],
 
@@ -85,8 +85,8 @@ class TestLightWorld(TestMinor):
             ["Bottle Merchant", True, []],
 
             ["Sahasrahla", False, []],
-            ["Sahasrahla", False, [], ['Green Pendant']],
-            ["Sahasrahla", True, ['Green Pendant']],
+            ["Sahasrahla", False, [], ['Pendant of Courage']],
+            ["Sahasrahla", True, ['Pendant of Courage']],
 
             ["Magic Bat", False, []],
             ["Magic Bat", False, [], ['Magic Powder']],

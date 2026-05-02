@@ -9,6 +9,7 @@ import settings
 from BaseClasses import Item, CollectionState, Tutorial, MultiWorld
 from worlds.AutoWorld import World, WebWorld, LogicMixin
 from .Client import ALTTPSNIClient
+from .BossPrizeData import boss_prize_items
 from .Dungeons import create_dungeons, Dungeon
 from .EntranceShuffle import link_entrances, link_inverted_entrances, plando_connect
 from .InvertedRegions import create_inverted_regions, mark_dark_world_regions
@@ -430,9 +431,9 @@ class ALTTPWorld(World):
         if self.options.goal in ["local_triforce_hunt", "local_ganon_triforce_hunt"]:
             self.options.local_items.value.add('Triforce Piece')
 
-        # Not possible to place crystals outside boss prizes yet (might as well make it consistent with pendants too).
-        self.options.non_local_items.value -= item_name_groups['Pendants']
-        self.options.non_local_items.value -= item_name_groups['Crystals']
+        if not self.options.boss_prize_shuffle:
+            self.options.non_local_items.value -= item_name_groups['Pendants']
+            self.options.non_local_items.value -= item_name_groups['Crystals']
 
     create_dungeons = create_dungeons
 
@@ -578,41 +579,42 @@ class ALTTPWorld(World):
 
     def pre_fill(self):
         from Fill import fill_restrictive, FillError
-        attempts = 5
-        all_state = self.multiworld.get_all_state(perform_sweep=False)
-        crystals = [self.create_item(name) for name in ['Red Pendant', 'Blue Pendant', 'Green Pendant', 'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 7', 'Crystal 5', 'Crystal 6']]
-        for crystal in crystals:
-            all_state.remove(crystal)
-        all_state.sweep_for_advancements()
-        crystal_locations = [self.get_location('Turtle Rock - Prize'),
-                             self.get_location('Eastern Palace - Prize'),
-                             self.get_location('Desert Palace - Prize'),
-                             self.get_location('Tower of Hera - Prize'),
-                             self.get_location('Palace of Darkness - Prize'),
-                             self.get_location('Thieves\' Town - Prize'),
-                             self.get_location('Skull Woods - Prize'),
-                             self.get_location('Swamp Palace - Prize'),
-                             self.get_location('Ice Palace - Prize'),
-                             self.get_location('Misery Mire - Prize')]
-        placed_prizes = {loc.item.name for loc in crystal_locations if loc.item}
-        unplaced_prizes = [crystal for crystal in crystals if crystal.name not in placed_prizes]
-        empty_crystal_locations = [loc for loc in crystal_locations if not loc.item]
-        for attempt in range(attempts):
-            try:
-                prizepool = unplaced_prizes.copy()
-                prize_locs = empty_crystal_locations.copy()
-                self.multiworld.random.shuffle(prize_locs)
-                fill_restrictive(self.multiworld, all_state, prize_locs, prizepool, True, lock=True,
-                                 name="LttP Dungeon Prizes")
-            except FillError as e:
-                lttp_logger.exception("Failed to place dungeon prizes (%s). Will retry %s more times", e,
-                                                attempts - attempt)
-                for location in empty_crystal_locations:
-                    location.item = None
-                continue
-            break
-        else:
-            raise FillError('Unable to place dungeon prizes')
+        if not self.options.boss_prize_shuffle:
+            attempts = 5
+            all_state = self.multiworld.get_all_state(perform_sweep=False)
+            crystals = [self.create_item(name) for name in boss_prize_items]
+            for crystal in crystals:
+                all_state.remove(crystal)
+            all_state.sweep_for_advancements()
+            crystal_locations = [self.get_location('Turtle Rock - Prize'),
+                                 self.get_location('Eastern Palace - Prize'),
+                                 self.get_location('Desert Palace - Prize'),
+                                 self.get_location('Tower of Hera - Prize'),
+                                 self.get_location('Palace of Darkness - Prize'),
+                                 self.get_location('Thieves\' Town - Prize'),
+                                 self.get_location('Skull Woods - Prize'),
+                                 self.get_location('Swamp Palace - Prize'),
+                                 self.get_location('Ice Palace - Prize'),
+                                 self.get_location('Misery Mire - Prize')]
+            placed_prizes = {loc.item.name for loc in crystal_locations if loc.item}
+            unplaced_prizes = [crystal for crystal in crystals if crystal.name not in placed_prizes]
+            empty_crystal_locations = [loc for loc in crystal_locations if not loc.item]
+            for attempt in range(attempts):
+                try:
+                    prizepool = unplaced_prizes.copy()
+                    prize_locs = empty_crystal_locations.copy()
+                    self.multiworld.random.shuffle(prize_locs)
+                    fill_restrictive(self.multiworld, all_state, prize_locs, prizepool, True, lock=True,
+                                     name="LttP Dungeon Prizes")
+                except FillError as e:
+                    lttp_logger.exception("Failed to place dungeon prizes (%s). Will retry %s more times", e,
+                                                    attempts - attempt)
+                    for location in empty_crystal_locations:
+                        location.item = None
+                    continue
+                break
+            else:
+                raise FillError('Unable to place dungeon prizes')
         if self.options.mode == 'standard' and self.options.small_key_shuffle \
                 and self.options.small_key_shuffle != small_key_shuffle.option_universal and \
                 self.options.small_key_shuffle != small_key_shuffle.option_own_dungeons:
@@ -701,8 +703,9 @@ class ALTTPWorld(World):
             if region.player in er_hint_data and region.locations:
                 main_entrance = region.get_connecting_entrance(is_main_entrance)
                 for location in region.locations:
-                    if type(location.address) == int:  # skips events and crystals
-                        if lookup_vanilla_location_to_entrance[location.address] != main_entrance.name:
+                    if type(location.address) == int:  # skips events
+                        vanilla_entrance = lookup_vanilla_location_to_entrance.get(location.address)
+                        if vanilla_entrance and vanilla_entrance != main_entrance.name:
                             er_hint_data[region.player][location.address] = main_entrance.name
         hint_data.update(er_hint_data)
 
@@ -888,9 +891,7 @@ class ALTTPWorld(World):
         return GetBeemizerItem(self.multiworld, self.player, item)
 
     def get_pre_fill_items(self):
-        res = [self.create_item(name) for name in ('Red Pendant', 'Blue Pendant', 'Green Pendant', 'Crystal 1',
-                                                   'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 7', 'Crystal 5',
-                                                   'Crystal 6')]
+        res = [] if self.options.boss_prize_shuffle else [self.create_item(name) for name in boss_prize_items]
         if self.dungeon_local_item_names:
             for dungeon in self.dungeons.values():
                 for item in dungeon.all_items:
@@ -911,7 +912,7 @@ class ALTTPWorld(World):
                             "progressive", "swordless", "retro_bow", "retro_caves", "shop_item_slots",
                             "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
                             "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
-                            "entrance_shuffle", "dark_room_logic", "goal", "mode",
+                            "boss_prize_shuffle", "entrance_shuffle", "dark_room_logic", "goal", "mode",
                             "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
                             "triforce_pieces_available", "triforce_pieces_extra",
             ]

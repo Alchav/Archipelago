@@ -21,16 +21,16 @@ class TestPrizes(WorldTestBase):
             self.multiworld.get_location("Turtle Rock - Prize", 1),
         ]
         prize_items: List[Item] = [
-            self.get_item_by_name("Green Pendant"),
-            self.get_item_by_name("Blue Pendant"),
-            self.get_item_by_name("Red Pendant"),
-            self.get_item_by_name("Crystal 1"),
-            self.get_item_by_name("Crystal 2"),
-            self.get_item_by_name("Crystal 3"),
-            self.get_item_by_name("Crystal 4"),
-            self.get_item_by_name("Crystal 5"),
-            self.get_item_by_name("Crystal 6"),
-            self.get_item_by_name("Crystal 7"),
+            self.get_item_by_name("Pendant of Courage"),
+            self.get_item_by_name("Pendant of Power"),
+            self.get_item_by_name("Pendant of Wisdom"),
+            self.get_item_by_name("Crystal (Palace of Darkness)"),
+            self.get_item_by_name("Crystal (Swamp Palace)"),
+            self.get_item_by_name("Crystal (Skull Woods)"),
+            self.get_item_by_name("Crystal (Thieves' Town)"),
+            self.get_item_by_name("Crystal (Ice Palace)"),
+            self.get_item_by_name("Crystal (Misery Mire)"),
+            self.get_item_by_name("Crystal (Turtle Rock)"),
         ]
 
         for item in self.multiworld.get_items():

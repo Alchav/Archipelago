@@ -316,6 +316,11 @@ class ShufflePrizes(Choice):
     option_both = 3
 
 
+class BossPrizeShuffle(Toggle):
+    """Shuffle dungeon prizes into the regular item pool and allow any item on boss prize locations."""
+    display_name = "Boss Prize Shuffle"
+
+
 class Medallion(Choice):
     default = "random"
     option_ether = 0
@@ -815,6 +820,7 @@ class ALTTPOptions(PerGameCommonOptions):
     shuffle_capacity_upgrades: ShuffleCapacityUpgrades
     bombless_start: BomblessStart
     shuffle_prizes: ShufflePrizes
+    boss_prize_shuffle: BossPrizeShuffle
     tile_shuffle: TileShuffle
     misery_mire_medallion: MiseryMireMedallion
     turtle_rock_medallion: TurtleRockMedallion

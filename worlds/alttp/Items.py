@@ -2,6 +2,7 @@ import typing
 
 from BaseClasses import MultiWorld, ItemClassification as IC
 from worlds.AutoWorld import World
+from .BossPrizeData import boss_prize_items
 
 
 def GetBeemizerItem(multiworld: MultiWorld, player: int, item):
@@ -126,19 +127,19 @@ item_table = {'Bow': ItemData(IC.progression, None, 0x0B, 'You have\nchosen the\
               'Golden Sword': ItemData(IC.progression, 'Sword', 0x03, 'The butter\nsword rests\nhere!', 'and the butter sword', 'sword-wielding kid', 'butter for sale', 'cap churned to butter', 'sword boy fights again', 'the Golden Sword'),
               'Progressive Sword': ItemData(IC.progression, 'Sword', 0x5E, 'a better copy\nof your sword\nfor your time', 'the unknown sword', 'sword-wielding kid', 'sword for sale', 'fungus for some slasher', 'sword boy fights again', 'a Sword'),
               'Progressive Glove': ItemData(IC.progression, None, 0x61, 'a way to lift\nheavier things', 'and the lift upgrade', 'body-building kid', 'some glove for sale', 'fungus for gloves', 'body-building boy lifts again', 'a Glove'),
-              'Green Pendant': ItemData(IC.progression, 'Crystal', (0x04, 0x38, 0x62, 0x00, 0x69, 0x01), None, None, None, None, None, None, "the green pendant"),
-              'Blue Pendant': ItemData(IC.progression, 'Crystal', (0x02, 0x34, 0x60, 0x00, 0x69, 0x02), None, None, None, None, None, None, "the blue pendant"),
-              'Red Pendant': ItemData(IC.progression, 'Crystal', (0x01, 0x32, 0x60, 0x00, 0x69, 0x03), None, None, None, None, None, None, "the red pendant"),
+              'Pendant of Courage': ItemData(IC.progression, 'Crystal', 0xB6, 'The Pendant\nof Courage\nrests here.', 'and the Pendant of Courage', 'courage pendant kid', 'courage for sale', 'courage brew', 'pendant boy is brave again', "the Pendant of Courage"),
+              'Pendant of Power': ItemData(IC.progression, 'Crystal', 0xB7, 'The Pendant\nof Power\nrests here.', 'and the Pendant of Power', 'power pendant kid', 'power for sale', 'power brew', 'pendant boy has power again', "the Pendant of Power"),
+              'Pendant of Wisdom': ItemData(IC.progression, 'Crystal', 0xB8, 'The Pendant\nof Wisdom\nrests here.', 'and the Pendant of Wisdom', 'wisdom pendant kid', 'wisdom for sale', 'wisdom brew', 'pendant boy is wise again', "the Pendant of Wisdom"),
               'Triforce': ItemData(IC.progression, None, 0x6A, '\n   YOU WIN!', 'and the triforce', 'victorious kid', 'victory for sale', 'fungus for the win', 'greedy boy wins game again', 'the Triforce'),
               'Power Star': ItemData(IC.progression, None, 0x6B, 'a small victory', 'and the power star', 'star-struck kid', 'star for sale', 'see stars with shroom', 'mario powers up again', 'a Power Star'),
               'Triforce Piece': ItemData(IC.progression_skip_balancing, None, 0x6C, 'a small victory', 'and the thirdforce', 'triangular kid', 'triangle for sale', 'fungus for triangle', 'wise boy has triangle again', 'a Triforce Piece'),
-              'Crystal 1': ItemData(IC.progression, 'Crystal', (0x02, 0x34, 0x64, 0x40, 0x7F, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 2': ItemData(IC.progression, 'Crystal', (0x10, 0x34, 0x64, 0x40, 0x79, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 3': ItemData(IC.progression, 'Crystal', (0x40, 0x34, 0x64, 0x40, 0x6C, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 4': ItemData(IC.progression, 'Crystal', (0x20, 0x34, 0x64, 0x40, 0x6D, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 5': ItemData(IC.progression, 'Crystal', (0x04, 0x32, 0x64, 0x40, 0x6E, 0x06), None, None, None, None, None, None, "a red crystal"),
-              'Crystal 6': ItemData(IC.progression, 'Crystal', (0x01, 0x32, 0x64, 0x40, 0x6F, 0x06), None, None, None, None, None, None, "a red crystal"),
-              'Crystal 7': ItemData(IC.progression, 'Crystal', (0x08, 0x34, 0x64, 0x40, 0x7C, 0x06), None, None, None, None, None, None, "a blue crystal"),
+              'Crystal (Palace of Darkness)': ItemData(IC.progression, 'Crystal', 0xB9, 'A crystal from\nPalace of\nDarkness.', 'and the dark palace crystal', 'crystal kid', 'crystal for sale', 'dark crystal brew', 'crystal boy shines again', "the Palace of Darkness crystal"),
+              'Crystal (Swamp Palace)': ItemData(IC.progression, 'Crystal', 0xBA, 'A crystal from\nSwamp Palace\nrests here.', 'and the swamp crystal', 'crystal kid', 'crystal for sale', 'swamp crystal brew', 'crystal boy shines again', "the Swamp Palace crystal"),
+              'Crystal (Skull Woods)': ItemData(IC.progression, 'Crystal', 0xBB, 'A crystal from\nSkull Woods\nrests here.', 'and the woods crystal', 'crystal kid', 'crystal for sale', 'woods crystal brew', 'crystal boy shines again', "the Skull Woods crystal"),
+              'Crystal (Thieves\' Town)': ItemData(IC.progression, 'Crystal', 0xBC, 'A crystal from\nThieves Town\nrests here.', 'and the thieves crystal', 'crystal kid', 'crystal for sale', 'thieves crystal brew', 'crystal boy shines again', "the Thieves' Town crystal"),
+              'Crystal (Ice Palace)': ItemData(IC.progression, 'Crystal', 0xBD, 'A crystal from\nIce Palace\nrests here.', 'and the ice crystal', 'crystal kid', 'crystal for sale', 'ice crystal brew', 'crystal boy shines again', "the Ice Palace crystal"),
+              'Crystal (Misery Mire)': ItemData(IC.progression, 'Crystal', 0xBE, 'A crystal from\nMisery Mire\nrests here.', 'and the mire crystal', 'crystal kid', 'crystal for sale', 'mire crystal brew', 'crystal boy shines again', "the Misery Mire crystal"),
+              'Crystal (Turtle Rock)': ItemData(IC.progression, 'Crystal', 0xBF, 'A crystal from\nTurtle Rock\nrests here.', 'and the turtle rock crystal', 'crystal kid', 'crystal for sale', 'turtle crystal brew', 'crystal boy shines again', "the Turtle Rock crystal"),
               'Single Arrow': ItemData(IC.filler, None, 0x43, 'a lonely arrow\nsits here.', 'and the arrow', 'stick-collecting kid', 'sewing needle for sale', 'fungus for arrow', 'archer boy sews again', 'an arrow'),
               'Arrows (10)': ItemData(IC.filler, None, 0x44, 'This will give\nyou ten shots\nwith your bow!', 'and the arrow pack','stick-collecting kid', 'sewing kit for sale', 'fungus for arrows', 'archer boy sews again','ten arrows'),
               'Arrow Upgrade (+10)': ItemData(IC.progression_skip_balancing, None, 0x54, 'increase arrow\nstorage, low\nlow price', 'and the quiver', 'quiver-enlarging kid', 'arrow boost for sale', 'witch and more skewers', 'upgrade boy sews more again', 'arrow capacity'),
@@ -325,6 +326,8 @@ for basename, substring in _simple_groups:
             tempset.add(itemname)
 
 del (_simple_groups)
+
+item_name_groups["Dungeon Prizes"] = set(boss_prize_items)
 
 
 everything = {name for name, data in item_table.items() if type(data.item_code) == int}
