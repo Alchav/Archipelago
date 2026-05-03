@@ -907,8 +907,8 @@ class ALTTPWorld(World):
             # they are used by the alttp-poptracker pack (https://github.com/StripesOO7/alttp-ap-poptracker-pack)
             # for convenient auto-tracking of the generated settings and adjusting the tracker accordingly
 
-            slot_options = ["crystals_needed_for_gt", "crystals_needed_for_ganon", "open_pyramid",
-                            "big_key_shuffle", "small_key_shuffle", "compass_shuffle", "map_shuffle",
+            slot_options = ["crystals_needed_for_gt", "crystals_needed_for_ganon", "dungeons_needed_for_ganon",
+                            "open_pyramid", "big_key_shuffle", "small_key_shuffle", "compass_shuffle", "map_shuffle",
                             "progressive", "swordless", "retro_bow", "retro_caves", "shop_item_slots",
                             "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
                             "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",

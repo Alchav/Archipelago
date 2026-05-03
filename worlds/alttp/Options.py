@@ -41,7 +41,7 @@ class DarkRoomLogic(Choice):
 class Goal(Choice):
     """Ganon: Climb GT, defeat Agahnim 2, and then kill Ganon
     Crystals: Only killing Ganon is required. However, items may still be placed in GT
-    Bosses: Defeat the boss of all dungeons, including Agahnim's tower and GT (Aga 2)
+    Dungeons: Clear the required number of dungeons, including Agahnim's tower and GT (Aga 2), then kill Ganon
     Pedestal: Pull the Triforce from the Master Sword pedestal
     Ganon Pedestal: Pull the Master Sword pedestal, then kill Ganon
     Triforce Hunt: Collect Triforce pieces spread throughout the worlds, then turn them in to Murahadala in front of Hyrule Castle
@@ -52,13 +52,14 @@ class Goal(Choice):
     default = 0
     option_ganon = 0
     option_crystals = 1
-    option_bosses = 2
+    option_dungeons = 2
     option_pedestal = 3
     option_ganon_pedestal = 4
     option_triforce_hunt = 5
     option_local_triforce_hunt = 6
     option_ganon_triforce_hunt = 7
     option_local_ganon_triforce_hunt = 8
+    alias_bosses = 2
 
 
 class EntranceShuffle(Choice):
@@ -156,11 +157,16 @@ class OpenPyramid(Choice):
     alias_false = option_closed
 
     def to_bool(self, multiworld: MultiWorld, player: int) -> bool:
+        options = multiworld.worlds[player].options
+        goal = options.goal.current_key
+        goal_opens_pyramid = goal in {'crystals', 'ganon_triforce_hunt', 'local_ganon_triforce_hunt',
+                                      'ganon_pedestal'} or (
+            goal == 'dungeons' and options.dungeons_needed_for_ganon.value < 12)
         if self.value == self.option_goal:
-            return multiworld.worlds[player].options.goal.current_key in {'crystals', 'ganon_triforce_hunt', 'local_ganon_triforce_hunt', 'ganon_pedestal'}
+            return goal_opens_pyramid
         elif self.value == self.option_auto:
-            return multiworld.worlds[player].options.goal.current_key in {'crystals', 'ganon_triforce_hunt', 'local_ganon_triforce_hunt', 'ganon_pedestal'} \
-            and (multiworld.worlds[player].options.entrance_shuffle.current_key in {'vanilla', 'dungeons_simple', 'dungeons_full', 'dungeons_crossed'} or not
+            return goal_opens_pyramid \
+            and (options.entrance_shuffle.current_key in {'vanilla', 'dungeons_simple', 'dungeons_full', 'dungeons_crossed'} or not
                  multiworld.shuffle_ganon)
         elif self.value == self.option_open:
             return True
@@ -400,6 +406,14 @@ class CrystalsGanon(Crystals):
     """Number of crystals needed to damage Ganon"""
     display_name = "Crystals for Ganon"
     default = 7
+
+
+class DungeonsGanon(Range):
+    """With Dungeons goal, number of dungeons that must be cleared to damage Ganon."""
+    display_name = "Dungeons for Ganon"
+    range_start = 0
+    range_end = 12
+    default = 12
 
 
 class TriforcePieces(Range):
@@ -779,6 +793,7 @@ class ALTTPOptions(PerGameCommonOptions):
     open_pyramid: OpenPyramid
     crystals_needed_for_gt: CrystalsTower
     crystals_needed_for_ganon: CrystalsGanon
+    dungeons_needed_for_ganon: DungeonsGanon
     triforce_pieces_mode: TriforcePiecesMode
     triforce_pieces_percentage: TriforcePiecesPercentage
     triforce_pieces_required: TriforcePiecesRequired

@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "6c56db52069e970aced3bd492aa6c821"
+RANDOMIZERBASEHASH: str = "07b21a4350ab4e0b1e88712cd3b393b1"
 ROM_PLAYER_LIMIT: int = 255
 
 import io
@@ -1556,15 +1556,18 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
         rom.write_byte(0x18003E, 0x05)  # make ganon invincible until enough triforce pieces are collected
     elif local_world.options.goal in ['ganon_pedestal']:
         rom.write_byte(0x18003E, 0x06)
-    elif local_world.options.goal in ['bosses']:
-        rom.write_byte(0x18003E, 0x02)  # make ganon invincible until all bosses are beat
+    elif local_world.options.goal in ['dungeons']:
+        rom.write_byte(0x18003E, 0x02)  # make ganon invincible until enough dungeons are cleared
     elif local_world.options.goal in ['crystals']:
         rom.write_byte(0x18003E, 0x04)  # make ganon invincible until all crystals
     else:
         rom.write_byte(0x18003E, 0x03)  # make ganon invincible until all crystals and aga 2 are collected
 
     rom.write_byte(0x18005E, local_world.options.crystals_needed_for_gt)
-    rom.write_byte(0x18005F, local_world.options.crystals_needed_for_ganon)
+    if local_world.options.goal == 'dungeons':
+        rom.write_byte(0x18005F, local_world.options.dungeons_needed_for_ganon)
+    else:
+        rom.write_byte(0x18005F, local_world.options.crystals_needed_for_ganon)
 
     # Bitfield - enable text box to show with free roaming items
     #
@@ -2471,19 +2474,31 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
 
     crystal5 = multiworld.find_item('Crystal (Ice Palace)', player)
     crystal6 = multiworld.find_item('Crystal (Misery Mire)', player)
-    tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
-        crystal5.hint_text, crystal6.hint_text)
+    if multiworld.worlds[player].options.boss_prize_shuffle:
+        tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until the crystals are found %s and %s.' % (
+            crystal5.hint_text, crystal6.hint_text)
+    else:
+        crystal5_text = crystal5.hint_text.partition(' ')[2] or crystal5.hint_text
+        crystal6_text = crystal6.hint_text.partition(' ')[2] or crystal6.hint_text
+        tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
+            crystal5_text, crystal6_text)
 
     courage_pendant = multiworld.find_item('Pendant of Courage', player)
-    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom in %s' % courage_pendant.hint_text
+    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % courage_pendant.hint_text
 
     if multiworld.worlds[player].options.crystals_needed_for_gt == 1:
         tt['sign_ganons_tower'] = 'You need a crystal to enter.'
     else:
         tt['sign_ganons_tower'] = f'You need {multiworld.worlds[player].options.crystals_needed_for_gt} crystals to enter.'
 
-    if multiworld.worlds[player].options.goal == 'bosses':
-        tt['sign_ganon'] = 'You need to kill all bosses, Ganon last.'
+    if multiworld.worlds[player].options.goal == 'dungeons':
+        dungeons_required = multiworld.worlds[player].options.dungeons_needed_for_ganon.value
+        if dungeons_required == 1:
+            tt['sign_ganon'] = 'You need to clear a dungeon to beat Ganon.'
+        elif dungeons_required == 12:
+            tt['sign_ganon'] = 'You need to clear all dungeons to beat Ganon.'
+        else:
+            tt['sign_ganon'] = f'You need to clear {dungeons_required} dungeons to beat Ganon.'
     elif multiworld.worlds[player].options.goal == 'ganon_pedestal':
         tt['sign_ganon'] = 'You need to pull the pedestal to defeat Ganon.'
     elif multiworld.worlds[player].options.goal == "ganon":

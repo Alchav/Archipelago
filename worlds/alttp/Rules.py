@@ -29,6 +29,19 @@ if TYPE_CHECKING:
     from . import ALTTPWorld
 
 
+dungeon_completion_locations = boss_prize_locations + ('Agahnim 1', 'Agahnim 2')
+
+
+def has_reachable_dungeons(state: CollectionState, player: int, count: int) -> bool:
+    if count <= 0:
+        return True
+    reachable_dungeons = sum(
+        state.can_reach(location_name, 'Location', player)
+        for location_name in dungeon_completion_locations
+    )
+    return reachable_dungeons >= count
+
+
 def set_rules(world: "ALTTPWorld"):
     player = world.player
     multiworld = world.multiworld
@@ -90,9 +103,10 @@ def set_rules(world: "ALTTPWorld"):
     else:
         raise NotImplementedError(f'Not implemented yet: Logic - {world.options.glitches_required}')
 
-    if world.options.goal == 'bosses':
-        # require all bosses to beat ganon
-        add_rule(multiworld.get_location('Ganon', player), lambda state: state.can_reach('Master Sword Pedestal', 'Location', player) and state.has('Beat Agahnim 1', player) and state.has('Beat Agahnim 2', player) and has_crystals(state, 7, player))
+    if world.options.goal == 'dungeons':
+        add_rule(multiworld.get_location('Ganon', player),
+                 lambda state: has_reachable_dungeons(
+                     state, player, state.multiworld.worlds[player].options.dungeons_needed_for_ganon.value))
     elif world.options.goal == 'ganon':
         # require aga2 to beat ganon
         add_rule(multiworld.get_location('Ganon', player), lambda state: state.has('Beat Agahnim 2', player))
@@ -633,6 +647,8 @@ def global_rules(multiworld: MultiWorld, player: int):
         add_rule(ganon, lambda state: has_triforce_pieces(state, player))
     elif world.options.goal == 'ganon_pedestal':
         add_rule(multiworld.get_location('Ganon', player), lambda state: state.can_reach('Master Sword Pedestal', 'Location', player))
+    elif world.options.goal == 'dungeons':
+        pass
     else:
         add_rule(ganon, lambda state: has_crystals(state, state.multiworld.worlds[player].options.crystals_needed_for_ganon, player))
     set_rule(multiworld.get_entrance('Ganon Drop', player), lambda state: has_beam_sword(state, player))  # need to damage ganon to get tiles to drop

@@ -234,7 +234,7 @@ def generate_itempool(world: "ALTTPWorld"):
 
     if world.options.item_pool.current_key not in difficulties:
         raise NotImplementedError(f"Diffulty {world.options.item_pool}")
-    if world.options.goal not in ('ganon', 'pedestal', 'bosses', 'triforce_hunt', 'local_triforce_hunt',
+    if world.options.goal not in ('ganon', 'pedestal', 'dungeons', 'triforce_hunt', 'local_triforce_hunt',
                                   'ganon_triforce_hunt', 'local_ganon_triforce_hunt', 'crystals',
                                   'ganon_pedestal'):
         raise NotImplementedError(f"Goal {world.options.goal} for player {player}")
