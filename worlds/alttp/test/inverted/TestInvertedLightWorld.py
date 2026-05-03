@@ -8,12 +8,12 @@ class TestInvertedLightWorld(TestInverted):
     def testLostWoods(self):
         self.run_location_tests([
             ["Master Sword Pedestal", False, []],
-            ["Master Sword Pedestal", False, [], ['Green Pendant']],
-            ["Master Sword Pedestal", False, [], ['Red Pendant']],
-            ["Master Sword Pedestal", False, [], ['Blue Pendant']],
-            ["Master Sword Pedestal", True, ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Beat Agahnim 1']],
-            ["Master Sword Pedestal", True, ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Moon Pearl', 'Progressive Glove', 'Hammer']],
-            ["Master Sword Pedestal", True, ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Moon Pearl', 'Progressive Glove', 'Progressive Glove']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Courage']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Wisdom']],
+            ["Master Sword Pedestal", False, [], ['Pendant of Power']],
+            ["Master Sword Pedestal", True, ['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Beat Agahnim 1']],
+            ["Master Sword Pedestal", True, ['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Moon Pearl', 'Progressive Glove', 'Hammer']],
+            ["Master Sword Pedestal", True, ['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Moon Pearl', 'Progressive Glove', 'Progressive Glove']],
 
             ["Mushroom", False, []],
             ["Mushroom", False, [], ['Moon Pearl']],
@@ -333,10 +333,10 @@ class TestInvertedLightWorld(TestInverted):
             ["Sahasrahla's Hut - Right", True, ['Bomb Upgrade (+5)', 'Moon Pearl', 'Progressive Glove', 'Progressive Glove']],
 
             ["Sahasrahla", False, []],
-            ["Sahasrahla", False, [], ['Green Pendant']],
-            ["Sahasrahla", True, ['Green Pendant', 'Beat Agahnim 1']],
-            ["Sahasrahla", True, ['Green Pendant', 'Moon Pearl', 'Progressive Glove', 'Hammer']],
-            ["Sahasrahla", True, ['Green Pendant', 'Moon Pearl', 'Progressive Glove', 'Progressive Glove']],
+            ["Sahasrahla", False, [], ['Pendant of Courage']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Beat Agahnim 1']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Moon Pearl', 'Progressive Glove', 'Hammer']],
+            ["Sahasrahla", True, ['Pendant of Courage', 'Moon Pearl', 'Progressive Glove', 'Progressive Glove']],
 
             ["Bonk Rock Cave", False, []],
             ["Bonk Rock Cave", False, [], ['Pegasus Boots']],

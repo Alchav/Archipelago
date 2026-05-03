@@ -2,9 +2,10 @@ from dataclasses import dataclass
 
 from BaseClasses import MultiWorld
 from Options import Choice, Range, DeathLink, DefaultOnToggle, FreeText, ItemsAccessibility, PerGameCommonOptions, \
-    PlandoBosses, PlandoConnections, PlandoTexts, Removed, StartInventoryPool, Toggle
+    PlandoBosses, PlandoConnections, PlandoTexts, Removed, StartInventoryPool, Toggle, OptionSet
 from .EntranceShuffle import default_connections, default_dungeon_connections, \
     inverted_default_connections, inverted_default_dungeon_connections
+from .Items import key_ring_option_names
 from .Text import TextTable
 
 
@@ -40,7 +41,7 @@ class DarkRoomLogic(Choice):
 class Goal(Choice):
     """Ganon: Climb GT, defeat Agahnim 2, and then kill Ganon
     Crystals: Only killing Ganon is required. However, items may still be placed in GT
-    Bosses: Defeat the boss of all dungeons, including Agahnim's tower and GT (Aga 2)
+    Dungeons: Clear the required number of dungeons, including Agahnim's tower and GT (Aga 2), then kill Ganon
     Pedestal: Pull the Triforce from the Master Sword pedestal
     Ganon Pedestal: Pull the Master Sword pedestal, then kill Ganon
     Triforce Hunt: Collect Triforce pieces spread throughout the worlds, then turn them in to Murahadala in front of Hyrule Castle
@@ -51,13 +52,14 @@ class Goal(Choice):
     default = 0
     option_ganon = 0
     option_crystals = 1
-    option_bosses = 2
+    option_dungeons = 2
     option_pedestal = 3
     option_ganon_pedestal = 4
     option_triforce_hunt = 5
     option_local_triforce_hunt = 6
     option_ganon_triforce_hunt = 7
     option_local_ganon_triforce_hunt = 8
+    alias_bosses = 2
 
 
 class EntranceShuffle(Choice):
@@ -154,13 +156,18 @@ class OpenPyramid(Choice):
     alias_true = option_open
     alias_false = option_closed
 
-    def to_bool(self, world: MultiWorld, player: int) -> bool:
+    def to_bool(self, multiworld: MultiWorld, player: int) -> bool:
+        options = multiworld.worlds[player].options
+        goal = options.goal.current_key
+        goal_opens_pyramid = goal in {'crystals', 'ganon_triforce_hunt', 'local_ganon_triforce_hunt',
+                                      'ganon_pedestal'} or (
+            goal == 'dungeons' and options.dungeons_needed_for_ganon.value < 12)
         if self.value == self.option_goal:
-            return world.worlds[player].options.goal.current_key in {'crystals', 'ganon_triforce_hunt', 'local_ganon_triforce_hunt', 'ganon_pedestal'}
+            return goal_opens_pyramid
         elif self.value == self.option_auto:
-            return world.worlds[player].options.goal.current_key in {'crystals', 'ganon_triforce_hunt', 'local_ganon_triforce_hunt', 'ganon_pedestal'} \
-            and (world.worlds[player].options.entrance_shuffle.current_key in {'vanilla', 'dungeons_simple', 'dungeons_full', 'dungeons_crossed'} or not
-                 world.shuffle_ganon)
+            return goal_opens_pyramid \
+            and (options.entrance_shuffle.current_key in {'vanilla', 'dungeons_simple', 'dungeons_full', 'dungeons_crossed'} or not
+                 multiworld.shuffle_ganon)
         elif self.value == self.option_open:
             return True
         else:
@@ -213,11 +220,28 @@ class map_shuffle(DungeonItem):
     display_name = "Map Shuffle"
 
 
-class MasterSmallKeys(Toggle):
-    """Each dungeon only has one Small Key, which is not consumed upon opening doors.
-    If Universal Small Keys is on, there will be a single universal Small Key."""
-    display_name = "Master Keys"
-    default = False
+class key_drop_shuffle(DefaultOnToggle):
+    """Shuffle keys found in pots and dropped from killed enemies,
+    respects the small key and big key shuffle options."""
+    display_name = "Key Drop Shuffle"
+
+
+class KeyRings(Choice):
+    """A key ring grants all dungeon small keys that would otherwise be in the item pool at once.
+    Choose: Use the option "Key Rings List" to choose which dungeons have key rings.
+    All: All eligible dungeons have key rings instead of individual small keys."""
+    display_name = "Key Rings Mode"
+    option_off = 0
+    option_choose = 1
+    option_all = 2
+    option_random_dungeons = 3
+
+
+class KeyRingsList(OptionSet):
+    """With Key Rings set to Choose: select dungeons with key rings rather than individual small keys."""
+    display_name = "Key Rings List"
+    valid_keys = set(key_ring_option_names)
+    default = valid_keys
 
 
 class DungeonCounters(Choice):
@@ -296,6 +320,11 @@ class ShufflePrizes(Choice):
     option_general = 1
     option_bonk = 2
     option_both = 3
+
+
+class BossPrizeShuffle(Toggle):
+    """Shuffle dungeon prizes into the regular item pool and allow any item on boss prize locations."""
+    display_name = "Boss Prize Shuffle"
 
 
 class Medallion(Choice):
@@ -377,6 +406,14 @@ class CrystalsGanon(Crystals):
     """Number of crystals needed to damage Ganon"""
     display_name = "Crystals for Ganon"
     default = 7
+
+
+class DungeonsGanon(Range):
+    """With Dungeons goal, number of dungeons that must be cleared to damage Ganon."""
+    display_name = "Dungeons for Ganon"
+    range_start = 0
+    range_end = 12
+    default = 12
 
 
 class TriforcePieces(Range):
@@ -756,6 +793,7 @@ class ALTTPOptions(PerGameCommonOptions):
     open_pyramid: OpenPyramid
     crystals_needed_for_gt: CrystalsTower
     crystals_needed_for_ganon: CrystalsGanon
+    dungeons_needed_for_ganon: DungeonsGanon
     triforce_pieces_mode: TriforcePiecesMode
     triforce_pieces_percentage: TriforcePiecesPercentage
     triforce_pieces_required: TriforcePiecesRequired
@@ -765,7 +803,9 @@ class ALTTPOptions(PerGameCommonOptions):
     entrance_shuffle_seed: EntranceShuffleSeed
     big_key_shuffle: big_key_shuffle
     small_key_shuffle: small_key_shuffle
-    master_keys: MasterSmallKeys
+    key_drop_shuffle: key_drop_shuffle
+    key_rings: KeyRings
+    key_rings_list: KeyRingsList
     compass_shuffle: compass_shuffle
     map_shuffle: map_shuffle
     restrict_dungeon_item_on_boss: RestrictBossItem
@@ -795,6 +835,7 @@ class ALTTPOptions(PerGameCommonOptions):
     shuffle_capacity_upgrades: ShuffleCapacityUpgrades
     bombless_start: BomblessStart
     shuffle_prizes: ShufflePrizes
+    boss_prize_shuffle: BossPrizeShuffle
     tile_shuffle: TileShuffle
     misery_mire_medallion: MiseryMireMedallion
     turtle_rock_medallion: TurtleRockMedallion

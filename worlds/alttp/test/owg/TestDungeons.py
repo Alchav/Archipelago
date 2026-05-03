@@ -124,8 +124,8 @@ class TestDungeons(TestVanillaOWG):
             ["Turtle Rock - Crystaroller Room", True, ['Pegasus Boots', 'Magic Mirror', 'Big Key (Turtle Rock)', 'Bomb Upgrade (50)']],
 
             ["Ganons Tower - Hope Room - Left", False, []],
-            ["Ganons Tower - Hope Room - Left", False, ['Moon Pearl', 'Crystal 1']],
-            ["Ganons Tower - Hope Room - Left", False, ['Pegasus Boots', 'Crystal 1']],
+            ["Ganons Tower - Hope Room - Left", False, ['Moon Pearl', 'Crystal (Palace of Darkness)']],
+            ["Ganons Tower - Hope Room - Left", False, ['Pegasus Boots', 'Crystal (Palace of Darkness)']],
             ["Ganons Tower - Hope Room - Left", True, ['Moon Pearl', 'Pegasus Boots']],
-            ["Ganons Tower - Hope Room - Left", True, ['Pegasus Boots', 'Hammer', 'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 5', 'Crystal 6', 'Crystal 7']],
+            ["Ganons Tower - Hope Room - Left", True, ['Pegasus Boots', 'Hammer', 'Crystal (Palace of Darkness)', 'Crystal (Swamp Palace)', 'Crystal (Skull Woods)', "Crystal (Thieves' Town)", 'Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Crystal (Turtle Rock)']],
         ])

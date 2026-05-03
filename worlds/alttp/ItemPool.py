@@ -1,18 +1,24 @@
 from collections import namedtuple
 import logging
 
-from BaseClasses import ItemClassification
+from BaseClasses import ItemClassification, MultiWorld
 from Options import OptionError
+from typing import TYPE_CHECKING
 
 from .SubClasses import ALttPLocation, LTTPRegion, LTTPRegionType
 from .Shops import TakeAny, total_shop_slots, set_up_shops, shop_table_by_location, ShopType
 from .Bosses import place_bosses
 from .Dungeons import get_dungeon_item_pool_player
 from .EntranceShuffle import connect_entrance
-from .Items import item_factory, GetBeemizerItem, trap_replaceable, item_name_groups
+from .BossPrizeData import boss_prize_items
+from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
+                    small_key_name_to_key_ring)
 from .Options import small_key_shuffle, compass_shuffle, big_key_shuffle, map_shuffle, TriforcePiecesMode, LTTPBosses
 from .StateHelpers import has_triforce_pieces, has_melee_weapon
 from .Regions import key_drop_data
+
+if TYPE_CHECKING:
+    from . import ALTTPWorld
 
 # This file sets the item pools for various modes. Timed modes and triforce hunt are enforced first, and then extra items are specified per mode to fill in the remaining space.
 # Some basic items that various modes require are placed here, including pendants and crystals. Medallion requirements for the two relevant entrances are also decided.
@@ -81,7 +87,7 @@ difficulties = {
         basicglove=basicgloves,
         alwaysitems=alwaysitems,
         legacyinsanity=legacyinsanity,
-        universal_keys=['Small Key (Universal)'] * 61,
+        universal_keys=['Small Key (Universal)'] * 29,
         extras=[easyfirst15extra, easysecond15extra, easythird10extra, easyfourth5extra, easyfinal25extra],
         progressive_sword_limit=8,
         progressive_shield_limit=6,
@@ -113,7 +119,7 @@ difficulties = {
         basicglove=basicgloves,
         alwaysitems=alwaysitems,
         legacyinsanity=legacyinsanity,
-        universal_keys=['Small Key (Universal)'] * 51 + ['Rupees (20)'] * 10,
+        universal_keys=['Small Key (Universal)'] * 19 + ['Rupees (20)'] * 10,
         extras=[normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit=4,
         progressive_shield_limit=3,
@@ -145,7 +151,7 @@ difficulties = {
         basicglove=basicgloves,
         alwaysitems=alwaysitems,
         legacyinsanity=legacyinsanity,
-        universal_keys=['Small Key (Universal)'] * 45 + ['Rupees (5)'] * 16,
+        universal_keys=['Small Key (Universal)'] * 13 + ['Rupees (5)'] * 16,
         extras=[normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit=3,
         progressive_shield_limit=2,
@@ -177,7 +183,7 @@ difficulties = {
         basicglove=basicgloves,
         alwaysitems=alwaysitems,
         legacyinsanity=legacyinsanity,
-        universal_keys=['Small Key (Universal)'] * 45 + ['Rupees (5)'] * 16,
+        universal_keys=['Small Key (Universal)'] * 13 + ['Rupees (5)'] * 16,
         extras=[normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit=2,
         progressive_shield_limit=1,
@@ -222,13 +228,13 @@ items_reduction_table = (
 )
 
 
-def generate_itempool(world):
+def generate_itempool(world: "ALTTPWorld"):
     player: int = world.player
     multiworld = world.multiworld
 
     if world.options.item_pool.current_key not in difficulties:
         raise NotImplementedError(f"Diffulty {world.options.item_pool}")
-    if world.options.goal not in ('ganon', 'pedestal', 'bosses', 'triforce_hunt', 'local_triforce_hunt',
+    if world.options.goal not in ('ganon', 'pedestal', 'dungeons', 'triforce_hunt', 'local_triforce_hunt',
                                   'ganon_triforce_hunt', 'local_ganon_triforce_hunt', 'crystals',
                                   'ganon_pedestal'):
         raise NotImplementedError(f"Goal {world.options.goal} for player {player}")
@@ -283,6 +289,9 @@ def generate_itempool(world):
         (pool, placed_items, precollected_items, clock_mode, treasure_hunt_required, treasure_hunt_total,
          additional_triforce_pieces) = get_pool_core(multiworld, player)
 
+    if world.options.boss_prize_shuffle:
+        pool.extend(boss_prize_items)
+
     for item in precollected_items:
         multiworld.push_precollected(item_factory(item, world))
 
@@ -333,29 +342,76 @@ def generate_itempool(world):
                 item.code = 0x65  # Progressive Bow (Alt)
                 break
 
-    if multiworld.worlds[player].options.master_keys and multiworld.worlds[player].options.small_key_shuffle == "universal":
-        for item in items:
-            if item.name == "Small Key (Universal)":
-                item.classification = ItemClassification.progression
-                break
-
     if clock_mode:
         world.clock_mode = clock_mode
 
     world.treasure_hunt_required = treasure_hunt_required % 999
     world.treasure_hunt_total = treasure_hunt_total
 
-    if multiworld.worlds[player].options.master_keys:
-        items_to_add = 60 if multiworld.worlds[player].options.small_key_shuffle == "universal" else 48
-        # add replacement items for the keys removed from the dungeon item pool
-        multiworld.itempool += [item_factory(GetBeemizerItem(multiworld, player, world.get_filler_item_name()), world)
-                                for _ in range(items_to_add)]
-
     dungeon_items = [item for item in get_dungeon_item_pool_player(world)
                      if item.name not in world.dungeon_local_item_names]
 
+    def dungeon_name_for_small_key(small_key_name: str) -> str:
+        dungeon_name = small_key_name.split("(")[1].split(")")[0]
+        if world.options.mode == 'inverted':
+            if dungeon_name == "Agahnims Tower":
+                return "Inverted Agahnims Tower"
+            if dungeon_name == "Ganons Tower":
+                return "Inverted Ganons Tower"
+        return dungeon_name
+
+    for key_loc in key_drop_data:
+        key_data = key_drop_data[key_loc]
+        drop_item = item_factory(key_data[3], world)
+        if not world.options.key_drop_shuffle:
+            if drop_item in dungeon_items:
+                dungeon_items.remove(drop_item)
+            else:
+                dungeon = dungeon_name_for_small_key(drop_item.name)
+                if drop_item in world.dungeons[dungeon].small_keys:
+                    world.dungeons[dungeon].small_keys.remove(drop_item)
+                elif world.dungeons[dungeon].big_key is not None and world.dungeons[dungeon].big_key == drop_item:
+                    world.dungeons[dungeon].big_key = None
+
+            loc = multiworld.get_location(key_loc, player)
+            loc.place_locked_item(drop_item)
+            loc.address = None
+        elif "Small" in key_data[3] and world.options.small_key_shuffle == small_key_shuffle.option_universal:
+            # key drop shuffle and universal keys are on. Add universal keys in place of key drop keys.
+            multiworld.itempool.append(item_factory(GetBeemizerItem(multiworld, player, 'Small Key (Universal)'), world))
+
+    if world.options.small_key_shuffle != small_key_shuffle.option_universal:
+        for key_ring in key_ring_table:
+            if key_ring.option_name not in world.key_rings:
+                continue
+
+            dungeon = world.dungeons[dungeon_name_for_small_key(key_ring.small_key_name)]
+            remaining_small_keys = [item for item in dungeon.small_keys if item.name == key_ring.small_key_name]
+            if len(remaining_small_keys) <= 1:
+                continue
+
+            for remaining_small_key in remaining_small_keys:
+                if remaining_small_key in dungeon_items:
+                    dungeon_items.remove(remaining_small_key)
+            dungeon.small_keys = [item for item in dungeon.small_keys if item.name != key_ring.small_key_name]
+
+            key_ring_item = item_factory(small_key_name_to_key_ring[key_ring.small_key_name], world)
+            key_ring_item.dungeon = dungeon
+            dungeon.small_keys.append(key_ring_item)
+            if key_ring_item.name not in world.dungeon_local_item_names:
+                dungeon_items.append(key_ring_item)
+
     dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
     multiworld.random.shuffle(dungeon_item_replacements)
+
+    if world.options.small_key_shuffle != small_key_shuffle.option_universal:
+        collapsed_small_keys = sum(
+            max(world.key_ring_data[small_key_name_to_key_ring[key_ring.small_key_name]] - 1, 0)
+            for key_ring in key_ring_table
+            if key_ring.option_name in world.key_rings
+        )
+        for _ in range(collapsed_small_keys):
+            multiworld.itempool.append(item_factory(dungeon_item_replacements.pop(), world))
 
     for x in range(len(dungeon_items)-1, -1, -1):
         item = dungeon_items[x]
@@ -519,7 +575,7 @@ take_any_locations_inverted.sort()
 take_any_locations.sort()
 
 
-def set_up_take_anys(multiworld, world, player):
+def set_up_take_anys(multiworld: MultiWorld, world: "ALTTPWorld", player: int):
     # these are references, do not modify these lists in-place
     if world.options.mode == 'inverted':
         take_any_locs = take_any_locations_inverted
@@ -573,15 +629,15 @@ def set_up_take_anys(multiworld, world, player):
         location.place_locked_item(item_factory("Boss Heart Container", world))
 
 
-def get_pool_core(world, player: int):
-    shuffle = world.worlds[player].options.entrance_shuffle.current_key
-    difficulty = world.worlds[player].options.item_pool.current_key
-    timer = world.worlds[player].options.timer.current_key
-    goal = world.worlds[player].options.goal.current_key
-    mode = world.worlds[player].options.mode.current_key
-    swordless = world.worlds[player].options.swordless
-    retro_bow = world.worlds[player].options.retro_bow
-    logic = world.worlds[player].options.glitches_required
+def get_pool_core(multiworld: MultiWorld, player: int):
+    shuffle = multiworld.worlds[player].options.entrance_shuffle.current_key
+    difficulty = multiworld.worlds[player].options.item_pool.current_key
+    timer = multiworld.worlds[player].options.timer.current_key
+    goal = multiworld.worlds[player].options.goal.current_key
+    mode = multiworld.worlds[player].options.mode.current_key
+    swordless = multiworld.worlds[player].options.swordless
+    retro_bow = multiworld.worlds[player].options.retro_bow
+    logic = multiworld.worlds[player].options.glitches_required
 
     pool = []
     placed_items = {}
@@ -598,13 +654,13 @@ def get_pool_core(world, player: int):
         placed_items[loc] = item
 
     # provide boots to major glitch dependent seeds
-    if logic.current_key in {'overworld_glitches', 'hybrid_major_glitches', 'no_logic'} and world.worlds[player].options.glitch_boots:
+    if logic.current_key in {'overworld_glitches', 'hybrid_major_glitches', 'no_logic'} and multiworld.worlds[player].options.glitch_boots:
         precollected_items.append('Pegasus Boots')
         pool.remove('Pegasus Boots')
         pool.append('Rupees (20)')
-    want_progressives = world.worlds[player].options.progressive.want_progressives
+    want_progressives = multiworld.worlds[player].options.progressive.want_progressives
 
-    if want_progressives(world.random):
+    if want_progressives(multiworld.random):
         pool.extend(diff.progressiveglove)
     else:
         pool.extend(diff.basicglove)
@@ -628,27 +684,27 @@ def get_pool_core(world, player: int):
     thisbottle = None
     for _ in range(diff.bottle_count):
         if not diff.same_bottle or not thisbottle:
-            thisbottle = world.random.choice(diff.bottles)
+            thisbottle = multiworld.random.choice(diff.bottles)
         pool.append(thisbottle)
 
-    if want_progressives(world.random):
+    if want_progressives(multiworld.random):
         pool.extend(diff.progressiveshield)
     else:
         pool.extend(diff.basicshield)
 
-    if want_progressives(world.random):
+    if want_progressives(multiworld.random):
         pool.extend(diff.progressivearmor)
     else:
         pool.extend(diff.basicarmor)
 
-    if want_progressives(world.random):
+    if want_progressives(multiworld.random):
         pool.extend(diff.progressivemagic)
     else:
         pool.extend(diff.basicmagic)
 
-    if want_progressives(world.random):
+    if want_progressives(multiworld.random):
         pool.extend(diff.progressivebow)
-        world.worlds[player].has_progressive_bows = True
+        multiworld.worlds[player].has_progressive_bows = True
     elif (swordless or logic == 'no_glitches'):
         swordless_bows = ['Bow', 'Silver Bow']
         if difficulty == "easy":
@@ -660,7 +716,7 @@ def get_pool_core(world, player: int):
     if swordless:
         pool.extend(diff.swordless)
     else:
-        progressive_swords = want_progressives(world.random)
+        progressive_swords = want_progressives(multiworld.random)
         pool.extend(diff.progressivesword if progressive_swords else diff.basicsword)
 
     extraitems = total_items_to_place - len(pool) - len(placed_items)
@@ -676,29 +732,29 @@ def get_pool_core(world, player: int):
     additional_pieces_to_place = 0
     if 'triforce_hunt' in goal:
 
-        if world.worlds[player].options.triforce_pieces_mode.value == TriforcePiecesMode.option_extra:
-            treasure_hunt_total = (world.worlds[player].options.triforce_pieces_required.value
-                                   + world.worlds[player].options.triforce_pieces_extra.value)
-        elif world.worlds[player].options.triforce_pieces_mode.value == TriforcePiecesMode.option_percentage:
-            percentage = float(world.worlds[player].options.triforce_pieces_percentage.value) / 100
-            treasure_hunt_total = int(round(world.worlds[player].options.triforce_pieces_required.value * percentage, 0))
+        if multiworld.worlds[player].options.triforce_pieces_mode.value == TriforcePiecesMode.option_extra:
+            treasure_hunt_total = (multiworld.worlds[player].options.triforce_pieces_required.value
+                                   + multiworld.worlds[player].options.triforce_pieces_extra.value)
+        elif multiworld.worlds[player].options.triforce_pieces_mode.value == TriforcePiecesMode.option_percentage:
+            percentage = float(multiworld.worlds[player].options.triforce_pieces_percentage.value) / 100
+            treasure_hunt_total = int(round(multiworld.worlds[player].options.triforce_pieces_required.value * percentage, 0))
         else:  # available
-            treasure_hunt_total = world.worlds[player].options.triforce_pieces_available.value
+            treasure_hunt_total = multiworld.worlds[player].options.triforce_pieces_available.value
 
-        triforce_pieces = min(90, max(treasure_hunt_total, world.worlds[player].options.triforce_pieces_required.value))
+        triforce_pieces = min(90, max(treasure_hunt_total, multiworld.worlds[player].options.triforce_pieces_required.value))
 
         pieces_in_core = min(extraitems, triforce_pieces)
         additional_pieces_to_place = triforce_pieces - pieces_in_core
         pool.extend(["Triforce Piece"] * pieces_in_core)
         extraitems -= pieces_in_core
-        treasure_hunt_required = world.worlds[player].options.triforce_pieces_required.value
+        treasure_hunt_required = multiworld.worlds[player].options.triforce_pieces_required.value
 
     for extra in diff.extras:
         if extraitems >= len(extra):
             pool.extend(extra)
             extraitems -= len(extra)
         elif extraitems > 0:
-            pool.extend(world.random.sample(extra, extraitems))
+            pool.extend(multiworld.random.sample(extra, extraitems))
             break
         else:
             break
@@ -706,34 +762,36 @@ def get_pool_core(world, player: int):
     if retro_bow:
         replace = {'Single Arrow', 'Arrows (10)', 'Arrow Upgrade (+5)', 'Arrow Upgrade (+10)', 'Arrow Upgrade (70)'}
         pool = ['Rupees (5)' if item in replace else item for item in pool]
-    if world.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
-        if world.worlds[player].options.master_keys:
-            if mode == 'standard':
-                # This is a silly choice of options, but if they really want...
-                key_locations = ["Link's House", "Secret Passage", "Hyrule Castle - Map Guard Key Drop"]
-                key_location = world.random.choice(key_locations)
-                key_locations.remove(key_location)
-                place_item(key_location, "Small Key (Universal)")
+
+    if goal == 'pedestal':
+        place_item('Master Sword Pedestal', 'Triforce')
+        for rupee_name in ("Rupees (5)", "Rupees (20)", "Rupees (50)", "Rupees (100)", "Rupees (300)"):
+            try:
+                pool.remove(rupee_name)
+            except ValueError:
+                pass
             else:
-                pool.append("Small Key (Universal)")
-        else:
-            pool.extend(diff.universal_keys)
-            if mode == 'standard':
+                break
+
+    if multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
+        pool.extend(diff.universal_keys)
+        if mode == 'standard':
+            if multiworld.worlds[player].options.key_drop_shuffle:
                 key_locations = ['Secret Passage', 'Hyrule Castle - Map Guard Key Drop']
-                key_location = world.random.choice(key_locations)
+                key_location = multiworld.random.choice(key_locations)
                 key_locations.remove(key_location)
                 place_item(key_location, "Small Key (Universal)")
                 key_locations += ['Hyrule Castle - Boomerang Guard Key Drop', 'Hyrule Castle - Boomerang Chest',
                                   'Hyrule Castle - Map Chest']
-                key_location = world.random.choice(key_locations)
+                key_location = multiworld.random.choice(key_locations)
                 key_locations.remove(key_location)
                 place_item(key_location, "Small Key (Universal)")
                 key_locations += ['Hyrule Castle - Big Key Drop', 'Hyrule Castle - Zelda\'s Chest', 'Sewers - Dark Cross']
-                key_location = world.random.choice(key_locations)
+                key_location = multiworld.random.choice(key_locations)
                 key_locations.remove(key_location)
                 place_item(key_location, "Small Key (Universal)")
                 key_locations += ['Sewers - Key Rat Key Drop']
-                key_location = world.random.choice(key_locations)
+                key_location = multiworld.random.choice(key_locations)
                 place_item(key_location, "Small Key (Universal)")
                 pool = pool[:-3]
 
@@ -887,7 +945,9 @@ def make_custom_item_pool(world, player):
         pool.extend(['Moon Pearl'] * customitemarray[28])
 
     if world.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
-        itemtotal = itemtotal - 61  # Corrects for small keys not being in item pool in universal Mode
+        itemtotal = itemtotal - 28  # Corrects for small keys not being in item pool in universal Mode
+        if world.worlds[player].options.key_drop_shuffle:
+            itemtotal = itemtotal - (len(key_drop_data) - 1)
     if itemtotal < total_items_to_place:
         pool.extend(['Nothing'] * (total_items_to_place - itemtotal))
         logging.warning(f"Pool was filled up with {total_items_to_place - itemtotal} Nothing's for player {player}")

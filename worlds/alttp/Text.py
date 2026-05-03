@@ -1963,14 +1963,14 @@ class TextTable(object):
             + "Understand?\n  ≥ yes\n    no\n{CHOICE}")
         text['sahasrahla_bring_courage'] = CompressedTextMapper.convert(
             "{BOTTOM}\n"
-            + "While you're here, could you do me a solid and get the green pendant from that dungeon?\n"
+            + "While you're here, could you do me a solid and get the Pendant of Courage from that dungeon?\n"
             + "{HARP}\nI'll give you a present if you do.")
         text['sahasrahla_have_ice_rod'] = CompressedTextMapper.convert("{BOTTOM}\nLike, I sit here, and tell you what to do?\n\n\nAlright, go and find all the maidens, there are, like, maybe 7 of them. I dunno anymore. I'm old.")
         text['telepathic_sahasrahla_beat_agahnim'] = CompressedTextMapper.convert("{NOBORDER}\n{SPEED6}\nNice, so you beat Agahnim. Now you must beat Ganon. Good Luck!")
         text['telepathic_sahasrahla_beat_agahnim_no_pearl'] = CompressedTextMapper.convert("{NOBORDER}\n{SPEED6}\nOh, also you forgot the Moon Pearl, dingus. Go back and find it!")
         text['sahasrahla_have_boots_no_icerod'] = CompressedTextMapper.convert("{BOTTOM}\nCave in South East has a cool item.")
-        text['sahasrahla_have_courage'] = CompressedTextMapper.convert("{BOTTOM}\nLook, you have the green pendant! I'll give you something. Go kill the other two bosses for more pendant fun!")
-        text['sahasrahla_found'] = CompressedTextMapper.convert("{BOTTOM}\nYup!\n\nI'm the old man you are looking for. I'll keep it short and sweet: Go into that dungeon, then bring me the green pendant and talk to me again.")
+        text['sahasrahla_have_courage'] = CompressedTextMapper.convert("{BOTTOM}\nLook, you have the Pendant of Courage! I'll give you something. Go kill the other two bosses for more pendant fun!")
+        text['sahasrahla_found'] = CompressedTextMapper.convert("{BOTTOM}\nYup!\n\nI'm the old man you are looking for. I'll keep it short and sweet: Go into that dungeon, then bring me the Pendant of Courage and talk to me again.")
         text['sign_rain_north_of_links_house'] = CompressedTextMapper.convert("↑ Dying Uncle\n  This way…")
         text['sign_north_of_links_house'] = CompressedTextMapper.convert("> Randomizer") #"> Randomizer The telepathic tiles can have hints!"
         text['sign_path_to_death_mountain'] = CompressedTextMapper.convert("Cave to lost, old man.\nGood luck.")

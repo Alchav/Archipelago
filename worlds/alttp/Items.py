@@ -1,24 +1,25 @@
 import typing
 
-from BaseClasses import ItemClassification as IC
+from BaseClasses import MultiWorld, ItemClassification as IC
 from worlds.AutoWorld import World
+from .BossPrizeData import boss_prize_items
 
 
-def GetBeemizerItem(world, player: int, item):
+def GetBeemizerItem(multiworld: MultiWorld, player: int, item):
     item_name = item if isinstance(item, str) else item.name
 
-    if item_name not in trap_replaceable or player in world.groups:
+    if item_name not in trap_replaceable or player in multiworld.groups:
         return item
 
     # first roll - replaceable item should be replaced, within beemizer_total_chance
-    if not world.worlds[player].options.beemizer_total_chance or world.random.random() > (world.worlds[player].options.beemizer_total_chance / 100):
+    if not multiworld.worlds[player].options.beemizer_total_chance or multiworld.random.random() > (multiworld.worlds[player].options.beemizer_total_chance / 100):
         return item
 
     # second roll - bee replacement should be trap, within beemizer_trap_chance
-    if not world.worlds[player].options.beemizer_trap_chance or world.random.random() > (world.worlds[player].options.beemizer_trap_chance / 100):
-        return "Bee" if isinstance(item, str) else world.create_item("Bee", player)
+    if not multiworld.worlds[player].options.beemizer_trap_chance or multiworld.random.random() > (multiworld.worlds[player].options.beemizer_trap_chance / 100):
+        return "Bee" if isinstance(item, str) else multiworld.create_item("Bee", player)
     else:
-        return "Bee Trap" if isinstance(item, str) else world.create_item("Bee Trap", player)
+        return "Bee Trap" if isinstance(item, str) else multiworld.create_item("Bee Trap", player)
 
 
 def item_factory(items: typing.Union[str, typing.Iterable[str]], world: World):
@@ -53,6 +54,37 @@ class ItemData(typing.NamedTuple):
     def as_init_dict(self) -> typing.Dict[str, typing.Any]:
         return {key: getattr(self, key) for key in
                 ('classification', 'type', 'item_code', 'pedestal_hint', 'hint_text')}
+
+
+class KeyRingData(typing.NamedTuple):
+    option_name: str
+    small_key_name: str
+    item_name: str
+    default_quantity: int
+    quantity_table_index: int
+
+
+key_ring_table = (
+    KeyRingData("Hyrule Castle", "Small Key (Hyrule Castle)", "Small Key Ring (Hyrule Castle)", 4, 0),
+    KeyRingData("Eastern Palace", "Small Key (Eastern Palace)", "Small Key Ring (Eastern Palace)", 2, 2),
+    KeyRingData("Desert Palace", "Small Key (Desert Palace)", "Small Key Ring (Desert Palace)", 4, 3),
+    KeyRingData("Agahnim's Tower", "Small Key (Agahnims Tower)", "Small Key Ring (Agahnims Tower)", 4, 4),
+    KeyRingData("Swamp Palace", "Small Key (Swamp Palace)", "Small Key Ring (Swamp Palace)", 6, 5),
+    KeyRingData("Palace of Darkness", "Small Key (Palace of Darkness)", "Small Key Ring (Palace of Darkness)", 6, 6),
+    KeyRingData("Misery Mire", "Small Key (Misery Mire)", "Small Key Ring (Misery Mire)", 6, 7),
+    KeyRingData("Skull Woods", "Small Key (Skull Woods)", "Small Key Ring (Skull Woods)", 5, 8),
+    KeyRingData("Ice Palace", "Small Key (Ice Palace)", "Small Key Ring (Ice Palace)", 6, 9),
+    KeyRingData("Tower of Hera", "Small Key (Tower of Hera)", "Small Key Ring (Tower of Hera)", 1, 10),
+    KeyRingData("Thieves' Town", "Small Key (Thieves Town)", "Small Key Ring (Thieves Town)", 3, 11),
+    KeyRingData("Turtle Rock", "Small Key (Turtle Rock)", "Small Key Ring (Turtle Rock)", 6, 12),
+    KeyRingData("Ganon's Tower", "Small Key (Ganons Tower)", "Small Key Ring (Ganons Tower)", 8, 13),
+)
+
+key_ring_option_names = tuple(data.option_name for data in key_ring_table if data.default_quantity > 1)
+small_key_name_to_key_ring = {data.small_key_name: data.item_name for data in key_ring_table}
+small_key_name_to_key_ring_option = {data.small_key_name: data.option_name for data in key_ring_table}
+key_ring_name_to_small_key = {data.item_name: data.small_key_name for data in key_ring_table}
+default_key_ring_data = {data.item_name: data.default_quantity for data in key_ring_table}
 
 
 # Format: Name: (Advancement, Type, ItemCode, Pedestal Hint Text, Pedestal Credit Text, Sick Kid Credit Text, Zora Credit Text, Witch Credit Text, Flute Boy Credit Text, Hint Text)
@@ -95,19 +127,19 @@ item_table = {'Bow': ItemData(IC.progression, None, 0x0B, 'You have\nchosen the\
               'Golden Sword': ItemData(IC.progression, 'Sword', 0x03, 'The butter\nsword rests\nhere!', 'and the butter sword', 'sword-wielding kid', 'butter for sale', 'cap churned to butter', 'sword boy fights again', 'the Golden Sword'),
               'Progressive Sword': ItemData(IC.progression, 'Sword', 0x5E, 'a better copy\nof your sword\nfor your time', 'the unknown sword', 'sword-wielding kid', 'sword for sale', 'fungus for some slasher', 'sword boy fights again', 'a Sword'),
               'Progressive Glove': ItemData(IC.progression, None, 0x61, 'a way to lift\nheavier things', 'and the lift upgrade', 'body-building kid', 'some glove for sale', 'fungus for gloves', 'body-building boy lifts again', 'a Glove'),
-              'Green Pendant': ItemData(IC.progression, 'Crystal', (0x04, 0x38, 0x62, 0x00, 0x69, 0x01), None, None, None, None, None, None, "the green pendant"),
-              'Blue Pendant': ItemData(IC.progression, 'Crystal', (0x02, 0x34, 0x60, 0x00, 0x69, 0x02), None, None, None, None, None, None, "the blue pendant"),
-              'Red Pendant': ItemData(IC.progression, 'Crystal', (0x01, 0x32, 0x60, 0x00, 0x69, 0x03), None, None, None, None, None, None, "the red pendant"),
+              'Pendant of Courage': ItemData(IC.progression, 'Crystal', 0xB6, 'The Pendant\nof Courage\nrests here.', 'and the Pendant of Courage', 'courage pendant kid', 'courage for sale', 'courage brew', 'pendant boy is brave again', "the Pendant of Courage"),
+              'Pendant of Power': ItemData(IC.progression, 'Crystal', 0xB7, 'The Pendant\nof Power\nrests here.', 'and the Pendant of Power', 'power pendant kid', 'power for sale', 'power brew', 'pendant boy has power again', "the Pendant of Power"),
+              'Pendant of Wisdom': ItemData(IC.progression, 'Crystal', 0xB8, 'The Pendant\nof Wisdom\nrests here.', 'and the Pendant of Wisdom', 'wisdom pendant kid', 'wisdom for sale', 'wisdom brew', 'pendant boy is wise again', "the Pendant of Wisdom"),
               'Triforce': ItemData(IC.progression, None, 0x6A, '\n   YOU WIN!', 'and the triforce', 'victorious kid', 'victory for sale', 'fungus for the win', 'greedy boy wins game again', 'the Triforce'),
               'Power Star': ItemData(IC.progression, None, 0x6B, 'a small victory', 'and the power star', 'star-struck kid', 'star for sale', 'see stars with shroom', 'mario powers up again', 'a Power Star'),
               'Triforce Piece': ItemData(IC.progression_skip_balancing, None, 0x6C, 'a small victory', 'and the thirdforce', 'triangular kid', 'triangle for sale', 'fungus for triangle', 'wise boy has triangle again', 'a Triforce Piece'),
-              'Crystal 1': ItemData(IC.progression, 'Crystal', (0x02, 0x34, 0x64, 0x40, 0x7F, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 2': ItemData(IC.progression, 'Crystal', (0x10, 0x34, 0x64, 0x40, 0x79, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 3': ItemData(IC.progression, 'Crystal', (0x40, 0x34, 0x64, 0x40, 0x6C, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 4': ItemData(IC.progression, 'Crystal', (0x20, 0x34, 0x64, 0x40, 0x6D, 0x06), None, None, None, None, None, None, "a blue crystal"),
-              'Crystal 5': ItemData(IC.progression, 'Crystal', (0x04, 0x32, 0x64, 0x40, 0x6E, 0x06), None, None, None, None, None, None, "a red crystal"),
-              'Crystal 6': ItemData(IC.progression, 'Crystal', (0x01, 0x32, 0x64, 0x40, 0x6F, 0x06), None, None, None, None, None, None, "a red crystal"),
-              'Crystal 7': ItemData(IC.progression, 'Crystal', (0x08, 0x34, 0x64, 0x40, 0x7C, 0x06), None, None, None, None, None, None, "a blue crystal"),
+              'Crystal (Palace of Darkness)': ItemData(IC.progression, 'Crystal', 0xB9, 'A crystal from\nPalace of\nDarkness.', 'and the dark palace crystal', 'crystal kid', 'crystal for sale', 'dark crystal brew', 'crystal boy shines again', "the Palace of Darkness crystal"),
+              'Crystal (Swamp Palace)': ItemData(IC.progression, 'Crystal', 0xBA, 'A crystal from\nSwamp Palace\nrests here.', 'and the swamp crystal', 'crystal kid', 'crystal for sale', 'swamp crystal brew', 'crystal boy shines again', "the Swamp Palace crystal"),
+              'Crystal (Skull Woods)': ItemData(IC.progression, 'Crystal', 0xBB, 'A crystal from\nSkull Woods\nrests here.', 'and the woods crystal', 'crystal kid', 'crystal for sale', 'woods crystal brew', 'crystal boy shines again', "the Skull Woods crystal"),
+              'Crystal (Thieves\' Town)': ItemData(IC.progression, 'Crystal', 0xBC, 'A crystal from\nThieves Town\nrests here.', 'and the thieves crystal', 'crystal kid', 'crystal for sale', 'thieves crystal brew', 'crystal boy shines again', "the Thieves' Town crystal"),
+              'Crystal (Ice Palace)': ItemData(IC.progression, 'Crystal', 0xBD, 'A crystal from\nIce Palace\nrests here.', 'and the ice crystal', 'crystal kid', 'crystal for sale', 'ice crystal brew', 'crystal boy shines again', "the Ice Palace crystal"),
+              'Crystal (Misery Mire)': ItemData(IC.progression, 'Crystal', 0xBE, 'A crystal from\nMisery Mire\nrests here.', 'and the mire crystal', 'crystal kid', 'crystal for sale', 'mire crystal brew', 'crystal boy shines again', "the Misery Mire crystal"),
+              'Crystal (Turtle Rock)': ItemData(IC.progression, 'Crystal', 0xBF, 'A crystal from\nTurtle Rock\nrests here.', 'and the turtle rock crystal', 'crystal kid', 'crystal for sale', 'turtle crystal brew', 'crystal boy shines again', "the Turtle Rock crystal"),
               'Single Arrow': ItemData(IC.filler, None, 0x43, 'a lonely arrow\nsits here.', 'and the arrow', 'stick-collecting kid', 'sewing needle for sale', 'fungus for arrow', 'archer boy sews again', 'an arrow'),
               'Arrows (10)': ItemData(IC.filler, None, 0x44, 'This will give\nyou ten shots\nwith your bow!', 'and the arrow pack','stick-collecting kid', 'sewing kit for sale', 'fungus for arrows', 'archer boy sews again','ten arrows'),
               'Arrow Upgrade (+10)': ItemData(IC.progression_skip_balancing, None, 0x54, 'increase arrow\nstorage, low\nlow price', 'and the quiver', 'quiver-enlarging kid', 'arrow boost for sale', 'witch and more skewers', 'upgrade boy sews more again', 'arrow capacity'),
@@ -148,56 +180,70 @@ item_table = {'Bow': ItemData(IC.progression, None, 0x0B, 'You have\nchosen the\
               'Magic Upgrade (1/2)': ItemData(IC.progression, None, 0x4E, 'Your magic\npower has been\ndoubled!', 'and the spell power', 'the magic-saving kid', 'wizardry for sale', 'mekalekahi mekahiney ho', 'magic boy saves magic again', 'Half Magic'),  # can be required to beat mothula in an open seed in very very rare circumstance
               'Magic Upgrade (1/4)': ItemData(IC.progression, None, 0x4F, 'Your magic\npower has been\nquadrupled!', 'and the spell power', 'the magic-saving kid', 'wizardry for sale', 'mekalekahi mekahiney ho', 'magic boy saves magic again', 'Quarter Magic'),  # can be required to beat mothula in an open seed in very very rare circumstance
               'Small Key (Eastern Palace)': ItemData(IC.progression, 'SmallKey', 0xA2, 'A small key to the eastern palace', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Eastern Palace'),
+              'Small Key Ring (Eastern Palace)': ItemData(IC.progression, 'SmallKey', 0xC2, 'A small key ring to the eastern palace', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Eastern Palace'),
               'Big Key (Eastern Palace)': ItemData(IC.progression, 'BigKey', 0x9D, 'A big key to the eastern palace', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Eastern Palace'),
               'Compass (Eastern Palace)': ItemData(IC.filler, 'Compass', 0x8D, 'Now you can find the the boss of the eastern palace!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Eastern Palace'),
               'Map (Eastern Palace)': ItemData(IC.filler, 'Map', 0x7D, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Eastern Palace'),
               'Small Key (Desert Palace)': ItemData(IC.progression, 'SmallKey', 0xA3, 'A small key to the desert', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Desert Palace'),
+              'Small Key Ring (Desert Palace)': ItemData(IC.progression, 'SmallKey', 0xC3, 'A small key ring to the desert', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Desert Palace'),
               'Big Key (Desert Palace)': ItemData(IC.progression, 'BigKey', 0x9C, 'A big key to the desert', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Desert Palace'),
               'Compass (Desert Palace)': ItemData(IC.filler, 'Compass', 0x8C, 'Now you can find the boss of the desert!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Desert Palace'),
               'Map (Desert Palace)': ItemData(IC.filler, 'Map', 0x7C, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Desert Palace'),
               'Small Key (Tower of Hera)': ItemData(IC.progression, 'SmallKey', 0xAA, 'A small key to Hera', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Tower of Hera'),
+              # This serves no purpose since ToH only has 1 Small Key. Leave it in for completeness. You never know.
+              'Small Key Ring (Tower of Hera)': ItemData(IC.progression, 'SmallKey', 0xCA, 'A small key ring to Hera', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Tower of Hera'),
               'Big Key (Tower of Hera)': ItemData(IC.progression, 'BigKey', 0x95, 'A big key to Hera', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Tower of Hera'),
               'Compass (Tower of Hera)': ItemData(IC.filler, 'Compass', 0x85, 'Now you can find the boss of Hera!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Tower of Hera'),
               'Map (Tower of Hera)': ItemData(IC.filler, 'Map', 0x75, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Tower of Hera'),
               'Small Key (Hyrule Castle)': ItemData(IC.progression, 'SmallKey', 0xA0, 'A small key to the castle', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Hyrule Castle'),
+              'Small Key Ring (Hyrule Castle)': ItemData(IC.progression, 'SmallKey', 0xC0, 'A small key ring to the castle', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Hyrule Castle'),
               'Big Key (Hyrule Castle)': ItemData(IC.progression, 'BigKey', 0x9F, 'A big key to the castle', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Hyrule Castle'),
               'Compass (Hyrule Castle)': ItemData(IC.filler, 'Compass', 0x8F, 'Now you can find no boss!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Hyrule Castle'),
               'Map (Hyrule Castle)': ItemData(IC.filler, 'Map', 0x7F, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Hyrule Castle'),
               'Small Key (Agahnims Tower)': ItemData(IC.progression, 'SmallKey', 0xA4, 'A small key to the castle tower', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Castle Tower'),
+              'Small Key Ring (Agahnims Tower)': ItemData(IC.progression, 'SmallKey', 0xC4, 'A small key ring to the castle tower', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Castle Tower'),
               # doors-specific items, baserom will not be able to understand these
               'Big Key (Agahnims Tower)': ItemData(IC.progression, 'BigKey', 0x9B, 'A big key to the castle tower', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Castle Tower'),
               'Compass (Agahnims Tower)': ItemData(IC.filler, 'Compass', 0x8B, 'Now you can find the boss of the castle tower!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds null again', 'a compass to Castle Tower'),
               'Map (Agahnims Tower)': ItemData(IC.filler, 'Map', 0x7B, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Castle Tower'),
               # end of doors-specific items
               'Small Key (Palace of Darkness)': ItemData(IC.progression, 'SmallKey', 0xA6, 'A small key to darkness', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Palace of Darkness'),
+              'Small Key Ring (Palace of Darkness)': ItemData(IC.progression, 'SmallKey', 0xC6, 'A small key ring to darkness', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Palace of Darkness'),
               'Big Key (Palace of Darkness)': ItemData(IC.progression, 'BigKey', 0x99, 'A big key to darkness', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Palace of Darkness'),
               'Compass (Palace of Darkness)': ItemData(IC.filler, 'Compass', 0x89, 'Now you can find the boss of darkness!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Palace of Darkness'),
               'Map (Palace of Darkness)': ItemData(IC.filler, 'Map', 0x79, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Palace of Darkness'),
               'Small Key (Thieves Town)': ItemData(IC.progression, 'SmallKey', 0xAB, 'A small key to thievery', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Thieves\' Town'),
+              'Small Key Ring (Thieves Town)': ItemData(IC.progression, 'SmallKey', 0xCB, 'A small key ring to thievery', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Thieves\' Town'),
               'Big Key (Thieves Town)': ItemData(IC.progression, 'BigKey', 0x94, 'A big key to thievery', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Thieves\' Town'),
               'Compass (Thieves Town)': ItemData(IC.filler, 'Compass', 0x84, 'Now you can find the boss of thievery!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Thieves\' Town'),
               'Map (Thieves Town)': ItemData(IC.filler, 'Map', 0x74, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Thieves\' Town'),
               'Small Key (Skull Woods)': ItemData(IC.progression, 'SmallKey', 0xA8, 'A small key to the woods', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Skull Woods'),
+              'Small Key Ring (Skull Woods)': ItemData(IC.progression, 'SmallKey', 0xC8, 'A small key ring to the woods', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Skull Woods'),
               'Big Key (Skull Woods)': ItemData(IC.progression, 'BigKey', 0x97, 'A big key to the woods', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Skull Woods'),
               'Compass (Skull Woods)': ItemData(IC.filler, 'Compass', 0x87, 'Now you can find the boss of the woods!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Skull Woods'),
               'Map (Skull Woods)': ItemData(IC.filler, 'Map', 0x77, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Skull Woods'),
               'Small Key (Swamp Palace)': ItemData(IC.progression, 'SmallKey', 0xA5, 'A small key to the swamp', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Swamp Palace'),
+              'Small Key Ring (Swamp Palace)': ItemData(IC.progression, 'SmallKey', 0xC5, 'A small key ring to the swamp', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Swamp Palace'),
               'Big Key (Swamp Palace)': ItemData(IC.progression, 'BigKey', 0x9A, 'A big key to the swamp', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Swamp Palace'),
               'Compass (Swamp Palace)': ItemData(IC.filler, 'Compass', 0x8A, 'Now you can find the boss of the swamp!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Swamp Palace'),
               'Map (Swamp Palace)': ItemData(IC.filler, 'Map', 0x7A, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Swamp Palace'),
               'Small Key (Ice Palace)': ItemData(IC.progression, 'SmallKey', 0xA9, 'A small key to the iceberg', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Ice Palace'),
+              'Small Key Ring (Ice Palace)': ItemData(IC.progression, 'SmallKey', 0xC9, 'A small key ring to the iceberg', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Ice Palace'),
               'Big Key (Ice Palace)': ItemData(IC.progression, 'BigKey', 0x96, 'A big key to the iceberg', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Ice Palace'),
               'Compass (Ice Palace)': ItemData(IC.filler, 'Compass', 0x86, 'Now you can find the boss of the iceberg!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Ice Palace'),
               'Map (Ice Palace)': ItemData(IC.filler, 'Map', 0x76, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Ice Palace'),
               'Small Key (Misery Mire)': ItemData(IC.progression, 'SmallKey', 0xA7, 'A small key to the mire', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Misery Mire'),
+              'Small Key Ring (Misery Mire)': ItemData(IC.progression, 'SmallKey', 0xC7, 'A small key ring to the mire', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Misery Mire'),
               'Big Key (Misery Mire)': ItemData(IC.progression, 'BigKey', 0x98, 'A big key to the mire', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Misery Mire'),
               'Compass (Misery Mire)': ItemData(IC.filler, 'Compass', 0x88, 'Now you can find the boss of the mire!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Misery Mire'),
               'Map (Misery Mire)': ItemData(IC.filler, 'Map', 0x78, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Misery Mire'),
               'Small Key (Turtle Rock)': ItemData(IC.progression, 'SmallKey', 0xAC, 'A small key to the pipe maze', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Turtle Rock'),
+              'Small Key Ring (Turtle Rock)': ItemData(IC.progression, 'SmallKey', 0xCC, 'A small key ring to the pipe maze', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Turtle Rock'),
               'Big Key (Turtle Rock)': ItemData(IC.progression, 'BigKey', 0x93, 'A big key to the pipe maze', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Turtle Rock'),
               'Compass (Turtle Rock)': ItemData(IC.filler, 'Compass', 0x83, 'Now you can find the boss of the pipe maze!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Turtle Rock'),
               'Map (Turtle Rock)': ItemData(IC.filler, 'Map', 0x73, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Turtle Rock'),
               'Small Key (Ganons Tower)': ItemData(IC.progression, 'SmallKey', 0xAD, 'A small key to the evil tower', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key to Ganon\'s Tower'),
+              'Small Key Ring (Ganons Tower)': ItemData(IC.progression, 'SmallKey', 0xCD, 'A small key ring to the evil tower', 'and the key', 'the unlocking kid', 'keys for sale', 'unlock the fungus', 'key boy opens door again', 'a small key ring to Ganon\'s Tower'),
               'Big Key (Ganons Tower)': ItemData(IC.progression, 'BigKey', 0x92, 'A big key to the evil tower', 'and the big key', 'the big-unlock kid', 'big key for sale', 'face key fungus', 'key boy opens chest again', 'a big key to Ganon\'s Tower'),
               'Compass (Ganons Tower)': ItemData(IC.filler, 'Compass', 0x82, 'Now you can find the boss of the evil tower!', 'and the compass', 'the magnetic kid', 'compass for sale', 'magnetic fungus', 'compass boy finds boss again', 'a compass to Ganon\'s Tower'),
               'Map (Ganons Tower)': ItemData(IC.filler, 'Map', 0x72, 'A tightly folded map rests here', 'and the map', 'cartography kid', 'map for sale', 'a map to shrooms', 'map boy navigates again', 'a map to Ganon\'s Tower'),
@@ -224,7 +270,6 @@ item_table = {'Bow': ItemData(IC.progression, None, 0x0B, 'You have\nchosen the\
               'Open Floodgate': ItemData(IC.progression, 'Event', None, None, None, None, None, None, None, None),
               'Capacity Upgrade Shop': ItemData(IC.progression, 'Event', None, None, None, None, None, None, None, None),
               }
-
 item_init_table = {name: data.as_init_dict() for name, data in item_table.items()}
 
 progression_mapping = {
@@ -281,6 +326,8 @@ for basename, substring in _simple_groups:
             tempset.add(itemname)
 
 del (_simple_groups)
+
+item_name_groups["Dungeon Prizes"] = set(boss_prize_items)
 
 
 everything = {name for name, data in item_table.items() if type(data.item_code) == int}

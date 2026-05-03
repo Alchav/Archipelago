@@ -27,7 +27,7 @@ class TestDungeon(LTTPTestBase):
         self.world.set_rules()
         self.world.create_items()
         self.multiworld.itempool.extend(get_dungeon_item_pool(self.multiworld))
-        self.multiworld.itempool.extend(item_factory(['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Beat Agahnim 1', 'Beat Agahnim 2', 'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 5', 'Crystal 6', 'Crystal 7'], self.world))
+        self.multiworld.itempool.extend(item_factory(['Pendant of Courage', 'Pendant of Wisdom', 'Pendant of Power', 'Beat Agahnim 1', 'Beat Agahnim 2', 'Crystal (Palace of Darkness)', 'Crystal (Swamp Palace)', 'Crystal (Skull Woods)', "Crystal (Thieves' Town)", 'Crystal (Ice Palace)', 'Crystal (Misery Mire)', 'Crystal (Turtle Rock)'], self.world))
 
     def run_tests(self, access_pool):
         for exit in self.remove_exits:

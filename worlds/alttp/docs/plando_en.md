@@ -116,9 +116,9 @@ plando_items:
       - Palace of Darkness - Big Chest
     world: false
   - items: # 3
-      Red Pendant: 1
-      Green Pendant: 1
-      Blue Pendant: 1
+      Pendant of Wisdom: 1
+      Pendant of Courage: 1
+      Pendant of Power: 1
     locations:
       - Desert Palace - Prize
       - Eastern Palace - Prize

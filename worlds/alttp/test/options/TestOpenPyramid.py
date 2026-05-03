@@ -28,10 +28,24 @@ class GoalPyramidTest(PyramidTestBase):
         self.collect_by_name(["Hammer", "Progressive Glove", "Moon Pearl"])
         self.assertTrue(self.can_reach_entrance("Pyramid Hole"))
 
-    def testGanonGoalAccess(self):
+    def testDungeonsGoalRequiresAga2ByDefault(self):
+        self.multiworld.worlds[1].options.goal.value = 2  # dungeons
         self.assertFalse(self.can_reach_entrance("Pyramid Hole"))
         self.collect_by_name(["Hammer", "Progressive Glove", "Moon Pearl"])
         self.assertFalse(self.can_reach_entrance("Pyramid Hole"))
         self.collect(item_factory("Beat Agahnim 2", self.multiworld.worlds[1]))
         self.assertTrue(self.can_reach_entrance("Pyramid Hole"))
 
+    def testDungeonsGoalAccessWhenAga2Optional(self):
+        self.multiworld.worlds[1].options.goal.value = 2  # dungeons
+        self.multiworld.worlds[1].options.dungeons_needed_for_ganon.value = 11
+        self.assertFalse(self.can_reach_entrance("Pyramid Hole"))
+        self.collect_by_name(["Hammer", "Progressive Glove", "Moon Pearl"])
+        self.assertTrue(self.can_reach_entrance("Pyramid Hole"))
+
+    def testGanonGoalAccess(self):
+        self.assertFalse(self.can_reach_entrance("Pyramid Hole"))
+        self.collect_by_name(["Hammer", "Progressive Glove", "Moon Pearl"])
+        self.assertFalse(self.can_reach_entrance("Pyramid Hole"))
+        self.collect(item_factory("Beat Agahnim 2", self.multiworld.worlds[1]))
+        self.assertTrue(self.can_reach_entrance("Pyramid Hole"))
