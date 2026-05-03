@@ -80,7 +80,7 @@ key_ring_table = (
     KeyRingData("Ganon's Tower", "Small Key (Ganons Tower)", "Small Key Ring (Ganons Tower)", 8, 13),
 )
 
-key_ring_option_names = tuple(data.option_name for data in key_ring_table)
+key_ring_option_names = tuple(data.option_name for data in key_ring_table if data.default_quantity > 1)
 small_key_name_to_key_ring = {data.small_key_name: data.item_name for data in key_ring_table}
 small_key_name_to_key_ring_option = {data.small_key_name: data.option_name for data in key_ring_table}
 key_ring_name_to_small_key = {data.item_name: data.small_key_name for data in key_ring_table}
