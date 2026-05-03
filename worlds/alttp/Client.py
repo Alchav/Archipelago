@@ -43,6 +43,8 @@ SCOUT_LOCATION_ADDR = SAVEDATA_START + 0x4D7        # 1 byte
 SCOUTREPLY_LOCATION_ADDR = SAVEDATA_START + 0x4D8   # 1 byte
 SCOUTREPLY_ITEM_ADDR = SAVEDATA_START + 0x4D9       # 1 byte
 SCOUTREPLY_PLAYER_ADDR = SAVEDATA_START + 0x4DA     # 1 byte
+HINT_READ_FLAGS_ADDR = SAVEDATA_START + 0x4F1       # 13 bytes
+HINT_READ_FLAGS_SIZE = 0x0D
 SHOP_ADDR = SAVEDATA_START + 0x302                  # 2 bytes
 SHOP_LEN = (len(Shops.shop_table) * 3) + 5
 
@@ -489,9 +491,57 @@ async def track_locations(ctx, roomid, roomdata) -> bool:
     return True
 
 
+async def track_in_game_hints(ctx) -> None:
+    from SNIClient import snes_buffered_write, snes_flush_writes, snes_read
+
+    slot_data = getattr(ctx, "slot_data", {})
+    hint_entries = slot_data.get("alttp_hint_texts", [])
+    if not hint_entries:
+        return
+
+    hint_flags = await snes_read(ctx, HINT_READ_FLAGS_ADDR, HINT_READ_FLAGS_SIZE)
+    if hint_flags is None:
+        return
+
+    handled_hints = getattr(ctx, "alttp_hint_reads_handled", None)
+    if handled_hints is None:
+        handled_hints = set()
+        ctx.alttp_hint_reads_handled = handled_hints
+
+    create_hint_msgs = []
+    for hint_entry in hint_entries:
+        flag = hint_entry["flag"]
+        if flag in handled_hints:
+            continue
+        if not hint_flags[flag // 8] & (1 << (flag % 8)):
+            continue
+
+        locations_by_player = {}
+        for location_data in hint_entry["locations"]:
+            locations_by_player.setdefault(location_data["player"], []).append(location_data["location"])
+
+        for hint_player, hint_locations in locations_by_player.items():
+            create_hint_msgs.append({
+                "cmd": "CreateHints",
+                "locations": hint_locations,
+                "player": hint_player,
+            })
+        handled_hints.add(flag)
+
+    if create_hint_msgs:
+        await ctx.send_msgs(create_hint_msgs)
+        snes_buffered_write(ctx, HINT_READ_FLAGS_ADDR, bytes(HINT_READ_FLAGS_SIZE))
+        await snes_flush_writes(ctx)
+
+
 class ALTTPSNIClient(SNIClient):
     game = "A Link to the Past"
     patch_suffix = [".aplttp", ".apz3"]
+
+    def on_package(self, ctx, cmd: str, args: dict) -> None:
+        if cmd == "Connected":
+            ctx.slot_data = args.get("slot_data", {})
+            ctx.alttp_hint_reads_handled = set()
 
     async def deathlink_kill_player(self, ctx):
         from SNIClient import DeathState, snes_read, snes_buffered_write, snes_flush_writes
@@ -525,6 +575,8 @@ class ALTTPSNIClient(SNIClient):
         ctx.game = self.game
         ctx.items_handling = 0b001  # full local
 
+        if getattr(ctx, "rom", None) != rom_name:
+            ctx.alttp_hint_reads_handled = set()
         ctx.rom = rom_name
 
         death_link = await snes_read(ctx, DEATH_LINK_ACTIVE_ADDR, 1)
@@ -595,6 +647,7 @@ class ALTTPSNIClient(SNIClient):
         if scout_location > 0 and scout_location not in ctx.locations_scouted:
             ctx.locations_scouted.add(scout_location)
             await ctx.send_msgs([{"cmd": "LocationScouts", "locations": [scout_location]}])
+        await track_in_game_hints(ctx)
         same_rom = await track_locations(ctx, roomid, roomdata)
         if not same_rom:
             return

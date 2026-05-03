@@ -298,6 +298,7 @@ class ALTTPWorld(World):
         self.dungeon_specific_item_names = set()
         self.key_rings = set()
         self.key_ring_data = default_key_ring_data.copy()
+        self.in_game_hint_data = None
         self.rom_name_available_event = threading.Event()
         self.pushed_shop_inventories = threading.Event()
         self.has_progressive_bows = False
@@ -924,6 +925,10 @@ class ALTTPWorld(World):
                 'tr_medalion': self.required_medallions[1],
                 }
             )
+
+            self.rom_name_available_event.wait()
+            if self.in_game_hint_data:
+                slot_data["alttp_hint_texts"] = self.in_game_hint_data["hints"]
         return slot_data
 
 
