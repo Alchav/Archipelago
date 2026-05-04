@@ -9,6 +9,7 @@ from .SubClasses import ALttPLocation, LTTPRegion, LTTPRegionType
 from .Shops import TakeAny, total_shop_slots, set_up_shops, shop_table_by_location, ShopType
 from .Bosses import place_bosses
 from .Dungeons import get_dungeon_item_pool_player
+from .EnemyShuffle import generate_enemy_shuffle_state
 from .EntranceShuffle import connect_entrance
 from .BossPrizeData import boss_prize_items
 from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
@@ -551,6 +552,8 @@ def generate_itempool(world: "ALTTPWorld"):
                                  world.options.turtle_rock_medallion.current_key.title())
 
     place_bosses(world)
+    if world.options.enemy_shuffle:
+        world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
 
     multiworld.itempool += items
 
