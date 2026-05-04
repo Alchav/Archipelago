@@ -67,7 +67,7 @@ class TetrisGBWorld(World):
 
         locs = list(range(1, min(20000, round(self.options.goal_score / 50) + 1)))
 
-        locations_used = [int(i * len(locs) / 19999) for i in range(1, 19999 + 1)]
+        locations_used = [int(i * len(locs) / self.location_count) for i in range(1, self.location_count + 1)]
 
         menu_region = Region("Menu", self.player, self.multiworld)
 
@@ -102,7 +102,7 @@ class TetrisGBWorld(World):
         )
 
     def create_items(self):
-        location_count = self.location_count
+        location_count = len(self.multiworld.get_unfilled_locations(self.player))
         item_pool = []
         if self.options.next_piece_display == "disabled":
             self.multiworld.push_precollected(self.create_item("Hide Next Piece"))

@@ -271,7 +271,14 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
                     all_state_base.remove(multiworld.worlds[player].create_item("Triforce"))
 
             fill_restrictive(multiworld, all_state_base, locations, in_dungeon_items, lock=True, allow_excluded=True,
-                             name="LttP Dungeon Items")
+                             name="LttP Dungeon Items", allow_partial=True)
+            if in_dungeon_items:
+                for item in in_dungeon_items:
+                    # logging.info(f"Moved {item} to start_inventory to prevent fill failure.")
+                    multiworld.push_precollected(item)
+                    # filleritempool.append(multiworld.worlds[item.player].create_filler())
+                # logging.warning(f"{len(in_dungeon_items)} items moved to start inventory,"
+                #                 f" due to failure in Progression fill step.")
 
 
 dungeon_music_addresses = {'Eastern Palace - Prize': [0x1559A],

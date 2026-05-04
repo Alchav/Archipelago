@@ -194,7 +194,6 @@ def call_single(multiworld: "MultiWorld", method_name: str, player: int, *args: 
         ret = _timed_call(method, *args, multiworld=multiworld, player=player)
     except Exception as e:
         message = f"Exception in {method} for player {player}, named {multiworld.player_name[player]}."
-        breakpoint()
         if sys.version_info >= (3, 11, 0):
             e.add_note(message)  # PEP 678
         else:
@@ -230,10 +229,7 @@ def call_stage(multiworld: "MultiWorld", method_name: str, *args: Any) -> None:
     for world_type in sorted(world_types, key=lambda world: world.__name__):
         stage_callable = getattr(world_type, f"stage_{method_name}", None)
         if stage_callable:
-            try:
-                _timed_call(stage_callable, multiworld, *args)
-            except Exception as e:
-                breakpoint()
+            _timed_call(stage_callable, multiworld, *args)
 
 
 class WebWorld(metaclass=WebWorldRegister):

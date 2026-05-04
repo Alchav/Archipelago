@@ -1443,7 +1443,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         if len(locations) < 1:
             return 0x0000
         location = locations[0]
-        if location.parent_region and location.parent_region.dungeon:
+        return 0x0000
+        if location.parent_region and location.parent_region.dungeon and location.parent_region.dungeon:
             return reveal_bytes.get(location.parent_region.dungeon.name, 0x0000)
         return 0x0000
 

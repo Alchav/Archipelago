@@ -156,7 +156,9 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
             items_to_place += [items.pop()
                               for items in reachable_items.values() if items]
             items_to_place += [items.pop()
-                              for items in reachable_items.values() if items and items[0].game == "Stardew Valley"]
+                              for items in reachable_items.values() if items and items[0].game in ["Stardew Valley", "Archipeladoku"]]
+            items_to_place += [items.pop()
+                              for items in reachable_items.values() if items and items[0].game in ["Archipeladoku"]]
         else:
             next_player = multiworld.random.choice([player for player, items in reachable_items.items() if items])
             items_to_place = []
@@ -627,7 +629,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     all_state = multiworld.get_all_state(False)
     if not multiworld.can_beat_game(all_state):
         beaten_games = {player: multiworld.has_beaten_game(all_state, player) for player in multiworld.player_ids}
-        # breakpoint()
+        logging.info("breaking (can't beat, first check)")
+        breakpoint()
 
     for item in itempool:
         if item.advancement:
@@ -817,6 +820,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
             unbeaten_games = [multiworld.player_name[p] for p in beaten_games if not beaten_games[p]]
             # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
+            logging.info("not beatable, breaking")
             breakpoint()
     test_beatable()
     # breakpoint()
@@ -1071,8 +1075,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     for owner, players in multiworld.owner_groups.items():
         text = " > ".join([multiworld.player_name[player] for player in players]) + "\n"
-        print(text)
-    breakpoint()
+        logging.info(text)
+    # breakpoint()
 
 
     starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items() if starting_sphere > 0]
@@ -1192,6 +1196,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     test_beatable()
 
     if not multiworld.fulfills_accessibility():
+        logging.info("doesn't fulfill accessibility, breaking")
         breakpoint()
 
     unreachable = False
@@ -2146,12 +2151,14 @@ def compress_spheres(multiworld, max_sphere):
             spheres = gen_spheres()
 
 def check_no_skips(multiworld, starting_spheres):
+    return
     games = {player: 0 for player in multiworld.player_ids}
     for n, sphere in enumerate(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False), start=1):
         sphere_games = {loc.player for loc in sphere}
         for player in multiworld.player_ids:
             if player in sphere_games:
                 if games[player] == 2:
+                    logging.info("breaking1")
                     breakpoint()
                 else:
                     games[player] = 1
@@ -2160,4 +2167,5 @@ def check_no_skips(multiworld, starting_spheres):
                     games[player] = 2
         for loc in sphere:
             if loc.item and loc.item.game == "AlchapelaBot" and loc.item.code in starting_spheres and starting_spheres[loc.item.code] != n:
+                logging.info("breaking2")
                 breakpoint()

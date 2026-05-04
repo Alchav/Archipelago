@@ -1,12 +1,12 @@
 from BaseClasses import ItemClassification
 
 items = {
-    "Score Multiplier": ItemClassification.progression_skip_balancing,
-    "Score Multiplier x2": ItemClassification.progression_skip_balancing,
-    "Score Multiplier x3": ItemClassification.progression_skip_balancing,
-    "Decrease Speed": ItemClassification.progression_skip_balancing | ItemClassification.useful,
+    "Score Multiplier": ItemClassification.progression,
+    "Score Multiplier x2": ItemClassification.progression,
+    "Score Multiplier x3": ItemClassification.progression,
+    "Decrease Speed": ItemClassification.progression | ItemClassification.useful,
     "Increase Speed": ItemClassification.trap,
-    "Toggle Next Piece": ItemClassification.trap | ItemClassification.useful,
+    "Toggle Next Piece": ItemClassification.trap,
     "Show Next Piece": ItemClassification.useful,
     "Hide Next Piece": ItemClassification.trap,
     "Garbage Line": ItemClassification.trap,
