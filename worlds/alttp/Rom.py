@@ -2561,6 +2561,10 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
     def hint_text(dest, ped_hint=False):
         return get_hint_text(multiworld, player, dest, ped_hint)
 
+    def clear_hint_text(dest) -> str:
+        text = hint_text(dest)
+        return text[3:] if text.startswith("in ") else text
+
     # We still need the older hints of course. Those are done here.
 
     silverarrows = multiworld.find_item_locations('Silver Bow', player, True)
@@ -2590,15 +2594,13 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
     crystal6 = multiworld.find_item('Crystal (Misery Mire)', player)
     if multiworld.worlds[player].options.boss_prize_shuffle:
         tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until the crystals are found %s and %s.' % (
-            crystal5.hint_text, crystal6.hint_text)
+            hint_text(crystal5), hint_text(crystal6))
     else:
-        crystal5_text = crystal5.hint_text.partition(' ')[2] or crystal5.hint_text
-        crystal6_text = crystal6.hint_text.partition(' ')[2] or crystal6.hint_text
         tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
-            crystal5_text, crystal6_text)
+            clear_hint_text(crystal5), clear_hint_text(crystal6))
 
     courage_pendant = multiworld.find_item('Pendant of Courage', player)
-    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % courage_pendant.hint_text
+    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % hint_text(courage_pendant)
 
     if multiworld.worlds[player].options.crystals_needed_for_gt == 1:
         tt['sign_ganons_tower'] = 'You need a crystal to enter.'
