@@ -1564,13 +1564,18 @@ class ClientMessageProcessor(CommonCommandProcessor):
 
         return self.ctx.commandprocessor(command)
 
-    def _cmd_itempool(self):
+    def _cmd_itempool(self, pool_player=None):
+        if pool_player:
+            pool_player = str(pool_player)
+            pool_player = self.ctx.player_name_lookup[pool_player][1]
+        else:
+            pool_player = self.client.slot
         item_pool = {}
         remaining_item_pool = {}
         game = self.ctx.slot_info[self.client.slot].game
         for player in self.ctx.locations:
             for location in self.ctx.locations[player]:
-                if self.ctx.locations[player][location][1] == self.client.slot:
+                if self.ctx.locations[player][location][1] == pool_player:
                     item = self.ctx.item_names[game][self.ctx.locations[player][location][0]]
                     if item in item_pool:
                         item_pool[item] += 1
@@ -1579,10 +1584,12 @@ class ClientMessageProcessor(CommonCommandProcessor):
                         remaining_item_pool[item] = 0
                     if location not in self.ctx.location_checks[(0, player)]:
                         remaining_item_pool[item] += 1
-        sorted_items = sorted(item_pool, key=lambda i: item_pool[i], reverse=True)
+        # sorted_items = sorted(item_pool, key=lambda i: item_pool[i], reverse=True)
+        sorted_items = sorted(remaining_item_pool, key=lambda i: remaining_item_pool[i], reverse=True)
         texts = []
         for item in sorted_items:
-            texts.append(f"{item}: {item_pool[item]} ({remaining_item_pool[item]} remaining)")
+            if remaining_item_pool[item]:
+                texts.append(f"{item}: {remaining_item_pool[item]}")
         self.output_multiple(texts)
 
     def _cmd_sphere(self, player=None):
