@@ -821,6 +821,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     test_beatable()
     # breakpoint()
     # compress_spheres(multiworld, sphere_max)
+
     compress_owner_spheres(multiworld)
 
 
@@ -1066,6 +1067,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             player_to_owner[player] = owner
 
     multiworld.owner_groups = owner_groups
+
+
+    for owner, players in multiworld.owner_groups.items():
+        text = " > ".join([multiworld.player_name[player] for player in players]) + "\n"
+        print(text)
+    breakpoint()
+
+
     starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items() if starting_sphere > 0]
     starting_spheres_list.sort(key=lambda i: i[1])
     for player, starting_sphere in starting_spheres_list:

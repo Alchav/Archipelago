@@ -104,6 +104,7 @@ Dictates what is allowed when it comes to a player collecting their run. A colle
 * `auto-enabled`: Both of the above options together.
 * `disabled`: All collect modes disabled.
 * `goal`: Allows for manual use of collect command once a player completes their goal. (Disabled until goal completion)
+* `cleared`: Allows for manual use of collect command once a player checks every location in their world that is not marked Unreachable. Unreachable items are only collected after the player checks every location in their world.
 
 
 #### remaining

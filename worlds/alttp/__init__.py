@@ -960,9 +960,5 @@ class ALttPLogic(LogicMixin):
         if self.multiworld.worlds[player].options.glitches_required == 'no_logic':
             return True
         if self.multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
-            if self.multiworld.worlds[player].options.master_keys:
-                return self.has("Small Key (Universal)", player)
             return can_buy_unlimited(self, 'Small Key (Universal)', player)
-        if self.multiworld.worlds[player].options.master_keys:
-            return self.has(item, player)
         return self.has(item, player, count)

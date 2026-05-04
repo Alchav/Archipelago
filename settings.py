@@ -571,6 +571,7 @@ class ServerOptions(Group):
         "auto" -> automatic collect on goal completion
         "auto-enabled" -> automatic collect on goal completion and manual collect is also enabled
         "goal" -> collect is allowed after goal completion
+        "cleared" -> collect is allowed after checking every non-Unreachable location
         """
 
     class RemainingMode(str):

@@ -210,6 +210,7 @@ item_table: Dict[str, KH1ItemData] = {
     "Emblem Piece (Flame)":              KH1ItemData("Key",              code = 264_1188, classification = ItemClassification.progression_deprioritized, type = "Item",                            ),
     "Emblem Piece (Chest)":              KH1ItemData("Key",              code = 264_1189, classification = ItemClassification.progression_deprioritized, type = "Item",                            ),
     "Emblem Piece (Statue)":             KH1ItemData("Key",              code = 264_1190, classification = ItemClassification.progression_deprioritized, type = "Item",                            ),
+    "Emblem Piece (Fountain)":           KH1ItemData("Key",              code = 264_1191, classification = ItemClassification.progression_deprioritized, type = "Item",                            ),
     #"Log":                              KH1ItemData("DI",               code = 264_1192, classification = ItemClassification.progression, type = "Item",           max_quantity = 2 ),
     #"Cloth":                            KH1ItemData("DI",               code = 264_1193, classification = ItemClassification.progression, type = "Item",                            ),
     #"Rope":                             KH1ItemData("DI",               code = 264_1194, classification = ItemClassification.progression, type = "Item",                            ),

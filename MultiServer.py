@@ -964,7 +964,7 @@ def get_permissions(ctx) -> typing.Dict[str, Permission]:
     return {
         "release": Permission.from_text(ctx.release_mode),
         "remaining": Permission.from_text(ctx.remaining_mode),
-        "collect": Permission.from_text(ctx.collect_mode)
+        "collect": Permission.enabled if ctx.collect_mode == "cleared" else Permission.from_text(ctx.collect_mode)
     }
 
 
@@ -1121,14 +1121,49 @@ def release_player(ctx: Context, team: int, slot: int, tokens=False):
     update_checked_locations(ctx, team, slot)
 
 
-def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False):
+def location_is_unreachable(ctx: Context, slot: int, location: int) -> bool:
+    return "Unreachable" in ctx.er_hint_data.get(slot, {}).get(location, "")
+
+
+def player_checked_all_locations(ctx: Context, team: int, slot: int) -> bool:
+    return set(ctx.locations[slot]) <= ctx.location_checks[team, slot]
+
+
+def player_checked_all_not_unreachable_locations(ctx: Context, team: int, slot: int) -> bool:
+    checked_locations = ctx.location_checks[team, slot]
+    return all(location in checked_locations or location_is_unreachable(ctx, slot, location)
+               for location in ctx.locations[slot])
+
+
+def collect_player_cleared(ctx: Context, team: int, slot: int) -> bool:
+    if player_checked_all_locations(ctx, team, slot):
+        collect_player(ctx, team, slot)
+        return True
+
+    if player_checked_all_not_unreachable_locations(ctx, team, slot):
+        collect_player(ctx, team, slot, include_unreachable=False)
+        return True
+
+    return False
+
+
+def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False, include_unreachable: bool = True):
     """register any locations that are in the multidata, pointing towards this player"""
     all_locations = ctx.locations.get_for_player(slot)
+    if not include_unreachable:
+        all_locations = {
+            source_player: {location for location in location_ids
+                            if not location_is_unreachable(ctx, source_player, location)}
+            for source_player, location_ids in all_locations.items()
+        }
 
-    ctx.broadcast_text_all("%s (Team #%d) has collected their items from other worlds."
-                           % (ctx.player_names[(team, slot)], team + 1),
+    collected_text = "items" if include_unreachable else "non-Unreachable items"
+    ctx.broadcast_text_all("%s (Team #%d) has collected their %s from other worlds."
+                           % (ctx.player_names[(team, slot)], team + 1, collected_text),
                            {"type": "Collect", "team": team, "slot": slot})
     for source_player, location_ids in all_locations.items():
+        if not location_ids:
+            continue
         register_location_checks(ctx, team, source_player, location_ids, count_activity=False)
         update_checked_locations(ctx, team, source_player)
 
@@ -1138,7 +1173,7 @@ def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False):
                 group_collected_players = ctx.group_collected.setdefault(group, set())
                 group_collected_players.add(slot)
                 if set(group_players) == group_collected_players:
-                    collect_player(ctx, team, group, True)
+                    collect_player(ctx, team, group, True, include_unreachable=include_unreachable)
 
 def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
     def g(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int, hint_data, item_names
@@ -1693,6 +1728,19 @@ class ClientMessageProcessor(CommonCommandProcessor):
         if "enabled" in self.ctx.collect_mode:
             collect_player(self.ctx, self.client.team, self.client.slot)
             return True
+        elif self.ctx.collect_mode == "cleared":
+            if collect_player_cleared(self.ctx, self.client.team, self.client.slot):
+                return True
+
+            checked_locations = self.ctx.location_checks[self.client.team, self.client.slot]
+            not_unreachable_locations = [location for location in self.ctx.locations[self.client.slot]
+                                         if not location_is_unreachable(self.ctx, self.client.slot, location)]
+            remaining = sum(location not in checked_locations for location in not_unreachable_locations)
+            self.output(
+                f"Sorry, client collecting requires you to check every location in your world that is not marked "
+                f"Unreachable. You have {remaining} non-Unreachable location"
+                f"{'' if remaining == 1 else 's'} remaining.")
+            return False
         elif "disabled" in self.ctx.collect_mode:
             self.output(
                 "Sorry, client collecting has been disabled on this server. You can ask the server admin for a /collect")
@@ -2756,6 +2804,8 @@ class ServerCommandProcessor(CommonCommandProcessor):
             valid_values = {"goal", "enabled", "disabled"}
             if option_name == "release_mode":
                 valid_values.add("tokens")
+            elif option_name == "collect_mode":
+                valid_values.add("cleared")
             valid_values.update(("auto", "auto_enabled") if option_name != "remaining_mode" else [])
             if option_value.lower() not in valid_values:
                 self.output(f"Unrecognized {option_name} value '{option_value}', known: {', '.join(valid_values)}")
@@ -2836,13 +2886,14 @@ def parse_args() -> argparse.Namespace:
                              auto-enabled: !release is available and automatically triggered on goal completion
                              ''')
     parser.add_argument('--collect_mode', default=defaults["collect_mode"], nargs='?',
-                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled"], help='''\
+                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "cleared"], help='''\
                              Select !collect Accessibility. (default: %(default)s)
                              auto:     Automatic "collect" on goal completion
                              enabled:  !collect is always available
                              disabled: !collect is never available
                              goal:     !collect can be used after goal completion
                              auto-enabled: !collect is available and automatically triggered on goal completion
+                             cleared:  !collect can be used after checking all non-Unreachable locations
                              ''')
     parser.add_argument('--countdown_mode', default=defaults["countdown_mode"], nargs='?',
                         choices=['enabled', 'disabled', "auto"], help='''\

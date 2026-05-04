@@ -318,7 +318,7 @@ def set_up_shops(multiworld: MultiWorld, player: int):
         replacement_items = [['Red Potion', 150], ['Green Potion', 75], ['Blue Potion', 200], ['Bombs (10)', 50],
                              ['Blue Shield', 50], ['Small Heart',
                                                    10]]  # Can't just replace the single arrow with 10 arrows as retro doesn't need them.
-        if multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal and not multiworld.worlds[player].options.master_keys:
+        if multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
             replacement_items.append(['Small Key (Universal)', 100])
         replacement_item = multiworld.random.choice(replacement_items)
         rss.add_inventory(2, 'Single Arrow', 80, 1, replacement_item[0], replacement_item[1])
@@ -331,8 +331,7 @@ def set_up_shops(multiworld: MultiWorld, player: int):
             slots = [0, 1, 2]
             multiworld.random.shuffle(slots)
             slots = iter(slots)
-            if (multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal
-                    and not multiworld.worlds[player].options.master_keys):
+            if multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:
                 shop.add_inventory(next(slots), 'Small Key (Universal)', 100)
             if local_world.options.retro_bow:
                 shop.push_inventory(next(slots), 'Single Arrow', 80)
