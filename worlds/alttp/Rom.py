@@ -10,6 +10,18 @@ ROM_PLAYER_LIMIT: int = 255
 HINT_READ_TABLE_ADDRESS: int = 0x1863B0
 HINT_READ_TABLE_SIZE: int = 0x100
 HINT_READ_FLAGS_SIZE: int = 13
+BOSS_PRIZE_DUNGEON_COUNTER_ADDRESSES: dict[str, int] = {
+    "Eastern Palace - Prize": 0x187002,
+    "Desert Palace - Prize": 0x187003,
+    "Tower of Hera - Prize": 0x18700A,
+    "Palace of Darkness - Prize": 0x187006,
+    "Swamp Palace - Prize": 0x187005,
+    "Skull Woods - Prize": 0x187008,
+    "Thieves' Town - Prize": 0x18700B,
+    "Ice Palace - Prize": 0x187009,
+    "Misery Mire - Prize": 0x187007,
+    "Turtle Rock - Prize": 0x18700C,
+}
 
 import io
 import json
@@ -969,7 +981,11 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int, enemized: bool
         rom.write_byte(0x118B6A, gt_bigkey_top)
         rom.write_byte(0x118B88, gt_bigkey_bottom)
 
-
+    if local_world.options.boss_prize_shuffle:
+        credits_total += len(boss_prize_location_table)
+        for location_name in boss_prize_location_table:
+            counter_address = BOSS_PRIZE_DUNGEON_COUNTER_ADDRESSES[location_name]
+            rom.write_byte(counter_address, rom.read_byte(counter_address) + 1)
 
     # collection rate address: 238C37
     first_top, first_bot = credits_digit((credits_total / 100) % 10)
