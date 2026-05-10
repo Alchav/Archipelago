@@ -1,15 +1,108 @@
 from copy import deepcopy
 from . import poke_data
 
-non_randomized_catch_em_all_candidate_slots = [
-    "Route 4 Pokemon Center - Pokemon For Sale",
-    "Underground Path Route 5 - Spot Trade",
-    "Route 11 Gate 2F - Terry Trade",
-    "Cinnabar Lab Fossil Room - Sailor Trade",
-    "Cinnabar Lab Trade Room - Crinkles Trade",
-    "Cinnabar Lab Trade Room - Doris Trade",
-    *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 3)]
-]
+
+def get_non_randomized_catch_em_all_candidate_slots(game):
+    if game in {"Pokemon Red", "Pokemon Blue"}:
+        return [
+            "Route 4 Pokemon Center - Pokemon For Sale",
+            "Underground Path Route 5 - Spot Trade",
+            "Route 11 Gate 2F - Terry Trade",
+            "Cinnabar Lab Fossil Room - Sailor Trade",
+            "Cinnabar Lab Trade Room - Crinkles Trade",
+            "Cinnabar Lab Trade Room - Doris Trade",
+            *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 3)],
+        ]
+    if game == "Pokemon Yellow":
+        return [
+            "Route 4 Pokemon Center - Pokemon For Sale",
+            "Route 11 Gate 2F - Gurio Trade",
+            "Cinnabar Lab Fossil Room - Sticky Trade",
+            "Route 18 Gate 2F - Spike Trade",
+            "Cinnabar Lab Trade Room - Buffy Trade",
+            "Cinnabar Lab Trade Room - Cezanne Trade",
+            "Underground Path Route 5 - Ricky Trade",
+            *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 7)],
+        ]
+    return []
+
+
+def get_non_randomized_catch_em_all_wild_substitutions(game):
+    if game == "Pokemon Red":
+        return {
+            "Arbok": "Sandslash",
+            "Caterpie": "Weedle",
+            "Ekans": "Sandshrew",
+            "Electabuzz": "Raichu",
+            "Gloom": "Weepinbell",
+            "Golduck": "Slowbro",
+            "Grimer": "Koffing",
+            "Growlithe": "Vulpix",
+            "Horsea": "Krabby",
+            "Kakuna": "Metapod",
+            "Koffing": "Grimer",
+            "Krabby": "Horsea",
+            "Mankey": "Meowth",
+            "Metapod": "Kakuna",
+            "Muk": "Weezing",
+            "Nidoran F": "Nidoran M",
+            "Nidoran M": "Nidoran F",
+            "Nidorina": "Nidorino",
+            "Nidorino": "Nidorina",
+            "Oddish": "Bellsprout",
+            "Ponyta": "Magmar",
+            "Psyduck": "Slowpoke",
+            "Scyther": "Pinsir",
+            "Seadra": "Kingler",
+            "Shellder": "Staryu",
+            "Slowpoke": "Psyduck",
+            "Staryu": "Shellder",
+            "Weedle": "Caterpie",
+            "Weezing": "Muk",
+        }
+    if game == "Pokemon Blue":
+        return {
+            "Bellsprout": "Oddish",
+            "Caterpie": "Weedle",
+            "Grimer": "Koffing",
+            "Horsea": "Krabby",
+            "Kakuna": "Metapod",
+            "Koffing": "Grimer",
+            "Krabby": "Horsea",
+            "Magmar": "Ponyta",
+            "Meowth": "Mankey",
+            "Metapod": "Kakuna",
+            "Muk": "Weezing",
+            "Nidoran F": "Nidoran M",
+            "Nidoran M": "Nidoran F",
+            "Nidorina": "Nidorino",
+            "Nidorino": "Nidorina",
+            "Pinsir": "Scyther",
+            "Psyduck": "Slowpoke",
+            "Raichu": "Electabuzz",
+            "Sandshrew": "Ekans",
+            "Sandslash": "Arbok",
+            "Shellder": "Staryu",
+            "Slowbro": "Golduck",
+            "Slowpoke": "Psyduck",
+            "Staryu": "Shellder",
+            "Vulpix": "Growlithe",
+            "Weedle": "Caterpie",
+            "Weepinbell": "Gloom",
+            "Weezing": "Muk",
+        }
+    if game == "Pokemon Yellow":
+        return {
+            "Caterpie": "Weedle",
+            "Grimer": "Koffing",
+            "Magnemite": "Electabuzz",
+            "Ponyta": "Magmar",
+            "Rattata": "Meowth",
+            "Sandshrew": "Ekans",
+            "Slowbro": "Jynx",
+        }
+    return {}
+
 
 RIVAL_STARTER_LINE = {
     "Bulbasaur", "Ivysaur", "Venusaur",
@@ -20,7 +113,25 @@ YELLOW_RIVAL_EEVEE_LINE = {"Eevee", "Jolteon", "Flareon", "Vaporeon"}
 
 
 def get_encounter_slots(world, types):
-    return deepcopy([location for location in world.location_data if location.type in types])
+    slots = deepcopy([location for location in world.location_data if location.type in types])
+    if "Wild Encounter" in types:
+        apply_non_randomized_catch_em_all_wild_substitutions(world, slots)
+    return slots
+
+
+def apply_non_randomized_catch_em_all_wild_substitutions(world, encounter_slots):
+    if not (world.options.catch_em_all and not world.options.randomize_pokemon_locations):
+        return
+
+    substitutions = get_non_randomized_catch_em_all_wild_substitutions(world.game)
+    seen = {mon: 0 for mon in substitutions}
+    for slot in encounter_slots:
+        replacement = substitutions.get(slot.original_item)
+        if replacement is None:
+            continue
+        seen[slot.original_item] += 1
+        if seen[slot.original_item] % 2 == 0:
+            slot.original_item = replacement
 
 
 def get_base_stat_total(mon):
@@ -168,9 +279,10 @@ def process_pokemon_locations(self):
     non_randomized_catch_em_all_mons = ["Bulbasaur", "Charmander", "Squirtle", "Eevee"]
     non_randomized_catch_em_all_slots = []
     if self.options.catch_em_all and not self.options.randomize_pokemon_locations:
+        candidate_slots = get_non_randomized_catch_em_all_candidate_slots(self.game)
         non_randomized_catch_em_all_slots = self.random.sample(
-            [mon for mon in non_randomized_catch_em_all_candidate_slots
-             if mon in [slot.name for slot in static_slots]], 4)
+            [mon for mon in candidate_slots if mon in [slot.name for slot in static_slots]],
+            len(non_randomized_catch_em_all_mons))
 
     for slot in static_slots:
         location = self.multiworld.get_location(slot.name, self.player)

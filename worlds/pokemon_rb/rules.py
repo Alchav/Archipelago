@@ -272,8 +272,9 @@ def set_rules(multiworld, world, player):
         "Evolution - Dragonite": lambda state: state.has("Dragonair", player) and logic.evolve_level(state, 55, player),
     }
     if world.game == "Pokemon Yellow":
-        access_rules["Route 6 - Surf Pokemon - 9"] = lambda state: logic.can_surf(state, world, player)
-        access_rules["Route 6 - Surf Pokemon - 10"] = lambda state: logic.can_surf(state, world, player)
+        for region in ("Route 6", "Route 12", "Route 13", "Seafoam Islands B3F", "Seafoam Islands B4F"):
+            for slot in range(1, 11):
+                access_rules[f"{region} - Surf Pokemon - {slot}"] = lambda state: logic.can_surf(state, world, player)
     for loc in multiworld.get_locations(player):
         if loc.name in access_rules:
             add_rule(loc, access_rules[loc.name])

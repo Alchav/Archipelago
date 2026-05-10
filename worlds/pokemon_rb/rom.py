@@ -141,8 +141,11 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
                 else:
                     return encode_text(f"#mon is<LINE>pronounced<CONT>Po-kuh-mon?<DONE>")
         elif q == 3:
-            starters = [" ".join(world.multiworld.get_location(
-                f"Oak's Lab - Starter {i}", world.player).item.name.split(" ")[1:]) for i in range(1, 4)]
+            if world.game == "Pokemon Yellow":
+                starters = ["Pikachu"]
+            else:
+                starters = [" ".join(world.multiworld.get_location(
+                    f"Oak's Lab - Starter {i}", world.player).item.name.split(" ")[1:]) for i in range(1, 4)]
             mon = random.choice(starters)
             nots = random.choice(range(8, 16, 2))
             if random.randint(0, 1):
@@ -180,7 +183,7 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
             while not a and i in [1, 2]:
                 i = random.randint(0, random.choice([9, 99]))
             return encode_text(f"POLIWAG evolves {i}<LINE>times?<DONE>")
-        elif q == 7:
+        elif q == 6:
             q2 = random.randint(0, 2)
             if q2 == 0:
                 entity = "Motor Carrier"
@@ -211,27 +214,27 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
                     country = random.choice(["The U.K.", "Pakistan", "India", "Japan", "Australia",
                                              "New Zealand", "Thailand"])
                 return encode_text(f"As of 2020,<LINE>drivers in<CONT>{country}<CONT>drive on the<CONT>right side of<CONT>the road?<DONE>")
-        elif q == 8:
+        elif q == 7:
             mon = random.choice(list(poke_data.evolution_levels.keys()))
             level = poke_data.evolution_levels[mon]
             if not a:
                 level += random.choice(range(1, 6)) * random.choice((-1, 1))
             return encode_text(f"{mon} evolves<LINE>at level {level}?<DONE>")
-        elif q == 9:
+        elif q == 8:
             move = random.choice(list(world.local_move_data.keys()))
             actual_type = world.local_move_data[move]["type"]
             question_type = actual_type
             while question_type == actual_type and not a:
                 question_type = random.choice(list(poke_data.type_ids.keys()))
             return encode_text(f"{move} is<LINE>{question_type} type?<DONE>")
-        elif q == 10:
+        elif q == 9:
             mon = random.choice(list(poke_data.pokemon_data.keys()))
             actual_type = world.local_poke_data[mon][random.choice(("type1", "type2"))]
             question_type = actual_type
             while question_type in [world.local_poke_data[mon]["type1"], world.local_poke_data[mon]["type2"]] and not a:
                 question_type = random.choice(list(poke_data.type_ids.keys()))
             return encode_text(f"{mon} is<LINE>{question_type} type?<DONE>")
-        elif q == 11:
+        elif q == 10:
             equation = ""
             while "*" not in equation:
                 equation = f"{random.randint(0, 9)} {random.choice(['+', '-', '*'])} {random.randint(0, 9)} {random.choice(['+', '-', '*'])} {random.randint(0, 9)} {random.choice(['+', '-', '*'])} {random.randint(0, 9)}"
@@ -248,7 +251,7 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
                     question_result += random.choice(range(1, 6)) * random.choice((-1, 1))
 
             return encode_text(f"{equation}<LINE>= {question_result}?<DONE>")
-        elif q == 12:
+        elif q == 11:
             route = random.choice((12, 16))
             actual_mon = world.multiworld.get_location(f"Route {route} - Sleeping Pokemon",
                                                        world.player).item.name.split("Static ")[1]
@@ -256,7 +259,7 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
             while question_mon == actual_mon and not a:
                 question_mon = random.choice(list(poke_data.pokemon_data.keys()))
             return encode_text(f"{question_mon} was<LINE>sleeping on route<CONT>{route}?<DONE>")
-        elif q == 13:
+        elif q == 12:
             type1 = random.choice(list(poke_data.type_ids.keys()))
             type2 = random.choice(list(poke_data.type_ids.keys()))
             eff_msgs = ["super effective<CONT>", "no ", "not very<CONT>effective<CONT>", "normal "]
@@ -277,13 +280,13 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
                 eff_msgs.remove(eff)
                 eff = random.choice(eff_msgs)
             return encode_text(f"{type1} deals<LINE>{eff}damage to<CONT>{type2} type?<DONE>")
-        elif q == 14:
+        elif q == 13:
             fossil_level = world.multiworld.get_location("Fossil Level - Trainer Parties",
                                                          world.player).party_data[0]["level"]
             if not a:
                 fossil_level += random.choice((-5, 5))
             return encode_text(f"Fossil #MON<LINE>revive at level<CONT>{fossil_level}?<DONE>")
-        elif q == 15:
+        elif q == 14:
             if a:
                 fodmap = random.choice(["garlic", "onion", "milk", "watermelon", "cherries", "wheat", "barley",
                                         "pistachios", "cashews", "kidney beans", "apples", "honey"])
@@ -292,9 +295,28 @@ def write_quizzes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorl
                                         "eggs", "beef", "chicken", "oat", "rice", "maple syrup", "peanuts"])
             are_is = "are" if fodmap[-1] == "s" else "is"
             return encode_text(f"According to<LINE>Monash Uni.,<CONT>{fodmap} {are_is}<CONT>considered high<CONT>in FODMAPs?<DONE>")
-
+        elif q == 15:
+            starters = [" ".join(world.multiworld.get_location(
+                f"Oak's Lab - Starter {i}", world.player).item.name.split(" ")[1:]) for i in range(1, 4)]
+            mon = random.choice(starters)
+            nots = random.choice(range(8, 16, 2))
+            if random.randint(0, 1):
+                while mon in starters:
+                    mon = random.choice(list(poke_data.pokemon_data.keys()))
+                    if a:
+                        nots += 1
+            elif not a:
+                nots += 1
+            text = f"{mon} was<LINE>"
+            while nots > 0:
+                i = random.randint(1, min(4, nots))
+                text += ("not " * i) + "<CONT>"
+                nots -= i
+            text += "a starter choice?<DONE>"
+            return encode_text(text)
     answers = [random.randint(0, 1) for _ in range(6)]
-    questions = random.sample((range(0, 16)), 6)
+    # No starter Pokemon questions for Yellow
+    questions = random.sample((range(0, 15 if world.game == "Pokemon Yellow" else 16)), 6)
     question_texts: list[bytearray] = []
     for i, question in enumerate(questions):
         question_texts.append(get_quiz(question, answers[i]))
@@ -567,9 +589,9 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
         write_bytes(address + 18, poke_data.moves[world.local_poke_data[mon]["start move 4"]]["id"])
         write_bytes(address + 20, world.local_poke_data[mon]["tms"])
         if mon in world.learnsets and world.learnsets[mon]:
-                address = world.rom_addresses["Learnset_" + mon.replace(" ", "")]
-                for i, move in enumerate(world.learnsets[mon]):
-                    write_bytes((address + 1) + i * 2, poke_data.moves[move]["id"])
+            address = world.rom_addresses["Learnset_" + mon.replace(" ", "")]
+            for i, move in enumerate(world.learnsets[mon]):
+                write_bytes((address + 1) + i * 2, poke_data.moves[move]["id"])
 
     write_bytes(world.rom_addresses["Option_Aide_Rt2"], world.options.oaks_aide_rt_2.value)
     write_bytes(world.rom_addresses["Option_Aide_Rt11"], world.options.oaks_aide_rt_11.value)
@@ -618,7 +640,7 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
             continue
         address = world.rom_addresses["Move_Data"] + ((move_data["id"] - 1) * 6)
         write_bytes(address, [move_data["id"], move_data["effect"], move_data["power"],
-                              poke_data.type_ids[move_data["type"]], round(move_data["accuracy"] * 2.55),
+                              poke_data.type_ids[move_data["type"]], move_data["accuracy"] * 255 // 100,
                               move_data["pp"]])
 
     TM_IDs = [poke_data.moves[move]["id"] for move in world.local_tms]

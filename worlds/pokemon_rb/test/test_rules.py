@@ -31,6 +31,8 @@ class FakeMultiWorld:
 
 def make_world() -> SimpleNamespace:
     return SimpleNamespace(
+        game="Pokemon Red",
+        trade_data=(),
         options=SimpleNamespace(
             prizesanity=False,
             require_pokedex=False,

@@ -73,6 +73,7 @@ class FakeTrainerMultiWorld:
 def make_world(game_version: int = 1, catch_em_all: bool = False,
                randomize_pokemon_locations: bool = False) -> SimpleNamespace:
     return SimpleNamespace(
+        game="Pokemon Red" if game_version else "Pokemon Blue",
         options=SimpleNamespace(
             game_version=SimpleNamespace(value=game_version),
             catch_em_all=catch_em_all,
@@ -103,15 +104,17 @@ class TestEncounterSlots(unittest.TestCase):
         self.assertEqual("Weedle", red_slots["Route 2 - Wild Pokemon - 6"].original_item)
         self.assertEqual("Caterpie", blue_slots["Route 2 - Wild Pokemon - 6"].original_item)
 
-    def test_get_encounter_slots_keeps_concrete_version_exclusives_for_non_randomized_catch_em_all(self) -> None:
+    def test_get_encounter_slots_alternates_version_exclusives_for_non_randomized_catch_em_all(self) -> None:
         slots = slot_by_name(get_encounter_slots(
             make_world(game_version=1, catch_em_all=True),
             ["Wild Encounter"],
         ))
 
         self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 6"].original_item)
-        self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 9"].original_item)
+        self.assertEqual("Caterpie", slots["Route 2 - Wild Pokemon - 9"].original_item)
         self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 10"].original_item)
+        self.assertEqual("Ekans", slots["Route 4 - Wild Pokemon - 4"].original_item)
+        self.assertEqual("Sandshrew", slots["Route 4 - Wild Pokemon - 6"].original_item)
 
     def test_get_encounter_slots_keeps_special_prize_slots_version_specific(self) -> None:
         red_prize_4_source = next(

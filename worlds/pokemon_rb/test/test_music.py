@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from ..music import default_music, music_pointers, randomize_map_music
 from ..regions import map_ids
-from ..rom_addresses import rom_addresses
+from ..rom_addresses import rom_addresses_red as rom_addresses
 
 
 class RecordingWriter:
@@ -32,6 +32,7 @@ def make_world(mode: str, rng) -> SimpleNamespace:
     return SimpleNamespace(
         options=SimpleNamespace(randomize_map_music=mode),
         random=rng,
+        rom_addresses=rom_addresses,
     )
 
 
