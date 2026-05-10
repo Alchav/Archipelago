@@ -50,11 +50,13 @@ opciones.
 
 ### ¿Dónde puedo obtener un archivo YAML?
 
-Puedes generar un archivo YAML or descargar su plantilla en la [página de configuración de jugador de Pokémon Red and Blue](/games/Pokemon%20Red%20and%20Blue/player-options)
+Puedes generar un archivo YAML o descargar su plantilla desde la página de configuración de jugador para
+[Pokemon Red](/games/Pokemon%20Red/player-options),
+[Pokemon Blue](/games/Pokemon%20Blue/player-options), o
+[Pokemon Yellow](/games/Pokemon%20Yellow/player-options).
 
-Es importante tener en cuenta que la opción `game_version` determina el ROM que será parcheado.
-Tanto el jugador como la persona que genera (si está generando localmente) necesitarán el archivo del ROM
-correspondiente.
+El juego seleccionado determina el ROM que será parcheado. Tanto el jugador como la persona que genera (si está
+generando localmente) necesitarán el archivo del ROM correspondiente.
 
 Para las opciones `trainer_name` y `rival_name`, los siguientes caracteres normales son permitidos:
 

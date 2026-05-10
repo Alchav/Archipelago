@@ -1,4 +1,4 @@
-# Pokémon Red and Blue
+# Pokémon Yellow
 
 ## Where is the options page?
 
