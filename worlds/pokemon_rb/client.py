@@ -6,11 +6,13 @@ from NetUtils import ClientStatus
 from worlds._bizhawk.client import BizHawkClient
 from worlds._bizhawk import read, write, guarded_write
 
-from .locations import location_data
+from .locations import build_location_data, build_location_name_to_id, location_data_red
 
 logger = logging.getLogger("Client")
 
 BANK_EXCHANGE_RATE = 50000000
+
+location_data, _, _, _ = build_location_data(location_data_red, trainer_data={})
 
 DATA_LOCATIONS = {
     "ItemIndex": (0x1A6E, 0x02),
@@ -68,13 +70,12 @@ for location in location_data:
             location_map[type(location.ram_address).__name__][location.ram_address.flag] = location.address
             location_bytes_bits[location.address] = {'byte': location.ram_address.byte, 'bit': location.ram_address.bit}
 
-location_name_to_id = {location.name: location.address for location in location_data if location.type == "Item"
-                       and location.address is not None}
+location_name_to_id = build_location_name_to_id(location_data)
 
 
 class PokemonRBClient(BizHawkClient):
     system = ("GB", "SGB")
-    patch_suffix = (".apred", ".apblue")
+    patch_suffix = (".apred", ".apblue", ".apyellow")
     game = "Pokemon Red and Blue"
 
     def __init__(self):
@@ -90,9 +91,9 @@ class PokemonRBClient(BizHawkClient):
         self.current_map = 0
 
     async def validate_rom(self, ctx):
-        game_name = await read(ctx.bizhawk_ctx, [(0x134, 12, "ROM")])
+        game_name = await read(ctx.bizhawk_ctx, [(0x134, 14, "ROM")])
         game_name = game_name[0].decode("ascii")
-        if game_name in ("POKEMON RED\00", "POKEMON BLUE"):
+        if game_name in ("POKEMON RED\00\00\00", "POKEMON BLUE\00\00", "POKEMON YELLOW"):
             ctx.game = self.game
             ctx.items_handling = 0b001
             ctx.command_processor.commands["bank"] = cmd_bank

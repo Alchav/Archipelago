@@ -4,8 +4,19 @@ from unittest import mock
 
 from .. import poke_data
 from .. import encounters
-from ..encounters import get_base_stat_total, get_encounter_slots, process_pokemon_locations, randomize_pokemon
-from ..locations import location_data
+from ..encounters import (get_base_stat_total, get_encounter_slots, process_pokemon_locations, process_trainer_data,
+                          randomize_pokemon)
+from ..locations import build_location_data, location_data_blue, location_data_red
+
+
+red_location_data, _, _, _ = build_location_data(
+    location_data_red,
+    trainer_data={},
+)
+blue_location_data, _, _, _ = build_location_data(
+    location_data_blue,
+    trainer_data={},
+)
 
 
 class FixedTriangularRandom:
@@ -48,6 +59,17 @@ class FakeMultiWorld:
         return self.locations[name]
 
 
+class FakeTrainerMultiWorld:
+    def __init__(self, locations) -> None:
+        self.locations = locations
+
+    def get_locations(self, player: int):
+        return self.locations
+
+    def get_location(self, name: str, player: int):
+        raise AssertionError(f"Unexpected starter lookup for {name}")
+
+
 def make_world(game_version: int = 1, catch_em_all: bool = False,
                randomize_pokemon_locations: bool = False) -> SimpleNamespace:
     return SimpleNamespace(
@@ -56,6 +78,7 @@ def make_world(game_version: int = 1, catch_em_all: bool = False,
             catch_em_all=catch_em_all,
             randomize_pokemon_locations=randomize_pokemon_locations,
         ),
+        location_data=red_location_data if game_version else blue_location_data,
         local_poke_data=poke_data.pokemon_data,
     )
 
@@ -80,23 +103,31 @@ class TestEncounterSlots(unittest.TestCase):
         self.assertEqual("Weedle", red_slots["Route 2 - Wild Pokemon - 6"].original_item)
         self.assertEqual("Caterpie", blue_slots["Route 2 - Wild Pokemon - 6"].original_item)
 
-    def test_get_encounter_slots_alternates_exclusives_for_non_randomized_catch_em_all(self) -> None:
+    def test_get_encounter_slots_keeps_concrete_version_exclusives_for_non_randomized_catch_em_all(self) -> None:
         slots = slot_by_name(get_encounter_slots(
             make_world(game_version=1, catch_em_all=True),
             ["Wild Encounter"],
         ))
 
         self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 6"].original_item)
-        self.assertEqual("Caterpie", slots["Route 2 - Wild Pokemon - 9"].original_item)
+        self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 9"].original_item)
         self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 10"].original_item)
 
     def test_get_encounter_slots_keeps_special_prize_slots_version_specific(self) -> None:
-        prize_4_source = next(
-            location.original_item for location in location_data
+        red_prize_4_source = next(
+            location.original_item for location in red_location_data
             if location.name == "Celadon Prize Corner - Pokemon Prize - 4"
         )
-        prize_5_source = next(
-            location.original_item for location in location_data
+        red_prize_5_source = next(
+            location.original_item for location in red_location_data
+            if location.name == "Celadon Prize Corner - Pokemon Prize - 5"
+        )
+        blue_prize_4_source = next(
+            location.original_item for location in blue_location_data
+            if location.name == "Celadon Prize Corner - Pokemon Prize - 4"
+        )
+        blue_prize_5_source = next(
+            location.original_item for location in blue_location_data
             if location.name == "Celadon Prize Corner - Pokemon Prize - 5"
         )
         red_slots = slot_by_name(get_encounter_slots(
@@ -108,19 +139,19 @@ class TestEncounterSlots(unittest.TestCase):
             ["Static Repeatable Pokemon"],
         ))
 
-        self.assertEqual(prize_4_source[1], red_slots["Celadon Prize Corner - Pokemon Prize - 4"].original_item)
-        self.assertEqual(prize_5_source[1], red_slots["Celadon Prize Corner - Pokemon Prize - 5"].original_item)
-        self.assertEqual(prize_4_source[0], blue_slots["Celadon Prize Corner - Pokemon Prize - 4"].original_item)
-        self.assertEqual(prize_5_source[0], blue_slots["Celadon Prize Corner - Pokemon Prize - 5"].original_item)
+        self.assertEqual(red_prize_4_source, red_slots["Celadon Prize Corner - Pokemon Prize - 4"].original_item)
+        self.assertEqual(red_prize_5_source, red_slots["Celadon Prize Corner - Pokemon Prize - 5"].original_item)
+        self.assertEqual(blue_prize_4_source, blue_slots["Celadon Prize Corner - Pokemon Prize - 4"].original_item)
+        self.assertEqual(blue_prize_5_source, blue_slots["Celadon Prize Corner - Pokemon Prize - 5"].original_item)
 
     def test_get_encounter_slots_deepcopies_location_data(self) -> None:
-        source_slot = next(location for location in location_data if location.name == "Route 2 - Wild Pokemon - 6")
+        source_slot = next(location for location in red_location_data if location.name == "Route 2 - Wild Pokemon - 6")
         returned_slot = slot_by_name(get_encounter_slots(make_world(), ["Wild Encounter"]))[
             "Route 2 - Wild Pokemon - 6"
         ]
 
         self.assertIsNot(source_slot, returned_slot)
-        self.assertEqual(["Weedle", "Caterpie"], source_slot.original_item)
+        self.assertEqual("Weedle", source_slot.original_item)
         self.assertEqual("Weedle", returned_slot.original_item)
 
 
@@ -159,6 +190,73 @@ class TestEncounterRandomizationHelpers(unittest.TestCase):
             "Oddish",
             randomize_pokemon(world, "Bulbasaur", ["Psyduck", "Oddish", "Bellsprout"], 3, FixedTriangularRandom()),
         )
+
+    def test_process_trainer_data_keeps_yellow_rival_eevee_line_vanilla(self) -> None:
+        flat_rival_party = {
+            "level": [9, 8],
+            "party": ["Spearow", "Eevee"],
+            "party_address": "Trainer_Party_Route_22_Rival1_A",
+        }
+        branched_rival_party = {
+            "level": [38, 40],
+            "party": [
+                ["Sandslash", "Jolteon"],
+                ["Sandslash", "Flareon"],
+                ["Sandslash", "Vaporeon"],
+            ],
+            "party_address": [
+                "Trainer_Party_Silph_Co_7F_Rival2_Jolteon_A",
+                "Trainer_Party_Silph_Co_7F_Rival2_Flareon_A",
+                "Trainer_Party_Silph_Co_7F_Rival2_Vaporeon_A",
+            ],
+        }
+        non_rival_party = {
+            "level": 20,
+            "party": ["Eevee"],
+            "party_address": "Trainer_Party_Test_A",
+        }
+        world = SimpleNamespace(
+            game="Pokemon Yellow",
+            player=1,
+            multiworld=FakeTrainerMultiWorld([
+                SimpleNamespace(
+                    name="Route 22 - Trainer Parties",
+                    type="Trainer Parties",
+                    party_data=[flat_rival_party],
+                ),
+                SimpleNamespace(
+                    name="Silph Co 7F-NW - Trainer Parties",
+                    type="Trainer Parties",
+                    party_data=[branched_rival_party],
+                ),
+                SimpleNamespace(
+                    name="Test Region - Trainer Parties",
+                    type="Trainer Parties",
+                    party_data=[non_rival_party],
+                ),
+            ]),
+            options=SimpleNamespace(
+                trainer_legendaries=SimpleNamespace(value=False),
+                randomize_legendary_pokemon=SimpleNamespace(value=0),
+                randomize_pokemon_locations=FakeChoice(0, "vanilla"),
+                randomize_trainer_parties=FakeChoice(4, "completely_random"),
+            ),
+            random=SimpleNamespace(),
+        )
+
+        with mock.patch.object(encounters, "randomize_pokemon", side_effect=lambda *args: "Pikachu"):
+            process_trainer_data(world)
+
+        self.assertEqual(["Pikachu", "Eevee"], flat_rival_party["party"])
+        self.assertEqual(
+            [
+                ["Pikachu", "Jolteon"],
+                ["Pikachu", "Flareon"],
+                ["Pikachu", "Vaporeon"],
+            ],
+            branched_rival_party["party"],
+        )
+        self.assertEqual(["Pikachu"], non_rival_party["party"])
 
     def test_process_pokemon_locations_counts_static_repeatable_pokemon_for_catch_em_all(self) -> None:
         repeatable_slot = SimpleNamespace(

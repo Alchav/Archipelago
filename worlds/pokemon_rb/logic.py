@@ -2,7 +2,7 @@ from . import poke_data
 
 
 def can_surf(state, world, player):
-    return (((state.has("HM03 Surf", player) and can_learn_hm(state, world, "Surf", player))) and (state.has("Soul Badge", player) or
+    return ((state.has("HM03 Surf", player) and can_learn_hm(state, world, "Surf", player)) and (state.has("Soul Badge", player) or
              state.has(world.extra_badges.get("Surf"), player)
              or world.options.badges_needed_for_hm_moves.value == 0))
 

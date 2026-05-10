@@ -1,4 +1,3 @@
-from .rom_addresses import rom_addresses
 from .regions import map_ids
 
 music_pointers = {
@@ -271,8 +270,8 @@ def randomize_map_music(world, write_bytes):
             music_data[map_id * 2:(map_id * 2) + 2] \
                 = world.random.choice(list(music_pointers.values())).to_bytes(2, byteorder='big')
     elif world.options.randomize_map_music == "chaos":
-        write_bytes(rom_addresses["Option_Chaos_Music"], [0, 0])
-        write_bytes(rom_addresses["Chaos_Music_Quantity"], len(music_pointers))
+        write_bytes(world.rom_addresses["Option_Chaos_Music"], [0, 0])
+        write_bytes(world.rom_addresses["Chaos_Music_Quantity"], len(music_pointers))
         for i, music_pointer in enumerate(music_pointers.values()):
             music_data[i * 2:(i * 2) + 2] = music_pointer.to_bytes(2, byteorder='big')
-    write_bytes(rom_addresses["Map_Songs"], music_data)
+    write_bytes(world.rom_addresses["Map_Songs"], music_data)

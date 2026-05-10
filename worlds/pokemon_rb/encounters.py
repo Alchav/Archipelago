@@ -1,6 +1,5 @@
 from copy import deepcopy
 from . import poke_data
-from .locations import location_data
 
 non_randomized_catch_em_all_candidate_slots = [
     "Route 4 Pokemon Center - Pokemon For Sale",
@@ -12,22 +11,16 @@ non_randomized_catch_em_all_candidate_slots = [
     *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 3)]
 ]
 
+RIVAL_STARTER_LINE = {
+    "Bulbasaur", "Ivysaur", "Venusaur",
+    "Charmander", "Charmeleon", "Charizard",
+    "Squirtle", "Wartortle", "Blastoise",
+}
+YELLOW_RIVAL_EEVEE_LINE = {"Eevee", "Jolteon", "Flareon", "Vaporeon"}
+
 
 def get_encounter_slots(world, types):
-    encounter_slots = deepcopy([location for location in location_data if location.type in types])
-
-    i = not world.options.game_version.value
-    for location in encounter_slots:
-        if isinstance(location.original_item, list):
-            if world.options.catch_em_all and not world.options.randomize_pokemon_locations and location.name in (
-                    "Celadon Prize Corner - Pokemon Prize - 4", "Celadon Prize Corner - Pokemon Prize - 5"):
-                location.original_item = location.original_item[world.options.game_version.value]
-            else:
-                location.original_item = location.original_item[i]
-                if world.options.catch_em_all and not world.options.randomize_pokemon_locations:
-                    i = not i
-
-    return encounter_slots
+    return deepcopy([location for location in world.location_data if location.type in types])
 
 
 def get_base_stat_total(mon):
@@ -57,17 +50,28 @@ def randomize_pokemon(self, mon, mons_list, randomize_type, random):
     return mon
 
 
+def is_yellow_rival_party(world, party):
+    if getattr(world, "game", None) != "Pokemon Yellow":
+        return False
+    party_addresses = party["party_address"]
+    if not isinstance(party_addresses, list):
+        party_addresses = [party_addresses]
+    return any("_Rival" in address for address in party_addresses)
+
+
 def process_trainer_data(world):
     mons_list = [pokemon for pokemon in poke_data.pokemon_data.keys() if pokemon not in poke_data.legendary_pokemon
                  or world.options.trainer_legendaries.value]
     unevolved_mons = [pokemon for pokemon in poke_data.first_stage_pokemon if pokemon not in poke_data.legendary_pokemon
                       or world.options.randomize_legendary_pokemon.value == 3]
     evolved_mons = [mon for mon in mons_list if mon not in unevolved_mons]
-    rival_map = {
-        "Charmander": world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name[9:],  # strip the
-        "Squirtle": world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name[9:],  # 'Missable'
-        "Bulbasaur": world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name[9:],  # from the name
-    }
+    rival_map = {}
+    if getattr(world, "game", None) != "Pokemon Yellow":
+        rival_map = {
+            "Charmander": world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name[9:],  # strip the
+            "Squirtle": world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name[9:],  # 'Missable'
+            "Bulbasaur": world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name[9:],  # from the name
+        }
 
     def add_evolutions():
         for a, b in rival_map.copy().items():
@@ -87,12 +91,14 @@ def process_trainer_data(world):
     for parties in parties_objs:
         parties_data = parties.party_data
         for party in parties_data:
+            yellow_rival_party = is_yellow_rival_party(world, party)
             if party["party"] and isinstance(party["party"][0], list):
                 # only for Rival parties
                 for rival_party in party["party"]:
                     for i, mon in enumerate(rival_party):
-                        if mon in ("Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
-                                   "Squirtle", "Wartortle", "Blastoise"):
+                        if yellow_rival_party and mon in YELLOW_RIVAL_EEVEE_LINE:
+                            continue
+                        if mon in RIVAL_STARTER_LINE and rival_map:
                             if world.options.randomize_pokemon_locations:
                                 rival_party[i] = rival_map[mon]
                         elif world.options.randomize_trainer_parties:
@@ -109,6 +115,8 @@ def process_trainer_data(world):
             else:
                 if world.options.randomize_trainer_parties:
                     for i, mon in enumerate(party["party"]):
+                        if yellow_rival_party and mon in YELLOW_RIVAL_EEVEE_LINE:
+                            continue
                         party["party"][i] = randomize_pokemon(world, mon, mons_list,
                                                               world.options.randomize_trainer_parties.value,
                                                               world.random)
@@ -153,7 +161,7 @@ def process_pokemon_locations(self):
             location = self.multiworld.get_location(slot.name, self.player)
             location.place_locked_item(self.create_item(prepend + swap_slot.original_item))
             swap_slot.original_item = slot.original_item
-            
+
     elif self.options.randomize_legendary_pokemon == "any":
         static_slots = static_slots + legendary_slots
 

@@ -4,6 +4,11 @@ from . import logic
 
 
 def set_rules(multiworld, world, player):
+    trade_rules = {
+        trade.location: (lambda state, source_location=trade.source_location:
+                         state.can_reach(source_location, "Location", player))
+        for trade in world.trade_data
+    }
 
     item_rules = {
         # Some items do special things when they are passed into the GiveItem function in the game, but
@@ -74,6 +79,7 @@ def set_rules(multiworld, world, player):
         "Seafoam Islands B4F - Legendary Pokemon": lambda state: logic.can_strength(state, world, player) and state.has("Seafoam Boss Boulders", player),
         "Vermilion Dock - Legendary Pokemon": lambda state: logic.can_surf(state, world, player),
         "Cerulean Cave B1F - Legendary Pokemon": lambda state: logic.can_surf(state, world, player),
+        "Cerulean Cave 1F - Southeast Item": lambda state: logic.can_surf(state, world, player),
 
         "Saffron Fighting Dojo - Gift 1": lambda state: state.has_any(["Defeat Sabrina", "ut_glitch"], player),
         "Saffron Fighting Dojo - Gift 2": lambda state: state.has_any(["Defeat Sabrina", "ut_glitch"], player),
@@ -85,15 +91,7 @@ def set_rules(multiworld, world, player):
         "Silph Co 5F - Hostage": lambda state: logic.card_key(state, 5, player),
         "Silph Co 7F - Hostage": lambda state: logic.card_key(state, 7, player),
 
-        "Route 2 Trade House - Marcel Trade": lambda state: state.can_reach("Route 24 - Wild Pokemon - 6", "Location", player),
-        "Underground Path Route 5 - Spot Trade": lambda state: state.can_reach("Route 24 - Wild Pokemon - 6", "Location", player),
-        "Route 11 Gate 2F - Terry Trade": lambda state: state.can_reach("Safari Zone Center - Wild Pokemon - 5", "Location", player),
-        "Route 18 Gate 2F - Marc Trade": lambda state: state.can_reach("Route 23/Cerulean Cave Fishing - Super Rod Pokemon - 1", "Location", player),
-        "Cinnabar Lab Fossil Room - Sailor Trade": lambda state: state.can_reach("Pokemon Mansion 1F - Wild Pokemon - 3", "Location", player),
-        "Cinnabar Lab Trade Room - Crinkles Trade": lambda state: state.can_reach("Route 12 - Wild Pokemon - 4", "Location", player),
-        "Cinnabar Lab Trade Room - Doris Trade": lambda state: state.can_reach("Cerulean Cave 1F - Wild Pokemon - 9", "Location", player),
-        "Vermilion Trade House - Dux Trade": lambda state: state.can_reach("Route 3 - Wild Pokemon - 2", "Location", player),
-        "Cerulean Trade House - Lola Trade": lambda state: state.can_reach("Route 10/Celadon Fishing - Super Rod Pokemon - 1", "Location", player),
+        **trade_rules,
 
         "Route 22 - Rival 1": lambda state: state.has("Oak's Parcel", player),
         "Route 22 - Trainer Parties": lambda state: state.has("Oak's Parcel", player),
@@ -155,6 +153,7 @@ def set_rules(multiworld, world, player):
         "Silph Co 9F - Hidden Item Nurse Bed": lambda state: logic.can_get_hidden_items(state, world, player),
         "Saffron Copycat's House 2F - Hidden Item Desk": lambda state: logic.can_get_hidden_items(state, world, player),
         "Cerulean Cave 1F - Hidden Item Center Rocks": lambda state: logic.can_get_hidden_items(state, world, player),
+        "Cerulean Cave 2F - Hidden Item Southeast Rocks": lambda state: logic.can_get_hidden_items(state, world, player),
         "Cerulean Cave B1F - Hidden Item Northeast Rocks": lambda state: logic.can_get_hidden_items(state, world, player),
         "Power Plant - Hidden Item Central Dead End": lambda state: logic.can_get_hidden_items(state, world, player),
         "Power Plant - Hidden Item Before Zapdos": lambda state: logic.can_get_hidden_items(state, world, player),
@@ -272,6 +271,9 @@ def set_rules(multiworld, world, player):
         "Evolution - Dragonair": lambda state: state.has("Dratini", player) and logic.evolve_level(state, 30, player),
         "Evolution - Dragonite": lambda state: state.has("Dragonair", player) and logic.evolve_level(state, 55, player),
     }
+    if world.game == "Pokemon Yellow":
+        access_rules["Route 6 - Surf Pokemon - 9"] = lambda state: logic.can_surf(state, world, player)
+        access_rules["Route 6 - Surf Pokemon - 10"] = lambda state: logic.can_surf(state, world, player)
     for loc in multiworld.get_locations(player):
         if loc.name in access_rules:
             add_rule(loc, access_rules[loc.name])

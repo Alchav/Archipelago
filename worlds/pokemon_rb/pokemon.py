@@ -4,14 +4,14 @@ import typing
 from worlds.Files import APTokenTypes
 
 from . import poke_data, logic
-from .rom_addresses import rom_addresses
 
 if typing.TYPE_CHECKING:
-    from . import PokemonRedBlueWorld
-    from .rom import PokemonRedProcedurePatch, PokemonBlueProcedurePatch
+    from . import PokemonRedWorld, PokemonBlueWorld, PokemonYellowWorld
+    from .rom import PokemonRedProcedurePatch, PokemonBlueProcedurePatch, PokemonYellowProcedurePatch
 
 
-def set_mon_palettes(world: "PokemonRedBlueWorld", patch: "PokemonRedProcedurePatch | PokemonBlueProcedurePatch"):
+def set_mon_palettes(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWorld",
+                     patch: "PokemonRedProcedurePatch | PokemonBlueProcedurePatch | PokemonYellowProcedurePatch"):
     if world.options.randomize_pokemon_palettes == "vanilla":
         return
     pallet_map = {
@@ -41,7 +41,7 @@ def set_mon_palettes(world: "PokemonRedBlueWorld", patch: "PokemonRedProcedurePa
         else:  # completely_random or follow_evolutions and it is not an evolved form (except eeveelutions)
             pallet = world.random.choice(list(pallet_map.values()))
         palettes.append(pallet)
-    patch.write_token(APTokenTypes.WRITE, rom_addresses["Mon_Palettes"], bytes(palettes))
+    patch.write_token(APTokenTypes.WRITE, world.rom_addresses["Mon_Palettes"], bytes(palettes))
 
 
 def choose_forced_type(chances, random):
@@ -145,8 +145,8 @@ def process_move_data(world):
 
 def process_pokemon_data(self):
 
-    local_poke_data = deepcopy(poke_data.pokemon_data)
-    learnsets = deepcopy(poke_data.learnsets)
+    local_poke_data = deepcopy(self.pokemon_data)
+    learnsets = deepcopy(self.pokemon_learnsets)
     tms_hms = self.local_tms + poke_data.hm_moves
 
     compat_hms = set()
@@ -350,7 +350,7 @@ def process_pokemon_data(self):
 
     for hm_move in hm_verify:
         if hm_move not in compat_hms:
-            mon = self.random.choice([mon for mon in poke_data.pokemon_data if mon not in poke_data.legendary_pokemon])
+            mon = self.random.choice([mon for mon in local_poke_data if mon not in poke_data.legendary_pokemon])
             flag = tms_hms.index(hm_move)
             local_poke_data[mon]["tms"][int(flag / 8)] |= 1 << (flag % 8)
 

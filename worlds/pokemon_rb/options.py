@@ -3,14 +3,6 @@ from Options import (PerGameCommonOptions, Toggle, Choice, Range, NamedRange, Fr
                      ItemsAccessibility, OptionSet, Visibility)
 
 
-class GameVersion(Choice):
-    """Select Red or Blue version."""
-    display_name = "Game Version"
-    option_red = 1
-    option_blue = 0
-    default = "random"
-
-
 class TrainerName(TextChoice):
     """Your trainer name. If not set to choose_in_game, must be a name not exceeding 7 characters, and the prompt to
     name your character in-game will be skipped. See the setup guide on archipelago.gg for a list of allowed characters."""
@@ -933,7 +925,6 @@ class PokemonDeathLink(DeathLink):
 @dataclass
 class PokemonRBOptions(PerGameCommonOptions):
     accessibility: ItemsAccessibility
-    game_version: GameVersion
     trainer_name: TrainerName
     rival_name: RivalName
     battle_style: BattleStyle

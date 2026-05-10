@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 id_to_mon = {1: 'Rhydon', 2: 'Kangaskhan', 3: 'Nidoran M', 4: 'Clefairy', 5: 'Spearow', 6: 'Voltorb', 7: 'Nidoking',
              8: 'Slowbro', 9: 'Ivysaur', 10: 'Exeggutor', 11: 'Lickitung', 12: 'Exeggcute', 13: 'Grimer', 14: 'Gengar',
              15: 'Nidoran F', 16: 'Nidoqueen', 17: 'Cubone', 18: 'Rhyhorn', 19: 'Lapras', 20: 'Arcanine', 21: 'Mew',
@@ -1005,6 +1007,98 @@ learnsets = {
     'Victreebel': ['Wrap', 'Poisonpowder', 'Sleep Powder']
 }
 
+pokemon_data_yellow = deepcopy(pokemon_data)
+learnsets_yellow = deepcopy(learnsets)
+
+pokemon_data_yellow['Dragonair']["catch rate"] = 27
+pokemon_data_yellow['Dragonite']["catch rate"] = 9
+
+pokemon_data_yellow['Alakazam']["start move 1"] = 'Teleport'
+pokemon_data_yellow['Alakazam']["start move 2"] = 'Kinesis'
+pokemon_data_yellow['Alakazam']["start move 3"] = 'No Move'
+pokemon_data_yellow['Alakazam']["start move 4"] = 'No Move'
+pokemon_data_yellow['Chansey']["start move 1"] = 'Pound'
+pokemon_data_yellow['Chansey']["start move 2"] = 'Tail Whip'
+pokemon_data_yellow['Chansey']["start move 3"] = 'No Move'
+pokemon_data_yellow['Chansey']["start move 4"] = 'No Move'
+pokemon_data_yellow['Cubone']["start move 1"] = 'Growl'
+pokemon_data_yellow['Cubone']["start move 2"] = 'No Move'
+pokemon_data_yellow['Cubone']["start move 3"] = 'No Move'
+pokemon_data_yellow['Cubone']["start move 4"] = 'No Move'
+pokemon_data_yellow['Eevee']["start move 1"] = 'Tackle'
+pokemon_data_yellow['Eevee']["start move 2"] = 'Tail Whip'
+pokemon_data_yellow['Eevee']["start move 3"] = 'No Move'
+pokemon_data_yellow['Eevee']["start move 4"] = 'No Move'
+pokemon_data_yellow['Flareon']["start move 1"] = 'Tackle'
+pokemon_data_yellow['Flareon']["start move 2"] = 'Tail Whip'
+pokemon_data_yellow['Flareon']["start move 3"] = 'Quick Attack'
+pokemon_data_yellow['Flareon']["start move 4"] = 'Ember'
+pokemon_data_yellow['Gyarados']["start move 1"] = 'Tackle'
+pokemon_data_yellow['Gyarados']["start move 2"] = 'No Move'
+pokemon_data_yellow['Gyarados']["start move 3"] = 'No Move'
+pokemon_data_yellow['Gyarados']["start move 4"] = 'No Move'
+pokemon_data_yellow['Jolteon']["start move 1"] = 'Tackle'
+pokemon_data_yellow['Jolteon']["start move 2"] = 'Tail Whip'
+pokemon_data_yellow['Jolteon']["start move 3"] = 'Quick Attack'
+pokemon_data_yellow['Jolteon']["start move 4"] = 'Thundershock'
+pokemon_data_yellow['Kadabra']["start move 1"] = 'Teleport'
+pokemon_data_yellow['Kadabra']["start move 2"] = 'Kinesis'
+pokemon_data_yellow['Kadabra']["start move 3"] = 'No Move'
+pokemon_data_yellow['Kadabra']["start move 4"] = 'No Move'
+pokemon_data_yellow['Marowak']["start move 1"] = 'Bone Club'
+pokemon_data_yellow['Marowak']["start move 2"] = 'Tail Whip'
+pokemon_data_yellow['Marowak']["start move 3"] = 'No Move'
+pokemon_data_yellow['Marowak']["start move 4"] = 'No Move'
+pokemon_data_yellow['Primeape']["start move 1"] = 'Scratch'
+pokemon_data_yellow['Primeape']["start move 2"] = 'Leer'
+pokemon_data_yellow['Primeape']["start move 3"] = 'Low Kick'
+pokemon_data_yellow['Primeape']["start move 4"] = 'Karate Chop'
+pokemon_data_yellow['Tangela']["start move 1"] = 'Constrict'
+pokemon_data_yellow['Tangela']["start move 2"] = 'No Move'
+pokemon_data_yellow['Tangela']["start move 3"] = 'No Move'
+pokemon_data_yellow['Tangela']["start move 4"] = 'No Move'
+pokemon_data_yellow['Vaporeon']["start move 1"] = 'Tackle'
+pokemon_data_yellow['Vaporeon']["start move 2"] = 'Tail Whip'
+pokemon_data_yellow['Vaporeon']["start move 3"] = 'Quick Attack'
+pokemon_data_yellow['Vaporeon']["start move 4"] = 'Water Gun'
+pokemon_data_yellow['Venomoth']["start move 1"] = 'Tackle'
+pokemon_data_yellow['Venomoth']["start move 2"] = 'Disable'
+pokemon_data_yellow['Venomoth']["start move 3"] = 'Supersonic'
+pokemon_data_yellow['Venomoth']["start move 4"] = 'Confusion'
+
+pokemon_data_yellow['Butterfree']["tms"] = bytearray(b'*C8\xf0C(B')
+pokemon_data_yellow['Charizard']["tms"] = bytearray(b'\xb5CO\xce\xe3\x08.')
+pokemon_data_yellow['Diglett']["tms"] = bytearray(b'\xa0\x03\x08\xce\x02\x88\x06')
+pokemon_data_yellow['Dugtrio']["tms"] = bytearray(b'\xa0C\x08\xce\x02\x88\x06')
+pokemon_data_yellow['Kabutops']["tms"] = bytearray(b'\xb6\x7f\r\xc0\x83\x08\x16')
+pokemon_data_yellow['Mew']["tms"] = bytearray(b'\xff\xff\xff\xff\xff\xff\x7f')
+pokemon_data_yellow['Mewtwo']["tms"] = bytearray(b'\xb1\x7f\xaf\xf1\xaf8c')
+pokemon_data_yellow['Venomoth']["tms"] = bytearray(b'*C8\xf0C(B')
+pokemon_data_yellow['Venonat']["tms"] = bytearray(b' \x038\xd0\x03(B')
+
+learnsets_yellow['Butterfree'] = ['Confusion', 'Poisonpowder', 'Stun Spore', 'Sleep Powder', 'Supersonic', 'Whirlwind', 'Gust', 'Psybeam']
+learnsets_yellow['Chansey'] = ['Doubleslap', 'Sing', 'Growl', 'Minimize', 'Defense Curl', 'Light Screen', 'Double Edge']
+learnsets_yellow['Cubone'] = ['Bone Club', 'Tail Whip', 'Headbutt', 'Leer', 'Focus Energy', 'Thrash', 'Bonemerang', 'Rage']
+learnsets_yellow['Eevee'] = ['Sand Attack', 'Growl', 'Quick Attack', 'Bite', 'Focus Energy', 'Take Down']
+learnsets_yellow['Flareon'] = ['Sand Attack', 'Ember', 'Quick Attack', 'Bite', 'Fire Spin', 'Smog', 'Leer', 'Flamethrower']
+learnsets_yellow['Jolteon'] = ['Sand Attack', 'Thundershock', 'Quick Attack', 'Double Kick', 'Pin Missile', 'Thunder Wave', 'Agility', 'Thunder']
+learnsets_yellow['Mankey'] = ['Low Kick', 'Karate Chop', 'Fury Swipes', 'Focus Energy', 'Seismic Toss', 'Thrash', 'Screech']
+learnsets_yellow['Marowak'] = ['Bone Club', 'Tail Whip', 'Headbutt', 'Leer', 'Focus Energy', 'Thrash', 'Bonemerang', 'Rage']
+learnsets_yellow['Metapod'] = ['Harden']
+learnsets_yellow['Nidoking'] = ['Horn Attack', 'Double Kick', 'Thrash']
+learnsets_yellow['Nidoqueen'] = ['Scratch', 'Double Kick', 'Body Slam']
+learnsets_yellow['Nidoran F'] = ['Scratch', 'Double Kick', 'Poison Sting', 'Tail Whip', 'Bite', 'Fury Swipes']
+learnsets_yellow['Nidoran M'] = ['Horn Attack', 'Double Kick', 'Poison Sting', 'Focus Energy', 'Fury Attack', 'Horn Drill']
+learnsets_yellow['Nidorina'] = ['Scratch', 'Double Kick', 'Poison Sting', 'Tail Whip', 'Bite', 'Fury Swipes']
+learnsets_yellow['Nidorino'] = ['Horn Attack', 'Double Kick', 'Poison Sting', 'Focus Energy', 'Fury Attack', 'Horn Drill']
+learnsets_yellow['Pikachu'] = ['Tail Whip', 'Thunder Wave', 'Quick Attack', 'Double Team', 'Slam', 'Thunderbolt', 'Agility', 'Thunder', 'Light Screen']
+learnsets_yellow['Pinsir'] = ['Bind', 'Seismic Toss', 'Guillotine', 'Focus Energy', 'Harden', 'Slash', 'Swords Dance']
+learnsets_yellow['Primeape'] = ['Low Kick', 'Karate Chop', 'Fury Swipes', 'Focus Energy', 'Rage', 'Seismic Toss', 'Thrash', 'Screech']
+learnsets_yellow['Scyther'] = ['Leer', 'Focus Energy', 'Double Team', 'Slash', 'Swords Dance', 'Agility', 'Wing Attack']
+learnsets_yellow['Tangela'] = ['Bind', 'Absorb', 'Vine Whip', 'Poisonpowder', 'Stun Spore', 'Sleep Powder', 'Slam', 'Growth']
+learnsets_yellow['Vaporeon'] = ['Sand Attack', 'Water Gun', 'Quick Attack', 'Bite', 'Aurora Beam', 'Haze', 'Mist', 'Acid Armor', 'Hydro Pump']
+learnsets_yellow['Venonat'] = ['Supersonic', 'Confusion', 'Poisonpowder', 'Leech Life', 'Stun Spore', 'Psybeam', 'Sleep Powder', 'Psychic']
+
 moves = {
     'No Move': {'id': 0, 'power': 0, 'type': 'Typeless', 'accuracy': 0, 'pp': 0, 'effect': 0},
     'Pound': {'id': 1, 'power': 40, 'type': 'Normal', 'accuracy': 100, 'pp': 35, 'effect': 0},
@@ -1219,4 +1313,3 @@ evolution_levels = {
 
 first_stage_pokemon = [pokemon for pokemon in pokemon_data.keys() if pokemon not in evolves_from]
 legendary_pokemon = ["Articuno", "Zapdos", "Moltres", "Mewtwo", "Mew"]
-

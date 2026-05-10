@@ -12,41 +12,62 @@ from Fill import fill_restrictive, FillError, sweep_from_pool
 from worlds.AutoWorld import World, WebWorld
 from worlds.generic.Rules import add_item_rule
 from .items import item_table, item_groups
-from .locations import location_data, PokemonRBLocation, location_groups
+from .locations import (PokemonRedLocation, PokemonBlueLocation, PokemonYellowLocation, build_location_data,
+                        build_location_name_to_id, location_data_blue, location_data_red, location_data_yellow)
 from .regions import create_regions
 from .options import PokemonRBOptions
-from .rom_addresses import rom_addresses
+from .rom_addresses import rom_addresses_red, rom_addresses_yellow, rom_addresses_blue
 from .text import encode_text
-from .rom import generate_output, PokemonRedProcedurePatch, PokemonBlueProcedurePatch
+from .rom import generate_output, PokemonRedProcedurePatch, PokemonBlueProcedurePatch, PokemonYellowProcedurePatch
 from .pokemon import process_pokemon_data, process_move_data, verify_hm_moves
 from .encounters import process_pokemon_locations, process_trainer_data
 from .rules import set_rules
 from .level_scaling import level_scaling
+from .trainer_data import trainer_data_rb, trainer_data_yellow
+from .trade_data import trade_data_blue, trade_data_red, trade_data_yellow
+from .warp_data import warp_data_rb, warp_data_yellow
 from . import logic
 from . import poke_data
 from . import client
 
 
-class PokemonSettings(settings.Group):
+pokemon_rby_games = ("Pokemon Red", "Pokemon Blue", "Pokemon Yellow")
+
+
+def get_rby_worlds(multiworld: MultiWorld):
+    for game in pokemon_rby_games:
+        yield from multiworld.get_game_worlds(game)
+
+
+class PokemonRedSettings(settings.Group):
     class RedRomFile(settings.UserFilePath):
-        """File names of the Pokemon Red and Blue roms"""
+        """File name of the Pokemon Red rom"""
         description = "Pokemon Red (UE) ROM File"
         copy_to = "Pokemon Red (UE) [S][!].gb"
         md5s = [PokemonRedProcedurePatch.hash]
+    red_rom_file: RedRomFile = RedRomFile(RedRomFile.copy_to)
 
+class PokemonBlueSettings(settings.Group):
     class BlueRomFile(settings.UserFilePath):
+        """File name of the Pokemon Blue rom"""
         description = "Pokemon Blue (UE) ROM File"
         copy_to = "Pokemon Blue (UE) [S][!].gb"
         md5s = [PokemonBlueProcedurePatch.hash]
-
-    red_rom_file: RedRomFile = RedRomFile(RedRomFile.copy_to)
     blue_rom_file: BlueRomFile = BlueRomFile(BlueRomFile.copy_to)
+
+class PokemonYellowSettings(settings.Group):
+    class YellowRomFile(settings.UserFilePath):
+        """File name of the Pokemon Yellow rom"""
+        description = "Pokemon Yellow (UE) ROM File"
+        copy_to = "Pokemon Yellow (U)[C][!].gbc"
+        md5s = [PokemonYellowProcedurePatch.hash]
+    yellow_rom_file: YellowRomFile = YellowRomFile(YellowRomFile.copy_to)
 
 
 class PokemonWebWorld(WebWorld):
     setup_en = Tutorial(
         "Multiworld Setup Guide",
-        "A guide to playing Pokémon Red and Blue with Archipelago.",
+        "A guide to playing Pokémon Red, Blue, and Yellow with Archipelago.",
         "English",
         "setup_en.md",
         "setup/en",
@@ -65,17 +86,15 @@ class PokemonWebWorld(WebWorld):
     tutorials = [setup_en, setup_es]
 
 
-class PokemonRedBlueWorld(World):
+
+class PokemonRBYWorld(World):
     """Pokémon Red and Pokémon Blue are the original monster-collecting turn-based RPGs.  Explore the Kanto region with
     your Pokémon, catch more than 150 unique creatures, earn badges from the region's Gym Leaders, and challenge the
     Elite Four to become the champion!"""
     # -MuffinJets#4559
-    game = "Pokemon Red and Blue"
 
     options_dataclass = PokemonRBOptions
     options: PokemonRBOptions
-
-    settings: typing.ClassVar[PokemonSettings]
 
     required_client_version = (0, 4, 2)
 
@@ -83,10 +102,17 @@ class PokemonRedBlueWorld(World):
     ut_can_gen_without_yaml = True
 
     item_name_to_id = {name: data.id for name, data in item_table.items()}
-    location_name_to_id = {location.name: location.address for location in location_data if location.type == "Item"
-                           and location.address is not None}
+    location_data = []
+    level_list = []
+    level_name_list = []
+    location_groups = {}
+    location_name_to_id = {}
+    trade_data = []
+    warp_data = {}
+    pokemon_data = poke_data.pokemon_data
+    pokemon_learnsets = poke_data.learnsets
     item_name_groups = item_groups
-    location_name_groups = location_groups
+    location_name_groups = {}
 
     glitches_item_name = "ut_glitch"
 
@@ -125,7 +151,7 @@ class PokemonRedBlueWorld(World):
     def stage_generate_early(cls, multiworld: MultiWorld):
 
         seed_groups = {}
-        pokemon_rb_worlds = multiworld.get_game_worlds("Pokemon Red and Blue")
+        pokemon_rb_worlds = list(get_rby_worlds(multiworld))
 
         for world in pokemon_rb_worlds:
             if not (world.options.type_chart_seed.value.isdigit() or world.options.type_chart_seed.value == "random"):
@@ -294,7 +320,7 @@ class PokemonRedBlueWorld(World):
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
         locs = []
-        for world in multiworld.get_game_worlds("Pokemon Red and Blue"):
+        for world in get_rby_worlds(multiworld):
             locs += world.local_locs
         for loc in sorted(locs):
             if loc.item:
@@ -406,7 +432,7 @@ class PokemonRedBlueWorld(World):
 
     def pre_fill(self) -> None:
         process_trainer_data(self)
-        locs = [location.name for location in location_data if location.type != "Item"]
+        locs = [location.name for location in self.location_data if location.type != "Item"]
         for location in self.multiworld.get_locations(self.player):
             if location.name in locs:
                 location.show_in_spoiler = False
@@ -447,6 +473,7 @@ class PokemonRedBlueWorld(World):
 
         for mon in ([" ".join(self.multiworld.get_location(
                 f"Oak's Lab - Starter {i}", self.player).item.name.split(" ")[1:]) for i in range(1, 4)]
+                if self.game != "Pokemon Yellow" else []
                 + [" ".join(self.multiworld.get_location(
                 f"Saffron Fighting Dojo - Gift {i}", self.player).item.name.split(" ")[1:]) for i in range(1, 3)]
                 + ["Vaporeon", "Jolteon", "Flareon"]):
@@ -538,7 +565,7 @@ class PokemonRedBlueWorld(World):
         for sphere in multiworld.get_spheres():
             mon_locations_in_sphere = {}
             for location in sphere:
-                if (location.game == location.item.game == "Pokemon Red and Blue"
+                if (location.game == location.item.game and location.game in pokemon_rby_games
                         and (location.item.name in poke_data.pokemon_data.keys() or "Static " in location.item.name)
                         and location.item.advancement):
                     key = (location.player, location.item.name)
@@ -594,8 +621,6 @@ class PokemonRedBlueWorld(World):
         set_rules(self.multiworld, self, self.player)
         self.multiworld.completion_condition[self.player] = lambda state, player=self.player: state.has("Become Champion", player=player)
 
-    def create_item(self, name: str) -> Item:
-        return PokemonRBItem(name, self.player)
 
     @classmethod
     def stage_generate_output(cls, multiworld, output_directory):
@@ -629,7 +654,11 @@ class PokemonRedBlueWorld(World):
             for matchup in self.type_chart:
                 spoiler_handle.write(f"{matchup[0]} deals {matchup[2] * 10}% damage to {matchup[1]}\n")
         spoiler_handle.write(f"\n\nPokémon locations ({self.multiworld.player_name[self.player]}):\n\n")
-        pokemon_locs = [location.name for location in location_data if location.type not in ("Item", "Trainer Parties")]
+        pokemon_locs = [
+            location.name
+            for location in self.location_data
+            if location.type not in ("Item", "Trainer Parties")
+        ]
         for location in self.multiworld.get_locations(self.player):
             if location.name in pokemon_locs:
                 spoiler_handle.write(location.name + ": " + location.item.name + "\n")
@@ -669,7 +698,7 @@ class PokemonRedBlueWorld(World):
             hint_data[self.player] = {}
         if self.options.dexsanity:
             mon_locations = {mon: set() for mon in poke_data.pokemon_data.keys()}
-            for loc in location_data:
+            for loc in self.location_data:
                 if loc.type in ["Wild Encounter", "Static Pokemon", "Legendary Pokemon"]:
                     mon = self.multiworld.get_location(loc.name, self.player).item.name
                     if mon.startswith("Static "):
@@ -704,7 +733,7 @@ class PokemonRedBlueWorld(World):
             "cerulean_cave_badges_condition", "cerulean_cave_key_items_condition", "randomize_pokedex", "trainersanity",
             "death_link", "prizesanity", "poke_doll_skip", "bicycle_gate_skips", "stonesanity", "door_shuffle",
             "warp_tile_shuffle", "dark_rock_tunnel_logic", "split_card_key", "all_elevators_locked", "require_pokedex",
-            "area_1_to_1_mapping", "blind_trainers", "game_version", "exp_all", "randomize_pokemon_locations",
+            "area_1_to_1_mapping", "blind_trainers", "exp_all", "randomize_pokemon_locations",
             "randomize_legendary_pokemon", "catch_em_all", "hm_same_type_compatibility", "hm_normal_type_compatibility",
             "hm_other_type_compatibility", "inherit_tm_hm_compatibility", "randomize_move_types",
             "randomize_pokemon_types", "secondary_type_chance"
@@ -726,14 +755,92 @@ class PokemonRedBlueWorld(World):
     def interpret_slot_data(slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
         return slot_data
 
-class PokemonRBItem(Item):
-    game = "Pokemon Red and Blue"
+
+class PokemonRedWorld(PokemonRBYWorld):
+    game = "Pokemon Red"
+
+    settings: typing.ClassVar[PokemonRedSettings]
+    item_name_to_id = PokemonRBYWorld.item_name_to_id
+    item_name_groups = PokemonRBYWorld.item_name_groups
+    patch = PokemonRedProcedurePatch
+    location = PokemonRedLocation
+    rom_addresses = rom_addresses_red
+    trainer_data = trainer_data_rb
+    trade_data = trade_data_red
+    warp_data = warp_data_rb
+    location_data, level_list, level_name_list, location_groups = build_location_data(
+        location_data_red,
+        trainer_data=trainer_data,
+    )
+    location_name_to_id = build_location_name_to_id(location_data)
+    location_name_groups = location_groups
+
+    def create_item(self, name: str) -> Item:
+        return PokemonRedItem(name, self.player)
+
+class PokemonBlueWorld(PokemonRBYWorld):
+    game = "Pokemon Blue"
+
+    settings: typing.ClassVar[PokemonBlueSettings]
+    item_name_to_id = PokemonRBYWorld.item_name_to_id
+    item_name_groups = PokemonRBYWorld.item_name_groups
+    patch = PokemonBlueProcedurePatch
+    location = PokemonBlueLocation
+    rom_addresses = rom_addresses_blue
+    trainer_data = trainer_data_rb
+    trade_data = trade_data_blue
+    warp_data = warp_data_rb
+    location_data, level_list, level_name_list, location_groups = build_location_data(
+        location_data_blue,
+        trainer_data=trainer_data,
+    )
+    location_name_to_id = build_location_name_to_id(location_data)
+    location_name_groups = location_groups
+
+    def create_item(self, name: str) -> Item:
+        return PokemonBlueItem(name, self.player)
+
+class PokemonYellowWorld(PokemonRBYWorld):
+    game = "Pokemon Yellow"
+
+    settings: typing.ClassVar[PokemonYellowSettings]
+    item_name_to_id = PokemonRBYWorld.item_name_to_id
+    item_name_groups = PokemonRBYWorld.item_name_groups
+    patch = PokemonYellowProcedurePatch
+    location = PokemonYellowLocation
+    rom_addresses = rom_addresses_yellow
+    trainer_data = trainer_data_yellow
+    trade_data = trade_data_yellow
+    warp_data = warp_data_yellow
+    pokemon_data = poke_data.pokemon_data_yellow
+    pokemon_learnsets = poke_data.learnsets_yellow
+    location_data, level_list, level_name_list, location_groups = build_location_data(
+        location_data_yellow,
+        trainer_data=trainer_data,
+    )
+    location_name_to_id = build_location_name_to_id(location_data)
+    location_name_groups = location_groups
+
+    def create_item(self, name: str) -> Item:
+        return PokemonYellowItem(name, self.player)
+
+
+class PokemonRBYItem(Item):
     type = None
 
     def __init__(self, name, player: int = None):
         item_data = item_table[name]
-        super(PokemonRBItem, self).__init__(
+        super(PokemonRBYItem, self).__init__(
             name,
             item_data.classification,
             item_data.id, player
         )
+
+class PokemonRedItem(PokemonRBYItem):
+    game = "Pokemon Red"
+
+class PokemonBlueItem(PokemonRBYItem):
+    game = "Pokemon Blue"
+
+class PokemonYellowItem(PokemonRBYItem):
+    game = "Pokemon Yellow"
