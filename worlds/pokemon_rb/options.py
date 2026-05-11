@@ -53,6 +53,11 @@ class BattleStyle(Choice):
     default = 0
 
 
+class YellowBattleStyle(BattleStyle):
+    """Choose battle style, or allow it to be changed in the in-game Options menu."""
+    option_in_game = 2
+
+
 class TextSpeed(NamedRange):
     """Choose text speed. CANNOT be changed in-game!"""
     display_name = "Text Speed"
@@ -65,6 +70,20 @@ class TextSpeed(NamedRange):
         "medium": 3,
         "slow": 5
     }
+
+
+class YellowTextSpeed(TextSpeed):
+    """Choose the starting text speed. Can be changed in the in-game Options menu."""
+
+
+class StartingSound(Choice):
+    """Choose the starting sound output mode. Can be changed in the in-game Options menu."""
+    display_name = "Starting Sound"
+    option_mono = 0
+    option_earphone1 = 1
+    option_earphone2 = 2
+    option_earphone3 = 3
+    default = 0
 
 
 class EliteFourBadgesCondition(Range):
@@ -1028,3 +1047,10 @@ class PokemonRBOptions(PerGameCommonOptions):
     randomize_map_music: RandomizeMapMusic
     death_link: PokemonDeathLink
     debug_options: DebugOptions
+
+
+@dataclass
+class PokemonYellowOptions(PokemonRBOptions):
+    battle_style: YellowBattleStyle
+    text_speed: YellowTextSpeed
+    starting_sound: StartingSound

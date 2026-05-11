@@ -15,7 +15,7 @@ from .items import item_table, item_groups
 from .locations import (PokemonRedLocation, PokemonBlueLocation, PokemonYellowLocation, build_location_data,
                         build_location_name_to_id, location_data_blue, location_data_red, location_data_yellow)
 from .regions import create_regions
-from .options import PokemonRBOptions
+from .options import PokemonRBOptions, PokemonYellowOptions
 from .rom_addresses import rom_addresses_red, rom_addresses_yellow, rom_addresses_blue
 from .text import encode_text
 from .rom import generate_output, PokemonRedProcedurePatch, PokemonBlueProcedurePatch, PokemonYellowProcedurePatch
@@ -803,6 +803,8 @@ class PokemonBlueWorld(PokemonRBYWorld):
 class PokemonYellowWorld(PokemonRBYWorld):
     game = "Pokemon Yellow"
 
+    options_dataclass = PokemonYellowOptions
+    options: PokemonYellowOptions
     settings: typing.ClassVar[PokemonYellowSettings]
     item_name_to_id = PokemonRBYWorld.item_name_to_id
     item_name_groups = PokemonRBYWorld.item_name_groups

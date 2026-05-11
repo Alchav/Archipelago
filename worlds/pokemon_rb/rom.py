@@ -346,9 +346,11 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
     paths = None
 
     if pallet_connections["Player's House 1F"] == "Oak's Lab":
-        paths = (bytes([0x00, 4, 0x80, 5, 0x40, 1, 0xE0, 1, 0xFF]), bytes([0x40, 2, 0x20, 5, 0x80, 5, 0xFF]))
+        paths = (bytes([0x00, 5 if world.game == "Pokemon Yellow" else 4, 0x80, 5, 0x40, 1, 0xE0, 1, 0xFF]),
+                 bytes([0x40, 2, 0x20, 5, 0x80, 6 if world.game == "Pokemon Yellow" else 5, 0xFF]))
     elif pallet_connections["Rival's House"] == "Oak's Lab":
-        paths = (bytes([0x00, 4, 0xC0, 3, 0x40, 1, 0xE0, 1, 0xFF]), bytes([0x40, 2, 0x10, 3, 0x80, 5, 0xFF]))
+        paths = (bytes([0x00, 5 if world.game == "Pokemon Yellow" else 4, 0xC0, 3, 0x40, 1, 0xE0, 1, 0xFF]),
+                 bytes([0x40, 2, 0x10, 3, 0x80, 6 if world.game == "Pokemon Yellow" else 5, 0xFF]))
 
     if paths:
         write_bytes(world.rom_addresses["Path_Pallet_Oak"], paths[0])
@@ -688,9 +690,17 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
         write_bytes(world.rom_addresses["Rival_Name"], world.rival_name)
 
     options_byte = world.options.text_speed.value
-    options_byte |= world.options.archipelago_item_text.value << 4
-    options_byte |= world.options.auto_run.value << 5
-    options_byte |= world.options.battle_style.value << 6
+    if world.game == "Pokemon Yellow":
+        options_byte |= world.options.starting_sound.value << 4
+        options_byte |= (0 if world.options.battle_style == "in_game" else world.options.battle_style.value) << 6
+        ap_options_byte = world.options.archipelago_item_text.value
+        ap_options_byte |= world.options.auto_run.value << 1
+        write_bytes(world.rom_addresses["AP_Options"], ap_options_byte)
+        write_bytes(world.rom_addresses["Option_Battle_Style_In_Game"], int(world.options.battle_style == "in_game"))
+    else:
+        options_byte |= world.options.archipelago_item_text.value << 4
+        options_byte |= world.options.auto_run.value << 5
+        options_byte |= world.options.battle_style.value << 6
     options_byte |= world.options.battle_animations.value << 7
     write_bytes(world.rom_addresses["Options"], options_byte)
 
