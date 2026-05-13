@@ -364,7 +364,6 @@ LocationData("Pokemon Mansion 3F-SW", "Burglar", None, 'Trainersanity_EVENT_BEAT
 LocationData("Pokemon Mansion B1F", "Scientist", None, 'Trainersanity_EVENT_BEAT_MANSION_4_TRAINER_1_ITEM', EventFlag(29), inclusion=trainersanity),
 LocationData("Pokemon Mansion B1F", "Burglar", None, 'Trainersanity_EVENT_BEAT_MANSION_4_TRAINER_0_ITEM', EventFlag(30), inclusion=trainersanity),
 LocationData("Silph Co 11F", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_11F_TRAINER_1_ITEM', EventFlag(45), inclusion=trainersanity),
-LocationData("Silph Co 11F-W", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_11F_TRAINER_0_ITEM', EventFlag(46), inclusion=trainersanity),
 LocationData("Silph Co 10F", "Scientist", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_10F_TRAINER_1_ITEM', EventFlag(47), inclusion=trainersanity),
 LocationData("Silph Co 10F", "Rocket", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_10F_TRAINER_0_ITEM', EventFlag(48), inclusion=trainersanity),
 LocationData("Silph Co 9F", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_9F_TRAINER_2_ITEM', EventFlag(49), inclusion=trainersanity),
@@ -402,7 +401,6 @@ LocationData("Rocket Hideout B2F", "Rocket", None, 'Trainersanity_EVENT_BEAT_ROC
 LocationData("Rocket Hideout B3F", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_3_TRAINER_1_ITEM', EventFlag(92), inclusion=trainersanity),
 LocationData("Rocket Hideout B3F", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_3_TRAINER_0_ITEM', EventFlag(93), inclusion=trainersanity),
 LocationData("Rocket Hideout B4F-NW", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_4_TRAINER_2_ITEM', EventFlag(79), inclusion=trainersanity),
-LocationData("Rocket Hideout B4F", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_4_TRAINER_0_ITEM', EventFlag(91), inclusion=trainersanity),
 LocationData("S.S. Anne 1F Rooms-West Gentleman Room", "Gentleman 1", None, 'Trainersanity_EVENT_BEAT_SS_ANNE_8_TRAINER_1_ITEM', EventFlag(121), inclusion=trainersanity),
 LocationData("S.S. Anne 1F Rooms-East Gentleman Room", "Gentleman 2", None, 'Trainersanity_EVENT_BEAT_SS_ANNE_8_TRAINER_0_ITEM', EventFlag(122), inclusion=trainersanity),
 LocationData("S.S. Anne 1F Rooms-Youngster and Lass Room", "Lass", None, 'Trainersanity_EVENT_BEAT_SS_ANNE_8_TRAINER_3_ITEM', EventFlag(117), inclusion=trainersanity),
@@ -429,7 +427,6 @@ LocationData("Mt Moon 1F", "Hiker", None, 'Trainersanity_EVENT_BEAT_MT_MOON_1_TR
 LocationData("Mt Moon B2F-C", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_1_ITEM', EventFlag(127), inclusion=trainersanity),
 LocationData("Mt Moon B2F-NE", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_2_ITEM', EventFlag(126), inclusion=trainersanity),
 LocationData("Mt Moon B2F", "Rocket 3", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_3_ITEM', EventFlag(125), inclusion=trainersanity),
-LocationData("Mt Moon B2F", "Rocket 4", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_0_ITEM', EventFlag(128), inclusion=trainersanity),
 LocationData("Viridian Forest", "Bug Catcher 1", None, 'Trainersanity_EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_0_ITEM', EventFlag(139), inclusion=trainersanity),
 LocationData("Viridian Forest", "Bug Catcher 2", None, 'Trainersanity_EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_1_ITEM', EventFlag(138), inclusion=trainersanity),
 LocationData("Viridian Forest", "Bug Catcher 3", None, 'Trainersanity_EVENT_BEAT_VIRIDIAN_FOREST_TRAINER_2_ITEM', EventFlag(137), inclusion=trainersanity),
@@ -637,7 +634,6 @@ LocationData("Pokemon Tower 5F", "Channeler 4", None, 'Trainersanity_EVENT_BEAT_
 LocationData("Pokemon Tower 6F", "Channeler 1", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_6_TRAINER_0_ITEM', EventFlag(407), inclusion=trainersanity),
 LocationData("Pokemon Tower 6F", "Channeler 2", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_6_TRAINER_2_ITEM', EventFlag(405), inclusion=trainersanity),
 LocationData("Pokemon Tower 6F", "Channeler 3", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_6_TRAINER_1_ITEM', EventFlag(406), inclusion=trainersanity),
-LocationData("Pokemon Tower 7F", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_0_ITEM', EventFlag(403), inclusion=trainersanity),
 LocationData("Cerulean Gym", "Swimmer", None, 'Trainersanity_EVENT_BEAT_CERULEAN_GYM_TRAINER_1_ITEM', EventFlag(420), inclusion=trainersanity),
 LocationData("Cerulean Gym", "Jr. Trainer F", None, 'Trainersanity_EVENT_BEAT_CERULEAN_GYM_TRAINER_0_ITEM', EventFlag(421), inclusion=trainersanity),
 LocationData("Pewter Gym", "Jr. Trainer M", None, 'Trainersanity_EVENT_BEAT_PEWTER_GYM_TRAINER_0_ITEM', EventFlag(434), inclusion=trainersanity),
@@ -784,6 +780,10 @@ LocationData("Vermilion Dock", "Legendary Pokemon", "Mew", ['Static_Encounter_Me
 ]
 
 location_data_rb = location_data_common + [
+LocationData("Silph Co 11F-W", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_11F_TRAINER_0_ITEM', EventFlag(46), inclusion=trainersanity),
+LocationData("Rocket Hideout B4F", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_4_TRAINER_0_ITEM', EventFlag(91), inclusion=trainersanity),
+LocationData("Mt Moon B2F", "Rocket 4", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_0_ITEM', EventFlag(128), inclusion=trainersanity),
+LocationData("Pokemon Tower 7F", "Rocket 1", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_0_ITEM', EventFlag(403), inclusion=trainersanity),
 LocationData("Rocket Hideout B4F", "Rocket 3", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_4_TRAINER_1_ITEM', EventFlag(90), inclusion=trainersanity),
 LocationData("Pokemon Tower 7F", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_1_ITEM', EventFlag(402), inclusion=trainersanity),
 LocationData("Pokemon Tower 7F", "Rocket 3", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_2_ITEM', EventFlag(401), inclusion=trainersanity),
@@ -2495,6 +2495,10 @@ LocationData("Celadon Prize Corner", "Pokemon Prize - 5", 'Dratini', ['Prize_Mon
 
 
 location_data_yellow = location_data_common + [
+LocationData("Silph Co 11F-C", "Jessie and James", None, 'Trainersanity_EVENT_BEAT_SILPH_CO_11F_TRAINER_0_ITEM', EventFlag(46), inclusion=trainersanity),
+LocationData("Rocket Hideout B4F", "Jessie and James", None, 'Trainersanity_EVENT_BEAT_ROCKET_HIDEOUT_4_TRAINER_0_ITEM', EventFlag(91), inclusion=trainersanity),
+LocationData("Mt Moon B2F", "Jessie and James", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_0_ITEM', EventFlag(128), inclusion=trainersanity),
+LocationData("Pokemon Tower 7F", "Jessie and James", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_0_ITEM', EventFlag(403), inclusion=trainersanity),
 LocationData("Viridian Forest", "East Item", "Potion", 'Missable_Viridian_Forest_Item_1',
                  Missable(100)),
 LocationData("Cerulean Cave 1F-C", "Southeast Item", "Rare Candy", 'Missable_Cerulean_Cave_1F_Item_1',
@@ -4261,7 +4265,6 @@ LocationData("Cinnabar Lab Trade Room", "Cezanne Trade", "Dewgong", 'Trade_Cezan
 LocationData("Underground Path Route 5", "Ricky Trade", "Machoke", 'Trade_Ricky',
                  None, event=True, type="Static Repeatable Pokemon", address_offset=1),
 ]
-
 
 def build_location_groups(location_data):
     location_groups = defaultdict(list)
