@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from .. import poke_data
 from ..pokemon import (choose_forced_type, filter_moves, get_move, move_power, process_move_data,
                        set_mon_palettes)
-from ..rom_addresses import rom_addresses_red as rom_addresses
+from ..rom_addresses import rom_addresses_rb as rom_addresses
 
 
 class FixedRandom:

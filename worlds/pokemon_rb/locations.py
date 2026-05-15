@@ -1,7 +1,8 @@
 from collections import defaultdict
 from copy import deepcopy
-from BaseClasses import Location, ItemClassification
+from BaseClasses import Location
 from .items import item_table
+from .rom_addresses import missable_flags_rb, missable_flags_yellow
 from . import poke_data
 loc_id_start = 1
 
@@ -50,8 +51,52 @@ def not_stonesanity(world, player):
     return not world.options.stonesanity
 
 
+class RamAddress:
+    def __init__(self, flag):
+        self.byte = {"RB": flag // 8, "Y": flag // 8}
+        self.bit = {"RB": flag % 8, "Y": flag % 8}
+        self.flag = {"RB": flag, "Y": flag}
+
+
+class Missable(RamAddress):
+    def __init__(self, key):
+        self.byte = {}
+        self.bit = {}
+        self.flag = {}
+        if key in missable_flags_rb:
+            flag = missable_flags_rb[key]
+            self.byte["RB"] = flag // 8
+            self.bit["RB"] = flag % 8
+            self.flag["RB"] = flag
+        if key in missable_flags_yellow:
+            flag = missable_flags_yellow[key]
+            self.byte["Y"] = flag // 8
+            self.bit["Y"] = flag % 8
+            self.flag["Y"] = flag
+
+
+class Rod(RamAddress):
+    def __init__(self, flag):
+        self.byte = {"RB": 0, "Y": 0}
+        self.bit = {"RB": flag, "Y": flag}
+        self.flag = {"RB": flag, "Y": flag}
+
+
+class EventFlag(RamAddress):
+    pass
+
+
+class Hidden(RamAddress):
+    pass
+
+
+class DexSanityFlag(RamAddress):
+    pass
+
+
 class LocationData:
-    def __init__(self, region, name, original_item, rom_address=None, ram_address=None, event=False, type="Item",
+    def __init__(self, region, name, original_item, rom_address=None,
+                 ram_address=None, event=False, type="Item",
                  inclusion=always_on, level=None, level_address=None, address_offset=0, level_address_offset=0):
         self.region = region
         self.name = region if name == "" else region.split("-")[0] + " - " + name if name != "Trainer Parties" else region + " - Trainer Parties"
@@ -76,41 +121,6 @@ class LocationData:
 
     def __repr__(self):
         return "LocationData: " + self.name
-
-
-class EventFlag:
-    def __init__(self, flag):
-        self.byte = int(flag / 8)
-        self.bit = flag % 8
-        self.flag = flag
-
-
-class Missable:
-    def __init__(self, flag):
-        self.byte = int(flag / 8)
-        self.bit = flag % 8
-        self.flag = flag
-
-
-class Hidden:
-    def __init__(self, flag):
-        self.byte = int(flag / 8)
-        self.bit = flag % 8
-        self.flag = flag
-
-
-class Rod:
-    def __init__(self, flag):
-        self.byte = 0
-        self.bit = flag
-        self.flag = flag
-
-
-class DexSanityFlag:
-    def __init__(self, flag):
-        self.byte = int(flag / 8)
-        self.bit = flag % 8
-        self.flag = flag
 
 
 location_data_common = [
@@ -176,178 +186,178 @@ LocationData("Saffron Gym-C", "Sabrina TM", "TM46 Psywave", 'Event_Saffron_Gym',
 LocationData("Fossil", "Choice A", "Dome Fossil", ['Event_Dome_Fossil', 'Event_Dome_Fossil_B', 'Dome_Fossil_Text'], EventFlag(0x57E)),
 LocationData("Fossil", "Choice B", "Helix Fossil", ['Event_Helix_Fossil', 'Event_Helix_Fossil_B', 'Helix_Fossil_Text'], EventFlag(0x57F)),
 LocationData("Cerulean City-Outskirts", "Stolen Item", "TM28 Dig", 'Event_Rocket_Thief',
-                 Missable(6)),
+                 Missable("HS_CERULEAN_ROCKET")),
 LocationData("Route 2-SE", "South Item", "Moon Stone", 'Missable_Route_2_Item_1',
-                 Missable(25)),
-LocationData("Route 2-SE", "North Item", "HP Up", 'Missable_Route_2_Item_2', Missable(26)),
-LocationData("Route 4-C", "Item", "TM04 Whirlwind", 'Missable_Route_4_Item', Missable(27)),
-LocationData("Route 9", "Item", "TM30 Teleport", 'Missable_Route_9_Item', Missable(28)),
-LocationData("Route 12-N", "Island Item", "TM16 Pay Day", 'Missable_Route_12_Item_1', Missable(30)),
-LocationData("Route 12-Grass", "Item Behind Cuttable Tree", "Iron", 'Missable_Route_12_Item_2', Missable(31)),
-LocationData("Route 15-N", "Item", "TM20 Rage", 'Missable_Route_15_Item', Missable(32)),
-LocationData("Route 24", "Item", "TM45 Thunder Wave", 'Missable_Route_24_Item', Missable(37)),
-LocationData("Route 25", "Item", "TM19 Seismic Toss", 'Missable_Route_25_Item', Missable(38)),
-LocationData("Viridian Gym", "Item", "Revive", 'Missable_Viridian_Gym_Item', Missable(51)),
+                 Missable("HS_ROUTE_2_ITEM_1")),
+LocationData("Route 2-SE", "North Item", "HP Up", 'Missable_Route_2_Item_2', Missable("HS_ROUTE_2_ITEM_2")),
+LocationData("Route 4-C", "Item", "TM04 Whirlwind", 'Missable_Route_4_Item', Missable("HS_ROUTE_4_ITEM")),
+LocationData("Route 9", "Item", "TM30 Teleport", 'Missable_Route_9_Item', Missable("HS_ROUTE_9_ITEM")),
+LocationData("Route 12-N", "Island Item", "TM16 Pay Day", 'Missable_Route_12_Item_1', Missable("HS_ROUTE_12_ITEM_1")),
+LocationData("Route 12-Grass", "Item Behind Cuttable Tree", "Iron", 'Missable_Route_12_Item_2', Missable("HS_ROUTE_12_ITEM_2")),
+LocationData("Route 15-N", "Item", "TM20 Rage", 'Missable_Route_15_Item', Missable("HS_ROUTE_15_ITEM")),
+LocationData("Route 24", "Item", "TM45 Thunder Wave", 'Missable_Route_24_Item', Missable("HS_ROUTE_24_ITEM")),
+LocationData("Route 25", "Item", "TM19 Seismic Toss", 'Missable_Route_25_Item', Missable("HS_ROUTE_25_ITEM")),
+LocationData("Viridian Gym", "Item", "Revive", 'Missable_Viridian_Gym_Item', Missable("HS_VIRIDIAN_GYM_ITEM")),
 LocationData("Pokemon Tower 3F", "North Item", "Escape Rope", 'Missable_Pokemon_Tower_3F_Item',
-                 Missable(57)),
+                 Missable("HS_POKEMON_TOWER_3F_ITEM")),
 LocationData("Pokemon Tower 4F", "East Item", "Elixir", 'Missable_Pokemon_Tower_4F_Item_1',
-                 Missable(58)),
+                 Missable("HS_POKEMON_TOWER_4F_ITEM_1")),
 LocationData("Pokemon Tower 4F", "West Item", "Awakening", 'Missable_Pokemon_Tower_4F_Item_2',
-                 Missable(59)),
+                 Missable("HS_POKEMON_TOWER_4F_ITEM_2")),
 LocationData("Pokemon Tower 4F", "South Item", "HP Up", 'Missable_Pokemon_Tower_4F_Item_3',
-                 Missable(60)),
+                 Missable("HS_POKEMON_TOWER_4F_ITEM_3")),
 LocationData("Pokemon Tower 5F", "Southwest Item", "Nugget", 'Missable_Pokemon_Tower_5F_Item',
-                 Missable(61)),
+                 Missable("HS_POKEMON_TOWER_5F_ITEM")),
 LocationData("Pokemon Tower 6F", "West Item", "Rare Candy", 'Missable_Pokemon_Tower_6F_Item_1',
-                 Missable(62)),
+                 Missable("HS_POKEMON_TOWER_6F_ITEM_1")),
 LocationData("Pokemon Tower 6F", "Southeast Item", "X Accuracy", 'Missable_Pokemon_Tower_6F_Item_2',
-                 Missable(63)),
+                 Missable("HS_POKEMON_TOWER_6F_ITEM_2")),
 LocationData("Fuchsia Warden's House", "Behind Boulder Item", "Rare Candy", 'Missable_Wardens_House_Item',
-                 Missable(71)),
+                 Missable("HS_WARDENS_HOUSE_ITEM")),
 LocationData("Pokemon Mansion 1F", "North Item", "Escape Rope",
-                 'Missable_Pokemon_Mansion_1F_Item_1', Missable(72)),
+                 'Missable_Pokemon_Mansion_1F_Item_1', Missable("HS_POKEMON_MANSION_1F_ITEM_1")),
 LocationData("Pokemon Mansion 1F-SE", "South Item", "Carbos", 'Missable_Pokemon_Mansion_1F_Item_2',
-                 Missable(73)),
-LocationData("Power Plant", "Southwest Item", "Carbos", 'Missable_Power_Plant_Item_1', Missable(86)),
-LocationData("Power Plant", "North Item", "HP Up", 'Missable_Power_Plant_Item_2', Missable(87)),
+                 Missable("HS_POKEMON_MANSION_1F_ITEM_2")),
+LocationData("Power Plant", "Southwest Item", "Carbos", 'Missable_Power_Plant_Item_1', Missable("HS_POWER_PLANT_ITEM_1")),
+LocationData("Power Plant", "North Item", "HP Up", 'Missable_Power_Plant_Item_2', Missable("HS_POWER_PLANT_ITEM_2")),
 LocationData("Power Plant", "Northeast Item", "Rare Candy", 'Missable_Power_Plant_Item_3',
-                 Missable(88)),
+                 Missable("HS_POWER_PLANT_ITEM_3")),
 LocationData("Power Plant", "Southeast Item", "TM25 Thunder", 'Missable_Power_Plant_Item_4',
-                 Missable(89)),
+                 Missable("HS_POWER_PLANT_ITEM_4")),
 LocationData("Power Plant", "South Item", "TM33 Reflect", 'Missable_Power_Plant_Item_5',
-                 Missable(90)),
+                 Missable("HS_POWER_PLANT_ITEM_5")),
 LocationData("Victory Road 2F-C", "Northeast Item", "TM17 Submission", 'Missable_Victory_Road_2F_Item_1',
-                 Missable(92)),
+                 Missable("HS_VICTORY_ROAD_2F_ITEM_1")),
 LocationData("Victory Road 2F-C", "East Item", "Full Heal", 'Missable_Victory_Road_2F_Item_2',
-                 Missable(93)),
+                 Missable("HS_VICTORY_ROAD_2F_ITEM_2")),
 LocationData("Victory Road 2F-C", "West Item", "TM05 Mega Kick", 'Missable_Victory_Road_2F_Item_3',
-                 Missable(94)),
+                 Missable("HS_VICTORY_ROAD_2F_ITEM_3")),
 LocationData("Victory Road 2F-NW", "North Item Near Moltres", "Guard Spec", 'Missable_Victory_Road_2F_Item_4',
-                 Missable(95)),
+                 Missable("HS_VICTORY_ROAD_2F_ITEM_4")),
 LocationData("Viridian Forest", "Northwest Item", "Potion", 'Missable_Viridian_Forest_Item_2',
-                 Missable(101)),
+                 Missable("HS_VIRIDIAN_FOREST_ITEM_2")),
 LocationData("Viridian Forest", "Southwest Item", "Poke Ball",
-                 'Missable_Viridian_Forest_Item_3', Missable(102)),
-LocationData("Mt Moon 1F", "West Item", "Potion", 'Missable_Mt_Moon_1F_Item_1', Missable(103)),
-LocationData("Mt Moon 1F", "Northwest Item", "Moon Stone", 'Missable_Mt_Moon_1F_Item_2', Missable(104)),
-LocationData("Mt Moon 1F", "Southeast Item", "Rare Candy", 'Missable_Mt_Moon_1F_Item_3', Missable(105)),
+                 'Missable_Viridian_Forest_Item_3', Missable("HS_VIRIDIAN_FOREST_ITEM_3")),
+LocationData("Mt Moon 1F", "West Item", "Potion", 'Missable_Mt_Moon_1F_Item_1', Missable("HS_MT_MOON_1F_ITEM_1")),
+LocationData("Mt Moon 1F", "Northwest Item", "Moon Stone", 'Missable_Mt_Moon_1F_Item_2', Missable("HS_MT_MOON_1F_ITEM_2")),
+LocationData("Mt Moon 1F", "Southeast Item", "Rare Candy", 'Missable_Mt_Moon_1F_Item_3', Missable("HS_MT_MOON_1F_ITEM_3")),
 LocationData("Mt Moon 1F", "East Item", "Escape Rope", 'Missable_Mt_Moon_1F_Item_4',
-                 Missable(106)),
-LocationData("Mt Moon 1F", "South Item", "Potion", 'Missable_Mt_Moon_1F_Item_5', Missable(107)),
+                 Missable("HS_MT_MOON_1F_ITEM_4")),
+LocationData("Mt Moon 1F", "South Item", "Potion", 'Missable_Mt_Moon_1F_Item_5', Missable("HS_MT_MOON_1F_ITEM_5")),
 LocationData("Mt Moon 1F", "Southwest Item", "TM12 Water Gun", 'Missable_Mt_Moon_1F_Item_6',
-                 Missable(108)),
-LocationData("Mt Moon B2F-C", "South Item", "HP Up", 'Missable_Mt_Moon_B2F_Item_1', Missable(111)),
+                 Missable("HS_MT_MOON_1F_ITEM_6")),
+LocationData("Mt Moon B2F-C", "South Item", "HP Up", 'Missable_Mt_Moon_B2F_Item_1', Missable("HS_MT_MOON_B2F_ITEM_1")),
 LocationData("Mt Moon B2F-NE", "North Item", "TM01 Mega Punch", 'Missable_Mt_Moon_B2F_Item_2',
-                 Missable(112)),
+                 Missable("HS_MT_MOON_B2F_ITEM_2")),
 LocationData("S.S. Anne 1F Rooms-Youngster and Lass Room", "Item", "TM08 Body Slam", 'Missable_SS_Anne_1F_Item',
-                 Missable(114)),
+                 Missable("HS_SS_ANNE_1F_ROOMS_ITEM")),
 LocationData("S.S. Anne 2F Rooms-Fisherman and Gentleman Room", "Fisherman and Gentleman Room Item", "Max Ether", 'Missable_SS_Anne_2F_Item_1',
-                 Missable(115)),
+                 Missable("HS_SS_ANNE_2F_ROOMS_ITEM_1")),
 LocationData("S.S. Anne 2F Rooms-Gentleman and Lass Room", "Gentleman and Lass Room Item", "Rare Candy", 'Missable_SS_Anne_2F_Item_2',
-                 Missable(116)),
-LocationData("S.S. Anne B1F Rooms-East Single Sailor Room", "East Single Sailor Room Item", "Ether", 'Missable_SS_Anne_B1F_Item_1', Missable(117)),
+                 Missable("HS_SS_ANNE_2F_ROOMS_ITEM_2")),
+LocationData("S.S. Anne B1F Rooms-East Single Sailor Room", "East Single Sailor Room Item", "Ether", 'Missable_SS_Anne_B1F_Item_1', Missable("HS_SS_ANNE_B1F_ROOMS_ITEM_1")),
 LocationData("S.S. Anne B1F Rooms-West Single Sailor Room", "West Single Sailor Room Item", "TM44 Rest", 'Missable_SS_Anne_B1F_Item_2',
-                 Missable(118)),
+                 Missable("HS_SS_ANNE_B1F_ROOMS_ITEM_2")),
 LocationData("S.S. Anne B1F Rooms-Machoke Room", "Machoke Room Item", "Max Potion", 'Missable_SS_Anne_B1F_Item_3',
-                 Missable(119)),
+                 Missable("HS_SS_ANNE_B1F_ROOMS_ITEM_3")),
 LocationData("Victory Road 3F", "Northeast Item", "Max Revive", 'Missable_Victory_Road_3F_Item_1',
-                 Missable(120)),
+                 Missable("HS_VICTORY_ROAD_3F_ITEM_1")),
 LocationData("Victory Road 3F", "Northwest Item", "TM47 Explosion", 'Missable_Victory_Road_3F_Item_2',
-                 Missable(121)),
+                 Missable("HS_VICTORY_ROAD_3F_ITEM_2")),
 LocationData("Rocket Hideout B1F", "West Item", "Escape Rope",
-                 'Missable_Rocket_Hideout_B1F_Item_1', Missable(123)),
+                 'Missable_Rocket_Hideout_B1F_Item_1', Missable("HS_ROCKET_HIDEOUT_B1F_ITEM_1")),
 LocationData("Rocket Hideout B1F-S", "Southwest Item", "Hyper Potion",
-                 'Missable_Rocket_Hideout_B1F_Item_2', Missable(124)),
+                 'Missable_Rocket_Hideout_B1F_Item_2', Missable("HS_ROCKET_HIDEOUT_B1F_ITEM_2")),
 LocationData("Rocket Hideout B2F", "Northwest Left Item", "Moon Stone", 'Missable_Rocket_Hideout_B2F_Item_1',
-                 Missable(125)),
+                 Missable("HS_ROCKET_HIDEOUT_B2F_ITEM_1")),
 LocationData("Rocket Hideout B2F", "Northeast Item", "Nugget", 'Missable_Rocket_Hideout_B2F_Item_2',
-                 Missable(126)),
+                 Missable("HS_ROCKET_HIDEOUT_B2F_ITEM_2")),
 LocationData("Rocket Hideout B2F", "Northwest Right Item", "TM07 Horn Drill",
-                 'Missable_Rocket_Hideout_B2F_Item_3', Missable(127)),
+                 'Missable_Rocket_Hideout_B2F_Item_3', Missable("HS_ROCKET_HIDEOUT_B2F_ITEM_3")),
 LocationData("Rocket Hideout B2F", "Southwest Item", "Super Potion",
-                 'Missable_Rocket_Hideout_B2F_Item_4', Missable(128)),
+                 'Missable_Rocket_Hideout_B2F_Item_4', Missable("HS_ROCKET_HIDEOUT_B2F_ITEM_4")),
 LocationData("Rocket Hideout B3F", "East Item", "TM10 Double Edge",
-                 'Missable_Rocket_Hideout_B3F_Item_1', Missable(129)),
+                 'Missable_Rocket_Hideout_B3F_Item_1', Missable("HS_ROCKET_HIDEOUT_B3F_ITEM_1")),
 LocationData("Rocket Hideout B3F", "Center Item", "Rare Candy", 'Missable_Rocket_Hideout_B3F_Item_2',
-                 Missable(130)),
+                 Missable("HS_ROCKET_HIDEOUT_B3F_ITEM_2")),
 LocationData("Rocket Hideout B4F-NW", "West Item", "HP Up", 'Missable_Rocket_Hideout_B4F_Item_1',
-                 Missable(132)),
+                 Missable("HS_ROCKET_HIDEOUT_B4F_ITEM_1")),
 LocationData("Rocket Hideout B4F-NW", "Northwest Item", "TM02 Razor Wind",
-                 'Missable_Rocket_Hideout_B4F_Item_2', Missable(133)),
+                 'Missable_Rocket_Hideout_B4F_Item_2', Missable("HS_ROCKET_HIDEOUT_B4F_ITEM_2")),
 LocationData("Rocket Hideout B4F", "Southwest Item", "Iron", 'Missable_Rocket_Hideout_B4F_Item_3',
-                 Missable(134)),
+                 Missable("HS_ROCKET_HIDEOUT_B4F_ITEM_3")),
 LocationData("Rocket Hideout B4F", "Giovanni Dropped Item", "Silph Scope",
-                 'Missable_Rocket_Hideout_B4F_Item_4', [EventFlag(0x6A7), Missable(135)]),
+                 'Missable_Rocket_Hideout_B4F_Item_4', [EventFlag(0x6A7), Missable("HS_ROCKET_HIDEOUT_B4F_ITEM_4")]),
 LocationData("Rocket Hideout B4F-NW", "Rocket Grunt Item", "Lift Key", 'Missable_Rocket_Hideout_B4F_Item_5',
-                 [EventFlag(0x6A6), Missable(136)]),
-LocationData("Silph Co 3F-W", "Item", "Hyper Potion", 'Missable_Silph_Co_3F_Item', Missable(144)),
+                 [EventFlag(0x6A6), Missable("HS_ROCKET_HIDEOUT_B4F_ITEM_5")]),
+LocationData("Silph Co 3F-W", "Item", "Hyper Potion", 'Missable_Silph_Co_3F_Item', Missable("HS_SILPH_CO_3F_ITEM")),
 LocationData("Silph Co 4F-W", "Left Item", "Full Heal", 'Missable_Silph_Co_4F_Item_1',
-                 Missable(148)),
+                 Missable("HS_SILPH_CO_4F_ITEM_1")),
 LocationData("Silph Co 4F-W", "Middle Item", "Max Revive", 'Missable_Silph_Co_4F_Item_2',
-                 Missable(149)),
+                 Missable("HS_SILPH_CO_4F_ITEM_2")),
 LocationData("Silph Co 4F-W", "Right Item", "Escape Rope", 'Missable_Silph_Co_4F_Item_3',
-                 Missable(150)),
+                 Missable("HS_SILPH_CO_4F_ITEM_3")),
 LocationData("Silph Co 5F-SW", "Southwest Item", "TM09 Take Down", 'Missable_Silph_Co_5F_Item_1',
-                 Missable(155)),
-LocationData("Silph Co 5F-NW", "Northwest Item", "Protein", 'Missable_Silph_Co_5F_Item_2', Missable(156)),
-LocationData("Silph Co 5F", "Southeast Item", "Card Key", 'Missable_Silph_Co_5F_Item_3', Missable(157)),
-LocationData("Silph Co 6F-SW", "Southwest Top Item", "HP Up", 'Missable_Silph_Co_6F_Item_1', Missable(161)),
+                 Missable("HS_SILPH_CO_5F_ITEM_1")),
+LocationData("Silph Co 5F-NW", "Northwest Item", "Protein", 'Missable_Silph_Co_5F_Item_2', Missable("HS_SILPH_CO_5F_ITEM_2")),
+LocationData("Silph Co 5F", "Southeast Item", "Card Key", 'Missable_Silph_Co_5F_Item_3', Missable("HS_SILPH_CO_5F_ITEM_3")),
+LocationData("Silph Co 6F-SW", "Southwest Top Item", "HP Up", 'Missable_Silph_Co_6F_Item_1', Missable("HS_SILPH_CO_6F_ITEM_1")),
 LocationData("Silph Co 6F-SW", "Southwest Bottom Item", "X Accuracy", 'Missable_Silph_Co_6F_Item_2',
-                 Missable(162)),
-LocationData("Silph Co 7F", "West Item", "Calcium", 'Missable_Silph_Co_7F_Item_1', Missable(168)),
+                 Missable("HS_SILPH_CO_6F_ITEM_2")),
+LocationData("Silph Co 7F", "West Item", "Calcium", 'Missable_Silph_Co_7F_Item_1', Missable("HS_SILPH_CO_7F_ITEM_1")),
 LocationData("Silph Co 7F-E", "East Item", "TM03 Swords Dance", 'Missable_Silph_Co_7F_Item_2',
-                 Missable(169)),
+                 Missable("HS_SILPH_CO_7F_ITEM_2")),
 LocationData("Silph Co 10F", "Left Item", "TM26 Earthquake", 'Missable_Silph_Co_10F_Item_1',
-                 Missable(180)),
+                 Missable("HS_SILPH_CO_10F_ITEM_1")),
 LocationData("Silph Co 10F", "Bottom Item", "Rare Candy", 'Missable_Silph_Co_10F_Item_2',
-                 Missable(181)),
-LocationData("Silph Co 10F", "Right Item", "Carbos", 'Missable_Silph_Co_10F_Item_3', Missable(182)),
+                 Missable("HS_SILPH_CO_10F_ITEM_2")),
+LocationData("Silph Co 10F", "Right Item", "Carbos", 'Missable_Silph_Co_10F_Item_3', Missable("HS_SILPH_CO_10F_ITEM_3")),
 LocationData("Pokemon Mansion 2F", "Northeast Item", "Calcium", 'Missable_Pokemon_Mansion_2F_Item',
-                 Missable(187)),
+                 Missable("HS_POKEMON_MANSION_2F_ITEM")),
 LocationData("Pokemon Mansion 3F-SW", "Southwest Item", "Max Potion", 'Missable_Pokemon_Mansion_3F_Item_1',
-                 Missable(188)),
+                 Missable("HS_POKEMON_MANSION_3F_ITEM_1")),
 LocationData("Pokemon Mansion 3F", "Northeast Item", "Iron", 'Missable_Pokemon_Mansion_3F_Item_2',
-                 Missable(189)),
+                 Missable("HS_POKEMON_MANSION_3F_ITEM_2")),
 LocationData("Pokemon Mansion B1F", "North Item", "Rare Candy",
-                 'Missable_Pokemon_Mansion_B1F_Item_1', Missable(190)),
+                 'Missable_Pokemon_Mansion_B1F_Item_1', Missable("HS_POKEMON_MANSION_B1F_ITEM_1")),
 LocationData("Pokemon Mansion B1F", "Southwest Item", "Full Restore",
-                 'Missable_Pokemon_Mansion_B1F_Item_2', Missable(191)),
+                 'Missable_Pokemon_Mansion_B1F_Item_2', Missable("HS_POKEMON_MANSION_B1F_ITEM_2")),
 LocationData("Pokemon Mansion B1F", "South Item", "TM14 Blizzard",
-                 'Missable_Pokemon_Mansion_B1F_Item_3', Missable(192)),
+                 'Missable_Pokemon_Mansion_B1F_Item_3', Missable("HS_POKEMON_MANSION_B1F_ITEM_3")),
 LocationData("Pokemon Mansion B1F", "Northwest Item", "TM22 Solar Beam",
-                 'Missable_Pokemon_Mansion_B1F_Item_4', Missable(193)),
+                 'Missable_Pokemon_Mansion_B1F_Item_4', Missable("HS_POKEMON_MANSION_B1F_ITEM_4")),
 LocationData("Pokemon Mansion B1F", "West Item", "Secret Key",
-                 'Missable_Pokemon_Mansion_B1F_Item_5', Missable(194)),
+                 'Missable_Pokemon_Mansion_B1F_Item_5', Missable("HS_POKEMON_MANSION_B1F_ITEM_5")),
 LocationData("Safari Zone East", "Northeast Item", "Full Restore", 'Missable_Safari_Zone_East_Item_1',
-                 Missable(195)),
+                 Missable("HS_SAFARI_ZONE_EAST_ITEM_1")),
 LocationData("Safari Zone East", "West Item", "Max Potion", 'Missable_Safari_Zone_East_Item_2',
-                 Missable(196)),
+                 Missable("HS_SAFARI_ZONE_EAST_ITEM_2")),
 LocationData("Safari Zone East", "East Item", "Carbos", 'Missable_Safari_Zone_East_Item_3',
-                 Missable(197)),
+                 Missable("HS_SAFARI_ZONE_EAST_ITEM_3")),
 LocationData("Safari Zone East", "Center Item", "TM37 Egg Bomb", 'Missable_Safari_Zone_East_Item_4',
-                 Missable(198)),
+                 Missable("HS_SAFARI_ZONE_EAST_ITEM_4")),
 LocationData("Safari Zone North", "Northeast Item", "Protein", 'Missable_Safari_Zone_North_Item_1',
-                 Missable(199)),
+                 Missable("HS_SAFARI_ZONE_NORTH_ITEM_1")),
 LocationData("Safari Zone North", "North Item", "TM40 Skull Bash",
-                 'Missable_Safari_Zone_North_Item_2', Missable(200)),
+                 'Missable_Safari_Zone_North_Item_2', Missable("HS_SAFARI_ZONE_NORTH_ITEM_2")),
 LocationData("Safari Zone West", "Southwest Item", "Max Potion", 'Missable_Safari_Zone_West_Item_1',
-                 Missable(201)),
+                 Missable("HS_SAFARI_ZONE_WEST_ITEM_1")),
 LocationData("Safari Zone West-NW", "Northwest Item", "TM32 Double Team",
-                 'Missable_Safari_Zone_West_Item_2', Missable(202)),
+                 'Missable_Safari_Zone_West_Item_2', Missable("HS_SAFARI_ZONE_WEST_ITEM_2")),
 LocationData("Safari Zone West", "Southeast Item", "Max Revive", 'Missable_Safari_Zone_West_Item_3',
-                 Missable(203)),
+                 Missable("HS_SAFARI_ZONE_WEST_ITEM_3")),
 LocationData("Safari Zone West-NW", "Northeast Item", "Gold Teeth", 'Missable_Safari_Zone_West_Item_4',
-                 Missable(204)),
+                 Missable("HS_SAFARI_ZONE_WEST_ITEM_4")),
 LocationData("Safari Zone Center-C", "Island Item", "Nugget", 'Missable_Safari_Zone_Center_Item',
-                 Missable(205)),
+                 Missable("HS_SAFARI_ZONE_CENTER_ITEM")),
 LocationData("Rock Tunnel B1F-E", "Southwest Item", "Hideout Key", 'Missable_Rock_Tunnel_B1F_Item_1',
-                 Missable(231), inclusion=extra_key_items),
+                 Missable("HS_ROCK_TUNNEL_B1F_ITEM_1"), inclusion=extra_key_items),
 LocationData("Rock Tunnel B1F-W", "West Item", "Mansion Key", 'Missable_Rock_Tunnel_B1F_Item_2',
-                 Missable(232), inclusion=extra_key_items),
+                 Missable("HS_ROCK_TUNNEL_B1F_ITEM_2"), inclusion=extra_key_items),
 LocationData("Rock Tunnel B1F-W", "Northwest Item", "Plant Key", 'Missable_Rock_Tunnel_B1F_Item_3',
-                 Missable(233), inclusion=extra_key_items),
+                 Missable("HS_ROCK_TUNNEL_B1F_ITEM_3"), inclusion=extra_key_items),
 LocationData("Rock Tunnel B1F-W", "North Item", "Safari Pass", 'Missable_Rock_Tunnel_B1F_Item_4',
-                 Missable(234), inclusion=extra_key_items),
+                 Missable("HS_ROCK_TUNNEL_B1F_ITEM_4"), inclusion=extra_key_items),
 LocationData("Pewter Gym", "Brock Prize", "Boulder Badge", 'Badge_Pewter_Gym', EventFlag(0x8A0)),
 LocationData("Cerulean Gym", "Misty Prize", "Cascade Badge", 'Badge_Cerulean_Gym', EventFlag(0x8A1)),
 LocationData("Vermilion Gym", "Lt. Surge Prize", "Thunder Badge", 'Badge_Vermilion_Gym', EventFlag(0x8A2)),
@@ -788,27 +798,27 @@ LocationData("Rocket Hideout B4F", "Rocket 3", None, 'Trainersanity_EVENT_BEAT_R
 LocationData("Pokemon Tower 7F", "Rocket 2", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_1_ITEM', EventFlag(402), inclusion=trainersanity),
 LocationData("Pokemon Tower 7F", "Rocket 3", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_2_ITEM', EventFlag(401), inclusion=trainersanity),
 LocationData("Viridian Forest", "East Item", "Antidote", 'Missable_Viridian_Forest_Item_1',
-                 Missable(100)),
+                 Missable("HS_VIRIDIAN_FOREST_ITEM_1")),
 LocationData("Cerulean Cave 1F-Water", "Southwest Item", "Full Restore", 'Missable_Cerulean_Cave_1F_Item_1',
-                 Missable(53)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_1")),
 LocationData("Cerulean Cave 1F-Water", "Northeast Item", "Max Elixir", 'Missable_Cerulean_Cave_1F_Item_2',
-                 Missable(54)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_2")),
 LocationData("Cerulean Cave 1F-N", "Northwest Item", "Nugget", 'Missable_Cerulean_Cave_1F_Item_3',
-                 Missable(55)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_3")),
 LocationData("Cerulean Cave 2F-E", "East Item", "PP Up", 'Missable_Cerulean_Cave_2F_Item_1',
-                 Missable(206)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_1")),
 LocationData("Cerulean Cave 2F-W", "Southwest Item", "Ultra Ball", 'Missable_Cerulean_Cave_2F_Item_2',
-                 Missable(207)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_2")),
 LocationData("Cerulean Cave 2F-N", "North Item", "Full Restore", 'Missable_Cerulean_Cave_2F_Item_3',
-                 Missable(208)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_3")),
 LocationData("Cerulean Cave B1F", "Center Item", "Ultra Ball", 'Missable_Cerulean_Cave_B1F_Item_1',
-                 Missable(210)),
+                 Missable("HS_CERULEAN_CAVE_B1F_ITEM_1")),
 LocationData("Cerulean Cave B1F", "North Item", "Max Revive", 'Missable_Cerulean_Cave_B1F_Item_2',
-                 Missable(211)),
+                 Missable("HS_CERULEAN_CAVE_B1F_ITEM_2")),
 LocationData("Victory Road 1F", "Top Item", "TM43 Sky Attack", 'Missable_Victory_Road_1F_Item_1',
-                 Missable(212)),
+                 Missable("HS_VICTORY_ROAD_1F_ITEM_1")),
 LocationData("Victory Road 1F", "Left Item", "Rare Candy", 'Missable_Victory_Road_1F_Item_2',
-                 Missable(213)),
+                 Missable("HS_VICTORY_ROAD_1F_ITEM_2")),
 LocationData("Viridian Forest", "Hidden Item Northwest by Trainer", "Potion", 'Hidden_Item_Viridian_Forest_1', Hidden(0), inclusion=hidden_items),
 LocationData("Viridian Forest", "Hidden Item Entrance Tree", "Antidote", 'Hidden_Item_Viridian_Forest_2', Hidden(1), inclusion=hidden_items),
 LocationData("Mt Moon B2F", "Hidden Item Dead End Before Fossils", "Moon Stone", 'Hidden_Item_MtMoonB2F_1', Hidden(2), inclusion=hidden_moon_stones),
@@ -2500,35 +2510,35 @@ LocationData("Rocket Hideout B4F", "Jessie and James", None, 'Trainersanity_EVEN
 LocationData("Mt Moon B2F", "Jessie and James", None, 'Trainersanity_EVENT_BEAT_MT_MOON_3_TRAINER_0_ITEM', EventFlag(128), inclusion=trainersanity),
 LocationData("Pokemon Tower 7F", "Jessie and James", None, 'Trainersanity_EVENT_BEAT_POKEMONTOWER_7_TRAINER_0_ITEM', EventFlag(403), inclusion=trainersanity),
 LocationData("Viridian Forest", "East Item", "Potion", 'Missable_Viridian_Forest_Item_1',
-                 Missable(100)),
+                 Missable("HS_VIRIDIAN_FOREST_ITEM_1")),
 LocationData("Cerulean Cave 1F-C", "Southeast Item", "Rare Candy", 'Missable_Cerulean_Cave_1F_Item_1',
-                 Missable(0x35)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_1")),
 LocationData("Cerulean Cave 1F-Water", "Southwest Item", "Max Elixir", 'Missable_Cerulean_Cave_1F_Item_2',
-                 Missable(0x36)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_2")),
 LocationData("Cerulean Cave 1F-N", "Northeast Item", "Max Revive", 'Missable_Cerulean_Cave_1F_Item_3',
-                 Missable(0x37)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_3")),
 LocationData("Cerulean Cave 1F-C", "North Item", "Ultra Ball", 'Missable_Cerulean_Cave_1F_Item_4',
-                 Missable(0x38)),
+                 Missable("HS_CERULEAN_CAVE_1F_ITEM_4")),
 LocationData("Cerulean Cave 2F-N", "West Item", "Rare Candy", 'Missable_Cerulean_Cave_2F_Item_1',
-                 Missable(0xD3)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_1")),
 LocationData("Cerulean Cave 2F-S", "Center Item", "Ultra Ball", 'Missable_Cerulean_Cave_2F_Item_2',
-                 Missable(0xD4)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_2")),
 LocationData("Cerulean Cave 2F-S", "East Item", "Max Revive", 'Missable_Cerulean_Cave_2F_Item_3',
-                 Missable(0xD5)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_3")),
 LocationData("Cerulean Cave 2F-E", "Northeast Item", "Full Restore", 'Missable_Cerulean_Cave_2F_Item_4',
-                 Missable(0xD6)),
+                 Missable("HS_CERULEAN_CAVE_2F_ITEM_4")),
 LocationData("Cerulean Cave B1F-E", "Northeast Item", "Ultra Ball", 'Missable_Cerulean_Cave_B1F_Item_1',
-                 Missable(0xD8)),
+                 Missable("HS_CERULEAN_CAVE_B1F_ITEM_1")),
 LocationData("Cerulean Cave B1F-E", "West Item", "Ultra Ball", 'Missable_Cerulean_Cave_B1F_Item_2',
-                 Missable(0xD9)),
+                 Missable("HS_CERULEAN_CAVE_B1F_ITEM_2")),
 LocationData("Cerulean Cave B1F-E", "Southwest Item", "Max Revive", 'Missable_Cerulean_Cave_B1F_Item_3',
-                 Missable(0xDA)),
+                 Missable("HS_CERULEAN_CAVE_B1F_ITEM_3")),
 LocationData("Cerulean Cave B1F", "North Item", "Max Elixir", 'Missable_Cerulean_Cave_B1F_Item_4',
-                 Missable(0xDB)),
+                 Missable("HS_CERULEAN_CAVE_B1F_ITEM_4")),
 LocationData("Victory Road 1F", "Top Item", "TM43 Sky Attack", 'Missable_Victory_Road_1F_Item_1',
-                 Missable(0xDC)),
+                 Missable("HS_VICTORY_ROAD_1F_ITEM_1")),
 LocationData("Victory Road 1F", "Left Item", "Rare Candy", 'Missable_Victory_Road_1F_Item_2',
-                 Missable(0xDD)),
+                 Missable("HS_VICTORY_ROAD_1F_ITEM_2")),
 LocationData("Silph Co 5F", "Hidden Item Pot Plant", "Elixir", 'Hidden_Item_Silph_Co_5F', Hidden(0), inclusion=hidden_items),
 LocationData("Silph Co 9F-SW", "Hidden Item Nurse Bed", "Max Potion", 'Hidden_Item_Silph_Co_9F', Hidden(1), inclusion=hidden_items),
 LocationData("Pokemon Mansion 3F-SW", "Hidden Item Behind Burglar", "Max Revive", 'Hidden_Item_Pokemon_Mansion_3F', Hidden(2), inclusion=hidden_items),
@@ -4347,7 +4357,6 @@ def build_location_data(*location_sets, trainer_data):
     return location_data, level_list, level_name_list, build_location_groups(location_data)
 
 class PokemonRBYLocation(Location):
-
     def __init__(self, player, name, address, rom_address, type, level, level_address,
                  address_offset=0, level_address_offset=0):
         super().__init__(

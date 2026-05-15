@@ -16,7 +16,7 @@ from .locations import (PokemonRedLocation, PokemonBlueLocation, PokemonYellowLo
                         build_location_name_to_id, location_data_blue, location_data_red, location_data_yellow)
 from .regions import create_regions
 from .options import PokemonRBOptions, PokemonYellowOptions
-from .rom_addresses import rom_addresses_red, rom_addresses_yellow, rom_addresses_blue
+from .rom_addresses import rom_addresses_rb, rom_addresses_yellow
 from .text import encode_text
 from .rom import generate_output, PokemonRedProcedurePatch, PokemonBlueProcedurePatch, PokemonYellowProcedurePatch
 from .pokemon import process_pokemon_data, process_move_data, verify_hm_moves
@@ -764,7 +764,7 @@ class PokemonRedWorld(PokemonRBYWorld):
     item_name_groups = PokemonRBYWorld.item_name_groups
     patch = PokemonRedProcedurePatch
     location = PokemonRedLocation
-    rom_addresses = rom_addresses_red
+    rom_addresses = rom_addresses_rb
     trainer_data = trainer_data_rb
     trade_data = trade_data_red
     warp_data = warp_data_rb
@@ -786,7 +786,7 @@ class PokemonBlueWorld(PokemonRBYWorld):
     item_name_groups = PokemonRBYWorld.item_name_groups
     patch = PokemonBlueProcedurePatch
     location = PokemonBlueLocation
-    rom_addresses = rom_addresses_blue
+    rom_addresses = rom_addresses_rb
     trainer_data = trainer_data_rb
     trade_data = trade_data_blue
     warp_data = warp_data_rb

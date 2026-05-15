@@ -7,13 +7,19 @@ from worlds._bizhawk.client import BizHawkClient
 from worlds._bizhawk import read, write, guarded_write
 
 from .locations import (
+    Missable,
     build_location_data,
     build_location_name_to_id,
     location_data_blue,
     location_data_red,
     location_data_yellow,
+    LocationData
 )
-from .rom_addresses import wram_addresses_blue, wram_addresses_red, wram_addresses_yellow
+from .rom_addresses import (
+
+    wram_addresses_rb,
+    wram_addresses_yellow,
+)
 
 logger = logging.getLogger("Client")
 
@@ -70,33 +76,34 @@ TRACKER_EVENT_FLAGS = [
 
 assert len(TRACKER_EVENT_FLAGS) <= 32
 
-def build_client_location_tables(source_location_data):
+def build_client_location_tables(source_location_data, game):
     location_data, _, _, _ = build_location_data(source_location_data, trainer_data={})
     location_map = {"Rod": {}, "EventFlag": {}, "Missable": {}, "Hidden": {}, "list": {}, "DexSanityFlag": {}}
     location_bytes_bits = {}
+    location: LocationData
     for location in location_data:
         if location.ram_address is not None:
-            if type(location.ram_address) == list:
+            if type(location.ram_address) is list:
                 location_map[type(location.ram_address).__name__][
-                    (location.ram_address[0].flag, location.ram_address[1].flag)
+                    (location.ram_address[0].flag[game], location.ram_address[1].flag[game])
                 ] = location.address
                 location_bytes_bits[location.address] = [
-                    {"byte": location.ram_address[0].byte, "bit": location.ram_address[0].bit},
-                    {"byte": location.ram_address[1].byte, "bit": location.ram_address[1].bit},
+                    {"byte": location.ram_address[0].byte[game], "bit": location.ram_address[0].bit[game]},
+                    {"byte": location.ram_address[1].byte[game], "bit": location.ram_address[1].bit[game]},
                 ]
             else:
-                location_map[type(location.ram_address).__name__][location.ram_address.flag] = location.address
+                location_map[type(location.ram_address).__name__][location.ram_address.flag[game]] = location.address
                 location_bytes_bits[location.address] = {
-                    "byte": location.ram_address.byte,
-                    "bit": location.ram_address.bit,
+                    "byte": location.ram_address.byte[game],
+                    "bit": location.ram_address.bit[game],
                 }
     return location_map, location_bytes_bits, build_location_name_to_id(location_data)
 
 
 LOCATION_TABLES = {
-    "Pokemon Red": build_client_location_tables(location_data_red),
-    "Pokemon Blue": build_client_location_tables(location_data_blue),
-    "Pokemon Yellow": build_client_location_tables(location_data_yellow),
+    "Pokemon Red": build_client_location_tables(location_data_red, "RB"),
+    "Pokemon Blue": build_client_location_tables(location_data_blue, "RB"),
+    "Pokemon Yellow": build_client_location_tables(location_data_yellow, "Y"),
 }
 
 
@@ -110,8 +117,8 @@ def build_client_data_locations(wram_addresses):
 
 
 WRAM_TABLES = {
-    "Pokemon Red": build_client_data_locations(wram_addresses_red),
-    "Pokemon Blue": build_client_data_locations(wram_addresses_blue),
+    "Pokemon Red": build_client_data_locations(wram_addresses_rb),
+    "Pokemon Blue": build_client_data_locations(wram_addresses_rb),
     "Pokemon Yellow": build_client_data_locations(wram_addresses_yellow),
 }
 
