@@ -68,7 +68,7 @@ and Safari Zone. Adds 4 extra item locations to Rock Tunnel B1F
 * Split Card Key: Splits the Card Key into 10 different Card Keys, one for each floor of Silph Co that has locked doors.
 Adds 9 location checks to friendly NPCs in Silph Co. You can also choose Progressive Card Keys to always obtain the
 keys in order from Card Key 2F to Card Key 11F.
-* Trainersanity: Adds location checks to trainers. You may choose between 0 and 317 trainersanity checks. Trainers
+* Trainersanity: Adds location checks to trainers. You may choose between 0 and 331 trainersanity checks. Trainers
 will be randomly selected to be given checks. Does not include scripted trainers, most of which disappear
 after battling them, but also includes Gym Leaders. You must talk to the trainer after defeating them to receive
 your prize. Adds random filler items to the item pool.

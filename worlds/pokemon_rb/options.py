@@ -321,6 +321,14 @@ class TrainerSanity(NamedRange):
     }
 
 
+class YellowTrainerSanity(TrainerSanity):
+    range_end = 328
+    special_range_names = {
+        "disabled": 0,
+        "full": 328
+    }
+
+
 class RequirePokedex(Toggle):
     """Require the Pokedex to obtain items from Oak's Aides or from Dexsanity checks."""
     display_name = "Require Pokedex"
@@ -1054,3 +1062,4 @@ class PokemonYellowOptions(PokemonRBOptions):
     battle_style: YellowBattleStyle
     text_speed: YellowTextSpeed
     starting_sound: StartingSound
+    trainersanity: YellowTrainerSanity
