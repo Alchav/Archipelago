@@ -915,7 +915,6 @@ warp_data_common = {'Menu': [],
                   'to': {'map': 'Seafoam Islands 1F', 'id': 2}}],
  'Route 20-E': [],
  'Route 20-W': [],
- 'Route 19/20-Water': [],
  'Route 23-S': [{'address': 'Warps_Route23',
                  'id': (0, 1),
                  'to': {'map': 'Route 22 Gate-N', 'id': (2, 3)}}],
@@ -1720,7 +1719,9 @@ warp_data_common = {'Menu': [],
                                    'to': {'map': "Indigo Plateau Lance's Room", 'id': 0}}]}
 
 
-warp_data_rb = warp_data_common | {'Cerulean City': [{'address': 'Warps_CeruleanCity',
+warp_data_rb = warp_data_common | {
+ 'Route 19/20-Water': [],
+ 'Cerulean City': [{'address': 'Warps_CeruleanCity',
                     'id': 1,
                     'to': {'map': 'Cerulean Trade House', 'id': (0, 1)}},
                    {'address': 'Warps_CeruleanCity',
