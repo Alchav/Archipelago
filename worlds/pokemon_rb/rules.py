@@ -283,4 +283,4 @@ def set_rules(multiworld, world, player):
         if loc.name.startswith("Pokedex"):
             mon = loc.name.split(" - ")[1]
             add_rule(loc, lambda state, i=mon: (state.has("Pokedex", player) or not
-                     world.options.require_pokedex) and (state.has(i, player) or state.has(f"Static {i}", player)))
+                     world.options.require_pokedex) and logic.has_pokedex_mon(state, i, player))

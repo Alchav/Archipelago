@@ -1502,7 +1502,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                                 full_interiors.remove(entrance_b)
                                 break
                         else:
-                            raise DoorShuffleException("No non-dead end interior sections found in Pokemon Red and Blue door shuffle.")
+                            raise DoorShuffleException(f"No non-dead end interior sections found in {world.game} door shuffle.")
                         break
                 else:
                     break
@@ -1644,7 +1644,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             entrances.sort(key=lambda e: e in reachable_entrances)
 
             if not reachable_entrances:
-                raise DoorShuffleException("Ran out of reachable entrances in Pokemon Red and Blue door shuffle")
+                raise DoorShuffleException(f"Ran out of reachable entrances in {world.game}  door shuffle")
 
             entrance_a = reachable_entrances.pop(0)
             entrances.remove(entrance_a)
@@ -1674,7 +1674,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     destinations = [entrance for entrance in entrances if outdoor_map(entrance.parent_region.name) is
                                     not is_outdoor_map]
                     if not destinations:
-                        raise DoorShuffleException("Ran out of connectable destinations in Pokemon Red and Blue door shuffle")
+                        raise DoorShuffleException(f"Ran out of connectable destinations in {world.game}  door shuffle")
                 else:
                     destinations = entrances
 

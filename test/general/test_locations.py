@@ -33,7 +33,7 @@ class TestBase(unittest.TestCase):
     def test_location_creation_steps(self):
         """Tests that Regions and Locations aren't created after `create_items`."""
         gen_steps = ("generate_early", "create_regions", "create_items")
-        excluded_games = ("Ocarina of Time", "Pokemon Red and Blue")
+        excluded_games = ("Ocarina of Time",)
         worlds_to_test = {game: world
                           for game, world in AutoWorldRegister.world_types.items() if game not in excluded_games}
         for game_name, world_type in worlds_to_test.items():

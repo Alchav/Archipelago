@@ -2,6 +2,11 @@ from copy import deepcopy
 from . import poke_data
 
 
+def get_full_accessibility_evolution_roots():
+    return [pokemon for pokemon in poke_data.first_stage_pokemon
+            if pokemon in poke_data.evolves_to or pokemon == "Eevee"]
+
+
 def get_non_randomized_catch_em_all_candidate_slots(game):
     if game in {"Pokemon Red", "Pokemon Blue"}:
         return [
@@ -103,13 +108,36 @@ def get_non_randomized_catch_em_all_wild_substitutions(game):
         }
     return {}
 
-
 RIVAL_STARTER_LINE = {
     "Bulbasaur", "Ivysaur", "Venusaur",
     "Charmander", "Charmeleon", "Charizard",
     "Squirtle", "Wartortle", "Blastoise",
 }
 YELLOW_RIVAL_EEVEE_LINE = {"Eevee", "Jolteon", "Flareon", "Vaporeon"}
+
+
+def ensure_non_randomized_full_accessibility(world, placed_mons, candidate_locations):
+    if world.options.accessibility != "full":
+        return
+
+    required_mons = set(get_full_accessibility_evolution_roots())
+    missing_mons = [pokemon for pokemon in sorted(required_mons) if placed_mons[pokemon] == 0]
+    if not missing_mons:
+        return
+
+    candidate_locations = candidate_locations.copy()
+    for mon in missing_mons:
+        for i, location in enumerate(candidate_locations):
+            current_mon = location.item.name
+            if placed_mons[current_mon] > 1 or current_mon not in required_mons:
+                placed_mons[current_mon] -= 1
+                location.item = world.create_item(mon)
+                location.item.location = location
+                placed_mons[mon] += 1
+                candidate_locations.pop(i)
+                break
+        else:
+            raise Exception(f"Failed to place required full accessibility Pokemon {mon}")
 
 
 def get_encounter_slots(world, types):
@@ -120,7 +148,8 @@ def get_encounter_slots(world, types):
 
 
 def apply_non_randomized_catch_em_all_wild_substitutions(world, encounter_slots):
-    if not (world.options.catch_em_all and not world.options.randomize_pokemon_locations):
+    if (world.options.randomize_pokemon_locations
+        or not (world.options.catch_em_all or world.options.accessibility == "full")):
         return
 
     substitutions = get_non_randomized_catch_em_all_wild_substitutions(world.game)
@@ -276,13 +305,22 @@ def process_pokemon_locations(self):
     elif self.options.randomize_legendary_pokemon == "any":
         static_slots = static_slots + legendary_slots
 
-    non_randomized_catch_em_all_mons = ["Bulbasaur", "Charmander", "Squirtle", "Eevee"]
-    non_randomized_catch_em_all_slots = []
-    if self.options.catch_em_all and not self.options.randomize_pokemon_locations:
+    non_randomized_catch_em_all_mons = []
+    non_randomized_catch_em_all_slots = {}
+    full_accessibility_candidate_names = set()
+    full_accessibility_candidate_locations = []
+    if not self.options.randomize_pokemon_locations:
+        full_accessibility_candidate_names = set(get_non_randomized_catch_em_all_candidate_slots(self.game))
+        if self.options.catch_em_all:
+            non_randomized_catch_em_all_mons.extend(["Bulbasaur", "Charmander", "Squirtle", "Eevee"])
+        non_randomized_catch_em_all_mons = list(dict.fromkeys(non_randomized_catch_em_all_mons))
+    if non_randomized_catch_em_all_mons:
         candidate_slots = get_non_randomized_catch_em_all_candidate_slots(self.game)
-        non_randomized_catch_em_all_slots = self.random.sample(
-            [mon for mon in candidate_slots if mon in [slot.name for slot in static_slots]],
-            len(non_randomized_catch_em_all_mons))
+        non_randomized_catch_em_all_slots = dict(zip(
+            self.random.sample([name for name in candidate_slots if name in [slot.name for slot in static_slots]],
+                               len(non_randomized_catch_em_all_mons)),
+            non_randomized_catch_em_all_mons,
+        ))
 
     for slot in static_slots:
         location = self.multiworld.get_location(slot.name, self.player)
@@ -294,9 +332,13 @@ def process_pokemon_locations(self):
             prepend = "Missable "
         if not randomize_type:
             if slot.name in non_randomized_catch_em_all_slots:
-                location.place_locked_item(self.create_item(prepend + non_randomized_catch_em_all_mons.pop()))
+                location.place_locked_item(self.create_item(prepend + non_randomized_catch_em_all_slots.pop(slot.name)))
             else:
                 location.place_locked_item(self.create_item(prepend + slot.original_item))
+            if slot.type == "Static Repeatable Pokemon":
+                placed_mons[location.item.name] += 1
+                if slot.name in full_accessibility_candidate_names:
+                    full_accessibility_candidate_locations.append(location)
         else:
             mon = self.create_item(prepend +
                                    randomize_pokemon(self, slot.original_item, mons_list, randomize_type,
@@ -306,7 +348,7 @@ def process_pokemon_locations(self):
                 static_placed_mons[mon.name.replace("Static ", "")] += 1
             elif slot.type == "Static Repeatable Pokemon":
                 placed_mons[mon.name] += 1
-    assert not (non_randomized_catch_em_all_mons and non_randomized_catch_em_all_slots)
+    assert not non_randomized_catch_em_all_slots
 
     chosen_starter_mons = set()
     for slot in starter_slots:
@@ -376,10 +418,13 @@ def process_pokemon_locations(self):
         mons_to_add = []
         remaining_pokemon = [pokemon for pokemon in poke_data.pokemon_data.keys() if placed_mons[pokemon] == 0 and
                              (pokemon not in poke_data.legendary_pokemon or self.options.randomize_legendary_pokemon.value == 3)]
-        if self.options.catch_em_all == "first_stage":
+        full_accessibility_first_stage = (self.options.accessibility == "full"
+                                          and self.options.catch_em_all != "all_pokemon")
+        if self.options.catch_em_all == "first_stage" or full_accessibility_first_stage:
             mons_to_add = [pokemon for pokemon in poke_data.first_stage_pokemon if placed_mons[pokemon] == 0 and
                            (pokemon not in poke_data.legendary_pokemon or self.options.randomize_legendary_pokemon.value == 3)]
-            mons_to_add += [pokemon for pokemon in evolutions_needed if placed_mons[pokemon] == 0]
+            if self.options.catch_em_all == "first_stage":
+                mons_to_add += [pokemon for pokemon in evolutions_needed if placed_mons[pokemon] == 0]
         elif self.options.catch_em_all == "all_pokemon":
             mons_to_add = remaining_pokemon.copy()
         logic_needed_mons = max(self.options.oaks_aide_rt_2.value,
@@ -411,15 +456,17 @@ def process_pokemon_locations(self):
                             if (not l.name.startswith(zone)) and
                                self.multiworld.get_location(l.name, self.player).item.name == location.item.name]:
                         continue
-                if self.options.catch_em_all == "first_stage" and self.options.area_1_to_1_mapping:
+                if (self.options.catch_em_all == "first_stage" or full_accessibility_first_stage) and self.options.area_1_to_1_mapping:
                     if not [self.multiworld.get_location(l.name, self.player) for l in encounter_slots_master
                             if (not l.name.startswith(zone)) and
                                self.multiworld.get_location(l.name, self.player).item.name == location.item.name and l.name
                             not in poke_data.evolves_from]:
                         continue
 
-                if placed_mons[location.item.name] < 2 and (location.item.name in poke_data.first_stage_pokemon
-                                                            or self.options.catch_em_all):
+                if placed_mons[location.item.name] < 2 and (
+                        (location.item.name in poke_data.first_stage_pokemon
+                         and (self.options.catch_em_all == "first_stage" or full_accessibility_first_stage))
+                        or self.options.catch_em_all == "all_pokemon"):
                     continue
 
                 if self.options.area_1_to_1_mapping:
@@ -444,3 +491,4 @@ def process_pokemon_locations(self):
             location.locked = True
             location.item.location = location
             placed_mons[location.item.name] += 1
+        ensure_non_randomized_full_accessibility(self, placed_mons, full_accessibility_candidate_locations)

@@ -946,7 +946,7 @@ class DebugOptions(OptionSet):
 
 class PokemonDeathLink(DeathLink):
     """When you black out, trigger a death link for all players with death link enabled, causing a blackout
-    for Pokemon Red and Blue players, and death in general for various other games."""
+    for Pokemon Red, Blue, and Yellow players, and death in general for various other games."""
 
 
 @dataclass

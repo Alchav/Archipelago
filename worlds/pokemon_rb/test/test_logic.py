@@ -47,6 +47,8 @@ class TestPokemonLogic(unittest.TestCase):
 
         self.assertTrue(logic.can_learn_hm(DummyState({"Squirtle": 1}), world, "Surf", self.player))
         self.assertFalse(logic.can_learn_hm(DummyState({"Charmander": 1}), world, "Surf", self.player))
+        self.assertFalse(logic.can_learn_hm(DummyState({"Static Squirtle": 1}), world, "Surf", self.player))
+        self.assertFalse(logic.can_learn_hm(DummyState({"Missable Squirtle": 1}), world, "Surf", self.player))
 
     def test_can_surf_allows_extra_badges_or_no_badge_requirement(self) -> None:
         world = make_world()
@@ -96,6 +98,15 @@ class TestPokemonLogic(unittest.TestCase):
 
         self.assertTrue(logic.has_pokemon(state, 2, self.player))
         self.assertFalse(logic.has_pokemon(state, 3, self.player))
+
+    def test_has_pokemon_counts_static_but_not_missable_species(self) -> None:
+        state = DummyState({
+            "Static Bulbasaur": 1,
+            "Missable Charmander": 1,
+        })
+
+        self.assertTrue(logic.has_pokemon(state, 1, self.player))
+        self.assertFalse(logic.has_pokemon(state, 2, self.player))
 
     def test_oaks_aide_requires_pokedex_only_when_enabled(self) -> None:
         state = DummyState({

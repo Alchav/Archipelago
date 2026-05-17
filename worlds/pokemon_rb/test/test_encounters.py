@@ -71,13 +71,14 @@ class FakeTrainerMultiWorld:
 
 
 def make_world(game_version: int = 1, catch_em_all: bool = False,
-               randomize_pokemon_locations: bool = False) -> SimpleNamespace:
+               randomize_pokemon_locations: bool = False, accessibility: str = "minimal") -> SimpleNamespace:
     return SimpleNamespace(
         game="Pokemon Red" if game_version else "Pokemon Blue",
         options=SimpleNamespace(
             game_version=SimpleNamespace(value=game_version),
             catch_em_all=catch_em_all,
             randomize_pokemon_locations=randomize_pokemon_locations,
+            accessibility=accessibility,
         ),
         location_data=red_location_data if game_version else blue_location_data,
         local_poke_data=poke_data.pokemon_data,
@@ -107,6 +108,18 @@ class TestEncounterSlots(unittest.TestCase):
     def test_get_encounter_slots_alternates_version_exclusives_for_non_randomized_catch_em_all(self) -> None:
         slots = slot_by_name(get_encounter_slots(
             make_world(game_version=1, catch_em_all=True),
+            ["Wild Encounter"],
+        ))
+
+        self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 6"].original_item)
+        self.assertEqual("Caterpie", slots["Route 2 - Wild Pokemon - 9"].original_item)
+        self.assertEqual("Weedle", slots["Route 2 - Wild Pokemon - 10"].original_item)
+        self.assertEqual("Ekans", slots["Route 4 - Wild Pokemon - 4"].original_item)
+        self.assertEqual("Sandshrew", slots["Route 4 - Wild Pokemon - 6"].original_item)
+
+    def test_get_encounter_slots_alternates_version_exclusives_for_full_accessibility(self) -> None:
+        slots = slot_by_name(get_encounter_slots(
+            make_world(game_version=1, accessibility="full"),
             ["Wild Encounter"],
         ))
 
@@ -273,6 +286,7 @@ class TestEncounterRandomizationHelpers(unittest.TestCase):
         ]
         multiworld = FakeMultiWorld([repeatable_slot.name, *(slot.name for slot in wild_slots)])
         world = SimpleNamespace(
+            game="Pokemon Red",
             options=SimpleNamespace(
                 randomize_legendary_pokemon=FakeChoice(0, "vanilla"),
                 randomize_pokemon_locations=FakeChoice(4, "completely_random"),
@@ -311,3 +325,48 @@ class TestEncounterRandomizationHelpers(unittest.TestCase):
         self.assertEqual("Bulbasaur", multiworld.get_location(repeatable_slot.name, 1).item.name)
         self.assertEqual("Charmander", multiworld.get_location("Route 1 - Wild Pokemon - 1", 1).item.name)
         self.assertEqual("Charmander", multiworld.get_location("Route 1 - Wild Pokemon - 2", 1).item.name)
+
+    def test_process_pokemon_locations_uses_repeatable_slots_for_full_accessibility(self) -> None:
+        repeatable_slots = [
+            SimpleNamespace(name="Route 4 Pokemon Center - Pokemon For Sale", type="Static Repeatable Pokemon",
+                            original_item="Magikarp"),
+            SimpleNamespace(name="Underground Path Route 5 - Spot Trade", type="Static Repeatable Pokemon",
+                            original_item="Nidoran M"),
+            SimpleNamespace(name="Route 11 Gate 2F - Terry Trade", type="Static Repeatable Pokemon",
+                            original_item="Nidoran F"),
+            SimpleNamespace(name="Cinnabar Lab Fossil Room - Sailor Trade", type="Static Repeatable Pokemon",
+                            original_item="Lickitung"),
+        ]
+        multiworld = FakeMultiWorld([slot.name for slot in repeatable_slots])
+        world = SimpleNamespace(
+            game="Pokemon Red",
+            options=SimpleNamespace(
+                randomize_legendary_pokemon=FakeChoice(0, "vanilla"),
+                randomize_pokemon_locations=FakeChoice(0, "vanilla"),
+                catch_em_all=False,
+                accessibility="full",
+            ),
+            multiworld=multiworld,
+            player=1,
+            random=SimpleNamespace(
+                shuffle=lambda sequence: None,
+                sample=lambda sequence, count: sequence[:count],
+            ),
+            local_poke_data=poke_data.pokemon_data,
+            create_item=lambda name: SimpleNamespace(name=name, location=None),
+        )
+
+        def fake_get_encounter_slots(world_obj, types):
+            if types == ["Starter Pokemon"] or types == ["Legendary Pokemon"] or types == ["Wild Encounter"]:
+                return []
+            if types == ["Static Pokemon", "Static Repeatable Pokemon", "Missable Pokemon"]:
+                return repeatable_slots
+            raise AssertionError(types)
+
+        with mock.patch.object(encounters, "get_encounter_slots", side_effect=fake_get_encounter_slots), \
+                mock.patch.object(encounters, "get_full_accessibility_evolution_roots",
+                                  return_value=["Bulbasaur", "Charmander", "Squirtle", "Eevee"]):
+            process_pokemon_locations(world)
+
+        placed = [multiworld.get_location(slot.name, 1).item.name for slot in repeatable_slots]
+        self.assertEqual(["Bulbasaur", "Charmander", "Eevee", "Squirtle"], sorted(placed))
