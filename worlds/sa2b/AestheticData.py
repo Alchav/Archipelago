@@ -325,7 +325,29 @@ totally_real_item_names: dict[str, list[str]] = {
 		"Pen",
 	],
 
-	"Pokemon Red and Blue": [
+	"Pokemon Red": [
+		"Rock Badge",
+		"Key Card",
+		"Pikachu",
+		"Eevee",
+		"HM02 Strength",
+		"HM05 Fly",
+		"HM01 Surf",
+		"Card Key 12F",
+	],
+
+	"Pokemon Blue": [
+		"Rock Badge",
+		"Key Card",
+		"Pikachu",
+		"Eevee",
+		"HM02 Strength",
+		"HM05 Fly",
+		"HM01 Surf",
+		"Card Key 12F",
+	],
+
+	"Pokemon Yellow": [
 		"Rock Badge",
 		"Key Card",
 		"Pikachu",
