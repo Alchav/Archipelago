@@ -31,14 +31,6 @@ from . import poke_data
 from . import client
 
 
-pokemon_rby_games = ("Pokemon Red", "Pokemon Blue", "Pokemon Yellow")
-
-
-def get_rby_worlds(multiworld: MultiWorld):
-    for game in pokemon_rby_games:
-        yield from multiworld.get_game_worlds(game)
-
-
 class PokemonRedSettings(settings.Group):
     class RedRomFile(settings.UserFilePath):
         """File name of the Pokemon Red rom"""
@@ -149,6 +141,9 @@ class PokemonRBYWorld(World):
 
     @classmethod
     def stage_generate_early(cls, multiworld: MultiWorld):
+        if getattr(multiworld, "_pokemon_rby_stage_generate_early_claimed", False):
+            return
+        multiworld._pokemon_rby_stage_generate_early_claimed = True
 
         seed_groups = {}
         pokemon_rb_worlds = list(get_rby_worlds(multiworld))
@@ -438,6 +433,10 @@ class PokemonRBYWorld(World):
 
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
+        if getattr(multiworld, "_pokemon_rby_stage_fill_hook_claimed", False):
+            return
+        multiworld._pokemon_rby_stage_fill_hook_claimed = True
+
         locs = []
         for world in get_rby_worlds(multiworld):
             locs += world.local_locs
@@ -472,6 +471,7 @@ class PokemonRBYWorld(World):
             progitempool += [item for item in unplaced_items if item.advancement]
             usefulitempool += [item for item in unplaced_items if item.useful]
             filleritempool += [item for item in unplaced_items if (not item.advancement) and (not item.useful)]
+
 
     def fill_hook(self, progitempool, usefulitempool, filleritempool, fill_locations):
         if not self.options.badgesanity:
@@ -551,6 +551,12 @@ class PokemonRBYWorld(World):
 
     @classmethod
     def stage_post_fill(cls, multiworld):
+        # The shared Pokemon R/B/Y stage methods are inherited by all three world classes,
+        # so this prevents stage_post_fill from running multiple times for the same multiworld.
+        if getattr(multiworld, "_pokemon_rby_stage_post_fill_claimed", False):
+            return
+        multiworld._pokemon_rby_stage_post_fill_claimed = True
+
         # Convert all but one of each instance of a wild Pokemon to useful classification.
         # This cuts down on time spent calculating the spoiler playthrough.
         found_mons = set()
@@ -576,6 +582,9 @@ class PokemonRBYWorld(World):
 
     @classmethod
     def stage_generate_output(cls, multiworld, output_directory):
+        if getattr(multiworld, "_pokemon_rby_level_scaling_claimed", False):
+            return
+        multiworld._pokemon_rby_level_scaling_claimed = True
         level_scaling(multiworld)
 
     def generate_output(self, output_directory: str):
@@ -802,3 +811,9 @@ class PokemonBlueItem(PokemonRBYItem):
 
 class PokemonYellowItem(PokemonRBYItem):
     game = "Pokemon Yellow"
+
+pokemon_rby_games = ("Pokemon Red", "Pokemon Blue", "Pokemon Yellow")
+
+def get_rby_worlds(multiworld: MultiWorld):
+    for game in pokemon_rby_games:
+        yield from multiworld.get_game_worlds(game)

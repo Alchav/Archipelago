@@ -1,15 +1,8 @@
 from BaseClasses import CollectionState
 
 
-pokemon_rby_games = ("Pokemon Red", "Pokemon Blue", "Pokemon Yellow")
-
-
-def get_rby_worlds(multiworld):
-    for game in pokemon_rby_games:
-        yield from multiworld.get_game_worlds(game)
-
-
 def level_scaling(multiworld):
+    from . import get_rby_worlds, pokemon_rby_games
     state = CollectionState(multiworld)
     locations = set(multiworld.get_filled_locations())
     spheres = []
