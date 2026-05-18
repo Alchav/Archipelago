@@ -322,6 +322,7 @@ class TrainerSanity(NamedRange):
 
 
 class YellowTrainerSanity(TrainerSanity):
+    __doc__ = TrainerSanity.__doc__
     range_end = 328
     special_range_names = {
         "disabled": 0,
