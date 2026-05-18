@@ -17,7 +17,6 @@ depending on your yaml options.
 Many baseline changes are made to the game, including:
 
 * Bag item space increased to 128 slots (up from 20).
-* PC item storage increased to 64 slots (up from 50).
 * You can hold B to run (or bike extra fast!). If Auto-Run is enabled, you instead hold B to move at normal speed.
 * You can hold select while talking to a trainer to re-battle them.
 * You can select "Pallet Warp" below the "Continue" option to warp to Pallet Town as you load your save.
