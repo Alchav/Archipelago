@@ -1,6 +1,8 @@
-from worlds.generic.Rules import add_item_rule, add_rule, location_item_name
+from BaseClasses import ItemClassification
+from worlds.generic.Rules import add_item_rule, add_rule, location_item_name, set_rule
 from .items import item_groups
 from . import logic
+from . import poke_data
 
 
 def set_rules(multiworld, world, player):
@@ -284,3 +286,33 @@ def set_rules(multiworld, world, player):
             mon = loc.name.split(" - ")[1]
             add_rule(loc, lambda state, i=mon: (state.has("Pokedex", player) or not
                      world.options.require_pokedex) and logic.has_pokedex_mon(state, i, player))
+
+    # We aren't allowed to delete locations at this point.
+    # But some evolution events may not be reachable if certain Pokemon can't be obtained.
+    # Just make them reachable but change them to filler so they don't affect logic.
+    available_mons = {
+        location.item.name
+        for location in multiworld.get_locations(player)
+        if (location.item
+            and location.item.name in poke_data.pokemon_data
+            and not location.name.startswith("Evolution - "))
+    }
+    unresolved_evolutions = {
+        location.name: location
+        for location in multiworld.get_region("Evolution", player).locations
+    }
+
+    found_new_evolution = True
+    while found_new_evolution:
+        found_new_evolution = False
+        for location_name, location in list(unresolved_evolutions.items()):
+            mon = location.item.name
+            if poke_data.evolves_from[mon] in available_mons:
+                available_mons.add(mon)
+                unresolved_evolutions.pop(location_name)
+                found_new_evolution = True
+
+    for location in unresolved_evolutions.values():
+        location.item.classification = ItemClassification.filler
+        location.show_in_spoiler = False
+        set_rule(location, lambda state: True)

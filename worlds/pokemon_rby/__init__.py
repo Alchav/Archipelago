@@ -344,14 +344,12 @@ class PokemonRBYWorld(World):
         create_regions(self)
 
     def create_items(self):
+        process_pokemon_locations(self)
         self.multiworld.itempool += self.item_pool
 
     def set_rules(self):
         set_rules(self.multiworld, self, self.player)
         self.multiworld.completion_condition[self.player] = lambda state, player=self.player: state.has("Become Champion", player=player)
-
-    def generate_basic(self) -> None:
-        process_pokemon_locations(self)
 
     def pre_fill(self) -> None:
         process_trainer_data(self)
