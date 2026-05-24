@@ -265,7 +265,7 @@ def process_trainer_data(world):
 def process_pokemon_locations(self):
     starter_slots = get_encounter_slots(self, ["Starter Pokemon"])
     legendary_slots = get_encounter_slots(self, ["Legendary Pokemon"])
-    static_slots = get_encounter_slots(self, ["Static Pokemon", "Static Repeatable Pokemon", "Missable Pokemon"])
+    static_slots = get_encounter_slots(self, ["Static Pokemon", "Static Repeatable Pokemon", "Uncatchable Pokemon"])
     legendary_mons = deepcopy([slot.original_item for slot in legendary_slots])
 
     static_placed_mons = {pokemon: 0 for pokemon in poke_data.pokemon_data.keys()}
@@ -328,8 +328,8 @@ def process_pokemon_locations(self):
         prepend = ""
         if slot.type in ("Legendary Pokemon", "Static Pokemon"):
             prepend = "Static "
-        elif slot.type == "Missable Pokemon":
-            prepend = "Missable "
+        elif slot.type == "Uncatchable Pokemon":
+            prepend = "Uncatchable "
         if not randomize_type:
             if slot.name in non_randomized_catch_em_all_slots:
                 location.place_locked_item(self.create_item(prepend + non_randomized_catch_em_all_slots.pop(slot.name)))
@@ -401,7 +401,7 @@ def process_pokemon_locations(self):
             #
             while ("Pokemon Tower 6F" in slot.name and
                    self.multiworld.get_location("Pokemon Tower 6F - Restless Soul", self.player).item.name
-                   == f"Missable {mon}"):
+                   == f"Uncatchable {mon}"):
                 # If you're fighting the Pokémon defined as the Restless Soul, and you're on the 6th floor of the tower,
                 # the battle is treates as the Restless Soul battle and you cannot catch it. So, prevent any wild mons
                 # from being the same species as the Restless Soul.

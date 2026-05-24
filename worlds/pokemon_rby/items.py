@@ -209,7 +209,7 @@ item_table.update(
     {pokemon: ItemData(None, ItemClassification.progression, []) for pokemon in pokemon_data.keys()}
 )
 item_table.update(
-    {f"Missable {pokemon}": ItemData(None, ItemClassification.useful, []) for pokemon in pokemon_data.keys()}
+    {f"Uncatchable {pokemon}": ItemData(None, ItemClassification.useful, []) for pokemon in pokemon_data.keys()}
 )
 item_table.update(
     {f"Static {pokemon}": ItemData(None, ItemClassification.progression, []) for pokemon in pokemon_data.keys()}

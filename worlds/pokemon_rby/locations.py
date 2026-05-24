@@ -768,7 +768,7 @@ LocationData("Power Plant", "Fake Pokeball Battle 7", "Electrode", ['Static_Enco
 LocationData("Power Plant", "Fake Pokeball Battle 8", "Electrode", ['Static_Encounter_Electrode_B', 'Reset_I'],
                  None, event=True, type="Static Pokemon", level=43, level_address='Static_Encounter_Electrode_B', level_address_offset=1),
 LocationData("Pokemon Tower 6F", "Restless Soul", "Marowak", ['Ghost_Battle1', 'Ghost_Battle2', 'Ghost_Battle3', 'Ghost_Battle4', 'Ghost_Battle5', 'Ghost_Battle6'], None, event=True,
-                 type="Missable Pokemon", level=30, level_address='Ghost_Battle_Level'),
+                 type="Uncatchable Pokemon", level=30, level_address='Ghost_Battle_Level'),
 LocationData("Route 12-W", "Sleeping Pokemon", "Snorlax", ['Static_Encounter_Snorlax_A', 'Reset_A'],
                  None, event=True, type="Static Pokemon", level=30, level_address='Static_Encounter_Snorlax_A_Level'),
 LocationData("Route 16-C", "Sleeping Pokemon", "Snorlax", ['Static_Encounter_Snorlax_B', 'Reset_B'],

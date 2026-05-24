@@ -3,9 +3,10 @@ from types import SimpleNamespace
 
 from BaseClasses import ItemClassification
 
-from .. import PokemonRBYWorld, PokemonRedWorld
+from .. import PokemonBlueWorld, PokemonRBYWorld, PokemonRedWorld, PokemonYellowWorld
 from ..items import item_groups, item_table
 from ..locations import LocationData, PokemonRBYLocation
+from ..rom_addresses import rom_addresses_rb, rom_addresses_yellow
 from ..poke_data import pokemon_data
 
 
@@ -16,16 +17,16 @@ class TestPokemonItemMetadata(unittest.TestCase):
             if pokemon not in item_table:
                 problems.append(f"missing base item for {pokemon}")
                 continue
-            if f"Missable {pokemon}" not in item_table:
-                problems.append(f"missing missable item for {pokemon}")
+            if f"Uncatchable {pokemon}" not in item_table:
+                problems.append(f"missing uncatchable item for {pokemon}")
                 continue
             if f"Static {pokemon}" not in item_table:
                 problems.append(f"missing static item for {pokemon}")
                 continue
             if item_table[pokemon].classification != ItemClassification.progression:
                 problems.append(f"{pokemon} classification changed")
-            if item_table[f"Missable {pokemon}"].classification != ItemClassification.useful:
-                problems.append(f"Missable {pokemon} classification changed")
+            if item_table[f"Uncatchable {pokemon}"].classification != ItemClassification.useful:
+                problems.append(f"Uncatchable {pokemon} classification changed")
             if item_table[f"Static {pokemon}"].classification != ItemClassification.progression:
                 problems.append(f"Static {pokemon} classification changed")
 
@@ -67,3 +68,25 @@ class TestPokemonLocationMetadata(unittest.TestCase):
 
         self.assertTrue(location.item_rule(SimpleNamespace(player=1, name="Trainer Parties")))
         self.assertFalse(location.item_rule(SimpleNamespace(player=1, name="Bulbasaur")))
+
+    def test_all_trainersanity_hooks_have_matching_locations(self) -> None:
+        rb_location_hooks = {
+            location.rom_address
+            for world_type in (PokemonRedWorld, PokemonBlueWorld)
+            for location in world_type.location_data
+            if isinstance(location.rom_address, str) and location.rom_address.startswith("Trainersanity_")
+        }
+        yellow_location_hooks = {
+            location.rom_address
+            for location in PokemonYellowWorld.location_data
+            if isinstance(location.rom_address, str) and location.rom_address.startswith("Trainersanity_")
+        }
+
+        self.assertEqual(
+            {key for key in rom_addresses_rb if key.startswith("Trainersanity_")},
+            rb_location_hooks,
+        )
+        self.assertEqual(
+            {key for key in rom_addresses_yellow if key.startswith("Trainersanity_")},
+            yellow_location_hooks,
+        )

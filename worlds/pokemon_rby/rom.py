@@ -666,7 +666,7 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
     else:
         for slot in starter_order[world.game]:
             item_name = world.multiworld.get_location(f"Oak's Lab - Starter {slot}", world.player).item.name
-            starter_ids.append(poke_data.pokemon_data[item_name.removeprefix("Missable ")]["id"])
+            starter_ids.append(poke_data.pokemon_data[item_name.removeprefix("Uncatchable ")]["id"])
         mons.sort(key=lambda mon: starter_ids.index(mon) if mon in starter_ids else len(starter_ids))
         write_bytes(world.rom_addresses["Title_Mon_First"], mons.pop())
         for mon in range(0, 16):

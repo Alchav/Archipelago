@@ -96,17 +96,17 @@ def level_scaling(multiworld):
         for location in sphere:
             if not location.item:
                 continue
-            if (location.item.game in pokemon_rby_games and (location.item.name.startswith("Missable ") or
+            if (location.item.game in pokemon_rby_games and (location.item.name.startswith("Uncatchable ") or
                     location.item.name.startswith("Static ")) and location.name !=
                     "Pokemon Tower 6F - Restless Soul"):
-                # Normally, missable Pokemon (starters, the dojo rewards) are not considered in logic, and static
+                # Normally, uncatchable Pokemon (starters, the dojo rewards) are not considered in logic, and static
                 # Pokemon are not considered for moves or evolutions, as you could release them and potentially soft
-                # lock the game. However, for level scaling purposes, we will treat them as not missable or static.
+                # lock the game. However, for level scaling purposes, we will treat them as not uncatchable or static.
                 # We would not want someone playing a minimal accessibility Dexsanity game to get what would be
                 # technically an "out of logic" Mansion Key from selecting Bulbasaur at the beginning of the game
                 # and end up in the Mansion early and encountering level 67 Pokémon
                 state.collect(multiworld.worlds[location.item.player].create_item(
-                    location.item.name.split("Missable ")[-1].split("Static ")[-1]), True, location)
+                    location.item.name.split("Uncatchable ")[-1].split("Static ")[-1]), True, location)
             else:
                 state.collect(location.item, True, location)
     for world in get_rby_worlds(multiworld):

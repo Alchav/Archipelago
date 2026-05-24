@@ -311,7 +311,7 @@ class TestEncounterRandomizationHelpers(unittest.TestCase):
         def fake_get_encounter_slots(world_obj, types):
             if types == ["Starter Pokemon"] or types == ["Legendary Pokemon"]:
                 return []
-            if types == ["Static Pokemon", "Static Repeatable Pokemon", "Missable Pokemon"]:
+            if types == ["Static Pokemon", "Static Repeatable Pokemon", "Uncatchable Pokemon"]:
                 return [repeatable_slot]
             if types == ["Wild Encounter"]:
                 return wild_slots
@@ -359,7 +359,7 @@ class TestEncounterRandomizationHelpers(unittest.TestCase):
         def fake_get_encounter_slots(world_obj, types):
             if types == ["Starter Pokemon"] or types == ["Legendary Pokemon"] or types == ["Wild Encounter"]:
                 return []
-            if types == ["Static Pokemon", "Static Repeatable Pokemon", "Missable Pokemon"]:
+            if types == ["Static Pokemon", "Static Repeatable Pokemon", "Uncatchable Pokemon"]:
                 return repeatable_slots
             raise AssertionError(types)
 
