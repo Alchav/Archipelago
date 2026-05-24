@@ -323,10 +323,10 @@ class TrainerSanity(NamedRange):
 
 class YellowTrainerSanity(TrainerSanity):
     __doc__ = TrainerSanity.__doc__
-    range_end = 328
+    range_end = 330
     special_range_names = {
         "disabled": 0,
-        "full": 328
+        "full": 330
     }
 
 

@@ -2074,6 +2074,16 @@ trainer_data_yellow = trainer_data_common | {
             'party': ['Caterpie'],
             'party_address': 'Trainer_Party_Viridian_Forest_BugCatcher_C',
         },
+        {
+            'level': 6,
+            'party': ['Nidoran F', 'Nidoran M'],
+            'party_address': 'Trainer_Party_Viridian_Forest_Lass_A',
+        },
+        {
+            'level': 8,
+            'party': ['Caterpie', 'Metapod'],
+            'party_address': 'Trainer_Party_Viridian_Forest_BugCatcher_D',
+        },
     ],
     'S.S. Anne 2F Rooms-Gentleman and Lass Room': [
         {
@@ -2366,6 +2376,8 @@ _trainer_data_rb_order = {
         'Trainer_Party_Viridian_Forest_BugCatcher_A',
         'Trainer_Party_Viridian_Forest_BugCatcher_B',
         'Trainer_Party_Viridian_Forest_BugCatcher_C',
+        'Trainer_Party_Viridian_Forest_Lass_A',
+        'Trainer_Party_Viridian_Forest_BugCatcher_D',
     ],
     'Route 24': [
         'Trainer_Party_Route_24_BugCatcher_A',
