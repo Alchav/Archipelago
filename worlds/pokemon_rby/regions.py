@@ -603,7 +603,7 @@ def create_regions(world):
          world.rock_tunnel_b1f_data) = randomize_rock_tunnel(world.random)
 
     for location in world.location_data:
-        if location.inclusion(world, player) or hasattr(multiworld, "generation_is_fake"):
+        if location.inclusion(world, player):
             location_object = world.location(player, location.name, location.address, location.rom_address,
                                                 location.type, location.level, location.level_address,
                                                 location.address_offset, location.level_address_offset)

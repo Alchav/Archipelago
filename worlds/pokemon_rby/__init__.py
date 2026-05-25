@@ -246,7 +246,8 @@ class PokemonRBYWorld(World):
             self.ut = True
             for key, value in self.multiworld.re_gen_passthrough[self.game].items():
                 if hasattr(self.options, key):
-                    getattr(self.options, key).value = value
+                    option = getattr(self.options, key)
+                    option.value = option.from_any(value).value
                 else:
                     setattr(self, key, value)
             seed = self.gen_seed
@@ -290,12 +291,9 @@ class PokemonRBYWorld(World):
         process_move_data(self)
         process_pokemon_data(self)
 
-        if hasattr(self.multiworld, "generation_is_fake"):
-            dex_count = 151
-            trainersanity_count = 317
-        else:
-            dex_count = self.options.dexsanity.value
-            trainersanity_count = self.options.trainersanity.value
+
+        dex_count = self.options.dexsanity.value
+        trainersanity_count = self.options.trainersanity.value
 
         self.dexsanity_table = [
             *(True for _ in range(dex_count)),
@@ -351,13 +349,39 @@ class PokemonRBYWorld(World):
         set_rules(self.multiworld, self, self.player)
         self.multiworld.completion_condition[self.player] = lambda state, player=self.player: state.has("Become Champion", player=player)
 
+    def generate_basic(self):
+        verify_hm_moves(self.multiworld, self, self.player)
+        # TrackerCore regeneration stops at generate_basic. When slot data is available, use the exact set of
+        # addressless Pokemon locations that remained progression after stage_post_fill in the real generated world.
+        if self.ut and hasattr(self, "progression_pokemon_locations"):
+            progression_locations = set(self.progression_pokemon_locations)
+            for location in self.multiworld.get_locations(self.player):
+                if (location.address is None and location.item
+                        and (location.item.name in poke_data.pokemon_data
+                             or location.item.name.startswith("Static "))):
+                    location.item.classification = (
+                        ItemClassification.progression
+                        if location.name in progression_locations
+                        else ItemClassification.useful
+                    )
+            return
+
+        # Before fill, approximate spoiler/playthrough pressure by downgrading duplicate wild mons within a region.
+        for region in self.multiworld.get_regions(self.player):
+            region_mons = set()
+            for location in region.locations:
+                if "Wild Pokemon" in location.name:
+                    if location.item.name in region_mons:
+                        location.item.classification = ItemClassification.useful
+                    else:
+                        region_mons.add(location.item.name)
+
     def pre_fill(self) -> None:
         process_trainer_data(self)
         locs = [location.name for location in self.location_data if location.type != "Item"]
         for location in self.multiworld.get_locations(self.player):
             if location.name in locs:
                 location.show_in_spoiler = False
-        verify_hm_moves(self.multiworld, self, self.player)
 
         if self.options.old_man == "early_parcel":
             self.multiworld.local_early_items[self.player]["Oak's Parcel"] = 1
@@ -412,19 +436,6 @@ class PokemonRBYWorld(World):
         for mon in poke_data.pokemon_data:
             if logic.has_pokedex_mon(all_state, mon, self.player):
                 reachable_mons.add(mon)
-
-        # The large number of wild Pokemon can make sweeping for events time-consuming, and is especially bad in
-        # the spoiler playthrough calculation because it removes each advancement item one at a time to verify
-        # if the game is beatable without it. We go through each zone and flag any duplicates as useful.
-        # Especially with area 1-to-1 mapping / vanilla wild Pokémon, this should cut down significantly on wasted time.
-        for region in self.multiworld.get_regions(self.player):
-            region_mons = set()
-            for location in region.locations:
-                if "Wild Pokemon" in location.name:
-                    if location.item.name in region_mons:
-                        location.item.classification = ItemClassification.useful
-                    else:
-                        region_mons.add(location.item.name)
 
         self.options.elite_four_pokedex_condition.total = \
             int((len(reachable_mons) / 100) * self.options.elite_four_pokedex_condition.value)
@@ -688,18 +699,30 @@ class PokemonRBYWorld(World):
 
     def fill_slot_data(self) -> dict:
         ret = self.options.as_dict(
+            "accessibility", "trainer_name", "rival_name", "badgesanity", "fossil_check_item_types",
             "second_fossil_check_condition", "require_item_finder", "randomize_hidden_items",
             "badges_needed_for_hm_moves", "oaks_aide_rt_2", "oaks_aide_rt_11", "oaks_aide_rt_15",
             "extra_key_items", "extra_strength_boulders", "tea", "old_man", "elite_four_badges_condition",
             "elite_four_key_items_condition", "elite_four_pokedex_condition", "victory_road_condition",
             "route_22_gate_condition", "route_3_condition", "robbed_house_officer", "viridian_gym_condition",
-            "cerulean_cave_badges_condition", "cerulean_cave_key_items_condition", "randomize_pokedex", "trainersanity",
+            "cerulean_cave_badges_condition", "cerulean_cave_key_items_condition", "randomize_pokedex", "dexsanity",
+            "trainersanity",
             "death_link", "prizesanity", "poke_doll_skip", "bicycle_gate_skips", "stonesanity", "door_shuffle",
             "warp_tile_shuffle", "dark_rock_tunnel_logic", "split_card_key", "all_elevators_locked", "require_pokedex",
-            "area_1_to_1_mapping", "blind_trainers", "exp_all", "randomize_pokemon_locations",
+            "area_1_to_1_mapping", "blind_trainers", "exp_all", "randomize_rock_tunnel",
+            "randomize_pokemon_locations",
             "randomize_legendary_pokemon", "catch_em_all", "hm_same_type_compatibility", "hm_normal_type_compatibility",
-            "hm_other_type_compatibility", "inherit_tm_hm_compatibility", "randomize_move_types",
-            "randomize_pokemon_types", "secondary_type_chance"
+            "hm_other_type_compatibility", "tm_same_type_compatibility", "tm_normal_type_compatibility",
+            "tm_other_type_compatibility", "inherit_tm_hm_compatibility", "randomize_move_types",
+            "move_balancing", "no_trapping_moves", "randomize_tm_moves", "randomize_pokemon_stats",
+            "randomize_pokemon_catch_rates", "minimum_catch_rate", "randomize_pokemon_movesets",
+            "confine_transform_to_ditto", "start_with_four_moves", "randomize_pokemon_types",
+            "secondary_type_chance", "randomize_type_chart", "normal_matchups", "super_effective_matchups",
+            "not_very_effective_matchups", "immunity_matchups", "type_chart_seed",
+            "randomize_trainer_parties", "trainer_legendaries", "randomize_pokemon_palettes",
+            "trap_percentage", "poison_trap_weight", "fire_trap_weight", "paralyze_trap_weight",
+            "sleep_trap_weight", "ice_trap_weight", "start_inventory", "non_local_items",
+            "exclude_locations", "priority_locations"
         )
         ret |= {
             "free_fly_map": self.fly_map_code,
@@ -707,7 +730,15 @@ class PokemonRBYWorld(World):
             "extra_badges": self.extra_badges,
             "gen_seed": self.gen_seed,
             "region_seed": self.region_seed,
-            "rock_tunnel_seed": self.rock_tunnel_seed
+            "rock_tunnel_seed": self.rock_tunnel_seed,
+            "progression_pokemon_locations": [
+                location.name
+                for location in self.multiworld.get_locations(self.player)
+                if (location.address is None and location.item
+                    and (location.item.name in poke_data.pokemon_data
+                         or location.item.name.startswith("Static "))
+                    and location.item.advancement)
+            ],
         }
         if self.options.type_chart_seed == "random" or self.options.type_chart_seed.value.isdigit():
             ret["type_chart"] = self.type_chart
