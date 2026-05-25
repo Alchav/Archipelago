@@ -354,7 +354,7 @@ def process_pokemon_locations(self):
     for slot in starter_slots:
         location = self.multiworld.get_location(slot.name, self.player)
         randomize_type = self.options.randomize_pokemon_locations.value
-        slot_type = "Missable"
+        slot_type = "Uncatchable"
         if not randomize_type:
             location.place_locked_item(self.create_item(slot_type + " " + slot.original_item))
         else:
