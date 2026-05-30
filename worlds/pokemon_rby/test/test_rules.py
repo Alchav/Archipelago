@@ -19,14 +19,24 @@ class DummyState:
 class FakeLocation:
     def __init__(self, name: str) -> None:
         self.name = name
+        self.item = None
+
+
+class FakeRegion:
+    def __init__(self, locations=None) -> None:
+        self.locations = list(locations or [])
 
 
 class FakeMultiWorld:
     def __init__(self, names) -> None:
         self.locations = [FakeLocation(name) for name in names]
+        self.regions = {"Evolution": FakeRegion()}
 
     def get_locations(self, player: int):
         return self.locations
+
+    def get_region(self, name: str, player: int):
+        return self.regions[name]
 
 
 def make_world() -> SimpleNamespace:
