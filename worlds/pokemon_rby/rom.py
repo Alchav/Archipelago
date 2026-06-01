@@ -726,6 +726,11 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
         write_bytes(world.rom_addresses["Debug_SelectInvFull"], [0, 0])
 
     for location in world.multiworld.get_locations(world.player):
+        if (world.game == "Pokemon Yellow"
+                and location.name == "Cerulean Melanie's House - Melanie's Gift"
+                and location.item):
+            write_bytes(world.rom_addresses["Gift_Bulbasaur_Sprite"],
+                        poke_data.get_pokemon_overworld_sprite(location.item.name))
         if location.party_data:
             for party in location.party_data:
                 if not isinstance(party["party_address"], list):

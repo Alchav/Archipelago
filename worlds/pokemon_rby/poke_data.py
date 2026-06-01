@@ -1007,6 +1007,57 @@ learnsets = {
     'Victreebel': ['Wrap', 'Poisonpowder', 'Sleep Powder']
 }
 
+SPRITE_MONSTER = 0x05
+SPRITE_BIRD = 0x09
+SPRITE_SEEL = 0x3C
+SPRITE_PIKACHU = 0x3D
+SPRITE_SANDSHREW = 0x3F
+SPRITE_ODDISH = 0x40
+SPRITE_BULBASAUR = 0x41
+SPRITE_JIGGLYPUFF = 0x42
+SPRITE_CLEFAIRY = 0x43
+SPRITE_CHANSEY = 0x44
+SPRITE_POKE_BALL = 0x47
+SPRITE_FOSSIL = 0x48
+SPRITE_SNORLAX = 0x4D
+
+pokemon_overworld_sprites = dict.fromkeys(pokemon_data, SPRITE_MONSTER)
+pokemon_overworld_sprites.update(dict.fromkeys((
+    "Pidgey", "Pidgeotto", "Pidgeot", "Spearow", "Fearow", "Farfetchd", "Doduo", "Dodrio",
+    "Articuno", "Zapdos", "Moltres",
+), SPRITE_BIRD))
+pokemon_overworld_sprites.update(dict.fromkeys((
+    "Squirtle", "Wartortle", "Blastoise", "Tentacool", "Tentacruel", "Seel", "Dewgong",
+    "Psyduck", "Golduck", "Poliwag", "Poliwhirl", "Poliwrath", "Krabby", "Kingler", "Horsea",
+    "Seadra", "Goldeen", "Seaking", "Staryu", "Starmie", "Magikarp", "Lapras",
+), SPRITE_SEEL))
+pokemon_overworld_sprites.update(dict.fromkeys(("Pikachu", "Raichu"), SPRITE_PIKACHU))
+pokemon_overworld_sprites.update(dict.fromkeys(("Sandshrew", "Sandslash"), SPRITE_SANDSHREW))
+pokemon_overworld_sprites.update(dict.fromkeys((
+    "Oddish", "Gloom", "Vileplume", "Bellsprout", "Weepinbell", "Victreebel", "Exeggcute",
+    "Exeggutor", "Tangela",
+), SPRITE_ODDISH))
+pokemon_overworld_sprites.update(dict.fromkeys(("Bulbasaur", "Ivysaur", "Venusaur"), SPRITE_BULBASAUR))
+pokemon_overworld_sprites.update(dict.fromkeys(("Jigglypuff", "Wigglytuff"), SPRITE_JIGGLYPUFF))
+pokemon_overworld_sprites.update(dict.fromkeys(("Clefairy", "Clefable"), SPRITE_CLEFAIRY))
+pokemon_overworld_sprites["Chansey"] = SPRITE_CHANSEY
+pokemon_overworld_sprites.update(dict.fromkeys((
+    "Magnemite", "Magneton", "Voltorb", "Electrode",
+), SPRITE_POKE_BALL))
+pokemon_overworld_sprites.update(dict.fromkeys((
+    "Omanyte", "Omastar", "Kabuto", "Kabutops", "Aerodactyl",
+), SPRITE_FOSSIL))
+pokemon_overworld_sprites["Snorlax"] = SPRITE_SNORLAX
+
+
+def get_pokemon_overworld_sprite(item_name: str) -> int:
+    for prefix in ("Static ", "Uncatchable "):
+        if item_name.startswith(prefix):
+            item_name = item_name.removeprefix(prefix)
+            break
+    return pokemon_overworld_sprites.get(item_name, SPRITE_POKE_BALL)
+
+
 pokemon_data_yellow = deepcopy(pokemon_data)
 learnsets_yellow = deepcopy(learnsets)
 
