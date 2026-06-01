@@ -4,6 +4,7 @@ The common data matches Red/Blue and Yellow. The version-specific dictionaries c
 party records that are missing or different in that version.
 """
 
+from copy import deepcopy
 
 trainer_data_common = {
     'Fossil Level': [
@@ -1777,7 +1778,7 @@ trainer_data_common = {
 }
 
 
-trainer_data_rb = trainer_data_common | {
+_trainer_data_rb = {
     'Viridian Forest': [
         {
             'level': 6,
@@ -2057,7 +2058,7 @@ trainer_data_rb = trainer_data_common | {
 }
 
 
-trainer_data_yellow = trainer_data_common | {
+_trainer_data_yellow = {
     'Viridian Forest': [
         {
             'level': 7,
@@ -3550,56 +3551,17 @@ _trainer_data_yellow_order = {
     ],
 }
 
-#
-# def combine_trainer_data(*data_sets):
-#     combined = {}
-#     for data_set in data_sets:
-#         for region, parties in data_set.items():
-#             combined.setdefault(region, [])
-#             combined[region].extend(deepcopy(parties))
-#     return combined
-#
-# #
-# # def _party_key(party):
-# #     party_address = party["party_address"]
-# #     if isinstance(party_address, list):
-# #         return tuple(party_address)
-# #     return party_address
-# #
-# #
-# # def _apply_trainer_order(combined, order):
-# #     ordered = {}
-# #     for region, keys in order.items():
-# #         parties = combined.get(region, [])
-# #         parties_by_key = {_party_key(party): party for party in parties}
-# #         ordered_parties = []
-# #         for key in keys:
-# #             party = parties_by_key.pop(key, None)
-# #             if party is not None:
-# #                 ordered_parties.append(party)
-# #         ordered_parties.extend(parties_by_key.values())
-# #         if ordered_parties:
-# #             ordered[region] = ordered_parties
-# #     for region, parties in combined.items():
-# #         if region not in ordered:
-# #             ordered[region] = parties
-# #     return ordered
-# #
-# #
-# # def combine_trainer_data(*data_sets, order=None):
-# #     combined = {}
-# #     for data_set in data_sets:
-# #         for region, parties in data_set.items():
-# #             combined.setdefault(region, [])
-# #             combined[region].extend(deepcopy(parties))
-# #     if order is not None:
-# #         combined = _apply_trainer_order(combined, order)
-# #     return combined
-# #
-# #
-# # trainer_data = combine_trainer_data(trainer_data_common, trainer_data_rb, order=_trainer_data_rb_order)
-# # yellow_trainer_data = combine_trainer_data(
-# #     trainer_data_common,
-# #     trainer_data_yellow,
-# #     order=_trainer_data_yellow_order,
-# # )
+def combine_trainer_data(*data_sets):
+    combined = {}
+    for data_set in data_sets:
+        for region, parties in data_set.items():
+            combined.setdefault(region, [])
+            combined[region].extend(deepcopy(parties))
+    return combined
+
+
+trainer_data_rb = combine_trainer_data(trainer_data_common, _trainer_data_rb)
+trainer_data_yellow = combine_trainer_data(
+    trainer_data_common,
+    _trainer_data_yellow,
+)
