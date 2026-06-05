@@ -147,6 +147,8 @@ rom_addresses_rb = {
     "Warps_VermilionCity": 0x189be,
     "Warps_FuchsiaCity": 0x18bd8,
     "Option_Viridian_Gym_Badges": 0x1901d,
+    "Old_Man_Encounter_Mon_Level": 0x1909a,
+    "Old_Man_Encounter_Mon": 0x1909f,
     "Event_Sleepy_Guy": 0x191cb,
     "Option_Route3_Guard_B": 0x19284,
     "Starter2_K": 0x195f8,
