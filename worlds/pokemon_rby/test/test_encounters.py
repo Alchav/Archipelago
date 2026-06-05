@@ -370,3 +370,21 @@ class TestEncounterRandomizationHelpers(unittest.TestCase):
 
         placed = [multiworld.get_location(slot.name, 1).item.name for slot in repeatable_slots]
         self.assertEqual(["Bulbasaur", "Charmander", "Eevee", "Squirtle"], sorted(placed))
+
+    def test_non_randomized_accessibility_requires_normal_evolution_roots(self) -> None:
+        candidate_location = FakePlacedLocation("Cinnabar Lab Fossil Room - Dome Fossil Pokemon")
+        candidate_location.item = SimpleNamespace(name="Articuno", location=candidate_location)
+        placed_mons = {pokemon: 0 for pokemon in poke_data.pokemon_data}
+        placed_mons["Articuno"] = 1
+        static_placed_mons = {pokemon: 0 for pokemon in poke_data.pokemon_data}
+        static_placed_mons["Kabuto"] = 1
+        world = SimpleNamespace(
+            options=SimpleNamespace(accessibility="full", dexsanity=False),
+            create_item=lambda name: SimpleNamespace(name=name, location=None),
+        )
+
+        with mock.patch.object(encounters, "get_full_accessibility_evolution_roots", return_value=["Kabuto"]):
+            encounters.ensure_non_randomized_accessibility(
+                world, placed_mons, static_placed_mons, [candidate_location])
+
+        self.assertEqual("Kabuto", candidate_location.item.name)

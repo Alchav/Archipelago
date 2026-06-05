@@ -379,7 +379,11 @@ class DoorShuffle(Choice):
     On Simple only, the Town Map will be updated to show the new locations for each dungeon.
     Interiors: Any outdoor entrance may lead to any interior, but intra-interior doors are not shuffled.
     Full: Exterior to interior entrances are shuffled, and interior to interior doors are shuffled, separately.
+    Full Mapped: Like Full, but interior region groups are only shuffled with other groups that have the same number
+    of shuffleable doors.
     Insanity: All doors in the game are shuffled.
+    Insanity Mapped: Like Insanity, but connected region groups are only shuffled with other groups that have the same
+    number of shuffleable doors.
     Decoupled: Doors may be decoupled from each other, so that leaving through an exit may not return you to the
     door you entered from."""
     display_name = "Door Shuffle"
@@ -389,14 +393,16 @@ class DoorShuffle(Choice):
     option_full = 3
     option_insanity = 4
     option_decoupled = 5
+    option_full_mapped = 6
+    option_insanity_mapped = 7
     default = 0
 
 
 class WarpTileShuffle(Choice):
     """Vanilla: The warp tiles in Silph Co and Sabrina's Gym are not changed.
     Shuffle: The warp tile destinations are shuffled among themselves.
-    Mixed: The warp tiles are mixed into the pool of available doors for Full, Insanity, and Decoupled. Same as Shuffle
-    for any other door shuffle option."""
+    Mixed: The warp tiles are mixed into the pool of available doors for Full, Full Mapped, Insanity,
+    Insanity Mapped, and Decoupled. Same as Shuffle for any other door shuffle option."""
     display_name = "Warp Tile Shuffle"
     default = 0
     option_vanilla = 0

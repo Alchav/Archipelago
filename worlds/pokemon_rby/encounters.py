@@ -116,12 +116,21 @@ RIVAL_STARTER_LINE = {
 YELLOW_RIVAL_EEVEE_LINE = {"Eevee", "Jolteon", "Flareon", "Vaporeon"}
 
 
-def ensure_non_randomized_full_accessibility(world, placed_mons, candidate_locations):
-    if world.options.accessibility != "full":
-        return
+def ensure_non_randomized_accessibility(world, placed_mons, static_placed_mons, candidate_locations):
+    normal_required_mons = set()
+    static_allowed_mons = set()
+    if world.options.accessibility == "full":
+        normal_required_mons.update(get_full_accessibility_evolution_roots())
+        if getattr(world.options, "dexsanity", False):
+            static_allowed_mons.update(
+                pokemon for pokemon in poke_data.first_stage_pokemon
+                if world.dexsanity_table[poke_data.pokemon_dex[pokemon] - 1])
 
-    required_mons = set(get_full_accessibility_evolution_roots())
-    missing_mons = [pokemon for pokemon in sorted(required_mons) if placed_mons[pokemon] == 0]
+    required_mons = normal_required_mons | static_allowed_mons
+    missing_mons = [pokemon for pokemon in sorted(normal_required_mons) if placed_mons[pokemon] == 0]
+    missing_mons.extend(
+        pokemon for pokemon in sorted(static_allowed_mons - normal_required_mons)
+        if placed_mons[pokemon] == 0 and static_placed_mons[pokemon] == 0)
     if not missing_mons:
         return
 
@@ -137,7 +146,7 @@ def ensure_non_randomized_full_accessibility(world, placed_mons, candidate_locat
                 candidate_locations.pop(i)
                 break
         else:
-            raise Exception(f"Failed to place required full accessibility Pokemon {mon}")
+            raise Exception(f"Failed to place required non-randomized Pokemon {mon}")
 
 
 def get_encounter_slots(world, types):
@@ -277,6 +286,7 @@ def process_pokemon_locations(self):
         for slot in legendary_slots:
             location = self.multiworld.get_location(slot.name, self.player)
             location.place_locked_item(self.create_item("Static " + slot.original_item))
+            static_placed_mons[slot.original_item] += 1
     elif self.options.randomize_legendary_pokemon == "shuffle":
         self.random.shuffle(legendary_mons)
         for slot in legendary_slots:
@@ -339,6 +349,8 @@ def process_pokemon_locations(self):
                 placed_mons[location.item.name] += 1
                 if slot.name in full_accessibility_candidate_names:
                     full_accessibility_candidate_locations.append(location)
+            elif slot.type in ("Legendary Pokemon", "Static Pokemon"):
+                static_placed_mons[location.item.name.replace("Static ", "")] += 1
         else:
             mon = self.create_item(prepend +
                                    randomize_pokemon(self, slot.original_item, mons_list, randomize_type,
@@ -491,4 +503,5 @@ def process_pokemon_locations(self):
             location.locked = True
             location.item.location = location
             placed_mons[location.item.name] += 1
-        ensure_non_randomized_full_accessibility(self, placed_mons, full_accessibility_candidate_locations)
+        ensure_non_randomized_accessibility(
+            self, placed_mons, static_placed_mons, full_accessibility_candidate_locations)
