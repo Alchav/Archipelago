@@ -208,9 +208,9 @@ def process_trainer_data(world):
     rival_map = {}
     if getattr(world, "game", None) != "Pokemon Yellow":
         rival_map = {
-            "Charmander": world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name[9:],  # strip the
-            "Squirtle": world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name[9:],  # 'Missable'
-            "Bulbasaur": world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name[9:],  # from the name
+            "Charmander": world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name[12:],  # strip the
+            "Squirtle": world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name[12:],  # 'Uncatchable'
+            "Bulbasaur": world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name[12:],  # from the name
         }
 
     def add_evolutions():
