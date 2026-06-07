@@ -1,6 +1,6 @@
-# Spicy Mycena 64
+# SM64: Spicy Mycena 64
 
-Spicy Mycena 64 is a fork of the SM64EX Archipelago world with a different progression model. It is built around
+SM64: Spicy Mycena 64 is a fork of the SM64EX Archipelago world with a different progression model. It is built around
 unlocking level objects and castle features directly instead of collecting Archipelago Power Star items.
 
 This page focuses on how it differs from the regular SM64EX APWorld.

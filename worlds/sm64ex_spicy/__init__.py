@@ -20,7 +20,7 @@ class SM64Web(WebWorld):
         "English",
         "setup_en.md",
         "setup/en",
-        ["N00byKing"]
+        ["N00byKing", "Alchav"]
     )]
 
     option_groups = sm64_options_groups
