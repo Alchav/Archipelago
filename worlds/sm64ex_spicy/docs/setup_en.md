@@ -1,11 +1,15 @@
 # Super Mario 64 EX MultiWorld Setup Guide
 
+## TL;DR
+
+Point SM64AP-Launcher at https://github.com/Alchav/sm64ex to build the Spicy Mycena 64 sm64ex fork.
+
 ## Required Software
 
 - Super Mario 64 US or JP Rom (Europe and Shindou not supported)
 - Either of
     - [SM64AP-Launcher](https://github.com/N00byKing/SM64AP-Launcher/releases) or
-    - Cloning and building [sm64ex](https://github.com/Alchav/sm64ex) manually
+    - Cloning and building Alchav's [sm64ex](https://github.com/Alchav/sm64ex) fork manually
 - Optional, for sending [commands](/tutorial/Archipelago/commands/en) like `!hint`: the TextClient from [the most recent Archipelago release](https://github.com/ArchipelagoMW/Archipelago/releases)
 
 NOTE: The above linked launcher is a special version designed to work with the Archipelago build of sm64ex.
