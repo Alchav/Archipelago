@@ -100,7 +100,7 @@ class MoveRandomizerActions(OptionSet):
 
 class MarioColors(OptionDict):
     """
-    Optional cosmetic Mario palette. Keys may be shirt, overalls, gloves, shoes, skin, or hair, with each value being
+    Cosmetic Mario palette. Keys may be shirt, overalls, gloves, shoes, skin, or hair, with each value being
     an RGB array.
     """
     display_name = "Mario Colors"
@@ -117,6 +117,8 @@ class MarioColors(OptionDict):
     def verify(self, world, player_name: str, plando_options) -> None:
         super().verify(world, player_name, plando_options)
         errors = []
+        if self.value.keys() != self.valid_keys:
+            errors.append(f"Color keys must be {self.valid_keys}. Keys used: {set(self.value.keys())}")
         for color_name, channels in self.value.items():
             if not isinstance(channels, (list, tuple)) or len(channels) != 3:
                 errors.append(f"{color_name} must be an RGB array with exactly three channels.")
