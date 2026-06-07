@@ -332,7 +332,7 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_on,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -368,7 +368,7 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_on,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,

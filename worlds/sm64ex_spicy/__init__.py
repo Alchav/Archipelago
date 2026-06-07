@@ -4,7 +4,7 @@ import json
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     arbitrary_item_data_table, castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item
-from .Locations import location_table, loc100Coin_table, SM64Location
+from .Locations import location_table, SM64Location
 from .Options import sm64_options_groups, SM64Options
 from .Rules import set_rules
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
@@ -121,8 +121,6 @@ class SM64World(World):
             locked_count += len(cannon_item_data_table)
         if not self.options.exclamation_boxes:
             locked_count += sum(1 for loc_name in location_table if "1Up Block" in loc_name)
-        if self.options.enable_coin_stars == self.options.enable_coin_stars.option_vanilla:
-            locked_count += len(loc100Coin_table)
         return locked_count
 
     def create_items(self):
@@ -179,10 +177,6 @@ class SM64World(World):
             self.multiworld.get_location("Bowser in the Fire Sea 1Up Block Near Poles", self.player).place_locked_item(self.create_item("1Up Mushroom"))
             self.multiworld.get_location("Wing Mario Over the Rainbow 1Up Block", self.player).place_locked_item(self.create_item("1Up Mushroom"))
             self.multiworld.get_location("Bowser in the Sky 1Up Block", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-
-        if self.options.enable_coin_stars == self.options.enable_coin_stars.option_vanilla:
-            for location in loc100Coin_table:
-                self.multiworld.get_location(location, self.player).place_locked_item(self.create_item("1Up Mushroom"))
 
     def get_filler_item_name(self) -> str:
         return "1Up Mushroom"

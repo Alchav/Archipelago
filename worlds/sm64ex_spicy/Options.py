@@ -3,21 +3,12 @@ from Options import DefaultOnToggle, Toggle, DeathLink, Choice, OptionError, Per
     OptionSet, OptionGroup
 from .Items import action_item_data_table
 
-class EnableCoinStars(Choice):
+class EnableCoinStars(Toggle):
     """
-    Determine logic for 100 Coin Stars.
-
-    Off - Removed from pool. You can still collect them, but they don't do anything.
-    Optimal for ignoring 100 Coin Stars entirely. Removes 15 locations from the pool.
-
-    On - Kept in pool, potentially randomized.
-
-    Vanilla - Kept in pool, but NOT randomized.
+    Add 100 Coin Stars as checks.
     """
     display_name = "Enable 100 Coin Stars"
-    option_off = 0
-    option_on = 1
-    option_vanilla = 2
+    default = 0
 
 class EnableLockedPaintings(Toggle):
     """

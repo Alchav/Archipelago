@@ -2,7 +2,7 @@ from typing import Callable, Union, Dict, Set
 
 from BaseClasses import CollectionState, Entrance, MultiWorld
 from ..generic.Rules import add_rule, set_rule
-from .Locations import loc100Coin_table, location_table
+from .Locations import location_table
 from .Options import SM64Options
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
@@ -37,8 +37,6 @@ def fix_reg(entrance_map: Dict[SM64Levels, str], entrance: SM64Levels, invalid_r
 
 
 def is_starting_check_location(location_name: str, options: SM64Options) -> bool:
-    if options.enable_coin_stars == options.enable_coin_stars.option_vanilla and location_name in loc100Coin_table:
-        return False
     if not options.exclamation_boxes and "1Up Block" in location_name:
         return False
     if not options.buddy_checks and location_name.endswith(" - Bob-omb Buddy"):

@@ -195,7 +195,7 @@ class MarioColorsValidationTestBase(SM64TestBase):
 # Coin Star Logic
 class EnableCoinStarsTestBase(SM64TestBase):
     options = {
-        "enable_coin_stars": Options.EnableCoinStars.option_on
+        "enable_coin_stars": Options.EnableCoinStars.option_true
     }
 
     # Ensure Coin Star locations are created
@@ -209,7 +209,7 @@ class EnableCoinStarsTestBase(SM64TestBase):
 
 class DisableCoinStarsTestBase(SM64TestBase):
     options = {
-        "enable_coin_stars": Options.EnableCoinStars.option_off
+        "enable_coin_stars": Options.EnableCoinStars.option_false
     }
 
     # Ensure Coin Star locations are not created
@@ -219,30 +219,6 @@ class DisableCoinStarsTestBase(SM64TestBase):
             # Use subtest to force all locations to be tested
             with self.subTest("Location not created", location=loc):
                 self.assertNotIn(loc, possible_locations)
-
-
-class VanillaCoinStarsTestBase(SM64TestBase):
-    options = {
-        "enable_coin_stars": Options.EnableCoinStars.option_vanilla
-    }
-
-    # Ensure Coin Star locations are created
-    def test_coin_star_locations(self):
-        possible_locations = self.world.location_names
-        for loc in loc100Coin_table:
-            # Use subtest to force all locations to be tested
-            with self.subTest("Location created", location=loc):
-                self.assertIn(loc, possible_locations)
-
-    # Vanilla Coin Stars are still fixed, but this fork does not generate Power Star items.
-    def test_items_in_coin_star_locations(self):
-        for loc in loc100Coin_table:
-            # Use subtest to force all locations to be tested
-            with self.subTest("Location created", location=loc):
-                item_in_loc = self.world.get_location(loc).item
-                self.assertEqual(item_in_loc.name, "1Up Mushroom")
-                # By default, these test bases are single player multiworld.
-                # In any other case, we should test that they belong to their respective worlds.
 
 
 # Exclamation Boxes
@@ -382,7 +358,7 @@ class NoPowerStarsTestBase(SM64TestBase):
     options = {
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "exclamation_boxes": Options.ExclamationBoxes.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_off
+        "enable_coin_stars": Options.EnableCoinStars.option_false
     }
 
     def test_no_power_stars_generated(self):

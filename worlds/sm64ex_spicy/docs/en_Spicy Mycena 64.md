@@ -20,8 +20,8 @@ more open first-floor progression.
 
 Spicy Mycena 64 replaces the old star-count castle doors with key-style progression:
 
-- `Progressive MIPS`, `Wing Cap Light`, `Courtyard Boos`, `Castle Toads`, `Castle Cannon`, and `Yoshi` for specific
-castle features.
+- `Progressive MIPS`, `Wing Cap Light`, `Courtyard Boos`, `Castle Toads`, `Castle Cannon`, and `Yoshi` for
+specific castle features.
 - `Dark World Key` unlocks the old 8-star door.
 - `Progressive Basement Key` unlocks the basement key door, and then the old 30-star door.
 - `Progressive Upstairs Key` unlocks the second floor key door, then the old 50-star door, and then disables the
