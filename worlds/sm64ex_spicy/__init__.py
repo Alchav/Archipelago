@@ -58,16 +58,7 @@ class SM64World(World):
             for action in self.options.move_rando_actions.value:
                 self.move_rando_bitvec |= (1 << (action_item_data_table[action].code - double_jump_bitvec_offset))
 
-        self.number_of_stars = 0
         self.filler_count = 0
-        self.star_costs = {
-            'FirstBowserDoorCost': 0,
-            'BasementDoorCost': 0,
-            'SecondFloorDoorCost': 0,
-            'MIPS1Cost': 0,
-            'MIPS2Cost': 0,
-            'StarsToFinish': 0
-        }
         self.topology_present = self.options.area_rando
 
     def create_regions(self):
@@ -75,7 +66,7 @@ class SM64World(World):
 
     def set_rules(self):
         self.area_connections = {}
-        set_rules(self.multiworld, self.options, self.player, self.area_connections, self.star_costs, self.move_rando_bitvec)
+        set_rules(self.multiworld, self.options, self.player, self.area_connections, self.move_rando_bitvec)
         if self.topology_present:
             # Write area_connections to spoiler log
             for entrance, destination in self.area_connections.items():
@@ -93,7 +84,7 @@ class SM64World(World):
     def get_castle_key_item_names(self) -> typing.List[str]:
         if self.options.combined_progressive_keys:
             return ["Progressive Key"] * 6
-        return ["First Floor Key"] + ["Progressive Basement Key"] * 2 + ["Progressive Upstairs Key"] * 3
+        return ["Dark World Key"] + ["Progressive Basement Key"] * 2 + ["Progressive Upstairs Key"] * 3
 
     def get_cap_item_names(self) -> typing.List[str]:
         if self.options.per_level_cap_items:
@@ -206,7 +197,6 @@ class SM64World(World):
             "PaintingRando": self.options.enable_locked_paintings.value,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
-            **self.star_costs
         }
         mario_colors = self.get_mario_colors_slot_data()
         if mario_colors:

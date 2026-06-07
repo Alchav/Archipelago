@@ -161,7 +161,7 @@ def ensure_reachable_starting_check(
 
     raise Exception("Unable to place a reachable starting check in an initially accessible SM64 entrance.")
 
-def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_connections: dict, star_costs: dict, move_rando_bitvec: int):
+def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_connections: dict, move_rando_bitvec: int):
     randomized_level_to_paintings = sm64_level_to_paintings.copy()
     randomized_level_to_secrets = sm64_level_to_secrets.copy()
 
@@ -202,7 +202,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         return entrance
 
     def has_first_floor_key(state):
-        return state.has("First Floor Key", player) or state.has("Progressive Key", player, 1)
+        return state.has("Dark World Key", player) or state.has("Progressive Key", player, 1)
 
     def has_basement_key(state):
         return state.has("Basement Key", player) or state.has("Progressive Basement Key", player, 1) or \

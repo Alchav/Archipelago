@@ -46,7 +46,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Dire, Dire Docks - Poles": 3626265,
             "Big Boo's Haunt - Staircase": 3626266,
             "Big Boo's Haunt - Merry-go-round": 3626267,
-            "First Floor Key": 3626268,
+            "Dark World Key": 3626268,
             "Progressive Basement Key": 3626269,
             "Progressive Upstairs Key": 3626270,
             "Progressive MIPS": 3626271,
@@ -150,7 +150,7 @@ class GroupedCastleKeyPoolTestBase(SM64TestBase):
     }
 
     def test_grouped_castle_keys_are_generated(self):
-        self.assertEqual(len(self.get_items_by_name("First Floor Key")), 1)
+        self.assertEqual(len(self.get_items_by_name("Dark World Key")), 1)
         self.assertEqual(len(self.get_items_by_name("Progressive Basement Key")), 2)
         self.assertEqual(len(self.get_items_by_name("Progressive Upstairs Key")), 3)
         self.assertEqual(len(self.get_items_by_name("Progressive Key")), 0)

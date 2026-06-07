@@ -82,7 +82,7 @@ class CompletionType(Choice):
 
 class CombinedProgressiveKeys(DefaultOnToggle):
     """
-    Off - Use grouped castle keys: First Floor Key, Progressive Basement Key x2, Progressive Upstairs Key x3.
+    Off - Use grouped castle keys: Dark World Key, Progressive Basement Key x2, Progressive Upstairs Key x3.
 
     On - Use a single combined Progressive Key with six tiers for all castle key doors.
     """

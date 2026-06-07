@@ -13,7 +13,7 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
 
     def test_BitDW_entrance_access(self):
         self.assertFalse(self.can_reach_region("Bowser in the Dark World"))
-        self.collect(self.get_item_by_name("First Floor Key"))
+        self.collect(self.get_item_by_name("Dark World Key"))
         self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
 
     def test_basement_access(self):

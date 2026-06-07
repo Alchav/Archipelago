@@ -50,7 +50,7 @@ feature_item_data_table: dict[str, SM64ItemData] = {
 }
 
 castle_key_item_data_table: dict[str, SM64ItemData] = {
-    "First Floor Key": SM64ItemData(sm64ex_base_id + 268),
+    "Dark World Key": SM64ItemData(sm64ex_base_id + 268),
     "Progressive Basement Key": SM64ItemData(sm64ex_base_id + 269),
     "Progressive Upstairs Key": SM64ItemData(sm64ex_base_id + 270),
 }
