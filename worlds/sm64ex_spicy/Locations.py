@@ -1,7 +1,7 @@
 from BaseClasses import Location
 
 class SM64Location(Location):
-    game: str = "Spicy Mycena 64"
+    game: str = "SM64: Spicy Mycena 64"
 
 #Bob-omb Battlefield
 locBoB_table = {

@@ -5,7 +5,7 @@ from BaseClasses import Item, ItemClassification
 sm64ex_base_id: int = 3626000
 
 class SM64Item(Item):
-    game: str = "Spicy Mycena 64"
+    game: str = "SM64: Spicy Mycena 64"
 
 class SM64ItemData(NamedTuple):
     code: int | None = None

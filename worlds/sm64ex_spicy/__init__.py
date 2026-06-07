@@ -32,7 +32,7 @@ class SM64World(World):
     combined with traditional Mario gameplay, visual style, and characters.
     """
 
-    game: str = "Spicy Mycena 64"
+    game: str = "SM64: Spicy Mycena 64"
     topology_present = False
 
     web = SM64Web()
