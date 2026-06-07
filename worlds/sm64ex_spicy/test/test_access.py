@@ -327,6 +327,77 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
 
 
+class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_on,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_hundred_coins_accepts_ground_pound(self):
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+
+    def test_hundred_coins_requires_top_and_fortress_for_shoot_movement_route(self):
+        self.collect([self.get_item_by_name("Wall Kick"), self.get_item_by_name("Side Flip")])
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Shoot into the Wild Blue"))
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+
+        self.collect(self.get_item_by_name("Whomp's Fortress - Fortress"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+
+    def test_hundred_coins_accepts_cannon_with_top_and_fortress(self):
+        self.collect([
+            self.get_item_by_name("Checkerboard Platforms"),
+            self.get_item_by_name("Whomp's Fortress - Fortress"),
+        ])
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+
+        self.collect(self.get_item_by_name("Cannon Unlock Whomp's Fortress"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+
+
+class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_coin_stars": Options.EnableCoinStars.option_on,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_second_floor_access(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+
+    def test_hundred_coins_accepts_huge_island_entry(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+
+    def test_hundred_coins_from_tiny_island_requires_pipes(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+            lambda state: False
+
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+
+        self.collect([self.get_item_by_name("Long Jump"), self.get_item_by_name("Tiny-Huge Island - Warp Pipes")])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+
+
 class BigBooHauntAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {

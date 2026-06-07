@@ -266,7 +266,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     thi_large_top = create_subregion(thi_pipes, "Tiny-Huge Island - Large Top", "Tiny-Huge Island - Make Wiggler Squirm")
     regTHI.subregions = [thi_pipes, thi_large_top]
     if options.enable_coin_stars:
-        create_locs(thi_large_top, "Tiny-Huge Island - 100 Coins")
+        create_locs(regTHI, "Tiny-Huge Island - 100 Coins")
 
     regFloor3 = create_region("Third Floor", player, multiworld)
 

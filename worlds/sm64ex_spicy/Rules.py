@@ -57,6 +57,7 @@ def get_randomized_entrance_connections(multiworld: MultiWorld, player: int) -> 
         entrance.name.split(" -> ", 1)[1]: entrance
         for entrance in multiworld.get_entrances(player)
         if " -> " in entrance.name and entrance.name.split(" -> ", 1)[1] in sm64_entrances_to_level
+        and entrance.parent_region.name not in sm64_wdw_entrances
     }
 
 
@@ -287,31 +288,31 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Bob-omb Battlefield
     rf.assign_rule("Bob-omb Battlefield - Big Bob-Omb on the Summit", "BOB_KING")
     rf.assign_rule("Bob-omb Battlefield - Footrace with Koopa The Quick", "BOB_KOOPA")
-    rf.assign_rule("Bob-omb Battlefield - Island", "CANN+BOB_BUDDY | CANNLESS & WC & TJ | CAPLESS & CANNLESS & LJ")
-    rf.assign_rule("Bob-omb Battlefield - Mario Wings to the Sky",  "CANN+BOB_BUDDY & WC | CAPLESS & CANN+BOB_BUDDY")
+    rf.assign_rule("Bob-omb Battlefield - Island", "CANN | CANNLESS & WC & TJ | CAPLESS & CANNLESS & LJ")
+    rf.assign_rule("Bob-omb Battlefield - Mario Wings to the Sky",  "CANN & WC | CAPLESS & CANN")
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate", "GP | MOVELESS")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
     # Whomp's Fortress
     rf.assign_rule("Whomp's Fortress - To the Top of the Fortress", "WF_FORTRESS")
     rf.assign_rule("Whomp's Fortress - Chip Off Whomp's Block", "WF_KING & GP")
     rf.assign_rule("Whomp's Fortress - Top", "CHECKERBOARD_PLATFORMS | WF_HOOT | WK & SF/TJ")
-    rf.assign_rule("Whomp's Fortress - Shoot into the Wild Blue", "WK & TJ/SF | CANN+WF_BUDDY")
+    rf.assign_rule("Whomp's Fortress - Shoot into the Wild Blue", "WK & TJ/SF | CANN")
     rf.assign_rule("Whomp's Fortress - Red Coins on the Floating Isle", "WF_FORTRESS")
     rf.assign_rule("Whomp's Fortress - Fall onto the Caged Island",
                    "WF_HOOT | CL & WF_FORTRESS & {Whomp's Fortress - Top} | "
                    "MOVELESS & TJ & WF_FORTRESS & {Whomp's Fortress - Top} | "
-                   "MOVELESS & LJ & WF_FORTRESS & {Whomp's Fortress - Top} | MOVELESS & CANN+WF_BUDDY")
-    rf.assign_rule("Whomp's Fortress - Blast Away the Wall", "CANN+WF_BUDDY | CANNLESS & LG")
+                   "MOVELESS & LJ & WF_FORTRESS & {Whomp's Fortress - Top} | MOVELESS & CANN")
+    rf.assign_rule("Whomp's Fortress - Blast Away the Wall", "CANN | CANNLESS & LG")
     rf.assign_rule("Whomp's Fortress - Bob-omb Buddy", "WF_BUDDY")
     # Jolly Roger Bay
     rf.assign_rule("Jolly Roger Bay - Plunder in the Sunken Ship", "JRB_SUNKEN_SHIP")
     rf.assign_rule("Jolly Roger Bay - Can the Eel Come Out to Play?", "JRB_UNAGI")
     rf.assign_rule("Jolly Roger Bay - Upper", "TJ/BF/SF/WK | MOVELESS & LG")
     rf.assign_rule("Jolly Roger Bay - Red Coins on the Ship Afloat",
-                   "JRB_RAISED_SHIP & CL/TJ | JRB_RAISED_SHIP & CANN+JRB_BUDDY | "
+                   "JRB_RAISED_SHIP & CL/TJ | JRB_RAISED_SHIP & CANN | "
                    "JRB_RAISED_SHIP & MOVELESS & BF/WK")
     rf.assign_rule("Jolly Roger Bay - Blast to the Stone Pillar",
-                   "CANN+JRB_BUDDY+CL | CANNLESS & MOVELESS | CANN+JRB_BUDDY & MOVELESS")
+                   "CANN+CL | CANNLESS & MOVELESS | CANN & MOVELESS")
     rf.assign_rule("Jolly Roger Bay - Through the Jet Stream", "JRB_JET_STREAM & MC/CAPLESS")
     rf.assign_rule("Jolly Roger Bay - Bob-omb Buddy", "JRB_BUDDY")
     # Cool, Cool Mountain
@@ -408,8 +409,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Sky - Top", "CL+TJ | CL+SF+LG | MOVELESS & TJ+WK+LG")
     # 100 Coin Stars
     if options.enable_coin_stars:
-        rf.assign_rule("Bob-omb Battlefield - 100 Coins", "CANN+BOB_BUDDY & WC | CANNLESS & WC & TJ")
-        rf.assign_rule("Whomp's Fortress - 100 Coins", "GP | MOVELESS")
+        rf.assign_rule("Bob-omb Battlefield - 100 Coins", "CANN & WC | CANNLESS & WC & TJ")
+        rf.assign_rule("Whomp's Fortress - 100 Coins",
+                       "GP | {Whomp's Fortress - Top} & WF_FORTRESS & WK & TJ/SF | "
+                       "{Whomp's Fortress - Top} & WF_FORTRESS & CANN")
         rf.assign_rule("Jolly Roger Bay - 100 Coins", "GP & {Jolly Roger Bay - Upper}")
         rf.assign_rule("Hazy Maze Cave - 100 Coins", "GP")
         rf.assign_rule("Shifting Sand Land - 100 Coins", "{Shifting Sand Land - Upper Pyramid} | GP")
@@ -417,7 +420,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         rf.assign_rule("Snowman's Land - 100 Coins", "VC | CAPLESS")
         rf.assign_rule("Wet-Dry World - 100 Coins", "GP | {Wet-Dry World - Downtown}")
         rf.assign_rule("Tick Tock Clock - 100 Coins", "GP")
-        rf.assign_rule("Tiny-Huge Island - 100 Coins", "GP")
+        rf.assign_rule("Tiny-Huge Island - 100 Coins", "GP & {Tiny-Huge Island (Huge)} | GP & {Tiny-Huge Island - Pipes}")
         rf.assign_rule("Rainbow Ride - 100 Coins", "GP & WK")
     # Castle Stars
     add_rule(multiworld.get_location("Toad (Basement)", player),
