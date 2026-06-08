@@ -285,8 +285,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         connect_randomized_entrance("Third Floor", ttc_entrance,
                                     rf.build_rule("LG/TJ/SF/BF/WK", painting_lvl_name="Tick Tock Clock"))
     connect_randomized_entrance("Third Floor", "Rainbow Ride", rf.build_rule("TJ/SF/BF"))
-    connect_randomized_entrance("Menu", "Wing Mario over the Rainbow",
-                                lambda state: state.has("Cannon Unlock - Castle", player))
+    connect_randomized_entrance("Third Floor", "Wing Mario over the Rainbow",
+                                rf.build_rule("TJ/SF/BF"))
     connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", has_endless_stairs_key)
 
     # Course Rules
