@@ -4,6 +4,7 @@ from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names
 from ..Locations import loc100Coin_table, location_table
+from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
 
@@ -190,6 +191,40 @@ class MarioColorsValidationTestBase(SM64TestBase):
 
     def test_color_channels_must_be_in_range(self):
         self.assert_mario_colors_invalid({"shirt": [256, 2, 3]})
+
+
+class MusicShuffleOffTestBase(SM64TestBase):
+    options = {
+        "music_shuffle": Options.MusicShuffle.option_off
+    }
+
+    def test_music_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(0, slot_data["MusicShuffleMode"])
+        self.assertNotIn("MusicMap", slot_data)
+
+
+class MusicShuffleShuffleTestBase(SM64TestBase):
+    options = {
+        "music_shuffle": Options.MusicShuffle.option_shuffle
+    }
+
+    def test_music_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(1, slot_data["MusicShuffleMode"])
+        self.assertEqual({str(area_key) for area_key in SM64_MUSIC_AREA_SEQUENCES}, set(slot_data["MusicMap"]))
+        self.assertTrue(all(song in SM64_MUSIC_SAFE_SEQUENCE_IDS for song in slot_data["MusicMap"].values()))
+
+
+class MusicShuffleRandomOnLoadTestBase(SM64TestBase):
+    options = {
+        "music_shuffle": Options.MusicShuffle.option_random_on_load
+    }
+
+    def test_music_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(2, slot_data["MusicShuffleMode"])
+        self.assertNotIn("MusicMap", slot_data)
 
 
 # Coin Star Logic

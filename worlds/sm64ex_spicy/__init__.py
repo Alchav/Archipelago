@@ -5,6 +5,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     arbitrary_item_data_table, castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item
 from .Locations import location_table, SM64Location
+from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options
 from .Rules import set_rules
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
@@ -192,6 +193,8 @@ class SM64World(World):
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
         }
+        slot_data.update(build_music_slot_data(
+            self.options.music_shuffle.value, self.multiworld.seed, self.player))
         mario_colors = self.get_mario_colors_slot_data()
         if mario_colors:
             slot_data["MarioColors"] = mario_colors

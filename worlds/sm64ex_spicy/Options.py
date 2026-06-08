@@ -132,6 +132,24 @@ class MarioColors(OptionDict):
         if errors:
             raise OptionError(f"Player {player_name} has invalid Mario Colors:\n" + "\n".join(errors))
 
+
+class MusicShuffle(Choice):
+    """
+    Control in-game background music.
+
+    Off - Use vanilla music.
+
+    Shuffle - Archipelago sends a deterministic per-area music map.
+
+    Random on Load - The client picks a random song each time an area loads.
+    """
+    display_name = "Music Shuffle"
+    option_off = 0
+    option_shuffle = 1
+    option_random_on_load = 2
+    alias_on = 1
+
+
 sm64_options_groups = [
     OptionGroup("Logic Options", [
         AreaRandomizer,
@@ -151,6 +169,7 @@ sm64_options_groups = [
     ]),
     OptionGroup("Cosmetic Options", [
         MarioColors,
+        MusicShuffle,
     ]),
 
 ]
@@ -170,5 +189,6 @@ class SM64Options(PerGameCommonOptions):
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
     mario_colors: MarioColors
+    music_shuffle: MusicShuffle
     death_link: DeathLink
     completion_type: CompletionType
