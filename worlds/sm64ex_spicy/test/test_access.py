@@ -138,6 +138,8 @@ class CastleFeatureAccessTestBase(SM64TestBase):
 
         self.assertFalse(self.can_reach_region("Wing Mario over the Rainbow"))
         self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
+        self.assertFalse(self.can_reach_region("Wing Mario over the Rainbow"))
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
         self.assertTrue(self.can_reach_region("Wing Mario over the Rainbow"))
 
     def test_yoshi_access(self):
@@ -254,7 +256,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Rolling Log"))
+        self.collect(self.get_item_by_name("Rolling Logs"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
     def test_lll_elevator_tour_accepts_checkerboard_platforms(self):
@@ -286,6 +288,131 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+
+    def test_tiny_huge_island_pipes_from_tiny_do_not_require_purple_switches(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+            lambda state: False
+
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+
+    def test_purple_switch_gated_locations(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Metal Cap"),
+            self.get_item_by_name("Dire, Dire Docks - Bowser's Sub"),
+        ])
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+    def test_wet_dry_world_express_elevator_requires_purple_switches(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+
+    def test_wet_dry_world_quick_race_tj_lg_route_requires_purple_switches(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Vanish Cap"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
+
+    def test_tall_tall_mountain_bridge_accepts_purple_switches(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Kick"),
+        ])
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Top"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
+
+    def test_tiny_huge_island_five_secrets_from_tiny_requires_purple_switches(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+            lambda state: False
+
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+    def test_tiny_huge_island_five_secrets_from_huge_requires_pipes_and_purple_switches(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
+            lambda state: False
+
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+    def test_rainbow_ride_tricky_triangles_requires_purple_switches(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Rainbow Ride - Carpets"),
+        ])
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Tricky Triangles!"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Tricky Triangles!"))
+
+    def test_bitdw_red_coins_and_key_require_purple_switches(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+        self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World Red Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World Key"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World Red Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World Key"))
+
+    def test_bowser_in_the_sky_top_requires_purple_switches(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertTrue(self.can_reach_region("Bowser in the Sky"))
+        self.assertFalse(self.can_reach_region("Bowser in the Sky - Top"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
 
     def test_cool_cool_mountain_lil_penguin_lost_requires_baby_penguins(self):
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Li'l Penguin Lost"))
@@ -393,9 +520,38 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
 
-        self.collect([self.get_item_by_name("Long Jump"), self.get_item_by_name("Tiny-Huge Island - Warp Pipes")])
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+
+
+class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_red_coins_and_hundred_coins_require_purple_switches(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Dire, Dire Docks - Poles"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Pole-Jumping for Red Coins"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - 100 Coins"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Pole-Jumping for Red Coins"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - 100 Coins"))
 
 
 class BigBooHauntAccessTestBase(SM64TestBase):
@@ -468,6 +624,29 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
 
 
+class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_quick_race_accepts_moveless_jump_and_kick_route(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
+
+        self.collect(self.get_item_by_name("Kick"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
+
+
 class GlobalCapAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -512,6 +691,8 @@ class PerLevelCapAccessTestBase(SM64TestBase):
 
     def test_hmc_metal_cap_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+        self.collect(self.get_item_by_name("Purple Switches"))
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
         self.collect(self.get_item_by_name("Hazy Maze Cave - Metal Cap"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))

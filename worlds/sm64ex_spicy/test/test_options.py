@@ -84,7 +84,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Cool, Cool Mountain - Baby Penguins": 3626299,
             "Snowman's Land - Penguin": 3626300,
             "Shifting Sand Land - Pyramid Elevator": 3626301,
-            "Lethal Lava Land - Rolling Log": 3626302,
+            "Rolling Logs": 3626302,
+            "Purple Switches": 3626303,
         }
         item_data = {
             **feature_item_data_table,

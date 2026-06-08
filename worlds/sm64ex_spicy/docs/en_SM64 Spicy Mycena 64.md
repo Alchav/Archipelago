@@ -44,8 +44,8 @@ Examples include:
 - Bob-omb Buddies and cannon unlock flow.
 - Jolly Roger Bay ship, Unagi, jet stream, and Dire, Dire Docks submarine or poles.
 - Big Boo's Haunt staircase and merry-go-round.
-- Arbitrary level elements such as Rainbow Ride carpets, Tiny-Huge Island warp pipes, Checkerboard Platforms, Hazy
-  Maze Cave's swimming beast, Shifting Sand Land's pyramid elevator, and Lethal Lava Land's rolling log.
+- Arbitrary level elements such as Rainbow Ride carpets, Tiny-Huge Island warp pipes, Checkerboard Platforms, Purple
+  Switches, Hazy Maze Cave's swimming beast, Shifting Sand Land's pyramid elevator, and Lethal Lava Land's rolling log.
 
 These items are progression when logic can require the corresponding object.
 

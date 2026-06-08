@@ -259,9 +259,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_region("Tiny-Huge Island (Huge)", player, multiworld)
     create_region("Tiny-Huge Island (Tiny)", player, multiworld)
     regTHI = create_region("Tiny-Huge Island", player, multiworld)
-    create_locs(regTHI, "Tiny-Huge Island - 1Up Block THI Small near Start")
+    create_locs(regTHI, "Tiny-Huge Island - 1Up Block THI Small near Start",
+                "Tiny-Huge Island - Five Itty Bitty Secrets")
     thi_pipes = create_subregion(regTHI, "Tiny-Huge Island - Pipes", "Tiny-Huge Island - The Tip Top of the Huge Island", "Tiny-Huge Island - Pluck the Piranha Flower", "Tiny-Huge Island - Rematch with Koopa the Quick",
-                                                       "Tiny-Huge Island - Five Itty Bitty Secrets", "Tiny-Huge Island - Wiggler's Red Coins", "Tiny-Huge Island - Bob-omb Buddy",
+                                                       "Tiny-Huge Island - Wiggler's Red Coins", "Tiny-Huge Island - Bob-omb Buddy",
                                                        "Tiny-Huge Island - 1Up Block THI Large near Start", "Tiny-Huge Island - 1Up Block Windy Area")
     thi_large_top = create_subregion(thi_pipes, "Tiny-Huge Island - Large Top", "Tiny-Huge Island - Make Wiggler Squirm")
     regTHI.subregions = [thi_pipes, thi_large_top]

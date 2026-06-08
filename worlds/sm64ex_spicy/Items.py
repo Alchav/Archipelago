@@ -93,7 +93,8 @@ arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Cool, Cool Mountain - Baby Penguins": SM64ItemData(sm64ex_base_id + 299),
     "Snowman's Land - Penguin": SM64ItemData(sm64ex_base_id + 300),
     "Shifting Sand Land - Pyramid Elevator": SM64ItemData(sm64ex_base_id + 301),
-    "Lethal Lava Land - Rolling Log": SM64ItemData(sm64ex_base_id + 302),
+    "Rolling Logs": SM64ItemData(sm64ex_base_id + 302),
+    "Purple Switches": SM64ItemData(sm64ex_base_id + 303),
 }
 
 action_item_data_table: dict[str, SM64ItemData] = {

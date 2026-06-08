@@ -338,7 +338,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Hazy Maze Cave - Red Coin Area",
                    "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | CHECKERBOARD_PLATFORMS & MOVELESS & WK")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | MOVELESS & WK & TJ/LJ | MOVELESS & WK+SF+LG")
-    rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!", "LJ+MC | CAPLESS & LJ+TJ | CAPLESS & MOVELESS & LJ/TJ/WK")
+    rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
+                   "PURPLE_SWITCHES & LJ+MC | PURPLE_SWITCHES & CAPLESS & LJ+TJ | "
+                   "PURPLE_SWITCHES & CAPLESS & MOVELESS & LJ/TJ/WK")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     # Lethal Lava Land
@@ -353,8 +355,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "SSL_PYRAMID_ELEVATOR & TJ/SF/BF & CAPLESS | MOVELESS & LG/KK")
     rf.assign_rule("Shifting Sand Land - Free Flying for 8 Red Coins", "TJ+WC | CANN+WC | TJ/SF/BF & CAPLESS | MOVELESS & CAPLESS")
     # Dire, Dire Docks
-    rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub", "DDD_BOWSER_SUB")
-    rf.assign_rule("Dire, Dire Docks - Pole-Jumping for Red Coins", "DDD_POLES & CL | DDD_POLES & TJ+DV+LG+WK & MOVELESS")
+    rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub", "PURPLE_SWITCHES & DDD_BOWSER_SUB")
+    rf.assign_rule("Dire, Dire Docks - Pole-Jumping for Red Coins",
+                   "PURPLE_SWITCHES & DDD_POLES & CL | "
+                   "PURPLE_SWITCHES & DDD_POLES & TJ+DV+LG+WK & MOVELESS")
     rf.assign_rule("Dire, Dire Docks - Through the Jet Stream", "MC | CAPLESS")
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC+MC | CAPLESS & VC")
@@ -366,17 +370,26 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Top", "WK/TJ/SF/BF | MOVELESS")
     rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World High} | CANN | MOVELESS & TJ+DV")
     rf.assign_rule("Wet-Dry World - Go to Town for Red Coins", "WK | MOVELESS & TJ")
-    rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!", "VC & WK/BF | VC & TJ+LG | MOVELESS & VC & TJ")
+    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES")
+    rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
+                   "VC & WK/BF | VC & TJ+LG+PURPLE_SWITCHES | MOVELESS & VC & TJ | "
+                   "MOVELESS & DJ/SF/BF & KK")
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy", "TJ | SF+LG | NAR & BF/SF")
     # Tall, Tall Mountain
     rf.assign_rule("Tall, Tall Mountain - Top", "MOVELESS & TJ | LJ/DV & LG/KK | MOVELESS & WK & SF/LG | MOVELESS & KK/DV")
     rf.assign_rule("Tall, Tall Mountain - Mystery of the Monkey Cage", "TTM_UKIKI")
+    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "TJ/DV/LG/PURPLE_SWITCHES")
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom", "CANN | CANNLESS & LJ | MOVELESS & CANNLESS")
     # Tiny-Huge Island
     rf.assign_rule("Tiny-Huge Island - 1Up Block THI Small near Start", "NAR | {Tiny-Huge Island - Pipes}")
-    rf.assign_rule("Tiny-Huge Island - Pipes", "THI_WARP_PIPES & LJ/TJ/DV/LG | THI_WARP_PIPES & MOVELESS & BF/SF/KK")
+    rf.assign_rule("Tiny-Huge Island - Pipes",
+                   "THI_WARP_PIPES & LJ/TJ/DV/LG | "
+                   "THI_WARP_PIPES & MOVELESS & BF/SF/KK")
     rf.assign_rule("Tiny-Huge Island - Large Top", "LJ/TJ/DV | MOVELESS")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
+    rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets",
+                   "PURPLE_SWITCHES & {Tiny-Huge Island (Tiny)} | "
+                   "PURPLE_SWITCHES & {Tiny-Huge Island - Pipes}")
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "GP | MOVELESS & DV")
     # Tick Tock Clock
@@ -390,7 +403,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - Maze", "WK | LJ & SF/BF/TJ | MOVELESS & LG/TJ")
     rf.assign_rule("Rainbow Ride - Bob-omb Buddy", "WK | MOVELESS & LG")
     rf.assign_rule("Rainbow Ride - Swingin' in the Breeze", "LG/TJ/BF/SF | MOVELESS")
-    rf.assign_rule("Rainbow Ride - Tricky Triangles!", "LG/TJ/BF/SF | MOVELESS")
+    rf.assign_rule("Rainbow Ride - Tricky Triangles!",
+                   "PURPLE_SWITCHES & LG/TJ/BF/SF | PURPLE_SWITCHES & MOVELESS")
     rf.assign_rule("Rainbow Ride - Cruiser", "RR_CARPETS & WK/SF/BF/LG/TJ")
     rf.assign_rule("Rainbow Ride - House", "RR_CARPETS & TJ/SF/BF/LG")
     rf.assign_rule("Rainbow Ride - Somewhere Over the Rainbow", "CANN")
@@ -403,6 +417,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
     rf.assign_rule("Vanish Cap Under the Moat Red Coins",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
+    # Bowser in the Dark World
+    rf.assign_rule("Bowser in the Dark World Red Coins", "PURPLE_SWITCHES")
+    rf.assign_rule("Bowser in the Dark World Key", "PURPLE_SWITCHES")
     # Bowser in the Fire Sea
     rf.assign_rule("Bowser in the Fire Sea - Upper", "CL")
     rf.assign_rule("Bowser in the Fire Sea Red Coins", "LG/WK")
@@ -411,7 +428,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wing Mario Over the Rainbow Red Coins", "TJ+WC")
     rf.assign_rule("Wing Mario Over the Rainbow 1Up Block", "TJ+WC")
     # Bowser in the Sky
-    rf.assign_rule("Bowser in the Sky - Top", "CL+TJ | CL+SF+LG | MOVELESS & TJ+WK+LG")
+    rf.assign_rule("Bowser in the Sky - Top",
+                   "PURPLE_SWITCHES & CL+TJ | PURPLE_SWITCHES & CL+SF+LG | "
+                   "PURPLE_SWITCHES & MOVELESS & TJ+WK+LG")
     # 100 Coin Stars
     if options.enable_coin_stars:
         rf.assign_rule("Bob-omb Battlefield - 100 Coins", "CANN & WC | CANNLESS & WC & TJ")
@@ -421,7 +440,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         rf.assign_rule("Jolly Roger Bay - 100 Coins", "GP & {Jolly Roger Bay - Upper}")
         rf.assign_rule("Hazy Maze Cave - 100 Coins", "GP")
         rf.assign_rule("Shifting Sand Land - 100 Coins", "{Shifting Sand Land - Upper Pyramid} | GP")
-        rf.assign_rule("Dire, Dire Docks - 100 Coins", "GP & {{Dire, Dire Docks - Pole-Jumping for Red Coins}}")
+        rf.assign_rule("Dire, Dire Docks - 100 Coins",
+                       "PURPLE_SWITCHES & GP & {{Dire, Dire Docks - Pole-Jumping for Red Coins}}")
         rf.assign_rule("Snowman's Land - 100 Coins", "VC | CAPLESS")
         rf.assign_rule("Wet-Dry World - 100 Coins", "GP | {Wet-Dry World - Downtown}")
         rf.assign_rule("Tick Tock Clock - 100 Coins", "GP")
@@ -482,7 +502,7 @@ class RuleFactory:
     }
     token_table = {
         "TJ": "Triple Jump",
-        "DJ": "Triple Jump",
+        "DJ": "Double Jump",
         "LJ": "Long Jump",
         "BF": "Backflip",
         "SF": "Side Flip",
@@ -522,7 +542,8 @@ class RuleFactory:
         "CCM_BABY_PENGUINS": "Cool, Cool Mountain - Baby Penguins",
         "SL_PENGUIN": "Snowman's Land - Penguin",
         "SSL_PYRAMID_ELEVATOR": "Shifting Sand Land - Pyramid Elevator",
-        "LLL_ROLLING_LOG": "Lethal Lava Land - Rolling Log",
+        "LLL_ROLLING_LOG": "Rolling Logs",
+        "PURPLE_SWITCHES": "Purple Switches",
     }
     cap_item_name_by_token_and_level = {
         "WC": {
