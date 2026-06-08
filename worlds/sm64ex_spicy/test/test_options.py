@@ -228,6 +228,37 @@ class MusicShuffleRandomOnLoadTestBase(SM64TestBase):
         self.assertNotIn("MusicMap", slot_data)
 
 
+class CoinStarRequirementTestBase(SM64TestBase):
+    options = {
+        "bob_omb_battlefield_coin_star_requirement": 100,
+        "whomps_fortress_coin_star_requirement": 90,
+        "jolly_roger_bay_coin_star_requirement": 100,
+        "cool_cool_mountain_coin_star_requirement": 80,
+        "big_boos_haunt_coin_star_requirement": 100,
+        "hazy_maze_cave_coin_star_requirement": 100,
+        "lethal_lava_land_coin_star_requirement": 75,
+        "shifting_sand_land_coin_star_requirement": 100,
+        "dire_dire_docks_coin_star_requirement": 100,
+        "snowmans_land_coin_star_requirement": 100,
+        "wet_dry_world_coin_star_requirement": 100,
+        "tall_tall_mountain_coin_star_requirement": 100,
+        "tiny_huge_island_coin_star_requirement": 100,
+        "tick_tock_clock_coin_star_requirement": 100,
+        "rainbow_ride_coin_star_requirement": 100,
+    }
+
+    def test_coin_star_requirements_slot_data(self):
+        self.assertEqual(self.world.fill_slot_data()["CoinStarRequirements"], [
+            100, 90, 100, 80, 100, 100, 75, 100, 100, 100, 100, 100, 100, 100, 100
+        ])
+
+    def test_coin_star_requirement_ranges(self):
+        for option in Options.coin_star_requirement_options:
+            with self.subTest(option=option.__name__):
+                self.assertEqual(option.range_start, 1)
+                self.assertEqual(option.range_end, 100)
+
+
 # Coin Star Logic
 class EnableCoinStarsTestBase(SM64TestBase):
     options = {

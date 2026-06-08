@@ -1,14 +1,132 @@
 from dataclasses import dataclass
-from Options import DefaultOnToggle, Toggle, DeathLink, Choice, OptionError, PerGameCommonOptions, OptionDict, \
+from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, OptionError, PerGameCommonOptions, OptionDict, \
     OptionSet, OptionGroup
 from .Items import action_item_data_table
 
 class EnableCoinStars(Toggle):
     """
-    Add 100 Coin Stars as checks.
+    Add Coin Stars as checks.
     """
-    display_name = "Enable 100 Coin Stars"
+    display_name = "Enable Coin Stars"
     default = 0
+
+
+class CoinStarRequirement(Range):
+    range_start = 1
+    range_end = 100
+    default = 100
+
+
+class BobOmbBattlefieldCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Bob-omb Battlefield. Does not yet affect logic."""
+    display_name = "Bob-omb Battlefield Coin Star Requirement"
+
+
+class WhompsFortressCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Whomp's Fortress. Does not yet affect logic."""
+    display_name = "Whomp's Fortress Coin Star Requirement"
+
+
+class JollyRogerBayCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Jolly Roger Bay. Does not yet affect logic."""
+    display_name = "Jolly Roger Bay Coin Star Requirement"
+
+
+class CoolCoolMountainCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Cool, Cool Mountain. Does not yet affect logic."""
+    display_name = "Cool, Cool Mountain Coin Star Requirement"
+
+
+class BigBoosHauntCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Big Boo's Haunt. Does not yet affect logic."""
+    display_name = "Big Boo's Haunt Coin Star Requirement"
+
+
+class HazyMazeCaveCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Hazy Maze Cave. Does not yet affect logic."""
+    display_name = "Hazy Maze Cave Coin Star Requirement"
+
+
+class LethalLavaLandCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Lethal Lava Land. Does not yet affect logic."""
+    display_name = "Lethal Lava Land Coin Star Requirement"
+
+
+class ShiftingSandLandCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Shifting Sand Land. Does not yet affect logic."""
+    display_name = "Shifting Sand Land Coin Star Requirement"
+
+
+class DireDireDocksCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Dire, Dire Docks. Does not yet affect logic."""
+    display_name = "Dire, Dire Docks Coin Star Requirement"
+
+
+class SnowmansLandCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Snowman's Land. Does not yet affect logic."""
+    display_name = "Snowman's Land Coin Star Requirement"
+
+
+class WetDryWorldCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Wet-Dry World. Does not yet affect logic."""
+    display_name = "Wet-Dry World Coin Star Requirement"
+
+
+class TallTallMountainCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Tall, Tall Mountain. Does not yet affect logic."""
+    display_name = "Tall, Tall Mountain Coin Star Requirement"
+
+
+class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Tiny-Huge Island. Does not yet affect logic."""
+    display_name = "Tiny-Huge Island Coin Star Requirement"
+
+
+class TickTockClockCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Tick Tock Clock. Does not yet affect logic."""
+    display_name = "Tick Tock Clock Coin Star Requirement"
+
+
+class RainbowRideCoinStarRequirement(CoinStarRequirement):
+    """Coins needed for the Coin Star in Rainbow Ride. Does not yet affect logic."""
+    display_name = "Rainbow Ride Coin Star Requirement"
+
+
+coin_star_requirement_options = (
+    BobOmbBattlefieldCoinStarRequirement,
+    WhompsFortressCoinStarRequirement,
+    JollyRogerBayCoinStarRequirement,
+    CoolCoolMountainCoinStarRequirement,
+    BigBoosHauntCoinStarRequirement,
+    HazyMazeCaveCoinStarRequirement,
+    LethalLavaLandCoinStarRequirement,
+    ShiftingSandLandCoinStarRequirement,
+    DireDireDocksCoinStarRequirement,
+    SnowmansLandCoinStarRequirement,
+    WetDryWorldCoinStarRequirement,
+    TallTallMountainCoinStarRequirement,
+    TinyHugeIslandCoinStarRequirement,
+    TickTockClockCoinStarRequirement,
+    RainbowRideCoinStarRequirement,
+)
+
+coin_star_requirement_option_names = (
+    "bob_omb_battlefield_coin_star_requirement",
+    "whomps_fortress_coin_star_requirement",
+    "jolly_roger_bay_coin_star_requirement",
+    "cool_cool_mountain_coin_star_requirement",
+    "big_boos_haunt_coin_star_requirement",
+    "hazy_maze_cave_coin_star_requirement",
+    "lethal_lava_land_coin_star_requirement",
+    "shifting_sand_land_coin_star_requirement",
+    "dire_dire_docks_coin_star_requirement",
+    "snowmans_land_coin_star_requirement",
+    "wet_dry_world_coin_star_requirement",
+    "tall_tall_mountain_coin_star_requirement",
+    "tiny_huge_island_coin_star_requirement",
+    "tick_tock_clock_coin_star_requirement",
+    "rainbow_ride_coin_star_requirement",
+)
 
 class EnableLockedPaintings(Toggle):
     """
@@ -162,6 +280,9 @@ sm64_options_groups = [
         PerLevelCapItems,
         StrictCannonRequirements,
     ]),
+    OptionGroup("Coin Star Requirements", [
+        *coin_star_requirement_options,
+    ]),
     OptionGroup("Ability Options", [
         EnableMoveRandomizer,
         MoveRandomizerActions,
@@ -190,5 +311,20 @@ class SM64Options(PerGameCommonOptions):
     strict_move_requirements: StrictMoveRequirements
     mario_colors: MarioColors
     music_shuffle: MusicShuffle
+    bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
+    whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
+    jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement
+    cool_cool_mountain_coin_star_requirement: CoolCoolMountainCoinStarRequirement
+    big_boos_haunt_coin_star_requirement: BigBoosHauntCoinStarRequirement
+    hazy_maze_cave_coin_star_requirement: HazyMazeCaveCoinStarRequirement
+    lethal_lava_land_coin_star_requirement: LethalLavaLandCoinStarRequirement
+    shifting_sand_land_coin_star_requirement: ShiftingSandLandCoinStarRequirement
+    dire_dire_docks_coin_star_requirement: DireDireDocksCoinStarRequirement
+    snowmans_land_coin_star_requirement: SnowmansLandCoinStarRequirement
+    wet_dry_world_coin_star_requirement: WetDryWorldCoinStarRequirement
+    tall_tall_mountain_coin_star_requirement: TallTallMountainCoinStarRequirement
+    tiny_huge_island_coin_star_requirement: TinyHugeIslandCoinStarRequirement
+    tick_tock_clock_coin_star_requirement: TickTockClockCoinStarRequirement
+    rainbow_ride_coin_star_requirement: RainbowRideCoinStarRequirement
     death_link: DeathLink
     completion_type: CompletionType

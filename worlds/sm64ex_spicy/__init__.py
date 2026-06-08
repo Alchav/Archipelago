@@ -6,7 +6,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     painting_unlock_item_data_table, item_table, SM64Item
 from .Locations import location_table, SM64Location
 from .Music import build_music_slot_data
-from .Options import sm64_options_groups, SM64Options
+from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names
 from .Rules import set_rules
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
 from BaseClasses import Item, Tutorial
@@ -185,6 +185,12 @@ class SM64World(World):
     def get_mario_colors_slot_data(self) -> typing.Dict[str, typing.List[int]]:
         return {color_name: list(channels) for color_name, channels in self.options.mario_colors.value.items()}
 
+    def get_coin_star_requirements_slot_data(self) -> typing.List[int]:
+        return [
+            getattr(self.options, option_name).value
+            for option_name in coin_star_requirement_option_names
+        ]
+
     def fill_slot_data(self):
         slot_data = {
             "AreaRando": self.area_connections,
@@ -192,6 +198,7 @@ class SM64World(World):
             "PaintingRando": self.options.enable_locked_paintings.value,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
+            "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
         }
         slot_data.update(build_music_slot_data(
             self.options.music_shuffle.value, self.multiworld.seed, self.player))

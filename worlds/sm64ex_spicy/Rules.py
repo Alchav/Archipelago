@@ -431,22 +431,22 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Sky - Top",
                    "PURPLE_SWITCHES & CL+TJ | PURPLE_SWITCHES & CL+SF+LG | "
                    "PURPLE_SWITCHES & MOVELESS & TJ+WK+LG")
-    # 100 Coin Stars
+    # Coin Stars
     if options.enable_coin_stars:
-        rf.assign_rule("Bob-omb Battlefield - 100 Coins", "CANN & WC | CANNLESS & WC & TJ")
-        rf.assign_rule("Whomp's Fortress - 100 Coins",
+        rf.assign_rule("Bob-omb Battlefield - Coins Star", "CANN & WC | CANNLESS & WC & TJ")
+        rf.assign_rule("Whomp's Fortress - Coins Star",
                        "GP | {Whomp's Fortress - Top} & WF_FORTRESS & WK & TJ/SF | "
                        "{Whomp's Fortress - Top} & WF_FORTRESS & CANN")
-        rf.assign_rule("Jolly Roger Bay - 100 Coins", "GP & {Jolly Roger Bay - Upper}")
-        rf.assign_rule("Hazy Maze Cave - 100 Coins", "GP")
-        rf.assign_rule("Shifting Sand Land - 100 Coins", "{Shifting Sand Land - Upper Pyramid} | GP")
-        rf.assign_rule("Dire, Dire Docks - 100 Coins",
+        rf.assign_rule("Jolly Roger Bay - Coins Star", "GP & {Jolly Roger Bay - Upper}")
+        rf.assign_rule("Hazy Maze Cave - Coins Star", "GP")
+        rf.assign_rule("Shifting Sand Land - Coins Star", "{Shifting Sand Land - Upper Pyramid} | GP")
+        rf.assign_rule("Dire, Dire Docks - Coins Star",
                        "PURPLE_SWITCHES & GP & {{Dire, Dire Docks - Pole-Jumping for Red Coins}}")
-        rf.assign_rule("Snowman's Land - 100 Coins", "VC | CAPLESS")
-        rf.assign_rule("Wet-Dry World - 100 Coins", "GP | {Wet-Dry World - Downtown}")
-        rf.assign_rule("Tick Tock Clock - 100 Coins", "GP")
-        rf.assign_rule("Tiny-Huge Island - 100 Coins", "GP & {Tiny-Huge Island (Huge)} | GP & {Tiny-Huge Island - Pipes}")
-        rf.assign_rule("Rainbow Ride - 100 Coins", "GP & WK")
+        rf.assign_rule("Snowman's Land - Coins Star", "VC | CAPLESS")
+        rf.assign_rule("Wet-Dry World - Coins Star", "GP | {Wet-Dry World - Downtown}")
+        rf.assign_rule("Tick Tock Clock - Coins Star", "GP")
+        rf.assign_rule("Tiny-Huge Island - Coins Star", "GP & {Tiny-Huge Island (Huge)} | GP & {Tiny-Huge Island - Pipes}")
+        rf.assign_rule("Rainbow Ride - Coins Star", "GP & WK")
     # Castle Stars
     add_rule(multiworld.get_location("Toad (Basement)", player),
              lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle Toads", player))

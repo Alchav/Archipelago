@@ -466,18 +466,18 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
     }
 
     def test_hundred_coins_accepts_ground_pound(self):
-        self.assertFalse(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
         self.collect(self.get_item_by_name("Ground Pound"))
-        self.assertTrue(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
     def test_hundred_coins_requires_top_and_fortress_for_shoot_movement_route(self):
         self.collect([self.get_item_by_name("Wall Kick"), self.get_item_by_name("Side Flip")])
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Shoot into the Wild Blue"))
-        self.assertFalse(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
         self.collect(self.get_item_by_name("Whomp's Fortress - Fortress"))
-        self.assertTrue(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
     def test_hundred_coins_accepts_cannon_with_top_and_fortress(self):
         self.collect([
@@ -485,10 +485,10 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
             self.get_item_by_name("Whomp's Fortress - Fortress"),
         ])
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
-        self.assertFalse(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
         self.collect(self.get_item_by_name("Cannon Unlock Whomp's Fortress"))
-        self.assertTrue(self.can_reach_location("Whomp's Fortress - 100 Coins"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
 
 class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
@@ -508,7 +508,7 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
         self.collect_second_floor_access()
         self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
-        self.assertTrue(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
     def test_hundred_coins_from_tiny_island_requires_pipes(self):
         self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
@@ -518,14 +518,14 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
-        self.assertFalse(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
         self.collect([
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
-        self.assertTrue(self.can_reach_location("Tiny-Huge Island - 100 Coins"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
 class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
@@ -547,11 +547,11 @@ class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
             self.get_item_by_name("Ground Pound"),
         ])
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Pole-Jumping for Red Coins"))
-        self.assertFalse(self.can_reach_location("Dire, Dire Docks - 100 Coins"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Pole-Jumping for Red Coins"))
-        self.assertTrue(self.can_reach_location("Dire, Dire Docks - 100 Coins"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
 
 
 class BigBooHauntAccessTestBase(SM64TestBase):

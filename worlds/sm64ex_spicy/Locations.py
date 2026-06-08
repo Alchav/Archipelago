@@ -186,21 +186,21 @@ locRR_table = {
 }
 
 loc100Coin_table = {
-        "Bob-omb Battlefield - 100 Coins": 3626006,
-        "Whomp's Fortress - 100 Coins": 3626013,
-        "Jolly Roger Bay - 100 Coins": 3626020,
-        "Cool, Cool Mountain - 100 Coins": 3626027,
-        "Big Boo's Haunt - 100 Coins": 3626034,
-        "Hazy Maze Cave - 100 Coins": 3626041,
-        "Lethal Lava Land - 100 Coins": 3626048,
-        "Shifting Sand Land - 100 Coins": 3626055,
-        "Dire, Dire Docks - 100 Coins": 3626062,
-        "Snowman's Land - 100 Coins": 3626069,
-        "Wet-Dry World - 100 Coins": 3626076,
-        "Tall, Tall Mountain - 100 Coins": 3626083,
-        "Tiny-Huge Island - 100 Coins": 3626090,
-        "Tick Tock Clock - 100 Coins": 3626097,
-        "Rainbow Ride - 100 Coins": 3626104
+        "Bob-omb Battlefield - Coins Star": 3626006,
+        "Whomp's Fortress - Coins Star": 3626013,
+        "Jolly Roger Bay - Coins Star": 3626020,
+        "Cool, Cool Mountain - Coins Star": 3626027,
+        "Big Boo's Haunt - Coins Star": 3626034,
+        "Hazy Maze Cave - Coins Star": 3626041,
+        "Lethal Lava Land - Coins Star": 3626048,
+        "Shifting Sand Land - Coins Star": 3626055,
+        "Dire, Dire Docks - Coins Star": 3626062,
+        "Snowman's Land - Coins Star": 3626069,
+        "Wet-Dry World - Coins Star": 3626076,
+        "Tall, Tall Mountain - Coins Star": 3626083,
+        "Tiny-Huge Island - Coins Star": 3626090,
+        "Tick Tock Clock - Coins Star": 3626097,
+        "Rainbow Ride - Coins Star": 3626104
 }
 
 locPSS_table = {
@@ -263,7 +263,7 @@ locSS_table = {
     "Yoshi": 3626244
 }
 
-# Correspond to 3626000 + course index * 7 + star index, then secret stars, then keys, then 100 Coin Stars
+# Correspond to 3626000 + course index * 7 + star index, then secret stars, then keys, then Coin Stars
 location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,**locBBH_table, \
                   **locHMC_table,**locLLL_table,**locSSL_table,**locDDD_table,**locSL_table, \
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
