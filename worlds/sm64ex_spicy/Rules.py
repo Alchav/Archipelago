@@ -17,6 +17,7 @@ initial_reachable_entrances = (
     "Cool, Cool Mountain",
     "The Princess's Secret Slide",
 )
+minimum_starting_check_count = 2
 
 def shuffle_dict_keys(multiworld: MultiWorld, dictionary: dict) -> dict:
     keys = list(dictionary.keys())
@@ -46,7 +47,7 @@ def is_starting_check_location(location_name: str, options: SM64Options) -> bool
 
 def get_starting_check_sources(options: SM64Options) -> tuple[str, ...]:
     if options.enable_locked_paintings:
-        return ("Bob-omb Battlefield",)
+        return ("Bob-omb Battlefield", "The Princess's Secret Slide")
     return initial_reachable_entrances
 
 
@@ -77,10 +78,13 @@ def has_reachable_starting_check(
 
     try:
         state = CollectionState(multiworld)
-        return any(
-            is_starting_check_location(location.name, options) and location.can_reach(state)
-            for location in multiworld.get_locations(player)
-        )
+        reachable_check_count = 0
+        for location in multiworld.get_locations(player):
+            if is_starting_check_location(location.name, options) and location.can_reach(state):
+                reachable_check_count += 1
+                if reachable_check_count >= minimum_starting_check_count:
+                    return True
+        return False
     finally:
         for entrance, access_rule in disabled_connections.items():
             entrance.access_rule = access_rule
@@ -157,7 +161,7 @@ def ensure_reachable_starting_check(
             retarget_entrance(source_connection, old_source_region, multiworld, player)
             retarget_entrance(donor_connection, old_donor_region, multiworld, player)
 
-    raise Exception("Unable to place a reachable starting check in an initially accessible SM64 entrance.")
+    raise Exception("Unable to place enough reachable starting checks in initially accessible SM64 entrances.")
 
 def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_connections: dict, move_rando_bitvec: int):
     randomized_level_to_paintings = sm64_level_to_paintings.copy()
@@ -174,15 +178,18 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     if options.area_rando == options.area_rando.option_Courses_and_Secrets:  # Randomize Courses and Secrets in one pool
         randomized_entrances = shuffle_dict_keys(multiworld, randomized_entrances)
     
-    # Now, fix assignment if necessary
-    swapdict = randomized_entrances.copy()
-    # Guarantee BITFS is not mapped to DDD
-    fix_reg(randomized_entrances, SM64Levels.BOWSER_IN_THE_FIRE_SEA, {"Dire, Dire Docks"}, swapdict, multiworld)
-    # Guarantee COTMC is not mapped to HMC, cuz thats impossible. If BitFS -> HMC, also no COTMC -> DDD.
-    if randomized_entrances[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Hazy Maze Cave":
-        fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP, {"Hazy Maze Cave", "Dire, Dire Docks"}, swapdict, multiworld)
-    else:
-        fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP, {"Hazy Maze Cave"}, swapdict, multiworld)
+    if options.area_rando > options.area_rando.option_Off:
+        # Now, fix assignment if necessary
+        swapdict = randomized_entrances.copy()
+        # Guarantee BITFS is not mapped to DDD
+        fix_reg(randomized_entrances, SM64Levels.BOWSER_IN_THE_FIRE_SEA, {"Dire, Dire Docks"}, swapdict, multiworld)
+        # Guarantee COTMC is not mapped to HMC, cuz thats impossible. If BitFS -> HMC, also no COTMC -> DDD.
+        if randomized_entrances[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Hazy Maze Cave":
+            fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP,
+                    {"Hazy Maze Cave", "Dire, Dire Docks"}, swapdict, multiworld)
+        else:
+            fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP, {"Hazy Maze Cave"}, swapdict,
+                    multiworld)
 
     randomized_entrances_s = {sm64_level_to_entrances[entrance_lvl]: destination for (entrance_lvl,destination) in randomized_entrances.items()}
     randomized_entrance_connections = {}
@@ -279,7 +286,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                     rf.build_rule("LG/TJ/SF/BF/WK", painting_lvl_name="Tick Tock Clock"))
     connect_randomized_entrance("Third Floor", "Rainbow Ride", rf.build_rule("TJ/SF/BF"))
     connect_randomized_entrance("Menu", "Wing Mario over the Rainbow",
-                                lambda state: state.has("Castle Cannon", player))
+                                lambda state: state.has("Cannon Unlock - Castle", player))
     connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", has_endless_stairs_key)
 
     # Course Rules
@@ -428,7 +435,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     add_rule(multiworld.get_location("Toad (Third Floor)", player),
              lambda state: state.can_reach("Third Floor", 'Region', player) and state.has("Castle Toads", player))
     add_rule(multiworld.get_location("Yoshi", player),
-             lambda state: state.has("Castle Cannon", player) and state.has("Yoshi", player))
+             lambda state: state.has("Cannon Unlock - Castle", player) and state.has("Yoshi", player))
 
     rf.assign_rule("MIPS 1", "DV | MOVELESS")
     rf.assign_rule("MIPS 2", "DV | MOVELESS")
@@ -438,8 +445,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
              lambda state: state.can_reach("Basement", 'Region', player) and
              state.has("Progressive MIPS", player, 2))
 
-    ensure_reachable_starting_check(
-        multiworld, options, player, randomized_entrances, randomized_entrances_s, randomized_entrance_connections)
+    if options.area_rando > options.area_rando.option_Off:
+        ensure_reachable_starting_check(
+            multiworld, options, player, randomized_entrances, randomized_entrances_s,
+            randomized_entrance_connections)
 
     # Destination Format: LVL | AREA with LVL = LEVEL_x, AREA = Area as used in sm64 code
     # Cast to int to not rely on availability of SM64Levels enum. Will cause crash in MultiServer otherwise

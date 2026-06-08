@@ -60,7 +60,7 @@ castle_progression_item_data_table: dict[str, SM64ItemData] = {
     "Wing Cap Light": SM64ItemData(sm64ex_base_id + 272),
     "Courtyard Boos": SM64ItemData(sm64ex_base_id + 273),
     "Castle Toads": SM64ItemData(sm64ex_base_id + 274),
-    "Castle Cannon": SM64ItemData(sm64ex_base_id + 275),
+    "Cannon Unlock - Castle": SM64ItemData(sm64ex_base_id + 275),
     "Yoshi": SM64ItemData(sm64ex_base_id + 276),
 }
 

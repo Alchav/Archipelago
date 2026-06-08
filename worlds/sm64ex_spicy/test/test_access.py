@@ -137,12 +137,12 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tower of the Wing Cap"))
 
         self.assertFalse(self.can_reach_region("Wing Mario over the Rainbow"))
-        self.collect(self.get_item_by_name("Castle Cannon"))
+        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
         self.assertTrue(self.can_reach_region("Wing Mario over the Rainbow"))
 
     def test_yoshi_access(self):
         self.assertFalse(self.can_reach_location("Yoshi"))
-        self.collect(self.get_item_by_name("Castle Cannon"))
+        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
         self.assertFalse(self.can_reach_location("Yoshi"))
         self.collect(self.get_item_by_name("Yoshi"))
         self.assertTrue(self.can_reach_location("Yoshi"))
@@ -150,7 +150,7 @@ class CastleFeatureAccessTestBase(SM64TestBase):
     def test_yoshi_access_requires_castle_cannon(self):
         self.collect(self.get_item_by_name("Yoshi"))
         self.assertFalse(self.can_reach_location("Yoshi"))
-        self.collect(self.get_item_by_name("Castle Cannon"))
+        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
         self.assertTrue(self.can_reach_location("Yoshi"))
 
 

@@ -53,7 +53,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Wing Cap Light": 3626272,
             "Courtyard Boos": 3626273,
             "Castle Toads": 3626274,
-            "Castle Cannon": 3626275,
+            "Cannon Unlock - Castle": 3626275,
             "Yoshi": 3626276,
             "Wing Cap": 3626181,
             "Metal Cap": 3626182,
@@ -253,6 +253,11 @@ class EntranceRandoOffTestBase(SM64TestBase):
     }
 
     # Ensure entrance rando disabled
+    def test_all_entrances_are_vanilla(self):
+        for entrance_level_id in {*sm64_level_to_paintings, *sm64_level_to_secrets}:
+            with self.subTest("Entrance maps to itself", entrance=entrance_level_id):
+                self.assertEqual(self.world.area_connections[entrance_level_id], entrance_level_id)
+
     def test_BoB_entrance(self):
         bob_level_id = sm64_entrances_to_level["Bob-omb Battlefield"]
         self.assertEqual(self.world.area_connections[bob_level_id], bob_level_id)
@@ -270,6 +275,25 @@ class EntranceRandoOffTestBase(SM64TestBase):
         for variant_id in ttc_variant_ids:
             with self.subTest("TTC variant maps to itself", variant=variant_id):
                 self.assertEqual(self.world.area_connections[variant_id], variant_id)
+
+    def test_princess_slide_source_has_reachable_check(self):
+        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+
+
+class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+    }
+
+    def test_all_entrances_are_vanilla(self):
+        for entrance_level_id in {*sm64_level_to_paintings, *sm64_level_to_secrets}:
+            with self.subTest("Entrance maps to itself", entrance=entrance_level_id):
+                self.assertEqual(self.world.area_connections[entrance_level_id], entrance_level_id)
+
+    def test_princess_slide_source_has_reachable_check(self):
+        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
 
 
 class EntranceRandoCourseTestBase(SM64TestBase):
@@ -293,6 +317,9 @@ class EntranceRandoCourseTestBase(SM64TestBase):
             with self.subTest("Variant source is shuffled in course pool", variant=variant_id):
                 self.assertIn(variant_id, self.world.area_connections)
                 self.assertIn(self.world.area_connections[variant_id], sm64_level_to_paintings.keys())
+
+    def test_princess_slide_source_has_reachable_check(self):
+        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
 
 
 class EntranceRandoSeparateTestBase(SM64TestBase):
@@ -388,6 +415,20 @@ class CourseEntrancesMoveTestBase(SM64TestBase):
         self.assertTrue(world_has_reachable_starting_check(self))
 
 
+class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
+    options = {
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Courses_Only
+    }
+
+    def test_starting_state_has_reachable_check(self):
+        self.assertTrue(world_has_reachable_starting_check(self))
+
+    def test_princess_slide_source_has_reachable_check(self):
+        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+
+
 class SeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -416,8 +457,8 @@ class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
     }
 
-    def test_BoB_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("Bob-omb Battlefield",)))
+    def test_starting_sources_have_reachable_checks(self):
+        self.assertTrue(world_has_reachable_starting_check(self))
 
 
 class AllEntrancesMoveTestBase(SM64TestBase):
