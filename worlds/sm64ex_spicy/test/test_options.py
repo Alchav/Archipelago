@@ -253,10 +253,23 @@ class CoinStarRequirementTestBase(SM64TestBase):
         ])
 
     def test_coin_star_requirement_ranges(self):
+        expected_range_ends = {
+            Options.BobOmbBattlefieldCoinStarRequirement: 146,
+            Options.WhompsFortressCoinStarRequirement: 141,
+            Options.JollyRogerBayCoinStarRequirement: 104,
+            Options.CoolCoolMountainCoinStarRequirement: 154,
+            Options.BigBoosHauntCoinStarRequirement: 151,
+            Options.HazyMazeCaveCoinStarRequirement: 139,
+            Options.LethalLavaLandCoinStarRequirement: 133,
+            Options.DireDireDocksCoinStarRequirement: 106,
+            Options.SnowmansLandCoinStarRequirement: 127,
+            Options.TallTallMountainCoinStarRequirement: 137,
+            Options.TinyHugeIslandCoinStarRequirement: 191,
+        }
         for option in Options.coin_star_requirement_options:
             with self.subTest(option=option.__name__):
                 self.assertEqual(option.range_start, 1)
-                self.assertEqual(option.range_end, 100)
+                self.assertEqual(option.range_end, expected_range_ends.get(option, 100))
 
 
 # Coin Star Logic

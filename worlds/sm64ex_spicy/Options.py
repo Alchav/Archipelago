@@ -18,38 +18,45 @@ class CoinStarRequirement(Range):
 
 
 class BobOmbBattlefieldCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Bob-omb Battlefield. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Bob-omb Battlefield."""
     display_name = "Bob-omb Battlefield Coin Star Requirement"
+    range_end = 146
 
 
 class WhompsFortressCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Whomp's Fortress. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Whomp's Fortress."""
     display_name = "Whomp's Fortress Coin Star Requirement"
+    range_end = 141
 
 
 class JollyRogerBayCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Jolly Roger Bay. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Jolly Roger Bay."""
     display_name = "Jolly Roger Bay Coin Star Requirement"
+    range_end = 104
 
 
 class CoolCoolMountainCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Cool, Cool Mountain. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Cool, Cool Mountain."""
     display_name = "Cool, Cool Mountain Coin Star Requirement"
+    range_end = 154
 
 
 class BigBoosHauntCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Big Boo's Haunt. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Big Boo's Haunt."""
     display_name = "Big Boo's Haunt Coin Star Requirement"
+    range_end = 151
 
 
 class HazyMazeCaveCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Hazy Maze Cave. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Hazy Maze Cave."""
     display_name = "Hazy Maze Cave Coin Star Requirement"
+    range_end = 139
 
 
 class LethalLavaLandCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Lethal Lava Land. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Lethal Lava Land."""
     display_name = "Lethal Lava Land Coin Star Requirement"
+    range_end = 133
 
 
 class ShiftingSandLandCoinStarRequirement(CoinStarRequirement):
@@ -58,13 +65,15 @@ class ShiftingSandLandCoinStarRequirement(CoinStarRequirement):
 
 
 class DireDireDocksCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Dire, Dire Docks. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Dire, Dire Docks."""
     display_name = "Dire, Dire Docks Coin Star Requirement"
+    range_end = 106
 
 
 class SnowmansLandCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Snowman's Land. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Snowman's Land."""
     display_name = "Snowman's Land Coin Star Requirement"
+    range_end = 127
 
 
 class WetDryWorldCoinStarRequirement(CoinStarRequirement):
@@ -73,13 +82,15 @@ class WetDryWorldCoinStarRequirement(CoinStarRequirement):
 
 
 class TallTallMountainCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Tall, Tall Mountain. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Tall, Tall Mountain."""
     display_name = "Tall, Tall Mountain Coin Star Requirement"
+    range_end = 137
 
 
 class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Tiny-Huge Island. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Tiny-Huge Island."""
     display_name = "Tiny-Huge Island Coin Star Requirement"
+    range_end = 191
 
 
 class TickTockClockCoinStarRequirement(CoinStarRequirement):

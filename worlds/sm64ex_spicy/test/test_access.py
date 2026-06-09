@@ -454,6 +454,77 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
 
 
+class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+
+class CoolCoolMountainCoinStar130AccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+    options = {
+        **CoolCoolMountainCoinStarAccessTestBase.options,
+        "cool_cool_mountain_coin_star_requirement": 130,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+
+
+class CoolCoolMountainCoinStar131AccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+    options = {
+        **CoolCoolMountainCoinStarAccessTestBase.options,
+        "cool_cool_mountain_coin_star_requirement": 131,
+    }
+
+    def test_wall_kicks_route_coins_require_cannon_with_strict_moves(self):
+        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Cool, Cool Mountain"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+
+
+class CoolCoolMountainCoinStar141MovelessAccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+    options = {
+        **CoolCoolMountainCoinStarAccessTestBase.options,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "cool_cool_mountain_coin_star_requirement": 141,
+    }
+
+    def test_moveless_wall_kicks_route_coins_reach_coin_star(self):
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+
+
+class CoolCoolMountainCoinStar144MovelessAccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+    options = {
+        **CoolCoolMountainCoinStarAccessTestBase.options,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "cool_cool_mountain_coin_star_requirement": 144,
+    }
+
+    def test_moveless_wall_kicks_route_needs_cannon_for_extra_spindrift_coins(self):
+        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Cool, Cool Mountain"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+
+
+class CoolCoolMountainCoinStar154AccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+    options = {
+        **CoolCoolMountainCoinStarAccessTestBase.options,
+        "cool_cool_mountain_coin_star_requirement": 154,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Cannon Unlock Cool, Cool Mountain"))
+        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
+
+
 class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -465,36 +536,260 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
-    def test_hundred_coins_accepts_ground_pound(self):
+
+class WhompsFortressCoinStar73AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+    options = {
+        **WhompsFortressCoinStarAccessTestBase.options,
+        "whomps_fortress_coin_star_requirement": 73,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
+
+
+class WhompsFortressCoinStar74AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+    options = {
+        **WhompsFortressCoinStarAccessTestBase.options,
+        "whomps_fortress_coin_star_requirement": 74,
+    }
+
+    def test_shoot_into_the_wild_blue_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Whomp's Fortress"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Shoot into the Wild Blue"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
+
+
+class WhompsFortressCoinStar82AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+    options = {
+        **WhompsFortressCoinStarAccessTestBase.options,
+        "whomps_fortress_coin_star_requirement": 82,
+    }
+
+    def test_top_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
+
+
+class WhompsFortressCoinStar94AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+    options = {
+        **WhompsFortressCoinStarAccessTestBase.options,
+        "whomps_fortress_coin_star_requirement": 94,
+    }
+
+    def test_ground_pound_coins_reach_coin_star(self):
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
         self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
-    def test_hundred_coins_requires_top_and_fortress_for_shoot_movement_route(self):
-        self.collect([self.get_item_by_name("Wall Kick"), self.get_item_by_name("Side Flip")])
+
+class WhompsFortressCoinStar141AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+    options = {
+        **WhompsFortressCoinStarAccessTestBase.options,
+        "whomps_fortress_coin_star_requirement": 141,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect([
+            self.get_item_by_name("Checkerboard Platforms"),
+            self.get_item_by_name("Cannon Unlock Whomp's Fortress"),
+        ])
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Shoot into the Wild Blue"))
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
-        self.collect(self.get_item_by_name("Whomp's Fortress - Fortress"))
+        self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
-    def test_hundred_coins_accepts_cannon_with_top_and_fortress(self):
+
+class BobOmbBattlefieldCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+
+class BobOmbBattlefieldCoinStar109AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+    options = {
+        **BobOmbBattlefieldCoinStarAccessTestBase.options,
+        "bob_omb_battlefield_coin_star_requirement": 109,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+    options = {
+        **BobOmbBattlefieldCoinStarAccessTestBase.options,
+        "bob_omb_battlefield_coin_star_requirement": 110,
+    }
+
+    def test_island_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Bob-omb Battlefield"))
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class BobOmbBattlefieldCoinStar113AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+    options = {
+        **BobOmbBattlefieldCoinStarAccessTestBase.options,
+        "bob_omb_battlefield_coin_star_requirement": 113,
+    }
+
+    def test_climb_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Cannon Unlock Bob-omb Battlefield"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class BobOmbBattlefieldCoinStar115AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+    options = {
+        **BobOmbBattlefieldCoinStarAccessTestBase.options,
+        "bob_omb_battlefield_coin_star_requirement": 115,
+    }
+
+    def test_side_flip_backflip_or_triple_jump_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Cannon Unlock Bob-omb Battlefield"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class BobOmbBattlefieldCoinStar118AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+    options = {
+        **BobOmbBattlefieldCoinStarAccessTestBase.options,
+        "bob_omb_battlefield_coin_star_requirement": 118,
+    }
+
+    def test_triple_jump_extra_coin_reaches_coin_star(self):
         self.collect([
-            self.get_item_by_name("Checkerboard Platforms"),
-            self.get_item_by_name("Whomp's Fortress - Fortress"),
+            self.get_item_by_name("Cannon Unlock Bob-omb Battlefield"),
+            self.get_item_by_name("Side Flip"),
         ])
-        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
-        self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+        self.remove_by_name("Side Flip")
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
-        self.collect(self.get_item_by_name("Cannon Unlock Whomp's Fortress"))
-        self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
+
+class BobOmbBattlefieldCoinStar121AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+    options = {
+        **BobOmbBattlefieldCoinStarAccessTestBase.options,
+        "bob_omb_battlefield_coin_star_requirement": 121,
+    }
+
+    def test_mario_wings_to_the_sky_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Cannon Unlock Bob-omb Battlefield"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+
+class JollyRogerBayCoinStar54AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 54,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar55AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 55,
+    }
+
+    def test_upper_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_region("Jolly Roger Bay - Upper"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar71AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 71,
+    }
+
+    def test_raised_ship_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Raised Ship"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar75AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 75,
+    }
+
+    def test_ground_pound_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar85AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 85,
+    }
+
+    def test_ground_pound_and_upper_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar101AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 101,
+    }
+
+    def test_all_jrb_coin_sources_reach_coin_star(self):
+        self.collect([
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Raised Ship"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
 class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
         "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -504,27 +799,201 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
     def collect_second_floor_access(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
-    def test_hundred_coins_accepts_huge_island_entry(self):
-        self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Ground Pound"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
-        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-
-    def test_hundred_coins_from_tiny_island_requires_pipes(self):
+    def disable_huge_entry(self):
         self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
+    def disable_tiny_entry(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
+            lambda state: False
+
+
+class TinyHugeIslandCoinStar1AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 1,
+    }
+
+    def test_tiny_start_coin_reaches_coin_star(self):
+        self.disable_huge_entry()
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar33AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 33,
+    }
+
+    def test_five_itty_bitty_secrets_coins_reach_coin_star_from_tiny(self):
+        self.disable_huge_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect([
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar120FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 120,
+    }
+
+    def test_tiny_start_reaches_huge_coins_with_pipes(self):
+        self.disable_huge_entry()
+        self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
         self.collect([
-            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar119AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 119,
+    }
+
+    def test_huge_start_coins_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar120FromHugeAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 120,
+    }
+
+    def test_huge_start_reaches_tiny_coin_with_pipes(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar123AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 123,
+    }
+
+    def test_wall_kick_coins_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar124AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 124,
+    }
+
+    def test_cannon_coins_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Tiny-Huge Island"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar129AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 129,
+    }
+
+    def test_ground_pound_coins_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar130AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 130,
+    }
+
+    def test_large_top_coins_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Dive"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Large Top"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar150AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 150,
+    }
+
+    def test_wiggler_and_ground_pound_coins_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar191AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 191,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Large Top"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Tiny-Huge Island"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -552,6 +1021,489 @@ class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Pole-Jumping for Red Coins"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
+class DireDireDocksCoinStarThresholdTestBase(SM64TestBase):
+    run_default_tests = False
+    options = DireDireDocksCoinStarAccessTestBase.options
+
+
+class DireDireDocksCoinStar60AccessTestBase(DireDireDocksCoinStarThresholdTestBase):
+    options = {
+        **DireDireDocksCoinStarThresholdTestBase.options,
+        "dire_dire_docks_coin_star_requirement": 60,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
+class DireDireDocksCoinStar61AccessTestBase(DireDireDocksCoinStarThresholdTestBase):
+    options = {
+        **DireDireDocksCoinStarThresholdTestBase.options,
+        "dire_dire_docks_coin_star_requirement": 61,
+    }
+
+    def test_purple_switch_coins_reach_coin_star(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
+class DireDireDocksCoinStar63AccessTestBase(DireDireDocksCoinStarThresholdTestBase):
+    options = {
+        **DireDireDocksCoinStarThresholdTestBase.options,
+        "dire_dire_docks_coin_star_requirement": 63,
+    }
+
+    def test_poles_coins_reach_coin_star(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+        self.collect(self.get_item_by_name("Dire, Dire Docks - Poles"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
+class DireDireDocksCoinStar77AccessTestBase(DireDireDocksCoinStarThresholdTestBase):
+    options = {
+        **DireDireDocksCoinStarThresholdTestBase.options,
+        "dire_dire_docks_coin_star_requirement": 77,
+    }
+
+    def test_ground_pound_coins_reach_coin_star(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Dire, Dire Docks - Poles"),
+        ])
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
+class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+
+class HazyMazeCaveCoinStar83AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 83,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar86AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 86,
+    }
+
+    def test_metal_cap_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Metal Cap"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar86CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
+        "hazy_maze_cave_coin_star_requirement": 86,
+    }
+
+    def test_capless_triple_jump_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar88AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 88,
+    }
+
+    def test_toxic_maze_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Navigating the Toxic Maze"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar89AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 89,
+    }
+
+    def test_pit_islands_climb_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Navigating the Toxic Maze"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Pit Islands"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar91AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 91,
+    }
+
+    def test_swimming_beast_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Hazy Maze Cave - Swimming Beast"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar118AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 118,
+    }
+
+    def test_ground_pound_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar139AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 139,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Hazy Maze Cave - Swimming Beast"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Metal Cap"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Pit Islands"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+
+class LethalLavaLandCoinStar125AccessTestBase(LethalLavaLandCoinStarAccessTestBase):
+    options = {
+        **LethalLavaLandCoinStarAccessTestBase.options,
+        "lethal_lava_land_coin_star_requirement": 125,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+
+class LethalLavaLandCoinStar128AccessTestBase(LethalLavaLandCoinStarAccessTestBase):
+    options = {
+        **LethalLavaLandCoinStarAccessTestBase.options,
+        "lethal_lava_land_coin_star_requirement": 128,
+    }
+
+    def test_elevator_tour_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+
+class LethalLavaLandCoinStar130AccessTestBase(LethalLavaLandCoinStarAccessTestBase):
+    options = {
+        **LethalLavaLandCoinStarAccessTestBase.options,
+        "lethal_lava_land_coin_star_requirement": 130,
+    }
+
+    def test_koopa_shell_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+
+class LethalLavaLandCoinStar133AccessTestBase(LethalLavaLandCoinStarAccessTestBase):
+    options = {
+        **LethalLavaLandCoinStarAccessTestBase.options,
+        "lethal_lava_land_coin_star_requirement": 133,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Lethal Lava Land - Koopa Shell"),
+        ])
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+
+class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_second_floor_access(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+
+
+class SnowmansLandCoinStar102AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "snowmans_land_coin_star_requirement": 102,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandCoinStar104AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "snowmans_land_coin_star_requirement": 104,
+    }
+
+    def test_big_head_coins_reach_coin_star_without_cannon(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Backflip"))
+        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Snowman's Land - Penguin"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandCoinStar105AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "snowmans_land_coin_star_requirement": 105,
+    }
+
+    def test_cannon_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Cannon Unlock Snowman's Land"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandCoinStar122AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "snowmans_land_coin_star_requirement": 122,
+    }
+
+    def test_igloo_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Vanish Cap"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Into the Igloo"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandCoinStar127AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "snowmans_land_coin_star_requirement": 127,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Cannon Unlock Snowman's Land"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
+        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
+
+        self.collect([
+            self.get_item_by_name("Vanish Cap"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+        self.assertTrue(self.can_reach_location("Snowman's Land - Into the Igloo"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_second_floor_access(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+
+
+class TallTallMountainCoinStar16AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "tall_tall_mountain_coin_star_requirement": 16,
+    }
+
+    def test_coins_above_start_require_middle_region(self):
+        self.multiworld.get_entrance("Tall, Tall Mountain - Middle", self.player).access_rule = \
+            lambda state: False
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain"))
+        self.assertFalse(self.can_reach_region("Tall, Tall Mountain - Middle"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainCoinStar70AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "tall_tall_mountain_coin_star_requirement": 70,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Middle"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainCoinStar75AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "tall_tall_mountain_coin_star_requirement": 75,
+    }
+
+    def test_climb_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainCoinStar75MovelessAccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "tall_tall_mountain_coin_star_requirement": 75,
+    }
+
+    def test_moveless_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainCoinStar129AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "tall_tall_mountain_coin_star_requirement": 129,
+    }
+
+    def test_top_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Top"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainCoinStar131AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "tall_tall_mountain_coin_star_requirement": 131,
+    }
+
+    def test_top_backflip_coins_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Top"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+        self.collect(self.get_item_by_name("Backflip"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainCoinStar137AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+    options = {
+        **TallTallMountainCoinStarAccessTestBase.options,
+        "tall_tall_mountain_coin_star_requirement": 137,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Backflip"),
+        ])
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Top"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
 class BigBooHauntAccessTestBase(SM64TestBase):
@@ -591,6 +1543,114 @@ class BigBooHauntAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Big Boo's Haunt - Third Floor"))
         self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+
+
+class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_bbh_access(self):
+        self.collect(self.get_item_by_name("Courtyard Boos"))
+
+
+class BigBooHauntCoinStar88AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+    options = {
+        **BigBooHauntCoinStarAccessTestBase.options,
+        "big_boos_haunt_coin_star_requirement": 88,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect_bbh_access()
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+
+
+class BigBooHauntCoinStar89AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+    options = {
+        **BigBooHauntCoinStarAccessTestBase.options,
+        "big_boos_haunt_coin_star_requirement": 89,
+    }
+
+    def test_second_floor_coins_reach_coin_star(self):
+        self.collect_bbh_access()
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Second Floor"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+
+
+class BigBooHauntCoinStar102AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+    options = {
+        **BigBooHauntCoinStarAccessTestBase.options,
+        "big_boos_haunt_coin_star_requirement": 102,
+    }
+
+    def test_third_floor_coins_reach_coin_star(self):
+        self.collect_bbh_access()
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+        self.collect([
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+
+
+class BigBooHauntCoinStar113AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+    options = {
+        **BigBooHauntCoinStarAccessTestBase.options,
+        "big_boos_haunt_coin_star_requirement": 113,
+    }
+
+    def test_merry_go_round_coins_reach_coin_star(self):
+        self.collect_bbh_access()
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Merry-go-round"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+
+
+class BigBooHauntCoinStar126AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+    options = {
+        **BigBooHauntCoinStarAccessTestBase.options,
+        "big_boos_haunt_coin_star_requirement": 126,
+    }
+
+    def test_third_floor_ground_pound_coins_reach_coin_star(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+
+
+class BigBooHauntCoinStar151AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+    options = {
+        **BigBooHauntCoinStarAccessTestBase.options,
+        "big_boos_haunt_coin_star_requirement": 151,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Coins Star"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Merry-go-round"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
 
 
 class WetDryWorldVariantAccessTestBase(SM64TestBase):

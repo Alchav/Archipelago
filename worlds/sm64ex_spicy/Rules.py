@@ -19,6 +19,190 @@ initial_reachable_entrances = (
 )
 minimum_starting_check_count = 2
 
+
+def has_action(state: CollectionState, player: int, action: str) -> bool:
+    move_rando_bitvec = state.multiworld.worlds[player].move_rando_bitvec
+    double_jump_bitvec_offset = action_item_data_table["Double Jump"].code
+    action_bit = 1 << (action_item_data_table[action].code - double_jump_bitvec_offset)
+    return not move_rando_bitvec & action_bit or state.has(action, player)
+
+
+def allows_moveless(state: CollectionState, player: int) -> bool:
+    return not state.multiworld.worlds[player].options.strict_move_requirements
+
+
+def allows_capless(state: CollectionState, player: int) -> bool:
+    return not state.multiworld.worlds[player].options.strict_cap_requirements
+
+
+def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
+    options = state.multiworld.worlds[player].options
+    item_name = f"{level_name} - Metal Cap" if options.per_level_cap_items else "Metal Cap"
+    return state.has(item_name, player)
+
+
+def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 109
+    if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
+        reachable_coins += 3
+        if has_action(state, player, "Climb"):
+            reachable_coins += 2
+        if any(has_action(state, player, action) for action in ("Side Flip", "Backflip", "Triple Jump")):
+            reachable_coins += 5
+        if has_action(state, player, "Triple Jump"):
+            reachable_coins += 1
+    if state.can_reach("Bob-omb Battlefield - Mario Wings to the Sky", "Location", player):
+        reachable_coins += 36
+    return coins <= min(reachable_coins, 146)
+
+
+def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 73
+    if state.can_reach("Whomp's Fortress - Shoot into the Wild Blue", "Location", player):
+        reachable_coins += 8
+    if has_action(state, player, "Ground Pound"):
+        reachable_coins += 40
+    if state.can_reach("Whomp's Fortress - Top", "Region", player):
+        reachable_coins += 20
+    return coins <= reachable_coins
+
+
+def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 130
+    has_cannon = state.has("Cannon Unlock Cool, Cool Mountain", player)
+    if has_cannon or allows_moveless(state, player):
+        reachable_coins += 11
+    if has_cannon:
+        reachable_coins += 3
+    if has_action(state, player, "Ground Pound"):
+        reachable_coins += 10
+    return coins <= reachable_coins
+
+
+def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 88
+    if state.can_reach("Big Boo's Haunt - Second Floor", "Region", player):
+        reachable_coins += 13
+    if state.can_reach("Big Boo's Haunt - Third Floor", "Region", player):
+        reachable_coins += 5
+        if has_action(state, player, "Ground Pound"):
+            reachable_coins += 20
+    if state.has("Big Boo's Haunt - Merry-go-round", player):
+        reachable_coins += 25
+    return coins <= reachable_coins
+
+
+def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 83
+    if state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player) and has_action(state, player, "Climb"):
+        reachable_coins += 5
+    if state.has("Hazy Maze Cave - Swimming Beast", player):
+        reachable_coins += 8
+    if state.can_reach("Hazy Maze Cave - Navigating the Toxic Maze", "Location", player):
+        reachable_coins += 5
+    if has_metal_cap(state, player, "Hazy Maze Cave") or (
+            allows_capless(state, player) and has_action(state, player, "Triple Jump")):
+        reachable_coins += 3
+    if has_action(state, player, "Ground Pound"):
+        reachable_coins += 35
+    return coins <= reachable_coins
+
+
+def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 125
+    if state.has("Lethal Lava Land - Koopa Shell", player):
+        # Technically possible without the shell, but no current option fits that logic.
+        reachable_coins += 5
+    if state.can_reach("Lethal Lava Land - Elevator Tour in the Volcano", "Location", player):
+        reachable_coins += 3
+    return coins <= reachable_coins
+
+
+def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 54
+    if state.can_reach("Jolly Roger Bay - Upper", "Region", player):
+        reachable_coins += 16
+        if state.has("Jolly Roger Bay - Raised Ship", player):
+            reachable_coins += 4
+    if has_action(state, player, "Ground Pound"):
+        reachable_coins += 30
+    return coins <= reachable_coins
+
+
+def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 60
+    if state.has("Purple Switches", player):
+        reachable_coins += 2
+        if state.has("Dire, Dire Docks - Poles", player):
+            reachable_coins += 14
+            if has_action(state, player, "Ground Pound"):
+                reachable_coins += 30
+    return coins <= reachable_coins
+
+
+def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 102
+    if state.has("Cannon Unlock Snowman's Land", player):
+        reachable_coins += 3
+    if state.can_reach("Snowman's Land - Snowman's Big Head", "Location", player):
+        reachable_coins += 2
+    if state.can_reach("Snowman's Land - Into the Igloo", "Location", player):
+        reachable_coins += 20
+    return coins <= reachable_coins
+
+
+def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 15
+    if state.can_reach("Tall, Tall Mountain - Middle", "Region", player):
+        reachable_coins += 55
+    if has_action(state, player, "Climb") or allows_moveless(state, player):
+        reachable_coins += 5
+    if state.can_reach("Tall, Tall Mountain - Top", "Region", player):
+        reachable_coins += 59
+        if state.has("Purple Switches", player) or any(
+                has_action(state, player, action) for action in ("Triple Jump", "Backflip", "Side Flip")):
+            reachable_coins += 2
+        if state.has("Purple Switches", player) or has_action(state, player, "Triple Jump"):
+            reachable_coins += 1
+    return coins <= reachable_coins
+
+
+def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> bool:
+    can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
+    can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
+    can_access_pipes = state.can_reach("Tiny-Huge Island - Pipes", "Region", player)
+    can_reach_five_secrets = state.can_reach("Tiny-Huge Island - Five Itty Bitty Secrets", "Location", player)
+    can_reach_large_top = state.can_reach("Tiny-Huge Island - Large Top", "Region", player)
+    can_reach_wiggler = state.can_reach("Tiny-Huge Island - Make Wiggler Squirm", "Location", player)
+
+    def route_coins(has_tiny_side: bool, has_huge_side: bool) -> int:
+        route_total = 0
+        if has_tiny_side:
+            route_total += 1
+            if can_reach_five_secrets:
+                route_total += 32
+        if has_huge_side:
+            route_total += 119
+            if can_reach_large_top:
+                route_total += 10
+            if can_reach_wiggler:
+                route_total += 10
+            if has_action(state, player, "Ground Pound"):
+                route_total += 10
+            if has_action(state, player, "Wall Kick"):
+                route_total += 4
+            if state.has("Cannon Unlock Tiny-Huge Island", player) or has_action(state, player, "Long Jump"):
+                route_total += 5
+        return route_total
+
+    reachable_totals = []
+    if can_enter_tiny:
+        reachable_totals.append(route_coins(True, can_access_pipes))
+    if can_enter_huge:
+        reachable_totals.append(route_coins(can_access_pipes, True))
+    return coins <= max(reachable_totals, default=0)
+
+
 def shuffle_dict_keys(multiworld: MultiWorld, dictionary: dict) -> dict:
     keys = list(dictionary.keys())
     values = list(dictionary.values())
@@ -339,8 +523,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | CHECKERBOARD_PLATFORMS & MOVELESS & WK")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | MOVELESS & WK & TJ/LJ | MOVELESS & WK+SF+LG")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
-                   "PURPLE_SWITCHES & LJ+MC | PURPLE_SWITCHES & CAPLESS & LJ+TJ | "
-                   "PURPLE_SWITCHES & CAPLESS & MOVELESS & LJ/TJ/WK")
+                   "PURPLE_SWITCHES & LJ+MC | CAPLESS & LJ+TJ | "
+                   "CAPLESS & MOVELESS & LJ/TJ/WK")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     # Lethal Lava Land
@@ -363,7 +547,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC+MC | CAPLESS & VC")
     # Snowman's Land
-    rf.assign_rule("Snowman's Land - Snowman's Big Head", "SL_PENGUIN & BF/SF/CANN/TJ | CANN")
+    rf.assign_rule("Snowman's Land - Snowman's Big Head", "SL_PENGUIN & BF/SF/TJ | CANN")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     # Wet-Dry World
@@ -388,10 +572,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Large Top", "LJ/TJ/DV | MOVELESS")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets",
-                   "PURPLE_SWITCHES & {Tiny-Huge Island (Tiny)} | "
-                   "PURPLE_SWITCHES & {Tiny-Huge Island - Pipes}")
+                   "PURPLE_SWITCHES & {Tiny-Huge Island (Tiny)} | PURPLE_SWITCHES & {Tiny-Huge Island - Pipes}")
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
-    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "GP | MOVELESS & DV")
+    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "THI_WARP_PIPES & GP | THI_WARP_PIPES & MOVELESS & DV")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF/WK")
     rf.assign_rule("Tick Tock Clock - Upper", "CL | MOVELESS & WK")
@@ -433,19 +616,56 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "PURPLE_SWITCHES & MOVELESS & TJ+WK+LG")
     # Coin Stars
     if options.enable_coin_stars:
-        rf.assign_rule("Bob-omb Battlefield - Coins Star", "CANN & WC | CANNLESS & WC & TJ")
-        rf.assign_rule("Whomp's Fortress - Coins Star",
-                       "GP | {Whomp's Fortress - Top} & WF_FORTRESS & WK & TJ/SF | "
-                       "{Whomp's Fortress - Top} & WF_FORTRESS & CANN")
-        rf.assign_rule("Jolly Roger Bay - Coins Star", "GP & {Jolly Roger Bay - Upper}")
-        rf.assign_rule("Hazy Maze Cave - Coins Star", "GP")
+        set_rule(
+            multiworld.get_location("Bob-omb Battlefield - Coins Star", player),
+            lambda state: bob_omb_battlefield_coins(
+                state, player, options.bob_omb_battlefield_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Whomp's Fortress - Coins Star", player),
+            lambda state: whomps_fortress_coins(state, player, options.whomps_fortress_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Jolly Roger Bay - Coins Star", player),
+            lambda state: jolly_roger_bay_coins(state, player, options.jolly_roger_bay_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Cool, Cool Mountain - Coins Star", player),
+            lambda state: cool_cool_mountain_coins(
+                state, player, options.cool_cool_mountain_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Big Boo's Haunt - Coins Star", player),
+            lambda state: big_boos_haunt_coins(state, player, options.big_boos_haunt_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Hazy Maze Cave - Coins Star", player),
+            lambda state: hazy_maze_cave_coins(state, player, options.hazy_maze_cave_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Lethal Lava Land - Coins Star", player),
+            lambda state: lethal_lava_land_coins(state, player, options.lethal_lava_land_coin_star_requirement.value)
+        )
         rf.assign_rule("Shifting Sand Land - Coins Star", "{Shifting Sand Land - Upper Pyramid} | GP")
-        rf.assign_rule("Dire, Dire Docks - Coins Star",
-                       "PURPLE_SWITCHES & GP & {{Dire, Dire Docks - Pole-Jumping for Red Coins}}")
-        rf.assign_rule("Snowman's Land - Coins Star", "VC | CAPLESS")
+        set_rule(
+            multiworld.get_location("Dire, Dire Docks - Coins Star", player),
+            lambda state: dire_dire_docks_coins(state, player, options.dire_dire_docks_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Snowman's Land - Coins Star", player),
+            lambda state: snowmans_land_coins(state, player, options.snowmans_land_coin_star_requirement.value)
+        )
         rf.assign_rule("Wet-Dry World - Coins Star", "GP | {Wet-Dry World - Downtown}")
+        set_rule(
+            multiworld.get_location("Tall, Tall Mountain - Coins Star", player),
+            lambda state: tall_tall_mountain_coins(
+                state, player, options.tall_tall_mountain_coin_star_requirement.value)
+        )
         rf.assign_rule("Tick Tock Clock - Coins Star", "GP")
-        rf.assign_rule("Tiny-Huge Island - Coins Star", "GP & {Tiny-Huge Island (Huge)} | GP & {Tiny-Huge Island - Pipes}")
+        set_rule(
+            multiworld.get_location("Tiny-Huge Island - Coins Star", player),
+            lambda state: tiny_huge_island_coins(state, player, options.tiny_huge_island_coin_star_requirement.value)
+        )
         rf.assign_rule("Rainbow Ride - Coins Star", "GP & WK")
     # Castle Stars
     add_rule(multiworld.get_location("Toad (Basement)", player),

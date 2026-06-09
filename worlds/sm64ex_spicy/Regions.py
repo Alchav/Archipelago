@@ -148,7 +148,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     jrb_upper = create_subregion(regJRB, 'Jolly Roger Bay - Upper', "Jolly Roger Bay - Red Coins on the Ship Afloat")
     regJRB.subregions = [jrb_upper]
     if options.enable_coin_stars:
-        create_locs(jrb_upper, "Jolly Roger Bay - Coins Star")
+        create_locs(regJRB, "Jolly Roger Bay - Coins Star")
 
     regCCM = create_region("Cool, Cool Mountain", player, multiworld)
     create_default_locs(regCCM, locCCM_table)
@@ -188,7 +188,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     hmc_pit_islands = create_subregion(regHMC, "Hazy Maze Cave - Pit Islands", "Hazy Maze Cave - A-Maze-Ing Emergency Exit", "Hazy Maze Cave - 1Up Block above Pit")
     regHMC.subregions = [hmc_red_coin_area, hmc_pit_islands]
     if options.enable_coin_stars:
-        create_locs(hmc_red_coin_area, "Hazy Maze Cave - Coins Star")
+        create_locs(regHMC, "Hazy Maze Cave - Coins Star")
 
     regLLL = create_region("Lethal Lava Land", player, multiworld)
     create_locs(regLLL, "Lethal Lava Land - Boil the Big Bully", "Lethal Lava Land - Bully the Bullies",
@@ -254,7 +254,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                                        "Tall, Tall Mountain - Mysterious Mountainside", "Tall, Tall Mountain - Breathtaking View from Bridge")
     regTTM.subregions = [ttm_middle, ttm_top]
     if options.enable_coin_stars:
-        create_locs(ttm_top, "Tall, Tall Mountain - Coins Star")
+        create_locs(regTTM, "Tall, Tall Mountain - Coins Star")
 
     create_region("Tiny-Huge Island (Huge)", player, multiworld)
     create_region("Tiny-Huge Island (Tiny)", player, multiworld)

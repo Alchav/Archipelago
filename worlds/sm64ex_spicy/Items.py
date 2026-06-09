@@ -120,7 +120,7 @@ cannon_item_data_table: dict[str, SM64ItemData] = {
     "Cannon Unlock Snowman's Land": SM64ItemData(sm64ex_base_id + 209),
     "Cannon Unlock Wet-Dry World": SM64ItemData(sm64ex_base_id + 210),
     "Cannon Unlock Tall, Tall Mountain": SM64ItemData(sm64ex_base_id + 211),
-    "Cannon Unlock Tiny-Huge Island": SM64ItemData(sm64ex_base_id + 212, ItemClassification.filler),
+    "Cannon Unlock Tiny-Huge Island": SM64ItemData(sm64ex_base_id + 212),
     "Cannon Unlock Rainbow Ride": SM64ItemData(sm64ex_base_id + 214),
 
 }
