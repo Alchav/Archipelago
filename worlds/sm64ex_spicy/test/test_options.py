@@ -56,6 +56,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Castle Toads": 3626274,
             "Cannon Unlock - Castle": 3626275,
             "Yoshi": 3626276,
+            "Unlock Bowser in the Fire Sea": 3626304,
             "Wing Cap": 3626181,
             "Metal Cap": 3626182,
             "Vanish Cap": 3626183,

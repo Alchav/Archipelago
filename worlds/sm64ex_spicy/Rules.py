@@ -444,7 +444,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 rf.build_rule("GP"))
     connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
                                 lambda state: has_thirty_star_key(state) and
-                                state.has_any({"Dire, Dire Docks - Bowser's Sub", "Dire, Dire Docks - Poles"}, player))
+                                state.has("Unlock Bowser in the Fire Sea", player))
 
     connect_regions(multiworld, player, "Menu", "Second Floor", has_second_floor_key)
 

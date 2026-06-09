@@ -62,6 +62,7 @@ castle_progression_item_data_table: dict[str, SM64ItemData] = {
     "Castle Toads": SM64ItemData(sm64ex_base_id + 274),
     "Cannon Unlock - Castle": SM64ItemData(sm64ex_base_id + 275),
     "Yoshi": SM64ItemData(sm64ex_base_id + 276),
+    "Unlock Bowser in the Fire Sea": SM64ItemData(sm64ex_base_id + 304),
 }
 
 cap_item_data_table: dict[str, SM64ItemData] = {

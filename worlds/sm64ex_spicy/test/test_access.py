@@ -30,7 +30,7 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Bowser in the Fire Sea"))
         self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
         self.assertFalse(self.can_reach_region("Bowser in the Fire Sea"))
-        self.collect(self.get_item_by_name("Dire, Dire Docks - Bowser's Sub"))
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
         self.assertTrue(self.can_reach_region("Bowser in the Fire Sea"))
 
     def test_second_floor_access(self):
@@ -93,6 +93,12 @@ class SingleProgressiveKeyAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Bowser in the Sky"))
         self.collect_progressive_keys(1)
         self.assertTrue(self.can_reach_region("Bowser in the Sky"))
+
+    def test_BitFS_entrance_access(self):
+        self.collect_progressive_keys(3)
+        self.assertFalse(self.can_reach_region("Bowser in the Fire Sea"))
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
+        self.assertTrue(self.can_reach_region("Bowser in the Fire Sea"))
 
 
 class CastleFeatureAccessTestBase(SM64TestBase):
