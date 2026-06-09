@@ -96,6 +96,7 @@ arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Shifting Sand Land - Pyramid Elevator": SM64ItemData(sm64ex_base_id + 301),
     "Rolling Logs": SM64ItemData(sm64ex_base_id + 302),
     "Purple Switches": SM64ItemData(sm64ex_base_id + 303),
+    "Wet-Dry World - Water Level Diamond": SM64ItemData(sm64ex_base_id + 305),
 }
 
 action_item_data_table: dict[str, SM64ItemData] = {

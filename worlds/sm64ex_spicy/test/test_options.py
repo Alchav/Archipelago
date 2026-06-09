@@ -87,6 +87,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Shifting Sand Land - Pyramid Elevator": 3626301,
             "Rolling Logs": 3626302,
             "Purple Switches": 3626303,
+            "Wet-Dry World - Water Level Diamond": 3626305,
         }
         item_data = {
             **feature_item_data_table,
