@@ -71,21 +71,20 @@ SM64_MUSIC_SAFE_SEQUENCE_IDS = [
 ]
 
 
-def generate_music_map(seed: int, player: int) -> typing.Dict[str, int]:
-    rng = random.Random(f"sm64ex-spicy-music-{seed}-{player}")
+def generate_music_map(random: random.Random) -> typing.Dict[str, int]:
     area_keys = sorted(SM64_MUSIC_AREA_SEQUENCES)
     assignments = []
 
     while len(assignments) < len(area_keys):
-        shuffled_pool = SM64_MUSIC_SAFE_SEQUENCE_IDS.copy()
-        rng.shuffle(shuffled_pool)
+        shuffled_pool = sorted(SM64_MUSIC_AREA_SEQUENCES.values())
+        random.shuffle(shuffled_pool)
         assignments.extend(shuffled_pool)
 
     return {str(area_key): assignments[i] for i, area_key in enumerate(area_keys)}
 
 
-def build_music_slot_data(mode: int, seed: int, player: int) -> typing.Dict[str, typing.Any]:
-    slot_data = {"MusicShuffleMode": mode}
+def build_music_slot_data(mode: int, random: random.Random) -> typing.Dict[str, typing.Any]:
+    slot_data = {"MusicShuffleMode": mode, "MusicMap": {}}
     if mode == 1:
-        slot_data["MusicMap"] = generate_music_map(seed, player)
+        slot_data["MusicMap"] = generate_music_map(random)
     return slot_data

@@ -46,6 +46,7 @@ class SM64World(World):
     area_connections: typing.Dict[int, int]
 
     options_dataclass = SM64Options
+    options: SM64Options
 
     number_of_stars: int
     move_rando_bitvec: int
@@ -201,7 +202,7 @@ class SM64World(World):
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
         }
         slot_data.update(build_music_slot_data(
-            self.options.music_shuffle.value, self.multiworld.seed, self.player))
+            self.options.music_shuffle.value, self.random))
         mario_colors = self.get_mario_colors_slot_data()
         if mario_colors:
             slot_data["MarioColors"] = mario_colors
