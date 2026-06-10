@@ -167,6 +167,64 @@ class PerLevelCapItems(Toggle):
     display_name = "Per-Level Cap Items"
 
 
+class ArbitraryFeatureToggle(DefaultOnToggle):
+    """Shuffle this level feature as an Archipelago item. If disabled, the client starts with it unlocked."""
+
+
+class HazyMazeCaveSwimmingBeast(ArbitraryFeatureToggle):
+    display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
+
+
+class RainbowRideCarpets(ArbitraryFeatureToggle):
+    display_name = "Shuffle Rainbow Ride - Carpets"
+
+
+class TinyHugeIslandWarpPipes(ArbitraryFeatureToggle):
+    display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
+
+
+class CoolCoolMountainBabyPenguins(ArbitraryFeatureToggle):
+    display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
+
+
+class SnowmansLandPenguin(ArbitraryFeatureToggle):
+    display_name = "Shuffle Snowman's Land - Penguin"
+
+
+class ShiftingSandLandPyramidElevator(ArbitraryFeatureToggle):
+    display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
+
+
+class WetDryWorldWaterLevelDiamond(ArbitraryFeatureToggle):
+    display_name = "Shuffle Wet-Dry World - Water Level Diamond"
+
+
+class ArbitraryFeatureItemMode(Choice):
+    """
+    Not Shuffled - The client starts with this feature family unlocked.
+
+    Global - Shuffle one item that unlocks every use of this feature family.
+
+    Individual - Shuffle separate level-specific items where supported by the client.
+    """
+    option_not_shuffled = 0
+    option_global = 1
+    option_individual = 2
+    default = 1
+
+
+class CheckerboardPlatforms(ArbitraryFeatureItemMode):
+    display_name = "Checkerboard Platform Items"
+
+
+class RollingLogs(ArbitraryFeatureItemMode):
+    display_name = "Rolling Log Items"
+
+
+class PurpleSwitches(ArbitraryFeatureItemMode):
+    display_name = "Purple Switch Items"
+
+
 class StrictCannonRequirements(DefaultOnToggle):
     """If disabled, Stars that expect cannons may have to be acquired without them.
     Has no effect if Buddy Checks and Move Randomizer are disabled"""
@@ -292,6 +350,18 @@ sm64_options_groups = [
         PerLevelCapItems,
         StrictCannonRequirements,
     ]),
+    OptionGroup("Arbitrary Feature Unlocks", [
+        HazyMazeCaveSwimmingBeast,
+        RainbowRideCarpets,
+        CheckerboardPlatforms,
+        TinyHugeIslandWarpPipes,
+        CoolCoolMountainBabyPenguins,
+        SnowmansLandPenguin,
+        ShiftingSandLandPyramidElevator,
+        RollingLogs,
+        PurpleSwitches,
+        WetDryWorldWaterLevelDiamond,
+    ]),
     OptionGroup("Coin Star Requirements", [
         *coin_star_requirement_options,
     ]),
@@ -319,6 +389,16 @@ class SM64Options(PerGameCommonOptions):
     move_rando_actions: MoveRandomizerActions
     strict_cap_requirements: StrictCapRequirements
     per_level_cap_items: PerLevelCapItems
+    hazy_maze_cave_swimming_beast: HazyMazeCaveSwimmingBeast
+    rainbow_ride_carpets: RainbowRideCarpets
+    checkerboard_platforms: CheckerboardPlatforms
+    tiny_huge_island_warp_pipes: TinyHugeIslandWarpPipes
+    cool_cool_mountain_baby_penguins: CoolCoolMountainBabyPenguins
+    snowmans_land_penguin: SnowmansLandPenguin
+    shifting_sand_land_pyramid_elevator: ShiftingSandLandPyramidElevator
+    rolling_logs: RollingLogs
+    purple_switches: PurpleSwitches
+    wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
     mario_colors: MarioColors

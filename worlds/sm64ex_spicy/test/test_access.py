@@ -221,7 +221,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Climb"), self.get_item_by_name("Wall Kick")])
         self.assertFalse(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
 
-        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.collect(self.world.create_item("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
 
     def test_rainbow_ride_carpets_gate_all_checks(self):
@@ -255,14 +255,14 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Whomp's Fortress - Fortress"), self.get_item_by_name("Climb")])
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
 
-        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.collect(self.world.create_item("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
 
     def test_lll_red_hot_log_rolling_requires_log_shell_or_wing_cap(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
-        self.collect(self.get_item_by_name("Rolling Logs"))
+        self.collect(self.world.create_item("Rolling Logs"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
     def test_lll_elevator_tour_accepts_checkerboard_platforms(self):
@@ -270,7 +270,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Climb"))
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
 
-        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.collect(self.world.create_item("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
 
     def test_vanish_cap_under_moat_requires_checkerboard_platforms(self):
@@ -318,7 +318,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
-        self.collect(self.get_item_by_name("Purple Switches"))
+        self.collect(self.world.create_item("Purple Switches"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
@@ -461,6 +461,83 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
+
+
+class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **ArbitraryFeatureAccessTestBase.options,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+        "rolling_logs": Options.RollingLogs.option_individual,
+        "purple_switches": Options.PurpleSwitches.option_individual,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_individual_checkerboard_platforms_ignore_global_item(self):
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+
+        self.collect(self.world.create_item("Checkerboard Platforms"))
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+
+        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platforms"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+
+    def test_individual_rolling_logs_ignore_global_item(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+        self.collect(self.world.create_item("Rolling Logs"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Rolling Log"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+    def test_individual_purple_switches_ignore_global_item(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Metal Cap"),
+        ])
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+
+        self.collect(self.world.create_item("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+
+        self.collect(self.get_item_by_name("Hazy Maze Cave - Purple Switch"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+
+
+class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **ArbitraryFeatureAccessTestBase.options,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_false,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_not_shuffled,
+        "rolling_logs": Options.RollingLogs.option_not_shuffled,
+        "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_unshuffled_simple_feature_passes_logic(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Swimming Beast in the Cavern"))
+        self.assertTrue(self.can_reach_region("Cavern of the Metal Cap"))
+
+    def test_unshuffled_family_features_pass_logic(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Metal Cap"),
+        ])
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
 
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):

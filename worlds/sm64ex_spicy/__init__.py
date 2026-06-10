@@ -2,8 +2,10 @@ import typing
 import os
 import json
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
-    arbitrary_item_data_table, castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
-    painting_unlock_item_data_table, item_table, SM64Item
+    castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
+    painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
+    global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
+    rolling_log_item_data_table, purple_switch_item_data_table
 from .Locations import location_table, SM64Location
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names
@@ -93,9 +95,68 @@ class SM64World(World):
             return list(cap_item_data_table)
         return list(global_cap_item_names)
 
+    def get_arbitrary_item_names(self) -> typing.List[str]:
+        item_names = [
+            item_name
+            for item_name, option_name in (
+                ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
+                ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
+                ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
+                ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
+                ("Snowman's Land - Penguin", "snowmans_land_penguin"),
+                ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
+                ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
+            )
+            if getattr(self.options, option_name).value
+        ]
+
+        if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_global:
+            item_names += list(global_checkerboard_item_names)
+        elif self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_individual:
+            item_names += list(checkerboard_item_data_table)
+
+        if self.options.rolling_logs.value == self.options.rolling_logs.option_global:
+            item_names += list(global_rolling_log_item_names)
+        elif self.options.rolling_logs.value == self.options.rolling_logs.option_individual:
+            item_names += list(rolling_log_item_data_table)
+
+        if self.options.purple_switches.value == self.options.purple_switches.option_global:
+            item_names += list(global_purple_switch_item_names)
+        elif self.options.purple_switches.value == self.options.purple_switches.option_individual:
+            item_names += list(purple_switch_item_data_table)
+
+        return item_names
+
+    def get_unrandomized_arbitrary_item_names(self) -> typing.List[str]:
+        item_names = [
+            item_name
+            for item_name, option_name in (
+                ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
+                ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
+                ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
+                ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
+                ("Snowman's Land - Penguin", "snowmans_land_penguin"),
+                ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
+                ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
+            )
+            if not getattr(self.options, option_name).value
+        ]
+
+        if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_not_shuffled:
+            item_names += list(global_checkerboard_item_names)
+            item_names += list(checkerboard_item_data_table)
+        if self.options.rolling_logs.value == self.options.rolling_logs.option_not_shuffled:
+            item_names += list(global_rolling_log_item_names)
+            item_names += list(rolling_log_item_data_table)
+        if self.options.purple_switches.value == self.options.purple_switches.option_not_shuffled:
+            item_names += list(global_purple_switch_item_names)
+            item_names += list(purple_switch_item_data_table)
+
+        return item_names
+
     def get_progression_item_names(self) -> typing.List[str]:
         item_names = list(feature_item_data_table)
-        item_names += list(arbitrary_item_data_table)
+        item_names += self.get_arbitrary_item_names()
         item_names += self.get_castle_key_item_names()
         item_names += ["Progressive MIPS"] * 2
         item_names += [
@@ -192,6 +253,13 @@ class SM64World(World):
             for option_name in coin_star_requirement_option_names
         ]
 
+    def get_start_inventory_slot_data(self) -> typing.Dict[int, int]:
+        start_inventory = {}
+        for item_name in self.get_unrandomized_arbitrary_item_names():
+            item_id = item_table[item_name]
+            start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
+        return start_inventory
+
     def fill_slot_data(self):
         slot_data = {
             "AreaRando": self.area_connections,
@@ -200,6 +268,7 @@ class SM64World(World):
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
+            "StartInventory": self.get_start_inventory_slot_data(),
         }
         slot_data.update(build_music_slot_data(
             self.options.music_shuffle.value, self.random))

@@ -1,8 +1,11 @@
 from .bases import SM64TestBase
+from BaseClasses import ItemClassification
 from Options import OptionError
 from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
-    castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names
+    castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
+    simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
+    rolling_log_item_data_table, purple_switch_item_data_table, item_table
 from ..Locations import loc100Coin_table, location_table
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -88,6 +91,19 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Rolling Logs": 3626302,
             "Purple Switches": 3626303,
             "Wet-Dry World - Water Level Diamond": 3626305,
+            "Bob-omb Battlefield - Checkerboard Platforms": 3626306,
+            "Whomp's Fortress - Checkerboard Platforms": 3626307,
+            "Lethal Lava Land - Checkerboard Platforms": 3626308,
+            "Hazy Maze Cave - Checkerboard Platform": 3626309,
+            "Vanish Cap Under the Moat - Checkerboard Platforms": 3626310,
+            "Lethal Lava Land - Rolling Log": 3626311,
+            "Tall, Tall Mountain - Rolling Log": 3626312,
+            "Bob-omb Battlefield - Purple Switch": 3626313,
+            "Hazy Maze Cave - Purple Switch": 3626314,
+            "Wet-Dry World - Purple Switch": 3626315,
+            "Rainbow Ride - Purple Switch": 3626316,
+            "Bowser in the Dark World - Purple Switch": 3626317,
+            "Bowser in the Sky - Purple Switch": 3626318,
         }
         item_data = {
             **feature_item_data_table,
@@ -104,10 +120,24 @@ class FeatureItemPoolTestBase(SM64TestBase):
             with self.subTest("Feature item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
-    def test_arbitrary_items_are_generated(self):
-        for item_name in arbitrary_item_data_table:
+    def test_default_arbitrary_items_are_generated(self):
+        for item_name in {**simple_arbitrary_item_data_table, **global_arbitrary_item_data_table}:
             with self.subTest("Arbitrary item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+
+    def test_default_individual_arbitrary_items_are_not_generated(self):
+        for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
+            with self.subTest("Individual arbitrary item not generated", item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+    def test_unused_individual_arbitrary_items_are_filler(self):
+        for item_name in (
+                "Bob-omb Battlefield - Checkerboard Platforms",
+                "Tall, Tall Mountain - Rolling Log",
+                "Bob-omb Battlefield - Purple Switch",
+        ):
+            with self.subTest("Unused individual arbitrary item is filler", item=item_name):
+                self.assertEqual(arbitrary_item_data_table[item_name].classification, ItemClassification.filler)
 
     def test_castle_progression_items_are_generated(self):
         self.assertEqual(len(self.get_items_by_name("Progressive Key")), 6)
@@ -146,6 +176,58 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class IndividualArbitraryItemPoolTestBase(SM64TestBase):
+    options = {
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+        "rolling_logs": Options.RollingLogs.option_individual,
+        "purple_switches": Options.PurpleSwitches.option_individual,
+    }
+
+    def test_individual_arbitrary_items_are_generated(self):
+        for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
+            with self.subTest("Individual arbitrary item generated", item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+
+    def test_global_arbitrary_family_items_are_not_generated(self):
+        for item_name in global_arbitrary_item_data_table:
+            with self.subTest("Global arbitrary family item not generated", item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
+    options = {
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_false,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_not_shuffled,
+        "rolling_logs": Options.RollingLogs.option_not_shuffled,
+        "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+    }
+
+    def test_unshuffled_arbitrary_items_are_not_generated(self):
+        for item_name in (
+                "Hazy Maze Cave - Swimming Beast",
+                "Checkerboard Platforms",
+                "Lethal Lava Land - Rolling Log",
+                "Purple Switches",
+                "Bowser in the Sky - Purple Switch",
+        ):
+            with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+    def test_unshuffled_arbitrary_items_are_start_inventory_slot_data_only(self):
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
+        for item_name in (
+                "Hazy Maze Cave - Swimming Beast",
+                "Checkerboard Platforms",
+                "Lethal Lava Land - Rolling Log",
+                "Purple Switches",
+                "Bowser in the Sky - Purple Switch",
+        ):
+            with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
+                self.assertEqual(start_inventory[item_table[item_name]], 1)
+                self.assertNotIn(item_name, precollected_names)
 
 
 class GroupedCastleKeyPoolTestBase(SM64TestBase):
