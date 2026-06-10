@@ -96,8 +96,9 @@ class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
 
 
 class TickTockClockCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Tick Tock Clock. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Tick Tock Clock."""
     display_name = "Tick Tock Clock Coin Star Requirement"
+    range_end = 128
 
 
 class RainbowRideCoinStarRequirement(CoinStarRequirement):
@@ -198,6 +199,10 @@ class ShiftingSandLandPyramidElevator(ArbitraryFeatureToggle):
 
 class WetDryWorldWaterLevelDiamond(ArbitraryFeatureToggle):
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
+
+
+class TickTockClockSpinners(ArbitraryFeatureToggle):
+    display_name = "Shuffle Tick Tock Clock - Spinners"
 
 
 class ArbitraryFeatureItemMode(Choice):
@@ -362,6 +367,7 @@ sm64_options_groups = [
         RollingLogs,
         PurpleSwitches,
         WetDryWorldWaterLevelDiamond,
+        TickTockClockSpinners,
     ]),
     OptionGroup("Coin Star Requirements", [
         *coin_star_requirement_options,
@@ -400,6 +406,7 @@ class SM64Options(PerGameCommonOptions):
     rolling_logs: RollingLogs
     purple_switches: PurpleSwitches
     wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
+    tick_tock_clock_spinners: TickTockClockSpinners
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
     mario_colors: MarioColors

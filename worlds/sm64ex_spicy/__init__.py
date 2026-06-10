@@ -106,6 +106,7 @@ class SM64World(World):
                 ("Snowman's Land - Penguin", "snowmans_land_penguin"),
                 ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
                 ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
+                ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
             )
             if getattr(self.options, option_name).value
         ]
@@ -138,6 +139,7 @@ class SM64World(World):
                 ("Snowman's Land - Penguin", "snowmans_land_penguin"),
                 ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
                 ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
+                ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
             )
             if not getattr(self.options, option_name).value
         ]

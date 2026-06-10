@@ -2200,3 +2200,239 @@ class TTCVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
         self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
+
+
+class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_third_floor_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+
+    def use_stopped_ttc_without_entry_move(self):
+        for ttc_entrance in sm64_ttc_entrances[1:]:
+            self.multiworld.get_entrance(f"Third Floor -> {ttc_entrance}", self.player).access_rule = \
+                lambda state: False
+        stopped_entrance = sm64_ttc_entrances[0]
+        self.multiworld.get_entrance(f"Third Floor -> {stopped_entrance}", self.player).access_rule = \
+            lambda state: True
+
+    def test_spinners_reach_lower_from_stopped_ttc_without_entry_move(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.assertTrue(self.can_reach_region("Tick Tock Clock Stopped"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.collect(self.get_item_by_name("Tick Tock Clock - Spinners"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
+
+    def test_timed_jumps_require_moving_ttc_or_wall_kick(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Tick Tock Clock - Spinners"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
+
+    def test_timed_jumps_reachable_in_moving_ttc_without_wall_kick(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
+
+    def test_midway_1up_requires_spinners_or_long_jump_and_ledge_grab(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Top"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - 1Up Block Midway Up"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - 1Up Block Midway Up"))
+
+    def test_midway_1up_reachable_with_spinners(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Tick Tock Clock - Spinners"),
+        ])
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - 1Up Block Midway Up"))
+
+
+class TickTockClockCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_third_floor_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+
+    def use_stopped_ttc_without_entry_move(self):
+        for ttc_entrance in sm64_ttc_entrances[1:]:
+            self.multiworld.get_entrance(f"Third Floor -> {ttc_entrance}", self.player).access_rule = \
+                lambda state: False
+        stopped_entrance = sm64_ttc_entrances[0]
+        self.multiworld.get_entrance(f"Third Floor -> {stopped_entrance}", self.player).access_rule = \
+            lambda state: True
+
+
+class TickTockClockCoinStar17AccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 17,
+    }
+
+    def test_coin_star_access(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar18AccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 18,
+    }
+
+    def test_coin_star_access(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar36StoppedSpinnersAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 36,
+    }
+
+    def test_coin_star_access(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Tick Tock Clock - Spinners"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar37StoppedSpinnersAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 37,
+    }
+
+    def test_coin_star_access(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Tick Tock Clock - Spinners"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar41StoppedSpinnersWallKickAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 41,
+    }
+
+    def test_coin_star_access(self):
+        self.use_stopped_ttc_without_entry_move()
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Tick Tock Clock - Spinners"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar35MovingAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 35,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar36MovingAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 36,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar76UpperGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 76,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar77UpperGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 77,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockCoinStar128AccessTestBase(TickTockClockCoinStarAccessTestBase):
+    options = {
+        **TickTockClockCoinStarAccessTestBase.options,
+        "tick_tock_clock_coin_star_requirement": 128,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Tick Tock Clock - Spinners"),
+        ])
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))

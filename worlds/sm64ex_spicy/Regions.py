@@ -296,11 +296,14 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regFloor3 = create_region("Third Floor", player, multiworld)
 
     regTTC = create_region("Tick Tock Clock", player, multiworld)
-    create_locs(regTTC, "Tick Tock Clock - Stop Time for Red Coins")
-    ttc_lower = create_subregion(regTTC, "Tick Tock Clock - Lower", "Tick Tock Clock - Roll into the Cage", "Tick Tock Clock - Get a Hand")
+    ttc_lower = create_subregion(regTTC, "Tick Tock Clock - Lower", "Tick Tock Clock - Roll into the Cage",
+                                 "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins")
     ttc_upper = create_subregion(ttc_lower, "Tick Tock Clock - Upper", "Tick Tock Clock - Timed Jumps on Moving Bars", "Tick Tock Clock - The Pit and the Pendulums")
-    ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - 1Up Block Midway Up", "Tick Tock Clock - Stomp on the Thwomp", "Tick Tock Clock - 1Up Block at the Top")
-    regTTC.subregions = [ttc_lower, ttc_upper, ttc_top]
+    ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - 1Up Block Midway Up")
+    ttc_top_past_spinners = create_subregion(ttc_top, "Tick Tock Clock - Top Past Spinners",
+                                             "Tick Tock Clock - Stomp on the Thwomp",
+                                             "Tick Tock Clock - 1Up Block at the Top")
+    regTTC.subregions = [ttc_lower, ttc_upper, ttc_top, ttc_top_past_spinners]
     regTTCStopped = create_region("Tick Tock Clock Stopped", player, multiworld)
     regTTCStopped.connect(regTTC)
     regTTCStopped.subregions = [regTTC, *regTTC.subregions]
@@ -308,7 +311,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regTTCMoving.connect(regTTC)
     regTTCMoving.subregions = [regTTC, *regTTC.subregions]
     if options.enable_coin_stars:
-        create_locs(ttc_top, "Tick Tock Clock - Coins Star")
+        create_locs(regTTC, "Tick Tock Clock - Coins Star")
 
     regRR = create_region("Rainbow Ride", player, multiworld)
     rr_carpets = create_subregion(regRR, "Rainbow Ride - Carpets", "Rainbow Ride - Swingin' in the Breeze",

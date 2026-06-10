@@ -94,6 +94,7 @@ simple_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Snowman's Land - Penguin": SM64ItemData(sm64ex_base_id + 300, ItemClassification.progression_deprioritized_skip_balancing),
     "Shifting Sand Land - Pyramid Elevator": SM64ItemData(sm64ex_base_id + 301),
     "Wet-Dry World - Water Level Diamond": SM64ItemData(sm64ex_base_id + 305),
+    "Tick Tock Clock - Spinners": SM64ItemData(sm64ex_base_id + 319),
 }
 
 global_checkerboard_item_names = ("Checkerboard Platforms",)

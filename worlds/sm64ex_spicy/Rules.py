@@ -28,6 +28,7 @@ simple_arbitrary_feature_options = {
     "SL_PENGUIN": ("Snowman's Land - Penguin", "snowmans_land_penguin"),
     "SSL_PYRAMID_ELEVATOR": ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
     "WDW_WATER_LEVEL_DIAMOND": ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
+    "TTC_SPINNERS": ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
 }
 
 checkerboard_item_name_by_level = {
@@ -313,6 +314,29 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
     if can_enter_huge:
         reachable_totals.append(route_coins(can_access_pipes, True))
     return coins <= max(reachable_totals, default=0)
+
+
+def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 17
+    if state.can_reach("Tick Tock Clock - Lower", "Region", player):
+        reachable_coins += 13
+        if has_simple_arbitrary_feature(state, player, "TTC_SPINNERS"):
+            reachable_coins += 6
+        if state.can_reach("Tick Tock Clock Moving", "Region", player) or (
+                state.can_reach("Tick Tock Clock Stopped", "Region", player) and any(
+                    has_action(state, player, action)
+                    for action in ("Ledge Grab", "Backflip", "Triple Jump", "Wall Kick")
+                )):
+            reachable_coins += 5
+    if state.can_reach("Tick Tock Clock - Upper", "Region", player):
+        reachable_coins += 6
+        if has_action(state, player, "Ground Pound"):
+            reachable_coins += 35
+    if state.can_reach("Tick Tock Clock - Top", "Region", player):
+        reachable_coins += 16
+    if state.can_reach("Tick Tock Clock - Top Past Spinners", "Region", player):
+        reachable_coins += 30
+    return coins <= min(reachable_coins, 128)
 
 
 def shuffle_dict_keys(multiworld: MultiWorld, dictionary: dict) -> dict:
@@ -705,11 +729,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "THI_WARP_PIPES & GP | THI_WARP_PIPES & MOVELESS & DV")
     # Tick Tock Clock
-    rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF/WK")
+    rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF/WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
     rf.assign_rule("Tick Tock Clock - Upper", "CL | MOVELESS & WK")
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
+    rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
+    rf.assign_rule("Tick Tock Clock - 1Up Block Midway Up", "TTC_SPINNERS | LJ+LG")
+    rf.assign_rule("Tick Tock Clock - Timed Jumps on Moving Bars", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
-    rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "{Tick Tock Clock Stopped} | {Tick Tock Clock - Lower}")
     # Rainbow Ride
     rf.assign_rule("Rainbow Ride - Carpets", "RR_CARPETS/LJ/DV/TJ")
     rf.assign_rule("Rainbow Ride - Maze", "WK | LJ & SF/BF/TJ | MOVELESS & LG/TJ")
@@ -797,10 +823,14 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             lambda state: tall_tall_mountain_coins(
                 state, player, options.tall_tall_mountain_coin_star_requirement.value)
         )
-        rf.assign_rule("Tick Tock Clock - Coins Star", "GP")
         set_rule(
             multiworld.get_location("Tiny-Huge Island - Coins Star", player),
             lambda state: tiny_huge_island_coins(state, player, options.tiny_huge_island_coin_star_requirement.value)
+        )
+        set_rule(
+            multiworld.get_location("Tick Tock Clock - Coins Star", player),
+            lambda state: tick_tock_clock_coins(
+                state, player, options.tick_tock_clock_coin_star_requirement.value)
         )
         rf.assign_rule("Rainbow Ride - Coins Star", "GP & WK")
     # Castle Stars
@@ -901,6 +931,7 @@ class RuleFactory:
         "LLL_ROLLING_LOG": "Rolling Logs",
         "PURPLE_SWITCHES": "Purple Switches",
         "WDW_WATER_LEVEL_DIAMOND": "Wet-Dry World - Water Level Diamond",
+        "TTC_SPINNERS": "Tick Tock Clock - Spinners",
     }
     cap_item_name_by_token_and_level = {
         "WC": {

@@ -104,6 +104,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Rainbow Ride - Purple Switch": 3626316,
             "Bowser in the Dark World - Purple Switch": 3626317,
             "Bowser in the Sky - Purple Switch": 3626318,
+            "Tick Tock Clock - Spinners": 3626319,
         }
         item_data = {
             **feature_item_data_table,
@@ -199,6 +200,7 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
 class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
     options = {
         "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_false,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_false,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_not_shuffled,
         "rolling_logs": Options.RollingLogs.option_not_shuffled,
         "purple_switches": Options.PurpleSwitches.option_not_shuffled,
@@ -207,6 +209,7 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
     def test_unshuffled_arbitrary_items_are_not_generated(self):
         for item_name in (
                 "Hazy Maze Cave - Swimming Beast",
+                "Tick Tock Clock - Spinners",
                 "Checkerboard Platforms",
                 "Lethal Lava Land - Rolling Log",
                 "Purple Switches",
@@ -220,6 +223,7 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
         precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
         for item_name in (
                 "Hazy Maze Cave - Swimming Beast",
+                "Tick Tock Clock - Spinners",
                 "Checkerboard Platforms",
                 "Lethal Lava Land - Rolling Log",
                 "Purple Switches",
@@ -351,6 +355,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
             Options.TinyHugeIslandCoinStarRequirement: 191,
+            Options.TickTockClockCoinStarRequirement: 128,
         }
         for option in Options.coin_star_requirement_options:
             with self.subTest(option=option.__name__):
