@@ -76,7 +76,7 @@ def generate_music_map(random: random.Random) -> typing.Dict[str, int]:
     assignments = []
 
     while len(assignments) < len(area_keys):
-        shuffled_pool = sorted(SM64_MUSIC_AREA_SEQUENCES.values())
+        shuffled_pool = list(SM64_MUSIC_SAFE_SEQUENCE_IDS)
         random.shuffle(shuffled_pool)
         assignments.extend(shuffled_pool)
 
@@ -84,7 +84,7 @@ def generate_music_map(random: random.Random) -> typing.Dict[str, int]:
 
 
 def build_music_slot_data(mode: int, random: random.Random) -> typing.Dict[str, typing.Any]:
-    slot_data = {"MusicShuffleMode": mode, "MusicMap": {}}
+    slot_data: typing.Dict[str, typing.Any] = {"MusicShuffleMode": mode}
     if mode == 1:
         slot_data["MusicMap"] = generate_music_map(random)
     return slot_data
