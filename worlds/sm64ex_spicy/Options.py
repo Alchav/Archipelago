@@ -60,8 +60,9 @@ class LethalLavaLandCoinStarRequirement(CoinStarRequirement):
 
 
 class ShiftingSandLandCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Shifting Sand Land. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Shifting Sand Land."""
     display_name = "Shifting Sand Land Coin Star Requirement"
+    range_end = 136
 
 
 class DireDireDocksCoinStarRequirement(CoinStarRequirement):

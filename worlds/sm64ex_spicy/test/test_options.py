@@ -345,6 +345,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.BigBoosHauntCoinStarRequirement: 151,
             Options.HazyMazeCaveCoinStarRequirement: 139,
             Options.LethalLavaLandCoinStarRequirement: 133,
+            Options.ShiftingSandLandCoinStarRequirement: 136,
             Options.DireDireDocksCoinStarRequirement: 106,
             Options.SnowmansLandCoinStarRequirement: 127,
             Options.WetDryWorldCoinStarRequirement: 152,

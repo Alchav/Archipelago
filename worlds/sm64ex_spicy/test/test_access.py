@@ -1374,6 +1374,98 @@ class LethalLavaLandCoinStar133AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
+class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+
+class ShiftingSandLandCoinStar89AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+    options = {
+        **ShiftingSandLandCoinStarAccessTestBase.options,
+        "shifting_sand_land_coin_star_requirement": 89,
+    }
+
+    def test_start_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+
+class ShiftingSandLandCoinStar93AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+    options = {
+        **ShiftingSandLandCoinStarAccessTestBase.options,
+        "shifting_sand_land_coin_star_requirement": 93,
+    }
+
+    def test_red_coin_star_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Wing Cap"),
+        ])
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+
+class ShiftingSandLandCoinStar104AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+    options = {
+        **ShiftingSandLandCoinStarAccessTestBase.options,
+        "shifting_sand_land_coin_star_requirement": 104,
+    }
+
+    def test_ground_pound_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+
+class ShiftingSandLandCoinStar117AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+    options = {
+        **ShiftingSandLandCoinStarAccessTestBase.options,
+        "shifting_sand_land_coin_star_requirement": 117,
+    }
+
+    def test_upper_pyramid_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+
+class ShiftingSandLandCoinStar136AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+    options = {
+        **ShiftingSandLandCoinStarAccessTestBase.options,
+        "shifting_sand_land_coin_star_requirement": 136,
+    }
+
+    def test_all_coin_sources_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+
 class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {

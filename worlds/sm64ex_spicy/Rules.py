@@ -168,6 +168,17 @@ def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> b
     return coins <= reachable_coins
 
 
+def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 89
+    if state.can_reach("Shifting Sand Land - Free Flying for 8 Red Coins", "Location", player):
+        reachable_coins += 4
+    if has_action(state, player, "Ground Pound"):
+        reachable_coins += 15
+    if state.can_reach("Shifting Sand Land - Upper Pyramid", "Region", player):
+        reachable_coins += 28
+    return coins <= reachable_coins
+
+
 def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
     reachable_coins = 54
     if state.can_reach("Jolly Roger Bay - Upper", "Region", player):
@@ -764,7 +775,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             multiworld.get_location("Lethal Lava Land - Coins Star", player),
             lambda state: lethal_lava_land_coins(state, player, options.lethal_lava_land_coin_star_requirement.value)
         )
-        rf.assign_rule("Shifting Sand Land - Coins Star", "{Shifting Sand Land - Upper Pyramid} | GP")
+        set_rule(
+            multiworld.get_location("Shifting Sand Land - Coins Star", player),
+            lambda state: shifting_sand_land_coins(
+                state, player, options.shifting_sand_land_coin_star_requirement.value)
+        )
         set_rule(
             multiworld.get_location("Dire, Dire Docks - Coins Star", player),
             lambda state: dire_dire_docks_coins(state, player, options.dire_dire_docks_coin_star_requirement.value)
