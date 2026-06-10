@@ -597,7 +597,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "PURPLE_SWITCHES & DDD_POLES & TJ+DV+LG+WK & MOVELESS")
     rf.assign_rule("Dire, Dire Docks - Through the Jet Stream", "MC | CAPLESS")
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
-    rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC+MC | CAPLESS & VC")
+    rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC")
     # Snowman's Land
     rf.assign_rule("Snowman's Land - Snowman's Big Head", "SL_PENGUIN & BF/SF/TJ | CANN")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
