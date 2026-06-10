@@ -77,8 +77,9 @@ class SnowmansLandCoinStarRequirement(CoinStarRequirement):
 
 
 class WetDryWorldCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Wet-Dry World. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Wet-Dry World."""
     display_name = "Wet-Dry World Coin Star Requirement"
+    range_end = 152
 
 
 class TallTallMountainCoinStarRequirement(CoinStarRequirement):

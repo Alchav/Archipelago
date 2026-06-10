@@ -265,6 +265,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.LethalLavaLandCoinStarRequirement: 133,
             Options.DireDireDocksCoinStarRequirement: 106,
             Options.SnowmansLandCoinStarRequirement: 127,
+            Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
             Options.TinyHugeIslandCoinStarRequirement: 191,
         }

@@ -1,3 +1,4 @@
+import re
 from typing import Callable, Union, Dict, Set
 
 from BaseClasses import CollectionState, Entrance, MultiWorld
@@ -149,6 +150,57 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
     if state.can_reach("Snowman's Land - Into the Igloo", "Location", player):
         reachable_coins += 20
     return coins <= reachable_coins
+
+
+def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_water_levels = {
+        "low": state.can_reach("Wet-Dry World - Low Water", "Region", player),
+        "mid": state.can_reach("Wet-Dry World - Mid Water", "Region", player),
+        "mid-high": state.can_reach("Wet-Dry World - Mid-High Water", "Region", player),
+        "high": state.can_reach("Wet-Dry World - High Water", "Region", player),
+        "highest": state.can_reach("Wet-Dry World - Highest Water", "Region", player),
+    }
+    has_ground_pound = has_action(state, player, "Ground Pound")
+    has_purple_switches = state.has("Purple Switches", player)
+    has_water_level_diamond = state.has("Wet-Dry World - Water Level Diamond", player)
+    has_triple_jump = has_action(state, player, "Triple Jump")
+    has_dive = has_action(state, player, "Dive")
+    has_movement_top_route = (
+        any(has_action(state, player, action) for action in ("Wall Kick", "Triple Jump", "Side Flip", "Backflip"))
+        or allows_moveless(state, player)
+        or has_purple_switches and has_action(state, player, "Long Jump")
+    )
+    has_downtown_route = (
+        state.has("Cannon Unlock Wet-Dry World", player)
+        or allows_moveless(state, player) and has_triple_jump and has_dive
+    )
+
+    def route_coins(water_level: str) -> int:
+        route_total = 0
+        if water_level == "low":
+            route_total += 22
+            if has_ground_pound:
+                route_total += 30
+        if water_level in {"low", "mid"}:
+            route_total += 3
+        if water_level in {"mid", "highest"} or has_purple_switches or (has_triple_jump and has_dive):
+            route_total += 5
+        if has_movement_top_route or water_level == "highest":
+            route_total += 15
+        if has_purple_switches:
+            route_total += 10
+        if has_downtown_route or water_level == "highest":
+            route_total += 31
+            if has_water_level_diamond:
+                route_total += 14
+        return route_total
+
+    reachable_totals = [
+        route_coins(water_level)
+        for water_level, is_reachable in reachable_water_levels.items()
+        if is_reachable
+    ]
+    return coins <= min(max(reachable_totals, default=0), 152)
 
 
 def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
@@ -551,14 +603,31 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     # Wet-Dry World
-    rf.assign_rule("Wet-Dry World - Top", "WK/TJ/SF/BF | MOVELESS")
-    rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World High} | CANN | MOVELESS & TJ+DV")
-    rf.assign_rule("Wet-Dry World - Go to Town for Red Coins", "WK | MOVELESS & TJ")
+    rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Mid Water to Mid-High Water",
+                   "WDW_WATER_LEVEL_DIAMOND & PURPLE_SWITCHES | WDW_WATER_LEVEL_DIAMOND & TJ+DV")
+    rf.assign_rule("Wet-Dry World - Mid-High Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Mid-High Water to High Water", "{Wet-Dry World - Top}")
+    rf.assign_rule("Wet-Dry World - High Water to Mid-High Water", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Highest Water to High Water", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Top", "WK/TJ/SF/BF | MOVELESS | PURPLE_SWITCHES & LJ | {Wet-Dry World - Highest Water}")
+    rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World - Highest Water} | CANN | MOVELESS & TJ+DV")
+    rf.assign_rule("Wet-Dry World - Go to Town for Red Coins",
+                   "WDW_WATER_LEVEL_DIAMOND & WK | WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
+    rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
+                   "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
+                   "{Wet-Dry World - High Water}")
     rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES")
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
-                   "VC & WK/BF | VC & TJ+LG+PURPLE_SWITCHES | MOVELESS & VC & TJ | "
-                   "MOVELESS & DJ/SF/BF & KK")
-    rf.assign_rule("Wet-Dry World - Bob-omb Buddy", "TJ | SF+LG | NAR & BF/SF")
+                   "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
+                   "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
+                   "WDW_WATER_LEVEL_DIAMOND & MOVELESS & VC & TJ | "
+                   "WDW_WATER_LEVEL_DIAMOND & MOVELESS & DJ/SF/BF & KK")
+    rf.assign_rule("Wet-Dry World - 1Up Block in Downtown", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
+                   "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
+                   "{Wet-Dry World - Highest Water} & BF/SF")
     # Tall, Tall Mountain
     rf.assign_rule("Tall, Tall Mountain - Top", "MOVELESS & TJ | LJ/DV & LG/KK | MOVELESS & WK & SF/LG | MOVELESS & KK/DV")
     rf.assign_rule("Tall, Tall Mountain - Mystery of the Monkey Cage", "TTM_UKIKI")
@@ -655,7 +724,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             multiworld.get_location("Snowman's Land - Coins Star", player),
             lambda state: snowmans_land_coins(state, player, options.snowmans_land_coin_star_requirement.value)
         )
-        rf.assign_rule("Wet-Dry World - Coins Star", "GP | {Wet-Dry World - Downtown}")
+        set_rule(
+            multiworld.get_location("Wet-Dry World - Coins Star", player),
+            lambda state: wet_dry_world_coins(state, player, options.wet_dry_world_coin_star_requirement.value)
+        )
         set_rule(
             multiworld.get_location("Tall, Tall Mountain - Coins Star", player),
             lambda state: tall_tall_mountain_coins(
@@ -764,6 +836,7 @@ class RuleFactory:
         "SSL_PYRAMID_ELEVATOR": "Shifting Sand Land - Pyramid Elevator",
         "LLL_ROLLING_LOG": "Rolling Logs",
         "PURPLE_SWITCHES": "Purple Switches",
+        "WDW_WATER_LEVEL_DIAMOND": "Wet-Dry World - Water Level Diamond",
     }
     cap_item_name_by_token_and_level = {
         "WC": {
@@ -818,6 +891,10 @@ class RuleFactory:
                 f"Error generating rule for {target_name} using rule expression {rule_expr}: {exception}")
         if rule:
             set_rule(target, rule)
+        if isinstance(target, Entrance):
+            for region_name in re.findall(r"(?<!\{)\{([^{}]+)\}(?!\})", rule_expr):
+                self.multiworld.register_indirect_condition(
+                    self.multiworld.get_region(region_name, self.player), target)
 
     def build_rule(
             self, rule_expr: str, cannon_name: str = '', cap_item_names: dict[str, str] | None = None,

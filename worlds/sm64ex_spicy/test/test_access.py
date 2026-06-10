@@ -341,6 +341,9 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
 
     def test_tall_tall_mountain_bridge_accepts_purple_switches(self):
@@ -1386,6 +1389,107 @@ class SnowmansLandCoinStar127AccessTestBase(SnowmansLandCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
 
 
+class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_second_floor_access(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+
+    def disable_wdw_entrance(self, entrance_name: str):
+        self.multiworld.get_entrance(f"Second Floor -> {entrance_name}", self.player).access_rule = \
+            lambda state: False
+
+
+class WetDryWorldCoinStar25AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "wet_dry_world_coin_star_requirement": 25,
+    }
+
+    def test_low_water_start_coins_reach_coin_star(self):
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Low Water"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
+class WetDryWorldCoinStar26AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "wet_dry_world_coin_star_requirement": 26,
+    }
+
+    def test_low_water_ground_pound_coins_reach_coin_star(self):
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
+class WetDryWorldCoinStar8AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "wet_dry_world_coin_star_requirement": 8,
+    }
+
+    def test_mid_water_start_coins_reach_coin_star(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid Water"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
+class WetDryWorldCoinStar9AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "wet_dry_world_coin_star_requirement": 9,
+    }
+
+    def test_mid_water_purple_switch_coins_reach_coin_star(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
+class WetDryWorldCoinStar65AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "wet_dry_world_coin_star_requirement": 65,
+    }
+
+    def test_highest_water_downtown_diamond_coins_reach_coin_star(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
 class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -1671,6 +1775,10 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
     def collect_second_floor_access(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
+    def disable_wdw_entrance(self, entrance_name: str):
+        self.multiworld.get_entrance(f"Second Floor -> {entrance_name}", self.player).access_rule = \
+            lambda state: False
+
     def test_high_entrance_requires_ledge_grab_and_jump(self):
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Wet-Dry World"))
@@ -1688,6 +1796,106 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
 
         self.collect([self.get_item_by_name("Ledge Grab"), self.get_item_by_name("Triple Jump")])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
+
+    def test_downtown_checks_require_water_level_diamond(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Go to Town for Red Coins"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - 1Up Block in Downtown"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Go to Town for Red Coins"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - 1Up Block in Downtown"))
+
+    def test_low_water_can_raise_to_high_but_not_highest(self):
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Low Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Mid Water"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Cannon"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Shocking Arrow Lifts!"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+        self.collect([
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Top"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - High Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Highest Water"))
+
+    def test_middle_water_to_mid_high_accepts_triple_jump_and_dive(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+        self.collect([self.get_item_by_name("Triple Jump"), self.get_item_by_name("Dive")])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+    def test_highest_water_lowers_with_diamond(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.collect_second_floor_access()
+        self.collect([self.get_item_by_name("Ledge Grab"), self.get_item_by_name("Triple Jump")])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - High Water"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - High Water"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+    def test_bob_omb_buddy_uses_high_or_highest_water_routes(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.collect_second_floor_access()
+        self.collect([self.get_item_by_name("Ledge Grab"), self.get_item_by_name("Triple Jump")])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
+
+        self.collect(self.get_item_by_name("Backflip"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
+
+    def test_bob_omb_buddy_high_water_requires_jump_route(self):
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Wet-Dry World - Water Level Diamond"),
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertTrue(self.can_reach_region("Wet-Dry World - High Water"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
+
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
+
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
+
+    def test_top_accepts_purple_switch_and_long_jump(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Top"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Top"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Top"))
 
 
 class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
@@ -1710,6 +1918,9 @@ class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
 
         self.collect(self.get_item_by_name("Kick"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
 
 
