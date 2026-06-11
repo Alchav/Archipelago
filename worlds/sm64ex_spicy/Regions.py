@@ -314,15 +314,21 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         create_locs(regTTC, "Tick Tock Clock - Coins Star")
 
     regRR = create_region("Rainbow Ride", player, multiworld)
-    rr_carpets = create_subregion(regRR, "Rainbow Ride - Carpets", "Rainbow Ride - Swingin' in the Breeze",
-                                  "Rainbow Ride - Tricky Triangles!", "Rainbow Ride - 1Up Block Top of Red Coin Maze",
-                                  "Rainbow Ride - 1Up Block Under Fly Guy", "Rainbow Ride - Bob-omb Buddy")
-    rr_maze = create_subregion(rr_carpets, "Rainbow Ride - Maze", "Rainbow Ride - Coins Amassed in a Maze")
+    rr_beneath_pole = create_subregion(regRR, "Rainbow Ride - Beneath the Pole",
+                                       "Rainbow Ride - Swingin' in the Breeze",
+                                       "Rainbow Ride - Tricky Triangles!",
+                                       "Rainbow Ride - 1Up Block Under Fly Guy")
+    rr_maze = create_subregion(rr_beneath_pole, "Rainbow Ride - Maze",
+                               "Rainbow Ride - Coins Amassed in a Maze",
+                               "Rainbow Ride - 1Up Block Top of Red Coin Maze")
+    connect_regions(multiworld, player, "Rainbow Ride", "Rainbow Ride - Maze",
+                    name="Rainbow Ride - Initial to Maze")
+    rr_carpets = create_subregion(rr_maze, "Rainbow Ride - Carpets", "Rainbow Ride - Bob-omb Buddy")
     rr_cruiser = create_subregion(rr_carpets, "Rainbow Ride - Cruiser", "Rainbow Ride - Cruiser Crossing the Rainbow", "Rainbow Ride - Somewhere Over the Rainbow")
     rr_house = create_subregion(rr_carpets, "Rainbow Ride - House", "Rainbow Ride - The Big House in the Sky", "Rainbow Ride - 1Up Block On House in the Sky")
-    regRR.subregions = [rr_carpets, rr_maze, rr_cruiser, rr_house]
+    regRR.subregions = [rr_beneath_pole, rr_maze, rr_carpets, rr_cruiser, rr_house]
     if options.enable_coin_stars:
-        create_locs(rr_maze, "Rainbow Ride - Coins Star")
+        create_locs(regRR, "Rainbow Ride - Coins Star")
 
     regWMotR = create_region("Wing Mario over the Rainbow", player, multiworld)
     create_default_locs(regWMotR, locWMotR_table)

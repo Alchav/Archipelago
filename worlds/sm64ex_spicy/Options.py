@@ -102,8 +102,9 @@ class TickTockClockCoinStarRequirement(CoinStarRequirement):
 
 
 class RainbowRideCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Rainbow Ride. Does not yet affect logic."""
+    """Coins needed for the Coin Star in Rainbow Ride."""
     display_name = "Rainbow Ride Coin Star Requirement"
+    range_end = 146
 
 
 coin_star_requirement_options = (

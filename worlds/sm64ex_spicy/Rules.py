@@ -339,6 +339,36 @@ def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bo
     return coins <= min(reachable_coins, 128)
 
 
+def rainbow_ride_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 0
+    has_carpets = has_simple_arbitrary_feature(state, player, "RR_CARPETS")
+    if has_carpets or (
+            allows_moveless(state, player) and has_action(state, player, "Long Jump") and
+            has_action(state, player, "Triple Jump") and has_action(state, player, "Ledge Grab")):
+        reachable_coins += 8
+    if state.can_reach("Rainbow Ride - Beneath the Pole", "Region", player):
+        reachable_coins += 27
+    if state.can_reach("Rainbow Ride - Maze", "Region", player):
+        reachable_coins += 23
+        if has_action(state, player, "Ground Pound"):
+            reachable_coins += 5
+        if has_action(state, player, "Long Jump") or has_action(state, player, "Wall Kick"):
+            reachable_coins += 2
+    if has_action(state, player, "Ground Pound") and has_action(state, player, "Wall Kick"):
+        reachable_coins += 25
+    if state.can_reach("Rainbow Ride - Coins Amassed in a Maze", "Location", player):
+        reachable_coins += 14
+    if state.can_reach("Rainbow Ride - Carpets", "Region", player):
+        reachable_coins += 2
+    if state.can_reach("Rainbow Ride - House", "Region", player):
+        reachable_coins += 20
+    if state.can_reach("Rainbow Ride - Cruiser", "Region", player):
+        reachable_coins += 15
+    if state.can_reach("Rainbow Ride - Somewhere Over the Rainbow", "Location", player):
+        reachable_coins += 5
+    return coins <= min(reachable_coins, 146)
+
+
 def shuffle_dict_keys(multiworld: MultiWorld, dictionary: dict) -> dict:
     keys = list(dictionary.keys())
     values = list(dictionary.values())
@@ -737,8 +767,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Timed Jumps on Moving Bars", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
     # Rainbow Ride
-    rf.assign_rule("Rainbow Ride - Carpets", "RR_CARPETS/LJ/DV/TJ")
-    rf.assign_rule("Rainbow Ride - Maze", "WK | LJ & SF/BF/TJ | MOVELESS & LG/TJ")
+    rf.assign_rule("Rainbow Ride - Beneath the Pole", "LJ/TJ/DV")
+    rf.assign_rule("Rainbow Ride - Maze", "CL")
+    rf.assign_rule("Rainbow Ride - Initial to Maze", "RR_CARPETS")
+    rf.assign_rule("Rainbow Ride - Carpets", "RR_CARPETS")
+    rf.assign_rule("Rainbow Ride - Coins Amassed in a Maze", "WK | LJ & SF/BF/TJ | MOVELESS & LG/TJ")
     rf.assign_rule("Rainbow Ride - Bob-omb Buddy", "WK | MOVELESS & LG")
     rf.assign_rule("Rainbow Ride - Swingin' in the Breeze", "LG/TJ/BF/SF | MOVELESS")
     rf.assign_rule("Rainbow Ride - Tricky Triangles!",
@@ -832,7 +865,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             lambda state: tick_tock_clock_coins(
                 state, player, options.tick_tock_clock_coin_star_requirement.value)
         )
-        rf.assign_rule("Rainbow Ride - Coins Star", "GP & WK")
+        set_rule(
+            multiworld.get_location("Rainbow Ride - Coins Star", player),
+            lambda state: rainbow_ride_coins(state, player, options.rainbow_ride_coin_star_requirement.value)
+        )
     # Castle Stars
     add_rule(multiworld.get_location("Toad (Basement)", player),
              lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle Toads", player))

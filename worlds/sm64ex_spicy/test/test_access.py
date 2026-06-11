@@ -224,24 +224,46 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
 
-    def test_rainbow_ride_carpets_gate_all_checks(self):
+    def test_rainbow_ride_beneath_pole_to_maze_route(self):
         self.collect_third_floor_access()
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Rainbow Ride"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride - Beneath the Pole"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride - Maze"))
         self.assertFalse(self.can_reach_region("Rainbow Ride - Carpets"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Swingin' in the Breeze"))
 
-        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
-        self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Beneath the Pole"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Swingin' in the Breeze"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride - Maze"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Maze"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride - Carpets"))
+
+    def test_rainbow_ride_carpets_create_shortcut_to_maze(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride - Maze"))
+
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Maze"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
 
     def test_rainbow_ride_cruiser_still_requires_carpets(self):
         self.collect_third_floor_access()
-        self.collect([self.get_item_by_name("Side Flip"), self.get_item_by_name("Long Jump")])
-        self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Maze"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride - Carpets"))
         self.assertFalse(self.can_reach_region("Rainbow Ride - Cruiser"))
 
         self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_region("Rainbow Ride - Cruiser"))
 
     def test_whomps_fortress_top_access(self):
@@ -393,9 +415,9 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect_third_floor_access()
         self.collect([
             self.get_item_by_name("Side Flip"),
-            self.get_item_by_name("Rainbow Ride - Carpets"),
+            self.get_item_by_name("Long Jump"),
         ])
-        self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Beneath the Pole"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Tricky Triangles!"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
@@ -2436,3 +2458,132 @@ class TickTockClockCoinStar128AccessTestBase(TickTockClockCoinStarAccessTestBase
             self.get_item_by_name("Tick Tock Clock - Spinners"),
         ])
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class RainbowRideCoinStarAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        "enable_coin_stars": Options.EnableCoinStars.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_rr_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect(self.get_item_by_name("Side Flip"))
+
+    def disable_carpet_shortcut_to_maze(self):
+        self.multiworld.get_entrance("Rainbow Ride - Initial to Maze", self.player).access_rule = \
+            lambda state: False
+
+
+class RainbowRideCoinStar8AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 8,
+    }
+
+    def test_coin_star_access(self):
+        self.disable_carpet_shortcut_to_maze()
+        self.collect_rr_access()
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideCoinStar9AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 9,
+    }
+
+    def test_coin_star_access(self):
+        self.disable_carpet_shortcut_to_maze()
+        self.collect_rr_access()
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideCoinStar50AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 50,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_rr_access()
+        self.collect([
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideCoinStar51AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 51,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_rr_access()
+        self.collect([
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideCoinStar96AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 96,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_rr_access()
+        self.collect([
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideCoinStar97AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 97,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_rr_access()
+        self.collect([
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideCoinStar146AccessTestBase(RainbowRideCoinStarAccessTestBase):
+    options = {
+        **RainbowRideCoinStarAccessTestBase.options,
+        "rainbow_ride_coin_star_requirement": 146,
+    }
+
+    def test_coin_star_access(self):
+        self.collect_rr_access()
+        self.collect([
+            self.get_item_by_name("Rainbow Ride - Carpets"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Cannon Unlock Rainbow Ride"),
+        ])
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))

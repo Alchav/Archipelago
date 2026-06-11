@@ -356,6 +356,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.TallTallMountainCoinStarRequirement: 137,
             Options.TinyHugeIslandCoinStarRequirement: 191,
             Options.TickTockClockCoinStarRequirement: 128,
+            Options.RainbowRideCoinStarRequirement: 146,
         }
         for option in Options.coin_star_requirement_options:
             with self.subTest(option=option.__name__):
