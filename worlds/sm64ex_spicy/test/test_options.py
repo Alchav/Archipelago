@@ -5,7 +5,7 @@ from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
-    rolling_log_item_data_table, purple_switch_item_data_table, item_table
+    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table
 from ..Locations import loc100Coin_table, location_table
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -105,6 +105,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Bowser in the Dark World - Purple Switch": 3626317,
             "Bowser in the Sky - Purple Switch": 3626318,
             "Tick Tock Clock - Spinners": 3626319,
+            "Mario's Hat": 3626320,
         }
         item_data = {
             **feature_item_data_table,
@@ -112,6 +113,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             **castle_progression_item_data_table,
             **cap_item_data_table,
             **arbitrary_item_data_table,
+            **optional_item_data_table,
             **{item_name: generic_item_data_table[item_name] for item_name in global_cap_item_names},
         }
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)
@@ -162,6 +164,16 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual(len(self.get_items_by_name("Basement Key")), 0)
         self.assertEqual(len(self.get_items_by_name("Second Floor Key")), 0)
 
+    def test_marios_hat_defaults_to_start_inventory_slot_data_only(self):
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
+        self.assertEqual(len(self.get_items_by_name("Mario's Hat")), 0)
+        self.assertEqual(start_inventory[item_table["Mario's Hat"]], 1)
+        self.assertNotIn("Mario's Hat", precollected_names)
+
+    def test_marios_hat_is_useful(self):
+        self.assertEqual(optional_item_data_table["Mario's Hat"].classification, ItemClassification.useful)
+
 
 class PerLevelCapItemPoolTestBase(SM64TestBase):
     options = {
@@ -177,6 +189,19 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class MariosHatItemPoolTestBase(SM64TestBase):
+    options = {
+        "marios_hat": Options.MariosHat.option_true,
+    }
+
+    def test_marios_hat_is_generated(self):
+        self.assertEqual(len(self.get_items_by_name("Mario's Hat")), 1)
+
+    def test_marios_hat_is_not_start_inventory_when_generated(self):
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        self.assertNotIn(item_table["Mario's Hat"], start_inventory)
 
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):

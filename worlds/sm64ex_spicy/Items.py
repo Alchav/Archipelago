@@ -129,6 +129,10 @@ purple_switch_item_data_table: dict[str, SM64ItemData] = {
     "Bowser in the Sky - Purple Switch": SM64ItemData(sm64ex_base_id + 318, ItemClassification.progression_skip_balancing),
 }
 
+optional_item_data_table: dict[str, SM64ItemData] = {
+    "Mario's Hat": SM64ItemData(sm64ex_base_id + 320, ItemClassification.useful),
+}
+
 arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **simple_arbitrary_item_data_table,
     **global_arbitrary_item_data_table,
@@ -186,6 +190,7 @@ item_data_table = {
     **castle_progression_item_data_table,
     **cap_item_data_table,
     **arbitrary_item_data_table,
+    **optional_item_data_table,
     **action_item_data_table,
     **cannon_item_data_table,
     **painting_unlock_item_data_table

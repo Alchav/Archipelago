@@ -5,7 +5,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
-    rolling_log_item_data_table, purple_switch_item_data_table
+    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table
 from .Locations import location_table, SM64Location
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names
@@ -156,6 +156,16 @@ class SM64World(World):
 
         return item_names
 
+    def get_optional_item_names(self) -> typing.List[str]:
+        if self.options.marios_hat:
+            return list(optional_item_data_table)
+        return []
+
+    def get_unrandomized_optional_item_names(self) -> typing.List[str]:
+        if self.options.marios_hat:
+            return []
+        return list(optional_item_data_table)
+
     def get_progression_item_names(self) -> typing.List[str]:
         item_names = list(feature_item_data_table)
         item_names += self.get_arbitrary_item_names()
@@ -190,6 +200,7 @@ class SM64World(World):
 
     def create_items(self):
         item_names = self.get_progression_item_names()
+        item_names += self.get_optional_item_names()
         fillable_location_count = len(self.multiworld.get_unfilled_locations(self.player)) - self.get_future_locked_location_count()
         self.filler_count = fillable_location_count - len(item_names)
         if self.filler_count < 0:
@@ -257,7 +268,7 @@ class SM64World(World):
 
     def get_start_inventory_slot_data(self) -> typing.Dict[int, int]:
         start_inventory = {}
-        for item_name in self.get_unrandomized_arbitrary_item_names():
+        for item_name in self.get_unrandomized_arbitrary_item_names() + self.get_unrandomized_optional_item_names():
             item_id = item_table[item_name]
             start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
         return start_inventory

@@ -170,6 +170,11 @@ class PerLevelCapItems(Toggle):
     display_name = "Per-Level Cap Items"
 
 
+class MariosHat(Toggle):
+    """Add Mario's Hat as a useful item. If disabled, the client starts with it unlocked."""
+    display_name = "Include Mario's Hat"
+
+
 class ArbitraryFeatureToggle(DefaultOnToggle):
     """Shuffle this level feature as an Archipelago item. If disabled, the client starts with it unlocked."""
 
@@ -379,6 +384,7 @@ sm64_options_groups = [
         StrictMoveRequirements,
     ]),
     OptionGroup("Cosmetic Options", [
+        MariosHat,
         MarioColors,
         MusicShuffle,
     ]),
@@ -410,6 +416,7 @@ class SM64Options(PerGameCommonOptions):
     tick_tock_clock_spinners: TickTockClockSpinners
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
+    marios_hat: MariosHat
     mario_colors: MarioColors
     music_shuffle: MusicShuffle
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
