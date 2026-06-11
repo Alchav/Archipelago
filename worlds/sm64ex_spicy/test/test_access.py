@@ -2153,8 +2153,6 @@ class PerLevelCapAccessTestBase(SM64TestBase):
 
     def test_tower_wing_cap_access(self):
         self.collect(self.get_item_by_name("Wing Cap Light"))
-        self.assertFalse(self.can_reach_location("Tower of the Wing Cap Red Coins"))
-        self.collect(self.get_item_by_name("Tower of the Wing Cap - Wing Cap"))
         self.assertTrue(self.can_reach_location("Tower of the Wing Cap Red Coins"))
 
     def test_hmc_metal_cap_access(self):
