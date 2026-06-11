@@ -389,33 +389,14 @@ class CoinStarRequirementTestBase(SM64TestBase):
                 self.assertEqual(option.range_end, expected_range_ends.get(option, 100))
 
 
-# Coin Star Logic
-class EnableCoinStarsTestBase(SM64TestBase):
-    options = {
-        "enable_coin_stars": Options.EnableCoinStars.option_true
-    }
-
-    # Ensure Coin Star locations are created
+class CoinStarsTestBase(SM64TestBase):
+    # Ensure Coin Star locations are always created.
     def test_coin_star_locations(self):
         possible_locations = self.world.location_names
         for loc in loc100Coin_table:
             # Use subtest to force all locations to be tested
             with self.subTest("Location created", location=loc):
                 self.assertIn(loc, possible_locations)
-
-
-class DisableCoinStarsTestBase(SM64TestBase):
-    options = {
-        "enable_coin_stars": Options.EnableCoinStars.option_false
-    }
-
-    # Ensure Coin Star locations are not created
-    def test_coin_star_locations(self):
-        possible_locations = self.world.get_locations()
-        for loc in loc100Coin_table:
-            # Use subtest to force all locations to be tested
-            with self.subTest("Location not created", location=loc):
-                self.assertNotIn(loc, possible_locations)
 
 
 # Exclamation Boxes
@@ -582,7 +563,6 @@ class NoPowerStarsTestBase(SM64TestBase):
     options = {
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "exclamation_boxes": Options.ExclamationBoxes.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_false
     }
 
     def test_no_power_stars_generated(self):

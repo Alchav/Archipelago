@@ -3,13 +3,6 @@ from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, OptionErr
     OptionSet, OptionGroup
 from .Items import action_item_data_table
 
-class EnableCoinStars(Toggle):
-    """
-    Add Coin Stars as checks.
-    """
-    display_name = "Enable Coin Stars"
-    default = 0
-
 
 class CoinStarRequirement(Range):
     range_start = 1
@@ -356,7 +349,6 @@ sm64_options_groups = [
         BuddyChecks,
         ExclamationBoxes,
         CombinedProgressiveKeys,
-        EnableCoinStars,
         EnableLockedPaintings,
         StrictCapRequirements,
         PerLevelCapItems,
@@ -397,7 +389,6 @@ class SM64Options(PerGameCommonOptions):
     buddy_checks: BuddyChecks
     exclamation_boxes: ExclamationBoxes
     combined_progressive_keys: CombinedProgressiveKeys
-    enable_coin_stars: EnableCoinStars
     enable_locked_paintings: EnableLockedPaintings
     enable_move_rando: EnableMoveRandomizer
     move_rando_actions: MoveRandomizerActions

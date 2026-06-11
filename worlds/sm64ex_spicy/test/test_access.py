@@ -567,7 +567,6 @@ class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -638,7 +637,6 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -717,7 +715,6 @@ class BobOmbBattlefieldCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -809,7 +806,6 @@ class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -898,7 +894,6 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1110,7 +1105,6 @@ class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1196,7 +1190,6 @@ class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1326,7 +1319,6 @@ class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1400,7 +1392,6 @@ class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1493,7 +1484,6 @@ class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1584,7 +1574,6 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "strict_move_requirements": Options.StrictMoveRequirements.option_true,
@@ -1686,7 +1675,6 @@ class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1850,7 +1838,6 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -2302,7 +2289,6 @@ class TickTockClockCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -2465,7 +2451,6 @@ class RainbowRideCoinStarAccessTestBase(SM64TestBase):
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
-        "enable_coin_stars": Options.EnableCoinStars.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 

@@ -803,72 +803,71 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "PURPLE_SWITCHES & CL+TJ | PURPLE_SWITCHES & CL+SF+LG | "
                    "PURPLE_SWITCHES & MOVELESS & TJ+WK+LG")
     # Coin Stars
-    if options.enable_coin_stars:
-        set_rule(
-            multiworld.get_location("Bob-omb Battlefield - Coins Star", player),
-            lambda state: bob_omb_battlefield_coins(
-                state, player, options.bob_omb_battlefield_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Whomp's Fortress - Coins Star", player),
-            lambda state: whomps_fortress_coins(state, player, options.whomps_fortress_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Jolly Roger Bay - Coins Star", player),
-            lambda state: jolly_roger_bay_coins(state, player, options.jolly_roger_bay_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Cool, Cool Mountain - Coins Star", player),
-            lambda state: cool_cool_mountain_coins(
-                state, player, options.cool_cool_mountain_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Big Boo's Haunt - Coins Star", player),
-            lambda state: big_boos_haunt_coins(state, player, options.big_boos_haunt_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Hazy Maze Cave - Coins Star", player),
-            lambda state: hazy_maze_cave_coins(state, player, options.hazy_maze_cave_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Lethal Lava Land - Coins Star", player),
-            lambda state: lethal_lava_land_coins(state, player, options.lethal_lava_land_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Shifting Sand Land - Coins Star", player),
-            lambda state: shifting_sand_land_coins(
-                state, player, options.shifting_sand_land_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Dire, Dire Docks - Coins Star", player),
-            lambda state: dire_dire_docks_coins(state, player, options.dire_dire_docks_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Snowman's Land - Coins Star", player),
-            lambda state: snowmans_land_coins(state, player, options.snowmans_land_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Wet-Dry World - Coins Star", player),
-            lambda state: wet_dry_world_coins(state, player, options.wet_dry_world_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Tall, Tall Mountain - Coins Star", player),
-            lambda state: tall_tall_mountain_coins(
-                state, player, options.tall_tall_mountain_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Tiny-Huge Island - Coins Star", player),
-            lambda state: tiny_huge_island_coins(state, player, options.tiny_huge_island_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Tick Tock Clock - Coins Star", player),
-            lambda state: tick_tock_clock_coins(
-                state, player, options.tick_tock_clock_coin_star_requirement.value)
-        )
-        set_rule(
-            multiworld.get_location("Rainbow Ride - Coins Star", player),
-            lambda state: rainbow_ride_coins(state, player, options.rainbow_ride_coin_star_requirement.value)
-        )
+    set_rule(
+        multiworld.get_location("Bob-omb Battlefield - Coins Star", player),
+        lambda state: bob_omb_battlefield_coins(
+            state, player, options.bob_omb_battlefield_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Whomp's Fortress - Coins Star", player),
+        lambda state: whomps_fortress_coins(state, player, options.whomps_fortress_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Jolly Roger Bay - Coins Star", player),
+        lambda state: jolly_roger_bay_coins(state, player, options.jolly_roger_bay_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Cool, Cool Mountain - Coins Star", player),
+        lambda state: cool_cool_mountain_coins(
+            state, player, options.cool_cool_mountain_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Big Boo's Haunt - Coins Star", player),
+        lambda state: big_boos_haunt_coins(state, player, options.big_boos_haunt_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Hazy Maze Cave - Coins Star", player),
+        lambda state: hazy_maze_cave_coins(state, player, options.hazy_maze_cave_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Lethal Lava Land - Coins Star", player),
+        lambda state: lethal_lava_land_coins(state, player, options.lethal_lava_land_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Shifting Sand Land - Coins Star", player),
+        lambda state: shifting_sand_land_coins(
+            state, player, options.shifting_sand_land_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Dire, Dire Docks - Coins Star", player),
+        lambda state: dire_dire_docks_coins(state, player, options.dire_dire_docks_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Snowman's Land - Coins Star", player),
+        lambda state: snowmans_land_coins(state, player, options.snowmans_land_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Wet-Dry World - Coins Star", player),
+        lambda state: wet_dry_world_coins(state, player, options.wet_dry_world_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Tall, Tall Mountain - Coins Star", player),
+        lambda state: tall_tall_mountain_coins(
+            state, player, options.tall_tall_mountain_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Tiny-Huge Island - Coins Star", player),
+        lambda state: tiny_huge_island_coins(state, player, options.tiny_huge_island_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Tick Tock Clock - Coins Star", player),
+        lambda state: tick_tock_clock_coins(
+            state, player, options.tick_tock_clock_coin_star_requirement.value)
+    )
+    set_rule(
+        multiworld.get_location("Rainbow Ride - Coins Star", player),
+        lambda state: rainbow_ride_coins(state, player, options.rainbow_ride_coin_star_requirement.value)
+    )
     # Castle Stars
     add_rule(multiworld.get_location("Toad (Basement)", player),
              lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle Toads", player))
