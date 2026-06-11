@@ -168,42 +168,42 @@ class MariosHat(Toggle):
     display_name = "Include Mario's Hat"
 
 
-class HazyMazeCaveSwimmingBeast(DefaultOnToggle):
+class HazyMazeCaveSwimmingBeast(Toggle):
     """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
 
 
-class RainbowRideCarpets(DefaultOnToggle):
+class RainbowRideCarpets(Toggle):
     """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Rainbow Ride - Carpets"
 
 
-class TinyHugeIslandWarpPipes(DefaultOnToggle):
+class TinyHugeIslandWarpPipes(Toggle):
     """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
 
 
-class CoolCoolMountainBabyPenguins(DefaultOnToggle):
+class CoolCoolMountainBabyPenguins(Toggle):
     """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
 
 
-class SnowmansLandPenguin(DefaultOnToggle):
+class SnowmansLandPenguin(Toggle):
     """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Snowman's Land - Penguin"
 
 
-class ShiftingSandLandPyramidElevator(DefaultOnToggle):
+class ShiftingSandLandPyramidElevator(Toggle):
     """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
 
 
-class WetDryWorldWaterLevelDiamond(DefaultOnToggle):
+class WetDryWorldWaterLevelDiamond(Toggle):
     """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
 
 
-class TickTockClockSpinners(DefaultOnToggle):
+class TickTockClockSpinners(Toggle):
     """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tick Tock Clock - Spinners"
 
@@ -212,7 +212,7 @@ class ArbitraryFeatureItemMode(Choice):
     option_not_shuffled = 0
     option_global = 1
     option_individual = 2
-    default = 1
+    default = 0
 
 
 class CheckerboardPlatforms(ArbitraryFeatureItemMode):
