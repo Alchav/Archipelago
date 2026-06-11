@@ -168,50 +168,47 @@ class MariosHat(Toggle):
     display_name = "Include Mario's Hat"
 
 
-class ArbitraryFeatureToggle(DefaultOnToggle):
-    """Shuffle this level feature as an Archipelago item. If disabled, the client starts with it unlocked."""
-
-
-class HazyMazeCaveSwimmingBeast(ArbitraryFeatureToggle):
+class HazyMazeCaveSwimmingBeast(DefaultOnToggle):
+    """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
 
 
-class RainbowRideCarpets(ArbitraryFeatureToggle):
+class RainbowRideCarpets(DefaultOnToggle):
+    """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Rainbow Ride - Carpets"
 
 
-class TinyHugeIslandWarpPipes(ArbitraryFeatureToggle):
+class TinyHugeIslandWarpPipes(DefaultOnToggle):
+    """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
 
 
-class CoolCoolMountainBabyPenguins(ArbitraryFeatureToggle):
+class CoolCoolMountainBabyPenguins(DefaultOnToggle):
+    """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
 
 
-class SnowmansLandPenguin(ArbitraryFeatureToggle):
+class SnowmansLandPenguin(DefaultOnToggle):
+    """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Snowman's Land - Penguin"
 
 
-class ShiftingSandLandPyramidElevator(ArbitraryFeatureToggle):
+class ShiftingSandLandPyramidElevator(DefaultOnToggle):
+    """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
 
 
-class WetDryWorldWaterLevelDiamond(ArbitraryFeatureToggle):
+class WetDryWorldWaterLevelDiamond(DefaultOnToggle):
+    """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
 
 
-class TickTockClockSpinners(ArbitraryFeatureToggle):
+class TickTockClockSpinners(DefaultOnToggle):
+    """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tick Tock Clock - Spinners"
 
 
 class ArbitraryFeatureItemMode(Choice):
-    """
-    Not Shuffled - The client starts with this feature family unlocked.
-
-    Global - Shuffle one item that unlocks every use of this feature family.
-
-    Individual - Shuffle separate level-specific items where supported by the client.
-    """
     option_not_shuffled = 0
     option_global = 1
     option_individual = 2
@@ -219,14 +216,41 @@ class ArbitraryFeatureItemMode(Choice):
 
 
 class CheckerboardPlatforms(ArbitraryFeatureItemMode):
+    """
+    Choose how Checkerboard Platform unlocks are handled.
+
+    Not Shuffled - The client starts with all Checkerboard Platforms unlocked.
+
+    Global - Shuffle one Checkerboard Platforms item that unlocks every applicable platform.
+
+    Individual - Shuffle separate level-specific Checkerboard Platforms items where supported by the client.
+    """
     display_name = "Checkerboard Platform Items"
 
 
 class RollingLogs(ArbitraryFeatureItemMode):
+    """
+    Choose how Rolling Log unlocks are handled.
+
+    Not Shuffled - The client starts with all Rolling Logs unlocked.
+
+    Global - Shuffle one Rolling Logs item that unlocks every applicable log.
+
+    Individual - Shuffle separate level-specific Rolling Log items where supported by the client.
+    """
     display_name = "Rolling Log Items"
 
 
 class PurpleSwitches(ArbitraryFeatureItemMode):
+    """
+    Choose how Purple Switch unlocks are handled.
+
+    Not Shuffled - The client starts with all Purple Switches unlocked.
+
+    Global - Shuffle one Purple Switches item that unlocks every applicable switch.
+
+    Individual - Shuffle separate level-specific Purple Switch items where supported by the client.
+    """
     display_name = "Purple Switch Items"
 
 
