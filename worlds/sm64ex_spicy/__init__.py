@@ -310,11 +310,20 @@ class SM64World(World):
             slot_data["MarioColors"] = mario_colors
         return slot_data
 
+    def get_apsm64ex_slot_data(self):
+        slot_data = self.fill_slot_data()
+        slot_data["StartInventory"] = slot_data["StartInventory"].copy()
+        for item in self.multiworld.precollected_items[self.player]:
+            if item.code is None:
+                continue
+            slot_data["StartInventory"][item.code] = slot_data["StartInventory"].get(item.code, 0) + 1
+        return slot_data
+
     def generate_output(self, output_directory: str):
         if self.multiworld.players != 1:
             return
         data = {
-            "slot_data": self.fill_slot_data(),
+            "slot_data": self.get_apsm64ex_slot_data(),
             "location_to_item": {self.location_name_to_id[i.name] : item_table[i.item.name] for i in self.multiworld.get_locations()},
             "data_package": {
                 "data": {

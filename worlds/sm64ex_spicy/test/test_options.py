@@ -214,6 +214,12 @@ class FeatureItemPoolTestBase(SM64TestBase):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
                 self.assertNotIn(item_name, precollected_names)
 
+    def test_precollected_items_are_only_added_to_apsm64ex_start_inventory(self):
+        self.multiworld.push_precollected(self.world.create_item("Dark World Key"))
+        item_id = item_table["Dark World Key"]
+        self.assertNotIn(item_id, self.world.fill_slot_data()["StartInventory"])
+        self.assertEqual(self.world.get_apsm64ex_slot_data()["StartInventory"][item_id], 1)
+
     def test_default_individual_arbitrary_items_are_not_generated(self):
         for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
             with self.subTest("Individual arbitrary item not generated", item=item_name):
