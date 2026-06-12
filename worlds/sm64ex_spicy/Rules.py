@@ -37,7 +37,6 @@ checkerboard_item_name_by_level = {
     "Lethal Lava Land": "Lethal Lava Land - Checkerboard Platforms",
     "Hazy Maze Cave": "Hazy Maze Cave - Checkerboard Platform",
     "Vanish Cap Under the Moat": "Vanish Cap Under the Moat - Checkerboard Platforms",
-    "Vanish Cap under the Moat": "Vanish Cap Under the Moat - Checkerboard Platforms",
 }
 
 rolling_log_item_name_by_level = {
@@ -65,11 +64,9 @@ move_area_name_aliases = {
     "The Princess's Secret Slide": "Castle",
     "The Secret Aquarium": "Castle",
     "Wing Mario Over the Rainbow": "Castle",
-    "Wing Mario over the Rainbow": "Castle",
     "Tower of the Wing Cap": "Cap Switch Stages",
     "Cavern of the Metal Cap": "Cap Switch Stages",
     "Vanish Cap Under the Moat": "Cap Switch Stages",
-    "Vanish Cap under the Moat": "Cap Switch Stages",
 }
 
 
@@ -662,8 +659,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 lambda state: has_thirty_star_key(state) and ddd_entry_rule(state))
     connect_randomized_entrance("Hazy Maze Cave", "Cavern of the Metal Cap",
                                 rf.build_rule("HMC_SWIMMING_BEAST"))
-    connect_randomized_entrance("Basement", "Vanish Cap under the Moat",
-                                rf.build_rule("GP"))
+    connect_randomized_entrance("Menu", "Vanish Cap Under the Moat",
+                                lambda state: state.has("Unlock Vanish Cap Under the Moat", player))
     connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
                                 lambda state: has_thirty_star_key(state) and
                                 state.has("Unlock Bowser in the Fire Sea", player))
@@ -691,7 +688,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         connect_randomized_entrance("Third Floor", ttc_entrance,
                                     rf.build_rule("LG/TJ/SF/BF/WK", painting_lvl_name="Tick Tock Clock"))
     connect_randomized_entrance("Third Floor", "Rainbow Ride", rf.build_rule("TJ/SF/BF"))
-    connect_randomized_entrance("Third Floor", "Wing Mario over the Rainbow",
+    connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
                                 rf.build_rule("TJ/SF/BF"))
     connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", has_endless_stairs_key)
 
@@ -787,8 +784,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "WDW_WATER_LEVEL_DIAMOND & WK | WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
                    "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
-                   "{Wet-Dry World - High Water} | {Wet-Dry World - Top} + TJ/LG/LJ")
-    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES | {Wet-Dry World - Top} + LG/TJ/LJ")
+                   "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ")
+    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES | {Wet-Dry World - Top} & LG/TJ/LJ")
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
@@ -934,6 +931,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     add_rule(multiworld.get_location("Yoshi", player),
              lambda state: state.has("Cannon Unlock - Castle", player) and state.has("Yoshi", player))
 
+    rf.assign_rule("Drain the Moat", "GP")
     rf.assign_rule("MIPS 1", "DV | MOVELESS")
     rf.assign_rule("MIPS 2", "DV | MOVELESS")
     add_rule(multiworld.get_location("MIPS 1", player),
@@ -1032,7 +1030,6 @@ class RuleFactory:
             "Shifting Sand Land": "Shifting Sand Land - Wing Cap",
             "Tower of the Wing Cap": "Tower of the Wing Cap - Wing Cap",
             "Wing Mario Over the Rainbow": "Wing Mario Over the Rainbow - Wing Cap",
-            "Wing Mario over the Rainbow": "Wing Mario Over the Rainbow - Wing Cap",
         },
         "MC": {
             "Whomp's Fortress": "Whomp's Fortress - Metal Cap",
@@ -1048,7 +1045,6 @@ class RuleFactory:
             "Dire, Dire Docks": "Dire, Dire Docks - Vanish Cap",
             "Snowman's Land": "Snowman's Land - Vanish Cap",
             "Vanish Cap Under the Moat": "Vanish Cap Under the Moat - Vanish Cap",
-            "Vanish Cap under the Moat": "Vanish Cap Under the Moat - Vanish Cap",
             "Wet-Dry World": "Wet-Dry World - Vanish Cap",
         },
     }
@@ -1131,9 +1127,7 @@ class RuleFactory:
                 "Tower of the Wing Cap",
                 "Cavern of the Metal Cap",
                 "Vanish Cap Under the Moat",
-                "Vanish Cap under the Moat",
                 "Wing Mario Over the Rainbow",
-                "Wing Mario over the Rainbow",
                 "Bowser in the Dark World",
                 "Bowser in the Fire Sea",
                 "Bowser in the Sky",

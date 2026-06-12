@@ -171,11 +171,26 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wing Cap Light"))
         self.assertTrue(self.can_reach_region("Tower of the Wing Cap"))
 
-        self.assertFalse(self.can_reach_region("Wing Mario over the Rainbow"))
+        self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
         self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
-        self.assertFalse(self.can_reach_region("Wing Mario over the Rainbow"))
+        self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
-        self.assertTrue(self.can_reach_region("Wing Mario over the Rainbow"))
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
+
+    def test_drain_the_moat_access_uses_old_vcutm_entrance_logic(self):
+        self.assertFalse(self.can_reach_location("Drain the Moat"))
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertTrue(self.can_reach_location("Drain the Moat"))
+
+    def test_vcutm_entrance_not_unlocked_by_old_basement_route(self):
+        self.assertFalse(self.can_reach_region("Vanish Cap Under the Moat"))
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertFalse(self.can_reach_region("Vanish Cap Under the Moat"))
+
+    def test_vcutm_entrance_requires_unlock_item_only(self):
+        self.assertFalse(self.can_reach_region("Vanish Cap Under the Moat"))
+        self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
+        self.assertTrue(self.can_reach_region("Vanish Cap Under the Moat"))
 
     def test_yoshi_access(self):
         self.assertFalse(self.can_reach_location("Yoshi"))
@@ -250,6 +265,7 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
     def test_cap_switch_stage_rule_uses_shared_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 2)
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
 
         self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
@@ -395,6 +411,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Wall Kick"),
             self.get_item_by_name("Vanish Cap"),
+            self.get_item_by_name("Unlock Vanish Cap Under the Moat"),
         ])
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
@@ -2299,6 +2316,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
     def test_vcutm_vanish_cap_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
         self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Vanish Cap"))
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))

@@ -263,10 +263,14 @@ locSS_table = {
     "Yoshi": 3626244
 }
 
+locBasement_table = {
+    "Drain the Moat": 3626245
+}
+
 # Correspond to 3626000 + course index * 7 + star index, then secret stars, then keys, then Coin Stars
 location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,**locBBH_table, \
                   **locHMC_table,**locLLL_table,**locSSL_table,**locDDD_table,**locSL_table, \
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
-                  **locSS_table}
+                  **locSS_table, **locBasement_table}

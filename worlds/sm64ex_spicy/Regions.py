@@ -8,7 +8,7 @@ from .Locations import SM64Location, location_table, locBoB_table, locWhomp_tabl
     locHMC_table, locLLL_table, locSSL_table, locDDD_table, locSL_table, \
     locWDW_table, locTTM_table, locTHI_table, locTTC_table, locRR_table, \
     locPSS_table, locSA_table, locBitDW_table, locTotWC_table, locCotMC_table, \
-    locVCutM_table, locBitFS_table, locWMotR_table, locBitS_table, locSS_table
+    locVCutM_table, locBitFS_table, locWMotR_table, locBitS_table, locSS_table, locBasement_table
 
 
 class SM64Levels(int, Enum):
@@ -97,9 +97,9 @@ sm64_level_to_secrets: typing.Dict[SM64Levels, str] = {
     SM64Levels.BOWSER_IN_THE_DARK_WORLD: "Bowser in the Dark World",
     SM64Levels.TOWER_OF_THE_WING_CAP: "Tower of the Wing Cap",
     SM64Levels.CAVERN_OF_THE_METAL_CAP: "Cavern of the Metal Cap",
-    SM64Levels.VANISH_CAP_UNDER_THE_MOAT: "Vanish Cap under the Moat",
+    SM64Levels.VANISH_CAP_UNDER_THE_MOAT: "Vanish Cap Under the Moat",
     SM64Levels.BOWSER_IN_THE_FIRE_SEA: "Bowser in the Fire Sea",
-    SM64Levels.WING_MARIO_OVER_THE_RAINBOW: "Wing Mario over the Rainbow"
+    SM64Levels.WING_MARIO_OVER_THE_RAINBOW: "Wing Mario Over the Rainbow"
 }
 sm64_secrets_to_level = {secret: level for (level,secret) in sm64_level_to_secrets.items() }
 
@@ -174,7 +174,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regBitDW = create_region("Bowser in the Dark World", player, multiworld)
     create_default_locs(regBitDW, locBitDW_table)
 
-    create_region("Basement", player, multiworld)
+    regBasement = create_region("Basement", player, multiworld)
+    create_default_locs(regBasement, locBasement_table)
 
     regHMC = create_region("Hazy Maze Cave", player, multiworld)
     create_locs(regHMC, "Hazy Maze Cave - Swimming Beast in the Cavern", "Hazy Maze Cave - Metal-Head Mario Can Move!",
@@ -208,7 +209,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regCotMC = create_region("Cavern of the Metal Cap", player, multiworld)
     create_default_locs(regCotMC, locCotMC_table)
 
-    regVCutM = create_region("Vanish Cap under the Moat", player, multiworld)
+    regVCutM = create_region("Vanish Cap Under the Moat", player, multiworld)
     create_default_locs(regVCutM, locVCutM_table)
 
     regBitFS = create_region("Bowser in the Fire Sea", player, multiworld)
@@ -315,7 +316,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regRR.subregions = [rr_beneath_pole, rr_maze, rr_carpets, rr_cruiser, rr_house]
     create_locs(regRR, "Rainbow Ride - Coins Star")
 
-    regWMotR = create_region("Wing Mario over the Rainbow", player, multiworld)
+    regWMotR = create_region("Wing Mario Over the Rainbow", player, multiworld)
     create_default_locs(regWMotR, locWMotR_table)
 
     regBitS = create_region("Bowser in the Sky", player, multiworld)

@@ -63,6 +63,7 @@ castle_progression_item_data_table: dict[str, SM64ItemData] = {
     "Cannon Unlock - Castle": SM64ItemData(sm64ex_base_id + 275, ItemClassification.progression_deprioritized_skip_balancing),
     "Yoshi": SM64ItemData(sm64ex_base_id + 276, ItemClassification.progression_deprioritized_skip_balancing),
     "Unlock Bowser in the Fire Sea": SM64ItemData(sm64ex_base_id + 304),
+    "Unlock Vanish Cap Under the Moat": SM64ItemData(sm64ex_base_id + 555),
 }
 
 cap_item_data_table: dict[str, SM64ItemData] = {

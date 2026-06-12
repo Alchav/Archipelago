@@ -39,6 +39,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
     def test_yoshi_location_id(self):
         self.assertEqual(location_table["Yoshi"], 3626244)
 
+    def test_drain_the_moat_location_id(self):
+        self.assertEqual(location_table["Drain the Moat"], 3626245)
+
     def test_item_ids_match_client_doc(self):
         expected_ids = {
             "Bob-omb Battlefield - King Bob-omb": 3626245,
@@ -74,6 +77,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Cannon Unlock - Castle": 3626275,
             "Yoshi": 3626276,
             "Unlock Bowser in the Fire Sea": 3626304,
+            "Unlock Vanish Cap Under the Moat": 3626555,
             "Wing Cap": 3626181,
             "Metal Cap": 3626182,
             "Vanish Cap": 3626183,
