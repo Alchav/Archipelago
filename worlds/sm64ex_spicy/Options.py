@@ -171,41 +171,49 @@ class MariosHat(Toggle):
 class HazyMazeCaveSwimmingBeast(Toggle):
     """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
+    default = 0
 
 
 class RainbowRideCarpets(Toggle):
     """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Rainbow Ride - Carpets"
+    default = 0
 
 
 class TinyHugeIslandWarpPipes(Toggle):
     """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
+    default = 0
 
 
 class CoolCoolMountainBabyPenguins(Toggle):
     """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
+    default = 0
 
 
 class SnowmansLandPenguin(Toggle):
     """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Snowman's Land - Penguin"
+    default = 0
 
 
 class ShiftingSandLandPyramidElevator(Toggle):
     """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
+    default = 0
 
 
 class WetDryWorldWaterLevelDiamond(Toggle):
     """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
+    default = 0
 
 
 class TickTockClockSpinners(Toggle):
     """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tick Tock Clock - Spinners"
+    default = 0
 
 
 class ArbitraryFeatureItemMode(Choice):

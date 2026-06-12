@@ -106,6 +106,10 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Bowser in the Sky - Purple Switch": 3626318,
             "Tick Tock Clock - Spinners": 3626319,
             "Mario's Hat": 3626320,
+            "Jolly Roger Bay - Purple Switch": 3626321,
+            "Dire, Dire Docks - Purple Switch": 3626322,
+            "Tall, Tall Mountain - Purple Switch": 3626323,
+            "Tiny-Huge Island - Purple Switch": 3626324,
         }
         item_data = {
             **feature_item_data_table,
@@ -123,10 +127,24 @@ class FeatureItemPoolTestBase(SM64TestBase):
             with self.subTest("Feature item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
-    def test_default_arbitrary_items_are_generated(self):
+    def test_default_arbitrary_items_are_not_generated(self):
         for item_name in {**simple_arbitrary_item_data_table, **global_arbitrary_item_data_table}:
-            with self.subTest("Arbitrary item generated", item=item_name):
-                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            with self.subTest("Default arbitrary item not generated", item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+    def test_default_arbitrary_items_are_start_inventory_slot_data_only(self):
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
+        for item_name in {
+                **simple_arbitrary_item_data_table,
+                **global_arbitrary_item_data_table,
+                **checkerboard_item_data_table,
+                **rolling_log_item_data_table,
+                **purple_switch_item_data_table,
+        }:
+            with self.subTest("Default arbitrary item in StartInventory only", item=item_name):
+                self.assertEqual(start_inventory[item_table[item_name]], 1)
+                self.assertNotIn(item_name, precollected_names)
 
     def test_default_individual_arbitrary_items_are_not_generated(self):
         for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
@@ -138,6 +156,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                 "Bob-omb Battlefield - Checkerboard Platforms",
                 "Tall, Tall Mountain - Rolling Log",
                 "Bob-omb Battlefield - Purple Switch",
+                "Jolly Roger Bay - Purple Switch",
         ):
             with self.subTest("Unused individual arbitrary item is filler", item=item_name):
                 self.assertEqual(arbitrary_item_data_table[item_name].classification, ItemClassification.filler)

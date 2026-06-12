@@ -47,8 +47,12 @@ rolling_log_item_name_by_level = {
 
 purple_switch_item_name_by_level = {
     "Bob-omb Battlefield": "Bob-omb Battlefield - Purple Switch",
+    "Jolly Roger Bay": "Jolly Roger Bay - Purple Switch",
     "Hazy Maze Cave": "Hazy Maze Cave - Purple Switch",
+    "Dire, Dire Docks": "Dire, Dire Docks - Purple Switch",
     "Wet-Dry World": "Wet-Dry World - Purple Switch",
+    "Tall, Tall Mountain": "Tall, Tall Mountain - Purple Switch",
+    "Tiny-Huge Island": "Tiny-Huge Island - Purple Switch",
     "Rainbow Ride": "Rainbow Ride - Purple Switch",
     "Bowser in the Dark World": "Bowser in the Dark World - Purple Switch",
     "Bowser in the Sky": "Bowser in the Sky - Purple Switch",

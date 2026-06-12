@@ -127,6 +127,10 @@ purple_switch_item_data_table: dict[str, SM64ItemData] = {
     "Rainbow Ride - Purple Switch": SM64ItemData(sm64ex_base_id + 316, ItemClassification.progression_deprioritized_skip_balancing),
     "Bowser in the Dark World - Purple Switch": SM64ItemData(sm64ex_base_id + 317),
     "Bowser in the Sky - Purple Switch": SM64ItemData(sm64ex_base_id + 318, ItemClassification.progression_skip_balancing),
+    "Jolly Roger Bay - Purple Switch": SM64ItemData(sm64ex_base_id + 321, ItemClassification.filler),
+    "Dire, Dire Docks - Purple Switch": SM64ItemData(sm64ex_base_id + 322, ItemClassification.progression_deprioritized_skip_balancing),
+    "Tall, Tall Mountain - Purple Switch": SM64ItemData(sm64ex_base_id + 323, ItemClassification.progression_deprioritized_skip_balancing),
+    "Tiny-Huge Island - Purple Switch": SM64ItemData(sm64ex_base_id + 324, ItemClassification.progression_deprioritized_skip_balancing),
 }
 
 optional_item_data_table: dict[str, SM64ItemData] = {

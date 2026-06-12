@@ -3,6 +3,21 @@ from .. import Options
 from ..Regions import sm64_ttc_entrances
 
 
+SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
+    "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+    "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+    "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+    "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+    "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+    "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+    "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+    "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+    "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+    "rolling_logs": Options.RollingLogs.option_global,
+    "purple_switches": Options.PurpleSwitches.option_global,
+}
+
+
 class GroupedCastleKeyAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -191,6 +206,7 @@ class LevelFeatureAccessTestBase(SM64TestBase):
 class ArbitraryFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -530,6 +546,45 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Hazy Maze Cave - Purple Switch"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
 
+    def test_dire_dire_docks_uses_individual_purple_switch(self):
+        self.collect([
+            self.get_item_by_name("Progressive Basement Key"),
+            self.get_item_by_name("Progressive Basement Key"),
+            self.get_item_by_name("Dire, Dire Docks - Bowser's Sub"),
+        ])
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+        self.collect(self.world.create_item("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+        self.collect(self.get_item_by_name("Dire, Dire Docks - Purple Switch"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+    def test_tall_tall_mountain_uses_individual_purple_switch(self):
+        self.collect([
+            self.get_item_by_name("Progressive Upstairs Key"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Kick"),
+        ])
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
+
+        self.collect(self.world.create_item("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
+
+        self.collect(self.get_item_by_name("Tall, Tall Mountain - Purple Switch"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
+
+    def test_tiny_huge_island_uses_individual_purple_switch(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect(self.world.create_item("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Purple Switch"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
 
 class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
@@ -565,6 +620,7 @@ class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -635,6 +691,7 @@ class CoolCoolMountainCoinStar154AccessTestBase(CoolCoolMountainCoinStarAccessTe
 class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -892,6 +949,7 @@ class JollyRogerBayCoinStar101AccessTestBase(JollyRogerBayCoinStarAccessTestBase
 class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -1103,6 +1161,7 @@ class TinyHugeIslandCoinStar191AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
 class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -1188,6 +1247,7 @@ class DireDireDocksCoinStar77AccessTestBase(DireDireDocksCoinStarThresholdTestBa
 class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -1318,6 +1378,7 @@ class HazyMazeCaveCoinStar139AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
 class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -1391,6 +1452,7 @@ class LethalLavaLandCoinStar133AccessTestBase(LethalLavaLandCoinStarAccessTestBa
 class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -1482,6 +1544,7 @@ class ShiftingSandLandCoinStar136AccessTestBase(ShiftingSandLandCoinStarAccessTe
 class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -1573,6 +1636,7 @@ class SnowmansLandCoinStar127AccessTestBase(SnowmansLandCoinStarAccessTestBase):
 class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -1673,6 +1737,7 @@ class WetDryWorldCoinStar65AccessTestBase(WetDryWorldCoinStarAccessTestBase):
 class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
@@ -1944,6 +2009,7 @@ class BigBooHauntCoinStar151AccessTestBase(BigBooHauntCoinStarAccessTestBase):
 class WetDryWorldVariantAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -2079,6 +2145,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
 class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -2123,6 +2190,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
 class PerLevelCapAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -2167,6 +2235,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
 class TTCVariantAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -2212,6 +2281,7 @@ class TTCVariantAccessTestBase(SM64TestBase):
 class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -2286,6 +2356,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
 class TickTockClockCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enable_move_rando": Options.EnableMoveRandomizer.option_true,
@@ -2447,6 +2518,7 @@ class TickTockClockCoinStar128AccessTestBase(TickTockClockCoinStarAccessTestBase
 class RainbowRideCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
