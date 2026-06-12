@@ -252,7 +252,9 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
             route_total += 5
         if has_movement_top_route or water_level == "highest":
             route_total += 15
-        if has_wdw_purple_switches:
+        if has_wdw_purple_switches or (has_movement_top_route and any(has_action(state, player, action, level_name)
+                                                                      for action in ("Long Jump", "Triple Jump",
+                                                                                     "Ledge Grab"))):
             route_total += 10
         if has_downtown_route or water_level == "highest":
             route_total += 31
@@ -730,13 +732,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - High Water to Mid-High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Highest Water to High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Top", "WK/TJ/SF/BF | MOVELESS | PURPLE_SWITCHES & LJ | {Wet-Dry World - Highest Water}")
-    rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World - Highest Water} | CANN | MOVELESS & TJ+DV")
+    rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World - Highest Water} | CANN | {Wet-Dry World - Top} & MOVELESS & TJ+DV")
     rf.assign_rule("Wet-Dry World - Go to Town for Red Coins",
                    "WDW_WATER_LEVEL_DIAMOND & WK | WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
                    "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
-                   "{Wet-Dry World - High Water}")
-    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES")
+                   "{Wet-Dry World - High Water} | {Wet-Dry World - Top} + TJ/LG/LJ")
+    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES | {Wet-Dry World - Top} + LG/TJ/LJ")
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
