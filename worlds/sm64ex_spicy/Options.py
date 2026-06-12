@@ -9,6 +9,17 @@ class CoinStarRequirement(Range):
     default = 100
 
 
+class Coinsanity(Range):
+    """
+    Adds extra location checks for collecting a percentage of each course's possible coin thresholds below that
+    course's Coin Star requirement.
+    """
+    display_name = "Coinsanity"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
 class BobOmbBattlefieldCoinStarRequirement(CoinStarRequirement):
     """Coins needed for the Coin Star in Bob-omb Battlefield."""
     display_name = "Bob-omb Battlefield Coin Star Requirement"
@@ -170,56 +181,49 @@ class MariosHat(Toggle):
 class HazyMazeCaveSwimmingBeast(Toggle):
     """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
-    default = 0
 
 
 class RainbowRideCarpets(Toggle):
     """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Rainbow Ride - Carpets"
-    default = 0
 
 
 class TinyHugeIslandWarpPipes(Toggle):
     """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
-    default = 0
 
 
 class CoolCoolMountainBabyPenguins(Toggle):
     """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
-    default = 0
 
 
 class SnowmansLandPenguin(Toggle):
     """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Snowman's Land - Penguin"
-    default = 0
 
 
 class ShiftingSandLandPyramidElevator(Toggle):
     """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
-    default = 0
 
 
 class WetDryWorldWaterLevelDiamond(Toggle):
     """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the client starts with it unlocked."""
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
-    default = 0
 
 
 class TickTockClockSpinners(Toggle):
     """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the client starts with them unlocked."""
     display_name = "Shuffle Tick Tock Clock - Spinners"
-    default = 0
+
 
 
 class ArbitraryFeatureItemMode(Choice):
     option_not_shuffled = 0
     option_global = 1
     option_individual = 2
-    default = 0
+
 
 
 class CheckerboardPlatforms(ArbitraryFeatureItemMode):
@@ -313,7 +317,7 @@ class MoveRandomizerMode(Choice):
     option_not_shuffled = 0
     option_global = 1
     option_per_level = 2
-    default = 0
+
 
 
 class TripleJump(MoveRandomizerMode):
@@ -550,6 +554,7 @@ sm64_options_groups = [
         TickTockClockSpinners,
     ]),
     OptionGroup("Coin Star Requirements", [
+        Coinsanity,
         *coin_star_requirement_options,
     ]),
     OptionGroup("Ability Options", [
@@ -599,6 +604,7 @@ class SM64Options(PerGameCommonOptions):
     marios_hat: MariosHat
     mario_colors: MarioColors
     music_shuffle: MusicShuffle
+    coinsanity: Coinsanity
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement

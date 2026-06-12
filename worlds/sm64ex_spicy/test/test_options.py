@@ -7,7 +7,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     per_level_action_item_data_table, per_level_move_area_names
-from ..Locations import loc100Coin_table, location_table
+from ..Locations import loc100Coin_table, location_table, coinsanity_location_table, get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
@@ -513,6 +513,68 @@ class CoinStarsTestBase(SM64TestBase):
             # Use subtest to force all locations to be tested
             with self.subTest("Location created", location=loc):
                 self.assertIn(loc, possible_locations)
+
+
+class CoinsanityLocationTableTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_coinsanity_location_ids_match_client_doc(self):
+        expected_ids = {
+            "Bob-omb Battlefield - 1 Coin": 3627000,
+            "Bob-omb Battlefield - 145 Coins": 3627144,
+            "Whomp's Fortress - 1 Coin": 3627146,
+            "Jolly Roger Bay - 1 Coin": 3627287,
+            "Rainbow Ride - 145 Coins": 3629089,
+        }
+        for location_name, location_id in expected_ids.items():
+            with self.subTest("Coinsanity location ID", location=location_name):
+                self.assertEqual(coinsanity_location_table[location_name], location_id)
+                self.assertEqual(location_table[location_name], location_id)
+
+    def test_coinsanity_skips_final_coin_threshold_for_each_course(self):
+        skipped_final_locations = {
+            "Bob-omb Battlefield": 146,
+            "Whomp's Fortress": 141,
+            "Jolly Roger Bay": 104,
+            "Cool, Cool Mountain": 154,
+            "Big Boo's Haunt": 151,
+            "Hazy Maze Cave": 139,
+            "Lethal Lava Land": 133,
+            "Shifting Sand Land": 136,
+            "Dire, Dire Docks": 106,
+            "Snowman's Land": 127,
+            "Wet-Dry World": 152,
+            "Tall, Tall Mountain": 137,
+            "Tiny-Huge Island": 191,
+            "Tick Tock Clock": 128,
+            "Rainbow Ride": 146,
+        }
+        self.assertEqual(len(coinsanity_location_table), 2076)
+        for course_name, coin_count in skipped_final_locations.items():
+            with self.subTest("Final coin threshold skipped", course=course_name):
+                self.assertNotIn(get_coinsanity_location_name(course_name, coin_count), coinsanity_location_table)
+
+
+class CoinsanityDefaultOffTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_default_no_active_coinsanity_locations(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertFalse(active_locations.intersection(coinsanity_location_table))
+
+
+class CoinsanityGenerationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coinsanity": 2,
+        "bob_omb_battlefield_coin_star_requirement": 50,
+    }
+
+    def test_coinsanity_generates_even_thresholds_below_coin_star(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Bob-omb Battlefield - 25 Coins", active_locations)
+        self.assertNotIn("Bob-omb Battlefield - 1 Coin", active_locations)
+        self.assertNotIn("Bob-omb Battlefield - 50 Coins", active_locations)
 
 
 # Exclamation Boxes

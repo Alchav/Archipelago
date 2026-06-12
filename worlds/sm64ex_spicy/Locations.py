@@ -3,6 +3,64 @@ from BaseClasses import Location
 class SM64Location(Location):
     game: str = "SM64: Spicy Mycena 64"
 
+coinsanity_location_base_id = 3627000
+
+coinsanity_course_data = (
+    ("Bob-omb Battlefield", 0, "bob_omb_battlefield_coin_star_requirement", 146),
+    ("Whomp's Fortress", 146, "whomps_fortress_coin_star_requirement", 141),
+    ("Jolly Roger Bay", 287, "jolly_roger_bay_coin_star_requirement", 104),
+    ("Cool, Cool Mountain", 391, "cool_cool_mountain_coin_star_requirement", 154),
+    ("Big Boo's Haunt", 545, "big_boos_haunt_coin_star_requirement", 151),
+    ("Hazy Maze Cave", 696, "hazy_maze_cave_coin_star_requirement", 139),
+    ("Lethal Lava Land", 835, "lethal_lava_land_coin_star_requirement", 133),
+    ("Shifting Sand Land", 968, "shifting_sand_land_coin_star_requirement", 136),
+    ("Dire, Dire Docks", 1104, "dire_dire_docks_coin_star_requirement", 106),
+    ("Snowman's Land", 1210, "snowmans_land_coin_star_requirement", 127),
+    ("Wet-Dry World", 1337, "wet_dry_world_coin_star_requirement", 152),
+    ("Tall, Tall Mountain", 1489, "tall_tall_mountain_coin_star_requirement", 137),
+    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 191),
+    ("Tick Tock Clock", 1817, "tick_tock_clock_coin_star_requirement", 128),
+    ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
+)
+
+
+def get_coinsanity_location_name(course_name: str, coin_count: int) -> str:
+    return f"{course_name} - {coin_count} Coin{'s' if coin_count != 1 else ''}"
+
+
+def get_coinsanity_thresholds(coin_star_requirement: int, percentage: int) -> tuple[int, ...]:
+    if coin_star_requirement <= 1 or percentage <= 0:
+        return ()
+
+    available_coin_checks = coin_star_requirement - 1
+    check_count = min((available_coin_checks * percentage + 99) // 100, available_coin_checks)
+    return tuple(
+        (coin_star_requirement * check_index) // (check_count + 1)
+        for check_index in range(1, check_count + 1)
+    )
+
+
+def get_coinsanity_location_names(coin_star_requirements: dict[str, int], percentage: int) -> tuple[str, ...]:
+    return tuple(
+        get_coinsanity_location_name(course_name, coin_count)
+        for course_name, _course_offset, option_name, _max_coins in coinsanity_course_data
+        for coin_count in get_coinsanity_thresholds(coin_star_requirements[option_name], percentage)
+    )
+
+
+def parse_coinsanity_location_name(location_name: str) -> tuple[str, int] | None:
+    if location_name not in coinsanity_location_table:
+        return None
+    course_name, coin_text = location_name.rsplit(" - ", 1)
+    return course_name, int(coin_text.split(" ", 1)[0])
+
+
+coinsanity_location_table = {
+    get_coinsanity_location_name(course_name, coin_count): coinsanity_location_base_id + course_offset + coin_count - 1
+    for course_name, course_offset, _option_name, max_coin_star_requirement in coinsanity_course_data
+    for coin_count in range(1, max_coin_star_requirement)
+}
+
 #Bob-omb Battlefield
 locBoB_table = {
     "Bob-omb Battlefield - Big Bob-Omb on the Summit": 3626000,
@@ -273,4 +331,4 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
-                  **locSS_table, **locBasement_table}
+                  **locSS_table, **locBasement_table, **coinsanity_location_table}

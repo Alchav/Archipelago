@@ -3,7 +3,7 @@ from typing import Callable, Union, Dict, Set
 
 from BaseClasses import CollectionState, Entrance, MultiWorld
 from ..generic.Rules import add_rule, set_rule
-from .Locations import location_table
+from .Locations import location_table, parse_coinsanity_location_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
@@ -290,13 +290,6 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
 
 def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Wet-Dry World"
-    reachable_water_levels = {
-        "low": state.can_reach("Wet-Dry World - Low Water", "Region", player),
-        "mid": state.can_reach("Wet-Dry World - Mid Water", "Region", player),
-        "mid-high": state.can_reach("Wet-Dry World - Mid-High Water", "Region", player),
-        "high": state.can_reach("Wet-Dry World - High Water", "Region", player),
-        "highest": state.can_reach("Wet-Dry World - Highest Water", "Region", player),
-    }
     has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     has_wdw_purple_switches = has_purple_switches(state, player, "Wet-Dry World")
     has_water_level_diamond = has_simple_arbitrary_feature(state, player, "WDW_WATER_LEVEL_DIAMOND")
@@ -308,38 +301,73 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
         or allows_moveless(state, player)
         or has_wdw_purple_switches and has_action(state, player, "Long Jump", level_name)
     )
-    has_downtown_route = (
-        state.has("Cannon Unlock Wet-Dry World", player)
-        or allows_moveless(state, player) and has_triple_jump and has_dive
-    )
+    can_reach_mid_high_from_mid = has_water_level_diamond and (has_wdw_purple_switches or has_triple_jump and has_dive)
 
-    def route_coins(water_level: str) -> int:
+    def route_water_levels(start_water_level: str) -> Set[str]:
+        water_levels = {start_water_level}
+        while True:
+            previous_count = len(water_levels)
+            if has_water_level_diamond:
+                if "low" in water_levels:
+                    water_levels.add("mid")
+                if "mid" in water_levels:
+                    water_levels.add("low")
+                    if can_reach_mid_high_from_mid:
+                        water_levels.add("mid-high")
+                if "mid-high" in water_levels:
+                    water_levels.add("mid")
+                if "high" in water_levels:
+                    water_levels.add("mid-high")
+                if "highest" in water_levels:
+                    water_levels.add("high")
+            if "mid-high" in water_levels and route_has_top(water_levels):
+                water_levels.add("high")
+            if len(water_levels) == previous_count:
+                return water_levels
+
+    def route_has_top(water_levels: Set[str]) -> bool:
+        return has_movement_top_route or "highest" in water_levels
+
+    def route_has_downtown(water_levels: Set[str]) -> bool:
+        return (
+            "highest" in water_levels
+            or state.has("Cannon Unlock Wet-Dry World", player)
+            or route_has_top(water_levels) and allows_moveless(state, player) and has_triple_jump and has_dive
+        )
+
+    def route_coins(start_water_level: str) -> int:
+        water_levels = route_water_levels(start_water_level)
         route_total = 0
-        if water_level == "low":
+        if "low" in water_levels:
             route_total += 22
             if has_ground_pound:
                 route_total += 30
-        if water_level in {"low", "mid"}:
+        if "high" in water_levels:
+            route_total += 22
+        if water_levels.intersection({"low", "mid"}):
             route_total += 3
-        if water_level in {"mid", "highest"} or has_wdw_purple_switches or (has_triple_jump and has_dive):
+        if water_levels.intersection({"mid", "highest"}) or has_wdw_purple_switches or (has_triple_jump and has_dive):
             route_total += 5
-        if has_movement_top_route or water_level == "highest":
+        if route_has_top(water_levels):
             route_total += 15
         if has_wdw_purple_switches or (has_movement_top_route and any(has_action(state, player, action, level_name)
                                                                       for action in ("Long Jump", "Triple Jump",
                                                                                      "Ledge Grab"))):
             route_total += 10
-        if has_downtown_route or water_level == "highest":
+        if route_has_downtown(water_levels):
             route_total += 31
             if has_water_level_diamond:
                 route_total += 14
         return route_total
 
-    reachable_totals = [
-        route_coins(water_level)
-        for water_level, is_reachable in reachable_water_levels.items()
-        if is_reachable
-    ]
+    reachable_variant_starts = (
+        ("Wet-Dry World Low", "low"),
+        ("Wet-Dry World Middle", "mid"),
+        ("Wet-Dry World High", "highest"),
+    )
+    reachable_totals = [route_coins(start_water_level)
+                        for variant_region, start_water_level in reachable_variant_starts
+                        if state.can_reach(variant_region, "Region", player)]
     return coins <= min(max(reachable_totals, default=0), 152)
 
 
@@ -955,6 +983,31 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         multiworld.get_location("Rainbow Ride - Coins Star", player),
         lambda state: rainbow_ride_coins(state, player, options.rainbow_ride_coin_star_requirement.value)
     )
+    coinsanity_coin_rules = {
+        "Bob-omb Battlefield": bob_omb_battlefield_coins,
+        "Whomp's Fortress": whomps_fortress_coins,
+        "Jolly Roger Bay": jolly_roger_bay_coins,
+        "Cool, Cool Mountain": cool_cool_mountain_coins,
+        "Big Boo's Haunt": big_boos_haunt_coins,
+        "Hazy Maze Cave": hazy_maze_cave_coins,
+        "Lethal Lava Land": lethal_lava_land_coins,
+        "Shifting Sand Land": shifting_sand_land_coins,
+        "Dire, Dire Docks": dire_dire_docks_coins,
+        "Snowman's Land": snowmans_land_coins,
+        "Wet-Dry World": wet_dry_world_coins,
+        "Tall, Tall Mountain": tall_tall_mountain_coins,
+        "Tiny-Huge Island": tiny_huge_island_coins,
+        "Tick Tock Clock": tick_tock_clock_coins,
+        "Rainbow Ride": rainbow_ride_coins,
+    }
+    for location in multiworld.get_locations(player):
+        coinsanity_location = parse_coinsanity_location_name(location.name)
+        if coinsanity_location is None:
+            continue
+        course_name, coin_count = coinsanity_location
+        coin_rule = coinsanity_coin_rules[course_name]
+        set_rule(location, lambda state, rule=coin_rule, count=coin_count: rule(state, player, count))
+
     # Castle Stars
     add_rule(multiworld.get_location("Toad (Basement)", player),
              lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle Toads", player))

@@ -31,6 +31,10 @@ SHUFFLED_GLOBAL_MOVE_OPTIONS = {
     "ledge_grab": Options.LedgeGrab.option_global,
 }
 
+ONE_COIN_STAR_REQUIREMENTS = {
+    option_name: 1 for option_name in Options.coin_star_requirement_option_names
+}
+
 
 class GroupedCastleKeyAccessTestBase(SM64TestBase):
     run_default_tests = False
@@ -1372,6 +1376,21 @@ class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
 
 
+class HazyMazeCaveCoinsanityAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        **ONE_COIN_STAR_REQUIREMENTS,
+        "coinsanity": 100,
+        "hazy_maze_cave_coin_star_requirement": 80,
+    }
+
+    def test_coinsanity_location_uses_hmc_coin_logic(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - 79 Coins"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - 79 Coins"))
+
+
 class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
@@ -1891,6 +1910,28 @@ class WetDryWorldCoinStar65AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         ])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
+class WetDryWorldCoinStar152AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "wet_dry_world_coin_star_requirement": 152,
+    }
+
+    def test_high_variant_diamond_route_reaches_all_coins(self):
+        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Purple Switches"),
+        ])
         self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
 
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))

@@ -7,7 +7,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     randomized_action_item_names, per_level_move_area_names
-from .Locations import location_table, SM64Location
+from .Locations import location_table, SM64Location, get_coinsanity_location_names
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
     move_randomizer_option_name_by_action
@@ -56,6 +56,7 @@ class SM64World(World):
     move_rando_bitvec: int
     filler_count: int
     star_costs: typing.Dict[str, int]
+    coinsanity_location_names: typing.Tuple[str, ...]
 
     def generate_early(self):
         self.move_rando_bitvec = 0
@@ -67,9 +68,19 @@ class SM64World(World):
 
         self.filler_count = 0
         self.topology_present = self.options.area_rando
+        coin_star_requirements = {
+            option_name: getattr(self.options, option_name).value
+            for option_name in coin_star_requirement_option_names
+        }
+        self.coinsanity_location_names = get_coinsanity_location_names(
+            coin_star_requirements, self.options.coinsanity.value)
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
+        for location_name in self.coinsanity_location_names:
+            region_name = location_name.rsplit(" - ", 1)[0]
+            region = self.multiworld.get_region(region_name, self.player)
+            region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
 
     def set_rules(self):
         self.area_connections = {}
