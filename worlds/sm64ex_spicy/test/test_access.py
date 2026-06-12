@@ -1339,6 +1339,24 @@ class DireDireDocksCoinStar77AccessTestBase(DireDireDocksCoinStarThresholdTestBa
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
 
 
+class DireDireDocksCoinStar76SubPolesMovementAccessTestBase(DireDireDocksCoinStarThresholdTestBase):
+    options = {
+        **DireDireDocksCoinStarThresholdTestBase.options,
+        "dire_dire_docks_coin_star_requirement": 76,
+    }
+
+    def test_sub_poles_triple_jump_climb_reach_purple_switch_and_poles_coins(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Dire, Dire Docks - Bowser's Sub"),
+            self.get_item_by_name("Dire, Dire Docks - Poles"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
 class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {

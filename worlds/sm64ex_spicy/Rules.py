@@ -235,11 +235,19 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
 def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Dire, Dire Docks"
     reachable_coins = 60
-    if has_purple_switches(state, player, "Dire, Dire Docks"):
+    has_poles = state.has("Dire, Dire Docks - Poles", player)
+    has_purple_switch_route = has_purple_switches(state, player, "Dire, Dire Docks")
+    has_sub_poles_movement_route = (
+            state.has("Dire, Dire Docks - Bowser's Sub", player)
+            and has_poles
+            and has_action(state, player, "Triple Jump", level_name)
+            and has_action(state, player, "Climb", level_name)
+    )
+    if has_purple_switch_route or has_sub_poles_movement_route:
         reachable_coins += 2
-        if state.has("Dire, Dire Docks - Poles", player):
+        if has_poles:
             reachable_coins += 14
-            if has_action(state, player, "Ground Pound", level_name):
+            if has_purple_switch_route and has_action(state, player, "Ground Pound", level_name):
                 reachable_coins += 30
     return coins <= reachable_coins
 
@@ -758,10 +766,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "SSL_PYRAMID_ELEVATOR & TJ/SF/BF & CAPLESS | MOVELESS & LG/KK")
     rf.assign_rule("Shifting Sand Land - Free Flying for 8 Red Coins", "TJ+WC | CANN+WC | TJ/SF/BF & CAPLESS | MOVELESS & CAPLESS")
     # Dire, Dire Docks
-    rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub", "PURPLE_SWITCHES & DDD_BOWSER_SUB")
+    rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub", "PURPLE_SWITCHES/TJ & DDD_BOWSER_SUB")
     rf.assign_rule("Dire, Dire Docks - Pole-Jumping for Red Coins",
                    "PURPLE_SWITCHES & DDD_POLES & CL | "
-                   "PURPLE_SWITCHES & DDD_POLES & TJ+DV+LG+WK & MOVELESS")
+                   # "PURPLE_SWITCHES & DDD_POLES & TJ+DV+LG+WK & MOVELESS |"  # I don't understand this and don't know if it is supposed to involve the sub
+                   "TJ & DDD_BOWSER_SUB & DDD_POLES & CL")
     rf.assign_rule("Dire, Dire Docks - Through the Jet Stream", "MC | CAPLESS")
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC")
