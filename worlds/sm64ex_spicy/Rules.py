@@ -125,6 +125,16 @@ def has_purple_switches(state: CollectionState, player: int, level_name: str) ->
     return item_name is None or state.has(item_name, player)
 
 
+def has_checkerboard_platforms(state: CollectionState, player: int, level_name: str) -> bool:
+    options = state.multiworld.worlds[player].options
+    if options.checkerboard_platforms.value == options.checkerboard_platforms.option_not_shuffled:
+        return True
+    if options.checkerboard_platforms.value == options.checkerboard_platforms.option_global:
+        return state.has("Checkerboard Platforms", player)
+    item_name = checkerboard_item_name_by_level.get(level_name)
+    return item_name is None or state.has(item_name, player)
+
+
 def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bob-omb Battlefield"
     reachable_coins = 109
@@ -182,7 +192,22 @@ def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> boo
 
 def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Hazy Maze Cave"
-    reachable_coins = 83
+    has_basic_movement = any(has_action(state, player, action, level_name)
+                             for action in ("Wall Kick", "Ledge Grab", "Backflip", "Side Flip", "Triple Jump"))
+    has_long_jump = has_action(state, player, "Long Jump", level_name)
+    has_climb = has_action(state, player, "Climb", level_name)
+    has_checkerboards = has_checkerboard_platforms(state, player, level_name)
+    has_platform_route = has_basic_movement and (
+            has_basic_movement and has_climb
+            or allows_moveless(state, player) and has_action(state, player, "Wall Kick", level_name))
+
+    reachable_coins = 75
+    if has_basic_movement:
+        reachable_coins += 4
+    if has_platform_route and (has_long_jump or has_checkerboards):
+        reachable_coins += 2
+    if has_platform_route and has_checkerboards:
+        reachable_coins += 2
     if state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player) and has_action(
             state, player, "Climb", level_name):
         reachable_coins += 5

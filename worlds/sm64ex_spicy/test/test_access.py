@@ -1372,10 +1372,10 @@ class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
 
 
-class HazyMazeCaveCoinStar83AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 83,
+        "hazy_maze_cave_coin_star_requirement": 75,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -1383,16 +1383,64 @@ class HazyMazeCaveCoinStar83AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar86AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar78AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 86,
+        "hazy_maze_cave_coin_star_requirement": 78,
     }
 
     def test_metal_cap_coins_reach_coin_star(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
         self.collect(self.get_item_by_name("Metal Cap"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar79AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 79,
+    }
+
+    def test_basic_movement_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar81AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 81,
+    }
+
+    def test_long_jump_platform_route_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveCoinStar83CheckerboardAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 83,
+    }
+
+    def test_checkerboard_platform_route_coins_reach_coin_star(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
@@ -1410,10 +1458,10 @@ class HazyMazeCaveCoinStar86CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTest
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar88AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar84AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 88,
+        "hazy_maze_cave_coin_star_requirement": 84,
     }
 
     def test_toxic_maze_coins_reach_coin_star(self):
@@ -1441,10 +1489,10 @@ class HazyMazeCaveCoinStar89AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar91AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar83SwimmingBeastAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 91,
+        "hazy_maze_cave_coin_star_requirement": 83,
     }
 
     def test_swimming_beast_coins_reach_coin_star(self):
@@ -1454,10 +1502,10 @@ class HazyMazeCaveCoinStar91AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar118AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar110AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 118,
+        "hazy_maze_cave_coin_star_requirement": 110,
     }
 
     def test_ground_pound_coins_reach_coin_star(self):
@@ -1485,6 +1533,8 @@ class HazyMazeCaveCoinStar139AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_region("Hazy Maze Cave - Pit Islands"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
