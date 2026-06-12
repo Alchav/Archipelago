@@ -1,6 +1,7 @@
 from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
+from ..Rules import get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -15,6 +16,19 @@ SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
     "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
     "rolling_logs": Options.RollingLogs.option_global,
     "purple_switches": Options.PurpleSwitches.option_global,
+}
+
+SHUFFLED_GLOBAL_MOVE_OPTIONS = {
+    "triple_jump": Options.TripleJump.option_global,
+    "long_jump": Options.LongJump.option_global,
+    "backflip": Options.Backflip.option_global,
+    "side_flip": Options.SideFlip.option_global,
+    "wall_kick": Options.WallKick.option_global,
+    "dive": Options.Dive.option_global,
+    "ground_pound": Options.GroundPound.option_global,
+    "kick": Options.Kick.option_global,
+    "climb": Options.Climb.option_global,
+    "ledge_grab": Options.LedgeGrab.option_global,
 }
 
 
@@ -203,6 +217,70 @@ class LevelFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Snowman's Lost His Head"))
 
 
+class PerLevelMoveAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "triple_jump": Options.TripleJump.option_per_level,
+        "backflip": Options.Backflip.option_global,
+        "side_flip": Options.SideFlip.option_per_level,
+        "wall_kick": Options.WallKick.option_per_level,
+        "ledge_grab": Options.LedgeGrab.option_global,
+    }
+
+    def test_course_rule_requires_course_move_item(self):
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+        self.collect(self.world.create_item("Wall Kick"))
+        self.collect(self.world.create_item("Whomp's Fortress - Side Flip"))
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+
+        self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+
+    def test_castle_entrance_rule_requires_castle_move_item(self):
+        self.assertFalse(self.can_reach_region("The Secret Aquarium"))
+        self.collect(self.world.create_item("Jolly Roger Bay - Side Flip"))
+        self.assertFalse(self.can_reach_region("The Secret Aquarium"))
+
+        self.collect(self.world.create_item("Castle - Side Flip"))
+        self.assertTrue(self.can_reach_region("The Secret Aquarium"))
+
+    def test_cap_switch_stage_rule_uses_shared_move_item(self):
+        self.collect([self.get_item_by_name("Progressive Key")] * 2)
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
+
+        self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
+
+        self.collect(self.world.create_item("Cap Switch Stages - Wall Kick"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Switch"))
+
+    def test_cap_switch_stage_names_use_shared_move_items(self):
+        for level_name in (
+                "Tower of the Wing Cap",
+                "Cavern of the Metal Cap",
+                "Vanish Cap Under the Moat",
+        ):
+            with self.subTest("Cap switch stage move alias", level=level_name):
+                self.assertEqual(
+                    get_per_level_action_item_name(level_name, "Triple Jump"),
+                    "Cap Switch Stages - Triple Jump")
+
+    def test_wmotR_rule_uses_castle_move_item(self):
+        self.collect([self.get_item_by_name("Progressive Key")] * 5)
+        self.collect(self.world.create_item("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+
+        self.collect(self.world.create_item("Cap Switch Stages - Triple Jump"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+
+        self.collect(self.world.create_item("Castle - Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+
+
 class ArbitraryFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -210,7 +288,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -624,7 +702,7 @@ class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -695,7 +773,7 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -773,7 +851,7 @@ class BobOmbBattlefieldCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -864,7 +942,7 @@ class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -953,7 +1031,7 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1165,7 +1243,7 @@ class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1251,7 +1329,7 @@ class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1381,7 +1459,7 @@ class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1455,7 +1533,7 @@ class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1548,7 +1626,7 @@ class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1639,7 +1717,7 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "strict_move_requirements": Options.StrictMoveRequirements.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -1741,7 +1819,7 @@ class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1864,7 +1942,7 @@ class BigBooHauntAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1904,7 +1982,7 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -2012,7 +2090,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -2148,7 +2226,7 @@ class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -2284,7 +2362,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -2359,7 +2437,7 @@ class TickTockClockCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -2522,7 +2600,7 @@ class RainbowRideCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 

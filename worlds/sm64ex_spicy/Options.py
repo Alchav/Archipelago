@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, OptionError, PerGameCommonOptions, OptionDict, \
-    OptionSet, OptionGroup
-from .Items import action_item_data_table
+    OptionGroup
 
 
 class CoinStarRequirement(Range):
@@ -264,7 +263,7 @@ class PurpleSwitches(ArbitraryFeatureItemMode):
 
 class StrictCannonRequirements(DefaultOnToggle):
     """If disabled, Stars that expect cannons may have to be acquired without them.
-    Has no effect if Buddy Checks and Move Randomizer are disabled"""
+    Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled."""
     display_name = "Strict Cannon Requirements"
 
 
@@ -305,22 +304,173 @@ class CombinedProgressiveKeys(DefaultOnToggle):
     display_name = "Combined Progressive Castle Keys"
 
 class StrictMoveRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect certain moves may have to be acquired without them. Only makes a difference
-    if Move Randomization is enabled"""
+    """If disabled, Stars that expect certain moves may have to be acquired without them.
+    Only makes a difference for movement abilities that are shuffled."""
     display_name = "Strict Move Requirements"
 
-class EnableMoveRandomizer(Toggle):
-    """Mario is unable to perform some actions until a corresponding item is picked up.
-    This option is incompatible with builds using a 'nomoverando' branch.
-    Specific actions to randomize can be specified in the YAML."""
-    display_name = "Enable Move Randomizer"
 
-class MoveRandomizerActions(OptionSet):
-    """Which actions to randomize when Move Randomizer is enabled"""
-    display_name = "Randomized Moves"
-    # HACK: Disable randomization for double jump
-    valid_keys = [action for action in action_item_data_table if action != 'Double Jump']
-    default = valid_keys
+class MoveRandomizerMode(Choice):
+    option_not_shuffled = 0
+    option_global = 1
+    option_per_level = 2
+    default = 0
+
+
+class TripleJump(MoveRandomizerMode):
+    """
+    Choose how Triple Jump is handled.
+
+    Not Shuffled - The client starts with Triple Jump unlocked.
+
+    Global - Shuffle one Triple Jump item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Triple Jump items for each area supported by the client.
+    """
+    display_name = "Triple Jump"
+
+
+class LongJump(MoveRandomizerMode):
+    """
+    Choose how Long Jump is handled.
+
+    Not Shuffled - The client starts with Long Jump unlocked.
+
+    Global - Shuffle one Long Jump item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Long Jump items for each area supported by the client.
+    """
+    display_name = "Long Jump"
+
+
+class Backflip(MoveRandomizerMode):
+    """
+    Choose how Backflip is handled.
+
+    Not Shuffled - The client starts with Backflip unlocked.
+
+    Global - Shuffle one Backflip item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Backflip items for each area supported by the client.
+    """
+    display_name = "Backflip"
+
+
+class SideFlip(MoveRandomizerMode):
+    """
+    Choose how Side Flip is handled.
+
+    Not Shuffled - The client starts with Side Flip unlocked.
+
+    Global - Shuffle one Side Flip item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Side Flip items for each area supported by the client.
+    """
+    display_name = "Side Flip"
+
+
+class WallKick(MoveRandomizerMode):
+    """
+    Choose how Wall Kick is handled.
+
+    Not Shuffled - The client starts with Wall Kick unlocked.
+
+    Global - Shuffle one Wall Kick item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Wall Kick items for each area supported by the client.
+    """
+    display_name = "Wall Kick"
+
+
+class Dive(MoveRandomizerMode):
+    """
+    Choose how Dive is handled.
+
+    Not Shuffled - The client starts with Dive unlocked.
+
+    Global - Shuffle one Dive item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Dive items for each area supported by the client.
+    """
+    display_name = "Dive"
+
+
+class GroundPound(MoveRandomizerMode):
+    """
+    Choose how Ground Pound is handled.
+
+    Not Shuffled - The client starts with Ground Pound unlocked.
+
+    Global - Shuffle one Ground Pound item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Ground Pound items for each area supported by the client.
+    """
+    display_name = "Ground Pound"
+
+
+class Kick(MoveRandomizerMode):
+    """
+    Choose how Kick is handled.
+
+    Not Shuffled - The client starts with Kick unlocked.
+
+    Global - Shuffle one Kick item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Kick items for each area supported by the client.
+    """
+    display_name = "Kick"
+
+
+class Climb(MoveRandomizerMode):
+    """
+    Choose how Climb is handled.
+
+    Not Shuffled - The client starts with Climb unlocked.
+
+    Global - Shuffle one Climb item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Climb items for each area supported by the client.
+    """
+    display_name = "Climb"
+
+
+class LedgeGrab(MoveRandomizerMode):
+    """
+    Choose how Ledge Grab is handled.
+
+    Not Shuffled - The client starts with Ledge Grab unlocked.
+
+    Global - Shuffle one Ledge Grab item that unlocks the move everywhere.
+
+    Per Level - Shuffle separate Ledge Grab items for each area supported by the client.
+    """
+    display_name = "Ledge Grab"
+
+
+move_randomizer_options = (
+    TripleJump,
+    LongJump,
+    Backflip,
+    SideFlip,
+    WallKick,
+    Dive,
+    GroundPound,
+    Kick,
+    Climb,
+    LedgeGrab,
+)
+
+move_randomizer_option_name_by_action = {
+    "Triple Jump": "triple_jump",
+    "Long Jump": "long_jump",
+    "Backflip": "backflip",
+    "Side Flip": "side_flip",
+    "Wall Kick": "wall_kick",
+    "Dive": "dive",
+    "Ground Pound": "ground_pound",
+    "Kick": "kick",
+    "Climb": "climb",
+    "Ledge Grab": "ledge_grab",
+}
 
 
 class MarioColors(OptionDict):
@@ -403,8 +553,7 @@ sm64_options_groups = [
         *coin_star_requirement_options,
     ]),
     OptionGroup("Ability Options", [
-        EnableMoveRandomizer,
-        MoveRandomizerActions,
+        *move_randomizer_options,
         StrictMoveRequirements,
     ]),
     OptionGroup("Cosmetic Options", [
@@ -422,8 +571,16 @@ class SM64Options(PerGameCommonOptions):
     exclamation_boxes: ExclamationBoxes
     combined_progressive_keys: CombinedProgressiveKeys
     enable_locked_paintings: EnableLockedPaintings
-    enable_move_rando: EnableMoveRandomizer
-    move_rando_actions: MoveRandomizerActions
+    triple_jump: TripleJump
+    long_jump: LongJump
+    backflip: Backflip
+    side_flip: SideFlip
+    wall_kick: WallKick
+    dive: Dive
+    ground_pound: GroundPound
+    kick: Kick
+    climb: Climb
+    ledge_grab: LedgeGrab
     strict_cap_requirements: StrictCapRequirements
     per_level_cap_items: PerLevelCapItems
     hazy_maze_cave_swimming_beast: HazyMazeCaveSwimmingBeast

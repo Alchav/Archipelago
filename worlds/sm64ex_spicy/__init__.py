@@ -5,10 +5,12 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
-    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table
+    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
+    randomized_action_item_names, per_level_move_area_names
 from .Locations import location_table, SM64Location
 from .Music import build_music_slot_data
-from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names
+from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
+    move_randomizer_option_name_by_action
 from .Rules import set_rules
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
 from BaseClasses import Item, Tutorial
@@ -57,9 +59,10 @@ class SM64World(World):
 
     def generate_early(self):
         self.move_rando_bitvec = 0
-        if self.options.enable_move_rando:
-            double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
-            for action in self.options.move_rando_actions.value:
+        double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
+        for action in randomized_action_item_names:
+            option = getattr(self.options, move_randomizer_option_name_by_action[action])
+            if option.value != option.option_not_shuffled:
                 self.move_rando_bitvec |= (1 << (action_item_data_table[action].code - double_jump_bitvec_offset))
 
         self.filler_count = 0
@@ -166,6 +169,16 @@ class SM64World(World):
             return []
         return list(optional_item_data_table)
 
+    def get_action_item_names(self) -> typing.List[str]:
+        item_names = []
+        for action in randomized_action_item_names:
+            option = getattr(self.options, move_randomizer_option_name_by_action[action])
+            if option.value == option.option_global:
+                item_names.append(action)
+            elif option.value == option.option_per_level:
+                item_names += [f"{area_name} - {action}" for area_name in per_level_move_area_names]
+        return item_names
+
     def get_progression_item_names(self) -> typing.List[str]:
         item_names = list(feature_item_data_table)
         item_names += self.get_arbitrary_item_names()
@@ -182,11 +195,7 @@ class SM64World(World):
         if self.options.enable_locked_paintings:
             item_names += list(painting_unlock_item_data_table)
 
-        double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
-        item_names += [
-            action for action, itemdata in action_item_data_table.items()
-            if self.move_rando_bitvec & (1 << itemdata.code - double_jump_bitvec_offset)
-        ]
+        item_names += self.get_action_item_names()
 
         return item_names
 

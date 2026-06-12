@@ -5,7 +5,8 @@ from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
-    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table
+    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
+    per_level_action_item_data_table, per_level_move_area_names
 from ..Locations import loc100Coin_table, location_table
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -19,6 +20,19 @@ def world_has_reachable_starting_check(test_base: SM64TestBase, allowed_source_e
 
 wdw_variant_ids = {SM64_WDW_LOW, SM64_WDW_MIDDLE, SM64_WDW_HIGH}
 ttc_variant_ids = {SM64_TTC_STOPPED, SM64_TTC_SLOW, SM64_TTC_RANDOM, SM64_TTC_FAST}
+
+SHUFFLED_GLOBAL_MOVE_OPTIONS = {
+    "triple_jump": Options.TripleJump.option_global,
+    "long_jump": Options.LongJump.option_global,
+    "backflip": Options.Backflip.option_global,
+    "side_flip": Options.SideFlip.option_global,
+    "wall_kick": Options.WallKick.option_global,
+    "dive": Options.Dive.option_global,
+    "ground_pound": Options.GroundPound.option_global,
+    "kick": Options.Kick.option_global,
+    "climb": Options.Climb.option_global,
+    "ledge_grab": Options.LedgeGrab.option_global,
+}
 
 
 class FeatureItemPoolTestBase(SM64TestBase):
@@ -122,6 +136,56 @@ class FeatureItemPoolTestBase(SM64TestBase):
         }
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)
 
+    def test_per_level_move_item_ids_match_client_table(self):
+        self.assertEqual(len(per_level_action_item_data_table), 200)
+        self.assertEqual(item_table["Bob-omb Battlefield - Triple Jump"], 3626325)
+        self.assertEqual(item_table["Bob-omb Battlefield - Ledge Grab"], 3626334)
+        self.assertEqual(item_table["Whomp's Fortress - Triple Jump"], 3626335)
+        self.assertEqual(item_table["Castle - Triple Jump"], 3626475)
+        self.assertEqual(item_table["Cap Switch Stages - Triple Jump"], 3626515)
+        self.assertEqual(item_table["Cap Switch Stages - Ledge Grab"], 3626524)
+        self.assertNotIn("Wing Mario Over the Rainbow - Triple Jump", item_table)
+        self.assertNotIn("Vanish Cap Under the Moat - Triple Jump", item_table)
+        self.assertNotIn("Cavern of the Metal Cap - Triple Jump", item_table)
+        self.assertNotIn("Tower of the Wing Cap - Triple Jump", item_table)
+
+    def test_current_per_level_move_item_classifications(self):
+        expected_classifications = {
+            "Bob-omb Battlefield - Dive": ItemClassification.useful,
+            "Bowser in the Dark World - Wall Kick": ItemClassification.filler,
+            "Cap Switch Stages - Ground Pound": ItemClassification.useful,
+            "Cap Switch Stages - Triple Jump": ItemClassification.progression,
+            "Cap Switch Stages - Long Jump": ItemClassification.filler,
+        }
+        for item_name, classification in expected_classifications.items():
+            with self.subTest("Per-level move item classification", item=item_name):
+                self.assertEqual(per_level_action_item_data_table[item_name].classification, classification)
+
+    def test_one_check_per_level_move_items_skip_balancing(self):
+        for item_name in (
+                "Bob-omb Battlefield - Ground Pound",
+                "Cool, Cool Mountain - Triple Jump",
+                "Dire, Dire Docks - Dive",
+                "Wet-Dry World - Kick",
+                "Tick Tock Clock - Ground Pound",
+        ):
+            with self.subTest("One-check per-level move item skips balancing", item=item_name):
+                self.assertEqual(
+                    per_level_action_item_data_table[item_name].classification,
+                    ItemClassification.progression_deprioritized_skip_balancing)
+
+    def test_multi_check_per_level_move_items_are_progression(self):
+        for item_name in (
+                "Bob-omb Battlefield - Triple Jump",
+                "Whomp's Fortress - Wall Kick",
+                "Castle - Dive",
+                "Cap Switch Stages - Triple Jump",
+        ):
+            with self.subTest("Multi-check per-level move item is progression", item=item_name):
+                self.assertEqual(
+                    per_level_action_item_data_table[item_name].classification,
+                    ItemClassification.progression)
+
     def test_feature_items_are_generated(self):
         for item_name in feature_item_data_table:
             with self.subTest("Feature item generated", item=item_name):
@@ -179,6 +243,11 @@ class FeatureItemPoolTestBase(SM64TestBase):
             with self.subTest("Per-level cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
 
+    def test_default_move_items_are_not_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 0)
+        self.assertEqual(len(self.get_items_by_name("Triple Jump")), 0)
+        self.assertEqual(len(self.get_items_by_name("Bob-omb Battlefield - Triple Jump")), 0)
+
     def test_old_keys_are_not_generated(self):
         self.assertEqual(len(self.get_items_by_name("Basement Key")), 0)
         self.assertEqual(len(self.get_items_by_name("Second Floor Key")), 0)
@@ -221,6 +290,30 @@ class MariosHatItemPoolTestBase(SM64TestBase):
     def test_marios_hat_is_not_start_inventory_when_generated(self):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
         self.assertNotIn(item_table["Mario's Hat"], start_inventory)
+
+
+class GlobalMoveItemPoolTestBase(SM64TestBase):
+    options = {
+        "triple_jump": Options.TripleJump.option_global,
+    }
+
+    def test_global_move_item_is_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 2)
+        self.assertEqual(len(self.get_items_by_name("Triple Jump")), 1)
+        self.assertEqual(len(self.get_items_by_name("Bob-omb Battlefield - Triple Jump")), 0)
+
+
+class PerLevelMoveItemPoolTestBase(SM64TestBase):
+    options = {
+        "triple_jump": Options.TripleJump.option_per_level,
+    }
+
+    def test_per_level_move_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 2)
+        self.assertEqual(len(self.get_items_by_name("Triple Jump")), 0)
+        for area_name in per_level_move_area_names:
+            with self.subTest("Per-level move item generated", area=area_name):
+                self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
 
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
@@ -481,7 +574,7 @@ class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
 
     def test_all_entrances_are_vanilla(self):
@@ -580,7 +673,7 @@ class CompletionAllBowserTestBase(SM64TestBase):
 # Power Star item generation
 class NoPowerStarsTestBase(SM64TestBase):
     options = {
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "exclamation_boxes": Options.ExclamationBoxes.option_false,
     }
 
@@ -592,7 +685,7 @@ class NoPowerStarsTestBase(SM64TestBase):
 # Entrance + Move Randos
 class CourseEntrancesMoveTestBase(SM64TestBase):
     options = {
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_Only
     }
 
@@ -614,7 +707,7 @@ class CourseEntrancesMoveTestBase(SM64TestBase):
 class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
     options = {
         "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_Only
     }
 
@@ -627,7 +720,7 @@ class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
 
 class SeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
     }
 
@@ -649,7 +742,7 @@ class SeparateEntrancesMoveTestBase(SM64TestBase):
 class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
         "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
     }
 
@@ -659,7 +752,7 @@ class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
 
 class AllEntrancesMoveTestBase(SM64TestBase):
     options = {
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets
     }
 
@@ -687,7 +780,7 @@ class AllEntrancesMoveTestBase(SM64TestBase):
 # No Strict Requirements
 class NoStrictRequirementsTestBase(SM64TestBase):
     options = {
-        "enable_move_rando": Options.EnableMoveRandomizer.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,
         "strict_cap_requirements": Options.StrictCapRequirements.option_false,

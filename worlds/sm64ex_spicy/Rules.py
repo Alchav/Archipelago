@@ -4,11 +4,11 @@ from typing import Callable, Union, Dict, Set
 from BaseClasses import CollectionState, Entrance, MultiWorld
 from ..generic.Rules import add_rule, set_rule
 from .Locations import location_table
-from .Options import SM64Options
+from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
     sm64_ttc_entrances, sm64_wdw_entrances
-from .Items import action_item_data_table, cap_item_data_table
+from .Items import action_item_data_table, cap_item_data_table, per_level_move_area_names
 
 
 initial_reachable_entrances = (
@@ -59,11 +59,43 @@ purple_switch_item_name_by_level = {
 }
 
 
-def has_action(state: CollectionState, player: int, action: str) -> bool:
-    move_rando_bitvec = state.multiworld.worlds[player].move_rando_bitvec
-    double_jump_bitvec_offset = action_item_data_table["Double Jump"].code
-    action_bit = 1 << (action_item_data_table[action].code - double_jump_bitvec_offset)
-    return not move_rando_bitvec & action_bit or state.has(action, player)
+move_area_name_aliases = {
+    "Castle Grounds": "Castle",
+    "Castle Courtyard": "Castle",
+    "The Princess's Secret Slide": "Castle",
+    "The Secret Aquarium": "Castle",
+    "Wing Mario Over the Rainbow": "Castle",
+    "Wing Mario over the Rainbow": "Castle",
+    "Tower of the Wing Cap": "Cap Switch Stages",
+    "Cavern of the Metal Cap": "Cap Switch Stages",
+    "Vanish Cap Under the Moat": "Cap Switch Stages",
+    "Vanish Cap under the Moat": "Cap Switch Stages",
+}
+
+
+def get_move_area_name(level_name: str) -> str:
+    return move_area_name_aliases.get(level_name, level_name)
+
+
+def get_per_level_action_item_name(level_name: str, action: str) -> str | None:
+    move_area_name = get_move_area_name(level_name)
+    if move_area_name not in per_level_move_area_names:
+        return None
+    return f"{move_area_name} - {action}"
+
+
+def has_action(state: CollectionState, player: int, action: str, level_name: str = "Castle") -> bool:
+    option_name = move_randomizer_option_name_by_action.get(action)
+    if option_name is None:
+        return True
+    options = state.multiworld.worlds[player].options
+    option = getattr(options, option_name)
+    if option.value == option.option_not_shuffled:
+        return True
+    if option.value == option.option_global:
+        return state.has(action, player)
+    item_name = get_per_level_action_item_name(level_name, action)
+    return item_name is None or state.has(item_name, player)
 
 
 def allows_moveless(state: CollectionState, player: int) -> bool:
@@ -97,14 +129,15 @@ def has_purple_switches(state: CollectionState, player: int, level_name: str) ->
 
 
 def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Bob-omb Battlefield"
     reachable_coins = 109
     if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
         reachable_coins += 3
-        if has_action(state, player, "Climb"):
+        if has_action(state, player, "Climb", level_name):
             reachable_coins += 2
-        if any(has_action(state, player, action) for action in ("Side Flip", "Backflip", "Triple Jump")):
+        if any(has_action(state, player, action, level_name) for action in ("Side Flip", "Backflip", "Triple Jump")):
             reachable_coins += 5
-        if has_action(state, player, "Triple Jump"):
+        if has_action(state, player, "Triple Jump", level_name):
             reachable_coins += 1
     if state.can_reach("Bob-omb Battlefield - Mario Wings to the Sky", "Location", player):
         reachable_coins += 36
@@ -112,10 +145,11 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
 
 
 def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Whomp's Fortress"
     reachable_coins = 73
     if state.can_reach("Whomp's Fortress - Shoot into the Wild Blue", "Location", player):
         reachable_coins += 8
-    if has_action(state, player, "Ground Pound"):
+    if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 40
     if state.can_reach("Whomp's Fortress - Top", "Region", player):
         reachable_coins += 20
@@ -123,24 +157,26 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
 
 
 def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Cool, Cool Mountain"
     reachable_coins = 130
     has_cannon = state.has("Cannon Unlock Cool, Cool Mountain", player)
     if has_cannon or allows_moveless(state, player):
         reachable_coins += 11
     if has_cannon:
         reachable_coins += 3
-    if has_action(state, player, "Ground Pound"):
+    if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 10
     return coins <= reachable_coins
 
 
 def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Big Boo's Haunt"
     reachable_coins = 88
     if state.can_reach("Big Boo's Haunt - Second Floor", "Region", player):
         reachable_coins += 13
     if state.can_reach("Big Boo's Haunt - Third Floor", "Region", player):
         reachable_coins += 5
-        if has_action(state, player, "Ground Pound"):
+        if has_action(state, player, "Ground Pound", level_name):
             reachable_coins += 20
     if state.has("Big Boo's Haunt - Merry-go-round", player):
         reachable_coins += 25
@@ -148,17 +184,19 @@ def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> boo
 
 
 def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Hazy Maze Cave"
     reachable_coins = 83
-    if state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player) and has_action(state, player, "Climb"):
+    if state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player) and has_action(
+            state, player, "Climb", level_name):
         reachable_coins += 5
     if has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST"):
         reachable_coins += 8
     if state.can_reach("Hazy Maze Cave - Navigating the Toxic Maze", "Location", player):
         reachable_coins += 5
     if has_metal_cap(state, player, "Hazy Maze Cave") or (
-            allows_capless(state, player) and has_action(state, player, "Triple Jump")):
+            allows_capless(state, player) and has_action(state, player, "Triple Jump", level_name)):
         reachable_coins += 3
-    if has_action(state, player, "Ground Pound"):
+    if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 35
     return coins <= reachable_coins
 
@@ -174,10 +212,11 @@ def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> b
 
 
 def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Shifting Sand Land"
     reachable_coins = 89
     if state.can_reach("Shifting Sand Land - Free Flying for 8 Red Coins", "Location", player):
         reachable_coins += 4
-    if has_action(state, player, "Ground Pound"):
+    if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 15
     if state.can_reach("Shifting Sand Land - Upper Pyramid", "Region", player):
         reachable_coins += 28
@@ -185,23 +224,25 @@ def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) ->
 
 
 def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Jolly Roger Bay"
     reachable_coins = 54
     if state.can_reach("Jolly Roger Bay - Upper", "Region", player):
         reachable_coins += 16
         if state.has("Jolly Roger Bay - Raised Ship", player):
             reachable_coins += 4
-    if has_action(state, player, "Ground Pound"):
+    if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 30
     return coins <= reachable_coins
 
 
 def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Dire, Dire Docks"
     reachable_coins = 60
     if has_purple_switches(state, player, "Dire, Dire Docks"):
         reachable_coins += 2
         if state.has("Dire, Dire Docks - Poles", player):
             reachable_coins += 14
-            if has_action(state, player, "Ground Pound"):
+            if has_action(state, player, "Ground Pound", level_name):
                 reachable_coins += 30
     return coins <= reachable_coins
 
@@ -218,6 +259,7 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
 
 
 def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Wet-Dry World"
     reachable_water_levels = {
         "low": state.can_reach("Wet-Dry World - Low Water", "Region", player),
         "mid": state.can_reach("Wet-Dry World - Mid Water", "Region", player),
@@ -225,15 +267,16 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
         "high": state.can_reach("Wet-Dry World - High Water", "Region", player),
         "highest": state.can_reach("Wet-Dry World - Highest Water", "Region", player),
     }
-    has_ground_pound = has_action(state, player, "Ground Pound")
+    has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     has_wdw_purple_switches = has_purple_switches(state, player, "Wet-Dry World")
     has_water_level_diamond = has_simple_arbitrary_feature(state, player, "WDW_WATER_LEVEL_DIAMOND")
-    has_triple_jump = has_action(state, player, "Triple Jump")
-    has_dive = has_action(state, player, "Dive")
+    has_triple_jump = has_action(state, player, "Triple Jump", level_name)
+    has_dive = has_action(state, player, "Dive", level_name)
     has_movement_top_route = (
-        any(has_action(state, player, action) for action in ("Wall Kick", "Triple Jump", "Side Flip", "Backflip"))
+        any(has_action(state, player, action, level_name)
+            for action in ("Wall Kick", "Triple Jump", "Side Flip", "Backflip"))
         or allows_moveless(state, player)
-        or has_wdw_purple_switches and has_action(state, player, "Long Jump")
+        or has_wdw_purple_switches and has_action(state, player, "Long Jump", level_name)
     )
     has_downtown_route = (
         state.has("Cannon Unlock Wet-Dry World", player)
@@ -271,22 +314,25 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
 
 
 def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Tall, Tall Mountain"
     reachable_coins = 15
     if state.can_reach("Tall, Tall Mountain - Middle", "Region", player):
         reachable_coins += 55
-    if has_action(state, player, "Climb") or allows_moveless(state, player):
+    if has_action(state, player, "Climb", level_name) or allows_moveless(state, player):
         reachable_coins += 5
     if state.can_reach("Tall, Tall Mountain - Top", "Region", player):
         reachable_coins += 59
         if has_purple_switches(state, player, "Tall, Tall Mountain") or any(
-                has_action(state, player, action) for action in ("Triple Jump", "Backflip", "Side Flip")):
+                has_action(state, player, action, level_name) for action in ("Triple Jump", "Backflip", "Side Flip")):
             reachable_coins += 2
-        if has_purple_switches(state, player, "Tall, Tall Mountain") or has_action(state, player, "Triple Jump"):
+        if has_purple_switches(state, player, "Tall, Tall Mountain") or has_action(
+                state, player, "Triple Jump", level_name):
             reachable_coins += 1
     return coins <= reachable_coins
 
 
 def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Tiny-Huge Island"
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
     can_access_pipes = state.can_reach("Tiny-Huge Island - Pipes", "Region", player)
@@ -306,11 +352,12 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
                 route_total += 10
             if can_reach_wiggler:
                 route_total += 10
-            if has_action(state, player, "Ground Pound"):
+            if has_action(state, player, "Ground Pound", level_name):
                 route_total += 10
-            if has_action(state, player, "Wall Kick"):
+            if has_action(state, player, "Wall Kick", level_name):
                 route_total += 4
-            if state.has("Cannon Unlock Tiny-Huge Island", player) or has_action(state, player, "Long Jump"):
+            if state.has("Cannon Unlock Tiny-Huge Island", player) or has_action(
+                    state, player, "Long Jump", level_name):
                 route_total += 5
         return route_total
 
@@ -323,6 +370,7 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
 
 
 def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Tick Tock Clock"
     reachable_coins = 17
     if state.can_reach("Tick Tock Clock - Lower", "Region", player):
         reachable_coins += 13
@@ -330,13 +378,13 @@ def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bo
             reachable_coins += 6
         if state.can_reach("Tick Tock Clock Moving", "Region", player) or (
                 state.can_reach("Tick Tock Clock Stopped", "Region", player) and any(
-                    has_action(state, player, action)
+                    has_action(state, player, action, level_name)
                     for action in ("Ledge Grab", "Backflip", "Triple Jump", "Wall Kick")
                 )):
             reachable_coins += 5
     if state.can_reach("Tick Tock Clock - Upper", "Region", player):
         reachable_coins += 6
-        if has_action(state, player, "Ground Pound"):
+        if has_action(state, player, "Ground Pound", level_name):
             reachable_coins += 35
     if state.can_reach("Tick Tock Clock - Top", "Region", player):
         reachable_coins += 16
@@ -346,21 +394,23 @@ def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bo
 
 
 def rainbow_ride_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Rainbow Ride"
     reachable_coins = 0
     has_carpets = has_simple_arbitrary_feature(state, player, "RR_CARPETS")
     if has_carpets or (
-            allows_moveless(state, player) and has_action(state, player, "Long Jump") and
-            has_action(state, player, "Triple Jump") and has_action(state, player, "Ledge Grab")):
+            allows_moveless(state, player) and has_action(state, player, "Long Jump", level_name) and
+            has_action(state, player, "Triple Jump", level_name) and
+            has_action(state, player, "Ledge Grab", level_name)):
         reachable_coins += 8
     if state.can_reach("Rainbow Ride - Beneath the Pole", "Region", player):
         reachable_coins += 27
     if state.can_reach("Rainbow Ride - Maze", "Region", player):
         reachable_coins += 23
-        if has_action(state, player, "Ground Pound"):
+        if has_action(state, player, "Ground Pound", level_name):
             reachable_coins += 5
-        if has_action(state, player, "Long Jump") or has_action(state, player, "Wall Kick"):
+        if has_action(state, player, "Long Jump", level_name) or has_action(state, player, "Wall Kick", level_name):
             reachable_coins += 2
-    if has_action(state, player, "Ground Pound") and has_action(state, player, "Wall Kick"):
+    if has_action(state, player, "Ground Pound", level_name) and has_action(state, player, "Wall Kick", level_name):
         reachable_coins += 25
     if state.can_reach("Rainbow Ride - Coins Amassed in a Maze", "Location", player):
         reachable_coins += 14
@@ -1024,7 +1074,7 @@ class RuleFactory:
         try:
             rule = self.build_rule(
                 rule_expr, cannon_name, self.get_cap_item_names(target_name),
-                self.get_arbitrary_item_names(target_name))
+                self.get_arbitrary_item_names(target_name), self.get_action_item_names(target_name))
         except RuleFactory.SM64LogicException as exception:
             raise RuleFactory.SM64LogicException(
                 f"Error generating rule for {target_name} using rule expression {rule_expr}: {exception}")
@@ -1038,6 +1088,7 @@ class RuleFactory:
     def build_rule(
             self, rule_expr: str, cannon_name: str = '', cap_item_names: dict[str, str] | None = None,
             arbitrary_item_names: dict[str, str | bool] | None = None,
+            action_item_names: dict[str, str | bool] | None = None,
             painting_lvl_name: str = None, star_num_req: int = None) -> Callable:
         # Star/painting requirements are outer and'd requirements, logically (painting? star? and (rule_expr))
         base_rule = self.build_star_painting_entry_requirements(painting_lvl_name, star_num_req)
@@ -1045,10 +1096,13 @@ class RuleFactory:
             cap_item_names = {}
         if arbitrary_item_names is None:
             arbitrary_item_names = self.get_arbitrary_item_names("")
+        if action_item_names is None:
+            action_item_names = self.get_action_item_names("Castle")
         expressions = rule_expr.split(" | ") if len(rule_expr) > 0 else []
         rules = []
         for expression in expressions:
-            or_clause = self.combine_and_clauses(expression, cannon_name, cap_item_names, arbitrary_item_names)
+            or_clause = self.combine_and_clauses(
+                expression, cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
             if or_clause is True:
                 return base_rule
             if or_clause is not False:
@@ -1081,6 +1135,10 @@ class RuleFactory:
                 "Wing Mario Over the Rainbow",
                 "Wing Mario over the Rainbow",
                 "Bowser in the Dark World",
+                "Bowser in the Fire Sea",
+                "Bowser in the Sky",
+                "The Princess's Secret Slide",
+                "The Secret Aquarium",
         ):
             if target_name.startswith(level_name):
                 return level_name
@@ -1123,6 +1181,23 @@ class RuleFactory:
             level_name)
         return item_names
 
+    def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:
+        level_name = self.get_level_name_from_target(target_name)
+        item_names = {}
+        for action in action_item_data_table:
+            option_name = move_randomizer_option_name_by_action.get(action)
+            if option_name is None:
+                item_names[action] = True
+                continue
+            option = getattr(self.options, option_name)
+            if option.value == option.option_not_shuffled:
+                item_names[action] = True
+            elif option.value == option.option_global:
+                item_names[action] = action
+            else:
+                item_names[action] = get_per_level_action_item_name(level_name, action) or True
+        return item_names
+
     @staticmethod
     def get_feature_family_item_name(
             option_value: int, not_shuffled_value: int, global_value: int, global_item_name: str,
@@ -1135,11 +1210,13 @@ class RuleFactory:
 
     def combine_and_clauses(
             self, rule_expr: str, cannon_name: str, cap_item_names: dict[str, str],
-            arbitrary_item_names: dict[str, str | bool]) -> Union[Callable, bool]:
+            arbitrary_item_names: dict[str, str | bool],
+            action_item_names: dict[str, str | bool]) -> Union[Callable, bool]:
         expressions = rule_expr.split(" & ")
         rules = []
         for expression in expressions:
-            and_clause = self.make_lambda(expression, cannon_name, cap_item_names, arbitrary_item_names)
+            and_clause = self.make_lambda(
+                expression, cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
             if and_clause is False:
                 return False
             if and_clause is not True:
@@ -1153,12 +1230,13 @@ class RuleFactory:
 
     def make_lambda(
             self, expression: str, cannon_name: str, cap_item_names: dict[str, str],
-            arbitrary_item_names: dict[str, str | bool]) -> Union[Callable, bool]:
+            arbitrary_item_names: dict[str, str | bool],
+            action_item_names: dict[str, str | bool]) -> Union[Callable, bool]:
         if '+' in expression:
             tokens = expression.split('+')
             items = set()
             for token in tokens:
-                item = self.parse_token(token, cannon_name, cap_item_names, arbitrary_item_names)
+                item = self.parse_token(token, cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
                 if item is True:
                     continue
                 if item is False:
@@ -1172,7 +1250,7 @@ class RuleFactory:
             tokens = expression.split('/')
             items = set()
             for token in tokens:
-                item = self.parse_token(token, cannon_name, cap_item_names, arbitrary_item_names)
+                item = self.parse_token(token, cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
                 if item is True:
                     return True
                 if item is False:
@@ -1186,14 +1264,15 @@ class RuleFactory:
             return lambda state: state.can_reach(expression[2:-2], "Location", self.player)
         if '{' in expression:
             return lambda state: state.can_reach(expression[1:-1], "Region", self.player)
-        item = self.parse_token(expression, cannon_name, cap_item_names, arbitrary_item_names)
+        item = self.parse_token(expression, cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
         if item in (True, False):
             return item
         return lambda state: state.has(item, self.player)
 
     def parse_token(
             self, token: str, cannon_name: str, cap_item_names: dict[str, str],
-            arbitrary_item_names: dict[str, str | bool]) -> Union[str, bool]:
+            arbitrary_item_names: dict[str, str | bool],
+            action_item_names: dict[str, str | bool]) -> Union[str, bool]:
         if token == "CANN":
             return cannon_name
         if token in self.global_cap_item_name_by_token:
@@ -1217,10 +1296,7 @@ class RuleFactory:
         if not item:
             raise Exception(f"Invalid token: '{item}'")
         if item in action_item_data_table:
-            double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
-            if self.move_rando_bitvec & (1 << (action_item_data_table[item].code - double_jump_bitvec_offset)) == 0:
-                # This action item is not randomized.
-                return True
+            return action_item_names[item]
         elif item in cap_item_data_table:
             return item
         return item
