@@ -125,6 +125,17 @@ def has_purple_switches(state: CollectionState, player: int, level_name: str) ->
     return item_name is None or state.has(item_name, player)
 
 
+def has_tiny_huge_island_top_return_movement(state: CollectionState, player: int) -> bool:
+    level_name = "Tiny-Huge Island"
+    return (
+        has_action(state, player, "Triple Jump", level_name)
+        or has_action(state, player, "Long Jump", level_name) and (
+            has_action(state, player, "Side Flip", level_name)
+            or has_action(state, player, "Ledge Grab", level_name)
+        )
+    )
+
+
 def has_checkerboard_platforms(state: CollectionState, player: int, level_name: str) -> bool:
     options = state.multiworld.worlds[player].options
     if options.checkerboard_platforms.value == options.checkerboard_platforms.option_not_shuffled:
@@ -391,39 +402,51 @@ def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) ->
 
 def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Tiny-Huge Island"
+    has_warp_pipes = has_simple_arbitrary_feature(state, player, "THI_WARP_PIPES")
+    has_thi_purple_switches = has_purple_switches(state, player, "Tiny-Huge Island")
+    has_long_jump = has_action(state, player, "Long Jump", level_name)
+    has_top_return_movement = has_tiny_huge_island_top_return_movement(state, player)
+    has_huge_piranha_area_reentry = (has_warp_pipes and has_thi_purple_switches) or has_top_return_movement
+    has_huge_top_gate = state.has("Cannon Unlock Tiny-Huge Island", player) or has_top_return_movement
+    has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
-    can_access_pipes = state.can_reach("Tiny-Huge Island - Pipes", "Region", player)
-    can_reach_five_secrets = state.can_reach("Tiny-Huge Island - Five Itty Bitty Secrets", "Location", player)
-    can_reach_large_top = state.can_reach("Tiny-Huge Island - Large Top", "Region", player)
+    can_reach_tiny_piranha_area = state.can_reach("Tiny-Huge Island - Tiny Piranha Area", "Region", player)
+    can_reach_tiny_main = state.can_reach("Tiny-Huge Island - Tiny Main", "Region", player)
+    can_reach_huge_piranha_area = state.can_reach("Tiny-Huge Island - Huge Piranha Area", "Region", player)
     can_reach_wiggler = state.can_reach("Tiny-Huge Island - Make Wiggler Squirm", "Location", player)
 
     def route_coins(has_tiny_side: bool, has_huge_side: bool) -> int:
         route_total = 0
         if has_tiny_side:
             route_total += 1
-            if can_reach_five_secrets:
-                route_total += 32
+            if can_reach_tiny_piranha_area:
+                route_total += 1
+            if can_reach_tiny_main:
+                route_total += 31
         if has_huge_side:
-            route_total += 75
-            if can_reach_large_top:
-                route_total += 10
+            route_total += 54
+            if has_huge_top_gate:
+                route_total += 21
+            if has_ground_pound:
+                route_total += 46
+                if has_huge_top_gate:
+                    route_total += 8
+            if has_action(state, player, "Wall Kick", level_name) and has_huge_top_gate:
+                route_total += 4
             if can_reach_wiggler:
                 route_total += 10
-            if has_action(state, player, "Ground Pound", level_name):
-                route_total += 54
-            if has_action(state, player, "Wall Kick", level_name):
-                route_total += 4
-            if state.has("Cannon Unlock Tiny-Huge Island", player) or has_action(
-                    state, player, "Long Jump", level_name):
+            if state.has("Cannon Unlock Tiny-Huge Island", player) or has_long_jump:
                 route_total += 5
+        if can_reach_huge_piranha_area and (not has_huge_side or has_huge_piranha_area_reentry):
+            route_total += 10
         return route_total
 
     reachable_totals = []
     if can_enter_tiny:
-        reachable_totals.append(route_coins(True, can_access_pipes))
+        reachable_totals.append(route_coins(True, False))
     if can_enter_huge:
-        reachable_totals.append(route_coins(can_access_pipes, True))
+        reachable_totals.append(route_coins(has_warp_pipes, True))
     return coins <= max(reachable_totals, default=0)
 
 
@@ -740,8 +763,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 rf.build_rule("", painting_lvl_name="Tiny-Huge Island"))
     connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Huge)",
                                 rf.build_rule("", painting_lvl_name="Tiny-Huge Island"))
-    connect_regions(multiworld, player, "Tiny-Huge Island (Tiny)", "Tiny-Huge Island")
-    connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island")
+    connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Piranha Area", "Tiny-Huge Island - Huge Piranha Area",
+                    name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
+    connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island (Tiny)",
+                    name="Tiny-Huge Island - Huge Island to Tiny Island")
 
     connect_regions(multiworld, player, "Second Floor", "Third Floor", has_third_floor_key)
 
@@ -863,16 +888,14 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "TJ/DV/LG/PURPLE_SWITCHES")
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom", "CANN | CANNLESS & LJ | MOVELESS & CANNLESS")
     # Tiny-Huge Island
-    rf.assign_rule("Tiny-Huge Island - 1Up Block THI Small near Start", "NAR | {Tiny-Huge Island - Pipes}")
-    rf.assign_rule("Tiny-Huge Island - Pipes",
-                   "THI_WARP_PIPES & LJ/TJ/DV/LG | "
-                   "THI_WARP_PIPES & MOVELESS & BF/SF/KK")
-    rf.assign_rule("Tiny-Huge Island - Large Top", "LJ/TJ/DV | MOVELESS")
+    rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
+    rf.assign_rule("Tiny-Huge Island - Tiny Main", "PURPLE_SWITCHES")
+    rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Huge Island to Tiny Island", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Huge Piranha Area", "THI_WARP_PIPES & PURPLE_SWITCHES | TJ | LJ+SF | LJ+LG")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
-    rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets",
-                   "PURPLE_SWITCHES & {Tiny-Huge Island (Tiny)} | PURPLE_SWITCHES & {Tiny-Huge Island - Pipes}")
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
-    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "THI_WARP_PIPES & GP | THI_WARP_PIPES & MOVELESS & DV")
+    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "{Tiny-Huge Island - Tiny Main} & GP")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF/WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
     rf.assign_rule("Tick Tock Clock - Upper", "CL | MOVELESS & WK")
@@ -1369,8 +1392,6 @@ class RuleFactory:
             return self.cannonless
         if token == "MOVELESS":
             return self.moveless
-        if token == "NAR":
-            return not self.area_randomizer
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)

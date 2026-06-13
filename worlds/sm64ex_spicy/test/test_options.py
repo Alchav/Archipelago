@@ -582,6 +582,10 @@ class CoinsanityGenerationTestBase(SM64TestBase):
         self.assertNotIn("Bob-omb Battlefield - 1 Coin", active_locations)
         self.assertNotIn("Bob-omb Battlefield - 50 Coins", active_locations)
 
+    def test_thi_coinsanity_locations_use_shared_coins_region(self):
+        location = self.multiworld.get_location("Tiny-Huge Island - 33 Coins", self.player)
+        self.assertEqual(location.parent_region.name, "Tiny-Huge Island - Coins")
+
 
 # Exclamation Boxes
 class ExclamationBoxesOnTestBase(SM64TestBase):

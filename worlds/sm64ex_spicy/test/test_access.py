@@ -424,26 +424,26 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Switch"))
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
 
-    def test_tiny_huge_island_pipes_require_warp_pipes(self):
+    def test_tiny_huge_island_tiny_piranha_area_requires_movement(self):
         self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
+
         self.collect(self.get_item_by_name("Long Jump"))
-        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
-
-    def test_tiny_huge_island_pipes_from_tiny_do_not_require_purple_switches(self):
+    def test_tiny_huge_island_warp_from_tiny_requires_piranha_area_and_warp_pipes(self):
         self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
-        self.collect([
-            self.get_item_by_name("Long Jump"),
-            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
-        ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
-        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
     def test_purple_switch_gated_locations(self):
         self.collect_basement_access()
@@ -501,10 +501,13 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
-        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
     def test_tiny_huge_island_five_secrets_from_huge_requires_pipes_and_purple_switches(self):
@@ -519,11 +522,13 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
         self.collect([
             self.get_item_by_name("Long Jump"),
-            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
     def test_rainbow_ride_tricky_triangles_requires_purple_switches(self):
@@ -681,7 +686,10 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Purple Switches"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Purple Switch"))
+        self.collect([
+            self.get_item_by_name("Tiny-Huge Island - Purple Switch"),
+            self.get_item_by_name("Long Jump"),
+        ])
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
 
@@ -1099,13 +1107,13 @@ class TinyHugeIslandCoinStar33AccessTestBase(TinyHugeIslandCoinStarAccessTestBas
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar76FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar56FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 76,
+        "tiny_huge_island_coin_star_requirement": 56,
     }
 
-    def test_tiny_start_reaches_huge_coins_with_pipes(self):
+    def test_tiny_pipe_reaches_huge_piranha_area_not_huge_main(self):
         self.disable_huge_entry()
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
@@ -1116,14 +1124,15 @@ class TinyHugeIslandCoinStar76FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
             self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
-        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar75AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar54AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 75,
+        "tiny_huge_island_coin_star_requirement": 54,
     }
 
     def test_huge_start_coins_reach_coin_star(self):
@@ -1133,35 +1142,34 @@ class TinyHugeIslandCoinStar75AccessTestBase(TinyHugeIslandCoinStarAccessTestBas
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar76FromHugeAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar55FromHugeAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 76,
+        "tiny_huge_island_coin_star_requirement": 55,
     }
 
     def test_huge_start_reaches_tiny_coin_with_pipes(self):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect([
-            self.get_item_by_name("Ledge Grab"),
-            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
-        ])
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Pipes"))
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar79AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar84AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 79,
+        "tiny_huge_island_coin_star_requirement": 84,
     }
 
-    def test_wall_kick_coins_reach_coin_star(self):
+    def test_wall_kick_coins_require_top_gate(self):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
         self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Tiny-Huge Island"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -1179,10 +1187,10 @@ class TinyHugeIslandCoinStar80AccessTestBase(TinyHugeIslandCoinStarAccessTestBas
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar129AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar100AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 129,
+        "tiny_huge_island_coin_star_requirement": 100,
     }
 
     def test_ground_pound_coins_reach_coin_star(self):
@@ -1193,22 +1201,92 @@ class TinyHugeIslandCoinStar129AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar86AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar134AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 86,
+        "tiny_huge_island_coin_star_requirement": 134,
     }
 
-    def test_large_top_coins_reach_coin_star(self):
+    def test_top_gated_ground_pound_coins_reach_coin_star(self):
         self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock Tiny-Huge Island"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar65AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 65,
+    }
+
+    def test_huge_piranha_area_coins_require_pipes_and_purple_switches(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar12FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 12,
+    }
+
+    def test_huge_piranha_area_coins_count_from_tiny_when_huge_entrance_is_not_reachable(self):
+        self.disable_huge_entry()
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar66FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 66,
+    }
+
+    def test_huge_piranha_area_coins_need_reentry_when_huge_island_is_reachable(self):
         self.collect_second_floor_access()
         self.collect([
             self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect(self.get_item_by_name("Dive"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Large Top"))
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandCoinStar85AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+    options = {
+        **TinyHugeIslandCoinStarAccessTestBase.options,
+        "tiny_huge_island_coin_star_requirement": 85,
+    }
+
+    def test_top_return_movement_reaches_huge_piranha_and_top_gate_coins(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -1224,6 +1302,7 @@ class TinyHugeIslandCoinStar150AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.collect([
             self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Dive"),
+            self.get_item_by_name("Purple Switches"),
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
@@ -1250,7 +1329,7 @@ class TinyHugeIslandCoinStar191AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Large Top"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
         self.collect(self.get_item_by_name("Cannon Unlock Tiny-Huge Island"))

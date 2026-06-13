@@ -269,17 +269,26 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regTTM.subregions = [ttm_middle, ttm_top]
     create_locs(regTTM, "Tall, Tall Mountain - Coins Star")
 
-    create_region("Tiny-Huge Island (Huge)", player, multiworld)
-    create_region("Tiny-Huge Island (Tiny)", player, multiworld)
-    regTHI = create_region("Tiny-Huge Island", player, multiworld)
-    create_locs(regTHI, "Tiny-Huge Island - 1Up Block THI Small near Start",
-                "Tiny-Huge Island - Five Itty Bitty Secrets")
-    thi_pipes = create_subregion(regTHI, "Tiny-Huge Island - Pipes", "Tiny-Huge Island - The Tip Top of the Huge Island", "Tiny-Huge Island - Pluck the Piranha Flower", "Tiny-Huge Island - Rematch with Koopa the Quick",
-                                                       "Tiny-Huge Island - Wiggler's Red Coins", "Tiny-Huge Island - Bob-omb Buddy",
-                                                       "Tiny-Huge Island - 1Up Block THI Large near Start", "Tiny-Huge Island - 1Up Block Windy Area")
-    thi_large_top = create_subregion(thi_pipes, "Tiny-Huge Island - Large Top", "Tiny-Huge Island - Make Wiggler Squirm")
-    regTHI.subregions = [thi_pipes, thi_large_top]
-    create_locs(regTHI, "Tiny-Huge Island - Coins Star")
+    hugeTHI = create_region("Tiny-Huge Island (Huge)", player, multiworld)
+    tinyTHI = create_region("Tiny-Huge Island (Tiny)", player, multiworld)
+    create_locs(tinyTHI, "Tiny-Huge Island - 1Up Block THI Small near Start")
+    create_locs(hugeTHI, "Tiny-Huge Island - 1Up Block Windy Area", "Tiny-Huge Island - The Tip Top of the Huge Island",
+                         "Tiny-Huge Island - Rematch with Koopa the Quick", "Tiny-Huge Island - Wiggler's Red Coins",
+                         "Tiny-Huge Island - 1Up Block THI Large near Start", "Tiny-Huge Island - Make Wiggler Squirm")
+    thi_windy = create_subregion(hugeTHI, "Tiny-Huge Island - Windy Area")
+    thi_coins = create_region("Tiny-Huge Island - Coins", player, multiworld)
+    create_locs(thi_coins, "Tiny-Huge Island - Coins Star")
+    hugeTHI.connect(thi_coins)
+    tinyTHI.connect(thi_coins)
+    thi_huge_piranha_area = create_subregion(hugeTHI, "Tiny-Huge Island - Huge Piranha Area",
+                                                      "Tiny-Huge Island - Pluck the Piranha Flower")
+    thi_tiny_piranha_area = create_subregion(tinyTHI, "Tiny-Huge Island - Tiny Piranha Area")
+    thi_tiny_main = create_subregion(thi_tiny_piranha_area, "Tiny-Huge Island - Tiny Main",
+                                     "Tiny-Huge Island - Five Itty Bitty Secrets",
+                                     "Tiny-Huge Island - Bob-omb Buddy")
+
+    hugeTHI.subregions = [thi_coins, thi_huge_piranha_area, thi_windy]
+    tinyTHI.subregions = [thi_coins, thi_tiny_piranha_area, thi_tiny_main]
 
     regFloor3 = create_region("Third Floor", player, multiworld)
 

@@ -77,8 +77,12 @@ class SM64World(World):
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
+        coin_check_region_names = {
+            "Tiny-Huge Island": "Tiny-Huge Island - Coins",
+        }
         for location_name in self.coinsanity_location_names:
             region_name = location_name.rsplit(" - ", 1)[0]
+            region_name = coin_check_region_names.get(region_name, region_name)
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
 
@@ -346,18 +350,24 @@ class SM64World(World):
             for entrance, destination in self.area_connections.items():
                 destination_name = sm64_level_to_entrances[destination]
                 region_name = sm64_entrance_to_region[destination_name]
+                if destination_name == "Tiny-Huge Island (Tiny)":
+                    continue
                 if region_name == "Tick Tock Clock Moving":
                     region_name = "Tick Tock Clock"
-                regions = [self.multiworld.get_region(region_name, self.player)]
                 if destination_name == "Tiny-Huge Island (Huge)":
                     # Special rules for Tiny-Huge Island's dual entrances
                     reverse_area_connections = {destination: entrance for entrance, destination in self.area_connections.items()}
                     entrance_name = sm64_level_to_entrances[reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_HUGE]] \
                                     + ' or ' + sm64_level_to_entrances[reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_TINY]]
-                    regions[0] = self.multiworld.get_region("Tiny-Huge Island", self.player)
+                    regions = [
+                        self.multiworld.get_region("Tiny-Huge Island (Huge)", self.player),
+                        self.multiworld.get_region("Tiny-Huge Island (Tiny)", self.player),
+                    ]
                 else:
                     entrance_name = sm64_level_to_entrances[entrance]
-                regions += regions[0].subregions
+                    regions = [self.multiworld.get_region(region_name, self.player)]
+                for region in regions[:]:
+                    regions += region.subregions
                 for region in regions:
                     for location in region.locations:
                         er_hint_data[location.address] = entrance_name
