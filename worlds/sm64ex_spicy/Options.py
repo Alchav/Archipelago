@@ -13,6 +13,8 @@ class Coinsanity(Range):
     """
     Adds extra location checks for collecting a percentage of each course's possible coin thresholds below that
     course's Coin Star requirement.
+
+    Some Coinsanity locations may be created regardless of this option if there are too many items in the item pool.
     """
     display_name = "Coinsanity"
     range_start = 0

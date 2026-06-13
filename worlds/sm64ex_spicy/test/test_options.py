@@ -7,7 +7,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     per_level_action_item_data_table, per_level_move_area_names, cannon_item_data_table
-from ..Locations import loc100Coin_table, location_table, coinsanity_location_table, get_coinsanity_location_name
+from ..Locations import coinsanity_course_data, loc100Coin_table, location_table, coinsanity_location_table, \
+    get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
@@ -594,6 +595,63 @@ class CoinsanityGenerationTestBase(SM64TestBase):
     def test_thi_coinsanity_locations_use_shared_coins_region(self):
         location = self.multiworld.get_location("Tiny-Huge Island - 33 Coins", self.player)
         self.assertEqual(location.parent_region.name, "Tiny-Huge Island - Coins")
+
+
+class CoinsanityOverflowGenerationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "exclamation_boxes": Options.ExclamationBoxes.option_false,
+        "marios_hat": Options.MariosHat.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+        "rolling_logs": Options.RollingLogs.option_individual,
+        "purple_switches": Options.PurpleSwitches.option_individual,
+        "triple_jump": Options.TripleJump.option_per_level,
+        "long_jump": Options.LongJump.option_per_level,
+        "backflip": Options.Backflip.option_per_level,
+        "side_flip": Options.SideFlip.option_per_level,
+        "wall_kick": Options.WallKick.option_per_level,
+        "dive": Options.Dive.option_per_level,
+        "ground_pound": Options.GroundPound.option_per_level,
+        "kick": Options.Kick.option_per_level,
+        "climb": Options.Climb.option_per_level,
+        "ledge_grab": Options.LedgeGrab.option_per_level,
+        **{option_name: 1 for option_name in Options.coin_star_requirement_option_names},
+    }
+
+    def get_active_coin_counts_by_course(self):
+        active_locations = set(self.world.coinsanity_location_names)
+        return {
+            course_name: [
+                coin_count for coin_count in range(1, max_coin_star_requirement)
+                if get_coinsanity_location_name(course_name, coin_count) in active_locations
+            ]
+            for course_name, _course_offset, _option_name, max_coin_star_requirement in coinsanity_course_data
+        }
+
+    def test_overflow_adds_extra_coinsanity_locations_before_item_creation(self):
+        self.assertGreater(len(self.world.coinsanity_location_names), 0)
+        self.assertGreaterEqual(self.world.filler_count, 0)
+
+    def test_overflow_locations_at_coin_star_thresholds_are_distributed_evenly(self):
+        coin_counts_by_course = self.get_active_coin_counts_by_course()
+        location_counts = [len(coin_counts) for coin_counts in coin_counts_by_course.values()]
+        self.assertGreater(min(location_counts), 0)
+        self.assertLessEqual(max(location_counts) - min(location_counts), 1)
+        for course_name, coin_counts in coin_counts_by_course.items():
+            with self.subTest("Overflow coin checks are consecutive from threshold", course=course_name):
+                self.assertEqual(coin_counts, list(range(1, len(coin_counts) + 1)))
 
 
 # Exclamation Boxes

@@ -7,7 +7,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     randomized_action_item_names, per_level_move_area_names
-from .Locations import location_table, SM64Location, get_coinsanity_location_names
+from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
+    get_coinsanity_location_names
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
     move_randomizer_option_name_by_action
@@ -77,6 +78,7 @@ class SM64World(World):
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
+        self.add_overflow_coinsanity_locations()
         coin_check_region_names = {
             "Tiny-Huge Island": "Tiny-Huge Island - Coins",
         }
@@ -213,6 +215,64 @@ class SM64World(World):
         item_names += self.get_action_item_names()
 
         return item_names
+
+    def get_item_pool_item_count(self) -> int:
+        return len(self.get_progression_item_names()) + len(self.get_optional_item_names())
+
+    def get_coin_star_requirements_by_option(self) -> typing.Dict[str, int]:
+        return {
+            option_name: getattr(self.options, option_name).value
+            for option_name in coin_star_requirement_option_names
+        }
+
+    def add_overflow_coinsanity_locations(self) -> None:
+        item_count = self.get_item_pool_item_count()
+        fillable_location_count = (
+            len(self.multiworld.get_unfilled_locations(self.player))
+            + len(self.coinsanity_location_names)
+            - self.get_future_locked_location_count()
+        )
+        extra_location_count = item_count - fillable_location_count
+        if extra_location_count <= 0:
+            return
+
+        coin_star_requirements = self.get_coin_star_requirements_by_option()
+        selected_locations = set(self.coinsanity_location_names)
+        extra_locations: list[str] = []
+
+        below_threshold_pool = [
+            get_coinsanity_location_name(course_name, coin_count)
+            for course_name, _course_offset, option_name, _max_coins in coinsanity_course_data
+            for coin_count in range(1, coin_star_requirements[option_name])
+            if get_coinsanity_location_name(course_name, coin_count) not in selected_locations
+        ]
+        self.random.shuffle(below_threshold_pool)
+        for location_name in below_threshold_pool[:extra_location_count]:
+            selected_locations.add(location_name)
+            extra_locations.append(location_name)
+
+        remaining_location_count = extra_location_count - len(extra_locations)
+        coin_offset = 0
+        while remaining_location_count > 0:
+            added_this_round = False
+            for course_name, _course_offset, option_name, max_coin_star_requirement in coinsanity_course_data:
+                coin_count = coin_star_requirements[option_name] + coin_offset
+                if coin_count >= max_coin_star_requirement:
+                    continue
+                location_name = get_coinsanity_location_name(course_name, coin_count)
+                if location_name in selected_locations:
+                    continue
+                selected_locations.add(location_name)
+                extra_locations.append(location_name)
+                remaining_location_count -= 1
+                added_this_round = True
+                if remaining_location_count <= 0:
+                    break
+            if not added_this_round:
+                break
+            coin_offset += 1
+
+        self.coinsanity_location_names = (*self.coinsanity_location_names, *extra_locations)
 
     def get_future_locked_location_count(self) -> int:
         locked_count = 0
