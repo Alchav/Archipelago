@@ -236,16 +236,17 @@ class SM64World(World):
 
     def generate_basic(self):
         if not self.options.buddy_checks:
-            self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Bob-omb Battlefield"))
-            self.multiworld.get_location("Whomp's Fortress - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Whomp's Fortress"))
-            self.multiworld.get_location("Jolly Roger Bay - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Jolly Roger Bay"))
-            self.multiworld.get_location("Cool, Cool Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Cool, Cool Mountain"))
-            self.multiworld.get_location("Shifting Sand Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Shifting Sand Land"))
-            self.multiworld.get_location("Snowman's Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Snowman's Land"))
-            self.multiworld.get_location("Wet-Dry World - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Wet-Dry World"))
-            self.multiworld.get_location("Tall, Tall Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Tall, Tall Mountain"))
-            self.multiworld.get_location("Tiny-Huge Island - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Tiny-Huge Island"))
-            self.multiworld.get_location("Rainbow Ride - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock Rainbow Ride"))
+            self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Bob-omb Battlefield"))
+            self.multiworld.get_location("Whomp's Fortress - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Whomp's Fortress"))
+            self.multiworld.get_location("Jolly Roger Bay - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Jolly Roger Bay"))
+            self.multiworld.get_location("Cool, Cool Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Cool, Cool Mountain"))
+            self.multiworld.get_location("Shifting Sand Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Shifting Sand Land"))
+            self.multiworld.get_location("Snowman's Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Snowman's Land"))
+            self.multiworld.get_location("Wet-Dry World - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Wet-Dry World"))
+            self.multiworld.get_location("Tall, Tall Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Tall, Tall Mountain"))
+            self.multiworld.get_location("Tiny-Huge Island - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Tiny-Huge Island"))
+            self.multiworld.get_location("Rainbow Ride - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Rainbow Ride"))
+            self.multiworld.get_location("Wing Mario Over the Rainbow - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Wing Mario Over the Rainbow"))
 
         if not self.options.exclamation_boxes:
             self.multiworld.get_location("Cool, Cool Mountain - 1Up Block Near Snowman", self.player).place_locked_item(self.create_item("1Up Mushroom"))

@@ -6,7 +6,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
-    per_level_action_item_data_table, per_level_move_area_names
+    per_level_action_item_data_table, per_level_move_area_names, cannon_item_data_table
 from ..Locations import loc100Coin_table, location_table, coinsanity_location_table, get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -41,6 +41,12 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_drain_the_moat_location_id(self):
         self.assertEqual(location_table["Drain the Moat"], 3626245)
+
+    def test_wmotr_bob_omb_buddy_location_id(self):
+        self.assertEqual(location_table["Wing Mario Over the Rainbow - Bob-omb Buddy"], 3626525)
+
+    def test_wmotr_cannon_unlock_item_id(self):
+        self.assertEqual(cannon_item_data_table["Cannon Unlock - Wing Mario Over the Rainbow"].code, 3626525)
 
     def test_item_ids_match_client_doc(self):
         expected_ids = {
@@ -162,7 +168,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Castle - Ground Pound": ItemClassification.progression,
             "Castle - Triple Jump": ItemClassification.progression,
             "Castle - Kick": ItemClassification.filler,
-            "Castle - Climb": ItemClassification.filler,
+            "Castle - Climb": ItemClassification.progression,
         }
         for item_name, classification in expected_classifications.items():
             with self.subTest("Per-level move item classification", item=item_name):

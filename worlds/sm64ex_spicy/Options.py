@@ -174,47 +174,47 @@ class PerLevelCapItems(Toggle):
 
 
 class MariosHat(Toggle):
-    """Add Mario's Hat as a useful item. If disabled, the client starts with it unlocked."""
+    """Add Mario's Hat as a useful item. If disabled, the game starts with it unlocked."""
     display_name = "Include Mario's Hat"
 
 
 class HazyMazeCaveSwimmingBeast(Toggle):
-    """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the client starts with it unlocked."""
+    """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
 
 
 class RainbowRideCarpets(Toggle):
-    """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the client starts with them unlocked."""
+    """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Rainbow Ride - Carpets"
 
 
 class TinyHugeIslandWarpPipes(Toggle):
-    """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the client starts with them unlocked."""
+    """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
 
 
 class CoolCoolMountainBabyPenguins(Toggle):
-    """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the client starts with them unlocked."""
+    """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
 
 
 class SnowmansLandPenguin(Toggle):
-    """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the client starts with it unlocked."""
+    """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Snowman's Land - Penguin"
 
 
 class ShiftingSandLandPyramidElevator(Toggle):
-    """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the client starts with it unlocked."""
+    """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
 
 
 class WetDryWorldWaterLevelDiamond(Toggle):
-    """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the client starts with it unlocked."""
+    """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
 
 
 class TickTockClockSpinners(Toggle):
-    """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the client starts with them unlocked."""
+    """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Tick Tock Clock - Spinners"
 
 
@@ -230,11 +230,11 @@ class CheckerboardPlatforms(ArbitraryFeatureItemMode):
     """
     Choose how Checkerboard Platform unlocks are handled.
 
-    Not Shuffled - The client starts with all Checkerboard Platforms unlocked.
+    Not Shuffled - The game starts with all Checkerboard Platforms unlocked.
 
     Global - Shuffle one Checkerboard Platforms item that unlocks every applicable platform.
 
-    Individual - Shuffle separate level-specific Checkerboard Platforms items where supported by the client.
+    Individual - Shuffle separate level-specific Checkerboard Platforms items where supported by the game.
     """
     display_name = "Checkerboard Platform Items"
 
@@ -243,11 +243,11 @@ class RollingLogs(ArbitraryFeatureItemMode):
     """
     Choose how Rolling Log unlocks are handled.
 
-    Not Shuffled - The client starts with all Rolling Logs unlocked.
+    Not Shuffled - The game starts with all Rolling Logs unlocked.
 
     Global - Shuffle one Rolling Logs item that unlocks every applicable log.
 
-    Individual - Shuffle separate level-specific Rolling Log items where supported by the client.
+    Individual - Shuffle separate level-specific Rolling Log items where supported by the game.
     """
     display_name = "Rolling Log Items"
 
@@ -256,11 +256,11 @@ class PurpleSwitches(ArbitraryFeatureItemMode):
     """
     Choose how Purple Switch unlocks are handled.
 
-    Not Shuffled - The client starts with all Purple Switches unlocked.
+    Not Shuffled - The game starts with all Purple Switches unlocked.
 
     Global - Shuffle one Purple Switches item that unlocks every applicable switch.
 
-    Individual - Shuffle separate level-specific Purple Switch items where supported by the client.
+    Individual - Shuffle separate level-specific Purple Switch items where supported by the game.
     """
     display_name = "Purple Switch Items"
 
@@ -281,7 +281,7 @@ class AreaRandomizer(Choice):
 
 
 class BuddyChecks(Toggle):
-    """Bob-omb Buddies are checks, Cannon Unlocks are items"""
+    """Bob-omb Buddies are checks, cannon unlocks are items"""
     display_name = "Bob-omb Buddy Checks"
 
 
@@ -324,11 +324,12 @@ class TripleJump(MoveRandomizerMode):
     """
     Choose how Triple Jump is handled.
 
-    Not Shuffled - The client starts with Triple Jump unlocked.
+    Not Shuffled - The game starts with Triple Jump unlocked.
 
     Global - Shuffle one Triple Jump item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Triple Jump items for each area supported by the client.
+    Per Level - Shuffle separate Triple Jump items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Triple Jump item.
     """
     display_name = "Triple Jump"
 
@@ -337,11 +338,12 @@ class LongJump(MoveRandomizerMode):
     """
     Choose how Long Jump is handled.
 
-    Not Shuffled - The client starts with Long Jump unlocked.
+    Not Shuffled - The game starts with Long Jump unlocked.
 
     Global - Shuffle one Long Jump item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Long Jump items for each area supported by the client.
+    Per Level - Shuffle separate Long Jump items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Long Jump item.
     """
     display_name = "Long Jump"
 
@@ -350,11 +352,12 @@ class Backflip(MoveRandomizerMode):
     """
     Choose how Backflip is handled.
 
-    Not Shuffled - The client starts with Backflip unlocked.
+    Not Shuffled - The game starts with Backflip unlocked.
 
     Global - Shuffle one Backflip item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Backflip items for each area supported by the client.
+    Per Level - Shuffle separate Backflip items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Backflip item.
     """
     display_name = "Backflip"
 
@@ -363,11 +366,12 @@ class SideFlip(MoveRandomizerMode):
     """
     Choose how Side Flip is handled.
 
-    Not Shuffled - The client starts with Side Flip unlocked.
+    Not Shuffled - The game starts with Side Flip unlocked.
 
     Global - Shuffle one Side Flip item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Side Flip items for each area supported by the client.
+    Per Level - Shuffle separate Side Flip items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Side Flip item.
     """
     display_name = "Side Flip"
 
@@ -376,11 +380,12 @@ class WallKick(MoveRandomizerMode):
     """
     Choose how Wall Kick is handled.
 
-    Not Shuffled - The client starts with Wall Kick unlocked.
+    Not Shuffled - The game starts with Wall Kick unlocked.
 
     Global - Shuffle one Wall Kick item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Wall Kick items for each area supported by the client.
+    Per Level - Shuffle separate Wall Kick items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Wall Kick item.
     """
     display_name = "Wall Kick"
 
@@ -389,11 +394,12 @@ class Dive(MoveRandomizerMode):
     """
     Choose how Dive is handled.
 
-    Not Shuffled - The client starts with Dive unlocked.
+    Not Shuffled - The game starts with Dive unlocked.
 
     Global - Shuffle one Dive item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Dive items for each area supported by the client.
+    Per Level - Shuffle separate Dive items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Dive item.
     """
     display_name = "Dive"
 
@@ -402,11 +408,12 @@ class GroundPound(MoveRandomizerMode):
     """
     Choose how Ground Pound is handled.
 
-    Not Shuffled - The client starts with Ground Pound unlocked.
+    Not Shuffled - The game starts with Ground Pound unlocked.
 
     Global - Shuffle one Ground Pound item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Ground Pound items for each area supported by the client.
+    Per Level - Shuffle separate Ground Pound items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Ground Pound item.
     """
     display_name = "Ground Pound"
 
@@ -415,11 +422,12 @@ class Kick(MoveRandomizerMode):
     """
     Choose how Kick is handled.
 
-    Not Shuffled - The client starts with Kick unlocked.
+    Not Shuffled - The game starts with Kick unlocked.
 
     Global - Shuffle one Kick item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Kick items for each area supported by the client.
+    Per Level - Shuffle separate Kick items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Kick item.
     """
     display_name = "Kick"
 
@@ -428,11 +436,12 @@ class Climb(MoveRandomizerMode):
     """
     Choose how Climb is handled.
 
-    Not Shuffled - The client starts with Climb unlocked.
+    Not Shuffled - The game starts with Climb unlocked.
 
     Global - Shuffle one Climb item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Climb items for each area supported by the client.
+    Per Level - Shuffle separate Climb items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Climb item.
     """
     display_name = "Climb"
 
@@ -441,11 +450,12 @@ class LedgeGrab(MoveRandomizerMode):
     """
     Choose how Ledge Grab is handled.
 
-    Not Shuffled - The client starts with Ledge Grab unlocked.
+    Not Shuffled - The game starts with Ledge Grab unlocked.
 
     Global - Shuffle one Ledge Grab item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Ledge Grab items for each area supported by the client.
+    Per Level - Shuffle separate Ledge Grab items for each main course. Castle, castle grounds, secret courses,
+    cap stages, and Bowser stages use the Castle - Ledge Grab item.
     """
     display_name = "Ledge Grab"
 
@@ -520,7 +530,7 @@ class MusicShuffle(Choice):
 
     Shuffle - Archipelago sends a deterministic per-area music map.
 
-    Random on Load - The client picks a random song each time an area loads.
+    Random on Load - The game picks a random song each time an area loads.
     """
     display_name = "Music Shuffle"
     option_off = 0

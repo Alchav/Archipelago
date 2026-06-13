@@ -180,7 +180,7 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
 def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Cool, Cool Mountain"
     reachable_coins = 130
-    has_cannon = state.has("Cannon Unlock Cool, Cool Mountain", player)
+    has_cannon = state.has("Cannon Unlock - Cool, Cool Mountain", player)
     if has_cannon or allows_moveless(state, player):
         reachable_coins += 11
     if has_cannon:
@@ -293,7 +293,7 @@ def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool:
     reachable_coins = 102
-    if state.has("Cannon Unlock Snowman's Land", player):
+    if state.has("Cannon Unlock - Snowman's Land", player):
         reachable_coins += 3
     if state.can_reach("Snowman's Land - Snowman's Big Head", "Location", player):
         reachable_coins += 2
@@ -345,7 +345,7 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
     def route_has_downtown(water_levels: Set[str]) -> bool:
         return (
             "highest" in water_levels
-            or state.has("Cannon Unlock Wet-Dry World", player)
+            or state.has("Cannon Unlock - Wet-Dry World", player)
             or route_has_top(water_levels) and allows_moveless(state, player) and has_triple_jump and has_dive
         )
 
@@ -410,7 +410,7 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
     has_long_jump = has_action(state, player, "Long Jump", level_name)
     has_top_return_movement = has_tiny_huge_island_top_return_movement(state, player)
     has_huge_piranha_area_reentry = (has_warp_pipes and has_thi_purple_switches) or has_top_return_movement
-    has_huge_top_gate = state.has("Cannon Unlock Tiny-Huge Island", player) or has_top_return_movement
+    has_huge_top_gate = state.has("Cannon Unlock - Tiny-Huge Island", player) or has_top_return_movement
     has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
@@ -439,7 +439,7 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
                 route_total += 4
             if can_reach_wiggler:
                 route_total += 10
-            if state.has("Cannon Unlock Tiny-Huge Island", player) or has_long_jump:
+            if state.has("Cannon Unlock - Tiny-Huge Island", player) or has_long_jump:
                 route_total += 5
         if can_reach_huge_piranha_area and (not has_huge_side or has_huge_piranha_area_reentry):
             route_total += 10
@@ -937,8 +937,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Fire Sea Red Coins", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea 1Up Block Near Poles", "LG/WK")
     # Wing Mario Over the Rainbow
-    rf.assign_rule("Wing Mario Over the Rainbow Red Coins", "TJ+WC")
-    rf.assign_rule("Wing Mario Over the Rainbow 1Up Block", "TJ+WC")
+    rf.assign_rule("Wing Mario Over the Rainbow Red Coins", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow 1Up Block", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "WC | LJ+CAPLESS")
     # Bowser in the Sky
     rf.assign_rule("Bowser in the Sky - Top",
                    "PURPLE_SWITCHES & CL+TJ | PURPLE_SWITCHES & CL+SF+LG | "
@@ -1161,6 +1162,9 @@ class RuleFactory:
             "Wet-Dry World": "Wet-Dry World - Vanish Cap",
         },
     }
+    cannon_item_name_by_level = {
+        "Wing Mario Over the Rainbow": "Cannon Unlock - Wing Mario Over the Rainbow",
+    }
 
     class SM64LogicException(Exception):
         pass
@@ -1179,7 +1183,7 @@ class RuleFactory:
 
     def assign_rule(self, target_name: str, rule_expr: str):
         target = self.multiworld.get_location(target_name, self.player) if target_name in location_table else self.multiworld.get_entrance(target_name, self.player)
-        cannon_name = "Cannon Unlock " + target_name.split(" - ", 1)[0]
+        cannon_name = self.get_cannon_item_name(target_name)
         try:
             rule = self.build_rule(
                 rule_expr, cannon_name, self.get_cap_item_names(target_name),
@@ -1229,7 +1233,7 @@ class RuleFactory:
         star_rule = nop_condition
         painting_rule = nop_condition
         if painting_lvl_name is not None and self.painting_randomizer:
-            painting_item_name = f"Painting Unlock {painting_lvl_name}"
+            painting_item_name = f"Painting Unlock - {painting_lvl_name}"
             painting_rule = lambda state: state.has(painting_item_name, self.player)
         return lambda state: star_rule(state) and painting_rule(state)
 
@@ -1250,6 +1254,10 @@ class RuleFactory:
             if target_name.startswith(level_name):
                 return level_name
         return "Castle"
+
+    def get_cannon_item_name(self, target_name: str) -> str:
+        level_name = self.get_level_name_from_target(target_name)
+        return self.cannon_item_name_by_level.get(level_name, "Cannon Unlock - " + target_name.split(" - ", 1)[0])
 
     def get_cap_item_names(self, target_name: str) -> dict[str, str]:
         level_name = self.get_level_name_from_target(target_name)
