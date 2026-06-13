@@ -405,13 +405,13 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
             if can_reach_five_secrets:
                 route_total += 32
         if has_huge_side:
-            route_total += 119
+            route_total += 75
             if can_reach_large_top:
                 route_total += 10
             if can_reach_wiggler:
                 route_total += 10
             if has_action(state, player, "Ground Pound", level_name):
-                route_total += 10
+                route_total += 54
             if has_action(state, player, "Wall Kick", level_name):
                 route_total += 4
             if state.has("Cannon Unlock Tiny-Huge Island", player) or has_action(

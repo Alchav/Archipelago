@@ -1099,10 +1099,10 @@ class TinyHugeIslandCoinStar33AccessTestBase(TinyHugeIslandCoinStarAccessTestBas
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar120FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar76FromTinyAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 120,
+        "tiny_huge_island_coin_star_requirement": 76,
     }
 
     def test_tiny_start_reaches_huge_coins_with_pipes(self):
@@ -1120,10 +1120,10 @@ class TinyHugeIslandCoinStar120FromTinyAccessTestBase(TinyHugeIslandCoinStarAcce
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar119AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar75AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 119,
+        "tiny_huge_island_coin_star_requirement": 75,
     }
 
     def test_huge_start_coins_reach_coin_star(self):
@@ -1133,10 +1133,10 @@ class TinyHugeIslandCoinStar119AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar120FromHugeAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar76FromHugeAccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 120,
+        "tiny_huge_island_coin_star_requirement": 76,
     }
 
     def test_huge_start_reaches_tiny_coin_with_pipes(self):
@@ -1151,10 +1151,10 @@ class TinyHugeIslandCoinStar120FromHugeAccessTestBase(TinyHugeIslandCoinStarAcce
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar123AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar79AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 123,
+        "tiny_huge_island_coin_star_requirement": 79,
     }
 
     def test_wall_kick_coins_reach_coin_star(self):
@@ -1165,10 +1165,10 @@ class TinyHugeIslandCoinStar123AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar124AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar80AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 124,
+        "tiny_huge_island_coin_star_requirement": 80,
     }
 
     def test_cannon_coins_reach_coin_star(self):
@@ -1193,10 +1193,10 @@ class TinyHugeIslandCoinStar129AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar130AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar86AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 130,
+        "tiny_huge_island_coin_star_requirement": 86,
     }
 
     def test_large_top_coins_reach_coin_star(self):
