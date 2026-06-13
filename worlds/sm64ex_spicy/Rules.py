@@ -8,7 +8,7 @@ from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
     sm64_ttc_entrances, sm64_wdw_entrances
-from .Items import action_item_data_table, cap_item_data_table, per_level_move_area_names
+from .Items import action_item_data_table, cap_item_data_table, per_level_move_area_names, ut_glitch_item_name
 
 
 initial_reachable_entrances = (
@@ -99,11 +99,11 @@ def has_action(state: CollectionState, player: int, action: str, level_name: str
 
 
 def allows_moveless(state: CollectionState, player: int) -> bool:
-    return not state.multiworld.worlds[player].options.strict_move_requirements
+    return not state.multiworld.worlds[player].options.strict_move_requirements or state.has(ut_glitch_item_name, player)
 
 
 def allows_capless(state: CollectionState, player: int) -> bool:
-    return not state.multiworld.worlds[player].options.strict_cap_requirements
+    return not state.multiworld.worlds[player].options.strict_cap_requirements or state.has(ut_glitch_item_name, player)
 
 
 def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
@@ -1405,11 +1405,11 @@ class RuleFactory:
                 raise RuleFactory.SM64LogicException(f"No per-level cap item for token '{token}' in this target.")
             return item
         if token == "CAPLESS":
-            return self.capless
+            return True if self.capless else ut_glitch_item_name
         if token == "CANNLESS":
-            return self.cannonless
+            return True if self.cannonless else ut_glitch_item_name
         if token == "MOVELESS":
-            return self.moveless
+            return True if self.moveless else ut_glitch_item_name
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)

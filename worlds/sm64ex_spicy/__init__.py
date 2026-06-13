@@ -6,7 +6,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
-    randomized_action_item_names, per_level_move_area_names
+    randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names
 from .Music import build_music_slot_data
@@ -49,6 +49,7 @@ class SM64World(World):
     required_client_version = (0, 3, 5)
 
     ut_can_gen_without_yaml = True
+    glitches_item_name = ut_glitch_item_name
 
     area_connections: typing.Dict[int, int]
 
