@@ -48,6 +48,8 @@ class SM64World(World):
 
     required_client_version = (0, 3, 5)
 
+    ut_can_gen_without_yaml = True
+
     area_connections: typing.Dict[int, int]
 
     options_dataclass = SM64Options
@@ -58,8 +60,62 @@ class SM64World(World):
     filler_count: int
     star_costs: typing.Dict[str, int]
     coinsanity_location_names: typing.Tuple[str, ...]
+    music_slot_data: typing.Dict[str, typing.Any] | None
+    using_slot_coinsanity_locations: bool
+
+    slot_option_names = (
+        "area_rando",
+        "buddy_checks",
+        "exclamation_boxes",
+        "combined_progressive_keys",
+        "enable_locked_paintings",
+        "triple_jump",
+        "long_jump",
+        "backflip",
+        "side_flip",
+        "wall_kick",
+        "dive",
+        "ground_pound",
+        "kick",
+        "climb",
+        "ledge_grab",
+        "strict_cap_requirements",
+        "per_level_cap_items",
+        "hazy_maze_cave_swimming_beast",
+        "rainbow_ride_carpets",
+        "checkerboard_platforms",
+        "tiny_huge_island_warp_pipes",
+        "cool_cool_mountain_baby_penguins",
+        "snowmans_land_penguin",
+        "shifting_sand_land_pyramid_elevator",
+        "rolling_logs",
+        "purple_switches",
+        "wet_dry_world_water_level_diamond",
+        "tick_tock_clock_spinners",
+        "strict_cannon_requirements",
+        "strict_move_requirements",
+        "marios_hat",
+        "mario_colors",
+        "music_shuffle",
+        "coinsanity",
+        *coin_star_requirement_option_names,
+        "death_link",
+        "completion_type",
+    )
 
     def generate_early(self):
+        slot_data = self.get_re_gen_slot_data()
+        self.area_connections = {}
+        self.music_slot_data = None
+        self.using_slot_coinsanity_locations = False
+        if slot_data:
+            self.restore_options_from_slot_data(slot_data)
+            self.area_connections = {
+                int(entrance): int(destination)
+                for entrance, destination in slot_data.get("AreaRando", {}).items()
+            }
+            self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
+
         self.move_rando_bitvec = 0
         double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
         for action in randomized_action_item_names:
@@ -73,12 +129,19 @@ class SM64World(World):
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names
         }
-        self.coinsanity_location_names = get_coinsanity_location_names(
-            coin_star_requirements, self.options.coinsanity.value)
+        if "CoinsanityLocations" in slot_data:
+            self.coinsanity_location_names = tuple(slot_data["CoinsanityLocations"])
+            self.using_slot_coinsanity_locations = True
+        else:
+            self.coinsanity_location_names = get_coinsanity_location_names(
+                coin_star_requirements, self.options.coinsanity.value)
+        if "MoveRandoVec" in slot_data:
+            self.move_rando_bitvec = slot_data["MoveRandoVec"]
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
-        self.add_overflow_coinsanity_locations()
+        if not self.using_slot_coinsanity_locations:
+            self.add_overflow_coinsanity_locations()
         coin_check_region_names = {
             "Tiny-Huge Island": "Tiny-Huge Island - Coins",
         }
@@ -89,7 +152,6 @@ class SM64World(World):
             region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
 
     def set_rules(self):
-        self.area_connections = {}
         set_rules(self.multiworld, self.options, self.player, self.area_connections, self.move_rando_bitvec)
         if self.topology_present:
             # Write area_connections to spoiler log
@@ -358,21 +420,53 @@ class SM64World(World):
             start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
         return start_inventory
 
+    def get_re_gen_slot_data(self) -> typing.Dict[str, typing.Any]:
+        return getattr(self.multiworld, "re_gen_passthrough", {}).get(self.game, {})
+
+    def restore_options_from_slot_data(self, slot_data: typing.Dict[str, typing.Any]) -> None:
+        for option_name, value in slot_data.get("Options", {}).items():
+            if hasattr(self.options, option_name):
+                getattr(self.options, option_name).value = value
+        for option_name, value in zip(coin_star_requirement_option_names, slot_data.get("CoinStarRequirements", [])):
+            getattr(self.options, option_name).value = value
+        if "MusicShuffleMode" in slot_data:
+            self.options.music_shuffle.value = slot_data["MusicShuffleMode"]
+
+    def get_music_slot_data_from_slot_data(
+            self, slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any] | None:
+        if "MusicShuffleMode" not in slot_data:
+            return None
+        music_slot_data = {"MusicShuffleMode": slot_data["MusicShuffleMode"]}
+        if "MusicMap" in slot_data:
+            music_slot_data["MusicMap"] = slot_data["MusicMap"]
+        return music_slot_data
+
+    def get_music_slot_data(self) -> typing.Dict[str, typing.Any]:
+        if self.music_slot_data is None:
+            self.music_slot_data = build_music_slot_data(
+                self.options.music_shuffle.value, self.random)
+        return self.music_slot_data.copy()
+
     def fill_slot_data(self):
         slot_data = {
+            "Options": self.options.as_dict(*self.slot_option_names),
             "AreaRando": self.area_connections,
             "MoveRandoVec": self.move_rando_bitvec,
             "PaintingRando": self.options.enable_locked_paintings.value,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
+            "CoinsanityLocations": list(self.coinsanity_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
         }
-        slot_data.update(build_music_slot_data(
-            self.options.music_shuffle.value, self.random))
+        slot_data.update(self.get_music_slot_data())
         mario_colors = self.get_mario_colors_slot_data()
         if mario_colors:
             slot_data["MarioColors"] = mario_colors
+        return slot_data
+
+    @staticmethod
+    def interpret_slot_data(slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
         return slot_data
 
     def get_apsm64ex_slot_data(self):

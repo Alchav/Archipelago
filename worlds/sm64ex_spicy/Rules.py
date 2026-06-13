@@ -654,32 +654,39 @@ def ensure_reachable_starting_check(
     raise Exception("Unable to place enough reachable starting checks in initially accessible SM64 entrances.")
 
 def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_connections: dict, move_rando_bitvec: int):
-    randomized_level_to_paintings = sm64_level_to_paintings.copy()
-    randomized_level_to_secrets = sm64_level_to_secrets.copy()
+    using_slot_area_connections = bool(area_connections)
+    if using_slot_area_connections:
+        randomized_entrances = {
+            int(entrance_lvl): sm64_level_to_entrances[int(destination_lvl)]
+            for entrance_lvl, destination_lvl in area_connections.items()
+        }
+    else:
+        randomized_level_to_paintings = sm64_level_to_paintings.copy()
+        randomized_level_to_secrets = sm64_level_to_secrets.copy()
 
-    if options.area_rando > options.area_rando.option_Off:  # Some randomization is happening, randomize Courses
-        randomized_level_to_paintings = shuffle_dict_keys(multiworld, sm64_level_to_paintings)
+        if options.area_rando > options.area_rando.option_Off:  # Some randomization is happening, randomize Courses
+            randomized_level_to_paintings = shuffle_dict_keys(multiworld, sm64_level_to_paintings)
 
-    if options.area_rando == options.area_rando.option_Courses_and_Secrets_Separate:  # Randomize Secrets as well
-        randomized_level_to_secrets = shuffle_dict_keys(multiworld, sm64_level_to_secrets)
+        if options.area_rando == options.area_rando.option_Courses_and_Secrets_Separate:  # Randomize Secrets as well
+            randomized_level_to_secrets = shuffle_dict_keys(multiworld, sm64_level_to_secrets)
 
-    randomized_entrances = {**randomized_level_to_paintings, **randomized_level_to_secrets} # Concatenate courses and secrets for rest
+        randomized_entrances = {**randomized_level_to_paintings, **randomized_level_to_secrets} # Concatenate courses and secrets for rest
 
-    if options.area_rando == options.area_rando.option_Courses_and_Secrets:  # Randomize Courses and Secrets in one pool
-        randomized_entrances = shuffle_dict_keys(multiworld, randomized_entrances)
-    
-    if options.area_rando > options.area_rando.option_Off:
-        # Now, fix assignment if necessary
-        swapdict = randomized_entrances.copy()
-        # Guarantee BITFS is not mapped to DDD
-        fix_reg(randomized_entrances, SM64Levels.BOWSER_IN_THE_FIRE_SEA, {"Dire, Dire Docks"}, swapdict, multiworld)
-        # Guarantee COTMC is not mapped to HMC, cuz thats impossible. If BitFS -> HMC, also no COTMC -> DDD.
-        if randomized_entrances[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Hazy Maze Cave":
-            fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP,
-                    {"Hazy Maze Cave", "Dire, Dire Docks"}, swapdict, multiworld)
-        else:
-            fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP, {"Hazy Maze Cave"}, swapdict,
-                    multiworld)
+        if options.area_rando == options.area_rando.option_Courses_and_Secrets:  # Randomize Courses and Secrets in one pool
+            randomized_entrances = shuffle_dict_keys(multiworld, randomized_entrances)
+
+        if options.area_rando > options.area_rando.option_Off:
+            # Now, fix assignment if necessary
+            swapdict = randomized_entrances.copy()
+            # Guarantee BITFS is not mapped to DDD
+            fix_reg(randomized_entrances, SM64Levels.BOWSER_IN_THE_FIRE_SEA, {"Dire, Dire Docks"}, swapdict, multiworld)
+            # Guarantee COTMC is not mapped to HMC, cuz thats impossible. If BitFS -> HMC, also no COTMC -> DDD.
+            if randomized_entrances[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Hazy Maze Cave":
+                fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP,
+                        {"Hazy Maze Cave", "Dire, Dire Docks"}, swapdict, multiworld)
+            else:
+                fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP, {"Hazy Maze Cave"}, swapdict,
+                        multiworld)
 
     randomized_entrances_s = {sm64_level_to_entrances[entrance_lvl]: destination for (entrance_lvl,destination) in randomized_entrances.items()}
     randomized_entrance_connections = {}
@@ -1054,7 +1061,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
              lambda state: state.can_reach("Basement", 'Region', player) and
              state.has("Progressive MIPS", player, 2))
 
-    if options.area_rando > options.area_rando.option_Off:
+    if options.area_rando > options.area_rando.option_Off and not using_slot_area_connections:
         ensure_reachable_starting_check(
             multiworld, options, player, randomized_entrances, randomized_entrances_s,
             randomized_entrance_connections)
