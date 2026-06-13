@@ -64,9 +64,12 @@ move_area_name_aliases = {
     "The Princess's Secret Slide": "Castle",
     "The Secret Aquarium": "Castle",
     "Wing Mario Over the Rainbow": "Castle",
-    "Tower of the Wing Cap": "Cap Switch Stages",
-    "Cavern of the Metal Cap": "Cap Switch Stages",
-    "Vanish Cap Under the Moat": "Cap Switch Stages",
+    "Tower of the Wing Cap": "Castle",
+    "Cavern of the Metal Cap": "Castle",
+    "Vanish Cap Under the Moat": "Castle",
+    "Bowser in the Dark World": "Castle",
+    "Bowser in the Fire Sea": "Castle",
+    "Bowser in the Sky": "Castle",
 }
 
 

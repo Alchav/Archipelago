@@ -266,7 +266,7 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Castle - Side Flip"))
         self.assertTrue(self.can_reach_region("The Secret Aquarium"))
 
-    def test_cap_switch_stage_rule_uses_shared_move_item(self):
+    def test_cap_switch_stage_rule_uses_castle_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 2)
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
@@ -275,26 +275,29 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
 
-        self.collect(self.world.create_item("Cap Switch Stages - Wall Kick"))
+        self.collect(self.world.create_item("Castle - Wall Kick"))
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Switch"))
 
-    def test_cap_switch_stage_names_use_shared_move_items(self):
+    def test_secret_stage_names_use_castle_move_items(self):
         for level_name in (
                 "Tower of the Wing Cap",
                 "Cavern of the Metal Cap",
                 "Vanish Cap Under the Moat",
+                "Bowser in the Dark World",
+                "Bowser in the Fire Sea",
+                "Bowser in the Sky",
         ):
-            with self.subTest("Cap switch stage move alias", level=level_name):
+            with self.subTest("Secret stage move alias", level=level_name):
                 self.assertEqual(
                     get_per_level_action_item_name(level_name, "Triple Jump"),
-                    "Cap Switch Stages - Triple Jump")
+                    "Castle - Triple Jump")
 
     def test_wmotR_rule_uses_castle_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 5)
         self.collect(self.world.create_item("Wing Cap"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
 
-        self.collect(self.world.create_item("Cap Switch Stages - Triple Jump"))
+        self.collect(self.world.create_item("Bob-omb Battlefield - Triple Jump"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
 
         self.collect(self.world.create_item("Castle - Triple Jump"))
@@ -2492,6 +2495,16 @@ class PerLevelCapAccessTestBase(SM64TestBase):
     def test_tower_wing_cap_access(self):
         self.collect(self.get_item_by_name("Wing Cap Light"))
         self.assertTrue(self.can_reach_location("Tower of the Wing Cap Red Coins"))
+
+    def test_wmotr_wing_cap_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.collect(self.world.create_item("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.collect(self.get_item_by_name("Castle - Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
 
     def test_hmc_metal_cap_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))

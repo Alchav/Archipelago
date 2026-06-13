@@ -141,25 +141,28 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)
 
     def test_per_level_move_item_ids_match_client_table(self):
-        self.assertEqual(len(per_level_action_item_data_table), 200)
+        self.assertEqual(len(per_level_action_item_data_table), 160)
         self.assertEqual(item_table["Bob-omb Battlefield - Triple Jump"], 3626325)
         self.assertEqual(item_table["Bob-omb Battlefield - Ledge Grab"], 3626334)
         self.assertEqual(item_table["Whomp's Fortress - Triple Jump"], 3626335)
         self.assertEqual(item_table["Castle - Triple Jump"], 3626475)
-        self.assertEqual(item_table["Cap Switch Stages - Triple Jump"], 3626515)
-        self.assertEqual(item_table["Cap Switch Stages - Ledge Grab"], 3626524)
+        self.assertEqual(item_table["Castle - Ledge Grab"], 3626484)
         self.assertNotIn("Wing Mario Over the Rainbow - Triple Jump", item_table)
         self.assertNotIn("Vanish Cap Under the Moat - Triple Jump", item_table)
         self.assertNotIn("Cavern of the Metal Cap - Triple Jump", item_table)
         self.assertNotIn("Tower of the Wing Cap - Triple Jump", item_table)
+        self.assertNotIn("Bowser in the Dark World - Triple Jump", item_table)
+        self.assertNotIn("Bowser in the Fire Sea - Triple Jump", item_table)
+        self.assertNotIn("Bowser in the Sky - Triple Jump", item_table)
+        self.assertNotIn("Cap Switch Stages - Triple Jump", item_table)
 
     def test_current_per_level_move_item_classifications(self):
         expected_classifications = {
             "Bob-omb Battlefield - Dive": ItemClassification.useful,
-            "Bowser in the Dark World - Wall Kick": ItemClassification.filler,
-            "Cap Switch Stages - Ground Pound": ItemClassification.useful,
-            "Cap Switch Stages - Triple Jump": ItemClassification.progression,
-            "Cap Switch Stages - Long Jump": ItemClassification.filler,
+            "Castle - Ground Pound": ItemClassification.progression,
+            "Castle - Triple Jump": ItemClassification.progression,
+            "Castle - Kick": ItemClassification.filler,
+            "Castle - Climb": ItemClassification.filler,
         }
         for item_name, classification in expected_classifications.items():
             with self.subTest("Per-level move item classification", item=item_name):
@@ -183,7 +186,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                 "Bob-omb Battlefield - Triple Jump",
                 "Whomp's Fortress - Wall Kick",
                 "Castle - Dive",
-                "Cap Switch Stages - Triple Jump",
+                "Castle - Triple Jump",
         ):
             with self.subTest("Multi-check per-level move item is progression", item=item_name):
                 self.assertEqual(
