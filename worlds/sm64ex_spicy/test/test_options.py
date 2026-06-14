@@ -9,7 +9,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
     cannon_item_data_table
 from ..Locations import coinsanity_course_data, loc100Coin_table, locFreestanding1Up_table, location_table, \
-    coinsanity_location_table, get_coinsanity_location_name
+    coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
@@ -650,6 +650,18 @@ class CoinsanityLocationTableTestBase(SM64TestBase):
             "Whomp's Fortress - 1 Coin": 3627146,
             "Jolly Roger Bay - 1 Coin": 3627287,
             "Rainbow Ride - 145 Coins": 3629089,
+            "The Princess's Secret Slide - 1 Coin": 3629193,
+            "The Princess's Secret Slide - 80 Coins": 3629272,
+            "The Secret Aquarium - 1 Coin": 3629273,
+            "Wing Mario Over the Rainbow - 1 Coin": 3629329,
+            "Tower of the Wing Cap - 1 Coin": 3629385,
+            "Tower of the Wing Cap - 63 Coins": 3629447,
+            "Vanish Cap Under the Moat - 1 Coin": 3629448,
+            "Cavern of the Metal Cap - 1 Coin": 3629475,
+            "Bowser in the Dark World - 1 Coin": 3629522,
+            "Bowser in the Fire Sea - 1 Coin": 3629602,
+            "Bowser in the Sky - 1 Coin": 3629682,
+            "Bowser in the Sky - 76 Coins": 3629757,
         }
         for location_name, location_id in expected_ids.items():
             with self.subTest("Coinsanity location ID", location=location_name):
@@ -674,7 +686,8 @@ class CoinsanityLocationTableTestBase(SM64TestBase):
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coinsanity_location_table), 2076)
+        self.assertEqual(len(coinsanity_location_table), 2641)
+        self.assertEqual(len(secret_stage_coinsanity_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):
                 self.assertNotIn(get_coinsanity_location_name(course_name, coin_count), coinsanity_location_table)
@@ -704,6 +717,50 @@ class CoinsanityGenerationTestBase(SM64TestBase):
     def test_thi_coinsanity_locations_use_shared_coins_region(self):
         location = self.multiworld.get_location("Tiny-Huge Island - 33 Coins", self.player)
         self.assertEqual(location.parent_region.name, "Tiny-Huge Island - Coins")
+
+
+class SecretStageCoinsanityOffTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_false,
+    }
+
+    def test_secret_stage_coinsanity_requires_toggle(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertFalse(active_locations.intersection(secret_stage_coinsanity_location_table))
+
+
+class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coinsanity": 50,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 16,
+    }
+
+    def test_secret_stage_coinsanity_generates_locations(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("The Princess's Secret Slide - 1 Coin", active_locations)
+        self.assertIn("The Secret Aquarium - 1 Coin", active_locations)
+        self.assertIn("Wing Mario Over the Rainbow - 1 Coin", active_locations)
+
+    def test_tower_of_the_wing_cap_max_coin_option_controls_location_count(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        active_totwc_locations = {
+            location_name for location_name in active_locations
+            if location_name in secret_stage_coinsanity_location_table
+            and location_name.startswith("Tower of the Wing Cap - ")
+        }
+        self.assertEqual(len(active_totwc_locations), 8)
+        self.assertIn("Tower of the Wing Cap - 1 Coin", active_locations)
+        self.assertIn("Tower of the Wing Cap - 15 Coins", active_locations)
+        self.assertNotIn("Tower of the Wing Cap - 16 Coins", active_locations)
+        self.assertNotIn("Tower of the Wing Cap - 63 Coins", active_locations)
+
+    def test_secret_stage_coinsanity_locations_use_stage_regions(self):
+        location = self.multiworld.get_location("Wing Mario Over the Rainbow - 1 Coin", self.player)
+        self.assertEqual(location.parent_region.name, "Wing Mario Over the Rainbow")
 
 
 class CoinsanityOverflowGenerationTestBase(SM64TestBase):

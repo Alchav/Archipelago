@@ -523,6 +523,99 @@ def rainbow_ride_coins(state: CollectionState, player: int, coins: int) -> bool:
     return coins <= min(reachable_coins, 146)
 
 
+def has_wing_cap(state: CollectionState, player: int, level_name: str) -> bool:
+    options = state.multiworld.worlds[player].options
+    item_name = f"{level_name} - Wing Cap" if options.per_level_cap_items else "Wing Cap"
+    return state.has(item_name, player)
+
+
+def has_vanish_cap(state: CollectionState, player: int, level_name: str) -> bool:
+    options = state.multiworld.worlds[player].options
+    item_name = f"{level_name} - Vanish Cap" if options.per_level_cap_items else "Vanish Cap"
+    return state.has(item_name, player)
+
+
+def princess_secret_slide_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 50
+    if has_action(state, player, "Ground Pound", "The Princess's Secret Slide"):
+        reachable_coins += 30
+    return coins <= reachable_coins
+
+
+def secret_aquarium_coins(state: CollectionState, player: int, coins: int) -> bool:
+    return coins <= 56
+
+
+def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Wing Mario Over the Rainbow"
+    reachable_coins = 2
+    has_wing = has_wing_cap(state, player, level_name)
+    if has_wing:
+        reachable_coins += 46
+        if state.has("Wing Mario Over the Rainbow - Cannon Unlock", player):
+            reachable_coins = 56
+    else:
+        if has_action(state, player, "Long Jump", level_name):
+            reachable_coins += 2
+            if has_action(state, player, "Ledge Grab", level_name):
+                reachable_coins += 2
+    return coins <= reachable_coins
+
+
+def tower_of_the_wing_cap_coins(state: CollectionState, player: int, coins: int) -> bool:
+    return coins <= state.multiworld.worlds[player].options.tower_of_the_wing_cap_coinsanity_max_coins.value
+
+
+def vanish_cap_under_the_moat_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Vanish Cap Under the Moat"
+    has_movement = any(has_action(state, player, action, level_name)
+                       for action in ("Triple Jump", "Ledge Grab", "Side Flip", "Backflip"))
+    has_checkerboards = has_checkerboard_platforms(state, player, level_name)
+    reachable_coins = 13
+    if has_movement:
+        reachable_coins += 3
+        if has_checkerboards:
+            reachable_coins += 8
+            if has_vanish_cap(state, player, level_name):
+                reachable_coins += 3
+    return coins <= reachable_coins
+
+
+def cavern_of_the_metal_cap_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 31
+    if has_metal_cap(state, player, "Cavern of the Metal Cap") or allows_capless(state, player):
+        reachable_coins += 16
+    return coins <= reachable_coins
+
+
+def bowser_in_the_dark_world_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 73
+    if has_purple_switches(state, player, "Bowser in the Dark World"):
+        reachable_coins += 7
+    return coins <= reachable_coins
+
+
+def bowser_in_the_fire_sea_coins(state: CollectionState, player: int, coins: int) -> bool:
+    reachable_coins = 30
+    if has_action(state, player, "Climb", "Bowser in the Fire Sea"):
+        reachable_coins += 50
+    return coins <= reachable_coins
+
+
+def bowser_in_the_sky_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Bowser in the Sky"
+    reachable_coins = 23
+    if has_action(state, player, "Ground Pound", level_name):
+        reachable_coins += 10
+    if state.can_reach("Bowser in the Sky - Chuckya", "Region", player):
+        reachable_coins += 9
+    if state.can_reach("Bowser in the Sky - Arrow Ride", "Region", player):
+        reachable_coins += 18
+    if state.can_reach("Bowser in the Sky - Top", "Region", player):
+        reachable_coins += 16
+    return coins <= reachable_coins
+
+
 def shuffle_dict_keys(multiworld: MultiWorld, dictionary: dict) -> dict:
     keys = list(dictionary.keys())
     values = list(dictionary.values())
@@ -1034,10 +1127,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", "WC")
     rf.assign_rule("Wing Mario Over the Rainbow - Hanging Pole 1-Up", "WC+CANN")
     # Bowser in the Sky
+    rf.assign_rule("Bowser in the Sky - Chuckya",
+                   "TJ/SF/LG/BF/MOVELESS")
+    rf.assign_rule("Bowser in the Sky - Arrow Ride",
+                   "PURPLE_SWITCHES | MOVELESS")
     rf.assign_rule("Bowser in the Sky - Top",
-                   "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Sky - Middle",
-                   "CL+TJ | CL+SF+LG | MOVELESS & TJ+WK+LG")
+                   "CL | MOVELESS & TJ+WK+LG")
     # Coin Stars
     set_rule(
         multiworld.get_location("Bob-omb Battlefield - Coins Star", player),
@@ -1120,6 +1215,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Tiny-Huge Island": tiny_huge_island_coins,
         "Tick Tock Clock": tick_tock_clock_coins,
         "Rainbow Ride": rainbow_ride_coins,
+        "The Princess's Secret Slide": princess_secret_slide_coins,
+        "The Secret Aquarium": secret_aquarium_coins,
+        "Wing Mario Over the Rainbow": wing_mario_over_the_rainbow_coins,
+        "Tower of the Wing Cap": tower_of_the_wing_cap_coins,
+        "Vanish Cap Under the Moat": vanish_cap_under_the_moat_coins,
+        "Cavern of the Metal Cap": cavern_of_the_metal_cap_coins,
+        "Bowser in the Dark World": bowser_in_the_dark_world_coins,
+        "Bowser in the Fire Sea": bowser_in_the_fire_sea_coins,
+        "Bowser in the Sky": bowser_in_the_sky_coins,
     }
     for location in multiworld.get_locations(player):
         coinsanity_location = parse_coinsanity_location_name(location.name)

@@ -909,23 +909,27 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
-    def test_bowser_in_the_sky_top_requires_purple_switches(self):
+    def test_bowser_in_the_sky_region_chain(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
-        self.collect([
-            self.get_item_by_name("Climb"),
-            self.get_item_by_name("Triple Jump"),
-        ])
         self.assertTrue(self.can_reach_region("Bowser in the Sky"))
-        self.assertTrue(self.can_reach_region("Bowser in the Sky - Middle"))
         self.assertTrue(self.can_reach_location("Bowser in the Sky - Ferris Wheel 1-Up"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - Spark Pole Coins 1-Up"))
-        self.assertFalse(self.can_reach_region("Bowser in the Sky - Top"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - Arrow Ride 1-Up"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - Final Platform 1-Up"))
+        self.assertFalse(self.can_reach_region("Bowser in the Sky - Chuckya"))
+        self.assertFalse(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - Spark Pole Coins 1-Up"))
+
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Chuckya"))
+        self.assertFalse(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
-        self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - Spark Pole Coins 1-Up"))
         self.assertTrue(self.can_reach_location("Bowser in the Sky - Arrow Ride 1-Up"))
+        self.assertFalse(self.can_reach_region("Bowser in the Sky - Top"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - Final Platform 1-Up"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
         self.assertTrue(self.can_reach_location("Bowser in the Sky - Final Platform 1-Up"))
 
     def test_cool_cool_mountain_lil_penguin_lost_requires_baby_penguins(self):
@@ -1095,6 +1099,45 @@ class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+
+class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+    }
+
+    def collect_bowser_in_the_sky_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+
+    def test_bowser_in_the_sky_coin_sources(self):
+        self.collect_bowser_in_the_sky_access()
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 23 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 24 Coins"))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 33 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 34 Coins"))
+
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Chuckya"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 42 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 43 Coins"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 60 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 61 Coins"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 76 Coins"))
 
 
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):

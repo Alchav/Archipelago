@@ -23,6 +23,20 @@ coinsanity_course_data = (
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )
 
+secret_stage_coinsanity_location_base_id = 3629193
+
+secret_stage_coinsanity_data = (
+    ("The Princess's Secret Slide", 3629193, 80),
+    ("The Secret Aquarium", 3629273, 56),
+    ("Wing Mario Over the Rainbow", 3629329, 56),
+    ("Tower of the Wing Cap", 3629385, 63),
+    ("Vanish Cap Under the Moat", 3629448, 27),
+    ("Cavern of the Metal Cap", 3629475, 47),
+    ("Bowser in the Dark World", 3629522, 80),
+    ("Bowser in the Fire Sea", 3629602, 80),
+    ("Bowser in the Sky", 3629682, 76),
+)
+
 
 def get_coinsanity_location_name(course_name: str, coin_count: int) -> str:
     return f"{course_name} - {coin_count} Coin{'s' if coin_count != 1 else ''}"
@@ -48,6 +62,19 @@ def get_coinsanity_location_names(coin_star_requirements: dict[str, int], percen
     )
 
 
+def get_secret_stage_coinsanity_location_names(
+        percentage: int, tower_of_the_wing_cap_max_coins: int) -> tuple[str, ...]:
+    max_coins_by_stage = {
+        course_name: tower_of_the_wing_cap_max_coins if course_name == "Tower of the Wing Cap" else max_coins
+        for course_name, _base_id, max_coins in secret_stage_coinsanity_data
+    }
+    return tuple(
+        get_coinsanity_location_name(course_name, coin_count)
+        for course_name, max_coins in max_coins_by_stage.items()
+        for coin_count in get_coinsanity_thresholds(max_coins + 1, percentage)
+    )
+
+
 def parse_coinsanity_location_name(location_name: str) -> tuple[str, int] | None:
     if location_name not in coinsanity_location_table:
         return None
@@ -59,6 +86,17 @@ coinsanity_location_table = {
     get_coinsanity_location_name(course_name, coin_count): coinsanity_location_base_id + course_offset + coin_count - 1
     for course_name, course_offset, _option_name, max_coin_star_requirement in coinsanity_course_data
     for coin_count in range(1, max_coin_star_requirement)
+}
+
+secret_stage_coinsanity_location_table = {
+    get_coinsanity_location_name(course_name, coin_count): base_id + coin_count - 1
+    for course_name, base_id, max_coins in secret_stage_coinsanity_data
+    for coin_count in range(1, max_coins + 1)
+}
+
+coinsanity_location_table = {
+    **coinsanity_location_table,
+    **secret_stage_coinsanity_location_table,
 }
 
 #Bob-omb Battlefield

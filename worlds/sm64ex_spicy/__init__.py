@@ -8,7 +8,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
-    get_coinsanity_location_names
+    get_coinsanity_location_names, get_secret_stage_coinsanity_location_names
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
     move_randomizer_option_name_by_action
@@ -103,6 +103,8 @@ class SM64World(World):
         "mario_colors",
         "music_shuffle",
         "coinsanity",
+        "secret_stage_coinsanity",
+        "tower_of_the_wing_cap_coinsanity_max_coins",
         *coin_star_requirement_option_names,
         "death_link",
         "completion_type",
@@ -140,6 +142,9 @@ class SM64World(World):
         else:
             self.coinsanity_location_names = get_coinsanity_location_names(
                 coin_star_requirements, self.options.coinsanity.value)
+            if self.options.secret_stage_coinsanity:
+                self.coinsanity_location_names += get_secret_stage_coinsanity_location_names(
+                    self.options.coinsanity.value, self.options.tower_of_the_wing_cap_coinsanity_max_coins.value)
         if "MoveRandoVec" in slot_data:
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
 

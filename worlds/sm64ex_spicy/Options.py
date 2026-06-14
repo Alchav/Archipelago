@@ -22,6 +22,19 @@ class Coinsanity(Range):
     default = 0
 
 
+class SecretStageCoinsanity(Toggle):
+    """Include Coinsanity checks for secret stages and Bowser stages."""
+    display_name = "Secret Stage Coinsanity"
+
+
+class TowerOfTheWingCapCoinsanityMaxCoins(Range):
+    """Maximum Tower of the Wing Cap coin threshold used for secret stage Coinsanity."""
+    display_name = "Tower of the Wing Cap Coinsanity Max Coins"
+    range_start = 0
+    range_end = 63
+    default = 31
+
+
 class BobOmbBattlefieldCoinStarRequirement(CoinStarRequirement):
     """Coins needed for the Coin Star in Bob-omb Battlefield."""
     display_name = "Bob-omb Battlefield Coin Star Requirement"
@@ -612,6 +625,8 @@ sm64_options_groups = [
     ]),
     OptionGroup("Coin Star Requirements", [
         Coinsanity,
+        SecretStageCoinsanity,
+        TowerOfTheWingCapCoinsanityMaxCoins,
         *coin_star_requirement_options,
     ]),
     OptionGroup("Ability Options", [
@@ -666,6 +681,8 @@ class SM64Options(PerGameCommonOptions):
     mario_colors: MarioColors
     music_shuffle: MusicShuffle
     coinsanity: Coinsanity
+    secret_stage_coinsanity: SecretStageCoinsanity
+    tower_of_the_wing_cap_coinsanity_max_coins: TowerOfTheWingCapCoinsanityMaxCoins
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement

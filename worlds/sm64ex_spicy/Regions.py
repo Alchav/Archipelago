@@ -453,14 +453,15 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     regBitS = create_region("Bowser in the Sky", player, multiworld)
     create_locs(regBitS, "Bowser in the Sky - 1-Up Block",
-                "Bowser in the Sky - Before Tilting Platform 1-Up")
-    bits_middle = create_subregion(regBitS, "Bowser in the Sky - Middle",
-                                   "Bowser in the Sky - Ferris Wheel 1-Up",
-                                   "Bowser in the Sky - Spark Pole Coins 1-Up")
-    bits_top = create_subregion(bits_middle, "Bowser in the Sky - Top", "Bowser in the Sky - Red Coins",
-                                "Bowser in the Sky - Arrow Ride 1-Up",
+                "Bowser in the Sky - Before Tilting Platform 1-Up",
+                "Bowser in the Sky - Ferris Wheel 1-Up")
+    bits_chuckya = create_subregion(regBitS, "Bowser in the Sky - Chuckya")
+    bits_arrow_ride = create_subregion(bits_chuckya, "Bowser in the Sky - Arrow Ride",
+                                       "Bowser in the Sky - Spark Pole Coins 1-Up",
+                                       "Bowser in the Sky - Arrow Ride 1-Up")
+    bits_top = create_subregion(bits_arrow_ride, "Bowser in the Sky - Top", "Bowser in the Sky - Red Coins",
                                 "Bowser in the Sky - Final Platform 1-Up")
-    regBitS.subregions = [bits_middle, bits_top]
+    regBitS.subregions = [bits_chuckya, bits_arrow_ride, bits_top]
 
     if not options.freestanding_1ups:
         remove_locs(multiworld, player, set(locFreestanding1Up_table))
