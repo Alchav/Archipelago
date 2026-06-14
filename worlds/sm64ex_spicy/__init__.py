@@ -6,7 +6,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
-    randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name
+    bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names
 from .Music import build_music_slot_data
@@ -68,6 +68,7 @@ class SM64World(World):
         "area_rando",
         "buddy_checks",
         "exclamation_boxes",
+        "freestanding_1ups",
         "combined_progressive_keys",
         "enable_locked_paintings",
         "triple_jump",
@@ -91,6 +92,7 @@ class SM64World(World):
         "shifting_sand_land_pyramid_elevator",
         "rolling_logs",
         "purple_switches",
+        "bowser_stage_1ups",
         "wet_dry_world_water_level_diamond",
         "tick_tock_clock_spinners",
         "strict_cannon_requirements",
@@ -249,6 +251,21 @@ class SM64World(World):
             return []
         return list(optional_item_data_table)
 
+    def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
+        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_global:
+            return ["Bowser Stage Extra 1-Ups"]
+        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_individual:
+            return [
+                "Bowser in the Dark World - Extra 1-Ups",
+                "Bowser in the Fire Sea - Extra 1-Ups",
+            ]
+        return []
+
+    def get_unrandomized_bowser_stage_1up_item_names(self) -> typing.List[str]:
+        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_always_spawn:
+            return ["Bowser Stage Extra 1-Ups"]
+        return []
+
     def get_action_item_names(self) -> typing.List[str]:
         item_names = []
         for action in randomized_action_item_names:
@@ -269,6 +286,7 @@ class SM64World(World):
             if item_name != "Progressive MIPS"
         ]
         item_names += self.get_cap_item_names()
+        item_names += self.get_bowser_stage_1up_item_names()
 
         if self.options.buddy_checks:
             item_names += list(cannon_item_data_table)
@@ -416,7 +434,10 @@ class SM64World(World):
 
     def get_start_inventory_slot_data(self) -> typing.Dict[int, int]:
         start_inventory = {}
-        for item_name in self.get_unrandomized_arbitrary_item_names() + self.get_unrandomized_optional_item_names():
+        for item_name in (
+                self.get_unrandomized_arbitrary_item_names()
+                + self.get_unrandomized_optional_item_names()
+                + self.get_unrandomized_bowser_stage_1up_item_names()):
             item_id = item_table[item_name]
             start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
         return start_inventory
@@ -459,6 +480,8 @@ class SM64World(World):
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
             "CoinsanityLocations": list(self.coinsanity_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
+            "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,
+            "OneUpChecks": self.options.freestanding_1ups.value
         }
         slot_data.update(self.get_music_slot_data())
         mario_colors = self.get_mario_colors_slot_data()

@@ -140,6 +140,12 @@ optional_item_data_table: dict[str, SM64ItemData] = {
     "Mario's Hat": SM64ItemData(sm64ex_base_id + 320, ItemClassification.useful),
 }
 
+bowser_stage_1up_item_data_table: dict[str, SM64ItemData] = {
+    "Bowser Stage Extra 1-Ups": SM64ItemData(sm64ex_base_id + 556, ItemClassification.progression_deprioritized),
+    "Bowser in the Dark World - Extra 1-Ups": SM64ItemData(sm64ex_base_id + 557, ItemClassification.progression_deprioritized),
+    "Bowser in the Fire Sea - Extra 1-Ups": SM64ItemData(sm64ex_base_id + 558, ItemClassification.progression_deprioritized),
+}
+
 arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **simple_arbitrary_item_data_table,
     **global_arbitrary_item_data_table,
@@ -274,7 +280,7 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Lethal Lava Land - Ledge Grab": SM64ItemData(sm64ex_base_id + 394, ItemClassification.useful),
     # Shifting Sand Land
     "Shifting Sand Land - Triple Jump": SM64ItemData(sm64ex_base_id + 395),
-    "Shifting Sand Land - Long Jump": SM64ItemData(sm64ex_base_id + 396, ItemClassification.useful),
+    "Shifting Sand Land - Long Jump": SM64ItemData(sm64ex_base_id + 396, ItemClassification.progression_deprioritized_skip_balancing),
     "Shifting Sand Land - Backflip": SM64ItemData(sm64ex_base_id + 397),
     "Shifting Sand Land - Side Flip": SM64ItemData(sm64ex_base_id + 398),
     "Shifting Sand Land - Wall Kick": SM64ItemData(sm64ex_base_id + 399, ItemClassification.useful),
@@ -410,6 +416,7 @@ item_data_table = {
     **cap_item_data_table,
     **arbitrary_item_data_table,
     **optional_item_data_table,
+    **bowser_stage_1up_item_data_table,
     **action_item_data_table,
     **per_level_action_item_data_table,
     **cannon_item_data_table,

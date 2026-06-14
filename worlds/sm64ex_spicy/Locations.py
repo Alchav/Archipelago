@@ -314,16 +314,137 @@ locBitS_table = {
 
 #Secret Stars found inside the Castle
 locSS_table = {
-    "Toad (Basement)": 3626168,
-    "Toad (Second Floor)": 3626169,
-    "Toad (Third Floor)": 3626170,
-    "MIPS 1": 3626171,
-    "MIPS 2": 3626172,
-    "Yoshi": 3626244
+    "Castle - Toad (Basement)": 3626168,
+    "Castle - Toad (Second Floor)": 3626169,
+    "Castle - Toad (Third Floor)": 3626170,
+    "Castle - MIPS 1": 3626171,
+    "Castle - MIPS 2": 3626172,
+    "Castle - Yoshi": 3626244
 }
 
 locBasement_table = {
-    "Drain the Moat": 3626245
+    "Castle - Drain the Moat": 3626245
+}
+
+locFreestanding1Up_table = {
+    "Big Boo's Haunt - Shed Roof 1-Up": 3629100,
+
+    "Bowser in the Dark World - Center Overhang 1-Up": 3629101,
+    "Bowser in the Dark World - Right Tilting Platform Base 1-Up": 3629102,
+    "Bowser in the Dark World - Left Tilting Platform Base 1-Up": 3629103,
+    "Bowser in the Dark World - Far Overhang 1-Up": 3629104,
+
+    "Bowser in the Fire Sea - First Stone Structure 1-Up": 3629105,
+    "Bowser in the Fire Sea - Elevator Pole 1-Up": 3629106,
+    "Bowser in the Fire Sea - Moving Platform Trigger 1-Up": 3629107,
+    "Bowser in the Fire Sea - Near Poles 1-Up": 3629108,
+    "Bowser in the Fire Sea - Second Stone Structure 1-Up": 3629109,
+
+    "Bowser in the Sky - Before Tilting Platform 1-Up": 3629110,
+    "Bowser in the Sky - Arrow Ride 1-Up": 3629111,
+    "Bowser in the Sky - Spark Pole Coins 1-Up": 3629112,
+    "Bowser in the Sky - Final Platform 1-Up": 3629113,
+    "Bowser in the Sky - Ferris Wheel 1-Up": 3629114,
+
+    "Bob-omb Battlefield - Flower Ring 1-Up": 3629115,
+    "Bob-omb Battlefield - Switch Platform 1-Up": 3629116,
+    "Bob-omb Battlefield - Cannon Tree 1-Up": 3629117,
+
+    "Castle - Third Tree From Waterfall 1-Up": 3629118,
+    "Castle - Roof Back 1-Up": 3629119,
+    "Castle - Roof Center 1-Up": 3629120,
+    "Castle - Roof Front 1-Up": 3629121,
+    "Castle - Bridge Coins 1-Up": 3629122,
+    "Castle - Left Butterfly 1-Up": 3629123,
+    "Castle - Right Butterfly 1-Up": 3629124,
+
+    "Castle - Jolly Roger Bay Lobby 1-Up": 3629125,
+    "Castle - Basement Four Corners 1-Up": 3629126,
+
+    "Cool, Cool Mountain - Snowman Tree 1-Up": 3629127,
+    "Cool, Cool Mountain - Slide Shortcut Entry 1-Up": 3629128,
+    "Cool, Cool Mountain - Slide Shortcut Exit 1-Up": 3629129,
+
+    "Cavern of the Metal Cap - Alcove 1-Up": 3629130,
+
+    "Dire, Dire Docks - Whirlpool Clam 1-Up": 3629131,
+
+    "Jolly Roger Bay - Underwater Coin Ring 1-Up": 3629132,
+    "Jolly Roger Bay - Stone Pillar 1-Up": 3629133,
+
+    "Lethal Lava Land - Flamethrower Ring 1-Up": 3629134,
+    "Lethal Lava Land - Spinning Platform Flame 1-Up": 3629135,
+    "Lethal Lava Land - Northeast Platform 1-Up": 3629136,
+    "Lethal Lava Land - Southern Curve 1-Up": 3629137,
+    "Lethal Lava Land - Raised Brown Platform 1-Up": 3629138,
+    "Lethal Lava Land - Volcano Curve 1-Up": 3629139,
+    "Lethal Lava Land - Northwest Curve 1-Up": 3629140,
+    "Lethal Lava Land - Volcano Pole 1-Up": 3629141,
+
+    "The Princess's Secret Slide - Star Room Corners 1-Up": 3629142,
+    "The Princess's Secret Slide - Slide 1-Up": 3629143,
+
+    "Rainbow Ride - Tricky Triangles 1-Up": 3629144,
+    "Rainbow Ride - Rotating Bridge Platform 1-Up": 3629145,
+    "Rainbow Ride - Ship Pole 1-Up": 3629146,
+    "Rainbow Ride - Ship Tip 1-Up": 3629147,
+    "Rainbow Ride - House Path Donut Lifts 1-Up": 3629148,
+    "Rainbow Ride - Donut Top of Red Coin Maze 1-Up": 3629149,
+
+    "The Secret Aquarium - Center Coin Ring 1-Up": 3629150,
+
+    "Snowman's Land - Snowman Tree 1-Up": 3629151,
+    "Snowman's Land - Igloo Ice Block 1-Up": 3629152,
+
+    "Shifting Sand Land - Oasis Tree 1-Up": 3629153,
+    "Shifting Sand Land - Near Quicksand Pits 1-Up": 3629154,
+    "Shifting Sand Land - Above Quicksand Pit 1-Up": 3629155,
+    "Shifting Sand Land - Pyramid Platform Triggers 1-Up": 3629156,
+    "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up": 3629157,
+    "Shifting Sand Land - Pyramid Right Path 1-Up": 3629158,
+
+    "Tiny-Huge Island - Cannon Tree 1-Up": 3629159,
+    "Tiny-Huge Island - Beach Coins 1-Up": 3629160,
+    "Tiny-Huge Island - Boss Bass 1-Up": 3629161,
+    "Tiny-Huge Island - Koopa Area Butterfly 1-Up": 3629162,
+    "Tiny-Huge Island - Cannon Tree Butterfly 1-Up": 3629163,
+    "Tiny-Huge Island - Start Butterfly 1-Up": 3629164,
+    "Tiny-Huge Island - Red Coin Cave 1-Up": 3629165,
+
+    "Tick Tock Clock - Pole 1-Up": 3629166,
+    "Tick Tock Clock - Moving Bars Platform 1-Up": 3629167,
+
+    "Tall, Tall Mountain - Start Edge 1-Up": 3629168,
+    "Tall, Tall Mountain - Monty Mole Platform 1-Up": 3629169,
+    "Tall, Tall Mountain - Waterfall Gap 1-Up": 3629170,
+    "Tall, Tall Mountain - Vine Platform Butterfly 1-Up": 3629171,
+    "Tall, Tall Mountain - Slide Start Room Corners 1-Up": 3629172,
+    "Tall, Tall Mountain - Slide Entry Ledge 1-Up": 3629173,
+    "Tall, Tall Mountain - Slide First 1-Up": 3629174,
+    "Tall, Tall Mountain - Slide Second 1-Up": 3629175,
+
+    "Vanish Cap Under the Moat - Upper Platform 1-Up": 3629176,
+    "Vanish Cap Under the Moat - Lower Platform 1-Up": 3629177,
+    "Vanish Cap Under the Moat - Red Coin Platform 1-Up": 3629178,
+
+    "Wet-Dry World - Cylinder Lower 1-Up": 3629179,
+    "Wet-Dry World - Cylinder Upper 1-Up": 3629180,
+    "Wet-Dry World - Downtown Center Coin Ring 1-Up": 3629181,
+
+    "Whomp's Fortress - Flagpole 1-Up": 3629182,
+    "Whomp's Fortress - Rotating Platform Coins 1-Up": 3629183,
+    "Whomp's Fortress - Flower Patch Butterfly 1-Up": 3629184,
+
+    "Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up": 3629185,
+    "Wing Mario Over the Rainbow - Cloud 1-Up": 3629186,
+    "Wing Mario Over the Rainbow - Hanging Pole 1-Up": 3629187,
+
+    "Whomp's Fortress - Tower Alcove 1-Up": 3629188,
+
+    "Hazy Maze Cave - Blue Coin Trail Monty Moles": 3629189,
+    "Tall, Tall Mountain - Upper Monty Moles": 3629190,
+    "Hazy Maze Cave - Twin Hole Monty Moles": 3629191,
+    "Tall, Tall Mountain - Lower Monty Moles": 3629192,
 }
 
 # Correspond to 3626000 + course index * 7 + star index, then secret stars, then keys, then Coin Stars
@@ -332,4 +453,4 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
-                  **locSS_table, **locBasement_table, **coinsanity_location_table}
+                  **locSS_table, **locBasement_table, **locFreestanding1Up_table, **coinsanity_location_table}

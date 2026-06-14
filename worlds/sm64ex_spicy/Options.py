@@ -267,6 +267,27 @@ class PurpleSwitches(ArbitraryFeatureItemMode):
     display_name = "Purple Switch Items"
 
 
+class BowserStage1Ups(Choice):
+    """
+    Choose how Bowser stage 1-Up objects that normally depend on Bowser key flags are handled.
+
+    Vanilla - The game uses vanilla key-based spawning, and the affected 1-Up checks logically require those keys.
+
+    Global - Shuffle one Bowser Stage Extra 1-Ups item that spawns all affected Bowser in the Dark World and Bowser in the
+    Fire Sea 1-Ups.
+
+    Individual - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
+
+    Always Spawn - The game starts with the global Bowser Stage Extra 1-Ups unlock.
+    """
+    display_name = "Bowser Stage 1-Up Behavior"
+    option_vanilla = 0
+    option_global = 1
+    option_individual = 2
+    option_always_spawn = 3
+    default = 0
+
+
 class StrictCannonRequirements(DefaultOnToggle):
     """If disabled, Stars that expect cannons may have to be acquired without them.
     Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled."""
@@ -292,6 +313,11 @@ class ExclamationBoxes(Toggle):
     Adds 29 locations to the pool."""
     display_name = "Randomize 1Up !-Blocks"
     alias_1Ups_Only = 1
+
+
+class Freestanding1Ups(Toggle):
+    """Include freestanding 1-Up mushrooms as Archipelago location checks."""
+    display_name = "Randomize Freestanding 1-Ups"
 
 
 class CompletionType(Choice):
@@ -546,6 +572,7 @@ sm64_options_groups = [
         AreaRandomizer,
         BuddyChecks,
         ExclamationBoxes,
+        Freestanding1Ups,
         CombinedProgressiveKeys,
         EnableLockedPaintings,
         StrictCapRequirements,
@@ -562,6 +589,7 @@ sm64_options_groups = [
         ShiftingSandLandPyramidElevator,
         RollingLogs,
         PurpleSwitches,
+        BowserStage1Ups,
         WetDryWorldWaterLevelDiamond,
         TickTockClockSpinners,
     ]),
@@ -586,6 +614,7 @@ class SM64Options(PerGameCommonOptions):
     area_rando: AreaRandomizer
     buddy_checks: BuddyChecks
     exclamation_boxes: ExclamationBoxes
+    freestanding_1ups: Freestanding1Ups
     combined_progressive_keys: CombinedProgressiveKeys
     enable_locked_paintings: EnableLockedPaintings
     triple_jump: TripleJump
@@ -609,6 +638,7 @@ class SM64Options(PerGameCommonOptions):
     shifting_sand_land_pyramid_elevator: ShiftingSandLandPyramidElevator
     rolling_logs: RollingLogs
     purple_switches: PurpleSwitches
+    bowser_stage_1ups: BowserStage1Ups
     wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
     tick_tock_clock_spinners: TickTockClockSpinners
     strict_cannon_requirements: StrictCannonRequirements

@@ -41,6 +41,7 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -163,32 +164,33 @@ class CastleFeatureAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
     def test_mips_access(self):
-        self.assertFalse(self.can_reach_location("MIPS 1"))
+        self.assertFalse(self.can_reach_location("Castle - MIPS 1"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertFalse(self.can_reach_location("MIPS 1"))
+        self.assertFalse(self.can_reach_location("Castle - MIPS 1"))
         self.collect(self.get_item_by_name("Progressive MIPS"))
-        self.assertTrue(self.can_reach_location("MIPS 1"))
-        self.assertFalse(self.can_reach_location("MIPS 2"))
+        self.assertTrue(self.can_reach_location("Castle - MIPS 1"))
+        self.assertFalse(self.can_reach_location("Castle - MIPS 2"))
         self.collect(self.get_item_by_name("Progressive MIPS"))
-        self.assertTrue(self.can_reach_location("MIPS 2"))
+        self.assertTrue(self.can_reach_location("Castle - MIPS 2"))
 
     def test_castle_toad_access(self):
-        self.assertFalse(self.can_reach_location("Toad (Basement)"))
+        self.assertFalse(self.can_reach_location("Castle - Toad (Basement)"))
         self.collect(self.get_item_by_name("Castle Toads"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertTrue(self.can_reach_location("Toad (Basement)"))
+        self.assertTrue(self.can_reach_location("Castle - Toad (Basement)"))
 
-        self.assertFalse(self.can_reach_location("Toad (Second Floor)"))
+        self.assertFalse(self.can_reach_location("Castle - Toad (Second Floor)"))
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.assertTrue(self.can_reach_location("Toad (Second Floor)"))
+        self.assertTrue(self.can_reach_location("Castle - Toad (Second Floor)"))
 
-        self.assertFalse(self.can_reach_location("Toad (Third Floor)"))
+        self.assertFalse(self.can_reach_location("Castle - Toad (Third Floor)"))
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.assertTrue(self.can_reach_location("Toad (Third Floor)"))
+        self.assertTrue(self.can_reach_location("Castle - Toad (Third Floor)"))
 
     def test_castle_feature_regions(self):
         self.assertFalse(self.can_reach_region("Big Boo's Haunt"))
@@ -206,9 +208,9 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
 
     def test_drain_the_moat_access_uses_old_vcutm_entrance_logic(self):
-        self.assertFalse(self.can_reach_location("Drain the Moat"))
+        self.assertFalse(self.can_reach_location("Castle - Drain the Moat"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertTrue(self.can_reach_location("Drain the Moat"))
+        self.assertTrue(self.can_reach_location("Castle - Drain the Moat"))
 
     def test_vcutm_entrance_not_unlocked_by_old_basement_route(self):
         self.assertFalse(self.can_reach_region("Vanish Cap Under the Moat"))
@@ -221,17 +223,296 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Vanish Cap Under the Moat"))
 
     def test_yoshi_access(self):
-        self.assertFalse(self.can_reach_location("Yoshi"))
+        self.assertFalse(self.can_reach_location("Castle - Yoshi"))
         self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
-        self.assertFalse(self.can_reach_location("Yoshi"))
+        self.assertFalse(self.can_reach_location("Castle - Yoshi"))
         self.collect(self.get_item_by_name("Yoshi"))
-        self.assertTrue(self.can_reach_location("Yoshi"))
+        self.assertTrue(self.can_reach_location("Castle - Yoshi"))
 
     def test_yoshi_access_requires_castle_cannon(self):
         self.collect(self.get_item_by_name("Yoshi"))
-        self.assertFalse(self.can_reach_location("Yoshi"))
+        self.assertFalse(self.can_reach_location("Castle - Yoshi"))
         self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
-        self.assertTrue(self.can_reach_location("Yoshi"))
+        self.assertTrue(self.can_reach_location("Castle - Yoshi"))
+
+    def test_castle_roof_1ups_require_castle_cannon_region(self):
+        for location_name in (
+                "Castle - Roof Back 1-Up",
+                "Castle - Roof Center 1-Up",
+                "Castle - Roof Front 1-Up",
+        ):
+            with self.subTest(location=location_name):
+                self.assertFalse(self.can_reach_location(location_name))
+        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
+        for location_name in (
+                "Castle - Roof Back 1-Up",
+                "Castle - Roof Center 1-Up",
+                "Castle - Roof Front 1-Up",
+        ):
+            with self.subTest(location=location_name):
+                self.assertTrue(self.can_reach_location(location_name))
+
+
+class CastleOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+    }
+
+    def test_castle_tree_1up_accepts_side_flip(self):
+        self.assertFalse(self.can_reach_location("Castle - Third Tree From Waterfall 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Castle - Third Tree From Waterfall 1-Up"))
+
+    def test_castle_bridge_coins_1up_requires_moat_drained_route_and_movement(self):
+        self.collect([
+            self.get_item_by_name("Progressive Basement Key"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+        self.assertTrue(self.can_reach_location("Castle - Drain the Moat"))
+        self.assertFalse(self.can_reach_location("Castle - Bridge Coins 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Castle - Bridge Coins 1-Up"))
+
+    def test_castle_jolly_roger_bay_lobby_1up_uses_secret_aquarium_logic(self):
+        self.assertFalse(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
+
+
+class CourseOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_bob_cannon_tree_1up_accepts_side_flip(self):
+        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Cannon Tree 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Cannon Tree 1-Up"))
+
+    def test_wf_flagpole_1up_requires_climb(self):
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Flagpole 1-Up"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Flagpole 1-Up"))
+
+    def test_jrb_stone_pillar_1up_requires_cannon(self):
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Stone Pillar 1-Up"))
+        self.collect(self.get_item_by_name("Cannon Unlock - Jolly Roger Bay"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Stone Pillar 1-Up"))
+
+    def test_jrb_underwater_coin_ring_1up_has_no_extra_rule(self):
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Underwater Coin Ring 1-Up"))
+
+    def test_ccm_snowman_tree_1up_accepts_side_flip(self):
+        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Snowman Tree 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Snowman Tree 1-Up"))
+
+    def test_ccm_slide_1ups_have_no_extra_rule(self):
+        for location_name in (
+                "Cool, Cool Mountain - Slide Shortcut Entry 1-Up",
+                "Cool, Cool Mountain - Slide Shortcut Exit 1-Up",
+        ):
+            with self.subTest(location=location_name):
+                self.assertTrue(self.can_reach_location(location_name))
+
+    def test_bbh_shed_roof_1up_accepts_side_flip(self):
+        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
+
+    def test_bbh_shed_roof_1up_accepts_wall_kick(self):
+        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
+
+    def test_ssl_oasis_tree_1up_accepts_side_flip(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Oasis Tree 1-Up"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Oasis Tree 1-Up"))
+
+    def test_ssl_near_quicksand_pits_1up_has_no_extra_rule(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Near Quicksand Pits 1-Up"))
+
+    def test_ssl_above_quicksand_pit_1up_accepts_wing_cap(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+
+    def test_ssl_above_quicksand_pit_1up_accepts_long_jump(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+
+    def test_ssl_pyramid_1ups_accept_movement(self):
+        self.collect_basement_access()
+        for location_name in (
+                "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
+                "Shifting Sand Land - Pyramid Right Path 1-Up",
+        ):
+            with self.subTest(location=location_name):
+                self.assertFalse(self.can_reach_location(location_name))
+        self.collect(self.get_item_by_name("Side Flip"))
+        for location_name in (
+                "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
+                "Shifting Sand Land - Pyramid Right Path 1-Up",
+        ):
+            with self.subTest(location=location_name):
+                self.assertTrue(self.can_reach_location(location_name))
+
+
+class VanillaBowserStageOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_bitdw_key_flag_1ups_use_vanilla_key_logic(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+        self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Right Tilting Platform Base 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Left Tilting Platform Base 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Far Overhang 1-Up"))
+
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Left Tilting Platform Base 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Far Overhang 1-Up"))
+
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Far Overhang 1-Up"))
+
+    def test_bitfs_key_flag_1ups_use_vanilla_key_logic(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
+        self.assertTrue(self.can_reach_region("Bowser in the Fire Sea"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+
+
+class GlobalBowserStageOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_global,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_global_bowser_stage_1up_item_unlocks_bitdw_key_flag_1ups(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+        self.collect(self.get_item_by_name("Bowser Stage Extra 1-Ups"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Left Tilting Platform Base 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Far Overhang 1-Up"))
+
+    def test_global_bowser_stage_1up_item_unlocks_bitfs_key_flag_1ups(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
+        self.collect(self.get_item_by_name("Bowser Stage Extra 1-Ups"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+
+
+class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_global,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_near_poles_1up_accepts_ledge_grab_like_near_poles_block(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Unlock Bowser in the Fire Sea"),
+            self.get_item_by_name("Bowser Stage Extra 1-Ups"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea 1Up Block Near Poles"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea 1Up Block Near Poles"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+
+
+class IndividualBowserStageOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_individual,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_individual_bowser_stage_1up_items_are_stage_specific(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+        self.collect(self.get_item_by_name("Bowser in the Fire Sea - Extra 1-Ups"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+        self.collect(self.get_item_by_name("Bowser in the Dark World - Extra 1-Ups"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
+
+
+class AlwaysSpawnBowserStageOneUpAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_always_spawn,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_bowser_stage_1ups_are_always_spawned_in_logic(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Center Overhang 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Left Tilting Platform Base 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Far Overhang 1-Up"))
+
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
 
 
 class LevelFeatureAccessTestBase(SM64TestBase):
@@ -336,6 +617,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -393,6 +675,32 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Rainbow Ride - Maze"))
         self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
 
+    def test_rainbow_ride_1up_placement_and_logic(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Beneath the Pole"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Tricky Triangles 1-Up"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Rotating Bridge Platform 1-Up"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Tricky Triangles!"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Tricky Triangles 1-Up"))
+
+    def test_rainbow_ride_red_coin_maze_donut_uses_maze_logic(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - 1Up Block Top of Red Coin Maze"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
+
     def test_rainbow_ride_cruiser_still_requires_carpets(self):
         self.collect_third_floor_access()
         self.collect([
@@ -407,6 +715,26 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_region("Rainbow Ride - Cruiser"))
+
+    def test_rainbow_ride_ship_pole_requires_cruiser_and_climb(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Cruiser"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Ship Tip 1-Up"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Ship Pole 1-Up"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Ship Pole 1-Up"))
+
+    def test_rainbow_ride_house_path_donut_uses_house_logic(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - House Path Donut Lifts 1-Up"))
+
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - The Big House in the Sky"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - House Path Donut Lifts 1-Up"))
 
     def test_whomps_fortress_top_access(self):
         self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
@@ -588,10 +916,17 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
             self.get_item_by_name("Triple Jump"),
         ])
         self.assertTrue(self.can_reach_region("Bowser in the Sky"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Middle"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - Ferris Wheel 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - Spark Pole Coins 1-Up"))
         self.assertFalse(self.can_reach_region("Bowser in the Sky - Top"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - Arrow Ride 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - Final Platform 1-Up"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - Arrow Ride 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - Final Platform 1-Up"))
 
     def test_cool_cool_mountain_lil_penguin_lost_requires_baby_penguins(self):
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Li'l Penguin Lost"))
@@ -612,6 +947,16 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Cannon Unlock - Snowman's Land"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
+
+    def test_snowmans_land_snowman_tree_requires_top_and_accepts_side_flip(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Cannon Unlock - Snowman's Land"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
+        self.assertFalse(self.can_reach_location("Snowman's Land - Snowman Tree 1-Up"))
+
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Snowman Tree 1-Up"))
 
     def test_shifting_sand_land_upper_pyramid_accepts_pyramid_elevator(self):
         self.collect_basement_access()
@@ -2527,6 +2872,22 @@ class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
 
 
+class NoStrictMoveCapLethalLavaLandAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_log_rolling_accepts_moveless_capless(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+
 class GlobalCapAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -2550,7 +2911,9 @@ class PerLevelCapAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
@@ -2586,6 +2949,16 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
+    def test_wmotr_cloud_and_hanging_pole_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
+        self.collect(self.get_item_by_name("Cannon Unlock - Wing Mario Over the Rainbow"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
+
     def test_hmc_metal_cap_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
@@ -2599,8 +2972,10 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coin Platform 1-Up"))
         self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Vanish Cap"))
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coin Platform 1-Up"))
 
     def test_lethal_lava_land_wing_cap_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
@@ -2614,6 +2989,7 @@ class WMotRCaplessBuddyAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "strict_cap_requirements": Options.StrictCapRequirements.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -2625,6 +3001,15 @@ class WMotRCaplessBuddyAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+    def test_wmotr_bob_omb_buddy_platform_requires_buddy_route_and_climb(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up"))
 
 
 class TTCVariantAccessTestBase(SM64TestBase):
