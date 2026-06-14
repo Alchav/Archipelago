@@ -468,8 +468,8 @@ class Climb(MoveRandomizerMode):
 
     Global - Shuffle one Climb item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Climb items for each main course. Castle, castle grounds, secret courses,
-    cap stages, and Bowser stages use the Castle - Climb item.
+    Per Level - Shuffle separate Climb items for each main course (Except Big Boo's Haunt which has no climbable objects).
+    Castle, castle grounds, secret courses, cap stages, and Bowser stages use the Castle - Climb item.
     """
     display_name = "Climb"
 

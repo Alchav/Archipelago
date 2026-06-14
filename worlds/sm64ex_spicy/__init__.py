@@ -273,7 +273,10 @@ class SM64World(World):
             if option.value == option.option_global:
                 item_names.append(action)
             elif option.value == option.option_per_level:
-                item_names += [f"{area_name} - {action}" for area_name in per_level_move_area_names]
+                item_names += [
+                    f"{area_name} - {action}" for area_name in per_level_move_area_names
+                    if not (area_name == "Big Boo's Haunt" and action == "Climb")
+                ]
         return item_names
 
     def get_progression_item_names(self) -> typing.List[str]:

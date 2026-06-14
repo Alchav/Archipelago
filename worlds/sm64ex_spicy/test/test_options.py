@@ -414,6 +414,25 @@ class PerLevelMoveItemPoolTestBase(SM64TestBase):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
 
 
+class PerLevelClimbItemPoolTestBase(SM64TestBase):
+    options = {
+        "climb": Options.Climb.option_per_level,
+    }
+
+    def test_big_boos_haunt_climb_is_not_generated(self):
+        self.assertEqual(per_level_action_item_data_table["Big Boo's Haunt - Climb"].code, 3626373)
+        self.assertEqual(len(self.get_items_by_name("Big Boo's Haunt - Climb")), 0)
+
+    def test_other_per_level_climb_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 512)
+        self.assertEqual(len(self.get_items_by_name("Climb")), 0)
+        for area_name in per_level_move_area_names:
+            if area_name == "Big Boo's Haunt":
+                continue
+            with self.subTest("Per-level Climb item generated", area=area_name):
+                self.assertEqual(len(self.get_items_by_name(f"{area_name} - Climb")), 1)
+
+
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     options = {
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
