@@ -261,10 +261,24 @@ def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) ->
 
 def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Jolly Roger Bay"
-    reachable_coins = 54
-    if state.can_reach("Jolly Roger Bay - Upper", "Region", player):
+    reachable_coins = 50
+    if (
+            has_action(state, player, "Climb", level_name)
+            or has_action(state, player, "Triple Jump", level_name)
+            or state.has("Cannon Unlock - Jolly Roger Bay", player)
+            or allows_moveless(state, player) and (
+                has_action(state, player, "Backflip", level_name)
+                or has_action(state, player, "Wall Kick", level_name)
+            )):
+        reachable_coins += 2
+    has_upper = state.can_reach("Jolly Roger Bay - Upper", "Region", player)
+    has_raised_ship = state.has("Jolly Roger Bay - Raised Ship", player)
+    if has_upper:
         reachable_coins += 16
-        if state.has("Jolly Roger Bay - Raised Ship", player):
+        if has_action(state, player, "Long Jump", level_name) or has_purple_switches(
+                state, player, level_name) or has_raised_ship:
+            reachable_coins += 2
+        if has_raised_ship:
             reachable_coins += 4
     if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 30

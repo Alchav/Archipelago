@@ -1004,14 +1004,35 @@ class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
     }
 
 
-class JollyRogerBayCoinStar54AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayCoinStar50AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
-        "jolly_roger_bay_coin_star_requirement": 54,
+        "jolly_roger_bay_coin_star_requirement": 50,
     }
 
     def test_start_coins_reach_coin_star(self):
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar51AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 51,
+    }
+
+    def test_climb_start_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+    def test_cannon_start_coins_reach_coin_star(self):
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Cannon Unlock - Jolly Roger Bay"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+    def test_raised_ship_without_upper_does_not_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Raised Ship"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
 class JollyRogerBayCoinStar55AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
@@ -1024,6 +1045,32 @@ class JollyRogerBayCoinStar55AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
         self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Jolly Roger Bay - Upper"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+
+class JollyRogerBayCoinStar67AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "purple_switches": Options.PurpleSwitches.option_global,
+        "jolly_roger_bay_coin_star_requirement": 67,
+    }
+
+    def test_upper_long_jump_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+    def test_upper_purple_switch_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+
+    def test_moveless_start_coins_reach_coin_star(self):
+        self.collect(self.get_item_by_name("Backflip"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
+        self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
