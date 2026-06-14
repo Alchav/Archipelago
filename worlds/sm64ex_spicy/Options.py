@@ -271,14 +271,15 @@ class BowserStage1Ups(Choice):
     """
     Choose how Bowser stage 1-Up objects that normally depend on Bowser key flags are handled.
 
-    Vanilla - The game uses vanilla key-based spawning, and the affected 1-Up checks logically require those keys.
+    Vanilla - Two 1-Ups in Bowser in the Dark World require the Basement Key, and one 1-Up in Bowser in the Dark World
+    plus two in Bowser in the Fire Sea require the Second Floor Key.
 
     Global - Shuffle one Bowser Stage Extra 1-Ups item that spawns all affected Bowser in the Dark World and Bowser in the
     Fire Sea 1-Ups.
 
     Individual - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
 
-    Always Spawn - The game starts with the global Bowser Stage Extra 1-Ups unlock.
+    Always Spawn - All 1-Ups always spawn in the Bowser stages.
     """
     display_name = "Bowser Stage 1-Up Behavior"
     option_vanilla = 0
@@ -318,6 +319,20 @@ class ExclamationBoxes(Toggle):
 class Freestanding1Ups(Toggle):
     """Include freestanding 1-Up mushrooms as Archipelago location checks."""
     display_name = "Randomize Freestanding 1-Ups"
+
+
+class EasyButterflies(Toggle):
+    """Butterflies turn into 1-Up mushrooms regardless of Mario's distance from the butterfly, and one of the three
+    always has a 1-Up."""
+    display_name = "Easy Butterflies"
+
+
+class NoDespawns(Toggle):
+    """
+    Prevent coins and 1-Ups from despawning over time. Coins and 1-Ups that fall into a void or lava are
+    granted automatically.
+    """
+    display_name = "No Despawns"
 
 
 class CompletionType(Choice):
@@ -573,6 +588,8 @@ sm64_options_groups = [
         BuddyChecks,
         ExclamationBoxes,
         Freestanding1Ups,
+        EasyButterflies,
+        NoDespawns,
         CombinedProgressiveKeys,
         EnableLockedPaintings,
         StrictCapRequirements,
@@ -615,6 +632,8 @@ class SM64Options(PerGameCommonOptions):
     buddy_checks: BuddyChecks
     exclamation_boxes: ExclamationBoxes
     freestanding_1ups: Freestanding1Ups
+    easy_butterflies: EasyButterflies
+    no_despawns: NoDespawns
     combined_progressive_keys: CombinedProgressiveKeys
     enable_locked_paintings: EnableLockedPaintings
     triple_jump: TripleJump

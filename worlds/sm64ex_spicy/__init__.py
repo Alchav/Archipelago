@@ -69,6 +69,8 @@ class SM64World(World):
         "buddy_checks",
         "exclamation_boxes",
         "freestanding_1ups",
+        "easy_butterflies",
+        "no_despawns",
         "combined_progressive_keys",
         "enable_locked_paintings",
         "triple_jump",
@@ -484,7 +486,9 @@ class SM64World(World):
             "CoinsanityLocations": list(self.coinsanity_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
             "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,
-            "OneUpChecks": self.options.freestanding_1ups.value
+            "OneUpChecks": self.options.freestanding_1ups.value,
+            "EasyButterflies": self.options.easy_butterflies.value,
+            "NoDespawn": self.options.no_despawns.value,
         }
         slot_data.update(self.get_music_slot_data())
         mario_colors = self.get_mario_colors_slot_data()
