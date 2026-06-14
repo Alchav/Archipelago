@@ -327,14 +327,14 @@ class TickTockClockSpinners(Toggle):
 
 
 
-class ArbitraryFeatureItemMode(Choice):
+class LevelFeatureItemMode(Choice):
     option_not_shuffled = 0
     option_global = 1
     option_individual = 2
 
 
 
-class CheckerboardPlatforms(ArbitraryFeatureItemMode):
+class CheckerboardPlatforms(LevelFeatureItemMode):
     """
     Choose how Checkerboard Platform unlocks are handled.
 
@@ -342,12 +342,12 @@ class CheckerboardPlatforms(ArbitraryFeatureItemMode):
 
     Global - Shuffle one Checkerboard Platforms item that unlocks every applicable platform.
 
-    Individual - Shuffle separate level-specific Checkerboard Platforms items where supported by the game.
+    Individual - Shuffle separate level-specific Checkerboard Platforms items.
     """
     display_name = "Checkerboard Platform Items"
 
 
-class RollingLogs(ArbitraryFeatureItemMode):
+class RollingLogs(LevelFeatureItemMode):
     """
     Choose how Rolling Log unlocks are handled.
 
@@ -355,12 +355,12 @@ class RollingLogs(ArbitraryFeatureItemMode):
 
     Global - Shuffle one Rolling Logs item that unlocks every applicable log.
 
-    Individual - Shuffle separate level-specific Rolling Log items where supported by the game.
+    Individual - Shuffle separate level-specific Rolling Log items.
     """
     display_name = "Rolling Log Items"
 
 
-class PurpleSwitches(ArbitraryFeatureItemMode):
+class PurpleSwitches(LevelFeatureItemMode):
     """
     Choose how Purple Switch unlocks are handled.
 
@@ -368,7 +368,7 @@ class PurpleSwitches(ArbitraryFeatureItemMode):
 
     Global - Shuffle one Purple Switches item that unlocks every applicable switch.
 
-    Individual - Shuffle separate level-specific Purple Switch items where supported by the game.
+    Individual - Shuffle separate level-specific Purple Switch items.
     """
     display_name = "Purple Switch Items"
 
@@ -423,7 +423,8 @@ class ExclamationBoxes(Toggle):
 
 
 class Freestanding1Ups(Toggle):
-    """Include freestanding 1-Up mushrooms as Archipelago location checks."""
+    """Include freestanding 1-Up mushrooms as Archipelago location checks.
+    Adds 93 locations to the pool."""
     display_name = "Randomize Freestanding 1-Ups"
 
 
@@ -702,7 +703,7 @@ sm64_options_groups = [
         PerLevelCapItems,
         StrictCannonRequirements,
     ]),
-    OptionGroup("Arbitrary Feature Unlocks", [
+    OptionGroup("Level Feature Unlocks", [
         HazyMazeCaveSwimmingBeast,
         RainbowRideCarpets,
         CheckerboardPlatforms,
@@ -716,7 +717,7 @@ sm64_options_groups = [
         WetDryWorldWaterLevelDiamond,
         TickTockClockSpinners,
     ]),
-    OptionGroup("Coin Star Requirements", [
+    OptionGroup("Coin Options", [
         Coinsanity,
         SecretStageCoinsanity,
         *secret_stage_coinsanity_max_coin_options,
@@ -775,15 +776,6 @@ class SM64Options(PerGameCommonOptions):
     music_shuffle: MusicShuffle
     coinsanity: Coinsanity
     secret_stage_coinsanity: SecretStageCoinsanity
-    princess_secret_slide_coinsanity_max_coins: PrincessSecretSlideCoinsanityMaxCoins
-    secret_aquarium_coinsanity_max_coins: SecretAquariumCoinsanityMaxCoins
-    wing_mario_over_the_rainbow_coinsanity_max_coins: WingMarioOverTheRainbowCoinsanityMaxCoins
-    tower_of_the_wing_cap_coinsanity_max_coins: TowerOfTheWingCapCoinsanityMaxCoins
-    vanish_cap_under_the_moat_coinsanity_max_coins: VanishCapUnderTheMoatCoinsanityMaxCoins
-    cavern_of_the_metal_cap_coinsanity_max_coins: CavernOfTheMetalCapCoinsanityMaxCoins
-    bowser_in_the_dark_world_coinsanity_max_coins: BowserInTheDarkWorldCoinsanityMaxCoins
-    bowser_in_the_fire_sea_coinsanity_max_coins: BowserInTheFireSeaCoinsanityMaxCoins
-    bowser_in_the_sky_coinsanity_max_coins: BowserInTheSkyCoinsanityMaxCoins
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement
@@ -799,5 +791,14 @@ class SM64Options(PerGameCommonOptions):
     tiny_huge_island_coin_star_requirement: TinyHugeIslandCoinStarRequirement
     tick_tock_clock_coin_star_requirement: TickTockClockCoinStarRequirement
     rainbow_ride_coin_star_requirement: RainbowRideCoinStarRequirement
+    princess_secret_slide_coinsanity_max_coins: PrincessSecretSlideCoinsanityMaxCoins
+    secret_aquarium_coinsanity_max_coins: SecretAquariumCoinsanityMaxCoins
+    wing_mario_over_the_rainbow_coinsanity_max_coins: WingMarioOverTheRainbowCoinsanityMaxCoins
+    tower_of_the_wing_cap_coinsanity_max_coins: TowerOfTheWingCapCoinsanityMaxCoins
+    vanish_cap_under_the_moat_coinsanity_max_coins: VanishCapUnderTheMoatCoinsanityMaxCoins
+    cavern_of_the_metal_cap_coinsanity_max_coins: CavernOfTheMetalCapCoinsanityMaxCoins
+    bowser_in_the_dark_world_coinsanity_max_coins: BowserInTheDarkWorldCoinsanityMaxCoins
+    bowser_in_the_fire_sea_coinsanity_max_coins: BowserInTheFireSeaCoinsanityMaxCoins
+    bowser_in_the_sky_coinsanity_max_coins: BowserInTheSkyCoinsanityMaxCoins
     death_link: DeathLink
     completion_type: CompletionType
