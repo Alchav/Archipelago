@@ -640,6 +640,29 @@ class CoinStarsTestBase(SM64TestBase):
                 self.assertIn(loc, possible_locations)
 
 
+class SecretStageCoinsanityMaxCoinsOptionTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_secret_stage_coinsanity_max_coin_ranges_and_defaults(self):
+        expected_options = {
+            Options.PrincessSecretSlideCoinsanityMaxCoins: (80, 80),
+            Options.SecretAquariumCoinsanityMaxCoins: (56, 56),
+            Options.WingMarioOverTheRainbowCoinsanityMaxCoins: (56, 56),
+            Options.TowerOfTheWingCapCoinsanityMaxCoins: (63, 31),
+            Options.VanishCapUnderTheMoatCoinsanityMaxCoins: (27, 27),
+            Options.CavernOfTheMetalCapCoinsanityMaxCoins: (47, 47),
+            Options.BowserInTheDarkWorldCoinsanityMaxCoins: (80, 80),
+            Options.BowserInTheFireSeaCoinsanityMaxCoins: (80, 80),
+            Options.BowserInTheSkyCoinsanityMaxCoins: (76, 76),
+        }
+        self.assertEqual(set(Options.secret_stage_coinsanity_max_coin_options), set(expected_options))
+        for option, (range_end, default) in expected_options.items():
+            with self.subTest(option=option.__name__):
+                self.assertEqual(option.range_start, 0)
+                self.assertEqual(option.range_end, range_end)
+                self.assertEqual(option.default, default)
+
+
 class CoinsanityLocationTableTestBase(SM64TestBase):
     run_default_tests = False
 
@@ -736,6 +759,7 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
     options = {
         "coinsanity": 50,
         "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "princess_secret_slide_coinsanity_max_coins": 10,
         "tower_of_the_wing_cap_coinsanity_max_coins": 16,
     }
 
@@ -744,6 +768,19 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
         self.assertIn("The Princess's Secret Slide - 1 Coin", active_locations)
         self.assertIn("The Secret Aquarium - 1 Coin", active_locations)
         self.assertIn("Wing Mario Over the Rainbow - 1 Coin", active_locations)
+
+    def test_secret_stage_max_coin_option_controls_location_count(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        active_slide_locations = {
+            location_name for location_name in active_locations
+            if location_name in secret_stage_coinsanity_location_table
+            and location_name.startswith("The Princess's Secret Slide - ")
+        }
+        self.assertEqual(len(active_slide_locations), 5)
+        self.assertIn("The Princess's Secret Slide - 1 Coin", active_locations)
+        self.assertIn("The Princess's Secret Slide - 9 Coins", active_locations)
+        self.assertNotIn("The Princess's Secret Slide - 10 Coins", active_locations)
+        self.assertNotIn("The Princess's Secret Slide - 80 Coins", active_locations)
 
     def test_tower_of_the_wing_cap_max_coin_option_controls_location_count(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}

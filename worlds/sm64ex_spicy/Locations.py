@@ -26,15 +26,15 @@ coinsanity_course_data = (
 secret_stage_coinsanity_location_base_id = 3629193
 
 secret_stage_coinsanity_data = (
-    ("The Princess's Secret Slide", 3629193, 80),
-    ("The Secret Aquarium", 3629273, 56),
-    ("Wing Mario Over the Rainbow", 3629329, 56),
-    ("Tower of the Wing Cap", 3629385, 63),
-    ("Vanish Cap Under the Moat", 3629448, 27),
-    ("Cavern of the Metal Cap", 3629475, 47),
-    ("Bowser in the Dark World", 3629522, 80),
-    ("Bowser in the Fire Sea", 3629602, 80),
-    ("Bowser in the Sky", 3629682, 76),
+    ("The Princess's Secret Slide", 3629193, "princess_secret_slide_coinsanity_max_coins", 80),
+    ("The Secret Aquarium", 3629273, "secret_aquarium_coinsanity_max_coins", 56),
+    ("Wing Mario Over the Rainbow", 3629329, "wing_mario_over_the_rainbow_coinsanity_max_coins", 56),
+    ("Tower of the Wing Cap", 3629385, "tower_of_the_wing_cap_coinsanity_max_coins", 63),
+    ("Vanish Cap Under the Moat", 3629448, "vanish_cap_under_the_moat_coinsanity_max_coins", 27),
+    ("Cavern of the Metal Cap", 3629475, "cavern_of_the_metal_cap_coinsanity_max_coins", 47),
+    ("Bowser in the Dark World", 3629522, "bowser_in_the_dark_world_coinsanity_max_coins", 80),
+    ("Bowser in the Fire Sea", 3629602, "bowser_in_the_fire_sea_coinsanity_max_coins", 80),
+    ("Bowser in the Sky", 3629682, "bowser_in_the_sky_coinsanity_max_coins", 76),
 )
 
 
@@ -63,15 +63,11 @@ def get_coinsanity_location_names(coin_star_requirements: dict[str, int], percen
 
 
 def get_secret_stage_coinsanity_location_names(
-        percentage: int, tower_of_the_wing_cap_max_coins: int) -> tuple[str, ...]:
-    max_coins_by_stage = {
-        course_name: tower_of_the_wing_cap_max_coins if course_name == "Tower of the Wing Cap" else max_coins
-        for course_name, _base_id, max_coins in secret_stage_coinsanity_data
-    }
+        secret_stage_coin_maxes: dict[str, int], percentage: int) -> tuple[str, ...]:
     return tuple(
         get_coinsanity_location_name(course_name, coin_count)
-        for course_name, max_coins in max_coins_by_stage.items()
-        for coin_count in get_coinsanity_thresholds(max_coins + 1, percentage)
+        for course_name, _base_id, option_name, _max_coins in secret_stage_coinsanity_data
+        for coin_count in get_coinsanity_thresholds(secret_stage_coin_maxes[option_name] + 1, percentage)
     )
 
 
@@ -90,7 +86,7 @@ coinsanity_location_table = {
 
 secret_stage_coinsanity_location_table = {
     get_coinsanity_location_name(course_name, coin_count): base_id + coin_count - 1
-    for course_name, base_id, max_coins in secret_stage_coinsanity_data
+    for course_name, base_id, _option_name, max_coins in secret_stage_coinsanity_data
     for coin_count in range(1, max_coins + 1)
 }
 

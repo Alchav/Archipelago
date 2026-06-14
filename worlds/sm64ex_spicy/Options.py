@@ -27,12 +27,105 @@ class SecretStageCoinsanity(Toggle):
     display_name = "Secret Stage Coinsanity"
 
 
+class PrincessSecretSlideCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for The Princess's Secret Slide Coinsanity."""
+    display_name = "The Princess's Secret Slide Coinsanity Max Coins"
+    range_start = 0
+    range_end = 80
+    default = 80
+
+
+class SecretAquariumCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for The Secret Aquarium Coinsanity."""
+    display_name = "The Secret Aquarium Coinsanity Max Coins"
+    range_start = 0
+    range_end = 56
+    default = 56
+
+
+class WingMarioOverTheRainbowCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for Wing Mario Over the Rainbow Coinsanity."""
+    display_name = "Wing Mario Over the Rainbow Coinsanity Max Coins"
+    range_start = 0
+    range_end = 56
+    default = 56
+
+
 class TowerOfTheWingCapCoinsanityMaxCoins(Range):
-    """Maximum Tower of the Wing Cap coin threshold used for secret stage Coinsanity."""
+    """
+    Maximum coin threshold used for Tower of the Wing Cap Coinsanity.
+
+    Collecting all Tower of the Wing Cap coins is very difficult.
+    """
     display_name = "Tower of the Wing Cap Coinsanity Max Coins"
     range_start = 0
     range_end = 63
     default = 31
+
+
+class VanishCapUnderTheMoatCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for Vanish Cap Under the Moat Coinsanity."""
+    display_name = "Vanish Cap Under the Moat Coinsanity Max Coins"
+    range_start = 0
+    range_end = 27
+    default = 27
+
+
+class CavernOfTheMetalCapCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for Cavern of the Metal Cap Coinsanity."""
+    display_name = "Cavern of the Metal Cap Coinsanity Max Coins"
+    range_start = 0
+    range_end = 47
+    default = 47
+
+
+class BowserInTheDarkWorldCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for Bowser in the Dark World Coinsanity."""
+    display_name = "Bowser in the Dark World Coinsanity Max Coins"
+    range_start = 0
+    range_end = 80
+    default = 80
+
+
+class BowserInTheFireSeaCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for Bowser in the Fire Sea Coinsanity."""
+    display_name = "Bowser in the Fire Sea Coinsanity Max Coins"
+    range_start = 0
+    range_end = 80
+    default = 80
+
+
+class BowserInTheSkyCoinsanityMaxCoins(Range):
+    """Maximum coin threshold used for Bowser in the Sky Coinsanity."""
+    display_name = "Bowser in the Sky Coinsanity Max Coins"
+    range_start = 0
+    range_end = 76
+    default = 76
+
+
+secret_stage_coinsanity_max_coin_options = (
+    PrincessSecretSlideCoinsanityMaxCoins,
+    SecretAquariumCoinsanityMaxCoins,
+    WingMarioOverTheRainbowCoinsanityMaxCoins,
+    TowerOfTheWingCapCoinsanityMaxCoins,
+    VanishCapUnderTheMoatCoinsanityMaxCoins,
+    CavernOfTheMetalCapCoinsanityMaxCoins,
+    BowserInTheDarkWorldCoinsanityMaxCoins,
+    BowserInTheFireSeaCoinsanityMaxCoins,
+    BowserInTheSkyCoinsanityMaxCoins,
+)
+
+secret_stage_coinsanity_max_coin_option_names = (
+    "princess_secret_slide_coinsanity_max_coins",
+    "secret_aquarium_coinsanity_max_coins",
+    "wing_mario_over_the_rainbow_coinsanity_max_coins",
+    "tower_of_the_wing_cap_coinsanity_max_coins",
+    "vanish_cap_under_the_moat_coinsanity_max_coins",
+    "cavern_of_the_metal_cap_coinsanity_max_coins",
+    "bowser_in_the_dark_world_coinsanity_max_coins",
+    "bowser_in_the_fire_sea_coinsanity_max_coins",
+    "bowser_in_the_sky_coinsanity_max_coins",
+)
 
 
 class BobOmbBattlefieldCoinStarRequirement(CoinStarRequirement):
@@ -170,7 +263,8 @@ class EnableLockedPaintings(Toggle):
     On - Paintings (other than Bob-omb Battlefield) are replaced in the pool with items to allow access to them.
     Attempting to enter a locked painting will simply kick Mario out.
     Does not affect secrets and levels that don't have a painting (Big Boo's Haunt, Hazy Maze Cave, Rainbow Ride).
-    This only affects the ability for Mario to enter a painting, the destination of the painting may change due to Entrance Randomization, if it is enabled.
+    This only affects the ability for Mario to enter a painting, the destination of the painting may change due to
+    Entrance Randomization, if it is enabled.
     """
     display_name = "Enable Locked Paintings"
 
@@ -182,8 +276,7 @@ class StrictCapRequirements(DefaultOnToggle):
 
 class PerLevelCapItems(Toggle):
     """
-    Generate separate cap items for each level that can require a cap instead of one global item per cap
-    type.
+    Generate separate cap items for each level that can require a cap instead of one global item per cap type.
     """
     display_name = "Per-Level Cap Items"
 
@@ -194,42 +287,42 @@ class MariosHat(Toggle):
 
 
 class HazyMazeCaveSwimmingBeast(Toggle):
-    """Shuffle Hazy Maze Cave - Swimming Beast as an Archipelago item. If disabled, the game starts with it unlocked."""
+    """Shuffle Hazy Maze Cave - Swimming Beast as an item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
 
 
 class RainbowRideCarpets(Toggle):
-    """Shuffle Rainbow Ride - Carpets as an Archipelago item. If disabled, the game starts with them unlocked."""
+    """Shuffle Rainbow Ride - Carpets as an item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Rainbow Ride - Carpets"
 
 
 class TinyHugeIslandWarpPipes(Toggle):
-    """Shuffle Tiny-Huge Island - Warp Pipes as an Archipelago item. If disabled, the game starts with them unlocked."""
+    """Shuffle Tiny-Huge Island - Warp Pipes as an item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
 
 
 class CoolCoolMountainBabyPenguins(Toggle):
-    """Shuffle Cool, Cool Mountain - Baby Penguins as an Archipelago item. If disabled, the game starts with them unlocked."""
+    """Shuffle Cool, Cool Mountain - Baby Penguins as an item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
 
 
 class SnowmansLandPenguin(Toggle):
-    """Shuffle Snowman's Land - Penguin as an Archipelago item. If disabled, the game starts with it unlocked."""
+    """Shuffle Snowman's Land - Penguin as an item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Snowman's Land - Penguin"
 
 
 class ShiftingSandLandPyramidElevator(Toggle):
-    """Shuffle Shifting Sand Land - Pyramid Elevator as an Archipelago item. If disabled, the game starts with it unlocked."""
+    """Shuffle Shifting Sand Land - Pyramid Elevator as an item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
 
 
 class WetDryWorldWaterLevelDiamond(Toggle):
-    """Shuffle Wet-Dry World - Water Level Diamond as an Archipelago item. If disabled, the game starts with it unlocked."""
+    """Shuffle Wet-Dry World - Water Level Diamond as an item. If disabled, the game starts with it unlocked."""
     display_name = "Shuffle Wet-Dry World - Water Level Diamond"
 
 
 class TickTockClockSpinners(Toggle):
-    """Shuffle Tick Tock Clock - Spinners as an Archipelago item. If disabled, the game starts with them unlocked."""
+    """Shuffle Tick Tock Clock - Spinners as an item. If disabled, the game starts with them unlocked."""
     display_name = "Shuffle Tick Tock Clock - Spinners"
 
 
@@ -626,7 +719,7 @@ sm64_options_groups = [
     OptionGroup("Coin Star Requirements", [
         Coinsanity,
         SecretStageCoinsanity,
-        TowerOfTheWingCapCoinsanityMaxCoins,
+        *secret_stage_coinsanity_max_coin_options,
         *coin_star_requirement_options,
     ]),
     OptionGroup("Ability Options", [
@@ -682,7 +775,15 @@ class SM64Options(PerGameCommonOptions):
     music_shuffle: MusicShuffle
     coinsanity: Coinsanity
     secret_stage_coinsanity: SecretStageCoinsanity
+    princess_secret_slide_coinsanity_max_coins: PrincessSecretSlideCoinsanityMaxCoins
+    secret_aquarium_coinsanity_max_coins: SecretAquariumCoinsanityMaxCoins
+    wing_mario_over_the_rainbow_coinsanity_max_coins: WingMarioOverTheRainbowCoinsanityMaxCoins
     tower_of_the_wing_cap_coinsanity_max_coins: TowerOfTheWingCapCoinsanityMaxCoins
+    vanish_cap_under_the_moat_coinsanity_max_coins: VanishCapUnderTheMoatCoinsanityMaxCoins
+    cavern_of_the_metal_cap_coinsanity_max_coins: CavernOfTheMetalCapCoinsanityMaxCoins
+    bowser_in_the_dark_world_coinsanity_max_coins: BowserInTheDarkWorldCoinsanityMaxCoins
+    bowser_in_the_fire_sea_coinsanity_max_coins: BowserInTheFireSeaCoinsanityMaxCoins
+    bowser_in_the_sky_coinsanity_max_coins: BowserInTheSkyCoinsanityMaxCoins
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement

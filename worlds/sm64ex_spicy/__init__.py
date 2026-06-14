@@ -11,7 +11,7 @@ from .Locations import location_table, SM64Location, coinsanity_course_data, get
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
-    move_randomizer_option_name_by_action
+    move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names
 from .Rules import set_rules
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
 from BaseClasses import Item, Tutorial
@@ -104,7 +104,7 @@ class SM64World(World):
         "music_shuffle",
         "coinsanity",
         "secret_stage_coinsanity",
-        "tower_of_the_wing_cap_coinsanity_max_coins",
+        *secret_stage_coinsanity_max_coin_option_names,
         *coin_star_requirement_option_names,
         "death_link",
         "completion_type",
@@ -143,8 +143,12 @@ class SM64World(World):
             self.coinsanity_location_names = get_coinsanity_location_names(
                 coin_star_requirements, self.options.coinsanity.value)
             if self.options.secret_stage_coinsanity:
+                secret_stage_coin_maxes = {
+                    option_name: getattr(self.options, option_name).value
+                    for option_name in secret_stage_coinsanity_max_coin_option_names
+                }
                 self.coinsanity_location_names += get_secret_stage_coinsanity_location_names(
-                    self.options.coinsanity.value, self.options.tower_of_the_wing_cap_coinsanity_max_coins.value)
+                    secret_stage_coin_maxes, self.options.coinsanity.value)
         if "MoveRandoVec" in slot_data:
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
 
