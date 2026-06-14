@@ -280,10 +280,10 @@ class SM64World(World):
         item_names = list(feature_item_data_table)
         item_names += self.get_arbitrary_item_names()
         item_names += self.get_castle_key_item_names()
-        item_names += ["Progressive MIPS"] * 2
+        item_names += ["Castle - Progressive MIPS"] * 2
         item_names += [
             item_name for item_name in castle_progression_item_data_table
-            if item_name != "Progressive MIPS"
+            if item_name != "Castle - Progressive MIPS"
         ]
         item_names += self.get_cap_item_names()
         item_names += self.get_bowser_stage_1up_item_names()
@@ -360,7 +360,7 @@ class SM64World(World):
         if not self.options.buddy_checks:
             locked_count += len(cannon_item_data_table)
         if not self.options.exclamation_boxes:
-            locked_count += sum(1 for loc_name in location_table if "1Up Block" in loc_name)
+            locked_count += sum(1 for loc_name in location_table if "1-Up Block" in loc_name)
         return locked_count
 
     def create_items(self):
@@ -373,55 +373,55 @@ class SM64World(World):
                               f"required items than randomized locations.")
 
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
-        self.multiworld.itempool += [self.create_item("1Up Mushroom") for i in range(0, self.filler_count)]
+        self.multiworld.itempool += [self.create_item("1-Up Mushroom") for i in range(0, self.filler_count)]
 
     def generate_basic(self):
         if not self.options.buddy_checks:
-            self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Bob-omb Battlefield"))
-            self.multiworld.get_location("Whomp's Fortress - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Whomp's Fortress"))
-            self.multiworld.get_location("Jolly Roger Bay - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Jolly Roger Bay"))
-            self.multiworld.get_location("Cool, Cool Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Cool, Cool Mountain"))
-            self.multiworld.get_location("Shifting Sand Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Shifting Sand Land"))
-            self.multiworld.get_location("Snowman's Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Snowman's Land"))
-            self.multiworld.get_location("Wet-Dry World - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Wet-Dry World"))
-            self.multiworld.get_location("Tall, Tall Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Tall, Tall Mountain"))
-            self.multiworld.get_location("Tiny-Huge Island - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Tiny-Huge Island"))
-            self.multiworld.get_location("Rainbow Ride - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Rainbow Ride"))
-            self.multiworld.get_location("Wing Mario Over the Rainbow - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cannon Unlock - Wing Mario Over the Rainbow"))
+            self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Bob-omb Battlefield - Cannon Unlock"))
+            self.multiworld.get_location("Whomp's Fortress - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Whomp's Fortress - Cannon Unlock"))
+            self.multiworld.get_location("Jolly Roger Bay - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Jolly Roger Bay - Cannon Unlock"))
+            self.multiworld.get_location("Cool, Cool Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Cool, Cool Mountain - Cannon Unlock"))
+            self.multiworld.get_location("Shifting Sand Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Shifting Sand Land - Cannon Unlock"))
+            self.multiworld.get_location("Snowman's Land - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Snowman's Land - Cannon Unlock"))
+            self.multiworld.get_location("Wet-Dry World - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Wet-Dry World - Cannon Unlock"))
+            self.multiworld.get_location("Tall, Tall Mountain - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Tall, Tall Mountain - Cannon Unlock"))
+            self.multiworld.get_location("Tiny-Huge Island - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Tiny-Huge Island - Cannon Unlock"))
+            self.multiworld.get_location("Rainbow Ride - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Rainbow Ride - Cannon Unlock"))
+            self.multiworld.get_location("Wing Mario Over the Rainbow - Bob-omb Buddy", self.player).place_locked_item(self.create_item("Wing Mario Over the Rainbow - Cannon Unlock"))
 
         if not self.options.exclamation_boxes:
-            self.multiworld.get_location("Cool, Cool Mountain - 1Up Block Near Snowman", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Cool, Cool Mountain - 1Up Block Ice Pillar", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Cool, Cool Mountain - 1Up Block Secret Slide", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Big Boo's Haunt - 1Up Block Top of Mansion", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Hazy Maze Cave - 1Up Block above Pit", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Hazy Maze Cave - 1Up Block Past Rolling Rocks", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Shifting Sand Land - 1Up Block Outside Pyramid", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Shifting Sand Land - 1Up Block Pyramid Left Path", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Shifting Sand Land - 1Up Block Pyramid Back", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Snowman's Land - 1Up Block Near Moneybags", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Snowman's Land - 1Up Block inside Igloo", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Wet-Dry World - 1Up Block in Downtown", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Tall, Tall Mountain - 1Up Block on Red Mushroom", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Tiny-Huge Island - 1Up Block THI Small near Start", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Tiny-Huge Island - 1Up Block THI Large near Start", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Tiny-Huge Island - 1Up Block Windy Area", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Tick Tock Clock - 1Up Block Midway Up", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Tick Tock Clock - 1Up Block at the Top", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Rainbow Ride - 1Up Block Top of Red Coin Maze", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Rainbow Ride - 1Up Block Under Fly Guy", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Rainbow Ride - 1Up Block On House in the Sky", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Bowser in the Dark World 1Up Block on Tower", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Bowser in the Dark World 1Up Block near Goombas", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Cavern of the Metal Cap 1Up Block", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Vanish Cap Under the Moat 1Up Block", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Bowser in the Fire Sea 1Up Block Swaying Stairs", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Bowser in the Fire Sea 1Up Block Near Poles", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Wing Mario Over the Rainbow 1Up Block", self.player).place_locked_item(self.create_item("1Up Mushroom"))
-            self.multiworld.get_location("Bowser in the Sky 1Up Block", self.player).place_locked_item(self.create_item("1Up Mushroom"))
+            self.multiworld.get_location("Cool, Cool Mountain - Near Snowman 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Cool, Cool Mountain - Ice Pillar 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Cool, Cool Mountain - Secret Slide 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Big Boo's Haunt - Top of Mansion 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Hazy Maze Cave - Above Pit 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Hazy Maze Cave - Past Rolling Rocks 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Shifting Sand Land - Outside Pyramid 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Shifting Sand Land - Pyramid Left Path 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Shifting Sand Land - Pyramid Back 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Snowman's Land - Near Moneybags 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Snowman's Land - Inside Igloo 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Wet-Dry World - Downtown 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Tall, Tall Mountain - Red Mushroom 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Tiny-Huge Island - Tiny Island Near Start 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Tiny-Huge Island - Huge Island Near Start 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Tiny-Huge Island - Windy Area 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Tick Tock Clock - Midway Up 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Tick Tock Clock - Top 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Rainbow Ride - Under Fly Guy 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Rainbow Ride - House in the Sky 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Bowser in the Dark World - Tower 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Bowser in the Dark World - Near Goombas 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Cavern of the Metal Cap - 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Vanish Cap Under the Moat - 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Bowser in the Fire Sea - Swaying Stairs 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Bowser in the Fire Sea - Near Poles 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Wing Mario Over the Rainbow - 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
+            self.multiworld.get_location("Bowser in the Sky - 1-Up Block", self.player).place_locked_item(self.create_item("1-Up Mushroom"))
 
     def get_filler_item_name(self) -> str:
-        return "1Up Mushroom"
+        return "1-Up Mushroom"
 
     def get_mario_colors_slot_data(self) -> typing.Dict[str, typing.List[int]]:
         return {color_name: list(channels) for color_name, channels in self.options.mario_colors.value.items()}

@@ -309,9 +309,9 @@ class BuddyChecks(Toggle):
 
 
 class ExclamationBoxes(Toggle):
-    """Include 1Up Exclamation Boxes during randomization.
+    """Include 1-Up Exclamation Boxes during randomization.
     Adds 29 locations to the pool."""
-    display_name = "Randomize 1Up !-Blocks"
+    display_name = "Randomize 1-Up !-Blocks"
     alias_1Ups_Only = 1
 
 

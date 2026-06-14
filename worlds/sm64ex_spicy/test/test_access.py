@@ -147,7 +147,7 @@ class UTGlitchLogicTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
 
     def test_ut_glitch_satisfies_capless(self):
-        self.collect(self.world.create_item("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.world.create_item("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
@@ -172,15 +172,15 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Castle - MIPS 1"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertFalse(self.can_reach_location("Castle - MIPS 1"))
-        self.collect(self.get_item_by_name("Progressive MIPS"))
+        self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
         self.assertTrue(self.can_reach_location("Castle - MIPS 1"))
         self.assertFalse(self.can_reach_location("Castle - MIPS 2"))
-        self.collect(self.get_item_by_name("Progressive MIPS"))
+        self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
         self.assertTrue(self.can_reach_location("Castle - MIPS 2"))
 
     def test_castle_toad_access(self):
         self.assertFalse(self.can_reach_location("Castle - Toad (Basement)"))
-        self.collect(self.get_item_by_name("Castle Toads"))
+        self.collect(self.get_item_by_name("Castle - Toads"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertTrue(self.can_reach_location("Castle - Toad (Basement)"))
 
@@ -194,15 +194,15 @@ class CastleFeatureAccessTestBase(SM64TestBase):
 
     def test_castle_feature_regions(self):
         self.assertFalse(self.can_reach_region("Big Boo's Haunt"))
-        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt"))
 
         self.assertFalse(self.can_reach_region("Tower of the Wing Cap"))
-        self.collect(self.get_item_by_name("Wing Cap Light"))
+        self.collect(self.get_item_by_name("Unlock Tower of the Wing Cap"))
         self.assertTrue(self.can_reach_region("Tower of the Wing Cap"))
 
         self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
+        self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
         self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
         self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
@@ -224,15 +224,15 @@ class CastleFeatureAccessTestBase(SM64TestBase):
 
     def test_yoshi_access(self):
         self.assertFalse(self.can_reach_location("Castle - Yoshi"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
+        self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Castle - Yoshi"))
-        self.collect(self.get_item_by_name("Yoshi"))
+        self.collect(self.get_item_by_name("Castle - Yoshi"))
         self.assertTrue(self.can_reach_location("Castle - Yoshi"))
 
     def test_yoshi_access_requires_castle_cannon(self):
-        self.collect(self.get_item_by_name("Yoshi"))
+        self.collect(self.get_item_by_name("Castle - Yoshi"))
         self.assertFalse(self.can_reach_location("Castle - Yoshi"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
+        self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Castle - Yoshi"))
 
     def test_castle_roof_1ups_require_castle_cannon_region(self):
@@ -243,7 +243,7 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         ):
             with self.subTest(location=location_name):
                 self.assertFalse(self.can_reach_location(location_name))
-        self.collect(self.get_item_by_name("Cannon Unlock - Castle"))
+        self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
         for location_name in (
                 "Castle - Roof Back 1-Up",
                 "Castle - Roof Center 1-Up",
@@ -299,7 +299,7 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
 
     def test_bob_cannon_tree_1up_accepts_side_flip(self):
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Cannon Tree 1-Up"))
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Cannon Tree 1-Up"))
@@ -311,7 +311,7 @@ class CourseOneUpAccessTestBase(SM64TestBase):
 
     def test_jrb_stone_pillar_1up_requires_cannon(self):
         self.assertFalse(self.can_reach_location("Jolly Roger Bay - Stone Pillar 1-Up"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Jolly Roger Bay"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Stone Pillar 1-Up"))
 
     def test_jrb_underwater_coin_ring_1up_has_no_extra_rule(self):
@@ -331,13 +331,13 @@ class CourseOneUpAccessTestBase(SM64TestBase):
                 self.assertTrue(self.can_reach_location(location_name))
 
     def test_bbh_shed_roof_1up_accepts_side_flip(self):
-        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
 
     def test_bbh_shed_roof_1up_accepts_wall_kick(self):
-        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
         self.collect(self.get_item_by_name("Wall Kick"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
@@ -463,11 +463,11 @@ class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
             self.get_item_by_name("Bowser Stage Extra 1-Ups"),
             self.get_item_by_name("Climb"),
         ])
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea 1Up Block Near Poles"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up Block"))
         self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
 
         self.collect(self.get_item_by_name("Ledge Grab"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea 1Up Block Near Poles"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up Block"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
 
 
@@ -575,13 +575,13 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Key")] * 2)
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
-        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
 
         self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
-        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
 
         self.collect(self.world.create_item("Castle - Wall Kick"))
-        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Switch"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
 
     def test_secret_stage_names_use_castle_move_items(self):
         for level_name in (
@@ -600,14 +600,14 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
     def test_wmotR_rule_uses_castle_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 5)
         self.collect(self.world.create_item("Wing Cap"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Wing Mario Over the Rainbow"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
         self.collect(self.world.create_item("Bob-omb Battlefield - Triple Jump"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
         self.collect(self.world.create_item("Castle - Triple Jump"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
 
 class ArbitraryFeatureAccessTestBase(SM64TestBase):
@@ -698,7 +698,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
         self.collect(self.get_item_by_name("Climb"))
-        self.assertTrue(self.can_reach_location("Rainbow Ride - 1Up Block Top of Red Coin Maze"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
     def test_rainbow_ride_cruiser_still_requires_carpets(self):
@@ -773,12 +773,12 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
             self.get_item_by_name("Vanish Cap"),
             self.get_item_by_name("Unlock Vanish Cap Under the Moat"),
         ])
-        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Switch"))
-        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
 
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
-        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Switch"))
-        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
 
     def test_tiny_huge_island_tiny_piranha_area_requires_movement(self):
         self.collect_second_floor_access()
@@ -902,12 +902,12 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
     def test_bitdw_red_coins_and_key_require_purple_switches(self):
         self.collect(self.get_item_by_name("Dark World Key"))
         self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
-        self.assertFalse(self.can_reach_location("Bowser in the Dark World Red Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Dark World Key"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
-        self.assertTrue(self.can_reach_location("Bowser in the Dark World Red Coins"))
-        self.assertTrue(self.can_reach_location("Bowser in the Dark World Key"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
     def test_bowser_in_the_sky_top_requires_purple_switches(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
@@ -945,12 +945,12 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
 
-        self.collect(self.get_item_by_name("Cannon Unlock - Snowman's Land"))
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
 
     def test_snowmans_land_snowman_tree_requires_top_and_accepts_side_flip(self):
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Cannon Unlock - Snowman's Land"))
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
         self.assertTrue(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
         self.assertFalse(self.can_reach_location("Snowman's Land - Snowman Tree 1-Up"))
@@ -1127,7 +1127,7 @@ class CoolCoolMountainCoinStar131AccessTestBase(CoolCoolMountainCoinStarAccessTe
 
     def test_wall_kicks_route_coins_require_cannon_with_strict_moves(self):
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Cool, Cool Mountain"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
 
 
@@ -1151,7 +1151,7 @@ class CoolCoolMountainCoinStar144MovelessAccessTestBase(CoolCoolMountainCoinStar
 
     def test_moveless_wall_kicks_route_needs_cannon_for_extra_spindrift_coins(self):
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Cool, Cool Mountain"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
 
 
@@ -1162,7 +1162,7 @@ class CoolCoolMountainCoinStar154AccessTestBase(CoolCoolMountainCoinStarAccessTe
     }
 
     def test_all_coin_sources_reach_coin_star(self):
-        self.collect(self.get_item_by_name("Cannon Unlock - Cool, Cool Mountain"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
         self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
@@ -1198,7 +1198,7 @@ class WhompsFortressCoinStar74AccessTestBase(WhompsFortressCoinStarAccessTestBas
 
     def test_shoot_into_the_wild_blue_coins_reach_coin_star(self):
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Whomp's Fortress"))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Shoot into the Wild Blue"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
@@ -1237,7 +1237,7 @@ class WhompsFortressCoinStar141AccessTestBase(WhompsFortressCoinStarAccessTestBa
     def test_all_coin_sources_reach_coin_star(self):
         self.collect([
             self.get_item_by_name("Checkerboard Platforms"),
-            self.get_item_by_name("Cannon Unlock - Whomp's Fortress"),
+            self.get_item_by_name("Whomp's Fortress - Cannon Unlock"),
         ])
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Shoot into the Wild Blue"))
@@ -1276,7 +1276,7 @@ class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccess
 
     def test_island_coins_reach_coin_star(self):
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
@@ -1288,7 +1288,7 @@ class BobOmbBattlefieldCoinStar113AccessTestBase(BobOmbBattlefieldCoinStarAccess
     }
 
     def test_climb_coins_reach_coin_star(self):
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
@@ -1301,7 +1301,7 @@ class BobOmbBattlefieldCoinStar115AccessTestBase(BobOmbBattlefieldCoinStarAccess
     }
 
     def test_side_flip_backflip_or_triple_jump_coins_reach_coin_star(self):
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
@@ -1315,7 +1315,7 @@ class BobOmbBattlefieldCoinStar118AccessTestBase(BobOmbBattlefieldCoinStarAccess
 
     def test_triple_jump_extra_coin_reaches_coin_star(self):
         self.collect([
-            self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"),
+            self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"),
             self.get_item_by_name("Side Flip"),
         ])
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
@@ -1331,7 +1331,7 @@ class BobOmbBattlefieldCoinStar121AccessTestBase(BobOmbBattlefieldCoinStarAccess
     }
 
     def test_mario_wings_to_the_sky_coins_reach_coin_star(self):
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
@@ -1372,7 +1372,7 @@ class JollyRogerBayCoinStar51AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
 
     def test_cannon_start_coins_reach_coin_star(self):
         self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Jolly Roger Bay"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
     def test_raised_ship_without_upper_does_not_reach_coin_star(self):
@@ -1589,7 +1589,7 @@ class TinyHugeIslandCoinStar84AccessTestBase(TinyHugeIslandCoinStarAccessTestBas
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
         self.collect(self.get_item_by_name("Wall Kick"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Tiny-Huge Island"))
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -1603,7 +1603,7 @@ class TinyHugeIslandCoinStar80AccessTestBase(TinyHugeIslandCoinStarAccessTestBas
         self.disable_tiny_entry()
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Tiny-Huge Island"))
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -1634,7 +1634,7 @@ class TinyHugeIslandCoinStar134AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
             self.get_item_by_name("Ground Pound"),
         ])
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Tiny-Huge Island"))
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -1752,7 +1752,7 @@ class TinyHugeIslandCoinStar191AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Tiny-Huge Island"))
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -2274,7 +2274,7 @@ class SnowmansLandCoinStar105AccessTestBase(SnowmansLandCoinStarAccessTestBase):
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
 
-        self.collect(self.get_item_by_name("Cannon Unlock - Snowman's Land"))
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
 
 
@@ -2302,7 +2302,7 @@ class SnowmansLandCoinStar127AccessTestBase(SnowmansLandCoinStarAccessTestBase):
 
     def test_all_coin_sources_reach_coin_star(self):
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Cannon Unlock - Snowman's Land"))
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
         self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
 
@@ -2572,7 +2572,7 @@ class BigBooHauntAccessTestBase(SM64TestBase):
     }
 
     def collect_bbh_access(self):
-        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
 
     def test_second_floor_access_with_staircase(self):
         self.collect_bbh_access()
@@ -2612,7 +2612,7 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
     }
 
     def collect_bbh_access(self):
-        self.collect(self.get_item_by_name("Courtyard Boos"))
+        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
 
 
 class BigBooHauntCoinStar88AccessTestBase(BigBooHauntCoinStarAccessTestBase):
@@ -2753,11 +2753,11 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         ])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Go to Town for Red Coins"))
-        self.assertFalse(self.can_reach_location("Wet-Dry World - 1Up Block in Downtown"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Downtown 1-Up Block"))
 
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Go to Town for Red Coins"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - 1Up Block in Downtown"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Downtown 1-Up Block"))
 
     def test_low_water_can_raise_to_high_but_not_highest(self):
         self.disable_wdw_entrance("Wet-Dry World Middle")
@@ -2898,7 +2898,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
 
     def test_bob_wing_cap_access(self):
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Bob-omb Buddy"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("Bob-omb Battlefield - Wing Cap"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
@@ -2920,7 +2920,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
 
     def test_bob_wing_cap_access(self):
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Bob-omb Buddy"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Bob-omb Battlefield"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("Wing Cap"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
@@ -2928,20 +2928,20 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
     def test_tower_wing_cap_access(self):
-        self.collect(self.get_item_by_name("Wing Cap Light"))
-        self.assertTrue(self.can_reach_location("Tower of the Wing Cap Red Coins"))
+        self.collect(self.get_item_by_name("Unlock Tower of the Wing Cap"))
+        self.assertTrue(self.can_reach_location("Tower of the Wing Cap - Red Coins"))
 
     def test_wmotr_wing_cap_access(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Wing Mario Over the Rainbow"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
         self.collect(self.world.create_item("Wing Cap"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
         self.collect(self.get_item_by_name("Castle - Wing Cap"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow Red Coins"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
     def test_wmotr_bob_omb_buddy_accepts_wing_cap(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
@@ -2956,7 +2956,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
-        self.collect(self.get_item_by_name("Cannon Unlock - Wing Mario Over the Rainbow"))
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
 
     def test_hmc_metal_cap_access(self):
@@ -2971,10 +2971,10 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
-        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coin Platform 1-Up"))
         self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Vanish Cap"))
-        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat Red Coins"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coin Platform 1-Up"))
 
     def test_lethal_lava_land_wing_cap_access(self):
@@ -3118,9 +3118,9 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
         ])
         self.assertTrue(self.can_reach_region("Tick Tock Clock - Top"))
-        self.assertFalse(self.can_reach_location("Tick Tock Clock - 1Up Block Midway Up"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
         self.collect(self.get_item_by_name("Long Jump"))
-        self.assertTrue(self.can_reach_location("Tick Tock Clock - 1Up Block Midway Up"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
 
     def test_midway_1up_reachable_with_spinners(self):
         self.collect_third_floor_access()
@@ -3130,7 +3130,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
             self.get_item_by_name("Tick Tock Clock - Spinners"),
         ])
-        self.assertTrue(self.can_reach_location("Tick Tock Clock - 1Up Block Midway Up"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
 
 
 class TickTockClockCoinStarAccessTestBase(SM64TestBase):
@@ -3419,6 +3419,6 @@ class RainbowRideCoinStar146AccessTestBase(RainbowRideCoinStarAccessTestBase):
             self.get_item_by_name("Climb"),
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Wall Kick"),
-            self.get_item_by_name("Cannon Unlock - Rainbow Ride"),
+            self.get_item_by_name("Rainbow Ride - Cannon Unlock"),
         ])
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))

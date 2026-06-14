@@ -188,7 +188,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                         "Big Boo's Haunt - Seek the 8 Red Coins")
     bbh_third_floor = create_subregion(bbh_second_floor, "Big Boo's Haunt - Third Floor",
                                        "Big Boo's Haunt - Eye to Eye in the Secret Room")
-    bbh_roof = create_subregion(bbh_third_floor, "Big Boo's Haunt - Roof", "Big Boo's Haunt - Big Boo's Balcony", "Big Boo's Haunt - 1Up Block Top of Mansion")
+    bbh_roof = create_subregion(bbh_third_floor, "Big Boo's Haunt - Roof", "Big Boo's Haunt - Big Boo's Balcony", "Big Boo's Haunt - Top of Mansion 1-Up Block")
     regBBH.subregions = [bbh_second_floor, bbh_third_floor, bbh_roof]
     create_locs(regBBH, "Big Boo's Haunt - Coins Star")
 
@@ -219,10 +219,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     regHMC = create_region("Hazy Maze Cave", player, multiworld)
     create_locs(regHMC, "Hazy Maze Cave - Swimming Beast in the Cavern", "Hazy Maze Cave - Metal-Head Mario Can Move!",
-                        "Hazy Maze Cave - Watch for Rolling Rocks", "Hazy Maze Cave - Navigating the Toxic Maze","Hazy Maze Cave - 1Up Block Past Rolling Rocks",
+                        "Hazy Maze Cave - Watch for Rolling Rocks", "Hazy Maze Cave - Navigating the Toxic Maze","Hazy Maze Cave - Past Rolling Rocks 1-Up Block",
                         "Hazy Maze Cave - Blue Coin Trail Monty Moles", "Hazy Maze Cave - Twin Hole Monty Moles")
     hmc_red_coin_area = create_subregion(regHMC, "Hazy Maze Cave - Red Coin Area", "Hazy Maze Cave - Elevate for 8 Red Coins")
-    hmc_pit_islands = create_subregion(regHMC, "Hazy Maze Cave - Pit Islands", "Hazy Maze Cave - A-Maze-Ing Emergency Exit", "Hazy Maze Cave - 1Up Block above Pit")
+    hmc_pit_islands = create_subregion(regHMC, "Hazy Maze Cave - Pit Islands", "Hazy Maze Cave - A-Maze-Ing Emergency Exit", "Hazy Maze Cave - Above Pit 1-Up Block")
     regHMC.subregions = [hmc_red_coin_area, hmc_pit_islands]
     create_locs(regHMC, "Hazy Maze Cave - Coins Star")
 
@@ -246,7 +246,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regSSL = create_region("Shifting Sand Land", player, multiworld)
     create_locs(regSSL, "Shifting Sand Land - In the Talons of the Big Bird", "Shifting Sand Land - Shining Atop the Pyramid",
                         "Shifting Sand Land - Free Flying for 8 Red Coins", "Shifting Sand Land - Bob-omb Buddy",
-                        "Shifting Sand Land - 1Up Block Outside Pyramid", "Shifting Sand Land - 1Up Block Pyramid Left Path", "Shifting Sand Land - 1Up Block Pyramid Back",
+                        "Shifting Sand Land - Outside Pyramid 1-Up Block", "Shifting Sand Land - Pyramid Left Path 1-Up Block", "Shifting Sand Land - Pyramid Back 1-Up Block",
                         "Shifting Sand Land - Oasis Tree 1-Up",
                         "Shifting Sand Land - Near Quicksand Pits 1-Up",
                         "Shifting Sand Land - Above Quicksand Pit 1-Up")
@@ -296,8 +296,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Snowman's Land - Shell Shreddin' for Red Coins",
                 "Snowman's Land - Into the Igloo",
                 "Snowman's Land - Bob-omb Buddy",
-                "Snowman's Land - 1Up Block Near Moneybags",
-                "Snowman's Land - 1Up Block inside Igloo",
+                "Snowman's Land - Near Moneybags 1-Up Block",
+                "Snowman's Land - Inside Igloo 1-Up Block",
                 "Snowman's Land - Igloo Ice Block 1-Up")
     sl_top_of_snowmans_head = create_subregion(regSL, "Snowman's Land - Top of Snowman's Head",
                                                "Snowman's Land - Snowman's Big Head",
@@ -326,7 +326,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     wdw_downtown = create_subregion(regWDW, "Wet-Dry World - Downtown",
                                     "Wet-Dry World - Go to Town for Red Coins",
                                     "Wet-Dry World - Quick Race Through Downtown!",
-                                    "Wet-Dry World - 1Up Block in Downtown",
+                                    "Wet-Dry World - Downtown 1-Up Block",
                                     "Wet-Dry World - Downtown Center Coin Ring 1-Up")
     regWDW.subregions = [
         wdw_low_water, wdw_mid_water, wdw_mid_high_water, wdw_high_water, wdw_highest_water, wdw_cannon,
@@ -354,7 +354,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regTTM = create_region("Tall, Tall Mountain", player, multiworld)
     create_locs(regTTM, "Tall, Tall Mountain - Start Edge 1-Up")
     ttm_middle = create_subregion(regTTM, "Tall, Tall Mountain - Middle", "Tall, Tall Mountain - Scary 'Shrooms, Red Coins", "Tall, Tall Mountain - Blast to the Lonely Mushroom",
-                                                         "Tall, Tall Mountain - Bob-omb Buddy", "Tall, Tall Mountain - 1Up Block on Red Mushroom",
+                                                         "Tall, Tall Mountain - Bob-omb Buddy", "Tall, Tall Mountain - Red Mushroom 1-Up Block",
                                                          "Tall, Tall Mountain - Monty Mole Platform 1-Up",
                                                          "Tall, Tall Mountain - Vine Platform Butterfly 1-Up",
                                                          "Tall, Tall Mountain - Lower Monty Moles")
@@ -371,11 +371,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     hugeTHI = create_region("Tiny-Huge Island (Huge)", player, multiworld)
     tinyTHI = create_region("Tiny-Huge Island (Tiny)", player, multiworld)
-    create_locs(tinyTHI, "Tiny-Huge Island - 1Up Block THI Small near Start",
+    create_locs(tinyTHI, "Tiny-Huge Island - Tiny Island Near Start 1-Up Block",
                 "Tiny-Huge Island - Start Butterfly 1-Up")
-    create_locs(hugeTHI, "Tiny-Huge Island - 1Up Block Windy Area", "Tiny-Huge Island - The Tip Top of the Huge Island",
+    create_locs(hugeTHI, "Tiny-Huge Island - Windy Area 1-Up Block", "Tiny-Huge Island - The Tip Top of the Huge Island",
                          "Tiny-Huge Island - Rematch with Koopa the Quick", "Tiny-Huge Island - Wiggler's Red Coins",
-                         "Tiny-Huge Island - 1Up Block THI Large near Start", "Tiny-Huge Island - Make Wiggler Squirm",
+                         "Tiny-Huge Island - Huge Island Near Start 1-Up Block", "Tiny-Huge Island - Make Wiggler Squirm",
                          "Tiny-Huge Island - Cannon Tree 1-Up",
                          "Tiny-Huge Island - Beach Coins 1-Up",
                          "Tiny-Huge Island - Boss Bass 1-Up",
@@ -406,10 +406,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     ttc_upper = create_subregion(ttc_lower, "Tick Tock Clock - Upper", "Tick Tock Clock - Timed Jumps on Moving Bars",
                                  "Tick Tock Clock - The Pit and the Pendulums",
                                  "Tick Tock Clock - Moving Bars Platform 1-Up")
-    ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - 1Up Block Midway Up")
+    ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - Midway Up 1-Up Block")
     ttc_top_past_spinners = create_subregion(ttc_top, "Tick Tock Clock - Top Past Spinners",
                                              "Tick Tock Clock - Stomp on the Thwomp",
-                                             "Tick Tock Clock - 1Up Block at the Top")
+                                             "Tick Tock Clock - Top 1-Up Block")
     regTTC.subregions = [ttc_lower, ttc_upper, ttc_top, ttc_top_past_spinners]
     regTTCStopped = create_region("Tick Tock Clock Stopped", player, multiworld)
     regTTCStopped.connect(regTTC)
@@ -423,12 +423,12 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     rr_beneath_pole = create_subregion(regRR, "Rainbow Ride - Beneath the Pole",
                                        "Rainbow Ride - Swingin' in the Breeze",
                                        "Rainbow Ride - Tricky Triangles!",
-                                       "Rainbow Ride - 1Up Block Under Fly Guy",
+                                       "Rainbow Ride - Under Fly Guy 1-Up Block",
                                        "Rainbow Ride - Tricky Triangles 1-Up",
                                        "Rainbow Ride - Rotating Bridge Platform 1-Up")
     rr_maze = create_subregion(rr_beneath_pole, "Rainbow Ride - Maze",
                                "Rainbow Ride - Coins Amassed in a Maze",
-                               "Rainbow Ride - 1Up Block Top of Red Coin Maze",
+                               "Rainbow Ride - Top of Red Coin Maze 1-Up Block",
                                "Rainbow Ride - Donut Top of Red Coin Maze 1-Up")
     connect_regions(multiworld, player, "Rainbow Ride", "Rainbow Ride - Maze",
                     name="Rainbow Ride - Initial to Maze")
@@ -439,7 +439,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                   "Rainbow Ride - Ship Pole 1-Up",
                                   "Rainbow Ride - Ship Tip 1-Up")
     rr_house = create_subregion(rr_carpets, "Rainbow Ride - House", "Rainbow Ride - The Big House in the Sky",
-                                "Rainbow Ride - 1Up Block On House in the Sky",
+                                "Rainbow Ride - House in the Sky 1-Up Block",
                                 "Rainbow Ride - House Path Donut Lifts 1-Up")
     regRR.subregions = [rr_beneath_pole, rr_maze, rr_carpets, rr_cruiser, rr_house]
     create_locs(regRR, "Rainbow Ride - Coins Star")
@@ -452,12 +452,12 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Wing Mario Over the Rainbow - Hanging Pole 1-Up")
 
     regBitS = create_region("Bowser in the Sky", player, multiworld)
-    create_locs(regBitS, "Bowser in the Sky 1Up Block",
+    create_locs(regBitS, "Bowser in the Sky - 1-Up Block",
                 "Bowser in the Sky - Before Tilting Platform 1-Up")
     bits_middle = create_subregion(regBitS, "Bowser in the Sky - Middle",
                                    "Bowser in the Sky - Ferris Wheel 1-Up",
                                    "Bowser in the Sky - Spark Pole Coins 1-Up")
-    bits_top = create_subregion(bits_middle, "Bowser in the Sky - Top", "Bowser in the Sky Red Coins",
+    bits_top = create_subregion(bits_middle, "Bowser in the Sky - Top", "Bowser in the Sky - Red Coins",
                                 "Bowser in the Sky - Arrow Ride 1-Up",
                                 "Bowser in the Sky - Final Platform 1-Up")
     regBitS.subregions = [bits_middle, bits_top]

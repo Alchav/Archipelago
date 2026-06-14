@@ -180,7 +180,7 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
 def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Cool, Cool Mountain"
     reachable_coins = 130
-    has_cannon = state.has("Cannon Unlock - Cool, Cool Mountain", player)
+    has_cannon = state.has("Cool, Cool Mountain - Cannon Unlock", player)
     if has_cannon or allows_moveless(state, player):
         reachable_coins += 11
     if has_cannon:
@@ -265,7 +265,7 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     if (
             has_action(state, player, "Climb", level_name)
             or has_action(state, player, "Triple Jump", level_name)
-            or state.has("Cannon Unlock - Jolly Roger Bay", player)
+            or state.has("Jolly Roger Bay - Cannon Unlock", player)
             or allows_moveless(state, player) and (
                 has_action(state, player, "Backflip", level_name)
                 or has_action(state, player, "Wall Kick", level_name)
@@ -307,7 +307,7 @@ def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool:
     reachable_coins = 102
-    if state.has("Cannon Unlock - Snowman's Land", player):
+    if state.has("Snowman's Land - Cannon Unlock", player):
         reachable_coins += 3
     if state.can_reach("Snowman's Land - Snowman's Big Head", "Location", player):
         reachable_coins += 2
@@ -359,7 +359,7 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
     def route_has_downtown(water_levels: Set[str]) -> bool:
         return (
             "highest" in water_levels
-            or state.has("Cannon Unlock - Wet-Dry World", player)
+            or state.has("Wet-Dry World - Cannon Unlock", player)
             or route_has_top(water_levels) and allows_moveless(state, player) and has_triple_jump and has_dive
         )
 
@@ -424,7 +424,7 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
     has_long_jump = has_action(state, player, "Long Jump", level_name)
     has_top_return_movement = has_tiny_huge_island_top_return_movement(state, player)
     has_huge_piranha_area_reentry = (has_warp_pipes and has_thi_purple_switches) or has_top_return_movement
-    has_huge_top_gate = state.has("Cannon Unlock - Tiny-Huge Island", player) or has_top_return_movement
+    has_huge_top_gate = state.has("Tiny-Huge Island - Cannon Unlock", player) or has_top_return_movement
     has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
@@ -453,7 +453,7 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
                 route_total += 4
             if can_reach_wiggler:
                 route_total += 10
-            if state.has("Cannon Unlock - Tiny-Huge Island", player) or has_long_jump:
+            if state.has("Tiny-Huge Island - Cannon Unlock", player) or has_long_jump:
                 route_total += 5
         if can_reach_huge_piranha_area and (not has_huge_side or has_huge_piranha_area_reentry):
             route_total += 10
@@ -542,7 +542,7 @@ def fix_reg(entrance_map: Dict[SM64Levels, str], entrance: SM64Levels, invalid_r
 
 
 def is_starting_check_location(location_name: str, options: SM64Options) -> bool:
-    if not options.exclamation_boxes and "1Up Block" in location_name:
+    if not options.exclamation_boxes and "1-Up Block" in location_name:
         return False
     if not options.buddy_checks and location_name.endswith(" - Bob-omb Buddy"):
         return False
@@ -757,12 +757,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance("Menu", "Cool, Cool Mountain",
                                 rf.build_rule("", painting_lvl_name="Cool, Cool Mountain"))
     connect_randomized_entrance("Menu", "Big Boo's Haunt",
-                                lambda state: state.has("Courtyard Boos", player))
+                                lambda state: state.has("Unlock Big Boo's Haunt", player))
     connect_randomized_entrance("Menu", "The Princess's Secret Slide")
     connect_randomized_entrance("Jolly Roger Bay Door", "The Secret Aquarium",
                                 rf.build_rule("SF/BF | TJ & LG | MOVELESS & TJ"))
     connect_randomized_entrance("Menu", "Tower of the Wing Cap",
-                                lambda state: state.has("Wing Cap Light", player))
+                                lambda state: state.has("Unlock Tower of the Wing Cap", player))
     connect_randomized_entrance("Menu", "Bowser in the Dark World", has_first_floor_key)
 
     connect_regions(multiworld, player, "Menu", "Basement", has_basement_key)
@@ -931,7 +931,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & VC & TJ | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & DJ/SF/BF & KK")
-    rf.assign_rule("Wet-Dry World - 1Up Block in Downtown", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Downtown 1-Up Block", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Downtown Center Coin Ring 1-Up", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
                    "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
@@ -958,7 +958,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Upper", "CL | MOVELESS & WK")
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
-    rf.assign_rule("Tick Tock Clock - 1Up Block Midway Up", "TTC_SPINNERS | LJ+LG")
+    rf.assign_rule("Tick Tock Clock - Midway Up 1-Up Block", "TTC_SPINNERS | LJ+LG")
     rf.assign_rule("Tick Tock Clock - Timed Jumps on Moving Bars", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
     rf.assign_rule("Tick Tock Clock - Moving Bars Platform 1-Up", "{Tick Tock Clock Moving} | WK")
@@ -979,14 +979,14 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - House", "RR_CARPETS & TJ/SF/BF/LG")
     rf.assign_rule("Rainbow Ride - Somewhere Over the Rainbow", "CANN")
     # Tower of the Wing Cap
-    # rf.assign_rule("Tower of the Wing Cap Red Coins", "WC") # ridiculous
+    # rf.assign_rule("Tower of the Wing Cap - Red Coins", "WC") # ridiculous
     # Cavern of the Metal Cap
-    rf.assign_rule("Cavern of the Metal Cap Red Coins", "MC | CAPLESS")
+    rf.assign_rule("Cavern of the Metal Cap - Red Coins", "MC | CAPLESS")
     rf.assign_rule("Cavern of the Metal Cap - Alcove 1-Up", "MC | CAPLESS")
     # Vanish Cap Under the Moat
-    rf.assign_rule("Vanish Cap Under the Moat Switch",
+    rf.assign_rule("Vanish Cap Under the Moat - Switch",
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
-    rf.assign_rule("Vanish Cap Under the Moat Red Coins",
+    rf.assign_rule("Vanish Cap Under the Moat - Red Coins",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
     rf.assign_rule("Vanish Cap Under the Moat - Upper Platform 1-Up",
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
@@ -995,8 +995,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
     # Bowser in the Dark World
-    rf.assign_rule("Bowser in the Dark World Red Coins", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World Key", "PURPLE_SWITCHES")
+    rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES")
+    rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Center Overhang 1-Up", "PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Right Tilting Platform Base 1-Up", "PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Left Tilting Platform Base 1-Up", "PURPLE_SWITCHES")
@@ -1014,8 +1014,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                      state, "Bowser in the Dark World - Extra 1-Ups", has_second_floor_key))
     # Bowser in the Fire Sea
     rf.assign_rule("Bowser in the Fire Sea - Upper", "CL")
-    rf.assign_rule("Bowser in the Fire Sea Red Coins", "LG/WK")
-    rf.assign_rule("Bowser in the Fire Sea 1Up Block Near Poles", "LG/WK")
+    rf.assign_rule("Bowser in the Fire Sea - Red Coins", "LG/WK")
+    rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up Block", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
     if options.freestanding_1ups:
         for location_name in (
@@ -1026,8 +1026,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                      lambda state: has_bowser_stage_1up_unlock(
                          state, "Bowser in the Fire Sea - Extra 1-Ups", has_second_floor_key))
     # Wing Mario Over the Rainbow
-    rf.assign_rule("Wing Mario Over the Rainbow Red Coins", "WC+CANN")
-    rf.assign_rule("Wing Mario Over the Rainbow 1Up Block", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Red Coins", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - 1-Up Block", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "WC | LJ+CAPLESS")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up", "CL & WC | CL & LJ+CAPLESS")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
@@ -1132,13 +1132,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Castle Stars
     rf.assign_rule("Castle - Roof", "CANN")
     add_rule(multiworld.get_location("Castle - Toad (Basement)", player),
-             lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle Toads", player))
+             lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle - Toads", player))
     add_rule(multiworld.get_location("Castle - Toad (Second Floor)", player),
-             lambda state: state.can_reach("Second Floor", 'Region', player) and state.has("Castle Toads", player))
+             lambda state: state.can_reach("Second Floor", 'Region', player) and state.has("Castle - Toads", player))
     add_rule(multiworld.get_location("Castle - Toad (Third Floor)", player),
-             lambda state: state.can_reach("Third Floor", 'Region', player) and state.has("Castle Toads", player))
+             lambda state: state.can_reach("Third Floor", 'Region', player) and state.has("Castle - Toads", player))
     add_rule(multiworld.get_location("Castle - Yoshi", player),
-             lambda state: state.has("Yoshi", player))
+             lambda state: state.has("Castle - Yoshi", player))
 
     rf.assign_rule("Castle - Third Tree From Waterfall 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF")
@@ -1147,10 +1147,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Castle - MIPS 1", "DV | MOVELESS")
     rf.assign_rule("Castle - MIPS 2", "DV | MOVELESS")
     add_rule(multiworld.get_location("Castle - MIPS 1", player),
-             lambda state: state.can_reach("Basement", 'Region', player) and state.has("Progressive MIPS", player))
+             lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle - Progressive MIPS", player))
     add_rule(multiworld.get_location("Castle - MIPS 2", player),
              lambda state: state.can_reach("Basement", 'Region', player) and
-             state.has("Progressive MIPS", player, 2))
+             state.has("Castle - Progressive MIPS", player, 2))
 
     if options.area_rando > options.area_rando.option_Off and not using_slot_area_connections:
         ensure_reachable_starting_check(
@@ -1261,7 +1261,7 @@ class RuleFactory:
         },
     }
     cannon_item_name_by_level = {
-        "Wing Mario Over the Rainbow": "Cannon Unlock - Wing Mario Over the Rainbow",
+        "Wing Mario Over the Rainbow": "Wing Mario Over the Rainbow - Cannon Unlock",
     }
 
     class SM64LogicException(Exception):
@@ -1333,7 +1333,7 @@ class RuleFactory:
         star_rule = nop_condition
         painting_rule = nop_condition
         if painting_lvl_name is not None and self.painting_randomizer:
-            painting_item_name = f"Painting Unlock - {painting_lvl_name}"
+            painting_item_name = f"Unlock {painting_lvl_name}"
             painting_rule = lambda state: state.has(painting_item_name, self.player)
         return lambda state: star_rule(state) and painting_rule(state)
 
@@ -1357,7 +1357,7 @@ class RuleFactory:
 
     def get_cannon_item_name(self, target_name: str) -> str:
         level_name = self.get_level_name_from_target(target_name)
-        return self.cannon_item_name_by_level.get(level_name, "Cannon Unlock - " + target_name.split(" - ", 1)[0])
+        return self.cannon_item_name_by_level.get(level_name, f"{level_name} - Cannon Unlock")
 
     def get_cap_item_names(self, target_name: str) -> dict[str, str]:
         level_name = self.get_level_name_from_target(target_name)

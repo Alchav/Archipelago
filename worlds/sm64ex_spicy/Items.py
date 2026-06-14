@@ -19,7 +19,7 @@ generic_item_data_table: dict[str, SM64ItemData] = {
     "Wing Cap": SM64ItemData(sm64ex_base_id + 181),
     "Metal Cap": SM64ItemData(sm64ex_base_id + 182),
     "Vanish Cap": SM64ItemData(sm64ex_base_id + 183),
-    "1Up Mushroom": SM64ItemData(sm64ex_base_id + 184, ItemClassification.filler),
+    "1-Up Mushroom": SM64ItemData(sm64ex_base_id + 184, ItemClassification.filler),
     ut_glitch_item_name: SM64ItemData(),
 }
 
@@ -58,12 +58,12 @@ castle_key_item_data_table: dict[str, SM64ItemData] = {
 }
 
 castle_progression_item_data_table: dict[str, SM64ItemData] = {
-    "Progressive MIPS": SM64ItemData(sm64ex_base_id + 271, ItemClassification.progression_deprioritized),
-    "Wing Cap Light": SM64ItemData(sm64ex_base_id + 272),
-    "Courtyard Boos": SM64ItemData(sm64ex_base_id + 273),
-    "Castle Toads": SM64ItemData(sm64ex_base_id + 274),
-    "Cannon Unlock - Castle": SM64ItemData(sm64ex_base_id + 275, ItemClassification.progression_deprioritized_skip_balancing),
-    "Yoshi": SM64ItemData(sm64ex_base_id + 276, ItemClassification.progression_deprioritized_skip_balancing),
+    "Castle - Progressive MIPS": SM64ItemData(sm64ex_base_id + 271, ItemClassification.progression_deprioritized),
+    "Unlock Tower of the Wing Cap": SM64ItemData(sm64ex_base_id + 272),
+    "Unlock Big Boo's Haunt": SM64ItemData(sm64ex_base_id + 273),
+    "Castle - Toads": SM64ItemData(sm64ex_base_id + 274),
+    "Castle - Cannon Unlock": SM64ItemData(sm64ex_base_id + 275, ItemClassification.progression_deprioritized_skip_balancing),
+    "Castle - Yoshi": SM64ItemData(sm64ex_base_id + 276, ItemClassification.progression_deprioritized_skip_balancing),
     "Unlock Bowser in the Fire Sea": SM64ItemData(sm64ex_base_id + 304),
     "Unlock Vanish Cap Under the Moat": SM64ItemData(sm64ex_base_id + 555),
 }
@@ -380,32 +380,32 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
 }
 
 cannon_item_data_table: dict[str, SM64ItemData] = {
-    "Cannon Unlock - Bob-omb Battlefield": SM64ItemData(sm64ex_base_id + 200),
-    "Cannon Unlock - Whomp's Fortress": SM64ItemData(sm64ex_base_id + 201),
-    "Cannon Unlock - Jolly Roger Bay": SM64ItemData(sm64ex_base_id + 202),
-    "Cannon Unlock - Cool, Cool Mountain": SM64ItemData(sm64ex_base_id + 203),
-    "Cannon Unlock - Shifting Sand Land": SM64ItemData(sm64ex_base_id + 207),
-    "Cannon Unlock - Snowman's Land": SM64ItemData(sm64ex_base_id + 209),
-    "Cannon Unlock - Wet-Dry World": SM64ItemData(sm64ex_base_id + 210),
-    "Cannon Unlock - Tall, Tall Mountain": SM64ItemData(sm64ex_base_id + 211),
-    "Cannon Unlock - Tiny-Huge Island": SM64ItemData(sm64ex_base_id + 212),
-    "Cannon Unlock - Rainbow Ride": SM64ItemData(sm64ex_base_id + 214),
-    "Cannon Unlock - Wing Mario Over the Rainbow": SM64ItemData(sm64ex_base_id + 525),
+    "Bob-omb Battlefield - Cannon Unlock": SM64ItemData(sm64ex_base_id + 200),
+    "Whomp's Fortress - Cannon Unlock": SM64ItemData(sm64ex_base_id + 201),
+    "Jolly Roger Bay - Cannon Unlock": SM64ItemData(sm64ex_base_id + 202),
+    "Cool, Cool Mountain - Cannon Unlock": SM64ItemData(sm64ex_base_id + 203),
+    "Shifting Sand Land - Cannon Unlock": SM64ItemData(sm64ex_base_id + 207),
+    "Snowman's Land - Cannon Unlock": SM64ItemData(sm64ex_base_id + 209),
+    "Wet-Dry World - Cannon Unlock": SM64ItemData(sm64ex_base_id + 210),
+    "Tall, Tall Mountain - Cannon Unlock": SM64ItemData(sm64ex_base_id + 211),
+    "Tiny-Huge Island - Cannon Unlock": SM64ItemData(sm64ex_base_id + 212),
+    "Rainbow Ride - Cannon Unlock": SM64ItemData(sm64ex_base_id + 214),
+    "Wing Mario Over the Rainbow - Cannon Unlock": SM64ItemData(sm64ex_base_id + 525),
 
 }
 
 painting_unlock_item_data_table: dict[str, SM64ItemData] = {
-    "Painting Unlock - Whomp's Fortress": SM64ItemData(sm64ex_base_id + 231),
-    "Painting Unlock - Jolly Roger Bay": SM64ItemData(sm64ex_base_id + 232),
-    "Painting Unlock - Cool, Cool Mountain": SM64ItemData(sm64ex_base_id + 233),
-    "Painting Unlock - Lethal Lava Land": SM64ItemData(sm64ex_base_id + 236),
-    "Painting Unlock - Shifting Sand Land": SM64ItemData(sm64ex_base_id + 237),
-    "Painting Unlock - Dire, Dire Docks": SM64ItemData(sm64ex_base_id + 238),
-    "Painting Unlock - Snowman's Land": SM64ItemData(sm64ex_base_id + 239),
-    "Painting Unlock - Wet-Dry World": SM64ItemData(sm64ex_base_id + 240),
-    "Painting Unlock - Tall, Tall Mountain": SM64ItemData(sm64ex_base_id + 241),
-    "Painting Unlock - Tiny-Huge Island": SM64ItemData(sm64ex_base_id + 242),
-    "Painting Unlock - Tick Tock Clock": SM64ItemData(sm64ex_base_id + 243),
+    "Unlock Whomp's Fortress": SM64ItemData(sm64ex_base_id + 231),
+    "Unlock Jolly Roger Bay": SM64ItemData(sm64ex_base_id + 232),
+    "Unlock Cool, Cool Mountain": SM64ItemData(sm64ex_base_id + 233),
+    "Unlock Lethal Lava Land": SM64ItemData(sm64ex_base_id + 236),
+    "Unlock Shifting Sand Land": SM64ItemData(sm64ex_base_id + 237),
+    "Unlock Dire, Dire Docks": SM64ItemData(sm64ex_base_id + 238),
+    "Unlock Snowman's Land": SM64ItemData(sm64ex_base_id + 239),
+    "Unlock Wet-Dry World": SM64ItemData(sm64ex_base_id + 240),
+    "Unlock Tall, Tall Mountain": SM64ItemData(sm64ex_base_id + 241),
+    "Unlock Tiny-Huge Island": SM64ItemData(sm64ex_base_id + 242),
+    "Unlock Tick Tock Clock": SM64ItemData(sm64ex_base_id + 243),
 }
 
 item_data_table = {

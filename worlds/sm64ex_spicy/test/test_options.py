@@ -59,7 +59,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                 self.assertEqual(location_table[location_name], location_id)
 
     def test_wmotr_cannon_unlock_item_id(self):
-        self.assertEqual(cannon_item_data_table["Cannon Unlock - Wing Mario Over the Rainbow"].code, 3626525)
+        self.assertEqual(cannon_item_data_table["Wing Mario Over the Rainbow - Cannon Unlock"].code, 3626525)
 
     def test_item_ids_match_client_doc(self):
         expected_ids = {
@@ -89,12 +89,12 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Dark World Key": 3626268,
             "Progressive Basement Key": 3626269,
             "Progressive Upstairs Key": 3626270,
-            "Progressive MIPS": 3626271,
-            "Wing Cap Light": 3626272,
-            "Courtyard Boos": 3626273,
-            "Castle Toads": 3626274,
-            "Cannon Unlock - Castle": 3626275,
-            "Yoshi": 3626276,
+            "Castle - Progressive MIPS": 3626271,
+            "Unlock Tower of the Wing Cap": 3626272,
+            "Unlock Big Boo's Haunt": 3626273,
+            "Castle - Toads": 3626274,
+            "Castle - Cannon Unlock": 3626275,
+            "Castle - Yoshi": 3626276,
             "Unlock Bowser in the Fire Sea": 3626304,
             "Unlock Vanish Cap Under the Moat": 3626555,
             "Wing Cap": 3626181,
@@ -263,9 +263,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_castle_progression_items_are_generated(self):
         self.assertEqual(len(self.get_items_by_name("Progressive Key")), 6)
-        self.assertEqual(len(self.get_items_by_name("Progressive MIPS")), 2)
+        self.assertEqual(len(self.get_items_by_name("Castle - Progressive MIPS")), 2)
         for item_name in castle_progression_item_data_table:
-            if item_name != "Progressive MIPS":
+            if item_name != "Castle - Progressive MIPS":
                 with self.subTest("Castle progression item generated", item=item_name):
                     self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
@@ -744,15 +744,15 @@ class ExclamationBoxesOffTestBase(SM64TestBase):
         "exclamation_boxes": Options.ExclamationBoxes.option_false,
     }
 
-    # Should populate the boxes with the players own 1Up Mushrooms
+    # Should populate the boxes with the players own 1-Up Mushrooms
     def test_items_in_exclamation_box_locations(self):
-        # Get 1Up Block locations
-        loc1ups_table = {name for name in location_table.keys() if "1Up Block" in name}
+        # Get 1-Up Block locations
+        loc1ups_table = {name for name in location_table.keys() if "1-Up Block" in name}
         for loc in loc1ups_table:
             # Use subtest to force all locations to be tested
-            with self.subTest("Location has own 1Up Mushroom.", location=loc):
+            with self.subTest("Location has own 1-Up Mushroom.", location=loc):
                 item_in_loc = self.world.get_location(loc).item
-                self.assertEqual(item_in_loc.name, "1Up Mushroom")
+                self.assertEqual(item_in_loc.name, "1-Up Mushroom")
                 # By default, these test bases are single player multiworld.
                 # In any other case, we should test that they belong to their respective worlds.
 
@@ -899,7 +899,7 @@ class NoPowerStarsTestBase(SM64TestBase):
     }
 
     def test_no_power_stars_generated(self):
-        self.assertGreater(len(self.get_items_by_name("1Up Mushroom")), 0)
+        self.assertGreater(len(self.get_items_by_name("1-Up Mushroom")), 0)
         self.assertNotIn("Power Star", {item.name for item in self.multiworld.get_items()})
 
 
