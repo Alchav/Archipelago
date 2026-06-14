@@ -396,8 +396,8 @@ locFreestanding1Up_table = {
     "Castle - Basement Four Corners 1-Up": 3629126,
 
     "Cool, Cool Mountain - Snowman Tree 1-Up": 3629127,
-    "Cool, Cool Mountain - Slide Shortcut Entry 1-Up": 3629128,
-    "Cool, Cool Mountain - Slide Shortcut Exit 1-Up": 3629129,
+    "Cool, Cool Mountain - Slide Shortcut First 1-Up": 3629128,
+    "Cool, Cool Mountain - Slide Shortcut Second 1-Up": 3629129,
 
     "Cavern of the Metal Cap - Alcove 1-Up": 3629130,
 

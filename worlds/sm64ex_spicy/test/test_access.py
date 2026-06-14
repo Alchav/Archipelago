@@ -324,8 +324,8 @@ class CourseOneUpAccessTestBase(SM64TestBase):
 
     def test_ccm_slide_1ups_have_no_extra_rule(self):
         for location_name in (
-                "Cool, Cool Mountain - Slide Shortcut Entry 1-Up",
-                "Cool, Cool Mountain - Slide Shortcut Exit 1-Up",
+                "Cool, Cool Mountain - Slide Shortcut First 1-Up",
+                "Cool, Cool Mountain - Slide Shortcut Second 1-Up",
         ):
             with self.subTest(location=location_name):
                 self.assertTrue(self.can_reach_location(location_name))

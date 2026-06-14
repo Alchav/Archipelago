@@ -176,8 +176,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_default_locs(regCCM, locCCM_table)
     create_locs(regCCM,
                 "Cool, Cool Mountain - Snowman Tree 1-Up",
-                "Cool, Cool Mountain - Slide Shortcut Entry 1-Up",
-                "Cool, Cool Mountain - Slide Shortcut Exit 1-Up")
+                "Cool, Cool Mountain - Slide Shortcut First 1-Up",
+                "Cool, Cool Mountain - Slide Shortcut Second 1-Up")
     create_locs(regCCM, "Cool, Cool Mountain - Coins Star")
 
     regBBH = create_region("Big Boo's Haunt", player, multiworld)
