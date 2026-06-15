@@ -1077,8 +1077,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
     # Bowser in the Dark World
-    rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES")
+    rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES | TJ+MOVELESS")
+    rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES | TJ+MOVELESS")
     if options.freestanding_1ups:
         for location_name in (
                 "Bowser in the Dark World - Center Overhang 1-Up",

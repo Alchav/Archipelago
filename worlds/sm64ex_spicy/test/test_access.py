@@ -928,13 +928,26 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Tricky Triangles!"))
 
-    def test_bitdw_red_coins_and_key_require_purple_switches(self):
+    def test_bitdw_red_coins_and_key_accept_purple_switches(self):
         self.collect(self.get_item_by_name("Dark World Key"))
         self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
+
+    def test_bitdw_red_coins_and_key_accept_moveless_triple_jump(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
+
+        self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
