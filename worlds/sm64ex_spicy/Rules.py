@@ -288,13 +288,12 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
 def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Dire, Dire Docks"
     reachable_coins = 60
-    has_poles = state.has("Dire, Dire Docks - Poles", player)
+    has_poles = state.has("Dire, Dire Docks - Poles", player) and has_action(state, player, "Climb", level_name)
     has_purple_switch_route = has_purple_switches(state, player, "Dire, Dire Docks")
     has_sub_poles_movement_route = (
             state.has("Dire, Dire Docks - Bowser's Sub", player)
             and has_poles
             and has_action(state, player, "Triple Jump", level_name)
-            and has_action(state, player, "Climb", level_name)
     )
     if has_purple_switch_route or has_sub_poles_movement_route:
         reachable_coins += 2

@@ -1935,6 +1935,8 @@ class DireDireDocksCoinStar63AccessTestBase(DireDireDocksCoinStarThresholdTestBa
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
         self.collect(self.get_item_by_name("Dire, Dire Docks - Poles"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+        self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
 
 
@@ -1952,6 +1954,8 @@ class DireDireDocksCoinStar77AccessTestBase(DireDireDocksCoinStarThresholdTestBa
         ])
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
         self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+        self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
 
 
