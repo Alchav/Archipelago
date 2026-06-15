@@ -151,7 +151,7 @@ def has_checkerboard_platforms(state: CollectionState, player: int, level_name: 
 
 def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bob-omb Battlefield"
-    reachable_coins = 109
+    reachable_coins = 99
     if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
         reachable_coins += 3
         if has_action(state, player, "Climb", level_name):
@@ -161,7 +161,7 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
         if has_action(state, player, "Triple Jump", level_name):
             reachable_coins += 1
     if state.can_reach("Bob-omb Battlefield - Mario Wings to the Sky", "Location", player):
-        reachable_coins += 36
+        reachable_coins += 46
     return coins <= min(reachable_coins, 146)
 
 
