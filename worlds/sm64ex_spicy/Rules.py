@@ -1104,13 +1104,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                      lambda state: has_bowser_stage_1up_unlock(
                          state, "Bowser in the Fire Sea - Extra 1-Ups", has_second_floor_key))
     # Wing Mario Over the Rainbow
-    rf.assign_rule("Wing Mario Over the Rainbow - Red Coins", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Red Coins", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - 1-Up Block", "WC & TJ/CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "WC & TJ/CANN | LJ+CAPLESS")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up", "CL & WC & TJ/CANN | CL & LJ+CAPLESS")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", "WC & TJ/CANN")
-    rf.assign_rule("Wing Mario Over the Rainbow - Hanging Pole 1-Up", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Hanging Pole 1-Up", "WC+CANN")
     # Bowser in the Sky
     rf.assign_rule("Bowser in the Sky - Chuckya",
                    "TJ/SF/LG/BF/MOVELESS")
