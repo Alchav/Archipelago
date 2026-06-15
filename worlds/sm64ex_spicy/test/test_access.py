@@ -318,9 +318,7 @@ class CourseOneUpAccessTestBase(SM64TestBase):
     def test_jrb_underwater_coin_ring_1up_has_no_extra_rule(self):
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Underwater Coin Ring 1-Up"))
 
-    def test_ccm_snowman_tree_1up_accepts_side_flip(self):
-        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Snowman Tree 1-Up"))
-        self.collect(self.get_item_by_name("Side Flip"))
+    def test_ccm_snowman_tree_1up_has_no_extra_rule(self):
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Snowman Tree 1-Up"))
 
     def test_ccm_slide_1ups_have_no_extra_rule(self):

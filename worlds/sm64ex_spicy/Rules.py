@@ -944,7 +944,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Cool, Cool Mountain - Snowman's Lost His Head", "CCM_SNOWMAN_HEAD")
     rf.assign_rule("Cool, Cool Mountain - Li'l Penguin Lost", "CCM_BABY_PENGUINS")
     rf.assign_rule("Cool, Cool Mountain - Wall Kicks Will Work", "TJ/WK & CANN | CANNLESS & TJ/WK | MOVELESS")
-    rf.assign_rule("Cool, Cool Mountain - Snowman Tree 1-Up", "CL/TJ/BF/SF")
     # Big Boo's Haunt
     rf.assign_rule("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", "BBH_MERRY_GO_ROUND")
     rf.assign_rule("Big Boo's Haunt - Second Floor", "BBH_STAIRCASE | WK & TJ/SF")
