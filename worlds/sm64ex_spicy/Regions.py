@@ -400,11 +400,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     regTTC = create_region("Tick Tock Clock", player, multiworld)
     ttc_lower = create_subregion(regTTC, "Tick Tock Clock - Lower", "Tick Tock Clock - Roll into the Cage",
-                                 "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins",
-                                 "Tick Tock Clock - Pole 1-Up")
+                                 "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins")
     ttc_upper = create_subregion(ttc_lower, "Tick Tock Clock - Upper", "Tick Tock Clock - Timed Jumps on Moving Bars",
                                  "Tick Tock Clock - The Pit and the Pendulums",
-                                 "Tick Tock Clock - Moving Bars Platform 1-Up")
+                                 "Tick Tock Clock - Moving Bars Platform 1-Up",
+                                 "Tick Tock Clock - Pole 1-Up")
     ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - Midway Up 1-Up Block")
     ttc_top_past_spinners = create_subregion(ttc_top, "Tick Tock Clock - Top Past Spinners",
                                              "Tick Tock Clock - Stomp on the Thwomp",

@@ -3266,6 +3266,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -3310,6 +3311,17 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
         self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
+
+    def test_pole_1up_is_in_upper_region(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Pole 1-Up"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Pole 1-Up"))
 
     def test_midway_1up_requires_spinners_or_long_jump_and_ledge_grab(self):
         self.collect_third_floor_access()
