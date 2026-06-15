@@ -422,12 +422,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                        "Rainbow Ride - Swingin' in the Breeze",
                                        "Rainbow Ride - Tricky Triangles!",
                                        "Rainbow Ride - Under Fly Guy 1-Up Block",
-                                       "Rainbow Ride - Tricky Triangles 1-Up",
-                                       "Rainbow Ride - Rotating Bridge Platform 1-Up")
+                                       "Rainbow Ride - Tricky Triangles 1-Up",)
     rr_maze = create_subregion(rr_beneath_pole, "Rainbow Ride - Maze",
                                "Rainbow Ride - Coins Amassed in a Maze",
-                               "Rainbow Ride - Top of Red Coin Maze 1-Up Block",
-                               "Rainbow Ride - Donut Top of Red Coin Maze 1-Up")
+                               )
     connect_regions(multiworld, player, "Rainbow Ride", "Rainbow Ride - Maze",
                     name="Rainbow Ride - Initial to Maze")
     rr_carpets = create_subregion(rr_maze, "Rainbow Ride - Carpets", "Rainbow Ride - Bob-omb Buddy")
@@ -435,10 +433,13 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                   "Rainbow Ride - Cruiser Crossing the Rainbow",
                                   "Rainbow Ride - Somewhere Over the Rainbow",
                                   "Rainbow Ride - Ship Pole 1-Up",
-                                  "Rainbow Ride - Ship Tip 1-Up")
+                                  "Rainbow Ride - Ship Tip 1-Up",
+                                  "Rainbow Ride - Rotating Bridge Platform 1-Up")
     rr_house = create_subregion(rr_carpets, "Rainbow Ride - House", "Rainbow Ride - The Big House in the Sky",
                                 "Rainbow Ride - House in the Sky 1-Up Block",
-                                "Rainbow Ride - House Path Donut Lifts 1-Up")
+                                "Rainbow Ride - House Path Donut Lifts 1-Up",
+                                "Rainbow Ride - Donut Top of Red Coin Maze 1-Up",
+                                "Rainbow Ride - Top of Red Coin Maze 1-Up Block",)
     regRR.subregions = [rr_beneath_pole, rr_maze, rr_carpets, rr_cruiser, rr_house]
     create_locs(regRR, "Rainbow Ride - Coins Star")
 
