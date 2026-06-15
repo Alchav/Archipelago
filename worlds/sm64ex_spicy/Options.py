@@ -723,12 +723,14 @@ sm64_options_groups = [
         *secret_stage_coinsanity_max_coin_options,
         *coin_star_requirement_options,
     ]),
+    OptionGroup("Gameplay Options", [
+        MariosHat,
+    ]),
     OptionGroup("Ability Options", [
         *move_randomizer_options,
         StrictMoveRequirements,
     ]),
     OptionGroup("Cosmetic Options", [
-        MariosHat,
         MarioColors,
         MusicShuffle,
     ]),
