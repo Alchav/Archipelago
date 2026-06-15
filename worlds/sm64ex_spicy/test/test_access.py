@@ -1171,6 +1171,34 @@ class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Sky - 76 Coins"))
 
 
+class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+    }
+
+    def collect_wing_mario_over_the_rainbow_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Side Flip"))
+
+    def test_long_jump_reaches_all_four_no_wing_fallback_coins(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 2 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
+
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {

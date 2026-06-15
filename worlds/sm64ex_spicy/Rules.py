@@ -557,9 +557,7 @@ def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins
             reachable_coins += 46
     else:
         if has_action(state, player, "Long Jump", level_name):
-            reachable_coins += 2
-            if has_action(state, player, "Ledge Grab", level_name):
-                reachable_coins += 2
+            reachable_coins += 4
     return coins <= reachable_coins
 
 
