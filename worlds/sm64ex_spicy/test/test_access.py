@@ -692,21 +692,30 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         ])
         self.assertTrue(self.can_reach_region("Rainbow Ride - Beneath the Pole"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Tricky Triangles 1-Up"))
-        self.assertTrue(self.can_reach_location("Rainbow Ride - Rotating Bridge Platform 1-Up"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Rotating Bridge Platform 1-Up"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Tricky Triangles!"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Tricky Triangles 1-Up"))
 
-    def test_rainbow_ride_red_coin_maze_donut_uses_maze_logic(self):
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride - Cruiser"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Rotating Bridge Platform 1-Up"))
+
+    def test_rainbow_ride_red_coin_maze_donut_uses_top_block_logic(self):
         self.collect_third_floor_access()
         self.collect([
             self.get_item_by_name("Side Flip"),
             self.get_item_by_name("Long Jump"),
         ])
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
         self.collect(self.get_item_by_name("Climb"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
+
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
@@ -859,6 +868,19 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
+
+    def test_tall_tall_mountain_vine_platform_uses_top_region(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Scale the Mountain"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Vine Platform Butterfly 1-Up"))
+
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Kick"),
+        ])
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Top"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Scale the Mountain"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Vine Platform Butterfly 1-Up"))
 
     def test_tiny_huge_island_five_secrets_from_tiny_requires_purple_switches(self):
         self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
@@ -1310,20 +1332,20 @@ class BobOmbBattlefieldCoinStarAccessTestBase(SM64TestBase):
     }
 
 
-class BobOmbBattlefieldCoinStar109AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar99AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 109,
+        "bob_omb_battlefield_coin_star_requirement": 99,
     }
 
     def test_start_coins_reach_coin_star(self):
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 
-class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar102AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 110,
+        "bob_omb_battlefield_coin_star_requirement": 102,
     }
 
     def test_island_coins_reach_coin_star(self):
@@ -1333,10 +1355,10 @@ class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccess
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 
-class BobOmbBattlefieldCoinStar113AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar104AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 113,
+        "bob_omb_battlefield_coin_star_requirement": 104,
     }
 
     def test_climb_coins_reach_coin_star(self):
@@ -1346,10 +1368,10 @@ class BobOmbBattlefieldCoinStar113AccessTestBase(BobOmbBattlefieldCoinStarAccess
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 
-class BobOmbBattlefieldCoinStar115AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar107AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 115,
+        "bob_omb_battlefield_coin_star_requirement": 107,
     }
 
     def test_side_flip_backflip_or_triple_jump_coins_reach_coin_star(self):
@@ -1359,10 +1381,10 @@ class BobOmbBattlefieldCoinStar115AccessTestBase(BobOmbBattlefieldCoinStarAccess
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 
-class BobOmbBattlefieldCoinStar118AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar108AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 118,
+        "bob_omb_battlefield_coin_star_requirement": 108,
     }
 
     def test_triple_jump_extra_coin_reaches_coin_star(self):
@@ -1376,10 +1398,10 @@ class BobOmbBattlefieldCoinStar118AccessTestBase(BobOmbBattlefieldCoinStarAccess
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 
-class BobOmbBattlefieldCoinStar121AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar146AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 121,
+        "bob_omb_battlefield_coin_star_requirement": 146,
     }
 
     def test_mario_wings_to_the_sky_coins_reach_coin_star(self):

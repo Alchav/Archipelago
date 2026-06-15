@@ -355,11 +355,12 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regTTM, "Tall, Tall Mountain - Start Edge 1-Up")
     ttm_middle = create_subregion(regTTM, "Tall, Tall Mountain - Middle", "Tall, Tall Mountain - Scary 'Shrooms, Red Coins", "Tall, Tall Mountain - Blast to the Lonely Mushroom",
                                           "Tall, Tall Mountain - Bob-omb Buddy", "Tall, Tall Mountain - Red Mushroom 1-Up Block",
-                                          "Tall, Tall Mountain - Monty Mole Platform 1-Up", "Tall, Tall Mountain - Vine Platform Butterfly 1-Up",
+                                          "Tall, Tall Mountain - Monty Mole Platform 1-Up",
                                           "Tall, Tall Mountain - Upper Monty Moles", "Tall, Tall Mountain - Lower Monty Moles")
     ttm_top = create_subregion(ttm_middle, "Tall, Tall Mountain - Top", "Tall, Tall Mountain - Scale the Mountain", "Tall, Tall Mountain - Mystery of the Monkey Cage",
                                                        "Tall, Tall Mountain - Mysterious Mountainside", "Tall, Tall Mountain - Breathtaking View from Bridge",
                                                        "Tall, Tall Mountain - Waterfall Gap 1-Up",
+                                                       "Tall, Tall Mountain - Vine Platform Butterfly 1-Up",
                                                        "Tall, Tall Mountain - Slide Start Room Corners 1-Up",
                                                        "Tall, Tall Mountain - Slide Entry Ledge 1-Up",
                                                        "Tall, Tall Mountain - Slide First 1-Up",
