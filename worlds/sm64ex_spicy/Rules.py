@@ -551,9 +551,10 @@ def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins
     reachable_coins = 2
     has_wing = has_wing_cap(state, player, level_name)
     if has_wing:
-        reachable_coins += 46
         if state.has("Wing Mario Over the Rainbow - Cannon Unlock", player):
             reachable_coins = 56
+        elif has_action(state, player, "Triple Jump", level_name):
+            reachable_coins += 46
     else:
         if has_action(state, player, "Long Jump", level_name):
             reachable_coins += 2
@@ -965,17 +966,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CAPLESS & MOVELESS & LJ/TJ/WK")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
-    rf.assign_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles", "WK/SF/BF/TJ")
-    rf.assign_rule("Hazy Maze Cave - Twin Hole Monty Moles", "WK/SF/BF/TJ")
     # Lethal Lava Land
-    rf.assign_rule("Lethal Lava Land - Red-Hot Log Rolling", "WC | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | MOVELESS+CAPLESS")
+    rf.assign_rule("Lethal Lava Land - Red-Hot Log Rolling", "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | MOVELESS+CAPLESS")
     rf.assign_rule("Lethal Lava Land - Upper Volcano", "CL")
     rf.assign_rule("Lethal Lava Land - Elevator Tour in the Volcano", "CHECKERBOARD_PLATFORMS/DV/TJ/LJ")
-    rf.assign_rule("Lethal Lava Land - Northeast Platform 1-Up", "LLL_KOOPA_SHELL | WC | LJ")
-    rf.assign_rule("Lethal Lava Land - Southern Curve 1-Up", "LLL_KOOPA_SHELL | WC | LJ")
-    rf.assign_rule("Lethal Lava Land - Raised Brown Platform 1-Up", "LLL_KOOPA_SHELL | WC | LJ")
-    rf.assign_rule("Lethal Lava Land - Volcano Curve 1-Up", "LLL_KOOPA_SHELL | WC | LJ")
-    rf.assign_rule("Lethal Lava Land - Northwest Curve 1-Up", "LLL_KOOPA_SHELL | WC | LJ")
     # Shifting Sand Land
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
     rf.assign_rule("Shifting Sand Land - Upper Pyramid", "CL & TJ/BF/SF/LG | SSL_PYRAMID_ELEVATOR")
@@ -984,7 +978,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "SSL_PYRAMID_ELEVATOR & TJ/SF/BF & CAPLESS | MOVELESS & LG/KK")
     rf.assign_rule("Shifting Sand Land - Free Flying for 8 Red Coins", "TJ+WC | CANN+WC | TJ/SF/BF & CAPLESS | MOVELESS & CAPLESS")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
-    rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC | LJ")
+    rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
     rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "TJ/LG/BF/SF")
     rf.assign_rule("Shifting Sand Land - Pyramid Right Path 1-Up", "TJ/LG/BF/SF")
     # Dire, Dire Docks
@@ -1019,13 +1013,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                    "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ")
     rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES | {Wet-Dry World - Top} & LG/TJ/LJ")
+    rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky",
+                   "{{Wet-Dry World - Express Elevator--Hurry Up!}} & {Wet-Dry World - Top} | "
+                   "{{Wet-Dry World - Express Elevator--Hurry Up!}} & WDW_WATER_LEVEL_DIAMOND | "
+                   "{{Wet-Dry World - Express Elevator--Hurry Up!}} & LG")
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & VC & TJ | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & DJ/SF/BF & KK")
     rf.assign_rule("Wet-Dry World - Downtown 1-Up Block", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Downtown Center Coin Ring 1-Up", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
                    "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
                    "{Wet-Dry World - Highest Water} & BF/SF")
@@ -1043,8 +1040,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "{Tiny-Huge Island - Tiny Main} & GP")
-    rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up", "CANN")
-    rf.assign_rule("Tiny-Huge Island - Cannon Tree Butterfly 1-Up", "CANN")
+    rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up", "CANN | CANNLESS")
+    rf.assign_rule("Tiny-Huge Island - Cannon Tree Butterfly 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF/WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
@@ -1075,25 +1072,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # rf.assign_rule("Tower of the Wing Cap - Red Coins", "WC") # ridiculous
     # Cavern of the Metal Cap
     rf.assign_rule("Cavern of the Metal Cap - Red Coins", "MC | CAPLESS")
-    rf.assign_rule("Cavern of the Metal Cap - Alcove 1-Up", "MC | CAPLESS")
     # Vanish Cap Under the Moat
     rf.assign_rule("Vanish Cap Under the Moat - Switch",
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coins",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
-    rf.assign_rule("Vanish Cap Under the Moat - Upper Platform 1-Up",
-                   "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
-    rf.assign_rule("Vanish Cap Under the Moat - Lower Platform 1-Up",
-                   "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
     # Bowser in the Dark World
     rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World - Center Overhang 1-Up", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World - Right Tilting Platform Base 1-Up", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World - Left Tilting Platform Base 1-Up", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World - Far Overhang 1-Up", "PURPLE_SWITCHES")
     if options.freestanding_1ups:
         for location_name in (
                 "Bowser in the Dark World - Center Overhang 1-Up",
@@ -1119,13 +1107,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                      lambda state: has_bowser_stage_1up_unlock(
                          state, "Bowser in the Fire Sea - Extra 1-Ups", has_second_floor_key))
     # Wing Mario Over the Rainbow
-    rf.assign_rule("Wing Mario Over the Rainbow - Red Coins", "WC+CANN")
-    rf.assign_rule("Wing Mario Over the Rainbow - 1-Up Block", "WC+CANN")
-    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "WC | LJ+CAPLESS")
-    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up", "CL & WC | CL & LJ+CAPLESS")
+    rf.assign_rule("Wing Mario Over the Rainbow - Red Coins", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - 1-Up Block", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "WC & TJ/CANN | LJ+CAPLESS")
+    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up", "CL & WC & TJ/CANN | CL & LJ+CAPLESS")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
-    rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", "WC")
-    rf.assign_rule("Wing Mario Over the Rainbow - Hanging Pole 1-Up", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Hanging Pole 1-Up", "WC & TJ/CANN")
     # Bowser in the Sky
     rf.assign_rule("Bowser in the Sky - Chuckya",
                    "TJ/SF/LG/BF/MOVELESS")

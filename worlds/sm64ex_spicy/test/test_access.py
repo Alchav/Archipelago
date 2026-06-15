@@ -290,6 +290,7 @@ class CourseOneUpAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
         "freestanding_1ups": Options.Freestanding1Ups.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -352,8 +353,17 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         self.collect_basement_access()
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Near Quicksand Pits 1-Up"))
 
-    def test_ssl_above_quicksand_pit_1up_accepts_wing_cap(self):
+    def test_ssl_above_quicksand_pit_1up_accepts_wing_cap_with_triple_jump(self):
         self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
+
+    def test_ssl_above_quicksand_pit_1up_accepts_wing_cap_with_cannon(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Shifting Sand Land - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
@@ -600,7 +610,6 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
     def test_wmotR_rule_uses_castle_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 5)
         self.collect(self.world.create_item("Wing Cap"))
-        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
         self.collect(self.world.create_item("Bob-omb Battlefield - Triple Jump"))
@@ -2810,14 +2819,19 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Wet-Dry World - Mid Water"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Cannon"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Shocking Arrow Lifts!"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid Water"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
         self.collect([
-            self.get_item_by_name("Purple Switches"),
             self.get_item_by_name("Long Jump"),
         ])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
@@ -2934,8 +2948,12 @@ class NoStrictMoveCapLethalLavaLandAccessTestBase(SM64TestBase):
 class GlobalCapAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -2947,6 +2965,79 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+    def test_lll_wing_cap_route_requires_triple_jump(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+    def test_wmotr_red_coins_wing_cap_route_accepts_triple_jump(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+
+    def test_wmotr_red_coins_wing_cap_route_accepts_cannon(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+
+    def test_wmotr_buddy_wing_cap_route_accepts_triple_jump(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+    def test_wmotr_buddy_wing_cap_route_accepts_cannon(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+    def test_wmotr_cloud_wing_cap_route_accepts_triple_jump(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
+
+    def test_wmotr_cloud_wing_cap_route_accepts_cannon(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
+
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
+
+    def test_wmotr_hanging_pole_wing_cap_route_accepts_triple_jump(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
 
 
 class PerLevelCapAccessTestBase(SM64TestBase):
@@ -2998,8 +3089,6 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
-        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Hanging Pole 1-Up"))
 
     def test_hmc_metal_cap_access(self):
