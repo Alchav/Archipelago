@@ -407,11 +407,11 @@ locFreestanding1Up_table = {
     "Jolly Roger Bay - Stone Pillar 1-Up": 3629133,
 
     "Lethal Lava Land - Flamethrower Ring 1-Up": 3629134,
-    "Lethal Lava Land - Spinning Platform Flame 1-Up": 3629135,
-    "Lethal Lava Land - Northeast Platform 1-Up": 3629136,
+    "Lethal Lava Land - Volcano Flamethrower 1-Up": 3629135,
+    "Lethal Lava Land - Northeast Brown Platform 1-Up": 3629136,
     "Lethal Lava Land - Southern Curve 1-Up": 3629137,
-    "Lethal Lava Land - Raised Brown Platform 1-Up": 3629138,
-    "Lethal Lava Land - Volcano Curve 1-Up": 3629139,
+    "Lethal Lava Land - Volcano Curve 1-Up": 3629138,
+    "Lethal Lava Land - Volcano Brown Platform 1-Up": 3629139,
     "Lethal Lava Land - Northwest Curve 1-Up": 3629140,
     "Lethal Lava Land - Volcano Pole 1-Up": 3629141,
 
