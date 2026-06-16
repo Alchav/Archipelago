@@ -437,7 +437,7 @@ class EasyButterflies(Toggle):
 class NoDespawns(Toggle):
     """
     Prevent coins and 1-Ups from despawning over time. Coins and 1-Ups that fall into a void or lava are
-    granted automatically.
+    granted automatically. Bookends drop blue coins when they kamikaze.
     """
     display_name = "No Despawns"
 
