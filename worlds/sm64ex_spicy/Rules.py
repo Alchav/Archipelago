@@ -919,8 +919,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Whomp's Fortress - Shoot into the Wild Blue", "WK & TJ/SF | CANN")
     rf.assign_rule("Whomp's Fortress - Red Coins on the Floating Isle", "WF_FORTRESS")
     rf.assign_rule("Whomp's Fortress - Fall onto the Caged Island",
-                   "WF_HOOT | CL & WF_FORTRESS & {Whomp's Fortress - Top} | "
-                   "MOVELESS & TJ & WF_FORTRESS & {Whomp's Fortress - Top} | "
+                   "WF_HOOT & CL | "
+                   "MOVELESS & TJ & WF_KING & {Whomp's Fortress - Top} | "
                    "MOVELESS & LJ & WF_FORTRESS & {Whomp's Fortress - Top} | MOVELESS & CANN")
     rf.assign_rule("Whomp's Fortress - Blast Away the Wall", "CANN | CANNLESS & LG")
     rf.assign_rule("Whomp's Fortress - Bob-omb Buddy", "WF_BUDDY")

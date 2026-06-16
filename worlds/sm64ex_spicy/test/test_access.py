@@ -759,11 +759,25 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
-    def test_whomps_fortress_caged_island_fortress_routes_need_top(self):
+    def test_whomps_fortress_caged_island_hoot_route_requires_climb(self):
         self.collect([self.get_item_by_name("Whomp's Fortress - Fortress"), self.get_item_by_name("Climb")])
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
+        self.collect([
+            self.world.create_item("Checkerboard Platforms"),
+            self.get_item_by_name("Whomp's Fortress - Hoot"),
+        ])
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
 
-        self.collect(self.world.create_item("Checkerboard Platforms"))
+    def test_whomps_fortress_caged_island_triple_jump_route_uses_whomp_king(self):
+        self.collect([
+            self.get_item_by_name("Whomp's Fortress - Fortress"),
+            self.world.create_item("Checkerboard Platforms"),
+            self.get_item_by_name("Triple Jump"),
+            self.world.create_item("ut_glitch"),
+        ])
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
+
+        self.collect(self.get_item_by_name("Whomp's Fortress - Whomp King"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
 
     def test_lll_red_hot_log_rolling_requires_log_shell_or_wing_cap(self):
