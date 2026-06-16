@@ -594,9 +594,9 @@ def bowser_in_the_dark_world_coins(state: CollectionState, player: int, coins: i
 
 
 def bowser_in_the_fire_sea_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 30
+    reachable_coins = 26
     if has_action(state, player, "Climb", "Bowser in the Fire Sea"):
-        reachable_coins += 50
+        reachable_coins += 54
     return coins <= reachable_coins
 
 

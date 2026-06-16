@@ -1199,6 +1199,30 @@ class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Sky - 76 Coins"))
 
 
+class BowserInTheFireSeaCoinsanityAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+    }
+
+    def collect_bowser_in_the_fire_sea_access(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
+
+    def test_bowser_in_the_fire_sea_coin_sources(self):
+        self.collect_bowser_in_the_fire_sea_access()
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 26 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - 27 Coins"))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 80 Coins"))
+
+
 class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
