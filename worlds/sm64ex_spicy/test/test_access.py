@@ -846,8 +846,11 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
-    def test_wet_dry_world_express_elevator_requires_purple_switches(self):
+    def test_wet_dry_world_express_elevator_requires_purple_switches_and_access_method(self):
         self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+
+        self.collect(self.get_item_by_name("Backflip"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
@@ -2979,6 +2982,15 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top"))
+
+    def test_express_elevator_top_route_needs_elevator_access_method(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Top"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+
+        self.collect(self.get_item_by_name("Backflip"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
 
 class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):

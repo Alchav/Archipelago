@@ -1008,7 +1008,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
                    "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                    "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ")
-    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!", "PURPLE_SWITCHES | {Wet-Dry World - Top} & LG/TJ/LJ")
+    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!",
+                   "WDW_WATER_LEVEL_DIAMOND/BF/SF/WK & PURPLE_SWITCHES | "
+                   "WDW_WATER_LEVEL_DIAMOND/BF/SF/WK & {Wet-Dry World - Top} & LG/TJ/LJ")
     rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky",
                    "{{Wet-Dry World - Express Elevator--Hurry Up!}} & {Wet-Dry World - Top} | "
                    "{{Wet-Dry World - Express Elevator--Hurry Up!}} & WDW_WATER_LEVEL_DIAMOND | "
