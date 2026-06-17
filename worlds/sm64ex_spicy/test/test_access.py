@@ -41,7 +41,7 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -164,7 +164,7 @@ class CastleFeatureAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -258,7 +258,7 @@ class CastleOneUpAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
@@ -291,7 +291,7 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
@@ -394,7 +394,7 @@ class VanillaBowserStageOneUpAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -432,7 +432,7 @@ class GlobalBowserStageOneUpAccessTestBase(SM64TestBase):
         "bowser_stage_1ups": Options.BowserStage1Ups.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -460,7 +460,7 @@ class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
         "bowser_stage_1ups": Options.BowserStage1Ups.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -485,7 +485,7 @@ class IndividualBowserStageOneUpAccessTestBase(SM64TestBase):
         "bowser_stage_1ups": Options.BowserStage1Ups.option_individual,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -507,7 +507,7 @@ class AlwaysSpawnBowserStageOneUpAccessTestBase(SM64TestBase):
         "bowser_stage_1ups": Options.BowserStage1Ups.option_always_spawn,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -624,7 +624,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -2873,6 +2873,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3067,7 +3068,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3168,7 +3169,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
@@ -3244,7 +3245,7 @@ class WMotRCaplessBuddyAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "strict_cap_requirements": Options.StrictCapRequirements.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -3320,7 +3321,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 

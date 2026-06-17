@@ -3,7 +3,7 @@ from typing import Callable, Union, Dict, Set
 
 from BaseClasses import CollectionState, Entrance, MultiWorld
 from ..generic.Rules import add_rule, set_rule
-from .Locations import locFreestanding1Up_table, location_table, parse_coinsanity_location_name
+from .Locations import locOneUp_table, location_table, parse_coinsanity_location_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
@@ -633,7 +633,7 @@ def fix_reg(entrance_map: Dict[SM64Levels, str], entrance: SM64Levels, invalid_r
 
 
 def is_starting_check_location(location_name: str, options: SM64Options) -> bool:
-    if not options.exclamation_boxes and "1-Up Block" in location_name:
+    if not options.one_up_checks and location_name in locOneUp_table:
         return False
     if not options.buddy_checks and location_name.endswith(" - Bob-omb Buddy"):
         return False
@@ -1080,7 +1080,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Bowser in the Dark World
     rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES | TJ+MOVELESS")
     rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES | TJ+MOVELESS")
-    if options.freestanding_1ups:
+    if options.one_up_checks:
         for location_name in (
                 "Bowser in the Dark World - Center Overhang 1-Up",
                 "Bowser in the Dark World - Left Tilting Platform Base 1-Up",
@@ -1096,7 +1096,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Fire Sea - Red Coins", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up Block", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
-    if options.freestanding_1ups:
+    if options.one_up_checks:
         for location_name in (
                 "Bowser in the Fire Sea - Near Poles 1-Up",
                 "Bowser in the Fire Sea - Second Stone Structure 1-Up",
@@ -1370,7 +1370,7 @@ class RuleFactory:
         self.per_level_caps = options.per_level_cap_items
 
     def assign_rule(self, target_name: str, rule_expr: str):
-        if target_name in locFreestanding1Up_table and not self.options.freestanding_1ups:
+        if target_name in locOneUp_table and not self.options.one_up_checks:
             return
         target = self.multiworld.get_location(target_name, self.player) if target_name in location_table else self.multiworld.get_entrance(target_name, self.player)
         cannon_name = self.get_cannon_item_name(target_name)

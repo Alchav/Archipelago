@@ -9,7 +9,7 @@ from .Locations import SM64Location, location_table, locBoB_table, locWhomp_tabl
     locWDW_table, locTTM_table, locTHI_table, locTTC_table, locRR_table, \
     locPSS_table, locSA_table, locBitDW_table, locTotWC_table, locCotMC_table, \
     locVCutM_table, locBitFS_table, locWMotR_table, locBitS_table, locSS_table, locBasement_table, \
-    locFreestanding1Up_table
+    locOneUp_table
 
 
 class SM64Levels(int, Enum):
@@ -463,8 +463,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                 "Bowser in the Sky - Final Platform 1-Up")
     regBitS.subregions = [bits_chuckya, bits_arrow_ride, bits_top]
 
-    if not options.freestanding_1ups:
-        remove_locs(multiworld, player, set(locFreestanding1Up_table))
+    if not options.one_up_checks:
+        remove_locs(multiworld, player, set(locOneUp_table))
 
 
 def connect_regions(multiworld: MultiWorld, player: int, source: str, target: str, rule=None,

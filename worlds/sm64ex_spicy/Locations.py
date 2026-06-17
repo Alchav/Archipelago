@@ -488,3 +488,6 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
                   **locSS_table, **locBasement_table, **locFreestanding1Up_table, **coinsanity_location_table}
+
+loc1UpBlock_table = {name: code for name, code in location_table.items() if "1-Up Block" in name}
+locOneUp_table = {**loc1UpBlock_table, **locFreestanding1Up_table}

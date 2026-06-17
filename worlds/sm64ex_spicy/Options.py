@@ -415,17 +415,9 @@ class BuddyChecks(Toggle):
     display_name = "Bob-omb Buddy Checks"
 
 
-class ExclamationBoxes(Toggle):
-    """Include 1-Up Exclamation Boxes during randomization.
-    Adds 29 locations to the pool."""
-    display_name = "Randomize 1-Up !-Blocks"
-    alias_1Ups_Only = 1
-
-
-class Freestanding1Ups(Toggle):
-    """Include freestanding 1-Up mushrooms as Archipelago location checks.
-    Adds 93 locations to the pool."""
-    display_name = "Randomize Freestanding 1-Ups"
+class OneUpChecks(Toggle):
+    """Include 1-Up mushrooms and 1-Up blocks as Archipelago location checks."""
+    display_name = "1-Up Checks"
 
 
 class EasyButterflies(Toggle):
@@ -693,8 +685,7 @@ sm64_options_groups = [
     OptionGroup("Logic Options", [
         AreaRandomizer,
         BuddyChecks,
-        ExclamationBoxes,
-        Freestanding1Ups,
+        OneUpChecks,
         EasyButterflies,
         NoDespawns,
         CombinedProgressiveKeys,
@@ -741,8 +732,7 @@ sm64_options_groups = [
 class SM64Options(PerGameCommonOptions):
     area_rando: AreaRandomizer
     buddy_checks: BuddyChecks
-    exclamation_boxes: ExclamationBoxes
-    freestanding_1ups: Freestanding1Ups
+    one_up_checks: OneUpChecks
     easy_butterflies: EasyButterflies
     no_despawns: NoDespawns
     combined_progressive_keys: CombinedProgressiveKeys

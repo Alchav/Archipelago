@@ -8,7 +8,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
     cannon_item_data_table
-from ..Locations import coinsanity_course_data, loc100Coin_table, locFreestanding1Up_table, location_table, \
+from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -298,10 +298,17 @@ class FeatureItemPoolTestBase(SM64TestBase):
     def test_marios_hat_is_useful(self):
         self.assertEqual(optional_item_data_table["Mario's Hat"].classification, ItemClassification.useful)
 
-    def test_freestanding_1ups_default_to_off(self):
+    def test_one_up_checks_default_to_off(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertEqual(self.world.fill_slot_data()["OneUpChecks"], 0)
-        self.assertTrue(set(locFreestanding1Up_table).isdisjoint(active_locations))
+        self.assertTrue(set(locOneUp_table).isdisjoint(active_locations))
+
+    def test_buddy_checks_default_to_events(self):
+        location = self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player)
+        self.assertEqual(self.world.fill_slot_data()["BuddyChecks"], 0)
+        self.assertIsNone(location.address)
+        self.assertEqual(location.item.name, "Bob-omb Battlefield - Cannon Unlock")
+        self.assertIsNone(location.item.code)
 
     def test_bowser_stage_1up_items_default_to_vanilla_behavior(self):
         self.assertFalse(self.world.fill_slot_data()["BowserStage1UpBehavior"])
@@ -377,16 +384,16 @@ class MariosHatItemPoolTestBase(SM64TestBase):
         self.assertNotIn(item_table["Mario's Hat"], start_inventory)
 
 
-class Freestanding1UpsOnTestBase(SM64TestBase):
+class OneUpChecksOnTestBase(SM64TestBase):
     options = {
-        "freestanding_1ups": Options.Freestanding1Ups.option_true,
+        "one_up_checks": Options.OneUpChecks.option_true,
     }
 
-    def test_freestanding_1up_locations_are_generated(self):
+    def test_one_up_locations_are_generated(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertEqual(self.world.fill_slot_data()["OneUpChecks"], 1)
-        for location_name in locFreestanding1Up_table:
-            with self.subTest("Freestanding 1-Up location generated", location=location_name):
+        for location_name in locOneUp_table:
+            with self.subTest("1-Up location generated", location=location_name):
                 self.assertIn(location_name, active_locations)
 
 
@@ -807,7 +814,7 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
         "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "exclamation_boxes": Options.ExclamationBoxes.option_false,
+        "one_up_checks": Options.OneUpChecks.option_false,
         "marios_hat": Options.MariosHat.option_true,
         "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
         "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
@@ -857,29 +864,15 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
                 self.assertEqual(coin_counts, list(range(1, len(coin_counts) + 1)))
 
 
-# Exclamation Boxes
-class ExclamationBoxesOnTestBase(SM64TestBase):
+# 1-Up Checks
+class OneUpChecksOffTestBase(SM64TestBase):
     options = {
-        "exclamation_boxes": Options.ExclamationBoxes.option_true,
+        "one_up_checks": Options.OneUpChecks.option_false,
     }
 
-
-class ExclamationBoxesOffTestBase(SM64TestBase):
-    options = {
-        "exclamation_boxes": Options.ExclamationBoxes.option_false,
-    }
-
-    # Should populate the boxes with the players own 1-Up Mushrooms
-    def test_items_in_exclamation_box_locations(self):
-        # Get 1-Up Block locations
-        loc1ups_table = {name for name in location_table.keys() if "1-Up Block" in name}
-        for loc in loc1ups_table:
-            # Use subtest to force all locations to be tested
-            with self.subTest("Location has own 1-Up Mushroom.", location=loc):
-                item_in_loc = self.world.get_location(loc).item
-                self.assertEqual(item_in_loc.name, "1-Up Mushroom")
-                # By default, these test bases are single player multiworld.
-                # In any other case, we should test that they belong to their respective worlds.
+    def test_one_up_locations_are_not_generated(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertTrue(set(locOneUp_table).isdisjoint(active_locations))
 
 
 # Entrance Randomizer
@@ -1020,7 +1013,7 @@ class CompletionAllBowserTestBase(SM64TestBase):
 class NoPowerStarsTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "exclamation_boxes": Options.ExclamationBoxes.option_false,
+        "one_up_checks": Options.OneUpChecks.option_false,
     }
 
     def test_no_power_stars_generated(self):
