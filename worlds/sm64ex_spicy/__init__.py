@@ -176,13 +176,13 @@ class SM64World(World):
 
     def create_item(self, name: str) -> Item:
         data = item_data_table[name]
-        item = SM64Item(name, data.classification, data.code, self.player)
+        item = SM64Item(name, data.classification(self.options), data.code, self.player)
 
         return item
 
     def create_event_item(self, name: str) -> Item:
         data = item_data_table[name]
-        return SM64Item(name, data.classification, None, self.player)
+        return SM64Item(name, data.classification(self.options), None, self.player)
 
     def get_castle_key_item_names(self) -> typing.List[str]:
         if self.options.combined_progressive_keys:
