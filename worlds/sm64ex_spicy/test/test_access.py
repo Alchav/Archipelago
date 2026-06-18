@@ -3345,6 +3345,11 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
 
+    def test_wall_kick_does_not_reach_lower_without_moveless_logic(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
+
     def test_timed_jumps_require_moving_ttc_or_wall_kick(self):
         self.use_stopped_ttc_without_entry_move()
         self.collect_third_floor_access()
@@ -3399,6 +3404,25 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Tick Tock Clock - Spinners"),
         ])
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
+
+
+class TTCMovelessWallKickAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_third_floor_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+
+    def test_wall_kick_reaches_lower_with_moveless_logic(self):
+        self.collect_third_floor_access()
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
 
 
 class TickTockClockCoinStarAccessTestBase(SM64TestBase):

@@ -1042,7 +1042,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Cannon Tree Butterfly 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
-    rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF/WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
+    rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF | MOVELESS & WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
     rf.assign_rule("Tick Tock Clock - Upper", "CL | MOVELESS & WK")
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
