@@ -1773,7 +1773,7 @@ rom_addresses_yellow = {
     "Starting_Money_High": 0xf838,
     "Starting_Money_Middle": 0xf83b,
     "Starting_Money_Low": 0xf83e,
-    "Option_Pokedex_Seen": 0xf857,
+    "Option_Pokedex_Seen": 0xf858,
     "HM_Fly_Badge_a": 0x11d07,
     "HM_Fly_Badge_b": 0x11d0c,
     "HM_Cut_Badge_a": 0x11d42,
