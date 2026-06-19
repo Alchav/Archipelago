@@ -77,11 +77,11 @@ class TestMappedDoorShuffleRegionGroups(unittest.TestCase):
             [warp.name for warp in saffron_gym_group["warps"]],
         )
 
-    def test_full_mapped_places_dead_end_slots_with_dead_end_groups(self) -> None:
+    def test_mapped_places_dead_end_slots_with_dead_end_groups(self) -> None:
         multiworld = setup_multiworld(
             PokemonRedWorld,
             seed=0,
-            options={"door_shuffle": "full_mapped", "accessibility": "full"},
+            options={"door_shuffle": "mapped", "accessibility": "full"},
         )
 
         all_warps = [

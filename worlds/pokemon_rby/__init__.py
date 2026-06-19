@@ -313,7 +313,7 @@ class PokemonRBYWorld(World):
             town_map_fly_map_code = self.town_map_fly_map
         else:
             if (self.options.old_man == "vanilla" or
-                    self.options.door_shuffle in ("full", "full_mapped", "insanity", "insanity_mapped")):
+                    self.options.door_shuffle in ("full", "mapped", "insanity", "insanity_mapped")):
                 fly_map_codes = self.random.sample(range(2, 11), 2)
             elif (self.options.door_shuffle == "simple" or
                     self.options.route_3_condition == "boulder_badge" or

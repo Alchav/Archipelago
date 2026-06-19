@@ -1376,8 +1376,9 @@ def connect_mapped_warp_if_needed(source_warp, destination_warp):
         )
 
 
-def connect_full_mapped_region_groups(world, region_groups, shuffleable_warps, destination_warps, exterior_warps,
-                                      state=None, event_locations=None, relevant_events=None):
+def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_warps, destination_warps,
+                                              exterior_warps, state=None, event_locations=None,
+                                              relevant_events=None):
     region_group_buckets = bucket_region_groups_by_warp_count(region_groups)
     validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets)
     vanilla_destination_warps = get_vanilla_destination_warps(shuffleable_warps, destination_warps)
@@ -1923,10 +1924,10 @@ def connect_mapped_region_groups_by_bucket(world, region_groups, shuffleable_war
 
 
 def door_shuffle(world, multiworld, player, badges, badge_locs):
-    full_door_shuffle_modes = ("full", "full_mapped")
+    full_door_shuffle_modes = ("full", "mapped")
     insanity_door_shuffle_modes = ("insanity", "insanity_mapped")
     coupled_door_shuffle_modes = full_door_shuffle_modes + insanity_door_shuffle_modes + ("decoupled",)
-    mapped_door_shuffle_modes = ("full_mapped", "insanity_mapped")
+    mapped_door_shuffle_modes = ("mapped", "insanity_mapped")
     full_style_door_shuffle_modes = ("interiors",) + full_door_shuffle_modes
 
     entrances = []
@@ -1965,7 +1966,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                                          entrance_data else "")
                 entrance.vanilla_target_region = entrance_data["to"]["map"]
                 entrance.vanilla_target_warp_id = entrance_data["to"]["id"]
-                if ((world.options.door_shuffle == "full_mapped" and not outdoor_map(region.name))
+                if ((world.options.door_shuffle == "mapped" and not outdoor_map(region.name))
                         or (interior and world.options.door_shuffle in full_door_shuffle_modes)):
                     full_interiors.append(entrance)
                 else:
@@ -1976,34 +1977,38 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                         name=entrance_data["name"] if "name" in entrance_data else None)
 
     all_warps = entrances + full_interiors
-    full_mapped_interior_warps = []
-    full_mapped_exterior_warps = []
-    if world.options.door_shuffle == "full_mapped":
-        full_mapped_static_forced_names = {door for pair in safari_zone_connections for door in pair}
-        full_mapped_interior_warps = [
+    mapped_interior_warps = []
+    mapped_exterior_warps = []
+    if world.options.door_shuffle == "mapped":
+        mapped_static_forced_names = {door for pair in safari_zone_connections for door in pair}
+        mapped_interior_warps = [
             entrance for entrance in full_interiors
-            if entrance.name not in full_mapped_static_forced_names
+            if entrance.name not in mapped_static_forced_names
         ]
-        full_mapped_exterior_warps = [
+        mapped_exterior_warps = [
             entrance for entrance in entrances
             if (not outdoor_map(entrance.vanilla_target_region)
-                and entrance.name not in full_mapped_static_forced_names)
+                and entrance.name not in mapped_static_forced_names)
         ]
     forced_connections = set()
     one_way_forced_connections = set()
     available_entrance_names = {entrance.name for entrance in entrances + full_interiors}
+    insanity_mapped_blocked_warps = set(entrances + full_interiors)
     mapped_blocked_warps = set(entrances + full_interiors)
-    full_mapped_blocked_warps = set(entrances + full_interiors)
-    if world.options.door_shuffle in mapped_door_shuffle_modes and world.options.warp_tile_shuffle == "shuffle":
+    if world.options.warp_tile_shuffle == "shuffle":
         non_mixed_warp_tile_names = set(silph_co_warps + saffron_gym_warps)
-        mapped_blocked_warps = {warp for warp in mapped_blocked_warps if warp.name not in non_mixed_warp_tile_names}
-        full_mapped_blocked_warps = {
-            warp for warp in full_mapped_blocked_warps
-            if warp.name not in non_mixed_warp_tile_names
-        }
-        if world.options.door_shuffle == "full_mapped":
-            full_mapped_interior_warps = [
-                warp for warp in full_mapped_interior_warps
+        if world.options.door_shuffle == "insanity_mapped":
+            insanity_mapped_blocked_warps = {
+                warp for warp in insanity_mapped_blocked_warps
+                if warp.name not in non_mixed_warp_tile_names
+            }
+        if world.options.door_shuffle == "mapped":
+            mapped_blocked_warps = {
+                warp for warp in mapped_blocked_warps
+                if warp.name not in non_mixed_warp_tile_names
+            }
+            mapped_interior_warps = [
+                warp for warp in mapped_interior_warps
                 if warp.name not in non_mixed_warp_tile_names
             ]
 
@@ -2036,7 +2041,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             usable_safe_rooms += pokemarts
         if world.options.door_shuffle in coupled_door_shuffle_modes:
             forced_connections.update(full_mandatory_connections)
-            if world.options.door_shuffle == "full_mapped":
+            if world.options.door_shuffle == "mapped":
                 forced_connections.update({
                     ("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
                      "Pokemon Mansion B1F to Pokemon Mansion 1F-SE"),
@@ -2175,14 +2180,14 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
         entrance_b = multiworld.get_entrance(pair[1], player)
         entrance_a.connect(entrance_b)
         entrance_b.connect(entrance_a)
-        if world.options.door_shuffle in mapped_door_shuffle_modes:
-            mapped_blocked_warps.discard(entrance_a)
-            mapped_blocked_warps.discard(entrance_b)
-        if (world.options.door_shuffle == "full_mapped"
+        if world.options.door_shuffle == "insanity_mapped":
+            insanity_mapped_blocked_warps.discard(entrance_a)
+            insanity_mapped_blocked_warps.discard(entrance_b)
+        if (world.options.door_shuffle == "mapped"
                 and not outdoor_map(entrance_a.parent_region.name)
                 and not outdoor_map(entrance_b.parent_region.name)):
-            full_mapped_blocked_warps.discard(entrance_a)
-            full_mapped_blocked_warps.discard(entrance_b)
+            mapped_blocked_warps.discard(entrance_a)
+            mapped_blocked_warps.discard(entrance_b)
         if entrance_a in entrances:
             entrances.remove(entrance_a)
         elif entrance_a in full_interiors:
@@ -2344,8 +2349,8 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             entrance_a.connect(entrance_b)
             entrance_b.connect(entrance_a)
     elif world.options.door_shuffle:
-        full_mapped_shuffleable_warps = []
-        full_mapped_region_groups = []
+        mapped_shuffleable_warps = []
+        mapped_region_groups = []
 
         def search_for_exit(entrance, region, checked_regions):
             checked_regions.add(region)
@@ -2390,21 +2395,21 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     entrance_b.connect(entrance_a)
 
             else:
-                full_mapped_shuffleable_warps = full_interiors.copy()
-                for exterior_warp in full_mapped_exterior_warps:
+                mapped_shuffleable_warps = full_interiors.copy()
+                for exterior_warp in mapped_exterior_warps:
                     if exterior_warp.connected_region is None:
                         continue
                     replacement_warp = find_mapped_warp_by_region_and_id(
-                        full_mapped_interior_warps, exterior_warp.connected_region, exterior_warp.target)
-                    if replacement_warp is not None and replacement_warp not in full_mapped_shuffleable_warps:
-                        full_mapped_shuffleable_warps.append(replacement_warp)
+                        mapped_interior_warps, exterior_warp.connected_region, exterior_warp.target)
+                    if replacement_warp is not None and replacement_warp not in mapped_shuffleable_warps:
+                        mapped_shuffleable_warps.append(replacement_warp)
                 region_groups = discover_mapped_region_groups(
-                    multiworld, player, full_mapped_shuffleable_warps, full_mapped_blocked_warps,
+                    multiworld, player, mapped_shuffleable_warps, mapped_blocked_warps,
                     include_outdoor_regions=False)
-                full_mapped_region_groups = region_groups
+                mapped_region_groups = region_groups
 
             loop_out_interiors = []
-            if world.options.door_shuffle != "full_mapped":
+            if world.options.door_shuffle != "mapped":
                 world.random.shuffle(entrances)
                 for entrance in reversed(entrances):
                     if loop_out_interiors and entrance in loop_out_interiors[0]:
@@ -2528,34 +2533,36 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                                     return False
             return True
 
-        if world.options.door_shuffle == "full_mapped":
-            connect_full_mapped_region_groups(
-                world, full_mapped_region_groups, full_mapped_shuffleable_warps, all_warps,
-                full_mapped_exterior_warps, state, event_locations, relevant_events)
+        if world.options.door_shuffle == "mapped":
+            connect_mapped_door_shuffle_region_groups(
+                world, mapped_region_groups, mapped_shuffleable_warps, all_warps,
+                mapped_exterior_warps, state, event_locations, relevant_events)
             entrances.clear()
             full_interiors.clear()
 
         starting_entrances = len(entrances)
 
-        mapped_region_groups = []
-        mapped_groups_by_warp = {}
-        mapped_group_buckets = {}
-        mapped_destination_group_buckets = {}
-        mapped_shuffleable_warps = []
-        mapped_vanilla_destination_warps = {}
+        insanity_mapped_region_groups = []
+        insanity_mapped_groups_by_warp = {}
+        insanity_mapped_group_buckets = {}
+        insanity_mapped_destination_group_buckets = {}
+        insanity_mapped_shuffleable_warps = []
+        insanity_mapped_vanilla_destination_warps = {}
         if world.options.door_shuffle == "insanity_mapped":
-            mapped_shuffleable_warps = entrances.copy()
-            mapped_vanilla_destination_warps = get_vanilla_destination_warps(mapped_shuffleable_warps, all_warps)
-            mapped_region_groups = discover_mapped_region_groups(
-                multiworld, player, entrances, mapped_blocked_warps, include_outdoor_regions=True)
-            mapped_group_buckets = bucket_region_groups_by_warp_count(mapped_region_groups)
-            mapped_destination_group_buckets = {warp_count: bucket.copy()
-                                                for warp_count, bucket in mapped_group_buckets.items()}
-            validate_mapped_region_groups(mapped_region_groups, entrances, mapped_group_buckets)
-            for bucket in mapped_group_buckets.values():
+            insanity_mapped_shuffleable_warps = entrances.copy()
+            insanity_mapped_vanilla_destination_warps = get_vanilla_destination_warps(
+                insanity_mapped_shuffleable_warps, all_warps)
+            insanity_mapped_region_groups = discover_mapped_region_groups(
+                multiworld, player, entrances, insanity_mapped_blocked_warps, include_outdoor_regions=True)
+            insanity_mapped_group_buckets = bucket_region_groups_by_warp_count(insanity_mapped_region_groups)
+            insanity_mapped_destination_group_buckets = {warp_count: bucket.copy()
+                                                        for warp_count, bucket in
+                                                        insanity_mapped_group_buckets.items()}
+            validate_mapped_region_groups(insanity_mapped_region_groups, entrances, insanity_mapped_group_buckets)
+            for bucket in insanity_mapped_group_buckets.values():
                 for region_group in bucket:
                     for warp in region_group["warps"]:
-                        mapped_groups_by_warp[warp] = region_group
+                        insanity_mapped_groups_by_warp[warp] = region_group
 
         while entrances:
             state.update_reachable_regions(player)
@@ -2580,7 +2587,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             entrances.remove(entrance_a)
 
             if world.options.door_shuffle == "insanity_mapped":
-                region_group_a = mapped_groups_by_warp[entrance_a]
+                region_group_a = insanity_mapped_groups_by_warp[entrance_a]
                 group_entrances_a = [entrance for entrance in region_group_a["warps"] if entrance in entrances]
                 for entrance in group_entrances_a:
                     entrances.remove(entrance)
@@ -2592,13 +2599,15 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
 
                 def opens_unused_vanilla_group(region_group):
                     for entrance in region_group["warps"]:
-                        destination_group = mapped_groups_by_warp.get(mapped_vanilla_destination_warps[entrance])
+                        destination_group = insanity_mapped_groups_by_warp.get(
+                            insanity_mapped_vanilla_destination_warps[entrance])
                         if (destination_group is not None and destination_group is not region_group
                                 and has_unused_source(destination_group)):
                             return True
                     return False
 
-                same_size_destinations = mapped_destination_group_buckets[count_shuffleable_warps(region_group_a)]
+                same_size_destinations = insanity_mapped_destination_group_buckets[
+                    count_shuffleable_warps(region_group_a)]
                 same_size_candidates = [region_group for region_group in same_size_destinations
                                         if region_group is not region_group_a] or same_size_destinations.copy()
                 unused_same_size_candidates = [region_group for region_group in same_size_candidates
@@ -2628,11 +2637,12 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     else:
                         region_group_b = destination_groups[0]
 
-                destination_bucket = mapped_destination_group_buckets[count_shuffleable_warps(region_group_b)]
+                destination_bucket = insanity_mapped_destination_group_buckets[
+                    count_shuffleable_warps(region_group_b)]
                 if region_group_b in destination_bucket:
                     destination_bucket.remove(region_group_b)
                 connect_mapped_region_group_directed(world, region_group_a, region_group_b,
-                                                     mapped_vanilla_destination_warps)
+                                                     insanity_mapped_vanilla_destination_warps)
                 continue
 
             is_outdoor_map = outdoor_map(entrance_a.parent_region.name)
@@ -2691,8 +2701,9 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                 entrance_b.connect(entrance_a)
 
         if world.options.door_shuffle == "insanity_mapped":
-            validate_mapped_region_groups(mapped_region_groups, mapped_shuffleable_warps, mapped_group_buckets,
-                                          require_connected=True)
+            validate_mapped_region_groups(
+                insanity_mapped_region_groups, insanity_mapped_shuffleable_warps,
+                insanity_mapped_group_buckets, require_connected=True)
 
         if world.options.door_shuffle in full_style_door_shuffle_modes:
             for pair in loop_out_interiors:
