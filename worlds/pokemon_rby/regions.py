@@ -569,7 +569,7 @@ mapped_indoor_region_groups = {
         "Cerulean Cave 1F-Water",
     ),
     "Indigo Plateau Lobby": ("Indigo Plateau Lobby", "Indigo Plateau Lobby-N"),
-    "Pokemon Mansion 1F-SE": (
+    "Pokemon Mansion Exit": (
         "Pokemon Mansion 1F-SE",
         "Pokemon Mansion 2F",
         "Pokemon Mansion 3F",
@@ -663,7 +663,7 @@ mapped_indoor_region_groups = {
         "Silph Co Elevator-9F",
     ),
     "Victory Road 1F": ("Victory Road 1F", "Victory Road 1F-S"),
-    "Victory Road 2F-C": (
+    "Victory Road 2F-3F": (
         "Victory Road 2F-C",
         "Victory Road 2F-NW",
         "Victory Road 2F-SE",
@@ -707,7 +707,7 @@ mapped_outdoor_region_groups = {
         "Route 15",
     ),
     "Route 17": ("Route 16-SW", "Route 17", "Route 18-W"),
-    "Route 23": ("Route 23-C", "Route 23-Grass", "Route 23-S"),
+    "Route 23": ("Route 23-C", "Route 23-S"),
     "Saffron City": (
         "Route 5-S",
         "Route 6-N",
@@ -719,9 +719,7 @@ mapped_outdoor_region_groups = {
         "Saffron City-Pidgey",
         "Saffron City-Silph",
     ),
-    "Safari Zone Center": ("Safari Zone Center-C", "Safari Zone Center-NE", "Safari Zone Center-NW", "Safari Zone Center-S"),
-    "Safari Zone West": ("Safari Zone West", "Safari Zone West-NW"),
-    "Fuchsia Coast": (
+    "Fuchsia City": (
         "Fuchsia City",
         "Route 15-W",
         "Route 18-E",
@@ -730,7 +728,7 @@ mapped_outdoor_region_groups = {
         "Route 20-E",
         "Route 20-IW",
     ),
-    "Pallet/Viridian/Cinnabar": (
+    "Pallet Town": (
         "Cinnabar Island",
         "Cinnabar Island-G",
         "Cinnabar Island-M",
@@ -746,7 +744,7 @@ mapped_outdoor_region_groups = {
         "Viridian City-G",
         "Viridian City-N",
     ),
-    "Pewter/Route 2 North": (
+    "Pewter City": (
         "Pewter City",
         "Pewter City-E",
         "Pewter City-M",
@@ -2253,11 +2251,11 @@ def connect_mapped_region_groups_by_bucket(world, region_groups, shuffleable_war
 
 
 def door_shuffle(world, multiworld, player, badges, badge_locs):
-    full_door_shuffle_modes = ("full", "mapped")
-    insanity_door_shuffle_modes = ("insanity", "insanity_mapped")
-    coupled_door_shuffle_modes = full_door_shuffle_modes + insanity_door_shuffle_modes + ("decoupled",)
-    mapped_door_shuffle_modes = ("mapped", "insanity_mapped")
-    full_style_door_shuffle_modes = ("interiors",) + full_door_shuffle_modes
+    internal_warp_shuffle_modes = ("full", "mapped", "insanity", "insanity_mapped", "decoupled")
+    full_interior_pool_modes = ("full", "mapped")
+    all_warps_pool_modes = ("insanity", "insanity_mapped", "decoupled")
+    mapped_region_group_modes = ("mapped", "insanity_mapped")
+    interior_style_fill_modes = ("interiors", *full_interior_pool_modes)
 
     world.mapped_door_shuffle_spoiler = []
     entrances = []
@@ -2268,7 +2266,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             shuffle = True
             interior = False
             if not outdoor_map(region.name) and not outdoor_map(entrance_data['to']['map']):
-                if world.options.door_shuffle not in coupled_door_shuffle_modes:
+                if world.options.door_shuffle not in internal_warp_shuffle_modes:
                     shuffle = False
                 interior = True
             if world.options.door_shuffle == "simple":
@@ -2281,7 +2279,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     entrance_data["name"]) in silph_co_warps + saffron_gym_warps:
                 if world.options.warp_tile_shuffle:
                     shuffle = True
-                    if world.options.warp_tile_shuffle == "mixed" and world.options.door_shuffle in full_door_shuffle_modes:
+                    if world.options.warp_tile_shuffle == "mixed" and world.options.door_shuffle in full_interior_pool_modes:
                         interior = True
                     else:
                         interior = False
@@ -2297,7 +2295,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                 entrance.vanilla_target_region = entrance_data["to"]["map"]
                 entrance.vanilla_target_warp_id = entrance_data["to"]["id"]
                 if ((world.options.door_shuffle == "mapped" and not outdoor_map(region.name))
-                        or (interior and world.options.door_shuffle in full_door_shuffle_modes)):
+                        or (interior and world.options.door_shuffle in full_interior_pool_modes)):
                     full_interiors.append(entrance)
                 else:
                     entrances.append(entrance)
@@ -2343,7 +2341,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             ]
 
     if world.options.door_shuffle:
-        if world.options.door_shuffle in coupled_door_shuffle_modes:
+        if world.options.door_shuffle in internal_warp_shuffle_modes:
             safari_zone_doors = [door for pair in safari_zone_connections for door in pair]
             safari_zone_doors.sort()
             order = ["Center", "East", "North", "West"]
@@ -2369,7 +2367,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             forced_connections.update(simple_mandatory_connections)
         else:
             usable_safe_rooms += pokemarts
-        if world.options.door_shuffle in coupled_door_shuffle_modes:
+        if world.options.door_shuffle in internal_warp_shuffle_modes:
             forced_connections.update(full_mandatory_connections)
             if world.options.door_shuffle == "mapped":
                 forced_connections.update({
@@ -2392,7 +2390,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
                                             world.random.choice(mansion_stair_destinations + mansion_dead_ends
                                                                      + ["Pokemon Mansion B1F to Pokemon Mansion 1F-SE"])))
-                    if world.options.door_shuffle in full_door_shuffle_modes:
+                    if world.options.door_shuffle in full_interior_pool_modes:
                         forced_connections.add(("Pokemon Mansion 1F to Pokemon Mansion 2F",
                                                 "Pokemon Mansion 3F to Pokemon Mansion 2F"))
                 elif r == 3:
@@ -2413,7 +2411,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                                             world.random.choice(mansion_stair_destinations
                                                                      + ["Pokemon Mansion B1F to Pokemon Mansion 1F-SE"])))
 
-            if world.options.door_shuffle in insanity_door_shuffle_modes + ("decoupled",):
+            if world.options.door_shuffle in all_warps_pool_modes:
                 usable_safe_rooms += insanity_safe_rooms
 
         usable_safe_rooms = [room for room in usable_safe_rooms if room in available_entrance_names]
@@ -2504,6 +2502,44 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             dc_destinations.remove(entrance_b)
     else:
         forced_connections.update(one_way_forced_connections)
+
+    if world.options.door_shuffle in mapped_region_group_modes:
+        vanilla_destination_warps = get_vanilla_destination_warps(all_warps, all_warps)
+        forced_connection_partners = {}
+
+        def add_forced_connection(entrance_a, entrance_b):
+            assigned_partner = forced_connection_partners.get(entrance_a.name)
+            if assigned_partner is not None and assigned_partner != entrance_b.name:
+                raise DoorShuffleException(
+                    f"Attempted to force {entrance_a.name} to connect to both "
+                    f"{assigned_partner} and {entrance_b.name}."
+                )
+            assigned_partner = forced_connection_partners.get(entrance_b.name)
+            if assigned_partner is not None and assigned_partner != entrance_a.name:
+                raise DoorShuffleException(
+                    f"Attempted to force {entrance_b.name} to connect to both "
+                    f"{assigned_partner} and {entrance_a.name}."
+                )
+            forced_connection_partners[entrance_a.name] = entrance_b.name
+            forced_connection_partners[entrance_b.name] = entrance_a.name
+            forced_connections.add((entrance_a.name, entrance_b.name))
+
+        for pair in list(forced_connections):
+            entrance_a = multiworld.get_entrance(pair[0], player)
+            entrance_b = multiworld.get_entrance(pair[1], player)
+            add_forced_connection(entrance_a, entrance_b)
+
+        for pair in list(forced_connections):
+            entrance_a = multiworld.get_entrance(pair[0], player)
+            entrance_b = multiworld.get_entrance(pair[1], player)
+            vanilla_destination_a = vanilla_destination_warps[entrance_a]
+            vanilla_destination_b = vanilla_destination_warps[entrance_b]
+            if {entrance_a, entrance_b} == {vanilla_destination_a, vanilla_destination_b}:
+                continue
+            if (vanilla_destination_a.name in forced_connection_partners
+                    or vanilla_destination_b.name in forced_connection_partners):
+                continue
+            add_forced_connection(vanilla_destination_a, vanilla_destination_b)
 
     for pair in forced_connections:
         entrance_a = multiworld.get_entrance(pair[0], player)
@@ -2661,6 +2697,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     and world.fly_map != "Cerulean City"
                     and world.town_map_fly_map != "Cerulean City"):
                 return True
+            return False
 
         while celadon_gym_problem() or cerulean_city_problem():
             world.random.shuffle(placed_gyms)
@@ -2695,7 +2732,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                         return found_exit
             return None
 
-        if world.options.door_shuffle in full_door_shuffle_modes:
+        if world.options.door_shuffle in full_interior_pool_modes:
             if world.options.door_shuffle == "full":
                 world.random.shuffle(full_interiors)
 
@@ -2792,7 +2829,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             "Victory Road Boulder",
             "Silph Co Liberated",
         ]
-        if world.options.door_shuffle in mapped_door_shuffle_modes:
+        if world.options.door_shuffle in mapped_region_group_modes:
             relevant_events += [
                 "Buy Poke Doll",
                 "Game Corner",
@@ -2911,15 +2948,15 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
 
             is_outdoor_map = outdoor_map(entrance_a.parent_region.name)
 
-            if world.options.door_shuffle in full_style_door_shuffle_modes or len(entrances) != len(reachable_entrances):
+            if world.options.door_shuffle in interior_style_fill_modes or len(entrances) != len(reachable_entrances):
 
                 find_dead_end = False
                 if (len(reachable_entrances) >
-                        (1 if world.options.door_shuffle in insanity_door_shuffle_modes + ("decoupled",) else 8) and len(entrances)
+                        (1 if world.options.door_shuffle in all_warps_pool_modes else 8) and len(entrances)
                         <= (starting_entrances - 3)):
                     find_dead_end = True
 
-                if (world.options.door_shuffle in full_style_door_shuffle_modes and len(entrances) < 48
+                if (world.options.door_shuffle in interior_style_fill_modes and len(entrances) < 48
                         and not is_outdoor_map):
                     # Try to prevent a situation where the only remaining outdoor entrances are ones that cannot be
                     # reached except by connecting directly to it.
@@ -2930,7 +2967,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
 
                 if world.options.door_shuffle == "decoupled":
                     destinations = dc_destinations
-                elif world.options.door_shuffle in full_style_door_shuffle_modes:
+                elif world.options.door_shuffle in interior_style_fill_modes:
                     destinations = [entrance for entrance in entrances if outdoor_map(entrance.parent_region.name) is
                                     not is_outdoor_map]
                     if not destinations:
@@ -2949,7 +2986,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                 else:
                     entrance_b = destinations.pop(0)
 
-                if world.options.door_shuffle in full_style_door_shuffle_modes:
+                if world.options.door_shuffle in interior_style_fill_modes:
                     # on Interiors/Full, the destinations variable does not point to the entrances list, so we need to
                     # remove from that list here.
                     entrances.remove(entrance_b)
@@ -2970,13 +3007,13 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                 insanity_mapped_group_buckets, require_connected=True)
             world.mapped_door_shuffle_spoiler.sort()
 
-        if world.options.door_shuffle in full_style_door_shuffle_modes:
+        if world.options.door_shuffle in interior_style_fill_modes:
             for pair in loop_out_interiors:
                 pair[1].connected_region = pair[0].connected_region
                 pair[1].parent_region.entrances.append(pair[0])
                 pair[1].target = pair[0].target
 
-        if world.options.door_shuffle in mapped_door_shuffle_modes:
+        if world.options.door_shuffle in mapped_region_group_modes:
             validate_mapped_door_shuffle_accessibility(multiworld, player)
 
     if world.options.door_shuffle:
