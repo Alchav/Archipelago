@@ -759,6 +759,9 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
+    def test_whomps_fortress_red_coins_on_floating_isle_does_not_require_fortress(self):
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
+
     def test_whomps_fortress_caged_island_hoot_route_requires_climb(self):
         self.collect([self.get_item_by_name("Whomp's Fortress - Fortress"), self.get_item_by_name("Climb")])
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
