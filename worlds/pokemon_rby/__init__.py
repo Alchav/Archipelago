@@ -137,6 +137,7 @@ class PokemonRBYWorld(World):
         self.gen_seed = None
         self.region_seed = None
         self.rock_tunnel_seed = None
+        self.mapped_door_shuffle_spoiler = []
         self.ut = False
 
     @classmethod
@@ -623,6 +624,11 @@ class PokemonRBYWorld(World):
                 spoiler_handle.write(hm_move + " enabled by: " + (" " * 20)[:20 - len(hm_move)] + badge + "\n")
 
     def write_spoiler(self, spoiler_handle):
+        if self.mapped_door_shuffle_spoiler:
+            spoiler_handle.write(f"\n\nMapped door shuffle region groups "
+                                 f"({self.multiworld.player_name[self.player]}):\n\n")
+            for slot_group, replacement_group in self.mapped_door_shuffle_spoiler:
+                spoiler_handle.write(f"{slot_group}: {replacement_group}\n")
         if self.options.randomize_type_chart:
             spoiler_handle.write(f"\n\nType matchups ({self.multiworld.player_name[self.player]}):\n\n")
             for matchup in self.type_chart:

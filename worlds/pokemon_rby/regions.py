@@ -303,6 +303,9 @@ saffron_gym_warps = [
     'Saffron Gym-SE to Saffron Gym-E', 'Saffron Gym-SE to Saffron Gym-SW', 'Saffron Gym-SE to Saffron Gym-S'
 ]
 
+silph_co_warp_tile_regions = tuple(sorted({warp_name.split(" to ", 1)[0] for warp_name in silph_co_warps}))
+saffron_gym_warp_tile_regions = tuple(sorted({warp_name.split(" to ", 1)[0] for warp_name in saffron_gym_warps}))
+
 entrance_only = [
     "Route 4-W to Mt Moon 1F", "Saffron City-G to Saffron Gym-S", "Saffron City-Copycat to Saffron Copycat's House 1F",
     "Saffron City-Pidgey to Saffron Pidgey House", "Celadon Game Corner-Hidden Stairs to Rocket Hideout B1F",
@@ -545,6 +548,223 @@ unreachable_outdoor_entrances = [
     # TODO: This doesn't need to be forced if fly location is Pokemon League?
     "Route 23-N to Victory Road 2F-E"
 ]
+
+# Multi-region mapped groups are static connected components after door warps, wild encounter helper regions,
+# fishing/menu utility regions, and fly shortcuts are removed. Regions not listed here are singleton groups.
+mapped_indoor_region_groups = {
+    "Celadon Department Store Elevator": (
+        "Celadon Department Store Elevator",
+        "Celadon Department Store Elevator-1F",
+        "Celadon Department Store Elevator-2F",
+        "Celadon Department Store Elevator-3F",
+        "Celadon Department Store Elevator-4F",
+        "Celadon Department Store Elevator-5F",
+    ),
+    "Celadon Game Corner": ("Celadon Game Corner", "Celadon Game Corner-Hidden Stairs"),
+    "Cerulean Cave 1F": (
+        "Cerulean Cave 1F-N",
+        "Cerulean Cave 1F-NE",
+        "Cerulean Cave 1F-SE",
+        "Cerulean Cave 1F-SW",
+        "Cerulean Cave 1F-Water",
+    ),
+    "Indigo Plateau Lobby": ("Indigo Plateau Lobby", "Indigo Plateau Lobby-N"),
+    "Pokemon Mansion 1F-SE": (
+        "Pokemon Mansion 1F-SE",
+        "Pokemon Mansion 2F",
+        "Pokemon Mansion 3F",
+        "Pokemon Mansion 3F-SE",
+    ),
+    "Pokemon Tower 6F": ("Pokemon Tower 6F", "Pokemon Tower 6F-S"),
+    "Rock Tunnel 1F-NE": (
+        "Rock Tunnel 1F-NE",
+        "Rock Tunnel 1F-NE 1",
+        "Rock Tunnel 1F-NE 2",
+    ),
+    "Rock Tunnel 1F-NW": (
+        "Rock Tunnel 1F-NW",
+        "Rock Tunnel 1F-NW 1",
+        "Rock Tunnel 1F-NW 2",
+    ),
+    "Rock Tunnel 1F-S": (
+        "Rock Tunnel 1F-S",
+        "Rock Tunnel 1F-S 1",
+        "Rock Tunnel 1F-S 2",
+    ),
+    "Rock Tunnel B1F-E": (
+        "Rock Tunnel B1F-E",
+        "Rock Tunnel B1F-E 1",
+        "Rock Tunnel B1F-E 2",
+    ),
+    "Rock Tunnel B1F-W": (
+        "Rock Tunnel B1F-W",
+        "Rock Tunnel B1F-W 1",
+        "Rock Tunnel B1F-W 2",
+    ),
+    "Rocket Hideout B1F": ("Rocket Hideout B1F", "Rocket Hideout B1F-SE"),
+    "Rocket Hideout Elevator": (
+        "Rocket Hideout Elevator",
+        "Rocket Hideout Elevator-B1F",
+        "Rocket Hideout Elevator-B2F",
+        "Rocket Hideout Elevator-B4F",
+    ),
+    "Route 16 Gate 1F": ("Route 16 Gate 1F-E", "Route 16 Gate 1F-W"),
+    "Route 18 Gate 1F": ("Route 18 Gate 1F-E", "Route 18 Gate 1F-W"),
+    "Route 22 Gate": ("Route 22 Gate-N", "Route 22 Gate-S"),
+    "Route 5 Gate": ("Route 5 Gate-N", "Route 5 Gate-S"),
+    "Route 6 Gate": ("Route 6 Gate-N", "Route 6 Gate-S"),
+    "Route 7 Gate": ("Route 7 Gate-E", "Route 7 Gate-W"),
+    "Route 8 Gate": ("Route 8 Gate-E", "Route 8 Gate-W"),
+    "Safari Zone Gate": ("Safari Zone Gate-N", "Safari Zone Gate-S"),
+    "Saffron Gym": (
+        "Saffron Gym-C",
+        "Saffron Gym-E",
+        "Saffron Gym-N",
+        "Saffron Gym-NE",
+        "Saffron Gym-NW",
+        "Saffron Gym-S",
+        "Saffron Gym-SE",
+        "Saffron Gym-SW",
+        "Saffron Gym-W",
+    ),
+    "Seafoam Islands 1F": (
+        "Seafoam Islands 1F",
+        "Seafoam Islands B1F",
+        "Seafoam Islands B1F-NE",
+        "Seafoam Islands B2F-NE",
+        "Seafoam Islands B2F-NW",
+        "Seafoam Islands B3F",
+        "Seafoam Islands B3F-SE",
+        "Seafoam Islands B4F",
+        "Seafoam Islands B4F-W",
+    ),
+    "Silph Co 10F": ("Silph Co 10F", "Silph Co 10F-SE"),
+    "Silph Co 11F-W": ("Silph Co 11F-C", "Silph Co 11F-W"),
+    "Silph Co 2F": ("Silph Co 2F", "Silph Co 2F-NW", "Silph Co 2F-SW"),
+    "Silph Co 3F": ("Silph Co 3F", "Silph Co 3F-C", "Silph Co 3F-W"),
+    "Silph Co 4F": ("Silph Co 4F", "Silph Co 4F-N", "Silph Co 4F-W"),
+    "Silph Co 5F": ("Silph Co 5F", "Silph Co 5F-NW", "Silph Co 5F-SW"),
+    "Silph Co 6F": ("Silph Co 6F", "Silph Co 6F-SW"),
+    "Silph Co 7F": ("Silph Co 7F", "Silph Co 7F-E", "Silph Co 7F-SE"),
+    "Silph Co 8F": ("Silph Co 8F", "Silph Co 8F-W"),
+    "Silph Co 9F": ("Silph Co 9F", "Silph Co 9F-NW", "Silph Co 9F-SW"),
+    "Silph Co Elevator": (
+        "Silph Co Elevator",
+        "Silph Co Elevator-10F",
+        "Silph Co Elevator-11F",
+        "Silph Co Elevator-1F",
+        "Silph Co Elevator-2F",
+        "Silph Co Elevator-3F",
+        "Silph Co Elevator-4F",
+        "Silph Co Elevator-5F",
+        "Silph Co Elevator-6F",
+        "Silph Co Elevator-7F",
+        "Silph Co Elevator-8F",
+        "Silph Co Elevator-9F",
+    ),
+    "Victory Road 1F": ("Victory Road 1F", "Victory Road 1F-S"),
+    "Victory Road 2F-C": (
+        "Victory Road 2F-C",
+        "Victory Road 2F-NW",
+        "Victory Road 2F-SE",
+        "Victory Road 2F-W",
+        "Victory Road 3F",
+        "Victory Road 3F-S",
+        "Victory Road 3F-SE",
+    ),
+}
+
+mapped_outdoor_region_groups = {
+    "Celadon City": ("Celadon City", "Celadon City-G", "Route 16-C", "Route 16-E", "Route 16-NE", "Route 7"),
+    "Cerulean City": (
+        "Cerulean City",
+        "Cerulean City-Cave",
+        "Cerulean City-Outskirts",
+        "Cerulean City-T",
+        "Cerulean City-Water",
+        "Route 10-C",
+        "Route 10-N",
+        "Route 10-P",
+        "Route 24",
+        "Route 25",
+        "Route 4-C",
+        "Route 4-E",
+        "Route 4-Lass",
+        "Route 5",
+        "Route 9",
+    ),
+    "Indigo Plateau": ("Indigo Plateau", "Route 23-N"),
+    "Lavender Town": ("Lavender Town", "Route 10-S", "Route 12-L", "Route 8"),
+    "Vermilion City": ("Route 11", "Route 11-C", "Route 6", "Vermilion City", "Vermilion City-Dock", "Vermilion City-G"),
+    "Route 11-15": (
+        "Route 11-E",
+        "Route 12-N",
+        "Route 12-S",
+        "Route 12-W",
+        "Route 13",
+        "Route 13-E",
+        "Route 14",
+        "Route 15",
+    ),
+    "Route 17": ("Route 16-SW", "Route 17", "Route 18-W"),
+    "Route 23": ("Route 23-C", "Route 23-Grass", "Route 23-S"),
+    "Saffron City": (
+        "Route 5-S",
+        "Route 6-N",
+        "Route 7-E",
+        "Route 8-W",
+        "Saffron City",
+        "Saffron City-Copycat",
+        "Saffron City-G",
+        "Saffron City-Pidgey",
+        "Saffron City-Silph",
+    ),
+    "Safari Zone Center": ("Safari Zone Center-C", "Safari Zone Center-NE", "Safari Zone Center-NW", "Safari Zone Center-S"),
+    "Safari Zone West": ("Safari Zone West", "Safari Zone West-NW"),
+    "Fuchsia Coast": (
+        "Fuchsia City",
+        "Route 15-W",
+        "Route 18-E",
+        "Route 19-N",
+        "Route 19-S",
+        "Route 20-E",
+        "Route 20-IW",
+    ),
+    "Pallet/Viridian/Cinnabar": (
+        "Cinnabar Island",
+        "Cinnabar Island-G",
+        "Cinnabar Island-M",
+        "Pallet Town",
+        "Route 1",
+        "Route 2-SE",
+        "Route 2-SW",
+        "Route 20-IE",
+        "Route 20-W",
+        "Route 21",
+        "Route 22",
+        "Viridian City",
+        "Viridian City-G",
+        "Viridian City-N",
+    ),
+    "Pewter/Route 2 North": (
+        "Pewter City",
+        "Pewter City-E",
+        "Pewter City-M",
+        "Route 2-E",
+        "Route 2-NE",
+        "Route 2-NW",
+        "Route 3",
+        "Route 4-W",
+    ),
+}
+
+
+def get_mapped_indoor_region_groups(world):
+    region_groups = dict(mapped_indoor_region_groups)
+    if world.options.warp_tile_shuffle != "mixed":
+        region_groups["Saffron Gym"] = saffron_gym_warp_tile_regions
+        region_groups["Silph Co Warp Tiles"] = silph_co_warp_tile_regions
+    return region_groups
 
 
 def create_region(multiworld: MultiWorld, player: int, name: str, locations_per_region=None, exits=None):
@@ -1088,6 +1308,7 @@ def create_regions(world):
     world.random.seed(seed)
 
     def cleanup_door_shuffle_attempt():
+        world.mapped_door_shuffle_spoiler = []
         for region in world.multiworld.get_regions(player):
             for entrance in reversed(region.exits):
                 if isinstance(entrance, PokemonRBWarp):
@@ -1237,34 +1458,75 @@ def discover_mapped_region_groups(multiworld, player, shuffleable_warps, blocked
                                   include_outdoor_regions=True):
     shuffleable_warps = list(shuffleable_warps)
     shuffleable_warp_set = set(shuffleable_warps)
+    shuffleable_warps_by_region = {}
+    for warp in shuffleable_warps:
+        shuffleable_warps_by_region.setdefault(warp.parent_region, []).append(warp)
+    world = multiworld.worlds[player]
+    indoor_region_groups = get_mapped_indoor_region_groups(world)
+    forced_complete_group_names = set()
+    if world.options.warp_tile_shuffle != "mixed":
+        forced_complete_group_names.update({"Saffron Gym", "Silph Co Warp Tiles"})
+    regions_with_authored_warps = {
+        multiworld.get_region(region_name, player)
+        for region_name, region_warps in world.warp_data.items()
+        if region_warps
+    }
     blocked_warp_set = set(blocked_warps if blocked_warps is not None else shuffleable_warps)
     start_regions = sorted({warp.parent_region for warp in shuffleable_warps}, key=lambda region: region.name)
     assigned_regions = set()
     region_groups = []
 
-    def can_traverse_region(region):
-        if include_outdoor_regions:
-            return True
-        if region.name.split("-")[0] not in map_ids:
-            return True
-        return not outdoor_map(region.name)
+    explicit_group_regions = {}
+    for group_name, region_names in indoor_region_groups.items():
+        for region_name in region_names:
+            explicit_group_regions[region_name] = group_name
+    if include_outdoor_regions:
+        for group_name, region_names in mapped_outdoor_region_groups.items():
+            for region_name in region_names:
+                explicit_group_regions[region_name] = group_name
+
+    def mapped_region_group_name(region):
+        return explicit_group_regions.get(region.name)
+
+    def has_group_warp(region):
+        return region in regions_with_authored_warps or region in shuffleable_warps_by_region
+
+    regions_by_group_name = {}
+    for region in multiworld.get_regions(player):
+        group_name = mapped_region_group_name(region)
+        if group_name is not None:
+            regions_by_group_name.setdefault(group_name, set()).add(region)
 
     for start_region in start_regions:
-        if start_region in assigned_regions or not can_traverse_region(start_region):
+        if start_region in assigned_regions:
             continue
 
-        checked_regions = set()
-        check_regions = [start_region]
-        while check_regions:
-            region = check_regions.pop()
-            if region in checked_regions or region in assigned_regions or not can_traverse_region(region):
+        group_name = mapped_region_group_name(start_region)
+        if group_name is None:
+            if not has_group_warp(start_region):
                 continue
-            checked_regions.add(region)
-            for exit in region.exits:
-                if exit in blocked_warp_set or exit.connected_region is None:
+            allowed_regions = {start_region}
+        else:
+            allowed_regions = regions_by_group_name[group_name]
+
+        if group_name in forced_complete_group_names:
+            checked_regions = allowed_regions - assigned_regions
+        else:
+            checked_regions = set()
+            check_regions = [start_region]
+            while check_regions:
+                region = check_regions.pop()
+                if region in checked_regions or region in assigned_regions or region not in allowed_regions:
                     continue
-                if exit.connected_region not in checked_regions and exit.connected_region not in assigned_regions:
-                    check_regions.append(exit.connected_region)
+                checked_regions.add(region)
+                for exit in [*region.exits, *region.entrances]:
+                    if exit in blocked_warp_set or exit.connected_region is None:
+                        continue
+                    adjacent_region = exit.connected_region if exit.parent_region is region else exit.parent_region
+                    if (adjacent_region in allowed_regions
+                            and adjacent_region not in checked_regions
+                            and adjacent_region not in assigned_regions):
+                        check_regions.append(adjacent_region)
 
         group_warps = sorted(
             [warp for warp in shuffleable_warps if warp.parent_region in checked_regions],
@@ -1274,9 +1536,19 @@ def discover_mapped_region_groups(multiworld, player, shuffleable_warps, blocked
             continue
 
         assigned_regions.update(checked_regions)
+        group_regions = {region for region in checked_regions if has_group_warp(region)}
+        if not group_regions:
+            continue
+        if group_name is not None and checked_regions == allowed_regions:
+            display_group_name = group_name
+        elif len(group_regions) == 1:
+            display_group_name = next(iter(group_regions)).name
+        else:
+            display_group_name = ", ".join(sorted(region.name for region in group_regions))
         region_groups.append({
-            "name": ", ".join(sorted(region.name for region in checked_regions)),
-            "regions": checked_regions,
+            "name": display_group_name,
+            "regions": group_regions,
+            "static_regions": checked_regions,
             "warps": group_warps,
         })
 
@@ -1309,11 +1581,6 @@ def get_vanilla_destination_warps(shuffleable_warps, destination_warps):
 
 def connect_mapped_region_group_directed(world, source_region_group, destination_region_group,
                                          vanilla_destination_warps=None):
-    if source_region_group is destination_region_group and vanilla_destination_warps is not None:
-        for entrance_a in source_region_group["warps"]:
-            entrance_a.connect(vanilla_destination_warps[entrance_a])
-        return
-
     source_warps = source_region_group["warps"].copy()
     destination_warps = destination_region_group["warps"].copy()
     if len(source_warps) != len(destination_warps):
@@ -1376,9 +1643,19 @@ def connect_mapped_warp_if_needed(source_warp, destination_warp):
         )
 
 
+def reconnect_mapped_warp(source_warp, destination_warp):
+    if source_warp.connected_region is destination_warp.parent_region and mapped_warp_id_matches(
+            source_warp.target, destination_warp.warp_id):
+        return
+    if source_warp.connected_region is not None and source_warp in source_warp.connected_region.entrances:
+        source_warp.connected_region.entrances.remove(source_warp)
+    source_warp.connected_region = None
+    source_warp.connect(destination_warp)
+
+
 def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_warps, destination_warps,
                                               exterior_warps, state=None, event_locations=None,
-                                              relevant_events=None):
+                                              relevant_events=None, allow_reachable_source_warps_as_entries=False):
     region_group_buckets = bucket_region_groups_by_warp_count(region_groups)
     validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets)
     vanilla_destination_warps = get_vanilla_destination_warps(shuffleable_warps, destination_warps)
@@ -1393,6 +1670,13 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
     }
     exterior_warp_set = set(exterior_warps)
     shuffleable_warp_set = set(shuffleable_warps)
+    required_location_regions = set()
+    if allow_reachable_source_warps_as_entries:
+        required_location_regions = {
+            location.parent_region for location in world.multiworld.get_locations(world.player)
+            if (location.progress_type != LocationProgressType.EXCLUDED
+                and location.parent_region.name.split("-")[0] in map_ids)
+        }
     replacement_group_by_slot_group = {}
     slot_group_by_replacement_group = {}
     pinned_replacement_warp_by_slot_warp = {}
@@ -1426,6 +1710,9 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
             )
         pinned_replacement_warp_by_slot_warp[slot_warp] = replacement_warp
 
+    def group_static_regions(region_group):
+        return region_group.get("static_regions", region_group["regions"])
+
     for exterior_warp, slot_warp in exterior_slot_warps.items():
         if exterior_warp.connected_region is None:
             continue
@@ -1444,17 +1731,6 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
             continue
         assign_replacement_group(slot_group, replacement_group)
         pin_replacement_warp(slot_warp, replacement_warp)
-
-    for slot_warp in shuffleable_warps:
-        if slot_warp.connected_region is None:
-            continue
-        destination_warp = find_mapped_warp_by_region_and_id(
-            destination_warps, slot_warp.connected_region, slot_warp.target)
-        if destination_warp in exterior_warp_set:
-            continue
-        if destination_warp in group_by_warp:
-            assign_replacement_group(group_by_warp[slot_warp], group_by_warp[slot_warp])
-            pin_replacement_warp(slot_warp, slot_warp)
 
     for bucket in region_group_buckets.values():
         if len(bucket) != 1:
@@ -1512,30 +1788,40 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
                 if slot_warp not in entry_slot_warps and slot_group_has_unreached_exit(slot_group, slot_warp)
             ]
             required_replacement_regions = {
-                region for region in replacement_group["regions"]
-                if any(location.item and location.item.name in relevant_events for location in region.locations)
+                region for region in group_static_regions(replacement_group)
+                if (region in required_location_regions
+                    or any(location.item and location.item.name in relevant_events for location in region.locations))
             }
 
+            selected_entry = None
+            selected_reachable_warps = []
+            selected_reachable_region_count = -1
             for entry_slot_warp in entry_slot_warps:
                 if entry_slot_warp not in slot_warps:
                     continue
                 for replacement_warp in replacement_warps:
-                    reachable_regions = static_reachable_regions_from(
-                        replacement_warp.parent_region, replacement_group["regions"], state)
-                    if not required_replacement_regions.issubset(reachable_regions):
+                    required_reachable_regions = static_reachable_regions_from(
+                        replacement_warp.parent_region, group_static_regions(replacement_group))
+                    if not required_replacement_regions.issubset(required_reachable_regions):
                         continue
+                    reachable_regions = static_reachable_regions_from(
+                        replacement_warp.parent_region, group_static_regions(replacement_group), state)
                     reachable_warps = [
                         warp for warp in replacement_warps
                         if warp is not replacement_warp and warp.parent_region in reachable_regions
                     ]
-                    if len(reachable_warps) >= len(progress_slot_warps):
-                        replacement_warp_by_slot_warp[entry_slot_warp] = replacement_warp
-                        slot_warps.remove(entry_slot_warp)
-                        replacement_warps.remove(replacement_warp)
-                        entry_reachable_warps = reachable_warps
-                        break
-                if entry_reachable_warps is not None:
-                    break
+                    if (len(reachable_warps) > len(selected_reachable_warps)
+                            or (len(reachable_warps) == len(selected_reachable_warps)
+                                and len(reachable_regions) > selected_reachable_region_count)):
+                        selected_entry = (entry_slot_warp, replacement_warp)
+                        selected_reachable_warps = reachable_warps
+                        selected_reachable_region_count = len(reachable_regions)
+            if selected_entry is not None:
+                entry_slot_warp, replacement_warp = selected_entry
+                replacement_warp_by_slot_warp[entry_slot_warp] = replacement_warp
+                slot_warps.remove(entry_slot_warp)
+                replacement_warps.remove(replacement_warp)
+                entry_reachable_warps = selected_reachable_warps
 
         if len(slot_warps) != len(replacement_warps):
             raise DoorShuffleException(
@@ -1571,22 +1857,22 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
                 continue
             if slot_warp not in replacement_warp_by_slot_warp:
                 continue
-            connect_mapped_warp_if_needed(exterior_warp, replacement_warp_by_slot_warp[slot_warp])
+            reconnect_mapped_warp(exterior_warp, replacement_warp_by_slot_warp[slot_warp])
 
         for slot_warp, source_warp in list(replacement_warp_by_slot_warp.items()):
             if source_warp in ignored_forced_replacement_warps:
                 continue
             destination_slot_warp = vanilla_destination_warps[slot_warp]
             if destination_slot_warp in replacement_warp_by_slot_warp:
-                connect_mapped_warp_if_needed(source_warp, replacement_warp_by_slot_warp[destination_slot_warp])
+                reconnect_mapped_warp(source_warp, replacement_warp_by_slot_warp[destination_slot_warp])
             elif destination_slot_warp in group_by_warp:
                 continue
             else:
-                connect_mapped_warp_if_needed(source_warp, destination_slot_warp)
+                reconnect_mapped_warp(source_warp, destination_slot_warp)
                 if (destination_slot_warp in exterior_warp_set
                         and destination_slot_warp not in ignored_forced_exterior_warps
                         and is_vanilla_reciprocal_warp(slot_warp, destination_slot_warp)):
-                    connect_mapped_warp_if_needed(destination_slot_warp, source_warp)
+                    reconnect_mapped_warp(destination_slot_warp, source_warp)
 
     if state is None:
         for bucket in region_group_buckets.values():
@@ -1627,8 +1913,20 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
                 return False
             return warp.parent_region.can_reach(check_state)
 
+        initial_entry_slot_warps = set()
+        if allow_reachable_source_warps_as_entries:
+            update_state(state)
+            initial_entry_slot_warps = {
+                slot_warp for region_group in region_groups for slot_warp in region_group["warps"]
+                if slot_source_warp_can_reach(slot_warp, state)
+            }
+
         def reachable_entry_slot_warps(slot_group, check_state):
             entry_slot_warps = []
+            if allow_reachable_source_warps_as_entries:
+                for slot_warp in slot_group["warps"]:
+                    if slot_warp in initial_entry_slot_warps:
+                        entry_slot_warps.append(slot_warp)
             for exterior_warp, slot_warp in exterior_slot_warps.items():
                 if group_by_warp.get(slot_warp) is slot_group and slot_source_warp_can_reach(exterior_warp, check_state):
                     entry_slot_warps.append(slot_warp)
@@ -1671,29 +1969,46 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
             return False
 
         def replacement_group_dead_end(slot_group, replacement_group):
-            for region in replacement_group["regions"]:
+            for region in group_static_regions(replacement_group):
                 for location in region.locations:
                     if (location.item and location.item.name in relevant_events
                             and event_item_opens_reachable_slot(location.item)):
                         return False
-            if any(region.can_reach(state) for region in replacement_group["regions"]):
+            if any(region.can_reach(state) for region in group_static_regions(replacement_group)):
                 return True
             return not slot_group_has_unreached_exit(slot_group)
 
         def group_has_relevant_event(region_group):
-            for region in region_group["regions"]:
+            for region in group_static_regions(region_group):
                 for location in region.locations:
                     if location.item and location.item.name in relevant_events:
                         return True
             return False
 
+        def group_has_required_location(region_group):
+            return any(region in required_location_regions for region in group_static_regions(region_group))
+
         def group_has_frontier_event(region_group):
-            for region in region_group["regions"]:
+            for region in group_static_regions(region_group):
                 for location in region.locations:
                     if (location.item and location.item.name in relevant_events
                             and event_item_opens_reachable_slot(location.item)):
                         return True
             return False
+
+        def replacement_group_required_regions_reachable(replacement_group):
+            required_replacement_regions = {
+                region for region in group_static_regions(replacement_group)
+                if (region in required_location_regions
+                    or any(location.item and location.item.name in relevant_events for location in region.locations))
+            }
+            if not required_replacement_regions:
+                return True
+            return any(
+                required_replacement_regions.issubset(static_reachable_regions_from(
+                    replacement_warp.parent_region, group_static_regions(replacement_group)))
+                for replacement_warp in replacement_group["warps"]
+            )
 
         update_state(state)
         for slot_group_name in list(replacement_group_by_slot_group):
@@ -1710,11 +2025,11 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
                     for bucket in region_group_buckets.values()
                     for region_group in bucket
                     if (region_group["name"] not in slot_group_by_replacement_group
-                        and group_has_relevant_event(region_group))
+                        and (group_has_relevant_event(region_group) or group_has_required_location(region_group)))
                 ]
                 if remaining_relevant_event_groups:
                     raise DoorShuffleException(
-                        "Mapped door shuffle stranded relevant event groups: "
+                        "Mapped door shuffle stranded required region groups: "
                         f"{sorted(remaining_relevant_event_groups)}"
                     )
                 for bucket in region_group_buckets.values():
@@ -1752,9 +2067,11 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
                 candidate_replacements = [
                     region_group for region_group in region_group_buckets[count_shuffleable_warps(slot_group)]
                     if region_group["name"] not in slot_group_by_replacement_group
+                    and replacement_group_required_regions_reachable(region_group)
                 ]
                 if (group_has_relevant_event(slot_group)
-                        and slot_group["name"] not in slot_group_by_replacement_group):
+                        and slot_group["name"] not in slot_group_by_replacement_group
+                        and replacement_group_required_regions_reachable(slot_group)):
                     selected_slot_group = slot_group
                     selected_entry_slot_warps = entry_slot_warps
                     selected_replacement_group = slot_group
@@ -1770,6 +2087,14 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
                     break
                 for replacement_group in candidate_replacements:
                     if group_has_relevant_event(replacement_group):
+                        selected_slot_group = slot_group
+                        selected_entry_slot_warps = entry_slot_warps
+                        selected_replacement_group = replacement_group
+                        break
+                if selected_replacement_group is not None:
+                    break
+                for replacement_group in candidate_replacements:
+                    if group_has_required_location(replacement_group):
                         selected_slot_group = slot_group
                         selected_entry_slot_warps = entry_slot_warps
                         selected_replacement_group = replacement_group
@@ -1813,13 +2138,13 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
             continue
         destination_slot_warp = vanilla_destination_warps[slot_warp]
         if destination_slot_warp in replacement_warp_by_slot_warp:
-            connect_mapped_warp_if_needed(source_warp, replacement_warp_by_slot_warp[destination_slot_warp])
+            reconnect_mapped_warp(source_warp, replacement_warp_by_slot_warp[destination_slot_warp])
         else:
-            connect_mapped_warp_if_needed(source_warp, destination_slot_warp)
+            reconnect_mapped_warp(source_warp, destination_slot_warp)
             if (destination_slot_warp in exterior_warp_set
                     and destination_slot_warp not in ignored_forced_exterior_warps
                     and is_vanilla_reciprocal_warp(slot_warp, destination_slot_warp)):
-                connect_mapped_warp_if_needed(destination_slot_warp, source_warp)
+                reconnect_mapped_warp(destination_slot_warp, source_warp)
 
     unconnected_exterior_warps = [
         warp.name for warp in exterior_warps if warp.connected_region is None
@@ -1841,6 +2166,10 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
             raise DoorShuffleException(
                 f"Mapped door shuffle left relevant events unreachable: {sorted(inaccessible_events)}"
             )
+
+    world.mapped_door_shuffle_spoiler = sorted(
+        (slot_group_name, replacement_group["name"])
+        for slot_group_name, replacement_group in replacement_group_by_slot_group.items())
 
 
 def connect_mapped_region_groups_by_bucket(world, region_groups, shuffleable_warps, destination_warps=None,
@@ -1930,6 +2259,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
     mapped_door_shuffle_modes = ("mapped", "insanity_mapped")
     full_style_door_shuffle_modes = ("interiors",) + full_door_shuffle_modes
 
+    world.mapped_door_shuffle_spoiler = []
     entrances = []
     full_interiors = []
     for region_name, region_entrances in world.warp_data.items():
@@ -2543,26 +2873,19 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
         starting_entrances = len(entrances)
 
         insanity_mapped_region_groups = []
-        insanity_mapped_groups_by_warp = {}
         insanity_mapped_group_buckets = {}
-        insanity_mapped_destination_group_buckets = {}
         insanity_mapped_shuffleable_warps = []
-        insanity_mapped_vanilla_destination_warps = {}
         if world.options.door_shuffle == "insanity_mapped":
             insanity_mapped_shuffleable_warps = entrances.copy()
-            insanity_mapped_vanilla_destination_warps = get_vanilla_destination_warps(
-                insanity_mapped_shuffleable_warps, all_warps)
             insanity_mapped_region_groups = discover_mapped_region_groups(
                 multiworld, player, entrances, insanity_mapped_blocked_warps, include_outdoor_regions=True)
             insanity_mapped_group_buckets = bucket_region_groups_by_warp_count(insanity_mapped_region_groups)
-            insanity_mapped_destination_group_buckets = {warp_count: bucket.copy()
-                                                        for warp_count, bucket in
-                                                        insanity_mapped_group_buckets.items()}
             validate_mapped_region_groups(insanity_mapped_region_groups, entrances, insanity_mapped_group_buckets)
-            for bucket in insanity_mapped_group_buckets.values():
-                for region_group in bucket:
-                    for warp in region_group["warps"]:
-                        insanity_mapped_groups_by_warp[warp] = region_group
+            connect_mapped_door_shuffle_region_groups(
+                world, insanity_mapped_region_groups, insanity_mapped_shuffleable_warps, all_warps,
+                [], state, event_locations, relevant_events, allow_reachable_source_warps_as_entries=True)
+            entrances.clear()
+            full_interiors.clear()
 
         while entrances:
             state.update_reachable_regions(player)
@@ -2585,65 +2908,6 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
 
             entrance_a = reachable_entrances.pop(0)
             entrances.remove(entrance_a)
-
-            if world.options.door_shuffle == "insanity_mapped":
-                region_group_a = insanity_mapped_groups_by_warp[entrance_a]
-                group_entrances_a = [entrance for entrance in region_group_a["warps"] if entrance in entrances]
-                for entrance in group_entrances_a:
-                    entrances.remove(entrance)
-                reachable_entrances = [entrance for entrance in reachable_entrances
-                                       if entrance not in region_group_a["warps"]]
-
-                def has_unused_source(region_group):
-                    return any(entrance in entrances for entrance in region_group["warps"])
-
-                def opens_unused_vanilla_group(region_group):
-                    for entrance in region_group["warps"]:
-                        destination_group = insanity_mapped_groups_by_warp.get(
-                            insanity_mapped_vanilla_destination_warps[entrance])
-                        if (destination_group is not None and destination_group is not region_group
-                                and has_unused_source(destination_group)):
-                            return True
-                    return False
-
-                same_size_destinations = insanity_mapped_destination_group_buckets[
-                    count_shuffleable_warps(region_group_a)]
-                same_size_candidates = [region_group for region_group in same_size_destinations
-                                        if region_group is not region_group_a] or same_size_destinations.copy()
-                unused_same_size_candidates = [region_group for region_group in same_size_candidates
-                                               if has_unused_source(region_group)]
-
-                if opens_unused_vanilla_group(region_group_a):
-                    region_group_b = region_group_a
-                else:
-                    destination_groups = unused_same_size_candidates or same_size_candidates
-                    if not destination_groups:
-                        raise DoorShuffleException(
-                            f"Ran out of connectable mapped destinations in {world.game} door shuffle"
-                        )
-
-                    find_dead_end = False
-                    if len(reachable_entrances) > 1 and len(entrances) <= (starting_entrances - 3):
-                        find_dead_end = True
-
-                    def group_dead_end(region_group):
-                        return all(dead_end(entrance) for entrance in region_group["warps"])
-
-                    world.random.shuffle(destination_groups)
-                    for region_group in destination_groups:
-                        if group_dead_end(region_group) is find_dead_end:
-                            region_group_b = region_group
-                            break
-                    else:
-                        region_group_b = destination_groups[0]
-
-                destination_bucket = insanity_mapped_destination_group_buckets[
-                    count_shuffleable_warps(region_group_b)]
-                if region_group_b in destination_bucket:
-                    destination_bucket.remove(region_group_b)
-                connect_mapped_region_group_directed(world, region_group_a, region_group_b,
-                                                     insanity_mapped_vanilla_destination_warps)
-                continue
 
             is_outdoor_map = outdoor_map(entrance_a.parent_region.name)
 
@@ -2704,6 +2968,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             validate_mapped_region_groups(
                 insanity_mapped_region_groups, insanity_mapped_shuffleable_warps,
                 insanity_mapped_group_buckets, require_connected=True)
+            world.mapped_door_shuffle_spoiler.sort()
 
         if world.options.door_shuffle in full_style_door_shuffle_modes:
             for pair in loop_out_interiors:
