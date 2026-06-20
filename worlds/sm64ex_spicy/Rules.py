@@ -548,15 +548,13 @@ def secret_aquarium_coins(state: CollectionState, player: int, coins: int) -> bo
 def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Wing Mario Over the Rainbow"
     reachable_coins = 2
-    has_wing = has_wing_cap(state, player, level_name)
-    if has_wing:
-        if state.has("Wing Mario Over the Rainbow - Cannon Unlock", player):
+    if has_wing_cap(state, player, level_name) and state.has("Wing Mario Over the Rainbow - Cannon Unlock", player):
             reachable_coins = 56
-        elif has_action(state, player, "Triple Jump", level_name):
+    elif has_wing_cap(state, player, level_name) and has_action(state, player, "Triple Jump", level_name):
             reachable_coins += 46
-    else:
-        if has_action(state, player, "Long Jump", level_name):
-            reachable_coins += 4
+    elif has_action(state, player, "Long Jump", level_name):
+        reachable_coins += 4
+    reachable_coins = min(reachable_coins, 56)
     return coins <= reachable_coins
 
 

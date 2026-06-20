@@ -1250,6 +1250,16 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
 
+    def test_wing_cap_does_not_remove_long_jump_coins(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
 
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
