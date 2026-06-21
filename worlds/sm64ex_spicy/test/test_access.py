@@ -1298,6 +1298,7 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coinsanity": 100,
         "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
@@ -1307,36 +1308,66 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect(self.get_item_by_name("Side Flip"))
 
-    def test_long_jump_reaches_all_four_no_wing_fallback_coins(self):
+    def test_long_jump_fallback_coins_require_capless(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 2 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
         self.collect(self.get_item_by_name("Long Jump"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
+
+        self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
 
         self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
 
-    def test_wing_cap_reaches_two_fallback_coins_without_flying(self):
+    def test_wing_cap_fallback_coins_require_moveless(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 2 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
         self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
+
+        self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 4 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 5 Coins"))
 
     def test_wing_cap_does_not_remove_long_jump_coins(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.collect(self.get_item_by_name("Long Jump"))
+        self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
 
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
+    def test_cannon_coin_route_requires_cannon_movement(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"),
+        ])
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
+
+    def test_cannon_coin_route_accepts_capless_long_jump(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
+
+        self.collect(self.world.create_item("ut_glitch"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
 
 
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
@@ -3246,7 +3277,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
-    def test_wmotr_red_coins_wing_cap_route_accepts_cannon(self):
+    def test_wmotr_red_coins_cannon_route_accepts_capless_long_jump(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect([
             self.get_item_by_name("Wing Cap"),
@@ -3255,6 +3286,10 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
     def test_wmotr_buddy_wing_cap_route_accepts_triple_jump(self):
@@ -3265,7 +3300,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Triple Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
-    def test_wmotr_buddy_wing_cap_route_accepts_cannon(self):
+    def test_wmotr_buddy_wing_cap_route_rejects_cannon_without_platform_movement(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect([
             self.get_item_by_name("Wing Cap"),
@@ -3274,7 +3309,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
     def test_wmotr_cloud_wing_cap_route_accepts_triple_jump(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
@@ -3403,13 +3438,11 @@ class WMotRCaplessBuddyAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
-    def test_wmotr_bob_omb_buddy_platform_requires_buddy_route_and_climb(self):
+    def test_wmotr_bob_omb_buddy_platform_uses_buddy_platform_region(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect(self.get_item_by_name("Side Flip"))
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up"))
-        self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up"))
 
 

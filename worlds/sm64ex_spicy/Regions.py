@@ -446,11 +446,15 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regRR, "Rainbow Ride - Coins Star")
 
     regWMotR = create_region("Wing Mario Over the Rainbow", player, multiworld)
-    create_default_locs(regWMotR, locWMotR_table)
-    create_locs(regWMotR,
-                "Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up",
-                "Wing Mario Over the Rainbow - Cloud 1-Up",
-                "Wing Mario Over the Rainbow - Hanging Pole 1-Up")
+    create_locs(regWMotR, "Wing Mario Over the Rainbow - 1-Up Block",
+                "Wing Mario Over the Rainbow - Cloud 1-Up")
+    wmotr_buddy_platform = create_subregion(regWMotR, "Wing Mario Over the Rainbow - Bob-omb Buddy Platform",
+                                            "Wing Mario Over the Rainbow - Bob-omb Buddy",
+                                            "Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up")
+    wmotr_cannon = create_subregion(wmotr_buddy_platform, "Wing Mario Over the Rainbow - Cannon",
+                                    "Wing Mario Over the Rainbow - Red Coins",
+                                    "Wing Mario Over the Rainbow - Hanging Pole 1-Up")
+    regWMotR.subregions = [wmotr_buddy_platform, wmotr_cannon]
 
     regBitS = create_region("Bowser in the Sky", player, multiworld)
     create_locs(regBitS, "Bowser in the Sky - 1-Up Block",
