@@ -332,15 +332,20 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
     has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     has_wdw_purple_switches = has_purple_switches(state, player, "Wet-Dry World")
     has_water_level_diamond = has_simple_arbitrary_feature(state, player, "WDW_WATER_LEVEL_DIAMOND")
+    has_long_jump = has_action(state, player, "Long Jump", level_name)
     has_triple_jump = has_action(state, player, "Triple Jump", level_name)
     has_dive = has_action(state, player, "Dive", level_name)
+    can_reach_top_of_express_elevator = state.can_reach(
+        "Wet-Dry World - Top of the Express Elevator", "Region", player)
     has_movement_top_route = (
         any(has_action(state, player, action, level_name)
             for action in ("Wall Kick", "Triple Jump", "Side Flip", "Backflip"))
         or allows_moveless(state, player)
-        or has_wdw_purple_switches and has_action(state, player, "Long Jump", level_name)
     )
-    can_reach_mid_high_from_mid = has_water_level_diamond and (has_wdw_purple_switches or has_triple_jump and has_dive)
+    can_reach_top_from_express_elevator = can_reach_top_of_express_elevator and (
+        has_long_jump or allows_moveless(state, player))
+    can_reach_mid_high_from_mid = has_water_level_diamond and (
+        can_reach_top_of_express_elevator or has_triple_jump and has_dive)
 
     def route_water_levels(start_water_level: str) -> Set[str]:
         water_levels = {start_water_level}
@@ -365,7 +370,7 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
                 return water_levels
 
     def route_has_top(water_levels: Set[str]) -> bool:
-        return has_movement_top_route or "highest" in water_levels
+        return has_movement_top_route or can_reach_top_from_express_elevator or "highest" in water_levels
 
     def route_has_downtown(water_levels: Set[str]) -> bool:
         return (
@@ -389,9 +394,7 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
             route_total += 5
         if route_has_top(water_levels):
             route_total += 15
-        if has_wdw_purple_switches or (has_movement_top_route and any(has_action(state, player, action, level_name)
-                                                                      for action in ("Long Jump", "Triple Jump",
-                                                                                     "Ledge Grab"))):
+        if can_reach_top_of_express_elevator:
             route_total += 10
         if route_has_downtown(water_levels):
             route_total += 31
@@ -1010,12 +1013,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Mid-High Water",
-                   "WDW_WATER_LEVEL_DIAMOND & PURPLE_SWITCHES | WDW_WATER_LEVEL_DIAMOND & TJ+DV")
+                   "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Top of the Express Elevator} | "
+                   "WDW_WATER_LEVEL_DIAMOND & TJ+DV")
     rf.assign_rule("Wet-Dry World - Mid-High Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid-High Water to High Water", "{Wet-Dry World - Top}")
     rf.assign_rule("Wet-Dry World - High Water to Mid-High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Highest Water to High Water", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Top", "WK/TJ/SF/BF | MOVELESS | PURPLE_SWITCHES & LJ | {Wet-Dry World - Highest Water}")
+    rf.assign_rule("Wet-Dry World - Top of the Express Elevator",
+                   "PURPLE_SWITCHES | WK/TJ/SF/BF/MOVELESS & LJ/TJ/LG/MOVELESS")
+    rf.assign_rule("Wet-Dry World - Top",
+                   "WK/TJ/SF/BF | MOVELESS | {Wet-Dry World - Top of the Express Elevator} & LJ/MOVELESS | "
+                   "{Wet-Dry World - Highest Water}")
     rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World - Highest Water} | CANN | {Wet-Dry World - Top} & MOVELESS & TJ+DV")
     rf.assign_rule("Wet-Dry World - Go to Town for Red Coins",
                    "WDW_WATER_LEVEL_DIAMOND & WK | WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
@@ -1023,12 +1031,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                    "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ")
     rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!",
-                   "WDW_WATER_LEVEL_DIAMOND/BF/SF/WK & PURPLE_SWITCHES | "
-                   "WDW_WATER_LEVEL_DIAMOND/BF/SF/WK & {Wet-Dry World - Top} & LG/TJ/LJ")
+                   "{Wet-Dry World - Low Water} & BF/SF/WK | "
+                   "{Wet-Dry World - Low Water} & WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky",
-                   "{{Wet-Dry World - Express Elevator--Hurry Up!}} & {Wet-Dry World - Top} | "
-                   "{{Wet-Dry World - Express Elevator--Hurry Up!}} & WDW_WATER_LEVEL_DIAMOND | "
-                   "{{Wet-Dry World - Express Elevator--Hurry Up!}} & LG")
+                   "{Wet-Dry World - Top of the Express Elevator} & LJ | "
+                   "{Wet-Dry World - Top of the Express Elevator} & {Wet-Dry World - Top} | "
+                   "{Wet-Dry World - Top of the Express Elevator} & WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
