@@ -379,7 +379,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regWDW, "Wet-Dry World - Shocking Arrow Lifts!", "Wet-Dry World - Bob-omb Buddy",
                 "Wet-Dry World - Shocking Arrow Lifts Star Block",
                 "Wet-Dry World - Pedestal 10 Coins Block",
-                "Wet-Dry World - Near Purple Switch 3 Coins Block")
+                "Wet-Dry World - Wooden Structure 3 Coins Block")
     wdw_low_water = create_region("Wet-Dry World - Low Water", player, multiworld)
     create_locs(wdw_low_water, "Wet-Dry World - Secrets in the Shallows & Sky",
                 "Wet-Dry World - Push Block 10 Coins Block",
@@ -497,7 +497,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                  "Tick Tock Clock - Moving Bars Platform 1-Up",
                                  "Tick Tock Clock - Pole 1-Up",
                                  "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
-                                 "Tick Tock Clock - Above Many Moving Bars 10 Coins Block")
+                                 "Tick Tock Clock - Above Four Moving Bars 10 Coins Block")
     ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - Midway Up 1-Up",
                                "Tick Tock Clock - Midway Up 1-Up Block",
                                "Tick Tock Clock - Past Three Spinners 3 Coins Block")

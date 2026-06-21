@@ -7,9 +7,10 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
-    cannon_item_data_table, painting_unlock_item_data_table
+    cannon_item_data_table, painting_unlock_item_data_table, item_name_groups
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
-    coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name
+    coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
+    location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
@@ -77,6 +78,35 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_wmotr_cannon_unlock_item_id(self):
         self.assertEqual(cannon_item_data_table["Wing Mario Over the Rainbow - Cannon Unlock"].code, 3626525)
+
+    def test_item_name_groups(self):
+        for group_name, group_items in item_name_groups.items():
+            with self.subTest(group=group_name):
+                self.assertLessEqual(group_items, set(item_table))
+
+        self.assertIn("Wing Cap", self.world.item_name_groups["Caps"])
+        self.assertIn("Bob-omb Battlefield - Cannon Unlock", self.world.item_name_groups["Cannon Unlocks"])
+        self.assertIn("Bob-omb Battlefield - Triple Jump", self.world.item_name_groups["Per-Level Moves"])
+        self.assertIn("Castle - Yoshi", self.world.item_name_groups["Castle Unlocks"])
+        self.assertIn("Tiny-Huge Island - Purple Switch", self.world.item_name_groups["Per-Level Purple Switches"])
+
+    def test_location_name_groups(self):
+        for group_name, group_locations in location_name_groups.items():
+            with self.subTest(group=group_name):
+                self.assertLessEqual(group_locations, set(location_table))
+
+        self.assertIn("Bob-omb Battlefield - Big Bob-Omb on the Summit",
+                      self.world.location_name_groups["Bob-omb Battlefield"])
+        self.assertIn("Wing Mario Over the Rainbow - Red Coins",
+                      self.world.location_name_groups["Secret Stages"])
+        self.assertIn("Wet-Dry World - Downtown 1-Up Block",
+                      self.world.location_name_groups["Blocksanity"])
+        self.assertIn("Wet-Dry World - Downtown 1-Up",
+                      self.world.location_name_groups["1-Ups"])
+        self.assertIn("Wet-Dry World - Downtown 1-Up Block",
+                      self.world.location_name_groups["1-Up Blocks"])
+        self.assertIn("The Princess's Secret Slide - 1 Coin",
+                      self.world.location_name_groups["Secret Stage Coinsanity"])
 
     def test_item_ids_match_client_doc(self):
         expected_ids = {

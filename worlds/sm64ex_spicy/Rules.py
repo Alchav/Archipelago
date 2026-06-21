@@ -1183,7 +1183,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Wet-Dry World - Shocking Arrow Lifts Star Block":
                 "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                 "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ",
-            "Wet-Dry World - Near Purple Switch 3 Coins Block":
+            "Wet-Dry World - Wooden Structure 3 Coins Block":
                 "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | PURPLE_SWITCHES & LJ",
             "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Metal Cap Block": "MC",

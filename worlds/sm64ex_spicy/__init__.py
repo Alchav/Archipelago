@@ -6,9 +6,10 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
-    bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name
+    bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
+    item_name_groups
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
-    get_coinsanity_location_names, get_secret_stage_coinsanity_location_names
+    get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
     move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names
@@ -45,6 +46,8 @@ class SM64World(World):
 
     item_name_to_id = item_table
     location_name_to_id = location_table
+    item_name_groups = item_name_groups
+    location_name_groups = location_name_groups
 
     required_client_version = (0, 3, 5)
 

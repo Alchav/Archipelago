@@ -570,7 +570,7 @@ locBlocksanity_table = {
     "Tick Tock Clock - First Pendulum 3 Coins Block": 3629825,
     "Tick Tock Clock - Top 1-Up Block": 3629826,
     "Tick Tock Clock - Top Clock Hand 10 Coins Block": 3629827,
-    "Tick Tock Clock - Above Many Moving Bars 10 Coins Block": 3629828,
+    "Tick Tock Clock - Above Four Moving Bars 10 Coins Block": 3629828,
     "Tick Tock Clock - Past Three Spinners 3 Coins Block": 3629829,
     "Tick Tock Clock - Top Central Platform 10 Coins Block": 3629830,
     "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block": 3629831,
@@ -593,7 +593,7 @@ locBlocksanity_table = {
     "Wet-Dry World - Pedestal 10 Coins Block": 3629845,
     "Wet-Dry World - Top of Express Elevator 10 Coins Block": 3629846,
     "Wet-Dry World - Top o' the Town Star Block": 3629847,
-    "Wet-Dry World - Near Purple Switch 3 Coins Block": 3629848,
+    "Wet-Dry World - Wooden Structure 3 Coins Block": 3629848,
     "Wet-Dry World - Downtown Vanish Cap Block": 3629849,
     "Wet-Dry World - Metal Cap Block": 3629850,
     "Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block": 3629851,
@@ -654,3 +654,90 @@ loc1UpBlock_table = {
     )
 }
 locOneUp_table = {**loc1UpBlock_table, **locFreestanding1Up_table}
+
+
+def _locations_with_prefix(prefix: str) -> set[str]:
+    return {
+        location_name
+        for location_name in location_table
+        if location_name.startswith(f"{prefix} - ")
+    }
+
+
+main_course_location_group_names = (
+    "Bob-omb Battlefield",
+    "Whomp's Fortress",
+    "Jolly Roger Bay",
+    "Cool, Cool Mountain",
+    "Big Boo's Haunt",
+    "Hazy Maze Cave",
+    "Lethal Lava Land",
+    "Shifting Sand Land",
+    "Dire, Dire Docks",
+    "Snowman's Land",
+    "Wet-Dry World",
+    "Tall, Tall Mountain",
+    "Tiny-Huge Island",
+    "Tick Tock Clock",
+    "Rainbow Ride",
+)
+
+secret_stage_location_group_names = (
+    "The Princess's Secret Slide",
+    "The Secret Aquarium",
+    "Tower of the Wing Cap",
+    "Cavern of the Metal Cap",
+    "Vanish Cap Under the Moat",
+    "Wing Mario Over the Rainbow",
+)
+
+bowser_stage_location_group_names = (
+    "Bowser in the Dark World",
+    "Bowser in the Fire Sea",
+    "Bowser in the Sky",
+)
+
+location_name_groups: dict[str, set[str]] = {
+    location_group_name: _locations_with_prefix(location_group_name)
+    for location_group_name in (
+        *main_course_location_group_names,
+        *secret_stage_location_group_names,
+        *bowser_stage_location_group_names,
+        "Castle",
+    )
+}
+
+location_name_groups.update({
+    "Main Courses": set().union(
+        *(location_name_groups[group_name] for group_name in main_course_location_group_names)),
+    "Secret Stages": set().union(
+        *(location_name_groups[group_name] for group_name in secret_stage_location_group_names)),
+    "Bowser Stages": set().union(
+        *(location_name_groups[group_name] for group_name in bowser_stage_location_group_names)),
+    "Coin Stars": set(loc100Coin_table),
+    "Coinsanity": set(coinsanity_location_table),
+    "Main Course Coinsanity": set(coinsanity_location_table) - set(secret_stage_coinsanity_location_table),
+    "Secret Stage Coinsanity": set(secret_stage_coinsanity_location_table),
+    "1-Ups": set(locOneUp_table),
+    "1-Ups from Blocks": set(loc1UpBlock_table),
+    "Freestanding 1-Ups": set(locFreestanding1Up_table),
+    "Blocksanity": set(locBlocksanity_table),
+    "1-Up Blocks": {
+        location_name for location_name in locBlocksanity_table if "1-Up Block" in location_name
+    },
+    "Cap Blocks": {
+        location_name for location_name in locBlocksanity_table if "Cap Block" in location_name
+    },
+    "Coin Blocks": {
+        location_name for location_name in locBlocksanity_table if " Coins Block" in location_name
+    },
+    "Shell Blocks": {
+        location_name for location_name in locBlocksanity_table if "Shell Block" in location_name
+    },
+    "Star Blocks": {
+        location_name for location_name in locBlocksanity_table if "Star Block" in location_name
+    },
+    "Bob-omb Buddies": {
+        location_name for location_name in location_table if location_name.endswith(" - Bob-omb Buddy")
+    },
+})

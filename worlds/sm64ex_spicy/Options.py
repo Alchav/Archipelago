@@ -421,7 +421,7 @@ class OneUpChecks(Toggle):
 
 
 class Blocksanity(Toggle):
-    """Include item blocks, coin blocks, cap blocks, shell blocks, and star blocks as Archipelago location checks."""
+    """Include coin blocks, cap blocks, shell blocks, and star blocks as Archipelago location checks."""
     display_name = "Blocksanity"
 
 

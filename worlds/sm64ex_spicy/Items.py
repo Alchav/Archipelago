@@ -442,3 +442,25 @@ item_data_table = {
 }
 
 item_table = {name: data.code for name, data in item_data_table.items() if data.code is not None}
+
+item_name_groups: dict[str, set[str]] = {
+    "Keys": {"Basement Key", "Second Floor Key", "Progressive Key", *castle_key_item_data_table},
+    "Caps": set(global_cap_item_names) | set(cap_item_data_table),
+    "Global Caps": set(global_cap_item_names),
+    "Per-Level Caps": set(cap_item_data_table),
+    "Moves": set(action_item_data_table) | set(per_level_action_item_data_table),
+    "Global Moves": set(action_item_data_table),
+    "Per-Level Moves": set(per_level_action_item_data_table),
+    "Cannon Unlocks": set(cannon_item_data_table),
+    "Painting Unlocks": set(painting_unlock_item_data_table),
+    "Course Feature Unlocks": set(feature_item_data_table),
+    "Castle Unlocks": set(castle_progression_item_data_table),
+    "Optional Feature Unlocks": set(arbitrary_item_data_table),
+    "Global Arbitrary Feature Unlocks": set(global_arbitrary_item_data_table),
+    "Per-Level Checkerboard Platforms": set(checkerboard_item_data_table),
+    "Per-Level Rolling Logs": set(rolling_log_item_data_table),
+    "Per-Level Purple Switches": set(purple_switch_item_data_table),
+    "Bowser Stage Extra 1-Ups": set(bowser_stage_1up_item_data_table),
+    "Optional Items": set(optional_item_data_table),
+    "Filler": {"1-Up Mushroom"},
+}
