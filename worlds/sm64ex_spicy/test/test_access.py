@@ -3537,10 +3537,15 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Tick Tock Clock - Spinners"),
             self.get_item_by_name("Climb"),
         ])
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Mid"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - The Pit and the Pendulums"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - Upper"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Moving Bars Platform 1-Up"))
         self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Moving Bars Platform 1-Up"))
 
     def test_timed_jumps_reachable_in_moving_ttc_without_wall_kick(self):
         self.collect_third_floor_access()

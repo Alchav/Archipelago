@@ -1068,14 +1068,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF | MOVELESS & WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
-    rf.assign_rule("Tick Tock Clock - Upper", "CL | MOVELESS & WK")
+    rf.assign_rule("Tick Tock Clock - Mid", "CL | MOVELESS & WK")
+    rf.assign_rule("Tick Tock Clock - Upper", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
     rf.assign_rule("Tick Tock Clock - Midway Up 1-Up Block", "TTC_SPINNERS | LJ+LG")
     rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "TTC_SPINNERS")
-    rf.assign_rule("Tick Tock Clock - Timed Jumps on Moving Bars", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
-    rf.assign_rule("Tick Tock Clock - Moving Bars Platform 1-Up", "{Tick Tock Clock Moving} | WK")
     # Rainbow Ride
     rf.assign_rule("Rainbow Ride - Beneath the Pole", "LJ/TJ/DV")
     rf.assign_rule("Rainbow Ride - Maze", "CL")

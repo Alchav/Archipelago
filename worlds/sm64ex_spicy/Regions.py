@@ -402,15 +402,16 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regTTC = create_region("Tick Tock Clock", player, multiworld)
     ttc_lower = create_subregion(regTTC, "Tick Tock Clock - Lower", "Tick Tock Clock - Roll into the Cage",
                                  "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins")
-    ttc_upper = create_subregion(ttc_lower, "Tick Tock Clock - Upper", "Tick Tock Clock - Timed Jumps on Moving Bars",
-                                 "Tick Tock Clock - The Pit and the Pendulums",
+    ttc_mid = create_subregion(ttc_lower, "Tick Tock Clock - Mid",
+                               "Tick Tock Clock - The Pit and the Pendulums")
+    ttc_upper = create_subregion(ttc_mid, "Tick Tock Clock - Upper", "Tick Tock Clock - Timed Jumps on Moving Bars",
                                  "Tick Tock Clock - Moving Bars Platform 1-Up",
                                  "Tick Tock Clock - Pole 1-Up")
     ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - Midway Up 1-Up Block")
     ttc_top_past_spinners = create_subregion(ttc_top, "Tick Tock Clock - Top Past Spinners",
                                              "Tick Tock Clock - Stomp on the Thwomp",
                                              "Tick Tock Clock - Top 1-Up Block")
-    regTTC.subregions = [ttc_lower, ttc_upper, ttc_top, ttc_top_past_spinners]
+    regTTC.subregions = [ttc_lower, ttc_mid, ttc_upper, ttc_top, ttc_top_past_spinners]
     regTTCStopped = create_region("Tick Tock Clock Stopped", player, multiworld)
     regTTCStopped.connect(regTTC)
     regTTCStopped.subregions = [regTTC, *regTTC.subregions]
