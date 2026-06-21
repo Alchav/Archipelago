@@ -481,7 +481,7 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Checkerboard Platforms": set(checkerboard_item_data_table),
     "Per-Level Rolling Logs": set(rolling_log_item_data_table),
     "Per-Level Purple Switches": set(purple_switch_item_data_table),
-    "Bowser Stage Extra 1-Ups": set(bowser_stage_1up_item_data_table),
+    "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
     "Optional Items": set(optional_item_data_table),
     "Filler": {"1-Up Mushroom"},
 }
