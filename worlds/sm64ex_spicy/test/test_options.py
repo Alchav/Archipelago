@@ -8,7 +8,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
     cannon_item_data_table, painting_unlock_item_data_table
-from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, location_table, \
+from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -57,6 +57,20 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Hazy Maze Cave - Twin Hole Monty Moles": 3629191,
             "Tall, Tall Mountain - Lower Monty Moles": 3629192,
         }
+        for location_name, location_id in expected_ids.items():
+            with self.subTest(location=location_name):
+                self.assertEqual(location_table[location_name], location_id)
+
+    def test_blocksanity_location_ids(self):
+        expected_ids = {
+            "Big Boo's Haunt - Back Entrance Vanish Cap Block": 3629758,
+            "The Princess's Secret Slide - Star Block": 3629800,
+            "Tower of the Wing Cap - Wing Cap Block": 3629823,
+            "Wet-Dry World - Downtown 1-Up Block": 3629852,
+            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block": 3629860,
+        }
+        self.assertEqual(len(locBlocksanity_table), 103)
+        self.assertEqual(set(range(3629758, 3629861)), set(locBlocksanity_table.values()))
         for location_name, location_id in expected_ids.items():
             with self.subTest(location=location_name):
                 self.assertEqual(location_table[location_name], location_id)
@@ -325,6 +339,11 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual(self.world.fill_slot_data()["OneUpChecks"], 0)
         self.assertTrue(set(locOneUp_table).isdisjoint(active_locations))
 
+    def test_blocksanity_defaults_to_off(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertEqual(self.world.fill_slot_data()["Blocksanity"], 0)
+        self.assertTrue(set(locBlocksanity_table).isdisjoint(active_locations))
+
     def test_buddy_checks_default_to_events(self):
         location = self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player)
         self.assertEqual(self.world.fill_slot_data()["BuddyChecks"], 0)
@@ -416,6 +435,19 @@ class OneUpChecksOnTestBase(SM64TestBase):
         self.assertEqual(self.world.fill_slot_data()["OneUpChecks"], 1)
         for location_name in locOneUp_table:
             with self.subTest("1-Up location generated", location=location_name):
+                self.assertIn(location_name, active_locations)
+
+
+class BlocksanityOnTestBase(SM64TestBase):
+    options = {
+        "blocksanity": Options.Blocksanity.option_true,
+    }
+
+    def test_blocksanity_locations_are_generated(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertEqual(self.world.fill_slot_data()["Blocksanity"], 1)
+        for location_name in locBlocksanity_table:
+            with self.subTest("Blocksanity location generated", location=location_name):
                 self.assertIn(location_name, active_locations)
 
 

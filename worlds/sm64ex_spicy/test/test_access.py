@@ -499,11 +499,11 @@ class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
             self.get_item_by_name("Bowser Stage Extra 1-Ups"),
             self.get_item_by_name("Climb"),
         ])
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up Block"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles Block 1-Up"))
         self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
 
         self.collect(self.get_item_by_name("Ledge Grab"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up Block"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles Block 1-Up"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
 
 
@@ -734,15 +734,15 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
             self.get_item_by_name("Side Flip"),
             self.get_item_by_name("Long Jump"),
         ])
-        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
         self.collect(self.get_item_by_name("Climb"))
-        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
         self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
-        self.assertTrue(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up Block"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze 1-Up"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
 
     def test_rainbow_ride_cruiser_still_requires_carpets(self):
@@ -3031,11 +3031,11 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         ])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Go to Town for Red Coins"))
-        self.assertFalse(self.can_reach_location("Wet-Dry World - Downtown 1-Up Block"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Downtown 1-Up"))
 
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Go to Town for Red Coins"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - Downtown 1-Up Block"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Downtown 1-Up"))
 
     def test_low_water_can_raise_to_high_but_not_highest(self):
         self.disable_wdw_entrance("Wet-Dry World Middle")
@@ -3576,9 +3576,9 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
         ])
         self.assertTrue(self.can_reach_region("Tick Tock Clock - Top"))
-        self.assertFalse(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up"))
         self.collect(self.get_item_by_name("Long Jump"))
-        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up"))
 
     def test_midway_1up_reachable_with_spinners(self):
         self.collect_third_floor_access()
@@ -3588,7 +3588,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
             self.get_item_by_name("Tick Tock Clock - Spinners"),
         ])
-        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up Block"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up 1-Up"))
 
 
 class TTCMovelessWallKickAccessTestBase(SM64TestBase):

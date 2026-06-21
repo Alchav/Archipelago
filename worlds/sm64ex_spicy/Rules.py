@@ -1010,6 +1010,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
+    rf.assign_rule("Snowman's Land - Inside Igloo 1-Up", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     # Wet-Dry World
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
@@ -1043,7 +1044,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & VC & TJ | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & DJ/SF/BF & KK")
-    rf.assign_rule("Wet-Dry World - Downtown 1-Up Block", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Downtown 1-Up", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
                    "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
                    "{Wet-Dry World - Highest Water} & BF/SF")
@@ -1072,7 +1073,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Upper", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
-    rf.assign_rule("Tick Tock Clock - Midway Up 1-Up Block", "TTC_SPINNERS | LJ+LG")
+    rf.assign_rule("Tick Tock Clock - Midway Up 1-Up", "TTC_SPINNERS | LJ+LG")
     rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "TTC_SPINNERS")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
     # Rainbow Ride
@@ -1119,7 +1120,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Bowser in the Fire Sea
     rf.assign_rule("Bowser in the Fire Sea - Upper", "CL")
     rf.assign_rule("Bowser in the Fire Sea - Red Coins", "LG/WK")
-    rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up Block", "LG/WK")
+    rf.assign_rule("Bowser in the Fire Sea - Near Poles Block 1-Up", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
     if options.one_up_checks:
         for location_name in (
@@ -1132,7 +1133,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Wing Mario Over the Rainbow
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform", "WC+TJ | LJ+CAPLESS")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
-    rf.assign_rule("Wing Mario Over the Rainbow - 1-Up Block", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", "WC & TJ/CANN")
     # Bowser in the Sky
@@ -1142,6 +1143,63 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "PURPLE_SWITCHES | MOVELESS")
     rf.assign_rule("Bowser in the Sky - Top",
                    "CL | MOVELESS & TJ+WK+LG")
+    if options.blocksanity:
+        blocksanity_rules = {
+            "Big Boo's Haunt - Back Entrance Vanish Cap Block": "VC",
+            "Big Boo's Haunt - Second Floor Vanish Cap Block": "VC",
+            "Big Boo's Haunt - Secret Room Vanish Cap Block": "VC",
+            "Bowser in the Dark World - Metal Cap Block": "MC",
+            "Bob-omb Battlefield - Near Flower Patches Wing Cap Block": "WC",
+            "Bob-omb Battlefield - Wooden Ramp Wing Cap Block": "WC",
+            "Bob-omb Battlefield - Island Wing Cap Block": "WC",
+            "Castle - Roof Wing Cap Block": "WC",
+            "Cavern of the Metal Cap - First Metal Cap Block": "MC",
+            "Cavern of the Metal Cap - Near Switch Metal Cap Block": "MC",
+            "Dire, Dire Docks - Metal Cap Block": "MC",
+            "Dire, Dire Docks - Vanish Cap Block": "VC",
+            "Hazy Maze Cave - Beginning Metal Cap Block": "MC",
+            "Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block": "MC",
+            "Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block": "MC",
+            "Hazy Maze Cave - Toxic Maze Near Bats Metal Cap Block": "MC",
+            "Hazy Maze Cave - Toxic Maze Near Twin Monty Mole Holes Metal Cap Block": "MC",
+            "Jolly Roger Bay - Beginning Metal Cap Block": "MC",
+            "Jolly Roger Bay - Ocean Cave Metal Cap Block": "MC",
+            "Jolly Roger Bay - Blast to the Stone Pillar Star Block": "CANN+CL | CANNLESS & MOVELESS | CANN & MOVELESS",
+            "Jolly Roger Bay - Purple Switch Metal Cap Block": "MC",
+            "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "JRB_SUNKEN_SHIP",
+            "Lethal Lava Land - Wing Cap Block": "WC",
+            "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
+            "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
+            "Snowman's Land - Inside Igloo 1-Up Block": "VC & TJ/SF/BF/WK/LG | MOVELESS & VC",
+            "Snowman's Land - Vanish Cap Block": "VC",
+            "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
+            "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
+            "Shifting Sand Land - Cannon Wing Cap Block": "WC",
+            "Tower of the Wing Cap - Wing Cap Block": "WC",
+            "Tick Tock Clock - Midway Up 1-Up Block": "TTC_SPINNERS | LJ+LG",
+            "Vanish Cap Under the Moat - Bottom of Slide Vanish Cap Block": "VC",
+            "Vanish Cap Under the Moat - 3 Coins Block": "LG/TJ/BF/SF",
+            "Vanish Cap Under the Moat - Near Switch Vanish Cap Block": "VC",
+            "Wet-Dry World - Shocking Arrow Lifts Star Block":
+                "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
+                "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ",
+            "Wet-Dry World - Near Purple Switch 3 Coins Block":
+                "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | PURPLE_SWITCHES & LJ",
+            "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
+            "Wet-Dry World - Metal Cap Block": "MC",
+            "Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
+            "Wet-Dry World - Downtown 1-Up Block": "WDW_WATER_LEVEL_DIAMOND",
+            "Whomp's Fortress - Metal Cap Block": "MC",
+            "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block": "WC",
+            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block":
+                "WC+TJ | {Wing Mario Over the Rainbow - Cannon}",
+            "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": "WC",
+            "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block": "WC+TJ | WC+MOVELESS | WC+LJ+CAPLESS",
+            "Wing Mario Over the Rainbow - Bob-omb Buddy Platform Wing Cap Block": "WC",
+            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block": "WC",
+        }
+        for location_name, rule in blocksanity_rules.items():
+            rf.assign_rule(location_name, rule)
     # Coin Stars
     set_rule(
         multiworld.get_location("Bob-omb Battlefield - Coins Star", player),

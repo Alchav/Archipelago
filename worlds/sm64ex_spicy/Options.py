@@ -416,8 +416,13 @@ class BuddyChecks(Toggle):
 
 
 class OneUpChecks(Toggle):
-    """Include 1-Up mushrooms and 1-Up blocks as Archipelago location checks."""
+    """Include 1-Up mushrooms, including 1-Ups spawned from blocks, as Archipelago location checks."""
     display_name = "1-Up Checks"
+
+
+class Blocksanity(Toggle):
+    """Include item blocks, coin blocks, cap blocks, shell blocks, and star blocks as Archipelago location checks."""
+    display_name = "Blocksanity"
 
 
 class EasyButterflies(Toggle):
@@ -686,6 +691,7 @@ sm64_options_groups = [
         AreaRandomizer,
         BuddyChecks,
         OneUpChecks,
+        Blocksanity,
         EasyButterflies,
         NoDespawns,
         CombinedProgressiveKeys,
@@ -733,6 +739,7 @@ class SM64Options(PerGameCommonOptions):
     area_rando: AreaRandomizer
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks
+    blocksanity: Blocksanity
     easy_butterflies: EasyButterflies
     no_despawns: NoDespawns
     combined_progressive_keys: CombinedProgressiveKeys
