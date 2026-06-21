@@ -1253,6 +1253,15 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
 
+    def test_wing_cap_reaches_two_fallback_coins_without_flying(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 2 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
+
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 4 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 5 Coins"))
+
     def test_wing_cap_does_not_remove_long_jump_coins(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.collect(self.get_item_by_name("Long Jump"))
@@ -3311,6 +3320,8 @@ class TTCVariantAccessTestBase(SM64TestBase):
     def test_stop_time_red_coins_reachable_from_stopped_ttc(self):
         self.collect_third_floor_access()
         self.assertTrue(self.can_reach_region("Tick Tock Clock Stopped"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
+        self.collect(self.get_item_by_name("Tick Tock Clock - Spinners"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
 
     def test_stop_time_red_coins_unreachable_from_moving_ttc_without_lower_access(self):

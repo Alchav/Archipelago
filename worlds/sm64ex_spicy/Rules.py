@@ -548,13 +548,17 @@ def secret_aquarium_coins(state: CollectionState, player: int, coins: int) -> bo
 def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Wing Mario Over the Rainbow"
     reachable_coins = 2
-    if has_wing_cap(state, player, level_name) and state.has("Wing Mario Over the Rainbow - Cannon Unlock", player):
-            reachable_coins = 56
-    elif has_wing_cap(state, player, level_name) and has_action(state, player, "Triple Jump", level_name):
-            reachable_coins += 46
-    elif has_action(state, player, "Long Jump", level_name):
-        reachable_coins += 4
-    reachable_coins = min(reachable_coins, 56)
+    has_wing_cap_item = has_wing_cap(state, player, level_name)
+
+    if has_wing_cap_item and state.has("Wing Mario Over the Rainbow - Cannon Unlock", player):
+        reachable_coins += 54
+    elif has_wing_cap_item and has_action(state, player, "Triple Jump", level_name):
+        reachable_coins += 46
+    else:
+        if has_action(state, player, "Long Jump", level_name):
+            reachable_coins += 2
+        if has_action(state, player, "Long Jump", level_name) or has_wing_cap_item:
+            reachable_coins += 2
     return coins <= reachable_coins
 
 
@@ -1044,6 +1048,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
     rf.assign_rule("Tick Tock Clock - Midway Up 1-Up Block", "TTC_SPINNERS | LJ+LG")
+    rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "TTC_SPINNERS")
     rf.assign_rule("Tick Tock Clock - Timed Jumps on Moving Bars", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
     rf.assign_rule("Tick Tock Clock - Moving Bars Platform 1-Up", "{Tick Tock Clock Moving} | WK")
