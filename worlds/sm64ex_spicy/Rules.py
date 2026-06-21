@@ -32,8 +32,8 @@ simple_arbitrary_feature_options = {
 }
 
 checkerboard_item_name_by_level = {
-    "Bob-omb Battlefield": "Bob-omb Battlefield - Checkerboard Platforms",
-    "Whomp's Fortress": "Whomp's Fortress - Checkerboard Platforms",
+    "Bob-omb Battlefield": "Bob-omb Battlefield - Checkerboard Platform",
+    "Whomp's Fortress": "Whomp's Fortress - Checkerboard Platform",
     "Lethal Lava Land": "Lethal Lava Land - Checkerboard Platforms",
     "Hazy Maze Cave": "Hazy Maze Cave - Checkerboard Platform",
     "Vanish Cap Under the Moat": "Vanish Cap Under the Moat - Checkerboard Platforms",

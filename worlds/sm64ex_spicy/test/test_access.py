@@ -1128,7 +1128,7 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Checkerboard Platforms"))
         self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
 
-        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platforms"))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
     def test_individual_rolling_logs_ignore_global_item(self):

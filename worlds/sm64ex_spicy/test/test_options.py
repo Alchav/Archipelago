@@ -37,6 +37,14 @@ SHUFFLED_GLOBAL_MOVE_OPTIONS = {
     "ledge_grab": Options.LedgeGrab.option_global,
 }
 
+SINGLE_BLOCKSANITY_CHECK_CAP_ITEMS = (
+    "Castle - Wing Cap",
+    "Tower of the Wing Cap - Wing Cap",
+    "Whomp's Fortress - Metal Cap",
+    "Wet-Dry World - Metal Cap",
+    "Bowser in the Dark World - Metal Cap",
+)
+
 
 class FeatureItemPoolTestBase(SM64TestBase):
     def get_item_data_classification(self, item_data):
@@ -188,8 +196,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Rolling Logs": 3626302,
             "Purple Switches": 3626303,
             "Wet-Dry World - Water Level Diamond": 3626305,
-            "Bob-omb Battlefield - Checkerboard Platforms": 3626306,
-            "Whomp's Fortress - Checkerboard Platforms": 3626307,
+            "Bob-omb Battlefield - Checkerboard Platform": 3626306,
+            "Whomp's Fortress - Checkerboard Platform": 3626307,
             "Lethal Lava Land - Checkerboard Platforms": 3626308,
             "Hazy Maze Cave - Checkerboard Platform": 3626309,
             "Vanish Cap Under the Moat - Checkerboard Platforms": 3626310,
@@ -247,6 +255,11 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Castle - Triple Jump": ItemClassification.progression,
             "Castle - Kick": ItemClassification.filler,
             "Castle - Climb": ItemClassification.progression,
+            "Dire, Dire Docks - Wall Kick": ItemClassification.filler,
+            "Dire, Dire Docks - Dive": ItemClassification.filler,
+            "Dire, Dire Docks - Ledge Grab": ItemClassification.filler,
+            "Tiny-Huge Island - Backflip": ItemClassification.filler,
+            "Tiny-Huge Island - Kick": ItemClassification.filler,
         }
         for item_name, classification in expected_classifications.items():
             with self.subTest("Per-level move item classification", item=item_name):
@@ -257,7 +270,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
         for item_name in (
                 "Bob-omb Battlefield - Ground Pound",
                 "Cool, Cool Mountain - Triple Jump",
-                "Dire, Dire Docks - Dive",
+                "Jolly Roger Bay - Long Jump",
+                "Snowman's Land - Climb",
                 "Wet-Dry World - Kick",
                 "Tick Tock Clock - Ground Pound",
         ):
@@ -315,10 +329,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_unused_individual_arbitrary_items_are_filler(self):
         for item_name in (
-                "Bob-omb Battlefield - Checkerboard Platforms",
+                "Bob-omb Battlefield - Checkerboard Platform",
                 "Tall, Tall Mountain - Rolling Log",
                 "Bob-omb Battlefield - Purple Switch",
-                "Jolly Roger Bay - Purple Switch",
         ):
             with self.subTest("Unused individual arbitrary item is filler", item=item_name):
                 self.assertEqual(
@@ -440,6 +453,33 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+    def test_blocksanity_only_cap_items_remain_filler_without_blocksanity(self):
+        for item_name in SINGLE_BLOCKSANITY_CHECK_CAP_ITEMS:
+            with self.subTest("Blocksanity-only cap item remains filler", item=item_name):
+                self.assertEqual(
+                    self.world.get_item_classification(cap_item_data_table[item_name]),
+                    ItemClassification.filler)
+
+
+class BlocksanityPerLevelCapItemPoolTestBase(SM64TestBase):
+    options = {
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
+    }
+
+    def test_blocksanity_only_cap_items_are_progression_skip_balancing(self):
+        for item_name in SINGLE_BLOCKSANITY_CHECK_CAP_ITEMS:
+            with self.subTest("Blocksanity-only cap item is progression", item=item_name):
+                self.assertEqual(
+                    self.world.get_item_classification(cap_item_data_table[item_name]),
+                    ItemClassification.progression_deprioritized_skip_balancing)
+                self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
+
+    def test_all_per_level_cap_items_are_progression_with_blocksanity(self):
+        for item_name in cap_item_data_table:
+            with self.subTest("Per-level cap item is progression", item=item_name):
+                self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
 
 
 class MariosHatItemPoolTestBase(SM64TestBase):
