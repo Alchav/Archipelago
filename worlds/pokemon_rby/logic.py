@@ -118,6 +118,12 @@ def route3(state, world, player):
     return True
 
 
+def vermilion_city_jenny(state, world, player):
+    if world.options.vermilion_city_jenny_requirement == "defeat_lt_surge":
+        return state.has("Defeat Lt. Surge", player)
+    return state.has("Thunder Badge", player)
+
+
 def evolve_level(state, level, player):
     if state.has("ut_glitch", player):
         return True

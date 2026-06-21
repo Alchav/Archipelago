@@ -85,7 +85,7 @@ def set_rules(multiworld, world, player):
 
         "Saffron Fighting Dojo - Gift 1": lambda state: state.has_any(["Defeat Sabrina", "ut_glitch"], player),
         "Saffron Fighting Dojo - Gift 2": lambda state: state.has_any(["Defeat Sabrina", "ut_glitch"], player),
-        "Vermilion City - Officer Jenny's Gift": lambda state: state.has("Thunder Badge", player),
+        "Vermilion City - Officer Jenny's Gift": lambda state: logic.vermilion_city_jenny(state, world, player),
 
         **{f"Pokemon Tower {floor}F - Wild Pokemon - {slot}": lambda state: state.has("Silph Scope", player) for floor in range(3, 8) for slot in range(1, 11)},
         "Pokemon Tower 6F - Restless Soul": lambda state: state.has("Silph Scope", player),  # just for level scaling

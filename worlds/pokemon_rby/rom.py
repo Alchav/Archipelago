@@ -503,6 +503,9 @@ def generate_output(world: "PokemonRedWorld | PokemonBlueWorld | PokemonYellowWo
     write_bytes(world.rom_addresses["Option_Route3_Guard_B"], world.options.route_3_condition.value)
     if world.options.route_3_condition == "open":
         write_bytes(world.rom_addresses["Option_Route3_Guard_A"], 0x11)
+    if "Option_Vermilion_City_Jenny" in world.rom_addresses:
+        write_bytes(world.rom_addresses["Option_Vermilion_City_Jenny"],
+                    world.options.vermilion_city_jenny_requirement.value)
     if not world.options.robbed_house_officer:
         write_bytes(world.rom_addresses["Option_Trashed_House_Guard_A"], 0x15)
         write_bytes(world.rom_addresses["Option_Trashed_House_Guard_B"], 0x11)

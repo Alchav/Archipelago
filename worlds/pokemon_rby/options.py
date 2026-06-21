@@ -169,6 +169,15 @@ class Route3Condition(Choice):
     default = 1
 
 
+class VermilionCityJennyRequirement(Choice):
+    """Set whether Officer Jenny's Squirtle gift in Vermilion City requires the Thunder Badge item or defeating
+    Lt. Surge."""
+    display_name = "Vermilion City Jenny Requirement"
+    option_thunder_badge = 0
+    option_defeat_lt_surge = 1
+    default = 1
+
+
 class RobbedHouseOfficer(Toggle):
     """You can disable to remove the requirement to help Bill before you can enter the robbed house in Cerulean City."""
     display_name = "Robbed House Officer"
@@ -974,6 +983,7 @@ class PokemonRBOptions(PerGameCommonOptions):
     cerulean_cave_badges_condition: CeruleanCaveBadgesCondition
     cerulean_cave_key_items_condition: CeruleanCaveKeyItemsCondition
     route_3_condition: Route3Condition
+    vermilion_city_jenny_requirement: VermilionCityJennyRequirement
     robbed_house_officer: RobbedHouseOfficer
     second_fossil_check_condition: SecondFossilCheckCondition
     fossil_check_item_types: FossilCheckItemTypes

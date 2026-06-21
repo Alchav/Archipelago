@@ -28,6 +28,7 @@ def make_world(**overrides) -> SimpleNamespace:
         require_pokedex=False,
         tea=False,
         route_3_condition="open",
+        vermilion_city_jenny_requirement="defeat_lt_surge",
         dark_rock_tunnel_logic=True,
     )
     for name, value in overrides.items():
@@ -162,6 +163,19 @@ class TestPokemonLogic(unittest.TestCase):
         for mode, state, expected in cases:
             with self.subTest(mode=mode, items=state.items):
                 self.assertEqual(expected, logic.route3(state, make_world(route_3_condition=mode), self.player))
+
+    def test_vermilion_city_jenny_requirement_follows_selected_mode(self) -> None:
+        cases = (
+            ("defeat_lt_surge", DummyState({"Defeat Lt. Surge": 1}), True),
+            ("defeat_lt_surge", DummyState({"Thunder Badge": 1}), False),
+            ("thunder_badge", DummyState({"Thunder Badge": 1}), True),
+            ("thunder_badge", DummyState({"Defeat Lt. Surge": 1}), False),
+        )
+
+        for mode, state, expected in cases:
+            with self.subTest(mode=mode, items=state.items):
+                self.assertEqual(expected, logic.vermilion_city_jenny(
+                    state, make_world(vermilion_city_jenny_requirement=mode), self.player))
 
     def test_rock_tunnel_only_needs_flash_when_dark_logic_is_enabled(self) -> None:
         self.assertTrue(logic.rock_tunnel(DummyState(), make_world(dark_rock_tunnel_logic=False), self.player))
