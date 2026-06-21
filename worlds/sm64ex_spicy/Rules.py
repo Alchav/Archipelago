@@ -872,7 +872,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     connect_regions(multiworld, player, "Menu", "Basement", has_basement_key)
 
-    connect_randomized_entrance("Basement", "Hazy Maze Cave")
+    connect_randomized_entrance("Basement", "Hazy Maze Cave",
+                                rf.build_rule("", painting_lvl_name="Hazy Maze Cave"))
     connect_randomized_entrance("Basement", "Lethal Lava Land",
                                 rf.build_rule("", painting_lvl_name="Lethal Lava Land"))
     connect_randomized_entrance("Basement", "Shifting Sand Land",
@@ -899,9 +900,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance("Second Floor", "Tall, Tall Mountain",
                                 rf.build_rule("", painting_lvl_name="Tall, Tall Mountain"))
     connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Tiny)",
-                                rf.build_rule("", painting_lvl_name="Tiny-Huge Island"))
+                                rf.build_rule("", painting_lvl_name="Tiny Island"))
     connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Huge)",
-                                rf.build_rule("", painting_lvl_name="Tiny-Huge Island"))
+                                rf.build_rule("", painting_lvl_name="Huge Island"))
     connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Piranha Area", "Tiny-Huge Island - Huge Piranha Area",
                     name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
     connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island (Tiny)",

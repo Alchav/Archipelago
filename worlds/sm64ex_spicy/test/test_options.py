@@ -7,7 +7,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
-    cannon_item_data_table
+    cannon_item_data_table, painting_unlock_item_data_table
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
@@ -97,6 +97,19 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Castle - Yoshi": 3626276,
             "Unlock Bowser in the Fire Sea": 3626304,
             "Unlock Vanish Cap Under the Moat": 3626555,
+            "Unlock Whomp's Fortress": 3626231,
+            "Unlock Jolly Roger Bay": 3626232,
+            "Unlock Cool, Cool Mountain": 3626233,
+            "Unlock Hazy Maze Cave": 3626235,
+            "Unlock Lethal Lava Land": 3626236,
+            "Unlock Shifting Sand Land": 3626237,
+            "Unlock Dire, Dire Docks": 3626238,
+            "Unlock Snowman's Land": 3626239,
+            "Unlock Wet-Dry World": 3626240,
+            "Unlock Tall, Tall Mountain": 3626241,
+            "Unlock Tiny Island": 3626242,
+            "Unlock Tick Tock Clock": 3626243,
+            "Unlock Huge Island": 3626559,
             "Wing Cap": 3626181,
             "Metal Cap": 3626182,
             "Vanish Cap": 3626183,
@@ -159,6 +172,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             **arbitrary_item_data_table,
             **optional_item_data_table,
             **bowser_stage_1up_item_data_table,
+            **painting_unlock_item_data_table,
             **{item_name: generic_item_data_table[item_name] for item_name in global_cap_item_names},
         }
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)

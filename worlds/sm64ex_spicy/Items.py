@@ -414,14 +414,16 @@ painting_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Unlock Whomp's Fortress": SM64ItemData(sm64ex_base_id + 231),
     "Unlock Jolly Roger Bay": SM64ItemData(sm64ex_base_id + 232),
     "Unlock Cool, Cool Mountain": SM64ItemData(sm64ex_base_id + 233),
+    "Unlock Hazy Maze Cave": SM64ItemData(sm64ex_base_id + 235),
     "Unlock Lethal Lava Land": SM64ItemData(sm64ex_base_id + 236),
     "Unlock Shifting Sand Land": SM64ItemData(sm64ex_base_id + 237),
     "Unlock Dire, Dire Docks": SM64ItemData(sm64ex_base_id + 238),
     "Unlock Snowman's Land": SM64ItemData(sm64ex_base_id + 239),
     "Unlock Wet-Dry World": SM64ItemData(sm64ex_base_id + 240),
     "Unlock Tall, Tall Mountain": SM64ItemData(sm64ex_base_id + 241),
-    "Unlock Tiny-Huge Island": SM64ItemData(sm64ex_base_id + 242),
+    "Unlock Tiny Island": SM64ItemData(sm64ex_base_id + 242),
     "Unlock Tick Tock Clock": SM64ItemData(sm64ex_base_id + 243),
+    "Unlock Huge Island": SM64ItemData(sm64ex_base_id + 559),
 }
 
 item_data_table = {

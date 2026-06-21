@@ -262,7 +262,7 @@ class EnableLockedPaintings(Toggle):
 
     On - Paintings (other than Bob-omb Battlefield) are replaced in the pool with items to allow access to them.
     Attempting to enter a locked painting will simply kick Mario out.
-    Does not affect secrets and levels that don't have a painting (Big Boo's Haunt, Hazy Maze Cave, Rainbow Ride).
+    Does not affect secrets and levels that don't have a painting (Big Boo's Haunt, Rainbow Ride).
     This only affects the ability for Mario to enter a painting, the destination of the painting may change due to
     Entrance Randomization, if it is enabled.
     """

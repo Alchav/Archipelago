@@ -135,6 +135,34 @@ class SingleProgressiveKeyAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Bowser in the Fire Sea"))
 
 
+class LockedPaintingAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+    }
+
+    def test_hazy_maze_cave_requires_unlock(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertFalse(self.can_reach_entrance("Basement -> Hazy Maze Cave"))
+
+        self.collect(self.get_item_by_name("Unlock Hazy Maze Cave"))
+        self.assertTrue(self.can_reach_entrance("Basement -> Hazy Maze Cave"))
+
+    def test_tiny_island_requires_tiny_unlock(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect(self.get_item_by_name("Unlock Huge Island"))
+        self.assertFalse(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Tiny)"))
+        self.assertTrue(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Huge)"))
+
+    def test_huge_island_requires_huge_unlock(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect(self.get_item_by_name("Unlock Tiny Island"))
+        self.assertTrue(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Huge)"))
+
+
 class UTGlitchLogicTestBase(SM64TestBase):
     options = {
         "buddy_checks": Options.BuddyChecks.option_true,
