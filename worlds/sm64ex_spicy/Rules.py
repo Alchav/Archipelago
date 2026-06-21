@@ -139,6 +139,18 @@ def has_tiny_huge_island_top_return_movement(state: CollectionState, player: int
     )
 
 
+def has_tiny_huge_island_rematch_movement(state: CollectionState, player: int) -> bool:
+    level_name = "Tiny-Huge Island"
+    return (
+        has_action(state, player, "Long Jump", level_name)
+        or has_action(state, player, "Dive", level_name)
+        or allows_moveless(state, player) and (
+            has_tiny_huge_island_top_return_movement(state, player)
+            or has_simple_arbitrary_feature(state, player, "THI_WARP_PIPES")
+        )
+    )
+
+
 def has_checkerboard_platforms(state: CollectionState, player: int, level_name: str) -> bool:
     options = state.multiworld.worlds[player].options
     if options.checkerboard_platforms.value == options.checkerboard_platforms.option_not_shuffled:
@@ -1037,6 +1049,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Huge Island to Tiny Island", "THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Huge Piranha Area", "THI_WARP_PIPES & PURPLE_SWITCHES | TJ | LJ+SF | LJ+LG")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
+    add_rule(multiworld.get_location("Tiny-Huge Island - Rematch with Koopa the Quick", player),
+             lambda state: has_tiny_huge_island_rematch_movement(state, player))
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "{Tiny-Huge Island - Tiny Main} & GP")
     rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up", "CANN | CANNLESS")

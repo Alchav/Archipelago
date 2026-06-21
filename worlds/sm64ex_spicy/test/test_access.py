@@ -834,6 +834,44 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
+    def test_tiny_huge_island_rematch_accepts_long_jump_or_dive(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Koopa the Quick"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+    def test_tiny_huge_island_rematch_accepts_dive(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Koopa the Quick"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+        self.collect(self.get_item_by_name("Dive"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+    def test_tiny_huge_island_rematch_requires_moveless_for_top_return_movement(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Tiny-Huge Island - Koopa the Quick"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+        self.collect(self.world.create_item("ut_glitch"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+    def test_tiny_huge_island_rematch_requires_moveless_for_warp_pipes(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Koopa the Quick"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
+        self.collect(self.world.create_item("ut_glitch"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
+
     def test_purple_switch_gated_locations(self):
         self.collect_basement_access()
         self.collect([
