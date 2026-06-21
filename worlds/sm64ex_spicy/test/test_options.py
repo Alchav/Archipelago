@@ -38,6 +38,9 @@ SHUFFLED_GLOBAL_MOVE_OPTIONS = {
 
 
 class FeatureItemPoolTestBase(SM64TestBase):
+    def get_item_data_classification(self, item_data):
+        return self.world.get_item_classification(item_data)
+
     def test_yoshi_location_id(self):
         self.assertEqual(location_table["Castle - Yoshi"], 3626244)
 
@@ -203,7 +206,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
         }
         for item_name, classification in expected_classifications.items():
             with self.subTest("Per-level move item classification", item=item_name):
-                self.assertEqual(per_level_action_item_data_table[item_name].classification, classification)
+                self.assertEqual(
+                    self.get_item_data_classification(per_level_action_item_data_table[item_name]), classification)
 
     def test_one_check_per_level_move_items_skip_balancing(self):
         for item_name in (
@@ -215,7 +219,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
         ):
             with self.subTest("One-check per-level move item skips balancing", item=item_name):
                 self.assertEqual(
-                    per_level_action_item_data_table[item_name].classification,
+                    self.get_item_data_classification(per_level_action_item_data_table[item_name]),
                     ItemClassification.progression_deprioritized_skip_balancing)
 
     def test_multi_check_per_level_move_items_are_progression(self):
@@ -227,7 +231,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
         ):
             with self.subTest("Multi-check per-level move item is progression", item=item_name):
                 self.assertEqual(
-                    per_level_action_item_data_table[item_name].classification,
+                    self.get_item_data_classification(per_level_action_item_data_table[item_name]),
                     ItemClassification.progression)
 
     def test_feature_items_are_generated(self):
@@ -273,7 +277,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
                 "Jolly Roger Bay - Purple Switch",
         ):
             with self.subTest("Unused individual arbitrary item is filler", item=item_name):
-                self.assertEqual(arbitrary_item_data_table[item_name].classification, ItemClassification.filler)
+                self.assertEqual(
+                    self.get_item_data_classification(arbitrary_item_data_table[item_name]),
+                    ItemClassification.filler)
 
     def test_castle_progression_items_are_generated(self):
         self.assertEqual(len(self.get_items_by_name("Progressive Key")), 6)
@@ -310,7 +316,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertNotIn("Mario's Hat", precollected_names)
 
     def test_marios_hat_is_useful(self):
-        self.assertEqual(optional_item_data_table["Mario's Hat"].classification, ItemClassification.useful)
+        self.assertEqual(
+            self.get_item_data_classification(optional_item_data_table["Mario's Hat"]),
+            ItemClassification.useful)
 
     def test_one_up_checks_default_to_off(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
