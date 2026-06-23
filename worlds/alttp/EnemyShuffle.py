@@ -60,8 +60,8 @@ WATER_TEKTITE_SPRITE_ID = 0x81
 KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM = {
     "Fighter Sword": frozenset((1, 2)),
     "Master Sword": frozenset((1, 2, 3)),
-    "Tempered Sword": frozenset((2, 3, 4)),
-    "Golden Sword": frozenset((3, 4, 5)),
+    "Tempered Sword": frozenset((1, 2, 3, 4)),
+    "Golden Sword": frozenset((1, 3, 4, 5)),
     "Hammer": frozenset((3,)),
     "Blue Boomerang": frozenset((0,)),
     "Red Boomerang": frozenset((0,)),
@@ -79,6 +79,7 @@ KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM = {
 }
 KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY = {
     "bombs": frozenset((8,)),
+    "sword_beams": frozenset((1,)),
 }
 POTENTIAL_SUBGROUP_0 = (22, 31, 47, 14)
 POTENTIAL_SUBGROUP_1 = (44, 30, 32)

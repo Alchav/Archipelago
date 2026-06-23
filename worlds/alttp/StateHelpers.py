@@ -10,6 +10,7 @@ from .enemizer_data.enemy_combat_data import (
     GOLDEN_SWORD_DAMAGE_CLASSES,
     KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
     MASTER_SWORD_DAMAGE_CLASSES,
+    SWORD_BEAM_DAMAGE_CLASS,
     STUN_255_FRAMES_EFFECT,
     TEMPERED_SWORD_DAMAGE_CLASSES,
     VANILLA_COMBAT_MODEL,
@@ -532,6 +533,13 @@ def _has_silver_arrow_attack(state: CollectionState, player: int) -> bool:
     return state.has("Silver Bow", player) or (state.has("Bow", player) and state.has("Silver Arrows", player))
 
 
+def _has_sword_beam_attack(state: CollectionState, player: int) -> bool:
+    return any(
+        state.has(sword, player)
+        for sword in ("Master Sword", "Tempered Sword", "Golden Sword")
+    )
+
+
 def _get_best_hit_count(
     state: CollectionState,
     player: int,
@@ -690,6 +698,19 @@ def _build_attack_plans_for_damage_classes(
         if hit_count is not None:
             plans.add(ResourceCosts(bombs=hit_count))
 
+    if ability_allowed("sword_beams") and _has_sword_beam_attack(state, player):
+        hit_count = _get_best_hit_count(
+            state,
+            player,
+            sprite_id,
+            (SWORD_BEAM_DAMAGE_CLASS,),
+            {SWORD_BEAM_DAMAGE_CLASS} if bypass_damage_class_filter else allowed_damage_classes,
+            combat_model,
+            hp_override=hp_override,
+        )
+        if hit_count is not None:
+            plans.add(FREE_RESOURCE_COSTS)
+
     if item_allowed("Fire Rod") and state.has("Fire Rod", player):
         hit_count = _get_best_hit_count(
             state,
@@ -779,6 +800,13 @@ def _build_single_hit_plans_for_damage_classes(
 
     if ability_allowed("bombs") and can_use_bombs(state, player, 1) and 8 in allowed_damage_classes:
         plans.add(ResourceCosts(bombs=1))
+
+    if (
+        ability_allowed("sword_beams")
+        and _has_sword_beam_attack(state, player)
+        and SWORD_BEAM_DAMAGE_CLASS in allowed_damage_classes
+    ):
+        plans.add(FREE_RESOURCE_COSTS)
 
     if item_allowed("Fire Rod") and state.has("Fire Rod", player) and 11 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST))

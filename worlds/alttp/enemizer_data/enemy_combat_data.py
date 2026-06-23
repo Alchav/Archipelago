@@ -30,11 +30,12 @@ STUN_128_FRAMES_EFFECT = 0xFC
 INCINERATE_EFFECT = 0xFD
 FREEZE_EFFECT = 0xFE
 STUN_255_FRAMES_EFFECT = 0xFF
+SWORD_BEAM_DAMAGE_CLASS = 1
 FIGHTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2))
 MASTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3))
-TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((2, 3, 4))
-GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((3, 4, 5))
-SWORD_UPGRADE_DAMAGE_CLASSES = (1, 2, 3, 4)
+TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3, 4))
+GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((1, 3, 4, 5))
+SWORD_UPGRADE_DAMAGE_CLASSES = (2, 3, 4)
 NORMAL_ARROW_DAMAGE_CLASS = 6
 SILVER_ARROW_DAMAGE_CLASS = 9
 ARROW_UPGRADE_DAMAGE_CLASSES = (NORMAL_ARROW_DAMAGE_CLASS, SILVER_ARROW_DAMAGE_CLASS)
@@ -81,7 +82,7 @@ class CombatDeliveryOverride(NamedTuple):
 
 DIRECT_KILL_DELIVERY_OVERRIDES = {
     # Bubble / Anti-Fairy does not check normal sword or hammer contact damage.
-    # Sword beams use the ancilla damage path, but logic does not assume full-health beams.
+    # Master Sword and higher can still deliver class 1 damage through sword beams.
     "Anti-Fairy": CombatDeliveryOverride(
         (
             "Blue Boomerang",
@@ -98,7 +99,7 @@ DIRECT_KILL_DELIVERY_OVERRIDES = {
             "Ether",
             "Quake",
         ),
-        ("bombs",),
+        ("bombs", "sword_beams"),
     ),
     # Damage class 1 includes both safe Cane hits and unsafe sword contact shocks.
     "Buzzblob": CombatDeliveryOverride(

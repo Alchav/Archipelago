@@ -49,14 +49,19 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     EnemyCombatModel,
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     FAIRY_TRANSFORM_EFFECT,
+    FIGHTER_SWORD_DAMAGE_CLASSES,
+    GOLDEN_SWORD_DAMAGE_CLASSES,
     INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
     INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+    MASTER_SWORD_DAMAGE_CLASSES,
     MIXED_RANDOMIZE_DAMAGE_CLASSES,
     MOTHULA_SPRITE_ID,
     RED_BARI_SPRITE_ID,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE,
     SPRITE_DAMAGE_SUBCLASSES,
+    SWORD_BEAM_DAMAGE_CLASS,
     SWORD_UPGRADE_DAMAGE_CLASSES,
+    TEMPERED_SWORD_DAMAGE_CLASSES,
     VANILLA_COMBAT_MODEL,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
@@ -227,6 +232,13 @@ class TestEnemizerPatches(unittest.TestCase):
                     else:
                         self.assertEqual(suffix, sorted(suffix))
                         self.assertTrue(all(0 < effect < FAIRY_TRANSFORM_EFFECT for effect in suffix))
+
+    def test_sword_beam_damage_class_is_retained_after_sword_upgrades(self) -> None:
+        self.assertNotIn(SWORD_BEAM_DAMAGE_CLASS, SWORD_UPGRADE_DAMAGE_CLASSES)
+        self.assertIn(SWORD_BEAM_DAMAGE_CLASS, FIGHTER_SWORD_DAMAGE_CLASSES)
+        self.assertIn(SWORD_BEAM_DAMAGE_CLASS, MASTER_SWORD_DAMAGE_CLASSES)
+        self.assertIn(SWORD_BEAM_DAMAGE_CLASS, TEMPERED_SWORD_DAMAGE_CLASSES)
+        self.assertIn(SWORD_BEAM_DAMAGE_CLASS, GOLDEN_SWORD_DAMAGE_CLASSES)
 
     def test_randomized_damage_classes_preserve_arrow_upgrade_order(self) -> None:
         for mode in (

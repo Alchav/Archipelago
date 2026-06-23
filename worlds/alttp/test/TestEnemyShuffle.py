@@ -101,7 +101,7 @@ SUPPORTED_OVERRIDE_ITEMS = {
     "Ether",
     "Quake",
 }
-SUPPORTED_OVERRIDE_ABILITIES = {"bombs"}
+SUPPORTED_OVERRIDE_ABILITIES = {"bombs", "sword_beams"}
 
 
 def _build_combat_model_with_sprite_subclass(sprite_id: int, damage_class: int, subclass: int) -> EnemyCombatModel:
@@ -523,8 +523,10 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         original_enemy_shuffle_state = world.enemy_shuffle_state
         original_max_attacks_in_logic = getattr(world.options, "max_attacks_in_logic", None)
         try:
+            fighter_state = logic_test.get_state(item_factory(["Fighter Sword"], world))
             master_state = logic_test.get_state(item_factory(["Master Sword"], world))
             tempered_state = logic_test.get_state(item_factory(["Tempered Sword"], world))
+            golden_state = logic_test.get_state(item_factory(["Golden Sword"], world))
             hammer_state = logic_test.get_state(item_factory(["Hammer"], world))
 
             world.enemy_shuffle_state = SimpleNamespace(combat_model=VANILLA_COMBAT_MODEL)
@@ -534,7 +536,10 @@ class TestEnemyShuffleValidation(unittest.TestCase):
                 combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 1, 2)
             )
             world.options.max_attacks_in_logic = SimpleNamespace(value=4)
-            self.assertFalse(can_kill_enemy_sprite(master_state, 1, "Anti-Fairy"))
+            self.assertFalse(can_kill_enemy_sprite(fighter_state, 1, "Anti-Fairy"))
+            self.assertTrue(can_kill_enemy_sprite(master_state, 1, "Anti-Fairy"))
+            self.assertTrue(can_kill_enemy_sprite(tempered_state, 1, "Anti-Fairy"))
+            self.assertTrue(can_kill_enemy_sprite(golden_state, 1, "Anti-Fairy"))
 
             world.enemy_shuffle_state = SimpleNamespace(
                 combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 3, 2)
@@ -879,8 +884,8 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             cases = (
                 (["Fighter Sword"], {1, 2}),
                 (["Master Sword"], {1, 2, 3}),
-                (["Tempered Sword"], {2, 3, 4}),
-                (["Golden Sword"], {3, 4, 5}),
+                (["Tempered Sword"], {1, 2, 3, 4}),
+                (["Golden Sword"], {1, 3, 4, 5}),
                 (["Hammer"], {3}),
                 (["Cane of Somaria"], {1}),
                 (["Cane of Byrna"], {1}),
@@ -2320,7 +2325,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
                     combat_reference_id=ANTI_FAIRY_SPRITE_ID,
                 ),
             ),
-            combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 6, 2),
+            combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 1, 2),
         )
         selected_group = state.sprite_groups[0x41]
 
