@@ -2,6 +2,7 @@ from typing import NamedTuple
 
 from .SubClasses import LTTPRegion
 from .enemizer_data.enemy_combat_data import (
+    DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DIRECT_KILL_DELIVERY_OVERRIDES,
     EnemyCombatModel,
     FIGHTER_SWORD_DAMAGE_CLASSES,
@@ -15,6 +16,7 @@ from .enemizer_data.enemy_combat_data import (
     YELLOW_SLIME_SPRITE_ID,
     get_blob_transform_damage_classes,
     get_damage_classes_with_effects,
+    get_hardcoded_enemy_hp,
     get_hits_to_kill,
     get_killing_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
@@ -260,9 +262,9 @@ def can_clear_enemy_room(state: CollectionState, player: int, room_name_or_id: s
         raise ValueError(f"Unknown ALTTP room {room_name_or_id!r}")
 
     room_enemies = tuple(
-        enemy.requirement
+        enemy
         for enemy in get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id)
-        if enemy.requirement.killable
+        if _enemy_requirement_counts_for_room_clear(enemy)
     )
     return _can_clear_enemy_requirements(state, player, room_enemies)
 
@@ -271,9 +273,9 @@ def can_clear_enemy_region(state: CollectionState, player: int, target_name: str
     from .EnemyLogicTargets import get_enemy_clear_target_enemies
 
     room_enemies = tuple(
-        enemy.requirement
+        enemy
         for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
-        if enemy.requirement.killable
+        if _enemy_requirement_counts_for_room_clear(enemy)
     )
     return _can_clear_enemy_requirements(state, player, room_enemies)
 
@@ -283,9 +285,9 @@ def can_clear_enemy_regions(state: CollectionState, player: int, *target_names: 
 
     enemy_groups = tuple(
         tuple(
-            enemy.requirement
+            enemy
             for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
-            if enemy.requirement.killable
+            if _enemy_requirement_counts_for_room_clear(enemy)
         )
         for target_name in target_names
     )
@@ -296,10 +298,10 @@ def can_kill_key_drop_enemy(state: CollectionState, player: int, location_name: 
     from .EnemyLogicTargets import get_key_drop_enemy
 
     enemy = get_key_drop_enemy(state.multiworld.worlds[player], location_name)
-    if enemy is None or not enemy.has_key or not enemy.requirement.killable:
+    if enemy is None or not enemy.has_key or not _enemy_requirement_can_be_killed(state, player, enemy):
         return False
 
-    return _can_clear_enemy_requirements(state, player, (enemy.requirement,), key_drop_enemy=True)
+    return _can_clear_enemy_requirements(state, player, (enemy,), key_drop_enemy=True)
 
 
 def can_kill_enemy_sprite(state: CollectionState, player: int, sprite_name: str) -> bool:
@@ -312,10 +314,36 @@ def can_kill_enemy_sprite(state: CollectionState, player: int, sprite_name: str)
         }
 
     requirement = can_kill_enemy_sprite.requirement_lookup[sprite_name]
-    if not requirement.killable:
+    if not _enemy_requirement_can_be_killed(state, player, requirement):
         return False
 
     return _can_clear_enemy_requirements(state, player, (requirement,))
+
+
+def _enemy_requirement_counts_for_room_clear(enemy_or_requirement) -> bool:
+    return _get_enemy_requirement(enemy_or_requirement).killable
+
+
+def _enemy_requirement_can_be_killed(state: CollectionState, player: int, requirement) -> bool:
+    requirement = _get_enemy_requirement(requirement)
+    if requirement.killable:
+        return True
+
+    combat_model = _get_active_combat_model(state, player)
+    combat_reference_id = _get_combat_reference_id(requirement, combat_model)
+    if combat_reference_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
+        return False
+    return bool(_get_direct_kill_damage_classes(requirement, combat_model))
+
+
+def _get_enemy_requirement(enemy_or_requirement):
+    return getattr(enemy_or_requirement, "requirement", enemy_or_requirement)
+
+
+def _get_enemy_hp_override(enemy_or_requirement) -> int | None:
+    requirement = _get_enemy_requirement(enemy_or_requirement)
+    x_coord_pixels = getattr(enemy_or_requirement, "x_coord_pixels", None)
+    return get_hardcoded_enemy_hp(requirement.sprite_id, x_coord_pixels)
 
 
 def _can_clear_enemy_requirements(
@@ -439,6 +467,7 @@ def _get_combat_reference_id(requirement, combat_model: EnemyCombatModel) -> int
 
 
 def _get_direct_kill_damage_classes(requirement, combat_model: EnemyCombatModel) -> set[int]:
+    requirement = _get_enemy_requirement(requirement)
     combat_reference_id = _get_combat_reference_id(requirement, combat_model)
     if combat_reference_id is None:
         return set()
@@ -446,6 +475,7 @@ def _get_direct_kill_damage_classes(requirement, combat_model: EnemyCombatModel)
 
 
 def _get_blob_transform_damage_classes(requirement, combat_model: EnemyCombatModel) -> set[int]:
+    requirement = _get_enemy_requirement(requirement)
     combat_reference_id = _get_combat_reference_id(requirement, combat_model)
     if combat_reference_id is None:
         return set()
@@ -458,6 +488,7 @@ def _get_direct_kill_context(
     *,
     key_drop_enemy: bool = False,
 ) -> tuple[set[int], object | None]:
+    requirement = _get_enemy_requirement(requirement)
     direct_kill_damage_classes = _get_direct_kill_damage_classes(requirement, combat_model)
     direct_kill_delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
     if key_drop_enemy:
@@ -471,6 +502,11 @@ def _get_direct_kill_context(
 def _get_enemy_health_key(state: CollectionState, player: int) -> str:
     enemy_health_option = state.multiworld.worlds[player].options.enemy_health
     return str(getattr(enemy_health_option, "current_key", enemy_health_option))
+
+
+def _get_max_attacks_in_logic(state: CollectionState, player: int) -> int:
+    option = getattr(state.multiworld.worlds[player].options, "max_attacks_in_logic", 16)
+    return int(getattr(option, "value", option))
 
 
 def _get_enemy_clear_resource_budget(state: CollectionState, player: int) -> ResourceBudget:
@@ -503,6 +539,7 @@ def _get_best_hit_count(
     damage_classes: tuple[int, ...],
     allowed_damage_classes: set[int],
     combat_model: EnemyCombatModel,
+    hp_override: int | None = None,
 ) -> int | None:
     enemy_health_key = _get_enemy_health_key(state, player)
     killable_thieves = bool(state.multiworld.worlds[player].options.killable_thieves)
@@ -511,6 +548,7 @@ def _get_best_hit_count(
             sprite_id,
             damage_class,
             enemy_health_key,
+            hp_override=hp_override,
             killable_thieves=killable_thieves,
             combat_model=combat_model,
         )
@@ -518,6 +556,8 @@ def _get_best_hit_count(
         if damage_class in allowed_damage_classes
     ]
     valid_hit_counts = [hit_count for hit_count in hit_counts if hit_count is not None]
+    max_attacks = _get_max_attacks_in_logic(state, player)
+    valid_hit_counts = [hit_count for hit_count in valid_hit_counts if hit_count <= max_attacks]
     if not valid_hit_counts:
         return None
     return min(valid_hit_counts)
@@ -530,6 +570,7 @@ def _build_attack_plans_for_damage_classes(
     allowed_damage_classes: set[int],
     combat_model: EnemyCombatModel,
     *,
+    hp_override: int | None = None,
     allowed_items: tuple[str, ...] | None = None,
     allowed_abilities: tuple[str, ...] | None = None,
     bypass_damage_class_filter: bool = False,
@@ -566,6 +607,7 @@ def _build_attack_plans_for_damage_classes(
                 item_damage_classes,
                 set(item_damage_classes) if bypass_damage_class_filter else allowed_damage_classes,
                 combat_model,
+                hp_override=hp_override,
             )
             if hit_count is not None:
                 plans.add(FREE_RESOURCE_COSTS)
@@ -578,6 +620,7 @@ def _build_attack_plans_for_damage_classes(
             (1,),
             {1} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST * hit_count))
@@ -590,6 +633,7 @@ def _build_attack_plans_for_damage_classes(
             (1,),
             {1} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST + (BYRNA_DRAIN_MAGIC_COST * max(0, hit_count - 1))))
@@ -602,6 +646,7 @@ def _build_attack_plans_for_damage_classes(
             (10,),
             {10} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST * hit_count))
@@ -614,6 +659,7 @@ def _build_attack_plans_for_damage_classes(
             (6,),
             {6} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(arrows=hit_count))
@@ -626,6 +672,7 @@ def _build_attack_plans_for_damage_classes(
             (9,),
             {9} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(arrows=hit_count))
@@ -638,6 +685,7 @@ def _build_attack_plans_for_damage_classes(
             (8,),
             {8} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(bombs=hit_count))
@@ -650,6 +698,7 @@ def _build_attack_plans_for_damage_classes(
             (11,),
             {11} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST * hit_count))
@@ -662,6 +711,7 @@ def _build_attack_plans_for_damage_classes(
             (12,),
             {12} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
+            hp_override=hp_override,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
@@ -817,6 +867,7 @@ def _get_transform_attack_plans(
     player: int,
     requirement,
 ) -> tuple[ResourceCosts, ...]:
+    requirement = _get_enemy_requirement(requirement)
     combat_model = _get_active_combat_model(state, player)
     combat_reference_id = _get_combat_reference_id(requirement, combat_model)
     if combat_reference_id is None:
@@ -853,6 +904,8 @@ def _get_enemy_kill_plans(
     *,
     key_drop_enemy: bool = False,
 ) -> tuple[ResourceCosts, ...]:
+    hp_override = _get_enemy_hp_override(requirement)
+    requirement = _get_enemy_requirement(requirement)
     combat_model = _get_active_combat_model(state, player)
     combat_reference_id = _get_combat_reference_id(requirement, combat_model)
     if combat_reference_id is None:
@@ -874,6 +927,7 @@ def _get_enemy_kill_plans(
             combat_reference_id,
             direct_kill_damage_classes,
             combat_model,
+            hp_override=hp_override,
             allowed_items=(
                 direct_kill_delivery_override.items
                 if direct_kill_delivery_override is not None
@@ -962,6 +1016,8 @@ def _get_room_wide_medallion_enemy_plans(
     if not room_wide_medallions:
         return tuple()
 
+    hp_override = _get_enemy_hp_override(requirement)
+    requirement = _get_enemy_requirement(requirement)
     combat_model = _get_active_combat_model(state, player)
     combat_reference_id = _get_combat_reference_id(requirement, combat_model)
     if combat_reference_id is None:
@@ -991,6 +1047,7 @@ def _get_room_wide_medallion_enemy_plans(
             direct_kill_damage_classes,
             direct_kill_delivery_override,
             combat_model,
+            hp_override=hp_override,
         ):
             plans.add(FREE_RESOURCE_COSTS)
 
@@ -1008,6 +1065,7 @@ def _get_room_wide_medallion_enemy_plans(
                     combat_reference_id,
                     direct_kill_damage_classes,
                     combat_model,
+                    hp_override=hp_override,
                     allowed_items=BUZZBLOB_FOLLOW_UP_ITEMS,
                 )
             )
@@ -1024,6 +1082,7 @@ def _room_wide_medallion_directly_kills_enemy(
     direct_kill_damage_classes: set[int],
     direct_kill_delivery_override,
     combat_model: EnemyCombatModel,
+    hp_override: int | None = None,
 ) -> bool:
     if requirement.sprite_name == "Terrorpin" and not state.has("Hammer", player):
         return False
@@ -1039,6 +1098,7 @@ def _room_wide_medallion_directly_kills_enemy(
         (damage_class,),
         direct_kill_damage_classes,
         combat_model,
+        hp_override=hp_override,
     )
     return hit_count == 1
 

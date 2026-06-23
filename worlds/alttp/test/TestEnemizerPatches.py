@@ -11,6 +11,7 @@ from worlds.alttp.EnemizerPatches import (
     ENEMY_DAMAGE_TABLE_ADDRESS,
     ENEMY_HP_TABLE_ADDRESS,
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
+    HARDHAT_BEETLE_HP_TABLE_ADDRESS,
     HIDDEN_ENEMY_CHANCE_POOL_ADDRESS,
     RANDOMIZED_HIDDEN_ENEMY_CHANCE_POOL,
     RETRO_ARROW_REPLACEMENT_CHECK_ADDRESS,
@@ -37,10 +38,14 @@ from worlds.alttp.EnemizerPatches import (
     apply_enemizer_base_patch,
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
+    ANTI_FAIRY_SPRITE_ID,
+    ARROW_UPGRADE_DAMAGE_CLASSES,
     BLOB_TRANSFORM_EFFECT,
     CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+    DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DAMAGE_SOURCE_TABLE_ADDRESS,
     DAMAGE_SOURCE_TABLE_SIZE,
+    DEADROCK_SPRITE_ID,
     EnemyCombatModel,
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     FAIRY_TRANSFORM_EFFECT,
@@ -48,6 +53,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
     MIXED_RANDOMIZE_DAMAGE_CLASSES,
     MOTHULA_SPRITE_ID,
+    RED_BARI_SPRITE_ID,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE,
     SPRITE_DAMAGE_SUBCLASSES,
     SWORD_UPGRADE_DAMAGE_CLASSES,
@@ -57,6 +63,8 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     build_randomized_damage_class_combat_model,
     get_blob_transform_damage_classes,
     get_damage_effect,
+    get_enemy_health_for_logic,
+    get_hits_to_kill,
     get_killing_damage_classes,
 )
 
@@ -200,7 +208,10 @@ class TestEnemizerPatches(unittest.TestCase):
                 for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
                     if (
                         sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
-                        or VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
+                        or (
+                            VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
+                            and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
+                        )
                     ):
                         continue
                     effects = [
@@ -216,6 +227,91 @@ class TestEnemizerPatches(unittest.TestCase):
                     else:
                         self.assertEqual(suffix, sorted(suffix))
                         self.assertTrue(all(0 < effect < FAIRY_TRANSFORM_EFFECT for effect in suffix))
+
+    def test_randomized_damage_classes_preserve_arrow_upgrade_order(self) -> None:
+        for mode in (
+            INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            MIXED_RANDOMIZE_DAMAGE_CLASSES,
+            CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+        ):
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(4), mode)
+
+                for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
+                    if (
+                        sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+                        or (
+                            VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
+                            and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
+                        )
+                    ):
+                        continue
+                    normal_arrow_effect, silver_arrow_effect = (
+                        get_damage_effect(sprite_id, damage_class, combat_model)
+                        for damage_class in ARROW_UPGRADE_DAMAGE_CLASSES
+                    )
+                    if normal_arrow_effect == 0:
+                        continue
+                    if normal_arrow_effect >= FAIRY_TRANSFORM_EFFECT:
+                        self.assertEqual(silver_arrow_effect, normal_arrow_effect)
+                    else:
+                        self.assertGreater(silver_arrow_effect, 0)
+                        self.assertLess(silver_arrow_effect, FAIRY_TRANSFORM_EFFECT)
+                        self.assertGreaterEqual(silver_arrow_effect, normal_arrow_effect)
+
+    def test_randomized_damage_classes_include_selected_hp_255_enemies(self) -> None:
+        combat_model = build_randomized_damage_class_combat_model(random.Random(2), CHAOS_RANDOMIZE_DAMAGE_CLASSES)
+
+        for sprite_id in (ANTI_FAIRY_SPRITE_ID, DEADROCK_SPRITE_ID):
+            with self.subTest(sprite_id=sprite_id):
+                vanilla_effects = tuple(get_damage_effect(sprite_id, damage_class) for damage_class in range(16))
+                randomized_effects = tuple(
+                    get_damage_effect(sprite_id, damage_class, combat_model)
+                    for damage_class in range(16)
+                )
+                self.assertNotEqual(vanilla_effects, randomized_effects)
+
+    def test_randomized_damage_classes_guarantee_capped_direct_kill(self) -> None:
+        combat_model = build_randomized_damage_class_combat_model(
+            random.Random(3),
+            CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+            max_attacks_in_logic=4,
+        )
+
+        for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
+            if (
+                sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+                or (
+                    VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
+                    and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
+                )
+            ):
+                continue
+            with self.subTest(sprite_id=sprite_id):
+                hp = get_enemy_health_for_logic(sprite_id, "default", combat_model=combat_model)
+                self.assertIsNotNone(hp)
+                hit_counts = tuple(
+                    hit_count
+                    for damage_class in range(16)
+                    if (
+                        hit_count := get_hits_to_kill(
+                            sprite_id,
+                            damage_class,
+                            "default",
+                            combat_model=combat_model,
+                        )
+                    ) is not None
+                )
+                self.assertTrue(any(hit_count <= 4 for hit_count in hit_counts))
+
+        red_bari_key_hit_counts = tuple(
+            get_hits_to_kill(RED_BARI_SPRITE_ID, damage_class, "default", combat_model=combat_model)
+            for damage_class in (11, 13)
+        )
+        self.assertTrue(
+            any(hit_count is not None and hit_count <= 4 for hit_count in red_bari_key_hit_counts)
+        )
 
     def test_randomized_damage_classes_change_non_boss_rows(self) -> None:
         vanilla_effects = {
@@ -294,6 +390,11 @@ class TestEnemizerPatches(unittest.TestCase):
         self.assertGreaterEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + included_hp_sprite_id), 2)
         self.assertLess(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + included_hp_sprite_id), 25)
         self.assertEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + excluded_sprite_id), 0x07)
+        red_hardhat_hp, blue_hardhat_hp = rom.read_bytes(HARDHAT_BEETLE_HP_TABLE_ADDRESS, 2)
+        self.assertGreaterEqual(red_hardhat_hp, 2)
+        self.assertLess(red_hardhat_hp, 25)
+        self.assertGreaterEqual(blue_hardhat_hp, 2)
+        self.assertLess(blue_hardhat_hp, 25)
         self.assertIn(rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + included_damage_sprite_id), range(8))
         self.assertEqual(rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + excluded_sprite_id), 0x05)
         for group_id in range(10):
@@ -422,6 +523,7 @@ class TestEnemizerPatches(unittest.TestCase):
         enemy_health: str = "default",
         enemy_damage: str = "default",
         randomize_damage_classes: str = "vanilla",
+        max_attacks_in_logic: int = 16,
     ) -> SimpleNamespace:
         return SimpleNamespace(
             player=1,
@@ -433,6 +535,7 @@ class TestEnemizerPatches(unittest.TestCase):
                 enemy_health=SimpleNamespace(current_key=enemy_health),
                 enemy_damage=SimpleNamespace(current_key=enemy_damage),
                 randomize_damage_classes=SimpleNamespace(current_key=randomize_damage_classes),
+                max_attacks_in_logic=SimpleNamespace(value=max_attacks_in_logic),
             ),
         )
 

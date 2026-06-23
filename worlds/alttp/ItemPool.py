@@ -565,6 +565,8 @@ def generate_itempool(world: "ALTTPWorld"):
         world.enemy_combat_model = build_randomized_damage_class_combat_model(
             _make_native_enemizer_rng(world),
             damage_class_mode,
+            max_attacks_in_logic=world.options.max_attacks_in_logic.value,
+            enemy_health_key=world.options.enemy_health.current_key,
         )
 
     place_bosses(world)

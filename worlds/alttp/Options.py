@@ -327,6 +327,15 @@ class RandomizeDamageClasses(Choice):
     option_chaos = 4
 
 
+class MaxAttacksInLogic(Range):
+    """Maximum number of attacks required to kill one enemy for that kill method to be considered logical.
+    Lower values opt out of tedious high-hit kills, such as very low-damage weapons against high-health enemies."""
+    display_name = "Max Attacks in Logic"
+    range_start = 4
+    range_end = 255
+    default = 16
+
+
 class ShufflePrizes(Choice):
     """Shuffle "general" prize packs, as in enemy, tree pull, dig etc.; "bonk" prizes; or both."""
     display_name = "Shuffle Prizes"
@@ -829,6 +838,7 @@ class ALTTPOptions(PerGameCommonOptions):
     enemy_health: EnemyHealth
     enemy_damage: EnemyDamage
     randomize_damage_classes: RandomizeDamageClasses
+    max_attacks_in_logic: MaxAttacksInLogic
     progressive: Progressive
     swordless: Swordless
     dungeon_counters: DungeonCounters

@@ -1979,16 +1979,18 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         combat_model = getattr(local_world, "enemy_combat_model", None)
         combat_model = getattr(enemy_shuffle_state, "combat_model", None) or combat_model
         damage_class_key = enemizer_patches._option_key(local_world.options.randomize_damage_classes)
+        enemy_health_key = enemizer_patches._option_key(local_world.options.enemy_health)
         if combat_model is None and damage_class_key != enemizer_patches.VANILLA_RANDOMIZE_DAMAGE_CLASSES:
             combat_model = enemizer_patches.build_randomized_damage_class_combat_model(
                 enemizer_patches._make_native_enemizer_rng(local_world),
                 damage_class_key,
+                max_attacks_in_logic=local_world.options.max_attacks_in_logic.value,
+                enemy_health_key=enemy_health_key,
             )
         enemizer_patches.apply_enemy_combat_data(rom, combat_model or enemizer_patches.VANILLA_COMBAT_MODEL)
 
         enemy_shuffle_enabled = bool(local_world.options.enemy_shuffle)
         bush_shuffle_enabled = bool(local_world.options.bush_shuffle)
-        enemy_health_key = enemizer_patches._option_key(local_world.options.enemy_health)
         enemy_damage_key = enemizer_patches._option_key(local_world.options.enemy_damage)
 
         if enemy_shuffle_enabled or bush_shuffle_enabled:

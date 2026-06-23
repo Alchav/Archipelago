@@ -8,7 +8,13 @@ from Utils import snes_to_pc
 from .enemizer_data.default_dungeon_room_enemies import DEFAULT_DUNGEON_ROOM_ENEMIES
 from .enemizer_data.dungeon_sprite_addresses import DUNGEON_SPRITE_ADDRESSES, KEYED_SPRITE_ID_ADDRESSES
 from .enemizer_data.enemy_shuffle_base_data import DUNGEON_ENEMY_ROOMS, DUNGEON_SPRITE_GROUPS, OVERWORLD_ENEMY_AREAS
-from .enemizer_data.enemy_combat_data import EnemyCombatModel, VANILLA_COMBAT_MODEL
+from .enemizer_data.enemy_combat_data import (
+    DIRECT_KILL_DELIVERY_OVERRIDES,
+    KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
+    EnemyCombatModel,
+    VANILLA_COMBAT_MODEL,
+    get_killing_damage_classes,
+)
 from .enemizer_data.enemy_room_metadata import (
     BOSS_ROOM_IDS,
     DONT_RANDOMIZE_ROOM_IDS,
@@ -51,6 +57,29 @@ FLOPPING_FISH_SPRITE_ID = 0xD2
 OW_FALLING_ROCKS_SPRITE_ID = 0xF4
 OW_WALLMASTER_TO_HOULIHAN_SPRITE_ID = 0xFB
 WATER_TEKTITE_SPRITE_ID = 0x81
+KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM = {
+    "Fighter Sword": frozenset((1, 2)),
+    "Master Sword": frozenset((1, 2, 3)),
+    "Tempered Sword": frozenset((2, 3, 4)),
+    "Golden Sword": frozenset((3, 4, 5)),
+    "Hammer": frozenset((3,)),
+    "Blue Boomerang": frozenset((0,)),
+    "Red Boomerang": frozenset((0,)),
+    "Cane of Somaria": frozenset((1,)),
+    "Cane of Byrna": frozenset((1,)),
+    "Bow": frozenset((6,)),
+    "Silver Bow": frozenset((9,)),
+    "Hookshot": frozenset((7,)),
+    "Magic Powder": frozenset((10,)),
+    "Fire Rod": frozenset((11,)),
+    "Ice Rod": frozenset((12,)),
+    "Bombos": frozenset((13,)),
+    "Ether": frozenset((14,)),
+    "Quake": frozenset((15,)),
+}
+KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY = {
+    "bombs": frozenset((8,)),
+}
 POTENTIAL_SUBGROUP_0 = (22, 31, 47, 14)
 POTENTIAL_SUBGROUP_1 = (44, 30, 32)
 POTENTIAL_SUBGROUP_2 = (12, 18, 23, 24, 28, 46, 34, 35, 39, 40, 38, 41, 36, 37, 42)
@@ -1213,12 +1242,6 @@ def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEn
     needs_water = room.is_water_room
     room_requirements = _get_requirements_for_usable_dungeon_enemies(state)
     water_requirements = tuple(requirement for requirement in room_requirements if requirement.is_water_sprite)
-    killable_requirements = tuple(
-        requirement for requirement in state.sprite_requirements
-        if _is_effectively_killable(requirement) and requirement.sprite_id != STAL_SPRITE_ID
-    )
-    key_requirements = tuple(requirement for requirement in killable_requirements if not requirement.cannot_have_key)
-
     if (
         not needs_key and not needs_killable and not needs_water
         and not do_not_update
@@ -1242,9 +1265,7 @@ def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEn
                         for requirement in _filter_requirements_for_room_water_state(room, possible_requirements)
                     ))
                     and (not needs_key or any(
-                        _is_effectively_killable(requirement)
-                        and not requirement.cannot_have_key
-                        and requirement.sprite_id != STAL_SPRITE_ID
+                        _can_be_key_drop_enemy(state, requirement)
                         for requirement in _filter_requirements_for_room_water_state(room, possible_requirements)
                     ))
                     and (not needs_water or any(
@@ -1302,6 +1323,47 @@ def _filter_requirements_for_room_water_state(
 
 def _is_effectively_killable(requirement: EnemySpriteRequirement) -> bool:
     return requirement.killable or requirement.sprite_id == WATER_TEKTITE_SPRITE_ID
+
+
+def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    if requirement.cannot_have_key or requirement.sprite_id == STAL_SPRITE_ID:
+        return False
+
+    combat_reference_id = _get_combat_reference_id(requirement, state.combat_model)
+    if combat_reference_id is None:
+        return False
+
+    direct_kill_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+    key_drop_damage_classes = KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES.get(requirement.sprite_name)
+    if key_drop_damage_classes is not None:
+        direct_kill_damage_classes &= set(key_drop_damage_classes)
+    if not direct_kill_damage_classes:
+        return False
+
+    delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
+    if delivery_override is None:
+        return True
+
+    deliverable_damage_classes = _get_deliverable_damage_classes(delivery_override)
+    return bool(direct_kill_damage_classes & deliverable_damage_classes)
+
+
+def _get_combat_reference_id(requirement: EnemySpriteRequirement, combat_model: EnemyCombatModel) -> Optional[int]:
+    combat_reference_id = requirement.combat_reference_id
+    if combat_reference_id is None:
+        combat_reference_id = requirement.sprite_id
+    if 0 <= combat_reference_id < len(combat_model.sprite_damage_subclasses):
+        return combat_reference_id
+    return None
+
+
+def _get_deliverable_damage_classes(delivery_override) -> set[int]:
+    damage_classes: set[int] = set()
+    for item_name in delivery_override.items:
+        damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM.get(item_name, tuple()))
+    for ability_name in delivery_override.abilities:
+        damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY.get(ability_name, tuple()))
+    return damage_classes
 
 
 def _get_effectively_killable_sprite_ids(requirements: tuple[EnemySpriteRequirement, ...]) -> set[int]:
@@ -1671,7 +1733,7 @@ def _randomize_room_sprites(
             ]
             killable_key_sprite_ids = [
                 requirement.sprite_id for requirement in non_water_requirements
-                if _is_effectively_killable(requirement) and not requirement.cannot_have_key and requirement.sprite_id != STAL_SPRITE_ID
+                if _can_be_key_drop_enemy(state, requirement)
             ]
             stal_count = 0
 
@@ -1876,7 +1938,7 @@ def _validate_dungeon_room(
     killable_sprite_ids = _get_effectively_killable_sprite_ids(possible_requirements)
     killable_key_sprite_ids = {
         requirement.sprite_id for requirement in possible_requirements
-        if _is_effectively_killable(requirement) and not requirement.cannot_have_key and requirement.sprite_id != STAL_SPRITE_ID
+        if _can_be_key_drop_enemy(state, requirement)
     }
     water_sprite_ids = {
         requirement.sprite_id for requirement in possible_requirements

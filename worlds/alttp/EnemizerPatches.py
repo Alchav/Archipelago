@@ -233,6 +233,7 @@ TRINEXX_ICE_FLOOR_ROUTINE_ADDRESS = 0x04B37E
 TRINEXX_ICE_PROJECTILE_TILE_ADDRESS = 0xE7A5
 TILE_TRAP_FLOOR_TILE_ADDRESS = 0xF3BED
 SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS = snes_to_pc(SPRITE_DAMAGE_SUBCLASS_TABLE_SNES_ADDRESS)
+HARDHAT_BEETLE_HP_TABLE_ADDRESS = 0x31118
 
 
 def apply_enemizer_base_patch(rom: "LocalRom") -> None:
@@ -402,6 +403,13 @@ def _randomize_enemy_health(
         if combat_model.enemy_health_table[sprite_id] == 0xFF or sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
             continue
         rom.write_byte(hp_address, rng.randrange(min_hp, max_hp))
+    rom.write_bytes(
+        HARDHAT_BEETLE_HP_TABLE_ADDRESS,
+        (
+            rng.randrange(min_hp, max_hp),
+            rng.randrange(min_hp, max_hp),
+        ),
+    )
 
 
 def _randomize_enemy_damage(rom: "LocalRom", rng: random.Random, allow_zero_damage: bool) -> None:
@@ -472,6 +480,7 @@ def _make_native_enemizer_rng(world: "ALTTPWorld") -> random.Random:
         _option_key(world.options.enemy_health),
         _option_key(world.options.enemy_damage),
         _option_key(getattr(world.options, "randomize_damage_classes", "vanilla")),
+        str(getattr(getattr(world.options, "max_attacks_in_logic", 16), "value", 16)),
         str(int(bool(world.options.enemy_shuffle))),
         str(int(bool(world.options.bush_shuffle))),
         str(int(bool(world.options.killable_thieves))),

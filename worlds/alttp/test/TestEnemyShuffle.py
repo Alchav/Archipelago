@@ -65,7 +65,9 @@ from worlds.alttp.StateHelpers import (
     _get_available_damage_classes,
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
+    ANTI_FAIRY_SPRITE_ID,
     DIRECT_KILL_DELIVERY_OVERRIDES,
+    DEADROCK_SPRITE_ID,
     DamageSource,
     EnemyCombatModel,
     FREEZE_EFFECT,
@@ -100,6 +102,19 @@ SUPPORTED_OVERRIDE_ITEMS = {
     "Quake",
 }
 SUPPORTED_OVERRIDE_ABILITIES = {"bombs"}
+
+
+def _build_combat_model_with_sprite_subclass(sprite_id: int, damage_class: int, subclass: int) -> EnemyCombatModel:
+    sprite_damage_subclasses = [
+        list(row)
+        for row in VANILLA_COMBAT_MODEL.sprite_damage_subclasses
+    ]
+    sprite_damage_subclasses[sprite_id][damage_class] = subclass
+    return EnemyCombatModel(
+        damage_sources=VANILLA_COMBAT_MODEL.damage_sources,
+        sprite_damage_subclasses=tuple(tuple(row) for row in sprite_damage_subclasses),
+        enemy_health_table=VANILLA_COMBAT_MODEL.enemy_health_table,
+    )
 
 
 class TestEnemyShuffleValidation(unittest.TestCase):
@@ -476,6 +491,170 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         finally:
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
+
+    def test_hp_255_damage_exception_uses_real_hp_for_hit_cap(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        original_max_attacks_in_logic = getattr(world.options, "max_attacks_in_logic", None)
+        try:
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=_build_combat_model_with_sprite_subclass(DEADROCK_SPRITE_ID, 3, 1)
+            )
+
+            tempered_state = logic_test.get_state(item_factory(["Tempered Sword"], world))
+            world.options.max_attacks_in_logic = SimpleNamespace(value=31)
+            self.assertFalse(can_kill_enemy_sprite(tempered_state, 1, "Deadrock"))
+
+            world.options.max_attacks_in_logic = SimpleNamespace(value=32)
+            self.assertTrue(can_kill_enemy_sprite(tempered_state, 1, "Deadrock"))
+        finally:
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+            if original_max_attacks_in_logic is None:
+                delattr(world.options, "max_attacks_in_logic")
+            else:
+                world.options.max_attacks_in_logic = original_max_attacks_in_logic
+
+    def test_damage_randomized_anti_fairy_uses_projectile_delivery_for_logic(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        original_max_attacks_in_logic = getattr(world.options, "max_attacks_in_logic", None)
+        try:
+            master_state = logic_test.get_state(item_factory(["Master Sword"], world))
+            tempered_state = logic_test.get_state(item_factory(["Tempered Sword"], world))
+            hammer_state = logic_test.get_state(item_factory(["Hammer"], world))
+
+            world.enemy_shuffle_state = SimpleNamespace(combat_model=VANILLA_COMBAT_MODEL)
+            self.assertFalse(can_kill_enemy_sprite(tempered_state, 1, "Anti-Fairy"))
+
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 1, 2)
+            )
+            world.options.max_attacks_in_logic = SimpleNamespace(value=4)
+            self.assertFalse(can_kill_enemy_sprite(master_state, 1, "Anti-Fairy"))
+
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 3, 2)
+            )
+            world.options.max_attacks_in_logic = SimpleNamespace(value=4)
+            self.assertFalse(can_kill_enemy_sprite(tempered_state, 1, "Anti-Fairy"))
+            self.assertFalse(can_kill_enemy_sprite(hammer_state, 1, "Anti-Fairy"))
+
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 6, 2)
+            )
+            bow_state = logic_test.get_state(item_factory(["Bow"], world))
+            self.assertTrue(can_kill_enemy_sprite(bow_state, 1, "Anti-Fairy"))
+        finally:
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+            if original_max_attacks_in_logic is None:
+                delattr(world.options, "max_attacks_in_logic")
+            else:
+                world.options.max_attacks_in_logic = original_max_attacks_in_logic
+
+    def test_damage_randomized_anti_fairy_does_not_count_for_room_clear(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        original_max_attacks_in_logic = getattr(world.options, "max_attacks_in_logic", None)
+        try:
+            world.options.enemy_shuffle = True
+            world.options.max_attacks_in_logic = SimpleNamespace(value=4)
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 3, 2),
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(
+                                0, 0, 0, ANTI_FAIRY_SPRITE_ID, ANTI_FAIRY_SPRITE_ID, False, False
+                            ),
+                        ),
+                        skipped_randomization=False,
+                    )
+                },
+            )
+
+            no_items_state = logic_test.get_state([])
+            self.assertTrue(can_clear_enemy_room(no_items_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+            if original_max_attacks_in_logic is None:
+                delattr(world.options, "max_attacks_in_logic")
+            else:
+                world.options.max_attacks_in_logic = original_max_attacks_in_logic
+
+    def test_hardhat_beetle_logic_uses_x_position_hp_variant(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        original_max_attacks_in_logic = getattr(world.options, "max_attacks_in_logic", None)
+        try:
+            world.options.enemy_shuffle = True
+            world.options.max_attacks_in_logic = SimpleNamespace(value=4)
+
+            world.enemy_shuffle_state = SimpleNamespace(
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0x00, 0x00, 38, 38, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            )
+            fighter_state = logic_test.get_state(item_factory(["Fighter Sword"], world))
+            self.assertFalse(can_clear_enemy_room(fighter_state, 1, "Mini-Moldorm Cave"))
+
+            world.enemy_shuffle_state = SimpleNamespace(
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0x00, 0x01, 38, 38, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            )
+            self.assertTrue(can_clear_enemy_room(fighter_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+            if original_max_attacks_in_logic is None:
+                delattr(world.options, "max_attacks_in_logic")
+            else:
+                world.options.max_attacks_in_logic = original_max_attacks_in_logic
 
     def test_can_clear_enemy_regions_aggregates_consumable_budget_across_targets(self) -> None:
         logic_test = TestLightWorld()
@@ -2059,6 +2238,151 @@ class TestEnemyShuffleValidation(unittest.TestCase):
 
         self.assertEqual(randomized_room.sprites[0].sprite_id, 0x13)
 
+    def test_key_enemy_replacements_exclude_transform_only_enemies(self) -> None:
+        room = DungeonEnemyRoom(
+            room_id=1,
+            room_header_address=0,
+            sprite_table_address=0,
+            graphics_block_id=1,
+            tag_1=0,
+            tag_2=0,
+            sort_sprites_value=0,
+            sprites=(
+                DungeonEnemySprite(address=0x1000, byte_0=0, byte_1=0, sprite_id=0x12, is_overlord=False, has_key=True),
+            ),
+            required_group_id=None,
+            required_subgroup_0=tuple(),
+            required_subgroup_1=tuple(),
+            required_subgroup_2=tuple(),
+            required_subgroup_3=tuple(),
+            is_shutter_room=False,
+            is_water_room=False,
+            do_not_randomize=False,
+            no_special_enemies_standard=False,
+        )
+        state = self._build_state(
+            dungeon_rooms={1: room},
+            sprite_requirements=(
+                self._requirement(0x12, killable=True, subgroup_0=(1,), cannot_have_key=True),
+                self._requirement(
+                    DEADROCK_SPRITE_ID,
+                    sprite_name="Deadrock",
+                    killable=True,
+                    subgroup_0=(1,),
+                    combat_reference_id=DEADROCK_SPRITE_ID,
+                ),
+                self._requirement(0x13, killable=True, subgroup_0=(1,)),
+            ),
+        )
+        selected_group = state.sprite_groups[0x41]
+
+        randomized_room = _randomize_room_sprites(
+            SimpleNamespace(random=random.Random(0)),
+            state,
+            room,
+            selected_group,
+            False,
+        )
+
+        self.assertEqual(randomized_room.sprites[0].sprite_id, 0x13)
+
+    def test_key_enemy_replacements_allow_deliverable_anti_fairy_kill(self) -> None:
+        room = DungeonEnemyRoom(
+            room_id=1,
+            room_header_address=0,
+            sprite_table_address=0,
+            graphics_block_id=1,
+            tag_1=0,
+            tag_2=0,
+            sort_sprites_value=0,
+            sprites=(
+                DungeonEnemySprite(address=0x1000, byte_0=0, byte_1=0, sprite_id=0x12, is_overlord=False, has_key=True),
+            ),
+            required_group_id=None,
+            required_subgroup_0=tuple(),
+            required_subgroup_1=tuple(),
+            required_subgroup_2=tuple(),
+            required_subgroup_3=tuple(),
+            is_shutter_room=False,
+            is_water_room=False,
+            do_not_randomize=False,
+            no_special_enemies_standard=False,
+        )
+        state = self._build_state(
+            dungeon_rooms={1: room},
+            sprite_requirements=(
+                self._requirement(0x12, killable=True, subgroup_0=(1,), cannot_have_key=True),
+                self._requirement(
+                    ANTI_FAIRY_SPRITE_ID,
+                    sprite_name="Anti-Fairy",
+                    killable=False,
+                    subgroup_0=(1,),
+                    combat_reference_id=ANTI_FAIRY_SPRITE_ID,
+                ),
+            ),
+            combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 6, 2),
+        )
+        selected_group = state.sprite_groups[0x41]
+
+        randomized_room = _randomize_room_sprites(
+            SimpleNamespace(random=random.Random(0)),
+            state,
+            room,
+            selected_group,
+            False,
+        )
+
+        self.assertEqual(randomized_room.sprites[0].sprite_id, ANTI_FAIRY_SPRITE_ID)
+
+    def test_key_enemy_replacements_exclude_anti_fairy_without_deliverable_kill(self) -> None:
+        room = DungeonEnemyRoom(
+            room_id=1,
+            room_header_address=0,
+            sprite_table_address=0,
+            graphics_block_id=1,
+            tag_1=0,
+            tag_2=0,
+            sort_sprites_value=0,
+            sprites=(
+                DungeonEnemySprite(address=0x1000, byte_0=0, byte_1=0, sprite_id=0x12, is_overlord=False, has_key=True),
+            ),
+            required_group_id=None,
+            required_subgroup_0=tuple(),
+            required_subgroup_1=tuple(),
+            required_subgroup_2=tuple(),
+            required_subgroup_3=tuple(),
+            is_shutter_room=False,
+            is_water_room=False,
+            do_not_randomize=False,
+            no_special_enemies_standard=False,
+        )
+        state = self._build_state(
+            dungeon_rooms={1: room},
+            sprite_requirements=(
+                self._requirement(0x12, killable=True, subgroup_0=(1,), cannot_have_key=True),
+                self._requirement(
+                    ANTI_FAIRY_SPRITE_ID,
+                    sprite_name="Anti-Fairy",
+                    killable=False,
+                    subgroup_0=(1,),
+                    combat_reference_id=ANTI_FAIRY_SPRITE_ID,
+                ),
+                self._requirement(0x13, killable=True, subgroup_0=(1,)),
+            ),
+            combat_model=_build_combat_model_with_sprite_subclass(ANTI_FAIRY_SPRITE_ID, 3, 2),
+        )
+        selected_group = state.sprite_groups[0x41]
+
+        randomized_room = _randomize_room_sprites(
+            SimpleNamespace(random=random.Random(0)),
+            state,
+            room,
+            selected_group,
+            False,
+        )
+
+        self.assertEqual(randomized_room.sprites[0].sprite_id, 0x13)
+
     def test_shutter_water_room_prefers_killable_water_enemy(self) -> None:
         room = DungeonEnemyRoom(
             room_id=40,
@@ -2390,7 +2714,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         state = self._build_state(
             dungeon_rooms={61: room},
             sprite_requirements=(
-                self._requirement(0x20, subgroup_0=(1,)),
+                self._requirement(0x20, subgroup_0=(1,), cannot_have_key=True),
                 self._requirement(0x50, killable=True, subgroup_1=(32,), excluded_rooms=(61,)),
                 self._requirement(0x9C, killable=True, subgroup_1=(32,), cannot_have_key=True),
                 self._requirement(0x51, killable=True, subgroup_1=(33,)),
@@ -2663,6 +2987,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
     def _requirement(
         sprite_id: int,
         *,
+        sprite_name: str | None = None,
         killable: bool = False,
         subgroup_0: tuple[int, ...] = tuple(),
         subgroup_1: tuple[int, ...] = tuple(),
@@ -2676,9 +3001,10 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         is_water_sprite: bool = False,
         excluded_rooms: tuple[int, ...] = tuple(),
         dont_randomize_rooms: tuple[int, ...] = tuple(),
+        combat_reference_id: int | None = None,
     ) -> EnemySpriteRequirement:
         return EnemySpriteRequirement(
-            sprite_name=f"sprite_{sprite_id:02x}",
+            sprite_name=sprite_name or f"sprite_{sprite_id:02x}",
             sprite_id=sprite_id,
             boss=False,
             overlord=False,
@@ -2702,6 +3028,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             excluded_rooms=excluded_rooms,
             dont_randomize_rooms=dont_randomize_rooms,
             spawnable_rooms=tuple(),
+            combat_reference_id=combat_reference_id,
         )
 
     @staticmethod
@@ -2712,6 +3039,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         randomized_dungeon_rooms=None,
         randomized_overworld_areas=None,
         sprite_requirements=tuple(),
+        combat_model=VANILLA_COMBAT_MODEL,
     ) -> EnemyShuffleState:
         sprite_groups = {
             1: DungeonSpriteGroup(group_id=1, dungeon_group_id=-63, subgroup_0=1, subgroup_1=1, subgroup_2=1, subgroup_3=1),
@@ -2732,6 +3060,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             dont_randomize_overworld_area_ids=frozenset(),
             randomized_dungeon_rooms=randomized_dungeon_rooms or {},
             randomized_overworld_areas=randomized_overworld_areas or {},
+            combat_model=combat_model,
         )
 
     @staticmethod

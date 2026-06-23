@@ -14,6 +14,12 @@ SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE = 0x800
 REACHABLE_SPRITE_DAMAGE_SUBCLASS_COUNT = 0xD8
 RANDOMIZABLE_DAMAGE_CLASS_COUNT = 0x10
 MOTHULA_SPRITE_ID = 0x88
+ANTI_FAIRY_SPRITE_ID = 0x15
+DEADROCK_SPRITE_ID = 0x27
+HARDHAT_BEETLE_SPRITE_ID = 0x26
+HARDHAT_BEETLE_RED_HP = 32
+HARDHAT_BEETLE_BLUE_HP = 6
+RED_BARI_SPRITE_ID = 0x23
 THIEF_SPRITE_ID = 0xC4
 THIEF_DEFAULT_HP = 4
 YELLOW_SLIME_SPRITE_ID = 0x8F
@@ -29,17 +35,26 @@ MASTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3))
 TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((2, 3, 4))
 GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((3, 4, 5))
 SWORD_UPGRADE_DAMAGE_CLASSES = (1, 2, 3, 4)
+NORMAL_ARROW_DAMAGE_CLASS = 6
+SILVER_ARROW_DAMAGE_CLASS = 9
+ARROW_UPGRADE_DAMAGE_CLASSES = (NORMAL_ARROW_DAMAGE_CLASS, SILVER_ARROW_DAMAGE_CLASS)
 VANILLA_RANDOMIZE_DAMAGE_CLASSES = "vanilla"
 INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES = "intra_enemy"
 INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES = "inter_enemy"
 MIXED_RANDOMIZE_DAMAGE_CLASSES = "mixed"
 CHAOS_RANDOMIZE_DAMAGE_CLASSES = "chaos"
+GUARANTEED_LOGIC_KILL_DAMAGE_CLASS = 9
+GUARANTEED_LOGIC_KILL_EFFECT = 0x64
 KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES = {
     "Red Bari": (11, 13),
 }
 EXCLUDED_ENEMY_TABLE_SPRITE_IDS = frozenset({
     0x09, 0x53, 0x54, 0x70, 0x7A, 0x7B, 0x88, 0x89, 0x8C, 0x8D, 0x92,
     0xA2, 0xA3, 0xA4, 0xBD, 0xBE, 0xBF, 0xCB, 0xCC, 0xCD, 0xCE, 0xD6, 0xD7,
+})
+DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS = frozenset({
+    ANTI_FAIRY_SPRITE_ID,
+    DEADROCK_SPRITE_ID,
 })
 ENEMY_HEALTH_RANGE_BY_KEY = {
     "easy": (1, 4),
@@ -65,6 +80,26 @@ class CombatDeliveryOverride(NamedTuple):
 
 
 DIRECT_KILL_DELIVERY_OVERRIDES = {
+    # Bubble / Anti-Fairy does not check normal sword or hammer contact damage.
+    # Sword beams use the ancilla damage path, but logic does not assume full-health beams.
+    "Anti-Fairy": CombatDeliveryOverride(
+        (
+            "Blue Boomerang",
+            "Red Boomerang",
+            "Cane of Somaria",
+            "Cane of Byrna",
+            "Bow",
+            "Silver Bow",
+            "Hookshot",
+            "Magic Powder",
+            "Fire Rod",
+            "Ice Rod",
+            "Bombos",
+            "Ether",
+            "Quake",
+        ),
+        ("bombs",),
+    ),
     # Damage class 1 includes both safe Cane hits and unsafe sword contact shocks.
     "Buzzblob": CombatDeliveryOverride(
         ("Cane of Somaria", "Cane of Byrna", "Golden Sword", "Bow", "Silver Bow", "Fire Rod", "Bombos"),
@@ -417,6 +452,9 @@ def build_randomized_damage_class_combat_model(
     rng: random.Random,
     mode: str,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+    *,
+    max_attacks_in_logic: int = 16,
+    enemy_health_key: str = "default",
 ) -> EnemyCombatModel:
     if mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
         return combat_model
@@ -431,7 +469,7 @@ def build_randomized_damage_class_combat_model(
         rng.shuffle(shuffled_profiles)
         for sprite_id, profile in zip(eligible_sprite_ids, shuffled_profiles):
             randomized_effects[sprite_id] = list(profile)
-            _enforce_sword_upgrade_damage_order(randomized_effects[sprite_id], rng)
+            _enforce_upgrade_damage_safety(randomized_effects[sprite_id], rng)
 
     if mode in {INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
         effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
@@ -460,6 +498,14 @@ def build_randomized_damage_class_combat_model(
     else:
         raise ValueError(f"Unknown damage class randomization mode: {mode}")
 
+    _ensure_damage_class_logic_guarantees(
+        randomized_effects,
+        eligible_sprite_ids,
+        combat_model,
+        max_attacks_in_logic=max_attacks_in_logic,
+        enemy_health_key=enemy_health_key,
+    )
+
     return _encode_sprite_damage_effects(combat_model, tuple(tuple(row) for row in randomized_effects))
 
 
@@ -483,7 +529,10 @@ def _get_damage_class_randomizable_sprite_ids(combat_model: EnemyCombatModel) ->
         sprite_id
         for sprite_id in range(max_sprite_id)
         if sprite_id not in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
-        and combat_model.enemy_health_table[sprite_id] != 0xFF
+        and (
+            combat_model.enemy_health_table[sprite_id] != 0xFF
+            or sprite_id in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
+        )
     )
 
 
@@ -510,6 +559,94 @@ def _build_effect_palettes(
     ]
 
 
+def _ensure_damage_class_logic_guarantees(
+    randomized_effects: list[list[int]],
+    eligible_sprite_ids: tuple[int, ...],
+    combat_model: EnemyCombatModel,
+    *,
+    max_attacks_in_logic: int,
+    enemy_health_key: str,
+) -> None:
+    max_attacks = max(1, max_attacks_in_logic)
+    effect_palettes = _build_effect_palettes(tuple(tuple(row) for row in randomized_effects))
+
+    for sprite_id in eligible_sprite_ids:
+        hp = get_enemy_health_for_logic(sprite_id, enemy_health_key, combat_model=combat_model)
+        if hp is None:
+            continue
+        row = randomized_effects[sprite_id]
+        if _has_direct_kill_within_attack_limit(row, hp, max_attacks):
+            continue
+
+        _set_guaranteed_logic_kill_effect_for_row(row, effect_palettes)
+
+    if RED_BARI_SPRITE_ID in eligible_sprite_ids:
+        red_bari_hp = get_enemy_health_for_logic(RED_BARI_SPRITE_ID, enemy_health_key, combat_model=combat_model)
+        if red_bari_hp is not None and not _has_direct_kill_within_attack_limit(
+            [randomized_effects[RED_BARI_SPRITE_ID][damage_class] for damage_class in (11, 13)],
+            red_bari_hp,
+            max_attacks,
+        ):
+            _set_guaranteed_logic_kill_effect(
+                randomized_effects[RED_BARI_SPRITE_ID],
+                effect_palettes,
+                11,
+                INCINERATE_EFFECT,
+            )
+
+
+def _has_direct_kill_within_attack_limit(row: list[int], hp: int, max_attacks: int) -> bool:
+    return any(_effect_kills_within_attack_limit(effect, hp, max_attacks) for effect in row)
+
+
+def _effect_kills_within_attack_limit(effect: int, hp: int, max_attacks: int) -> bool:
+    if effect == INCINERATE_EFFECT:
+        return True
+    if not 0 < effect < FAIRY_TRANSFORM_EFFECT:
+        return False
+    return (hp + effect - 1) // effect <= max_attacks
+
+
+def _set_guaranteed_logic_kill_effect(
+    row: list[int],
+    effect_palettes: list[set[int]],
+    damage_class: int,
+    effect: int,
+) -> None:
+    if not _effect_fits_palette(effect, effect_palettes[damage_class]):
+        raise ValueError(f"Damage class {damage_class} has no subclass slot for guaranteed logic effect 0x{effect:02X}")
+    row[damage_class] = effect
+    effect_palettes[damage_class].add(effect)
+
+
+def _set_guaranteed_logic_kill_effect_for_row(row: list[int], effect_palettes: list[set[int]]) -> None:
+    arrow_safe_effect = _get_arrow_safe_silver_arrow_guarantee_effect(row)
+    if (
+        arrow_safe_effect is not None
+        and _effect_fits_palette(arrow_safe_effect, effect_palettes[GUARANTEED_LOGIC_KILL_DAMAGE_CLASS])
+    ):
+        _set_guaranteed_logic_kill_effect(
+            row,
+            effect_palettes,
+            GUARANTEED_LOGIC_KILL_DAMAGE_CLASS,
+            arrow_safe_effect,
+        )
+        return
+
+    _set_guaranteed_logic_kill_effect(row, effect_palettes, 11, INCINERATE_EFFECT)
+
+
+def _get_arrow_safe_silver_arrow_guarantee_effect(row: list[int]) -> int | None:
+    normal_arrow_effect = row[NORMAL_ARROW_DAMAGE_CLASS]
+    if normal_arrow_effect == 0:
+        return GUARANTEED_LOGIC_KILL_EFFECT
+    if _is_special_damage_effect(normal_arrow_effect):
+        return None
+    if is_killing_damage_effect(normal_arrow_effect):
+        return max(normal_arrow_effect, GUARANTEED_LOGIC_KILL_EFFECT)
+    return None
+
+
 def _fill_effect_palettes(
     effect_palettes: list[set[int]],
     resolved_effects: tuple[tuple[int, ...], ...],
@@ -529,13 +666,13 @@ def _shuffle_sprite_damage_effects(
     for _ in range(100):
         candidate = list(row)
         rng.shuffle(candidate)
-        _enforce_sword_upgrade_damage_order(candidate, rng)
+        _enforce_upgrade_damage_safety(candidate, rng)
         if _row_fits_effect_palettes(candidate, effect_palettes):
             _add_row_to_effect_palettes(candidate, effect_palettes)
             return candidate
 
     fallback = list(row)
-    _enforce_sword_upgrade_damage_order(fallback, rng)
+    _enforce_upgrade_damage_safety(fallback, rng)
     if _row_fits_effect_palettes(fallback, effect_palettes):
         _add_row_to_effect_palettes(fallback, effect_palettes)
         return fallback
@@ -554,7 +691,7 @@ def _fit_sprite_damage_effects(
             else rng.choice(tuple(sorted(effect_palettes[damage_class])))
             for damage_class, effect in enumerate(row)
         ]
-        _enforce_sword_upgrade_damage_order(candidate, rng)
+        _enforce_upgrade_damage_safety(candidate, rng)
         if _row_fits_effect_palettes(candidate, effect_palettes):
             _add_row_to_effect_palettes(candidate, effect_palettes)
             return candidate
@@ -566,6 +703,8 @@ def _fit_sprite_damage_effects(
     ]
     for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES:
         fallback[damage_class] = 0
+    if not _arrow_upgrade_damage_is_safe(fallback):
+        fallback[NORMAL_ARROW_DAMAGE_CLASS] = 0
     if not _row_fits_effect_palettes(fallback, effect_palettes):
         fallback = [
             effect if _effect_fits_palette(effect, effect_palettes[damage_class])
@@ -583,7 +722,7 @@ def _build_chaos_sprite_damage_effects(effect_palettes: list[set[int]], rng: ran
             rng.choice(ordered_palettes[damage_class])
             for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
         ]
-        _enforce_sword_upgrade_damage_order(candidate, rng)
+        _enforce_upgrade_damage_safety(candidate, rng)
         if _row_fits_effect_palettes(candidate, effect_palettes):
             return candidate
 
@@ -593,6 +732,8 @@ def _build_chaos_sprite_damage_effects(effect_palettes: list[set[int]], rng: ran
     ]
     for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES:
         candidate[damage_class] = 0
+    if not _arrow_upgrade_damage_is_safe(candidate):
+        candidate[NORMAL_ARROW_DAMAGE_CLASS] = 0
     return candidate
 
 
@@ -612,6 +753,11 @@ def _add_row_to_effect_palettes(row: list[int], effect_palettes: list[set[int]])
 
 def _effect_fits_palette(effect: int, palette: set[int]) -> bool:
     return effect in palette or len(palette) < 8
+
+
+def _enforce_upgrade_damage_safety(row: list[int], rng: random.Random) -> None:
+    _enforce_sword_upgrade_damage_order(row, rng)
+    _enforce_arrow_upgrade_damage_order(row)
 
 
 def _enforce_sword_upgrade_damage_order(row: list[int], rng: random.Random) -> None:
@@ -638,6 +784,29 @@ def _enforce_sword_upgrade_damage_order(row: list[int], rng: random.Random) -> N
         row[SWORD_UPGRADE_DAMAGE_CLASSES[index]] = effect
 
 
+def _enforce_arrow_upgrade_damage_order(row: list[int]) -> None:
+    normal_arrow_effect = row[NORMAL_ARROW_DAMAGE_CLASS]
+    if normal_arrow_effect == 0 or _arrow_upgrade_damage_is_safe(row):
+        return
+    row[SILVER_ARROW_DAMAGE_CLASS] = normal_arrow_effect
+
+
+def _arrow_upgrade_damage_is_safe(row: list[int]) -> bool:
+    normal_arrow_effect = row[NORMAL_ARROW_DAMAGE_CLASS]
+    silver_arrow_effect = row[SILVER_ARROW_DAMAGE_CLASS]
+    if normal_arrow_effect == 0:
+        return True
+    if _is_special_damage_effect(normal_arrow_effect):
+        return silver_arrow_effect == normal_arrow_effect
+    if is_killing_damage_effect(normal_arrow_effect):
+        return (
+            is_killing_damage_effect(silver_arrow_effect)
+            and not _is_special_damage_effect(silver_arrow_effect)
+            and silver_arrow_effect >= normal_arrow_effect
+        )
+    return silver_arrow_effect == normal_arrow_effect
+
+
 def _is_special_damage_effect(effect: int) -> bool:
     return effect >= FAIRY_TRANSFORM_EFFECT
 
@@ -651,10 +820,12 @@ def _encode_sprite_damage_effects(
         source._replace(subclasses=effect_palettes[damage_class])
         for damage_class, source in enumerate(combat_model.damage_sources)
     )
-    subclass_indexes = [
-        {effect: index for index, effect in enumerate(palette)}
-        for palette in effect_palettes
-    ]
+    subclass_indexes = []
+    for palette in effect_palettes:
+        indexes: dict[int, int] = {}
+        for index, effect in enumerate(palette):
+            indexes.setdefault(effect, index)
+        subclass_indexes.append(indexes)
     sprite_damage_subclasses = tuple(
         tuple(
             subclass_indexes[damage_class][effect]
@@ -783,6 +954,7 @@ def get_enemy_health_for_logic(
     sprite_id: int,
     enemy_health_key: str,
     *,
+    hp_override: int | None = None,
     killable_thieves: bool = False,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> int | None:
@@ -792,7 +964,15 @@ def get_enemy_health_for_logic(
 
     if enemy_health_key != "default" and hp != 0xFF and sprite_id not in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
         hp = ENEMY_HEALTH_RANGE_BY_KEY[enemy_health_key][1] - 1
+    elif hp_override is not None:
+        hp = hp_override
+    else:
+        hardcoded_hp = get_hardcoded_enemy_hp(sprite_id)
+        if hardcoded_hp is not None:
+            hp = hardcoded_hp
 
+    if hp == 0xFF and sprite_id in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
+        return 0xFF
     if hp == 0xFF:
         return None
     return hp
@@ -803,6 +983,7 @@ def get_hits_to_kill(
     damage_class: int,
     enemy_health_key: str,
     *,
+    hp_override: int | None = None,
     killable_thieves: bool = False,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> int | None:
@@ -815,9 +996,20 @@ def get_hits_to_kill(
     hp = get_enemy_health_for_logic(
         sprite_id,
         enemy_health_key,
+        hp_override=hp_override,
         killable_thieves=killable_thieves,
         combat_model=combat_model,
     )
     if hp is None:
         return None
     return (hp + effect - 1) // effect
+
+
+def get_hardcoded_enemy_hp(sprite_id: int, x_coord_pixels: int | None = None) -> int | None:
+    if sprite_id != HARDHAT_BEETLE_SPRITE_ID:
+        return None
+    if x_coord_pixels is None:
+        return max(HARDHAT_BEETLE_RED_HP, HARDHAT_BEETLE_BLUE_HP)
+    if x_coord_pixels & 0x10:
+        return HARDHAT_BEETLE_BLUE_HP
+    return HARDHAT_BEETLE_RED_HP
