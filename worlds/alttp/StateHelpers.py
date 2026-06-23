@@ -5,18 +5,31 @@ from .enemizer_data.enemy_combat_data import (
     DIRECT_KILL_DELIVERY_OVERRIDES,
     EnemyCombatModel,
     FIGHTER_SWORD_DAMAGE_CLASSES,
+    FREEZE_EFFECT,
     GOLDEN_SWORD_DAMAGE_CLASSES,
     KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
     MASTER_SWORD_DAMAGE_CLASSES,
+    STUN_255_FRAMES_EFFECT,
     TEMPERED_SWORD_DAMAGE_CLASSES,
     VANILLA_COMBAT_MODEL,
     YELLOW_SLIME_SPRITE_ID,
     get_blob_transform_damage_classes,
+    get_damage_classes_with_effects,
     get_hits_to_kill,
     get_killing_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
 )
 from BaseClasses import CollectionState
+
+
+BUZZBLOB_DISABLE_EFFECTS = frozenset((FREEZE_EFFECT, STUN_255_FRAMES_EFFECT))
+BUZZBLOB_FOLLOW_UP_ITEMS = (
+    "Fighter Sword",
+    "Master Sword",
+    "Tempered Sword",
+    "Golden Sword",
+    "Hammer",
+)
 
 
 def is_not_bunny(state: CollectionState, region: LTTPRegion, player: int) -> bool:
@@ -519,6 +532,50 @@ def _build_attack_plans_for_damage_classes(
     return _prune_dominated_resource_costs(plans)
 
 
+def _build_single_hit_plans_for_damage_classes(
+    state: CollectionState,
+    player: int,
+    allowed_damage_classes: set[int],
+) -> tuple[ResourceCosts, ...]:
+    plans: set[ResourceCosts] = set()
+
+    zero_cost_damage_class_items = (
+        ("Fighter Sword", FIGHTER_SWORD_DAMAGE_CLASSES, state.has("Fighter Sword", player)),
+        ("Master Sword", MASTER_SWORD_DAMAGE_CLASSES, state.has("Master Sword", player)),
+        ("Tempered Sword", TEMPERED_SWORD_DAMAGE_CLASSES, state.has("Tempered Sword", player)),
+        ("Golden Sword", GOLDEN_SWORD_DAMAGE_CLASSES, state.has("Golden Sword", player)),
+        ("Hammer", (3,), state.has("Hammer", player)),
+        ("Blue Boomerang", (0,), state.has("Blue Boomerang", player)),
+        ("Red Boomerang", (0,), state.has("Red Boomerang", player)),
+        ("Hookshot", (7,), state.has("Hookshot", player)),
+        ("Cane of Somaria", (1,), state.has("Cane of Somaria", player)),
+        ("Cane of Byrna", (1,), state.has("Cane of Byrna", player) and can_extend_magic(state, player, 8)),
+        ("Bombos", (13,), state.has("Bombos", player) and _can_cast_medallion(state, player)),
+        ("Ether", (14,), state.has("Ether", player) and _can_cast_medallion(state, player)),
+        ("Quake", (15,), state.has("Quake", player) and _can_cast_medallion(state, player)),
+    )
+    for _, item_damage_classes, available in zero_cost_damage_class_items:
+        if available and allowed_damage_classes.intersection(item_damage_classes):
+            plans.add(ResourceCosts())
+
+    if state.has("Bow", player) and can_shoot_arrows(state, player, 1) and 6 in allowed_damage_classes:
+        plans.add(ResourceCosts(arrows=1))
+
+    if _has_silver_arrow_attack(state, player) and can_shoot_arrows(state, player, 1) and 9 in allowed_damage_classes:
+        plans.add(ResourceCosts(arrows=1))
+
+    if can_use_bombs(state, player, 1) and 8 in allowed_damage_classes:
+        plans.add(ResourceCosts(bombs=1))
+
+    if state.has("Fire Rod", player) and 11 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=1))
+
+    if state.has("Ice Rod", player) and 12 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=2))
+
+    return _prune_dominated_resource_costs(plans)
+
+
 def _get_transform_source_plans(
     state: CollectionState,
     player: int,
@@ -529,6 +586,45 @@ def _get_transform_source_plans(
         plans.add(ResourceCosts())
     if 15 in transform_damage_classes and state.has("Quake", player) and _can_cast_medallion(state, player):
         plans.add(ResourceCosts())
+    return _prune_dominated_resource_costs(plans)
+
+
+def _get_buzzblob_disable_follow_up_plans(
+    state: CollectionState,
+    player: int,
+    combat_reference_id: int,
+    direct_kill_damage_classes: set[int],
+    combat_model: EnemyCombatModel,
+) -> tuple[ResourceCosts, ...]:
+    disable_damage_classes = set(
+        get_damage_classes_with_effects(combat_reference_id, BUZZBLOB_DISABLE_EFFECTS, combat_model)
+    )
+    if not disable_damage_classes:
+        return tuple()
+
+    disable_plans = _build_single_hit_plans_for_damage_classes(
+        state,
+        player,
+        disable_damage_classes,
+    )
+    if not disable_plans:
+        return tuple()
+
+    follow_up_plans = _build_attack_plans_for_damage_classes(
+        state,
+        player,
+        combat_reference_id,
+        direct_kill_damage_classes,
+        combat_model,
+        allowed_items=BUZZBLOB_FOLLOW_UP_ITEMS,
+    )
+    if not follow_up_plans:
+        return tuple()
+
+    plans: set[ResourceCosts] = set()
+    for disable_plan in disable_plans:
+        for follow_up_plan in follow_up_plans:
+            plans.add(_add_resource_costs(disable_plan, follow_up_plan))
     return _prune_dominated_resource_costs(plans)
 
 
@@ -618,6 +714,16 @@ def _get_enemy_kill_plans(
         return direct_attack_plans
 
     plans = set(direct_attack_plans)
+    if requirement.sprite_name == "BuzzblobSprite":
+        plans.update(
+            _get_buzzblob_disable_follow_up_plans(
+                state,
+                player,
+                combat_reference_id,
+                direct_kill_damage_classes,
+                combat_model,
+            )
+        )
     plans.update(_get_transform_attack_plans(state, player, requirement))
     return _prune_dominated_resource_costs(plans)
 

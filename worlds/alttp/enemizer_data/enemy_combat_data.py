@@ -451,6 +451,18 @@ def get_damage_effect(
     return combat_model.damage_sources[damage_class].subclasses[subclass]
 
 
+def get_damage_classes_with_effects(
+    sprite_id: int,
+    effects: frozenset[int],
+    combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+) -> tuple[int, ...]:
+    return tuple(
+        damage_class
+        for damage_class in range(len(combat_model.damage_sources))
+        if get_damage_effect(sprite_id, damage_class, combat_model) in effects
+    )
+
+
 def is_killing_damage_effect(effect: int) -> bool:
     return 0 < effect < FAIRY_TRANSFORM_EFFECT or effect == INCINERATE_EFFECT
 

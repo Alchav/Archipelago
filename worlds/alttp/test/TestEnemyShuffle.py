@@ -66,7 +66,9 @@ from worlds.alttp.StateHelpers import (
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
     DIRECT_KILL_DELIVERY_OVERRIDES,
+    DamageSource,
     EnemyCombatModel,
+    FREEZE_EFFECT,
     KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
     REACHABLE_SPRITE_DAMAGE_SUBCLASS_COUNT,
     VANILLA_COMBAT_MODEL,
@@ -212,6 +214,69 @@ class TestEnemyShuffleValidation(unittest.TestCase):
 
             bow_state = logic_test.get_state(item_factory(["Bow"], world))
             self.assertTrue(can_clear_enemy_room(bow_state, 1, "Mini-Moldorm Cave"))
+
+            ice_only_state = logic_test.get_state(item_factory(["Ice Rod"], world))
+            self.assertFalse(can_clear_enemy_room(ice_only_state, 1, "Mini-Moldorm Cave"))
+
+            fighter_boomerang_state = logic_test.get_state(item_factory(["Fighter Sword", "Blue Boomerang"], world))
+            self.assertTrue(can_clear_enemy_room(fighter_boomerang_state, 1, "Mini-Moldorm Cave"))
+
+            hammer_hookshot_state = logic_test.get_state(item_factory(["Hammer", "Hookshot"], world))
+            self.assertTrue(can_clear_enemy_room(hammer_hookshot_state, 1, "Mini-Moldorm Cave"))
+
+            fighter_ice_state = logic_test.get_state(item_factory(["Fighter Sword", "Ice Rod"], world))
+            self.assertTrue(can_clear_enemy_room(fighter_ice_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+
+    def test_buzzblob_disable_uses_active_damage_effects(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        try:
+            world.options.enemy_shuffle = True
+            damage_sources = list(VANILLA_COMBAT_MODEL.damage_sources)
+            fire_rod = damage_sources[11]
+            fire_rod_subclasses = list(fire_rod.subclasses)
+            fire_rod_subclasses[3] = FREEZE_EFFECT
+            damage_sources[11] = DamageSource(
+                fire_rod.name,
+                fire_rod.damage_class,
+                tuple(fire_rod_subclasses),
+            )
+            custom_combat_model = EnemyCombatModel(
+                damage_sources=tuple(damage_sources),
+                sprite_damage_subclasses=VANILLA_COMBAT_MODEL.sprite_damage_subclasses,
+                enemy_health_table=VANILLA_COMBAT_MODEL.enemy_health_table,
+            )
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=custom_combat_model,
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0, 0, 13, 13, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                },
+            )
+
+            fire_rod_state = logic_test.get_state(item_factory(["Fire Rod"], world))
+            self.assertFalse(can_clear_enemy_room(fire_rod_state, 1, "Mini-Moldorm Cave"))
+
+            fire_rod_fighter_state = logic_test.get_state(item_factory(["Fire Rod", "Fighter Sword"], world))
+            self.assertTrue(can_clear_enemy_room(fire_rod_fighter_state, 1, "Mini-Moldorm Cave"))
         finally:
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
@@ -1349,6 +1414,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         }
 
         deadrock = requirements["DeadrockSprite"]
+        devalant_non_shooter = requirements["Devalant_NonShooterSprite"]
         mimic = requirements["MimicSprite"]
         terrorpin = requirements["TerrorpinSprite"]
         water_tektite = requirements["WaterTektiteSprite"]
@@ -1367,6 +1433,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertEqual(deadrock_follow_up.abilities, ("bombs",))
 
         self.assertEqual(mimic.combat_reference_id, 131)
+        self.assertEqual(devalant_non_shooter.combat_reference_id, 100)
         self.assertEqual(terrorpin.combat_reference_id, 142)
         self.assertEqual(KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES[requirements["RedBariSprite"].sprite_name], (11, 13))
         self.assertEqual(water_tektite.dont_randomize_rooms, (40, 118))
