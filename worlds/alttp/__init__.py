@@ -18,9 +18,10 @@ from .Items import (item_init_table, item_name_groups, item_table, GetBeemizerIt
                     key_ring_name_to_small_key, key_ring_option_names, small_key_name_to_key_ring,
                     small_key_name_to_key_ring_option)
 from .Options import ALTTPOptions, small_key_shuffle
+from .PotShuffle import generate_pot_shuffle
 from .Regions import lookup_name_to_id, create_regions, mark_light_world_regions, lookup_vanilla_location_to_entrance, \
     is_main_entrance, key_drop_data
-from .Rom import LocalRom, patch_rom, patch_race_rom, check_enemizer, patch_enemizer, apply_rom_settings, \
+from .Rom import LocalRom, patch_rom, patch_race_rom, apply_rom_settings, \
     get_hash_string, get_base_rom_path, LttPDeltaPatch
 from .Rules import set_rules
 from .Shops import create_shops, Shop, push_shop_inventories, ShopType, price_rate_display, price_type_display_name
@@ -257,17 +258,6 @@ class ALTTPWorld(World):
 
     create_items = generate_itempool
 
-    _enemizer_path: typing.ClassVar[typing.Optional[str]] = None
-
-    @property
-    def enemizer_path(self) -> str:
-        # TODO: directly use settings
-        cls = self.__class__
-        if cls._enemizer_path is None:
-            cls._enemizer_path = settings.get_settings().generator.enemizer_path
-            assert isinstance(cls._enemizer_path, str)
-        return cls._enemizer_path
-
     # custom instance vars
     dungeon_local_item_names: typing.Set[str]
     dungeon_specific_item_names: typing.Set[str]
@@ -312,6 +302,8 @@ class ALTTPWorld(World):
         self.required_medallions = ["Ether", "Quake"]
         self.escape_assist = []
         self.shops = []
+        self.enemy_shuffle_state = None
+        self.pot_shuffle_state = None
         self.logical_heart_containers = 10
         self.logical_heart_pieces = 24
         super(ALTTPWorld, self).__init__(*args, **kwargs)
@@ -323,10 +315,6 @@ class ALTTPWorld(World):
             raise FileNotFoundError(rom_file)
         if multiworld.is_race:
             import xxtea  # noqa
-        for player in multiworld.get_game_players(cls.game):
-            if multiworld.worlds[player].use_enemizer:
-                check_enemizer(multiworld.worlds[player].enemizer_path)
-                break
 
     def generate_early(self):
         multiworld = self.multiworld
@@ -345,6 +333,9 @@ class ALTTPWorld(World):
             bottle_options.append("Bottle (Fairy)")
         self.waterfall_fairy_bottle_fill = self.random.choice(bottle_options)
         self.pyramid_fairy_bottle_fill = self.random.choice(bottle_options)
+
+        if self.options.pot_shuffle:
+            self.pot_shuffle_state = generate_pot_shuffle(self)
 
         locked_small_key_drops = collections.Counter()
         if not self.options.key_drop_shuffle:
@@ -632,13 +623,6 @@ class ALTTPWorld(World):
     def stage_generate_output(cls, multiworld, output_directory):
         push_shop_inventories(multiworld)
 
-    @property
-    def use_enemizer(self) -> bool:
-        return bool(self.options.boss_shuffle or self.options.enemy_shuffle
-                    or self.options.enemy_health != 'default' or self.options.enemy_damage != 'default'
-                    or self.options.pot_shuffle or self.options.bush_shuffle
-                    or self.options.killable_thieves)
-
     def generate_output(self, output_directory: str):
         multiworld = self.multiworld
         player = self.player
@@ -646,14 +630,9 @@ class ALTTPWorld(World):
         self.pushed_shop_inventories.wait()
 
         try:
-            use_enemizer = self.use_enemizer
-
             rom = LocalRom(get_base_rom_path())
 
-            patch_rom(multiworld, rom, player, use_enemizer)
-
-            if use_enemizer:
-                patch_enemizer(self, rom, self.enemizer_path, output_directory)
+            patch_rom(multiworld, rom, player)
 
             if multiworld.is_race:
                 patch_race_rom(rom, multiworld, player)
