@@ -108,19 +108,24 @@ def _get_available_magic_amount(
     *,
     fullrefill: bool = False,
 ) -> int:
-    basemagic = 8
-    if state.has('Magic Upgrade (1/4)', player):
-        basemagic = 32
-    elif state.has('Magic Upgrade (1/2)', player):
-        basemagic = 16
+    basemagic = _get_magic_meter_capacity(state, player)
+    bottles = min(4, bottle_count(state, player))
     if can_buy_unlimited(state, 'Green Potion', player) or can_buy_unlimited(state, 'Blue Potion', player):
         if state.multiworld.worlds[player].options.item_functionality == 'hard' and not fullrefill:
-            basemagic = basemagic + int(basemagic * 0.5 * bottle_count(state, player))
+            basemagic = basemagic + int(basemagic * 0.5 * bottles)
         elif state.multiworld.worlds[player].options.item_functionality == 'expert' and not fullrefill:
-            basemagic = basemagic + int(basemagic * 0.25 * bottle_count(state, player))
+            basemagic = basemagic + int(basemagic * 0.25 * bottles)
         else:
-            basemagic = basemagic + basemagic * bottle_count(state, player)
+            basemagic = basemagic + basemagic * bottles
     return basemagic
+
+
+def _get_magic_meter_capacity(state: CollectionState, player: int) -> int:
+    if state.has('Magic Upgrade (1/4)', player):
+        return 32
+    if state.has('Magic Upgrade (1/2)', player):
+        return 16
+    return 8
 
 
 def can_hold_arrows(state: CollectionState, player: int, quantity: int):
@@ -177,6 +182,22 @@ class ResourceBudget(NamedTuple):
     bombs: int
     arrows: int | None
     magic: int
+
+
+FREE_RESOURCE_COSTS = ResourceCosts()
+ENEMY_CLEAR_MAGIC_UNITS_PER_LOGIC_UNIT = 2
+FIRE_ROD_MAGIC_COST = 2
+ICE_ROD_MAGIC_COST = 2
+MEDALLION_MAGIC_COST = 4
+MAGIC_POWDER_MAGIC_COST = 1
+SOMARIA_MAGIC_COST = 1
+BYRNA_INITIAL_MAGIC_COST = 2
+BYRNA_DRAIN_MAGIC_COST = 1
+ROOM_WIDE_MEDALLION_DAMAGE_CLASSES = {
+    "Bombos": 13,
+    "Ether": 14,
+    "Quake": 15,
+}
 
 
 def _add_resource_costs(left: ResourceCosts, right: ResourceCosts) -> ResourceCosts:
@@ -246,13 +267,15 @@ def can_clear_enemy_region(state: CollectionState, player: int, target_name: str
 def can_clear_enemy_regions(state: CollectionState, player: int, *target_names: str) -> bool:
     from .EnemyLogicTargets import get_enemy_clear_target_enemies
 
-    room_enemies = tuple(
-        enemy.requirement
+    enemy_groups = tuple(
+        tuple(
+            enemy.requirement
+            for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
+            if enemy.requirement.killable
+        )
         for target_name in target_names
-        for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
-        if enemy.requirement.killable
     )
-    return _can_clear_enemy_requirements(state, player, room_enemies)
+    return _can_clear_enemy_requirement_groups(state, player, enemy_groups)
 
 
 def can_kill_key_drop_enemy(state: CollectionState, player: int, location_name: str) -> bool:
@@ -262,10 +285,7 @@ def can_kill_key_drop_enemy(state: CollectionState, player: int, location_name: 
     if enemy is None or not enemy.has_key or not enemy.requirement.killable:
         return False
 
-    return _can_execute_enemy_kill_plans(
-        (_get_enemy_kill_plans(state, player, enemy.requirement, key_drop_enemy=True),),
-        _get_enemy_clear_resource_budget(state, player),
-    )
+    return _can_clear_enemy_requirements(state, player, (enemy.requirement,), key_drop_enemy=True)
 
 
 def can_kill_enemy_sprite(state: CollectionState, player: int, sprite_name: str) -> bool:
@@ -281,28 +301,65 @@ def can_kill_enemy_sprite(state: CollectionState, player: int, sprite_name: str)
     if not requirement.killable:
         return False
 
-    return _can_execute_enemy_kill_plans(
-        (_get_enemy_kill_plans(state, player, requirement),),
-        _get_enemy_clear_resource_budget(state, player),
-    )
+    return _can_clear_enemy_requirements(state, player, (requirement,))
 
 
 def _can_clear_enemy_requirements(
     state: CollectionState,
     player: int,
     room_enemies: tuple,
+    *,
+    key_drop_enemy: bool = False,
 ) -> bool:
-    if not room_enemies:
-        return True
+    return _can_clear_enemy_requirement_groups(state, player, (room_enemies,), key_drop_enemy=key_drop_enemy)
 
-    plans_by_enemy = tuple(
-        _get_enemy_kill_plans(state, player, requirement)
-        for requirement in room_enemies
+
+def _can_clear_enemy_requirement_groups(
+    state: CollectionState,
+    player: int,
+    enemy_groups: tuple[tuple, ...],
+    *,
+    key_drop_enemy: bool = False,
+) -> bool:
+    budget = _get_enemy_clear_resource_budget(state, player)
+    group_clear_plans = tuple(
+        _get_enemy_group_clear_plans(state, player, enemy_group, budget, key_drop_enemy=key_drop_enemy)
+        for enemy_group in enemy_groups
     )
-    return _can_execute_enemy_kill_plans(
-        plans_by_enemy,
-        _get_enemy_clear_resource_budget(state, player),
-    )
+    return _can_execute_enemy_kill_plans(group_clear_plans, budget)
+
+
+def _get_enemy_group_clear_plans(
+    state: CollectionState,
+    player: int,
+    room_enemies: tuple,
+    budget: ResourceBudget,
+    *,
+    key_drop_enemy: bool = False,
+) -> tuple[ResourceCosts, ...]:
+    if not room_enemies:
+        return (FREE_RESOURCE_COSTS,)
+
+    clear_plans: set[ResourceCosts] = set()
+    available_medallions = _get_available_room_wide_medallions(state, player)
+    for room_wide_medallions in _get_room_wide_medallion_cast_sets(available_medallions):
+        base_costs = ResourceCosts(magic=MEDALLION_MAGIC_COST * len(room_wide_medallions))
+        if not _fits_within_resource_budget(base_costs, budget):
+            continue
+
+        plans_by_enemy = tuple(
+            _get_enemy_kill_plans_after_room_wide_medallions(
+                state,
+                player,
+                requirement,
+                room_wide_medallions,
+                key_drop_enemy=key_drop_enemy,
+            )
+            for requirement in room_enemies
+        )
+        clear_plans.update(_get_executable_enemy_kill_costs(plans_by_enemy, budget, base_costs=base_costs))
+
+    return _prune_dominated_resource_costs(clear_plans)
 
 
 def _get_available_damage_classes(state: CollectionState, player: int, enemy_count: int) -> set[int]:
@@ -322,28 +379,28 @@ def _get_available_damage_classes(state: CollectionState, player: int, enemy_cou
         available_damage_classes.add(0)
     if state.has("Hookshot", player):
         available_damage_classes.add(7)
-    if can_shoot_arrows(state, player, enemy_count):
+    if can_shoot_arrows(state, player, 1):
         if state.has("Bow", player):
             available_damage_classes.add(6)
         if state.has("Silver Bow", player) or (state.has("Bow", player) and state.has("Silver Arrows", player)):
             available_damage_classes.add(9)
-    if can_use_bombs(state, player, enemy_count):
+    if can_use_bombs(state, player, 1):
         available_damage_classes.add(8)
     if state.has("Cane of Somaria", player):
         available_damage_classes.add(1)
-    if state.has("Cane of Byrna", player) and can_extend_magic(state, player, 8):
+    if state.has("Cane of Byrna", player):
         available_damage_classes.add(1)
     if state.has("Magic Powder", player):
         available_damage_classes.add(10)
-    if state.has("Fire Rod", player) and can_extend_magic(state, player, enemy_count):
+    if state.has("Fire Rod", player):
         available_damage_classes.add(11)
-    if state.has("Ice Rod", player) and can_extend_magic(state, player, 2 * enemy_count):
+    if state.has("Ice Rod", player):
         available_damage_classes.add(12)
-    if state.has("Bombos", player) and _can_cast_medallion(state, player):
+    if state.has("Bombos", player) and _can_ready_medallion(state, player):
         available_damage_classes.add(13)
-    if state.has("Ether", player) and _can_cast_medallion(state, player):
+    if state.has("Ether", player) and _can_ready_medallion(state, player):
         available_damage_classes.add(14)
-    if state.has("Quake", player) and _can_cast_medallion(state, player):
+    if state.has("Quake", player) and _can_ready_medallion(state, player):
         available_damage_classes.add(15)
 
     return available_damage_classes
@@ -378,6 +435,22 @@ def _get_blob_transform_damage_classes(requirement, combat_model: EnemyCombatMod
     return set(get_blob_transform_damage_classes(combat_reference_id, combat_model))
 
 
+def _get_direct_kill_context(
+    requirement,
+    combat_model: EnemyCombatModel,
+    *,
+    key_drop_enemy: bool = False,
+) -> tuple[set[int], object | None]:
+    direct_kill_damage_classes = _get_direct_kill_damage_classes(requirement, combat_model)
+    direct_kill_delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
+    if key_drop_enemy:
+        key_drop_damage_classes = KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES.get(requirement.sprite_name)
+        if key_drop_damage_classes is not None:
+            direct_kill_damage_classes = set(key_drop_damage_classes)
+            direct_kill_delivery_override = None
+    return direct_kill_damage_classes, direct_kill_delivery_override
+
+
 def _get_enemy_health_key(state: CollectionState, player: int) -> str:
     enemy_health_option = state.multiworld.worlds[player].options.enemy_health
     return str(getattr(enemy_health_option, "current_key", enemy_health_option))
@@ -391,8 +464,15 @@ def _get_enemy_clear_resource_budget(state: CollectionState, player: int) -> Res
     return ResourceBudget(
         bombs=_get_available_bomb_count(state, player),
         arrows=arrows,
-        magic=_get_available_magic_amount(state, player),
+        magic=_get_enemy_clear_magic_budget(state, player),
     )
+
+
+def _get_enemy_clear_magic_budget(state: CollectionState, player: int) -> int:
+    meter_capacity = _get_magic_meter_capacity(state, player) * ENEMY_CLEAR_MAGIC_UNITS_PER_LOGIC_UNIT
+    if can_buy_unlimited(state, 'Green Potion', player) or can_buy_unlimited(state, 'Blue Potion', player):
+        return meter_capacity * (1 + min(4, bottle_count(state, player)))
+    return meter_capacity
 
 
 def _has_silver_arrow_attack(state: CollectionState, player: int) -> bool:
@@ -457,17 +537,57 @@ def _build_attack_plans_for_damage_classes(
         ("Blue Boomerang", (0,), state.has("Blue Boomerang", player)),
         ("Red Boomerang", (0,), state.has("Red Boomerang", player)),
         ("Hookshot", (7,), state.has("Hookshot", player)),
-        ("Cane of Somaria", (1,), state.has("Cane of Somaria", player)),
-        ("Cane of Byrna", (1,), state.has("Cane of Byrna", player) and can_extend_magic(state, player, 8)),
-        ("Bombos", (13,), state.has("Bombos", player) and _can_cast_medallion(state, player)),
-        ("Ether", (14,), state.has("Ether", player) and _can_cast_medallion(state, player)),
-        ("Quake", (15,), state.has("Quake", player) and _can_cast_medallion(state, player)),
     )
     for item_name, item_damage_classes, available in zero_cost_damage_class_items:
         if available and item_allowed(item_name) and (
             bypass_damage_class_filter or allowed_damage_classes.intersection(item_damage_classes)
         ):
-            plans.add(ResourceCosts())
+            hit_count = _get_best_hit_count(
+                state,
+                player,
+                sprite_id,
+                item_damage_classes,
+                set(item_damage_classes) if bypass_damage_class_filter else allowed_damage_classes,
+                combat_model,
+            )
+            if hit_count is not None:
+                plans.add(FREE_RESOURCE_COSTS)
+
+    if item_allowed("Cane of Somaria") and state.has("Cane of Somaria", player):
+        hit_count = _get_best_hit_count(
+            state,
+            player,
+            sprite_id,
+            (1,),
+            {1} if bypass_damage_class_filter else allowed_damage_classes,
+            combat_model,
+        )
+        if hit_count is not None:
+            plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST * hit_count))
+
+    if item_allowed("Cane of Byrna") and state.has("Cane of Byrna", player):
+        hit_count = _get_best_hit_count(
+            state,
+            player,
+            sprite_id,
+            (1,),
+            {1} if bypass_damage_class_filter else allowed_damage_classes,
+            combat_model,
+        )
+        if hit_count is not None:
+            plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST + (BYRNA_DRAIN_MAGIC_COST * max(0, hit_count - 1))))
+
+    if item_allowed("Magic Powder") and state.has("Magic Powder", player):
+        hit_count = _get_best_hit_count(
+            state,
+            player,
+            sprite_id,
+            (10,),
+            {10} if bypass_damage_class_filter else allowed_damage_classes,
+            combat_model,
+        )
+        if hit_count is not None:
+            plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST * hit_count))
 
     if item_allowed("Bow") and state.has("Bow", player) and can_shoot_arrows(state, player, 1):
         hit_count = _get_best_hit_count(
@@ -515,7 +635,7 @@ def _build_attack_plans_for_damage_classes(
             combat_model,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=hit_count))
+            plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST * hit_count))
 
     if item_allowed("Ice Rod") and state.has("Ice Rod", player):
         hit_count = _get_best_hit_count(
@@ -527,7 +647,7 @@ def _build_attack_plans_for_damage_classes(
             combat_model,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=2 * hit_count))
+            plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
 
     return _prune_dominated_resource_costs(plans)
 
@@ -548,15 +668,19 @@ def _build_single_hit_plans_for_damage_classes(
         ("Blue Boomerang", (0,), state.has("Blue Boomerang", player)),
         ("Red Boomerang", (0,), state.has("Red Boomerang", player)),
         ("Hookshot", (7,), state.has("Hookshot", player)),
-        ("Cane of Somaria", (1,), state.has("Cane of Somaria", player)),
-        ("Cane of Byrna", (1,), state.has("Cane of Byrna", player) and can_extend_magic(state, player, 8)),
-        ("Bombos", (13,), state.has("Bombos", player) and _can_cast_medallion(state, player)),
-        ("Ether", (14,), state.has("Ether", player) and _can_cast_medallion(state, player)),
-        ("Quake", (15,), state.has("Quake", player) and _can_cast_medallion(state, player)),
     )
     for _, item_damage_classes, available in zero_cost_damage_class_items:
         if available and allowed_damage_classes.intersection(item_damage_classes):
-            plans.add(ResourceCosts())
+            plans.add(FREE_RESOURCE_COSTS)
+
+    if state.has("Cane of Somaria", player) and 1 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST))
+
+    if state.has("Cane of Byrna", player) and 1 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST))
+
+    if state.has("Magic Powder", player) and 10 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST))
 
     if state.has("Bow", player) and can_shoot_arrows(state, player, 1) and 6 in allowed_damage_classes:
         plans.add(ResourceCosts(arrows=1))
@@ -568,10 +692,10 @@ def _build_single_hit_plans_for_damage_classes(
         plans.add(ResourceCosts(bombs=1))
 
     if state.has("Fire Rod", player) and 11 in allowed_damage_classes:
-        plans.add(ResourceCosts(magic=1))
+        plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST))
 
     if state.has("Ice Rod", player) and 12 in allowed_damage_classes:
-        plans.add(ResourceCosts(magic=2))
+        plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST))
 
     return _prune_dominated_resource_costs(plans)
 
@@ -583,9 +707,7 @@ def _get_transform_source_plans(
 ) -> tuple[ResourceCosts, ...]:
     plans: set[ResourceCosts] = set()
     if 10 in transform_damage_classes and state.has("Magic Powder", player):
-        plans.add(ResourceCosts())
-    if 15 in transform_damage_classes and state.has("Quake", player) and _can_cast_medallion(state, player):
-        plans.add(ResourceCosts())
+        plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST))
     return _prune_dominated_resource_costs(plans)
 
 
@@ -628,6 +750,27 @@ def _get_buzzblob_disable_follow_up_plans(
     return _prune_dominated_resource_costs(plans)
 
 
+def _get_yellow_slime_follow_up_plans(
+    state: CollectionState,
+    player: int,
+    combat_reference_id: int,
+    combat_model: EnemyCombatModel,
+) -> tuple[ResourceCosts, ...]:
+    follow_up_override = get_yellow_slime_follow_up_delivery_override(combat_reference_id)
+    if follow_up_override is None:
+        return tuple()
+
+    return _build_attack_plans_for_damage_classes(
+        state,
+        player,
+        YELLOW_SLIME_SPRITE_ID,
+        set(get_killing_damage_classes(YELLOW_SLIME_SPRITE_ID, combat_model)),
+        combat_model,
+        allowed_items=follow_up_override.items,
+        allowed_abilities=follow_up_override.abilities,
+    )
+
+
 def _get_transform_attack_plans(
     state: CollectionState,
     player: int,
@@ -638,10 +781,6 @@ def _get_transform_attack_plans(
     if combat_reference_id is None:
         return tuple()
 
-    follow_up_override = get_yellow_slime_follow_up_delivery_override(combat_reference_id)
-    if follow_up_override is None:
-        return tuple()
-
     transform_source_plans = _get_transform_source_plans(
         state,
         player,
@@ -650,14 +789,11 @@ def _get_transform_attack_plans(
     if not transform_source_plans:
         return tuple()
 
-    yellow_slime_follow_up_plans = _build_attack_plans_for_damage_classes(
+    yellow_slime_follow_up_plans = _get_yellow_slime_follow_up_plans(
         state,
         player,
-        YELLOW_SLIME_SPRITE_ID,
-        set(get_killing_damage_classes(YELLOW_SLIME_SPRITE_ID, combat_model)),
+        combat_reference_id,
         combat_model,
-        allowed_items=follow_up_override.items,
-        allowed_abilities=follow_up_override.abilities,
     )
     if not yellow_slime_follow_up_plans:
         return tuple()
@@ -690,7 +826,7 @@ def _get_enemy_kill_plans(
             direct_kill_delivery_override = None
 
     direct_attack_plans: tuple[ResourceCosts, ...] = tuple()
-    if requirement.sprite_name != "TerrorpinSprite" or state.has("Hammer", player):
+    if requirement.sprite_name != "Terrorpin" or state.has("Hammer", player):
         direct_attack_plans = _build_attack_plans_for_damage_classes(
             state,
             player,
@@ -714,7 +850,7 @@ def _get_enemy_kill_plans(
         return direct_attack_plans
 
     plans = set(direct_attack_plans)
-    if requirement.sprite_name == "BuzzblobSprite":
+    if requirement.sprite_name == "Buzzblob":
         plans.update(
             _get_buzzblob_disable_follow_up_plans(
                 state,
@@ -728,14 +864,168 @@ def _get_enemy_kill_plans(
     return _prune_dominated_resource_costs(plans)
 
 
+def _get_enemy_kill_plans_after_room_wide_medallions(
+    state: CollectionState,
+    player: int,
+    requirement,
+    room_wide_medallions: tuple[str, ...],
+    *,
+    key_drop_enemy: bool = False,
+) -> tuple[ResourceCosts, ...]:
+    individual_plans = _get_enemy_kill_plans(state, player, requirement, key_drop_enemy=key_drop_enemy)
+    if FREE_RESOURCE_COSTS in individual_plans:
+        return (FREE_RESOURCE_COSTS,)
+
+    plans = set(individual_plans)
+    plans.update(
+        _get_room_wide_medallion_enemy_plans(
+            state,
+            player,
+            requirement,
+            room_wide_medallions,
+            key_drop_enemy=key_drop_enemy,
+        )
+    )
+    return _prune_dominated_resource_costs(plans)
+
+
+def _get_available_room_wide_medallions(state: CollectionState, player: int) -> tuple[str, ...]:
+    if not _can_ready_medallion(state, player):
+        return tuple()
+    return tuple(
+        medallion
+        for medallion in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES
+        if state.has(medallion, player)
+    )
+
+
+def _get_room_wide_medallion_cast_sets(available_medallions: tuple[str, ...]) -> tuple[tuple[str, ...], ...]:
+    cast_sets: list[tuple[str, ...]] = [tuple()]
+    for mask in range(1, 1 << len(available_medallions)):
+        cast_sets.append(tuple(
+            medallion
+            for index, medallion in enumerate(available_medallions)
+            if mask & (1 << index)
+        ))
+    return tuple(cast_sets)
+
+
+def _get_room_wide_medallion_enemy_plans(
+    state: CollectionState,
+    player: int,
+    requirement,
+    room_wide_medallions: tuple[str, ...],
+    *,
+    key_drop_enemy: bool = False,
+) -> tuple[ResourceCosts, ...]:
+    if not room_wide_medallions:
+        return tuple()
+
+    combat_model = _get_active_combat_model(state, player)
+    combat_reference_id = _get_combat_reference_id(requirement, combat_model)
+    if combat_reference_id is None:
+        return tuple()
+
+    plans: set[ResourceCosts] = set()
+    direct_kill_damage_classes, direct_kill_delivery_override = _get_direct_kill_context(
+        requirement,
+        combat_model,
+        key_drop_enemy=key_drop_enemy,
+    )
+    transform_damage_classes = _get_blob_transform_damage_classes(requirement, combat_model)
+    disable_damage_classes = (
+        set(get_damage_classes_with_effects(combat_reference_id, BUZZBLOB_DISABLE_EFFECTS, combat_model))
+        if requirement.sprite_name == "Buzzblob"
+        else set()
+    )
+
+    for medallion in room_wide_medallions:
+        damage_class = ROOM_WIDE_MEDALLION_DAMAGE_CLASSES[medallion]
+        if _room_wide_medallion_directly_kills_enemy(
+            state,
+            player,
+            requirement,
+            combat_reference_id,
+            damage_class,
+            direct_kill_damage_classes,
+            direct_kill_delivery_override,
+            combat_model,
+        ):
+            plans.add(FREE_RESOURCE_COSTS)
+
+        if key_drop_enemy and requirement.sprite_name in KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES:
+            continue
+
+        if damage_class in transform_damage_classes:
+            plans.update(_get_yellow_slime_follow_up_plans(state, player, combat_reference_id, combat_model))
+
+        if damage_class in disable_damage_classes:
+            plans.update(
+                _build_attack_plans_for_damage_classes(
+                    state,
+                    player,
+                    combat_reference_id,
+                    direct_kill_damage_classes,
+                    combat_model,
+                    allowed_items=BUZZBLOB_FOLLOW_UP_ITEMS,
+                )
+            )
+
+    return _prune_dominated_resource_costs(plans)
+
+
+def _room_wide_medallion_directly_kills_enemy(
+    state: CollectionState,
+    player: int,
+    requirement,
+    combat_reference_id: int,
+    damage_class: int,
+    direct_kill_damage_classes: set[int],
+    direct_kill_delivery_override,
+    combat_model: EnemyCombatModel,
+) -> bool:
+    if requirement.sprite_name == "Terrorpin" and not state.has("Hammer", player):
+        return False
+
+    medallion = combat_model.damage_sources[damage_class].name
+    if direct_kill_delivery_override is not None and medallion not in direct_kill_delivery_override.items:
+        return False
+
+    hit_count = _get_best_hit_count(
+        state,
+        player,
+        combat_reference_id,
+        (damage_class,),
+        direct_kill_damage_classes,
+        combat_model,
+    )
+    return hit_count == 1
+
+
 def _can_execute_enemy_kill_plans(
     plans_by_enemy: tuple[tuple[ResourceCosts, ...], ...],
     budget: ResourceBudget,
+    *,
+    base_costs: ResourceCosts = FREE_RESOURCE_COSTS,
 ) -> bool:
-    frontier: tuple[ResourceCosts, ...] = (ResourceCosts(),)
+    return bool(_get_executable_enemy_kill_costs(plans_by_enemy, budget, base_costs=base_costs))
+
+
+def _get_executable_enemy_kill_costs(
+    plans_by_enemy: tuple[tuple[ResourceCosts, ...], ...],
+    budget: ResourceBudget,
+    *,
+    base_costs: ResourceCosts = FREE_RESOURCE_COSTS,
+) -> tuple[ResourceCosts, ...]:
+    if not _fits_within_resource_budget(base_costs, budget):
+        return tuple()
+
+    frontier: tuple[ResourceCosts, ...] = (base_costs,)
     for enemy_plans in sorted(plans_by_enemy, key=len):
         if not enemy_plans:
-            return False
+            return tuple()
+        if FREE_RESOURCE_COSTS in enemy_plans:
+            continue
         next_frontier: set[ResourceCosts] = set()
         for used_costs in frontier:
             for enemy_plan in enemy_plans:
@@ -743,13 +1033,17 @@ def _can_execute_enemy_kill_plans(
                 if _fits_within_resource_budget(combined_costs, budget):
                     next_frontier.add(combined_costs)
         if not next_frontier:
-            return False
+            return tuple()
         frontier = _prune_dominated_resource_costs(next_frontier)
-    return True
+    return frontier
+
+
+def _can_ready_medallion(state: CollectionState, player: int) -> bool:
+    return state.multiworld.worlds[player].options.swordless or has_sword(state, player)
 
 
 def _can_cast_medallion(state: CollectionState, player: int) -> bool:
-    return (state.multiworld.worlds[player].options.swordless or has_sword(state, player)) and can_extend_magic(state, player, 16)
+    return _can_ready_medallion(state, player) and can_extend_magic(state, player, 16)
 
 
 def can_kill_standard_start(state: CollectionState, player: int, enemies: int = 5) -> bool:

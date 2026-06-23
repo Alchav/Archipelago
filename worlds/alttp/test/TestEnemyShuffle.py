@@ -103,6 +103,24 @@ SUPPORTED_OVERRIDE_ABILITIES = {"bombs"}
 
 
 class TestEnemyShuffleValidation(unittest.TestCase):
+    def test_enemy_sprite_requirements_use_readable_names(self) -> None:
+        requirements = {
+            requirement.sprite_name: requirement
+            for requirement in _load_enemy_sprite_requirements()
+        }
+
+        self.assertIn("Red Bari", requirements)
+        self.assertIn("Octorok (four-way)", requirements)
+        self.assertIn("Cucco", requirements)
+        self.assertIn("Stalfos Knight", requirements)
+        self.assertIn("Green Zirro", requirements)
+        self.assertIn("Wizzrobe Spawner", requirements)
+
+        for requirement in requirements.values():
+            with self.subTest(sprite=requirement.sprite_name):
+                self.assertNotIn("Sprite", requirement.sprite_name)
+                self.assertNotIn("_", requirement.sprite_name)
+
     def test_effective_room_enemy_requirements_fall_back_to_default_room_data(self) -> None:
         world = SimpleNamespace(
             options=SimpleNamespace(enemy_shuffle=False),
@@ -118,10 +136,10 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertEqual(
             [requirement.sprite_name for requirement in requirements],
             [
-                "MiniMoldormSprite",
-                "MiniMoldormSprite",
-                "MiniMoldormSprite",
-                "MiniMoldormSprite",
+                "Mini Moldorm",
+                "Mini Moldorm",
+                "Mini Moldorm",
+                "Mini Moldorm",
             ],
         )
 
@@ -281,6 +299,84 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
 
+    def test_room_wide_medallion_cast_applies_to_each_enemy_once(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        try:
+            world.options.enemy_shuffle = True
+            world.enemy_shuffle_state = SimpleNamespace(
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=tuple(
+                            RandomizedDungeonEnemySprite(0, 0, 0, 13, 13, False, False)
+                            for _ in range(5)
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            )
+
+            bombos_state = logic_test.get_state(item_factory(["Fighter Sword", "Bombos"], world))
+            self.assertTrue(can_clear_enemy_room(bombos_state, 1, "Mini-Moldorm Cave"))
+
+            ether_state = logic_test.get_state(item_factory(["Fighter Sword", "Ether"], world))
+            self.assertTrue(can_clear_enemy_room(ether_state, 1, "Mini-Moldorm Cave"))
+
+            quake_state = logic_test.get_state(item_factory(["Fighter Sword", "Quake"], world))
+            self.assertTrue(can_clear_enemy_room(quake_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+
+    def test_room_clear_counts_magic_budget_across_enemies_and_potions(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        try:
+            world.options.enemy_shuffle = True
+            world.enemy_shuffle_state = SimpleNamespace(
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=tuple(
+                            RandomizedDungeonEnemySprite(0, 0, 0, 13, 13, False, False)
+                            for _ in range(9)
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            )
+
+            fire_rod_state = logic_test.get_state(item_factory(["Fire Rod"], world))
+            self.assertFalse(can_clear_enemy_room(fire_rod_state, 1, "Mini-Moldorm Cave"))
+
+            bottle_fire_rod_state = logic_test.get_state(item_factory(["Fire Rod", "Bottle"], world))
+            with patch("worlds.alttp.StateHelpers.can_buy_unlimited", return_value=True):
+                self.assertTrue(can_clear_enemy_room(bottle_fire_rod_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+
     def test_deadrock_requires_transform_and_follow_up_item(self) -> None:
         logic_test = TestLightWorld()
         logic_test.setUp()
@@ -397,6 +493,46 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
 
+    def test_room_clear_counts_arrow_capacity_across_enemies(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        original_shuffle_capacity_upgrades = world.options.shuffle_capacity_upgrades
+        try:
+            world.options.enemy_shuffle = True
+            world.options.shuffle_capacity_upgrades = True
+            world.enemy_shuffle_state = SimpleNamespace(
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=tuple(
+                            RandomizedDungeonEnemySprite(0, 0, 0, 0x84, 0x84, False, False)
+                            for _ in range(16)
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            )
+
+            bow_state = logic_test.get_state(item_factory(["Bow"], world))
+            self.assertFalse(can_clear_enemy_room(bow_state, 1, "Mini-Moldorm Cave"))
+
+            upgraded_bow_state = logic_test.get_state(item_factory(["Bow", "Arrow Upgrade (+5)"], world))
+            self.assertTrue(can_clear_enemy_room(upgraded_bow_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.options.shuffle_capacity_upgrades = original_shuffle_capacity_upgrades
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+
     def test_room_clear_uses_enemy_hit_counts_for_bomb_budget(self) -> None:
         logic_test = TestLightWorld()
         logic_test.setUp()
@@ -484,13 +620,13 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         world = logic_test.multiworld.worlds[1]
         try:
             bow_state = logic_test.get_state(item_factory(["Bow"], world))
-            self.assertFalse(can_kill_enemy_sprite(bow_state, 1, "TerrorpinSprite"))
+            self.assertFalse(can_kill_enemy_sprite(bow_state, 1, "Terrorpin"))
 
             hammer_state = logic_test.get_state(item_factory(["Hammer"], world))
-            self.assertTrue(can_kill_enemy_sprite(hammer_state, 1, "TerrorpinSprite"))
+            self.assertTrue(can_kill_enemy_sprite(hammer_state, 1, "Terrorpin"))
 
             hammer_bow_state = logic_test.get_state(item_factory(["Hammer", "Bow"], world))
-            self.assertTrue(can_kill_enemy_sprite(hammer_bow_state, 1, "TerrorpinSprite"))
+            self.assertTrue(can_kill_enemy_sprite(hammer_bow_state, 1, "Terrorpin"))
         finally:
             logic_test.tearDown()
 
@@ -525,18 +661,18 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         world = logic_test.multiworld.worlds[1]
         try:
             no_items_state = logic_test.get_state([])
-            self.assertFalse(can_kill_enemy_sprite(no_items_state, 1, "KyameronWaterSplashSprite"))
+            self.assertFalse(can_kill_enemy_sprite(no_items_state, 1, "Kyameron"))
 
             hammer_state = logic_test.get_state(item_factory(["Hammer"], world))
-            self.assertFalse(can_kill_enemy_sprite(hammer_state, 1, "KyameronWaterSplashSprite"))
+            self.assertFalse(can_kill_enemy_sprite(hammer_state, 1, "Kyameron"))
 
             ice_hammer_state = logic_test.get_state(item_factory(["Ice Rod", "Hammer"], world))
-            self.assertFalse(can_kill_enemy_sprite(ice_hammer_state, 1, "KyameronWaterSplashSprite"))
+            self.assertFalse(can_kill_enemy_sprite(ice_hammer_state, 1, "Kyameron"))
 
             ether_hammer_state = logic_test.get_state(
                 item_factory(["Ether", "Hammer", "Fighter Sword", "Magic Upgrade (1/2)"], world)
             )
-            self.assertFalse(can_kill_enemy_sprite(ether_hammer_state, 1, "KyameronWaterSplashSprite"))
+            self.assertFalse(can_kill_enemy_sprite(ether_hammer_state, 1, "Kyameron"))
         finally:
             logic_test.tearDown()
 
@@ -757,6 +893,11 @@ class TestEnemyShuffleValidation(unittest.TestCase):
 
             fire_rod_state = logic_test.get_state(item_factory(["Fire Rod", "Big Key (Eastern Palace)"], world))
             self.assertTrue(can_kill_key_drop_enemy(fire_rod_state, 1, "Eastern Palace - Dark Eyegore Key Drop"))
+
+            bombos_state = logic_test.get_state(
+                item_factory(["Bombos", "Fighter Sword", "Big Key (Eastern Palace)"], world)
+            )
+            self.assertTrue(can_kill_key_drop_enemy(bombos_state, 1, "Eastern Palace - Dark Eyegore Key Drop"))
         finally:
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
@@ -1413,14 +1554,14 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             for requirement in _load_enemy_sprite_requirements()
         }
 
-        deadrock = requirements["DeadrockSprite"]
-        devalant_non_shooter = requirements["Devalant_NonShooterSprite"]
-        mimic = requirements["MimicSprite"]
-        terrorpin = requirements["TerrorpinSprite"]
-        water_tektite = requirements["WaterTektiteSprite"]
-        kyameron = requirements["KyameronWaterSplashSprite"]
-        floating_stalfos_head = requirements["FloatingStalfosHeadSprite"]
-        spark = requirements["Spark_LeftToRightSprite"]
+        deadrock = requirements["Deadrock"]
+        devalant_non_shooter = requirements["Devalant (non-shooter)"]
+        mimic = requirements["Mimic"]
+        terrorpin = requirements["Terrorpin"]
+        water_tektite = requirements["Water Tektite"]
+        kyameron = requirements["Kyameron"]
+        floating_stalfos_head = requirements["Floating Stalfos Head"]
+        spark = requirements["Spark (clockwise)"]
 
         self.assertTrue(deadrock.killable)
         self.assertEqual(deadrock.combat_reference_id, 39)
@@ -1435,7 +1576,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertEqual(mimic.combat_reference_id, 131)
         self.assertEqual(devalant_non_shooter.combat_reference_id, 100)
         self.assertEqual(terrorpin.combat_reference_id, 142)
-        self.assertEqual(KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES[requirements["RedBariSprite"].sprite_name], (11, 13))
+        self.assertEqual(KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES[requirements["Red Bari"].sprite_name], (11, 13))
         self.assertEqual(water_tektite.dont_randomize_rooms, (40, 118))
         self.assertFalse(kyameron.killable)
         self.assertTrue(kyameron.cannot_have_key)

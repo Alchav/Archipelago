@@ -540,7 +540,7 @@ def global_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Swamp Palace (West)', player), lambda state: state._lttp_has_key('Small Key (Swamp Palace)', player, 6))
     set_rule(multiworld.get_location('Swamp Palace - Big Chest', player), lambda state: state.has('Big Key (Swamp Palace)', player))
     add_rule(multiworld.get_location('Swamp Palace - Entrance', player),
-             lambda state: can_kill_enemy_sprite(state, player, "WaterTektiteSprite"))
+             lambda state: can_kill_enemy_sprite(state, player, "Water Tektite"))
     if world.options.accessibility != 'full':
         allow_self_locking_items(multiworld.get_location('Swamp Palace - Big Chest', player), 'Big Key (Swamp Palace)')
     set_rule(multiworld.get_entrance('Swamp Palace (North)', player), lambda state: state.has('Hookshot', player) and state._lttp_has_key('Small Key (Swamp Palace)', player, 5))
