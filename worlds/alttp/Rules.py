@@ -53,7 +53,6 @@ from .Regions import LTTPRegionType, location_table
 from .StateHelpers import (can_extend_magic, can_clear_enemy_region, can_clear_enemy_regions,
                            can_kill_enemy_sprite,
                            can_kill_key_drop_enemy,
-                           can_kill_most_things,
                            can_lift_heavy_rocks, can_lift_rocks,
                            can_melt_things, can_retrieve_tablet,
                            can_shoot_arrows, has_beam_sword, has_crystals,

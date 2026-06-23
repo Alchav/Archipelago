@@ -21,8 +21,8 @@ from .Options import ALTTPOptions, small_key_shuffle
 from .PotShuffle import generate_pot_shuffle
 from .Regions import lookup_name_to_id, create_regions, mark_light_world_regions, lookup_vanilla_location_to_entrance, \
     is_main_entrance, key_drop_data
-from .Rom import LocalRom, patch_rom, patch_race_rom, apply_rom_settings, \
-    get_hash_string, get_base_rom_path, LttPDeltaPatch
+from .Rom import TokenRom, patch_rom, apply_rom_settings, \
+    get_hash_string, LttPDeltaPatch
 from .Rules import set_rules
 from .Shops import create_shops, Shop, push_shop_inventories, ShopType, price_rate_display, price_type_display_name
 from .StateHelpers import can_buy_unlimited
@@ -310,9 +310,6 @@ class ALTTPWorld(World):
 
     @classmethod
     def stage_assert_generate(cls, multiworld: MultiWorld):
-        rom_file = get_base_rom_path()
-        if not os.path.exists(rom_file):
-            raise FileNotFoundError(rom_file)
         if multiworld.is_race:
             import xxtea  # noqa
 
@@ -630,12 +627,20 @@ class ALTTPWorld(World):
         self.pushed_shop_inventories.wait()
 
         try:
-            rom = LocalRom(get_base_rom_path())
+            patch = LttPDeltaPatch(
+                os.path.join(output_directory,
+                             f"{self.multiworld.get_out_file_name_base(self.player)}{LttPDeltaPatch.patch_file_ending}"),
+                player=player,
+                player_name=multiworld.player_name[player],
+            )
+            if multiworld.is_race:
+                patch.use_encrypted_token_file()
+            rom = TokenRom(patch)
 
             patch_rom(multiworld, rom, player)
 
             if multiworld.is_race:
-                patch_race_rom(rom, multiworld, player)
+                patch.add_race_rom_encryption(multiworld, player)
 
             multiworld.spoiler.hashes[player] = get_hash_string(rom.hash)
 
@@ -662,12 +667,7 @@ class ALTTPWorld(World):
                                deathlink=self.options.death_link,
                                allowcollect=self.options.allow_collect)
 
-            rompath = os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.sfc")
-            rom.write_to_file(rompath)
-            patch = LttPDeltaPatch(os.path.splitext(rompath)[0]+LttPDeltaPatch.patch_file_ending, player=player,
-                                   player_name=multiworld.player_name[player], patched_path=rompath)
             patch.write()
-            os.unlink(rompath)
             self.rom_name = rom.name
         except:
             raise

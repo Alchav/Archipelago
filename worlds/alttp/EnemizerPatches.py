@@ -165,6 +165,11 @@ DAMAGE_GROUP_TABLE_ADDRESS = 0x3742D
 RETRO_ARROW_REPLACEMENT_CHECK_ADDRESS = 0x301FC
 RETRO_RUPEE_REPLACEMENT_SPRITE_ID = 0xDA
 ARROW_REFILL_5_SPRITE_ID = 0xE1
+VANILLA_HIDDEN_ENEMY_ITEM_TABLE = (
+    0x00, 0xD9, 0x3E, 0x79, 0xD9, 0xDC, 0xD8, 0xDA,
+    0xE4, 0xE1, 0xDC, 0xD8, 0xDF, 0xE0, 0x0B, 0x42,
+    0xD3, 0x41, 0xD4, 0xD9, 0xE3, 0xD8,
+)
 VANILLA_HIDDEN_ENEMY_CHANCE_POOL = (
     0x01, 0x01, 0x01, 0x01, 0x0F, 0x01, 0x01, 0x12,
     0x10, 0x01, 0x01, 0x01, 0x11, 0x01, 0x01, 0x03,
@@ -380,16 +385,19 @@ def _set_enemizer_flag(rom: "LocalRom", symbol_name: str, enabled: bool) -> None
 
 def _apply_killable_thief(rom: "LocalRom") -> None:
     rom.write_byte(_get_enemizer_symbol("notItemSprite_Mimic") + 4, THIEF_SPRITE_ID)
-    thief_hp_address = ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID
-    if rom.read_byte(thief_hp_address) != 0xFF:
-        rom.write_byte(thief_hp_address, THIEF_DEFAULT_HP)
+    rom.write_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID, THIEF_DEFAULT_HP)
 
 
-def _randomize_enemy_health(rom: "LocalRom", rng: random.Random, enemy_health_key: str) -> None:
+def _randomize_enemy_health(
+    rom: "LocalRom",
+    rng: random.Random,
+    enemy_health_key: str,
+    combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+) -> None:
     min_hp, max_hp = ENEMY_HEALTH_RANGE_BY_KEY[enemy_health_key]
     for sprite_id in range(0xF3):
         hp_address = ENEMY_HP_TABLE_ADDRESS + sprite_id
-        if rom.read_byte(hp_address) == 0xFF or sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
+        if combat_model.enemy_health_table[sprite_id] == 0xFF or sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
             continue
         rom.write_byte(hp_address, rng.randrange(min_hp, max_hp))
 
@@ -431,8 +439,12 @@ def _update_hidden_enemy_item_table_for_retro_mode(rom: "LocalRom") -> None:
         return
 
     item_table_address = _get_enemizer_symbol("sprite_bush_spawn_item_table")
-    for index in range(22):
-        if rom.read_byte(item_table_address + index) == ARROW_REFILL_5_SPRITE_ID:
+    for index, default_item in enumerate(VANILLA_HIDDEN_ENEMY_ITEM_TABLE):
+        try:
+            item = rom.read_byte(item_table_address + index)
+        except RuntimeError:
+            item = default_item
+        if item == ARROW_REFILL_5_SPRITE_ID:
             rom.write_byte(item_table_address + index, RETRO_RUPEE_REPLACEMENT_SPRITE_ID)
 
 

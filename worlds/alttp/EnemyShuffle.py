@@ -5,10 +5,9 @@ from typing import Optional, TYPE_CHECKING
 
 from Utils import snes_to_pc
 
-from .EnemizerPatches import apply_enemizer_base_patch
-from .Rom import LocalRom, get_base_rom_path
 from .enemizer_data.default_dungeon_room_enemies import DEFAULT_DUNGEON_ROOM_ENEMIES
 from .enemizer_data.dungeon_sprite_addresses import DUNGEON_SPRITE_ADDRESSES, KEYED_SPRITE_ID_ADDRESSES
+from .enemizer_data.enemy_shuffle_base_data import DUNGEON_ENEMY_ROOMS, DUNGEON_SPRITE_GROUPS, OVERWORLD_ENEMY_AREAS
 from .enemizer_data.enemy_combat_data import EnemyCombatModel, VANILLA_COMBAT_MODEL
 from .enemizer_data.enemy_room_metadata import (
     BOSS_ROOM_IDS,
@@ -305,23 +304,20 @@ class EnemyShuffleState:
 
 
 def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
-    rom_bytes = _get_base_patched_rom_bytes()
-    moved_header_bank = _get_enemizer_symbol("moved_room_header_bank_value_address")
-    bush_spawn_table_address = _get_enemizer_symbol("sprite_bush_spawn_table_overworld")
     metadata = _load_enemy_room_metadata()
     overworld_metadata = _load_overworld_enemy_metadata()
     sprite_requirements = _load_enemy_sprite_requirements()
     dungeon_rooms = {
         room.room_id: room
-        for room in _read_dungeon_rooms(rom_bytes, moved_header_bank, metadata)
+        for room in _load_base_dungeon_rooms(metadata)
     }
     overworld_areas = {
         area.area_id: area
-        for area in _read_overworld_areas(rom_bytes, bush_spawn_table_address, overworld_metadata)
+        for area in _load_base_overworld_areas(overworld_metadata)
     }
     sprite_groups = {
         group.group_id: group
-        for group in _read_sprite_groups(rom_bytes)
+        for group in _load_base_sprite_groups()
     }
     original_sprite_groups = _snapshot_sprite_groups(sprite_groups)
     _setup_required_dungeon_groups(world, sprite_groups, metadata["room_requirements"])
@@ -369,13 +365,102 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
 
 
 def _get_base_patched_rom_bytes() -> bytes:
-    patched_rom_bytes = getattr(_get_base_patched_rom_bytes, "patched_rom_bytes", None)
-    if patched_rom_bytes is None:
-        patched_rom = LocalRom(get_base_rom_path())
-        apply_enemizer_base_patch(patched_rom)
-        patched_rom_bytes = bytes(patched_rom.buffer)
-        _get_base_patched_rom_bytes.patched_rom_bytes = patched_rom_bytes
-    return patched_rom_bytes
+    raise RuntimeError("Enemy shuffle base data is bundled; generation should not read a local ALttP ROM.")
+
+
+def _load_base_dungeon_rooms(metadata: dict[str, object]) -> tuple[DungeonEnemyRoom, ...]:
+    rooms = getattr(_load_base_dungeon_rooms, "rooms", None)
+    if rooms is None:
+        shutter_room_ids = metadata["shutter_room_ids"]
+        water_room_ids = metadata["water_room_ids"]
+        dont_randomize_room_ids = metadata["dont_randomize_room_ids"]
+        no_special_enemies_standard_room_ids = metadata["no_special_enemies_standard_room_ids"]
+        room_requirements = metadata["room_requirements"]
+        loaded_rooms = []
+        for (
+            room_id,
+            room_header_address,
+            sprite_table_address,
+            graphics_block_id,
+            tag_1,
+            tag_2,
+            sort_sprites_value,
+            sprites,
+            all_sprites,
+        ) in DUNGEON_ENEMY_ROOMS:
+            merged_requirement = _merge_room_requirements(room_id, room_requirements)
+            loaded_rooms.append(
+                DungeonEnemyRoom(
+                    room_id=room_id,
+                    room_header_address=room_header_address,
+                    sprite_table_address=sprite_table_address,
+                    graphics_block_id=graphics_block_id,
+                    tag_1=tag_1,
+                    tag_2=tag_2,
+                    sort_sprites_value=sort_sprites_value,
+                    sprites=tuple(DungeonEnemySprite(*sprite) for sprite in sprites),
+                    all_sprites=tuple(DungeonEnemySprite(*sprite) for sprite in all_sprites),
+                    required_group_id=merged_requirement.group_id,
+                    required_subgroup_0=merged_requirement.subgroup_0,
+                    required_subgroup_1=merged_requirement.subgroup_1,
+                    required_subgroup_2=merged_requirement.subgroup_2,
+                    required_subgroup_3=merged_requirement.subgroup_3,
+                    is_shutter_room=room_id in shutter_room_ids,
+                    is_water_room=room_id in water_room_ids,
+                    do_not_randomize=room_id in dont_randomize_room_ids,
+                    no_special_enemies_standard=room_id in no_special_enemies_standard_room_ids,
+                )
+            )
+        rooms = tuple(loaded_rooms)
+        _load_base_dungeon_rooms.rooms = rooms
+    return rooms
+
+
+def _load_base_sprite_groups() -> tuple[DungeonSpriteGroup, ...]:
+    groups = getattr(_load_base_sprite_groups, "groups", None)
+    if groups is None:
+        groups = tuple(DungeonSpriteGroup(*group) for group in DUNGEON_SPRITE_GROUPS)
+        _load_base_sprite_groups.groups = groups
+    return tuple(
+        DungeonSpriteGroup(
+            group.group_id,
+            group.dungeon_group_id,
+            group.subgroup_0,
+            group.subgroup_1,
+            group.subgroup_2,
+            group.subgroup_3,
+        )
+        for group in groups
+    )
+
+
+def _load_base_overworld_areas(metadata: dict[str, object]) -> tuple[OverworldEnemyArea, ...]:
+    areas = getattr(_load_base_overworld_areas, "areas", None)
+    if areas is None:
+        do_not_randomize_area_ids = metadata["do_not_randomize_area_ids"]
+        loaded_areas = []
+        for (
+            area_id,
+            sprite_table_address,
+            graphics_block_address,
+            graphics_block_id,
+            bush_sprite_id,
+            sprites,
+        ) in OVERWORLD_ENEMY_AREAS:
+            loaded_areas.append(
+                OverworldEnemyArea(
+                    area_id=area_id,
+                    sprite_table_address=sprite_table_address,
+                    graphics_block_address=graphics_block_address,
+                    graphics_block_id=graphics_block_id,
+                    bush_sprite_id=bush_sprite_id,
+                    sprites=tuple(OverworldEnemySprite(*sprite) for sprite in sprites),
+                    do_not_randomize=area_id in do_not_randomize_area_ids,
+                )
+            )
+        areas = tuple(loaded_areas)
+        _load_base_overworld_areas.areas = areas
+    return areas
 
 
 def _read_dungeon_rooms(rom_bytes: bytes, moved_header_bank_address: int, metadata: dict[str, object]) -> list[DungeonEnemyRoom]:

@@ -22,6 +22,56 @@ BOSS_PRIZE_DUNGEON_COUNTER_ADDRESSES: dict[str, int] = {
     "Misery Mire - Prize": 0x187007,
     "Turtle Rock - Prize": 0x18700C,
 }
+BOSS_PRIZE_DUNGEON_COUNTER_DEFAULTS: dict[str, int] = {
+    "Eastern Palace - Prize": 6,
+    "Desert Palace - Prize": 6,
+    "Tower of Hera - Prize": 6,
+    "Palace of Darkness - Prize": 14,
+    "Swamp Palace - Prize": 10,
+    "Skull Woods - Prize": 8,
+    "Thieves' Town - Prize": 8,
+    "Ice Palace - Prize": 8,
+    "Misery Mire - Prize": 8,
+    "Turtle Rock - Prize": 12,
+}
+VANILLA_DIG_PRIZES = bytes((
+    0xB2, 0xD8, 0xD8, 0xD8, 0xD8, 0xD8, 0xD8, 0xD8,
+    0xD8, 0xD9, 0xD9, 0xD9, 0xD9, 0xD9, 0xDA, 0xDA,
+    0xDA, 0xDA, 0xDA, 0xDB, 0xDB, 0xDB, 0xDB, 0xDB,
+    0xDC, 0xDC, 0xDC, 0xDC, 0xDC, 0xDD, 0xDD, 0xDD,
+    0xDD, 0xDD, 0xDE, 0xDE, 0xDE, 0xDE, 0xDE, 0xDF,
+    0xDF, 0xDF, 0xDF, 0xDF, 0xE0, 0xE0, 0xE0, 0xE0,
+    0xE0, 0xE1, 0xE1, 0xE1, 0xE1, 0xE1, 0xE2, 0xE2,
+    0xE2, 0xE2, 0xE2, 0xE3, 0xE3, 0xE3, 0xE3, 0xE3,
+))
+VANILLA_ENEMY_PRIZES = bytes((
+    0xD8, 0xD8, 0xD8, 0xD8, 0xD9, 0xD8, 0xD8, 0xD9,
+    0xDA, 0xD9, 0xDA, 0xDB, 0xDA, 0xD9, 0xDA, 0xDA,
+    0xE0, 0xDF, 0xDF, 0xDA, 0xE0, 0xDF, 0xD8, 0xDF,
+    0xDC, 0xDC, 0xDC, 0xDD, 0xDC, 0xDC, 0xDE, 0xDC,
+    0xE1, 0xD8, 0xE1, 0xE2, 0xE1, 0xD8, 0xE1, 0xE2,
+    0xDF, 0xD9, 0xD8, 0xE1, 0xDF, 0xDC, 0xD9, 0xD8,
+    0xD8, 0xE3, 0xE0, 0xDB, 0xDE, 0xD8, 0xDB, 0xE2,
+))
+VANILLA_SINGLE_PRIZES = {
+    0xEFBD4: 0xD9,
+    0xEFBD5: 0xDA,
+    0xEFBD6: 0xDB,
+    0x329C8: 0xD9,
+    0x329C4: 0xDB,
+    0x37993: 0xD9,
+    0xE82CC: 0xDB,
+}
+VANILLA_BONK_PRIZES = bytes((
+    0x79, 0xE3, 0x79, 0xAC, 0xAC, 0xE0, 0xDC, 0xAC,
+    0xE3, 0xE3, 0xDA, 0xE3, 0xDA, 0x43, 0xAC, 0xAC,
+    0xE3, 0xD8, 0xE3, 0xE3, 0xE3, 0xE3, 0xE3, 0xE3,
+    0xDC, 0xDB, 0xE3, 0xDA, 0x79, 0x79, 0xE3, 0xE3,
+    0xDA, 0x79, 0xAC, 0xAC, 0x79, 0xE3, 0x79, 0xAC,
+    0xAC, 0xE0, 0xDC, 0xE3, 0x79, 0xDE, 0xE3, 0xAC,
+    0xDB, 0x79, 0xE3, 0x45, 0xAC, 0x79, 0xE3, 0xDB,
+    0xDB, 0xE3, 0xE3, 0x79, 0xD8, 0xDD,
+))
 
 import io
 import json
@@ -53,7 +103,7 @@ from .Text import KingsReturn_texts, Sanctuary_texts, Kakariko_texts, Blacksmith
     SickKid_texts, FluteBoy_texts, Zora_texts, MagicShop_texts, Sahasrahla_names
 from .Items import item_table, item_name_groups, progression_items, key_ring_table
 from .EntranceShuffle import door_addresses
-from .Graphics import patch_boss_prize_crystal_sprite
+from .Graphics import patch_boss_prize_crystal_sprite, patch_boss_prize_crystal_sprite_data
 from .Options import small_key_shuffle
 
 if TYPE_CHECKING:
@@ -70,12 +120,184 @@ try:
 except:
     xxtea = None
 
+
+def _require_xxtea():
+    global xxtea
+    if xxtea is None:
+        import xxtea
+    return xxtea
+
+
+def _require_z3pr():
+    global z3pr, build_offset_collections
+    if z3pr is None:
+        from maseya import z3pr as z3pr_module
+        from maseya.z3pr.palette_randomizer import build_offset_collections as build_offset_collections_function
+        z3pr = z3pr_module
+        build_offset_collections = build_offset_collections_function
+    return z3pr, build_offset_collections
+
+
+class LttPPatchExtensions(worlds.Files.APPatchExtension):
+    game = "A Link to the Past"
+
+    @staticmethod
+    def apply_encrypted_tokens(caller: worlds.Files.APProcedurePatch, rom: bytes, token_file: str,
+                               key_file: str) -> bytes:
+        token_data = _require_xxtea().decrypt(caller.get_file(token_file), caller.get_file(key_file))
+
+        class TokenData:
+            def get_file(self, _: str) -> bytes:
+                return token_data
+
+        return worlds.Files.APPatchExtension.apply_tokens(TokenData(), rom, token_file)
+
+    @staticmethod
+    def apply_boss_prize_crystal_sprite(_: worlds.Files.APProcedurePatch, rom: bytes) -> bytes:
+        return patch_boss_prize_crystal_sprite_data(rom)
+
+    @staticmethod
+    def apply_ap_sprites(caller: worlds.Files.APProcedurePatch, rom: bytes, sprites_file: str) -> bytes:
+        rom_data = bytearray(rom)
+        base_sprite_data = bytes(
+            rom_data[0x80000:0x87000]
+            + rom_data[0xDD308:0xDD380]
+            + rom_data[0xDEDF5:0xDEDF9]
+        )
+        for sprite_patch in json.loads(caller.get_file(sprites_file).decode("utf-8")):
+            sprite_data = bsdiff4.patch(base_sprite_data, caller.get_file(sprite_patch["file"]))
+            sprite = sprite_data[:Sprite.sprite_size]
+            palette = sprite_data[Sprite.sprite_size:Sprite.sprite_size + Sprite.palette_size]
+            glove_palette = sprite_data[Sprite.sprite_size + Sprite.palette_size:]
+
+            if sprite_patch["primary"]:
+                rom_data[0x80000:0x87000] = sprite
+                rom_data[0xDD308:0xDD380] = palette
+                rom_data[0xDEDF5:0xDEDF9] = glove_palette
+
+            slot = sprite_patch["slot"]
+            if slot is not None:
+                sprite_address = 0x300000 + (slot * 0x8000)
+                palette_address = 0x307000 + (slot * 0x8000)
+                glove_palette_address = 0x307078 + (slot * 0x8000)
+                rom_data[sprite_address:sprite_address + Sprite.sprite_size] = sprite
+                rom_data[palette_address:palette_address + Sprite.palette_size] = palette
+                rom_data[glove_palette_address:glove_palette_address + Sprite.glove_size] = glove_palette
+
+        return bytes(rom_data)
+
+    @staticmethod
+    def apply_boss_shuffle(caller: worlds.Files.APProcedurePatch, rom: bytes, boss_file: str) -> bytes:
+        from . import EnemizerPatches as enemizer_patches
+
+        patch_data = json.loads(caller.get_file(boss_file).decode("utf-8"))
+        mode = patch_data["mode"]
+
+        class Boss:
+            def __init__(self, enemizer_name: str) -> None:
+                self.enemizer_name = enemizer_name
+
+        class Dungeon:
+            def __init__(self, boss_name: str | None = None, bosses: dict[str, str] | None = None) -> None:
+                self.boss = Boss(boss_name) if boss_name is not None else None
+                self.bosses = {slot: Boss(name) for slot, name in (bosses or {}).items()}
+
+        class Options:
+            def __init__(self, mode: str) -> None:
+                self.mode = mode
+
+        class World:
+            def __init__(self, mode: str, dungeons: dict[str, Dungeon]) -> None:
+                self.options = Options(mode)
+                self.dungeons = dungeons
+
+        dungeons = {
+            dungeon_name: Dungeon(boss_name)
+            for dungeon_name, boss_name in patch_data["dungeons"].items()
+        }
+        gt_name = "Ganons Tower" if mode != "inverted" else "Inverted Ganons Tower"
+        dungeons[gt_name] = Dungeon(bosses=patch_data["gt_bosses"])
+
+        rom_data = ProcedureRom(rom)
+        enemizer_patches.patch_bosses(World(mode, dungeons), rom_data)
+        return rom_data.get_bytes()
+
+    @staticmethod
+    def apply_z3pr_palettes(caller: worlds.Files.APProcedurePatch, rom: bytes, palettes_file: str) -> bytes:
+        palette_randomizer, build_offsets = _require_z3pr()
+        rom_data = bytearray(rom)
+        palette_patches = json.loads(caller.get_file(palettes_file).decode("utf-8"))
+        ColorF = palette_randomizer.ColorF
+
+        for patch in palette_patches:
+            mode = patch["mode"]
+            if mode == "default":
+                continue
+            if mode in ("good", "random"):
+                mode = "maseya"
+
+            rng = random.Random(patch["seed"])
+
+            def next_color_generator():
+                while True:
+                    yield ColorF(rng.random(), rng.random(), rng.random())
+
+            data_dir = local_path("data") if is_frozen() else None
+            offsets_array = build_offsets({patch["option_name"]: True}, data_dir)
+            palette_randomizer.randomize(
+                rom_data, mode, offset_collections=offsets_array, random_colors=next_color_generator())
+
+        return bytes(rom_data)
+
+    @staticmethod
+    def apply_race_rom_encryption(caller: worlds.Files.APProcedurePatch, rom: bytes, key_file: str) -> bytes:
+        key = caller.get_file(key_file)
+        cryptography = _require_xxtea()
+        rom_data = ProcedureRom(rom)
+
+        rom_data.write_bytes(0x180213, [0x01, 0x00])
+        rom_data.write_bytes(0x1800B0, key)
+        rom_data.write_int16(0x180087, 1)
+
+        itemtable = []
+        locationtable = []
+        itemplayertable = []
+        for i in range(168):
+            itemtable.append(rom_data.read_byte(0xE96E + (i * 3)))
+            itemplayertable.append(rom_data.read_byte(0x186142 + (i * 3)))
+            locationtable.append(rom_data.read_byte(0xE96C + (i * 3)))
+            locationtable.append(rom_data.read_byte(0xE96D + (i * 3)))
+
+        rom_data.write_bytes(0xE96C, locationtable)
+        rom_data.write_bytes(0xE96C + 0x150, itemtable)
+        _encrypt_range(rom_data, 0xE96C + 0x150, 168, key, cryptography)
+        rom_data.write_bytes(0x186140, [0] * 0x150)
+        rom_data.write_bytes(0x186140 + 0x150, itemplayertable)
+        _encrypt_range(rom_data, 0x186140 + 0x150, 168, key, cryptography)
+        _encrypt_range(rom_data, 0x186338, 56, key, cryptography)
+        _encrypt_range(rom_data, 0x180000, 32, key, cryptography)
+        _encrypt_range(rom_data, 0x180140, 32, key, cryptography)
+        _encrypt_range(rom_data, 0xEDA1, 8, key, cryptography)
+        return rom_data.get_bytes()
+
+
+def _encrypt_range(rom, startaddress: int, length: int, key: bytes, cryptography=None) -> None:
+    if cryptography is None:
+        cryptography = _require_xxtea()
+    for i in range(0, length, 8):
+        data = bytes(rom.read_bytes(startaddress + i, 8))
+        data = cryptography.encrypt(data, key, padding=False)
+        rom.write_bytes(startaddress + i, bytearray(data))
+
+
 class LocalRom:
 
-    def __init__(self, file, patch=True, vanillaRom=None, name=None, hash=None):
+    def __init__(self, file, patch=True, vanillaRom=None, name=None, hash=None,
+                 token_patch: Optional["LttPDeltaPatch"] = None):
         self.name = name
         self.hash = hash
         self.orig_buffer = None
+        self.token_patch = None
 
         with open(file, 'rb') as stream:
             self.buffer = read_snes_rom(stream)
@@ -85,6 +307,7 @@ class LocalRom:
         if vanillaRom:
             with open(vanillaRom, 'rb') as vanillaStream:
                 self.orig_buffer = read_snes_rom(vanillaStream)
+        self.token_patch = token_patch
 
     def read_byte(self, address: int) -> int:
         return self.buffer[address]
@@ -93,16 +316,31 @@ class LocalRom:
         return self.buffer[startaddress:startaddress + length]
 
     def write_byte(self, address: int, value: int):
-        self.buffer[address] = value
+        self.write_bytes(address, (value,))
 
     def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
+        values = bytes(values)
         self.buffer[startaddress:startaddress + len(values)] = values
+        if self.token_patch:
+            self.token_patch.write_bytes(startaddress, values)
+
+    def record_changed_bytes(self, old_buffer: bytes) -> None:
+        if len(old_buffer) != len(self.buffer):
+            raise ValueError("Cannot record direct ROM buffer changes when buffer size changed.")
+
+        start = None
+        for address, (old_value, new_value) in enumerate(zip(old_buffer, self.buffer)):
+            if old_value != new_value:
+                if start is None:
+                    start = address
+            elif start is not None:
+                self.write_bytes(start, self.buffer[start:address])
+                start = None
+        if start is not None:
+            self.write_bytes(start, self.buffer[start:])
 
     def encrypt_range(self, startaddress: int, length: int, key: bytes):
-        for i in range(0, length, 8):
-            data = bytes(self.read_bytes(startaddress + i, 8))
-            data = xxtea.encrypt(data, key, padding=False)
-            self.write_bytes(startaddress + i, bytearray(data))
+        _encrypt_range(self, startaddress, length, key, xxtea)
 
     def encrypt(self, world, player):
         global xxtea
@@ -194,13 +432,97 @@ class LocalRom:
             self.write_int32(startaddress + (i * 4), value)
 
 
+class TokenRom:
+    orig_buffer = None
+
+    def __init__(self, token_patch: "LttPDeltaPatch", name=None, hash=None):
+        self.name = name
+        self.hash = hash
+        self.token_patch = token_patch
+        self._written_bytes: dict[int, int] = {}
+
+    def read_byte(self, address: int) -> int:
+        try:
+            return self._written_bytes[address]
+        except KeyError as e:
+            raise RuntimeError(f"Token-only ALttP ROM tried to read unwritten byte {address:#x}") from e
+
+    def read_bytes(self, startaddress: int, length: int) -> bytearray:
+        return bytearray(self.read_byte(startaddress + offset) for offset in range(length))
+
+    def write_byte(self, address: int, value: int):
+        self.write_bytes(address, (value,))
+
+    def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
+        values = bytes(values)
+        for offset, value in enumerate(values):
+            self._written_bytes[startaddress + offset] = value
+        self.token_patch.write_bytes(startaddress, values)
+
+    def write_int16(self, address: int, value: int):
+        self.write_bytes(address, int16_as_bytes(value))
+
+    def write_int32(self, address: int, value: int):
+        self.write_bytes(address, int32_as_bytes(value))
+
+    def write_int16s(self, startaddress: int, values):
+        for i, value in enumerate(values):
+            self.write_int16(startaddress + (i * 2), value)
+
+    def write_int32s(self, startaddress: int, values):
+        for i, value in enumerate(values):
+            self.write_int32(startaddress + (i * 4), value)
+
+    def copy_bytes(self, destination: int, source: int, length: int) -> None:
+        self.token_patch.write_token(worlds.Files.APTokenTypes.COPY, destination, (length, source))
+
+    def get_hash(self) -> str:
+        h = hashlib.md5()
+        h.update(self.token_patch.get_token_binary())
+        return h.hexdigest()
+
+
+class ProcedureRom:
+    def __init__(self, rom: bytes | bytearray):
+        self.buffer = bytearray(rom)
+
+    def read_byte(self, address: int) -> int:
+        return self.buffer[address]
+
+    def read_bytes(self, startaddress: int, length: int) -> bytearray:
+        return self.buffer[startaddress:startaddress + length]
+
+    def write_byte(self, address: int, value: int):
+        self.buffer[address] = value
+
+    def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
+        values = bytes(values)
+        self.buffer[startaddress:startaddress + len(values)] = values
+
+    def write_int16(self, address: int, value: int):
+        self.write_bytes(address, int16_as_bytes(value))
+
+    def write_int32(self, address: int, value: int):
+        self.write_bytes(address, int32_as_bytes(value))
+
+    def get_bytes(self) -> bytes:
+        return bytes(self.buffer)
+
+
+def read_byte_or_default(rom, address: int, default: int) -> int:
+    try:
+        return rom.read_byte(address)
+    except RuntimeError:
+        return default
+
+
 def apply_random_sprite_on_event(rom: LocalRom, sprite, local_random, allow_random_on_event, sprite_pool):
     userandomsprites = False
     if sprite and not isinstance(sprite, Sprite):
         sprite = sprite.lower()
         userandomsprites = sprite.startswith('randomon')
 
-        racerom = rom.read_byte(0x180213)
+        racerom = read_byte_or_default(rom, 0x180213, 0x00)
         if allow_random_on_event or not racerom:
             # Changes to this byte for race rom seeds are only permitted on initial rolling of the seed.
             # However, if the seed is not a racerom seed, then it is always allowed.
@@ -256,9 +578,7 @@ def apply_random_sprite_on_event(rom: LocalRom, sprite, local_random, allow_rand
             for i, sprite in enumerate(sprites[:32]):
                 if not i and not userandomsprites:
                     continue
-                rom.write_bytes(0x300000 + (i * 0x8000), sprite.sprite)
-                rom.write_bytes(0x307000 + (i * 0x8000), sprite.palette)
-                rom.write_bytes(0x307078 + (i * 0x8000), sprite.glove_palette)
+                sprite.write_to_sprite_slot(rom, i)
 
 tile_list_lock = threading.Lock()
 _tile_collection_table = []
@@ -335,8 +655,8 @@ def _populate_sprite_table():
                         pool.submit(load_sprite_from_file, os.path.join(dir, file))
 
             if "link" not in _sprite_table:
-                logging.info("Link sprite was not loaded. Loading link from base rom")
-                load_sprite_from_file(get_base_rom_path())
+                logging.info("Link sprite was not loaded. Loading default Link sprite")
+                load_sprite_from_file(local_path("data", "default.apsprite"))
 
 
 class Sprite():
@@ -347,8 +667,9 @@ class Sprite():
     base_data: bytes
 
     def __init__(self, filename):
-        if not hasattr(Sprite, "base_data"):
-            self.get_vanilla_sprite_data()
+        self.is_vanilla_link = False
+        self.is_ap_sprite_patch = False
+        self.ap_sprite_patch_data = b""
         with open(filename, 'rb') as file:
             filedata = file.read()
         self.name = os.path.basename(filename)
@@ -384,6 +705,8 @@ class Sprite():
             self.valid = False
 
     def get_vanilla_sprite_data(self):
+        if hasattr(Sprite, "base_data"):
+            return
         file_name = get_base_rom_path()
         base_rom_bytes = bytes(read_snes_rom(open(file_name, "rb")))
         Sprite.sprite = base_rom_bytes[0x80000:0x87000]
@@ -400,10 +723,13 @@ class Sprite():
             self.author_name = obj["author"]
             self.name = obj["name"]
             if obj["data"]:  # skip patching for vanilla content
-                data = bsdiff4.patch(Sprite.base_data, obj["data"])
-                self.sprite = data[:self.sprite_size]
-                self.palette = data[self.sprite_size:self.palette_size]
-                self.glove_palette = data[self.sprite_size + self.palette_size:]
+                self.is_ap_sprite_patch = True
+                self.ap_sprite_patch_data = bytes(obj["data"])
+            else:
+                self.is_vanilla_link = True
+                self.sprite = b""
+                self.palette = b""
+                self.glove_palette = b""
         except Exception:
             logger = logging.getLogger("apsprite")
             logger.exception("Error parsing apsprite file")
@@ -433,6 +759,15 @@ class Sprite():
     def get_delta(self):
         modified_data = self.sprite + self.palette + self.glove_palette
         return bsdiff4.diff(Sprite.base_data, modified_data)
+
+    def decode_ap_sprite_patch(self) -> None:
+        if not self.is_ap_sprite_patch or getattr(self, "sprite", None):
+            return
+        self.get_vanilla_sprite_data()
+        data = bsdiff4.patch(Sprite.base_data, self.ap_sprite_patch_data)
+        self.sprite = data[:self.sprite_size]
+        self.palette = data[self.sprite_size:self.sprite_size + self.palette_size]
+        self.glove_palette = data[self.sprite_size + self.palette_size:]
 
     def from_zspr(self, filedata, filename):
         result = self.parse_zspr(filedata, 1)
@@ -580,12 +915,39 @@ class Sprite():
         if not self.valid:
             logging.warning("Tried writing invalid sprite to rom, skipping.")
             return
+        if self.is_vanilla_link:
+            self.write_to_sprite_slot(rom, 0)
+            return
+        if self.is_ap_sprite_patch and isinstance(rom, TokenRom):
+            rom.token_patch.add_ap_sprite_patch(self.ap_sprite_patch_data, primary=True, slot=0)
+            return
+        self.decode_ap_sprite_patch()
         rom.write_bytes(0x80000, self.sprite)
         rom.write_bytes(0xDD308, self.palette)
         rom.write_bytes(0xDEDF5, self.glove_palette)
-        rom.write_bytes(0x300000, self.sprite)
-        rom.write_bytes(0x307000, self.palette)
-        rom.write_bytes(0x307078, self.glove_palette)
+        self.write_to_sprite_slot(rom, 0)
+
+    def write_to_sprite_slot(self, rom: LocalRom, slot: int) -> None:
+        sprite_address = 0x300000 + (slot * 0x8000)
+        palette_address = 0x307000 + (slot * 0x8000)
+        glove_palette_address = 0x307078 + (slot * 0x8000)
+        if self.is_vanilla_link:
+            if hasattr(rom, "copy_bytes"):
+                rom.copy_bytes(sprite_address, 0x80000, self.sprite_size)
+                rom.copy_bytes(palette_address, 0xDD308, self.palette_size)
+                rom.copy_bytes(glove_palette_address, 0xDEDF5, self.glove_size)
+            else:
+                rom.write_bytes(sprite_address, rom.read_bytes(0x80000, self.sprite_size))
+                rom.write_bytes(palette_address, rom.read_bytes(0xDD308, self.palette_size))
+                rom.write_bytes(glove_palette_address, rom.read_bytes(0xDEDF5, self.glove_size))
+            return
+        if self.is_ap_sprite_patch and isinstance(rom, TokenRom):
+            rom.token_patch.add_ap_sprite_patch(self.ap_sprite_patch_data, primary=False, slot=slot)
+            return
+        self.decode_ap_sprite_patch()
+        rom.write_bytes(sprite_address, self.sprite)
+        rom.write_bytes(palette_address, self.palette)
+        rom.write_bytes(glove_palette_address, self.glove_palette)
 
 
 bonk_addresses = [0x4CF6C, 0x4CFBA, 0x4CFE0, 0x4CFFB, 0x4D018, 0x4D01B, 0x4D028, 0x4D03C, 0x4D059, 0x4D07A,
@@ -672,7 +1034,11 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
 
     rom.write_byte(0x18018E, 0x01 if local_world.options.boss_prize_shuffle else 0x00)
     if local_world.options.boss_prize_shuffle:
-        patch_boss_prize_crystal_sprite(rom)
+        token_patch = getattr(rom, "token_patch", None)
+        if token_patch:
+            token_patch.add_boss_prize_crystal_sprite_patch()
+        else:
+            patch_boss_prize_crystal_sprite(rom)
 
     if local_world.options.map_shuffle:
         rom.write_byte(0x155C9, local_random.choice([0x11, 0x16]))  # Randomize GT music too with map shuffle
@@ -780,7 +1146,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         credits_total += len(boss_prize_location_table)
         for location_name in boss_prize_location_table:
             counter_address = BOSS_PRIZE_DUNGEON_COUNTER_ADDRESSES[location_name]
-            rom.write_byte(counter_address, rom.read_byte(counter_address) + 1)
+            counter = read_byte_or_default(rom, counter_address, BOSS_PRIZE_DUNGEON_COUNTER_DEFAULTS[location_name])
+            rom.write_byte(counter_address, counter + 1)
 
     # collection rate address: 238C37
     first_top, first_bot = credits_digit((credits_total / 100) % 10)
@@ -993,16 +1360,15 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         rom.write_bytes(0x37A78, prizes)
 
     elif prize_replacements:
-        dig_prizes = list(rom.read_bytes(0x180100, 64))
+        dig_prizes = list(VANILLA_DIG_PRIZES)
         dig_prizes = [prize_replacements.get(byte, byte) for byte in dig_prizes]
         rom.write_bytes(0x180100, dig_prizes)
 
-        prizes = list(rom.read_bytes(0x37A78, 56))
+        prizes = list(VANILLA_ENEMY_PRIZES)
         prizes = [prize_replacements.get(byte, byte) for byte in prizes]
         rom.write_bytes(0x37A78, prizes)
 
-        for address in (0xEFBD4, 0xEFBD5, 0xEFBD6, 0x329C8, 0x329C4, 0x37993, 0xE82CC):
-            byte = int(rom.read_byte(address))
+        for address, byte in VANILLA_SINGLE_PRIZES.items():
             rom.write_byte(address, prize_replacements.get(byte, byte))
 
     if local_world.options.shuffle_prizes in ("bonk", "both"):
@@ -1022,8 +1388,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
             rom.write_byte(address, prize)
 
     elif prize_replacements:
-        for address in bonk_addresses:
-            byte = int(rom.read_byte(address))
+        for address, byte in zip(bonk_addresses, VANILLA_BONK_PRIZES):
             rom.write_byte(address, prize_replacements.get(byte, byte))
 
     # Fill in item substitutions table
@@ -1646,7 +2011,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
 
         if enemy_health_key != "default":
             assert rng is not None
-            enemizer_patches._randomize_enemy_health(rom, rng, enemy_health_key)
+            enemizer_patches._randomize_enemy_health(rom, rng, enemy_health_key, combat_model)
 
         if enemy_damage_key != "default":
             assert rng is not None
@@ -1664,7 +2029,10 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         if local_world.options.boss_shuffle:
             # Boss shuffle must run after enemy shuffle so boss room sprite pointers
             # and graphics block IDs are not restored to the enemy-shuffled room values.
-            enemizer_patches.patch_bosses(local_world, rom)
+            if isinstance(rom, TokenRom):
+                rom.token_patch.add_boss_shuffle_patch(local_world)
+            else:
+                enemizer_patches.patch_bosses(local_world, rom)
 
         pot_shuffle_state = getattr(local_world, "pot_shuffle_state", None)
         if local_world.options.pot_shuffle and pot_shuffle_state is not None:
@@ -1906,12 +2274,17 @@ def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, me
 
     if triforcehud:
         # set triforcehud
-        triforce_flag = (rom.read_byte(0x180167) & 0x80) | \
+        triforce_flag = (read_byte_or_default(rom, 0x180167, 0x00) & 0x80) | \
                         {'normal': 0x00, 'hide_goal': 0x01, 'hide_required': 0x02, 'hide_both': 0x03}[triforcehud]
         rom.write_byte(0x180167, triforce_flag)
 
     if z3pr:
         def buildAndRandomize(option_name: str, mode: str):
+            if isinstance(rom, TokenRom):
+                if mode != "default":
+                    rom.token_patch.add_z3pr_palette_randomization(option_name, mode, local_random.getrandbits(64))
+                return
+
             options = {
                 option_name: True
             }
@@ -1927,9 +2300,12 @@ def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, me
                 while True:
                     yield ColorF(local_random.random(), local_random.random(), local_random.random())
 
-            if mode == 'good':
+            if mode in ('good', 'random'):
                 mode = 'maseya'
+            old_buffer = bytes(rom.buffer) if getattr(rom, "token_patch", None) else None
             z3pr.randomize(rom.buffer, mode, offset_collections=offsets_array, random_colors=next_color_generator())
+            if old_buffer is not None:
+                rom.record_changed_bytes(old_buffer)
 
         uw_palettes = palettes_options['dungeon']
         ow_palettes = palettes_options['overworld']
@@ -1971,7 +2347,7 @@ def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, me
     if oof is not None:
         apply_oof_sfx(rom, oof)
 
-    if isinstance(rom, LocalRom):
+    if isinstance(rom, LocalRom) and not getattr(rom, "token_patch", None):
         rom.write_crc()
 
 
@@ -3085,14 +3461,157 @@ hash_alphabet = [
 ]
 
 
-class LttPDeltaPatch(worlds.Files.APDeltaPatch):
+class LttPDeltaPatch(worlds.Files.APProcedurePatch, worlds.Files.APTokenMixin):
     hash = LTTPJPN10HASH
     game = "A Link to the Past"
     patch_file_ending = ".aplttp"
+    procedure = [
+        ("apply_bsdiff4", ["basepatch.bsdiff4"]),
+        ("apply_tokens", ["token_patch.bin"]),
+        ("calc_snes_crc", []),
+    ]
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.encrypt_token_file = False
+        self.token_file_key: Optional[bytes] = None
+        self.patch_boss_prize_crystal_sprite = False
+        self.ap_sprite_patches: list[dict[str, str | int | bool | None]] = []
+        self.ap_sprite_files: dict[str, bytes] = {}
+        self.boss_shuffle_patch: Optional[dict[str, object]] = None
+        self.race_rom_key: Optional[bytes] = None
+        self.z3pr_palette_patches: list[dict[str, str | int]] = []
 
     @classmethod
     def get_source_data(cls) -> bytes:
         return get_base_rom_bytes()
+
+    def add_boss_prize_crystal_sprite_patch(self) -> None:
+        self.patch_boss_prize_crystal_sprite = True
+
+    def add_ap_sprite_patch(self, patch_data: bytes, *, primary: bool, slot: Optional[int]) -> None:
+        h = hashlib.md5()
+        h.update(patch_data)
+        file_name = f"ap_sprite_{h.hexdigest()}.bsdiff4"
+        self.ap_sprite_files[file_name] = patch_data
+        self.ap_sprite_patches.append({
+            "file": file_name,
+            "primary": primary,
+            "slot": slot,
+        })
+
+    def add_boss_shuffle_patch(self, world: "ALTTPWorld") -> None:
+        mode = world.options.mode.current_key
+        gt_dungeon_name = "Ganons Tower" if mode != "inverted" else "Inverted Ganons Tower"
+        gt_dungeon = world.dungeons[gt_dungeon_name]
+        self.boss_shuffle_patch = {
+            "mode": mode,
+            "dungeons": {
+                "Eastern Palace": world.dungeons["Eastern Palace"].boss.enemizer_name,
+                "Desert Palace": world.dungeons["Desert Palace"].boss.enemizer_name,
+                "Tower of Hera": world.dungeons["Tower of Hera"].boss.enemizer_name,
+                "Palace of Darkness": world.dungeons["Palace of Darkness"].boss.enemizer_name,
+                "Swamp Palace": world.dungeons["Swamp Palace"].boss.enemizer_name,
+                "Skull Woods": world.dungeons["Skull Woods"].boss.enemizer_name,
+                "Thieves Town": world.dungeons["Thieves Town"].boss.enemizer_name,
+                "Ice Palace": world.dungeons["Ice Palace"].boss.enemizer_name,
+                "Misery Mire": world.dungeons["Misery Mire"].boss.enemizer_name,
+                "Turtle Rock": world.dungeons["Turtle Rock"].boss.enemizer_name,
+            },
+            "gt_bosses": {
+                "bottom": gt_dungeon.bosses["bottom"].enemizer_name,
+                "middle": gt_dungeon.bosses["middle"].enemizer_name,
+                "top": gt_dungeon.bosses["top"].enemizer_name,
+            },
+        }
+
+    def add_z3pr_palette_randomization(self, option_name: str, mode: str, seed: int) -> None:
+        self.z3pr_palette_patches.append({
+            "option_name": option_name,
+            "mode": mode,
+            "seed": seed,
+        })
+
+    def add_race_rom_encryption(self, multiworld: MultiWorld, player: int) -> None:
+        local_random = multiworld.worlds[player].random
+        self.race_rom_key = bytes(local_random.getrandbits(8 * 16).to_bytes(16, "big"))
+
+    def use_encrypted_token_file(self) -> None:
+        self.encrypt_token_file = True
+        if self.token_file_key is None:
+            self.token_file_key = os.urandom(16)
+
+    def get_procedure(self) -> list[tuple[str, list]]:
+        token_step = (
+            ("apply_encrypted_tokens", ["token_patch.bin.enc", "race_token_key.bin"])
+            if self.encrypt_token_file
+            else ("apply_tokens", ["token_patch.bin"])
+        )
+        procedure = [
+            ("apply_bsdiff4", ["basepatch.bsdiff4"]),
+            token_step,
+        ]
+        if self.ap_sprite_patches:
+            procedure.append(("apply_ap_sprites", ["ap_sprites.json"]))
+        if self.boss_shuffle_patch:
+            procedure.append(("apply_boss_shuffle", ["boss_shuffle.json"]))
+        if self.z3pr_palette_patches:
+            procedure.append(("apply_z3pr_palettes", ["z3pr_palettes.json"]))
+        if self.patch_boss_prize_crystal_sprite:
+            procedure.append(("apply_boss_prize_crystal_sprite", []))
+        if self.race_rom_key is not None:
+            procedure.append(("apply_race_rom_encryption", ["race_rom_key.bin"]))
+        procedure.append(("calc_snes_crc", []))
+        return procedure
+
+    def write_byte(self, address: int, value: int) -> None:
+        self.write_bytes(address, (value,))
+
+    def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
+        self.write_token(worlds.Files.APTokenTypes.WRITE, startaddress, bytes(values))
+
+    def write_contents(self, opened_zipfile) -> None:
+        self.procedure = self.get_procedure()
+        if "basepatch.bsdiff4" not in self.files:
+            basepatch = pkgutil.get_data(__name__, "basepatch.bsdiff4")
+            if basepatch is None:
+                raise FileNotFoundError("Could not load ALttP basepatch.bsdiff4")
+            self.write_file("basepatch.bsdiff4", basepatch)
+
+        token_data = self.get_token_binary()
+        if self.encrypt_token_file:
+            self.files.pop("token_patch.bin", None)
+            key = self.token_file_key
+            if key is None:
+                raise RuntimeError("Encrypted ALttP token patch requested without a token file key.")
+            self.write_file("token_patch.bin.enc", _require_xxtea().encrypt(token_data, key))
+            self.write_file("race_token_key.bin", key)
+        else:
+            self.files.pop("token_patch.bin.enc", None)
+            self.files.pop("race_token_key.bin", None)
+            self.write_file("token_patch.bin", token_data)
+        if self.boss_shuffle_patch:
+            self.write_file("boss_shuffle.json", json.dumps(self.boss_shuffle_patch).encode("utf-8"))
+        else:
+            self.files.pop("boss_shuffle.json", None)
+        if self.ap_sprite_patches:
+            self.write_file("ap_sprites.json", json.dumps(self.ap_sprite_patches).encode("utf-8"))
+            for file_name, patch_data in self.ap_sprite_files.items():
+                self.write_file(file_name, patch_data)
+        else:
+            self.files.pop("ap_sprites.json", None)
+            for file_name in list(self.files):
+                if file_name.startswith("ap_sprite_") and file_name.endswith(".bsdiff4"):
+                    self.files.pop(file_name, None)
+        if self.z3pr_palette_patches:
+            self.write_file("z3pr_palettes.json", json.dumps(self.z3pr_palette_patches).encode("utf-8"))
+        else:
+            self.files.pop("z3pr_palettes.json", None)
+        if self.race_rom_key is not None:
+            self.write_file("race_rom_key.bin", self.race_rom_key)
+        else:
+            self.files.pop("race_rom_key.bin", None)
+        super().write_contents(opened_zipfile)
 
 
 def get_base_rom_bytes(file_name: str = "") -> bytes:

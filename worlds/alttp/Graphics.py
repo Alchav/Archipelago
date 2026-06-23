@@ -230,17 +230,17 @@ def remap_3bpp_tile_colors(sheet: bytearray, tile_offsets: Collection[int],
         _encode_3bpp_tile(sheet, tile_offset, tile)
 
 
-def _read_sprite_graphics_pointer(rom, graphics_pack: int) -> tuple[int, int]:
-    bank = rom.read_byte(SPRITE_GRAPHICS_POINTER_BANK_TABLE + graphics_pack)
-    high = rom.read_byte(SPRITE_GRAPHICS_POINTER_HIGH_TABLE + graphics_pack)
-    low = rom.read_byte(SPRITE_GRAPHICS_POINTER_LOW_TABLE + graphics_pack)
+def _read_sprite_graphics_pointer_from_buffer(rom_data: bytes | bytearray, graphics_pack: int) -> tuple[int, int]:
+    bank = rom_data[SPRITE_GRAPHICS_POINTER_BANK_TABLE + graphics_pack]
+    high = rom_data[SPRITE_GRAPHICS_POINTER_HIGH_TABLE + graphics_pack]
+    low = rom_data[SPRITE_GRAPHICS_POINTER_LOW_TABLE + graphics_pack]
     snes_address = (bank << 16) | (high << 8) | low
     return snes_address, snes_to_pc(snes_address)
 
 
-def patch_boss_prize_crystal_sprite(rom) -> None:
-    _, pc_address = _read_sprite_graphics_pointer(rom, BOSS_PRIZE_CRYSTAL_GRAPHICS_PACK)
-    sheet, compressed_size = decompress_graphics_with_size(bytes(rom.buffer[pc_address:]))
+def get_boss_prize_crystal_sprite_patch(rom_data: bytes | bytearray) -> tuple[int, bytes]:
+    _, pc_address = _read_sprite_graphics_pointer_from_buffer(rom_data, BOSS_PRIZE_CRYSTAL_GRAPHICS_PACK)
+    sheet, compressed_size = decompress_graphics_with_size(bytes(rom_data[pc_address:]))
     sheet = bytearray(sheet)
 
     remap_3bpp_tile_colors(
@@ -260,4 +260,16 @@ def patch_boss_prize_crystal_sprite(rom) -> None:
             f"({len(compressed)} > {compressed_size})."
         )
 
+    return pc_address, compressed
+
+
+def patch_boss_prize_crystal_sprite(rom) -> None:
+    pc_address, compressed = get_boss_prize_crystal_sprite_patch(rom.buffer)
     rom.write_bytes(pc_address, compressed)
+
+
+def patch_boss_prize_crystal_sprite_data(rom: bytes) -> bytes:
+    rom_data = bytearray(rom)
+    pc_address, compressed = get_boss_prize_crystal_sprite_patch(rom_data)
+    rom_data[pc_address:pc_address + len(compressed)] = compressed
+    return bytes(rom_data)
