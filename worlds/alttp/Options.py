@@ -312,6 +312,21 @@ class EnemyDamage(Choice):
     option_chaos = 3
 
 
+class RandomizeDamageClasses(Choice):
+    """Vanilla: Enemies use their vanilla damage class tables.
+    Intra-Enemy: Shuffle each enemy's own damage class results among that enemy's damage classes.
+    Inter-Enemy: Shuffle whole enemy damage class profiles between enemies.
+    Mixed: Shuffle profiles between enemies, then shuffle within each enemy.
+    Chaos: Generate random damage class results for each enemy."""
+    display_name = "Randomize Damage Classes"
+    default = 0
+    option_vanilla = 0
+    option_intra_enemy = 1
+    option_inter_enemy = 2
+    option_mixed = 3
+    option_chaos = 4
+
+
 class ShufflePrizes(Choice):
     """Shuffle "general" prize packs, as in enemy, tree pull, dig etc.; "bonk" prizes; or both."""
     display_name = "Shuffle Prizes"
@@ -813,6 +828,7 @@ class ALTTPOptions(PerGameCommonOptions):
     item_functionality: ItemFunctionality
     enemy_health: EnemyHealth
     enemy_damage: EnemyDamage
+    randomize_damage_classes: RandomizeDamageClasses
     progressive: Progressive
     swordless: Swordless
     dungeon_counters: DungeonCounters

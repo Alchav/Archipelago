@@ -30,6 +30,20 @@ BUZZBLOB_FOLLOW_UP_ITEMS = (
     "Golden Sword",
     "Hammer",
 )
+BUZZBLOB_DISABLE_ITEMS = (
+    "Blue Boomerang",
+    "Red Boomerang",
+    "Hookshot",
+    "Cane of Somaria",
+    "Cane of Byrna",
+    "Golden Sword",
+    "Bow",
+    "Silver Bow",
+    "Magic Powder",
+    "Fire Rod",
+    "Ice Rod",
+)
+BUZZBLOB_DISABLE_ABILITIES = ("bombs",)
 
 
 def is_not_bunny(state: CollectionState, region: LTTPRegion, player: int) -> bool:
@@ -407,8 +421,11 @@ def _get_available_damage_classes(state: CollectionState, player: int, enemy_cou
 
 
 def _get_active_combat_model(state: CollectionState, player: int) -> EnemyCombatModel:
-    enemy_shuffle_state = getattr(state.multiworld.worlds[player], "enemy_shuffle_state", None)
+    world = state.multiworld.worlds[player]
+    enemy_shuffle_state = getattr(world, "enemy_shuffle_state", None)
     combat_model = getattr(enemy_shuffle_state, "combat_model", None)
+    if combat_model is None:
+        combat_model = getattr(world, "enemy_combat_model", None)
     return combat_model or VANILLA_COMBAT_MODEL
 
 
@@ -656,7 +673,19 @@ def _build_single_hit_plans_for_damage_classes(
     state: CollectionState,
     player: int,
     allowed_damage_classes: set[int],
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
 ) -> tuple[ResourceCosts, ...]:
+    allowed_items_set = set(allowed_items) if allowed_items is not None else None
+    allowed_abilities_set = set(allowed_abilities) if allowed_abilities is not None else None
+
+    def item_allowed(item_name: str) -> bool:
+        return allowed_items_set is None or item_name in allowed_items_set
+
+    def ability_allowed(ability_name: str) -> bool:
+        return allowed_abilities_set is None or ability_name in allowed_abilities_set
+
     plans: set[ResourceCosts] = set()
 
     zero_cost_damage_class_items = (
@@ -669,32 +698,42 @@ def _build_single_hit_plans_for_damage_classes(
         ("Red Boomerang", (0,), state.has("Red Boomerang", player)),
         ("Hookshot", (7,), state.has("Hookshot", player)),
     )
-    for _, item_damage_classes, available in zero_cost_damage_class_items:
-        if available and allowed_damage_classes.intersection(item_damage_classes):
+    for item_name, item_damage_classes, available in zero_cost_damage_class_items:
+        if available and item_allowed(item_name) and allowed_damage_classes.intersection(item_damage_classes):
             plans.add(FREE_RESOURCE_COSTS)
 
-    if state.has("Cane of Somaria", player) and 1 in allowed_damage_classes:
+    if item_allowed("Cane of Somaria") and state.has("Cane of Somaria", player) and 1 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST))
 
-    if state.has("Cane of Byrna", player) and 1 in allowed_damage_classes:
+    if item_allowed("Cane of Byrna") and state.has("Cane of Byrna", player) and 1 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST))
 
-    if state.has("Magic Powder", player) and 10 in allowed_damage_classes:
+    if item_allowed("Magic Powder") and state.has("Magic Powder", player) and 10 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST))
 
-    if state.has("Bow", player) and can_shoot_arrows(state, player, 1) and 6 in allowed_damage_classes:
+    if (
+        item_allowed("Bow")
+        and state.has("Bow", player)
+        and can_shoot_arrows(state, player, 1)
+        and 6 in allowed_damage_classes
+    ):
         plans.add(ResourceCosts(arrows=1))
 
-    if _has_silver_arrow_attack(state, player) and can_shoot_arrows(state, player, 1) and 9 in allowed_damage_classes:
+    if (
+        item_allowed("Silver Bow")
+        and _has_silver_arrow_attack(state, player)
+        and can_shoot_arrows(state, player, 1)
+        and 9 in allowed_damage_classes
+    ):
         plans.add(ResourceCosts(arrows=1))
 
-    if can_use_bombs(state, player, 1) and 8 in allowed_damage_classes:
+    if ability_allowed("bombs") and can_use_bombs(state, player, 1) and 8 in allowed_damage_classes:
         plans.add(ResourceCosts(bombs=1))
 
-    if state.has("Fire Rod", player) and 11 in allowed_damage_classes:
+    if item_allowed("Fire Rod") and state.has("Fire Rod", player) and 11 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST))
 
-    if state.has("Ice Rod", player) and 12 in allowed_damage_classes:
+    if item_allowed("Ice Rod") and state.has("Ice Rod", player) and 12 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST))
 
     return _prune_dominated_resource_costs(plans)
@@ -728,6 +767,8 @@ def _get_buzzblob_disable_follow_up_plans(
         state,
         player,
         disable_damage_classes,
+        allowed_items=BUZZBLOB_DISABLE_ITEMS,
+        allowed_abilities=BUZZBLOB_DISABLE_ABILITIES,
     )
     if not disable_plans:
         return tuple()

@@ -11,6 +11,11 @@ from .Bosses import place_bosses
 from .Dungeons import get_dungeon_item_pool_player
 from .EnemyShuffle import generate_enemy_shuffle_state
 from .EntranceShuffle import connect_entrance
+from .enemizer_data.enemy_combat_data import (
+    VANILLA_COMBAT_MODEL,
+    VANILLA_RANDOMIZE_DAMAGE_CLASSES,
+    build_randomized_damage_class_combat_model,
+)
 from .BossPrizeData import boss_prize_items
 from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
                     small_key_name_to_key_ring)
@@ -550,6 +555,17 @@ def generate_itempool(world: "ALTTPWorld"):
 
     world.required_medallions = (world.options.misery_mire_medallion.current_key.title(),
                                  world.options.turtle_rock_medallion.current_key.title())
+
+    damage_class_mode = world.options.randomize_damage_classes.current_key
+    if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
+        world.enemy_combat_model = VANILLA_COMBAT_MODEL
+    else:
+        from .EnemizerPatches import _make_native_enemizer_rng
+
+        world.enemy_combat_model = build_randomized_damage_class_combat_model(
+            _make_native_enemizer_rng(world),
+            damage_class_mode,
+        )
 
     place_bosses(world)
     if world.options.enemy_shuffle:

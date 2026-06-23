@@ -18,8 +18,10 @@ from .enemizer_data.enemy_combat_data import (
     THIEF_DEFAULT_HP,
     THIEF_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
+    VANILLA_RANDOMIZE_DAMAGE_CLASSES,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
+    build_randomized_damage_class_combat_model,
 )
 from .enemizer_data.symbols import ENEMIZER_SYMBOLS
 
@@ -469,6 +471,7 @@ def _make_native_enemizer_rng(world: "ALTTPWorld") -> random.Random:
         str(world.player),
         _option_key(world.options.enemy_health),
         _option_key(world.options.enemy_damage),
+        _option_key(getattr(world.options, "randomize_damage_classes", "vanilla")),
         str(int(bool(world.options.enemy_shuffle))),
         str(int(bool(world.options.bush_shuffle))),
         str(int(bool(world.options.killable_thieves))),

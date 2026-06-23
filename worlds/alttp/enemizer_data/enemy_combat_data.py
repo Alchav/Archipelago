@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from typing import NamedTuple
 
@@ -11,6 +12,7 @@ ENEMY_HEALTH_TABLE_SIZE = 0xF3
 SPRITE_DAMAGE_SUBCLASS_TABLE_SNES_ADDRESS = 0x31C800
 SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE = 0x800
 REACHABLE_SPRITE_DAMAGE_SUBCLASS_COUNT = 0xD8
+RANDOMIZABLE_DAMAGE_CLASS_COUNT = 0x10
 MOTHULA_SPRITE_ID = 0x88
 THIEF_SPRITE_ID = 0xC4
 THIEF_DEFAULT_HP = 4
@@ -26,6 +28,12 @@ FIGHTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2))
 MASTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3))
 TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((2, 3, 4))
 GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((3, 4, 5))
+SWORD_UPGRADE_DAMAGE_CLASSES = (1, 2, 3, 4)
+VANILLA_RANDOMIZE_DAMAGE_CLASSES = "vanilla"
+INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES = "intra_enemy"
+INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES = "inter_enemy"
+MIXED_RANDOMIZE_DAMAGE_CLASSES = "mixed"
+CHAOS_RANDOMIZE_DAMAGE_CLASSES = "chaos"
 KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES = {
     "Red Bari": (11, 13),
 }
@@ -403,6 +411,284 @@ VANILLA_COMBAT_MODEL = EnemyCombatModel(
     sprite_damage_subclasses=SPRITE_DAMAGE_SUBCLASSES,
     enemy_health_table=VANILLA_ENEMY_HEALTH,
 )
+
+
+def build_randomized_damage_class_combat_model(
+    rng: random.Random,
+    mode: str,
+    combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+) -> EnemyCombatModel:
+    if mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
+        return combat_model
+
+    resolved_effects = _resolve_sprite_damage_effects(combat_model)
+    randomized_effects = [list(row) for row in resolved_effects]
+    eligible_sprite_ids = _get_damage_class_randomizable_sprite_ids(combat_model)
+    locked_sprite_ids = _get_locked_damage_class_sprite_ids(resolved_effects, eligible_sprite_ids)
+
+    if mode in {INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
+        shuffled_profiles = [tuple(randomized_effects[sprite_id]) for sprite_id in eligible_sprite_ids]
+        rng.shuffle(shuffled_profiles)
+        for sprite_id, profile in zip(eligible_sprite_ids, shuffled_profiles):
+            randomized_effects[sprite_id] = list(profile)
+            _enforce_sword_upgrade_damage_order(randomized_effects[sprite_id], rng)
+
+    if mode in {INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
+        effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
+        for sprite_id in eligible_sprite_ids:
+            randomized_effects[sprite_id] = _shuffle_sprite_damage_effects(
+                randomized_effects[sprite_id],
+                effect_palettes,
+                rng,
+            )
+
+    elif mode == CHAOS_RANDOMIZE_DAMAGE_CLASSES:
+        effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
+        _fill_effect_palettes(effect_palettes, resolved_effects, rng)
+        for sprite_id in eligible_sprite_ids:
+            randomized_effects[sprite_id] = _build_chaos_sprite_damage_effects(effect_palettes, rng)
+
+    elif mode == INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES:
+        effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
+        for sprite_id in eligible_sprite_ids:
+            randomized_effects[sprite_id] = _fit_sprite_damage_effects(
+                randomized_effects[sprite_id],
+                effect_palettes,
+                rng,
+            )
+
+    else:
+        raise ValueError(f"Unknown damage class randomization mode: {mode}")
+
+    return _encode_sprite_damage_effects(combat_model, tuple(tuple(row) for row in randomized_effects))
+
+
+def _resolve_sprite_damage_effects(combat_model: EnemyCombatModel) -> tuple[tuple[int, ...], ...]:
+    return tuple(
+        tuple(
+            combat_model.damage_sources[damage_class].subclasses[subclass]
+            for damage_class, subclass in enumerate(row)
+        )
+        for row in combat_model.sprite_damage_subclasses
+    )
+
+
+def _get_damage_class_randomizable_sprite_ids(combat_model: EnemyCombatModel) -> tuple[int, ...]:
+    max_sprite_id = min(
+        len(combat_model.sprite_damage_subclasses),
+        REACHABLE_SPRITE_DAMAGE_SUBCLASS_COUNT,
+        len(combat_model.enemy_health_table),
+    )
+    return tuple(
+        sprite_id
+        for sprite_id in range(max_sprite_id)
+        if sprite_id not in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+        and combat_model.enemy_health_table[sprite_id] != 0xFF
+    )
+
+
+def _get_locked_damage_class_sprite_ids(
+    resolved_effects: tuple[tuple[int, ...], ...],
+    eligible_sprite_ids: tuple[int, ...],
+) -> tuple[int, ...]:
+    eligible_sprite_ids_set = set(eligible_sprite_ids)
+    return tuple(
+        sprite_id
+        for sprite_id in range(len(resolved_effects))
+        if sprite_id not in eligible_sprite_ids_set
+    )
+
+
+def _build_effect_palettes(
+    resolved_effects: tuple[tuple[int, ...], ...],
+    sprite_ids: tuple[int, ...] | None = None,
+) -> list[set[int]]:
+    rows = resolved_effects if sprite_ids is None else tuple(resolved_effects[sprite_id] for sprite_id in sprite_ids)
+    return [
+        {row[damage_class] for row in rows}
+        for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
+    ]
+
+
+def _fill_effect_palettes(
+    effect_palettes: list[set[int]],
+    resolved_effects: tuple[tuple[int, ...], ...],
+    rng: random.Random,
+) -> None:
+    all_effects = sorted({effect for row in resolved_effects for effect in row})
+    for palette in effect_palettes:
+        while len(palette) < 8:
+            palette.add(rng.choice(all_effects))
+
+
+def _shuffle_sprite_damage_effects(
+    row: list[int],
+    effect_palettes: list[set[int]],
+    rng: random.Random,
+) -> list[int]:
+    for _ in range(100):
+        candidate = list(row)
+        rng.shuffle(candidate)
+        _enforce_sword_upgrade_damage_order(candidate, rng)
+        if _row_fits_effect_palettes(candidate, effect_palettes):
+            _add_row_to_effect_palettes(candidate, effect_palettes)
+            return candidate
+
+    fallback = list(row)
+    _enforce_sword_upgrade_damage_order(fallback, rng)
+    if _row_fits_effect_palettes(fallback, effect_palettes):
+        _add_row_to_effect_palettes(fallback, effect_palettes)
+        return fallback
+
+    return _fit_sprite_damage_effects(row, effect_palettes, rng)
+
+
+def _fit_sprite_damage_effects(
+    row: list[int],
+    effect_palettes: list[set[int]],
+    rng: random.Random,
+) -> list[int]:
+    for _ in range(100):
+        candidate = [
+            effect if _effect_fits_palette(effect, effect_palettes[damage_class])
+            else rng.choice(tuple(sorted(effect_palettes[damage_class])))
+            for damage_class, effect in enumerate(row)
+        ]
+        _enforce_sword_upgrade_damage_order(candidate, rng)
+        if _row_fits_effect_palettes(candidate, effect_palettes):
+            _add_row_to_effect_palettes(candidate, effect_palettes)
+            return candidate
+
+    fallback = [
+        effect if _effect_fits_palette(effect, effect_palettes[damage_class])
+        else rng.choice(tuple(sorted(effect_palettes[damage_class])))
+        for damage_class, effect in enumerate(row)
+    ]
+    for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES:
+        fallback[damage_class] = 0
+    if not _row_fits_effect_palettes(fallback, effect_palettes):
+        fallback = [
+            effect if _effect_fits_palette(effect, effect_palettes[damage_class])
+            else next(iter(effect_palettes[damage_class]))
+            for damage_class, effect in enumerate(fallback)
+        ]
+    _add_row_to_effect_palettes(fallback, effect_palettes)
+    return fallback
+
+
+def _build_chaos_sprite_damage_effects(effect_palettes: list[set[int]], rng: random.Random) -> list[int]:
+    ordered_palettes = [tuple(sorted(palette)) for palette in effect_palettes]
+    for _ in range(100):
+        candidate = [
+            rng.choice(ordered_palettes[damage_class])
+            for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
+        ]
+        _enforce_sword_upgrade_damage_order(candidate, rng)
+        if _row_fits_effect_palettes(candidate, effect_palettes):
+            return candidate
+
+    candidate = [
+        rng.choice(ordered_palettes[damage_class])
+        for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
+    ]
+    for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES:
+        candidate[damage_class] = 0
+    return candidate
+
+
+def _row_fits_effect_palettes(row: list[int], effect_palettes: list[set[int]]) -> bool:
+    return all(
+        _effect_fits_palette(effect, effect_palettes[damage_class])
+        for damage_class, effect in enumerate(row)
+    )
+
+
+def _add_row_to_effect_palettes(row: list[int], effect_palettes: list[set[int]]) -> None:
+    for damage_class, effect in enumerate(row):
+        if not _effect_fits_palette(effect, effect_palettes[damage_class]):
+            raise ValueError(f"Damage class {damage_class} has no subclass slot for effect 0x{effect:02X}")
+        effect_palettes[damage_class].add(effect)
+
+
+def _effect_fits_palette(effect: int, palette: set[int]) -> bool:
+    return effect in palette or len(palette) < 8
+
+
+def _enforce_sword_upgrade_damage_order(row: list[int], rng: random.Random) -> None:
+    sword_effects = [row[damage_class] for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES]
+    first_nonzero = next((index for index, effect in enumerate(sword_effects) if effect != 0), None)
+    if first_nonzero is None:
+        return
+
+    suffix = sword_effects[first_nonzero:]
+    special_effects = [effect for effect in suffix if _is_special_damage_effect(effect)]
+    normal_effects = [
+        effect for effect in suffix
+        if is_killing_damage_effect(effect) and not _is_special_damage_effect(effect)
+    ]
+
+    if special_effects and (not normal_effects or rng.choice((False, True))):
+        normalized_suffix = [rng.choice(special_effects)] * len(suffix)
+    elif normal_effects:
+        normalized_suffix = sorted(rng.choice(normal_effects) for _ in suffix)
+    else:
+        normalized_suffix = [0] * len(suffix)
+
+    for index, effect in enumerate(normalized_suffix, start=first_nonzero):
+        row[SWORD_UPGRADE_DAMAGE_CLASSES[index]] = effect
+
+
+def _is_special_damage_effect(effect: int) -> bool:
+    return effect >= FAIRY_TRANSFORM_EFFECT
+
+
+def _encode_sprite_damage_effects(
+    combat_model: EnemyCombatModel,
+    resolved_effects: tuple[tuple[int, ...], ...],
+) -> EnemyCombatModel:
+    effect_palettes = _build_ordered_effect_palettes(combat_model, resolved_effects)
+    damage_sources = tuple(
+        source._replace(subclasses=effect_palettes[damage_class])
+        for damage_class, source in enumerate(combat_model.damage_sources)
+    )
+    subclass_indexes = [
+        {effect: index for index, effect in enumerate(palette)}
+        for palette in effect_palettes
+    ]
+    sprite_damage_subclasses = tuple(
+        tuple(
+            subclass_indexes[damage_class][effect]
+            for damage_class, effect in enumerate(row)
+        )
+        for row in resolved_effects
+    )
+    return EnemyCombatModel(
+        damage_sources=damage_sources,
+        sprite_damage_subclasses=sprite_damage_subclasses,
+        enemy_health_table=combat_model.enemy_health_table,
+    )
+
+
+def _build_ordered_effect_palettes(
+    combat_model: EnemyCombatModel,
+    resolved_effects: tuple[tuple[int, ...], ...],
+) -> tuple[tuple[int, ...], ...]:
+    palettes: list[tuple[int, ...]] = []
+    for damage_class, source in enumerate(combat_model.damage_sources):
+        effects = {row[damage_class] for row in resolved_effects}
+        ordered_palette = []
+        for effect in source.subclasses:
+            if effect in effects and effect not in ordered_palette:
+                ordered_palette.append(effect)
+        for effect in sorted(effects):
+            if effect not in ordered_palette:
+                ordered_palette.append(effect)
+        if len(ordered_palette) > 8:
+            raise ValueError(f"Damage class {damage_class} has {len(ordered_palette)} effects, but only 8 fit")
+        while len(ordered_palette) < 8:
+            ordered_palette.append(0)
+        palettes.append(tuple(ordered_palette))
+    return tuple(palettes)
 
 
 def build_damage_source_table_bytes(damage_sources: tuple[DamageSource, ...] = DAMAGE_SOURCES) -> bytes:

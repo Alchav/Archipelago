@@ -299,6 +299,67 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
 
+    def test_buzzblob_disable_rejects_unsafe_contact_damage_classes(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        try:
+            world.options.enemy_shuffle = True
+            damage_sources = list(VANILLA_COMBAT_MODEL.damage_sources)
+            for damage_class in (1, 3):
+                damage_source = damage_sources[damage_class]
+                subclasses = list(damage_source.subclasses)
+                subclasses[1] = FREEZE_EFFECT
+                damage_sources[damage_class] = DamageSource(
+                    damage_source.name,
+                    damage_source.damage_class,
+                    tuple(subclasses),
+                )
+            custom_combat_model = EnemyCombatModel(
+                damage_sources=tuple(damage_sources),
+                sprite_damage_subclasses=VANILLA_COMBAT_MODEL.sprite_damage_subclasses,
+                enemy_health_table=VANILLA_COMBAT_MODEL.enemy_health_table,
+            )
+            world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=custom_combat_model,
+                randomized_dungeon_rooms={
+                    291: RandomizedDungeonEnemyRoom(
+                        room_id=291,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0, 0, 13, 13, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                },
+            )
+
+            fighter_state = logic_test.get_state(item_factory(["Fighter Sword"], world))
+            self.assertFalse(can_clear_enemy_room(fighter_state, 1, "Mini-Moldorm Cave"))
+
+            master_state = logic_test.get_state(item_factory(["Master Sword"], world))
+            self.assertFalse(can_clear_enemy_room(master_state, 1, "Mini-Moldorm Cave"))
+
+            tempered_state = logic_test.get_state(item_factory(["Tempered Sword"], world))
+            self.assertFalse(can_clear_enemy_room(tempered_state, 1, "Mini-Moldorm Cave"))
+
+            fighter_hammer_state = logic_test.get_state(item_factory(["Fighter Sword", "Hammer"], world))
+            self.assertFalse(can_clear_enemy_room(fighter_hammer_state, 1, "Mini-Moldorm Cave"))
+
+            fighter_hookshot_state = logic_test.get_state(item_factory(["Fighter Sword", "Hookshot"], world))
+            self.assertTrue(can_clear_enemy_room(fighter_hookshot_state, 1, "Mini-Moldorm Cave"))
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+
     def test_room_wide_medallion_cast_applies_to_each_enemy_once(self) -> None:
         logic_test = TestLightWorld()
         logic_test.setUp()

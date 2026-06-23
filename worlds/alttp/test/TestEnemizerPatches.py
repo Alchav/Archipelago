@@ -1,4 +1,5 @@
 import unittest
+import random
 from types import SimpleNamespace
 
 from worlds.alttp.EnemizerPatches import (
@@ -37,15 +38,23 @@ from worlds.alttp.EnemizerPatches import (
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
     BLOB_TRANSFORM_EFFECT,
+    CHAOS_RANDOMIZE_DAMAGE_CLASSES,
     DAMAGE_SOURCE_TABLE_ADDRESS,
     DAMAGE_SOURCE_TABLE_SIZE,
     EnemyCombatModel,
+    EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
+    FAIRY_TRANSFORM_EFFECT,
+    INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+    INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+    MIXED_RANDOMIZE_DAMAGE_CLASSES,
     MOTHULA_SPRITE_ID,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE,
     SPRITE_DAMAGE_SUBCLASSES,
+    SWORD_UPGRADE_DAMAGE_CLASSES,
     VANILLA_COMBAT_MODEL,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
+    build_randomized_damage_class_combat_model,
     get_blob_transform_damage_classes,
     get_damage_effect,
     get_killing_damage_classes,
@@ -123,6 +132,17 @@ class TestEnemizerPatches(unittest.TestCase):
             (0x01, 0x11, 0x11, 0x00, 0x00, 0x04, 0x00, 0x00),
         )
 
+    def test_enemy_combat_damage_source_names_are_readable(self) -> None:
+        damage_source_names = {
+            source.damage_class: source.name
+            for source in VANILLA_COMBAT_MODEL.damage_sources
+        }
+
+        self.assertEqual(damage_source_names[9], "Silver Arrows")
+        self.assertEqual(damage_source_names[10], "Magic Powder")
+        self.assertEqual(damage_source_names[11], "Fire Rod")
+        self.assertEqual(damage_source_names[12], "Ice Rod")
+
     def test_enemy_combat_data_uses_supplied_combat_model(self) -> None:
         rom = FakeRom()
         custom_damage_sources = list(VANILLA_COMBAT_MODEL.damage_sources)
@@ -147,6 +167,77 @@ class TestEnemizerPatches(unittest.TestCase):
             tuple(rom.read_bytes(SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS, SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE)),
             tuple(build_packed_sprite_damage_subclass_table(custom_combat_model.sprite_damage_subclasses)),
         )
+
+    def test_randomized_damage_classes_preserve_boss_effects(self) -> None:
+        for mode in (
+            INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            MIXED_RANDOMIZE_DAMAGE_CLASSES,
+            CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+        ):
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(0), mode)
+
+                for sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
+                    if sprite_id >= len(VANILLA_COMBAT_MODEL.sprite_damage_subclasses):
+                        continue
+                    for damage_class in range(16):
+                        self.assertEqual(
+                            get_damage_effect(sprite_id, damage_class, combat_model),
+                            get_damage_effect(sprite_id, damage_class),
+                        )
+
+    def test_randomized_damage_classes_preserve_sword_upgrade_order(self) -> None:
+        for mode in (
+            INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            MIXED_RANDOMIZE_DAMAGE_CLASSES,
+            CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+        ):
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(1), mode)
+
+                for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
+                    if (
+                        sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+                        or VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
+                    ):
+                        continue
+                    effects = [
+                        get_damage_effect(sprite_id, damage_class, combat_model)
+                        for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES
+                    ]
+                    first_nonzero = next((index for index, effect in enumerate(effects) if effect != 0), None)
+                    if first_nonzero is None:
+                        continue
+                    suffix = effects[first_nonzero:]
+                    if suffix[0] >= FAIRY_TRANSFORM_EFFECT:
+                        self.assertEqual(set(suffix), {suffix[0]})
+                    else:
+                        self.assertEqual(suffix, sorted(suffix))
+                        self.assertTrue(all(0 < effect < FAIRY_TRANSFORM_EFFECT for effect in suffix))
+
+    def test_randomized_damage_classes_change_non_boss_rows(self) -> None:
+        vanilla_effects = {
+            (sprite_id, damage_class): get_damage_effect(sprite_id, damage_class)
+            for sprite_id in range(len(VANILLA_COMBAT_MODEL.sprite_damage_subclasses))
+            if sprite_id not in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+            for damage_class in range(16)
+        }
+
+        for mode in (
+            INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+            MIXED_RANDOMIZE_DAMAGE_CLASSES,
+            CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+        ):
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(2), mode)
+                changed = any(
+                    get_damage_effect(sprite_id, damage_class, combat_model) != effect
+                    for (sprite_id, damage_class), effect in vanilla_effects.items()
+                )
+                self.assertTrue(changed)
 
     def test_enemy_shuffle_enables_hidden_enemy_and_mimic_support(self) -> None:
         rom = FakeRom()
@@ -330,6 +421,7 @@ class TestEnemizerPatches(unittest.TestCase):
         killable_thieves: bool = False,
         enemy_health: str = "default",
         enemy_damage: str = "default",
+        randomize_damage_classes: str = "vanilla",
     ) -> SimpleNamespace:
         return SimpleNamespace(
             player=1,
@@ -340,6 +432,7 @@ class TestEnemizerPatches(unittest.TestCase):
                 killable_thieves=killable_thieves,
                 enemy_health=SimpleNamespace(current_key=enemy_health),
                 enemy_damage=SimpleNamespace(current_key=enemy_damage),
+                randomize_damage_classes=SimpleNamespace(current_key=randomize_damage_classes),
             ),
         )
 

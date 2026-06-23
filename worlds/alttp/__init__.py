@@ -302,6 +302,7 @@ class ALTTPWorld(World):
         self.required_medallions = ["Ether", "Quake"]
         self.escape_assist = []
         self.shops = []
+        self.enemy_combat_model = None
         self.enemy_shuffle_state = None
         self.pot_shuffle_state = None
         self.logical_heart_containers = 10
@@ -927,7 +928,8 @@ class ALTTPWorld(World):
                             "progressive", "swordless", "retro_bow", "retro_caves", "shop_item_slots",
                             "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
                             "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
-                            "boss_prize_shuffle", "entrance_shuffle", "dark_room_logic", "goal", "mode",
+                            "boss_prize_shuffle", "randomize_damage_classes", "entrance_shuffle",
+                            "dark_room_logic", "goal", "mode",
                             "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
                             "triforce_pieces_available", "triforce_pieces_extra",
             ]

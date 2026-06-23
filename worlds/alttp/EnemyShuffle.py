@@ -359,6 +359,7 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         dont_randomize_overworld_area_ids=overworld_metadata["do_not_randomize_area_ids"],
         randomized_dungeon_rooms=randomized_dungeon_rooms,
         randomized_overworld_areas=randomized_overworld_areas,
+        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
     )
     validate_enemy_shuffle_state(state, is_standard_mode=world.options.mode == "standard")
     return state
