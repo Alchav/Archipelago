@@ -9,11 +9,14 @@ from .enemizer_data.default_dungeon_room_enemies import DEFAULT_DUNGEON_ROOM_ENE
 from .enemizer_data.dungeon_sprite_addresses import DUNGEON_SPRITE_ADDRESSES, KEYED_SPRITE_ID_ADDRESSES
 from .enemizer_data.enemy_shuffle_base_data import DUNGEON_ENEMY_ROOMS, DUNGEON_SPRITE_GROUPS, OVERWORLD_ENEMY_AREAS
 from .enemizer_data.enemy_combat_data import (
+    DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DIRECT_KILL_DELIVERY_OVERRIDES,
     KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
     EnemyCombatModel,
     VANILLA_COMBAT_MODEL,
     get_killing_damage_classes,
+    get_hits_to_kill,
+    get_progression_kill_damage_classes,
 )
 from .enemizer_data.enemy_room_metadata import (
     BOSS_ROOM_IDS,
@@ -331,6 +334,10 @@ class EnemyShuffleState:
     randomized_dungeon_rooms: dict[int, RandomizedDungeonEnemyRoom]
     randomized_overworld_areas: dict[int, RandomizedOverworldEnemyArea]
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL
+    enemy_health_key: str = "default"
+    max_attacks_in_logic: int = 16
+    killable_thieves: bool = False
+    available_damage_classes: frozenset[int] = frozenset(range(16))
 
 
 def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
@@ -390,9 +397,31 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         randomized_dungeon_rooms=randomized_dungeon_rooms,
         randomized_overworld_areas=randomized_overworld_areas,
         combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        enemy_health_key=_get_world_enemy_health_key(world),
+        max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
+        killable_thieves=_get_world_killable_thieves(world),
+        available_damage_classes=_get_world_available_damage_classes(world),
     )
     validate_enemy_shuffle_state(state, is_standard_mode=world.options.mode == "standard")
     return state
+
+
+def _get_world_enemy_health_key(world: "ALTTPWorld") -> str:
+    option = getattr(world.options, "enemy_health", "default")
+    return str(getattr(option, "current_key", option))
+
+
+def _get_world_max_attacks_in_logic(world: "ALTTPWorld") -> int:
+    option = getattr(world.options, "max_attacks_in_logic", 16)
+    return int(getattr(option, "value", option))
+
+
+def _get_world_killable_thieves(world: "ALTTPWorld") -> bool:
+    return bool(getattr(world.options, "killable_thieves", False))
+
+
+def _get_world_available_damage_classes(world: "ALTTPWorld") -> frozenset[int]:
+    return frozenset(getattr(world, "enemy_shuffle_available_damage_classes", frozenset(range(16))))
 
 
 def _get_base_patched_rom_bytes() -> bytes:
@@ -1241,6 +1270,7 @@ def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEn
     needs_key = any(sprite.has_key for sprite in room.sprites)
     needs_killable = room.is_shutter_room
     needs_water = room.is_water_room
+    needs_killable_key = needs_key and needs_killable
     room_requirements = _get_requirements_for_usable_dungeon_enemies(state)
     water_requirements = tuple(requirement for requirement in room_requirements if requirement.is_water_sprite)
     if (
@@ -1262,11 +1292,16 @@ def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEn
             and (
                 lambda possible_requirements: (
                     (not needs_killable or any(
-                        _is_effectively_killable(requirement) and requirement.sprite_id != STAL_SPRITE_ID
+                        _can_be_shutter_room_clear_enemy(state, requirement)
                         for requirement in _filter_requirements_for_room_water_state(room, possible_requirements)
                     ))
                     and (not needs_key or any(
                         _can_be_key_drop_enemy(state, requirement)
+                        for requirement in _filter_requirements_for_room_water_state(room, possible_requirements)
+                    ))
+                    and (not needs_killable_key or any(
+                        _can_be_key_drop_enemy(state, requirement)
+                        and _can_be_shutter_room_clear_enemy(state, requirement)
                         for requirement in _filter_requirements_for_room_water_state(room, possible_requirements)
                     ))
                     and (not needs_water or any(
@@ -1333,20 +1368,62 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     combat_reference_id = _get_combat_reference_id(requirement, state.combat_model)
     if combat_reference_id is None:
         return False
+    if not _is_effectively_killable(requirement) and combat_reference_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
+        return False
 
-    direct_kill_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
     key_drop_damage_classes = KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES.get(requirement.sprite_name)
     if key_drop_damage_classes is not None:
-        direct_kill_damage_classes &= set(key_drop_damage_classes)
-    if not direct_kill_damage_classes:
+        candidate_damage_classes = set(key_drop_damage_classes)
+    else:
+        delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
+        if delivery_override is None:
+            candidate_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+        else:
+            candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+    candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
+    candidate_damage_classes &= state.available_damage_classes
+
+    return any(
+        _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
+        for damage_class in candidate_damage_classes
+    )
+
+
+def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    if not _is_effectively_killable(requirement) or requirement.sprite_id == STAL_SPRITE_ID:
+        return False
+
+    combat_reference_id = _get_combat_reference_id(requirement, state.combat_model)
+    if combat_reference_id is None:
         return False
 
     delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
     if delivery_override is None:
-        return True
+        candidate_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+    else:
+        candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+    candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
+    candidate_damage_classes &= state.available_damage_classes
 
-    deliverable_damage_classes = _get_deliverable_damage_classes(delivery_override)
-    return bool(direct_kill_damage_classes & deliverable_damage_classes)
+    return any(
+        _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
+        for damage_class in candidate_damage_classes
+    )
+
+
+def _damage_class_kills_within_enemy_shuffle_logic(
+    state: EnemyShuffleState,
+    combat_reference_id: int,
+    damage_class: int,
+) -> bool:
+    hit_count = get_hits_to_kill(
+        combat_reference_id,
+        damage_class,
+        state.enemy_health_key,
+        killable_thieves=state.killable_thieves,
+        combat_model=state.combat_model,
+    )
+    return hit_count is not None and hit_count <= state.max_attacks_in_logic
 
 
 def _get_combat_reference_id(requirement: EnemySpriteRequirement, combat_model: EnemyCombatModel) -> Optional[int]:
@@ -1365,13 +1442,6 @@ def _get_deliverable_damage_classes(delivery_override) -> set[int]:
     for ability_name in delivery_override.abilities:
         damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY.get(ability_name, tuple()))
     return damage_classes
-
-
-def _get_effectively_killable_sprite_ids(requirements: tuple[EnemySpriteRequirement, ...]) -> set[int]:
-    return {
-        requirement.sprite_id for requirement in requirements
-        if _is_effectively_killable(requirement) and requirement.sprite_id != STAL_SPRITE_ID
-    }
 
 
 def _get_unconstrained_possible_dungeon_sprite_groups(
@@ -1591,6 +1661,11 @@ def _randomize_dungeon_rooms(
         dont_randomize_overworld_area_ids=frozenset(),
         randomized_dungeon_rooms={},
         randomized_overworld_areas={},
+        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        enemy_health_key=_get_world_enemy_health_key(world),
+        max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
+        killable_thieves=_get_world_killable_thieves(world),
+        available_damage_classes=_get_world_available_damage_classes(world),
     )
     randomized_rooms: dict[int, RandomizedDungeonEnemyRoom] = {}
 
@@ -1642,6 +1717,11 @@ def _randomize_overworld_areas(
         dont_randomize_overworld_area_ids=frozenset(area.area_id for area in overworld_areas.values() if area.do_not_randomize),
         randomized_dungeon_rooms={},
         randomized_overworld_areas={},
+        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        enemy_health_key=_get_world_enemy_health_key(world),
+        max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
+        killable_thieves=_get_world_killable_thieves(world),
+        available_damage_classes=_get_world_available_damage_classes(world),
     )
     randomized_areas: dict[int, RandomizedOverworldEnemyArea] = {}
 
@@ -1730,17 +1810,24 @@ def _randomize_room_sprites(
                 return _build_randomized_room(room, selected_group, randomized_sprites, False)
             killable_sprite_ids = [
                 requirement.sprite_id for requirement in non_water_requirements
-                if _is_effectively_killable(requirement) and requirement.sprite_id != STAL_SPRITE_ID
+                if _can_be_shutter_room_clear_enemy(state, requirement)
             ]
             killable_key_sprite_ids = [
                 requirement.sprite_id for requirement in non_water_requirements
                 if _can_be_key_drop_enemy(state, requirement)
             ]
+            killable_shutter_key_sprite_ids = [
+                requirement.sprite_id for requirement in non_water_requirements
+                if _can_be_key_drop_enemy(state, requirement)
+                and _can_be_shutter_room_clear_enemy(state, requirement)
+            ]
             stal_count = 0
 
             for sprite in sprites_to_update:
                 replacement_sprite_id: int
-                if sprite.has_key and killable_key_sprite_ids:
+                if sprite.has_key and room.is_shutter_room and killable_shutter_key_sprite_ids:
+                    replacement_sprite_id = world.random.choice(killable_shutter_key_sprite_ids)
+                elif sprite.has_key and killable_key_sprite_ids:
                     replacement_sprite_id = world.random.choice(killable_key_sprite_ids)
                 elif room.is_shutter_room and killable_sprite_ids:
                     replacement_sprite_id = world.random.choice(killable_sprite_ids)
@@ -1936,7 +2023,10 @@ def _validate_dungeon_room(
 
     possible_requirements = _get_possible_enemy_requirements_for_group(state, room, selected_group)
     possible_sprite_ids = {requirement.sprite_id for requirement in possible_requirements}
-    killable_sprite_ids = _get_effectively_killable_sprite_ids(possible_requirements)
+    killable_sprite_ids = {
+        requirement.sprite_id for requirement in possible_requirements
+        if _can_be_shutter_room_clear_enemy(state, requirement)
+    }
     killable_key_sprite_ids = {
         requirement.sprite_id for requirement in possible_requirements
         if _can_be_key_drop_enemy(state, requirement)
@@ -1973,6 +2063,8 @@ def _validate_dungeon_room(
         if original_sprite.has_key:
             if randomized_sprite.sprite_id not in killable_key_sprite_ids:
                 raise ValueError(f"Enemy shuffle placed invalid key enemy {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
+            if room.is_shutter_room and randomized_sprite.sprite_id not in killable_sprite_ids:
+                raise ValueError(f"Enemy shuffle placed non-killable shutter key enemy {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
             continue
 
         if room.is_shutter_room and randomized_sprite.sprite_id not in killable_sprite_ids:
@@ -1982,9 +2074,10 @@ def _validate_dungeon_room(
             raise ValueError(f"Enemy shuffle placed illegal sprite {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
 
     if room.is_shutter_room and _get_randomizable_sprites_in_room(state, room):
-        all_killable_sprite_ids = _get_effectively_killable_sprite_ids(
-            _filter_requirements_for_room_water_state(room, state.sprite_requirements)
-        )
+        all_killable_sprite_ids = {
+            requirement.sprite_id for requirement in _filter_requirements_for_room_water_state(room, state.sprite_requirements)
+            if _can_be_shutter_room_clear_enemy(state, requirement)
+        }
         randomized_sprite_ids = {sprite.sprite_id for sprite in randomized_room.sprites}
         if not (randomized_sprite_ids & all_killable_sprite_ids):
             raise ValueError(f"Enemy shuffle left shutter room {room.room_id} without any killable enemies")

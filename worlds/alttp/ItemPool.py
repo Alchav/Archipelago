@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import Counter, namedtuple
 import logging
 
 from BaseClasses import ItemClassification, MultiWorld
@@ -12,6 +12,10 @@ from .Dungeons import get_dungeon_item_pool_player
 from .EnemyShuffle import generate_enemy_shuffle_state
 from .EntranceShuffle import connect_entrance
 from .enemizer_data.enemy_combat_data import (
+    FIGHTER_SWORD_DAMAGE_CLASSES,
+    GOLDEN_SWORD_DAMAGE_CLASSES,
+    MASTER_SWORD_DAMAGE_CLASSES,
+    TEMPERED_SWORD_DAMAGE_CLASSES,
     VANILLA_COMBAT_MODEL,
     VANILLA_RANDOMIZE_DAMAGE_CLASSES,
     build_randomized_damage_class_combat_model,
@@ -20,7 +24,7 @@ from .BossPrizeData import boss_prize_items
 from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
                     small_key_name_to_key_ring)
 from .Options import small_key_shuffle, compass_shuffle, big_key_shuffle, map_shuffle, TriforcePiecesMode, LTTPBosses
-from .StateHelpers import has_triforce_pieces, has_melee_weapon
+from .StateHelpers import can_clear_standard_escape, has_triforce_pieces, has_melee_weapon
 from .Regions import key_drop_data
 
 if TYPE_CHECKING:
@@ -234,6 +238,94 @@ items_reduction_table = (
 )
 
 
+def get_enemy_shuffle_available_damage_classes(world: "ALTTPWorld", item_names) -> frozenset[int]:
+    item_counts = Counter(item_names)
+    damage_classes: set[int] = set()
+
+    def has_item(item_name: str) -> bool:
+        return item_counts[item_name] > 0
+
+    progressive_sword_count = min(
+        item_counts["Progressive Sword"],
+        world.difficulty_requirements.progressive_sword_limit,
+    )
+    if has_item("Fighter Sword") or progressive_sword_count >= 1:
+        damage_classes.update(FIGHTER_SWORD_DAMAGE_CLASSES)
+    if has_item("Master Sword") or progressive_sword_count >= 2:
+        damage_classes.update(MASTER_SWORD_DAMAGE_CLASSES)
+    if has_item("Tempered Sword") or progressive_sword_count >= 3:
+        damage_classes.update(TEMPERED_SWORD_DAMAGE_CLASSES)
+    if has_item("Golden Sword") or progressive_sword_count >= 4:
+        damage_classes.update(GOLDEN_SWORD_DAMAGE_CLASSES)
+
+    if has_item("Hammer"):
+        damage_classes.add(3)
+    if has_item("Blue Boomerang") or has_item("Red Boomerang"):
+        damage_classes.add(0)
+    if has_item("Hookshot"):
+        damage_classes.add(7)
+    if has_item("Cane of Somaria") or has_item("Cane of Byrna"):
+        damage_classes.add(1)
+    if has_item("Magic Powder"):
+        damage_classes.add(10)
+    if has_item("Fire Rod"):
+        damage_classes.add(11)
+    if has_item("Ice Rod"):
+        damage_classes.add(12)
+    if has_item("Bombos"):
+        damage_classes.add(13)
+    if has_item("Ether"):
+        damage_classes.add(14)
+    if has_item("Quake"):
+        damage_classes.add(15)
+
+    if (
+        not world.options.bombless_start
+        or has_item("Bomb Upgrade (+5)")
+        or has_item("Bomb Upgrade (+10)")
+        or has_item("Bomb Upgrade (50)")
+        or (
+            not world.options.shuffle_capacity_upgrades
+            and has_item("Capacity Upgrade Shop")
+        )
+    ):
+        damage_classes.add(8)
+
+    progressive_bow_count = min(
+        item_counts["Progressive Bow"] + item_counts["Progressive Bow (Alt)"],
+        world.difficulty_requirements.progressive_bow_limit,
+    )
+    has_bow = has_item("Bow") or has_item("Silver Bow") or progressive_bow_count >= 1
+    if has_bow:
+        damage_classes.add(6)
+    if has_item("Silver Bow") or progressive_bow_count >= 2 or (has_bow and has_item("Silver Arrows")):
+        damage_classes.add(9)
+
+    return frozenset(damage_classes)
+
+
+def set_enemy_combat_model(world: "ALTTPWorld") -> None:
+    damage_class_mode = world.options.randomize_damage_classes.current_key
+    if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
+        world.enemy_combat_model = VANILLA_COMBAT_MODEL
+    else:
+        from .EnemizerPatches import _make_native_enemizer_rng
+
+        world.enemy_combat_model = build_randomized_damage_class_combat_model(
+            _make_native_enemizer_rng(world),
+            damage_class_mode,
+            max_attacks_in_logic=world.options.max_attacks_in_logic.value,
+            enemy_health_key=world.options.enemy_health.current_key,
+        )
+
+
+def starting_items_can_clear_standard_escape(world: "ALTTPWorld", item_names) -> bool:
+    state = world.multiworld.state.copy()
+    for item_name in item_names:
+        state.collect(item_factory(item_name, world), True)
+    return can_clear_standard_escape(state, world.player)
+
+
 def generate_itempool(world: "ALTTPWorld"):
     player: int = world.player
     multiworld = world.multiworld
@@ -301,6 +393,8 @@ def generate_itempool(world: "ALTTPWorld"):
     for item in precollected_items:
         multiworld.push_precollected(item_factory(item, world))
 
+    set_enemy_combat_model(world)
+
     if world.options.mode == 'standard' and not has_melee_weapon(multiworld.state, player):
         if "Link's Uncle" not in placed_items:
             found_sword = False
@@ -311,10 +405,23 @@ def generate_itempool(world: "ALTTPWorld"):
                     if not found_sword:
                         found_sword = True
                         possible_weapons.append(item)
-                elif item in ['Progressive Bow', 'Bow'] and not found_bow:
+                elif item in ['Progressive Bow', 'Bow', 'Silver Bow'] and not found_bow:
                     found_bow = True
                     possible_weapons.append(item)
-                elif item in ['Hammer', 'Fire Rod', 'Cane of Somaria', 'Cane of Byrna']:
+                elif item in [
+                    'Hammer',
+                    'Blue Boomerang',
+                    'Red Boomerang',
+                    'Hookshot',
+                    'Cane of Somaria',
+                    'Cane of Byrna',
+                    'Magic Powder',
+                    'Fire Rod',
+                    'Ice Rod',
+                    'Bombos',
+                    'Ether',
+                    'Quake',
+                ]:
                     if item not in possible_weapons:
                         possible_weapons.append(item)
                 elif (item == 'Bombs (10)' and (not world.options.bombless_start) and item not in
@@ -324,9 +431,38 @@ def generate_itempool(world: "ALTTPWorld"):
                         not in possible_weapons):
                     possible_weapons.append(item)
 
-            starting_weapon = multiworld.random.choice(possible_weapons)
+            damage_class_weapons = [
+                item for item in possible_weapons
+                if starting_items_can_clear_standard_escape(world, (item,))
+            ]
+            secret_passage_item = None
+            if damage_class_weapons:
+                possible_weapons = damage_class_weapons
+            elif "Secret Passage" not in placed_items:
+                possible_escape_pairs = [
+                    (uncle_item, secret_item)
+                    for uncle_item in possible_weapons
+                    for secret_item in possible_weapons
+                    if uncle_item != secret_item
+                    and starting_items_can_clear_standard_escape(world, (uncle_item, secret_item))
+                ]
+                if possible_escape_pairs:
+                    starting_weapon, secret_passage_item = multiworld.random.choice(possible_escape_pairs)
+                    possible_weapons = [starting_weapon]
+
+            if (
+                world.options.enemy_shuffle
+                and world.options.bombless_start
+                and "Hammer" in possible_weapons
+            ):
+                starting_weapon = "Hammer"
+            else:
+                starting_weapon = multiworld.random.choice(possible_weapons)
             placed_items["Link's Uncle"] = starting_weapon
             pool.remove(starting_weapon)
+            if secret_passage_item:
+                placed_items["Secret Passage"] = secret_passage_item
+                pool.remove(secret_passage_item)
         if (placed_items["Link's Uncle"] in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Bomb Upgrade (+10)',
                                             'Bomb Upgrade (50)', 'Cane of Somaria', 'Cane of Byrna'] and world.options.enemy_health not in ['default', 'easy']):
             if world.options.bombless_start and "Bomb Upgrade" not in placed_items["Link's Uncle"]:
@@ -336,6 +472,9 @@ def generate_itempool(world: "ALTTPWorld"):
                     world.escape_assist.append('magic')
             else:
                 world.escape_assist.append('bombs')
+
+    if world.options.mode == 'standard' and "Big Key (Hyrule Castle)" in pool:
+        multiworld.local_early_items[player]["Big Key (Hyrule Castle)"] = 1
 
     for (location, item) in placed_items.items():
         multiworld.get_location(location, player).place_locked_item(item_factory(item, world))
@@ -366,10 +505,17 @@ def generate_itempool(world: "ALTTPWorld"):
                 return "Inverted Ganons Tower"
         return dungeon_name
 
+    def fixed_key_drop_can_be_required(key_location: str, item) -> bool:
+        if world.options.accessibility == "full":
+            return True
+        return key_location != "Skull Woods - Spike Corner Key Drop"
+
     for key_loc in key_drop_data:
         key_data = key_drop_data[key_loc]
         drop_item = item_factory(key_data[3], world)
         if not world.options.key_drop_shuffle:
+            if not fixed_key_drop_can_be_required(key_loc, drop_item):
+                drop_item.classification = ItemClassification.filler
             if drop_item in dungeon_items:
                 dungeon_items.remove(drop_item)
             else:
@@ -556,21 +702,15 @@ def generate_itempool(world: "ALTTPWorld"):
     world.required_medallions = (world.options.misery_mire_medallion.current_key.title(),
                                  world.options.turtle_rock_medallion.current_key.title())
 
-    damage_class_mode = world.options.randomize_damage_classes.current_key
-    if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
-        world.enemy_combat_model = VANILLA_COMBAT_MODEL
-    else:
-        from .EnemizerPatches import _make_native_enemizer_rng
-
-        world.enemy_combat_model = build_randomized_damage_class_combat_model(
-            _make_native_enemizer_rng(world),
-            damage_class_mode,
-            max_attacks_in_logic=world.options.max_attacks_in_logic.value,
-            enemy_health_key=world.options.enemy_health.current_key,
-        )
-
     place_bosses(world)
     if world.options.enemy_shuffle:
+        enemy_shuffle_item_names = [item.name for item in items]
+        enemy_shuffle_item_names.extend(placed_items.values())
+        enemy_shuffle_item_names.extend(precollected_items)
+        world.enemy_shuffle_available_damage_classes = get_enemy_shuffle_available_damage_classes(
+            world,
+            enemy_shuffle_item_names,
+        )
         world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
 
     multiworld.itempool += items

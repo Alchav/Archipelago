@@ -36,6 +36,8 @@ HARDHAT_BEETLE_SPRITE_ID = 0x26
 HARDHAT_BEETLE_RED_HP = 32
 HARDHAT_BEETLE_BLUE_HP = 6
 RED_BARI_SPRITE_ID = 0x23
+BUZZBLOB_SPRITE_ID = 0x0D
+FLOATING_STALFOS_HEAD_SPRITE_ID = 0x7C
 THIEF_SPRITE_ID = 0xC4
 THIEF_DEFAULT_HP = 4
 YELLOW_SLIME_SPRITE_ID = 0x8F
@@ -67,6 +69,7 @@ NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES = (
     CHAOS_RANDOMIZE_DAMAGE_CLASSES,
 )
 GUARANTEED_LOGIC_KILL_DAMAGE_CLASS = 9
+PROGRESSION_LOGIC_KILL_DAMAGE_CLASSES = frozenset((1, 3, 6, 7, 9, 10, 11, 12, 13, 14, 15))
 GUARANTEED_LOGIC_KILL_EFFECT = 0x64
 KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES = {
     "Red Bari": (11, 13),
@@ -751,10 +754,11 @@ def _ensure_damage_class_logic_guarantees(
         if hp is None:
             continue
         row = randomized_effects[sprite_id]
-        if _has_direct_kill_within_attack_limit(row, hp, max_attacks):
+        candidate_damage_classes = get_progression_kill_damage_classes(sprite_id)
+        if _has_direct_kill_within_attack_limit(row, hp, max_attacks, candidate_damage_classes):
             continue
 
-        _set_guaranteed_logic_kill_effect_for_row(row, effect_palettes)
+        _set_guaranteed_logic_kill_effect_for_row(row, effect_palettes, hp, max_attacks, candidate_damage_classes)
 
     if RED_BARI_SPRITE_ID in eligible_sprite_ids:
         red_bari_hp = get_enemy_health_for_logic(RED_BARI_SPRITE_ID, enemy_health_key, combat_model=combat_model)
@@ -762,6 +766,7 @@ def _ensure_damage_class_logic_guarantees(
             [randomized_effects[RED_BARI_SPRITE_ID][damage_class] for damage_class in (11, 13)],
             red_bari_hp,
             max_attacks,
+            (0, 1),
         ):
             _set_guaranteed_logic_kill_effect(
                 randomized_effects[RED_BARI_SPRITE_ID],
@@ -771,8 +776,23 @@ def _ensure_damage_class_logic_guarantees(
             )
 
 
-def _has_direct_kill_within_attack_limit(row: list[int], hp: int, max_attacks: int) -> bool:
-    return any(_effect_kills_within_attack_limit(effect, hp, max_attacks) for effect in row)
+def get_progression_kill_damage_classes(sprite_id: int) -> tuple[int, ...]:
+    if sprite_id == FLOATING_STALFOS_HEAD_SPRITE_ID:
+        return (1,)
+    if sprite_id == BUZZBLOB_SPRITE_ID:
+        return (1, 3, 6, 9, 11, 13)
+    if sprite_id == ANTI_FAIRY_SPRITE_ID:
+        return (1, 6, 7, 9, 10, 11, 12, 13, 14, 15)
+    return tuple(sorted(PROGRESSION_LOGIC_KILL_DAMAGE_CLASSES))
+
+
+def _has_direct_kill_within_attack_limit(
+    row: list[int],
+    hp: int,
+    max_attacks: int,
+    damage_classes: tuple[int, ...],
+) -> bool:
+    return any(_effect_kills_within_attack_limit(row[damage_class], hp, max_attacks) for damage_class in damage_classes)
 
 
 def _effect_kills_within_attack_limit(effect: int, hp: int, max_attacks: int) -> bool:
@@ -795,15 +815,32 @@ def _set_guaranteed_logic_kill_effect(
     effect_palettes[damage_class].add(effect)
 
 
-def _set_guaranteed_logic_kill_effect_for_row(row: list[int], effect_palettes: list[set[int]]) -> None:
-    if _effect_fits_palette(GUARANTEED_LOGIC_KILL_EFFECT, effect_palettes[GUARANTEED_LOGIC_KILL_DAMAGE_CLASS]):
-        _set_guaranteed_logic_kill_effect(
-            row,
-            effect_palettes,
-            GUARANTEED_LOGIC_KILL_DAMAGE_CLASS,
-            GUARANTEED_LOGIC_KILL_EFFECT,
-        )
-        return
+def _set_guaranteed_logic_kill_effect_for_row(
+    row: list[int],
+    effect_palettes: list[set[int]],
+    hp: int,
+    max_attacks: int,
+    damage_classes: tuple[int, ...],
+) -> None:
+    for damage_class in damage_classes:
+        if _effect_fits_palette(GUARANTEED_LOGIC_KILL_EFFECT, effect_palettes[damage_class]):
+            _set_guaranteed_logic_kill_effect(
+                row,
+                effect_palettes,
+                damage_class,
+                GUARANTEED_LOGIC_KILL_EFFECT,
+            )
+            return
+
+        for effect in sorted(effect_palettes[damage_class], reverse=True):
+            if _effect_kills_within_attack_limit(effect, hp, max_attacks):
+                _set_guaranteed_logic_kill_effect(
+                    row,
+                    effect_palettes,
+                    damage_class,
+                    effect,
+                )
+                return
 
     _set_guaranteed_logic_kill_effect(row, effect_palettes, 11, INCINERATE_EFFECT)
 

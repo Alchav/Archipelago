@@ -1,3 +1,4 @@
+from bisect import bisect_left, bisect_right
 from typing import NamedTuple
 
 from .SubClasses import LTTPRegion
@@ -228,6 +229,15 @@ ENEMY_COMBAT_STATE_ITEMS = (
     "Ether",
     "Quake",
 )
+ENEMY_COMBAT_STATE_VERSION_ITEMS = frozenset(ENEMY_COMBAT_STATE_ITEMS + (
+    "Bomb Upgrade (+5)",
+    "Bomb Upgrade (+10)",
+    "Bomb Upgrade (50)",
+    "Arrow Upgrade (+5)",
+    "Arrow Upgrade (+10)",
+    "Arrow Upgrade (70)",
+    "Capacity Upgrade Shop",
+))
 ENEMY_CLEAR_MAGIC_UNITS_PER_LOGIC_UNIT = 2
 FIRE_ROD_MAGIC_COST = 2
 ICE_ROD_MAGIC_COST = 2
@@ -250,6 +260,42 @@ LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
     ("Tempered Sword", frozenset((2, 3, 4))),
     ("Golden Sword", frozenset((3, 4, 5))),
 )
+ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE = "_alttp_enemy_combat_logic_version"
+UNBOUNDED_RESOURCE_BUDGET = ResourceBudget(bombs=10_000, arrows=None, magic=10_000)
+
+
+def init_enemy_combat_state_version(state: CollectionState, parent) -> None:
+    setattr(state, ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE, {})
+
+
+def copy_enemy_combat_state_version(state: CollectionState, ret: CollectionState) -> CollectionState:
+    version_by_player = getattr(state, ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE, None)
+    if version_by_player is not None:
+        setattr(ret, ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE, version_by_player.copy())
+    cache_by_player = getattr(state, ENEMY_COMBAT_CACHE_ATTRIBUTE, None)
+    if cache_by_player is not None:
+        setattr(ret, ENEMY_COMBAT_CACHE_ATTRIBUTE, cache_by_player.copy())
+    return ret
+
+
+def bump_enemy_combat_state_version(state: CollectionState, player: int, item_name: str | None = None) -> None:
+    if item_name is not None and item_name not in ENEMY_COMBAT_STATE_VERSION_ITEMS:
+        world = state.multiworld.worlds[player]
+        if not world.options.retro_bow:
+            return
+
+    version_by_player = getattr(state, ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE, None)
+    if version_by_player is None:
+        version_by_player = {}
+        setattr(state, ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE, version_by_player)
+    version_by_player[player] = version_by_player.get(player, 0) + 1
+
+
+def _get_enemy_combat_state_version(state: CollectionState, player: int) -> int | None:
+    version_by_player = getattr(state, ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE, None)
+    if version_by_player is None:
+        return None
+    return version_by_player.get(player, 0)
 
 
 def _get_enemy_combat_state_key(state: CollectionState, player: int) -> tuple:
@@ -272,7 +318,17 @@ def _get_enemy_combat_cache(state: CollectionState, player: int) -> dict:
         cache_by_player = {}
         setattr(state, ENEMY_COMBAT_CACHE_ATTRIBUTE, cache_by_player)
 
-    state_key = _get_enemy_combat_state_key(state, player)
+    state_version = _get_enemy_combat_state_version(state, player)
+    if state_version is None:
+        state_key = _get_enemy_combat_state_key(state, player)
+    else:
+        state_key = (
+            state_version,
+            id(_get_active_combat_model(state, player)),
+            _get_enemy_health_key(state, player),
+            _get_max_attacks_in_logic(state, player),
+            bool(state.multiworld.worlds[player].options.killable_thieves),
+        )
     cache_entry = cache_by_player.get(player)
     if cache_entry is None or cache_entry[0] != state_key:
         cache_entry = (state_key, {})
@@ -343,15 +399,28 @@ def _lightning_gate_damage_class_removes_barrier(damage_class: int, combat_model
 
 
 def _prune_dominated_resource_costs(costs: set[ResourceCosts]) -> tuple[ResourceCosts, ...]:
+    if not costs:
+        return tuple()
+    if FREE_RESOURCE_COSTS in costs:
+        return (FREE_RESOURCE_COSTS,)
+    if len(costs) == 1:
+        return tuple(costs)
+
     frontier: list[ResourceCosts] = []
+    arrow_values: list[int] = []
+    arrow_magic_frontier: list[tuple[int, int]] = []
     for candidate in sorted(costs):
-        if any(_resource_costs_dominate(existing, candidate) for existing in frontier):
+        candidate_bombs, candidate_arrows, candidate_magic = candidate
+        index = bisect_right(arrow_values, candidate_arrows) - 1
+        if index >= 0 and arrow_magic_frontier[index][1] <= candidate_magic:
             continue
-        frontier = [
-            existing
-            for existing in frontier
-            if not _resource_costs_dominate(candidate, existing)
-        ]
+
+        insert_index = bisect_left(arrow_values, candidate_arrows)
+        remove_end = insert_index
+        while remove_end < len(arrow_magic_frontier) and arrow_magic_frontier[remove_end][1] >= candidate_magic:
+            remove_end += 1
+        arrow_values[insert_index:remove_end] = [candidate_arrows]
+        arrow_magic_frontier[insert_index:remove_end] = [(candidate_arrows, candidate_magic)]
         frontier.append(candidate)
     return tuple(frontier)
 
@@ -467,7 +536,7 @@ def _can_clear_enemy_requirement_groups(
 ) -> bool:
     budget = _get_enemy_clear_resource_budget(state, player)
     group_clear_plans = tuple(
-        _get_enemy_group_clear_plans(state, player, enemy_group, budget, key_drop_enemy=key_drop_enemy)
+        _get_enemy_group_clear_plans(state, player, enemy_group, key_drop_enemy=key_drop_enemy)
         for enemy_group in enemy_groups
     )
     return _can_execute_enemy_kill_plans(group_clear_plans, budget)
@@ -477,19 +546,25 @@ def _get_enemy_group_clear_plans(
     state: CollectionState,
     player: int,
     room_enemies: tuple,
-    budget: ResourceBudget,
     *,
     key_drop_enemy: bool = False,
 ) -> tuple[ResourceCosts, ...]:
     if not room_enemies:
         return (FREE_RESOURCE_COSTS,)
 
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = (
+        "enemy_group_clear_plans",
+        tuple(_get_enemy_requirement_cache_key(requirement) for requirement in room_enemies),
+        key_drop_enemy,
+    )
+    if cache_key in cache:
+        return cache[cache_key]
+
     clear_plans: set[ResourceCosts] = set()
     available_medallions = _get_available_room_wide_medallions(state, player)
     for room_wide_medallions in _get_room_wide_medallion_cast_sets(available_medallions):
         base_costs = ResourceCosts(magic=MEDALLION_MAGIC_COST * len(room_wide_medallions))
-        if not _fits_within_resource_budget(base_costs, budget):
-            continue
 
         plans_by_enemy = tuple(
             _get_enemy_kill_plans_after_room_wide_medallions(
@@ -501,9 +576,15 @@ def _get_enemy_group_clear_plans(
             )
             for requirement in room_enemies
         )
-        clear_plans.update(_get_executable_enemy_kill_costs(plans_by_enemy, budget, base_costs=base_costs))
+        clear_plans.update(_get_executable_enemy_kill_costs(
+            plans_by_enemy,
+            UNBOUNDED_RESOURCE_BUDGET,
+            base_costs=base_costs,
+        ))
 
-    return _prune_dominated_resource_costs(clear_plans)
+    result = _prune_dominated_resource_costs(clear_plans)
+    cache[cache_key] = result
+    return result
 
 
 def _get_available_damage_classes(state: CollectionState, player: int, enemy_count: int) -> set[int]:
@@ -837,6 +918,21 @@ def _build_attack_plans_for_damage_classes(
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
+
+    if _can_ready_medallion(state, player):
+        for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
+            if item_allowed(medallion) and state.has(medallion, player):
+                hit_count = _get_best_hit_count(
+                    state,
+                    player,
+                    sprite_id,
+                    (damage_class,),
+                    {damage_class} if bypass_damage_class_filter else allowed_damage_classes,
+                    combat_model,
+                    hp_override=hp_override,
+                )
+                if hit_count is not None:
+                    plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST * hit_count))
 
     return _prune_dominated_resource_costs(plans)
 
@@ -1259,7 +1355,27 @@ def _can_execute_enemy_kill_plans(
     *,
     base_costs: ResourceCosts = FREE_RESOURCE_COSTS,
 ) -> bool:
-    return bool(_get_executable_enemy_kill_costs(plans_by_enemy, budget, base_costs=base_costs))
+    if not _fits_within_resource_budget(base_costs, budget):
+        return False
+
+    frontier: tuple[ResourceCosts, ...] = (base_costs,)
+    for enemy_plans in sorted(plans_by_enemy, key=len):
+        if not enemy_plans:
+            return False
+        if FREE_RESOURCE_COSTS in enemy_plans:
+            continue
+        next_frontier: set[ResourceCosts] = set()
+        for used_bombs, used_arrows, used_magic in frontier:
+            for plan_bombs, plan_arrows, plan_magic in enemy_plans:
+                bombs = used_bombs + plan_bombs
+                arrows = used_arrows + plan_arrows
+                magic = used_magic + plan_magic
+                if bombs <= budget.bombs and (budget.arrows is None or arrows <= budget.arrows) and magic <= budget.magic:
+                    next_frontier.add(ResourceCosts(bombs, arrows, magic))
+        if not next_frontier:
+            return False
+        frontier = _prune_dominated_resource_costs(next_frontier)
+    return True
 
 
 def _get_executable_enemy_kill_costs(
@@ -1278,11 +1394,13 @@ def _get_executable_enemy_kill_costs(
         if FREE_RESOURCE_COSTS in enemy_plans:
             continue
         next_frontier: set[ResourceCosts] = set()
-        for used_costs in frontier:
-            for enemy_plan in enemy_plans:
-                combined_costs = _add_resource_costs(used_costs, enemy_plan)
-                if _fits_within_resource_budget(combined_costs, budget):
-                    next_frontier.add(combined_costs)
+        for used_bombs, used_arrows, used_magic in frontier:
+            for plan_bombs, plan_arrows, plan_magic in enemy_plans:
+                bombs = used_bombs + plan_bombs
+                arrows = used_arrows + plan_arrows
+                magic = used_magic + plan_magic
+                if bombs <= budget.bombs and (budget.arrows is None or arrows <= budget.arrows) and magic <= budget.magic:
+                    next_frontier.add(ResourceCosts(bombs, arrows, magic))
         if not next_frontier:
             return tuple()
         frontier = _prune_dominated_resource_costs(next_frontier)
@@ -1297,14 +1415,31 @@ def _can_cast_medallion(state: CollectionState, player: int) -> bool:
     return _can_ready_medallion(state, player) and can_extend_magic(state, player, 16)
 
 
+def can_clear_standard_escape(state: CollectionState, player: int) -> bool:
+    # Standard start enemies are not enemy-shuffled, but randomized damage classes still affect them.
+    from .EnemyLogicTargets import (
+        HYRULE_CASTLE_BIG_KEY_DROP,
+        HYRULE_CASTLE_BOOMERANG_GUARD_KEY_DROP,
+        HYRULE_CASTLE_MAP_GUARD_KEY_DROP,
+        HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM,
+        SEWERS_KEY_RAT_KEY_DROP,
+    )
+
+    return (
+        can_kill_key_drop_enemy(state, player, HYRULE_CASTLE_MAP_GUARD_KEY_DROP)
+        and can_clear_enemy_region(state, player, HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM)
+        and can_kill_key_drop_enemy(state, player, HYRULE_CASTLE_BOOMERANG_GUARD_KEY_DROP)
+        and can_kill_key_drop_enemy(state, player, HYRULE_CASTLE_BIG_KEY_DROP)
+        and can_kill_key_drop_enemy(state, player, SEWERS_KEY_RAT_KEY_DROP)
+    )
+
+
 def can_kill_standard_start(state: CollectionState, player: int, enemies: int = 5) -> bool:
-    # Enemizer does not randomize standard start enemies
-        return (has_melee_weapon(state, player)
-                or state.has('Cane of Somaria', player)
-                or (state.has('Cane of Byrna', player) and (enemies < 6 or can_extend_magic(state, player)))
-                or state.has_any(["Bow", "Progressive Bow"], player)
-                or state.has('Fire Rod', player)
-                or can_use_bombs(state, player, enemies)) # Escape assist is set
+    from .EnemyLogicTargets import HYRULE_CASTLE_BIG_KEY_DROP
+
+    if enemies <= 1:
+        return can_kill_key_drop_enemy(state, player, HYRULE_CASTLE_BIG_KEY_DROP)
+    return can_clear_standard_escape(state, player)
 
 
 def can_get_good_bee(state: CollectionState, player: int) -> bool:

@@ -6,7 +6,7 @@ import threading
 import typing
 
 import settings
-from BaseClasses import Item, CollectionState, Tutorial, MultiWorld
+from BaseClasses import Item, CollectionState, Tutorial, MultiWorld, ItemClassification
 from worlds.AutoWorld import World, WebWorld, LogicMixin
 from .Client import ALTTPSNIClient
 from .BossPrizeData import boss_prize_items
@@ -25,12 +25,60 @@ from .Rom import TokenRom, patch_rom, apply_rom_settings, \
     get_hash_string, LttPDeltaPatch
 from .Rules import set_rules
 from .Shops import create_shops, Shop, push_shop_inventories, ShopType, price_rate_display, price_type_display_name
-from .StateHelpers import can_buy_unlimited
+from .StateHelpers import (
+    bump_enemy_combat_state_version,
+    can_buy_unlimited,
+    copy_enemy_combat_state_version,
+    init_enemy_combat_state_version,
+)
 from .SubClasses import ALttPItem, LTTPRegionType
 
 lttp_logger = logging.getLogger("A Link to the Past")
 
 extras_list = sum(difficulties['normal'].extras[0:5], [])
+
+complex_entrance_shuffle_modes = {"full", "crossed", "insanity"}
+complex_entrance_fill_priority_items = {
+    "Blue Boomerang",
+    "Arrow Upgrade (+5)",
+    "Arrow Upgrade (+10)",
+    "Arrow Upgrade (70)",
+    "Bombos",
+    "Bomb Upgrade (+5)",
+    "Bomb Upgrade (+10)",
+    "Bomb Upgrade (50)",
+    "Book of Mudora",
+    "Bow",
+    "Bug Catching Net",
+    "Cane of Byrna",
+    "Cane of Somaria",
+    "Cape",
+    "Ether",
+    "Fire Rod",
+    "Fighter Sword",
+    "Flippers",
+    "Flute",
+    "Golden Sword",
+    "Hammer",
+    "Hookshot",
+    "Ice Rod",
+    "Lamp",
+    "Magic Mirror",
+    "Magic Powder",
+    "Master Sword",
+    "Moon Pearl",
+    "Mushroom",
+    "Pegasus Boots",
+    "Power Glove",
+    "Progressive Bow",
+    "Progressive Glove",
+    "Progressive Sword",
+    "Quake",
+    "Red Boomerang",
+    "Silver Bow",
+    "Tempered Sword",
+    "Titans Mitts",
+}
 
 
 class ALTTPSettings(settings.Group):
@@ -556,7 +604,12 @@ class ALTTPWorld(World):
             if count:
                 state.add_item(small_key_name, self.player, count)
             return True
-        return super().collect(state, item)
+        item_name = self.collect_item(state, item)
+        if item_name:
+            state.add_item(item_name, self.player)
+            bump_enemy_combat_state_version(state, self.player, item_name)
+            return True
+        return False
 
     def remove(self, state: CollectionState, item: Item) -> bool:
         small_key_name = key_ring_name_to_small_key.get(item.name)
@@ -565,17 +618,24 @@ class ALTTPWorld(World):
             if count:
                 state.remove_item(small_key_name, self.player, count)
             return True
-        return super().remove(state, item)
+        item_name = self.collect_item(state, item, True)
+        if item_name:
+            state.remove_item(item_name, self.player)
+            bump_enemy_combat_state_version(state, self.player, item_name)
+            return True
+        return False
 
     def pre_fill(self):
         from Fill import fill_restrictive, FillError
         if not self.options.boss_prize_shuffle:
             attempts = 5
-            all_state = self.multiworld.get_all_state(perform_sweep=False)
+            all_state_with_prizes = self.multiworld.get_all_state(perform_sweep=False)
+            all_state = all_state_with_prizes.copy()
             crystals = [self.create_item(name) for name in boss_prize_items]
             for crystal in crystals:
                 all_state.remove(crystal)
             all_state.sweep_for_advancements()
+            all_state_with_prizes.sweep_for_advancements()
             crystal_locations = [self.get_location('Turtle Rock - Prize'),
                                  self.get_location('Eastern Palace - Prize'),
                                  self.get_location('Desert Palace - Prize'),
@@ -589,22 +649,55 @@ class ALTTPWorld(World):
             placed_prizes = {loc.item.name for loc in crystal_locations if loc.item}
             unplaced_prizes = [crystal for crystal in crystals if crystal.name not in placed_prizes]
             empty_crystal_locations = [loc for loc in crystal_locations if not loc.item]
-            for attempt in range(attempts):
-                try:
-                    prizepool = unplaced_prizes.copy()
-                    prize_locs = empty_crystal_locations.copy()
-                    self.multiworld.random.shuffle(prize_locs)
-                    fill_restrictive(self.multiworld, all_state, prize_locs, prizepool, True, lock=True,
-                                     name="LttP Dungeon Prizes")
-                except FillError as e:
-                    lttp_logger.exception("Failed to place dungeon prizes (%s). Will retry %s more times", e,
-                                                    attempts - attempt)
-                    for location in empty_crystal_locations:
-                        location.item = None
-                    continue
-                break
-            else:
-                raise FillError('Unable to place dungeon prizes')
+            original_item_rules = {}
+            last_error = None
+
+            try:
+                for fill_state, state_attempts, prevent_self_lock in (
+                        (all_state, 1, False),
+                        (all_state_with_prizes, attempts, True)):
+                    if prevent_self_lock:
+                        allowed_prizes = {}
+                        for location in empty_crystal_locations:
+                            allowed_prizes[location] = set()
+                            for prize in unplaced_prizes:
+                                state_without_prize = fill_state.copy()
+                                state_without_prize.remove(prize)
+                                state_without_prize.sweep_for_advancements()
+                                if location.can_reach(state_without_prize):
+                                    allowed_prizes[location].add(prize.name)
+
+                        for location in empty_crystal_locations:
+                            if location not in original_item_rules:
+                                original_item_rules[location] = location.item_rule
+                            orig_rule = original_item_rules[location]
+                            location.item_rule = lambda item, location=location, orig_rule=orig_rule: \
+                                item.name in allowed_prizes[location] and orig_rule(item)
+
+                    for _ in range(state_attempts):
+                        try:
+                            prizepool = unplaced_prizes.copy()
+                            prize_locs = empty_crystal_locations.copy()
+                            self.multiworld.random.shuffle(prize_locs)
+                            fill_restrictive(self.multiworld, fill_state.copy(), prize_locs, prizepool, True,
+                                             lock=True, name="LttP Dungeon Prizes")
+                        except FillError as e:
+                            last_error = e
+                            for location in empty_crystal_locations:
+                                if location.item:
+                                    location.item.location = None
+                                location.item = None
+                                location.locked = False
+                            continue
+                        break
+                    else:
+                        continue
+                    break
+                else:
+                    raise FillError('Unable to place dungeon prizes') from last_error
+            finally:
+                for location, item_rule in original_item_rules.items():
+                    location.item_rule = item_rule
         if self.options.mode == 'standard' and self.options.small_key_shuffle \
                 and self.options.small_key_shuffle != small_key_shuffle.option_universal and \
                 self.options.small_key_shuffle != small_key_shuffle.option_own_dungeons:
@@ -742,6 +835,50 @@ class ALTTPWorld(World):
 
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
+        required_triforce_pieces = {}
+        for player in multiworld.get_game_players("A Link to the Past"):
+            world = multiworld.worlds[player]
+            if "triforce_hunt" in world.options.goal.current_key:
+                precollected_pieces = sum(
+                    1 for item in multiworld.precollected_items[player] if item.name == "Triforce Piece"
+                )
+                required_triforce_pieces[player] = max(0, world.treasure_hunt_required - precollected_pieces)
+
+        goal_items = []
+        promoted_items = []
+        remaining_items = []
+        for item in progitempool:
+            world = multiworld.worlds[item.player]
+            if item.name == "Triforce Piece" and item.player in required_triforce_pieces:
+                if required_triforce_pieces[item.player] > 0:
+                    required_triforce_pieces[item.player] -= 1
+                    goal_items.append(item)
+                else:
+                    item.classification = ItemClassification.filler
+                    filleritempool.append(item)
+                continue
+
+            if (
+                world.game == "A Link to the Past"
+                and (
+                    (item.name == "Hammer" and world.options.enemy_shuffle)
+                    or (item.name == "Small Key (Hyrule Castle)" and world.options.mode == "standard")
+                    or (
+                        world.options.entrance_shuffle.current_key in complex_entrance_shuffle_modes
+                        and (
+                            item.name in complex_entrance_fill_priority_items
+                            or item.name.startswith("Big Key (")
+                        )
+                    )
+                )
+            ):
+                promoted_items.append(item)
+            else:
+                remaining_items.append(item)
+        if promoted_items or goal_items:
+            # fill_restrictive pops from the end of the item pool, so higher-priority items belong later.
+            progitempool[:] = remaining_items + promoted_items + goal_items
+
         trash_counts = {}
         for player in multiworld.get_game_players("A Link to the Past"):
             world = multiworld.worlds[player]
@@ -959,6 +1096,12 @@ def get_same_seed(world, seed_def: tuple) -> str:
 
 
 class ALttPLogic(LogicMixin):
+    def init_mixin(self, parent: MultiWorld) -> None:
+        init_enemy_combat_state_version(self, parent)
+
+    def copy_mixin(self, ret: CollectionState) -> CollectionState:
+        return copy_enemy_combat_state_version(self, ret)
+
     def _lttp_has_key(self, item, player, count: int = 1):
         if self.multiworld.worlds[player].options.glitches_required == 'no_logic':
             return True
