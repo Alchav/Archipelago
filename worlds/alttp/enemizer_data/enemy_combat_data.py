@@ -35,10 +35,10 @@ FIGHTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2))
 MASTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3))
 TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3, 4))
 GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((1, 3, 4, 5))
-SWORD_UPGRADE_DAMAGE_CLASSES = (2, 3, 4)
+LOST_SWORD_UPGRADE_DAMAGE_CLASS = 2
+SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES = (1, 3, 4, 5)
 NORMAL_ARROW_DAMAGE_CLASS = 6
 SILVER_ARROW_DAMAGE_CLASS = 9
-ARROW_UPGRADE_DAMAGE_CLASSES = (NORMAL_ARROW_DAMAGE_CLASS, SILVER_ARROW_DAMAGE_CLASS)
 VANILLA_RANDOMIZE_DAMAGE_CLASSES = "vanilla"
 INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES = "intra_enemy"
 INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES = "inter_enemy"
@@ -621,31 +621,16 @@ def _set_guaranteed_logic_kill_effect(
 
 
 def _set_guaranteed_logic_kill_effect_for_row(row: list[int], effect_palettes: list[set[int]]) -> None:
-    arrow_safe_effect = _get_arrow_safe_silver_arrow_guarantee_effect(row)
-    if (
-        arrow_safe_effect is not None
-        and _effect_fits_palette(arrow_safe_effect, effect_palettes[GUARANTEED_LOGIC_KILL_DAMAGE_CLASS])
-    ):
+    if _effect_fits_palette(GUARANTEED_LOGIC_KILL_EFFECT, effect_palettes[GUARANTEED_LOGIC_KILL_DAMAGE_CLASS]):
         _set_guaranteed_logic_kill_effect(
             row,
             effect_palettes,
             GUARANTEED_LOGIC_KILL_DAMAGE_CLASS,
-            arrow_safe_effect,
+            GUARANTEED_LOGIC_KILL_EFFECT,
         )
         return
 
     _set_guaranteed_logic_kill_effect(row, effect_palettes, 11, INCINERATE_EFFECT)
-
-
-def _get_arrow_safe_silver_arrow_guarantee_effect(row: list[int]) -> int | None:
-    normal_arrow_effect = row[NORMAL_ARROW_DAMAGE_CLASS]
-    if normal_arrow_effect == 0:
-        return GUARANTEED_LOGIC_KILL_EFFECT
-    if _is_special_damage_effect(normal_arrow_effect):
-        return None
-    if is_killing_damage_effect(normal_arrow_effect):
-        return max(normal_arrow_effect, GUARANTEED_LOGIC_KILL_EFFECT)
-    return None
 
 
 def _fill_effect_palettes(
@@ -702,10 +687,8 @@ def _fit_sprite_damage_effects(
         else rng.choice(tuple(sorted(effect_palettes[damage_class])))
         for damage_class, effect in enumerate(row)
     ]
-    for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES:
-        fallback[damage_class] = 0
-    if not _arrow_upgrade_damage_is_safe(fallback):
-        fallback[NORMAL_ARROW_DAMAGE_CLASS] = 0
+    if not _sword_class_2_loss_is_safe(fallback):
+        fallback[LOST_SWORD_UPGRADE_DAMAGE_CLASS] = 0
     if not _row_fits_effect_palettes(fallback, effect_palettes):
         fallback = [
             effect if _effect_fits_palette(effect, effect_palettes[damage_class])
@@ -731,10 +714,8 @@ def _build_chaos_sprite_damage_effects(effect_palettes: list[set[int]], rng: ran
         rng.choice(ordered_palettes[damage_class])
         for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
     ]
-    for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES:
-        candidate[damage_class] = 0
-    if not _arrow_upgrade_damage_is_safe(candidate):
-        candidate[NORMAL_ARROW_DAMAGE_CLASS] = 0
+    if not _sword_class_2_loss_is_safe(candidate):
+        candidate[LOST_SWORD_UPGRADE_DAMAGE_CLASS] = 0
     return candidate
 
 
@@ -757,55 +738,35 @@ def _effect_fits_palette(effect: int, palette: set[int]) -> bool:
 
 
 def _enforce_upgrade_damage_safety(row: list[int], rng: random.Random) -> None:
-    _enforce_sword_upgrade_damage_order(row, rng)
-    _enforce_arrow_upgrade_damage_order(row)
+    _enforce_sword_upgrade_damage_safety(row, rng)
 
 
-def _enforce_sword_upgrade_damage_order(row: list[int], rng: random.Random) -> None:
-    sword_effects = [row[damage_class] for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES]
-    first_nonzero = next((index for index, effect in enumerate(sword_effects) if effect != 0), None)
-    if first_nonzero is None:
+def _enforce_sword_upgrade_damage_safety(row: list[int], rng: random.Random) -> None:
+    if _sword_class_2_loss_is_safe(row):
         return
 
-    suffix = sword_effects[first_nonzero:]
-    special_effects = [effect for effect in suffix if _is_special_damage_effect(effect)]
-    normal_effects = [
-        effect for effect in suffix
-        if is_killing_damage_effect(effect) and not _is_special_damage_effect(effect)
-    ]
-
-    if special_effects and (not normal_effects or rng.choice((False, True))):
-        normalized_suffix = [rng.choice(special_effects)] * len(suffix)
-    elif normal_effects:
-        normalized_suffix = sorted(rng.choice(normal_effects) for _ in suffix)
-    else:
-        normalized_suffix = [0] * len(suffix)
-
-    for index, effect in enumerate(normalized_suffix, start=first_nonzero):
-        row[SWORD_UPGRADE_DAMAGE_CLASSES[index]] = effect
+    replacement_damage_classes = list(SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES)
+    rng.shuffle(replacement_damage_classes)
+    row[replacement_damage_classes[0]] = row[LOST_SWORD_UPGRADE_DAMAGE_CLASS]
 
 
-def _enforce_arrow_upgrade_damage_order(row: list[int]) -> None:
-    normal_arrow_effect = row[NORMAL_ARROW_DAMAGE_CLASS]
-    if normal_arrow_effect == 0 or _arrow_upgrade_damage_is_safe(row):
-        return
-    row[SILVER_ARROW_DAMAGE_CLASS] = normal_arrow_effect
-
-
-def _arrow_upgrade_damage_is_safe(row: list[int]) -> bool:
-    normal_arrow_effect = row[NORMAL_ARROW_DAMAGE_CLASS]
-    silver_arrow_effect = row[SILVER_ARROW_DAMAGE_CLASS]
-    if normal_arrow_effect == 0:
+def _sword_class_2_loss_is_safe(row: list[int]) -> bool:
+    class_2_effect = row[LOST_SWORD_UPGRADE_DAMAGE_CLASS]
+    if class_2_effect == 0:
         return True
-    if _is_special_damage_effect(normal_arrow_effect):
-        return silver_arrow_effect == normal_arrow_effect
-    if is_killing_damage_effect(normal_arrow_effect):
-        return (
-            is_killing_damage_effect(silver_arrow_effect)
-            and not _is_special_damage_effect(silver_arrow_effect)
-            and silver_arrow_effect >= normal_arrow_effect
-        )
-    return silver_arrow_effect == normal_arrow_effect
+
+    return any(
+        _damage_effect_covers_lost_sword_class_2(row[damage_class], class_2_effect)
+        for damage_class in SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES
+    )
+
+
+def _damage_effect_covers_lost_sword_class_2(effect: int, class_2_effect: int) -> bool:
+    if _is_special_damage_effect(class_2_effect):
+        return effect == class_2_effect
+    if is_killing_damage_effect(class_2_effect):
+        return is_killing_damage_effect(effect) and not _is_special_damage_effect(effect) and effect >= class_2_effect
+    return effect == class_2_effect
 
 
 def _is_special_damage_effect(effect: int) -> bool:

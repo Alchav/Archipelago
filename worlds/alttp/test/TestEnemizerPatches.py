@@ -39,7 +39,6 @@ from worlds.alttp.EnemizerPatches import (
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
     ANTI_FAIRY_SPRITE_ID,
-    ARROW_UPGRADE_DAMAGE_CLASSES,
     BLOB_TRANSFORM_EFFECT,
     CHAOS_RANDOMIZE_DAMAGE_CLASSES,
     DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
@@ -53,14 +52,15 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     GOLDEN_SWORD_DAMAGE_CLASSES,
     INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
     INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
+    LOST_SWORD_UPGRADE_DAMAGE_CLASS,
     MASTER_SWORD_DAMAGE_CLASSES,
     MIXED_RANDOMIZE_DAMAGE_CLASSES,
     MOTHULA_SPRITE_ID,
     RED_BARI_SPRITE_ID,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE,
     SPRITE_DAMAGE_SUBCLASSES,
+    SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES,
     SWORD_BEAM_DAMAGE_CLASS,
-    SWORD_UPGRADE_DAMAGE_CLASSES,
     TEMPERED_SWORD_DAMAGE_CLASSES,
     VANILLA_COMBAT_MODEL,
     build_damage_source_table_bytes,
@@ -200,7 +200,7 @@ class TestEnemizerPatches(unittest.TestCase):
                             get_damage_effect(sprite_id, damage_class),
                         )
 
-    def test_randomized_damage_classes_preserve_sword_upgrade_order(self) -> None:
+    def test_randomized_damage_classes_preserve_lost_sword_class_2(self) -> None:
         for mode in (
             INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
             INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
@@ -219,58 +219,31 @@ class TestEnemizerPatches(unittest.TestCase):
                         )
                     ):
                         continue
-                    effects = [
-                        get_damage_effect(sprite_id, damage_class, combat_model)
-                        for damage_class in SWORD_UPGRADE_DAMAGE_CLASSES
-                    ]
-                    first_nonzero = next((index for index, effect in enumerate(effects) if effect != 0), None)
-                    if first_nonzero is None:
+                    class_2_effect = get_damage_effect(
+                        sprite_id,
+                        LOST_SWORD_UPGRADE_DAMAGE_CLASS,
+                        combat_model,
+                    )
+                    if class_2_effect == 0:
                         continue
-                    suffix = effects[first_nonzero:]
-                    if suffix[0] >= FAIRY_TRANSFORM_EFFECT:
-                        self.assertEqual(set(suffix), {suffix[0]})
+                    replacement_effects = [
+                        get_damage_effect(sprite_id, damage_class, combat_model)
+                        for damage_class in SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES
+                    ]
+                    if class_2_effect >= FAIRY_TRANSFORM_EFFECT:
+                        self.assertIn(class_2_effect, replacement_effects)
                     else:
-                        self.assertEqual(suffix, sorted(suffix))
-                        self.assertTrue(all(0 < effect < FAIRY_TRANSFORM_EFFECT for effect in suffix))
+                        self.assertTrue(
+                            any(0 < effect < FAIRY_TRANSFORM_EFFECT and effect >= class_2_effect
+                                for effect in replacement_effects)
+                        )
 
     def test_sword_beam_damage_class_is_retained_after_sword_upgrades(self) -> None:
-        self.assertNotIn(SWORD_BEAM_DAMAGE_CLASS, SWORD_UPGRADE_DAMAGE_CLASSES)
+        self.assertNotEqual(SWORD_BEAM_DAMAGE_CLASS, LOST_SWORD_UPGRADE_DAMAGE_CLASS)
         self.assertIn(SWORD_BEAM_DAMAGE_CLASS, FIGHTER_SWORD_DAMAGE_CLASSES)
         self.assertIn(SWORD_BEAM_DAMAGE_CLASS, MASTER_SWORD_DAMAGE_CLASSES)
         self.assertIn(SWORD_BEAM_DAMAGE_CLASS, TEMPERED_SWORD_DAMAGE_CLASSES)
         self.assertIn(SWORD_BEAM_DAMAGE_CLASS, GOLDEN_SWORD_DAMAGE_CLASSES)
-
-    def test_randomized_damage_classes_preserve_arrow_upgrade_order(self) -> None:
-        for mode in (
-            INTRA_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
-            INTER_ENEMY_RANDOMIZE_DAMAGE_CLASSES,
-            MIXED_RANDOMIZE_DAMAGE_CLASSES,
-            CHAOS_RANDOMIZE_DAMAGE_CLASSES,
-        ):
-            with self.subTest(mode=mode):
-                combat_model = build_randomized_damage_class_combat_model(random.Random(4), mode)
-
-                for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
-                    if (
-                        sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
-                        or (
-                            VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
-                            and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
-                        )
-                    ):
-                        continue
-                    normal_arrow_effect, silver_arrow_effect = (
-                        get_damage_effect(sprite_id, damage_class, combat_model)
-                        for damage_class in ARROW_UPGRADE_DAMAGE_CLASSES
-                    )
-                    if normal_arrow_effect == 0:
-                        continue
-                    if normal_arrow_effect >= FAIRY_TRANSFORM_EFFECT:
-                        self.assertEqual(silver_arrow_effect, normal_arrow_effect)
-                    else:
-                        self.assertGreater(silver_arrow_effect, 0)
-                        self.assertLess(silver_arrow_effect, FAIRY_TRANSFORM_EFFECT)
-                        self.assertGreaterEqual(silver_arrow_effect, normal_arrow_effect)
 
     def test_randomized_damage_classes_include_selected_hp_255_enemies(self) -> None:
         combat_model = build_randomized_damage_class_combat_model(random.Random(2), CHAOS_RANDOMIZE_DAMAGE_CLASSES)
