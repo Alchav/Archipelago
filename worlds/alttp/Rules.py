@@ -55,7 +55,7 @@ from .StateHelpers import (can_extend_magic, can_clear_enemy_region, can_clear_e
                            can_kill_key_drop_enemy,
                            can_lift_heavy_rocks, can_lift_rocks,
                            can_melt_things, can_retrieve_tablet,
-                           can_shoot_arrows, has_beam_sword, has_crystals,
+                           can_pass_evil_barrier, can_shoot_arrows, has_beam_sword, has_crystals,
                            has_fire_source, has_hearts, has_melee_weapon,
                            has_misery_mire_medallion, has_sword, has_turtle_rock_medallion,
                            has_triforce_pieces, can_use_bombs, can_bomb_or_bonk,
@@ -848,7 +848,7 @@ def default_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Desert Palace Entrance (North) Rocks', player), lambda state: can_lift_rocks(state, player))
     set_rule(multiworld.get_entrance('Desert Ledge Return Rocks', player), lambda state: can_lift_rocks(state, player))  # should we decide to place something that is not a dungeon end up there at some point
     set_rule(multiworld.get_entrance('Checkerboard Cave', player), lambda state: can_lift_rocks(state, player))
-    set_rule(multiworld.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or has_beam_sword(state, player) or state.has('Beat Agahnim 1', player))  # barrier gets removed after killing agahnim, relevant for entrance shuffle
+    set_rule(multiworld.get_entrance('Agahnims Tower', player), lambda state: can_pass_evil_barrier(state, player) or state.has('Beat Agahnim 1', player))  # barrier gets removed after killing agahnim, relevant for entrance shuffle
     set_rule(multiworld.get_entrance('Top of Pyramid', player), lambda state: state.has('Beat Agahnim 1', player))
     set_rule(multiworld.get_entrance('Old Man Cave Exit (West)', player), lambda state: False)  # drop cannot be climbed up
     set_rule(multiworld.get_entrance('Broken Bridge (West)', player), lambda state: state.has('Hookshot', player))
@@ -1273,7 +1273,7 @@ def swordless_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Ganon Drop', player), lambda state: state.has('Hammer', player))  # need to damage ganon to get tiles to drop
 
     if multiworld.worlds[player].options.mode != 'inverted':
-        set_rule(multiworld.get_entrance('Agahnims Tower', player), lambda state: state.has('Cape', player) or state.has('Hammer', player) or state.has('Beat Agahnim 1', player))  # barrier gets removed after killing agahnim, relevant for entrance shuffle
+        set_rule(multiworld.get_entrance('Agahnims Tower', player), lambda state: can_pass_evil_barrier(state, player) or state.has('Beat Agahnim 1', player))  # barrier gets removed after killing agahnim, relevant for entrance shuffle
         set_rule(multiworld.get_entrance('Turtle Rock', player), lambda state: state.has('Moon Pearl', player) and has_turtle_rock_medallion(state, player) and state.can_reach('Turtle Rock (Top)', 'Region', player))   # sword not required to use medallion for opening in swordless (!)
         set_rule(multiworld.get_entrance('Misery Mire', player), lambda state: state.has('Moon Pearl', player) and has_misery_mire_medallion(state, player))  # sword not required to use medallion for opening in swordless (!)
     else:

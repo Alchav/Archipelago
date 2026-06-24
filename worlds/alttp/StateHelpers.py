@@ -2,9 +2,11 @@ from typing import NamedTuple
 
 from .SubClasses import LTTPRegion
 from .enemizer_data.enemy_combat_data import (
+    BLOB_TRANSFORM_EFFECT,
     DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DIRECT_KILL_DELIVERY_OVERRIDES,
     EnemyCombatModel,
+    FAIRY_TRANSFORM_EFFECT,
     FIGHTER_SWORD_DAMAGE_CLASSES,
     FREEZE_EFFECT,
     GOLDEN_SWORD_DAMAGE_CLASSES,
@@ -17,10 +19,12 @@ from .enemizer_data.enemy_combat_data import (
     YELLOW_SLIME_SPRITE_ID,
     get_blob_transform_damage_classes,
     get_damage_classes_with_effects,
+    get_damage_effect,
     get_hardcoded_enemy_hp,
     get_hits_to_kill,
     get_killing_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
+    is_killing_damage_effect,
 )
 from BaseClasses import CollectionState
 
@@ -215,6 +219,15 @@ ROOM_WIDE_MEDALLION_DAMAGE_CLASSES = {
     "Ether": 14,
     "Quake": 15,
 }
+LIGHTNING_GATE_SPRITE_ID = 0x40
+LIGHTNING_GATE_MAGIC_POWDER_DAMAGE_CLASS = 10
+LIGHTNING_GATE_TRANSFORM_EFFECTS = frozenset((FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT))
+# Evil Barrier rejects Fighter Sword and Hammer contact hits before the damage table result matters.
+LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
+    ("Master Sword", frozenset((1, 2, 3))),
+    ("Tempered Sword", frozenset((2, 3, 4))),
+    ("Golden Sword", frozenset((3, 4, 5))),
+)
 
 
 def _add_resource_costs(left: ResourceCosts, right: ResourceCosts) -> ResourceCosts:
@@ -239,6 +252,32 @@ def _resource_costs_dominate(left: ResourceCosts, right: ResourceCosts) -> bool:
         and left.arrows <= right.arrows
         and left.magic <= right.magic
     )
+
+
+def can_pass_evil_barrier(state: CollectionState, player: int) -> bool:
+    if state.has("Cape", player):
+        return True
+
+    combat_model = _get_active_combat_model(state, player)
+    if state.has("Magic Powder", player) and _lightning_gate_damage_class_removes_barrier(
+        LIGHTNING_GATE_MAGIC_POWDER_DAMAGE_CLASS,
+        combat_model,
+    ):
+        return True
+
+    return any(
+        state.has(sword_name, player)
+        and any(
+            _lightning_gate_damage_class_removes_barrier(damage_class, combat_model)
+            for damage_class in damage_classes
+        )
+        for sword_name, damage_classes in LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES
+    )
+
+
+def _lightning_gate_damage_class_removes_barrier(damage_class: int, combat_model: EnemyCombatModel) -> bool:
+    effect = get_damage_effect(LIGHTNING_GATE_SPRITE_ID, damage_class, combat_model)
+    return is_killing_damage_effect(effect) or effect in LIGHTNING_GATE_TRANSFORM_EFFECTS
 
 
 def _prune_dominated_resource_costs(costs: set[ResourceCosts]) -> tuple[ResourceCosts, ...]:
