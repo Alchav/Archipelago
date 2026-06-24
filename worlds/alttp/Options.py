@@ -314,15 +314,15 @@ class EnemyDamage(Choice):
 
 class RandomizeDamageClasses(Choice):
     """Vanilla: Enemies use their vanilla damage class tables.
-    Intra-Enemy: Shuffle each enemy's own damage class results among that enemy's damage classes.
-    Inter-Enemy: Shuffle whole enemy damage class profiles between enemies.
-    Mixed: Shuffle profiles between enemies, then shuffle within each enemy.
+    Enemy Swap: Shuffle whole enemy damage class profiles between enemies.
+    Damage Class Swap: Globally shuffle what each damage class does to every enemy.
+    Mixed: Globally shuffle damage classes, then shuffle whole enemy profiles between enemies.
     Chaos: Generate random damage class results for each enemy."""
     display_name = "Randomize Damage Classes"
     default = 0
     option_vanilla = 0
-    option_intra_enemy = 1
-    option_inter_enemy = 2
+    option_enemy_swap = 1
+    option_damage_class_swap = 2
     option_mixed = 3
     option_chaos = 4
 
