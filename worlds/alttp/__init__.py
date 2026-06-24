@@ -17,7 +17,7 @@ from .ItemPool import generate_itempool, difficulties
 from .Items import (item_init_table, item_name_groups, item_table, GetBeemizerItem, default_key_ring_data,
                     key_ring_name_to_small_key, key_ring_option_names, small_key_name_to_key_ring,
                     small_key_name_to_key_ring_option)
-from .Options import ALTTPOptions, small_key_shuffle
+from .Options import ALTTPOptions, big_key_shuffle, small_key_shuffle
 from .PotShuffle import generate_pot_shuffle
 from .Regions import lookup_name_to_id, create_regions, mark_light_world_regions, lookup_vanilla_location_to_entrance, \
     is_main_entrance, key_drop_data
@@ -423,6 +423,11 @@ class ALTTPWorld(World):
             if self.options.big_key_shuffle:
                 self.options.local_items.value.add("Big Key (Hyrule Castle)")
                 self.options.non_local_items.value.discard("Big Key (Hyrule Castle)")
+                if (
+                    not self.options.big_key_shuffle.in_dungeon
+                    and self.options.big_key_shuffle != big_key_shuffle.option_start_with
+                ):
+                    self.dungeon_local_item_names.add("Big Key (Hyrule Castle)")
 
         # system for sharing ER layouts
         self.er_seed = str(multiworld.random.randint(0, 2 ** 64))
@@ -863,6 +868,7 @@ class ALTTPWorld(World):
                 and (
                     (item.name == "Hammer" and world.options.enemy_shuffle)
                     or (item.name == "Small Key (Hyrule Castle)" and world.options.mode == "standard")
+                    or (item.name == "Big Key (Hyrule Castle)" and world.options.mode == "standard")
                     or (
                         world.options.entrance_shuffle.current_key in complex_entrance_shuffle_modes
                         and (
