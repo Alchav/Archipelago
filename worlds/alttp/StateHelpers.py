@@ -206,6 +206,28 @@ class ResourceBudget(NamedTuple):
 
 
 FREE_RESOURCE_COSTS = ResourceCosts()
+ENEMY_COMBAT_CACHE_ATTRIBUTE = "_alttp_enemy_combat_logic_cache"
+ENEMY_COMBAT_STATE_ITEMS = (
+    "Fighter Sword",
+    "Master Sword",
+    "Tempered Sword",
+    "Golden Sword",
+    "Hammer",
+    "Blue Boomerang",
+    "Red Boomerang",
+    "Hookshot",
+    "Cane of Somaria",
+    "Cane of Byrna",
+    "Magic Powder",
+    "Bow",
+    "Silver Bow",
+    "Silver Arrows",
+    "Fire Rod",
+    "Ice Rod",
+    "Bombos",
+    "Ether",
+    "Quake",
+)
 ENEMY_CLEAR_MAGIC_UNITS_PER_LOGIC_UNIT = 2
 FIRE_ROD_MAGIC_COST = 2
 ICE_ROD_MAGIC_COST = 2
@@ -228,6 +250,46 @@ LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
     ("Tempered Sword", frozenset((2, 3, 4))),
     ("Golden Sword", frozenset((3, 4, 5))),
 )
+
+
+def _get_enemy_combat_state_key(state: CollectionState, player: int) -> tuple:
+    player_items = state.prog_items[player]
+    has_arrow_weapon = bool(player_items["Bow"] or player_items["Silver Bow"])
+    return (
+        id(_get_active_combat_model(state, player)),
+        _get_enemy_health_key(state, player),
+        _get_max_attacks_in_logic(state, player),
+        bool(state.multiworld.worlds[player].options.killable_thieves),
+        can_shoot_arrows(state, player, 1) if has_arrow_weapon else False,
+        can_use_bombs(state, player, 1),
+        tuple(player_items[item_name] for item_name in ENEMY_COMBAT_STATE_ITEMS),
+    )
+
+
+def _get_enemy_combat_cache(state: CollectionState, player: int) -> dict:
+    cache_by_player = getattr(state, ENEMY_COMBAT_CACHE_ATTRIBUTE, None)
+    if cache_by_player is None:
+        cache_by_player = {}
+        setattr(state, ENEMY_COMBAT_CACHE_ATTRIBUTE, cache_by_player)
+
+    state_key = _get_enemy_combat_state_key(state, player)
+    cache_entry = cache_by_player.get(player)
+    if cache_entry is None or cache_entry[0] != state_key:
+        cache_entry = (state_key, {})
+        cache_by_player[player] = cache_entry
+    return cache_entry[1]
+
+
+def _get_enemy_requirement_cache_key(requirement) -> tuple:
+    enemy_or_requirement = requirement
+    requirement = _get_enemy_requirement(enemy_or_requirement)
+    return (
+        requirement.sprite_id,
+        requirement.combat_reference_id,
+        requirement.sprite_name,
+        getattr(requirement, "killable", None),
+        _get_enemy_hp_override(enemy_or_requirement),
+    )
 
 
 def _add_resource_costs(left: ResourceCosts, right: ResourceCosts) -> ResourceCosts:
@@ -971,6 +1033,11 @@ def _get_enemy_kill_plans(
     *,
     key_drop_enemy: bool = False,
 ) -> tuple[ResourceCosts, ...]:
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = ("enemy_kill_plans", _get_enemy_requirement_cache_key(requirement), key_drop_enemy)
+    if cache_key in cache:
+        return cache[cache_key]
+
     hp_override = _get_enemy_hp_override(requirement)
     requirement = _get_enemy_requirement(requirement)
     combat_model = _get_active_combat_model(state, player)
@@ -1009,6 +1076,7 @@ def _get_enemy_kill_plans(
         )
 
     if key_drop_enemy and requirement.sprite_name in KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES:
+        cache[cache_key] = direct_attack_plans
         return direct_attack_plans
 
     plans = set(direct_attack_plans)
@@ -1023,7 +1091,9 @@ def _get_enemy_kill_plans(
             )
         )
     plans.update(_get_transform_attack_plans(state, player, requirement))
-    return _prune_dominated_resource_costs(plans)
+    result = _prune_dominated_resource_costs(plans)
+    cache[cache_key] = result
+    return result
 
 
 def _get_enemy_kill_plans_after_room_wide_medallions(
@@ -1034,8 +1104,19 @@ def _get_enemy_kill_plans_after_room_wide_medallions(
     *,
     key_drop_enemy: bool = False,
 ) -> tuple[ResourceCosts, ...]:
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = (
+        "enemy_kill_plans_after_medallions",
+        _get_enemy_requirement_cache_key(requirement),
+        room_wide_medallions,
+        key_drop_enemy,
+    )
+    if cache_key in cache:
+        return cache[cache_key]
+
     individual_plans = _get_enemy_kill_plans(state, player, requirement, key_drop_enemy=key_drop_enemy)
     if FREE_RESOURCE_COSTS in individual_plans:
+        cache[cache_key] = (FREE_RESOURCE_COSTS,)
         return (FREE_RESOURCE_COSTS,)
 
     plans = set(individual_plans)
@@ -1048,7 +1129,9 @@ def _get_enemy_kill_plans_after_room_wide_medallions(
             key_drop_enemy=key_drop_enemy,
         )
     )
-    return _prune_dominated_resource_costs(plans)
+    result = _prune_dominated_resource_costs(plans)
+    cache[cache_key] = result
+    return result
 
 
 def _get_available_room_wide_medallions(state: CollectionState, player: int) -> tuple[str, ...]:
