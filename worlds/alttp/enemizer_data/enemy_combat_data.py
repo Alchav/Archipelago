@@ -57,6 +57,7 @@ MASTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3))
 TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3, 4))
 GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((1, 3, 4, 5))
 LOST_SWORD_UPGRADE_DAMAGE_CLASS = 2
+GOLDEN_SWORD_SPIN_DAMAGE_CLASS = 5
 SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES = (1, 3, 4, 5)
 NORMAL_ARROW_DAMAGE_CLASS = 6
 SILVER_ARROW_DAMAGE_CLASS = 9
@@ -1234,15 +1235,23 @@ def _build_nightmare_sprite_damage_effects(
     candidate_damage_classes = tuple(
         damage_class
         for damage_class in progression_damage_classes
-        if damage_class != LOST_SWORD_UPGRADE_DAMAGE_CLASS
-        and (available_damage_classes is None or damage_class in available_damage_classes)
+        if (
+            available_damage_classes is None
+            or (
+                damage_class in available_damage_classes
+                and (
+                    damage_class != LOST_SWORD_UPGRADE_DAMAGE_CLASS
+                    or GOLDEN_SWORD_SPIN_DAMAGE_CLASS in available_damage_classes
+                )
+            )
+            or (
+                damage_class == LOST_SWORD_UPGRADE_DAMAGE_CLASS
+                and GOLDEN_SWORD_SPIN_DAMAGE_CLASS in available_damage_classes
+            )
+        )
     )
     if not candidate_damage_classes:
-        candidate_damage_classes = tuple(
-            damage_class
-            for damage_class in progression_damage_classes
-            if damage_class != LOST_SWORD_UPGRADE_DAMAGE_CLASS
-        )
+        candidate_damage_classes = progression_damage_classes
 
     max_attacks = None if sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS else max(1, max_attacks_in_logic)
     if sprite_id == RED_BARI_SPRITE_ID:
@@ -1313,14 +1322,16 @@ def _set_nightmare_defeat_effect_for_row(
                 _set_guaranteed_logic_kill_effect(row, effect_palettes, damage_class, preferred_effect)
                 return
 
-    _set_guaranteed_logic_kill_effect_for_row(
-        row,
-        effect_palettes,
-        sprite_id,
-        hp,
-        max_attacks,
-        damage_classes,
-    )
+    if LOST_SWORD_UPGRADE_DAMAGE_CLASS in damage_classes:
+        paired_damage_classes = (LOST_SWORD_UPGRADE_DAMAGE_CLASS, GOLDEN_SWORD_SPIN_DAMAGE_CLASS)
+        effects = _get_guaranteed_logic_kill_effect_candidates(sprite_id, hp, max_attacks)
+        for effect in effects:
+            if all(_effect_fits_palette(effect, effect_palettes[damage_class]) for damage_class in paired_damage_classes):
+                for damage_class in paired_damage_classes:
+                    _set_guaranteed_logic_kill_effect(row, effect_palettes, damage_class, effect)
+                return
+
+    _set_guaranteed_logic_kill_effect_for_row(row, effect_palettes, sprite_id, hp, max_attacks, damage_classes)
 
 
 def _row_fits_effect_palettes(row: list[int], effect_palettes: list[set[int]]) -> bool:

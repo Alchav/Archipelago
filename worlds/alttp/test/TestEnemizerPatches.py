@@ -52,6 +52,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     FAIRY_TRANSFORM_EFFECT,
     FIGHTER_SWORD_DAMAGE_CLASSES,
+    GOLDEN_SWORD_SPIN_DAMAGE_CLASS,
     GOLDEN_SWORD_DAMAGE_CLASSES,
     GANON_D7_SPRITE_ID,
     HELMASAUR_KING_SPRITE_ID,
@@ -524,7 +525,15 @@ class TestEnemizerPatches(unittest.TestCase):
                         get_damage_effect(sprite_id, damage_class, combat_model)
                     )
                 )
-                self.assertEqual(len(defeat_classes), 1)
+                if LOST_SWORD_UPGRADE_DAMAGE_CLASS in defeat_classes:
+                    self.assertIn(GOLDEN_SWORD_SPIN_DAMAGE_CLASS, defeat_classes)
+                    self.assertEqual(
+                        get_damage_effect(sprite_id, LOST_SWORD_UPGRADE_DAMAGE_CLASS, combat_model),
+                        get_damage_effect(sprite_id, GOLDEN_SWORD_SPIN_DAMAGE_CLASS, combat_model),
+                    )
+                    self.assertEqual(set(defeat_classes), {LOST_SWORD_UPGRADE_DAMAGE_CLASS, GOLDEN_SWORD_SPIN_DAMAGE_CLASS})
+                else:
+                    self.assertEqual(len(defeat_classes), 1)
 
     def test_randomized_damage_classes_change_non_boss_rows(self) -> None:
         vanilla_effects = {

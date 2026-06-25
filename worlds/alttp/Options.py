@@ -318,7 +318,7 @@ class RandomizeDamageClasses(Choice):
     Damage Class Swap: Globally shuffle what each damage class does to every enemy.
     Mixed: Globally shuffle damage classes, then shuffle whole enemy profiles between enemies.
     Chaos: Generate random damage class results for each enemy.
-    Nightmare: Each enemy has exactly one damage class that can defeat it."""
+    Nightmare: No more than one concurrently available damage class can defeat any particular enemy."""
     display_name = "Randomize Damage Classes"
     default = 0
     option_vanilla = 0
