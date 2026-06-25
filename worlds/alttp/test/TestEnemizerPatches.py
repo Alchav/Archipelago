@@ -40,6 +40,8 @@ from worlds.alttp.EnemizerPatches import (
 from worlds.alttp.enemizer_data.enemy_combat_data import (
     ANTI_FAIRY_SPRITE_ID,
     BLOB_TRANSFORM_EFFECT,
+    BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS,
+    BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS,
     BOSS_SPRITE_IDS_FORBID_SPECIAL_DAMAGE_EFFECTS,
     CHAOS_RANDOMIZE_DAMAGE_CLASSES,
     DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
@@ -51,16 +53,21 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     FAIRY_TRANSFORM_EFFECT,
     FIGHTER_SWORD_DAMAGE_CLASSES,
     GOLDEN_SWORD_DAMAGE_CLASSES,
+    GANON_D7_SPRITE_ID,
+    HELMASAUR_KING_SPRITE_ID,
     INCINERATE_EFFECT,
     LANMOLAS_SPRITE_ID,
+    LIGHTNING_GATE_SPRITE_ID,
     LOST_SWORD_UPGRADE_DAMAGE_CLASS,
     MASTER_SWORD_DAMAGE_CLASSES,
     MIXED_RANDOMIZE_DAMAGE_CLASSES,
     MOTHULA_SPRITE_ID,
+    NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES,
     NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES,
     RED_BARI_SPRITE_ID,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SIZE,
     SPRITE_DAMAGE_SUBCLASSES,
+    SPECIAL_DAMAGE_EFFECTS,
     SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES,
     SWORD_BEAM_DAMAGE_CLASS,
     TEMPERED_SWORD_DAMAGE_CLASSES,
@@ -73,7 +80,9 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     get_damage_effect,
     get_enemy_health_for_logic,
     get_hits_to_kill,
+    get_incinerating_damage_classes,
     get_killing_damage_classes,
+    is_defeating_damage_effect_for_nightmare,
     _swap_damage_class_effects,
 )
 
@@ -228,7 +237,7 @@ class TestEnemizerPatches(unittest.TestCase):
             tuple(build_packed_sprite_damage_subclass_table(custom_combat_model.sprite_damage_subclasses)),
         )
 
-    def test_randomized_damage_classes_preserve_boss_effects(self) -> None:
+    def test_randomized_damage_classes_preserve_excluded_effects(self) -> None:
         for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
             with self.subTest(mode=mode):
                 combat_model = build_randomized_damage_class_combat_model(random.Random(0), mode)
@@ -241,6 +250,131 @@ class TestEnemizerPatches(unittest.TestCase):
                             get_damage_effect(sprite_id, damage_class, combat_model),
                             get_damage_effect(sprite_id, damage_class),
                         )
+
+    def test_randomized_damage_classes_change_boss_rows(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(2), mode)
+                changed = any(
+                    get_damage_effect(sprite_id, damage_class, combat_model) != get_damage_effect(sprite_id, damage_class)
+                    for sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
+                    if sprite_id < len(VANILLA_COMBAT_MODEL.sprite_damage_subclasses)
+                    for damage_class in range(16)
+                )
+                self.assertTrue(changed)
+
+    def test_randomized_damage_classes_change_lightning_gate_row(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            with self.subTest(mode=mode):
+                changed = any(
+                    get_damage_effect(
+                        LIGHTNING_GATE_SPRITE_ID,
+                        damage_class,
+                        build_randomized_damage_class_combat_model(random.Random(seed), mode),
+                    ) != get_damage_effect(LIGHTNING_GATE_SPRITE_ID, damage_class)
+                    for seed in range(10)
+                    for damage_class in range(16)
+                )
+                self.assertTrue(changed)
+
+    def test_randomized_damage_classes_sanitize_forbidden_boss_special_effects(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(3), mode)
+
+                for sprite_id in BOSS_SPRITE_IDS_FORBID_SPECIAL_DAMAGE_EFFECTS:
+                    with self.subTest(mode=mode, sprite_id=sprite_id):
+                        self.assertFalse(any(
+                            get_damage_effect(sprite_id, damage_class, combat_model) in SPECIAL_DAMAGE_EFFECTS
+                            for damage_class in range(16)
+                        ))
+
+    def test_randomized_damage_classes_guarantee_boss_logic_classes(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            if mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
+                continue
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(4),
+                    mode,
+                    enemy_health_key="hard",
+                )
+
+                for sprite_id, damage_class_groups in BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS.items():
+                    with self.subTest(mode=mode, sprite_id=sprite_id):
+                        for damage_classes in damage_class_groups:
+                            hit_counts = tuple(
+                                get_hits_to_kill(
+                                    sprite_id,
+                                    damage_class,
+                                    "hard",
+                                    combat_model=combat_model,
+                                )
+                                for damage_class in damage_classes
+                            )
+                            self.assertTrue(any(hit_count is not None for hit_count in hit_counts))
+
+    def test_randomized_damage_classes_guarantee_swordless_helmasaur_bow_logic_classes(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            if mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
+                continue
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(5),
+                    mode,
+                    enemy_health_key="hard",
+                    available_damage_classes=frozenset({6, 9}),
+                    swordless=True,
+                )
+
+                self.assertIsNotNone(get_hits_to_kill(
+                    HELMASAUR_KING_SPRITE_ID,
+                    6,
+                    "hard",
+                    combat_model=combat_model,
+                ))
+                self.assertIsNotNone(get_hits_to_kill(
+                    HELMASAUR_KING_SPRITE_ID,
+                    9,
+                    "hard",
+                    combat_model=combat_model,
+                ))
+
+    def test_randomized_damage_classes_guarantee_swordless_ganon_d7_delivery_classes(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            if mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
+                continue
+            with self.subTest(mode=mode, damage_classes="hammer"):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(6),
+                    mode,
+                    enemy_health_key="hard",
+                    available_damage_classes=frozenset({1, 3}),
+                    swordless=True,
+                )
+                self.assertIsNotNone(get_hits_to_kill(
+                    GANON_D7_SPRITE_ID,
+                    3,
+                    "hard",
+                    hp_override=0x60,
+                    combat_model=combat_model,
+                ))
+
+            with self.subTest(mode=mode, damage_classes="boomerang"):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(6),
+                    mode,
+                    enemy_health_key="hard",
+                    available_damage_classes=frozenset({0, 1}),
+                    swordless=True,
+                )
+                self.assertIsNotNone(get_hits_to_kill(
+                    GANON_D7_SPRITE_ID,
+                    0,
+                    "hard",
+                    hp_override=0x60,
+                    combat_model=combat_model,
+                ))
 
     def test_randomized_damage_classes_preserve_all_zero_profiles(self) -> None:
         all_zero_sprite_ids = tuple(
@@ -266,6 +400,7 @@ class TestEnemizerPatches(unittest.TestCase):
                 for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
                     if (
                         sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+                        or sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
                         or (
                             VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
                             and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
@@ -337,6 +472,7 @@ class TestEnemizerPatches(unittest.TestCase):
                 for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
                     if (
                         sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+                        or sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
                         or (
                             VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
                             and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
@@ -361,13 +497,34 @@ class TestEnemizerPatches(unittest.TestCase):
                         )
                         self.assertTrue(any(hit_count <= 4 for hit_count in hit_counts))
 
-                red_bari_key_hit_counts = tuple(
-                    get_hits_to_kill(RED_BARI_SPRITE_ID, damage_class, "default", combat_model=combat_model)
-                    for damage_class in (11, 13)
+                self.assertTrue(get_incinerating_damage_classes(RED_BARI_SPRITE_ID, combat_model))
+
+    def test_nightmare_damage_classes_have_exactly_one_defeating_class(self) -> None:
+        combat_model = build_randomized_damage_class_combat_model(
+            random.Random(9),
+            NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES,
+            max_attacks_in_logic=4,
+        )
+
+        for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
+            if (
+                sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+                or (
+                    VANILLA_COMBAT_MODEL.enemy_health_table[sprite_id] == 0xFF
+                    and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
                 )
-                self.assertTrue(
-                    any(hit_count is not None and hit_count <= 4 for hit_count in red_bari_key_hit_counts)
+                or not has_vanilla_damage_profile(sprite_id)
+            ):
+                continue
+            with self.subTest(sprite_id=sprite_id):
+                defeat_classes = tuple(
+                    damage_class
+                    for damage_class in range(16)
+                    if is_defeating_damage_effect_for_nightmare(
+                        get_damage_effect(sprite_id, damage_class, combat_model)
+                    )
                 )
+                self.assertEqual(len(defeat_classes), 1)
 
     def test_randomized_damage_classes_change_non_boss_rows(self) -> None:
         vanilla_effects = {
@@ -454,6 +611,21 @@ class TestEnemizerPatches(unittest.TestCase):
             self.assertIn(green_mail, range(64))
             self.assertIn(blue_mail, range(64))
             self.assertIn(red_mail, range(64))
+
+    def test_enemy_health_randomizer_does_not_corrupt_sprite_prep_helper(self) -> None:
+        rom = FakeRom()
+        move_down_helper_jsr_address = 0x31117
+        rom.write_bytes(move_down_helper_jsr_address, (0x20, 0xD3, 0x90))
+        rom.write_bytes(HARDHAT_BEETLE_HP_TABLE_ADDRESS, (0x20, 0x06))
+
+        _randomize_enemy_health(rom, random.Random(0), "hard")
+
+        self.assertEqual(tuple(rom.read_bytes(move_down_helper_jsr_address, 3)), (0x20, 0xD3, 0x90))
+        red_hardhat_hp, blue_hardhat_hp = rom.read_bytes(HARDHAT_BEETLE_HP_TABLE_ADDRESS, 2)
+        self.assertGreaterEqual(red_hardhat_hp, 2)
+        self.assertLess(red_hardhat_hp, 25)
+        self.assertGreaterEqual(blue_hardhat_hp, 2)
+        self.assertLess(blue_hardhat_hp, 25)
 
     def test_killable_thief_sets_default_hp_without_enemy_health_shuffle(self) -> None:
         rom = FakeRom()

@@ -11,9 +11,10 @@ from .enemizer_data.enemy_shuffle_base_data import DUNGEON_ENEMY_ROOMS, DUNGEON_
 from .enemizer_data.enemy_combat_data import (
     DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DIRECT_KILL_DELIVERY_OVERRIDES,
-    KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
+    KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
     EnemyCombatModel,
     VANILLA_COMBAT_MODEL,
+    get_incinerating_damage_classes,
     get_killing_damage_classes,
     get_hits_to_kill,
     get_progression_kill_damage_classes,
@@ -1371,9 +1372,8 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     if not _is_effectively_killable(requirement) and combat_reference_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
         return False
 
-    key_drop_damage_classes = KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES.get(requirement.sprite_name)
-    if key_drop_damage_classes is not None:
-        candidate_damage_classes = set(key_drop_damage_classes)
+    if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
+        candidate_damage_classes = set(get_incinerating_damage_classes(combat_reference_id, state.combat_model))
     else:
         delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
         if delivery_override is None:

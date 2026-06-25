@@ -1986,6 +1986,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
                 damage_class_key,
                 max_attacks_in_logic=local_world.options.max_attacks_in_logic.value,
                 enemy_health_key=enemy_health_key,
+                item_pool_key=enemizer_patches._option_key(getattr(local_world.options, "item_pool", "normal")),
+                swordless=bool(getattr(local_world.options, "swordless", False)),
             )
         enemizer_patches.apply_enemy_combat_data(rom, combat_model or enemizer_patches.VANILLA_COMBAT_MODEL)
 

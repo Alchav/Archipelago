@@ -11,7 +11,9 @@ from .enemizer_data.enemy_combat_data import (
     FIGHTER_SWORD_DAMAGE_CLASSES,
     FREEZE_EFFECT,
     GOLDEN_SWORD_DAMAGE_CLASSES,
-    KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
+    INCINERATE_EFFECT,
+    KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
+    LIGHTNING_GATE_SPRITE_ID,
     MASTER_SWORD_DAMAGE_CLASSES,
     SWORD_BEAM_DAMAGE_CLASS,
     STUN_255_FRAMES_EFFECT,
@@ -21,8 +23,10 @@ from .enemizer_data.enemy_combat_data import (
     get_blob_transform_damage_classes,
     get_damage_classes_with_effects,
     get_damage_effect,
+    get_enemy_health_for_logic,
     get_hardcoded_enemy_hp,
     get_hits_to_kill,
+    get_incinerating_damage_classes,
     get_killing_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
     is_killing_damage_effect,
@@ -206,6 +210,11 @@ class ResourceBudget(NamedTuple):
     magic: int
 
 
+class EnemyHpOverride(NamedTuple):
+    requirement: object
+    hp_override: int
+
+
 FREE_RESOURCE_COSTS = ResourceCosts()
 ENEMY_COMBAT_CACHE_ATTRIBUTE = "_alttp_enemy_combat_logic_cache"
 ENEMY_COMBAT_STATE_ITEMS = (
@@ -246,12 +255,12 @@ MAGIC_POWDER_MAGIC_COST = 1
 SOMARIA_MAGIC_COST = 1
 BYRNA_INITIAL_MAGIC_COST = 2
 BYRNA_DRAIN_MAGIC_COST = 1
+SUPERTILE_QUADRANT_SIZE = 256
 ROOM_WIDE_MEDALLION_DAMAGE_CLASSES = {
     "Bombos": 13,
     "Ether": 14,
     "Quake": 15,
 }
-LIGHTNING_GATE_SPRITE_ID = 0x40
 LIGHTNING_GATE_MAGIC_POWDER_DAMAGE_CLASS = 10
 LIGHTNING_GATE_TRANSFORM_EFFECTS = frozenset((FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT))
 # Evil Barrier rejects Fighter Sword and Hammer contact hits before the damage table result matters.
@@ -261,7 +270,6 @@ LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
     ("Golden Sword", frozenset((3, 4, 5))),
 )
 ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE = "_alttp_enemy_combat_logic_version"
-UNBOUNDED_RESOURCE_BUDGET = ResourceBudget(bombs=10_000, arrows=None, magic=10_000)
 
 
 def init_enemy_combat_state_version(state: CollectionState, parent) -> None:
@@ -437,22 +445,36 @@ def can_clear_enemy_room(state: CollectionState, player: int, room_name_or_id: s
         for enemy in get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id)
         if _enemy_requirement_counts_for_room_clear(enemy)
     )
-    return _can_clear_enemy_requirements(state, player, room_enemies)
+    return _can_clear_enemy_requirements(
+        state,
+        player,
+        room_enemies,
+        pot_class_1_hits_by_quadrant=_get_room_pot_class_1_hits_by_quadrant(room_id),
+    )
 
 
 def can_clear_enemy_region(state: CollectionState, player: int, target_name: str) -> bool:
-    from .EnemyLogicTargets import get_enemy_clear_target_enemies
+    from .EnemyLogicTargets import get_enemy_clear_target, get_enemy_clear_target_enemies
+    from .EnemyShuffle import get_room_id
 
+    target = get_enemy_clear_target(target_name)
+    room_id = get_room_id(target.room_name)
     room_enemies = tuple(
         enemy
         for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
         if _enemy_requirement_counts_for_room_clear(enemy)
     )
-    return _can_clear_enemy_requirements(state, player, room_enemies)
+    return _can_clear_enemy_requirements(
+        state,
+        player,
+        room_enemies,
+        pot_class_1_hits_by_quadrant=_get_room_pot_class_1_hits_by_quadrant(room_id, target),
+    )
 
 
 def can_clear_enemy_regions(state: CollectionState, player: int, *target_names: str) -> bool:
-    from .EnemyLogicTargets import get_enemy_clear_target_enemies
+    from .EnemyLogicTargets import get_enemy_clear_target, get_enemy_clear_target_enemies
+    from .EnemyShuffle import get_room_id
 
     enemy_groups = tuple(
         tuple(
@@ -462,7 +484,17 @@ def can_clear_enemy_regions(state: CollectionState, player: int, *target_names: 
         )
         for target_name in target_names
     )
-    return _can_clear_enemy_requirement_groups(state, player, enemy_groups)
+    pot_class_1_hits_by_group = []
+    for target_name in target_names:
+        target = get_enemy_clear_target(target_name)
+        room_id = get_room_id(target.room_name)
+        pot_class_1_hits_by_group.append(_get_room_pot_class_1_hits_by_quadrant(room_id, target))
+    return _can_clear_enemy_requirement_groups(
+        state,
+        player,
+        enemy_groups,
+        pot_class_1_hits_by_group=tuple(pot_class_1_hits_by_group),
+    )
 
 
 def can_kill_key_drop_enemy(state: CollectionState, player: int, location_name: str) -> bool:
@@ -508,13 +540,78 @@ def _enemy_requirement_can_be_killed(state: CollectionState, player: int, requir
 
 
 def _get_enemy_requirement(enemy_or_requirement):
-    return getattr(enemy_or_requirement, "requirement", enemy_or_requirement)
+    requirement = getattr(enemy_or_requirement, "requirement", enemy_or_requirement)
+    if requirement is enemy_or_requirement:
+        return requirement
+    return _get_enemy_requirement(requirement)
 
 
 def _get_enemy_hp_override(enemy_or_requirement) -> int | None:
+    explicit_hp_override = getattr(enemy_or_requirement, "hp_override", None)
+    if explicit_hp_override is not None:
+        return explicit_hp_override
     requirement = _get_enemy_requirement(enemy_or_requirement)
     x_coord_pixels = getattr(enemy_or_requirement, "x_coord_pixels", None)
     return get_hardcoded_enemy_hp(requirement.sprite_id, x_coord_pixels)
+
+
+def _get_room_pot_class_1_hit_count(room_id: int | None, target=None) -> int:
+    return sum(count for _, count in _get_room_pot_class_1_hits_by_quadrant(room_id, target))
+
+
+def _get_room_pot_class_1_hits_by_quadrant(room_id: int | None, target=None) -> tuple[tuple[tuple[int, int], int], ...]:
+    if room_id is None:
+        return tuple()
+
+    room_pots = _get_pot_data_by_room_id().get(room_id)
+    if room_pots is None:
+        return tuple()
+
+    counts: dict[tuple[int, int], int] = {}
+    for pot in room_pots:
+        if target is not None and not _target_contains_pot(target, pot):
+            continue
+        quadrant = _get_position_quadrant(pot.x * 2, pot.y * 16)
+        counts[quadrant] = counts.get(quadrant, 0) + 1
+    return tuple(sorted(counts.items()))
+
+
+def _get_pot_data_by_room_id() -> dict[int, tuple]:
+    if not hasattr(_get_pot_data_by_room_id, "cache"):
+        from .enemizer_data.pot_shuffle_data import POT_ROOMS
+
+        _get_pot_data_by_room_id.cache = {
+            room.room_id: room.pots
+            for room in POT_ROOMS
+        }
+    return _get_pot_data_by_room_id.cache
+
+
+def _target_contains_pot(target, pot) -> bool:
+    x_coord_pixels = pot.x * 2
+    y_coord_pixels = pot.y * 16
+    if x_coord_pixels < target.min_x or y_coord_pixels < target.min_y:
+        return False
+    if target.max_x is not None and x_coord_pixels >= target.max_x:
+        return False
+    if target.max_y is not None and y_coord_pixels >= target.max_y:
+        return False
+    return True
+
+
+def _get_position_quadrant(x_coord_pixels: int, y_coord_pixels: int) -> tuple[int, int]:
+    return (
+        x_coord_pixels // SUPERTILE_QUADRANT_SIZE,
+        y_coord_pixels // SUPERTILE_QUADRANT_SIZE,
+    )
+
+
+def _get_enemy_position_quadrant(enemy_or_requirement) -> tuple[int, int] | None:
+    x_coord_pixels = getattr(enemy_or_requirement, "x_coord_pixels", None)
+    y_coord_pixels = getattr(enemy_or_requirement, "y_coord_pixels", None)
+    if x_coord_pixels is None or y_coord_pixels is None:
+        return None
+    return _get_position_quadrant(x_coord_pixels, y_coord_pixels)
 
 
 def _can_clear_enemy_requirements(
@@ -523,8 +620,15 @@ def _can_clear_enemy_requirements(
     room_enemies: tuple,
     *,
     key_drop_enemy: bool = False,
+    pot_class_1_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
 ) -> bool:
-    return _can_clear_enemy_requirement_groups(state, player, (room_enemies,), key_drop_enemy=key_drop_enemy)
+    return _can_clear_enemy_requirement_groups(
+        state,
+        player,
+        (room_enemies,),
+        key_drop_enemy=key_drop_enemy,
+        pot_class_1_hits_by_group=(pot_class_1_hits_by_quadrant,),
+    )
 
 
 def _can_clear_enemy_requirement_groups(
@@ -533,11 +637,21 @@ def _can_clear_enemy_requirement_groups(
     enemy_groups: tuple[tuple, ...],
     *,
     key_drop_enemy: bool = False,
+    pot_class_1_hits_by_group: tuple[tuple[tuple[tuple[int, int], int], ...], ...] | None = None,
 ) -> bool:
     budget = _get_enemy_clear_resource_budget(state, player)
+    if pot_class_1_hits_by_group is None:
+        pot_class_1_hits_by_group = (tuple(),) * len(enemy_groups)
     group_clear_plans = tuple(
-        _get_enemy_group_clear_plans(state, player, enemy_group, key_drop_enemy=key_drop_enemy)
-        for enemy_group in enemy_groups
+        _get_enemy_group_clear_plans(
+            state,
+            player,
+            enemy_group,
+            budget,
+            key_drop_enemy=key_drop_enemy,
+            pot_class_1_hits_by_quadrant=pot_class_1_hits_by_quadrant,
+        )
+        for enemy_group, pot_class_1_hits_by_quadrant in zip(enemy_groups, pot_class_1_hits_by_group)
     )
     return _can_execute_enemy_kill_plans(group_clear_plans, budget)
 
@@ -546,8 +660,10 @@ def _get_enemy_group_clear_plans(
     state: CollectionState,
     player: int,
     room_enemies: tuple,
+    budget: ResourceBudget,
     *,
     key_drop_enemy: bool = False,
+    pot_class_1_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
 ) -> tuple[ResourceCosts, ...]:
     if not room_enemies:
         return (FREE_RESOURCE_COSTS,)
@@ -557,34 +673,149 @@ def _get_enemy_group_clear_plans(
         "enemy_group_clear_plans",
         tuple(_get_enemy_requirement_cache_key(requirement) for requirement in room_enemies),
         key_drop_enemy,
+        pot_class_1_hits_by_quadrant,
+        budget,
     )
     if cache_key in cache:
         return cache[cache_key]
 
     clear_plans: set[ResourceCosts] = set()
+    pot_adjusted_enemy_groups = _get_pot_adjusted_enemy_groups(
+        state,
+        player,
+        room_enemies,
+        pot_class_1_hits_by_quadrant,
+    )
     available_medallions = _get_available_room_wide_medallions(state, player)
-    for room_wide_medallions in _get_room_wide_medallion_cast_sets(available_medallions):
-        base_costs = ResourceCosts(magic=MEDALLION_MAGIC_COST * len(room_wide_medallions))
-
-        plans_by_enemy = tuple(
-            _get_enemy_kill_plans_after_room_wide_medallions(
-                state,
-                player,
-                requirement,
-                room_wide_medallions,
-                key_drop_enemy=key_drop_enemy,
-            )
-            for requirement in room_enemies
+    for adjusted_enemy_group in pot_adjusted_enemy_groups:
+        useful_medallions = _get_useful_room_wide_medallions(
+            state,
+            player,
+            adjusted_enemy_group,
+            available_medallions,
+            key_drop_enemy=key_drop_enemy,
         )
-        clear_plans.update(_get_executable_enemy_kill_costs(
-            plans_by_enemy,
-            UNBOUNDED_RESOURCE_BUDGET,
-            base_costs=base_costs,
-        ))
+        for room_wide_medallions in _get_room_wide_medallion_cast_sets(useful_medallions):
+            base_costs = ResourceCosts(magic=MEDALLION_MAGIC_COST * len(room_wide_medallions))
+            plans_by_enemy = tuple(
+                _get_enemy_kill_plans_after_room_wide_medallions(
+                    state,
+                    player,
+                    requirement,
+                    room_wide_medallions,
+                    key_drop_enemy=key_drop_enemy,
+                )
+                for requirement in adjusted_enemy_group
+            )
+            clear_plans.update(_get_executable_enemy_kill_costs(
+                plans_by_enemy,
+                budget,
+                base_costs=base_costs,
+            ))
 
     result = _prune_dominated_resource_costs(clear_plans)
     cache[cache_key] = result
     return result
+
+
+def _get_pot_adjusted_enemy_groups(
+    state: CollectionState,
+    player: int,
+    room_enemies: tuple,
+    pot_class_1_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...],
+) -> tuple[tuple, ...]:
+    pot_hits_by_quadrant = {
+        quadrant: count
+        for quadrant, count in pot_class_1_hits_by_quadrant
+        if count > 0
+    }
+    if not pot_hits_by_quadrant:
+        return (room_enemies,)
+
+    enemy_health_key = _get_enemy_health_key(state, player)
+    killable_thieves = bool(state.multiworld.worlds[player].options.killable_thieves)
+    combat_model = _get_active_combat_model(state, player)
+    enemy_entries = []
+    for enemy in room_enemies:
+        requirement = _get_enemy_requirement(enemy)
+        combat_reference_id = _get_combat_reference_id(requirement, combat_model)
+        if combat_reference_id is None:
+            enemy_entries.append((enemy, None, None, None))
+            continue
+
+        hp = get_enemy_health_for_logic(
+            combat_reference_id,
+            enemy_health_key,
+            hp_override=_get_enemy_hp_override(enemy),
+            killable_thieves=killable_thieves,
+            combat_model=combat_model,
+        )
+        effect = get_damage_effect(combat_reference_id, SWORD_BEAM_DAMAGE_CLASS, combat_model)
+        if hp is None or not _pot_damage_effect_counts_for_room_clear(effect):
+            enemy_entries.append((enemy, hp, None, None))
+            continue
+        enemy_entries.append((enemy, hp, effect, _get_enemy_position_quadrant(enemy)))
+
+    if not any(effect is not None and quadrant in pot_hits_by_quadrant for _, _, effect, quadrant in enemy_entries):
+        return (room_enemies,)
+
+    hp_state = [hp for _, hp, _, _ in enemy_entries]
+    for quadrant, pot_class_1_hits in pot_hits_by_quadrant.items():
+        remaining_pot_hits = pot_class_1_hits
+        pot_targets = sorted(
+            (
+                (_get_pot_hits_to_remove_enemy(hp, effect), index)
+                for index, (_, hp, effect, enemy_quadrant) in enumerate(enemy_entries)
+                if hp is not None and effect is not None and enemy_quadrant == quadrant
+            ),
+            key=lambda target: (target[0], target[1]),
+        )
+        for hits_to_remove, index in pot_targets:
+            if remaining_pot_hits <= 0:
+                break
+            _, _, effect, _ = enemy_entries[index]
+            if remaining_pot_hits >= hits_to_remove:
+                hp_state[index] = 0
+                remaining_pot_hits -= hits_to_remove
+            else:
+                for _ in range(remaining_pot_hits):
+                    hp_state[index] = _apply_pot_damage_to_hp(hp_state[index], effect)
+                remaining_pot_hits = 0
+
+    adjusted_group = []
+    for index, remaining_hp in enumerate(hp_state):
+        if remaining_hp == 0:
+            continue
+        enemy = enemy_entries[index][0]
+        original_hp = enemy_entries[index][1]
+        if remaining_hp is not None and original_hp is not None and remaining_hp < original_hp:
+            adjusted_group.append(EnemyHpOverride(enemy, remaining_hp))
+        else:
+            adjusted_group.append(enemy)
+    return (tuple(adjusted_group),)
+
+
+def _pot_damage_effect_counts_for_room_clear(effect: int) -> bool:
+    return effect == INCINERATE_EFFECT or 0 < effect < FAIRY_TRANSFORM_EFFECT
+
+
+def _pot_adjusted_enemy_group_sort_key(group: tuple) -> tuple[int, tuple[str, ...]]:
+    return (
+        len(group),
+        tuple(repr(_get_enemy_requirement_cache_key(enemy)) for enemy in group),
+    )
+
+
+def _get_pot_hits_to_remove_enemy(hp: int, effect: int) -> int:
+    if effect == INCINERATE_EFFECT:
+        return 1
+    return (hp + effect - 1) // effect
+
+
+def _apply_pot_damage_to_hp(hp: int, effect: int) -> int:
+    if effect == INCINERATE_EFFECT:
+        return 0
+    return max(0, hp - effect)
 
 
 def _get_available_damage_classes(state: CollectionState, player: int, enemy_count: int) -> set[int]:
@@ -672,12 +903,14 @@ def _get_direct_kill_context(
     key_drop_enemy: bool = False,
 ) -> tuple[set[int], object | None]:
     requirement = _get_enemy_requirement(requirement)
+    combat_reference_id = _get_combat_reference_id(requirement, combat_model)
+    if combat_reference_id is None:
+        return set(), None
     direct_kill_damage_classes = _get_direct_kill_damage_classes(requirement, combat_model)
     direct_kill_delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
     if key_drop_enemy:
-        key_drop_damage_classes = KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES.get(requirement.sprite_name)
-        if key_drop_damage_classes is not None:
-            direct_kill_damage_classes = set(key_drop_damage_classes)
+        if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
+            direct_kill_damage_classes = set(get_incinerating_damage_classes(combat_reference_id, combat_model))
             direct_kill_delivery_override = None
     return direct_kill_damage_classes, direct_kill_delivery_override
 
@@ -730,6 +963,7 @@ def _get_best_hit_count(
     allowed_damage_classes: set[int],
     combat_model: EnemyCombatModel,
     hp_override: int | None = None,
+    ignore_attack_limit: bool = False,
 ) -> int | None:
     enemy_health_key = _get_enemy_health_key(state, player)
     killable_thieves = bool(state.multiworld.worlds[player].options.killable_thieves)
@@ -746,8 +980,9 @@ def _get_best_hit_count(
         if damage_class in allowed_damage_classes
     ]
     valid_hit_counts = [hit_count for hit_count in hit_counts if hit_count is not None]
-    max_attacks = _get_max_attacks_in_logic(state, player)
-    valid_hit_counts = [hit_count for hit_count in valid_hit_counts if hit_count <= max_attacks]
+    if not ignore_attack_limit:
+        max_attacks = _get_max_attacks_in_logic(state, player)
+        valid_hit_counts = [hit_count for hit_count in valid_hit_counts if hit_count <= max_attacks]
     if not valid_hit_counts:
         return None
     return min(valid_hit_counts)
@@ -764,6 +999,7 @@ def _build_attack_plans_for_damage_classes(
     allowed_items: tuple[str, ...] | None = None,
     allowed_abilities: tuple[str, ...] | None = None,
     bypass_damage_class_filter: bool = False,
+    ignore_attack_limit: bool = False,
 ) -> tuple[ResourceCosts, ...]:
     allowed_items_set = set(allowed_items) if allowed_items is not None else None
     allowed_abilities_set = set(allowed_abilities) if allowed_abilities is not None else None
@@ -798,6 +1034,7 @@ def _build_attack_plans_for_damage_classes(
                 set(item_damage_classes) if bypass_damage_class_filter else allowed_damage_classes,
                 combat_model,
                 hp_override=hp_override,
+                ignore_attack_limit=ignore_attack_limit,
             )
             if hit_count is not None:
                 plans.add(FREE_RESOURCE_COSTS)
@@ -811,6 +1048,7 @@ def _build_attack_plans_for_damage_classes(
             {1} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST * hit_count))
@@ -824,6 +1062,7 @@ def _build_attack_plans_for_damage_classes(
             {1} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST + (BYRNA_DRAIN_MAGIC_COST * max(0, hit_count - 1))))
@@ -837,6 +1076,7 @@ def _build_attack_plans_for_damage_classes(
             {10} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST * hit_count))
@@ -850,6 +1090,7 @@ def _build_attack_plans_for_damage_classes(
             {6} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(arrows=hit_count))
@@ -863,6 +1104,7 @@ def _build_attack_plans_for_damage_classes(
             {9} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(arrows=hit_count))
@@ -876,6 +1118,7 @@ def _build_attack_plans_for_damage_classes(
             {8} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(bombs=hit_count))
@@ -889,6 +1132,7 @@ def _build_attack_plans_for_damage_classes(
             {SWORD_BEAM_DAMAGE_CLASS} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(FREE_RESOURCE_COSTS)
@@ -902,6 +1146,7 @@ def _build_attack_plans_for_damage_classes(
             {11} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST * hit_count))
@@ -915,6 +1160,7 @@ def _build_attack_plans_for_damage_classes(
             {12} if bypass_damage_class_filter else allowed_damage_classes,
             combat_model,
             hp_override=hp_override,
+            ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
             plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
@@ -930,6 +1176,7 @@ def _build_attack_plans_for_damage_classes(
                     {damage_class} if bypass_damage_class_filter else allowed_damage_classes,
                     combat_model,
                     hp_override=hp_override,
+                    ignore_attack_limit=ignore_attack_limit,
                 )
                 if hit_count is not None:
                     plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST * hit_count))
@@ -1011,7 +1258,169 @@ def _build_single_hit_plans_for_damage_classes(
     if item_allowed("Ice Rod") and state.has("Ice Rod", player) and 12 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST))
 
+    if _can_ready_medallion(state, player):
+        for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
+            if item_allowed(medallion) and state.has(medallion, player) and damage_class in allowed_damage_classes:
+                plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST))
+
     return _prune_dominated_resource_costs(plans)
+
+
+def _get_boss_attack_plans(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
+    hp_override: int | None = None,
+    include_transform_removal: bool = False,
+) -> tuple[ResourceCosts, ...]:
+    boss_allowed_abilities = allowed_abilities if allowed_abilities is not None else tuple()
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = (
+        "boss_attack_plans",
+        sprite_id,
+        allowed_items,
+        boss_allowed_abilities,
+        hp_override,
+        include_transform_removal,
+    )
+    if cache_key in cache:
+        return cache[cache_key]
+
+    combat_model = _get_active_combat_model(state, player)
+    plans = set(_build_attack_plans_for_damage_classes(
+        state,
+        player,
+        sprite_id,
+        set(get_killing_damage_classes(sprite_id, combat_model)),
+        combat_model,
+        hp_override=hp_override,
+        allowed_items=allowed_items,
+        allowed_abilities=boss_allowed_abilities,
+        ignore_attack_limit=True,
+    ))
+
+    if include_transform_removal:
+        transform_damage_classes = set(get_damage_classes_with_effects(
+            sprite_id,
+            frozenset((FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT)),
+            combat_model,
+        ))
+        plans.update(_build_single_hit_plans_for_damage_classes(
+            state,
+            player,
+            transform_damage_classes,
+            allowed_items=allowed_items,
+            allowed_abilities=boss_allowed_abilities,
+        ))
+
+    result = _prune_dominated_resource_costs(plans)
+    cache[cache_key] = result
+    return result
+
+
+def can_damage_boss_sprite(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
+    hp_override: int | None = None,
+    include_transform_removal: bool = False,
+) -> bool:
+    return _can_execute_enemy_kill_plans(
+        (_get_boss_attack_plans(
+            state,
+            player,
+            sprite_id,
+            allowed_items=allowed_items,
+            allowed_abilities=allowed_abilities,
+            hp_override=hp_override,
+            include_transform_removal=include_transform_removal,
+        ),),
+        _get_enemy_clear_resource_budget(state, player),
+    )
+
+
+def can_damage_boss_sprite_phases(
+    state: CollectionState,
+    player: int,
+    *phase_plans: tuple[ResourceCosts, ...],
+) -> bool:
+    return _can_execute_enemy_kill_plans(phase_plans, _get_enemy_clear_resource_budget(state, player))
+
+
+def can_hit_boss_sprite(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
+) -> bool:
+    boss_allowed_abilities = allowed_abilities if allowed_abilities is not None else tuple()
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = ("boss_hit_plans", sprite_id, allowed_items, boss_allowed_abilities)
+    if cache_key in cache:
+        plans = cache[cache_key]
+        return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
+
+    combat_model = _get_active_combat_model(state, player)
+    damage_classes = set(get_killing_damage_classes(sprite_id, combat_model))
+    plans = _build_single_hit_plans_for_damage_classes(
+        state,
+        player,
+        damage_classes,
+        allowed_items=allowed_items,
+        allowed_abilities=boss_allowed_abilities,
+    )
+    cache[cache_key] = plans
+    return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
+
+
+def can_hit_boss_sprite_for_at_least_damage(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    minimum_damage: int,
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
+) -> bool:
+    boss_allowed_abilities = allowed_abilities if allowed_abilities is not None else tuple()
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = (
+        "boss_minimum_damage_hit_plans",
+        sprite_id,
+        minimum_damage,
+        allowed_items,
+        boss_allowed_abilities,
+    )
+    if cache_key in cache:
+        plans = cache[cache_key]
+        return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
+
+    combat_model = _get_active_combat_model(state, player)
+    damage_classes = {
+        damage_class
+        for damage_class in range(len(combat_model.damage_sources))
+        if (
+            (effect := get_damage_effect(sprite_id, damage_class, combat_model)) == INCINERATE_EFFECT
+            or 0 < effect < FAIRY_TRANSFORM_EFFECT and effect >= minimum_damage
+        )
+    }
+    plans = _build_single_hit_plans_for_damage_classes(
+        state,
+        player,
+        damage_classes,
+        allowed_items=allowed_items,
+        allowed_abilities=boss_allowed_abilities,
+    )
+    cache[cache_key] = plans
+    return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
 
 
 def _get_transform_source_plans(
@@ -1144,9 +1553,8 @@ def _get_enemy_kill_plans(
     direct_kill_damage_classes = _get_direct_kill_damage_classes(requirement, combat_model)
     direct_kill_delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
     if key_drop_enemy:
-        key_drop_damage_classes = KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES.get(requirement.sprite_name)
-        if key_drop_damage_classes is not None:
-            direct_kill_damage_classes = set(key_drop_damage_classes)
+        if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
+            direct_kill_damage_classes = set(get_incinerating_damage_classes(combat_reference_id, combat_model))
             direct_kill_delivery_override = None
 
     direct_attack_plans: tuple[ResourceCosts, ...] = tuple()
@@ -1171,11 +1579,19 @@ def _get_enemy_kill_plans(
             bypass_damage_class_filter=direct_kill_delivery_override is not None,
         )
 
-    if key_drop_enemy and requirement.sprite_name in KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES:
+    if key_drop_enemy and requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
         cache[cache_key] = direct_attack_plans
         return direct_attack_plans
 
     plans = set(direct_attack_plans)
+    if requirement.sprite_name == "Floating Stalfos Head" and direct_kill_delivery_override is not None:
+        plans.update(_build_single_hit_plans_for_damage_classes(
+            state,
+            player,
+            {0, 1},
+            allowed_items=direct_kill_delivery_override.items,
+            allowed_abilities=direct_kill_delivery_override.abilities,
+        ))
     if requirement.sprite_name == "Buzzblob":
         plans.update(
             _get_buzzblob_disable_follow_up_plans(
@@ -1240,6 +1656,62 @@ def _get_available_room_wide_medallions(state: CollectionState, player: int) -> 
     )
 
 
+def _get_useful_room_wide_medallions(
+    state: CollectionState,
+    player: int,
+    room_enemies: tuple,
+    available_medallions: tuple[str, ...],
+    *,
+    key_drop_enemy: bool = False,
+) -> tuple[str, ...]:
+    if not available_medallions or not room_enemies:
+        return tuple()
+
+    useful_medallions: set[str] = set()
+    combat_model = _get_active_combat_model(state, player)
+    for enemy_or_requirement in room_enemies:
+        hp_override = _get_enemy_hp_override(enemy_or_requirement)
+        requirement = _get_enemy_requirement(enemy_or_requirement)
+        combat_reference_id = _get_combat_reference_id(requirement, combat_model)
+        if combat_reference_id is None:
+            continue
+
+        direct_kill_damage_classes, direct_kill_delivery_override = _get_direct_kill_context(
+            requirement,
+            combat_model,
+            key_drop_enemy=key_drop_enemy,
+        )
+        transform_damage_classes = _get_blob_transform_damage_classes(requirement, combat_model)
+        disable_damage_classes = (
+            set(get_damage_classes_with_effects(combat_reference_id, BUZZBLOB_DISABLE_EFFECTS, combat_model))
+            if requirement.sprite_name == "Buzzblob"
+            else set()
+        )
+
+        for medallion in available_medallions:
+            damage_class = ROOM_WIDE_MEDALLION_DAMAGE_CLASSES[medallion]
+            if _room_wide_medallion_directly_kills_enemy(
+                state,
+                player,
+                requirement,
+                combat_reference_id,
+                damage_class,
+                direct_kill_damage_classes,
+                direct_kill_delivery_override,
+                combat_model,
+                hp_override=hp_override,
+            ):
+                useful_medallions.add(medallion)
+                continue
+
+            if key_drop_enemy and requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
+                continue
+            if damage_class in transform_damage_classes or damage_class in disable_damage_classes:
+                useful_medallions.add(medallion)
+
+    return tuple(medallion for medallion in available_medallions if medallion in useful_medallions)
+
+
 def _get_room_wide_medallion_cast_sets(available_medallions: tuple[str, ...]) -> tuple[tuple[str, ...], ...]:
     cast_sets: list[tuple[str, ...]] = [tuple()]
     for mask in range(1, 1 << len(available_medallions)):
@@ -1297,7 +1769,7 @@ def _get_room_wide_medallion_enemy_plans(
         ):
             plans.add(FREE_RESOURCE_COSTS)
 
-        if key_drop_enemy and requirement.sprite_name in KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES:
+        if key_drop_enemy and requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
             continue
 
         if damage_class in transform_damage_classes:

@@ -87,7 +87,11 @@ ENEMY_CLEAR_TARGETS = (
     EnemyClearTarget(name=AGA_TOWER_ENTRANCE_TOP_LEFT, room_name="Agahnim's Tower (Entrance Room)", max_x=256, max_y=256),
     EnemyClearTarget(name=AGA_TOWER_CIRCLE_OF_POTS_TOP_HALF, room_name="Agahnim's Tower (Circle of Pots)", max_y=256),
     EnemyClearTarget(name=EASTERN_BIG_KEY_ROOM, room_name="Eastern Palace (Big Key Room)"),
-    EnemyClearTarget(name=EASTERN_PRE_ARMOS_ROOM, room_name="Eastern Palace ('Zeldagamer Room' / Pre-Armos Knights Room)"),
+    EnemyClearTarget(
+        name=EASTERN_PRE_ARMOS_ROOM,
+        room_name="Eastern Palace ('Zeldagamer Room' / Pre-Armos Knights Room)",
+        min_x=256,
+    ),
     EnemyClearTarget(name=DESERT_EAST_ENTRANCE_TOP_RIGHT, room_name="Desert Palace (East Entrance Room)", min_x=256, max_y=256),
     EnemyClearTarget(
         name=DESERT_BEAMOS_HELLWAY_BOTTOM_LEFT,

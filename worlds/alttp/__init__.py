@@ -634,11 +634,13 @@ class ALTTPWorld(World):
         from Fill import fill_restrictive, FillError
         if not self.options.boss_prize_shuffle:
             attempts = 5
-            all_state_with_prizes = self.multiworld.get_all_state(perform_sweep=False)
-            all_state = all_state_with_prizes.copy()
             crystals = [self.create_item(name) for name in boss_prize_items]
+            all_state_with_prizes_base = self.multiworld.get_all_state(perform_sweep=False)
+            all_state_base = all_state_with_prizes_base.copy()
             for crystal in crystals:
-                all_state.remove(crystal)
+                all_state_base.remove(crystal)
+            all_state = all_state_base.copy()
+            all_state_with_prizes = all_state_with_prizes_base.copy()
             all_state.sweep_for_advancements()
             all_state_with_prizes.sweep_for_advancements()
             crystal_locations = [self.get_location('Turtle Rock - Prize'),
@@ -654,55 +656,113 @@ class ALTTPWorld(World):
             placed_prizes = {loc.item.name for loc in crystal_locations if loc.item}
             unplaced_prizes = [crystal for crystal in crystals if crystal.name not in placed_prizes]
             empty_crystal_locations = [loc for loc in crystal_locations if not loc.item]
-            original_item_rules = {}
             last_error = None
 
-            try:
-                for fill_state, state_attempts, prevent_self_lock in (
-                        (all_state, 1, False),
-                        (all_state_with_prizes, attempts, True)):
-                    if prevent_self_lock:
-                        allowed_prizes = {}
-                        for location in empty_crystal_locations:
-                            allowed_prizes[location] = set()
-                            for prize in unplaced_prizes:
-                                state_without_prize = fill_state.copy()
-                                state_without_prize.remove(prize)
-                                state_without_prize.sweep_for_advancements()
-                                if location.can_reach(state_without_prize):
-                                    allowed_prizes[location].add(prize.name)
+            def place_prizes_without_self_locks(
+                fill_state: CollectionState,
+                removal_base_state: CollectionState,
+            ) -> bool:
+                def demote_fixed_key_drops_in_dungeon(location):
+                    if self.options.key_drop_shuffle:
+                        return
+                    dungeon = location.parent_region.dungeon
+                    if dungeon is None:
+                        return
+                    dungeon_key_names = {item.name for item in dungeon.small_keys}
+                    dungeon_key_names.update(
+                        key_ring_name
+                        for key_ring_name, small_key_name in key_ring_name_to_small_key.items()
+                        if small_key_name in dungeon_key_names
+                    )
+                    for region in dungeon.regions:
+                        for dungeon_location in region.locations:
+                            if (
+                                dungeon_location.name in key_drop_data
+                                and dungeon_location.item
+                                and dungeon_location.item.name in dungeon_key_names
+                            ):
+                                dungeon_location.item.classification = ItemClassification.filler
 
-                        for location in empty_crystal_locations:
-                            if location not in original_item_rules:
-                                original_item_rules[location] = location.item_rule
-                            orig_rule = original_item_rules[location]
-                            location.item_rule = lambda item, location=location, orig_rule=orig_rule: \
-                                item.name in allowed_prizes[location] and orig_rule(item)
+                allowed_prizes = {}
+                for location in empty_crystal_locations:
+                    allowed_prizes[location] = []
+                    for prize in unplaced_prizes:
+                        state_without_prize = removal_base_state.copy()
+                        state_without_prize.remove(prize)
+                        state_without_prize.sweep_for_advancements()
+                        if location.can_fill(state_without_prize, prize):
+                            allowed_prizes[location].append((prize, False))
+                        elif (
+                            self.multiworld.has_beaten_game(state_without_prize, prize.player)
+                            and location.can_fill(fill_state, prize, check_access=False)
+                        ):
+                            allowed_prizes[location].append((prize, True))
+                    self.multiworld.random.shuffle(allowed_prizes[location])
+                    if not allowed_prizes[location]:
+                        return False
+                    allowed_prizes[location].sort(key=lambda candidate: candidate[1])
 
-                    for _ in range(state_attempts):
-                        try:
+                ordered_locations = empty_crystal_locations.copy()
+                self.multiworld.random.shuffle(ordered_locations)
+                ordered_locations.sort(key=lambda location: len(allowed_prizes[location]))
+
+                assigned_prizes = {}
+                assigned_names = set()
+
+                def assign_prize(location_index: int) -> bool:
+                    if location_index == len(ordered_locations):
+                        return True
+                    location = ordered_locations[location_index]
+                    for prize, demote in allowed_prizes[location]:
+                        if prize.name in assigned_names:
+                            continue
+                        assigned_names.add(prize.name)
+                        assigned_prizes[location] = (prize, demote)
+                        if assign_prize(location_index + 1):
+                            return True
+                        assigned_names.remove(prize.name)
+                        del assigned_prizes[location]
+                    return False
+
+                if not assign_prize(0):
+                    return False
+
+                for location, (prize, demote) in assigned_prizes.items():
+                    if demote:
+                        prize.classification = ItemClassification.filler
+                        demote_fixed_key_drops_in_dungeon(location)
+                    self.multiworld.push_item(location, prize, False)
+                    location.locked = True
+                return True
+
+            for fill_state, state_attempts, prevent_self_lock in (
+                    (all_state, 1, False),
+                    (all_state_with_prizes, attempts, True)):
+                for _ in range(state_attempts):
+                    try:
+                        if prevent_self_lock:
+                            if not place_prizes_without_self_locks(fill_state, all_state_with_prizes_base):
+                                raise FillError('Unable to place dungeon prizes without prize self-locks')
+                        else:
                             prizepool = unplaced_prizes.copy()
                             prize_locs = empty_crystal_locations.copy()
                             self.multiworld.random.shuffle(prize_locs)
                             fill_restrictive(self.multiworld, fill_state.copy(), prize_locs, prizepool, True,
                                              lock=True, name="LttP Dungeon Prizes")
-                        except FillError as e:
-                            last_error = e
-                            for location in empty_crystal_locations:
-                                if location.item:
-                                    location.item.location = None
-                                location.item = None
-                                location.locked = False
-                            continue
-                        break
-                    else:
+                    except FillError as e:
+                        last_error = e
+                        for location in empty_crystal_locations:
+                            if location.item:
+                                location.item.location = None
+                            location.item = None
+                            location.locked = False
                         continue
                     break
                 else:
-                    raise FillError('Unable to place dungeon prizes') from last_error
-            finally:
-                for location, item_rule in original_item_rules.items():
-                    location.item_rule = item_rule
+                    continue
+                break
+            else:
+                raise FillError('Unable to place dungeon prizes') from last_error
         if self.options.mode == 'standard' and self.options.small_key_shuffle \
                 and self.options.small_key_shuffle != small_key_shuffle.option_universal and \
                 self.options.small_key_shuffle != small_key_shuffle.option_own_dungeons:

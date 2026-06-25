@@ -10,6 +10,7 @@ from Utils import pc_to_snes, snes_to_pc
 from .enemizer_data.base_patch_data import ENEMIZER_BASE_PATCHES
 from .enemizer_data.enemy_combat_data import (
     DAMAGE_SOURCE_TABLE_ADDRESS,
+    ENEMY_HEALTH_RANDOMIZER_INCLUDED_SPRITE_IDS,
     ENEMY_HEALTH_RANGE_BY_KEY,
     ENEMY_HP_TABLE_ADDRESS,
     EnemyCombatModel,
@@ -233,7 +234,7 @@ TRINEXX_ICE_FLOOR_ROUTINE_ADDRESS = 0x04B37E
 TRINEXX_ICE_PROJECTILE_TILE_ADDRESS = 0xE7A5
 TILE_TRAP_FLOOR_TILE_ADDRESS = 0xF3BED
 SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS = snes_to_pc(SPRITE_DAMAGE_SUBCLASS_TABLE_SNES_ADDRESS)
-HARDHAT_BEETLE_HP_TABLE_ADDRESS = 0x31118
+HARDHAT_BEETLE_HP_TABLE_ADDRESS = 0x3111F
 
 
 def apply_enemizer_base_patch(rom: "LocalRom") -> None:
@@ -400,7 +401,11 @@ def _randomize_enemy_health(
     min_hp, max_hp = ENEMY_HEALTH_RANGE_BY_KEY[enemy_health_key]
     for sprite_id in range(0xF3):
         hp_address = ENEMY_HP_TABLE_ADDRESS + sprite_id
-        if combat_model.enemy_health_table[sprite_id] == 0xFF or sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
+        if (
+            combat_model.enemy_health_table[sprite_id] == 0xFF
+            or sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
+            or sprite_id not in ENEMY_HEALTH_RANDOMIZER_INCLUDED_SPRITE_IDS
+        ):
             continue
         rom.write_byte(hp_address, rng.randrange(min_hp, max_hp))
     rom.write_bytes(

@@ -57,7 +57,7 @@ from .StateHelpers import (can_extend_magic, can_clear_enemy_region, can_clear_e
                            can_lift_heavy_rocks, can_lift_rocks,
                            can_melt_things, can_retrieve_tablet,
                            can_pass_evil_barrier, can_shoot_arrows, has_beam_sword, has_crystals,
-                           has_fire_source, has_hearts, has_melee_weapon,
+                           has_fire_source, has_hearts,
                            has_misery_mire_medallion, has_sword, has_turtle_rock_medallion,
                            has_triforce_pieces, can_use_bombs, can_bomb_or_bonk,
                            can_activate_crystal_switch, can_kill_standard_start)
@@ -103,25 +103,6 @@ def _eastern_big_key_chest_needs_room_clear(world: "ALTTPWorld") -> bool:
     if not world.options.pot_shuffle:
         return True
     return _get_shuffled_pot_item_position(world, EP_BIG_KEY_ROOM_ID, POT_SWITCH) == EP_BIG_KEY_VANILLA_SWITCH_POT
-
-
-def _can_kill_hard_eastern_stalfos(state: CollectionState, player: int) -> bool:
-    medallion_access = (state.multiworld.worlds[player].options.swordless or has_sword(state, player)) \
-        and can_extend_magic(state, player, 16)
-    direct_stalfos_kill = (
-        state.has_any(["Blue Boomerang", "Red Boomerang", "Cane of Somaria"], player)
-        or (state.has("Cane of Byrna", player) and can_extend_magic(state, player, 8))
-        or has_melee_weapon(state, player)
-        or can_shoot_arrows(state, player, 4)
-        or (state.has("Fire Rod", player) and can_extend_magic(state, player, 4))
-        or (state.has("Ice Rod", player) and can_extend_magic(state, player, 8))
-        or (state.has_any(["Bombos", "Ether"], player) and medallion_access)
-        or can_use_bombs(state, player, 4)
-    )
-    return direct_stalfos_kill or (
-        (state.has("Magic Powder", player) or (state.has("Quake", player) and medallion_access))
-        and direct_stalfos_kill
-    )
 
 
 def set_rules(world: "ALTTPWorld"):
@@ -482,14 +463,6 @@ def global_rules(multiworld: MultiWorld, player: int):
                                      state._lttp_has_key('Small Key (Eastern Palace)', player, 2) and
                                      can_clear_enemy_region(state, player, EASTERN_PRE_ARMOS_ROOM) and
                                      ep_prize.parent_region.dungeon.boss.can_defeat(state))
-
-    # You can always kill the Stalfos' with the pots on easy/normal.
-    if world.options.enemy_health in ("hard", "expert"):
-        stalfos_rule = lambda state: _can_kill_hard_eastern_stalfos(state, player)
-        for location in ['Eastern Palace - Compass Chest', 'Eastern Palace - Big Chest',
-                         'Eastern Palace - Dark Square Pot Key', 'Eastern Palace - Dark Eyegore Key Drop',
-                         'Eastern Palace - Big Key Chest', 'Eastern Palace - Boss', 'Eastern Palace - Prize']:
-            add_rule(multiworld.get_location(location, player), stalfos_rule)
 
     set_rule(multiworld.get_location('Desert Palace - Big Chest', player), lambda state: state.has('Big Key (Desert Palace)', player))
     set_rule(multiworld.get_location('Desert Palace - Torch', player), lambda state: state.has('Pegasus Boots', player))

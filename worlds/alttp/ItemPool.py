@@ -304,18 +304,26 @@ def get_enemy_shuffle_available_damage_classes(world: "ALTTPWorld", item_names) 
     return frozenset(damage_classes)
 
 
-def set_enemy_combat_model(world: "ALTTPWorld") -> None:
+def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
     damage_class_mode = world.options.randomize_damage_classes.current_key
     if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
         world.enemy_combat_model = VANILLA_COMBAT_MODEL
     else:
         from .EnemizerPatches import _make_native_enemizer_rng
 
+        item_pool_damage_classes = (
+            get_enemy_shuffle_available_damage_classes(world, item_names)
+            if item_names is not None
+            else None
+        )
         world.enemy_combat_model = build_randomized_damage_class_combat_model(
             _make_native_enemizer_rng(world),
             damage_class_mode,
             max_attacks_in_logic=world.options.max_attacks_in_logic.value,
             enemy_health_key=world.options.enemy_health.current_key,
+            item_pool_key=getattr(getattr(world.options, "item_pool", None), "current_key", "normal"),
+            available_damage_classes=item_pool_damage_classes,
+            swordless=bool(getattr(world.options, "swordless", False)),
         )
 
 
@@ -393,7 +401,10 @@ def generate_itempool(world: "ALTTPWorld"):
     for item in precollected_items:
         multiworld.push_precollected(item_factory(item, world))
 
-    set_enemy_combat_model(world)
+    enemy_combat_item_names = list(pool)
+    enemy_combat_item_names.extend(placed_items.values())
+    enemy_combat_item_names.extend(precollected_items)
+    set_enemy_combat_model(world, enemy_combat_item_names)
 
     if world.options.mode == 'standard' and not has_melee_weapon(multiworld.state, player):
         if "Link's Uncle" not in placed_items:

@@ -71,11 +71,12 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     DamageSource,
     EnemyCombatModel,
     FREEZE_EFFECT,
-    KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES,
+    KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
     REACHABLE_SPRITE_DAMAGE_SUBCLASS_COUNT,
     VANILLA_COMBAT_MODEL,
     YELLOW_SLIME_FOLLOW_UP_DELIVERY_OVERRIDES,
     get_blob_transform_damage_classes,
+    get_incinerating_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
 )
 from worlds.alttp.test.bases import item_factory
@@ -681,6 +682,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
                 for _ in range(4)
             )
             world.enemy_shuffle_state = SimpleNamespace(
+                combat_model=_build_combat_model_with_sprite_subclass(24, 1, 0),
                 randomized_dungeon_rooms={
                     wizzrobes_room_id: RandomizedDungeonEnemyRoom(
                         room_id=wizzrobes_room_id,
@@ -1821,7 +1823,8 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertEqual(mimic.combat_reference_id, 131)
         self.assertEqual(devalant_non_shooter.combat_reference_id, 100)
         self.assertEqual(terrorpin.combat_reference_id, 142)
-        self.assertEqual(KEY_DROP_KILL_DAMAGE_CLASS_OVERRIDES[requirements["Red Bari"].sprite_name], (11, 13))
+        self.assertIn(requirements["Red Bari"].sprite_name, KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES)
+        self.assertEqual(get_incinerating_damage_classes(requirements["Red Bari"].combat_reference_id), (11, 13))
         self.assertEqual(water_tektite.dont_randomize_rooms, (40, 118))
         self.assertFalse(kyameron.killable)
         self.assertTrue(kyameron.cannot_have_key)

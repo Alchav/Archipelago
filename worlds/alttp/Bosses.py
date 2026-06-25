@@ -5,8 +5,36 @@ from typing import Optional, Union, List, Tuple, Callable, Dict, TYPE_CHECKING
 
 from Fill import FillError
 from .Options import LTTPBosses as Bosses
-from .StateHelpers import can_shoot_arrows, can_extend_magic, can_get_good_bee, has_sword, has_beam_sword, \
-    has_melee_weapon, has_fire_source, can_use_bombs
+from .StateHelpers import (
+    can_damage_boss_sprite,
+    can_damage_boss_sprite_phases,
+    can_get_good_bee,
+    can_hit_boss_sprite,
+    can_hit_boss_sprite_for_at_least_damage,
+    has_fire_source,
+    has_sword,
+    can_use_bombs,
+    _get_boss_attack_plans,
+)
+from .enemizer_data.enemy_combat_data import (
+    ARRGHUS_FUZZ_SPRITE_ID,
+    ARRGHUS_SPRITE_ID,
+    ARMOS_KNIGHTS_SPRITE_ID,
+    BLIND_SPRITE_ID,
+    GANON_D6_SPRITE_ID,
+    GANON_D7_SPRITE_ID,
+    HELMASAUR_KING_SPRITE_ID,
+    KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
+    KHOLDSTARE_SPRITE_ID,
+    LANMOLAS_SPRITE_ID,
+    MOLDORM_SPRITE_ID,
+    MOTHULA_SPRITE_ID,
+    TRINEXX_BLUE_HEAD_SPRITE_ID,
+    TRINEXX_MAIN_HEAD_SPRITE_ID,
+    TRINEXX_RED_HEAD_SPRITE_ID,
+    VITREOUS_SMALL_EYE_SPRITE_ID,
+    VITREOUS_SPRITE_ID,
+)
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
@@ -33,103 +61,234 @@ def BossFactory(boss: str, player: int) -> Optional[Boss]:
     raise Exception('Unknown Boss: %s', boss)
 
 
+BOSS_SWORD_ITEMS = ("Fighter Sword", "Master Sword", "Tempered Sword", "Golden Sword")
+BOSS_MELEE_ITEMS = BOSS_SWORD_ITEMS + ("Hammer",)
+BOSS_ARROW_ITEMS = ("Bow", "Silver Bow")
+BOSS_BOOMERANG_ITEMS = ("Blue Boomerang", "Red Boomerang")
+BOSS_CANE_ITEMS = ("Cane of Somaria", "Cane of Byrna")
+BOSS_ROD_ITEMS = ("Fire Rod", "Ice Rod")
+BOSS_MEDALLION_ITEMS = ("Bombos", "Ether", "Quake")
+# Generic ancilla damage reaches active, same-floor sprites through Ancilla_CheckSpriteDamage.
+# See Bank08.asm:402-472, Bank08.asm:1260-1316, Bank08.asm:1740-1826,
+# ancilla_magic_powder.asm:250-253, and Bank06.asm:4653-4667.
+BOSS_GENERIC_ATTACK_ITEMS = (
+    BOSS_MELEE_ITEMS
+    + BOSS_ARROW_ITEMS
+    + BOSS_BOOMERANG_ITEMS
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder",)
+    + BOSS_ROD_ITEMS
+    + BOSS_MEDALLION_ITEMS
+)
+BOSS_BOMB_ABILITIES = ("bombs",)
+
+# No item delivery is excluded here; contact is checked by Sprite_CheckDamageFromPlayerLong
+# at sprite_armos_knight.asm:142 and ordinary ancillas use the shared damage paths above.
+ARMOS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# No item delivery is excluded here; Lanmolas calls Sprite2_CheckDamage at
+# sprite_lanmola.asm:153 and :212, and Sprite2_CheckDamage includes contact damage
+# at sprite_cannon_trooper.asm:36-39 while ordinary ancillas use the shared paths above.
+LANMOLAS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Bombs are excluded from the body phase: Bomb_CheckSpriteDamage explicitly skips
+# Helmasaur King when $0DB0 >= 3, i.e. after the mask is gone. See Bank08.asm:458-464.
+# Other basic ancillas skip only the mask and can hit the body; see Bank08.asm:1295-1316
+# and Bank08.asm:1778-1826. Hammer is contact class 3 and reaches the body through
+# the Helmasaur contact branch at Bank06.asm:6006-6012.
+HELMASAUR_BODY_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Hookshot is excluded from damaging Arrghus fuzz: the hookshot branch pulls sprite
+# 0x8D before reaching Ancilla_CheckSpriteDamage. See Bank08.asm:1273-1287.
+ARRGHUS_FUZZ_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if item != "Hookshot")
+# No item delivery is excluded from Arrghus body damage while vulnerable; it clears
+# impervious status before contact damage at sprite_arrghus.asm:193-198, and ordinary
+# ancillas use the shared damage paths above.
+ARRGHUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# No item delivery is excluded here; Mothula calls Sprite3_CheckDamage at
+# sprite_mothula.asm:215 and :255, and ordinary ancillas use the shared paths above.
+MOTHULA_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# No item delivery is excluded here; Blind calls Sprite4_CheckDamage at
+# sprite_blind_entities.asm:259 and :1175, and ordinary ancillas use the shared paths above.
+BLIND_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# No item delivery is excluded here; Kholdstare shell/body use contact damage at
+# sprite_kholdstare.asm:19, :203, and :283, and ordinary ancillas use the shared paths above.
+KHOLDSTARE_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# No item delivery is excluded here; Vitreous and small eyes call damage checks at
+# sprite_vitreous.asm:19 and sprite_vitreolus.asm:47, and ordinary ancillas use the shared paths above.
+VITREOUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# No item delivery is excluded from the side heads; they call Sprite4_CheckDamage at
+# sprite_trinexx.asm:177 and :568, and ordinary ancillas use the shared paths above.
+TRINEXX_HEAD_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Projectiles, rods, canes, powder, medallions, and bombs are excluded from the final
+# Trinexx body: it temporarily clears impervious status only around
+# Sprite_CheckDamageFromPlayerLong, then restores it. See sprite_trinexx.asm:408-420.
+TRINEXX_BODY_ATTACK_ITEMS = BOSS_MELEE_ITEMS
+# Hammer is excluded by the hardcoded Ganon contact check at Bank06.asm:5784-5791.
+# Arrows are excluded from D6 logic because the Ganon-specific silver-arrow vulnerability
+# branch only recognizes sprite D7; see Bank06.asm:4712-4724. Cane of Byrna is excluded
+# because its persistent sparkle is not part of the basic projectile damage paths, and
+# in-game testing found it does not damage Ganon.
+GANON_D6_ATTACK_ITEMS = (
+    BOSS_SWORD_ITEMS
+    + BOSS_BOOMERANG_ITEMS
+    + ("Hookshot", "Cane of Somaria", "Magic Powder", "Fire Rod", "Ice Rod")
+    + BOSS_MEDALLION_ITEMS
+)
+# Hammer is excluded by the hardcoded Ganon contact check at Bank06.asm:5784-5791.
+# Cane of Byrna is excluded for the same reason as D6. Arrows are allowed here because
+# D7 is the sprite handled by the silver-arrow vulnerability branch at Bank06.asm:4718-4724.
+GANON_D7_ATTACK_ITEMS = (
+    BOSS_SWORD_ITEMS
+    + BOSS_ARROW_ITEMS
+    + BOSS_BOOMERANG_ITEMS
+    + ("Hookshot", "Cane of Somaria", "Magic Powder", "Fire Rod", "Ice Rod")
+    + BOSS_MEDALLION_ITEMS
+)
+# Swordless Ganon keeps Hammer because Archipelago patches the swordless fight around it;
+# vanilla still blocks Hammer in the shared contact routine cited above.
+GANON_D7_SWORDLESS_ATTACK_ITEMS = ("Hammer",) + GANON_D7_ATTACK_ITEMS
+GANON_HP_FOR_LOGIC = 0x60
+GANON_D6_PHASE_SKIP_DAMAGE = 0x64
+
+
 def ArmosKnightsDefeatRule(state, player: int) -> bool:
-    # Magic amounts are probably a bit overkill
-    return (
-            has_melee_weapon(state, player) or
-            can_shoot_arrows(state, player) or
-            (state.has('Cane of Somaria', player) and can_extend_magic(state, player, 10)) or
-            (state.has('Cane of Byrna', player) and can_extend_magic(state, player, 16)) or
-            (state.has('Ice Rod', player) and can_extend_magic(state, player, 32)) or
-            (state.has('Fire Rod', player) and can_extend_magic(state, player, 32)) or
-            state.has('Blue Boomerang', player) or
-            state.has('Red Boomerang', player))
+    return can_damage_boss_sprite(
+        state,
+        player,
+        ARMOS_KNIGHTS_SPRITE_ID,
+        allowed_items=ARMOS_ATTACK_ITEMS,
+    )
 
 
 def LanmolasDefeatRule(state, player: int) -> bool:
-    return (
-            has_melee_weapon(state, player) or
-            state.has('Fire Rod', player) or
-            state.has('Ice Rod', player) or
-            state.has('Cane of Somaria', player) or
-            state.has('Cane of Byrna', player) or
-            can_shoot_arrows(state, player))
+    return can_damage_boss_sprite(
+        state,
+        player,
+        LANMOLAS_SPRITE_ID,
+        allowed_items=LANMOLAS_ATTACK_ITEMS,
+    )
 
 
 def MoldormDefeatRule(state, player: int) -> bool:
-    return has_melee_weapon(state, player)
+    return can_damage_boss_sprite(
+        state,
+        player,
+        MOLDORM_SPRITE_ID,
+        allowed_items=BOSS_MELEE_ITEMS,
+    )
 
 
 def HelmasaurKingDefeatRule(state, player: int) -> bool:
-    # TODO: technically possible with the hammer
-    return (can_use_bombs(state, player, 5) or state.has("Hammer", player)) and (has_sword(state, player)
-                                                                                 or can_shoot_arrows(state, player))
+    return (
+        (can_use_bombs(state, player, 5) or state.has("Hammer", player))
+        and can_damage_boss_sprite(
+            state,
+            player,
+            HELMASAUR_KING_SPRITE_ID,
+            allowed_items=HELMASAUR_BODY_ATTACK_ITEMS,
+        )
+    )
 
 
 def ArrghusDefeatRule(state, player: int) -> bool:
     if not state.has('Hookshot', player):
         return False
-    # TODO: ideally we would have a check for bow and silvers, which combined with the
-    # hookshot is enough. This is not coded yet because the silvers that only work in pyramid feature
-    # makes this complicated
-    if has_melee_weapon(state, player):
-        return True
 
-    return ((state.has('Fire Rod', player) and (can_shoot_arrows(state, player) or can_extend_magic(state, player,
-                                                                                                         12))) or  # assuming mostly gitting two puff with one shot
-            (state.has('Ice Rod', player) and (can_shoot_arrows(state, player) or can_extend_magic(state, player, 16))))
+    fuzz_plans = _get_boss_attack_plans(
+        state,
+        player,
+        ARRGHUS_FUZZ_SPRITE_ID,
+        allowed_items=("Hookshot",) + ARRGHUS_ATTACK_ITEMS,
+        include_transform_removal=True,
+    )
+    body_plans = _get_boss_attack_plans(
+        state,
+        player,
+        ARRGHUS_SPRITE_ID,
+        allowed_items=ARRGHUS_ATTACK_ITEMS,
+    )
+    return can_damage_boss_sprite_phases(state, player, fuzz_plans, body_plans)
 
 
 def MothulaDefeatRule(state, player: int) -> bool:
-    return (
-            has_melee_weapon(state, player) or
-            (state.has('Fire Rod', player) and can_extend_magic(state, player, 10)) or
-            # TODO: Not sure how much (if any) extend magic is needed for these two, since they only apply
-            # to non-vanilla locations, so are harder to test, so sticking with what VT has for now:
-            (state.has('Cane of Somaria', player) and can_extend_magic(state, player, 16)) or
-            (state.has('Cane of Byrna', player) and can_extend_magic(state, player, 16)) or
-            can_get_good_bee(state, player)
+    return can_get_good_bee(state, player) or can_damage_boss_sprite(
+        state,
+        player,
+        MOTHULA_SPRITE_ID,
+        allowed_items=MOTHULA_ATTACK_ITEMS,
     )
 
 
 def BlindDefeatRule(state, player: int) -> bool:
-    return has_melee_weapon(state, player) or state.has('Cane of Somaria', player) or state.has('Cane of Byrna', player)
-
-
-def KholdstareDefeatRule(state, player: int) -> bool:
-    return (
-            (
-                    state.has('Fire Rod', player) or
-                    (
-                            state.has('Bombos', player) and
-                            (has_sword(state, player) or state.multiworld.worlds[player].options.swordless)
-                    )
-            ) and
-            (
-                    has_melee_weapon(state, player) or
-                    (state.has('Fire Rod', player) and can_extend_magic(state, player, 20)) or
-                    (
-                            state.has('Fire Rod', player) and
-                            state.has('Bombos', player) and
-                            state.multiworld.worlds[player].options.swordless and
-                            can_extend_magic(state, player, 16)
-                    )
-            )
+    return can_damage_boss_sprite(
+        state,
+        player,
+        BLIND_SPRITE_ID,
+        allowed_items=BOSS_MELEE_ITEMS,
+    ) or can_hit_boss_sprite(
+        state,
+        player,
+        BLIND_SPRITE_ID,
+        allowed_items=BOSS_CANE_ITEMS,
     )
 
 
+def KholdstareDefeatRule(state, player: int) -> bool:
+    shell_plans = _get_boss_attack_plans(
+        state,
+        player,
+        KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
+        allowed_items=("Fire Rod", "Bombos"),
+    )
+    body_plans = _get_boss_attack_plans(
+        state,
+        player,
+        KHOLDSTARE_SPRITE_ID,
+        allowed_items=BOSS_MELEE_ITEMS + ("Fire Rod", "Bombos", "Cane of Somaria"),
+    )
+    return can_damage_boss_sprite_phases(state, player, shell_plans, body_plans)
+
+
 def VitreousDefeatRule(state, player: int) -> bool:
-    return ((can_shoot_arrows(state, player) and can_use_bombs(state, player, 10))
-            or can_shoot_arrows(state, player, 35) or state.has("Silver Bow", player)
-            or has_melee_weapon(state, player))
+    small_eye_plans = _get_boss_attack_plans(
+        state,
+        player,
+        VITREOUS_SMALL_EYE_SPRITE_ID,
+        allowed_items=VITREOUS_ATTACK_ITEMS,
+    )
+    body_plans = _get_boss_attack_plans(
+        state,
+        player,
+        VITREOUS_SPRITE_ID,
+        allowed_items=VITREOUS_ATTACK_ITEMS,
+    )
+    return can_damage_boss_sprite_phases(state, player, small_eye_plans, body_plans)
 
 
 def TrinexxDefeatRule(state, player: int) -> bool:
     if not (state.has('Fire Rod', player) and state.has('Ice Rod', player)):
         return False
-    return state.has('Hammer', player) or state.has('Tempered Sword', player) or state.has('Golden Sword', player) or \
-           (state.has('Master Sword', player) and can_extend_magic(state, player, 16)) or \
-           (has_sword(state, player) and can_extend_magic(state, player, 32))
+
+    red_head_plans = _get_boss_attack_plans(
+        state,
+        player,
+        TRINEXX_RED_HEAD_SPRITE_ID,
+        allowed_items=TRINEXX_HEAD_ATTACK_ITEMS,
+        include_transform_removal=True,
+    )
+    blue_head_plans = _get_boss_attack_plans(
+        state,
+        player,
+        TRINEXX_BLUE_HEAD_SPRITE_ID,
+        allowed_items=TRINEXX_HEAD_ATTACK_ITEMS,
+        include_transform_removal=True,
+    )
+    body_plans = _get_boss_attack_plans(
+        state,
+        player,
+        TRINEXX_MAIN_HEAD_SPRITE_ID,
+        allowed_items=TRINEXX_BODY_ATTACK_ITEMS,
+    )
+    return can_damage_boss_sprite_phases(state, player, red_head_plans, blue_head_plans, body_plans)
 
 
 def AgahnimDefeatRule(state, player: int) -> bool:
@@ -138,22 +297,54 @@ def AgahnimDefeatRule(state, player: int) -> bool:
 
 def GanonDefeatRule(state, player: int) -> bool:
     if state.multiworld.worlds[player].options.swordless:
-        return state.has('Hammer', player) and \
-               has_fire_source(state, player) and \
-               state.has('Silver Bow', player) and \
-               can_shoot_arrows(state, player)
+        return (
+            state.has('Hammer', player)
+            and has_fire_source(state, player)
+            and can_damage_boss_sprite(
+                state,
+                player,
+                GANON_D7_SPRITE_ID,
+                allowed_items=GANON_D7_SWORDLESS_ATTACK_ITEMS,
+                hp_override=GANON_HP_FOR_LOGIC,
+            )
+        )
 
-    can_hurt = has_beam_sword(state, player)
-    common = can_hurt and has_fire_source(state, player)
-    # silverless ganon may be needed in anything higher than no glitches
-    if state.multiworld.worlds[player].options.glitches_required != 'no_glitches':
-        # need to light torch a sufficient amount of times
-        return common and (state.has('Tempered Sword', player) or state.has('Golden Sword', player) or (
-                state.has('Silver Bow', player) and can_shoot_arrows(state, player)) or
-                           state.has('Lamp', player) or can_extend_magic(state, player, 12))
+    common = has_fire_source(state, player) and can_hit_boss_sprite(
+        state,
+        player,
+        GANON_D6_SPRITE_ID,
+        allowed_items=GANON_D6_ATTACK_ITEMS,
+    )
+    if not common:
+        return False
 
-    else:
-        return common and state.has('Silver Bow', player) and can_shoot_arrows(state, player)
+    if can_hit_boss_sprite_for_at_least_damage(
+        state,
+        player,
+        GANON_D6_SPRITE_ID,
+        GANON_D6_PHASE_SKIP_DAMAGE,
+        allowed_items=GANON_D6_ATTACK_ITEMS,
+    ):
+        return True
+
+    d7_kill = can_damage_boss_sprite(
+        state,
+        player,
+        GANON_D7_SPRITE_ID,
+        allowed_items=GANON_D7_ATTACK_ITEMS,
+        hp_override=GANON_HP_FOR_LOGIC,
+    )
+    if state.multiworld.worlds[player].options.glitches_required == 'no_glitches':
+        return d7_kill
+
+    d6_kill = can_damage_boss_sprite(
+        state,
+        player,
+        GANON_D6_SPRITE_ID,
+        allowed_items=GANON_D6_ATTACK_ITEMS,
+        hp_override=GANON_HP_FOR_LOGIC,
+    )
+    return d7_kill or d6_kill
 
 
 boss_table: Dict[str, Tuple[str, Optional[Callable]]] = {
