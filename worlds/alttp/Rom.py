@@ -103,7 +103,7 @@ from .Text import KingsReturn_texts, Sanctuary_texts, Kakariko_texts, Blacksmith
     SickKid_texts, FluteBoy_texts, Zora_texts, MagicShop_texts, Sahasrahla_names
 from .Items import item_table, item_name_groups, progression_items, key_ring_table
 from .EntranceShuffle import door_addresses
-from .Graphics import patch_boss_prize_crystal_sprite, patch_boss_prize_crystal_sprite_data
+from .Graphics import patch_boss_prize_crystal_sprite_data
 from .Options import small_key_shuffle
 
 if TYPE_CHECKING:
@@ -323,21 +323,6 @@ class LocalRom:
         self.buffer[startaddress:startaddress + len(values)] = values
         if self.token_patch:
             self.token_patch.write_bytes(startaddress, values)
-
-    def record_changed_bytes(self, old_buffer: bytes) -> None:
-        if len(old_buffer) != len(self.buffer):
-            raise ValueError("Cannot record direct ROM buffer changes when buffer size changed.")
-
-        start = None
-        for address, (old_value, new_value) in enumerate(zip(old_buffer, self.buffer)):
-            if old_value != new_value:
-                if start is None:
-                    start = address
-            elif start is not None:
-                self.write_bytes(start, self.buffer[start:address])
-                start = None
-        if start is not None:
-            self.write_bytes(start, self.buffer[start:])
 
     def encrypt_range(self, startaddress: int, length: int, key: bytes):
         _encrypt_range(self, startaddress, length, key, xxtea)
@@ -918,7 +903,7 @@ class Sprite():
         if self.is_vanilla_link:
             self.write_to_sprite_slot(rom, 0)
             return
-        if self.is_ap_sprite_patch and isinstance(rom, TokenRom):
+        if self.is_ap_sprite_patch:
             rom.token_patch.add_ap_sprite_patch(self.ap_sprite_patch_data, primary=True, slot=0)
             return
         self.decode_ap_sprite_patch()
@@ -932,16 +917,11 @@ class Sprite():
         palette_address = 0x307000 + (slot * 0x8000)
         glove_palette_address = 0x307078 + (slot * 0x8000)
         if self.is_vanilla_link:
-            if hasattr(rom, "copy_bytes"):
-                rom.copy_bytes(sprite_address, 0x80000, self.sprite_size)
-                rom.copy_bytes(palette_address, 0xDD308, self.palette_size)
-                rom.copy_bytes(glove_palette_address, 0xDEDF5, self.glove_size)
-            else:
-                rom.write_bytes(sprite_address, rom.read_bytes(0x80000, self.sprite_size))
-                rom.write_bytes(palette_address, rom.read_bytes(0xDD308, self.palette_size))
-                rom.write_bytes(glove_palette_address, rom.read_bytes(0xDEDF5, self.glove_size))
+            rom.copy_bytes(sprite_address, 0x80000, self.sprite_size)
+            rom.copy_bytes(palette_address, 0xDD308, self.palette_size)
+            rom.copy_bytes(glove_palette_address, 0xDEDF5, self.glove_size)
             return
-        if self.is_ap_sprite_patch and isinstance(rom, TokenRom):
+        if self.is_ap_sprite_patch:
             rom.token_patch.add_ap_sprite_patch(self.ap_sprite_patch_data, primary=False, slot=slot)
             return
         self.decode_ap_sprite_patch()
@@ -1035,11 +1015,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
 
     rom.write_byte(0x18018E, 0x01 if local_world.options.boss_prize_shuffle else 0x00)
     if local_world.options.boss_prize_shuffle:
-        token_patch = getattr(rom, "token_patch", None)
-        if token_patch:
-            token_patch.add_boss_prize_crystal_sprite_patch()
-        else:
-            patch_boss_prize_crystal_sprite(rom)
+        rom.token_patch.add_boss_prize_crystal_sprite_patch()
 
     if local_world.options.map_shuffle:
         rom.write_byte(0x155C9, local_random.choice([0x11, 0x16]))  # Randomize GT music too with map shuffle
@@ -2041,10 +2017,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         if local_world.options.boss_shuffle:
             # Boss shuffle must run after enemy shuffle so boss room sprite pointers
             # and graphics block IDs are not restored to the enemy-shuffled room values.
-            if isinstance(rom, TokenRom):
-                rom.token_patch.add_boss_shuffle_patch(local_world)
-            else:
-                enemizer_patches.patch_bosses(local_world, rom)
+            rom.token_patch.add_boss_shuffle_patch(local_world)
 
         pot_shuffle_state = getattr(local_world, "pot_shuffle_state", None)
         if local_world.options.pot_shuffle and pot_shuffle_state is not None:
@@ -2290,64 +2263,23 @@ def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, me
                         {'normal': 0x00, 'hide_goal': 0x01, 'hide_required': 0x02, 'hide_both': 0x03}[triforcehud]
         rom.write_byte(0x180167, triforce_flag)
 
-    if z3pr:
-        def buildAndRandomize(option_name: str, mode: str):
-            if isinstance(rom, TokenRom):
-                if mode != "default":
-                    rom.token_patch.add_z3pr_palette_randomization(option_name, mode, local_random.getrandbits(64))
-                return
+    def buildAndRandomize(option_name: str, mode: str):
+        if mode != "default":
+            rom.token_patch.add_z3pr_palette_randomization(option_name, mode, local_random.getrandbits(64))
 
-            options = {
-                option_name: True
-            }
-
-            data_dir = local_path("data") if is_frozen() else None
-            offsets_array = build_offset_collections(options, data_dir)
-            restore_maseya_colors(rom, offsets_array)
-            if mode == 'default':
-                return
-            ColorF = z3pr.ColorF
-
-            def next_color_generator():
-                while True:
-                    yield ColorF(local_random.random(), local_random.random(), local_random.random())
-
-            if mode in ('good', 'random'):
-                mode = 'maseya'
-            old_buffer = bytes(rom.buffer) if getattr(rom, "token_patch", None) else None
-            z3pr.randomize(rom.buffer, mode, offset_collections=offsets_array, random_colors=next_color_generator())
-            if old_buffer is not None:
-                rom.record_changed_bytes(old_buffer)
-
-        uw_palettes = palettes_options['dungeon']
-        ow_palettes = palettes_options['overworld']
-        hud_palettes = palettes_options['hud']
-        sword_palettes = palettes_options['sword']
-        shield_palettes = palettes_options['shield']
-        # link_palettes = palettes_options['link']
-        buildAndRandomize("randomize_dungeon", uw_palettes)
-        buildAndRandomize("randomize_overworld", ow_palettes)
-        buildAndRandomize("randomize_hud", hud_palettes)
-        buildAndRandomize("randomize_sword", sword_palettes)
-        buildAndRandomize("randomize_shield", shield_palettes)
-        # link palette shuffle does not work very well and it's incompatible with random sprite on event
-        # buildAndRandomize("randomize_link_sprite", link_palettes)
-
-    else:
-        # reset palette if it was adjusted already
-        default_ow_palettes(rom)
-        default_uw_palettes(rom)
-        logging.warning("Could not find z3pr palette shuffle. "
-                        "If you want improved palette shuffling please install the maseya-z3pr package.")
-        if palettes_options['overworld'] == 'random':
-            randomize_ow_palettes(rom, local_random)
-        elif palettes_options['overworld'] == 'blackout':
-            blackout_ow_palettes(rom)
-
-        if palettes_options['dungeon'] == 'blackout':
-            blackout_uw_palettes(rom)
-        elif palettes_options['dungeon'] == 'random':
-            randomize_uw_palettes(rom, local_random)
+    uw_palettes = palettes_options['dungeon']
+    ow_palettes = palettes_options['overworld']
+    hud_palettes = palettes_options['hud']
+    sword_palettes = palettes_options['sword']
+    shield_palettes = palettes_options['shield']
+    # link_palettes = palettes_options['link']
+    buildAndRandomize("randomize_dungeon", uw_palettes)
+    buildAndRandomize("randomize_overworld", ow_palettes)
+    buildAndRandomize("randomize_hud", hud_palettes)
+    buildAndRandomize("randomize_sword", sword_palettes)
+    buildAndRandomize("randomize_shield", shield_palettes)
+    # link palette shuffle does not work very well and it's incompatible with random sprite on event
+    # buildAndRandomize("randomize_link_sprite", link_palettes)
 
     rom.write_byte(0x18008D, (0b00000001 if deathlink else 0) |
                    #          0b00000010 is already used for death_link_allow_survive in super metroid.
@@ -2358,18 +2290,6 @@ def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, me
 
     if oof is not None:
         apply_oof_sfx(rom, oof)
-
-    if isinstance(rom, LocalRom) and not getattr(rom, "token_patch", None):
-        rom.write_crc()
-
-
-def restore_maseya_colors(rom: LocalRom, offsets_array: list[list[int]]):
-    if not rom.orig_buffer:
-        return
-    for offsetC in offsets_array:
-        for address in offsetC:
-            rom.write_bytes(address, rom.orig_buffer[address:address + 2])
-
 
 def set_color(rom: LocalRom, address: int, color: tuple[int, int, int], shade: int):
     r = round(min(color[0], 0xFF) * pow(0.8, shade) * 0x1F / 0xFF)

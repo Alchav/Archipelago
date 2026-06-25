@@ -263,11 +263,6 @@ def get_boss_prize_crystal_sprite_patch(rom_data: bytes | bytearray) -> tuple[in
     return pc_address, compressed
 
 
-def patch_boss_prize_crystal_sprite(rom) -> None:
-    pc_address, compressed = get_boss_prize_crystal_sprite_patch(rom.buffer)
-    rom.write_bytes(pc_address, compressed)
-
-
 def patch_boss_prize_crystal_sprite_data(rom: bytes) -> bytes:
     rom_data = bytearray(rom)
     pc_address, compressed = get_boss_prize_crystal_sprite_patch(rom_data)
