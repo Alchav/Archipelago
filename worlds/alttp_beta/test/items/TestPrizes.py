@@ -5,7 +5,7 @@ from test.bases import WorldTestBase
 
 
 class TestPrizes(WorldTestBase):
-    game = "A Link to the Past"
+    game = "A Link to the Past Beta"
 
     def test_item_rules(self):
         prize_locations: List[Location] = [

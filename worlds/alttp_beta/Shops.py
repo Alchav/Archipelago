@@ -409,7 +409,7 @@ price_rate_display = {
 
 
 def get_price_modifier(item: Item) -> float:
-    if item.game == "A Link to the Past":
+    if item.game == "A Link to the Past Beta":
         if any(x in item.name for x in
                ['Compass', 'Map', 'Single Bomb', 'Single Arrow', 'Piece of Heart']):
             return 0.125

@@ -33,7 +33,7 @@ from .StateHelpers import (
 )
 from .SubClasses import ALttPItem, LTTPRegionType
 
-lttp_logger = logging.getLogger("A Link to the Past")
+lttp_logger = logging.getLogger("A Link to the Past Beta")
 
 extras_list = sum(difficulties['normal'].extras[0:5], [])
 
@@ -184,7 +184,7 @@ class ALTTPWorld(World):
     dungeons on your quest to rescue the descendents of the seven wise men and defeat the evil
     Ganon!
     """
-    game = "A Link to the Past"
+    game = "A Link to the Past Beta"
     options_dataclass = ALTTPOptions
     options: ALTTPOptions
     settings_key = "lttp_options"
@@ -835,7 +835,7 @@ class ALTTPWorld(World):
 
     @classmethod
     def stage_extend_hint_information(cls, world, hint_data: typing.Dict[int, typing.Dict[int, str]]):
-        er_hint_data = {player: {} for player in world.get_game_players("A Link to the Past") if
+        er_hint_data = {player: {} for player in world.get_game_players("A Link to the Past Beta") if
                         world.worlds[player].options.entrance_shuffle != "vanilla" or world.worlds[player].options.retro_caves}
 
         for region in world.regions:
@@ -901,7 +901,7 @@ class ALTTPWorld(World):
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
         required_triforce_pieces = {}
-        for player in multiworld.get_game_players("A Link to the Past"):
+        for player in multiworld.get_game_players("A Link to the Past Beta"):
             world = multiworld.worlds[player]
             if "triforce_hunt" in world.options.goal.current_key:
                 precollected_pieces = sum(
@@ -924,7 +924,7 @@ class ALTTPWorld(World):
                 continue
 
             if (
-                world.game == "A Link to the Past"
+                world.game == "A Link to the Past Beta"
                 and (
                     (item.name == "Hammer" and world.options.enemy_shuffle)
                     or (item.name == "Small Key (Hyrule Castle)" and world.options.mode == "standard")
@@ -946,7 +946,7 @@ class ALTTPWorld(World):
             progitempool[:] = remaining_items + promoted_items + goal_items
 
         trash_counts = {}
-        for player in multiworld.get_game_players("A Link to the Past"):
+        for player in multiworld.get_game_players("A Link to the Past Beta"):
             world = multiworld.worlds[player]
             if not world.ganonstower_vanilla or \
                     world.options.glitches_required.current_key in {'overworld_glitches', 'hybrid_major_glitches', "no_logic"}:
@@ -1168,7 +1168,7 @@ class ALttPLogic(LogicMixin):
     def copy_mixin(self, ret: CollectionState) -> CollectionState:
         return copy_enemy_combat_state_version(self, ret)
 
-    def _lttp_has_key(self, item, player, count: int = 1):
+    def _lttp_beta_has_key(self, item, player, count: int = 1):
         if self.multiworld.worlds[player].options.glitches_required == 'no_logic':
             return True
         if self.multiworld.worlds[player].options.small_key_shuffle == small_key_shuffle.option_universal:

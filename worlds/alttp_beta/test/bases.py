@@ -100,10 +100,10 @@ class LTTPTestBase(unittest.TestCase):
     def world_setup(self):
         from worlds.alttp.Options import Medallion
         self.multiworld = MultiWorld(1)
-        self.multiworld.game[1] = "A Link to the Past"
+        self.multiworld.game[1] = "A Link to the Past Beta"
         self.multiworld.set_seed(None)
         args = Namespace()
-        for name, option in AutoWorldRegister.world_types["A Link to the Past"].options_dataclass.type_hints.items():
+        for name, option in AutoWorldRegister.world_types["A Link to the Past Beta"].options_dataclass.type_hints.items():
             setattr(args, name, {1: option.from_any(getattr(option, "default"))})
         self.multiworld.set_options(args)
         self.multiworld.state = CollectionState(self.multiworld)

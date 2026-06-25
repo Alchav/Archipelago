@@ -180,7 +180,7 @@ def create_dungeons(world: "ALTTPWorld"):
 
 def get_dungeon_item_pool(multiworld: MultiWorld) -> typing.List[ALttPItem]:
     return [item
-            for world in multiworld.get_game_worlds("A Link to the Past")
+            for world in multiworld.get_game_worlds("A Link to the Past Beta")
             for item in get_dungeon_item_pool_player(world)]
 
 
@@ -192,7 +192,7 @@ def get_dungeon_item_pool_player(world) -> typing.List[ALttPItem]:
 
 def get_unfilled_dungeon_locations(multiworld: MultiWorld) -> typing.List[ALttPLocation]:
     return [location
-            for world in multiworld.get_game_worlds("A Link to the Past")
+            for world in multiworld.get_game_worlds("A Link to the Past Beta")
             for dungeon in world.dungeons.values()
             for region in dungeon.regions
             for location in region.locations if not location.item]
@@ -202,7 +202,7 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
     """Places dungeon-native items into their dungeons, places nothing if everything is shuffled outside."""
     localized: set = set()
     dungeon_specific: set = set()
-    for subworld in multiworld.get_game_worlds("A Link to the Past"):
+    for subworld in multiworld.get_game_worlds("A Link to the Past Beta"):
         player = subworld.player
         if player not in multiworld.groups:
             localized |= {(player, item_name) for item_name in
@@ -213,7 +213,7 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
     if localized:
         in_dungeon_items = [item for item in get_dungeon_item_pool(multiworld) if (item.player, item.name) in localized]
         if in_dungeon_items:
-            restricted_players = {world.player for world in multiworld.get_game_worlds("A Link to the Past") if
+            restricted_players = {world.player for world in multiworld.get_game_worlds("A Link to the Past Beta") if
                                   world.options.restrict_dungeon_item_on_boss}
             locations: typing.List["ALttPLocation"] = [
                 location for location in get_unfilled_dungeon_locations(multiworld)
@@ -257,7 +257,7 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
                 multiworld.worlds[item.player].collect(all_state_base, item)
             locked_key_drop_locations = {
                 multiworld.get_location(key_loc, lttp_world.player)
-                for lttp_world in multiworld.get_game_worlds("A Link to the Past")
+                for lttp_world in multiworld.get_game_worlds("A Link to the Past Beta")
                 if not lttp_world.options.key_drop_shuffle and lttp_world.player not in multiworld.groups
                 for key_loc in key_drop_data
             }

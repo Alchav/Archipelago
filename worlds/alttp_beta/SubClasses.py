@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class ALttPLocation(Location):
-    game: str = "A Link to the Past"
+    game: str = "A Link to the Past Beta"
     crystal: bool
     player_address: Optional[int]
     _hint_text: Optional[str]
@@ -38,7 +38,7 @@ class ALttPLocation(Location):
 
 
 class ALttPItem(Item):
-    game: str = "A Link to the Past"
+    game: str = "A Link to the Past Beta"
     type: Optional[str]
     _pedestal_hint_text: Optional[str]
     _hint_text: Optional[str]

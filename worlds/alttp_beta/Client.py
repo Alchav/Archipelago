@@ -16,7 +16,7 @@ from .Rom import ROM_PLAYER_LIMIT
 
 snes_logger = logging.getLogger("SNES")
 
-GAME_ALTTP = "A Link to the Past"
+GAME_ALTTP = "A Link to the Past Beta"
 
 # FXPAK Pro protocol memory mapping used by SNI
 ROM_START = 0x000000
@@ -481,7 +481,7 @@ async def track_locations(ctx, roomid, roomdata) -> bool:
     if new_locations:
         # verify rom is still the same:
         rom_name = await snes_read(ctx, ROMNAME_START, ROMNAME_SIZE)
-        if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"AP" or \
+        if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"XP" or \
                 rom_name != ctx.rom:
             snes_logger.info(f"Discarding recent {len(new_locations)} checks as ROM Status has changed.")
             return False
@@ -535,8 +535,8 @@ async def track_in_game_hints(ctx) -> None:
 
 
 class ALTTPSNIClient(SNIClient):
-    game = "A Link to the Past"
-    patch_suffix = [".aplttp", ".apz3"]
+    game = "A Link to the Past Beta"
+    patch_suffix = [".aplttpbeta"]
 
     def on_package(self, ctx, cmd: str, args: dict) -> None:
         if cmd == "Connected":
@@ -569,7 +569,7 @@ class ALTTPSNIClient(SNIClient):
         from SNIClient import snes_read
 
         rom_name = await snes_read(ctx, ROMNAME_START, ROMNAME_SIZE)
-        if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"AP":
+        if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"XP":
             return False
 
         ctx.game = self.game

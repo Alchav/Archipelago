@@ -3,7 +3,7 @@ from ...Items import item_factory
 
 
 class PyramidTestBase(WorldTestBase):
-    game = "A Link to the Past"
+    game = "A Link to the Past Beta"
 
 
 class OpenPyramidTest(PyramidTestBase):
