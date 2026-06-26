@@ -1123,6 +1123,16 @@ def _set_guaranteed_logic_kill_effect_for_row(
     raise ValueError(f"Could not guarantee a logical damage class for sprite 0x{sprite_id:02X}")
 
 
+def _get_guaranteed_logic_kill_effect_candidates(sprite_id: int, hp: int, max_attacks: int | None) -> tuple[int, ...]:
+    candidates = [GUARANTEED_LOGIC_KILL_EFFECT]
+    candidates.extend((0x64, 0x40, 0x20, 0x10, 0x08, 0x04, 0x03, 0x02, 0x01, INCINERATE_EFFECT))
+    return tuple(
+        effect
+        for effect in candidates
+        if _effect_is_allowed_logic_kill(sprite_id, effect, hp, max_attacks)
+    )
+
+
 def _fill_effect_palettes(
     effect_palettes: list[set[int]],
     resolved_effects: tuple[tuple[int, ...], ...],
@@ -1324,7 +1334,14 @@ def _set_nightmare_defeat_effect_for_row(
 
     if LOST_SWORD_UPGRADE_DAMAGE_CLASS in damage_classes:
         paired_damage_classes = (LOST_SWORD_UPGRADE_DAMAGE_CLASS, GOLDEN_SWORD_SPIN_DAMAGE_CLASS)
-        effects = _get_guaranteed_logic_kill_effect_candidates(sprite_id, hp, max_attacks)
+        effects = _get_guaranteed_logic_kill_effect_candidates(sprite_id, hp, max_attacks) + tuple(
+            effect
+            for effect in sorted(
+                effect_palettes[LOST_SWORD_UPGRADE_DAMAGE_CLASS] & effect_palettes[GOLDEN_SWORD_SPIN_DAMAGE_CLASS],
+                reverse=True,
+            )
+            if _effect_is_allowed_logic_kill(sprite_id, effect, hp, max_attacks)
+        )
         for effect in effects:
             if all(_effect_fits_palette(effect, effect_palettes[damage_class]) for damage_class in paired_damage_classes):
                 for damage_class in paired_damage_classes:
