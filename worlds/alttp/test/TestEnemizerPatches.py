@@ -128,6 +128,9 @@ class FakeTokenRom:
         for offset, value in enumerate(values):
             self.bytes[startaddress + offset] = value
 
+    def write_int16(self, address: int, value: int) -> None:
+        self.write_bytes(address, (value & 0xFF, (value >> 8) & 0xFF))
+
 
 def has_vanilla_damage_profile(sprite_id: int) -> bool:
     return any(get_damage_effect(sprite_id, damage_class) != 0 for damage_class in range(16))
@@ -734,6 +737,32 @@ class TestEnemizerPatches(unittest.TestCase):
             self.assertEqual(rom.read_byte(0x4FC0 + table_index), 0xAA)
             self.assertEqual(rom.read_byte(0x509F + table_index), 0xBB)
             self.assertEqual(rom.read_byte(0x517E + table_index), 0xCC)
+
+    def test_patch_bosses_supports_token_only_roms(self) -> None:
+        rom = FakeTokenRom()
+        dungeon_header_base = _get_enemizer_symbol("room_header_table")
+        moved_room_object_base = _get_enemizer_symbol("modified_room_object_table")
+        eastern_dungeon_data = DUNGEON_BOSS_PATCH_DATA[("Eastern Palace", None)]
+        turtle_rock_dungeon_data = DUNGEON_BOSS_PATCH_DATA[("Turtle Rock", None)]
+
+        patch_bosses(self._build_boss_world({
+            "Eastern Palace": "Trinexx",
+            "Turtle Rock": "Armos",
+        }), rom)
+
+        self.assertEqual(
+            (rom.read_byte(eastern_dungeon_data.sprite_pointer_address),
+             rom.read_byte(eastern_dungeon_data.sprite_pointer_address + 1)),
+            BOSS_PATCH_DATA["Trinexx"].pointer,
+        )
+        self.assertEqual(
+            rom.read_byte(dungeon_header_base + (eastern_dungeon_data.room_id * 14) + 3),
+            BOSS_PATCH_DATA["Trinexx"].graphics,
+        )
+        self.assertIn(moved_room_object_base, rom.bytes)
+        self.assertIn(moved_room_object_base + 1, rom.bytes)
+        self.assertIn(0xF8000 + (eastern_dungeon_data.room_id * 3), rom.bytes)
+        self.assertIn(0xF8000 + (turtle_rock_dungeon_data.room_id * 3), rom.bytes)
 
     def test_native_enemizer_rng_is_deterministic_for_same_world_settings(self) -> None:
         world = self._build_world(enemy_health="hard", enemy_damage="chaos", bush_shuffle=True)
