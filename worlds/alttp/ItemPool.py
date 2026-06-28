@@ -914,6 +914,7 @@ def get_pool_core(multiworld: MultiWorld, player: int):
             treasure_hunt_total = multiworld.worlds[player].options.triforce_pieces_available.value
 
         triforce_pieces = min(90, max(treasure_hunt_total, multiworld.worlds[player].options.triforce_pieces_required.value))
+        treasure_hunt_total = triforce_pieces
 
         pieces_in_core = min(extraitems, triforce_pieces)
         additional_pieces_to_place = triforce_pieces - pieces_in_core
