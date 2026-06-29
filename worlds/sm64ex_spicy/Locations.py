@@ -415,7 +415,7 @@ locFreestanding1Up_table = {
     "Lethal Lava Land - Northwest Curve 1-Up": 3629140,
     "Lethal Lava Land - Volcano Pole 1-Up": 3629141,
 
-    "The Princess's Secret Slide - Star Room Corners 1-Up": 3629142,
+    "The Princess's Secret Slide - Coin Triggers 1-Up": 3629142,
     "The Princess's Secret Slide - Slide 1-Up": 3629143,
 
     "Rainbow Ride - Tricky Triangles 1-Up": 3629144,

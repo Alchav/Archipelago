@@ -218,7 +218,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regPSS = create_region("The Princess's Secret Slide", player, multiworld)
     create_default_locs(regPSS, locPSS_table)
     create_locs(regPSS,
-                "The Princess's Secret Slide - Star Room Corners 1-Up",
+                "The Princess's Secret Slide - Coin Triggers 1-Up",
                 "The Princess's Secret Slide - Slide 1-Up",
                 "The Princess's Secret Slide - Star Block")
 
