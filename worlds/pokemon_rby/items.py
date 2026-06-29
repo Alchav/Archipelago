@@ -6,7 +6,8 @@ class ItemData:
     def __init__(self, item_id, classification, groups):
         self.groups = groups
         self.classification = classification
-        self.id = item_id
+        self.id = None if item_id is None else item_id
+
 
 item_table = {
     "Master Ball": ItemData(1, ItemClassification.useful, ["Consumables", "Poke Balls"]),
