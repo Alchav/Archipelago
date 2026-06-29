@@ -111,6 +111,27 @@ class FakeRom:
         self.write_bytes(address, (value & 0xFF, (value >> 8) & 0xFF))
 
 
+class FakeTokenRom:
+    def __init__(self) -> None:
+        self.bytes: dict[int, int] = {}
+
+    def read_byte(self, address: int) -> int:
+        try:
+            return self.bytes[address]
+        except KeyError as e:
+            raise RuntimeError(f"unwritten byte {address:#x}") from e
+
+    def write_byte(self, address: int, value: int) -> None:
+        self.write_bytes(address, (value,))
+
+    def write_bytes(self, startaddress: int, values) -> None:
+        for offset, value in enumerate(values):
+            self.bytes[startaddress + offset] = value
+
+    def write_int16(self, address: int, value: int) -> None:
+        self.write_bytes(address, (value & 0xFF, (value >> 8) & 0xFF))
+
+
 def has_vanilla_damage_profile(sprite_id: int) -> bool:
     return any(get_damage_effect(sprite_id, damage_class) != 0 for damage_class in range(16))
 
@@ -580,10 +601,12 @@ class TestEnemizerPatches(unittest.TestCase):
 
         included_hp_sprite_id = 0x01
         included_damage_sprite_id = 0x02
+        boss_damage_sprite_id = 0x53
         excluded_sprite_id = min(EXCLUDED_ENEMY_TABLE_SPRITE_IDS)
         rom.write_byte(ENEMY_HP_TABLE_ADDRESS + included_hp_sprite_id, 0x06)
         rom.write_byte(ENEMY_HP_TABLE_ADDRESS + excluded_sprite_id, 0x07)
-        rom.write_byte(ENEMY_DAMAGE_TABLE_ADDRESS + included_damage_sprite_id, 0x06)
+        rom.write_byte(ENEMY_DAMAGE_TABLE_ADDRESS + included_damage_sprite_id, 0x86)
+        rom.write_byte(ENEMY_DAMAGE_TABLE_ADDRESS + boss_damage_sprite_id, 0x17)
         rom.write_byte(ENEMY_DAMAGE_TABLE_ADDRESS + excluded_sprite_id, 0x05)
 
         world = self._build_world(
@@ -612,7 +635,12 @@ class TestEnemizerPatches(unittest.TestCase):
         self.assertLess(red_hardhat_hp, 25)
         self.assertGreaterEqual(blue_hardhat_hp, 2)
         self.assertLess(blue_hardhat_hp, 25)
-        self.assertIn(rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + included_damage_sprite_id), range(8))
+        randomized_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + included_damage_sprite_id)
+        self.assertEqual(randomized_damage & 0xF0, 0x80)
+        self.assertIn(randomized_damage & 0x0F, range(8))
+        randomized_boss_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + boss_damage_sprite_id)
+        self.assertEqual(randomized_boss_damage & 0x10, 0x10)
+        self.assertIn(randomized_boss_damage & 0x0F, range(8))
         self.assertEqual(rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + excluded_sprite_id), 0x05)
         for group_id in range(10):
             group_address = DAMAGE_GROUP_TABLE_ADDRESS + (group_id * 3)
@@ -620,6 +648,18 @@ class TestEnemizerPatches(unittest.TestCase):
             self.assertIn(green_mail, range(64))
             self.assertIn(blue_mail, range(64))
             self.assertIn(red_mail, range(64))
+
+    def test_enemy_damage_randomizer_supports_token_only_roms(self) -> None:
+        rom = FakeTokenRom()
+
+        _randomize_enemy_damage(rom, random.Random(0), allow_zero_damage=True)
+
+        randomized_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + 0x02)
+        self.assertEqual(randomized_damage & 0xF0, 0x80)
+        self.assertIn(randomized_damage & 0x0F, range(8))
+        randomized_boss_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + 0x53)
+        self.assertEqual(randomized_boss_damage & 0x10, 0x10)
+        self.assertIn(randomized_boss_damage & 0x0F, range(8))
 
     def test_enemy_health_randomizer_does_not_corrupt_sprite_prep_helper(self) -> None:
         rom = FakeRom()
@@ -697,6 +737,32 @@ class TestEnemizerPatches(unittest.TestCase):
             self.assertEqual(rom.read_byte(0x4FC0 + table_index), 0xAA)
             self.assertEqual(rom.read_byte(0x509F + table_index), 0xBB)
             self.assertEqual(rom.read_byte(0x517E + table_index), 0xCC)
+
+    def test_patch_bosses_supports_token_only_roms(self) -> None:
+        rom = FakeTokenRom()
+        dungeon_header_base = _get_enemizer_symbol("room_header_table")
+        moved_room_object_base = _get_enemizer_symbol("modified_room_object_table")
+        eastern_dungeon_data = DUNGEON_BOSS_PATCH_DATA[("Eastern Palace", None)]
+        turtle_rock_dungeon_data = DUNGEON_BOSS_PATCH_DATA[("Turtle Rock", None)]
+
+        patch_bosses(self._build_boss_world({
+            "Eastern Palace": "Trinexx",
+            "Turtle Rock": "Armos",
+        }), rom)
+
+        self.assertEqual(
+            (rom.read_byte(eastern_dungeon_data.sprite_pointer_address),
+             rom.read_byte(eastern_dungeon_data.sprite_pointer_address + 1)),
+            BOSS_PATCH_DATA["Trinexx"].pointer,
+        )
+        self.assertEqual(
+            rom.read_byte(dungeon_header_base + (eastern_dungeon_data.room_id * 14) + 3),
+            BOSS_PATCH_DATA["Trinexx"].graphics,
+        )
+        self.assertIn(moved_room_object_base, rom.bytes)
+        self.assertIn(moved_room_object_base + 1, rom.bytes)
+        self.assertIn(0xF8000 + (eastern_dungeon_data.room_id * 3), rom.bytes)
+        self.assertIn(0xF8000 + (turtle_rock_dungeon_data.room_id * 3), rom.bytes)
 
     def test_native_enemizer_rng_is_deterministic_for_same_world_settings(self) -> None:
         world = self._build_world(enemy_health="hard", enemy_damage="chaos", bush_shuffle=True)

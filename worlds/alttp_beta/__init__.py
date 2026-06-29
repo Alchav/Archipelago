@@ -1,15 +1,18 @@
 import collections
 import logging
 import os
+import dataclasses
 import random
 import threading
 import typing
+from dataclasses import fields
 
 import settings
 from BaseClasses import Item, CollectionState, Tutorial, MultiWorld, ItemClassification
 from worlds.AutoWorld import World, WebWorld, LogicMixin
 from .Client import ALTTPSNIClient
 from .BossPrizeData import boss_prize_items
+from .Bosses import encode_ut_bosses
 from .Dungeons import create_dungeons, Dungeon
 from .EntranceShuffle import link_entrances, link_inverted_entrances, plando_connect
 from .InvertedRegions import create_inverted_regions, mark_dark_world_regions
@@ -36,6 +39,117 @@ from .SubClasses import ALttPItem, LTTPRegionType
 lttp_logger = logging.getLogger("A Link to the Past Beta")
 
 extras_list = sum(difficulties['normal'].extras[0:5], [])
+
+ALTTP_UT_LOGIC_OPTION_NAMES = (
+    "accessibility",
+    "goal",
+    "mode",
+    "glitches_required",
+    "dark_room_logic",
+    "open_pyramid",
+    "crystals_needed_for_gt",
+    "crystals_needed_for_ganon",
+    "dungeons_needed_for_ganon",
+    "triforce_pieces_mode",
+    "triforce_pieces_percentage",
+    "triforce_pieces_required",
+    "triforce_pieces_available",
+    "triforce_pieces_extra",
+    "entrance_shuffle",
+    "big_key_shuffle",
+    "small_key_shuffle",
+    "key_drop_shuffle",
+    "key_rings",
+    "key_rings_list",
+    "compass_shuffle",
+    "map_shuffle",
+    "restrict_dungeon_item_on_boss",
+    "item_pool",
+    "item_functionality",
+    "enemy_health",
+    "randomize_damage_classes",
+    "progressive",
+    "max_attacks_in_logic",
+    "swordless",
+    "retro_bow",
+    "retro_caves",
+    "scams",
+    "boss_shuffle",
+    "pot_shuffle",
+    "enemy_shuffle",
+    "killable_thieves",
+    "shop_item_slots",
+    "randomize_shop_inventories",
+    "shuffle_shop_inventories",
+    "include_witch_hut",
+    "randomize_shop_prices",
+    "randomize_cost_types",
+    "shop_price_modifier",
+    "shuffle_capacity_upgrades",
+    "bombless_start",
+    "shuffle_prizes",
+    "boss_prize_shuffle",
+    "tile_shuffle",
+    "glitch_boots",
+    "timer",
+)
+
+ALTTP_UT_LOGIC_LOCATION_ITEM_NAMES = (
+    "Ganon",
+    "Murahdahla",
+    "Agahnim 1",
+    "Agahnim 2",
+    "Dark Blacksmith Ruins",
+    "Frog",
+    "Missing Smith",
+    "Floodgate",
+    "Flute Activation Spot",
+    "Capacity Upgrade Shop",
+    "Sewers - Key Rat Key Drop",
+    "Eastern Palace - Big Key Chest",
+    "Tower of Hera - Big Key Chest",
+    "Thieves' Town - Big Chest",
+    "Swamp Palace - Big Chest",
+    "Skull Woods - Spike Corner Key Drop",
+    "Skull Woods - Big Chest",
+    "Ice Palace - Spike Room",
+    "Ice Palace - Hammer Block Key Drop",
+    "Ice Palace - Big Key Chest",
+    "Ice Palace - Map Chest",
+    "Misery Mire - Compass Chest",
+    "Misery Mire - Big Key Chest",
+    "Misery Mire - Conveyor Crystal Key Drop",
+    "Palace of Darkness - Big Key Chest",
+    "Palace of Darkness - Harmless Hellway",
+    "Ganons Tower - Map Chest",
+    "Ganons Tower - Randomizer Room - Top Left",
+    "Ganons Tower - Randomizer Room - Top Right",
+    "Ganons Tower - Randomizer Room - Bottom Left",
+    "Ganons Tower - Randomizer Room - Bottom Right",
+    "Ganons Tower - Firesnake Room",
+    "Ganons Tower - Compass Room - Top Left",
+    "Ganons Tower - Compass Room - Top Right",
+    "Ganons Tower - Compass Room - Bottom Left",
+    "Ganons Tower - Compass Room - Bottom Right",
+    "Ganons Tower - Conveyor Star Pits Pot Key",
+    "Ganons Tower - Bob's Chest",
+    "Ganons Tower - Big Chest",
+    "Ganons Tower - Big Key Room - Left",
+    "Ganons Tower - Big Key Room - Right",
+    "Ganons Tower - Big Key Chest",
+    "Turtle Rock - Big Key Chest",
+    "Turtle Rock - Compass Chest",
+    "Turtle Rock - Chain Chomps",
+    "Turtle Rock - Crystaroller Room",
+    "Turtle Rock - Pokey 1 Key Drop",
+    "Turtle Rock - Pokey 2 Key Drop",
+    "Turtle Rock - Roller Room - Left",
+    "Turtle Rock - Roller Room - Right",
+    "Turtle Rock - Eye Bridge - Top Left",
+    "Turtle Rock - Eye Bridge - Top Right",
+    "Turtle Rock - Eye Bridge - Bottom Left",
+    "Turtle Rock - Eye Bridge - Bottom Right",
+)
 
 complex_entrance_shuffle_modes = {"full", "crossed", "insanity"}
 complex_entrance_fill_priority_items = {
@@ -190,6 +304,7 @@ class ALTTPWorld(World):
     settings_key = "lttp_options"
     settings: typing.ClassVar[ALTTPSettings]
     topology_present = True
+    ut_can_gen_without_yaml = True
     explicit_indirect_conditions = False
     item_name_groups = item_name_groups
     location_name_groups = {
@@ -302,8 +417,6 @@ class ALTTPWorld(World):
     fluteboy_credit_texts: typing.Dict[int, str] = \
         {data.item_code: data.flute_boy_credit for data in item_table.values() if data.flute_boy_credit}
 
-    set_rules = set_rules
-
     create_items = generate_itempool
 
     # custom instance vars
@@ -352,6 +465,8 @@ class ALTTPWorld(World):
         self.shops = []
         self.enemy_combat_model = None
         self.enemy_shuffle_state = None
+        self.ut_replay_data = None
+        self.ut_pending_entrance_connections = None
         self.pot_shuffle_state = None
         self.logical_heart_containers = 10
         self.logical_heart_pieces = 24
@@ -364,13 +479,15 @@ class ALTTPWorld(World):
 
     def generate_early(self):
         multiworld = self.multiworld
+        self.ut_replay_data = self._get_ut_replay_data()
+        if self.ut_replay_data:
+            self._apply_ut_replay_options(self.ut_replay_data)
 
         self.fix_trock_doors = (self.options.entrance_shuffle != 'vanilla' or self.options.mode == 'inverted')
         self.fix_skullwoods_exit = self.options.entrance_shuffle not in ['vanilla', 'simple', 'restricted', 'dungeons_simple']
         self.fix_palaceofdarkness_exit = self.options.entrance_shuffle not in ['dungeons_simple', 'vanilla', 'simple', 'restricted']
         self.fix_trock_exit = self.options.entrance_shuffle not in ['vanilla', 'simple', 'restricted', 'dungeons_simple']
 
-        # fairy bottle fills
         bottle_options = [
             "Bottle (Red Potion)", "Bottle (Green Potion)", "Bottle (Blue Potion)",
             "Bottle (Bee)", "Bottle (Good Bee)"
@@ -381,7 +498,11 @@ class ALTTPWorld(World):
         self.pyramid_fairy_bottle_fill = self.random.choice(bottle_options)
 
         if self.options.pot_shuffle:
-            self.pot_shuffle_state = generate_pot_shuffle(self)
+            pot_shuffle = _get_ut_replay_value(self.ut_replay_data, "ut_pot_shuffle", "pot_shuffle")
+            if pot_shuffle is not None:
+                self.pot_shuffle_state = _decode_ut_pot_shuffle(pot_shuffle)
+            else:
+                self.pot_shuffle_state = generate_pot_shuffle(self)
 
         locked_small_key_drops = collections.Counter()
         if not self.options.key_drop_shuffle:
@@ -406,6 +527,12 @@ class ALTTPWorld(World):
         elif self.options.key_rings == 'random_dungeons':
             self.key_rings = set(self.random.sample(key_ring_option_names,
                                                     self.random.randint(0, len(key_ring_option_names))))
+        key_rings = _get_ut_replay_value(self.ut_replay_data, "ut_key_rings", "key_rings")
+        if key_rings is not None:
+            self.key_rings = set(key_rings)
+        key_ring_data = _get_ut_replay_value(self.ut_replay_data, "ut_key_ring_data", "key_ring_data")
+        if key_ring_data is not None:
+            self.key_ring_data = dict(key_ring_data)
 
         if self.options.mode == 'standard':
             hyrule_castle_key_item = self.get_dungeon_small_key_item_name("Small Key (Hyrule Castle)")
@@ -509,6 +636,24 @@ class ALTTPWorld(World):
 
         multiworld.random = old_random
         plando_connect(multiworld, player)
+        entrance_connections = _get_ut_replay_value(self.ut_replay_data, "ut_entrance_connections", "entrance_connections")
+        if entrance_connections is not None:
+            self.ut_pending_entrance_connections = _apply_ut_entrance_connections(
+                self,
+                entrance_connections,
+            )
+            _apply_ut_region_worlds(self)
+            _refresh_ut_entrance_derived_flags(self)
+
+    def set_rules(self) -> None:
+        set_rules(self)
+        if self.ut_pending_entrance_connections:
+            self.ut_pending_entrance_connections = _apply_ut_entrance_connections(
+                self,
+                self.ut_pending_entrance_connections,
+            )
+            _apply_ut_region_worlds(self)
+            _refresh_ut_entrance_derived_flags(self)
 
     def collect_item(self, state: CollectionState, item: Item, remove=False):
         item_name = item.name
@@ -770,13 +915,23 @@ class ALTTPWorld(World):
             if hyrule_castle_key_item:
                 self.multiworld.local_early_items[self.player][hyrule_castle_key_item] = 1
 
+    def post_fill(self) -> None:
+        location_items = _get_ut_replay_value(self.ut_replay_data, "ut_location_items", "location_items")
+        if location_items is not None:
+            _apply_ut_location_items(self, location_items)
+
+    def generate_basic(self) -> None:
+        location_items = _get_ut_replay_value(self.ut_replay_data, "ut_location_items", "location_items")
+        if location_items is not None:
+            _apply_ut_location_items(self, location_items)
+
     @classmethod
     def stage_pre_fill(cls, world):
         from .Dungeons import fill_dungeons_restrictive
         fill_dungeons_restrictive(world)
 
     @classmethod
-    def stage_generate_output(cls, multiworld, output_directory):
+    def stage_pre_output(cls, multiworld):
         push_shop_inventories(multiworld)
 
     def generate_output(self, output_directory: str):
@@ -1126,17 +1281,19 @@ class ALTTPWorld(World):
             # they are used by the alttp-poptracker pack (https://github.com/StripesOO7/alttp-ap-poptracker-pack)
             # for convenient auto-tracking of the generated settings and adjusting the tracker accordingly
 
-            slot_options = ["crystals_needed_for_gt", "crystals_needed_for_ganon", "dungeons_needed_for_ganon",
-                            "open_pyramid", "big_key_shuffle", "small_key_shuffle", "compass_shuffle", "map_shuffle",
-                            "progressive", "swordless", "retro_bow", "retro_caves", "shop_item_slots",
-                            "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
-                            "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
-                            "boss_prize_shuffle", "randomize_damage_classes", "max_attacks_in_logic",
-                            "entrance_shuffle",
-                            "dark_room_logic", "goal", "mode",
-                            "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
-                            "triforce_pieces_available", "triforce_pieces_extra",
-            ]
+            slot_options = sorted({
+                "crystals_needed_for_gt", "crystals_needed_for_ganon", "dungeons_needed_for_ganon",
+                "open_pyramid", "big_key_shuffle", "small_key_shuffle", "compass_shuffle", "map_shuffle",
+                "progressive", "swordless", "retro_bow", "retro_caves", "shop_item_slots",
+                "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
+                "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
+                "boss_prize_shuffle", "randomize_damage_classes", "max_attacks_in_logic",
+                "entrance_shuffle",
+                "dark_room_logic", "goal", "mode",
+                "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
+                "triforce_pieces_available", "triforce_pieces_extra",
+                *ALTTP_UT_LOGIC_OPTION_NAMES,
+            })
 
             slot_data = {option_name: getattr(self.options, option_name).value for option_name in slot_options}
 
@@ -1149,7 +1306,436 @@ class ALTTPWorld(World):
             self.rom_name_available_event.wait()
             if self.in_game_hint_data:
                 slot_data["alttp_hint_texts"] = self.in_game_hint_data["hints"]
+            slot_data.update(self._build_ut_replay_data())
         return slot_data
+
+    @staticmethod
+    def interpret_slot_data(slot_data: dict[str, typing.Any]) -> typing.Optional[dict[str, typing.Any]]:
+        if "alttp_ut" in slot_data:
+            return slot_data["alttp_ut"]
+        if slot_data.get("ut_replay"):
+            return slot_data
+        return None
+
+    def _get_ut_replay_data(self) -> typing.Optional[dict[str, typing.Any]]:
+        passthrough = getattr(self.multiworld, "re_gen_passthrough", None)
+        if not passthrough:
+            return None
+        replay_data = passthrough.get(self.game)
+        if not replay_data:
+            return None
+        return typing.cast(dict[str, typing.Any], replay_data)
+
+    def _apply_ut_replay_options(self, replay_data: dict[str, typing.Any]) -> None:
+        option_values = replay_data.get("options", replay_data)
+        for option_name in ALTTP_UT_LOGIC_OPTION_NAMES:
+            if option_name not in option_values:
+                continue
+            value = option_values[option_name]
+            option_type = type(self.options).type_hints.get(option_name)
+            if option_type is not None:
+                setattr(self.options, option_name, option_type.from_any(value))
+
+    def _build_ut_replay_data(self) -> dict[str, typing.Any]:
+        return {
+            "ut_replay": True,
+            "ut_entrance_connections": _encode_ut_entrance_connections(self),
+            "ut_light_world_regions": sorted(
+                region.name for region in self.multiworld.get_regions(self.player) if region.is_light_world
+            ),
+            "ut_dark_world_regions": sorted(
+                region.name for region in self.multiworld.get_regions(self.player) if region.is_dark_world
+            ),
+            "ut_key_rings": sorted(self.key_rings),
+            "ut_key_ring_data": dict(self.key_ring_data),
+            "ut_location_items": _encode_ut_location_items(self),
+            "ut_pot_shuffle": _encode_ut_pot_shuffle(self.pot_shuffle_state),
+            "ut_shop_inventories": _encode_ut_shop_inventories(self),
+            "ut_shop_locations": _encode_ut_shop_locations(self),
+            "ut_take_any_caves": _encode_ut_take_any_caves(self),
+            "ut_bosses": encode_ut_bosses(self),
+            "ut_enemy_combat_model": _encode_ut_enemy_combat_model(self.enemy_combat_model),
+            "ut_enemy_shuffle": _encode_ut_enemy_shuffle(self.enemy_shuffle_state),
+        }
+
+
+def _get_ut_replay_value(
+    replay_data: typing.Optional[dict[str, typing.Any]],
+    key: str,
+    legacy_key: typing.Optional[str] = None,
+):
+    if not replay_data:
+        return None
+    if key in replay_data:
+        return replay_data[key]
+    if legacy_key and legacy_key in replay_data:
+        return replay_data[legacy_key]
+    return None
+
+
+def _encode_ut_location_items(world: ALTTPWorld) -> dict[str, dict[str, typing.Any]]:
+    location_items = {}
+    for location_name in ALTTP_UT_LOGIC_LOCATION_ITEM_NAMES:
+        try:
+            location = world.multiworld.get_location(location_name, world.player)
+        except KeyError:
+            continue
+        if location.item is None:
+            continue
+        location_items[location_name] = {
+            "item": location.item.name,
+            "player": location.item.player,
+            "classification": int(location.item.classification),
+        }
+    return location_items
+
+
+def _apply_ut_location_items(world: ALTTPWorld, location_items: dict[str, dict[str, typing.Any]]) -> None:
+    for location_name, item_data in location_items.items():
+        try:
+            location = world.multiworld.get_location(location_name, world.player)
+        except KeyError:
+            continue
+        item_name = str(item_data["item"])
+        item_player = int(item_data["player"])
+        if item_player == world.player and item_name in item_init_table:
+            location.item = world.create_item(item_name)
+        else:
+            location.item = world.create_item("Rupees (20)")
+        if "classification" in item_data:
+            location.item.classification = ItemClassification(int(item_data["classification"]))
+        location.item.location = location
+
+
+def _encode_ut_entrance_connections(world: ALTTPWorld) -> list[list[str]]:
+    connections = []
+    for region in world.multiworld.get_regions(world.player):
+        for entrance in region.entrances:
+            if entrance.connected_region is not None:
+                connections.append([entrance.name, entrance.connected_region.name])
+    connections.sort()
+    return connections
+
+
+def _apply_ut_entrance_connections(world: ALTTPWorld, connections: list[list[str]]) -> list[list[str]]:
+    entrances = {
+        entrance.name: entrance
+        for region in world.multiworld.get_regions(world.player)
+        for entrance in region.entrances
+    }
+    regions = {
+        region.name: region
+        for region in world.multiworld.get_regions(world.player)
+    }
+    pending = []
+    for entrance_name, region_name in connections:
+        entrance = entrances.get(entrance_name)
+        region = regions.get(region_name)
+        if entrance is None or region is None:
+            pending.append([entrance_name, region_name])
+            continue
+        if entrance.connected_region is not None and entrance in entrance.connected_region.entrances:
+            entrance.connected_region.entrances.remove(entrance)
+        entrance.connect(region)
+    return pending
+
+
+def _apply_ut_region_worlds(world: ALTTPWorld) -> None:
+    light_world_regions = _get_ut_replay_value(world.ut_replay_data, "ut_light_world_regions")
+    dark_world_regions = _get_ut_replay_value(world.ut_replay_data, "ut_dark_world_regions")
+    if light_world_regions is None or dark_world_regions is None:
+        return
+    light_world_regions = set(light_world_regions)
+    dark_world_regions = set(dark_world_regions)
+    for region in world.multiworld.get_regions(world.player):
+        region.is_light_world = region.name in light_world_regions
+        region.is_dark_world = region.name in dark_world_regions
+
+
+def _refresh_ut_entrance_derived_flags(world: ALTTPWorld) -> None:
+    multiworld = world.multiworld
+    player = world.player
+
+    try:
+        world.swamp_patch_required = (
+            multiworld.get_entrance('Dam', player).connected_region.name != 'Dam'
+            or multiworld.get_entrance('Swamp Palace', player).connected_region.name != 'Swamp Palace (Entrance)'
+        )
+        world.powder_patch_required = multiworld.get_entrance('Potion Shop', player).connected_region.name != 'Potion Shop'
+        world.ganon_at_pyramid = multiworld.get_entrance('Pyramid Hole', player).connected_region.name == 'Pyramid'
+        world.ganonstower_vanilla = (
+            multiworld.get_entrance('Ganons Tower', player).connected_region.name == 'Ganons Tower (Entrance)'
+        )
+    except (AttributeError, KeyError):
+        pass
+
+
+def _encode_ut_pot_shuffle(pot_shuffle_state) -> typing.Optional[dict[str, list[list[int]]]]:
+    if not pot_shuffle_state:
+        return None
+    return {
+        str(room_id): [[pot.x, pot.y, pot.item] for pot in pots]
+        for room_id, pots in sorted(pot_shuffle_state.items())
+    }
+
+
+def _decode_ut_pot_shuffle(data: typing.Optional[dict[str, list[list[int]]]]):
+    if not data:
+        return None
+    from .PotShuffle import FilledPot
+
+    return {
+        int(room_id): tuple(FilledPot(*pot_data) for pot_data in pots)
+        for room_id, pots in data.items()
+    }
+
+
+def _encode_ut_shop_locations(world: ALTTPWorld) -> dict[str, dict[str, int]]:
+    from .Shops import ShopType
+
+    return {
+        location.name: {
+            "price": int(location.shop_price),
+            "price_type": int(location.shop_price_type),
+        }
+        for location in world.get_locations()
+        if (getattr(location, "shop_slot", None) is not None
+            and getattr(location, "shop", None) is not None
+            and location.shop.type != ShopType.TakeAny
+            and not location.shop_slot_disabled)
+    }
+
+
+def _apply_ut_shop_locations(world: ALTTPWorld) -> None:
+    shop_locations = _get_ut_replay_value(world.ut_replay_data, "ut_shop_locations", "shop_locations")
+    if shop_locations is None:
+        return
+    from .Shops import ShopType, shop_price_rules
+
+    for location in world.get_locations():
+        if getattr(location, "shop_slot", None) is None:
+            continue
+        if location.shop.type == ShopType.TakeAny:
+            continue
+        location_data = shop_locations.get(location.name)
+        if location_data is None:
+            location.access_rule = lambda state: False
+            location.locked = True
+            location.shop_slot_disabled = True
+            continue
+        location.locked = False
+        location.shop_slot_disabled = False
+        location.shop_price = int(location_data["price"])
+        location.shop_price_type = int(location_data["price_type"])
+        location.access_rule = lambda state, spot=location: shop_price_rules(state, world.player, spot)
+
+
+def _encode_ut_shop_inventory(inventory: list[typing.Optional[dict]]) -> list[typing.Optional[dict[str, typing.Any]]]:
+    return [
+        None if inventory_item is None else {
+            "item": inventory_item["item"],
+            "price": int(inventory_item["price"]),
+            "price_type": int(inventory_item["price_type"]),
+            "max": int(inventory_item["max"]),
+            "replacement": inventory_item["replacement"],
+            "replacement_price": int(inventory_item["replacement_price"]),
+            "replacement_price_type": int(inventory_item["replacement_price_type"]),
+            "player": int(inventory_item["player"]),
+        }
+        for inventory_item in inventory
+    ]
+
+
+def _encode_ut_shop_inventories(world: ALTTPWorld) -> dict[str, dict[str, typing.Any]]:
+    from .Shops import ShopType
+
+    return {
+        shop.region.name: {
+            "locked": bool(shop.locked),
+            "shopkeeper_config": int(shop.shopkeeper_config),
+            "inventory": _encode_ut_shop_inventory(shop.inventory),
+        }
+        for shop in world.shops
+        if shop.type != ShopType.TakeAny
+    }
+
+
+def _apply_ut_shop_inventories(world: ALTTPWorld) -> None:
+    shop_inventories = _get_ut_replay_value(world.ut_replay_data, "ut_shop_inventories", "shop_inventories")
+    if shop_inventories is None:
+        return
+    for shop in world.shops:
+        shop_data = shop_inventories.get(shop.region.name)
+        if shop_data is None:
+            continue
+        shop.locked = bool(shop_data["locked"])
+        shop.shopkeeper_config = int(shop_data["shopkeeper_config"])
+        shop.clear_inventory()
+        for slot, inventory_data in enumerate(shop_data["inventory"]):
+            if inventory_data is not None:
+                shop.add_inventory(
+                    slot,
+                    inventory_data["item"],
+                    int(inventory_data["price"]),
+                    int(inventory_data["max"]),
+                    inventory_data["replacement"],
+                    int(inventory_data["replacement_price"]),
+                    int(inventory_data["player"]),
+                    int(inventory_data["price_type"]),
+                    int(inventory_data["replacement_price_type"]),
+                )
+
+
+def _encode_ut_take_any_caves(world: ALTTPWorld) -> typing.Optional[dict[str, dict[str, typing.Any]]]:
+    if not world.options.retro_caves:
+        return None
+    from .ItemPool import take_any_replay_locations
+
+    take_any_data = {}
+    for region_name in take_any_replay_locations:
+        try:
+            region = world.multiworld.get_region(region_name, world.player)
+        except KeyError:
+            return None
+        if not region.entrances or region.shop is None:
+            return None
+        entrance = region.entrances[0]
+        location = next((location for location in region.locations if location.name == region_name), None)
+        location_item = None
+        if location and location.item:
+            location_item = {
+                "item": location.item.name,
+                "classification": int(location.item.classification),
+                "shop_slot": int(location.shop_slot),
+            }
+        take_any_data[region_name] = {
+            "hint": region.hint_text,
+            "entrance": entrance.name,
+            "target": int(entrance.target),
+            "room_id": int(region.shop.room_id),
+            "shopkeeper_config": int(region.shop.shopkeeper_config),
+            "custom": bool(region.shop.custom),
+            "locked": bool(region.shop.locked),
+            "inventory": _encode_ut_shop_inventory(region.shop.inventory),
+            "location_item": location_item,
+        }
+    return take_any_data
+
+
+def _encode_ut_enemy_combat_model(combat_model) -> typing.Optional[dict[str, typing.Any]]:
+    if combat_model is None:
+        return None
+    return {
+        "damage_sources": [
+            [source.name, source.damage_class, list(source.subclasses)]
+            for source in combat_model.damage_sources
+        ],
+        "sprite_damage_subclasses": [list(row) for row in combat_model.sprite_damage_subclasses],
+        "enemy_health_table": list(combat_model.enemy_health_table),
+    }
+
+
+def _decode_ut_enemy_combat_model(data: typing.Optional[dict[str, typing.Any]]):
+    if not data:
+        return None
+    from .enemizer_data.enemy_combat_data import DamageSource, EnemyCombatModel
+
+    return EnemyCombatModel(
+        damage_sources=tuple(
+            DamageSource(str(name), int(damage_class), tuple(int(subclass) for subclass in subclasses))
+            for name, damage_class, subclasses in data["damage_sources"]
+        ),
+        sprite_damage_subclasses=tuple(
+            tuple(int(subclass) for subclass in row)
+            for row in data["sprite_damage_subclasses"]
+        ),
+        enemy_health_table=bytes(data["enemy_health_table"]),
+    )
+
+
+def _encode_dataclass_instance(instance) -> dict[str, typing.Any]:
+    return {
+        field.name: _encode_dataclass_value(getattr(instance, field.name))
+        for field in fields(instance)
+    }
+
+
+def _encode_dataclass_value(value):
+    if dataclasses.is_dataclass(value):
+        return _encode_dataclass_instance(value)
+    if isinstance(value, tuple):
+        return [_encode_dataclass_value(entry) for entry in value]
+    if isinstance(value, frozenset):
+        return sorted(value)
+    return value
+
+
+def _decode_dataclass_instance(cls, data: dict[str, typing.Any]):
+    values = {}
+    for field in fields(cls):
+        value = data[field.name]
+        if field.name in {"sprites", "all_sprites"}:
+            sprite_cls = _get_ut_enemy_shuffle_sprite_cls(cls, field.name)
+            value = tuple(_decode_dataclass_instance(sprite_cls, entry) for entry in value)
+        values[field.name] = value
+    return cls(**values)
+
+
+def _get_ut_enemy_shuffle_sprite_cls(cls, field_name: str):
+    from .EnemyShuffle import (
+        DungeonEnemySprite,
+        OverworldEnemySprite,
+        RandomizedDungeonEnemySprite,
+        RandomizedOverworldEnemySprite,
+    )
+
+    if cls.__name__ == "DungeonEnemyRoom":
+        return DungeonEnemySprite
+    if cls.__name__ == "RandomizedDungeonEnemyRoom":
+        return RandomizedDungeonEnemySprite
+    if cls.__name__ == "OverworldEnemyArea":
+        return OverworldEnemySprite
+    if cls.__name__ == "RandomizedOverworldEnemyArea":
+        return RandomizedOverworldEnemySprite
+    raise TypeError(f"Unexpected enemy shuffle dataclass field {cls.__name__}.{field_name}")
+
+
+def _encode_ut_enemy_shuffle(enemy_shuffle_state) -> typing.Optional[dict[str, typing.Any]]:
+    if enemy_shuffle_state is None:
+        return None
+    return {
+        "randomized_dungeon_rooms": {
+            str(room_id): _encode_dataclass_instance(room)
+            for room_id, room in sorted(enemy_shuffle_state.randomized_dungeon_rooms.items())
+        },
+        "randomized_overworld_areas": {
+            str(area_id): _encode_dataclass_instance(area)
+            for area_id, area in sorted(enemy_shuffle_state.randomized_overworld_areas.items())
+        },
+        "available_damage_classes": sorted(enemy_shuffle_state.available_damage_classes),
+    }
+
+
+def _apply_ut_enemy_shuffle_state(world: ALTTPWorld) -> None:
+    data = _get_ut_replay_value(world.ut_replay_data, "ut_enemy_shuffle", "enemy_shuffle")
+    if data is None:
+        return
+    from .EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedOverworldEnemyArea
+
+    if world.enemy_shuffle_state is None:
+        return
+    world.enemy_shuffle_state = dataclasses.replace(
+        world.enemy_shuffle_state,
+        randomized_dungeon_rooms={
+        int(room_id): _decode_dataclass_instance(RandomizedDungeonEnemyRoom, room_data)
+        for room_id, room_data in data["randomized_dungeon_rooms"].items()
+        },
+        randomized_overworld_areas={
+        int(area_id): _decode_dataclass_instance(RandomizedOverworldEnemyArea, area_data)
+        for area_id, area_data in data["randomized_overworld_areas"].items()
+        },
+        available_damage_classes=frozenset(data["available_damage_classes"]),
+    )
 
 
 def get_same_seed(world, seed_def: tuple) -> str:

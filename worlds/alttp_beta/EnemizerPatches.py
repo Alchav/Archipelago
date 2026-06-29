@@ -61,30 +61,30 @@ class RoomObjectTable:
     layer_3_doors: list[bytes] = field(default_factory=list)
 
     @classmethod
-    def from_rom(cls, rom: "LocalRom", start_address: int) -> "RoomObjectTable":
-        table = cls(rom.read_byte(start_address), rom.read_byte(start_address + 1))
+    def from_bytes(cls, table_bytes: bytes) -> "RoomObjectTable":
+        table = cls(table_bytes[0], table_bytes[1])
         layers = (
             (table.layer_1_objects, table.layer_1_doors),
             (table.layer_2_objects, table.layer_2_doors),
             (table.layer_3_objects, table.layer_3_doors),
         )
-        index = start_address + 2
+        index = 2
 
         for objects, doors in layers:
             is_door = False
             while True:
-                if rom.read_bytes(index, 2) == bytearray((0xF0, 0xFF)):
+                if table_bytes[index:index + 2] == bytes((0xF0, 0xFF)):
                     is_door = True
                     index += 2
                     continue
-                if rom.read_bytes(index, 2) == bytearray((0xFF, 0xFF)):
+                if table_bytes[index:index + 2] == bytes((0xFF, 0xFF)):
                     index += 2
                     break
                 if is_door:
-                    doors.append(bytes(rom.read_bytes(index, 2)))
+                    doors.append(table_bytes[index:index + 2])
                     index += 2
                 else:
-                    objects.append(bytes(rom.read_bytes(index, 3)))
+                    objects.append(table_bytes[index:index + 3])
                     index += 3
 
         return table
@@ -157,12 +157,91 @@ DUNGEON_BOSS_PATCH_DATA: dict[tuple[str, Optional[str]], DungeonBossPatchData] =
     ),
     ("Ganons Tower", "top"): DungeonBossPatchData(77, 0x04D6C8, 0x18, 0x16),
 }
+ROOM_OBJECT_TABLE_BYTES: dict[int, bytes] = {
+    200: bytes.fromhex("e10098923a88aa65e8aa66fffffffff0ff8118ffff"),
+    51: bytes.fromhex("e900fffffffff0ff6118ffff"),
+    7: bytes.fromhex(
+        "811c0a4e0d0aaa0e0b5161c02ca2b0200fb02262fec102c93801ffa382bae610e8aa62ff43b95353e09153e05391e091"
+        "91e03c6bc23d9bc354a6c35caac368b1c375b0c38fb1c39baac3a6a0c3ad98c3b46ac2513dc34549c33d51c39c39c2a1"
+        "49c3ad51c33a508a38502244446944442258130560155578103a085b650c617fc83905e85b66ec4a8058eb0660ed5678"
+        "ec3b50386950385fa83869a84422b44469b45122c6508a3bc8228bc82274bc6988bc69633cc2664f2964506b5c542b5c"
+        "586b545c2b54606b4c642b4e6b6b4c982d549c6b54a02d5ca46b5ca82d64ac6b66b32a98ac6a98a82ea0a46aa0a02ea8"
+        "9c6aa8982eb26b6aa8642ca8606aa05c2ca0586a98542c98506a6874c268712768776a74776b688528fc317274ae0471"
+        "a0e00a13a00abfa1bef7a3c311c0d13100fffffffff0ffffff"
+    ),
+    90: bytes.fromhex("e900a8a8deb0a0deb8a8dec0a0dec8a8ded0a0defffffffff0ff8118ffff"),
+    6: bytes.fromhex(
+        "e1001ba3c858a3c81bd8c858d8c8179f3f549f3f17a37914e17917eb4054eb406ba37a68e17a2190f85190f80ca57f6c"
+        "a580fffffffff0ff6118ffff"
+    ),
+    41: bytes.fromhex(
+        "e500979cdeb79cded69cde97e4deb7e4ded6e4de94a7de94c7dee4a7dee4c7deffff0303ca4303ca8303cac303ca0343"
+        "ca4343ca8343cac343ca0383ca4383ca8383cac383ca03c3ca43c3ca83c3cac3c3caffff9fa7c6d4a7c6fef9f4ff1e74"
+        "fe5c74ff9c74f0ffffff"
+    ),
+    172: bytes.fromhex("e90088a40d88d00ee0900fe0e41089ab61e9ab628891a088e5a1e491a2e4f5a3ffffb1a8fffffff0ff8118ffff"),
+    222: bytes.fromhex("e400ffffad21f9fffff0ffffff"),
+    144: bytes.fromhex("e10028ec5648ec561ba2ffffff169cfefffff0ff6118ffff"),
+    164: bytes.fromhex(
+        "e100fc0800138001fdc802029361fc0e8113e802fdce837293621393c45193c451c9c410c9c40e8dde0d9cde0ca5de5e"
+        "8cde6594de6c9cdeffff2e98fffffff0ff6118ffff"
+    ),
+    28: bytes.fromhex(
+        "e1002d32a4a91edca8913a88ad76ecad77a8503dd0503d30a93d30c13dfc6938979fd1cd9fd197dcd1cddcd1bd32f9b1"
+        "22f9c922f9fffffffff0ff803682186028ffff"
+    ),
+    108: bytes.fromhex(
+        "e200179fe84d9fe817dce84ddce818e1fe88ad7699bc339bbb349bcf34d8b834d8cc34afaafec7aafeafd2fec7d2fe28"
+        "113a28913afce1382b33fa5333fa2b53fa5353fafffffffff0ff823860188300ffff"
+    ),
+    77: bytes.fromhex(
+        "821c09340d083a6109c00e08c261d1100fe83a625e1c03174963df4b64dcca64ff7dcb9ddf043b5be07b5be0b85be06a"
+        "b1e07854c25b2ac2982ac2214bc3217bc321a1c3387bc2488ac23aaac25b9cc2c94bc3c97bc3b879c2a888c29b9bc29b"
+        "d0c2d0a3c2788cc2154522591f69a51f69c9452268e45e15b92235b96937d92288d92298d96966cb2a69c90479cbf98d"
+        "baf9375729875729785a6a845a6b786528355b6b347a2d447e6b448a2d548e6b559b2a788e6a788927848e6b859b2aa8"
+        "8e6aa88a2eb87e6ab87a2ec95b6a66af2965b16b99b16a384b03a84b0348133a0c4a7fec4a80fee1390911a0d511a209"
+        "d5a1ffff5b19db9819db114bdb118adb3948dba948dbd94bdbd98bdb6ac8db9bcadbd9cadbfffff0ff001c2200ffff"
+    ),
+}
 
 TRINEXX_SHELL_OBJECT_ID = 0xFF2
 KHOLDSTARE_SHELL_OBJECT_ID = 0xF95
 TRINEXX_VANILLA_ROOM_ID = 164
 KHOLDSTARE_VANILLA_ROOM_ID = 222
 ENEMY_DAMAGE_TABLE_ADDRESS = 0x6B266
+VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES = (
+    0x80, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00,
+    0x00, 0x80, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x10, 0x10, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+    0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00,
+    0x00, 0x10, 0x10, 0x00, 0x00, 0x00, 0x00, 0x10,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x10, 0x10, 0x10, 0x00, 0x00, 0x00,
+    0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x10, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x10, 0x10, 0x10, 0x10, 0x00,
+    0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x10, 0x10,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00,
+)
 HIDDEN_ENEMY_CHANCE_POOL_ADDRESS = 0xD7BBB
 DAMAGE_GROUP_TABLE_ADDRESS = 0x3742D
 RETRO_ARROW_REPLACEMENT_CHECK_ADDRESS = 0x301FC
@@ -284,7 +363,7 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
         rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 3, boss_data.graphics)
 
         if boss_name == "Trinexx" and dungeon_data.room_id != TRINEXX_VANILLA_ROOM_ID:
-            room_table = _get_room_object_table(rom, modified_room_tables, dungeon_data.room_id)
+            room_table = _get_room_object_table(modified_room_tables, dungeon_data.room_id)
             room_table.add_shell(
                 dungeon_data.shell_x,
                 dungeon_data.shell_y - 2,
@@ -295,7 +374,7 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
             rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 4, 0x04)
 
         if boss_name == "Kholdstare" and dungeon_data.room_id != KHOLDSTARE_VANILLA_ROOM_ID:
-            room_table = _get_room_object_table(rom, modified_room_tables, dungeon_data.room_id)
+            room_table = _get_room_object_table(modified_room_tables, dungeon_data.room_id)
             room_table.add_shell(
                 dungeon_data.shell_x,
                 dungeon_data.shell_y,
@@ -306,10 +385,10 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
             rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 4, 0x01)
 
         if boss_name != "Trinexx" and dungeon_data.room_id == TRINEXX_VANILLA_ROOM_ID:
-            _get_room_object_table(rom, modified_room_tables, dungeon_data.room_id).remove_shell(TRINEXX_SHELL_OBJECT_ID)
+            _get_room_object_table(modified_room_tables, dungeon_data.room_id).remove_shell(TRINEXX_SHELL_OBJECT_ID)
 
         if boss_name != "Kholdstare" and dungeon_data.room_id == KHOLDSTARE_VANILLA_ROOM_ID:
-            _get_room_object_table(rom, modified_room_tables, dungeon_data.room_id).remove_shell(KHOLDSTARE_SHELL_OBJECT_ID)
+            _get_room_object_table(modified_room_tables, dungeon_data.room_id).remove_shell(KHOLDSTARE_SHELL_OBJECT_ID)
 
         if dungeon_data.gt_sprite_write_address is not None:
             _write_gt_boss_sprite_block(rom, dungeon_data, boss_data)
@@ -328,15 +407,12 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
         rom.write_byte(0x1B0101, 0x00)
 
 
-def _get_room_object_table(rom: "LocalRom", cache: dict[int, RoomObjectTable], room_id: int) -> RoomObjectTable:
+def _get_room_object_table(cache: dict[int, RoomObjectTable], room_id: int) -> RoomObjectTable:
     room_table = cache.get(room_id)
     if room_table is not None:
         return room_table
 
-    pointer_address = 0xF8000 + (room_id * 3)
-    snes_address_bytes = rom.read_bytes(pointer_address, 3)
-    snes_address = (snes_address_bytes[2] << 16) | (snes_address_bytes[1] << 8) | snes_address_bytes[0]
-    room_table = RoomObjectTable.from_rom(rom, snes_to_pc(snes_address))
+    room_table = RoomObjectTable.from_bytes(ROOM_OBJECT_TABLE_BYTES[room_id])
     cache[room_id] = room_table
     return room_table
 
@@ -421,10 +497,11 @@ def _randomize_enemy_damage(rom: "LocalRom", rng: random.Random, allow_zero_dama
     for sprite_id in range(0xF3):
         if sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
             continue
+        damage_address = ENEMY_DAMAGE_TABLE_ADDRESS + sprite_id
         new_damage = rng.randrange(8)
         if not allow_zero_damage and new_damage == 2:
             continue
-        rom.write_byte(ENEMY_DAMAGE_TABLE_ADDRESS + sprite_id, new_damage)
+        rom.write_byte(damage_address, VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES[sprite_id] | new_damage)
 
 
 def _shuffle_damage_groups(

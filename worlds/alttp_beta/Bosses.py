@@ -449,7 +449,39 @@ def format_boss_location(location_name: str, level: str) -> str:
     return location_name + (' (' + level + ')' if level else '')
 
 
+def encode_ut_bosses(world: "ALTTPWorld") -> dict[str, dict[str, str]]:
+    bosses = {}
+    for dungeon_name, dungeon in world.dungeons.items():
+        dungeon_bosses = {
+            str(level) if level is not None else "main": boss.name
+            for level, boss in dungeon.bosses.items()
+            if boss is not None
+        }
+        if dungeon_bosses:
+            bosses[dungeon_name] = dungeon_bosses
+    return bosses
+
+
+def apply_ut_bosses(world: "ALTTPWorld", bosses: dict[str, dict[str, str]]) -> bool:
+    if not bosses:
+        return False
+
+    for dungeon_name, dungeon_bosses in bosses.items():
+        dungeon = world.dungeons[dungeon_name]
+        for level_name, boss_name in dungeon_bosses.items():
+            level = None if level_name == "main" else level_name
+            dungeon.bosses[level] = BossFactory(boss_name, world.player)
+    return True
+
+
 def place_bosses(world: "ALTTPWorld") -> None:
+    if getattr(world, "ut_replay_data", None):
+        from . import _get_ut_replay_value
+
+        bosses = _get_ut_replay_value(world.ut_replay_data, "ut_bosses", "bosses")
+        if apply_ut_bosses(world, bosses):
+            return
+
     multiworld = world.multiworld
     # will either be an int or a lower case string with ';' between options
     boss_shuffle: Union[str, int] = world.options.boss_shuffle.value

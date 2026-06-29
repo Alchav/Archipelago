@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "032bd832980b93dc6e3799ac383bb9b1"
+RANDOMIZERBASEHASH: str = "902f840986705336c637e25d6b654315"
 ROM_PLAYER_LIMIT: int = 255
 HINT_READ_TABLE_ADDRESS: int = 0x1863B0
 HINT_READ_TABLE_SIZE: int = 0x100
@@ -285,19 +285,17 @@ def _encrypt_range(rom, startaddress: int, length: int, key: bytes, cryptography
     if cryptography is None:
         cryptography = _require_xxtea()
     for i in range(0, length, 8):
-        data = bytes(rom.read_bytes(startaddress + i, 8))
+        data = bytes(rom.read_byte(startaddress + i + offset) for offset in range(8))
         data = cryptography.encrypt(data, key, padding=False)
         rom.write_bytes(startaddress + i, bytearray(data))
 
 
 class LocalRom:
 
-    def __init__(self, file, patch=True, vanillaRom=None, name=None, hash=None,
-                 token_patch: Optional["LttPDeltaPatch"] = None):
+    def __init__(self, file, patch=True, vanillaRom=None, name=None, hash=None):
         self.name = name
         self.hash = hash
         self.orig_buffer = None
-        self.token_patch = None
 
         with open(file, 'rb') as stream:
             self.buffer = read_snes_rom(stream)
@@ -307,13 +305,9 @@ class LocalRom:
         if vanillaRom:
             with open(vanillaRom, 'rb') as vanillaStream:
                 self.orig_buffer = read_snes_rom(vanillaStream)
-        self.token_patch = token_patch
 
     def read_byte(self, address: int) -> int:
         return self.buffer[address]
-
-    def read_bytes(self, startaddress: int, length: int) -> bytearray:
-        return self.buffer[startaddress:startaddress + length]
 
     def write_byte(self, address: int, value: int):
         self.write_bytes(address, (value,))
@@ -321,8 +315,6 @@ class LocalRom:
     def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
         values = bytes(values)
         self.buffer[startaddress:startaddress + len(values)] = values
-        if self.token_patch:
-            self.token_patch.write_bytes(startaddress, values)
 
     def encrypt_range(self, startaddress: int, length: int, key: bytes):
         _encrypt_range(self, startaddress, length, key, xxtea)
@@ -432,9 +424,6 @@ class TokenRom:
         except KeyError as e:
             raise RuntimeError(f"Token-only ALttP ROM tried to read unwritten byte {address:#x}") from e
 
-    def read_bytes(self, startaddress: int, length: int) -> bytearray:
-        return bytearray(self.read_byte(startaddress + offset) for offset in range(length))
-
     def write_byte(self, address: int, value: int):
         self.write_bytes(address, (value,))
 
@@ -473,9 +462,6 @@ class ProcedureRom:
 
     def read_byte(self, address: int) -> int:
         return self.buffer[address]
-
-    def read_bytes(self, startaddress: int, length: int) -> bytearray:
-        return self.buffer[startaddress:startaddress + length]
 
     def write_byte(self, address: int, value: int):
         self.buffer[address] = value

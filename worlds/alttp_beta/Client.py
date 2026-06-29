@@ -284,6 +284,16 @@ collect_ignore_locations = {Regions.lookup_name_to_id[name] for name in {
     'Ice Palace - Boss',
     'Misery Mire - Boss',
     'Turtle Rock - Boss',
+    'Eastern Palace - Prize',
+    'Desert Palace - Prize',
+    'Tower of Hera - Prize',
+    'Palace of Darkness - Prize',
+    'Swamp Palace - Prize',
+    'Skull Woods - Prize',
+    "Thieves' Town - Prize",
+    'Ice Palace - Prize',
+    'Misery Mire - Prize',
+    'Turtle Rock - Prize',
     'Sahasrahla',
     'Master Sword Pedestal',  # can circumvent ganon pedestal's goal's pendant collection
 }}
