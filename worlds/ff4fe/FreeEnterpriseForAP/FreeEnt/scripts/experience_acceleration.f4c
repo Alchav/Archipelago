@@ -42,22 +42,6 @@ msfpatch {
         sta $af
         // %end%
 
-        // %flag experience_no_key_item_bonus off%
-        // check for key item bonus
-        lda $=Stats_KeyItems
-        cmp #$0a
-        bcc $+ExperienceAcceleration_CalculateMedianLevel
-
-        clc
-        rol $ad
-        rol $ae
-        rol $af
-        bcc $+ExperienceAcceleration_CalculateMedianLevel
-        lda #$ff
-        sta $ad
-        sta $ae
-        sta $af
-        // %end%
 
     ExperienceAcceleration_CalculateMedianLevel:
         // I am sincerely hoping at this point that

@@ -173,15 +173,11 @@ class FF4FEWorld(World):
             for location in locations.free_character_locations:
                 character_locations.remove(location)
                 self.get_location(location).place_locked_item(self.create_item("None"))
-                self.get_location(location).address = None
-                self.get_location(location).item.code = None
                 item_pool.remove("None")
         if self.options.NoEarnedCharacters:
             for location in locations.earned_character_locations:
                 character_locations.remove(location)
                 self.get_location(location).place_locked_item(self.create_item("None"))
-                self.get_location(location).address = None
-                self.get_location(location).item.code = None
                 item_pool.remove("None")
 
         restricted_character_allow_locations = sorted(set(character_locations) - set(locations.restricted_character_locations))
