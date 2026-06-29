@@ -1543,7 +1543,7 @@ def get_damage_classes_with_effects(
     matching_damage_classes = []
     for damage_class in range(len(combat_model.damage_sources)):
         effect = get_damage_effect(sprite_id, damage_class, combat_model)
-        if effect in effects and _damage_effect_allowed_for_sprite(sprite_id, effect):
+        if effect in effects:
             matching_damage_classes.append(damage_class)
     result = tuple(matching_damage_classes)
     cache[cache_key] = result
@@ -1573,7 +1573,10 @@ def get_killing_damage_classes(
     matching_damage_classes = []
     for damage_class in range(len(combat_model.damage_sources)):
         effect = get_damage_effect(sprite_id, damage_class, combat_model)
-        if is_killing_damage_effect(effect) and _damage_effect_allowed_for_sprite(sprite_id, effect):
+        if is_killing_damage_effect(effect) or (
+            sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
+            and effect in TRANSFORM_DAMAGE_EFFECTS
+        ):
             matching_damage_classes.append(damage_class)
     result = tuple(matching_damage_classes)
     cache[sprite_id] = result
@@ -1650,9 +1653,10 @@ def get_hits_to_kill(
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> int | None:
     effect = get_damage_effect(sprite_id, damage_class, combat_model)
-    if not _damage_effect_allowed_for_sprite(sprite_id, effect):
-        return None
-    if effect == INCINERATE_EFFECT:
+    if effect == INCINERATE_EFFECT or (
+        sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
+        and effect in TRANSFORM_DAMAGE_EFFECTS
+    ):
         return 1
     if not 0 < effect < FAIRY_TRANSFORM_EFFECT:
         return None
