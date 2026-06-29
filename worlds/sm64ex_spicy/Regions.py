@@ -336,14 +336,18 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regBitFS,
                 "Bowser in the Fire Sea - First Stone Structure 1-Up",
                 "Bowser in the Fire Sea - Second Stone Structure 1-Up",
-                "Bowser in the Fire Sea - Swaying Stairs 1-Up Block",
-                "Bowser in the Fire Sea - 10 Coins Block",
-                "Bowser in the Fire Sea - Near Poles 1-Up Block",
                 "Bowser in the Fire Sea - 3 Coins Block")
-    bitfs_upper = create_subregion(regBitFS, "Bowser in the Fire Sea - Upper", *locBitFS_table.keys(),
+    bitfs_upper = create_subregion(regBitFS, "Bowser in the Fire Sea - Upper",
+                                   "Bowser in the Fire Sea - Red Coins",
+                                   "Bowser in the Fire Sea - Key",
+                                   "Bowser in the Fire Sea - Swaying Stairs 1-Up",
+                                   "Bowser in the Fire Sea - Near Poles Block 1-Up",
                                    "Bowser in the Fire Sea - Elevator Pole 1-Up",
                                    "Bowser in the Fire Sea - Moving Platform Trigger 1-Up",
-                                   "Bowser in the Fire Sea - Near Poles 1-Up")
+                                   "Bowser in the Fire Sea - Near Poles 1-Up",
+                                   "Bowser in the Fire Sea - Swaying Stairs 1-Up Block",
+                                   "Bowser in the Fire Sea - 10 Coins Block",
+                                   "Bowser in the Fire Sea - Near Poles 1-Up Block")
     regBitFS.subregions = [bitfs_upper]
 
     create_region("Second Floor", player, multiworld)
