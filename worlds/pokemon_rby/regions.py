@@ -1320,7 +1320,7 @@ def create_regions(world):
                 loc.item = None
                 loc.locked = False
 
-    door_shuffle_attempts = 10
+    door_shuffle_attempts = 100
 
     for attempt in range(door_shuffle_attempts):
         try:
