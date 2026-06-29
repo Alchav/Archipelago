@@ -98,6 +98,8 @@ class Group:
                     self._changed = True
                     attr = new
             # resolve the path immediately when accessing it
+            if attr.exists():
+                attr.__class__.validate(attr.resolve())
             return attr.__class__(attr.resolve())
         return attr
 
@@ -645,6 +647,12 @@ class GeneratorOptions(Group):
     class Players(int):
         """amount of players, 0 to infer from player files"""
 
+    class AllowQuantity(Bool):
+        """
+        allow players to set an individual quantity for their yaml settings
+        with 'false' any amounts from the players will be ignored and set to 1
+        """
+
     class WeightsFilePath(str):
         """
         general weights file, within the stated player_files_path location
@@ -690,6 +698,7 @@ class GeneratorOptions(Group):
 
     player_files_path: PlayerFilesPath = PlayerFilesPath("Players")
     players: Players = Players(0)
+    allow_quantity: AllowQuantity | bool = False
     weights_file_path: WeightsFilePath = WeightsFilePath("weights.yaml")
     meta_file_path: MetaFilePath = MetaFilePath("meta.yaml")
     spoiler: Spoiler = Spoiler(3)
