@@ -1,4 +1,3 @@
-from .rom_addresses import rom_addresses
 from .regions import map_ids
 
 music_pointers = {
@@ -27,6 +26,16 @@ music_pointers = {
     "MUSIC_CINNABAR_MANSION": 60447,
     "MUSIC_SAFARI_ZONE": 58626
 }
+
+music_pointers_yellow = music_pointers | {
+    "MUSIC_DUNGEON2": 0xE31F,
+    "MUSIC_DUNGEON3": 0xE71F,
+    "MUSIC_DUNGEON1": 0xDF1F,
+    "MUSIC_POKEMON_TOWER": 0xEF1F,
+    "MUSIC_SILPH_CO": 0xF21F,
+    "MUSIC_CINNABAR_MANSION": 0xEB1F,
+}
+
 default_music = {
     "Pallet Town": "MUSIC_PALLET_TOWN",
     "Viridian City": "MUSIC_CITIES1",
@@ -252,27 +261,45 @@ default_music = {
     "Indigo Plateau Agatha's Room": "MUSIC_POKEMON_TOWER"
 }
 
+default_music_yellow = default_music | {
+    "Summer Beach House": "MUSIC_ROUTES3",
+}
+
+
+def get_music_pointers(world):
+    if getattr(world, "game", None) == "Pokemon Yellow":
+        return music_pointers_yellow
+    return music_pointers
+
+
+def get_default_music(world):
+    if getattr(world, "game", None) == "Pokemon Yellow":
+        return default_music_yellow
+    return default_music
+
 
 def randomize_map_music(world, write_bytes):
     if world.options.randomize_map_music == "vanilla":
         return
-    music_data = bytearray(0x1ee)
+    music_pointer_table = get_music_pointers(world)
+    default_music_table = get_default_music(world)
+    music_data = bytearray((max(map_ids[music_map] for music_map in default_music_table) + 1) * 2)
     if world.options.randomize_map_music == "shuffle":
-        shuffled_music = list(music_pointers.keys())
+        shuffled_music = list(music_pointer_table.keys())
         world.random.shuffle(shuffled_music)
-        music_mapping = {default: shuffled for default, shuffled in zip(music_pointers.keys(), shuffled_music)}
-        for music_map, default in default_music.items():
+        music_mapping = {default: shuffled for default, shuffled in zip(music_pointer_table.keys(), shuffled_music)}
+        for music_map, default in default_music_table.items():
             map_id = map_ids[music_map]
             music_data[map_id * 2:(map_id * 2) + 2] \
-                = music_pointers[music_mapping[default]].to_bytes(2, byteorder='big')
+                = music_pointer_table[music_mapping[default]].to_bytes(2, byteorder='big')
     elif world.options.randomize_map_music == "randomize":
-        for music_map in default_music.keys():
+        for music_map in default_music_table.keys():
             map_id = map_ids[music_map]
             music_data[map_id * 2:(map_id * 2) + 2] \
-                = world.random.choice(list(music_pointers.values())).to_bytes(2, byteorder='big')
+                = world.random.choice(list(music_pointer_table.values())).to_bytes(2, byteorder='big')
     elif world.options.randomize_map_music == "chaos":
-        write_bytes(rom_addresses["Option_Chaos_Music"], [0, 0])
-        write_bytes(rom_addresses["Chaos_Music_Quantity"], len(music_pointers))
-        for i, music_pointer in enumerate(music_pointers.values()):
+        write_bytes(world.rom_addresses["Option_Chaos_Music"], [0, 0])
+        write_bytes(world.rom_addresses["Chaos_Music_Quantity"], len(music_pointer_table))
+        for i, music_pointer in enumerate(music_pointer_table.values()):
             music_data[i * 2:(i * 2) + 2] = music_pointer.to_bytes(2, byteorder='big')
-    write_bytes(rom_addresses["Map_Songs"], music_data)
+    write_bytes(world.rom_addresses["Map_Songs"], music_data)

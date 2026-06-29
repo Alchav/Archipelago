@@ -1,14 +1,6 @@
 from dataclasses import dataclass
 from Options import (PerGameCommonOptions, Toggle, Choice, Range, NamedRange, FreeText, TextChoice, DeathLink,
-                     ItemsAccessibility, OptionList, Visibility)
-
-
-class GameVersion(Choice):
-    """Select Red or Blue version."""
-    display_name = "Game Version"
-    option_red = 1
-    option_blue = 0
-    default = "random"
+                     ItemsAccessibility, OptionSet, Visibility)
 
 
 class TrainerName(TextChoice):
@@ -61,6 +53,11 @@ class BattleStyle(Choice):
     default = 0
 
 
+class YellowBattleStyle(BattleStyle):
+    """Choose battle style, or allow it to be changed in the in-game Options menu."""
+    option_in_game = 2
+
+
 class TextSpeed(NamedRange):
     """Choose text speed. CANNOT be changed in-game!"""
     display_name = "Text Speed"
@@ -73,6 +70,20 @@ class TextSpeed(NamedRange):
         "medium": 3,
         "slow": 5
     }
+
+
+class YellowTextSpeed(TextSpeed):
+    """Choose the starting text speed. Can be changed in the in-game Options menu."""
+
+
+class StartingSound(Choice):
+    """Choose the starting sound output mode. Can be changed in the in-game Options menu."""
+    display_name = "Starting Sound"
+    option_mono = 0
+    option_earphone1 = 1
+    option_earphone2 = 2
+    option_earphone3 = 3
+    default = 0
 
 
 class EliteFourBadgesCondition(Range):
@@ -155,6 +166,15 @@ class Route3Condition(Choice):
     option_defeat_any_gym = 2
     option_boulder_badge = 3
     option_any_badge = 4
+    default = 1
+
+
+class VermilionCityJennyRequirement(Choice):
+    """Set whether Officer Jenny's Squirtle gift in Vermilion City requires the Thunder Badge item or defeating
+    Lt. Surge."""
+    display_name = "Vermilion City Jenny Requirement"
+    option_thunder_badge = 0
+    option_defeat_lt_surge = 1
     default = 1
 
 
@@ -310,6 +330,15 @@ class TrainerSanity(NamedRange):
     }
 
 
+class YellowTrainerSanity(TrainerSanity):
+    __doc__ = TrainerSanity.__doc__
+    range_end = 330
+    special_range_names = {
+        "disabled": 0,
+        "full": 330
+    }
+
+
 class RequirePokedex(Toggle):
     """Require the Pokedex to obtain items from Oak's Aides or from Dexsanity checks."""
     display_name = "Require Pokedex"
@@ -361,7 +390,10 @@ class DoorShuffle(Choice):
     Full: Exterior to interior entrances are shuffled, and interior to interior doors are shuffled, separately.
     Insanity: All doors in the game are shuffled.
     Decoupled: Doors may be decoupled from each other, so that leaving through an exit may not return you to the
-    door you entered from."""
+    door you entered from.
+    Mapped: Indoor rooms are randomly swapped with other indoor rooms that have the same number of exits. Rooms
+    connected by holes or non-mixed warp tiles are considered one room for this purpose.
+    Insanity Mapped: Like mapped, but indoor rooms and outdoor sections are shuffled in a mixed pool."""
     display_name = "Door Shuffle"
     option_off = 0
     option_simple = 1
@@ -369,14 +401,16 @@ class DoorShuffle(Choice):
     option_full = 3
     option_insanity = 4
     option_decoupled = 5
+    option_mapped = 6
+    option_insanity_mapped = 7
     default = 0
 
 
 class WarpTileShuffle(Choice):
     """Vanilla: The warp tiles in Silph Co and Sabrina's Gym are not changed.
     Shuffle: The warp tile destinations are shuffled among themselves.
-    Mixed: The warp tiles are mixed into the pool of available doors for Full, Insanity, and Decoupled. Same as Shuffle
-    for any other door shuffle option."""
+    Mixed: The warp tiles are mixed into the pool of available doors for Full, Mapped, Insanity,
+    Insanity Mapped, and Decoupled. Same as Shuffle for any other door shuffle option."""
     display_name = "Warp Tile Shuffle"
     default = 0
     option_vanilla = 0
@@ -915,7 +949,7 @@ class RandomizeMapMusic(Choice):
     option_chaos = 3
 
 
-class DebugOptions(OptionList):
+class DebugOptions(OptionSet):
     """Debug options.
     SelectInvFull: Hold select to have AddItemToInventory fail and report inventory full when holding SELECT
     (AddItemToInventory is not called when obtaining non-inventory items like AP_ITEM, badges, traps, etc.)
@@ -927,13 +961,12 @@ class DebugOptions(OptionList):
 
 class PokemonDeathLink(DeathLink):
     """When you black out, trigger a death link for all players with death link enabled, causing a blackout
-    for Pokemon Red and Blue players, and death in general for various other games."""
+    for Pokemon Red, Blue, and Yellow players, and death in general for various other games."""
 
 
 @dataclass
 class PokemonRBOptions(PerGameCommonOptions):
     accessibility: ItemsAccessibility
-    game_version: GameVersion
     trainer_name: TrainerName
     rival_name: RivalName
     battle_style: BattleStyle
@@ -950,6 +983,7 @@ class PokemonRBOptions(PerGameCommonOptions):
     cerulean_cave_badges_condition: CeruleanCaveBadgesCondition
     cerulean_cave_key_items_condition: CeruleanCaveKeyItemsCondition
     route_3_condition: Route3Condition
+    vermilion_city_jenny_requirement: VermilionCityJennyRequirement
     robbed_house_officer: RobbedHouseOfficer
     second_fossil_check_condition: SecondFossilCheckCondition
     fossil_check_item_types: FossilCheckItemTypes
@@ -1037,3 +1071,11 @@ class PokemonRBOptions(PerGameCommonOptions):
     randomize_map_music: RandomizeMapMusic
     death_link: PokemonDeathLink
     debug_options: DebugOptions
+
+
+@dataclass
+class PokemonYellowOptions(PokemonRBOptions):
+    battle_style: YellowBattleStyle
+    text_speed: YellowTextSpeed
+    starting_sound: StartingSound
+    trainersanity: YellowTrainerSanity

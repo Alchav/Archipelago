@@ -1,9 +1,16 @@
-from worlds.generic.Rules import add_item_rule, add_rule, location_item_name
+from BaseClasses import ItemClassification
+from worlds.generic.Rules import add_item_rule, add_rule, location_item_name, set_rule
 from .items import item_groups
 from . import logic
+from . import poke_data
 
 
 def set_rules(multiworld, world, player):
+    trade_rules = {
+        trade.location: (lambda state, source_location=trade.source_location:
+                         state.can_reach(source_location, "Location", player))
+        for trade in world.trade_data
+    }
 
     item_rules = {
         # Some items do special things when they are passed into the GiveItem function in the game, but
@@ -74,9 +81,11 @@ def set_rules(multiworld, world, player):
         "Seafoam Islands B4F - Legendary Pokemon": lambda state: logic.can_strength(state, world, player) and state.has("Seafoam Boss Boulders", player),
         "Vermilion Dock - Legendary Pokemon": lambda state: logic.can_surf(state, world, player),
         "Cerulean Cave B1F - Legendary Pokemon": lambda state: logic.can_surf(state, world, player),
+        "Cerulean Cave 1F - Southeast Item": lambda state: logic.can_surf(state, world, player),
 
-        "Saffron Fighting Dojo - Gift 1": lambda state: state.has("Defeat Sabrina", player),
-        "Saffron Fighting Dojo - Gift 2": lambda state: state.has("Defeat Sabrina", player),
+        "Saffron Fighting Dojo - Gift 1": lambda state: state.has_any(["Defeat Sabrina", "ut_glitch"], player),
+        "Saffron Fighting Dojo - Gift 2": lambda state: state.has_any(["Defeat Sabrina", "ut_glitch"], player),
+        "Vermilion City - Officer Jenny's Gift": lambda state: logic.vermilion_city_jenny(state, world, player),
 
         **{f"Pokemon Tower {floor}F - Wild Pokemon - {slot}": lambda state: state.has("Silph Scope", player) for floor in range(3, 8) for slot in range(1, 11)},
         "Pokemon Tower 6F - Restless Soul": lambda state: state.has("Silph Scope", player),  # just for level scaling
@@ -85,15 +94,7 @@ def set_rules(multiworld, world, player):
         "Silph Co 5F - Hostage": lambda state: logic.card_key(state, 5, player),
         "Silph Co 7F - Hostage": lambda state: logic.card_key(state, 7, player),
 
-        "Route 2 Trade House - Marcel Trade": lambda state: state.can_reach("Route 24 - Wild Pokemon - 6", "Location", player),
-        "Underground Path Route 5 - Spot Trade": lambda state: state.can_reach("Route 24 - Wild Pokemon - 6", "Location", player),
-        "Route 11 Gate 2F - Terry Trade": lambda state: state.can_reach("Safari Zone Center - Wild Pokemon - 5", "Location", player),
-        "Route 18 Gate 2F - Marc Trade": lambda state: state.can_reach("Route 23/Cerulean Cave Fishing - Super Rod Pokemon - 1", "Location", player),
-        "Cinnabar Lab Fossil Room - Sailor Trade": lambda state: state.can_reach("Pokemon Mansion 1F - Wild Pokemon - 3", "Location", player),
-        "Cinnabar Lab Trade Room - Crinkles Trade": lambda state: state.can_reach("Route 12 - Wild Pokemon - 4", "Location", player),
-        "Cinnabar Lab Trade Room - Doris Trade": lambda state: state.can_reach("Cerulean Cave 1F - Wild Pokemon - 9", "Location", player),
-        "Vermilion Trade House - Dux Trade": lambda state: state.can_reach("Route 3 - Wild Pokemon - 2", "Location", player),
-        "Cerulean Trade House - Lola Trade": lambda state: state.can_reach("Route 10/Celadon Fishing - Super Rod Pokemon - 1", "Location", player),
+        **trade_rules,
 
         "Route 22 - Rival 1": lambda state: state.has("Oak's Parcel", player),
         "Route 22 - Trainer Parties": lambda state: state.has("Oak's Parcel", player),
@@ -155,6 +156,7 @@ def set_rules(multiworld, world, player):
         "Silph Co 9F - Hidden Item Nurse Bed": lambda state: logic.can_get_hidden_items(state, world, player),
         "Saffron Copycat's House 2F - Hidden Item Desk": lambda state: logic.can_get_hidden_items(state, world, player),
         "Cerulean Cave 1F - Hidden Item Center Rocks": lambda state: logic.can_get_hidden_items(state, world, player),
+        "Cerulean Cave 2F - Hidden Item Southeast Rocks": lambda state: logic.can_get_hidden_items(state, world, player),
         "Cerulean Cave B1F - Hidden Item Northeast Rocks": lambda state: logic.can_get_hidden_items(state, world, player),
         "Power Plant - Hidden Item Central Dead End": lambda state: logic.can_get_hidden_items(state, world, player),
         "Power Plant - Hidden Item Before Zapdos": lambda state: logic.can_get_hidden_items(state, world, player),
@@ -272,6 +274,10 @@ def set_rules(multiworld, world, player):
         "Evolution - Dragonair": lambda state: state.has("Dratini", player) and logic.evolve_level(state, 30, player),
         "Evolution - Dragonite": lambda state: state.has("Dragonair", player) and logic.evolve_level(state, 55, player),
     }
+    if world.game == "Pokemon Yellow":
+        for region in ("Route 6", "Route 12", "Route 13", "Seafoam Islands B3F", "Seafoam Islands B4F"):
+            for slot in range(1, 11):
+                access_rules[f"{region} - Surf Pokemon - {slot}"] = lambda state: logic.can_surf(state, world, player)
     for loc in multiworld.get_locations(player):
         if loc.name in access_rules:
             add_rule(loc, access_rules[loc.name])
@@ -280,4 +286,34 @@ def set_rules(multiworld, world, player):
         if loc.name.startswith("Pokedex"):
             mon = loc.name.split(" - ")[1]
             add_rule(loc, lambda state, i=mon: (state.has("Pokedex", player) or not
-                     world.options.require_pokedex) and (state.has(i, player) or state.has(f"Static {i}", player)))
+                     world.options.require_pokedex) and logic.has_pokedex_mon(state, i, player))
+
+    # We aren't allowed to delete locations at this point.
+    # But some evolution events may not be reachable if certain Pokemon can't be obtained.
+    # Just make them reachable but change them to filler so they don't affect logic.
+    available_mons = {
+        location.item.name
+        for location in multiworld.get_locations(player)
+        if (location.item
+            and location.item.name in poke_data.pokemon_data
+            and not location.name.startswith("Evolution - "))
+    }
+    unresolved_evolutions = {
+        location.name: location
+        for location in multiworld.get_region("Evolution", player).locations
+    }
+
+    found_new_evolution = True
+    while found_new_evolution:
+        found_new_evolution = False
+        for location_name, location in list(unresolved_evolutions.items()):
+            mon = location.item.name
+            if poke_data.evolves_from[mon] in available_mons:
+                available_mons.add(mon)
+                unresolved_evolutions.pop(location_name)
+                found_new_evolution = True
+
+    for location in unresolved_evolutions.values():
+        location.item.classification = ItemClassification.filler
+        location.show_in_spoiler = False
+        set_rule(location, lambda state: True)

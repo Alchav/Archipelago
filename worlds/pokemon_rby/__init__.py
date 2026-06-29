@@ -12,41 +12,54 @@ from Fill import fill_restrictive, FillError, sweep_from_pool
 from worlds.AutoWorld import World, WebWorld
 from worlds.generic.Rules import add_item_rule
 from .items import item_table, item_groups
-from .locations import location_data, PokemonRBLocation, location_groups
+from .locations import (PokemonRedLocation, PokemonBlueLocation, PokemonYellowLocation, build_location_data,
+                        build_location_name_to_id, location_data_blue, location_data_red, location_data_yellow)
 from .regions import create_regions
-from .options import PokemonRBOptions
-from .rom_addresses import rom_addresses
+from .options import PokemonRBOptions, PokemonYellowOptions
+from .rom_addresses import rom_addresses_rb, rom_addresses_yellow
 from .text import encode_text
-from .rom import generate_output, PokemonRedProcedurePatch, PokemonBlueProcedurePatch
+from .rom import generate_output, PokemonRedProcedurePatch, PokemonBlueProcedurePatch, PokemonYellowProcedurePatch
 from .pokemon import process_pokemon_data, process_move_data, verify_hm_moves
 from .encounters import process_pokemon_locations, process_trainer_data
 from .rules import set_rules
 from .level_scaling import level_scaling
+from .trainer_data import trainer_data_rb, trainer_data_yellow
+from .trade_data import trade_data_blue, trade_data_red, trade_data_yellow
+from .warp_data import warp_data_rb, warp_data_yellow
 from . import logic
 from . import poke_data
 from . import client
 
 
-class PokemonSettings(settings.Group):
+class PokemonRedSettings(settings.Group):
     class RedRomFile(settings.UserFilePath):
-        """File names of the Pokemon Red and Blue roms"""
+        """File name of the Pokemon Red rom"""
         description = "Pokemon Red (UE) ROM File"
         copy_to = "Pokemon Red (UE) [S][!].gb"
         md5s = [PokemonRedProcedurePatch.hash]
+    red_rom_file: RedRomFile = RedRomFile(RedRomFile.copy_to)
 
+class PokemonBlueSettings(settings.Group):
     class BlueRomFile(settings.UserFilePath):
+        """File name of the Pokemon Blue rom"""
         description = "Pokemon Blue (UE) ROM File"
         copy_to = "Pokemon Blue (UE) [S][!].gb"
         md5s = [PokemonBlueProcedurePatch.hash]
-
-    red_rom_file: RedRomFile = RedRomFile(RedRomFile.copy_to)
     blue_rom_file: BlueRomFile = BlueRomFile(BlueRomFile.copy_to)
+
+class PokemonYellowSettings(settings.Group):
+    class YellowRomFile(settings.UserFilePath):
+        """File name of the Pokemon Yellow rom"""
+        description = "Pokemon Yellow (UE) ROM File"
+        copy_to = "Pokemon Yellow (U)[C][!].gbc"
+        md5s = [PokemonYellowProcedurePatch.hash]
+    yellow_rom_file: YellowRomFile = YellowRomFile(YellowRomFile.copy_to)
 
 
 class PokemonWebWorld(WebWorld):
     setup_en = Tutorial(
         "Multiworld Setup Guide",
-        "A guide to playing Pokémon Red and Blue with Archipelago.",
+        "A guide to playing Pokémon Red, Blue, and Yellow with Archipelago.",
         "English",
         "setup_en.md",
         "setup/en",
@@ -65,17 +78,15 @@ class PokemonWebWorld(WebWorld):
     tutorials = [setup_en, setup_es]
 
 
-class PokemonRedBlueWorld(World):
+
+class PokemonRBYWorld(World):
     """Pokémon Red and Pokémon Blue are the original monster-collecting turn-based RPGs.  Explore the Kanto region with
     your Pokémon, catch more than 150 unique creatures, earn badges from the region's Gym Leaders, and challenge the
     Elite Four to become the champion!"""
     # -MuffinJets#4559
-    game = "Pokemon Red and Blue"
 
     options_dataclass = PokemonRBOptions
     options: PokemonRBOptions
-
-    settings: typing.ClassVar[PokemonSettings]
 
     required_client_version = (0, 4, 2)
 
@@ -83,10 +94,17 @@ class PokemonRedBlueWorld(World):
     ut_can_gen_without_yaml = True
 
     item_name_to_id = {name: data.id for name, data in item_table.items()}
-    location_name_to_id = {location.name: location.address for location in location_data if location.type == "Item"
-                           and location.address is not None}
+    location_data = []
+    level_list = []
+    level_name_list = []
+    location_groups = {}
+    location_name_to_id = {}
+    trade_data = []
+    warp_data = {}
+    pokemon_data = poke_data.pokemon_data
+    pokemon_learnsets = poke_data.learnsets
     item_name_groups = item_groups
-    location_name_groups = location_groups
+    location_name_groups = {}
 
     glitches_item_name = "ut_glitch"
 
@@ -119,13 +137,17 @@ class PokemonRedBlueWorld(World):
         self.gen_seed = None
         self.region_seed = None
         self.rock_tunnel_seed = None
+        self.mapped_door_shuffle_spoiler = []
         self.ut = False
 
     @classmethod
     def stage_generate_early(cls, multiworld: MultiWorld):
+        if getattr(multiworld, "_pokemon_rby_stage_generate_early_claimed", False):
+            return
+        multiworld._pokemon_rby_stage_generate_early_claimed = True
 
         seed_groups = {}
-        pokemon_rb_worlds = multiworld.get_game_worlds("Pokemon Red and Blue")
+        pokemon_rb_worlds = list(get_rby_worlds(multiworld))
 
         for world in pokemon_rb_worlds:
             if not (world.options.type_chart_seed.value.isdigit() or world.options.type_chart_seed.value == "random"):
@@ -225,7 +247,8 @@ class PokemonRedBlueWorld(World):
             self.ut = True
             for key, value in self.multiworld.re_gen_passthrough[self.game].items():
                 if hasattr(self.options, key):
-                    getattr(self.options, key).value = value
+                    option = getattr(self.options, key)
+                    option.value = option.from_any(value).value
                 else:
                     setattr(self, key, value)
             seed = self.gen_seed
@@ -269,12 +292,9 @@ class PokemonRedBlueWorld(World):
         process_move_data(self)
         process_pokemon_data(self)
 
-        if hasattr(self.multiworld, "generation_is_fake"):
-            dex_count = 151
-            trainersanity_count = 317
-        else:
-            dex_count = self.options.dexsanity.value
-            trainersanity_count = self.options.trainersanity.value
+
+        dex_count = self.options.dexsanity.value
+        trainersanity_count = self.options.trainersanity.value
 
         self.dexsanity_table = [
             *(True for _ in range(dex_count)),
@@ -288,13 +308,147 @@ class PokemonRedBlueWorld(World):
         ]
         self.random.shuffle(self.trainersanity_table)
 
+    def create_regions(self):
+        if self.ut:
+            fly_map_code = self.free_fly_map
+            town_map_fly_map_code = self.town_map_fly_map
+        else:
+            if (self.options.old_man == "vanilla" or
+                    self.options.door_shuffle in ("full", "mapped", "insanity", "insanity_mapped")):
+                fly_map_codes = self.random.sample(range(2, 11), 2)
+            elif (self.options.door_shuffle == "simple" or
+                    self.options.route_3_condition == "boulder_badge" or
+                  (self.options.route_3_condition == "any_badge" and
+                   self.options.badgesanity)):
+                fly_map_codes = self.random.sample(range(3, 11), 2)
+
+            else:
+                fly_map_codes = self.random.sample([4, 6, 7, 8, 9, 10], 2)
+            if self.options.free_fly_location:
+                fly_map_code = fly_map_codes[0]
+            else:
+                fly_map_code = 0
+            if self.options.town_map_fly_location:
+                town_map_fly_map_code = fly_map_codes[1]
+            else:
+                town_map_fly_map_code = 0
+        fly_maps = ["Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Lavender Town",
+                    "Vermilion City", "Celadon City", "Fuchsia City", "Cinnabar Island", "Indigo Plateau",
+                    "Saffron City"]
+        self.fly_map = fly_maps[fly_map_code]
+        self.town_map_fly_map = fly_maps[town_map_fly_map_code]
+        self.fly_map_code = fly_map_code
+        self.town_map_fly_map_code = town_map_fly_map_code
+
+        create_regions(self)
+
     def create_items(self):
+        process_pokemon_locations(self)
         self.multiworld.itempool += self.item_pool
+
+    def set_rules(self):
+        set_rules(self.multiworld, self, self.player)
+        self.multiworld.completion_condition[self.player] = lambda state, player=self.player: state.has("Become Champion", player=player)
+
+    def generate_basic(self):
+        verify_hm_moves(self.multiworld, self, self.player)
+        # TrackerCore regeneration stops at generate_basic. When slot data is available, use the exact set of
+        # addressless Pokemon locations that remained progression after stage_post_fill in the real generated world.
+        if self.ut and hasattr(self, "progression_pokemon_locations"):
+            progression_locations = set(self.progression_pokemon_locations)
+            for location in self.multiworld.get_locations(self.player):
+                if (location.address is None and location.item
+                        and (location.item.name in poke_data.pokemon_data
+                             or location.item.name.startswith("Static "))):
+                    location.item.classification = (
+                        ItemClassification.progression
+                        if location.name in progression_locations
+                        else ItemClassification.useful
+                    )
+            return
+
+        # Before fill, approximate spoiler/playthrough pressure by downgrading duplicate wild mons within a region.
+        for region in self.multiworld.get_regions(self.player):
+            region_mons = set()
+            for location in region.locations:
+                if "Wild Pokemon" in location.name:
+                    if location.item.name in region_mons:
+                        location.item.classification = ItemClassification.useful
+                    else:
+                        region_mons.add(location.item.name)
+
+    def pre_fill(self) -> None:
+        process_trainer_data(self)
+        locs = [location.name for location in self.location_data if location.type != "Item"]
+        for location in self.multiworld.get_locations(self.player):
+            if location.name in locs:
+                location.show_in_spoiler = False
+
+        if self.options.old_man == "early_parcel":
+            self.multiworld.local_early_items[self.player]["Oak's Parcel"] = 1
+            if self.options.dexsanity:
+                for i, mon in enumerate(poke_data.pokemon_data):
+                    if self.dexsanity_table[i]:
+                        location = self.multiworld.get_location(f"Pokedex - {mon}", self.player)
+                        add_item_rule(location, lambda item: item.name != "Oak's Parcel" or item.player != self.player)
+
+        # Place local items in some locations to prevent save-scumming. Also Oak's PC to prevent an "AP Item" from
+        # entering the player's inventory.
+
+        locs = {self.multiworld.get_location("Fossil - Choice A", self.player),
+                self.multiworld.get_location("Fossil - Choice B", self.player)}
+
+        rule = None
+        if self.options.fossil_check_item_types == "key_items":
+            rule = lambda i: i.advancement
+        elif self.options.fossil_check_item_types == "unique_items":
+            rule = lambda i: i.name in item_groups["Unique"]
+        elif self.options.fossil_check_item_types == "no_key_items":
+            rule = lambda i: not i.advancement
+        if rule:
+            for loc in locs:
+                add_item_rule(loc, rule)
+
+        for mon in ([" ".join(self.multiworld.get_location(
+                f"Oak's Lab - Starter {i}", self.player).item.name.split(" ")[1:]) for i in range(1, 4)]
+                if self.game != "Pokemon Yellow" else []
+                + [" ".join(self.multiworld.get_location(
+                f"Saffron Fighting Dojo - Gift {i}", self.player).item.name.split(" ")[1:]) for i in range(1, 3)]
+                + ["Vaporeon", "Jolteon", "Flareon"]):
+            if self.dexsanity_table[poke_data.pokemon_dex[mon] - 1]:
+                loc = self.multiworld.get_location(f"Pokedex - {mon}", self.player)
+                if loc.item is None:
+                    locs.add(loc)
+
+        for loc in sorted(locs):
+            if loc.name in self.options.priority_locations.value:
+                add_item_rule(loc, lambda i: i.advancement)
+            add_item_rule(loc, lambda i: i.player == self.player
+                                         or (i.player in self.multiworld.groups
+                                             and self.player in self.multiworld.groups[i.player]["players"]))
+            if self.options.old_man == "early_parcel" and loc.name != "Player's House 2F - Player's PC":
+                add_item_rule(loc, lambda i: i.name != "Oak's Parcel")
+
+        self.local_locs = locs
+
+        all_state = self.multiworld.get_all_state(False, True, False)
+
+        reachable_mons = set()
+        for mon in poke_data.pokemon_data:
+            if logic.has_pokedex_mon(all_state, mon, self.player):
+                reachable_mons.add(mon)
+
+        self.options.elite_four_pokedex_condition.total = \
+            int((len(reachable_mons) / 100) * self.options.elite_four_pokedex_condition.value)
 
     @classmethod
     def stage_fill_hook(cls, multiworld, progitempool, usefulitempool, filleritempool, fill_locations):
+        if getattr(multiworld, "_pokemon_rby_stage_fill_hook_claimed", False):
+            return
+        multiworld._pokemon_rby_stage_fill_hook_claimed = True
+
         locs = []
-        for world in multiworld.get_game_worlds("Pokemon Red and Blue"):
+        for world in get_rby_worlds(multiworld):
             locs += world.local_locs
         for loc in sorted(locs):
             if loc.item:
@@ -327,6 +481,7 @@ class PokemonRedBlueWorld(World):
             progitempool += [item for item in unplaced_items if item.advancement]
             usefulitempool += [item for item in unplaced_items if item.useful]
             filleritempool += [item for item in unplaced_items if (not item.advancement) and (not item.useful)]
+
 
     def fill_hook(self, progitempool, usefulitempool, filleritempool, fill_locations):
         if not self.options.badgesanity:
@@ -404,141 +559,21 @@ class PokemonRedBlueWorld(World):
                 else:
                     raise Exception("Missing Gym Leader data")
 
-    def pre_fill(self) -> None:
-        process_trainer_data(self)
-        locs = [location.name for location in location_data if location.type != "Item"]
-        for location in self.multiworld.get_locations(self.player):
-            if location.name in locs:
-                location.show_in_spoiler = False
-        verify_hm_moves(self.multiworld, self, self.player)
-
-        # Delete evolution events for Pokémon that are not in logic in an all_state so that accessibility check does not
-        # fail.
-        all_state = self.multiworld.get_all_state(False, True, False)
-        evolutions_region = self.multiworld.get_region("Evolution", self.player)
-        for location in evolutions_region.locations.copy():
-            if not all_state.can_reach(location, player=self.player):
-                evolutions_region.locations.remove(location)
-
-        if self.options.old_man == "early_parcel":
-            self.multiworld.local_early_items[self.player]["Oak's Parcel"] = 1
-            if self.options.dexsanity:
-                for i, mon in enumerate(poke_data.pokemon_data):
-                    if self.dexsanity_table[i]:
-                        location = self.multiworld.get_location(f"Pokedex - {mon}", self.player)
-                        add_item_rule(location, lambda item: item.name != "Oak's Parcel" or item.player != self.player)
-
-        # Place local items in some locations to prevent save-scumming. Also Oak's PC to prevent an "AP Item" from
-        # entering the player's inventory.
-
-        locs = {self.multiworld.get_location("Fossil - Choice A", self.player),
-                self.multiworld.get_location("Fossil - Choice B", self.player)}
-
-        rule = None
-        if self.options.fossil_check_item_types == "key_items":
-            rule = lambda i: i.advancement
-        elif self.options.fossil_check_item_types == "unique_items":
-            rule = lambda i: i.name in item_groups["Unique"]
-        elif self.options.fossil_check_item_types == "no_key_items":
-            rule = lambda i: not i.advancement
-        if rule:
-            for loc in locs:
-                add_item_rule(loc, rule)
-
-        for mon in ([" ".join(self.multiworld.get_location(
-                f"Oak's Lab - Starter {i}", self.player).item.name.split(" ")[1:]) for i in range(1, 4)]
-                + [" ".join(self.multiworld.get_location(
-                f"Saffron Fighting Dojo - Gift {i}", self.player).item.name.split(" ")[1:]) for i in range(1, 3)]
-                + ["Vaporeon", "Jolteon", "Flareon"]):
-            if self.dexsanity_table[poke_data.pokemon_dex[mon] - 1]:
-                loc = self.multiworld.get_location(f"Pokedex - {mon}", self.player)
-                if loc.item is None:
-                    locs.add(loc)
-
-        for loc in sorted(locs):
-            if loc.name in self.options.priority_locations.value:
-                add_item_rule(loc, lambda i: i.advancement)
-            add_item_rule(loc, lambda i: i.player == self.player
-                                         or (i.player in self.multiworld.groups
-                                             and self.player in self.multiworld.groups[i.player]["players"]))
-            if self.options.old_man == "early_parcel" and loc.name != "Player's House 2F - Player's PC":
-                add_item_rule(loc, lambda i: i.name != "Oak's Parcel")
-
-        self.local_locs = locs
-
-        all_state = self.multiworld.get_all_state(False, True, False)
-
-        reachable_mons = set()
-        for mon in poke_data.pokemon_data:
-            if all_state.has(mon, self.player) or all_state.has(f"Static {mon}", self.player):
-                reachable_mons.add(mon)
-
-        # The large number of wild Pokemon can make sweeping for events time-consuming, and is especially bad in
-        # the spoiler playthrough calculation because it removes each advancement item one at a time to verify
-        # if the game is beatable without it. We go through each zone and flag any duplicates as useful.
-        # Especially with area 1-to-1 mapping / vanilla wild Pokémon, this should cut down significantly on wasted time.
-        for region in self.multiworld.get_regions(self.player):
-            region_mons = set()
-            for location in region.locations:
-                if "Wild Pokemon" in location.name:
-                    if location.item.name in region_mons:
-                        location.item.classification = ItemClassification.useful
-                    else:
-                        region_mons.add(location.item.name)
-
-        self.options.elite_four_pokedex_condition.total = \
-            int((len(reachable_mons) / 100) * self.options.elite_four_pokedex_condition.value)
-
-        if self.options.accessibility == "full":
-            balls = [self.create_item(ball) for ball in ["Poke Ball", "Great Ball", "Ultra Ball"]]
-            traps = [self.create_item(trap) for trap in item_groups["Traps"]]
-            locations = [location for location in self.multiworld.get_locations(self.player) if "Pokedex - " in
-                         location.name]
-            pokedex = self.multiworld.get_region("Pokedex", self.player)
-            remove_items = 0
-
-            for location in locations:
-                if not location.can_reach(all_state):
-                    pokedex.locations.remove(location)
-                    if location in self.local_locs:
-                        self.local_locs.remove(location)
-                    self.dexsanity_table[poke_data.pokemon_dex[location.name.split(" - ")[1]] - 1] = False
-                    remove_items += 1
-
-            for _ in range(remove_items):
-                balls.append(balls.pop(0))
-                for ball in balls:
-                    try:
-                        self.multiworld.itempool.remove(ball)
-                    except ValueError:
-                        continue
-                    else:
-                        break
-                else:
-                    self.random.shuffle(traps)
-                    for trap in traps:
-                        try:
-                            self.multiworld.itempool.remove(trap)
-                        except ValueError:
-                            continue
-                        else:
-                            break
-                    else:
-                        raise Exception("Failed to remove corresponding item while deleting unreachable Dexsanity location")
-
-    def get_pre_fill_items(self) -> typing.List["Item"]:
-        pool = [self.create_item(mon) for mon in poke_data.pokemon_data]
-        return pool
-
     @classmethod
     def stage_post_fill(cls, multiworld):
+        # The shared Pokemon R/B/Y stage methods are inherited by all three world classes,
+        # so this prevents stage_post_fill from running multiple times for the same multiworld.
+        if getattr(multiworld, "_pokemon_rby_stage_post_fill_claimed", False):
+            return
+        multiworld._pokemon_rby_stage_post_fill_claimed = True
+
         # Convert all but one of each instance of a wild Pokemon to useful classification.
         # This cuts down on time spent calculating the spoiler playthrough.
         found_mons = set()
         for sphere in multiworld.get_spheres():
             mon_locations_in_sphere = {}
             for location in sphere:
-                if (location.game == location.item.game == "Pokemon Red and Blue"
+                if (location.game == location.item.game and location.game in pokemon_rby_games
                         and (location.item.name in poke_data.pokemon_data.keys() or "Static " in location.item.name)
                         and location.item.advancement):
                     key = (location.player, location.item.name)
@@ -555,54 +590,19 @@ class PokemonRedBlueWorld(World):
                     for location in mon_locations[1:]:
                         location.item.classification = ItemClassification.useful
 
-    def create_regions(self):
-        if self.ut:
-            fly_map_code = self.free_fly_map
-            town_map_fly_map_code = self.town_map_fly_map
-        else:
-            if (self.options.old_man == "vanilla" or
-                    self.options.door_shuffle in ("full", "insanity")):
-                fly_map_codes = self.random.sample(range(2, 11), 2)
-            elif (self.options.door_shuffle == "simple" or
-                    self.options.route_3_condition == "boulder_badge" or
-                  (self.options.route_3_condition == "any_badge" and
-                   self.options.badgesanity)):
-                fly_map_codes = self.random.sample(range(3, 11), 2)
-
-            else:
-                fly_map_codes = self.random.sample([4, 6, 7, 8, 9, 10], 2)
-            if self.options.free_fly_location:
-                fly_map_code = fly_map_codes[0]
-            else:
-                fly_map_code = 0
-            if self.options.town_map_fly_location:
-                town_map_fly_map_code = fly_map_codes[1]
-            else:
-                town_map_fly_map_code = 0
-        fly_maps = ["Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Lavender Town",
-                    "Vermilion City", "Celadon City", "Fuchsia City", "Cinnabar Island", "Indigo Plateau",
-                    "Saffron City"]
-        self.fly_map = fly_maps[fly_map_code]
-        self.town_map_fly_map = fly_maps[town_map_fly_map_code]
-        self.fly_map_code = fly_map_code
-        self.town_map_fly_map_code = town_map_fly_map_code
-
-        create_regions(self)
-        process_pokemon_locations(self)
-
-    def set_rules(self):
-        set_rules(self.multiworld, self, self.player)
-        self.multiworld.completion_condition[self.player] = lambda state, player=self.player: state.has("Become Champion", player=player)
-
-    def create_item(self, name: str) -> Item:
-        return PokemonRBItem(name, self.player)
-
     @classmethod
     def stage_generate_output(cls, multiworld, output_directory):
+        if getattr(multiworld, "_pokemon_rby_level_scaling_claimed", False):
+            return
+        multiworld._pokemon_rby_level_scaling_claimed = True
         level_scaling(multiworld)
 
     def generate_output(self, output_directory: str):
         generate_output(self, output_directory)
+
+    def get_pre_fill_items(self) -> typing.List["Item"]:
+        pool = [self.create_item(mon) for mon in poke_data.pokemon_data]
+        return pool
 
     def modify_multidata(self, multidata: dict):
         rom_name = bytearray(f'AP{__version__.replace(".", "")[0:3]}_{self.player}_{self.multiworld.seed:11}\0',
@@ -624,12 +624,21 @@ class PokemonRedBlueWorld(World):
                 spoiler_handle.write(hm_move + " enabled by: " + (" " * 20)[:20 - len(hm_move)] + badge + "\n")
 
     def write_spoiler(self, spoiler_handle):
+        if self.mapped_door_shuffle_spoiler:
+            spoiler_handle.write(f"\n\nMapped door shuffle region groups "
+                                 f"({self.multiworld.player_name[self.player]}):\n\n")
+            for slot_group, replacement_group in self.mapped_door_shuffle_spoiler:
+                spoiler_handle.write(f"{slot_group}: {replacement_group}\n")
         if self.options.randomize_type_chart:
             spoiler_handle.write(f"\n\nType matchups ({self.multiworld.player_name[self.player]}):\n\n")
             for matchup in self.type_chart:
                 spoiler_handle.write(f"{matchup[0]} deals {matchup[2] * 10}% damage to {matchup[1]}\n")
         spoiler_handle.write(f"\n\nPokémon locations ({self.multiworld.player_name[self.player]}):\n\n")
-        pokemon_locs = [location.name for location in location_data if location.type not in ("Item", "Trainer Parties")]
+        pokemon_locs = [
+            location.name
+            for location in self.location_data
+            if location.type not in ("Item", "Trainer Parties")
+        ]
         for location in self.multiworld.get_locations(self.player):
             if location.name in pokemon_locs:
                 spoiler_handle.write(location.name + ": " + location.item.name + "\n")
@@ -669,7 +678,7 @@ class PokemonRedBlueWorld(World):
             hint_data[self.player] = {}
         if self.options.dexsanity:
             mon_locations = {mon: set() for mon in poke_data.pokemon_data.keys()}
-            for loc in location_data:
+            for loc in self.location_data:
                 if loc.type in ["Wild Encounter", "Static Pokemon", "Legendary Pokemon"]:
                     mon = self.multiworld.get_location(loc.name, self.player).item.name
                     if mon.startswith("Static "):
@@ -696,18 +705,26 @@ class PokemonRedBlueWorld(World):
 
     def fill_slot_data(self) -> dict:
         ret = self.options.as_dict(
+            "accessibility", "trainer_name", "rival_name", "badgesanity", "fossil_check_item_types",
             "second_fossil_check_condition", "require_item_finder", "randomize_hidden_items",
             "badges_needed_for_hm_moves", "oaks_aide_rt_2", "oaks_aide_rt_11", "oaks_aide_rt_15",
             "extra_key_items", "extra_strength_boulders", "tea", "old_man", "elite_four_badges_condition",
             "elite_four_key_items_condition", "elite_four_pokedex_condition", "victory_road_condition",
-            "route_22_gate_condition", "route_3_condition", "robbed_house_officer", "viridian_gym_condition",
-            "cerulean_cave_badges_condition", "cerulean_cave_key_items_condition", "randomize_pokedex", "trainersanity",
-            "death_link", "prizesanity", "poke_doll_skip", "bicycle_gate_skips", "stonesanity", "door_shuffle",
-            "warp_tile_shuffle", "dark_rock_tunnel_logic", "split_card_key", "all_elevators_locked", "require_pokedex",
-            "area_1_to_1_mapping", "blind_trainers", "game_version", "exp_all", "randomize_pokemon_locations",
+            "route_22_gate_condition", "route_3_condition", "vermilion_city_jenny_requirement",
+            "robbed_house_officer", "viridian_gym_condition", "cerulean_cave_badges_condition",
+            "cerulean_cave_key_items_condition", "randomize_pokedex", "dexsanity", "trainersanity", "death_link",
+            "prizesanity", "poke_doll_skip", "bicycle_gate_skips", "stonesanity", "door_shuffle", "warp_tile_shuffle",
+            "dark_rock_tunnel_logic", "split_card_key", "all_elevators_locked", "require_pokedex",
+            "area_1_to_1_mapping", "blind_trainers", "exp_all", "randomize_rock_tunnel", "randomize_pokemon_locations",
             "randomize_legendary_pokemon", "catch_em_all", "hm_same_type_compatibility", "hm_normal_type_compatibility",
-            "hm_other_type_compatibility", "inherit_tm_hm_compatibility", "randomize_move_types",
-            "randomize_pokemon_types", "secondary_type_chance"
+            "hm_other_type_compatibility", "tm_same_type_compatibility", "tm_normal_type_compatibility",
+            "tm_other_type_compatibility", "inherit_tm_hm_compatibility", "randomize_move_types", "move_balancing",
+            "no_trapping_moves", "randomize_tm_moves", "randomize_pokemon_stats", "randomize_pokemon_catch_rates",
+            "minimum_catch_rate", "randomize_pokemon_movesets", "confine_transform_to_ditto", "start_with_four_moves",
+            "randomize_pokemon_types", "secondary_type_chance", "randomize_type_chart", "normal_matchups",
+            "super_effective_matchups", "not_very_effective_matchups", "immunity_matchups", "type_chart_seed",
+            "randomize_trainer_parties", "trainer_legendaries", "randomize_pokemon_palettes", "trap_percentage",
+            "poison_trap_weight", "fire_trap_weight", "paralyze_trap_weight", "sleep_trap_weight", "ice_trap_weight"
         )
         ret |= {
             "free_fly_map": self.fly_map_code,
@@ -734,7 +751,15 @@ class PokemonRedBlueWorld(World):
             "v5_update": True,
             "gen_seed": self.gen_seed,
             "region_seed": self.region_seed,
-            "rock_tunnel_seed": self.rock_tunnel_seed
+            "rock_tunnel_seed": self.rock_tunnel_seed,
+            "progression_pokemon_locations": [
+                location.name
+                for location in self.multiworld.get_locations(self.player)
+                if (location.address is None and location.item
+                    and (location.item.name in poke_data.pokemon_data
+                         or location.item.name.startswith("Static "))
+                    and location.item.advancement)
+            ],
         }
         if self.options.type_chart_seed == "random" or self.options.type_chart_seed.value.isdigit():
             ret["type_chart"] = self.type_chart
@@ -745,14 +770,100 @@ class PokemonRedBlueWorld(World):
     def interpret_slot_data(slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
         return slot_data
 
-class PokemonRBItem(Item):
-    game = "Pokemon Red and Blue"
+
+class PokemonRedWorld(PokemonRBYWorld):
+    game = "Pokemon Red"
+
+    settings: typing.ClassVar[PokemonRedSettings]
+    item_name_to_id = PokemonRBYWorld.item_name_to_id
+    item_name_groups = PokemonRBYWorld.item_name_groups
+    patch = PokemonRedProcedurePatch
+    location = PokemonRedLocation
+    rom_addresses = rom_addresses_rb
+    trainer_data = trainer_data_rb
+    trade_data = trade_data_red
+    warp_data = warp_data_rb
+    location_data, level_list, level_name_list, location_groups = build_location_data(
+        location_data_red,
+        trainer_data=trainer_data,
+    )
+    location_name_to_id = build_location_name_to_id(location_data)
+    location_name_groups = location_groups
+
+    def create_item(self, name: str) -> Item:
+        return PokemonRedItem(name, self.player)
+
+class PokemonBlueWorld(PokemonRBYWorld):
+    game = "Pokemon Blue"
+
+    settings: typing.ClassVar[PokemonBlueSettings]
+    item_name_to_id = PokemonRBYWorld.item_name_to_id
+    item_name_groups = PokemonRBYWorld.item_name_groups
+    patch = PokemonBlueProcedurePatch
+    location = PokemonBlueLocation
+    rom_addresses = rom_addresses_rb
+    trainer_data = trainer_data_rb
+    trade_data = trade_data_blue
+    warp_data = warp_data_rb
+    location_data, level_list, level_name_list, location_groups = build_location_data(
+        location_data_blue,
+        trainer_data=trainer_data,
+    )
+    location_name_to_id = build_location_name_to_id(location_data)
+    location_name_groups = location_groups
+
+    def create_item(self, name: str) -> Item:
+        return PokemonBlueItem(name, self.player)
+
+class PokemonYellowWorld(PokemonRBYWorld):
+    game = "Pokemon Yellow"
+
+    options_dataclass = PokemonYellowOptions
+    options: PokemonYellowOptions
+    settings: typing.ClassVar[PokemonYellowSettings]
+    item_name_to_id = PokemonRBYWorld.item_name_to_id
+    item_name_groups = PokemonRBYWorld.item_name_groups
+    patch = PokemonYellowProcedurePatch
+    location = PokemonYellowLocation
+    rom_addresses = rom_addresses_yellow
+    trainer_data = trainer_data_yellow
+    trade_data = trade_data_yellow
+    warp_data = warp_data_yellow
+    pokemon_data = poke_data.pokemon_data_yellow
+    pokemon_learnsets = poke_data.learnsets_yellow
+    location_data, level_list, level_name_list, location_groups = build_location_data(
+        location_data_yellow,
+        trainer_data=trainer_data,
+    )
+    location_name_to_id = build_location_name_to_id(location_data)
+    location_name_groups = location_groups
+
+    def create_item(self, name: str) -> Item:
+        return PokemonYellowItem(name, self.player)
+
+
+class PokemonRBYItem(Item):
     type = None
 
     def __init__(self, name, player: int = None):
         item_data = item_table[name]
-        super(PokemonRBItem, self).__init__(
+        super(PokemonRBYItem, self).__init__(
             name,
             item_data.classification,
             item_data.id, player
         )
+
+class PokemonRedItem(PokemonRBYItem):
+    game = "Pokemon Red"
+
+class PokemonBlueItem(PokemonRBYItem):
+    game = "Pokemon Blue"
+
+class PokemonYellowItem(PokemonRBYItem):
+    game = "Pokemon Yellow"
+
+pokemon_rby_games = ("Pokemon Red", "Pokemon Blue", "Pokemon Yellow")
+
+def get_rby_worlds(multiworld: MultiWorld):
+    for game in pokemon_rby_games:
+        yield from multiworld.get_game_worlds(game)

@@ -1,33 +1,175 @@
 from copy import deepcopy
 from . import poke_data
-from .locations import location_data
 
-non_randomized_catch_em_all_candidate_slots = [
-    "Route 4 Pokemon Center - Pokemon For Sale",
-    "Underground Path Route 5 - Spot Trade",
-    "Route 11 Gate 2F - Terry Trade",
-    "Cinnabar Lab Fossil Room - Sailor Trade",
-    "Cinnabar Lab Trade Room - Crinkles Trade",
-    "Cinnabar Lab Trade Room - Doris Trade",
-    *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 3)]
-]
+
+def get_full_accessibility_evolution_roots():
+    return [pokemon for pokemon in poke_data.first_stage_pokemon
+            if pokemon in poke_data.evolves_to or pokemon == "Eevee"]
+
+
+def get_non_randomized_catch_em_all_candidate_slots(game):
+    if game in {"Pokemon Red", "Pokemon Blue"}:
+        return [
+            "Route 4 Pokemon Center - Pokemon For Sale",
+            "Underground Path Route 5 - Spot Trade",
+            "Route 11 Gate 2F - Terry Trade",
+            "Cinnabar Lab Fossil Room - Sailor Trade",
+            "Cinnabar Lab Trade Room - Crinkles Trade",
+            "Cinnabar Lab Trade Room - Doris Trade",
+            *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 3)],
+        ]
+    if game == "Pokemon Yellow":
+        return [
+            "Route 4 Pokemon Center - Pokemon For Sale",
+            "Route 11 Gate 2F - Gurio Trade",
+            "Cinnabar Lab Fossil Room - Sticky Trade",
+            "Route 18 Gate 2F - Spike Trade",
+            "Cinnabar Lab Trade Room - Buffy Trade",
+            "Cinnabar Lab Trade Room - Cezanne Trade",
+            "Underground Path Route 5 - Ricky Trade",
+            *[f"Celadon Prize Corner - Pokemon Prize - {i}" for i in range(1, 7)],
+        ]
+    return []
+
+
+def get_non_randomized_catch_em_all_wild_substitutions(game):
+    if game == "Pokemon Red":
+        return {
+            "Arbok": "Sandslash",
+            "Caterpie": "Weedle",
+            "Ekans": "Sandshrew",
+            "Electabuzz": "Raichu",
+            "Gloom": "Weepinbell",
+            "Golduck": "Slowbro",
+            "Grimer": "Koffing",
+            "Growlithe": "Vulpix",
+            "Horsea": "Krabby",
+            "Kakuna": "Metapod",
+            "Koffing": "Grimer",
+            "Krabby": "Horsea",
+            "Mankey": "Meowth",
+            "Metapod": "Kakuna",
+            "Muk": "Weezing",
+            "Nidoran F": "Nidoran M",
+            "Nidoran M": "Nidoran F",
+            "Nidorina": "Nidorino",
+            "Nidorino": "Nidorina",
+            "Oddish": "Bellsprout",
+            "Ponyta": "Magmar",
+            "Psyduck": "Slowpoke",
+            "Scyther": "Pinsir",
+            "Seadra": "Kingler",
+            "Shellder": "Staryu",
+            "Slowpoke": "Psyduck",
+            "Staryu": "Shellder",
+            "Weedle": "Caterpie",
+            "Weezing": "Muk",
+        }
+    if game == "Pokemon Blue":
+        return {
+            "Bellsprout": "Oddish",
+            "Caterpie": "Weedle",
+            "Grimer": "Koffing",
+            "Horsea": "Krabby",
+            "Kakuna": "Metapod",
+            "Koffing": "Grimer",
+            "Krabby": "Horsea",
+            "Magmar": "Ponyta",
+            "Meowth": "Mankey",
+            "Metapod": "Kakuna",
+            "Muk": "Weezing",
+            "Nidoran F": "Nidoran M",
+            "Nidoran M": "Nidoran F",
+            "Nidorina": "Nidorino",
+            "Nidorino": "Nidorina",
+            "Pinsir": "Scyther",
+            "Psyduck": "Slowpoke",
+            "Raichu": "Electabuzz",
+            "Sandshrew": "Ekans",
+            "Sandslash": "Arbok",
+            "Shellder": "Staryu",
+            "Slowbro": "Golduck",
+            "Slowpoke": "Psyduck",
+            "Staryu": "Shellder",
+            "Vulpix": "Growlithe",
+            "Weedle": "Caterpie",
+            "Weepinbell": "Gloom",
+            "Weezing": "Muk",
+        }
+    if game == "Pokemon Yellow":
+        return {
+            "Caterpie": "Weedle",
+            "Grimer": "Koffing",
+            "Magnemite": "Electabuzz",
+            "Ponyta": "Magmar",
+            "Rattata": "Meowth",
+            "Sandshrew": "Ekans",
+            "Slowbro": "Jynx",
+        }
+    return {}
+
+RIVAL_STARTER_LINE = {
+    "Bulbasaur", "Ivysaur", "Venusaur",
+    "Charmander", "Charmeleon", "Charizard",
+    "Squirtle", "Wartortle", "Blastoise",
+}
+YELLOW_RIVAL_EEVEE_LINE = {"Eevee", "Jolteon", "Flareon", "Vaporeon"}
+
+
+def ensure_non_randomized_accessibility(world, placed_mons, static_placed_mons, candidate_locations):
+    normal_required_mons = set()
+    static_allowed_mons = set()
+    if world.options.accessibility == "full":
+        normal_required_mons.update(get_full_accessibility_evolution_roots())
+        if getattr(world.options, "dexsanity", False):
+            static_allowed_mons.update(
+                pokemon for pokemon in poke_data.first_stage_pokemon
+                if world.dexsanity_table[poke_data.pokemon_dex[pokemon] - 1])
+
+    required_mons = normal_required_mons | static_allowed_mons
+    missing_mons = [pokemon for pokemon in sorted(normal_required_mons) if placed_mons[pokemon] == 0]
+    missing_mons.extend(
+        pokemon for pokemon in sorted(static_allowed_mons - normal_required_mons)
+        if placed_mons[pokemon] == 0 and static_placed_mons[pokemon] == 0)
+    if not missing_mons:
+        return
+
+    candidate_locations = candidate_locations.copy()
+    for mon in missing_mons:
+        for i, location in enumerate(candidate_locations):
+            current_mon = location.item.name
+            if placed_mons[current_mon] > 1 or current_mon not in required_mons:
+                placed_mons[current_mon] -= 1
+                location.item = world.create_item(mon)
+                location.item.location = location
+                placed_mons[mon] += 1
+                candidate_locations.pop(i)
+                break
+        else:
+            raise Exception(f"Failed to place required non-randomized Pokemon {mon}")
 
 
 def get_encounter_slots(world, types):
-    encounter_slots = deepcopy([location for location in location_data if location.type in types])
+    slots = deepcopy([location for location in world.location_data if location.type in types])
+    if "Wild Encounter" in types:
+        apply_non_randomized_catch_em_all_wild_substitutions(world, slots)
+    return slots
 
-    i = [True, False][world.options.game_version.value]
-    for location in encounter_slots:
-        if isinstance(location.original_item, list):
-            if world.options.catch_em_all and not world.options.randomize_pokemon_locations and location.name in (
-                    "Celadon Prize Corner - Pokemon Prize - 4", "Celadon Prize Corner - Pokemon Prize - 5"):
-                location.original_item = location.original_item[world.options.game_version.value]
-            else:
-                location.original_item = location.original_item[i]
-                if world.options.catch_em_all and not world.options.randomize_pokemon_locations:
-                    i = not i
 
-    return encounter_slots
+def apply_non_randomized_catch_em_all_wild_substitutions(world, encounter_slots):
+    if (world.options.randomize_pokemon_locations
+        or not (world.options.catch_em_all or world.options.accessibility == "full")):
+        return
+
+    substitutions = get_non_randomized_catch_em_all_wild_substitutions(world.game)
+    seen = {mon: 0 for mon in substitutions}
+    for slot in encounter_slots:
+        replacement = substitutions.get(slot.original_item)
+        if replacement is None:
+            continue
+        seen[slot.original_item] += 1
+        if seen[slot.original_item] % 2 == 0:
+            slot.original_item = replacement
 
 
 def get_base_stat_total(mon):
@@ -57,17 +199,28 @@ def randomize_pokemon(self, mon, mons_list, randomize_type, random):
     return mon
 
 
+def is_yellow_rival_party(world, party):
+    if getattr(world, "game", None) != "Pokemon Yellow":
+        return False
+    party_addresses = party["party_address"]
+    if not isinstance(party_addresses, list):
+        party_addresses = [party_addresses]
+    return any("_Rival" in address for address in party_addresses)
+
+
 def process_trainer_data(world):
     mons_list = [pokemon for pokemon in poke_data.pokemon_data.keys() if pokemon not in poke_data.legendary_pokemon
                  or world.options.trainer_legendaries.value]
     unevolved_mons = [pokemon for pokemon in poke_data.first_stage_pokemon if pokemon not in poke_data.legendary_pokemon
                       or world.options.randomize_legendary_pokemon.value == 3]
     evolved_mons = [mon for mon in mons_list if mon not in unevolved_mons]
-    rival_map = {
-        "Charmander": world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name[9:],  # strip the
-        "Squirtle": world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name[9:],  # 'Missable'
-        "Bulbasaur": world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name[9:],  # from the name
-    }
+    rival_map = {}
+    if getattr(world, "game", None) != "Pokemon Yellow":
+        rival_map = {
+            "Charmander": world.multiworld.get_location("Oak's Lab - Starter 1", world.player).item.name[12:],  # strip the
+            "Squirtle": world.multiworld.get_location("Oak's Lab - Starter 2", world.player).item.name[12:],  # 'Uncatchable'
+            "Bulbasaur": world.multiworld.get_location("Oak's Lab - Starter 3", world.player).item.name[12:],  # from the name
+        }
 
     def add_evolutions():
         for a, b in rival_map.copy().items():
@@ -87,12 +240,14 @@ def process_trainer_data(world):
     for parties in parties_objs:
         parties_data = parties.party_data
         for party in parties_data:
+            yellow_rival_party = is_yellow_rival_party(world, party)
             if party["party"] and isinstance(party["party"][0], list):
                 # only for Rival parties
                 for rival_party in party["party"]:
                     for i, mon in enumerate(rival_party):
-                        if mon in ("Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
-                                   "Squirtle", "Wartortle", "Blastoise"):
+                        if yellow_rival_party and mon in YELLOW_RIVAL_EEVEE_LINE:
+                            continue
+                        if mon in RIVAL_STARTER_LINE and rival_map:
                             if world.options.randomize_pokemon_locations:
                                 rival_party[i] = rival_map[mon]
                         elif world.options.randomize_trainer_parties:
@@ -109,6 +264,8 @@ def process_trainer_data(world):
             else:
                 if world.options.randomize_trainer_parties:
                     for i, mon in enumerate(party["party"]):
+                        if yellow_rival_party and mon in YELLOW_RIVAL_EEVEE_LINE:
+                            continue
                         party["party"][i] = randomize_pokemon(world, mon, mons_list,
                                                               world.options.randomize_trainer_parties.value,
                                                               world.random)
@@ -117,7 +274,7 @@ def process_trainer_data(world):
 def process_pokemon_locations(self):
     starter_slots = get_encounter_slots(self, ["Starter Pokemon"])
     legendary_slots = get_encounter_slots(self, ["Legendary Pokemon"])
-    static_slots = get_encounter_slots(self, ["Static Pokemon", "Static Repeatable Pokemon", "Missable Pokemon"])
+    static_slots = get_encounter_slots(self, ["Static Pokemon", "Static Repeatable Pokemon", "Uncatchable Pokemon"])
     legendary_mons = deepcopy([slot.original_item for slot in legendary_slots])
 
     static_placed_mons = {pokemon: 0 for pokemon in poke_data.pokemon_data.keys()}
@@ -129,6 +286,7 @@ def process_pokemon_locations(self):
         for slot in legendary_slots:
             location = self.multiworld.get_location(slot.name, self.player)
             location.place_locked_item(self.create_item("Static " + slot.original_item))
+            static_placed_mons[slot.original_item] += 1
     elif self.options.randomize_legendary_pokemon == "shuffle":
         self.random.shuffle(legendary_mons)
         for slot in legendary_slots:
@@ -157,12 +315,22 @@ def process_pokemon_locations(self):
     elif self.options.randomize_legendary_pokemon == "any":
         static_slots = static_slots + legendary_slots
 
-    non_randomized_catch_em_all_mons = ["Bulbasaur", "Charmander", "Squirtle", "Eevee"]
-    non_randomized_catch_em_all_slots = []
-    if self.options.catch_em_all and not self.options.randomize_pokemon_locations:
-        non_randomized_catch_em_all_slots = self.random.sample(
-            [mon for mon in non_randomized_catch_em_all_candidate_slots
-             if mon in [slot.name for slot in static_slots]], 4)
+    non_randomized_catch_em_all_mons = []
+    non_randomized_catch_em_all_slots = {}
+    full_accessibility_candidate_names = set()
+    full_accessibility_candidate_locations = []
+    if not self.options.randomize_pokemon_locations:
+        full_accessibility_candidate_names = set(get_non_randomized_catch_em_all_candidate_slots(self.game))
+        if self.options.catch_em_all:
+            non_randomized_catch_em_all_mons.extend(["Bulbasaur", "Charmander", "Squirtle", "Eevee"])
+        non_randomized_catch_em_all_mons = list(dict.fromkeys(non_randomized_catch_em_all_mons))
+    if non_randomized_catch_em_all_mons:
+        candidate_slots = get_non_randomized_catch_em_all_candidate_slots(self.game)
+        non_randomized_catch_em_all_slots = dict(zip(
+            self.random.sample([name for name in candidate_slots if name in [slot.name for slot in static_slots]],
+                               len(non_randomized_catch_em_all_mons)),
+            non_randomized_catch_em_all_mons,
+        ))
 
     for slot in static_slots:
         location = self.multiworld.get_location(slot.name, self.player)
@@ -170,13 +338,19 @@ def process_pokemon_locations(self):
         prepend = ""
         if slot.type in ("Legendary Pokemon", "Static Pokemon"):
             prepend = "Static "
-        elif slot.type == "Missable Pokemon":
-            prepend = "Missable "
+        elif slot.type == "Uncatchable Pokemon":
+            prepend = "Uncatchable "
         if not randomize_type:
             if slot.name in non_randomized_catch_em_all_slots:
-                location.place_locked_item(self.create_item(prepend + non_randomized_catch_em_all_mons.pop()))
+                location.place_locked_item(self.create_item(prepend + non_randomized_catch_em_all_slots.pop(slot.name)))
             else:
                 location.place_locked_item(self.create_item(prepend + slot.original_item))
+            if slot.type == "Static Repeatable Pokemon":
+                placed_mons[location.item.name] += 1
+                if slot.name in full_accessibility_candidate_names:
+                    full_accessibility_candidate_locations.append(location)
+            elif slot.type in ("Legendary Pokemon", "Static Pokemon"):
+                static_placed_mons[location.item.name.replace("Static ", "")] += 1
         else:
             mon = self.create_item(prepend +
                                    randomize_pokemon(self, slot.original_item, mons_list, randomize_type,
@@ -184,15 +358,15 @@ def process_pokemon_locations(self):
             location.place_locked_item(mon)
             if slot.type in ("Legendary Pokemon", "Static Pokemon"):
                 static_placed_mons[mon.name.replace("Static ", "")] += 1
-            elif slot.type == "Repeatable Static Pokemon":
+            elif slot.type == "Static Repeatable Pokemon":
                 placed_mons[mon.name] += 1
-    assert not (non_randomized_catch_em_all_mons and non_randomized_catch_em_all_slots)
+    assert not non_randomized_catch_em_all_slots
 
     chosen_starter_mons = set()
     for slot in starter_slots:
         location = self.multiworld.get_location(slot.name, self.player)
         randomize_type = self.options.randomize_pokemon_locations.value
-        slot_type = "Missable"
+        slot_type = "Uncatchable"
         if not randomize_type:
             location.place_locked_item(self.create_item(slot_type + " " + slot.original_item))
         else:
@@ -239,7 +413,7 @@ def process_pokemon_locations(self):
             #
             while ("Pokemon Tower 6F" in slot.name and
                    self.multiworld.get_location("Pokemon Tower 6F - Restless Soul", self.player).item.name
-                   == f"Missable {mon}"):
+                   == f"Uncatchable {mon}"):
                 # If you're fighting the Pokémon defined as the Restless Soul, and you're on the 6th floor of the tower,
                 # the battle is treates as the Restless Soul battle and you cannot catch it. So, prevent any wild mons
                 # from being the same species as the Restless Soul.
@@ -256,10 +430,13 @@ def process_pokemon_locations(self):
         mons_to_add = []
         remaining_pokemon = [pokemon for pokemon in poke_data.pokemon_data.keys() if placed_mons[pokemon] == 0 and
                              (pokemon not in poke_data.legendary_pokemon or self.options.randomize_legendary_pokemon.value == 3)]
-        if self.options.catch_em_all == "first_stage":
+        full_accessibility_first_stage = (self.options.accessibility == "full"
+                                          and self.options.catch_em_all != "all_pokemon")
+        if self.options.catch_em_all == "first_stage" or full_accessibility_first_stage:
             mons_to_add = [pokemon for pokemon in poke_data.first_stage_pokemon if placed_mons[pokemon] == 0 and
                            (pokemon not in poke_data.legendary_pokemon or self.options.randomize_legendary_pokemon.value == 3)]
-            mons_to_add += [pokemon for pokemon in evolutions_needed if placed_mons[pokemon] == 0]
+            if self.options.catch_em_all == "first_stage":
+                mons_to_add += [pokemon for pokemon in evolutions_needed if placed_mons[pokemon] == 0]
         elif self.options.catch_em_all == "all_pokemon":
             mons_to_add = remaining_pokemon.copy()
         logic_needed_mons = max(self.options.oaks_aide_rt_2.value,
@@ -291,15 +468,17 @@ def process_pokemon_locations(self):
                             if (not l.name.startswith(zone)) and
                                self.multiworld.get_location(l.name, self.player).item.name == location.item.name]:
                         continue
-                if self.options.catch_em_all == "first_stage" and self.options.area_1_to_1_mapping:
+                if (self.options.catch_em_all == "first_stage" or full_accessibility_first_stage) and self.options.area_1_to_1_mapping:
                     if not [self.multiworld.get_location(l.name, self.player) for l in encounter_slots_master
                             if (not l.name.startswith(zone)) and
                                self.multiworld.get_location(l.name, self.player).item.name == location.item.name and l.name
                             not in poke_data.evolves_from]:
                         continue
 
-                if placed_mons[location.item.name] < 2 and (location.item.name in poke_data.first_stage_pokemon
-                                                            or self.options.catch_em_all):
+                if placed_mons[location.item.name] < 2 and (
+                        (location.item.name in poke_data.first_stage_pokemon
+                         and (self.options.catch_em_all == "first_stage" or full_accessibility_first_stage))
+                        or self.options.catch_em_all == "all_pokemon"):
                     continue
 
                 if self.options.area_1_to_1_mapping:
@@ -324,3 +503,5 @@ def process_pokemon_locations(self):
             location.locked = True
             location.item.location = location
             placed_mons[location.item.name] += 1
+        ensure_non_randomized_accessibility(
+            self, placed_mons, static_placed_mons, full_accessibility_candidate_locations)

@@ -6,35 +6,55 @@ from NetUtils import ClientStatus
 from worlds._bizhawk.client import BizHawkClient
 from worlds._bizhawk import read, write, guarded_write
 
-from .locations import location_data
+from .locations import (
+    Missable,
+    build_location_data,
+    build_location_name_to_id,
+    location_data_blue,
+    location_data_red,
+    location_data_yellow,
+    LocationData
+)
+from .rom_addresses import (
+
+    wram_addresses_rb,
+    wram_addresses_yellow,
+)
 
 logger = logging.getLogger("Client")
 
 BANK_EXCHANGE_RATE = 50000000
 
-DATA_LOCATIONS = {
-    "ItemIndex": (0x1A6E, 0x02),
-    "Deathlink": (0x00FD, 0x01),
-    "APItem": (0x00FF, 0x01),
-    "EventFlag": (0x1735, 0x140),
-    "Missable": (0x161A, 0x20),
-    "Hidden": (0x16DE, 0x0E),
-    "Rod": (0x1716, 0x01),
-    "DexSanityFlag": (0x1A71, 19),
-    "GameStatus": (0x1A84, 0x01),
-    "Money": (0x141F, 3),
-    "CurrentMap": (0x1436, 1),
-    "ResetCheck": (0x0100, 4),
+GAME_NAMES_BY_ROM_HEADER = {
+    "POKEMON RED\00\00\00": "Pokemon Red",
+    "POKEMON BLUE\00\00": "Pokemon Blue",
+    "POKEMON YELLOW": "Pokemon Yellow",
+}
+SUPPORTED_GAMES = set(GAME_NAMES_BY_ROM_HEADER.values())
+
+DATA_LOCATION_LENGTHS = {
+    "ItemIndex": 0x02,
+    "Deathlink": 0x01,
+    "APItem": 0x01,
+    "EventFlag": 0x140,
+    "Missable": 0x20,
+    "Hidden": 0x0E,
+    "Rod": 0x01,
+    "DexSanityFlag": 19,
+    "GameStatus": 0x01,
+    "Money": 3,
+    "CurrentMap": 1,
     # First and second Vermilion Gym trash can selection. Second is not used, so should always be 0.
     # First should never be above 0x0F. This is just before Event Flags.
-    "CrashCheck1": (0x1731, 2),
+    "CrashCheck1": 2,
     # Unused, should always be 0. This is just before Missables flags.
-    "CrashCheck2": (0x1617, 1),
+    "CrashCheck2": 1,
     # Progressive keys, should never be above 10. Just before Dexsanity flags.
-    "CrashCheck3": (0x1A70, 1),
+    "CrashCheck3": 1,
     # Route 18 Gate script value. Should never be above 3. Just before Hidden items flags.
-    "CrashCheck4": (0x16DD, 1),
+    "CrashCheck4": 1,
 }
+RESET_CHECK_LOCATION = (0x0100, 4, "ROM")
 
 TRACKER_EVENT_FLAGS = [
     0x77, # EVENT_BEAT_BROCK
@@ -56,26 +76,57 @@ TRACKER_EVENT_FLAGS = [
 
 assert len(TRACKER_EVENT_FLAGS) <= 32
 
-location_map = {"Rod": {}, "EventFlag": {}, "Missable": {}, "Hidden": {}, "list": {}, "DexSanityFlag": {}}
-location_bytes_bits = {}
-for location in location_data:
-    if location.ram_address is not None:
-        if type(location.ram_address) == list:
-            location_map[type(location.ram_address).__name__][(location.ram_address[0].flag, location.ram_address[1].flag)] = location.address
-            location_bytes_bits[location.address] = [{'byte': location.ram_address[0].byte, 'bit': location.ram_address[0].bit},
-                                                     {'byte': location.ram_address[1].byte, 'bit': location.ram_address[1].bit}]
-        else:
-            location_map[type(location.ram_address).__name__][location.ram_address.flag] = location.address
-            location_bytes_bits[location.address] = {'byte': location.ram_address.byte, 'bit': location.ram_address.bit}
+def build_client_location_tables(source_location_data, game):
+    location_data, _, _, _ = build_location_data(source_location_data, trainer_data={})
+    location_map = {"Rod": {}, "EventFlag": {}, "Missable": {}, "Hidden": {}, "list": {}, "DexSanityFlag": {}}
+    location_bytes_bits = {}
+    location: LocationData
+    for location in location_data:
+        if location.ram_address is not None:
+            if type(location.ram_address) is list:
+                location_map[type(location.ram_address).__name__][
+                    (location.ram_address[0].flag[game], location.ram_address[1].flag[game])
+                ] = location.address
+                location_bytes_bits[location.address] = [
+                    {"byte": location.ram_address[0].byte[game], "bit": location.ram_address[0].bit[game]},
+                    {"byte": location.ram_address[1].byte[game], "bit": location.ram_address[1].bit[game]},
+                ]
+            else:
+                location_map[type(location.ram_address).__name__][location.ram_address.flag[game]] = location.address
+                location_bytes_bits[location.address] = {
+                    "byte": location.ram_address.byte[game],
+                    "bit": location.ram_address.bit[game],
+                }
+    return location_map, location_bytes_bits, build_location_name_to_id(location_data)
 
-location_name_to_id = {location.name: location.address for location in location_data if location.type == "Item"
-                       and location.address is not None}
+
+LOCATION_TABLES = {
+    "Pokemon Red": build_client_location_tables(location_data_red, "RB"),
+    "Pokemon Blue": build_client_location_tables(location_data_blue, "RB"),
+    "Pokemon Yellow": build_client_location_tables(location_data_yellow, "Y"),
+}
 
 
-class PokemonRBClient(BizHawkClient):
-    system = ("GB", "SGB")
-    patch_suffix = (".apred", ".apblue")
-    game = "Pokemon Red and Blue"
+def build_client_data_locations(wram_addresses):
+    data_locations = {
+        name: (wram_addresses[name], length, "WRAM")
+        for name, length in DATA_LOCATION_LENGTHS.items()
+    }
+    data_locations["ResetCheck"] = RESET_CHECK_LOCATION
+    return data_locations
+
+
+WRAM_TABLES = {
+    "Pokemon Red": build_client_data_locations(wram_addresses_rb),
+    "Pokemon Blue": build_client_data_locations(wram_addresses_rb),
+    "Pokemon Yellow": build_client_data_locations(wram_addresses_yellow),
+}
+
+
+class PokemonRBYClient(BizHawkClient):
+    system = ("GB", "GBC", "SGB")
+    patch_suffix = (".apred", ".apblue", ".apyellow")
+    game = "Pokemon RBY"
 
     def __init__(self):
         super().__init__()
@@ -88,12 +139,18 @@ class PokemonRBClient(BizHawkClient):
         self.game_state = False
         self.last_death_link = 0
         self.current_map = 0
+        self.ap_game = None
+        self.location_map = {"Rod": {}, "EventFlag": {}, "Missable": {}, "Hidden": {}, "list": {}, "DexSanityFlag": {}}
+        self.location_bytes_bits = {}
+        self.location_name_to_id = {}
+        self.data_locations = {"ResetCheck": RESET_CHECK_LOCATION}
 
     async def validate_rom(self, ctx):
-        game_name = await read(ctx.bizhawk_ctx, [(0x134, 12, "ROM")])
+        game_name = await read(ctx.bizhawk_ctx, [(0x134, 14, "ROM")])
         game_name = game_name[0].decode("ascii")
-        if game_name in ("POKEMON RED\00", "POKEMON BLUE"):
-            ctx.game = self.game
+        ap_game = GAME_NAMES_BY_ROM_HEADER.get(game_name)
+        if ap_game:
+            ctx.game = ap_game
             ctx.items_handling = 0b001
             ctx.command_processor.commands["bank"] = cmd_bank
             seed_name = await read(ctx.bizhawk_ctx, [(0xFFDB, 21, "ROM")])
@@ -102,6 +159,13 @@ class PokemonRBClient(BizHawkClient):
             self.banking_command = None
             self.locations_array = None
             self.disconnect_pending = False
+            self.game_state = False
+            self.auto_hints.clear()
+            self.tracker_bitfield = 0
+            self.current_map = 0
+            self.ap_game = ap_game
+            self.location_map, self.location_bytes_bits, self.location_name_to_id = LOCATION_TABLES[ap_game]
+            self.data_locations = WRAM_TABLES[ap_game]
             return True
         return False
 
@@ -119,9 +183,14 @@ class PokemonRBClient(BizHawkClient):
         if not ctx.server or not ctx.server.socket.open or ctx.server.socket.closed:
             return
 
-        data = await read(ctx.bizhawk_ctx, [(loc_data[0], loc_data[1], "WRAM")
-                                            for loc_data in DATA_LOCATIONS.values()])
-        data = {data_set_name: data_name for data_set_name, data_name in zip(DATA_LOCATIONS.keys(), data)}
+        data = await read(
+            ctx.bizhawk_ctx,
+            [(address, length, domain) for address, length, domain in self.data_locations.values()],
+        )
+        data = {
+            data_set_name: data_name
+            for data_set_name, data_name in zip(self.data_locations.keys(), data)
+        }
 
         if self.set_deathlink:
             self.set_deathlink = False
@@ -141,7 +210,7 @@ class PokemonRBClient(BizHawkClient):
               or data["CrashCheck3"][0] > 10
               or data["CrashCheck4"][0] > 3):
             # Should mean game crashed
-            logger.warning("Pokémon Red/Blue game may have crashed. Disconnecting from server.")
+            logger.warning("%s may have crashed. Disconnecting from server.", self.ap_game or "Pokemon RBY")
             self.game_state = False
             await ctx.disconnect()
             return
@@ -155,22 +224,22 @@ class PokemonRBClient(BizHawkClient):
                 item_code = ctx.items_received[item_index].item
                 if item_code > 255:
                     item_code -= 256
-                await write(ctx.bizhawk_ctx, [(DATA_LOCATIONS["APItem"][0],
-                                               [item_code], "WRAM")])
+                await write(ctx.bizhawk_ctx, [(self.data_locations["APItem"][0],
+                                               [item_code], self.data_locations["APItem"][2])])
 
         # LOCATION CHECKS
 
         locations = set()
 
-        for flag_type, loc_map in location_map.items():
+        for flag_type, loc_map in self.location_map.items():
             for flag, loc_id in loc_map.items():
                 if flag_type == "list":
-                    if (data["EventFlag"][location_bytes_bits[loc_id][0]['byte']] & 1 <<
-                            location_bytes_bits[loc_id][0]['bit']
-                            and data["Missable"][location_bytes_bits[loc_id][1]['byte']] & 1 <<
-                            location_bytes_bits[loc_id][1]['bit']):
+                    if (data["EventFlag"][self.location_bytes_bits[loc_id][0]["byte"]] & 1 <<
+                            self.location_bytes_bits[loc_id][0]["bit"]
+                            and data["Missable"][self.location_bytes_bits[loc_id][1]["byte"]] & 1 <<
+                            self.location_bytes_bits[loc_id][1]["bit"]):
                         locations.add(loc_id)
-                elif data[flag_type][location_bytes_bits[loc_id]['byte']] & 1 << location_bytes_bits[loc_id]['bit']:
+                elif data[flag_type][self.location_bytes_bits[loc_id]["byte"]] & 1 << self.location_bytes_bits[loc_id]["bit"]:
                     locations.add(loc_id)
 
         if locations != self.locations_array:
@@ -192,18 +261,18 @@ class PokemonRBClient(BizHawkClient):
         if data["EventFlag"][281] & 1:
             hints += ["Celadon Prize Corner - Item Prize 1", "Celadon Prize Corner - Item Prize 2",
                       "Celadon Prize Corner - Item Prize 3"]
-        if (location_name_to_id["Fossil - Choice A"] in ctx.checked_locations and location_name_to_id[
-            "Fossil - Choice B"]
-                not in ctx.checked_locations):
+        fossil_choice_a = self.location_name_to_id.get("Fossil - Choice A")
+        fossil_choice_b = self.location_name_to_id.get("Fossil - Choice B")
+        if fossil_choice_a in ctx.checked_locations and fossil_choice_b not in ctx.checked_locations:
             hints.append("Fossil - Choice B")
-        elif (location_name_to_id["Fossil - Choice B"] in ctx.checked_locations and location_name_to_id[
-            "Fossil - Choice A"]
-              not in ctx.checked_locations):
+        elif fossil_choice_b in ctx.checked_locations and fossil_choice_a not in ctx.checked_locations:
             hints.append("Fossil - Choice A")
         hints = [
-            location_name_to_id[loc] for loc in hints if location_name_to_id[loc] not in self.auto_hints and
-                                                         location_name_to_id[loc] in ctx.missing_locations and
-                                                         location_name_to_id[loc] not in ctx.locations_checked
+            loc_id for loc in hints
+            if (loc_id := self.location_name_to_id.get(loc)) is not None
+            and loc_id not in self.auto_hints
+            and loc_id in ctx.missing_locations
+            and loc_id not in ctx.locations_checked
         ]
         if hints:
             await ctx.send_msgs([{"cmd": "LocationScouts", "locations": hints, "create_as_hint": 2}])
@@ -215,11 +284,11 @@ class PokemonRBClient(BizHawkClient):
             if data["Deathlink"][0] == 3:
                 await ctx.send_death(ctx.player_names[ctx.slot] + " is out of usable Pokémon! "
                                      + ctx.player_names[ctx.slot] + " blacked out!")
-                await write(ctx.bizhawk_ctx, [(DATA_LOCATIONS["Deathlink"][0], [0], "WRAM")])
+                await write(ctx.bizhawk_ctx, [(self.data_locations["Deathlink"][0], [0], self.data_locations["Deathlink"][2])])
                 self.last_death_link = ctx.last_death_link
             elif ctx.last_death_link > self.last_death_link:
                 self.last_death_link = ctx.last_death_link
-                await write(ctx.bizhawk_ctx, [(DATA_LOCATIONS["Deathlink"][0], [1], "WRAM")])
+                await write(ctx.bizhawk_ctx, [(self.data_locations["Deathlink"][0], [1], self.data_locations["Deathlink"][2])])
 
         # BANK
 
@@ -236,8 +305,12 @@ class PokemonRBClient(BizHawkClient):
                     self.banking_command = 999999 - money
                 money = str(money - self.banking_command).zfill(6)
                 money = [int(money[:2], 16), int(money[2:4], 16), int(money[4:], 16)]
-                money_written = await guarded_write(ctx.bizhawk_ctx, [(0x141F, money, "WRAM")],
-                                                    [(0x141F, original_money, "WRAM")])
+                money_address, _, money_domain = self.data_locations["Money"]
+                money_written = await guarded_write(
+                    ctx.bizhawk_ctx,
+                    [(money_address, money, money_domain)],
+                    [(money_address, original_money, money_domain)],
+                )
                 if money_written:
                     if self.banking_command >= 0:
                         deposit = self.banking_command - int(self.banking_command / 4)
@@ -298,8 +371,8 @@ def cmd_bank(self, cmd: str = "", amount: str = ""):
     /bank - check server balance.
     /bank deposit # - deposit money. One quarter of the amount will be lost to taxation.
     /bank withdraw # - withdraw money."""
-    if self.ctx.game != "Pokemon Red and Blue":
-        logger.warning("This command can only be used while playing Pokémon Red and Blue")
+    if self.ctx.game not in SUPPORTED_GAMES:
+        logger.warning("This command can only be used while playing Pokemon Red, Blue, or Yellow")
         return
     if (not self.ctx.server) or self.ctx.server.socket.closed or not self.ctx.client_handler.game_state:
         logger.info(f"Must be connected to server and in game.")

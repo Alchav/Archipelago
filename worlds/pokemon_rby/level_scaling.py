@@ -1,15 +1,15 @@
 from BaseClasses import CollectionState
-from .locations import level_name_list, level_list
 
 
 def level_scaling(multiworld):
+    from . import get_rby_worlds, pokemon_rby_games
     state = CollectionState(multiworld)
     locations = set(multiworld.get_filled_locations())
     spheres = []
 
     while locations:
         sphere = set()
-        for world in multiworld.get_game_worlds("Pokemon Red and Blue"):
+        for world in get_rby_worlds(multiworld):
             if (world.options.level_scaling != "by_spheres_and_distance"
                     and (world.options.level_scaling != "auto"
                          or world.options.door_shuffle in ("off", "simple"))):
@@ -96,23 +96,23 @@ def level_scaling(multiworld):
         for location in sphere:
             if not location.item:
                 continue
-            if (location.item.game == "Pokemon Red and Blue" and (location.item.name.startswith("Missable ") or
+            if (location.item.game in pokemon_rby_games and (location.item.name.startswith("Uncatchable ") or
                     location.item.name.startswith("Static ")) and location.name !=
                     "Pokemon Tower 6F - Restless Soul"):
-                # Normally, missable Pokemon (starters, the dojo rewards) are not considered in logic, and static
+                # Normally, uncatchable Pokemon (starters, the dojo rewards) are not considered in logic, and static
                 # Pokemon are not considered for moves or evolutions, as you could release them and potentially soft
-                # lock the game. However, for level scaling purposes, we will treat them as not missable or static.
+                # lock the game. However, for level scaling purposes, we will treat them as not uncatchable or static.
                 # We would not want someone playing a minimal accessibility Dexsanity game to get what would be
                 # technically an "out of logic" Mansion Key from selecting Bulbasaur at the beginning of the game
                 # and end up in the Mansion early and encountering level 67 Pokémon
                 state.collect(multiworld.worlds[location.item.player].create_item(
-                    location.item.name.split("Missable ")[-1].split("Static ")[-1]), True, location)
+                    location.item.name.split("Uncatchable ")[-1].split("Static ")[-1]), True, location)
             else:
                 state.collect(location.item, True, location)
-    for world in multiworld.get_game_worlds("Pokemon Red and Blue"):
+    for world in get_rby_worlds(multiworld):
         if world.options.level_scaling == "off":
             continue
-        level_list_copy = level_list.copy()
+        level_list_copy = world.level_list.copy()
         for sphere in spheres:
             sphere_objects = {loc.name: loc for loc in sphere if loc.player == world.player
                               and (loc.type == "Wild Encounter" or "Pokemon" in loc.type) and loc.level is not None}
@@ -127,7 +127,7 @@ def level_scaling(multiworld):
                             sphere_objects[(party["party_address"][0] if isinstance(party["party_address"], list)
                                             else party["party_address"], i)] = parties
             ordered_sphere_objects = list(sphere_objects.keys())
-            ordered_sphere_objects.sort(key=lambda obj: level_name_list.index(obj))
+            ordered_sphere_objects.sort(key=lambda obj: world.level_name_list.index(obj))
             for object in ordered_sphere_objects:
                 if sphere_objects[object].type == "Trainer Parties":
                     for party in sphere_objects[object].party_data:
@@ -139,6 +139,5 @@ def level_scaling(multiworld):
                             break
                 else:
                     sphere_objects[object].level = level_list_copy.pop(0)
-    for world in multiworld.get_game_worlds("Pokemon Red and Blue"):
+    for world in get_rby_worlds(multiworld):
         world.finished_level_scaling.set()
-        

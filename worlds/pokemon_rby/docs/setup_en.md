@@ -1,4 +1,4 @@
-# Setup Guide for Pokémon Red and Blue: Archipelago
+# Setup Guide for Pokémon Red, Blue, and Yellow: Archipelago
 
 ## Important
 
@@ -47,10 +47,13 @@ an experience customized for their taste, and different players in the same mult
 
 ### Where do I get a YAML file?
 
-You can generate a yaml or download a template by visiting the [Pokemon Red and Blue Player Options Page](/games/Pokemon%20Red%20and%20Blue/player-options)
+You can generate a yaml or download a template from the player options page for
+[Pokemon Red](/games/Pokemon%20Red/player-options),
+[Pokemon Blue](/games/Pokemon%20Blue/player-options), or
+[Pokemon Yellow](/games/Pokemon%20Yellow/player-options).
 
-It is important to note that the `game_version` option determines the ROM file that will be patched.
-Both the player and the person generating (if they are generating locally) will need the corresponding ROM file.
+The selected game determines which ROM file will be patched. Both the player and the person generating (if they are
+generating locally) will need the corresponding ROM file.
 
 For `trainer_name` and `rival_name` the following regular characters are allowed:
 

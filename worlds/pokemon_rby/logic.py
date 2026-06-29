@@ -1,8 +1,12 @@
 from . import poke_data
 
 
+def has_pokedex_mon(state, mon, player):
+    return state.has(mon, player) or state.has(f"Static {mon}", player)
+
+
 def can_surf(state, world, player):
-    return (((state.has("HM03 Surf", player) and can_learn_hm(state, world, "Surf", player))) and (state.has("Soul Badge", player) or
+    return ((state.has("HM03 Surf", player) and can_learn_hm(state, world, "Surf", player)) and (state.has("Soul Badge", player) or
              state.has(world.extra_badges.get("Surf"), player)
              or world.options.badges_needed_for_hm_moves.value == 0))
 
@@ -77,7 +81,7 @@ def oaks_aide(state, world, count, player):
 def has_pokemon(state, count, player):
     obtained_pokemon = set()
     for pokemon in poke_data.pokemon_data.keys():
-        if state.has(pokemon, player) or state.has(f"Static {pokemon}", player):
+        if has_pokedex_mon(state, pokemon, player):
             obtained_pokemon.add(pokemon)
 
     return len(obtained_pokemon) >= count
@@ -112,6 +116,12 @@ def route3(state, world, player):
                               "Soul Badge", "Volcano Badge", "Earth Badge"], player)
     # open
     return True
+
+
+def vermilion_city_jenny(state, world, player):
+    if world.options.vermilion_city_jenny_requirement == "defeat_lt_surge":
+        return state.has("Defeat Lt. Surge", player)
+    return state.has("Thunder Badge", player)
 
 
 def evolve_level(state, level, player):

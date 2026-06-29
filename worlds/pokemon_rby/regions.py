@@ -1,7 +1,6 @@
 from copy import deepcopy
 from BaseClasses import MultiWorld, Region, Entrance, LocationProgressType, ItemClassification
 from .items import item_table, item_groups
-from .locations import location_data, PokemonRBLocation
 from .rock_tunnel import randomize_rock_tunnel
 from . import logic
 from . import poke_data
@@ -70,7 +69,7 @@ map_ids = {
     "Mt Moon B1F": 0x3C,
     "Mt Moon B2F": 0x3D,
     "Cerulean Trashed House": 0x3E,
-    "Cerulean Trade House": 0x3F,
+    "Cerulean Trade House": 0x3F, "Cerulean Melanie's House": 0x3F,
     "Cerulean Pokemon Center": 0x40,
     "Cerulean Gym": 0x41,
     "Cerulean Bicycle Shop": 0x42,
@@ -255,6 +254,7 @@ map_ids = {
     "Indigo Plateau Lorelei's Room": 0xF5,
     "Indigo Plateau Bruno's Room": 0xF6,
     "Indigo Plateau Agatha's Room": 0xF7,
+    "Summer Beach House": 0xF8,
 }
 
 town_map_coords = {
@@ -273,939 +273,6 @@ town_map_coords = {
     "Route 10-P": ("Power Plant to Route 10-P", 15, 4, (14,), "Power Plant", 49), #PowerPlantName
 }
 
-warp_data = {'Menu': [], 'Evolution': [], 'Old Rod Fishing': [], 'Good Rod Fishing': [], 'Fossil Level': [],
-             'Pokedex': [], 'Fossil': [], 'Celadon City': [
-        {'name': 'Celadon City to Celadon Department Store 1F W', 'address': 'Warps_CeladonCity', 'id': 0,
-         'to': {'map': 'Celadon Department Store 1F', 'id': (1, 0)}},
-        {'name': 'Celadon City to Celadon Department Store 1F E', 'address': 'Warps_CeladonCity', 'id': 1,
-         'to': {'map': 'Celadon Department Store 1F', 'id': (3, 2)}},
-        {'address': 'Warps_CeladonCity', 'id': 2, 'to': {'map': 'Celadon Mansion 1F', 'id': (0, 1)}},
-        {'address': 'Warps_CeladonCity', 'id': (3, 4), 'to': {'map': 'Celadon Mansion 1F-Back', 'id': 2}},
-        {'address': 'Warps_CeladonCity', 'id': 5, 'to': {'map': 'Celadon Pokemon Center', 'id': 0}},
-        {'address': 'Warps_CeladonCity', 'id': 7, 'to': {'map': 'Celadon Game Corner', 'id': (0, 1)}},
-        {'address': 'Warps_CeladonCity', 'id': 9, 'to': {'map': 'Celadon Prize Corner', 'id': (0, 1)}},
-        {'address': 'Warps_CeladonCity', 'id': 10, 'to': {'map': 'Celadon Diner', 'id': (0, 1)}},
-        {'address': 'Warps_CeladonCity', 'id': 11, 'to': {'map': 'Celadon Chief House', 'id': (0, 1)}},
-        {'address': 'Warps_CeladonCity', 'id': 12, 'to': {'map': 'Celadon Hotel', 'id': (0, 1)}}],
-             'Celadon City-G': [{'address': 'Warps_CeladonCity', 'id': 6, 'to': {'map': 'Celadon Gym', 'id': (0, 1)}}],
-             'Pallet Town': [{'address': 'Warps_PalletTown', 'id': 0, 'to': {'map': "Player's House 1F", 'id': (0, 1)}},
-                             {'address': 'Warps_PalletTown', 'id': 1, 'to': {'map': "Rival's House", 'id': (0, 1)}},
-                             {'address': 'Warps_PalletTown', 'id': 2, 'to': {'map': "Oak's Lab", 'id': (1, 0)}}],
-             'Viridian City': [
-                 {'address': 'Warps_ViridianCity', 'id': 0, 'to': {'map': 'Viridian Pokemon Center', 'id': (0, 1)}},
-                 {'address': 'Warps_ViridianCity', 'id': 1, 'to': {'map': 'Viridian Pokemart', 'id': (0, 1)}},
-                 {'address': 'Warps_ViridianCity', 'id': 2, 'to': {'map': 'Viridian School House', 'id': (0, 1)}},
-                 {'address': 'Warps_ViridianCity', 'id': 3, 'to': {'map': 'Viridian Nickname House', 'id': (0, 1)}}],
-             'Viridian City-N': [], 'Viridian City-G': [
-        {'address': 'Warps_ViridianCity', 'id': 4, 'to': {'map': 'Viridian Gym', 'id': (0, 1)}}], 'Pewter City-E': [],
-             'Pewter City-M': [
-                 {'address': 'Warps_PewterCity', 'id': 1, 'to': {'map': 'Pewter Museum 1F-E', 'id': (2, 3)}}],
-             'Pewter City': [{'address': 'Warps_PewterCity', 'id': 0, 'to': {'map': 'Pewter Museum 1F', 'id': (0, 1)}},
-                             {'address': 'Warps_PewterCity', 'id': 2, 'to': {'map': 'Pewter Gym', 'id': (0, 1)}},
-                             {'address': 'Warps_PewterCity', 'id': 3,
-                              'to': {'map': 'Pewter Nidoran House', 'id': (0, 1)}},
-                             {'address': 'Warps_PewterCity', 'id': 4, 'to': {'map': 'Pewter Pokemart', 'id': (0, 1)}},
-                             {'address': 'Warps_PewterCity', 'id': 5,
-                              'to': {'map': 'Pewter Speech House', 'id': (0, 1)}},
-                             {'address': 'Warps_PewterCity', 'id': 6,
-                              'to': {'map': 'Pewter Pokemon Center', 'id': (0, 1)}}], 'Cerulean City-T': [
-        {'address': 'Warps_CeruleanCity', 'id': 0, 'to': {'map': 'Cerulean Trashed House', 'id': (0, 1)}}],
-             'Cerulean City': [
-                 {'address': 'Warps_CeruleanCity', 'id': 1, 'to': {'map': 'Cerulean Trade House', 'id': (0, 1)}},
-                 {'address': 'Warps_CeruleanCity', 'id': 2, 'to': {'map': 'Cerulean Pokemon Center', 'id': (0, 1)}},
-                 {'address': 'Warps_CeruleanCity', 'id': 3, 'to': {'map': 'Cerulean Gym', 'id': (0, 1)}},
-                 {'address': 'Warps_CeruleanCity', 'id': 4, 'to': {'map': 'Cerulean Bicycle Shop', 'id': (0, 1)}},
-                 {'address': 'Warps_CeruleanCity', 'id': 5, 'to': {'map': 'Cerulean Pokemart', 'id': (0, 1)}},
-                 {'address': 'Warps_CeruleanCity', 'id': 8, 'to': {'map': 'Cerulean Badge House', 'id': (1, 2)}}],
-             'Cerulean City-Badge House Backyard': [
-                 {'address': 'Warps_CeruleanCity', 'id': 9, 'to': {'map': 'Cerulean Badge House', 'id': 0}}],
-             'Cerulean City-Water': [], 'Cerulean City-Cave': [
-        {'address': 'Warps_CeruleanCity', 'id': 6, 'to': {'map': 'Cerulean Cave 1F-SE', 'id': (0, 1)}}],
-             'Cerulean City-Outskirts': [
-                 {'address': 'Warps_CeruleanCity', 'id': 7, 'to': {'map': 'Cerulean Trashed House', 'id': 2}}],
-             'Vermilion City': [
-                 {'address': 'Warps_VermilionCity', 'id': 0, 'to': {'map': 'Vermilion Pokemon Center', 'id': (0, 1)}},
-                 {'address': 'Warps_VermilionCity', 'id': 1, 'to': {'map': 'Vermilion Pokemon Fan Club', 'id': (0, 1)}},
-                 {'address': 'Warps_VermilionCity', 'id': 2, 'to': {'map': 'Vermilion Pokemart', 'id': (0, 1)}},
-                 {'address': 'Warps_VermilionCity', 'id': 4, 'to': {'map': 'Vermilion Pidgey House', 'id': 0}},
-                 {'address': 'Warps_VermilionCity', 'id': 7, 'to': {'map': 'Vermilion Trade House', 'id': 0}},
-                 {'address': 'Warps_VermilionCity', 'id': 8, 'to': {'map': 'Vermilion Old Rod House', 'id': 0}}],
-             'Vermilion City-G': [
-                 {'address': 'Warps_VermilionCity', 'id': 3, 'to': {'map': 'Vermilion Gym', 'id': (0, 1)}}],
-             'Vermilion City-Dock': [
-                 {'address': 'Warps_VermilionCity', 'id': (5, 6), 'to': {'map': 'Vermilion Dock', 'id': 0}}],
-             'Fuchsia City': [
-                 {'address': 'Warps_FuchsiaCity', 'id': 0, 'to': {'map': 'Fuchsia Pokemart', 'id': (0, 1)}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 1, 'to': {'map': "Fuchsia Bill's Grandpa's House", 'id': 0}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 2, 'to': {'map': 'Fuchsia Pokemon Center', 'id': 0}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 3, 'to': {'map': "Fuchsia Warden's House", 'id': 0}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 4, 'to': {'map': 'Safari Zone Gate-S', 'id': (0, 1)}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 5, 'to': {'map': 'Fuchsia Gym', 'id': 0}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 6, 'to': {'map': 'Fuchsia Meeting Room', 'id': 0}},
-                 {'address': 'Warps_FuchsiaCity', 'id': 7, 'to': {'map': 'Fuchsia Good Rod House', 'id': 1}}],
-             'Fuchsia City-Good Rod House Backyard': [
-                 {'address': 'Warps_FuchsiaCity', 'id': 8, 'to': {'map': 'Fuchsia Good Rod House', 'id': 0}}],
-             "Rival's House": [{'address': 'Warps_BluesHouse', 'id': (0, 1), 'to': {'map': 'Pallet Town', 'id': 1}}],
-             'Vermilion Trade House': [
-                 {'address': 'Warps_VermilionTradeHouse', 'id': (0, 1), 'to': {'map': 'Vermilion City', 'id': 7}}],
-             'Indigo Plateau Lobby': [
-                 {'address': 'Warps_IndigoPlateauLobby', 'id': (0, 1), 'to': {'map': 'Indigo Plateau', 'id': (0, 1)}}],
-             'Indigo Plateau Lobby-N': [{'address': 'Warps_IndigoPlateauLobby', 'id': 2,
-                                         'to': {'map': "Indigo Plateau Lorelei's Room", 'id': 0}}],
-             'Silph Co 4F': [{'address': 'Warps_SilphCo4F', 'id': 0, 'to': {'map': 'Silph Co 3F', 'id': 1}},
-                             {'address': 'Warps_SilphCo4F', 'id': 1, 'to': {'map': 'Silph Co 5F', 'id': 1}},
-                             {'address': 'Warps_SilphCo4F', 'id': 2, 'to': {'map': 'Silph Co Elevator-4F', 'id': 3}},
-                             {'address': 'Warps_SilphCo4F', 'id': 5, 'to': {'map': 'Silph Co 10F-SE', 'id': 4}},
-                             {'address': 'Warps_SilphCo4F', 'id': 6, 'to': {'map': 'Silph Co 10F', 'id': 5}}],
-             'Silph Co 4F-N': [{'address': 'Warps_SilphCo4F', 'id': 4, 'to': {'map': 'Silph Co 6F', 'id': 3}},
-                               {'address': 'Warps_SilphCo4F', 'id': 3, 'to': {'map': 'Silph Co 10F-SE', 'id': 3}}],
-             'Silph Co 4F-W': [], 'Silph Co 5F-NW': [], 'Silph Co 6F-SW': [],
-             'Silph Co 5F': [{'address': 'Warps_SilphCo5F', 'id': 0, 'to': {'map': 'Silph Co 6F', 'id': 1}},
-                             {'address': 'Warps_SilphCo5F', 'id': 1, 'to': {'map': 'Silph Co 4F', 'id': 1}},
-                             {'address': 'Warps_SilphCo5F', 'id': 2, 'to': {'map': 'Silph Co Elevator-5F', 'id': 4}},
-                             {'address': 'Warps_SilphCo5F', 'id': 3, 'to': {'map': 'Silph Co 7F-SE', 'id': 5}},
-                             {'address': 'Warps_SilphCo5F', 'id': 4, 'to': {'map': 'Silph Co 9F', 'id': 4}},
-                             {'address': 'Warps_SilphCo5F', 'id': 5, 'to': {'map': 'Silph Co 3F', 'id': 4}}],
-             'Silph Co 5F-SW': [{'address': 'Warps_SilphCo5F', 'id': 6, 'to': {'map': 'Silph Co 3F', 'id': 5}}],
-             'Silph Co 6F': [{'address': 'Warps_SilphCo6F', 'id': 0, 'to': {'map': 'Silph Co 7F', 'id': 1}},
-                             {'address': 'Warps_SilphCo6F', 'id': 1, 'to': {'map': 'Silph Co 5F', 'id': 0}},
-                             {'address': 'Warps_SilphCo6F', 'id': 2, 'to': {'map': 'Silph Co Elevator-7F', 'id': 6}},
-                             {'address': 'Warps_SilphCo6F', 'id': 3, 'to': {'map': 'Silph Co 4F-N', 'id': 4}},
-                             {'address': 'Warps_SilphCo6F', 'id': 4, 'to': {'map': 'Silph Co 2F-SW', 'id': 6}}],
-             'Cinnabar Island-M': [
-                 {'address': 'Warps_CinnabarIsland', 'id': 0, 'to': {'map': 'Pokemon Mansion 1F', 'id': 1}}],
-             'Cinnabar Island-G': [
-                 {'address': 'Warps_CinnabarIsland', 'id': 1, 'to': {'map': 'Cinnabar Gym', 'id': 0}}],
-             'Cinnabar Island': [{'address': 'Warps_CinnabarIsland', 'id': 2, 'to': {'map': 'Cinnabar Lab', 'id': 0}},
-                                 {'address': 'Warps_CinnabarIsland', 'id': 3,
-                                  'to': {'map': 'Cinnabar Pokemon Center', 'id': 0}},
-                                 {'address': 'Warps_CinnabarIsland', 'id': 4,
-                                  'to': {'map': 'Cinnabar Pokemart', 'id': (0, 1)}}], 'Route 1': [],
-             "Oak's Lab": [{'address': 'Warps_OaksLab', 'id': (1, 0), 'to': {'map': 'Pallet Town', 'id': 2}}],
-             'Viridian Pokemart': [
-                 {'address': 'Warps_ViridianMart', 'id': (0, 1), 'to': {'map': 'Viridian City', 'id': 1}}],
-             'Viridian School House': [
-                 {'address': 'Warps_ViridianSchoolHouse', 'id': (0, 1), 'to': {'map': 'Viridian City', 'id': 2}}],
-             'Viridian Nickname House': [
-                 {'address': 'Warps_ViridianNicknameHouse', 'id': (0, 1), 'to': {'map': 'Viridian City', 'id': 3}}],
-             'Pewter Nidoran House': [
-                 {'address': 'Warps_PewterNidoranHouse', 'id': (0, 1), 'to': {'map': 'Pewter City', 'id': 3}}],
-             'Pewter Speech House': [
-                 {'address': 'Warps_PewterSpeechHouse', 'id': (0, 1), 'to': {'map': 'Pewter City', 'id': 5}}],
-             'Cerulean Trashed House': [
-                 {'address': 'Warps_CeruleanTrashedHouse', 'id': (0, 1), 'to': {'map': 'Cerulean City-T', 'id': 0}},
-                 {'address': 'Warps_CeruleanTrashedHouse', 'id': 2, 'to': {'map': 'Cerulean City-Outskirts', 'id': 7}}],
-             'Cerulean Trade House': [
-                 {'address': 'Warps_CeruleanTradeHouse', 'id': (0, 1), 'to': {'map': 'Cerulean City', 'id': 1}}],
-             'Cerulean Bicycle Shop': [
-                 {'address': 'Warps_BikeShop', 'id': (0, 1), 'to': {'map': 'Cerulean City', 'id': 4}}],
-             "Lavender Mr. Fuji's House": [
-                 {'address': 'Warps_MrFujisHouse', 'id': (0, 1), 'to': {'map': 'Lavender Town', 'id': 2}}],
-             'Lavender Cubone House': [
-                 {'address': 'Warps_LavenderCuboneHouse', 'id': (0, 1), 'to': {'map': 'Lavender Town', 'id': 4}}],
-             "Lavender Name Rater's House": [
-                 {'address': 'Warps_NameRatersHouse', 'id': (0, 1), 'to': {'map': 'Lavender Town', 'id': 5}}],
-             'Vermilion Pidgey House': [
-                 {'address': 'Warps_VermilionPidgeyHouse', 'id': (0, 1), 'to': {'map': 'Vermilion City', 'id': 4}}],
-             'Vermilion Dock': [
-                 {'address': 'Warps_VermilionDock', 'id': 0, 'to': {'map': 'Vermilion City-Dock', 'id': 5}},
-                 {'address': 'Warps_VermilionDock', 'id': 1, 'to': {'map': 'S.S. Anne 1F', 'id': 1}}],
-             'Celadon Mansion Roof House': [{'address': 'Warps_CeladonMansionRoofHouse', 'id': (0, 1),
-                                             'to': {'map': 'Celadon Mansion Roof-Back', 'id': 2}}],
-             'Fuchsia Pokemart': [
-                 {'address': 'Warps_FuchsiaMart', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 0}}],
-             'Saffron Pidgey House': [
-                 {'address': 'Warps_SaffronPidgeyHouse', 'id': (0, 1), 'to': {'map': 'Saffron City-Pidgey', 'id': 3}}],
-             "Saffron Mr. Psychic's House": [
-                 {'address': 'Warps_MrPsychicsHouse', 'id': (0, 1), 'to': {'map': 'Saffron City', 'id': 7}}],
-             "Diglett's Cave Route 2": [
-                 {'address': 'Warps_DiglettsCaveRoute2', 'id': (0, 1), 'to': {'map': 'Route 2-NE', 'id': 0}},
-                 {'address': 'Warps_DiglettsCaveRoute2', 'id': 2, 'to': {'map': "Diglett's Cave", 'id': 0}}],
-             'Route 2 Trade House': [
-                 {'address': 'Warps_Route2TradeHouse', 'id': (0, 1), 'to': {'map': 'Route 2-NE', 'id': 2}}],
-             'Route 5 Gate-S': [{'address': 'Warps_Route5Gate', 'id': (0, 1), 'to': {'map': 'Route 5-S', 'id': 2}}],
-             'Route 5 Gate-N': [{'address': 'Warps_Route5Gate', 'id': (3, 2), 'to': {'map': 'Route 5', 'id': (1, 0)}}],
-             'Route 6 Gate-S': [{'address': 'Warps_Route6Gate', 'id': (0, 1), 'to': {'map': 'Route 6', 'id': 2}}],
-             'Route 6 Gate-N': [{'address': 'Warps_Route6Gate', 'id': (2, 3), 'to': {'map': 'Route 6-N', 'id': 1}}],
-             'Route 7 Gate-W': [{'address': 'Warps_Route7Gate', 'id': (0, 1), 'to': {'map': 'Route 7', 'id': 3}}],
-             'Route 7 Gate-E': [
-                 {'address': 'Warps_Route7Gate', 'id': (2, 3), 'to': {'map': 'Route 7-E', 'id': (0, 1)}}],
-             'Route 8 Gate-W': [
-                 {'address': 'Warps_Route8Gate', 'id': (0, 1), 'to': {'map': 'Route 8-W', 'id': (0, 1)}}],
-             'Route 8 Gate-E': [{'address': 'Warps_Route8Gate', 'id': (2, 3), 'to': {'map': 'Route 8', 'id': (2, 3)}}],
-             'Underground Path Route 8': [
-                 {'address': 'Warps_UndergroundPathRoute8', 'id': (0, 1), 'to': {'map': 'Route 8', 'id': 4}},
-                 {'address': 'Warps_UndergroundPathRoute8', 'id': 2,
-                  'to': {'map': 'Underground Path West East', 'id': 1}}],
-             'Power Plant': [{'address': 'Warps_PowerPlant', 'id': (0, 1), 'to': {'map': 'Route 10-P', 'id': 3}},
-                             {'name': 'Power Plant to Route 10-P Back Door', 'address': 'Warps_PowerPlant', 'id': 2,
-                              'to': {'map': 'Route 10-P', 'id': 3}}], "Diglett's Cave Route 11": [
-        {'address': 'Warps_DiglettsCaveRoute11', 'id': (0, 1), 'to': {'map': 'Route 11', 'id': 4}},
-        {'address': 'Warps_DiglettsCaveRoute11', 'id': 2, 'to': {'map': "Diglett's Cave", 'id': 1}}],
-             'Route 16 Fly House': [
-                 {'address': 'Warps_Route16FlyHouse', 'id': (0, 1), 'to': {'map': 'Route 16-NW', 'id': 8}}],
-             'Route 22 Gate-S': [{'address': 'Warps_Route22Gate', 'id': (0, 1), 'to': {'map': 'Route 22', 'id': 0}}],
-             'Route 22 Gate-N': [
-                 {'address': 'Warps_Route22Gate', 'id': (2, 3), 'to': {'map': 'Route 23-S', 'id': (0, 1)}}],
-             "Bill's House": [{'address': 'Warps_BillsHouse', 'id': (0, 1), 'to': {'map': 'Route 25', 'id': 0}}],
-             'Lavender Town': [
-                 {'address': 'Warps_LavenderTown', 'id': 0, 'to': {'map': 'Lavender Pokemon Center', 'id': 0}},
-                 {'address': 'Warps_LavenderTown', 'id': 1, 'to': {'map': 'Pokemon Tower 1F', 'id': 0}},
-                 {'address': 'Warps_LavenderTown', 'id': 2, 'to': {'map': "Lavender Mr. Fuji's House", 'id': 0}},
-                 {'address': 'Warps_LavenderTown', 'id': 3, 'to': {'map': 'Lavender Pokemart', 'id': 0}},
-                 {'address': 'Warps_LavenderTown', 'id': 4, 'to': {'map': 'Lavender Cubone House', 'id': 0}},
-                 {'address': 'Warps_LavenderTown', 'id': 5, 'to': {'map': "Lavender Name Rater's House", 'id': 0}}],
-             'Viridian Pokemon Center': [
-                 {'address': 'Warps_ViridianPokecenter', 'id': (0, 1), 'to': {'map': 'Viridian City', 'id': 0}}],
-             'Pokemon Mansion 1F-Wild': [], 'Pokemon Mansion 1F': [
-        {'address': 'Warps_PokemonMansion1F', 'id': 4, 'to': {'map': 'Pokemon Mansion 2F', 'id': 0}},
-        {'address': 'Warps_PokemonMansion1F', 'id': (0, 1, 2, 3), 'to': {'map': 'Cinnabar Island-M', 'id': 0}}],
-             'Pokemon Mansion 1F-SE': [
-                 {'address': 'Warps_PokemonMansion1F', 'id': 5, 'to': {'map': 'Pokemon Mansion B1F', 'id': 0}},
-                 {'name': "Pokemon Mansion 1F-SE to Cinnabar Island-M", 'address': 'Warps_PokemonMansion1F',
-                  'id': (6, 7), 'to': {'map': 'Cinnabar Island-M', 'id': 0}}],
-             'Pokemon Mansion 2F': [
-                 {'address': 'Warps_PokemonMansion2F', 'id': 0, 'to': {'map': 'Pokemon Mansion 1F', 'id': 4}},
-                 {'address': 'Warps_PokemonMansion2F', 'id': 1, 'to': {'map': 'Pokemon Mansion 3F-SW', 'id': 0}},
-                 {'address': 'Warps_PokemonMansion2F', 'id': 3, 'to': {'map': 'Pokemon Mansion 3F', 'id': 1}}],
-             'Pokemon Mansion 2F-E': [
-                 {'address': 'Warps_PokemonMansion2F', 'id': 2, 'to': {'map': 'Pokemon Mansion 3F-SE', 'id': 2}}],
-             'Pokemon Mansion 3F-Wild': [], 'Pokemon Mansion 2F-Wild': [], 'Pokemon Mansion 3F': [
-        {'address': 'Warps_PokemonMansion3F', 'id': 1, 'to': {'map': 'Pokemon Mansion 2F', 'id': 3}}],
-             'Pokemon Mansion 3F-SE': [
-                 {'address': 'Warps_PokemonMansion3F', 'id': 2, 'to': {'map': 'Pokemon Mansion 2F-E', 'id': 2}},],
-             'Pokemon Mansion 3F-SW': [
-                 {'address': 'Warps_PokemonMansion3F', 'id': 0, 'to': {'map': 'Pokemon Mansion 2F', 'id': 1}}],
-             'Pokemon Mansion B1F': [
-                 {'address': 'Warps_PokemonMansionB1F', 'id': 0, 'to': {'map': 'Pokemon Mansion 1F-SE', 'id': 5}}],
-             'Rock Tunnel 1F-NE 1': [{'address': 'Warps_RockTunnel1F', 'id': 0, 'to': {'map': 'Route 10-N', 'id': 1}}],
-             'Rock Tunnel 1F-NE 2':
-                                   [{'address': 'Warps_RockTunnel1F', 'id': 4,
-                                    'to': {'map': 'Rock Tunnel B1F-E 1', 'id': 0}}], 'Rock Tunnel 1F-NW 1': [
-        {'address': 'Warps_RockTunnel1F', 'id': 5, 'to': {'map': 'Rock Tunnel B1F-E 2', 'id': 1}}],
-             'Rock Tunnel 1F-NW 2': [
-        {'address': 'Warps_RockTunnel1F', 'id': 6, 'to': {'map': 'Rock Tunnel B1F-W 1', 'id': 2}}],
-             'Rock Tunnel 1F-S 1': [{'address': 'Warps_RockTunnel1F', 'id': 2, 'to': {'map': 'Route 10-S', 'id': 2}}],
-             'Rock Tunnel 1F-S 2': [
-                                  {'address': 'Warps_RockTunnel1F', 'id': 7,
-                                   'to': {'map': 'Rock Tunnel B1F-W 2', 'id': 3}}], 'Rock Tunnel 1F-Wild': [],
-             'Rock Tunnel B1F-Wild': [],
-             'Rock Tunnel 1F-NE': [], 'Rock Tunnel 1F-NW': [], 'Rock Tunnel 1F-S': [], 'Rock Tunnel B1F-E': [],
-             'Rock Tunnel B1F-W': [],
-             'Seafoam Islands 1F': [
-        {'address': 'Warps_SeafoamIslands1F', 'id': (2, 3), 'to': {'map': 'Route 20-IE', 'id': 1}},
-        {'address': 'Warps_SeafoamIslands1F', 'id': 4, 'to': {'map': 'Seafoam Islands B1F', 'id': 1}},
-        {'address': 'Warps_SeafoamIslands1F', 'id': 5, 'to': {'map': 'Seafoam Islands B1F-NE', 'id': 6}}],
-             'Seafoam Islands B1F-Wild': [], 'Seafoam Islands 1F-Wild': [], 'Seafoam Islands 1F-SE': [
-        {'address': 'Warps_SeafoamIslands1F', 'id': (0, 1), 'to': {'map': 'Route 20-IW', 'id': 0}},
-        {'address': 'Warps_SeafoamIslands1F', 'id': 6, 'to': {'map': 'Seafoam Islands B1F-SE', 'id': 4}}],
-             'S.S. Anne 3F': [{'address': 'Warps_SSAnne3F', 'id': 0, 'to': {'map': 'S.S. Anne Bow', 'id': 0}},
-                              {'address': 'Warps_SSAnne3F', 'id': 1, 'to': {'map': 'S.S. Anne 2F', 'id': 7}}],
-             'Victory Road 3F': [
-                 {'address': 'Warps_VictoryRoad3F', 'id': 0, 'to': {'map': 'Victory Road 2F-C', 'id': 3}},
-                 {'address': 'Warps_VictoryRoad3F', 'id': 3, 'to': {'map': 'Victory Road 2F-NW', 'id': 6}}],
-             'Victory Road 3F-SE': [
-                 {'address': 'Warps_VictoryRoad3F', 'id': 1, 'to': {'map': 'Victory Road 2F-E', 'id': 5}},
-                 {'address': 'Warps_VictoryRoad3F', 'id': 2, 'to': {'map': 'Victory Road 2F-SE', 'id': 4}}],
-             'Victory Road 3F-S': [], 'Victory Road 3F-Wild': [], 'Rocket Hideout B1F': [
-        {'address': 'Warps_RocketHideoutB1F', 'id': 0, 'to': {'map': 'Rocket Hideout B2F', 'id': 0}},
-        {'address': 'Warps_RocketHideoutB1F', 'id': 1, 'to': {'map': 'Celadon Game Corner-Hidden Stairs', 'id': 2}}],
-             'Rocket Hideout B1F-SE': [{'address': 'Warps_RocketHideoutB1F', 'id': (2, 4),
-                                        'to': {'map': 'Rocket Hideout Elevator-B1F', 'id': 0}}],
-             'Rocket Hideout B1F-S': [
-                 {'address': 'Warps_RocketHideoutB1F', 'id': 3, 'to': {'map': 'Rocket Hideout B2F', 'id': 3}}],
-             'Rocket Hideout B2F': [
-                 {'address': 'Warps_RocketHideoutB2F', 'id': 0, 'to': {'map': 'Rocket Hideout B1F', 'id': 0}},
-                 {'address': 'Warps_RocketHideoutB2F', 'id': 1, 'to': {'map': 'Rocket Hideout B3F', 'id': 0}},
-                 {'address': 'Warps_RocketHideoutB2F', 'id': (2, 4),
-                  'to': {'map': 'Rocket Hideout Elevator-B2F', 'id': 1}},
-                 {'address': 'Warps_RocketHideoutB2F', 'id': 3, 'to': {'map': 'Rocket Hideout B1F-S', 'id': 3}}],
-             'Rocket Hideout B3F': [
-                 {'address': 'Warps_RocketHideoutB3F', 'id': 0, 'to': {'map': 'Rocket Hideout B2F', 'id': 1}},
-                 {'address': 'Warps_RocketHideoutB3F', 'id': 1, 'to': {'map': 'Rocket Hideout B4F-NW', 'id': 0}}],
-             'Rocket Hideout B4F': [{'address': 'Warps_RocketHideoutB4F', 'id': (1, 2),
-                                     'to': {'map': 'Rocket Hideout Elevator-B4F', 'id': 2}}], 'Rocket Hideout B4F-NW': [
-        {'address': 'Warps_RocketHideoutB4F', 'id': 0, 'to': {'map': 'Rocket Hideout B3F', 'id': 1}}],
-             'Rocket Hideout Elevator': [], 'Silph Co Elevator': [], 'Celadon Department Store Elevator': [],
-             'Rocket Hideout Elevator-B1F': [{'address': 'RocketHideoutElevatorWarpMaps', 'id': 0,
-                                              'to': {'map': 'Rocket Hideout B1F-SE', 'id': 4}}],
-             'Rocket Hideout Elevator-B2F': [
-                 {'address': 'RocketHideoutElevatorWarpMaps', 'id': 1, 'to': {'map': 'Rocket Hideout B2F', 'id': 4}}],
-             'Rocket Hideout Elevator-B4F': [
-                 {'address': 'RocketHideoutElevatorWarpMaps', 'id': 2, 'to': {'map': 'Rocket Hideout B4F', 'id': 2}}],
-             'Silph Co Elevator-1F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 0, 'to': {'map': 'Silph Co 1F', 'id': 3}}],
-             'Silph Co Elevator-2F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 1, 'to': {'map': 'Silph Co 2F', 'id': 2}}],
-             'Silph Co Elevator-3F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 2, 'to': {'map': 'Silph Co 3F', 'id': 2}}],
-             'Silph Co Elevator-4F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 3, 'to': {'map': 'Silph Co 4F', 'id': 2}}],
-             'Silph Co Elevator-5F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 4, 'to': {'map': 'Silph Co 5F', 'id': 2}}],
-             'Silph Co Elevator-6F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 5, 'to': {'map': 'Silph Co 6F', 'id': 2}}],
-             'Silph Co Elevator-7F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 6, 'to': {'map': 'Silph Co 7F', 'id': 2}}],
-             'Silph Co Elevator-8F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 7, 'to': {'map': 'Silph Co 8F', 'id': 2}}],
-             'Silph Co Elevator-9F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 8, 'to': {'map': 'Silph Co 9F', 'id': 2}}],
-             'Silph Co Elevator-10F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 9, 'to': {'map': 'Silph Co 10F', 'id': 2}}],
-             'Silph Co Elevator-11F': [
-                 {'address': 'SilphCoElevatorWarpMaps', 'id': 10, 'to': {'map': 'Silph Co 11F', 'id': 1}}],
-             'Safari Zone East': [
-                 {'address': 'Warps_SafariZoneEast', 'id': (0, 1), 'to': {'map': 'Safari Zone North', 'id': (6, 7)}},
-                 {'address': 'Warps_SafariZoneEast', 'id': (2, 3), 'to': {'map': 'Safari Zone Center-S', 'id': (6, 7)}},
-                 {'address': 'Warps_SafariZoneEast', 'id': 4, 'to': {'map': 'Safari Zone East Rest House', 'id': 0}}],
-             'Safari Zone North': [
-                 {'address': 'Warps_SafariZoneNorth', 'id': (0, 1), 'to': {'map': 'Safari Zone West-NW', 'id': (0, 1)}},
-                 {'address': 'Warps_SafariZoneNorth', 'id': (2, 3), 'to': {'map': 'Safari Zone West', 'id': (2, 3)}},
-                 {'address': 'Warps_SafariZoneNorth', 'id': (4, 5),
-                  'to': {'map': 'Safari Zone Center-NE', 'id': (4, 5)}},
-                 {'address': 'Warps_SafariZoneNorth', 'id': (6, 7), 'to': {'map': 'Safari Zone East', 'id': (0, 1)}},
-                 {'address': 'Warps_SafariZoneNorth', 'id': 8, 'to': {'map': 'Safari Zone North Rest House', 'id': 0}}],
-             'Safari Zone Center-C': [], 'Safari Zone Center-Wild': [], 'Safari Zone Center-NW': [
-        {'address': 'Warps_SafariZoneCenter', 'id': (2, 3), 'to': {'map': 'Safari Zone West', 'id': (4, 5)}}],
-             'Safari Zone Center-NE': [
-                 {'address': 'Warps_SafariZoneCenter', 'id': (4, 5), 'to': {'map': 'Safari Zone North', 'id': (4, 5)}}],
-             'Safari Zone Center-S': [
-                 {'address': 'Warps_SafariZoneCenter', 'id': (0, 1), 'to': {'map': 'Safari Zone Gate-N', 'id': (2, 3)}},
-                 {'address': 'Warps_SafariZoneCenter', 'id': (6, 7), 'to': {'map': 'Safari Zone East', 'id': (2, 3)}},
-                 {'address': 'Warps_SafariZoneCenter', 'id': 8,
-                  'to': {'map': 'Safari Zone Center Rest House', 'id': 0}}], 'Safari Zone Center Rest House': [
-        {'address': 'Warps_SafariZoneCenterRestHouse', 'id': (0, 1), 'to': {'map': 'Safari Zone Center-S', 'id': 8}}],
-             'Safari Zone West Rest House': [{'address': 'Warps_SafariZoneWestRestHouse', 'id': (0, 1),
-                                              'to': {'map': 'Safari Zone West', 'id': 7}}],
-             'Safari Zone East Rest House': [{'address': 'Warps_SafariZoneEastRestHouse', 'id': (0, 1),
-                                              'to': {'map': 'Safari Zone East', 'id': 4}}],
-             'Safari Zone North Rest House': [{'address': 'Warps_SafariZoneNorthRestHouse', 'id': (0, 1),
-                                               'to': {'map': 'Safari Zone North', 'id': 8}}], 'Cerulean Cave 2F-E': [
-        {'address': 'Warps_CeruleanCave2F', 'id': 0, 'to': {'map': 'Cerulean Cave 1F-NE', 'id': 2}},
-        {'address': 'Warps_CeruleanCave2F', 'id': 1, 'to': {'map': 'Cerulean Cave 1F-SE', 'id': 3}}],
-             'Cerulean Cave 2F-Wild': [], 'Cerulean Cave 2F-W': [
-        {'address': 'Warps_CeruleanCave2F', 'id': 4, 'to': {'map': 'Cerulean Cave 1F-NW', 'id': 6}},
-        {'address': 'Warps_CeruleanCave2F', 'id': 5, 'to': {'map': 'Cerulean Cave 1F-SW', 'id': 7}}],
-             'Cerulean Cave 2F-N': [
-                 {'address': 'Warps_CeruleanCave2F', 'id': 2, 'to': {'map': 'Cerulean Cave 1F-SW', 'id': 4}},
-                 {'address': 'Warps_CeruleanCave2F', 'id': 3, 'to': {'map': 'Cerulean Cave 1F-N', 'id': 5}}],
-             'Cerulean Cave B1F': [
-                 {'address': 'Warps_CeruleanCaveB1F', 'id': 0, 'to': {'map': 'Cerulean Cave 1F-NW', 'id': 8}}],
-             'Cerulean Cave B1F-E': [], 'Rock Tunnel B1F-E 1': [
-        {'address': 'Warps_RockTunnelB1F', 'id': 0, 'to': {'map': 'Rock Tunnel 1F-NE 2', 'id': 4}}],
-             'Rock Tunnel B1F-E 2': [
-        {'address': 'Warps_RockTunnelB1F', 'id': 1, 'to': {'map': 'Rock Tunnel 1F-NW 1', 'id': 5}}],
-             'Rock Tunnel B1F-W 1': [
-                 {'address': 'Warps_RockTunnelB1F', 'id': 2, 'to': {'map': 'Rock Tunnel 1F-NW 2', 'id': 6}}],
-             'Rock Tunnel B1F-W 2': [
-                 {'address': 'Warps_RockTunnelB1F', 'id': 3, 'to': {'map': 'Rock Tunnel 1F-S 2', 'id': 7}}],
-             'Seafoam Islands B1F': [
-                 {'address': 'Warps_SeafoamIslandsB1F', 'id': 0, 'to': {'map': 'Seafoam Islands B2F-NW', 'id': 0}},
-                 {'address': 'Warps_SeafoamIslandsB1F', 'id': 1, 'to': {'map': 'Seafoam Islands 1F', 'id': 4}},
-                 {'name': 'Seafoam Islands B1F to Seafoam Islands B2F-SW N', 'address': 'Warps_SeafoamIslandsB1F',
-                  'id': 2, 'to': {'map': 'Seafoam Islands B2F-SW', 'id': 2}},
-                 {'name': 'Seafoam Islands B1F to Seafoam Islands B2F-SW S', 'address': 'Warps_SeafoamIslandsB1F',
-                  'id': 3, 'to': {'map': 'Seafoam Islands B2F-SW', 'id': 3}}], 'Seafoam Islands B1F-SE': [
-        {'address': 'Warps_SeafoamIslandsB1F', 'id': 4, 'to': {'map': 'Seafoam Islands 1F-SE', 'id': 6}},
-        {'address': 'Warps_SeafoamIslandsB1F', 'id': 5, 'to': {'map': 'Seafoam Islands B2F-SE', 'id': 5}}],
-             'Seafoam Islands B1F-NE': [
-                 {'address': 'Warps_SeafoamIslandsB1F', 'id': 6, 'to': {'map': 'Seafoam Islands 1F', 'id': 5}}],
-             'Seafoam Islands B2F-Wild': [], 'Seafoam Islands B2F-SE': [
-        {'address': 'Warps_SeafoamIslandsB2F', 'id': 5, 'to': {'map': 'Seafoam Islands B1F-SE', 'id': 5}},
-        {'address': 'Warps_SeafoamIslandsB2F', 'id': 6, 'to': {'map': 'Seafoam Islands B3F-SE', 'id': 4}}],
-             'Seafoam Islands B2F-NE': [
-                 {'address': 'Warps_SeafoamIslandsB2F', 'id': 4, 'to': {'map': 'Seafoam Islands B3F-NE', 'id': 3}}],
-             'Seafoam Islands B2F-SW': [
-                 {'name': 'Seafoam Islands B2F-SW to Seafoam Islands 1F-SW S', 'address': 'Warps_SeafoamIslandsB2F',
-                  'id': 3, 'to': {'map': 'Seafoam Islands B1F', 'id': 3}},
-                 {'address': 'Warps_SeafoamIslandsB2F', 'id': 1, 'to': {'map': 'Seafoam Islands B3F', 'id': 0}},
-                 {'name': 'Seafoam Islands B2F-SW to Seafoam Islands 1F-SW N', 'address': 'Warps_SeafoamIslandsB2F',
-                  'id': 2, 'to': {'map': 'Seafoam Islands B1F', 'id': 2}}], 'Seafoam Islands B2F-NW': [
-        {'address': 'Warps_SeafoamIslandsB2F', 'id': 0, 'to': {'map': 'Seafoam Islands B1F', 'id': 0}}],
-             'Seafoam Islands B3F': [
-                 {'address': 'Warps_SeafoamIslandsB3F', 'id': 0, 'to': {'map': 'Seafoam Islands B2F-SW', 'id': 1}},
-                 {'address': 'Warps_SeafoamIslandsB3F', 'id': 1, 'to': {'map': 'Seafoam Islands B4F', 'id': 2}}
-                 ], 'Seafoam Islands B3F-SE': [
-        {'address': 'Warps_SeafoamIslandsB3F', 'id': 4, 'to': {'map': 'Seafoam Islands B2F-SE', 'id': 6}}],
-             'Seafoam Islands B3F-Wild': [], 'Seafoam Islands B3F-NE': [
-        {'address': 'Warps_SeafoamIslandsB3F', 'id': 2, 'to': {'map': 'Seafoam Islands B4F', 'id': 3}},
-        {'address': 'Warps_SeafoamIslandsB3F', 'id': 3, 'to': {'map': 'Seafoam Islands B2F-NE', 'id': 4}}],
-             'Seafoam Islands B4F-W': [],
-             'Seafoam Islands B4F': [
-                                     {'address': 'Warps_SeafoamIslandsB4F', 'id': 2,
-                                      'to': {'map': 'Seafoam Islands B3F', 'id': 1}},
-                                     {'address': 'Warps_SeafoamIslandsB4F', 'id': 3,
-                                      'to': {'map': 'Seafoam Islands B3F-NE', 'id': 2}}],
-             'Route 7': [{'address': 'Warps_Route7', 'id': 3, 'to': {'map': 'Route 7 Gate-W', 'id': (0, 1)}},
-                         {'address': 'Warps_Route7', 'id': 4, 'to': {'map': 'Underground Path Route 7', 'id': 0}}],
-             'Route 7-E': [{'address': 'Warps_Route7', 'id': (0, 1), 'to': {'map': 'Route 7 Gate-E', 'id': (2, 3)}}],
-             "Player's House 1F": [
-                 {'address': 'Warps_RedsHouse1F', 'id': (0, 1), 'to': {'map': 'Pallet Town', 'id': 0}},
-                 {'address': 'Warps_RedsHouse1F', 'id': 2, 'to': {'map': "Player's House 2F", 'id': 0}}],
-             'Celadon Department Store 3F': [
-                 {'address': 'Warps_CeladonMart3F', 'id': 0, 'to': {'map': 'Celadon Department Store 4F', 'id': 0}},
-                 {'address': 'Warps_CeladonMart3F', 'id': 1, 'to': {'map': 'Celadon Department Store 2F', 'id': 1}},
-                 {'address': 'Warps_CeladonMart3F', 'id': 2,
-                  'to': {'map': 'Celadon Department Store Elevator-3F', 'id': 2}}], 'Celadon Department Store 4F': [
-        {'address': 'Warps_CeladonMart4F', 'id': 0, 'to': {'map': 'Celadon Department Store 3F', 'id': 0}},
-        {'address': 'Warps_CeladonMart4F', 'id': 1, 'to': {'map': 'Celadon Department Store 5F', 'id': 1}},
-        {'address': 'Warps_CeladonMart4F', 'id': 2, 'to': {'map': 'Celadon Department Store Elevator-4F', 'id': 3}}],
-             'Celadon Department Store Roof': [
-                 {'address': 'Warps_CeladonMartRoof', 'id': 0, 'to': {'map': 'Celadon Department Store 5F', 'id': 0}}],
-             'Celadon Department Store Elevator-1F': [{'address': 'CeladonMartElevatorWarpMaps', 'id': 0,
-                                                       'to': {'map': 'Celadon Department Store 1F', 'id': 5}}],
-             'Celadon Department Store Elevator-2F': [{'address': 'CeladonMartElevatorWarpMaps', 'id': 1,
-                                                       'to': {'map': 'Celadon Department Store 2F', 'id': 2}}],
-             'Celadon Department Store Elevator-3F': [{'address': 'CeladonMartElevatorWarpMaps', 'id': 2,
-                                                       'to': {'map': 'Celadon Department Store 3F', 'id': 2}}],
-             'Celadon Department Store Elevator-4F': [{'address': 'CeladonMartElevatorWarpMaps', 'id': 3,
-                                                       'to': {'map': 'Celadon Department Store 4F', 'id': 2}}],
-             'Celadon Department Store Elevator-5F': [{'address': 'CeladonMartElevatorWarpMaps', 'id': 4,
-                                                       'to': {'map': 'Celadon Department Store 5F', 'id': 2}}],
-             'Celadon Mansion 1F': [
-                 {'address': 'Warps_CeladonMansion1F', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 2}},
-                 {'address': 'Warps_CeladonMansion1F', 'id': 3, 'to': {'map': 'Celadon Mansion 2F', 'id': 1}}],
-             'Celadon Mansion 1F-Back': [
-                 {'address': 'Warps_CeladonMansion1F', 'id': 4, 'to': {'map': 'Celadon Mansion 2F-Back', 'id': 2}},
-                 {'address': 'Warps_CeladonMansion1F', 'id': 2, 'to': {'map': 'Celadon City', 'id': 4}}],
-             'Celadon Mansion 2F': [
-                 {'address': 'Warps_CeladonMansion2F', 'id': 0, 'to': {'map': 'Celadon Mansion 3F', 'id': 0}},
-                 {'address': 'Warps_CeladonMansion2F', 'id': 1, 'to': {'map': 'Celadon Mansion 1F', 'id': 3}}],
-             'Celadon Mansion 2F-Back': [
-                 {'address': 'Warps_CeladonMansion2F', 'id': 2, 'to': {'map': 'Celadon Mansion 1F-Back', 'id': 4}},
-                 {'address': 'Warps_CeladonMansion2F', 'id': 3, 'to': {'map': 'Celadon Mansion 3F-Back', 'id': 3}}],
-             'Celadon Mansion 3F': [
-                 {'address': 'Warps_CeladonMansion3F', 'id': 0, 'to': {'map': 'Celadon Mansion 2F', 'id': 0}},
-                 {'address': 'Warps_CeladonMansion3F', 'id': 1, 'to': {'map': 'Celadon Mansion Roof', 'id': 0}}],
-             'Celadon Mansion 3F-Back': [
-                 {'address': 'Warps_CeladonMansion3F', 'id': 2, 'to': {'map': 'Celadon Mansion Roof-Back', 'id': 1}},
-                 {'address': 'Warps_CeladonMansion3F', 'id': 3, 'to': {'map': 'Celadon Mansion 2F-Back', 'id': 3}}],
-             'Celadon Mansion Roof': [
-                 {'address': 'Warps_CeladonMansionRoof', 'id': 0, 'to': {'map': 'Celadon Mansion 3F', 'id': 1}}],
-             'Celadon Mansion Roof-Back': [
-                 {'address': 'Warps_CeladonMansionRoof', 'id': 1, 'to': {'map': 'Celadon Mansion 3F-Back', 'id': 2}},
-                 {'address': 'Warps_CeladonMansionRoof', 'id': 2,
-                  'to': {'map': 'Celadon Mansion Roof House', 'id': 0}}], 'Celadon Pokemon Center': [
-        {'address': 'Warps_CeladonPokecenter', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 5}}],
-             'Celadon Gym': [{'address': 'Warps_CeladonGym', 'id': (0, 1), 'to': {'map': 'Celadon City-G', 'id': 6}}],
-             'Celadon Gym-C': [], 'Celadon Game Corner': [
-        {'address': 'Warps_GameCorner', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 7}}],
-             'Celadon Game Corner-Hidden Stairs': [
-                 {'address': 'Warps_GameCorner', 'id': 2, 'to': {'map': 'Rocket Hideout B1F', 'id': 1}}],
-             'Celadon Department Store 5F': [
-                 {'address': 'Warps_CeladonMart5F', 'id': 0, 'to': {'map': 'Celadon Department Store Roof', 'id': 0}},
-                 {'address': 'Warps_CeladonMart5F', 'id': 1, 'to': {'map': 'Celadon Department Store 4F', 'id': 1}},
-                 {'address': 'Warps_CeladonMart5F', 'id': 2,
-                  'to': {'map': 'Celadon Department Store Elevator-5F', 'id': 4}}], 'Celadon Prize Corner': [
-        {'address': 'Warps_GameCornerPrizeRoom', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 9}}],
-             'Celadon Diner': [
-                 {'address': 'Warps_CeladonDiner', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 10}}],
-             'Celadon Chief House': [
-                 {'address': 'Warps_CeladonChiefHouse', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 11}}],
-             'Celadon Hotel': [
-                 {'address': 'Warps_CeladonHotel', 'id': (0, 1), 'to': {'map': 'Celadon City', 'id': 12}}],
-             'Route 4 Pokemon Center': [
-                 {'address': 'Warps_MtMoonPokecenter', 'id': (0, 1), 'to': {'map': 'Route 4-W', 'id': 0}}],
-             'Rock Tunnel Pokemon Center': [
-                 {'address': 'Warps_RockTunnelPokecenter', 'id': (0, 1), 'to': {'map': 'Route 10-N', 'id': 0}}],
-             'Route 11 Gate 1F': [
-                 {'address': 'Warps_Route11Gate1F', 'id': (0, 1), 'to': {'map': 'Route 11-C', 'id': (0, 1)}},
-                 {'address': 'Warps_Route11Gate1F', 'id': (2, 3), 'to': {'map': 'Route 11-E', 'id': (2, 3)}},
-                 {'address': 'Warps_Route11Gate1F', 'id': 4, 'to': {'map': 'Route 11 Gate 2F', 'id': 0}}],
-             'Route 11 Gate 2F': [
-                 {'address': 'Warps_Route11Gate2F', 'id': 0, 'to': {'map': 'Route 11 Gate 1F', 'id': 4}}],
-             'Route 12 Gate 1F': [
-                 {'address': 'Warps_Route12Gate1F', 'id': (0, 1), 'to': {'map': 'Route 12-L', 'id': (0, 1)}},
-                 {'address': 'Warps_Route12Gate1F', 'id': (2, 3), 'to': {'map': 'Route 12-N', 'id': 2}},
-                 {'address': 'Warps_Route12Gate1F', 'id': 4, 'to': {'map': 'Route 12 Gate 2F', 'id': 0}}],
-             'Route 12 Gate 2F': [
-                 {'address': 'Warps_Route12Gate2F', 'id': 0, 'to': {'map': 'Route 12 Gate 1F', 'id': 4}}],
-             'Route 15 Gate 1F': [
-                 {'address': 'Warps_Route15Gate1F', 'id': (0, 1), 'to': {'map': 'Route 15-W', 'id': (0, 1)}},
-                 {'address': 'Warps_Route15Gate1F', 'id': (2, 3), 'to': {'map': 'Route 15', 'id': (2, 3)}},
-                 {'address': 'Warps_Route15Gate1F', 'id': 4, 'to': {'map': 'Route 15 Gate 2F', 'id': 0}}],
-             'Route 15 Gate 2F': [
-                 {'address': 'Warps_Route15Gate2F', 'id': 0, 'to': {'map': 'Route 15 Gate 1F', 'id': 4}}],
-             'Route 16 Gate 1F-W': [
-                 {'address': 'Warps_Route16Gate1F', 'id': (0, 1), 'to': {'map': 'Route 16-SW', 'id': (0, 1)}}],
-             'Route 16 Gate 1F-E': [
-                 {'address': 'Warps_Route16Gate1F', 'id': (2, 3), 'to': {'map': 'Route 16-C', 'id': 2}},
-                 {'address': 'Warps_Route16Gate1F', 'id': 8, 'to': {'map': 'Route 16 Gate 2F', 'id': 0}}],
-             'Route 16 Gate 1F-N': [
-                 {'address': 'Warps_Route16Gate1F', 'id': (4, 5), 'to': {'map': 'Route 16-NW', 'id': (4, 5)}},
-                 {'address': 'Warps_Route16Gate1F', 'id': (6, 7), 'to': {'map': 'Route 16-NE', 'id': (6, 7)}}],
-             'Route 16 Gate 2F': [
-                 {'address': 'Warps_Route16Gate2F', 'id': 0, 'to': {'map': 'Route 16 Gate 1F-E', 'id': 8}}],
-             'Route 18 Gate 1F-W': [
-                 {'address': 'Warps_Route18Gate1F', 'id': (0, 1), 'to': {'map': 'Route 18-W', 'id': (0, 1)}}],
-             'Route 18 Gate 1F-E': [
-                 {'address': 'Warps_Route18Gate1F', 'id': (2, 3), 'to': {'map': 'Route 18-E', 'id': (2, 3)}},
-                 {'address': 'Warps_Route18Gate1F', 'id': 4, 'to': {'map': 'Route 18 Gate 2F', 'id': 0}}],
-             'Route 18 Gate 2F': [
-                 {'address': 'Warps_Route18Gate2F', 'id': 0, 'to': {'map': 'Route 18 Gate 1F-E', 'id': 4}}],
-             'Mt Moon 1F': [{'address': 'Warps_MtMoon1F', 'id': (0, 1), 'to': {'map': 'Route 4-W', 'id': 1}},
-                            {'address': 'Warps_MtMoon1F', 'id': 2, 'to': {'map': 'Mt Moon B1F-W', 'id': 0}},
-                            {'address': 'Warps_MtMoon1F', 'id': 3, 'to': {'map': 'Mt Moon B1F-C', 'id': 2}},
-                            {'address': 'Warps_MtMoon1F', 'id': 4, 'to': {'map': 'Mt Moon B1F-SE', 'id': 3}}],
-             'Mt Moon B2F': [{'address': 'Warps_MtMoonB2F', 'id': 1, 'to': {'map': 'Mt Moon B1F-W', 'id': 4}},
-                             {'address': 'Warps_MtMoonB2F', 'id': 3, 'to': {'map': 'Mt Moon B1F-NE', 'id': 6}}],
-             'Mt Moon B2F-NE': [{'address': 'Warps_MtMoonB2F', 'id': 0, 'to': {'map': 'Mt Moon B1F-C', 'id': 1}}],
-             'Mt Moon B2F-C': [{'address': 'Warps_MtMoonB2F', 'id': 2, 'to': {'map': 'Mt Moon B1F-SE', 'id': 5}}],
-             'Mt Moon B2F-Wild': [], 'Victory Road 1F-Wild': [], 'Pallet/Viridian Fishing': [], 'Route 22 Fishing': [],
-             'Route 24/25/Cerulean/Cerulean Gym Fishing': [], 'Route 6/11/Vermilion/Dock Fishing': [],
-             'Route 10/Celadon Fishing': [], 'Safari Zone Fishing': [], 'Route 12/13/17/18 Fishing': [],
-             'Sea Routes/Cinnabar/Seafoam Fishing': [], 'Route 23/Cerulean Cave Fishing': [], 'Fuchsia Fishing': [],
-             'Safari Zone West': [
-                 {'address': 'Warps_SafariZoneWest', 'id': (2, 3), 'to': {'map': 'Safari Zone North', 'id': (2, 3)}},
-                 {'address': 'Warps_SafariZoneWest', 'id': (4, 5),
-                  'to': {'map': 'Safari Zone Center-NW', 'id': (2, 3)}},
-                 {'address': 'Warps_SafariZoneWest', 'id': 7, 'to': {'map': 'Safari Zone West Rest House', 'id': 0}}],
-             'Safari Zone West-NW': [
-                 {'address': 'Warps_SafariZoneWest', 'id': (0, 1), 'to': {'map': 'Safari Zone North', 'id': (0, 1)}},
-                 {'address': 'Warps_SafariZoneWest', 'id': 6, 'to': {'map': 'Safari Zone Secret House', 'id': 0}}],
-             'Safari Zone West-Wild': [], 'Safari Zone Secret House': [
-        {'address': 'Warps_SafariZoneSecretHouse', 'id': (0, 1), 'to': {'map': 'Safari Zone West-NW', 'id': 6}}],
-             'Route 22': [{'address': 'Warps_Route22', 'id': 0, 'to': {'map': 'Route 22 Gate-S', 'id': (0, 1)}}],
-             'Route 22-F': [],
-             'Route 20-IW': [{'address': 'Warps_Route20', 'id': 0, 'to': {'map': 'Seafoam Islands 1F-SE', 'id': 0}}],
-             'Route 20-IE': [{'address': 'Warps_Route20', 'id': 1, 'to': {'map': 'Seafoam Islands 1F', 'id': 2}}],
-             'Route 20-E': [], 'Route 20-W': [], 'Route 19/20-Water': [],
-             'Route 23-S': [{'address': 'Warps_Route23', 'id': (0, 1), 'to': {'map': 'Route 22 Gate-N', 'id': (2, 3)}}],
-             'Route 23-C': [{'address': 'Warps_Route23', 'id': 2, 'to': {'map': 'Victory Road 1F-S', 'id': 0}}],
-             'Route 23-N': [{'address': 'Warps_Route23', 'id': 3, 'to': {'map': 'Victory Road 2F-E', 'id': 1}}],
-             'Route 23-Grass': [], 'Route 24': [],
-             'Route 25': [{'address': 'Warps_Route25', 'id': 0, 'to': {'map': "Bill's House", 'id': 0}}],
-             'Indigo Plateau': [
-                 {'address': 'Warps_IndigoPlateau', 'id': (0, 1), 'to': {'map': 'Indigo Plateau Lobby', 'id': (0, 1)}}],
-             'Saffron City': [
-                 {'address': 'Warps_SaffronCity', 'id': 1, 'to': {'map': 'Saffron Fighting Dojo', 'id': 0}},
-                 {'address': 'Warps_SaffronCity', 'id': 4, 'to': {'map': 'Saffron Pokemart', 'id': 0}},
-                 {'address': 'Warps_SaffronCity', 'id': 6, 'to': {'map': 'Saffron Pokemon Center', 'id': 0}},
-                 {'address': 'Warps_SaffronCity', 'id': 7, 'to': {'map': "Saffron Mr. Psychic's House", 'id': 0}}],
-             'Saffron City-Pidgey': [
-                 {'address': 'Warps_SaffronCity', 'id': 3, 'to': {'map': 'Saffron Pidgey House', 'id': 0}}],
-             'Saffron City-Copycat': [
-                 {'address': 'Warps_SaffronCity', 'id': 0, 'to': {'map': "Saffron Copycat's House 1F", 'id': 0}}],
-             'Saffron City-G': [{'address': 'Warps_SaffronCity', 'id': 2, 'to': {'map': 'Saffron Gym-S', 'id': 0}}],
-             'Saffron City-Silph': [{'address': 'Warps_SaffronCity', 'id': 5, 'to': {'map': 'Silph Co 1F', 'id': 0}}],
-             'Victory Road 2F-E': [
-                 {'address': 'Warps_VictoryRoad2F', 'id': (1, 2), 'to': {'map': 'Route 23-N', 'id': 3}},
-                 {'address': 'Warps_VictoryRoad2F', 'id': 5, 'to': {'map': 'Victory Road 3F-SE', 'id': 1}}],
-             'Victory Road 2F-W': [
-                 {'address': 'Warps_VictoryRoad2F', 'id': 0, 'to': {'map': 'Victory Road 1F', 'id': 2}}],
-             'Victory Road 2F-NW': [
-                 {'address': 'Warps_VictoryRoad2F', 'id': 6, 'to': {'map': 'Victory Road 3F', 'id': 3}}],
-             'Victory Road 2F-C': [
-                 {'address': 'Warps_VictoryRoad2F', 'id': 3, 'to': {'map': 'Victory Road 3F', 'id': 0}}],
-             'Victory Road 2F-SE': [
-                 {'address': 'Warps_VictoryRoad2F', 'id': 4, 'to': {'map': 'Victory Road 3F-SE', 'id': 2}}],
-             'Victory Road 2F-Wild': [],
-             'Mt Moon B1F-W': [{'address': 'Warps_MtMoonB1F', 'id': 0, 'to': {'map': 'Mt Moon 1F', 'id': 2}},
-                               {'address': 'Warps_MtMoonB1F', 'id': 4, 'to': {'map': 'Mt Moon B2F', 'id': 1}}],
-             'Mt Moon B1F-C': [{'address': 'Warps_MtMoonB1F', 'id': 1, 'to': {'map': 'Mt Moon B2F-NE', 'id': 0}},
-                               {'address': 'Warps_MtMoonB1F', 'id': 2, 'to': {'map': 'Mt Moon 1F', 'id': 3}}],
-             'Mt Moon B1F-NE': [{'address': 'Warps_MtMoonB1F', 'id': 6, 'to': {'map': 'Mt Moon B2F', 'id': 3}},
-                                {'address': 'Warps_MtMoonB1F', 'id': 7, 'to': {'map': 'Route 4-C', 'id': 2}}],
-             'Mt Moon B1F-SE': [{'address': 'Warps_MtMoonB1F', 'id': 3, 'to': {'map': 'Mt Moon 1F', 'id': 4}},
-                                {'address': 'Warps_MtMoonB1F', 'id': 5, 'to': {'map': 'Mt Moon B2F-C', 'id': 2}}],
-             'Mt Moon B1F-Wild': [],
-             'Silph Co 7F': [{'address': 'Warps_SilphCo7F', 'id': 0, 'to': {'map': 'Silph Co 8F', 'id': 1}},
-                             {'address': 'Warps_SilphCo7F', 'id': 1, 'to': {'map': 'Silph Co 6F', 'id': 0}},
-                             {'address': 'Warps_SilphCo7F', 'id': 2, 'to': {'map': 'Silph Co Elevator-7F', 'id': 6}}],
-             'Silph Co 7F-NW': [{'address': 'Warps_SilphCo7F', 'id': 4, 'to': {'map': 'Silph Co 3F-C', 'id': 8}},
-                                {'address': 'Warps_SilphCo7F', 'id': 3, 'to': {'map': 'Silph Co 11F-W', 'id': 3}}],
-             'Silph Co 7F-SE': [{'address': 'Warps_SilphCo7F', 'id': 5, 'to': {'map': 'Silph Co 5F', 'id': 3}}],
-             'Silph Co 7F-E': [], 'Silph Co 11F-C': [],
-             'Route 2-NW': [{'address': 'Warps_Route2', 'id': 1, 'to': {'map': 'Viridian Forest North Gate', 'id': 1}}],
-             'Route 2-SW': [{'address': 'Warps_Route2', 'id': 5, 'to': {'map': 'Viridian Forest South Gate', 'id': 2}}],
-             'Route 2-NE': [{'address': 'Warps_Route2', 'id': 0, 'to': {'map': "Diglett's Cave Route 2", 'id': 0}},
-                            {'address': 'Warps_Route2', 'id': 2, 'to': {'map': 'Route 2 Trade House', 'id': 0}}],
-             'Route 2-E': [{'address': 'Warps_Route2', 'id': 3, 'to': {'map': 'Route 2 Gate', 'id': 1}}],
-             'Route 2-SE': [{'address': 'Warps_Route2', 'id': 4, 'to': {'map': 'Route 2 Gate', 'id': 2}}],
-             'Route 2-Grass': [], 'Route 3': [],
-             'Route 4-W': [{'address': 'Warps_Route4', 'id': 0, 'to': {'map': 'Route 4 Pokemon Center', 'id': 0}},
-                           {'address': 'Warps_Route4', 'id': 1, 'to': {'map': 'Mt Moon 1F', 'id': 0}}],
-             'Route 4-C': [{'address': 'Warps_Route4', 'id': 2, 'to': {'map': 'Mt Moon B1F-NE', 'id': 7}}],
-             'Route 4-Lass': [], 'Route 4-E': [],
-             'Route 5': [{'address': 'Warps_Route5', 'id': (1, 0), 'to': {'map': 'Route 5 Gate-N', 'id': (3, 2)}},
-                         {'address': 'Warps_Route5', 'id': 3, 'to': {'map': 'Underground Path Route 5', 'id': 0}},
-                         {'address': 'Warps_Route5', 'id': 4, 'to': {'map': 'Daycare', 'id': 0}}], 'Route 9': [],
-             'Route 5-S': [{'address': 'Warps_Route5', 'id': 2, 'to': {'map': 'Route 5 Gate-S', 'id': 0}}],
-             'Route 13': [], 'Route 13-E': [], 'Route 13-Grass': [], 'Route 14': [], 'Route 14-Grass': [],
-             'Route 17': [], 'Route 19-S': [], 'Route 19-N': [], 'Route 21': [], 'Vermilion Old Rod House': [
-        {'address': 'Warps_VermilionOldRodHouse', 'id': (0, 1), 'to': {'map': 'Vermilion City', 'id': 8}}],
-             'Celadon Department Store 2F': [
-                 {'address': 'Warps_CeladonMart2F', 'id': 0, 'to': {'map': 'Celadon Department Store 1F', 'id': 4}},
-                 {'address': 'Warps_CeladonMart2F', 'id': 1, 'to': {'map': 'Celadon Department Store 3F', 'id': 1}},
-                 {'address': 'Warps_CeladonMart2F', 'id': 2,
-                  'to': {'map': 'Celadon Department Store Elevator-2F', 'id': 1}}], 'Fuchsia Good Rod House': [
-        {'address': 'Warps_FuchsiaGoodRodHouse', 'id': 0,
-         'to': {'map': 'Fuchsia City-Good Rod House Backyard', 'id': 8}},
-        {'address': 'Warps_FuchsiaGoodRodHouse', 'id': (1, 2), 'to': {'map': 'Fuchsia City', 'id': 7}}],
-             'Daycare': [{'address': 'Warps_Daycare', 'id': (0, 1), 'to': {'map': 'Route 5', 'id': 4}}],
-             'Route 12 Super Rod House': [
-                 {'address': 'Warps_Route12SuperRodHouse', 'id': (0, 1), 'to': {'map': 'Route 12-S', 'id': 3}}],
-             'Silph Co 8F': [{'address': 'Warps_SilphCo8F', 'id': 0, 'to': {'map': 'Silph Co 9F', 'id': 1}},
-                             {'address': 'Warps_SilphCo8F', 'id': 1, 'to': {'map': 'Silph Co 7F', 'id': 0}},
-                             {'address': 'Warps_SilphCo8F', 'id': 2, 'to': {'map': 'Silph Co Elevator-8F', 'id': 7}},
-                             {'name': 'Silph Co 8F to Silph Co 2F S', 'address': 'Warps_SilphCo8F', 'id': 4,
-                              'to': {'map': 'Silph Co 2F', 'id': 4}},
-                             {'name': 'Silph Co 8F to Silph Co 2F N', 'address': 'Warps_SilphCo8F', 'id': 5,
-                              'to': {'map': 'Silph Co 2F', 'id': 5}},
-                             {'address': 'Warps_SilphCo8F', 'id': 6, 'to': {'map': 'Silph Co 8F-W', 'id': 3}}],
-             'Silph Co 8F-W': [{'address': 'Warps_SilphCo8F', 'id': 3, 'to': {'map': 'Silph Co 8F', 'id': 6}}],
-             'Route 6': [{'address': 'Warps_Route6', 'id': 2, 'to': {'map': 'Route 6 Gate-S', 'id': 0}},
-                         {'address': 'Warps_Route6', 'id': 3, 'to': {'map': 'Underground Path Route 6', 'id': 0}}],
-             'Route 6-N': [{'address': 'Warps_Route6', 'id': 1, 'to': {'map': 'Route 6 Gate-N', 'id': 2}}],
-             'Route 8-W': [{'address': 'Warps_Route8', 'id': (0, 1), 'to': {'map': 'Route 8 Gate-W', 'id': (0, 1)}}],
-             'Route 8': [{'address': 'Warps_Route8', 'id': (2, 3), 'to': {'map': 'Route 8 Gate-E', 'id': (2, 3)}},
-                         {'address': 'Warps_Route8', 'id': 4, 'to': {'map': 'Underground Path Route 8', 'id': 0}}],
-             'Route 8-Grass': [],
-             'Route 10-N': [{'address': 'Warps_Route10', 'id': 0, 'to': {'map': 'Rock Tunnel Pokemon Center', 'id': 0}},
-                            {'address': 'Warps_Route10', 'id': 1, 'to': {'map': 'Rock Tunnel 1F-NE 1', 'id': 0}}],
-             'Route 10-S': [{'address': 'Warps_Route10', 'id': 2, 'to': {'map': 'Rock Tunnel 1F-S 1', 'id': 2}}],
-             'Route 10-P': [{'address': 'Warps_Route10', 'id': 3, 'to': {'map': 'Power Plant', 'id': 0}}],
-             'Route 10-C': [],
-             'Route 11': [{'address': 'Warps_Route11', 'id': 4, 'to': {'map': "Diglett's Cave Route 11", 'id': 0}}],
-             'Route 11-E': [
-                 {'address': 'Warps_Route11', 'id': (2, 3), 'to': {'map': 'Route 11 Gate 1F', 'id': (2, 3)}}],
-             'Route 11-C': [
-                 {'address': 'Warps_Route11', 'id': (0, 1), 'to': {'map': 'Route 11 Gate 1F', 'id': (0, 1)}}],
-             'Route 12-L': [
-                 {'address': 'Warps_Route12', 'id': (0, 1), 'to': {'map': 'Route 12 Gate 1F', 'id': (0, 1)}}],
-             'Route 12-N': [{'address': 'Warps_Route12', 'id': 2, 'to': {'map': 'Route 12 Gate 1F', 'id': 2}}],
-             'Route 12-S': [{'address': 'Warps_Route12', 'id': 3, 'to': {'map': 'Route 12 Super Rod House', 'id': 0}}],
-             'Route 12-W': [], 'Route 12-Grass': [], 'Route 15-N': [], 'Route 15-W': [
-        {'address': 'Warps_Route15', 'id': (0, 1), 'to': {'map': 'Route 15 Gate 1F', 'id': (0, 1)}}],
-             'Route 15': [{'address': 'Warps_Route15', 'id': (2, 3), 'to': {'map': 'Route 15 Gate 1F', 'id': (2, 3)}}],
-             'Route 16-E': [],
-             'Route 16-C': [{'address': 'Warps_Route16', 'id': 2, 'to': {'map': 'Route 16 Gate 1F-E', 'id': (2, 3)}}],
-             'Route 16-SW': [
-                 {'address': 'Warps_Route16', 'id': (0, 1), 'to': {'map': 'Route 16 Gate 1F-W', 'id': (0, 1)}}],
-             'Route 16-NW': [
-                 {'address': 'Warps_Route16', 'id': (4, 5), 'to': {'map': 'Route 16 Gate 1F-N', 'id': (4, 5)}},
-                 {'address': 'Warps_Route16', 'id': 8, 'to': {'map': 'Route 16 Fly House', 'id': 0}}], 'Route 16-NE': [
-        {'address': 'Warps_Route16', 'id': (6, 7), 'to': {'map': 'Route 16 Gate 1F-N', 'id': (6, 7)}}], 'Route 18-W': [
-        {'address': 'Warps_Route18', 'id': (0, 1), 'to': {'map': 'Route 18 Gate 1F-W', 'id': (0, 1)}}], 'Route 18-E': [
-        {'address': 'Warps_Route18', 'id': (2, 3), 'to': {'map': 'Route 18 Gate 1F-E', 'id': (2, 3)}}],
-             'Vermilion Pokemon Fan Club': [
-                 {'address': 'Warps_PokemonFanClub', 'id': (0, 1), 'to': {'map': 'Vermilion City', 'id': 1}}],
-             'Silph Co 2F-NW': [{'address': 'Warps_SilphCo2F', 'id': 3, 'to': {'map': 'Silph Co 3F', 'id': 6}}],
-             'Silph Co 2F': [{'address': 'Warps_SilphCo2F', 'id': 0, 'to': {'map': 'Silph Co 1F', 'id': 2}},
-                             {'address': 'Warps_SilphCo2F', 'id': 1, 'to': {'map': 'Silph Co 3F', 'id': 0}},
-                             {'address': 'Warps_SilphCo2F', 'id': 2, 'to': {'map': 'Silph Co Elevator-2F', 'id': 1}},
-                             {'name': 'Silph Co 2F to Silph Co 8F N', 'address': 'Warps_SilphCo2F', 'id': 4,
-                              'to': {'map': 'Silph Co 8F', 'id': 4}},
-                             {'name': 'Silph Co 2F to Silph Co 8F S', 'address': 'Warps_SilphCo2F', 'id': 5,
-                              'to': {'map': 'Silph Co 8F', 'id': 5}}],
-             'Silph Co 2F-SW': [{'address': 'Warps_SilphCo2F', 'id': 6, 'to': {'map': 'Silph Co 6F', 'id': 4}}],
-             'Silph Co 3F': [{'address': 'Warps_SilphCo3F', 'id': 0, 'to': {'map': 'Silph Co 2F', 'id': 1}},
-                             {'address': 'Warps_SilphCo3F', 'id': 1, 'to': {'map': 'Silph Co 4F', 'id': 0}},
-                             {'address': 'Warps_SilphCo3F', 'id': 2, 'to': {'map': 'Silph Co Elevator-3F', 'id': 2}},
-                             {'name': 'Silph Co 3F to Silph Co 3F N', 'address': 'Warps_SilphCo3F', 'id': 3,
-                              'to': {'map': 'Silph Co 3F', 'id': 9}},
-                             {'address': 'Warps_SilphCo3F', 'id': 4, 'to': {'map': 'Silph Co 5F', 'id': 5}},
-                             {'address': 'Warps_SilphCo3F', 'id': 5, 'to': {'map': 'Silph Co 5F-SW', 'id': 6}},
-                             {'address': 'Warps_SilphCo3F', 'id': 6, 'to': {'map': 'Silph Co 2F-NW', 'id': 3}},
-                             {'name': 'Silph Co 3F to Silph Co 3F S', 'address': 'Warps_SilphCo3F', 'id': 9,
-                              'to': {'map': 'Silph Co 3F', 'id': 3}}],
-             'Silph Co 3F-C': [{'address': 'Warps_SilphCo3F', 'id': 8, 'to': {'map': 'Silph Co 7F-NW', 'id': 4}}],
-             'Silph Co 3F-W': [{'address': 'Warps_SilphCo3F', 'id': 7, 'to': {'map': 'Silph Co 9F-NW', 'id': 3}}],
-             'Silph Co 10F': [{'address': 'Warps_SilphCo10F', 'id': 0, 'to': {'map': 'Silph Co 9F', 'id': 0}},
-                              {'address': 'Warps_SilphCo10F', 'id': 1, 'to': {'map': 'Silph Co 11F', 'id': 0}},
-                              {'address': 'Warps_SilphCo10F', 'id': 2, 'to': {'map': 'Silph Co Elevator-10F', 'id': 9}},
-                              {'address': 'Warps_SilphCo10F', 'id': 5, 'to': {'map': 'Silph Co 4F', 'id': 6}}],
-             'Silph Co 10F-SE': [{'address': 'Warps_SilphCo10F', 'id': 3, 'to': {'map': 'Silph Co 4F-N', 'id': 3}},
-                                 {'address': 'Warps_SilphCo10F', 'id': 4, 'to': {'map': 'Silph Co 4F', 'id': 5}}],
-             "Indigo Plateau Lance's Room": [
-                 {'address': 'Warps_LancesRoom', 'id': 0, 'to': {'map': "Indigo Plateau Agatha's Room", 'id': 2}},
-                 {'address': 'Warps_LancesRoom', 'id': (1, 2),
-                  'to': {'map': "Indigo Plateau Champion's Room", 'id': 0}}], 'Indigo Plateau Hall of Fame': [
-        {'address': 'Warps_HallOfFame', 'id': 0, 'to': {'map': "Indigo Plateau Champion's Room", 'id': (2, 3)}}],
-             "Player's House 2F": [
-                 {'address': 'Warps_RedsHouse2F', 'id': 0, 'to': {'map': "Player's House 1F", 'id': 2}}],
-             'Pewter Museum 1F': [{'address': 'Warps_Museum1F', 'id': (0, 1), 'to': {'map': 'Pewter City', 'id': 0}},
-                                  {'address': 'Warps_Museum1F', 'id': 4, 'to': {'map': 'Pewter Museum 2F', 'id': 0}}],
-             'Pewter Museum 1F-E': [
-                 {'address': 'Warps_Museum1F', 'id': (2, 3), 'to': {'map': 'Pewter City-M', 'id': 1}}],
-             'Pewter Museum 2F': [{'address': 'Warps_Museum2F', 'id': 0, 'to': {'map': 'Pewter Museum 1F', 'id': 4}}],
-             'Pewter Gym': [{'address': 'Warps_PewterGym', 'id': (0, 1), 'to': {'map': 'Pewter City', 'id': 2}}],
-             'Pewter Pokemon Center': [
-                 {'address': 'Warps_PewterPokecenter', 'id': (0, 1), 'to': {'map': 'Pewter City', 'id': 6}}],
-             'Cerulean Pokemon Center': [
-                 {'address': 'Warps_CeruleanPokecenter', 'id': (0, 1), 'to': {'map': 'Cerulean City', 'id': 2}}],
-             'Cerulean Gym': [{'address': 'Warps_CeruleanGym', 'id': (0, 1), 'to': {'map': 'Cerulean City', 'id': 3}}],
-             'Cerulean Pokemart': [
-                 {'address': 'Warps_CeruleanMart', 'id': (0, 1), 'to': {'map': 'Cerulean City', 'id': 5}}],
-             'Lavender Pokemon Center': [
-                 {'address': 'Warps_LavenderPokecenter', 'id': (0, 1), 'to': {'map': 'Lavender Town', 'id': 0}}],
-             'Lavender Pokemart': [
-                 {'address': 'Warps_LavenderMart', 'id': (0, 1), 'to': {'map': 'Lavender Town', 'id': 3}}],
-             'Vermilion Pokemon Center': [
-                 {'address': 'Warps_VermilionPokecenter', 'id': (0, 1), 'to': {'map': 'Vermilion City', 'id': 0}}],
-             'Vermilion Pokemart': [
-                 {'address': 'Warps_VermilionMart', 'id': (0, 1), 'to': {'map': 'Vermilion City', 'id': 2}}],
-             'Vermilion Gym': [
-                 {'address': 'Warps_VermilionGym', 'id': (0, 1), 'to': {'map': 'Vermilion City-G', 'id': 3}}],
-             "Saffron Copycat's House 2F": [
-                 {'address': 'Warps_CopycatsHouse2F', 'id': 0, 'to': {'map': "Saffron Copycat's House 1F", 'id': 2}}],
-             'Saffron Fighting Dojo': [
-                 {'address': 'Warps_FightingDojo', 'id': (0, 1), 'to': {'map': 'Saffron City', 'id': 1}}],
-             'Saffron Gym-NW': [{'address': 'Warps_SaffronGym', 'id': 2, 'to': {'map': 'Saffron Gym-NE', 'id': 22}},
-                                {'address': 'Warps_SaffronGym', 'id': 3, 'to': {'map': 'Saffron Gym-N', 'id': 15}},
-                                {'address': 'Warps_SaffronGym', 'id': 4, 'to': {'map': 'Saffron Gym-C', 'id': 18}},
-                                {'address': 'Warps_SaffronGym', 'id': 5, 'to': {'map': 'Saffron Gym-W', 'id': 8}}],
-             'Saffron Gym-W': [{'address': 'Warps_SaffronGym', 'id': 6, 'to': {'map': 'Saffron Gym-E', 'id': 27}},
-                               {'address': 'Warps_SaffronGym', 'id': 7, 'to': {'map': 'Saffron Gym-N', 'id': 16}},
-                               {'address': 'Warps_SaffronGym', 'id': 8, 'to': {'map': 'Saffron Gym-NW', 'id': 5}},
-                               {'address': 'Warps_SaffronGym', 'id': 9, 'to': {'map': 'Saffron Gym-SW', 'id': 13}}],
-             'Saffron Gym-SW': [{'address': 'Warps_SaffronGym', 'id': 10, 'to': {'map': 'Saffron Gym-NE', 'id': 23}},
-                                {'address': 'Warps_SaffronGym', 'id': 11, 'to': {'map': 'Saffron Gym-SE', 'id': 30}},
-                                {'address': 'Warps_SaffronGym', 'id': 12, 'to': {'map': 'Saffron Gym-N', 'id': 17}},
-                                {'address': 'Warps_SaffronGym', 'id': 13, 'to': {'map': 'Saffron Gym-W', 'id': 9}}],
-             'Saffron Gym-N': [{'address': 'Warps_SaffronGym', 'id': 14, 'to': {'map': 'Saffron Gym-E', 'id': 26}},
-                               {'address': 'Warps_SaffronGym', 'id': 15, 'to': {'map': 'Saffron Gym-NW', 'id': 3}},
-                               {'address': 'Warps_SaffronGym', 'id': 16, 'to': {'map': 'Saffron Gym-W', 'id': 7}},
-                               {'address': 'Warps_SaffronGym', 'id': 17, 'to': {'map': 'Saffron Gym-SW', 'id': 12}}],
-             'Saffron Gym-C': [{'address': 'Warps_SaffronGym', 'id': 18, 'to': {'map': 'Saffron Gym-NW', 'id': 4}}],
-             'Saffron Gym-S': [{'address': 'Warps_SaffronGym', 'id': 19, 'to': {'map': 'Saffron Gym-SE', 'id': 31}},
-                               {'address': 'Warps_SaffronGym', 'id': (0, 1), 'to': {'map': 'Saffron City-G', 'id': 2}}],
-             'Saffron Gym-NE': [{'address': 'Warps_SaffronGym', 'id': 20, 'to': {'map': 'Saffron Gym-E', 'id': 24}},
-                                {'address': 'Warps_SaffronGym', 'id': 21, 'to': {'map': 'Saffron Gym-SE', 'id': 28}},
-                                {'address': 'Warps_SaffronGym', 'id': 22, 'to': {'map': 'Saffron Gym-NW', 'id': 2}},
-                                {'address': 'Warps_SaffronGym', 'id': 23, 'to': {'map': 'Saffron Gym-SW', 'id': 10}}],
-             'Saffron Gym-E': [{'address': 'Warps_SaffronGym', 'id': 24, 'to': {'map': 'Saffron Gym-NE', 'id': 20}},
-                               {'address': 'Warps_SaffronGym', 'id': 25, 'to': {'map': 'Saffron Gym-SE', 'id': 29}},
-                               {'address': 'Warps_SaffronGym', 'id': 26, 'to': {'map': 'Saffron Gym-N', 'id': 14}},
-                               {'address': 'Warps_SaffronGym', 'id': 27, 'to': {'map': 'Saffron Gym-W', 'id': 6}}],
-             'Saffron Gym-SE': [{'address': 'Warps_SaffronGym', 'id': 28, 'to': {'map': 'Saffron Gym-NE', 'id': 21}},
-                                {'address': 'Warps_SaffronGym', 'id': 29, 'to': {'map': 'Saffron Gym-E', 'id': 25}},
-                                {'address': 'Warps_SaffronGym', 'id': 30, 'to': {'map': 'Saffron Gym-SW', 'id': 11}},
-                                {'address': 'Warps_SaffronGym', 'id': 31, 'to': {'map': 'Saffron Gym-S', 'id': 19}}],
-             'Saffron Pokemart': [
-                 {'address': 'Warps_SaffronMart', 'id': (0, 1), 'to': {'map': 'Saffron City', 'id': 4}}],
-             'Silph Co 1F': [{'address': 'Warps_SilphCo1F', 'id': (0, 1), 'to': {'map': 'Saffron City-Silph', 'id': 5}},
-                             {'address': 'Warps_SilphCo1F', 'id': 2, 'to': {'map': 'Silph Co 2F', 'id': 0}},
-                             {'address': 'Warps_SilphCo1F', 'id': 3, 'to': {'map': 'Silph Co Elevator-1F', 'id': 0}}],
-             'Saffron Pokemon Center': [
-                 {'address': 'Warps_SaffronPokecenter', 'id': (0, 1), 'to': {'map': 'Saffron City', 'id': 6}}],
-             'Viridian Forest North Gate': [
-                 {'address': 'Warps_ViridianForestNorthGate', 'id': 1, 'to': {'map': 'Route 2-NW', 'id': 1}},
-                 {'address': 'Warps_ViridianForestNorthGate', 'id': (2, 3), 'to': {'map': 'Viridian Forest', 'id': 0}}],
-             'Route 2 Gate': [{'address': 'Warps_Route2Gate', 'id': 1, 'to': {'map': 'Route 2-E', 'id': 3}},
-                              {'address': 'Warps_Route2Gate', 'id': (2, 3), 'to': {'map': 'Route 2-SE', 'id': 4}}],
-             'Viridian Forest South Gate': [
-                 {'address': 'Warps_ViridianForestSouthGate', 'id': 1, 'to': {'map': 'Viridian Forest', 'id': 4}},
-                 {'address': 'Warps_ViridianForestSouthGate', 'id': (2, 3), 'to': {'map': 'Route 2-SW', 'id': 5}}],
-             'Underground Path Route 5': [
-                 {'address': 'Warps_UndergroundPathRoute5', 'id': (0, 1), 'to': {'map': 'Route 5', 'id': 3}},
-                 {'address': 'Warps_UndergroundPathRoute5', 'id': 2,
-                  'to': {'map': 'Underground Path North South', 'id': 0}}], 'Underground Path Route 6': [
-        {'address': 'Warps_UndergroundPathRoute6', 'id': (0, 1), 'to': {'map': 'Route 6', 'id': 3}},
-        {'address': 'Warps_UndergroundPathRoute6', 'id': 2, 'to': {'map': 'Underground Path North South', 'id': 1}}],
-             'Underground Path Route 7': [
-                 {'address': 'Warps_UndergroundPathRoute7', 'id': (0, 1), 'to': {'map': 'Route 7', 'id': 4}},
-                 {'address': 'Warps_UndergroundPathRoute7', 'id': 2,
-                  'to': {'map': 'Underground Path West East', 'id': 0}}], 'Silph Co 9F-SW': [],
-             'Silph Co 9F': [{'address': 'Warps_SilphCo9F', 'id': 0, 'to': {'map': 'Silph Co 10F', 'id': 0}},
-                             {'address': 'Warps_SilphCo9F', 'id': 1, 'to': {'map': 'Silph Co 8F', 'id': 0}},
-                             {'address': 'Warps_SilphCo9F', 'id': 2, 'to': {'map': 'Silph Co Elevator-9F', 'id': 8}},
-                             {'address': 'Warps_SilphCo9F', 'id': 4, 'to': {'map': 'Silph Co 5F', 'id': 4}}],
-             'Silph Co 9F-NW': [{'address': 'Warps_SilphCo9F', 'id': 3, 'to': {'map': 'Silph Co 3F-W', 'id': 7}}],
-             'Victory Road 1F-S': [
-                 {'address': 'Warps_VictoryRoad1F', 'id': (0, 1), 'to': {'map': 'Route 23-C', 'id': 2}}],
-             'Victory Road 1F': [
-                 {'address': 'Warps_VictoryRoad1F', 'id': 2, 'to': {'map': 'Victory Road 2F-W', 'id': 0}}],
-             'Pokemon Tower 1F': [
-                 {'address': 'Warps_PokemonTower1F', 'id': (0, 1), 'to': {'map': 'Lavender Town', 'id': 1}},
-                 {'address': 'Warps_PokemonTower1F', 'id': 2, 'to': {'map': 'Pokemon Tower 2F', 'id': 1}}],
-             'Pokemon Tower 2F': [
-                 {'address': 'Warps_PokemonTower2F', 'id': 0, 'to': {'map': 'Pokemon Tower 3F', 'id': 0}},
-                 {'address': 'Warps_PokemonTower2F', 'id': 1, 'to': {'map': 'Pokemon Tower 1F', 'id': 2}}],
-             'Pokemon Tower 3F': [
-                 {'address': 'Warps_PokemonTower3F', 'id': 0, 'to': {'map': 'Pokemon Tower 2F', 'id': 0}},
-                 {'address': 'Warps_PokemonTower3F', 'id': 1, 'to': {'map': 'Pokemon Tower 4F', 'id': 1}}],
-             'Pokemon Tower 4F': [
-                 {'address': 'Warps_PokemonTower4F', 'id': 0, 'to': {'map': 'Pokemon Tower 5F', 'id': 0}},
-                 {'address': 'Warps_PokemonTower4F', 'id': 1, 'to': {'map': 'Pokemon Tower 3F', 'id': 1}}],
-             'Pokemon Tower 5F': [
-                 {'address': 'Warps_PokemonTower5F', 'id': 0, 'to': {'map': 'Pokemon Tower 4F', 'id': 0}},
-                 {'address': 'Warps_PokemonTower5F', 'id': 1, 'to': {'map': 'Pokemon Tower 6F', 'id': 0}}],
-             'Pokemon Tower 6F': [
-                 {'address': 'Warps_PokemonTower6F', 'id': 0, 'to': {'map': 'Pokemon Tower 5F', 'id': 1}}],
-             'Pokemon Tower 6F-S': [
-                 {'address': 'Warps_PokemonTower6F', 'id': 1, 'to': {'map': 'Pokemon Tower 7F', 'id': 0}}],
-             'Pokemon Tower 7F': [
-                 {'address': 'Warps_PokemonTower7F', 'id': 0, 'to': {'map': 'Pokemon Tower 6F-S', 'id': 1}}],
-             'Celadon Department Store 1F': [
-                 {'name': 'Celadon Department Store 1F to Celadon City W', 'address': 'Warps_CeladonMart1F',
-                  'id': (1, 0), 'to': {'map': 'Celadon City', 'id': 0}},
-                 {'name': 'Celadon Department Store 1F to Celadon City E', 'address': 'Warps_CeladonMart1F',
-                  'id': (3, 2), 'to': {'map': 'Celadon City', 'id': 1}},
-                 {'address': 'Warps_CeladonMart1F', 'id': 4, 'to': {'map': 'Celadon Department Store 2F', 'id': 0}},
-                 {'address': 'Warps_CeladonMart1F', 'id': 5,
-                  'to': {'map': 'Celadon Department Store Elevator-1F', 'id': 0}}], 'Viridian Forest': [
-        {'address': 'Warps_ViridianForest', 'id': (0, 1), 'to': {'map': 'Viridian Forest North Gate', 'id': (2, 3)}},
-        {'address': 'Warps_ViridianForest', 'id': (4, 2, 5, 3), 'to': {'map': 'Viridian Forest South Gate', 'id': 1}}],
-             'S.S. Anne 1F': [{'address': 'Warps_SSAnne1F', 'id': (0, 1), 'to': {'map': 'Vermilion Dock', 'id': 1}},
-                              {'address': 'Warps_SSAnne1F', 'id': 2,
-                               'to': {'map': 'S.S. Anne 1F Rooms-East Gentleman Room', 'id': 0}},
-                              {'address': 'Warps_SSAnne1F', 'id': 3,
-                               'to': {'map': 'S.S. Anne 1F Rooms-West Gentleman Room', 'id': 1}},
-                              {'address': 'Warps_SSAnne1F', 'id': 4,
-                               'to': {'map': 'S.S. Anne 1F Rooms-Cherry Pie Room', 'id': 2}},
-                              {'address': 'Warps_SSAnne1F', 'id': 5,
-                               'to': {'map': 'S.S. Anne 1F Rooms-Wigglytuff Room', 'id': 3}},
-                              {'address': 'Warps_SSAnne1F', 'id': 6,
-                               'to': {'map': 'S.S. Anne 1F Rooms-Youngster and Lass Room', 'id': 4}},
-                              {'address': 'Warps_SSAnne1F', 'id': 7,
-                               'to': {'map': 'S.S. Anne 1F Rooms-Police Room', 'id': 5}},
-                              {'address': 'Warps_SSAnne1F', 'id': 8, 'to': {'map': 'S.S. Anne 2F', 'id': 6}},
-                              {'address': 'Warps_SSAnne1F', 'id': 9, 'to': {'map': 'S.S. Anne B1F', 'id': 5}},
-                              {'address': 'Warps_SSAnne1F', 'id': 10, 'to': {'map': 'S.S. Anne Kitchen', 'id': 0}}],
-             'S.S. Anne 2F': [
-                 {'address': 'Warps_SSAnne2F', 'id': 0, 'to': {'map': 'S.S. Anne 2F Rooms-Snorlax Room', 'id': 0}},
-                 {'address': 'Warps_SSAnne2F', 'id': 1,
-                  'to': {'map': 'S.S. Anne 2F Rooms-Fisherman and Gentleman Room', 'id': 2}},
-                 {'address': 'Warps_SSAnne2F', 'id': 2, 'to': {'map': 'S.S. Anne 2F Rooms-Surf and Cut Room', 'id': 4}},
-                 {'address': 'Warps_SSAnne2F', 'id': 3,
-                  'to': {'map': 'S.S. Anne 2F Rooms-Gentleman and Lass Room', 'id': 6}},
-                 {'address': 'Warps_SSAnne2F', 'id': 4, 'to': {'map': 'S.S. Anne 2F Rooms-Safari Zone Room', 'id': 8}},
-                 {'address': 'Warps_SSAnne2F', 'id': 5, 'to': {'map': 'S.S. Anne 2F Rooms-Seasickness Room', 'id': 10}},
-                 {'address': 'Warps_SSAnne2F', 'id': 6, 'to': {'map': 'S.S. Anne 1F', 'id': 8}},
-                 {'address': 'Warps_SSAnne2F', 'id': 7, 'to': {'map': 'S.S. Anne 3F', 'id': 1}},
-                 {'address': 'Warps_SSAnne2F', 'id': 8, 'to': {'map': "S.S. Anne Captain's Room", 'id': 0}}],
-             'S.S. Anne B1F': [
-                 {'address': 'Warps_SSAnneB1F', 'id': 0, 'to': {'map': 'S.S. Anne B1F Rooms-Machoke Room', 'id': 8}},
-                 {'address': 'Warps_SSAnneB1F', 'id': 1,
-                  'to': {'map': 'S.S. Anne B1F Rooms-Two Sailors Room', 'id': 6}},
-                 {'address': 'Warps_SSAnneB1F', 'id': 2,
-                  'to': {'map': 'S.S. Anne B1F Rooms-East Single Sailor Room', 'id': 4}},
-                 {'address': 'Warps_SSAnneB1F', 'id': 3,
-                  'to': {'map': 'S.S. Anne B1F Rooms-West Single Sailor Room', 'id': 2}},
-                 {'address': 'Warps_SSAnneB1F', 'id': 4, 'to': {'map': 'S.S. Anne B1F Rooms-Fisherman Room', 'id': 0}},
-                 {'address': 'Warps_SSAnneB1F', 'id': 5, 'to': {'map': 'S.S. Anne 1F', 'id': 9}}],
-             'S.S. Anne Bow': [{'address': 'Warps_SSAnneBow', 'id': (0, 1), 'to': {'map': 'S.S. Anne 3F', 'id': 0}}],
-             'S.S. Anne Kitchen': [
-                 {'address': 'Warps_SSAnneKitchen', 'id': 0, 'to': {'map': 'S.S. Anne 1F', 'id': 10}}],
-             "S.S. Anne Captain's Room": [
-                 {'address': 'Warps_SSAnneCaptainsRoom', 'id': 0, 'to': {'map': 'S.S. Anne 2F', 'id': 8}}],
-             'S.S. Anne 1F Rooms-West Gentleman Room': [
-                 {'address': 'Warps_SSAnne1FRooms', 'id': 1, 'to': {'map': 'S.S. Anne 1F', 'id': 3}}],
-             'S.S. Anne 1F Rooms-East Gentleman Room': [
-                 {'address': 'Warps_SSAnne1FRooms', 'id': 0, 'to': {'map': 'S.S. Anne 1F', 'id': 2}}],
-             'S.S. Anne 1F Rooms-Police Room': [
-                 {'address': 'Warps_SSAnne1FRooms', 'id': 5, 'to': {'map': 'S.S. Anne 1F', 'id': 7}}],
-             'S.S. Anne 1F Rooms-Youngster and Lass Room': [
-                 {'address': 'Warps_SSAnne1FRooms', 'id': 4, 'to': {'map': 'S.S. Anne 1F', 'id': 6}}],
-             'S.S. Anne 1F Rooms-Wigglytuff Room': [
-                 {'address': 'Warps_SSAnne1FRooms', 'id': 3, 'to': {'map': 'S.S. Anne 1F', 'id': 5}}],
-             'S.S. Anne 1F Rooms-Cherry Pie Room': [
-                 {'address': 'Warps_SSAnne1FRooms', 'id': 2, 'to': {'map': 'S.S. Anne 1F', 'id': 4}}],
-             'S.S. Anne 2F Rooms-Snorlax Room': [
-                 {'address': 'Warps_SSAnne2FRooms', 'id': (0, 1), 'to': {'map': 'S.S. Anne 2F', 'id': 0}}],
-             'S.S. Anne 2F Rooms-Fisherman and Gentleman Room': [
-                 {'address': 'Warps_SSAnne2FRooms', 'id': (2, 3), 'to': {'map': 'S.S. Anne 2F', 'id': 1}}],
-             'S.S. Anne 2F Rooms-Surf and Cut Room': [
-                 {'address': 'Warps_SSAnne2FRooms', 'id': (4, 5), 'to': {'map': 'S.S. Anne 2F', 'id': 2}}],
-             'S.S. Anne 2F Rooms-Gentleman and Lass Room': [
-                 {'address': 'Warps_SSAnne2FRooms', 'id': (6, 7), 'to': {'map': 'S.S. Anne 2F', 'id': 3}}],
-             'S.S. Anne 2F Rooms-Safari Zone Room': [
-                 {'address': 'Warps_SSAnne2FRooms', 'id': (8, 9), 'to': {'map': 'S.S. Anne 2F', 'id': 4}}],
-             'S.S. Anne 2F Rooms-Seasickness Room': [
-                 {'address': 'Warps_SSAnne2FRooms', 'id': (10, 11), 'to': {'map': 'S.S. Anne 2F', 'id': 5}}],
-             'S.S. Anne B1F Rooms-Fisherman Room': [
-                 {'address': 'Warps_SSAnneB1FRooms', 'id': (0, 1), 'to': {'map': 'S.S. Anne B1F', 'id': 4}}],
-             'S.S. Anne B1F Rooms-West Single Sailor Room': [
-                 {'address': 'Warps_SSAnneB1FRooms', 'id': (2, 3), 'to': {'map': 'S.S. Anne B1F', 'id': 3}}],
-             'S.S. Anne B1F Rooms-East Single Sailor Room': [
-                 {'address': 'Warps_SSAnneB1FRooms', 'id': (4, 5), 'to': {'map': 'S.S. Anne B1F', 'id': 2}}],
-             'S.S. Anne B1F Rooms-Two Sailors Room': [
-                 {'address': 'Warps_SSAnneB1FRooms', 'id': (6, 7), 'to': {'map': 'S.S. Anne B1F', 'id': 1}}],
-             'S.S. Anne B1F Rooms-Machoke Room': [
-                 {'address': 'Warps_SSAnneB1FRooms', 'id': (8, 9), 'to': {'map': 'S.S. Anne B1F', 'id': 0}}],
-             'Underground Path North South': [{'address': 'Warps_UndergroundPathNorthSouth', 'id': 0,
-                                               'to': {'map': 'Underground Path Route 5', 'id': 2}},
-                                              {'address': 'Warps_UndergroundPathNorthSouth', 'id': 1,
-                                               'to': {'map': 'Underground Path Route 6', 'id': 2}}],
-             'Underground Path West East': [{'address': 'Warps_UndergroundPathWestEast', 'id': 0,
-                                             'to': {'map': 'Underground Path Route 7', 'id': 2}},
-                                            {'address': 'Warps_UndergroundPathWestEast', 'id': 1,
-                                             'to': {'map': 'Underground Path Route 8', 'id': 2}}], "Diglett's Cave": [
-        {'address': 'Warps_DiglettsCave', 'id': 0, 'to': {'map': "Diglett's Cave Route 2", 'id': 2}},
-        {'address': 'Warps_DiglettsCave', 'id': 1, 'to': {'map': "Diglett's Cave Route 11", 'id': 2}}],
-             'Silph Co 11F': [{'address': 'Warps_SilphCo11F', 'id': 0, 'to': {'map': 'Silph Co 10F', 'id': 1}},
-                              {'address': 'Warps_SilphCo11F', 'id': 1,
-                               'to': {'map': 'Silph Co Elevator-11F', 'id': 10}}],
-             'Silph Co 11F-W': [{'address': 'Warps_SilphCo11F', 'id': 3, 'to': {'map': 'Silph Co 7F-NW', 'id': 3}}],
-             'Viridian Gym': [
-                 {'address': 'Warps_ViridianGym', 'id': (0, 1), 'to': {'map': 'Viridian City-G', 'id': 4}}],
-             'Pewter Pokemart': [{'address': 'Warps_PewterMart', 'id': (0, 1), 'to': {'map': 'Pewter City', 'id': 4}}],
-             'Cerulean Cave 1F-SE': [
-                 {'address': 'Warps_CeruleanCave1F', 'id': (0, 1), 'to': {'map': 'Cerulean City-Cave', 'id': 6}},
-                 {'address': 'Warps_CeruleanCave1F', 'id': 3, 'to': {'map': 'Cerulean Cave 2F-E', 'id': 1}}],
-             'Cerulean Cave 1F-NE': [
-                 {'address': 'Warps_CeruleanCave1F', 'id': 2, 'to': {'map': 'Cerulean Cave 2F-E', 'id': 0}}],
-             'Cerulean Cave 1F-N': [
-                 {'address': 'Warps_CeruleanCave1F', 'id': 5, 'to': {'map': 'Cerulean Cave 2F-N', 'id': 3}}],
-             'Cerulean Cave 1F-SW': [
-                 {'address': 'Warps_CeruleanCave1F', 'id': 4, 'to': {'map': 'Cerulean Cave 2F-N', 'id': 2}},
-                 {'address': 'Warps_CeruleanCave1F', 'id': 7, 'to': {'map': 'Cerulean Cave 2F-W', 'id': 5}}],
-             'Cerulean Cave 1F-NW': [
-                 {'address': 'Warps_CeruleanCave1F', 'id': 6, 'to': {'map': 'Cerulean Cave 2F-W', 'id': 4}},
-                 {'address': 'Warps_CeruleanCave1F', 'id': 8, 'to': {'map': 'Cerulean Cave B1F', 'id': 0}}],
-             'Cerulean Cave 1F-Wild': [], 'Cerulean Cave 1F-Water': [], 'Cerulean Badge House': [
-        {'address': 'Warps_CeruleanBadgeHouse', 'id': 0, 'to': {'map': 'Cerulean City-Badge House Backyard', 'id': 9}},
-        {'address': 'Warps_CeruleanBadgeHouse', 'id': (1, 2), 'to': {'map': 'Cerulean City', 'id': 8}}],
-             "Fuchsia Bill's Grandpa's House": [
-                 {'address': 'Warps_FuchsiaBillsGrandpasHouse', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 1}}],
-             'Fuchsia Pokemon Center': [
-                 {'address': 'Warps_FuchsiaPokecenter', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 2}}],
-             "Fuchsia Warden's House": [
-                 {'address': 'Warps_WardensHouse', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 3}}],
-             'Safari Zone Gate-S': [
-                 {'address': 'Warps_SafariZoneGate', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 4}}],
-             'Safari Zone Gate-N': [{'address': 'Warps_SafariZoneGate', 'id': (2, 3),
-                                     'to': {'map': 'Safari Zone Center-S', 'id': (0, 1)}}],
-             'Fuchsia Gym': [{'address': 'Warps_FuchsiaGym', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 5}}],
-             'Fuchsia Meeting Room': [
-                 {'address': 'Warps_FuchsiaMeetingRoom', 'id': (0, 1), 'to': {'map': 'Fuchsia City', 'id': 6}}],
-             'Cinnabar Gym': [
-                 {'address': 'Warps_CinnabarGym', 'id': (0, 1), 'to': {'map': 'Cinnabar Island-G', 'id': 1}}],
-             'Cinnabar Lab': [{'address': 'Warps_CinnabarLab', 'id': (0, 1), 'to': {'map': 'Cinnabar Island', 'id': 2}},
-                              {'address': 'Warps_CinnabarLab', 'id': 2,
-                               'to': {'map': 'Cinnabar Lab Trade Room', 'id': 0}},
-                              {'address': 'Warps_CinnabarLab', 'id': 3,
-                               'to': {'map': 'Cinnabar Lab R&D Room', 'id': 0}},
-                              {'address': 'Warps_CinnabarLab', 'id': 4,
-                               'to': {'map': 'Cinnabar Lab Fossil Room', 'id': 0}}], 'Cinnabar Lab Trade Room': [
-        {'address': 'Warps_CinnabarLabTradeRoom', 'id': (0, 1), 'to': {'map': 'Cinnabar Lab', 'id': 2}}],
-             'Cinnabar Lab R&D Room': [
-                 {'address': 'Warps_CinnabarLabMetronomeRoom', 'id': (0, 1), 'to': {'map': 'Cinnabar Lab', 'id': 3}}],
-             'Cinnabar Lab Fossil Room': [
-                 {'address': 'Warps_CinnabarLabFossilRoom', 'id': (0, 1), 'to': {'map': 'Cinnabar Lab', 'id': 4}}],
-             'Cinnabar Pokemon Center': [
-                 {'address': 'Warps_CinnabarPokecenter', 'id': (0, 1), 'to': {'map': 'Cinnabar Island', 'id': 3}}],
-             'Cinnabar Pokemart': [
-                 {'address': 'Warps_CinnabarMart', 'id': (0, 1), 'to': {'map': 'Cinnabar Island', 'id': 4}}],
-             "Saffron Copycat's House 1F": [
-                 {'address': 'Warps_CopycatsHouse1F', 'id': (0, 1), 'to': {'map': 'Saffron City-Copycat', 'id': 0}},
-                 {'address': 'Warps_CopycatsHouse1F', 'id': 2, 'to': {'map': "Saffron Copycat's House 2F", 'id': 0}}],
-             "Indigo Plateau Champion's Room": [{'address': 'Warps_ChampionsRoom', 'id': (0, 1),
-                                                 'to': {'map': "Indigo Plateau Lance's Room", 'id': (1, 2)}},
-                                                {'address': 'Warps_ChampionsRoom', 'id': (2, 3),
-                                                 'to': {'map': 'Indigo Plateau Hall of Fame', 'id': 0}}],
-             "Indigo Plateau Lorelei's Room": [
-                 {'address': 'Warps_LoreleisRoom', 'id': (0, 1), 'to': {'map': 'Indigo Plateau Lobby-N', 'id': 2}},
-                 {'address': 'Warps_LoreleisRoom', 'id': (2, 3),
-                  'to': {'map': "Indigo Plateau Bruno's Room", 'id': (0, 1)}}], "Indigo Plateau Bruno's Room": [
-        {'address': 'Warps_BrunosRoom', 'id': (0, 1), 'to': {'map': "Indigo Plateau Lorelei's Room", 'id': (2, 3)}},
-        {'address': 'Warps_BrunosRoom', 'id': (2, 3), 'to': {'map': "Indigo Plateau Agatha's Room", 'id': (0, 1)}}],
-             "Indigo Plateau Agatha's Room": [{'address': 'Warps_AgathasRoom', 'id': (0, 1),
-                                               'to': {'map': "Indigo Plateau Bruno's Room", 'id': (2, 3)}},
-                                              {'address': 'Warps_AgathasRoom', 'id': (2, 3),
-                                               'to': {'map': "Indigo Plateau Lance's Room", 'id': 0}}]}
 
 
 silph_co_warps = [
@@ -1235,6 +302,9 @@ saffron_gym_warps = [
     'Saffron Gym-E to Saffron Gym-N', 'Saffron Gym-E to Saffron Gym-W', 'Saffron Gym-SE to Saffron Gym-NE',
     'Saffron Gym-SE to Saffron Gym-E', 'Saffron Gym-SE to Saffron Gym-SW', 'Saffron Gym-SE to Saffron Gym-S'
 ]
+
+silph_co_warp_tile_regions = tuple(sorted({warp_name.split(" to ", 1)[0] for warp_name in silph_co_warps}))
+saffron_gym_warp_tile_regions = tuple(sorted({warp_name.split(" to ", 1)[0] for warp_name in saffron_gym_warps}))
 
 entrance_only = [
     "Route 4-W to Mt Moon 1F", "Saffron City-G to Saffron Gym-S", "Saffron City-Copycat to Saffron Copycat's House 1F",
@@ -1274,7 +344,8 @@ safe_rooms = ["Rival's House to Pallet Town",
               'Vermilion Trade House to Vermilion City',
               'Viridian School House to Viridian City', 'Viridian Nickname House to Viridian City',
               'Pewter Nidoran House to Pewter City', 'Pewter Speech House to Pewter City',
-              'Cerulean Trade House to Cerulean City', 'Cerulean Bicycle Shop to Cerulean City',
+              'Cerulean Trade House to Cerulean City', "Cerulean Melanie's House to Cerulean City",
+              'Cerulean Bicycle Shop to Cerulean City',
               "Lavender Mr. Fuji's House to Lavender Town", 'Lavender Cubone House to Lavender Town',
               "Lavender Name Rater's House to Lavender Town", 'Vermilion Pidgey House to Vermilion City',
               'Saffron Pidgey House to Saffron City-Pidgey', "Saffron Mr. Psychic's House to Saffron City",
@@ -1288,7 +359,7 @@ safe_rooms = ["Rival's House to Pallet Town",
               'Vermilion Old Rod House to Vermilion City', 'Daycare to Route 5',
               'Route 12 Super Rod House to Route 12-S', 'Vermilion Pokemon Fan Club to Vermilion City',
               "Fuchsia Bill's Grandpa's House to Fuchsia City", "Fuchsia Warden's House to Fuchsia City",
-              'Fuchsia Meeting Room to Fuchsia City',]
+              'Fuchsia Meeting Room to Fuchsia City', "Summer Beach House"]
 
 insanity_safe_rooms = [
     'Cinnabar Lab Trade Room to Cinnabar Lab',
@@ -1478,6 +549,221 @@ unreachable_outdoor_entrances = [
     "Route 23-N to Victory Road 2F-E"
 ]
 
+# Multi-region mapped groups are static connected components after door warps, wild encounter helper regions,
+# fishing/menu utility regions, and fly shortcuts are removed. Regions not listed here are singleton groups.
+mapped_indoor_region_groups = {
+    "Celadon Department Store Elevator": (
+        "Celadon Department Store Elevator",
+        "Celadon Department Store Elevator-1F",
+        "Celadon Department Store Elevator-2F",
+        "Celadon Department Store Elevator-3F",
+        "Celadon Department Store Elevator-4F",
+        "Celadon Department Store Elevator-5F",
+    ),
+    "Celadon Game Corner": ("Celadon Game Corner", "Celadon Game Corner-Hidden Stairs"),
+    "Cerulean Cave 1F": (
+        "Cerulean Cave 1F-N",
+        "Cerulean Cave 1F-NE",
+        "Cerulean Cave 1F-SE",
+        "Cerulean Cave 1F-SW",
+        "Cerulean Cave 1F-Water",
+    ),
+    "Indigo Plateau Lobby": ("Indigo Plateau Lobby", "Indigo Plateau Lobby-N"),
+    "Pokemon Mansion Exit": (
+        "Pokemon Mansion 1F-SE",
+        "Pokemon Mansion 2F",
+        "Pokemon Mansion 3F",
+        "Pokemon Mansion 3F-SE",
+    ),
+    "Pokemon Tower 6F": ("Pokemon Tower 6F", "Pokemon Tower 6F-S"),
+    "Rock Tunnel 1F-NE": (
+        "Rock Tunnel 1F-NE",
+        "Rock Tunnel 1F-NE 1",
+        "Rock Tunnel 1F-NE 2",
+    ),
+    "Rock Tunnel 1F-NW": (
+        "Rock Tunnel 1F-NW",
+        "Rock Tunnel 1F-NW 1",
+        "Rock Tunnel 1F-NW 2",
+    ),
+    "Rock Tunnel 1F-S": (
+        "Rock Tunnel 1F-S",
+        "Rock Tunnel 1F-S 1",
+        "Rock Tunnel 1F-S 2",
+    ),
+    "Rock Tunnel B1F-E": (
+        "Rock Tunnel B1F-E",
+        "Rock Tunnel B1F-E 1",
+        "Rock Tunnel B1F-E 2",
+    ),
+    "Rock Tunnel B1F-W": (
+        "Rock Tunnel B1F-W",
+        "Rock Tunnel B1F-W 1",
+        "Rock Tunnel B1F-W 2",
+    ),
+    "Rocket Hideout B1F": ("Rocket Hideout B1F", "Rocket Hideout B1F-SE"),
+    "Rocket Hideout Elevator": (
+        "Rocket Hideout Elevator",
+        "Rocket Hideout Elevator-B1F",
+        "Rocket Hideout Elevator-B2F",
+        "Rocket Hideout Elevator-B4F",
+    ),
+    "Route 16 Gate 1F": ("Route 16 Gate 1F-E", "Route 16 Gate 1F-W"),
+    "Route 18 Gate 1F": ("Route 18 Gate 1F-E", "Route 18 Gate 1F-W"),
+    "Route 22 Gate": ("Route 22 Gate-N", "Route 22 Gate-S"),
+    "Route 5 Gate": ("Route 5 Gate-N", "Route 5 Gate-S"),
+    "Route 6 Gate": ("Route 6 Gate-N", "Route 6 Gate-S"),
+    "Route 7 Gate": ("Route 7 Gate-E", "Route 7 Gate-W"),
+    "Route 8 Gate": ("Route 8 Gate-E", "Route 8 Gate-W"),
+    "Safari Zone Gate": ("Safari Zone Gate-N", "Safari Zone Gate-S"),
+    "Saffron Gym": (
+        "Saffron Gym-C",
+        "Saffron Gym-E",
+        "Saffron Gym-N",
+        "Saffron Gym-NE",
+        "Saffron Gym-NW",
+        "Saffron Gym-S",
+        "Saffron Gym-SE",
+        "Saffron Gym-SW",
+        "Saffron Gym-W",
+    ),
+    "Seafoam Islands 1F": (
+        "Seafoam Islands 1F",
+        "Seafoam Islands B1F",
+        "Seafoam Islands B1F-NE",
+        "Seafoam Islands B2F-NE",
+        "Seafoam Islands B2F-NW",
+        "Seafoam Islands B3F",
+        "Seafoam Islands B3F-SE",
+        "Seafoam Islands B4F",
+        "Seafoam Islands B4F-W",
+    ),
+    "Silph Co 10F": ("Silph Co 10F", "Silph Co 10F-SE"),
+    "Silph Co 11F-W": ("Silph Co 11F-C", "Silph Co 11F-W"),
+    "Silph Co 2F": ("Silph Co 2F", "Silph Co 2F-NW", "Silph Co 2F-SW"),
+    "Silph Co 3F": ("Silph Co 3F", "Silph Co 3F-C", "Silph Co 3F-W"),
+    "Silph Co 4F": ("Silph Co 4F", "Silph Co 4F-N", "Silph Co 4F-W"),
+    "Silph Co 5F": ("Silph Co 5F", "Silph Co 5F-NW", "Silph Co 5F-SW"),
+    "Silph Co 6F": ("Silph Co 6F", "Silph Co 6F-SW"),
+    "Silph Co 7F": ("Silph Co 7F", "Silph Co 7F-E", "Silph Co 7F-SE"),
+    "Silph Co 8F": ("Silph Co 8F", "Silph Co 8F-W"),
+    "Silph Co 9F": ("Silph Co 9F", "Silph Co 9F-NW", "Silph Co 9F-SW"),
+    "Silph Co Elevator": (
+        "Silph Co Elevator",
+        "Silph Co Elevator-10F",
+        "Silph Co Elevator-11F",
+        "Silph Co Elevator-1F",
+        "Silph Co Elevator-2F",
+        "Silph Co Elevator-3F",
+        "Silph Co Elevator-4F",
+        "Silph Co Elevator-5F",
+        "Silph Co Elevator-6F",
+        "Silph Co Elevator-7F",
+        "Silph Co Elevator-8F",
+        "Silph Co Elevator-9F",
+    ),
+    "Victory Road 1F": ("Victory Road 1F", "Victory Road 1F-S"),
+    "Victory Road 2F-3F": (
+        "Victory Road 2F-C",
+        "Victory Road 2F-NW",
+        "Victory Road 2F-SE",
+        "Victory Road 2F-W",
+        "Victory Road 3F",
+        "Victory Road 3F-S",
+        "Victory Road 3F-SE",
+    ),
+}
+
+mapped_outdoor_region_groups = {
+    "Celadon City": ("Celadon City", "Celadon City-G", "Route 16-C", "Route 16-E", "Route 16-NE", "Route 7"),
+    "Cerulean City": (
+        "Cerulean City",
+        "Cerulean City-Cave",
+        "Cerulean City-Outskirts",
+        "Cerulean City-T",
+        "Cerulean City-Water",
+        "Route 10-C",
+        "Route 10-N",
+        "Route 10-P",
+        "Route 24",
+        "Route 25",
+        "Route 4-C",
+        "Route 4-E",
+        "Route 4-Lass",
+        "Route 5",
+        "Route 9",
+    ),
+    "Indigo Plateau": ("Indigo Plateau", "Route 23-N"),
+    "Lavender Town": ("Lavender Town", "Route 10-S", "Route 12-L", "Route 8"),
+    "Vermilion City": ("Route 11", "Route 11-C", "Route 6", "Vermilion City", "Vermilion City-Dock", "Vermilion City-G"),
+    "Route 11-15": (
+        "Route 11-E",
+        "Route 12-N",
+        "Route 12-S",
+        "Route 12-W",
+        "Route 13",
+        "Route 13-E",
+        "Route 14",
+        "Route 15",
+    ),
+    "Route 17": ("Route 16-SW", "Route 17", "Route 18-W"),
+    "Route 23": ("Route 23-C", "Route 23-S"),
+    "Saffron City": (
+        "Route 5-S",
+        "Route 6-N",
+        "Route 7-E",
+        "Route 8-W",
+        "Saffron City",
+        "Saffron City-Copycat",
+        "Saffron City-G",
+        "Saffron City-Pidgey",
+        "Saffron City-Silph",
+    ),
+    "Fuchsia City": (
+        "Fuchsia City",
+        "Route 15-W",
+        "Route 18-E",
+        "Route 19-N",
+        "Route 19-S",
+        "Route 20-E",
+        "Route 20-IW",
+    ),
+    "Pallet Town": (
+        "Cinnabar Island",
+        "Cinnabar Island-G",
+        "Cinnabar Island-M",
+        "Pallet Town",
+        "Route 1",
+        "Route 2-SE",
+        "Route 2-SW",
+        "Route 20-IE",
+        "Route 20-W",
+        "Route 21",
+        "Route 22",
+        "Viridian City",
+        "Viridian City-G",
+        "Viridian City-N",
+    ),
+    "Pewter City": (
+        "Pewter City",
+        "Pewter City-E",
+        "Pewter City-M",
+        "Route 2-E",
+        "Route 2-NE",
+        "Route 2-NW",
+        "Route 3",
+        "Route 4-W",
+    ),
+}
+
+
+def get_mapped_indoor_region_groups(world):
+    region_groups = dict(mapped_indoor_region_groups)
+    if world.options.warp_tile_shuffle != "mixed":
+        region_groups["Saffron Gym"] = saffron_gym_warp_tile_regions
+        region_groups["Silph Co Warp Tiles"] = silph_co_warp_tile_regions
+    return region_groups
+
 
 def create_region(multiworld: MultiWorld, player: int, name: str, locations_per_region=None, exits=None):
     ret = PokemonRBRegion(name, player, multiworld)
@@ -1534,10 +820,12 @@ def create_regions(world):
         (rock_tunnel_regions, world.rock_tunnel_1f_data,
          world.rock_tunnel_b1f_data) = randomize_rock_tunnel(world.random)
 
-    for location in location_data:
-        if location.inclusion(world, player) or hasattr(multiworld, "generation_is_fake"):
-            location_object = PokemonRBLocation(player, location.name, location.address, location.rom_address,
-                                                location.type, location.level, location.level_address)
+    for location in world.location_data:
+        if location.inclusion(world, player):
+            location_object = world.location(player, location.name, location.address, location.rom_address,
+                                                location.type, location.level, location.level_address,
+                                                location.address_offset, location.level_address_offset)
+            location_object.game = world.game
             location_region = location.region
             if (location.region.startswith("Rock Tunnel") and "Wild" not in location.region
                     and "Trainer Parties" not in location.name and world.options.randomize_rock_tunnel):
@@ -1620,7 +908,7 @@ def create_regions(world):
     world.options.elite_four_key_items_condition.total = \
         int((world.total_key_items / 100) * world.options.elite_four_key_items_condition.value)
 
-    regions = [create_region(multiworld, player, region, locations_per_region) for region in warp_data]
+    regions = [create_region(multiworld, player, region, locations_per_region) for region in world.warp_data]
     multiworld.regions += regions
     if __debug__:
         for region in locations_per_region:
@@ -1695,7 +983,8 @@ def create_regions(world):
     connect(multiworld, player, "Cerulean City", "Cerulean City-Outskirts", lambda state: logic.can_cut(state, world, player), one_way=True)
     connect(multiworld, player, "Cerulean City-Outskirts", "Route 9", lambda state: logic.can_cut(state, world, player))
     connect(multiworld, player, "Cerulean City-Outskirts", "Route 5")
-    connect(multiworld, player, "Cerulean Cave B1F", "Cerulean Cave B1F-E", lambda state: logic.can_surf(state, world, player), one_way=True)
+    connect(multiworld, player, "Cerulean Cave B1F", "Cerulean Cave B1F-E",
+            lambda state: logic.can_surf(state, world, player), one_way=True)
     connect(multiworld, player, "Route 24", "Route 25")
     connect(multiworld, player, "Route 9", "Route 10-N")
     connect(multiworld, player, "Route 10-N", "Route 10-C", lambda state: logic.can_surf(state, world, player))
@@ -1737,10 +1026,14 @@ def create_regions(world):
     connect(multiworld, player, "Route 23-S", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
     connect(multiworld, player, "Route 23-Grass", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
     connect(multiworld, player, "Cerulean Cave 1F-SE", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
-    connect(multiworld, player, "Cerulean Cave 1F-NE", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
-    connect(multiworld, player, "Cerulean Cave 1F-N", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
     connect(multiworld, player, "Cerulean Cave 1F-SW", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
     connect(multiworld, player, "Cerulean Cave B1F", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
+    if world.game == "Pokemon Yellow":
+        connect(multiworld, player, "Cerulean Cave 1F-C", "Route 23/Cerulean Cave Fishing",
+                lambda state: state.has("Super Rod", player), one_way=True)
+    else:
+        connect(multiworld, player, "Cerulean Cave 1F-NE", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
+        connect(multiworld, player, "Cerulean Cave 1F-N", "Route 23/Cerulean Cave Fishing", lambda state: state.has("Super Rod", player), one_way=True)
     connect(multiworld, player, "Fuchsia City", "Fuchsia Fishing", lambda state: state.has("Super Rod", player), one_way=True)
     connect(multiworld, player, "Pallet Town", "Old Rod Fishing", lambda state: state.has("Old Rod", player), one_way=True)
     connect(multiworld, player, "Pallet Town", "Good Rod Fishing", lambda state: state.has("Good Rod", player), one_way=True)
@@ -1797,9 +1090,14 @@ def create_regions(world):
     connect(multiworld, player, "Route 20-E", "Route 19-S")
     connect(multiworld, player, "Route 20-W", "Cinnabar Island", lambda state: logic.can_surf(state, world, player))
     connect(multiworld, player, "Route 20-IE", "Route 20-W", lambda state: logic.can_surf(state, world, player))
-    connect(multiworld, player, "Route 20-E", "Route 19/20-Water", one_way=True)
-    connect(multiworld, player, "Route 20-W", "Route 19/20-Water", one_way=True)
-    connect(multiworld, player, "Route 19-S", "Route 19/20-Water", one_way=True)
+    if world.game == "Pokemon Yellow":
+        connect(multiworld, player, "Route 20-E", "Route 20-Water", one_way=True)
+        connect(multiworld, player, "Route 20-W", "Route 20-Water", one_way=True)
+        connect(multiworld, player, "Route 19-S", "Route 19-Water", one_way=True)
+    else:
+        connect(multiworld, player, "Route 20-E", "Route 19/20-Water", one_way=True)
+        connect(multiworld, player, "Route 20-W", "Route 19/20-Water", one_way=True)
+        connect(multiworld, player, "Route 19-S", "Route 19/20-Water", one_way=True)
     connect(multiworld, player, "Safari Zone West-NW", "Safari Zone West", lambda state: logic.can_surf(state, world, player))
     connect(multiworld, player, "Safari Zone West", "Safari Zone West-Wild", one_way=True)
     connect(multiworld, player, "Safari Zone West-NW", "Safari Zone West-Wild", one_way=True)
@@ -1831,7 +1129,10 @@ def create_regions(world):
     connect(multiworld, player, "Mt Moon B1F-SE", "Mt Moon B1F-Wild", one_way=True)
     connect(multiworld, player, "Cerulean Cave 2F-N", "Cerulean Cave 2F-Wild", one_way=True)
     connect(multiworld, player, "Cerulean Cave 2F-E", "Cerulean Cave 2F-Wild", one_way=True)
-    connect(multiworld, player, "Cerulean Cave 2F-W", "Cerulean Cave 2F-Wild", one_way=True)
+    if world.game == "Pokemon Yellow":
+        connect(multiworld, player, "Cerulean Cave 2F-S", "Cerulean Cave 2F-Wild", one_way=True)
+    else:
+        connect(multiworld, player, "Cerulean Cave 2F-W", "Cerulean Cave 2F-Wild", one_way=True)
     connect(multiworld, player, "Seafoam Islands 1F", "Seafoam Islands 1F-Wild", one_way=True)
     connect(multiworld, player, "Seafoam Islands 1F-SE", "Seafoam Islands 1F-Wild", one_way=True)
     connect(multiworld, player, "Seafoam Islands B1F", "Seafoam Islands B1F-Wild", one_way=True)
@@ -1887,13 +1188,18 @@ def create_regions(world):
     connect(multiworld, player, "Rock Tunnel B1F-E", "Rock Tunnel B1F-Wild", lambda state: logic.rock_tunnel(state, world, player), one_way=True)
     connect(multiworld, player, "Cerulean Cave 1F-SE", "Cerulean Cave 1F-Wild", one_way=True)
     connect(multiworld, player, "Cerulean Cave 1F-SW", "Cerulean Cave 1F-Wild", one_way=True)
-    connect(multiworld, player, "Cerulean Cave 1F-NE", "Cerulean Cave 1F-Wild", one_way=True)
-    connect(multiworld, player, "Cerulean Cave 1F-N", "Cerulean Cave 1F-Wild", one_way=True)
     connect(multiworld, player, "Cerulean Cave 1F-NW", "Cerulean Cave 1F-Wild", one_way=True)
-    connect(multiworld, player, "Cerulean Cave 1F-SE", "Cerulean Cave 1F-Water", lambda state: logic.can_surf(state, world, player))
-    connect(multiworld, player, "Cerulean Cave 1F-SW", "Cerulean Cave 1F-Water", lambda state: logic.can_surf(state, world, player))
-    connect(multiworld, player, "Cerulean Cave 1F-N", "Cerulean Cave 1F-Water", lambda state: logic.can_surf(state, world, player))
-    connect(multiworld, player, "Cerulean Cave 1F-NE", "Cerulean Cave 1F-Water", lambda state: logic.can_surf(state, world, player))
+    connect(multiworld, player, "Cerulean Cave 1F-N", "Cerulean Cave 1F-Wild", one_way=True)
+    connect(multiworld, player, "Cerulean Cave 1F-SE", "Cerulean Cave 1F-Water",
+            lambda state: logic.can_surf(state, world, player))
+    connect(multiworld, player, "Cerulean Cave 1F-SW", "Cerulean Cave 1F-Water",
+            lambda state: logic.can_surf(state, world, player))
+    if world.game == "Pokemon Yellow":
+        connect(multiworld, player, "Cerulean Cave 1F-C", "Cerulean Cave 1F-Wild", one_way=True)
+    else:
+        connect(multiworld, player, "Cerulean Cave 1F-NE", "Cerulean Cave 1F-Wild", one_way=True)
+        connect(multiworld, player, "Cerulean Cave 1F-N", "Cerulean Cave 1F-Water", lambda state: logic.can_surf(state, world, player))
+        connect(multiworld, player, "Cerulean Cave 1F-NE", "Cerulean Cave 1F-Water", lambda state: logic.can_surf(state, world, player))
     connect(multiworld, player, "Pokemon Mansion 3F", "Pokemon Mansion 3F-SE", one_way=True)
     connect(multiworld, player, "Silph Co 2F", "Silph Co 2F-NW", lambda state: logic.card_key(state, 2, player))
     connect(multiworld, player, "Silph Co 2F", "Silph Co 2F-SW", lambda state: logic.card_key(state, 2, player))
@@ -1999,38 +1305,968 @@ def create_regions(world):
         world.region_seed = seed
     world.random.seed(seed)
 
-    for attempt in range(10):
+    def cleanup_door_shuffle_attempt():
+        world.mapped_door_shuffle_spoiler = []
+        for region in world.multiworld.get_regions(player):
+            for entrance in reversed(region.exits):
+                if isinstance(entrance, PokemonRBWarp):
+                    region.exits.remove(entrance)
+            for entrance in reversed(region.entrances):
+                if isinstance(entrance, PokemonRBWarp):
+                    region.entrances.remove(entrance)
+        multiworld.regions.entrance_cache[world.player] = cache.copy()
+        if badge_locs:
+            for loc in badge_locs:
+                loc.item = None
+                loc.locked = False
+
+    door_shuffle_attempts = 10
+
+    for attempt in range(door_shuffle_attempts):
         try:
             door_shuffle(world, multiworld, player, badges, badge_locs)
         except DoorShuffleException as e:
-            if attempt == 9:
+            if attempt == door_shuffle_attempts - 1:
                 raise e
-            for region in world.multiworld.get_regions(player):
-                for entrance in reversed(region.exits):
-                    if isinstance(entrance, PokemonRBWarp):
-                        region.exits.remove(entrance)
-                for entrance in reversed(region.entrances):
-                    if isinstance(entrance, PokemonRBWarp):
-                        region.entrances.remove(entrance)
-            multiworld.regions.entrance_cache[world.player] = cache.copy()
-            if badge_locs:
-                for loc in badge_locs:
-                    loc.item = None
-                    loc.locked = False
+            cleanup_door_shuffle_attempt()
         else:
             break
 
 
+def count_shuffleable_warps(region_group):
+    return len(region_group["warps"])
+
+
+def bucket_region_groups_by_warp_count(region_groups):
+    buckets = {}
+    for region_group in region_groups:
+        buckets.setdefault(count_shuffleable_warps(region_group), []).append(region_group)
+    return buckets
+
+
+def mapped_warp_id_matches(warp_id, target_warp_id):
+    if warp_id == target_warp_id:
+        return True
+    if isinstance(warp_id, tuple):
+        if isinstance(target_warp_id, tuple):
+            return bool(set(warp_id) & set(target_warp_id))
+        return target_warp_id in warp_id
+    if isinstance(target_warp_id, tuple):
+        return warp_id in target_warp_id
+    return False
+
+
+def is_vanilla_reciprocal_warp(source_warp, destination_warp):
+    return (source_warp.parent_region.name == destination_warp.vanilla_target_region
+            and mapped_warp_id_matches(source_warp.warp_id, destination_warp.vanilla_target_warp_id))
+
+
+def validate_mapped_region_groups(region_groups, shuffleable_warps, buckets=None, require_connected=False):
+    expected_warps = set(shuffleable_warps)
+    seen_warps = {}
+    for region_group in region_groups:
+        for warp in region_group["warps"]:
+            if warp in seen_warps:
+                raise DoorShuffleException(
+                    f"Mapped door shuffle found duplicate shuffleable warp {warp.name} in region groups "
+                    f"{seen_warps[warp]} and {region_group['name']}."
+                )
+            seen_warps[warp] = region_group["name"]
+
+    missing_warps = expected_warps - set(seen_warps)
+    if missing_warps:
+        missing_names = sorted(warp.name for warp in missing_warps)
+        raise DoorShuffleException(f"Mapped door shuffle did not place shuffleable warps in a region group: "
+                                   f"{missing_names}")
+
+    extra_warps = set(seen_warps) - expected_warps
+    if extra_warps:
+        extra_names = sorted(warp.name for warp in extra_warps)
+        raise DoorShuffleException(f"Mapped door shuffle found unexpected shuffleable warps in region groups: "
+                                   f"{extra_names}")
+
+    if buckets is not None:
+        for warp_count, bucket in buckets.items():
+            for region_group in bucket:
+                if count_shuffleable_warps(region_group) != warp_count:
+                    raise DoorShuffleException(
+                        f"Mapped door shuffle placed group {region_group['name']} in the wrong size bucket."
+                    )
+
+    if require_connected:
+        unconnected_warps = [warp.name for warp in shuffleable_warps if warp.connected_region is None]
+        if unconnected_warps:
+            raise DoorShuffleException(f"Mapped door shuffle left shuffleable warps unconnected: "
+                                       f"{sorted(unconnected_warps)}")
+
+
+def validate_mapped_door_shuffle_accessibility(multiworld, player):
+    reachable_regions = set()
+    check_regions = [multiworld.get_region("Menu", player)]
+    while check_regions:
+        region = check_regions.pop()
+        if region in reachable_regions:
+            continue
+        reachable_regions.add(region)
+        for exit in region.exits:
+            if exit.connected_region is not None and exit.connected_region not in reachable_regions:
+                check_regions.append(exit.connected_region)
+
+    inaccessible_locations = [
+        location.name for location in multiworld.get_locations(player)
+        if (location.progress_type != LocationProgressType.EXCLUDED
+            and location.parent_region.name.split("-")[0] in map_ids
+            and location.parent_region not in reachable_regions)
+    ]
+    if inaccessible_locations:
+        raise DoorShuffleException(
+            f"Mapped door shuffle left locations unreachable: {sorted(inaccessible_locations)}"
+        )
+
+    world = multiworld.worlds[player]
+    state = multiworld.state.copy()
+    state.allow_partial_entrances = True
+    for item, data in item_table.items():
+        if ((data.id or item in poke_data.pokemon_data)
+                and ItemClassification.progression in data.classification):
+            state.collect(world.create_item(item), True)
+    for item in multiworld.precollected_items[player]:
+        state.collect(item, True)
+    for pokemon in poke_data.pokemon_data:
+        state.collect(world.create_item(pokemon), True)
+    state.sweep_for_advancements(locations=multiworld.get_filled_locations(player))
+
+    required_locations = {
+        location for location in multiworld.get_locations(player)
+        if (location.progress_type != LocationProgressType.EXCLUDED
+            and location.parent_region.name.split("-")[0] in map_ids)
+    }
+    inaccessible_locations = [
+        location.name for location in required_locations
+        if (location.progress_type != LocationProgressType.EXCLUDED
+            and not state.can_reach(location, "Location", player))
+    ]
+    if inaccessible_locations:
+        raise DoorShuffleException(
+            f"Mapped door shuffle left locations logic-unreachable: {sorted(inaccessible_locations)}"
+        )
+
+
+def discover_mapped_region_groups(multiworld, player, shuffleable_warps, blocked_warps=None,
+                                  include_outdoor_regions=True):
+    shuffleable_warps = list(shuffleable_warps)
+    shuffleable_warp_set = set(shuffleable_warps)
+    shuffleable_warps_by_region = {}
+    for warp in shuffleable_warps:
+        shuffleable_warps_by_region.setdefault(warp.parent_region, []).append(warp)
+    world = multiworld.worlds[player]
+    indoor_region_groups = get_mapped_indoor_region_groups(world)
+    forced_complete_group_names = set()
+    if world.options.warp_tile_shuffle != "mixed":
+        forced_complete_group_names.update({"Saffron Gym", "Silph Co Warp Tiles"})
+    regions_with_authored_warps = {
+        multiworld.get_region(region_name, player)
+        for region_name, region_warps in world.warp_data.items()
+        if region_warps
+    }
+    blocked_warp_set = set(blocked_warps if blocked_warps is not None else shuffleable_warps)
+    start_regions = sorted({warp.parent_region for warp in shuffleable_warps}, key=lambda region: region.name)
+    assigned_regions = set()
+    region_groups = []
+
+    explicit_group_regions = {}
+    for group_name, region_names in indoor_region_groups.items():
+        for region_name in region_names:
+            explicit_group_regions[region_name] = group_name
+    if include_outdoor_regions:
+        for group_name, region_names in mapped_outdoor_region_groups.items():
+            for region_name in region_names:
+                explicit_group_regions[region_name] = group_name
+
+    def mapped_region_group_name(region):
+        return explicit_group_regions.get(region.name)
+
+    def has_group_warp(region):
+        return region in regions_with_authored_warps or region in shuffleable_warps_by_region
+
+    regions_by_group_name = {}
+    for region in multiworld.get_regions(player):
+        group_name = mapped_region_group_name(region)
+        if group_name is not None:
+            regions_by_group_name.setdefault(group_name, set()).add(region)
+
+    for start_region in start_regions:
+        if start_region in assigned_regions:
+            continue
+
+        group_name = mapped_region_group_name(start_region)
+        if group_name is None:
+            if not has_group_warp(start_region):
+                continue
+            allowed_regions = {start_region}
+        else:
+            allowed_regions = regions_by_group_name[group_name]
+
+        if group_name in forced_complete_group_names:
+            checked_regions = allowed_regions - assigned_regions
+        else:
+            checked_regions = set()
+            check_regions = [start_region]
+            while check_regions:
+                region = check_regions.pop()
+                if region in checked_regions or region in assigned_regions or region not in allowed_regions:
+                    continue
+                checked_regions.add(region)
+                for exit in [*region.exits, *region.entrances]:
+                    if exit in blocked_warp_set or exit.connected_region is None:
+                        continue
+                    adjacent_region = exit.connected_region if exit.parent_region is region else exit.parent_region
+                    if (adjacent_region in allowed_regions
+                            and adjacent_region not in checked_regions
+                            and adjacent_region not in assigned_regions):
+                        check_regions.append(adjacent_region)
+
+        group_warps = sorted(
+            [warp for warp in shuffleable_warps if warp.parent_region in checked_regions],
+            key=lambda warp: warp.name,
+        )
+        if not group_warps:
+            continue
+
+        assigned_regions.update(checked_regions)
+        group_regions = {region for region in checked_regions if has_group_warp(region)}
+        if not group_regions:
+            continue
+        if group_name is not None and checked_regions == allowed_regions:
+            display_group_name = group_name
+        elif len(group_regions) == 1:
+            display_group_name = next(iter(group_regions)).name
+        else:
+            display_group_name = ", ".join(sorted(region.name for region in group_regions))
+        region_groups.append({
+            "name": display_group_name,
+            "regions": group_regions,
+            "static_regions": checked_regions,
+            "warps": group_warps,
+        })
+
+    validate_mapped_region_groups(region_groups, shuffleable_warp_set)
+    return region_groups
+
+
+def get_vanilla_destination_warps(shuffleable_warps, destination_warps):
+    warps_by_region = {}
+    for warp in destination_warps:
+        warps_by_region.setdefault(warp.parent_region.name, []).append(warp)
+
+    vanilla_destination_warps = {}
+    for warp in shuffleable_warps:
+        destination_warps = [
+            destination_warp for destination_warp in warps_by_region.get(warp.vanilla_target_region, [])
+            if mapped_warp_id_matches(destination_warp.warp_id, warp.vanilla_target_warp_id)
+        ]
+        if not destination_warps:
+            raise DoorShuffleException(
+                f"Mapped door shuffle could not find vanilla destination for shuffleable warp {warp.name}."
+            )
+        if len(destination_warps) > 1:
+            raise DoorShuffleException(
+                f"Mapped door shuffle found ambiguous vanilla destinations for shuffleable warp {warp.name}."
+            )
+        vanilla_destination_warps[warp] = destination_warps[0]
+    return vanilla_destination_warps
+
+
+def connect_mapped_region_group_directed(world, source_region_group, destination_region_group,
+                                         vanilla_destination_warps=None):
+    source_warps = source_region_group["warps"].copy()
+    destination_warps = destination_region_group["warps"].copy()
+    if len(source_warps) != len(destination_warps):
+        raise DoorShuffleException(
+            f"Mapped door shuffle tried to connect groups with different warp counts: "
+            f"{source_region_group['name']} and {destination_region_group['name']}."
+        )
+    world.random.shuffle(source_warps)
+    world.random.shuffle(destination_warps)
+    for entrance_a, entrance_b in zip(source_warps, destination_warps):
+        entrance_a.connect(entrance_b)
+
+
+def connect_mapped_region_groups_bidirectional(world, region_group_a, region_group_b):
+    warps_a = region_group_a["warps"].copy()
+    warps_b = region_group_b["warps"].copy()
+    if len(warps_a) != len(warps_b):
+        raise DoorShuffleException(
+            f"Mapped door shuffle tried to connect groups with different warp counts: "
+            f"{region_group_a['name']} and {region_group_b['name']}."
+        )
+    world.random.shuffle(warps_a)
+    world.random.shuffle(warps_b)
+    for entrance_a, entrance_b in zip(warps_a, warps_b):
+        entrance_a.connect(entrance_b)
+        entrance_b.connect(entrance_a)
+
+
+def connect_mapped_region_groups_to_vanilla(region_groups, shuffleable_warps, destination_warps=None):
+    region_group_buckets = bucket_region_groups_by_warp_count(region_groups)
+    validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets)
+    vanilla_destination_warps = get_vanilla_destination_warps(shuffleable_warps, destination_warps or shuffleable_warps)
+    for source_warp in shuffleable_warps:
+        source_warp.connect(vanilla_destination_warps[source_warp])
+    validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets, require_connected=True)
+
+
+def find_mapped_warp_by_region_and_id(warps, region, warp_id):
+    matching_warps = [
+        warp for warp in warps
+        if warp.parent_region is region and mapped_warp_id_matches(warp.warp_id, warp_id)
+    ]
+    if not matching_warps:
+        return None
+    if len(matching_warps) > 1:
+        raise DoorShuffleException(
+            f"Mapped door shuffle found ambiguous connected warp in region {region.name}."
+        )
+    return matching_warps[0]
+
+
+def connect_mapped_warp_if_needed(source_warp, destination_warp):
+    if source_warp.connected_region is None:
+        source_warp.connect(destination_warp)
+    elif (source_warp.connected_region is not destination_warp.parent_region
+          or not mapped_warp_id_matches(source_warp.target, destination_warp.warp_id)):
+        raise DoorShuffleException(
+            f"Mapped door shuffle tried to reconnect {source_warp.name} from "
+            f"{source_warp.connected_region.name} to {destination_warp.parent_region.name}."
+        )
+
+
+def reconnect_mapped_warp(source_warp, destination_warp):
+    if source_warp.connected_region is destination_warp.parent_region and mapped_warp_id_matches(
+            source_warp.target, destination_warp.warp_id):
+        return
+    if source_warp.connected_region is not None and source_warp in source_warp.connected_region.entrances:
+        source_warp.connected_region.entrances.remove(source_warp)
+    source_warp.connected_region = None
+    source_warp.connect(destination_warp)
+
+
+def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_warps, destination_warps,
+                                              exterior_warps, state=None, event_locations=None,
+                                              relevant_events=None, allow_reachable_source_warps_as_entries=False):
+    region_group_buckets = bucket_region_groups_by_warp_count(region_groups)
+    validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets)
+    vanilla_destination_warps = get_vanilla_destination_warps(shuffleable_warps, destination_warps)
+    exterior_slot_warps = get_vanilla_destination_warps(exterior_warps, shuffleable_warps)
+    event_locations = event_locations or []
+    relevant_events = relevant_events or []
+
+    group_by_warp = {
+        warp: region_group
+        for region_group in region_groups
+        for warp in region_group["warps"]
+    }
+    exterior_warp_set = set(exterior_warps)
+    shuffleable_warp_set = set(shuffleable_warps)
+    required_location_regions = set()
+    if allow_reachable_source_warps_as_entries:
+        required_location_regions = {
+            location.parent_region for location in world.multiworld.get_locations(world.player)
+            if (location.progress_type != LocationProgressType.EXCLUDED
+                and location.parent_region.name.split("-")[0] in map_ids)
+        }
+    replacement_group_by_slot_group = {}
+    slot_group_by_replacement_group = {}
+    pinned_replacement_warp_by_slot_warp = {}
+    ignored_forced_exterior_warps = set()
+    ignored_forced_replacement_warps = set()
+
+    def assign_replacement_group(slot_group, replacement_group):
+        if count_shuffleable_warps(slot_group) != count_shuffleable_warps(replacement_group):
+            raise DoorShuffleException(
+                f"Mapped door shuffle tried to place group {replacement_group['name']} in "
+                f"different-size slot {slot_group['name']}."
+            )
+        assigned_replacement = replacement_group_by_slot_group.get(slot_group["name"])
+        if assigned_replacement is not None and assigned_replacement is not replacement_group:
+            raise DoorShuffleException(
+                f"Mapped door shuffle found conflicting forced placements for slot {slot_group['name']}."
+            )
+        assigned_slot = slot_group_by_replacement_group.get(replacement_group["name"])
+        if assigned_slot is not None and assigned_slot is not slot_group:
+            raise DoorShuffleException(
+                f"Mapped door shuffle tried to place group {replacement_group['name']} in multiple slots."
+            )
+        replacement_group_by_slot_group[slot_group["name"]] = replacement_group
+        slot_group_by_replacement_group[replacement_group["name"]] = slot_group
+
+    def pin_replacement_warp(slot_warp, replacement_warp):
+        pinned_warp = pinned_replacement_warp_by_slot_warp.get(slot_warp)
+        if pinned_warp is not None and pinned_warp is not replacement_warp:
+            raise DoorShuffleException(
+                f"Mapped door shuffle found conflicting forced warp placements for {slot_warp.name}."
+            )
+        pinned_replacement_warp_by_slot_warp[slot_warp] = replacement_warp
+
+    def group_static_regions(region_group):
+        return region_group.get("static_regions", region_group["regions"])
+
+    for exterior_warp, slot_warp in exterior_slot_warps.items():
+        if exterior_warp.connected_region is None:
+            continue
+        replacement_warp = find_mapped_warp_by_region_and_id(
+            shuffleable_warps, exterior_warp.connected_region, exterior_warp.target)
+        if replacement_warp is None:
+            raise DoorShuffleException(
+                f"Mapped door shuffle could not resolve forced exterior connection {exterior_warp.name}."
+            )
+        slot_group = group_by_warp[slot_warp]
+        replacement_group = group_by_warp[replacement_warp]
+        if (count_shuffleable_warps(slot_group) != count_shuffleable_warps(replacement_group)
+                or not is_vanilla_reciprocal_warp(slot_warp, exterior_warp)):
+            ignored_forced_exterior_warps.add(exterior_warp)
+            ignored_forced_replacement_warps.add(replacement_warp)
+            continue
+        assign_replacement_group(slot_group, replacement_group)
+        pin_replacement_warp(slot_warp, replacement_warp)
+
+    for bucket in region_group_buckets.values():
+        if len(bucket) != 1:
+            continue
+        region_group = bucket[0]
+        assign_replacement_group(region_group, region_group)
+        for slot_warp in region_group["warps"]:
+            pin_replacement_warp(slot_warp, slot_warp)
+
+    replacement_warp_by_slot_warp = {}
+    assigned_warp_slot_group_names = set()
+
+    def static_reachable_regions_from(region, allowed_regions, check_state=None):
+        reachable_regions = set()
+        check_regions = [region]
+        while check_regions:
+            check_region = check_regions.pop()
+            if check_region in reachable_regions or check_region not in allowed_regions:
+                continue
+            reachable_regions.add(check_region)
+            for exit in check_region.exits:
+                if exit in shuffleable_warp_set or exit.connected_region is None:
+                    continue
+                if check_state is not None and not exit.access_rule(check_state):
+                    continue
+                if exit.connected_region not in reachable_regions:
+                    check_regions.append(exit.connected_region)
+        return reachable_regions
+
+    def assign_replacement_warps(slot_group, entry_slot_warps=None):
+        if slot_group["name"] in assigned_warp_slot_group_names:
+            return
+        replacement_group = replacement_group_by_slot_group[slot_group["name"]]
+        entry_slot_warps = [warp for warp in (entry_slot_warps or []) if warp in slot_group["warps"]]
+        replacement_warps = [
+            warp for warp in replacement_group["warps"]
+            if warp not in pinned_replacement_warp_by_slot_warp.values()
+        ]
+        slot_warps = []
+        for slot_warp in slot_group["warps"]:
+            pinned_replacement_warp = pinned_replacement_warp_by_slot_warp.get(slot_warp)
+            if pinned_replacement_warp is None:
+                slot_warps.append(slot_warp)
+                continue
+            if pinned_replacement_warp not in replacement_group["warps"]:
+                raise DoorShuffleException(
+                    f"Mapped door shuffle pinned {slot_warp.name} to a warp outside its replacement group."
+                )
+            replacement_warp_by_slot_warp[slot_warp] = pinned_replacement_warp
+
+        entry_reachable_warps = None
+        if state is not None and entry_slot_warps:
+            progress_slot_warps = [
+                slot_warp for slot_warp in slot_group["warps"]
+                if slot_warp not in entry_slot_warps and slot_group_has_unreached_exit(slot_group, slot_warp)
+            ]
+            required_replacement_regions = {
+                region for region in group_static_regions(replacement_group)
+                if (region in required_location_regions
+                    or any(location.item and location.item.name in relevant_events for location in region.locations))
+            }
+
+            selected_entry = None
+            selected_reachable_warps = []
+            selected_reachable_region_count = -1
+            for entry_slot_warp in entry_slot_warps:
+                if entry_slot_warp not in slot_warps:
+                    continue
+                for replacement_warp in replacement_warps:
+                    required_reachable_regions = static_reachable_regions_from(
+                        replacement_warp.parent_region, group_static_regions(replacement_group))
+                    if not required_replacement_regions.issubset(required_reachable_regions):
+                        continue
+                    reachable_regions = static_reachable_regions_from(
+                        replacement_warp.parent_region, group_static_regions(replacement_group), state)
+                    reachable_warps = [
+                        warp for warp in replacement_warps
+                        if warp is not replacement_warp and warp.parent_region in reachable_regions
+                    ]
+                    if (len(reachable_warps) > len(selected_reachable_warps)
+                            or (len(reachable_warps) == len(selected_reachable_warps)
+                                and len(reachable_regions) > selected_reachable_region_count)):
+                        selected_entry = (entry_slot_warp, replacement_warp)
+                        selected_reachable_warps = reachable_warps
+                        selected_reachable_region_count = len(reachable_regions)
+            if selected_entry is not None:
+                entry_slot_warp, replacement_warp = selected_entry
+                replacement_warp_by_slot_warp[entry_slot_warp] = replacement_warp
+                slot_warps.remove(entry_slot_warp)
+                replacement_warps.remove(replacement_warp)
+                entry_reachable_warps = selected_reachable_warps
+
+        if len(slot_warps) != len(replacement_warps):
+            raise DoorShuffleException(
+                f"Mapped door shuffle found mismatched remaining warp slots for group {slot_group['name']}."
+            )
+
+        if entry_reachable_warps is not None:
+            progress_slot_warps = [
+                slot_warp for slot_warp in slot_warps
+                if slot_group_has_unreached_exit(slot_group, slot_warp)
+            ]
+            world.random.shuffle(progress_slot_warps)
+            for slot_warp in progress_slot_warps:
+                reachable_replacements = [
+                    warp for warp in replacement_warps
+                    if warp in entry_reachable_warps
+                ]
+                if not reachable_replacements:
+                    break
+                replacement_warp = world.random.choice(reachable_replacements)
+                replacement_warp_by_slot_warp[slot_warp] = replacement_warp
+                slot_warps.remove(slot_warp)
+                replacement_warps.remove(replacement_warp)
+
+        world.random.shuffle(replacement_warps)
+        for slot_warp, replacement_warp in zip(slot_warps, replacement_warps):
+            replacement_warp_by_slot_warp[slot_warp] = replacement_warp
+        assigned_warp_slot_group_names.add(slot_group["name"])
+
+    def connect_available_edges():
+        for exterior_warp, slot_warp in exterior_slot_warps.items():
+            if exterior_warp in ignored_forced_exterior_warps:
+                continue
+            if slot_warp not in replacement_warp_by_slot_warp:
+                continue
+            reconnect_mapped_warp(exterior_warp, replacement_warp_by_slot_warp[slot_warp])
+
+        for slot_warp, source_warp in list(replacement_warp_by_slot_warp.items()):
+            if source_warp in ignored_forced_replacement_warps:
+                continue
+            destination_slot_warp = vanilla_destination_warps[slot_warp]
+            if destination_slot_warp in replacement_warp_by_slot_warp:
+                reconnect_mapped_warp(source_warp, replacement_warp_by_slot_warp[destination_slot_warp])
+            elif destination_slot_warp in group_by_warp:
+                continue
+            else:
+                reconnect_mapped_warp(source_warp, destination_slot_warp)
+                if (destination_slot_warp in exterior_warp_set
+                        and destination_slot_warp not in ignored_forced_exterior_warps
+                        and is_vanilla_reciprocal_warp(slot_warp, destination_slot_warp)):
+                    reconnect_mapped_warp(destination_slot_warp, source_warp)
+
+    if state is None:
+        for bucket in region_group_buckets.values():
+            remaining_slots = [
+                region_group for region_group in bucket
+                if region_group["name"] not in replacement_group_by_slot_group
+            ]
+            remaining_replacements = [
+                region_group for region_group in bucket
+                if region_group["name"] not in slot_group_by_replacement_group
+            ]
+            if len(remaining_slots) != len(remaining_replacements):
+                raise DoorShuffleException(
+                    "Mapped door shuffle found an unequal number of open slots and replacement groups."
+                )
+            world.random.shuffle(remaining_replacements)
+            for slot_group, replacement_group in zip(remaining_slots, remaining_replacements):
+                assign_replacement_group(slot_group, replacement_group)
+
+        for slot_group in region_groups:
+            assign_replacement_warps(slot_group)
+        connect_available_edges()
+    else:
+        player = world.player
+        groups_by_name = {region_group["name"]: region_group for region_group in region_groups}
+
+        def update_state(check_state):
+            check_state.update_reachable_regions(player)
+            check_state.sweep_for_advancements(locations=event_locations)
+
+        def slot_source_warp_can_reach(warp, check_state):
+            if warp.connected_region is not None:
+                return warp.can_reach(check_state)
+            if ("Elevator" in warp.parent_region.name and (
+                    (check_state.multiworld.worlds[warp.player].options.all_elevators_locked
+                     or "Rocket Hideout" in warp.parent_region.name)
+                    and not check_state.has("Lift Key", warp.player))):
+                return False
+            return warp.parent_region.can_reach(check_state)
+
+        initial_entry_slot_warps = set()
+        if allow_reachable_source_warps_as_entries:
+            update_state(state)
+            initial_entry_slot_warps = {
+                slot_warp for region_group in region_groups for slot_warp in region_group["warps"]
+                if slot_source_warp_can_reach(slot_warp, state)
+            }
+
+        def reachable_entry_slot_warps(slot_group, check_state):
+            entry_slot_warps = []
+            if allow_reachable_source_warps_as_entries:
+                for slot_warp in slot_group["warps"]:
+                    if slot_warp in initial_entry_slot_warps:
+                        entry_slot_warps.append(slot_warp)
+            for exterior_warp, slot_warp in exterior_slot_warps.items():
+                if group_by_warp.get(slot_warp) is slot_group and slot_source_warp_can_reach(exterior_warp, check_state):
+                    entry_slot_warps.append(slot_warp)
+
+            for source_slot_warp, destination_slot_warp in vanilla_destination_warps.items():
+                if group_by_warp.get(destination_slot_warp) is not slot_group:
+                    continue
+                source_warp = replacement_warp_by_slot_warp.get(source_slot_warp)
+                if source_warp is not None and slot_source_warp_can_reach(source_warp, check_state):
+                    entry_slot_warps.append(destination_slot_warp)
+            return entry_slot_warps
+
+        def slot_group_has_reachable_entry(slot_group, check_state):
+            return bool(reachable_entry_slot_warps(slot_group, check_state))
+
+        def reachable_slot_groups(check_state):
+            return [
+                region_group for region_group in region_groups
+                if (region_group["name"] not in replacement_group_by_slot_group
+                    and slot_group_has_reachable_entry(region_group, check_state))
+            ]
+
+        def event_item_opens_reachable_slot(item):
+            state_copy = state.copy()
+            state_copy.collect(item, True)
+            update_state(state_copy)
+            return len(reachable_slot_groups(state_copy)) > len(reachable_slot_groups(state))
+
+        def slot_group_has_unreached_exit(slot_group, only_slot_warp=None):
+            slot_warps = [only_slot_warp] if only_slot_warp is not None else slot_group["warps"]
+            for check_slot_warp in slot_warps:
+                destination_slot_warp = vanilla_destination_warps[check_slot_warp]
+                destination_group = group_by_warp.get(destination_slot_warp)
+                if (destination_group is not None
+                        and destination_group["name"] not in replacement_group_by_slot_group):
+                    return True
+                if (destination_group is None
+                        and not destination_slot_warp.can_reach(state)):
+                    return True
+            return False
+
+        def replacement_group_dead_end(slot_group, replacement_group):
+            for region in group_static_regions(replacement_group):
+                for location in region.locations:
+                    if (location.item and location.item.name in relevant_events
+                            and event_item_opens_reachable_slot(location.item)):
+                        return False
+            if any(region.can_reach(state) for region in group_static_regions(replacement_group)):
+                return True
+            return not slot_group_has_unreached_exit(slot_group)
+
+        def group_has_relevant_event(region_group):
+            for region in group_static_regions(region_group):
+                for location in region.locations:
+                    if location.item and location.item.name in relevant_events:
+                        return True
+            return False
+
+        def group_has_required_location(region_group):
+            return any(region in required_location_regions for region in group_static_regions(region_group))
+
+        def group_has_frontier_event(region_group):
+            for region in group_static_regions(region_group):
+                for location in region.locations:
+                    if (location.item and location.item.name in relevant_events
+                            and event_item_opens_reachable_slot(location.item)):
+                        return True
+            return False
+
+        def replacement_group_required_regions_reachable(replacement_group):
+            required_replacement_regions = {
+                region for region in group_static_regions(replacement_group)
+                if (region in required_location_regions
+                    or any(location.item and location.item.name in relevant_events for location in region.locations))
+            }
+            if not required_replacement_regions:
+                return True
+            return any(
+                required_replacement_regions.issubset(static_reachable_regions_from(
+                    replacement_warp.parent_region, group_static_regions(replacement_group)))
+                for replacement_warp in replacement_group["warps"]
+            )
+
+        update_state(state)
+        for slot_group_name in list(replacement_group_by_slot_group):
+            slot_group = groups_by_name[slot_group_name]
+            assign_replacement_warps(slot_group, reachable_entry_slot_warps(slot_group, state))
+        connect_available_edges()
+
+        while len(replacement_group_by_slot_group) < len(region_groups):
+            update_state(state)
+            open_slot_groups = reachable_slot_groups(state)
+            if not open_slot_groups:
+                remaining_relevant_event_groups = [
+                    region_group["name"]
+                    for bucket in region_group_buckets.values()
+                    for region_group in bucket
+                    if (region_group["name"] not in slot_group_by_replacement_group
+                        and (group_has_relevant_event(region_group) or group_has_required_location(region_group)))
+                ]
+                if remaining_relevant_event_groups:
+                    raise DoorShuffleException(
+                        "Mapped door shuffle stranded required region groups: "
+                        f"{sorted(remaining_relevant_event_groups)}"
+                    )
+                for bucket in region_group_buckets.values():
+                    remaining_slots = [
+                        region_group for region_group in bucket
+                        if region_group["name"] not in replacement_group_by_slot_group
+                    ]
+                    remaining_replacements = [
+                        region_group for region_group in bucket
+                        if region_group["name"] not in slot_group_by_replacement_group
+                    ]
+                    if len(remaining_slots) != len(remaining_replacements):
+                        raise DoorShuffleException(
+                            "Mapped door shuffle found an unequal number of open slots and replacement groups."
+                        )
+                    world.random.shuffle(remaining_replacements)
+                    for slot_group, replacement_group in zip(remaining_slots, remaining_replacements):
+                        assign_replacement_group(slot_group, replacement_group)
+                        assign_replacement_warps(slot_group)
+                        connect_available_edges()
+                break
+
+            unassigned_count = len(region_groups) - len(replacement_group_by_slot_group)
+            find_dead_end = len(open_slot_groups) > 8 and unassigned_count <= len(region_groups) - 3
+
+            world.random.shuffle(open_slot_groups)
+            selected_slot_group = None
+            selected_entry_slot_warps = None
+            selected_replacement_group = None
+            fallback_slot_group = None
+            fallback_entry_slot_warps = None
+            fallback_replacement_group = None
+            for slot_group in open_slot_groups:
+                entry_slot_warps = reachable_entry_slot_warps(slot_group, state)
+                candidate_replacements = [
+                    region_group for region_group in region_group_buckets[count_shuffleable_warps(slot_group)]
+                    if region_group["name"] not in slot_group_by_replacement_group
+                    and replacement_group_required_regions_reachable(region_group)
+                ]
+                if (group_has_relevant_event(slot_group)
+                        and slot_group["name"] not in slot_group_by_replacement_group
+                        and replacement_group_required_regions_reachable(slot_group)):
+                    selected_slot_group = slot_group
+                    selected_entry_slot_warps = entry_slot_warps
+                    selected_replacement_group = slot_group
+                    break
+                world.random.shuffle(candidate_replacements)
+                for replacement_group in candidate_replacements:
+                    if group_has_frontier_event(replacement_group):
+                        selected_slot_group = slot_group
+                        selected_entry_slot_warps = entry_slot_warps
+                        selected_replacement_group = replacement_group
+                        break
+                if selected_replacement_group is not None:
+                    break
+                for replacement_group in candidate_replacements:
+                    if group_has_relevant_event(replacement_group):
+                        selected_slot_group = slot_group
+                        selected_entry_slot_warps = entry_slot_warps
+                        selected_replacement_group = replacement_group
+                        break
+                if selected_replacement_group is not None:
+                    break
+                for replacement_group in candidate_replacements:
+                    if group_has_required_location(replacement_group):
+                        selected_slot_group = slot_group
+                        selected_entry_slot_warps = entry_slot_warps
+                        selected_replacement_group = replacement_group
+                        break
+                if selected_replacement_group is not None:
+                    break
+                for replacement_group in candidate_replacements:
+                    if replacement_group_dead_end(slot_group, replacement_group) is find_dead_end:
+                        selected_slot_group = slot_group
+                        selected_entry_slot_warps = entry_slot_warps
+                        selected_replacement_group = replacement_group
+                        break
+                if selected_replacement_group is not None:
+                    break
+                if fallback_slot_group is None and candidate_replacements:
+                    fallback_slot_group = slot_group
+                    fallback_entry_slot_warps = entry_slot_warps
+                    fallback_replacement_group = candidate_replacements[0]
+
+            if selected_slot_group is None:
+                selected_slot_group = fallback_slot_group
+                selected_entry_slot_warps = fallback_entry_slot_warps
+                selected_replacement_group = fallback_replacement_group
+
+            if selected_slot_group is None or selected_replacement_group is None:
+                raise DoorShuffleException(
+                    "Mapped door shuffle found no replacement group for a reachable slot group."
+                )
+
+            assign_replacement_group(selected_slot_group, selected_replacement_group)
+            assign_replacement_warps(selected_slot_group, selected_entry_slot_warps)
+            connect_available_edges()
+
+        for slot_group in region_groups:
+            assign_replacement_warps(slot_group)
+        connect_available_edges()
+
+    for slot_warp in shuffleable_warps:
+        source_warp = replacement_warp_by_slot_warp[slot_warp]
+        if source_warp in ignored_forced_replacement_warps:
+            continue
+        destination_slot_warp = vanilla_destination_warps[slot_warp]
+        if destination_slot_warp in replacement_warp_by_slot_warp:
+            reconnect_mapped_warp(source_warp, replacement_warp_by_slot_warp[destination_slot_warp])
+        else:
+            reconnect_mapped_warp(source_warp, destination_slot_warp)
+            if (destination_slot_warp in exterior_warp_set
+                    and destination_slot_warp not in ignored_forced_exterior_warps
+                    and is_vanilla_reciprocal_warp(slot_warp, destination_slot_warp)):
+                reconnect_mapped_warp(destination_slot_warp, source_warp)
+
+    unconnected_exterior_warps = [
+        warp.name for warp in exterior_warps if warp.connected_region is None
+    ]
+    if unconnected_exterior_warps:
+        raise DoorShuffleException(f"Mapped door shuffle left exterior warps unconnected: "
+                                   f"{sorted(unconnected_exterior_warps)}")
+    validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets, require_connected=True)
+
+    if state is not None:
+        state.update_reachable_regions(world.player)
+        state.sweep_for_advancements(locations=event_locations)
+        inaccessible_events = [
+            location.name for location in event_locations
+            if (location.item and location.item.name in relevant_events
+                and not location.can_reach(state))
+        ]
+        if inaccessible_events:
+            raise DoorShuffleException(
+                f"Mapped door shuffle left relevant events unreachable: {sorted(inaccessible_events)}"
+            )
+
+    world.mapped_door_shuffle_spoiler = sorted(
+        (slot_group_name, replacement_group["name"])
+        for slot_group_name, replacement_group in replacement_group_by_slot_group.items())
+
+
+def connect_mapped_region_groups_by_bucket(world, region_groups, shuffleable_warps, destination_warps=None,
+                                           group_has_unconnected_exit=None):
+    region_group_buckets = bucket_region_groups_by_warp_count(region_groups)
+    validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets)
+    vanilla_destination_warps = get_vanilla_destination_warps(shuffleable_warps, destination_warps or shuffleable_warps)
+
+    vanilla_group_names = set()
+    if group_has_unconnected_exit is not None:
+        groups_by_name = {region_group["name"]: region_group for region_group in region_groups}
+        groups_by_warp = {
+            warp: region_group["name"]
+            for region_group in region_groups
+            for warp in region_group["warps"]
+        }
+        while True:
+            changed = False
+            for region_group_name in list(vanilla_group_names):
+                for warp in groups_by_name[region_group_name]["warps"]:
+                    destination_group_name = groups_by_warp.get(vanilla_destination_warps[warp])
+                    if destination_group_name is not None and destination_group_name not in vanilla_group_names:
+                        vanilla_group_names.add(destination_group_name)
+                        changed = True
+            for bucket in region_group_buckets.values():
+                remaining_groups = [
+                    region_group for region_group in bucket
+                    if region_group["name"] not in vanilla_group_names
+                ]
+                groups_with_exit = [
+                    region_group for region_group in remaining_groups
+                    if group_has_unconnected_exit(region_group)
+                ]
+                dead_end_groups = [
+                    region_group for region_group in remaining_groups
+                    if region_group not in groups_with_exit
+                ]
+                world.random.shuffle(groups_with_exit)
+                world.random.shuffle(dead_end_groups)
+                while len(dead_end_groups) > len(groups_with_exit):
+                    vanilla_group_names.add(dead_end_groups.pop()["name"])
+                    changed = True
+                if (len(groups_with_exit) + len(dead_end_groups)) % 2:
+                    vanilla_group_names.add((dead_end_groups or groups_with_exit).pop()["name"])
+                    changed = True
+            if not changed:
+                break
+
+        for region_group_name in vanilla_group_names:
+            region_group = groups_by_name[region_group_name]
+            connect_mapped_region_group_directed(world, region_group, region_group, vanilla_destination_warps)
+
+    for bucket in region_group_buckets.values():
+        remaining_groups = [
+            region_group for region_group in bucket
+            if region_group["name"] not in vanilla_group_names
+        ]
+        if group_has_unconnected_exit is not None:
+            groups_with_exit = [
+                region_group for region_group in remaining_groups
+                if group_has_unconnected_exit(region_group)
+            ]
+            dead_end_groups = [
+                region_group for region_group in remaining_groups
+                if region_group not in groups_with_exit
+            ]
+            world.random.shuffle(groups_with_exit)
+            world.random.shuffle(dead_end_groups)
+            while dead_end_groups:
+                connect_mapped_region_groups_bidirectional(world, dead_end_groups.pop(), groups_with_exit.pop())
+            remaining_groups = groups_with_exit
+
+        world.random.shuffle(remaining_groups)
+        if len(remaining_groups) % 2:
+            unmatched_group = remaining_groups.pop()
+            connect_mapped_region_group_directed(world, unmatched_group, unmatched_group, vanilla_destination_warps)
+        while remaining_groups:
+            connect_mapped_region_groups_bidirectional(world, remaining_groups.pop(), remaining_groups.pop())
+
+    validate_mapped_region_groups(region_groups, shuffleable_warps, region_group_buckets, require_connected=True)
+
+
 def door_shuffle(world, multiworld, player, badges, badge_locs):
+    internal_warp_shuffle_modes = ("full", "mapped", "insanity", "insanity_mapped", "decoupled")
+    full_interior_pool_modes = ("full", "mapped")
+    all_warps_pool_modes = ("insanity", "insanity_mapped", "decoupled")
+    mapped_region_group_modes = ("mapped", "insanity_mapped")
+    interior_style_fill_modes = ("interiors", *full_interior_pool_modes)
+
+    world.mapped_door_shuffle_spoiler = []
     entrances = []
     full_interiors = []
-    for region_name, region_entrances in warp_data.items():
+    for region_name, region_entrances in world.warp_data.items():
         region = multiworld.get_region(region_name, player)
         for entrance_data in region_entrances:
             shuffle = True
             interior = False
             if not outdoor_map(region.name) and not outdoor_map(entrance_data['to']['map']):
-                if world.options.door_shuffle not in ("full", "insanity", "decoupled"):
+                if world.options.door_shuffle not in internal_warp_shuffle_modes:
                     shuffle = False
                 interior = True
             if world.options.door_shuffle == "simple":
@@ -2043,7 +2279,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     entrance_data["name"]) in silph_co_warps + saffron_gym_warps:
                 if world.options.warp_tile_shuffle:
                     shuffle = True
-                    if world.options.warp_tile_shuffle == "mixed" and world.options.door_shuffle == "full":
+                    if world.options.warp_tile_shuffle == "mixed" and world.options.door_shuffle in full_interior_pool_modes:
                         interior = True
                     else:
                         interior = False
@@ -2056,7 +2292,10 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                                          entrance_data else entrance_data["name"], region, entrance_data["id"],
                                          entrance_data["address"], entrance_data["flags"] if "flags" in
                                          entrance_data else "")
-                if interior and world.options.door_shuffle == "full":
+                entrance.vanilla_target_region = entrance_data["to"]["map"]
+                entrance.vanilla_target_warp_id = entrance_data["to"]["id"]
+                if ((world.options.door_shuffle == "mapped" and not outdoor_map(region.name))
+                        or (interior and world.options.door_shuffle in full_interior_pool_modes)):
                     full_interiors.append(entrance)
                 else:
                     entrances.append(entrance)
@@ -2065,11 +2304,44 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                 connect(multiworld, player, region.name, entrance_data["to"]["map"], one_way=True,
                         name=entrance_data["name"] if "name" in entrance_data else None)
 
+    all_warps = entrances + full_interiors
+    mapped_interior_warps = []
+    mapped_exterior_warps = []
+    if world.options.door_shuffle == "mapped":
+        mapped_static_forced_names = {door for pair in safari_zone_connections for door in pair}
+        mapped_interior_warps = [
+            entrance for entrance in full_interiors
+            if entrance.name not in mapped_static_forced_names
+        ]
+        mapped_exterior_warps = [
+            entrance for entrance in entrances
+            if (not outdoor_map(entrance.vanilla_target_region)
+                and entrance.name not in mapped_static_forced_names)
+        ]
     forced_connections = set()
     one_way_forced_connections = set()
+    available_entrance_names = {entrance.name for entrance in entrances + full_interiors}
+    insanity_mapped_blocked_warps = set(entrances + full_interiors)
+    mapped_blocked_warps = set(entrances + full_interiors)
+    if world.options.warp_tile_shuffle == "shuffle":
+        non_mixed_warp_tile_names = set(silph_co_warps + saffron_gym_warps)
+        if world.options.door_shuffle == "insanity_mapped":
+            insanity_mapped_blocked_warps = {
+                warp for warp in insanity_mapped_blocked_warps
+                if warp.name not in non_mixed_warp_tile_names
+            }
+        if world.options.door_shuffle == "mapped":
+            mapped_blocked_warps = {
+                warp for warp in mapped_blocked_warps
+                if warp.name not in non_mixed_warp_tile_names
+            }
+            mapped_interior_warps = [
+                warp for warp in mapped_interior_warps
+                if warp.name not in non_mixed_warp_tile_names
+            ]
 
     if world.options.door_shuffle:
-        if world.options.door_shuffle in ("full", "insanity", "decoupled"):
+        if world.options.door_shuffle in internal_warp_shuffle_modes:
             safari_zone_doors = [door for pair in safari_zone_connections for door in pair]
             safari_zone_doors.sort()
             order = ["Center", "East", "North", "West"]
@@ -2095,39 +2367,54 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             forced_connections.update(simple_mandatory_connections)
         else:
             usable_safe_rooms += pokemarts
-        if world.options.door_shuffle in ("full", "insanity", "decoupled"):
+        if world.options.door_shuffle in internal_warp_shuffle_modes:
             forced_connections.update(full_mandatory_connections)
-            r = world.random.randint(0, 3)
-            if r == 2:
-                forced_connections.add(("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
-                                        "Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E"))
-                forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
-                                        world.random.choice(mansion_stair_destinations + mansion_dead_ends
-                                                                 + ["Pokemon Mansion B1F to Pokemon Mansion 1F-SE"])))
-                if world.options.door_shuffle == "full":
-                    forced_connections.add(("Pokemon Mansion 1F to Pokemon Mansion 2F",
-                                            "Pokemon Mansion 3F to Pokemon Mansion 2F"))
-            elif r == 3:
-                dead_end = world.random.randint(0, 1)
-                forced_connections.add(("Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E",
-                                        mansion_dead_ends[dead_end]))
-                forced_connections.add(("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
-                                        "Pokemon Mansion B1F to Pokemon Mansion 1F-SE"))
-                forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
-                                        world.random.choice(mansion_stair_destinations
-                                                                 + [mansion_dead_ends[dead_end ^ 1]])))
+            if world.options.door_shuffle == "mapped":
+                forced_connections.update({
+                    ("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
+                     "Pokemon Mansion B1F to Pokemon Mansion 1F-SE"),
+                    ("Pokemon Mansion 1F to Pokemon Mansion 2F",
+                     "Pokemon Mansion 2F to Pokemon Mansion 1F"),
+                    ("Pokemon Mansion 2F to Pokemon Mansion 3F",
+                     "Pokemon Mansion 3F to Pokemon Mansion 2F"),
+                    ("Pokemon Mansion 2F to Pokemon Mansion 3F-SW",
+                     "Pokemon Mansion 3F-SW to Pokemon Mansion 2F"),
+                    ("Pokemon Mansion 2F-E to Pokemon Mansion 3F-SE",
+                     "Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E"),
+                })
             else:
-                forced_connections.add(("Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E",
-                                        mansion_dead_ends[r]))
-                forced_connections.add(("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
-                                        mansion_dead_ends[r ^ 1]))
-                forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
-                                        world.random.choice(mansion_stair_destinations
-                                                                 + ["Pokemon Mansion B1F to Pokemon Mansion 1F-SE"])))
+                r = world.random.randint(0, 3)
+                if r == 2:
+                    forced_connections.add(("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
+                                            "Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E"))
+                    forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
+                                            world.random.choice(mansion_stair_destinations + mansion_dead_ends
+                                                                     + ["Pokemon Mansion B1F to Pokemon Mansion 1F-SE"])))
+                    if world.options.door_shuffle in full_interior_pool_modes:
+                        forced_connections.add(("Pokemon Mansion 1F to Pokemon Mansion 2F",
+                                                "Pokemon Mansion 3F to Pokemon Mansion 2F"))
+                elif r == 3:
+                    dead_end = world.random.randint(0, 1)
+                    forced_connections.add(("Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E",
+                                            mansion_dead_ends[dead_end]))
+                    forced_connections.add(("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
+                                            "Pokemon Mansion B1F to Pokemon Mansion 1F-SE"))
+                    forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
+                                            world.random.choice(mansion_stair_destinations
+                                                                + [mansion_dead_ends[dead_end ^ 1]])))
+                else:
+                    forced_connections.add(("Pokemon Mansion 3F-SE to Pokemon Mansion 2F-E",
+                                            mansion_dead_ends[r]))
+                    forced_connections.add(("Pokemon Mansion 1F-SE to Pokemon Mansion B1F",
+                                            mansion_dead_ends[r ^ 1]))
+                    forced_connections.add(("Pokemon Mansion 2F to Pokemon Mansion 3F",
+                                            world.random.choice(mansion_stair_destinations
+                                                                     + ["Pokemon Mansion B1F to Pokemon Mansion 1F-SE"])))
 
-            if world.options.door_shuffle in ("insanity", "decoupled"):
+            if world.options.door_shuffle in all_warps_pool_modes:
                 usable_safe_rooms += insanity_safe_rooms
 
+        usable_safe_rooms = [room for room in usable_safe_rooms if room in available_entrance_names]
         safe_rooms_sample = world.random.sample(usable_safe_rooms, 6)
         pallet_safe_room = safe_rooms_sample[-1]
 
@@ -2216,11 +2503,57 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
     else:
         forced_connections.update(one_way_forced_connections)
 
+    if world.options.door_shuffle in mapped_region_group_modes:
+        vanilla_destination_warps = get_vanilla_destination_warps(all_warps, all_warps)
+        forced_connection_partners = {}
+
+        def add_forced_connection(entrance_a, entrance_b):
+            assigned_partner = forced_connection_partners.get(entrance_a.name)
+            if assigned_partner is not None and assigned_partner != entrance_b.name:
+                raise DoorShuffleException(
+                    f"Attempted to force {entrance_a.name} to connect to both "
+                    f"{assigned_partner} and {entrance_b.name}."
+                )
+            assigned_partner = forced_connection_partners.get(entrance_b.name)
+            if assigned_partner is not None and assigned_partner != entrance_a.name:
+                raise DoorShuffleException(
+                    f"Attempted to force {entrance_b.name} to connect to both "
+                    f"{assigned_partner} and {entrance_a.name}."
+                )
+            forced_connection_partners[entrance_a.name] = entrance_b.name
+            forced_connection_partners[entrance_b.name] = entrance_a.name
+            forced_connections.add((entrance_a.name, entrance_b.name))
+
+        for pair in list(forced_connections):
+            entrance_a = multiworld.get_entrance(pair[0], player)
+            entrance_b = multiworld.get_entrance(pair[1], player)
+            add_forced_connection(entrance_a, entrance_b)
+
+        for pair in list(forced_connections):
+            entrance_a = multiworld.get_entrance(pair[0], player)
+            entrance_b = multiworld.get_entrance(pair[1], player)
+            vanilla_destination_a = vanilla_destination_warps[entrance_a]
+            vanilla_destination_b = vanilla_destination_warps[entrance_b]
+            if {entrance_a, entrance_b} == {vanilla_destination_a, vanilla_destination_b}:
+                continue
+            if (vanilla_destination_a.name in forced_connection_partners
+                    or vanilla_destination_b.name in forced_connection_partners):
+                continue
+            add_forced_connection(vanilla_destination_a, vanilla_destination_b)
+
     for pair in forced_connections:
         entrance_a = multiworld.get_entrance(pair[0], player)
         entrance_b = multiworld.get_entrance(pair[1], player)
         entrance_a.connect(entrance_b)
         entrance_b.connect(entrance_a)
+        if world.options.door_shuffle == "insanity_mapped":
+            insanity_mapped_blocked_warps.discard(entrance_a)
+            insanity_mapped_blocked_warps.discard(entrance_b)
+        if (world.options.door_shuffle == "mapped"
+                and not outdoor_map(entrance_a.parent_region.name)
+                and not outdoor_map(entrance_b.parent_region.name)):
+            mapped_blocked_warps.discard(entrance_a)
+            mapped_blocked_warps.discard(entrance_b)
         if entrance_a in entrances:
             entrances.remove(entrance_a)
         elif entrance_a in full_interiors:
@@ -2364,6 +2697,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                     and world.fly_map != "Cerulean City"
                     and world.town_map_fly_map != "Cerulean City"):
                 return True
+            return False
 
         while celadon_gym_problem() or cerulean_city_problem():
             world.random.shuffle(placed_gyms)
@@ -2382,61 +2716,81 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             entrance_a.connect(entrance_b)
             entrance_b.connect(entrance_a)
     elif world.options.door_shuffle:
-        if world.options.door_shuffle == "full":
-            world.random.shuffle(full_interiors)
+        mapped_shuffleable_warps = []
+        mapped_region_groups = []
 
-            def search_for_exit(entrance, region, checked_regions):
-                checked_regions.add(region)
-                for exit_candidate in region.exits:
-                    if ((not exit_candidate.connected_region)
-                            and exit_candidate in entrances and exit_candidate is not entrance):
-                        return exit_candidate
-                for entrance_candidate in region.entrances:
-                    if entrance_candidate.parent_region not in checked_regions:
-                        found_exit = search_for_exit(entrance, entrance_candidate.parent_region, checked_regions)
-                        if found_exit is not None:
-                            return found_exit
-                return None
+        def search_for_exit(entrance, region, checked_regions):
+            checked_regions.add(region)
+            for exit_candidate in region.exits:
+                if ((not exit_candidate.connected_region)
+                        and exit_candidate in entrances and exit_candidate is not entrance):
+                    return exit_candidate
+            for entrance_candidate in region.entrances:
+                if entrance_candidate.parent_region not in checked_regions:
+                    found_exit = search_for_exit(entrance, entrance_candidate.parent_region, checked_regions)
+                    if found_exit is not None:
+                        return found_exit
+            return None
 
-            e = multiworld.get_entrance("Underground Path Route 5 to Underground Path North South", player)
-            while True:
-                for entrance_a in full_interiors:
-                    if search_for_exit(entrance_a, entrance_a.parent_region, set()) is None:
-                        for entrance_b in full_interiors:
-                            if search_for_exit(entrance_b, entrance_b.parent_region, set()):
-                                entrance_a.connect(entrance_b)
-                                entrance_b.connect(entrance_a)
-                                # Yes, it removes from full_interiors while iterating through it, but it immediately
-                                # breaks out, from both loops.
-                                full_interiors.remove(entrance_a)
-                                full_interiors.remove(entrance_b)
-                                break
-                        else:
-                            raise DoorShuffleException("No non-dead end interior sections found in Pokemon Red and Blue door shuffle.")
+        if world.options.door_shuffle in full_interior_pool_modes:
+            if world.options.door_shuffle == "full":
+                world.random.shuffle(full_interiors)
+
+                while True:
+                    for entrance_a in full_interiors:
+                        if search_for_exit(entrance_a, entrance_a.parent_region, set()) is None:
+                            for entrance_b in full_interiors:
+                                if search_for_exit(entrance_b, entrance_b.parent_region, set()):
+                                    entrance_a.connect(entrance_b)
+                                    entrance_b.connect(entrance_a)
+                                    # Yes, it removes from full_interiors while iterating through it, but it
+                                    # immediately breaks out, from both loops.
+                                    full_interiors.remove(entrance_a)
+                                    full_interiors.remove(entrance_b)
+                                    break
+                            else:
+                                raise DoorShuffleException(
+                                    f"No non-dead end interior sections found in {world.game} door shuffle."
+                                )
+                            break
+                    else:
                         break
-                else:
-                    break
+
+                for entrance_a, entrance_b in zip(full_interiors[:len(full_interiors) // 2],
+                                                  full_interiors[len(full_interiors) // 2:]):
+                    entrance_a.connect(entrance_b)
+                    entrance_b.connect(entrance_a)
+
+            else:
+                mapped_shuffleable_warps = full_interiors.copy()
+                for exterior_warp in mapped_exterior_warps:
+                    if exterior_warp.connected_region is None:
+                        continue
+                    replacement_warp = find_mapped_warp_by_region_and_id(
+                        mapped_interior_warps, exterior_warp.connected_region, exterior_warp.target)
+                    if replacement_warp is not None and replacement_warp not in mapped_shuffleable_warps:
+                        mapped_shuffleable_warps.append(replacement_warp)
+                region_groups = discover_mapped_region_groups(
+                    multiworld, player, mapped_shuffleable_warps, mapped_blocked_warps,
+                    include_outdoor_regions=False)
+                mapped_region_groups = region_groups
 
             loop_out_interiors = []
-            world.random.shuffle(entrances)
-            for entrance in reversed(entrances):
-                if loop_out_interiors and entrance in loop_out_interiors[0]:
-                    continue
-                if not outdoor_map(entrance.parent_region.name):
-                    found_exit = search_for_exit(entrance, entrance.parent_region, set())
-                    if found_exit is None or (loop_out_interiors and (found_exit in loop_out_interiors[0]
-                                                                      or entrance in loop_out_interiors[0])):
+            if world.options.door_shuffle != "mapped":
+                world.random.shuffle(entrances)
+                for entrance in reversed(entrances):
+                    if loop_out_interiors and entrance in loop_out_interiors[0]:
                         continue
-                    loop_out_interiors.append([found_exit, entrance])
-                    entrances.remove(entrance)
+                    if not outdoor_map(entrance.parent_region.name):
+                        found_exit = search_for_exit(entrance, entrance.parent_region, set())
+                        if found_exit is None or (loop_out_interiors and (found_exit in loop_out_interiors[0]
+                                                                          or entrance in loop_out_interiors[0])):
+                            continue
+                        loop_out_interiors.append([found_exit, entrance])
+                        entrances.remove(entrance)
 
-                    if len(loop_out_interiors) == 2:
-                        break
-
-            for entrance_a, entrance_b in zip(full_interiors[:len(full_interiors) // 2],
-                                              full_interiors[len(full_interiors) // 2:]):
-                entrance_a.connect(entrance_b)
-                entrance_b.connect(entrance_a)
+                        if len(loop_out_interiors) == 2:
+                            break
 
         elif world.options.door_shuffle == "interiors":
             loop_out_interiors = [[multiworld.get_entrance(e[0], player), multiworld.get_entrance(e[1], player)] for e
@@ -2454,8 +2808,9 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
         state = multiworld.state.copy()
         state.allow_partial_entrances = True
         for item, data in item_table.items():
-            if (data.id or item in poke_data.pokemon_data) and data.classification == ItemClassification.progression \
-                    and ("Badge" not in item or world.options.badgesanity):
+            if ((data.id or item in poke_data.pokemon_data)
+                    and ItemClassification.progression in data.classification
+                    and ("Badge" not in item or world.options.badgesanity)):
                 state.collect(world.create_item(item))
 
         world.random.shuffle(entrances)
@@ -2474,6 +2829,16 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             "Victory Road Boulder",
             "Silph Co Liberated",
         ]
+        if world.options.door_shuffle in mapped_region_group_modes:
+            relevant_events += [
+                "Buy Poke Doll",
+                "Game Corner",
+                "Mt Moon Fossils",
+                "Cinnabar Island",
+                "Cinnabar Lab",
+                "Fuji Saved",
+                "Seafoam Boss Boulders",
+            ]
         if world.options.robbed_house_officer:
             relevant_events.append("Help Bill")
         if world.options.tea:
@@ -2535,7 +2900,29 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                                     return False
             return True
 
+        if world.options.door_shuffle == "mapped":
+            connect_mapped_door_shuffle_region_groups(
+                world, mapped_region_groups, mapped_shuffleable_warps, all_warps,
+                mapped_exterior_warps, state, event_locations, relevant_events)
+            entrances.clear()
+            full_interiors.clear()
+
         starting_entrances = len(entrances)
+
+        insanity_mapped_region_groups = []
+        insanity_mapped_group_buckets = {}
+        insanity_mapped_shuffleable_warps = []
+        if world.options.door_shuffle == "insanity_mapped":
+            insanity_mapped_shuffleable_warps = entrances.copy()
+            insanity_mapped_region_groups = discover_mapped_region_groups(
+                multiworld, player, entrances, insanity_mapped_blocked_warps, include_outdoor_regions=True)
+            insanity_mapped_group_buckets = bucket_region_groups_by_warp_count(insanity_mapped_region_groups)
+            validate_mapped_region_groups(insanity_mapped_region_groups, entrances, insanity_mapped_group_buckets)
+            connect_mapped_door_shuffle_region_groups(
+                world, insanity_mapped_region_groups, insanity_mapped_shuffleable_warps, all_warps,
+                [], state, event_locations, relevant_events, allow_reachable_source_warps_as_entries=True)
+            entrances.clear()
+            full_interiors.clear()
 
         while entrances:
             state.update_reachable_regions(player)
@@ -2554,22 +2941,22 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             entrances.sort(key=lambda e: e in reachable_entrances)
 
             if not reachable_entrances:
-                raise DoorShuffleException("Ran out of reachable entrances in Pokemon Red and Blue door shuffle")
+                raise DoorShuffleException(f"Ran out of reachable entrances in {world.game}  door shuffle")
 
             entrance_a = reachable_entrances.pop(0)
             entrances.remove(entrance_a)
 
             is_outdoor_map = outdoor_map(entrance_a.parent_region.name)
 
-            if world.options.door_shuffle in ("interiors", "full") or len(entrances) != len(reachable_entrances):
+            if world.options.door_shuffle in interior_style_fill_modes or len(entrances) != len(reachable_entrances):
 
                 find_dead_end = False
                 if (len(reachable_entrances) >
-                        (1 if world.options.door_shuffle in ("insanity", "decoupled") else 8) and len(entrances)
+                        (1 if world.options.door_shuffle in all_warps_pool_modes else 8) and len(entrances)
                         <= (starting_entrances - 3)):
                     find_dead_end = True
 
-                if (world.options.door_shuffle in ("interiors", "full") and len(entrances) < 48
+                if (world.options.door_shuffle in interior_style_fill_modes and len(entrances) < 48
                         and not is_outdoor_map):
                     # Try to prevent a situation where the only remaining outdoor entrances are ones that cannot be
                     # reached except by connecting directly to it.
@@ -2580,11 +2967,11 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
 
                 if world.options.door_shuffle == "decoupled":
                     destinations = dc_destinations
-                elif world.options.door_shuffle in ("interiors", "full"):
+                elif world.options.door_shuffle in interior_style_fill_modes:
                     destinations = [entrance for entrance in entrances if outdoor_map(entrance.parent_region.name) is
                                     not is_outdoor_map]
                     if not destinations:
-                        raise DoorShuffleException("Ran out of connectable destinations in Pokemon Red and Blue door shuffle")
+                        raise DoorShuffleException(f"Ran out of connectable destinations in {world.game}  door shuffle")
                 else:
                     destinations = entrances
 
@@ -2599,7 +2986,7 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
                 else:
                     entrance_b = destinations.pop(0)
 
-                if world.options.door_shuffle in ("interiors", "full"):
+                if world.options.door_shuffle in interior_style_fill_modes:
                     # on Interiors/Full, the destinations variable does not point to the entrances list, so we need to
                     # remove from that list here.
                     entrances.remove(entrance_b)
@@ -2614,11 +3001,20 @@ def door_shuffle(world, multiworld, player, badges, badge_locs):
             if world.options.door_shuffle != "decoupled":
                 entrance_b.connect(entrance_a)
 
-        if world.options.door_shuffle in ("interiors", "full"):
+        if world.options.door_shuffle == "insanity_mapped":
+            validate_mapped_region_groups(
+                insanity_mapped_region_groups, insanity_mapped_shuffleable_warps,
+                insanity_mapped_group_buckets, require_connected=True)
+            world.mapped_door_shuffle_spoiler.sort()
+
+        if world.options.door_shuffle in interior_style_fill_modes:
             for pair in loop_out_interiors:
                 pair[1].connected_region = pair[0].connected_region
                 pair[1].parent_region.entrances.append(pair[0])
                 pair[1].target = pair[0].target
+
+        if world.options.door_shuffle in mapped_region_group_modes:
+            validate_mapped_door_shuffle_accessibility(multiworld, player)
 
     if world.options.door_shuffle:
         for region in multiworld.get_regions(player):
