@@ -194,9 +194,14 @@ def create_shops(multiworld: MultiWorld, player: int):
     if multiworld.worlds[player].options.shuffle_capacity_upgrades:
         player_shop_table["Capacity Upgrade"] = player_shop_table["Capacity Upgrade"]._replace(locked=False)
 
-    num_slots = min(dynamic_shop_slots, multiworld.worlds[player].options.shop_item_slots)
-    single_purchase_slots: List[bool] = [True] * num_slots + [False] * (dynamic_shop_slots - num_slots)
-    multiworld.random.shuffle(single_purchase_slots)
+    fake_generation = getattr(multiworld, "generation_is_fake", False)
+    if fake_generation:
+        num_slots = dynamic_shop_slots
+        single_purchase_slots: List[bool] = [True] * dynamic_shop_slots
+    else:
+        num_slots = min(dynamic_shop_slots, multiworld.worlds[player].options.shop_item_slots)
+        single_purchase_slots = [True] * num_slots + [False] * (dynamic_shop_slots - num_slots)
+        multiworld.random.shuffle(single_purchase_slots)
 
     if multiworld.worlds[player].options.randomize_shop_inventories:
         default_shop_table = [i for l in

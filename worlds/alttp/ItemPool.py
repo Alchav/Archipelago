@@ -305,6 +305,14 @@ def get_enemy_shuffle_available_damage_classes(world: "ALTTPWorld", item_names) 
 
 
 def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
+    if getattr(world, "ut_replay_data", None):
+        from . import _decode_ut_enemy_combat_model, _get_ut_replay_value
+
+        enemy_combat_model = _get_ut_replay_value(world.ut_replay_data, "ut_enemy_combat_model", "enemy_combat_model")
+        if enemy_combat_model is not None:
+            world.enemy_combat_model = _decode_ut_enemy_combat_model(enemy_combat_model)
+            return
+
     damage_class_mode = world.options.randomize_damage_classes.current_key
     if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
         world.enemy_combat_model = VANILLA_COMBAT_MODEL
@@ -588,6 +596,13 @@ def generate_itempool(world: "ALTTPWorld"):
     multiworld.itempool.extend([item for item in dungeon_items])
 
     set_up_shops(multiworld, player)
+    if getattr(world, "ut_replay_data", None):
+        from . import _apply_ut_shop_inventories, _apply_ut_shop_locations, _get_ut_replay_value
+
+        if _get_ut_replay_value(world.ut_replay_data, "ut_shop_inventories", "shop_inventories") is not None:
+            _apply_ut_shop_inventories(world)
+        if _get_ut_replay_value(world.ut_replay_data, "ut_shop_locations", "shop_locations") is not None:
+            _apply_ut_shop_locations(world)
 
     if world.options.retro_bow:
         shop_items = 0
@@ -710,8 +725,13 @@ def generate_itempool(world: "ALTTPWorld"):
                 except StopIteration:
                     break  # logically health tanking is an option, so rules should still resolve to something beatable
 
-    world.required_medallions = (world.options.misery_mire_medallion.current_key.title(),
-                                 world.options.turtle_rock_medallion.current_key.title())
+    if getattr(world, "ut_replay_data", None) and "required_medallions" in world.ut_replay_data:
+        world.required_medallions = tuple(world.ut_replay_data["required_medallions"])
+    elif getattr(world, "ut_replay_data", None) and "mm_medalion" in world.ut_replay_data and "tr_medalion" in world.ut_replay_data:
+        world.required_medallions = (world.ut_replay_data["mm_medalion"], world.ut_replay_data["tr_medalion"])
+    else:
+        world.required_medallions = (world.options.misery_mire_medallion.current_key.title(),
+                                     world.options.turtle_rock_medallion.current_key.title())
 
     place_bosses(world)
     if world.options.enemy_shuffle:
@@ -723,11 +743,23 @@ def generate_itempool(world: "ALTTPWorld"):
             enemy_shuffle_item_names,
         )
         world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
+        if getattr(world, "ut_replay_data", None):
+            from . import _apply_ut_enemy_shuffle_state, _get_ut_replay_value
+
+            if _get_ut_replay_value(world.ut_replay_data, "ut_enemy_shuffle", "enemy_shuffle") is not None:
+                _apply_ut_enemy_shuffle_state(world)
 
     multiworld.itempool += items
 
     if world.options.retro_caves:
         set_up_take_anys(multiworld, world, player)  # depends on world.itempool to be set
+        if getattr(world, "ut_pending_entrance_connections", None):
+            from . import _apply_ut_entrance_connections
+
+            world.ut_pending_entrance_connections = _apply_ut_entrance_connections(
+                world,
+                world.ut_pending_entrance_connections,
+            )
 
 
 take_any_locations = {
@@ -747,7 +779,78 @@ take_any_locations_inverted.sort()
 take_any_locations.sort()
 
 
+take_any_replay_locations = ("Old Man Sword Cave", "Take-Any #1", "Take-Any #2", "Take-Any #3", "Take-Any #4")
+
+
+def _add_inventory_from_data(shop: TakeAny, slot: int, inventory_data: dict):
+    shop.add_inventory(
+        slot,
+        inventory_data["item"],
+        int(inventory_data["price"]),
+        int(inventory_data["max"]),
+        inventory_data["replacement"],
+        int(inventory_data["replacement_price"]),
+        int(inventory_data["player"]),
+        int(inventory_data["price_type"]),
+        int(inventory_data["replacement_price_type"]),
+    )
+
+
+def _set_up_replayed_take_anys(multiworld: MultiWorld, world: "ALTTPWorld", player: int):
+    from . import _get_ut_replay_value
+
+    take_any_data = _get_ut_replay_value(world.ut_replay_data, "ut_take_any_caves", "take_any_caves")
+    for index, region_name in enumerate(take_any_replay_locations):
+        data = take_any_data[region_name]
+        take_any = LTTPRegion(region_name, LTTPRegionType.Cave, data["hint"], player, multiworld)
+        multiworld.regions.append(take_any)
+
+        connect_entrance(multiworld, data["entrance"], region_name, player)
+        take_any.entrances[0].target = int(data["target"])
+
+        shop = TakeAny(
+            take_any,
+            int(data["room_id"]),
+            int(data["shopkeeper_config"]),
+            bool(data["custom"]),
+            bool(data["locked"]),
+            total_shop_slots + index,
+        )
+        take_any.shop = shop
+        world.shops.append(shop)
+        for slot, inventory_data in enumerate(data["inventory"]):
+            if inventory_data is not None:
+                _add_inventory_from_data(shop, slot, inventory_data)
+
+        item_data = data.get("location_item")
+        if item_data is None:
+            continue
+        location = ALttPLocation(player, region_name, shop_table_by_location[region_name], parent=take_any)
+        location.shop = shop
+        location.shop_slot = int(item_data["shop_slot"])
+        take_any.locations.append(location)
+
+        item_name = item_data["item"]
+        item = None
+        for pool_index, pool_item in enumerate(multiworld.itempool):
+            if pool_item.player == player and pool_item.name == item_name:
+                item = multiworld.itempool.pop(pool_index)
+                multiworld.itempool.append(item_factory("Rupees (20)", world))
+                break
+        if item is None:
+            item = item_factory(item_name, world)
+        item.classification = ItemClassification(int(item_data["classification"]))
+        location.place_locked_item(item)
+
+
 def set_up_take_anys(multiworld: MultiWorld, world: "ALTTPWorld", player: int):
+    if getattr(world, "ut_replay_data", None):
+        from . import _get_ut_replay_value
+
+        if _get_ut_replay_value(world.ut_replay_data, "ut_take_any_caves", "take_any_caves") is not None:
+            _set_up_replayed_take_anys(multiworld, world, player)
+            return
+
     # these are references, do not modify these lists in-place
     if world.options.mode == 'inverted':
         take_any_locs = take_any_locations_inverted
