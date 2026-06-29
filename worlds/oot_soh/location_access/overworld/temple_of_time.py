@@ -19,64 +19,64 @@ def set_region_rules(world: "SohWorld") -> None:
     # Locations
     add_locations(Regions.TOT_ENTRANCE, world, [
         (Locations.MARKET_TOT_LEFT_GOSSIP_STONE_FAIRY,
-         lambda bundle: call_gossip_fairy_except_suns(bundle) or (can_use(Items.SUNS_SONG, bundle) and is_adult(bundle))),
+         lambda bundle: call_gossip_fairy_except_suns(bundle) | (can_use(Items.SUNS_SONG, bundle) & is_adult(bundle))),
         (Locations.MARKET_TOT_LEFT_GOSSIP_STONE_BIG_FAIRY,
          lambda bundle: can_use(Items.SONG_OF_STORMS, bundle)),
         (Locations.MARKET_TOT_LEFT_CENTER_GOSSIP_STONE_FAIRY,
-         lambda bundle: call_gossip_fairy_except_suns(bundle) or (can_use(Items.SUNS_SONG, bundle) and is_adult(bundle))),
+         lambda bundle: call_gossip_fairy_except_suns(bundle) | (can_use(Items.SUNS_SONG, bundle) & is_adult(bundle))),
         (Locations.MARKET_TOT_LEFT_CENTER_GOSSIP_STONE_BIG_FAIRY,
          lambda bundle: can_use(Items.SONG_OF_STORMS, bundle)),
         (Locations.MARKET_TOT_RIGHT_CENTER_GOSSIP_STONE_FAIRY,
-         lambda bundle: call_gossip_fairy_except_suns(bundle) or (can_use(Items.SUNS_SONG, bundle) and is_adult(bundle))),
+         lambda bundle: call_gossip_fairy_except_suns(bundle) | (can_use(Items.SUNS_SONG, bundle) & is_adult(bundle))),
         (Locations.MARKET_TOT_RIGHT_CENTER_GOSSIP_STONE_BIG_FAIRY,
          lambda bundle: can_use(Items.SONG_OF_STORMS, bundle)),
         (Locations.MARKET_TOT_RIGHT_GOSSIP_STONE_FAIRY,
-         lambda bundle: call_gossip_fairy_except_suns(bundle) or (can_use(Items.SUNS_SONG, bundle) and is_adult(bundle))),
+         lambda bundle: call_gossip_fairy_except_suns(bundle) | (can_use(Items.SUNS_SONG, bundle) & is_adult(bundle))),
         (Locations.MARKET_TOT_RIGHT_GOSSIP_STONE_BIG_FAIRY,
          lambda bundle: can_use(Items.SONG_OF_STORMS, bundle))
     ])
     # Connections
     connect_regions(Regions.TOT_ENTRANCE, world, [
-        (Regions.MARKET, lambda bundle: True),
-        (Regions.TEMPLE_OF_TIME, lambda bundle: True)
+        (Regions.MARKET, lambda bundle: True_()),
+        (Regions.TEMPLE_OF_TIME, lambda bundle: True_())
     ])
 
     # Temple of Time
     # Locations
     add_locations(Regions.TEMPLE_OF_TIME, world, [
         (Locations.MARKET_TOT_LIGHT_ARROW_CUTSCENE,
-         lambda bundle: is_adult(bundle) and can_trigger_lacs(bundle))
+         lambda bundle: is_adult(bundle) & can_trigger_lacs(bundle))
     ])
     # Connections
     connect_regions(Regions.TEMPLE_OF_TIME, world, [
-        (Regions.TOT_ENTRANCE, lambda bundle: True),
+        (Regions.TOT_ENTRANCE, lambda bundle: True_()),
         (Regions.BEYOND_DOOR_OF_TIME,
-         lambda bundle: world.options.door_of_time == "open" or
-         (can_use(Items.SONG_OF_TIME, bundle) and
-          (world.options.door_of_time == "song_only" or
-           (stone_count(bundle) == 3 and has_item(Items.OCARINA_OF_TIME, bundle))))),
+         lambda bundle: OptionFilter(DoorOfTime, DoorOfTime.option_open) |
+         (can_use(Items.SONG_OF_TIME, bundle) &
+          (OptionFilter(DoorOfTime, DoorOfTime.option_song_only) |
+           (has_enough_stones(bundle, 3) & has_item(Items.OCARINA_OF_TIME, bundle))))),
     ])
 
     # Beyond Door of Time
     # Events
     add_events(Regions.BEYOND_DOOR_OF_TIME, world, [
         (EventLocations.CHAMBER_OF_SAGES,
-         Events.TIME_TRAVEL, lambda bundle: True)
+         Events.TIME_TRAVEL, lambda bundle: True_())
     ])
     # Locations
     add_locations(Regions.BEYOND_DOOR_OF_TIME, world, [
         (Locations.GIFT_FROM_RAURU, lambda bundle: is_adult(bundle)),
         (Locations.SHEIK_AT_TEMPLE, lambda bundle: has_item(
-            Items.FOREST_MEDALLION, bundle) and is_adult(bundle))
+            Items.FOREST_MEDALLION, bundle) & is_adult(bundle))
     ])
     # Connections
     connect_regions(Regions.BEYOND_DOOR_OF_TIME, world, [
-        (Regions.TEMPLE_OF_TIME, lambda bundle: True),
+        (Regions.TEMPLE_OF_TIME, lambda bundle: True_()),
         (Regions.MASTER_SWORD_PEDESTAL, lambda bundle: is_adult(bundle))
     ])
 
     # Get Master Sword
     # Locations
     add_locations(Regions.MASTER_SWORD_PEDESTAL, world, [
-        (Locations.MARKET_TOT_MASTER_SWORD, lambda bundle: True),
+        (Locations.MARKET_TOT_MASTER_SWORD, lambda bundle: True_()),
     ])

@@ -1,112 +1,121 @@
-from .. import SohWorld
 from ..Items import progressive_items, Items
 from .bases import SohTestBase
+from ..LogicHelpers import has_item
+from itertools import combinations
 
+class TestCollectRemoveNonProgressive(SohTestBase):
+    options = {"shuffle_kokiri_sword": True, "shuffle_master_sword": True, "shuffle_songs": "anywhere",
+               "start_with_sarias_song": True, "start_with_master_sword": True, "start_with_eponas_song": True}
 
-class TestCollectRemoveAllOff(SohTestBase):
+    def test_collect_gives_item(self):
+        """
+        Testing to make sure that collecting items properly gives the player a single copy.
+        """
+        self.sweep()
+        items = [Items.KOKIRI_SWORD, Items.MEGATON_HAMMER, Items.FIRE_ARROW, Items.SUNS_SONG, Items.BOOMERANG]
+        for item in items:
+            self.assertFalse(self.multiworld.state.has(item, self.player), f"Should not have {item} before collecting it.")
+
+        for size in range(1, len(items) + 1):
+            for combo in combinations(items, size):
+                self.collect_by_name(combo)
+                for item in combo:
+                    self.assertTrue(self.multiworld.state.has(item, self.player), f"No {item} after trying to collect it.")
+                    self.assertTrue(self.multiworld.state.count(item, self.player) == 1, f"{item} was collected, but has a count greater than 1 when it shouldn't.")
+                self.remove_by_name(combo)
+
+    def test_remove_takes_away_item(self):
+        """
+        Testing to make sure that removing items properly removes them.
+        """
+        self.sweep()
+        items = [Items.BIGGORONS_SWORD, Items.LENS_OF_TRUTH, Items.ICE_ARROW, Items.SONG_OF_STORMS, Items.FARORES_WIND]
+        for item in items:
+            self.assertFalse(self.multiworld.state.has(item, self.player), f"Should not have {item} before collecting it.")
+
+        for size in range(1, len(items) + 1):
+            for combo in combinations(items, size):
+                self.collect_by_name(combo)
+                self.remove_by_name(combo)
+                for item in combo:
+                    self.assertFalse(self.multiworld.state.has(item, self.player), f"{item} should not be present after removing it.")
+
+    def test_precollected_items(self):
+        """
+        Testing to ensure that starting items are collected properly, based on settings.
+        """
+        self.sweep()
+        items = [Items.SARIAS_SONG, Items.MASTER_SWORD, Items.EPONAS_SONG]
+        for item in items:
+            self.assertTrue(self.multiworld.state.has(item, self.player), f"{item} should be precollected, but isn't.")
+            self.assertTrue(self.multiworld.state.count(item, self.player) == 1,
+                            f"{item} was precollected, but has a count greater than 1 when it shouldn't.")
+
+class ProgressiveTestsMixin:
+    optional_prog_item_set = set()
+
+    def test_collect_progressive(self):
+        """
+        Testing to make sure that, depending on how many of each progressive item are collected, that we have the corresponding "ranks,"
+        and that we don't have the unobtainable ranks.
+        """
+        for item_name, prog_items in progressive_items.items():
+            total = len(prog_items)
+            start = 1 if item_name in self.optional_prog_item_set else 0
+            for i in range(start, total):
+                self.collect(self.world.create_item(item_name))
+                for rank in range(i + 1):
+                    self.assertTrue(has_item(prog_items[rank], self.get_bundle())._instantiate(self.world)._evaluate(self.multiworld.state),
+                                    f"Failed for {item_name}, we do not have {prog_items[rank]}")
+                for rank in range(i + 1, total):
+                    self.assertFalse(has_item(prog_items[rank], self.get_bundle())._instantiate(self.world)._evaluate(
+                        self.multiworld.state),
+                                    f"Failed for {item_name}, we should not have {prog_items[rank]}")
+
+    def test_remove_progressive(self):
+        """
+        Testing to make sure that, if we remove progressive items, we have the correct amount of their corresponding ranks.
+        """
+        for item_name, prog_items in progressive_items.items():
+            total = len(prog_items)
+            start = 1 if item_name in self.optional_prog_item_set else 0
+            for _ in range(start, total):
+                self.collect(self.world.create_item(item_name))
+            count = self.multiworld.state.count(item_name, self.player)
+            self.assertTrue(count == total, f"Wrong count for {item_name}, should be {total}.")
+            for i in range(count):
+                self.remove(self.get_item_by_name(item_name))
+                for rank in range(count - i - 1):
+                    self.assertTrue(has_item(prog_items[rank], self.get_bundle())._instantiate(self.world)._evaluate(self.multiworld.state),
+                                    f"Failed for {item_name}, we do not have {prog_items[rank]}")
+                for rank in range(count- i - 1, total):
+                    self.assertFalse(has_item(prog_items[rank], self.get_bundle())._instantiate(self.world)._evaluate(
+                        self.multiworld.state),
+                                    f"Failed for {item_name}, we should not have {prog_items[rank]}")
+
+    def test_progressive_precollected_items(self):
+        """
+        Testing to make sure that we have the first rank of a progressive item if its setting results in one being precollected,
+        and zero ranks otherwise.
+        """
+        self.sweep()
+        for item_name, prog_items in progressive_items.items():
+            first_rank = prog_items[0]
+            if item_name in self.optional_prog_item_set:
+                self.assertTrue(has_item(first_rank, self.get_bundle())._instantiate(self.world)._evaluate(
+                    self.multiworld.state),
+                    f"Failed for {item_name}, we do not have {first_rank}")
+            else:
+                self.assertFalse(has_item(first_rank, self.get_bundle())._instantiate(self.world)._evaluate(
+                    self.multiworld.state),
+                    f"Failed for {item_name}, we should not have {first_rank}")
+
+class TestCollectRemoveProgressiveAllOff(ProgressiveTestsMixin, SohTestBase):
     options = {"shuffle_childs_wallet": False, "shuffle_swim": False, "shuffle_deku_stick_bag": False,
                "shuffle_deku_nut_bag": False, "bombchu_bag": "none", "shuffle_ocarinas": True}
-    world: SohWorld
     optional_prog_item_set = {Items.PROGRESSIVE_SCALE, Items.PROGRESSIVE_WALLET, Items.PROGRESSIVE_STICK_CAPACITY,
                               Items.PROGRESSIVE_NUT_CAPACITY, Items.BOMBCHU_BAG}
 
-    def test_single_of_each(self):
-        """
-        Checking if we collect 1 of each progressive item, or 0 in the case of ones that aren't shuffled, that we have
-        the first "rank" of each item.
-        """
-        for item_name, prog_items in progressive_items.items():
-            if item_name not in self.optional_prog_item_set:
-                item = SohWorld.create_item(self.world, item_name)
-                self.collect(item)
-            self.assertTrue(self.multiworld.state.has(prog_items[0], self.player),
-                            f"Failed for {item_name}, we do not have {prog_items[0]}")
-            if len(prog_items) > 1:
-                self.assertFalse(self.multiworld.state.has(prog_items[1], self.player))
-
-    def test_one_collect_of_optional_ones(self):
-        """
-        Checking if we have rank 2 of the ones that are not shuffled
-        """
-        for item_name, prog_items in progressive_items.items():
-            if item_name in self.optional_prog_item_set:
-                item = SohWorld.create_item(self.world, item_name)
-                self.collect(item)
-                index_to_check = 1
-                if len(prog_items) == 1:
-                    # if there's only 1 item in the list, we just want to make sure that it doesn't break
-                    index_to_check = 0
-                self.assertTrue(self.multiworld.state.has(prog_items[index_to_check], self.player))
-                if len(prog_items) > 1:
-                    self.assertFalse(self.multiworld.state.has(prog_items[index_to_check + 1], self.player))
-
-    def test_full_collect_and_remove_of_all(self):
-        """
-        Checking that we have every one of the non-progressive event versions of the items after collecting enough.
-        Easy way to do that: just collect 4 of each progressive item.
-        """
-        full_list_of_items = []
-        for item_name, prog_items in progressive_items.items():
-            for _ in range(4):
-                item = SohWorld.create_item(self.world, item_name)
-                full_list_of_items.append(item)
-                self.collect(item)
-
-        # check that we have all the non-progressive event versions of items
-        for prog_items in progressive_items.values():
-            for i in range(len(prog_items)):
-                self.assertTrue(self.multiworld.state.has(prog_items[i], self.player))
-
-        # remove the progressive items
-        for item in full_list_of_items:
-            self.multiworld.state.remove(item)
-
-        for item_name, prog_items in progressive_items.items():
-            for i in range(len(prog_items)):
-                if i == 0 and item_name in self.optional_prog_item_set:
-                    self.assertTrue(self.multiworld.state.has(prog_items[i], self.player))
-                else:
-                    self.assertFalse(self.multiworld.state.has(prog_items[i], self.player))
-
-
-class TestCollectRemoveAllOn(SohTestBase):
+class TestCollectRemoveProgressiveAllOn(ProgressiveTestsMixin, SohTestBase):
     options = {"shuffle_childs_wallet": True, "shuffle_swim": True, "shuffle_deku_stick_bag": True,
                "shuffle_deku_nut_bag": True, "bombchu_bag": "single_bag", "shuffle_ocarinas": True}
-    world: SohWorld
-
-    def test_single_of_each(self):
-        """
-        Checking if we collect 1 of each progressive item that we have the first "rank" of each item.
-        """
-        for item_name, prog_items in progressive_items.items():
-            item = SohWorld.create_item(self.world, item_name)
-            self.collect(item)
-            self.assertTrue(self.multiworld.state.has(prog_items[0], self.player),
-                            f"Failed for {item_name}, we do not have {prog_items[0]}")
-            if len(prog_items) > 1:
-                self.assertFalse(self.multiworld.state.has(prog_items[1], self.player))
-
-    def test_full_collect_and_remove_of_all(self):
-        """
-        Checking that we have every one of the non-progressive event versions of the items after collecting enough.
-        Easy way to do that: just collect 4 of each progressive item.
-        """
-        full_list_of_items = []
-        for item_name, prog_items in progressive_items.items():
-            for _ in range(4):
-                item = SohWorld.create_item(self.world, item_name)
-                full_list_of_items.append(item)
-                self.collect(item)
-
-        # check that we have all the non-progressive event versions of items
-        for prog_items in progressive_items.values():
-            for i in range(len(prog_items)):
-                self.assertTrue(self.multiworld.state.has(prog_items[i], self.player))
-
-        # remove the progressive items
-        for item in full_list_of_items:
-            self.multiworld.state.remove(item)
-
-        for item_name, prog_items in progressive_items.items():
-            for i in range(len(prog_items)):
-                self.assertFalse(self.multiworld.state.has(prog_items[i], self.player))

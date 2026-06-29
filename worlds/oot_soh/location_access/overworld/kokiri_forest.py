@@ -28,36 +28,36 @@ def set_region_rules(world: "SohWorld") -> None:
     # Events
     add_events(Regions.KOKIRI_FOREST, world, [
         (EventLocations.MIDO, LocalEvents.MIDO_SWORD_AND_SHIELD, lambda bundle: (is_child(bundle)
-                                                                                 and has_item(Items.KOKIRI_SWORD, bundle)
-                                                                                 and has_item(Items.DEKU_SHIELD, bundle))
-         or world.options.closed_forest.value == 2),
+            & has_item(Items.KOKIRI_SWORD, bundle)
+            & has_item(Items.DEKU_SHIELD, bundle))
+         | OptionFilter(ClosedForest, ClosedForest.option_off)),
         (EventLocations.KF_GOSSIP_STONE_SONG_FAIRY, Events.CAN_ACCESS_FAIRIES,
          lambda bundle: call_gossip_fairy_except_suns(bundle)),
-        (EventLocations.KF_SOFT_SOIL, LocalEvents.KF_BEAN_PLANTED, lambda bundle: is_child(bundle) and
+        (EventLocations.KF_SOFT_SOIL, LocalEvents.KF_BEAN_PLANTED, lambda bundle: is_child(bundle) &
          can_use(Items.MAGIC_BEAN, bundle)),
     ])
     # Locations
     add_locations(Regions.KOKIRI_FOREST, world, [
         (Locations.KF_KOKIRI_SWORD_CHEST, lambda bundle: is_child(bundle)),
-        (Locations.KF_GS_KNOW_IT_ALL_HOUSE, lambda bundle: (is_child(bundle) and
-                                                            can_attack(bundle) and
+        (Locations.KF_GS_KNOW_IT_ALL_HOUSE, lambda bundle: (is_child(bundle) &
+                                                            can_attack(bundle) &
                                                             can_get_nighttime_gs(bundle))),
-        (Locations.KF_GS_BEAN_PATCH, lambda bundle: can_attack(bundle) and
-         is_child(bundle) and
+        (Locations.KF_GS_BEAN_PATCH, lambda bundle: can_attack(bundle) &
+         is_child(bundle) &
          can_use(Items.BOTTLE_WITH_BUGS, bundle)),
-        (Locations.KF_GS_HOUSE_OF_TWINS, lambda bundle: is_adult(bundle) and
+        (Locations.KF_GS_HOUSE_OF_TWINS, lambda bundle: is_adult(bundle) &
          (hookshot_or_boomerang(bundle)
-          or (can_do_trick(Tricks.KF_ADULT_GS, bundle)
-              and can_use(Items.HOVER_BOOTS, bundle))) and can_get_nighttime_gs(bundle)),
+          | (can_do_trick(Tricks.KF_ADULT_GS, bundle)
+              & can_use(Items.HOVER_BOOTS, bundle))) & can_get_nighttime_gs(bundle)),
         (Locations.KF_BEAN_SPROUT_FAIRY1, lambda bundle: is_child(bundle)
-         and has_item(LocalEvents.KF_BEAN_PLANTED, bundle)
-         and can_use(Items.SONG_OF_STORMS, bundle)),
+         & has_item(LocalEvents.KF_BEAN_PLANTED, bundle)
+         & can_use(Items.SONG_OF_STORMS, bundle)),
         (Locations.KF_BEAN_SPROUT_FAIRY2, lambda bundle: is_child(bundle)
-         and has_item(LocalEvents.KF_BEAN_PLANTED, bundle)
-         and can_use(Items.SONG_OF_STORMS, bundle)),
+         & has_item(LocalEvents.KF_BEAN_PLANTED, bundle)
+         & can_use(Items.SONG_OF_STORMS, bundle)),
         (Locations.KF_BEAN_SPROUT_FAIRY3, lambda bundle: is_child(bundle)
-         and has_item(LocalEvents.KF_BEAN_PLANTED, bundle)
-         and can_use(Items.SONG_OF_STORMS, bundle)),
+         & has_item(LocalEvents.KF_BEAN_PLANTED, bundle)
+         & can_use(Items.SONG_OF_STORMS, bundle)),
         (Locations.KF_GOSSIP_STONE_FAIRY,
          lambda bundle: call_gossip_fairy_except_suns(bundle)),
         (Locations.KF_GOSSIP_STONE_BIG_FAIRY,
@@ -70,117 +70,117 @@ def set_region_rules(world: "SohWorld") -> None:
         (Locations.KF_NORTH_GRASS_EAST_RUPEE, lambda bundle: is_child(bundle)),
         (Locations.KF_BOULDER_MAZE_FIRST_RUPEE, lambda bundle: is_child(bundle)),
         (Locations.KF_BOULDER_MAZE_SECOND_RUPEE, lambda bundle: is_child(bundle)),
-        (Locations.KF_BEAN_PLATFORM_RUPEE1, lambda bundle: is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                 can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RUPEE1, lambda bundle: is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                 can_use(Items.BOOMERANG, bundle) |
                                                                                  has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
-        (Locations.KF_BEAN_PLATFORM_RUPEE2, lambda bundle: is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                 can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RUPEE2, lambda bundle: is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                 can_use(Items.BOOMERANG, bundle) |
                                                                                  has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
-        (Locations.KF_BEAN_PLATFORM_RUPEE3, lambda bundle: is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                 can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RUPEE3, lambda bundle: is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                 can_use(Items.BOOMERANG, bundle) |
                                                                                  has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
-        (Locations.KF_BEAN_PLATFORM_RUPEE4, lambda bundle: is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                 can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RUPEE4, lambda bundle: is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                 can_use(Items.BOOMERANG, bundle) |
                                                                                  has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
-        (Locations.KF_BEAN_PLATFORM_RUPEE5, lambda bundle: is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                 can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RUPEE5, lambda bundle: is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                 can_use(Items.BOOMERANG, bundle) |
                                                                                  has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
-        (Locations.KF_BEAN_PLATFORM_RUPEE6, lambda bundle:  is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                  can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RUPEE6, lambda bundle:  is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                  can_use(Items.BOOMERANG, bundle) |
                                                                                   has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
-        (Locations.KF_BEAN_PLATFORM_RED_RUPEE, lambda bundle: is_adult(bundle) and (has_item(Items.HOVER_BOOTS, bundle) or
-                                                                                    can_use(Items.BOOMERANG, bundle) or
+        (Locations.KF_BEAN_PLATFORM_RED_RUPEE, lambda bundle: is_adult(bundle) & (has_item(Items.HOVER_BOOTS, bundle) |
+                                                                                    can_use(Items.BOOMERANG, bundle) |
                                                                                     has_item(LocalEvents.KF_BEAN_PLANTED, bundle))),
         (Locations.KF_SARIAS_ROOF_EAST_HEART, lambda bundle: is_child(bundle)),
         (Locations.KF_SARIAS_ROOF_NORTH_HEART, lambda bundle: is_child(bundle)),
         (Locations.KF_SARIAS_ROOF_WEST_HEART, lambda bundle: is_child(bundle)),
         (Locations.KF_CHILD_GRASS1, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS2, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS3, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS4, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS5, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS6, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS7, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS8, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS9, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS10, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS11, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS12, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS_MAZE1, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS_MAZE2, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_CHILD_GRASS_MAZE3, lambda bundle: (
-            is_child(bundle) and can_cut_shrubs(bundle))),
+            is_child(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS1, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS2, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS3, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS4, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS5, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS6, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS7, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS8, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS9, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS10, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS11, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS12, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS13, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS14, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS15, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS16, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS17, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS18, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS19, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
         (Locations.KF_ADULT_GRASS20, lambda bundle: (
-            is_adult(bundle) and can_cut_shrubs(bundle))),
+            is_adult(bundle) & can_cut_shrubs(bundle))),
     ])
     # Connections
     connect_regions(Regions.KOKIRI_FOREST, world, [
-        (Regions.KF_LINKS_HOUSE, lambda bundle: True),
-        (Regions.KF_MIDOS_HOUSE, lambda bundle: True),
-        (Regions.KF_SARIAS_HOUSE, lambda bundle: True),
-        (Regions.KF_HOUSE_OF_TWINS, lambda bundle: True),
-        (Regions.KF_KNOW_IT_ALL_HOUSE, lambda bundle: True),
-        (Regions.KF_KOKIRI_SHOP, lambda bundle: True),
-        (Regions.KF_OUTSIDE_DEKU_TREE, lambda bundle: (is_adult(bundle) and
-                                                       (can_pass_enemy(bundle, Enemies.BIG_SKULLTULA) or
+        (Regions.KF_LINKS_HOUSE, lambda bundle: True_()),
+        (Regions.KF_MIDOS_HOUSE, lambda bundle: True_()),
+        (Regions.KF_SARIAS_HOUSE, lambda bundle: True_()),
+        (Regions.KF_HOUSE_OF_TWINS, lambda bundle: True_()),
+        (Regions.KF_KNOW_IT_ALL_HOUSE, lambda bundle: True_()),
+        (Regions.KF_KOKIRI_SHOP, lambda bundle: True_()),
+        (Regions.KF_OUTSIDE_DEKU_TREE, lambda bundle: (is_adult(bundle) &
+                                                       (can_pass_enemy(bundle, Enemies.BIG_SKULLTULA) |
                                                         has_item(Events.FOREST_TEMPLE_COMPLETED, bundle)))
-         or (is_child(bundle) and has_item(LocalEvents.MIDO_SWORD_AND_SHIELD, bundle))
+         | (is_child(bundle) & has_item(LocalEvents.MIDO_SWORD_AND_SHIELD, bundle))
          # Todo, maybe create a helper for handling settings
-         or world.options.closed_forest.value == 2),
-        (Regions.LOST_WOODS, lambda bundle: True),
-        (Regions.LW_BRIDGE_FROM_FOREST, lambda bundle: world.options.closed_forest.value >= 1 or is_adult(bundle) or
+         | OptionFilter(ClosedForest, ClosedForest.option_off)),
+        (Regions.LOST_WOODS, lambda bundle: True_()),
+        (Regions.LW_BRIDGE_FROM_FOREST, lambda bundle: OptionFilter(ClosedForest, [ClosedForest.option_deku_only, ClosedForest.option_off], operator="in") | is_adult(bundle) |
          has_item(Events.DEKU_TREE_COMPLETED, bundle)),
         (Regions.KF_STORMS_GROTTO, lambda bundle: can_open_storms_grotto(bundle))
     ])
@@ -193,9 +193,9 @@ def set_region_rules(world: "SohWorld") -> None:
         (EventLocations.KF_DEKU_TREE_DEKU_BABA_STICKS, Events.CAN_FARM_STICKS,
          lambda bundle: (can_get_deku_baba_sticks(bundle))),
         (EventLocations.MIDO_FROM_OUTSIDE_DEKU_TREE, LocalEvents.MIDO_SWORD_AND_SHIELD, lambda bundle: (is_child(bundle)
-                                                                                                        and has_item(Items.KOKIRI_SWORD, bundle)
-                                                                                                        and has_item(Items.DEKU_SHIELD, bundle))
-         or world.options.closed_forest.value == 2),
+                                                                                                        & has_item(Items.KOKIRI_SWORD, bundle)
+                                                                                                        & has_item(Items.DEKU_SHIELD, bundle))
+         | OptionFilter(ClosedForest, ClosedForest.option_off)),
         (EventLocations.KF_DEKU_TREE_GOSSIP_STONE_SONG_FAIRY, Events.CAN_ACCESS_FAIRIES,
          lambda bundle: (call_gossip_fairy_except_suns(bundle))),
     ])
@@ -213,52 +213,52 @@ def set_region_rules(world: "SohWorld") -> None:
     connect_regions(Regions.KF_OUTSIDE_DEKU_TREE, world, [
         (Regions.DEKU_TREE_ENTRYWAY, lambda bundle: (is_child(bundle))
          # Todo: Add dungeons shuffle rule when entrance shuffle is implementedd
-         and (world.options.closed_forest.value == 2
-              or has_item(LocalEvents.MIDO_SWORD_AND_SHIELD, bundle))),
-        (Regions.KOKIRI_FOREST, lambda bundle:  (is_adult(bundle) and
-                                                 (can_pass_enemy(bundle, Enemies.BIG_SKULLTULA) or
+         & (OptionFilter(ClosedForest, ClosedForest.option_off)
+              | has_item(LocalEvents.MIDO_SWORD_AND_SHIELD, bundle))),
+        (Regions.KOKIRI_FOREST, lambda bundle:  (is_adult(bundle) &
+                                                 (can_pass_enemy(bundle, Enemies.BIG_SKULLTULA) |
                                                   has_item(Events.FOREST_TEMPLE_COMPLETED, bundle)))
-         or has_item(LocalEvents.MIDO_SWORD_AND_SHIELD, bundle)
-         or world.options.closed_forest.value == 2)
+         | has_item(LocalEvents.MIDO_SWORD_AND_SHIELD, bundle)
+         | OptionFilter(ClosedForest, ClosedForest.option_off))
     ])
 
     # KF Link's House
     # Locations
     add_locations(Regions.KF_LINKS_HOUSE, world, [
-        (Locations.KF_LINKS_HOUSE_COW, lambda bundle: is_adult(bundle) and
-         can_use(Items.EPONAS_SONG, bundle) and
+        (Locations.KF_LINKS_HOUSE_COW, lambda bundle: is_adult(bundle) &
+         can_use(Items.EPONAS_SONG, bundle) &
          has_item(Events.GOTTEN_LINKS_COW, bundle)),
         (Locations.KF_LINKS_HOUSE_POT, lambda bundle: can_break_pots(bundle))
     ])
     # Connections
     connect_regions(Regions.KF_LINKS_HOUSE, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])
 
     # KF Mido's House
     # Locations
     add_locations(Regions.KF_MIDOS_HOUSE, world, [
-        (Locations.KF_MIDO_TOP_LEFT_CHEST, lambda bundle: True),
-        (Locations.KF_MIDO_TOP_RIGHT_CHEST, lambda bundle: True),
-        (Locations.KF_MIDO_BOTTOM_LEFT_CHEST, lambda bundle: True),
-        (Locations.KF_MIDO_BOTTOM_RIGHT_CHEST, lambda bundle: True)
+        (Locations.KF_MIDO_TOP_LEFT_CHEST, lambda bundle: True_()),
+        (Locations.KF_MIDO_TOP_RIGHT_CHEST, lambda bundle: True_()),
+        (Locations.KF_MIDO_BOTTOM_LEFT_CHEST, lambda bundle: True_()),
+        (Locations.KF_MIDO_BOTTOM_RIGHT_CHEST, lambda bundle: True_())
     ])
     # Connections
     connect_regions(Regions.KF_MIDOS_HOUSE, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])
 
     # KF Saria's House
     # Locations
     add_locations(Regions.KF_SARIAS_HOUSE, world, [
-        (Locations.KF_SARIAS_HOUSE_TOP_LEFT_HEART, lambda bundle: True),
-        (Locations.KF_SARIAS_HOUSE_TOP_RIGHT_HEART, lambda bundle: True),
-        (Locations.KF_SARIAS_HOUSE_BOTTOM_LEFT_HEART, lambda bundle: True),
-        (Locations.KF_SARIAS_HOUSE_BOTTOM_RIGHT_HEART, lambda bundle: True)
+        (Locations.KF_SARIAS_HOUSE_TOP_LEFT_HEART, lambda bundle: True_()),
+        (Locations.KF_SARIAS_HOUSE_TOP_RIGHT_HEART, lambda bundle: True_()),
+        (Locations.KF_SARIAS_HOUSE_BOTTOM_LEFT_HEART, lambda bundle: True_()),
+        (Locations.KF_SARIAS_HOUSE_BOTTOM_RIGHT_HEART, lambda bundle: True_())
     ])
     # Connections
     connect_regions(Regions.KF_SARIAS_HOUSE, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])
 
     # KF House of Twins
@@ -270,7 +270,7 @@ def set_region_rules(world: "SohWorld") -> None:
     ])
     # Connections
     connect_regions(Regions.KF_HOUSE_OF_TWINS, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])
 
     # KF Know it All House
@@ -282,24 +282,24 @@ def set_region_rules(world: "SohWorld") -> None:
     ])
     # Connections
     connect_regions(Regions.KF_KNOW_IT_ALL_HOUSE, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])
 
     # KF Kokiri Shop
     # Locations
     add_locations(Regions.KF_KOKIRI_SHOP, world, [
-        (Locations.KF_SHOP_ITEM1, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM2, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM3, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM4, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM5, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM6, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM7, lambda bundle: True),
-        (Locations.KF_SHOP_ITEM8, lambda bundle: True)
+        (Locations.KF_SHOP_ITEM1, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM1, bundle)),
+        (Locations.KF_SHOP_ITEM2, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM2, bundle)),
+        (Locations.KF_SHOP_ITEM3, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM3, bundle)),
+        (Locations.KF_SHOP_ITEM4, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM4, bundle)),
+        (Locations.KF_SHOP_ITEM5, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM5, bundle)),
+        (Locations.KF_SHOP_ITEM6, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM6, bundle)),
+        (Locations.KF_SHOP_ITEM7, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM7, bundle)),
+        (Locations.KF_SHOP_ITEM8, lambda bundle: can_afford_slot(Locations.KF_SHOP_ITEM8, bundle))
     ])
     # Connections
     connect_regions(Regions.KF_KOKIRI_SHOP, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])
 
     # KF Storms Grotto
@@ -312,11 +312,11 @@ def set_region_rules(world: "SohWorld") -> None:
         (EventLocations.KF_STORMS_GROTTO_BUG_GRASS,
          Events.CAN_ACCESS_BUGS, lambda bundle: (can_cut_shrubs(bundle))),
         (EventLocations.KF_STORMS_GROTTO_PUDDLE_FISH,
-         Events.CAN_ACCESS_FISH, lambda bundle: True)
+         Events.CAN_ACCESS_FISH, lambda bundle: True_())
     ])
     # Locations
     add_locations(Regions.KF_STORMS_GROTTO, world, [
-        (Locations.KF_STORMS_GROTTO_CHEST, lambda bundle: True),
+        (Locations.KF_STORMS_GROTTO_CHEST, lambda bundle: True_()),
         (Locations.KF_STORMS_GROTTO_FISH, lambda bundle: has_bottle(bundle)),
         (Locations.KF_STORMS_GOSSIP_STONE_FAIRY,
          lambda bundle: call_gossip_fairy(bundle)),
@@ -333,5 +333,5 @@ def set_region_rules(world: "SohWorld") -> None:
     ])
     # Connections
     connect_regions(Regions.KF_STORMS_GROTTO, world, [
-        (Regions.KOKIRI_FOREST, lambda bundle: True)
+        (Regions.KOKIRI_FOREST, lambda bundle: True_())
     ])

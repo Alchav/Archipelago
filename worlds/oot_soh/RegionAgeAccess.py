@@ -1,6 +1,7 @@
 from collections import deque
 from BaseClasses import CollectionState, MultiWorld
 from worlds.AutoWorld import LogicMixin
+from .LogicHelpers import IsChild, IsAdult, child_age_dependent_rules, adult_age_dependent_rules
 from .Enums import Regions, Ages
 import copy
 

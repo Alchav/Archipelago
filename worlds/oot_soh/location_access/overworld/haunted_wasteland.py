@@ -19,30 +19,30 @@ def set_region_rules(world: "SohWorld") -> None:
     ])
     # Connections
     connect_regions(Regions.WASTELAND_NEAR_FORTRESS, world, [
-        (Regions.GF_OUTSIDE_GATE, lambda bundle: True),
+        (Regions.GF_OUTSIDE_GATE, lambda bundle: True_()),
         (Regions.HAUNTED_WASTELAND, lambda bundle: can_use_any(
-            [Items.HOVER_BOOTS, Items.LONGSHOT], bundle) or can_do_trick(Tricks.HW_CROSSING, bundle))
+            [Items.HOVER_BOOTS, Items.LONGSHOT], bundle) | can_do_trick(Tricks.HW_CROSSING, bundle))
     ])
 
     # Haunted Wasteland
     # Events
     add_events(Regions.HAUNTED_WASTELAND, world, [
         (EventLocations.WASTELAND_FAIRY_POT,
-         Events.CAN_ACCESS_FAIRIES, lambda bundle: True),
-        (EventLocations.WASTELAND_NUT_POT, Events.CAN_FARM_NUTS, lambda bundle: True)
+         Events.CAN_ACCESS_FAIRIES, lambda bundle: True_()),
+        (EventLocations.WASTELAND_NUT_POT, Events.CAN_FARM_NUTS, lambda bundle: True_())
     ])
     if world.options.shuffle_merchants.value == 0 or world.options.shuffle_merchants.value == 1:
         add_events(Regions.HAUNTED_WASTELAND, world, [
             (EventLocations.WASTELAND_CARPET_SALESMAN_STORE, Events.CARPET_MERCHANT, lambda bundle: has_item(
-                Items.ADULT_WALLET, bundle) and (can_jump_slash(bundle) or can_use(Items.HOVER_BOOTS, bundle)))
+                Items.ADULT_WALLET, bundle) & (can_jump_slash(bundle) | can_use(Items.HOVER_BOOTS, bundle)))
         ])
     # Locations
     add_locations(Regions.HAUNTED_WASTELAND, world, [
         (Locations.WASTELAND_CHEST, lambda bundle: has_fire_source(bundle)),
-        (Locations.WASTELAND_CARPET_SALESMAN, lambda bundle: has_item(Items.ADULT_WALLET,
-         bundle) and (can_jump_slash(bundle) or can_use(Items.HOVER_BOOTS, bundle))),
-        (Locations.WASTELAND_GS, lambda bundle: hookshot_or_boomerang(bundle) or (
-            is_adult(bundle) and can_ground_jump(bundle) and can_jump_slash(bundle))),
+        (Locations.WASTELAND_CARPET_SALESMAN, lambda bundle: can_afford_slot(Locations.WASTELAND_CARPET_SALESMAN, bundle) & has_item(Items.ADULT_WALLET,
+         bundle) & (can_jump_slash(bundle) | can_use(Items.HOVER_BOOTS, bundle))),
+        (Locations.WASTELAND_GS, lambda bundle: hookshot_or_boomerang(bundle) | (
+            is_adult(bundle) & can_ground_jump(bundle) & can_jump_slash(bundle))),
         (Locations.WASTELAND_NEAR_GS_POT1, lambda bundle: can_break_pots(bundle)),
         (Locations.WASTELAND_NEAR_GS_POT2, lambda bundle: can_break_pots(bundle)),
         (Locations.WASTELAND_NEAR_GS_POT3, lambda bundle: can_break_pots(bundle)),
@@ -57,9 +57,9 @@ def set_region_rules(world: "SohWorld") -> None:
     # Connections
     connect_regions(Regions.HAUNTED_WASTELAND, world, [
         (Regions.WASTELAND_NEAR_COLOSSUS, lambda bundle: can_do_trick(
-            Tricks.LENS_HW, bundle) or can_use(Items.LENS_OF_TRUTH, bundle)),
+            Tricks.LENS_HW, bundle) | can_use(Items.LENS_OF_TRUTH, bundle)),
         (Regions.WASTELAND_NEAR_FORTRESS, lambda bundle: can_use_any(
-            [Items.HOVER_BOOTS, Items.LONGSHOT], bundle) or can_do_trick(Tricks.HW_CROSSING, bundle))
+            [Items.HOVER_BOOTS, Items.LONGSHOT], bundle) | can_do_trick(Tricks.HW_CROSSING, bundle))
     ])
 
     # Haunted Wasteland Near Colossus
@@ -70,7 +70,7 @@ def set_region_rules(world: "SohWorld") -> None:
     ])
     # Connections
     connect_regions(Regions.WASTELAND_NEAR_COLOSSUS, world, [
-        (Regions.DESERT_COLOSSUS, lambda bundle: True),
+        (Regions.DESERT_COLOSSUS, lambda bundle: True_()),
         (Regions.HAUNTED_WASTELAND, lambda bundle: can_do_trick(
             Tricks.HW_REVERSE, bundle))
     ])
