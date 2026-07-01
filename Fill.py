@@ -811,7 +811,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # inaccessible_location_rules(multiworld, multiworld.state, defaultlocations)
 
     # longify_spheres(multiworld)
-    # sphere_max = 150
+    sphere_max = 15
 
     def test_beatable():
         if not multiworld.can_beat_game():
@@ -824,9 +824,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             breakpoint()
     test_beatable()
     # breakpoint()
-    # compress_spheres(multiworld, sphere_max)
+    compress_spheres(multiworld, sphere_max)
 
-    compress_owner_spheres(multiworld)
+    # compress_owner_spheres(multiworld)
 
 
     test_beatable()
@@ -935,11 +935,15 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 return 2
             return 1
 
-    option = "o"  # g: total spheres, b: beaten game spheres
+    option = "r"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
     starting_spheres = {}
+    owner_groups = {
+        owner: [player for player in multiworld.player_ids if multiworld.worlds[player].options.owner == owner]
+        for owner in Owner.name_lookup
+    }
     if option == "b":
         game_spheres = beaten_game_spheres
     else:
@@ -960,6 +964,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     if option in ("e", "r"):
         for player in player_names:
             highest_sphere = max(highest_sphere, game_spheres[player[0]])
+        if option == "r":
+            highest_sphere = max(highest_sphere, sphere_max)
         for player in player_names:
             if game_spheres[player[0]] == highest_sphere:
                 playable_games.append(player)
@@ -969,9 +975,16 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 starting_spheres[player[0]] = highest_sphere - game_spheres[player[0]]
                 if option == "r":
                     starting_spheres[player[0]] = multiworld.random.randint(1, starting_spheres[player[0]])
+        playable_player_ids = {player for player, _player_name in playable_games}
+        for owner_group in owner_groups.values():
+            if not owner_group or playable_player_ids.intersection(owner_group):
+                continue
+            starting_player = multiworld.random.choice(owner_group)
+            playable_games.append((starting_player, multiworld.player_name[starting_player]))
+            playable_player_ids.add(starting_player)
+            starting_spheres.pop(starting_player, None)
+            multiworld.push_precollected(multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[starting_player]}"))
     elif option == "o":
-
-        owner_groups = {owner: [player for player in multiworld.player_ids if multiworld.worlds[player].options.owner == owner] for owner in Owner.name_lookup}
 
         for owner_group in owner_groups.values():
             if not owner_group:

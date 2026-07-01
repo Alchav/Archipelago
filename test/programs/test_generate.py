@@ -21,13 +21,26 @@ class TestGenerateMain(unittest.TestCase):
     rel_input_dir = abs_input_dir.relative_to(run_dir)  # directly supplied relative paths are relative to cwd
     yaml_input_dir = abs_input_dir.relative_to(generate_dir)  # yaml paths are relative to user_path
 
-    def assertOutput(self, output_dir: str):
+    def assertZipOutput(self, output_dir: str):
         output_path = Path(output_dir)
         output_files = list(output_path.glob('*.zip'))
         if len(output_files) == 1:
             return True
         self.fail(f"Expected {output_dir} to contain one zip, but has {len(output_files)}: "
                   f"{list(output_path.glob('*'))}")
+
+    def assertFolderOutput(self, output_dir: str):
+        output_path = Path(output_dir)
+        output_folders = [path for path in output_path.iterdir() if path.is_dir()]
+        if len(output_folders) != 1:
+            self.fail(f"Expected {output_dir} to contain one output folder, but has {len(output_folders)}: "
+                      f"{list(output_path.glob('*'))}")
+        if list(output_path.glob('*.zip')):
+            self.fail(f"Expected {output_dir} to contain no zip files, but has: {list(output_path.glob('*.zip'))}")
+        archipelago_files = list(output_folders[0].glob('*.archipelago'))
+        if len(archipelago_files) != 1:
+            self.fail(f"Expected {output_folders[0]} to contain one .archipelago file, but has "
+                      f"{len(archipelago_files)}: {list(output_folders[0].glob('*'))}")
 
     def setUp(self):
         self.original_argv = sys.argv.copy()
@@ -61,7 +74,7 @@ class TestGenerateMain(unittest.TestCase):
         print(f'Testing Generate.py {sys.argv} in {os.getcwd()}')
         Main.main(*Generate.main())
 
-        self.assertOutput(self.output_tempdir.name)
+        self.assertZipOutput(self.output_tempdir.name)
 
     def test_generate_relative(self):
         sys.argv = [sys.argv[0], '--seed', '0',
@@ -70,7 +83,7 @@ class TestGenerateMain(unittest.TestCase):
         print(f'Testing Generate.py {sys.argv} in {os.getcwd()}')
         Main.main(*Generate.main())
 
-        self.assertOutput(self.output_tempdir.name)
+        self.assertZipOutput(self.output_tempdir.name)
 
     def test_generate_yaml(self):
         # override host.yaml
@@ -91,7 +104,17 @@ class TestGenerateMain(unittest.TestCase):
         finally:
             user_path.cached_path = user_path_backup
 
-        self.assertOutput(self.output_tempdir.name)
+        self.assertZipOutput(self.output_tempdir.name)
+
+    def test_generate_folder_output(self):
+        sys.argv = [sys.argv[0], '--seed', '0',
+                    '--player_files_path', str(self.abs_input_dir),
+                    '--outputpath', self.output_tempdir.name,
+                    '--output_as_folder']
+        print(f'Testing Generate.py {sys.argv} in {os.getcwd()}')
+        Main.main(*Generate.main())
+
+        self.assertFolderOutput(self.output_tempdir.name)
 
 
 class TestGenerateWeights(TestGenerateMain):
@@ -108,6 +131,7 @@ class TestGenerateWeights(TestGenerateMain):
     # don't need to run these tests
     test_generate_absolute = None
     test_generate_relative = None
+    test_generate_folder_output = None
 
     def test_generate_yaml(self):
         from settings import get_settings
