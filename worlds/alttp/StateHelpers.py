@@ -261,8 +261,9 @@ ROOM_WIDE_MEDALLION_DAMAGE_CLASSES = {
     "Ether": 14,
     "Quake": 15,
 }
+THROWN_OBJECT_DAMAGE_CLASS = 3
 LIGHTNING_GATE_MAGIC_POWDER_DAMAGE_CLASS = 10
-LIGHTNING_GATE_TRANSFORM_EFFECTS = frozenset((FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT))
+LIGHTNING_GATE_REMOVAL_EFFECTS = frozenset((FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT, FREEZE_EFFECT))
 # Evil Barrier rejects Fighter Sword and Hammer contact hits before the damage table result matters.
 LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
     ("Master Sword", frozenset((1, 2, 3))),
@@ -390,6 +391,12 @@ def can_pass_evil_barrier(state: CollectionState, player: int) -> bool:
         combat_model,
     ):
         return True
+    if (
+        state.multiworld.worlds[player].options.swordless
+        and state.has("Hammer", player)
+        and _lightning_gate_damage_class_removes_barrier(THROWN_OBJECT_DAMAGE_CLASS, combat_model)
+    ):
+        return True
 
     return any(
         state.has(sword_name, player)
@@ -403,7 +410,7 @@ def can_pass_evil_barrier(state: CollectionState, player: int) -> bool:
 
 def _lightning_gate_damage_class_removes_barrier(damage_class: int, combat_model: EnemyCombatModel) -> bool:
     effect = get_damage_effect(LIGHTNING_GATE_SPRITE_ID, damage_class, combat_model)
-    return is_killing_damage_effect(effect) or effect in LIGHTNING_GATE_TRANSFORM_EFFECTS
+    return is_killing_damage_effect(effect) or effect in LIGHTNING_GATE_REMOVAL_EFFECTS
 
 
 def _prune_dominated_resource_costs(costs: set[ResourceCosts]) -> tuple[ResourceCosts, ...]:
@@ -440,16 +447,17 @@ def can_clear_enemy_room(state: CollectionState, player: int, room_name_or_id: s
     if room_id is None:
         raise ValueError(f"Unknown ALTTP room {room_name_or_id!r}")
 
+    effective_room_enemies = tuple(get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id))
     room_enemies = tuple(
         enemy
-        for enemy in get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id)
+        for enemy in effective_room_enemies
         if _enemy_requirement_counts_for_room_clear(enemy)
     )
     return _can_clear_enemy_requirements(
         state,
         player,
         room_enemies,
-        pot_class_1_hits_by_quadrant=_get_room_pot_class_1_hits_by_quadrant(room_id),
+        thrown_object_hits_by_quadrant=_get_thrown_object_hits_by_quadrant(room_id, effective_room_enemies),
     )
 
 
@@ -464,11 +472,12 @@ def can_clear_enemy_region(state: CollectionState, player: int, target_name: str
         for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
         if _enemy_requirement_counts_for_room_clear(enemy)
     )
+    effective_room_enemies = tuple(get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name))
     return _can_clear_enemy_requirements(
         state,
         player,
         room_enemies,
-        pot_class_1_hits_by_quadrant=_get_room_pot_class_1_hits_by_quadrant(room_id, target),
+        thrown_object_hits_by_quadrant=_get_thrown_object_hits_by_quadrant(room_id, effective_room_enemies, target),
     )
 
 
@@ -484,27 +493,45 @@ def can_clear_enemy_regions(state: CollectionState, player: int, *target_names: 
         )
         for target_name in target_names
     )
-    pot_class_1_hits_by_group = []
+    thrown_object_hits_by_group = []
     for target_name in target_names:
         target = get_enemy_clear_target(target_name)
         room_id = get_room_id(target.room_name)
-        pot_class_1_hits_by_group.append(_get_room_pot_class_1_hits_by_quadrant(room_id, target))
+        effective_room_enemies = tuple(get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name))
+        thrown_object_hits_by_group.append(_get_thrown_object_hits_by_quadrant(room_id, effective_room_enemies, target))
     return _can_clear_enemy_requirement_groups(
         state,
         player,
         enemy_groups,
-        pot_class_1_hits_by_group=tuple(pot_class_1_hits_by_group),
+        thrown_object_hits_by_group=tuple(thrown_object_hits_by_group),
     )
 
 
 def can_kill_key_drop_enemy(state: CollectionState, player: int, location_name: str) -> bool:
-    from .EnemyLogicTargets import get_key_drop_enemy
+    from .EnemyLogicTargets import get_key_drop_enemy, get_key_drop_enemy_target
+    from .EnemyShuffle import get_effective_dungeon_room_enemies, get_room_id
 
     enemy = get_key_drop_enemy(state.multiworld.worlds[player], location_name)
     if enemy is None or not enemy.has_key or not _enemy_requirement_can_be_killed(state, player, enemy):
         return False
 
-    return _can_clear_enemy_requirements(state, player, (enemy,), key_drop_enemy=True)
+    target = get_key_drop_enemy_target(location_name)
+    room_id = get_room_id(target.room_name)
+    if room_id is None:
+        raise ValueError(f"Unknown ALTTP room {target.room_name!r}")
+    room_enemies = tuple(get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id))
+    context_enemies = tuple(
+        context_enemy
+        for context_enemy in room_enemies
+        if context_enemy is enemy or _enemy_requirement_counts_for_room_clear(context_enemy)
+    )
+    return _can_clear_enemy_requirements(
+        state,
+        player,
+        (enemy,),
+        key_drop_enemy=True,
+        freeze_throw_context_enemies=context_enemies,
+    )
 
 
 def can_kill_enemy_sprite(state: CollectionState, player: int, sprite_name: str) -> bool:
@@ -555,11 +582,20 @@ def _get_enemy_hp_override(enemy_or_requirement) -> int | None:
     return get_hardcoded_enemy_hp(requirement.sprite_id, x_coord_pixels)
 
 
-def _get_room_pot_class_1_hit_count(room_id: int | None, target=None) -> int:
-    return sum(count for _, count in _get_room_pot_class_1_hits_by_quadrant(room_id, target))
+def _get_thrown_object_hits_by_quadrant(
+    room_id: int | None,
+    room_enemies: tuple = tuple(),
+    target=None,
+) -> tuple[tuple[tuple[int, int], int], ...]:
+    counts: dict[tuple[int, int], int] = {}
+    for quadrant, count in _get_room_pot_hits_by_quadrant(room_id, target):
+        counts[quadrant] = counts.get(quadrant, 0) + count
+    for quadrant, count in _get_fake_master_sword_hits_by_quadrant(room_enemies, target):
+        counts[quadrant] = counts.get(quadrant, 0) + count
+    return tuple(sorted(counts.items()))
 
 
-def _get_room_pot_class_1_hits_by_quadrant(room_id: int | None, target=None) -> tuple[tuple[tuple[int, int], int], ...]:
+def _get_room_pot_hits_by_quadrant(room_id: int | None, target=None) -> tuple[tuple[tuple[int, int], int], ...]:
     if room_id is None:
         return tuple()
 
@@ -572,6 +608,20 @@ def _get_room_pot_class_1_hits_by_quadrant(room_id: int | None, target=None) -> 
         if target is not None and not _target_contains_pot(target, pot):
             continue
         quadrant = _get_position_quadrant(pot.x * 2, pot.y * 16)
+        counts[quadrant] = counts.get(quadrant, 0) + 1
+    return tuple(sorted(counts.items()))
+
+
+def _get_fake_master_sword_hits_by_quadrant(room_enemies: tuple, target=None) -> tuple[tuple[tuple[int, int], int], ...]:
+    counts: dict[tuple[int, int], int] = {}
+    for enemy in room_enemies:
+        if _get_enemy_requirement(enemy).sprite_name != "Fake Master Sword":
+            continue
+        if target is not None and not target.contains(enemy):
+            continue
+        quadrant = _get_enemy_position_quadrant(enemy)
+        if quadrant is None:
+            continue
         counts[quadrant] = counts.get(quadrant, 0) + 1
     return tuple(sorted(counts.items()))
 
@@ -620,14 +670,16 @@ def _can_clear_enemy_requirements(
     room_enemies: tuple,
     *,
     key_drop_enemy: bool = False,
-    pot_class_1_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
+    thrown_object_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
+    freeze_throw_context_enemies: tuple = tuple(),
 ) -> bool:
     return _can_clear_enemy_requirement_groups(
         state,
         player,
         (room_enemies,),
         key_drop_enemy=key_drop_enemy,
-        pot_class_1_hits_by_group=(pot_class_1_hits_by_quadrant,),
+        thrown_object_hits_by_group=(thrown_object_hits_by_quadrant,),
+        freeze_throw_context_groups=((freeze_throw_context_enemies or room_enemies),),
     )
 
 
@@ -637,11 +689,14 @@ def _can_clear_enemy_requirement_groups(
     enemy_groups: tuple[tuple, ...],
     *,
     key_drop_enemy: bool = False,
-    pot_class_1_hits_by_group: tuple[tuple[tuple[tuple[int, int], int], ...], ...] | None = None,
+    thrown_object_hits_by_group: tuple[tuple[tuple[tuple[int, int], int], ...], ...] | None = None,
+    freeze_throw_context_groups: tuple[tuple, ...] | None = None,
 ) -> bool:
     budget = _get_enemy_clear_resource_budget(state, player)
-    if pot_class_1_hits_by_group is None:
-        pot_class_1_hits_by_group = (tuple(),) * len(enemy_groups)
+    if thrown_object_hits_by_group is None:
+        thrown_object_hits_by_group = (tuple(),) * len(enemy_groups)
+    if freeze_throw_context_groups is None:
+        freeze_throw_context_groups = enemy_groups
     group_clear_plans = tuple(
         _get_enemy_group_clear_plans(
             state,
@@ -649,9 +704,11 @@ def _can_clear_enemy_requirement_groups(
             enemy_group,
             budget,
             key_drop_enemy=key_drop_enemy,
-            pot_class_1_hits_by_quadrant=pot_class_1_hits_by_quadrant,
+            thrown_object_hits_by_quadrant=thrown_object_hits_by_quadrant,
+            freeze_throw_context_enemies=freeze_throw_context_enemies,
         )
-        for enemy_group, pot_class_1_hits_by_quadrant in zip(enemy_groups, pot_class_1_hits_by_group)
+        for enemy_group, thrown_object_hits_by_quadrant, freeze_throw_context_enemies
+        in zip(enemy_groups, thrown_object_hits_by_group, freeze_throw_context_groups)
     )
     return _can_execute_enemy_kill_plans(group_clear_plans, budget)
 
@@ -663,7 +720,8 @@ def _get_enemy_group_clear_plans(
     budget: ResourceBudget,
     *,
     key_drop_enemy: bool = False,
-    pot_class_1_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
+    thrown_object_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
+    freeze_throw_context_enemies: tuple = tuple(),
 ) -> tuple[ResourceCosts, ...]:
     if not room_enemies:
         return (FREE_RESOURCE_COSTS,)
@@ -673,21 +731,34 @@ def _get_enemy_group_clear_plans(
         "enemy_group_clear_plans",
         tuple(_get_enemy_requirement_cache_key(requirement) for requirement in room_enemies),
         key_drop_enemy,
-        pot_class_1_hits_by_quadrant,
+        thrown_object_hits_by_quadrant,
+        tuple(_get_enemy_requirement_cache_key(requirement) for requirement in freeze_throw_context_enemies),
         budget,
     )
     if cache_key in cache:
         return cache[cache_key]
 
     clear_plans: set[ResourceCosts] = set()
-    pot_adjusted_enemy_groups = _get_pot_adjusted_enemy_groups(
+    thrown_object_adjusted_enemy_groups = _get_thrown_object_adjusted_enemy_groups(
         state,
         player,
         room_enemies,
-        pot_class_1_hits_by_quadrant,
+        thrown_object_hits_by_quadrant,
+        key_drop_enemy=key_drop_enemy,
     )
     available_medallions = _get_available_room_wide_medallions(state, player)
-    for adjusted_enemy_group in pot_adjusted_enemy_groups:
+    pre_adjusted_group_plans = []
+    for adjusted_enemy_group in thrown_object_adjusted_enemy_groups:
+        pre_adjusted_group_plans.append((adjusted_enemy_group, FREE_RESOURCE_COSTS))
+        pre_adjusted_group_plans.extend(_get_frozen_throw_adjusted_enemy_group_plans(
+            state,
+            player,
+            adjusted_enemy_group,
+            freeze_throw_context_enemies or adjusted_enemy_group,
+            key_drop_enemy=key_drop_enemy,
+        ))
+
+    for adjusted_enemy_group, pre_adjustment_costs in pre_adjusted_group_plans:
         useful_medallions = _get_useful_room_wide_medallions(
             state,
             player,
@@ -696,7 +767,10 @@ def _get_enemy_group_clear_plans(
             key_drop_enemy=key_drop_enemy,
         )
         for room_wide_medallions in _get_room_wide_medallion_cast_sets(useful_medallions):
-            base_costs = ResourceCosts(magic=MEDALLION_MAGIC_COST * len(room_wide_medallions))
+            base_costs = _add_resource_costs(
+                pre_adjustment_costs,
+                ResourceCosts(magic=MEDALLION_MAGIC_COST * len(room_wide_medallions)),
+            )
             plans_by_enemy = tuple(
                 _get_enemy_kill_plans_after_room_wide_medallions(
                     state,
@@ -718,18 +792,20 @@ def _get_enemy_group_clear_plans(
     return result
 
 
-def _get_pot_adjusted_enemy_groups(
+def _get_thrown_object_adjusted_enemy_groups(
     state: CollectionState,
     player: int,
     room_enemies: tuple,
-    pot_class_1_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...],
+    thrown_object_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...],
+    *,
+    key_drop_enemy: bool = False,
 ) -> tuple[tuple, ...]:
-    pot_hits_by_quadrant = {
+    thrown_object_hits_by_quadrant = {
         quadrant: count
-        for quadrant, count in pot_class_1_hits_by_quadrant
+        for quadrant, count in thrown_object_hits_by_quadrant
         if count > 0
     }
-    if not pot_hits_by_quadrant:
+    if not thrown_object_hits_by_quadrant:
         return (room_enemies,)
 
     enemy_health_key = _get_enemy_health_key(state, player)
@@ -750,37 +826,42 @@ def _get_pot_adjusted_enemy_groups(
             killable_thieves=killable_thieves,
             combat_model=combat_model,
         )
-        effect = get_damage_effect(combat_reference_id, SWORD_BEAM_DAMAGE_CLASS, combat_model)
-        if hp is None or not _pot_damage_effect_counts_for_room_clear(effect):
+        effect = get_damage_effect(combat_reference_id, THROWN_OBJECT_DAMAGE_CLASS, combat_model)
+        if hp is None or not _thrown_object_damage_effect_counts_for_room_clear(
+            state, player, effect, enemy, key_drop_enemy=key_drop_enemy,
+        ):
             enemy_entries.append((enemy, hp, None, None))
             continue
         enemy_entries.append((enemy, hp, effect, _get_enemy_position_quadrant(enemy)))
 
-    if not any(effect is not None and quadrant in pot_hits_by_quadrant for _, _, effect, quadrant in enemy_entries):
+    if not any(
+        effect is not None and quadrant in thrown_object_hits_by_quadrant
+        for _, _, effect, quadrant in enemy_entries
+    ):
         return (room_enemies,)
 
     hp_state = [hp for _, hp, _, _ in enemy_entries]
-    for quadrant, pot_class_1_hits in pot_hits_by_quadrant.items():
-        remaining_pot_hits = pot_class_1_hits
-        pot_targets = sorted(
+    for quadrant, thrown_object_hits in thrown_object_hits_by_quadrant.items():
+        remaining_thrown_object_hits = thrown_object_hits
+        thrown_object_targets = sorted(
             (
-                (_get_pot_hits_to_remove_enemy(hp, effect), index)
+                (_get_thrown_object_hits_to_remove_enemy(state, player, hp, effect), index)
                 for index, (_, hp, effect, enemy_quadrant) in enumerate(enemy_entries)
                 if hp is not None and effect is not None and enemy_quadrant == quadrant
             ),
             key=lambda target: (target[0], target[1]),
         )
-        for hits_to_remove, index in pot_targets:
-            if remaining_pot_hits <= 0:
+        for hits_to_remove, index in thrown_object_targets:
+            if remaining_thrown_object_hits <= 0:
                 break
             _, _, effect, _ = enemy_entries[index]
-            if remaining_pot_hits >= hits_to_remove:
+            if remaining_thrown_object_hits >= hits_to_remove:
                 hp_state[index] = 0
-                remaining_pot_hits -= hits_to_remove
+                remaining_thrown_object_hits -= hits_to_remove
             else:
-                for _ in range(remaining_pot_hits):
-                    hp_state[index] = _apply_pot_damage_to_hp(hp_state[index], effect)
-                remaining_pot_hits = 0
+                for _ in range(remaining_thrown_object_hits):
+                    hp_state[index] = _apply_thrown_object_damage_to_hp(state, player, hp_state[index], effect)
+                remaining_thrown_object_hits = 0
 
     adjusted_group = []
     for index, remaining_hp in enumerate(hp_state):
@@ -795,8 +876,23 @@ def _get_pot_adjusted_enemy_groups(
     return (tuple(adjusted_group),)
 
 
-def _pot_damage_effect_counts_for_room_clear(effect: int) -> bool:
-    return effect == INCINERATE_EFFECT or 0 < effect < FAIRY_TRANSFORM_EFFECT
+def _thrown_object_damage_effect_counts_for_room_clear(
+    state: CollectionState,
+    player: int,
+    effect: int,
+    enemy=None,
+    *,
+    key_drop_enemy: bool = False,
+) -> bool:
+    if key_drop_enemy and enemy is not None:
+        requirement = _get_enemy_requirement(enemy)
+        if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
+            return effect == INCINERATE_EFFECT
+    return (
+        effect == INCINERATE_EFFECT
+        or 0 < effect < FAIRY_TRANSFORM_EFFECT
+        or (effect == FREEZE_EFFECT and state.has("Hammer", player))
+    )
 
 
 def _pot_adjusted_enemy_group_sort_key(group: tuple) -> tuple[int, tuple[str, ...]]:
@@ -806,16 +902,97 @@ def _pot_adjusted_enemy_group_sort_key(group: tuple) -> tuple[int, tuple[str, ..
     )
 
 
-def _get_pot_hits_to_remove_enemy(hp: int, effect: int) -> int:
-    if effect == INCINERATE_EFFECT:
+def _get_thrown_object_hits_to_remove_enemy(state: CollectionState, player: int, hp: int, effect: int) -> int:
+    if effect == INCINERATE_EFFECT or (effect == FREEZE_EFFECT and state.has("Hammer", player)):
         return 1
     return (hp + effect - 1) // effect
 
 
-def _apply_pot_damage_to_hp(hp: int, effect: int) -> int:
-    if effect == INCINERATE_EFFECT:
+def _apply_thrown_object_damage_to_hp(state: CollectionState, player: int, hp: int, effect: int) -> int:
+    if effect == INCINERATE_EFFECT or (effect == FREEZE_EFFECT and state.has("Hammer", player)):
         return 0
     return max(0, hp - effect)
+
+
+def _get_frozen_throw_adjusted_enemy_group_plans(
+    state: CollectionState,
+    player: int,
+    room_enemies: tuple,
+    freeze_throw_context_enemies: tuple,
+    *,
+    key_drop_enemy: bool = False,
+) -> tuple[tuple[tuple, ResourceCosts], ...]:
+    if not room_enemies:
+        return tuple()
+
+    combat_model = _get_active_combat_model(state, player)
+    enemy_health_key = _get_enemy_health_key(state, player)
+    killable_thieves = bool(state.multiworld.worlds[player].options.killable_thieves)
+    plans: list[tuple[tuple, ResourceCosts]] = []
+    seen_plan_keys: set[tuple[tuple, ResourceCosts]] = set()
+    target_entries = []
+    for target_index, enemy in enumerate(room_enemies):
+        requirement = _get_enemy_requirement(enemy)
+        combat_reference_id = _get_combat_reference_id(requirement, combat_model)
+        if combat_reference_id is None:
+            continue
+        hp = get_enemy_health_for_logic(
+            combat_reference_id,
+            enemy_health_key,
+            hp_override=_get_enemy_hp_override(enemy),
+            killable_thieves=killable_thieves,
+            combat_model=combat_model,
+        )
+        effect = get_damage_effect(combat_reference_id, THROWN_OBJECT_DAMAGE_CLASS, combat_model)
+        if hp is None or not _thrown_object_damage_effect_counts_for_room_clear(
+            state, player, effect, enemy, key_drop_enemy=key_drop_enemy,
+        ):
+            continue
+        target_entries.append((target_index, enemy, hp, effect, _get_enemy_position_quadrant(enemy)))
+
+    if not target_entries:
+        return tuple()
+
+    for source_enemy in freeze_throw_context_enemies:
+        source_requirement = _get_enemy_requirement(source_enemy)
+        source_combat_reference_id = _get_combat_reference_id(source_requirement, combat_model)
+        if source_combat_reference_id is None:
+            continue
+        source_quadrant = _get_enemy_position_quadrant(source_enemy)
+        if source_quadrant is None:
+            continue
+        freeze_damage_classes = set(get_damage_classes_with_effects(
+            source_combat_reference_id,
+            frozenset({FREEZE_EFFECT}),
+            combat_model,
+        ))
+        if not freeze_damage_classes:
+            continue
+        freeze_plans = _build_single_hit_plans_for_damage_classes(state, player, freeze_damage_classes)
+        if not freeze_plans:
+            continue
+        for target_index, target_enemy, hp, effect, target_quadrant in target_entries:
+            if target_enemy is source_enemy or target_quadrant != source_quadrant:
+                continue
+            adjusted_group = list(room_enemies)
+            remaining_hp = _apply_thrown_object_damage_to_hp(state, player, hp, effect)
+            if remaining_hp == 0:
+                del adjusted_group[target_index]
+            elif remaining_hp < hp:
+                adjusted_group[target_index] = EnemyHpOverride(target_enemy, remaining_hp)
+            else:
+                continue
+            for freeze_plan in freeze_plans:
+                plan = (tuple(adjusted_group), freeze_plan)
+                plan_key = (
+                    tuple(_get_enemy_requirement_cache_key(requirement) for requirement in plan[0]),
+                    freeze_plan,
+                )
+                if plan_key in seen_plan_keys:
+                    continue
+                seen_plan_keys.add(plan_key)
+                plans.append(plan)
+    return tuple(sorted(plans, key=lambda plan: (_pot_adjusted_enemy_group_sort_key(plan[0]), plan[1])))
 
 
 def _get_available_damage_classes(state: CollectionState, player: int, enemy_count: int) -> set[int]:
@@ -1584,6 +1761,15 @@ def _get_enemy_kill_plans(
         return direct_attack_plans
 
     plans = set(direct_attack_plans)
+    if state.has("Hammer", player) and (
+        direct_kill_delivery_override is None or "Hammer" in direct_kill_delivery_override.items
+    ):
+        freeze_damage_classes = set(get_damage_classes_with_effects(
+            combat_reference_id,
+            frozenset({FREEZE_EFFECT}),
+            combat_model,
+        ))
+        plans.update(_build_single_hit_plans_for_damage_classes(state, player, freeze_damage_classes))
     if requirement.sprite_name == "Floating Stalfos Head" and direct_kill_delivery_override is not None:
         plans.update(_build_single_hit_plans_for_damage_classes(
             state,

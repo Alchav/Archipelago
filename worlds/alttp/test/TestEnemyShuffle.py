@@ -681,8 +681,19 @@ class TestEnemyShuffleValidation(unittest.TestCase):
                 RandomizedDungeonEnemySprite(0, 0, 0, 24, 24, False, False)
                 for _ in range(4)
             )
+            combat_model = _build_combat_model_with_sprite_subclass(24, 1, 0)
+            sprite_damage_subclasses = [
+                list(row)
+                for row in combat_model.sprite_damage_subclasses
+            ]
+            sprite_damage_subclasses[24][3] = 0
+            combat_model = EnemyCombatModel(
+                damage_sources=combat_model.damage_sources,
+                sprite_damage_subclasses=tuple(tuple(row) for row in sprite_damage_subclasses),
+                enemy_health_table=combat_model.enemy_health_table,
+            )
             world.enemy_shuffle_state = SimpleNamespace(
-                combat_model=_build_combat_model_with_sprite_subclass(24, 1, 0),
+                combat_model=combat_model,
                 randomized_dungeon_rooms={
                     wizzrobes_room_id: RandomizedDungeonEnemyRoom(
                         room_id=wizzrobes_room_id,
