@@ -287,7 +287,18 @@ class ALTTPWeb(WebWorld):
         ["Nyx Edelstein"]
     )
 
-    tutorials = [setup_en, setup_de, setup_es, setup_fr, msu, msu_es, msu_fr, plando, oof_sound]
+    randomize_damage_classes = Tutorial(
+        "Randomize Damage Classes Guide",
+        "A guide to how randomized enemy damage classes affect weapons, items, enemies, bosses, and logic.",
+        "English",
+        "randomize_damage_classes_en.md",
+        "randomize_damage_classes/en",
+        ["Alchav"]
+    )
+
+    tutorials = [
+        setup_en, setup_de, setup_es, setup_fr, msu, msu_es, msu_fr, plando, oof_sound, randomize_damage_classes
+    ]
     game_info_languages = ["en", "fr"]
 
 
