@@ -57,6 +57,7 @@ from worlds.alttp.EnemyShuffle import (
 )
 from worlds.alttp.Items import item_table
 from worlds.alttp.StateHelpers import (
+    can_damage_blind_sprite,
     can_clear_enemy_room,
     can_clear_enemy_region,
     can_clear_enemy_regions,
@@ -66,6 +67,7 @@ from worlds.alttp.StateHelpers import (
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
     ANTI_FAIRY_SPRITE_ID,
+    BLIND_SPRITE_ID,
     DIRECT_KILL_DELIVERY_OVERRIDES,
     DEADROCK_SPRITE_ID,
     DamageSource,
@@ -661,6 +663,31 @@ class TestEnemyShuffleValidation(unittest.TestCase):
                 delattr(world.options, "max_attacks_in_logic")
             else:
                 world.options.max_attacks_in_logic = original_max_attacks_in_logic
+
+    def test_blind_logic_uses_fixed_hit_count_instead_of_damage_amount(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        try:
+            damage_sources = list(VANILLA_COMBAT_MODEL.damage_sources)
+            damage_sources[11] = DamageSource("Fire Rod", 0x0B, (0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
+            sprite_damage_subclasses = [
+                [0] * len(row)
+                for row in VANILLA_COMBAT_MODEL.sprite_damage_subclasses
+            ]
+            sprite_damage_subclasses[BLIND_SPRITE_ID][11] = 1
+            combat_model = EnemyCombatModel(
+                damage_sources=tuple(damage_sources),
+                sprite_damage_subclasses=tuple(tuple(row) for row in sprite_damage_subclasses),
+                enemy_health_table=VANILLA_COMBAT_MODEL.enemy_health_table,
+            )
+            world.enemy_shuffle_state = SimpleNamespace(combat_model=combat_model)
+
+            fire_rod_state = logic_test.get_state(item_factory(["Fire Rod", "Magic Upgrade (1/2)"], world))
+            self.assertTrue(can_damage_blind_sprite(fire_rod_state, 1, BLIND_SPRITE_ID, allowed_items=("Fire Rod",)))
+        finally:
+            world.enemy_shuffle_state = original_enemy_shuffle_state
 
     def test_can_clear_enemy_regions_aggregates_consumable_budget_across_targets(self) -> None:
         logic_test = TestLightWorld()

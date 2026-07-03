@@ -1443,6 +1443,89 @@ def _build_single_hit_plans_for_damage_classes(
     return _prune_dominated_resource_costs(plans)
 
 
+def _build_fixed_hit_plans_for_damage_classes(
+    state: CollectionState,
+    player: int,
+    allowed_damage_classes: set[int],
+    hit_count: int,
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
+) -> tuple[ResourceCosts, ...]:
+    allowed_items_set = set(allowed_items) if allowed_items is not None else None
+    allowed_abilities_set = set(allowed_abilities) if allowed_abilities is not None else None
+
+    def item_allowed(item_name: str) -> bool:
+        return allowed_items_set is None or item_name in allowed_items_set
+
+    def ability_allowed(ability_name: str) -> bool:
+        return allowed_abilities_set is None or ability_name in allowed_abilities_set
+
+    plans: set[ResourceCosts] = set()
+
+    zero_cost_damage_class_items = (
+        ("Fighter Sword", FIGHTER_SWORD_DAMAGE_CLASSES, state.has("Fighter Sword", player)),
+        ("Master Sword", MASTER_SWORD_DAMAGE_CLASSES, state.has("Master Sword", player)),
+        ("Tempered Sword", TEMPERED_SWORD_DAMAGE_CLASSES, state.has("Tempered Sword", player)),
+        ("Golden Sword", GOLDEN_SWORD_DAMAGE_CLASSES, state.has("Golden Sword", player)),
+        ("Hammer", (3,), state.has("Hammer", player)),
+        ("Blue Boomerang", (0,), state.has("Blue Boomerang", player)),
+        ("Red Boomerang", (0,), state.has("Red Boomerang", player)),
+        ("Hookshot", (7,), state.has("Hookshot", player)),
+    )
+    for item_name, item_damage_classes, available in zero_cost_damage_class_items:
+        if available and item_allowed(item_name) and allowed_damage_classes.intersection(item_damage_classes):
+            plans.add(FREE_RESOURCE_COSTS)
+
+    if item_allowed("Cane of Somaria") and state.has("Cane of Somaria", player) and 1 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST * hit_count))
+
+    if item_allowed("Cane of Byrna") and state.has("Cane of Byrna", player) and 1 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST + (BYRNA_DRAIN_MAGIC_COST * max(0, hit_count - 1))))
+
+    if item_allowed("Magic Powder") and state.has("Magic Powder", player) and 10 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST * hit_count))
+
+    if (
+        item_allowed("Bow")
+        and state.has("Bow", player)
+        and can_shoot_arrows(state, player, 1)
+        and 6 in allowed_damage_classes
+    ):
+        plans.add(ResourceCosts(arrows=hit_count))
+
+    if (
+        item_allowed("Silver Bow")
+        and _has_silver_arrow_attack(state, player)
+        and can_shoot_arrows(state, player, 1)
+        and 9 in allowed_damage_classes
+    ):
+        plans.add(ResourceCosts(arrows=hit_count))
+
+    if ability_allowed("bombs") and can_use_bombs(state, player, 1) and 8 in allowed_damage_classes:
+        plans.add(ResourceCosts(bombs=hit_count))
+
+    if (
+        ability_allowed("sword_beams")
+        and _has_sword_beam_attack(state, player)
+        and SWORD_BEAM_DAMAGE_CLASS in allowed_damage_classes
+    ):
+        plans.add(FREE_RESOURCE_COSTS)
+
+    if item_allowed("Fire Rod") and state.has("Fire Rod", player) and 11 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST * hit_count))
+
+    if item_allowed("Ice Rod") and state.has("Ice Rod", player) and 12 in allowed_damage_classes:
+        plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
+
+    if _can_ready_medallion(state, player):
+        for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
+            if item_allowed(medallion) and state.has(medallion, player) and damage_class in allowed_damage_classes:
+                plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST * hit_count))
+
+    return _prune_dominated_resource_costs(plans)
+
+
 def _get_boss_attack_plans(
     state: CollectionState,
     player: int,
@@ -1496,6 +1579,41 @@ def _get_boss_attack_plans(
     result = _prune_dominated_resource_costs(plans)
     cache[cache_key] = result
     return result
+
+
+def can_damage_blind_sprite(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    *,
+    allowed_items: tuple[str, ...] | None = None,
+    allowed_abilities: tuple[str, ...] | None = None,
+) -> bool:
+    boss_allowed_abilities = allowed_abilities if allowed_abilities is not None else tuple()
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = ("blind_fixed_hit_plans", sprite_id, allowed_items, boss_allowed_abilities)
+    if cache_key in cache:
+        plans = cache[cache_key]
+        return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
+
+    combat_model = _get_active_combat_model(state, player)
+    damage_classes = {
+        damage_class
+        for damage_class in range(16)
+        if (
+            effect := get_damage_effect(sprite_id, damage_class, combat_model)
+        ) != 0 and effect not in (FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT)
+    }
+    plans = _build_fixed_hit_plans_for_damage_classes(
+        state,
+        player,
+        damage_classes,
+        9,
+        allowed_items=allowed_items,
+        allowed_abilities=boss_allowed_abilities,
+    )
+    cache[cache_key] = plans
+    return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
 
 
 def can_damage_boss_sprite(

@@ -995,7 +995,9 @@ def _set_red_bari_incineration_guarantee(
 
 
 def get_progression_kill_damage_classes(sprite_id: int) -> tuple[int, ...]:
-    if sprite_id in {MOLDORM_SPRITE_ID, TRINEXX_MAIN_HEAD_SPRITE_ID}:
+    if sprite_id == MOLDORM_SPRITE_ID:
+        return (1, 2, 3, 4, 5, 10)
+    if sprite_id == TRINEXX_MAIN_HEAD_SPRITE_ID:
         return (1, 2, 3, 4, 5)
     if sprite_id in {
         ARMOS_KNIGHTS_SPRITE_ID,

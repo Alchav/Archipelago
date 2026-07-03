@@ -8,6 +8,7 @@ from .Options import LTTPBosses as Bosses
 from .StateHelpers import (
     can_damage_boss_sprite,
     can_damage_boss_sprite_phases,
+    can_damage_blind_sprite,
     can_get_good_bee,
     can_hit_boss_sprite,
     can_hit_boss_sprite_for_at_least_damage,
@@ -103,6 +104,9 @@ ARRGHUS_FUZZ_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if 
 # impervious status before contact damage at sprite_arrghus.asm:193-198, and ordinary
 # ancillas use the shared damage paths above.
 ARRGHUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Magic Powder can affect Moldorm's head, while sustained tail damage remains
+# player-contact only. See alttp_sprite_weapon_vulnerability_audit.md.
+MOLDORM_ATTACK_ITEMS = BOSS_MELEE_ITEMS + ("Magic Powder",)
 # No item delivery is excluded here; Mothula calls Sprite3_CheckDamage at
 # sprite_mothula.asm:215 and :255, and ordinary ancillas use the shared paths above.
 MOTHULA_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
@@ -124,23 +128,26 @@ TRINEXX_HEAD_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
 TRINEXX_BODY_ATTACK_ITEMS = BOSS_MELEE_ITEMS
 # Hammer is excluded by the hardcoded Ganon contact check at Bank06.asm:5784-5791.
 # Arrows are excluded from D6 logic because the Ganon-specific silver-arrow vulnerability
-# branch only recognizes sprite D7; see Bank06.asm:4712-4724. Cane of Byrna is excluded
-# because its persistent sparkle is not part of the basic projectile damage paths, and
-# in-game testing found it does not damage Ganon.
+# branch only recognizes sprite D7; see Bank06.asm:4712-4724. Both canes can deliver
+# class 1 damage to Ganon when his table row permits it.
 GANON_D6_ATTACK_ITEMS = (
     BOSS_SWORD_ITEMS
     + BOSS_BOOMERANG_ITEMS
-    + ("Hookshot", "Cane of Somaria", "Magic Powder", "Fire Rod", "Ice Rod")
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder", "Fire Rod", "Ice Rod")
     + BOSS_MEDALLION_ITEMS
 )
 # Hammer is excluded by the hardcoded Ganon contact check at Bank06.asm:5784-5791.
-# Cane of Byrna is excluded for the same reason as D6. Arrows are allowed here because
-# D7 is the sprite handled by the silver-arrow vulnerability branch at Bank06.asm:4718-4724.
+# Arrows are allowed here because D7 is the sprite handled by the silver-arrow
+# vulnerability branch at Bank06.asm:4718-4724.
 GANON_D7_ATTACK_ITEMS = (
     BOSS_SWORD_ITEMS
     + BOSS_ARROW_ITEMS
     + BOSS_BOOMERANG_ITEMS
-    + ("Hookshot", "Cane of Somaria", "Magic Powder", "Fire Rod", "Ice Rod")
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder", "Fire Rod", "Ice Rod")
     + BOSS_MEDALLION_ITEMS
 )
 # Swordless Ganon keeps Hammer because Archipelago patches the swordless fight around it;
@@ -173,7 +180,7 @@ def MoldormDefeatRule(state, player: int) -> bool:
         state,
         player,
         MOLDORM_SPRITE_ID,
-        allowed_items=BOSS_MELEE_ITEMS,
+        allowed_items=MOLDORM_ATTACK_ITEMS,
     )
 
 
@@ -197,7 +204,7 @@ def ArrghusDefeatRule(state, player: int) -> bool:
         state,
         player,
         ARRGHUS_FUZZ_SPRITE_ID,
-        allowed_items=("Hookshot",) + ARRGHUS_ATTACK_ITEMS,
+        allowed_items=ARRGHUS_FUZZ_ATTACK_ITEMS,
         include_transform_removal=True,
     )
     body_plans = _get_boss_attack_plans(
@@ -219,16 +226,11 @@ def MothulaDefeatRule(state, player: int) -> bool:
 
 
 def BlindDefeatRule(state, player: int) -> bool:
-    return can_damage_boss_sprite(
+    return can_damage_blind_sprite(
         state,
         player,
         BLIND_SPRITE_ID,
-        allowed_items=BOSS_MELEE_ITEMS,
-    ) or can_hit_boss_sprite(
-        state,
-        player,
-        BLIND_SPRITE_ID,
-        allowed_items=BOSS_CANE_ITEMS,
+        allowed_items=BLIND_ATTACK_ITEMS,
     )
 
 
