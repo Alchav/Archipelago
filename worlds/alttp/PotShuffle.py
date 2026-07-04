@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .enemizer_data.pot_shuffle_data import POT_ROOMS
+from .enemizer_data.vanilla_pot_data import VANILLA_POT_ITEMS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
@@ -200,6 +201,20 @@ def get_unique_pot_item_position(
             f"Expected exactly one pot item {hex(item)} in room {hex(room_id)}, found {len(positions)}"
         )
     return positions[0]
+
+
+def get_vanilla_pot_items(room_id: int) -> tuple[FilledPot, ...]:
+    return tuple(
+        FilledPot(record.x, record.y, record.item)
+        for record in VANILLA_POT_ITEMS.get(room_id, ())
+    )
+
+
+def get_vanilla_pot_item(room_id: int, x: int, y: int) -> int | None:
+    for record in VANILLA_POT_ITEMS.get(room_id, ()):
+        if record.x == x and record.y == y:
+            return record.item
+    return None
 
 
 def _load_pot_room_data() -> tuple[PotRoomData, ...]:
