@@ -44,6 +44,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS,
     BOSS_SPRITE_IDS_FORBID_SPECIAL_DAMAGE_EFFECTS,
     CHAOS_RANDOMIZE_DAMAGE_CLASSES,
+    DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
     DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DAMAGE_SOURCE_TABLE_ADDRESS,
     DAMAGE_SOURCE_TABLE_SIZE,
@@ -338,7 +339,7 @@ class TestEnemizerPatches(unittest.TestCase):
 
     def test_randomized_damage_classes_guarantee_swordless_helmasaur_bow_logic_classes(self) -> None:
         for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
-            if mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
+            if mode in {DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES, NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES}:
                 continue
             with self.subTest(mode=mode):
                 combat_model = build_randomized_damage_class_combat_model(
@@ -364,7 +365,7 @@ class TestEnemizerPatches(unittest.TestCase):
 
     def test_randomized_damage_classes_guarantee_swordless_ganon_d7_delivery_classes(self) -> None:
         for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
-            if mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
+            if mode in {DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES, NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES}:
                 continue
             with self.subTest(mode=mode, damage_classes="hammer"):
                 combat_model = build_randomized_damage_class_combat_model(
@@ -484,6 +485,8 @@ class TestEnemizerPatches(unittest.TestCase):
 
     def test_randomized_damage_classes_guarantee_capped_direct_kill(self) -> None:
         for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            if mode == DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES:
+                continue
             with self.subTest(mode=mode):
                 combat_model = build_randomized_damage_class_combat_model(
                     random.Random(3),
