@@ -1,4 +1,5 @@
 from .TestDungeon import TestDungeon
+from worlds.alttp.PotShuffle import FilledPot, POT_KEY
 
 
 class TestThievesTown(TestDungeon):
@@ -49,4 +50,43 @@ class TestThievesTown(TestDungeon):
             ["Thieves' Town - Boss", True, ['Bomb Upgrade (+5)', 'Small Key (Thieves Town)', 'Small Key (Thieves Town)', 'Small Key (Thieves Town)', 'Big Key (Thieves Town)', 'Progressive Sword']],
             ["Thieves' Town - Boss", True, ['Bomb Upgrade (+5)', 'Small Key (Thieves Town)', 'Small Key (Thieves Town)', 'Small Key (Thieves Town)', 'Big Key (Thieves Town)', 'Cane of Somaria']],
             ["Thieves' Town - Boss", True, ['Bomb Upgrade (+5)', 'Small Key (Thieves Town)', 'Small Key (Thieves Town)', 'Small Key (Thieves Town)', 'Big Key (Thieves Town)', 'Cane of Byrna']],
+        ])
+
+    def testThievesTownPotShuffleHallwayKeyLogic(self):
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state())
+        self.starting_regions = ['Thieves Town (Entrance)']
+        self.run_tests([
+            ["Thieves' Town - Hallway Pot Key", False, []],
+            ["Thieves' Town - Hallway Pot Key", True, ['Big Key (Thieves Town)']],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0xBC: (FilledPot(28, 27, POT_KEY),),
+        }))
+        self.starting_regions = ['Thieves Town (Entrance)']
+        self.run_tests([
+            ["Thieves' Town - Hallway Pot Key", False, []],
+            ["Thieves' Town - Hallway Pot Key", False, ['Big Key (Thieves Town)']],
+            ["Thieves' Town - Hallway Pot Key", True, ['Bomb Upgrade (+5)']],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0xBC: (FilledPot(48, 20, POT_KEY),),
+        }))
+        self.starting_regions = ['Thieves Town (Entrance)']
+        self.run_tests([
+            ["Thieves' Town - Hallway Pot Key", False, []],
+            ["Thieves' Town - Hallway Pot Key", False, ['Big Key (Thieves Town)']],
+            ["Thieves' Town - Hallway Pot Key", False, ['Small Key (Thieves Town)']],
+            ["Thieves' Town - Hallway Pot Key", True, ['Big Key (Thieves Town)', 'Small Key (Thieves Town)']],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0xBC: (FilledPot(138, 3, POT_KEY),),
+        }))
+        self.starting_regions = ['Thieves Town (Entrance)']
+        self.run_tests([
+            ["Thieves' Town - Hallway Pot Key", False, []],
+            ["Thieves' Town - Hallway Pot Key", False, ['Big Key (Thieves Town)', 'Small Key (Thieves Town)']],
+            ["Thieves' Town - Hallway Pot Key", True, ['Big Key (Thieves Town)', 'Small Key (Thieves Town)', 'Progressive Sword']],
         ])

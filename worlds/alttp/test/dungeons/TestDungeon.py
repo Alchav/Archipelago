@@ -48,9 +48,12 @@ class TestDungeon(LTTPTestBase):
     def get_test_pot_shuffle_state(overrides=None):
         state = {
             0x36: (FilledPot(10, 16, POT_KEY),),
+            0x35: (FilledPot(60, 6, POT_KEY),),
             0x16: (FilledPot(188, 3, POT_KEY),),
             0x0A: (FilledPot(100, 7, POT_SWITCH),),
             0x8B: (FilledPot(112, 12, POT_KEY),),
+            0x56: (FilledPot(100, 6, POT_KEY),),
+            0xBC: (FilledPot(102, 4, POT_KEY),),
             0xB8: (
                 FilledPot(96, 13, 11),
                 FilledPot(88, 16, 11),

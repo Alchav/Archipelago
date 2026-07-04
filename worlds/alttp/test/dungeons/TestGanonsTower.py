@@ -175,6 +175,17 @@ class TestGanonsTower(TestDungeon):
             ["Ganons Tower - Conveyor Cross Pot Key", True, ['Hammer', 'Pegasus Boots']],
         ])
 
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0x8B: (FilledPot(76, 20, POT_KEY),),
+        }))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        gt_keys = ['Small Key (Ganons Tower)'] * 6
+        self.run_tests([
+            ["Ganons Tower - Conveyor Cross Pot Key", False, ['Hammer', 'Hookshot']],
+            ["Ganons Tower - Conveyor Cross Pot Key", False, ['Hammer', 'Hookshot'] + gt_keys[:5]],
+            ["Ganons Tower - Conveyor Cross Pot Key", True, ['Hammer', 'Hookshot'] + gt_keys],
+        ])
+
     def testGanonsTowerTorchRoomsRequireWizzrobesAndGauntletRooms(self):
         world = self.multiworld.worlds[1]
         entrance = self.multiworld.get_entrance('Ganons Tower Torch Rooms', 1)

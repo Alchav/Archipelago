@@ -11,7 +11,7 @@ from worlds.alttp.PotShuffle import (
 
 
 class TestPotShuffle(unittest.TestCase):
-    def test_reserved_key_rooms_only_place_actual_keys(self) -> None:
+    def test_key_rooms_place_actual_keys(self) -> None:
         for seed in range(10):
             world = SimpleNamespace(
                 random=random.Random(seed),
@@ -30,10 +30,15 @@ class TestPotShuffle(unittest.TestCase):
             options=SimpleNamespace(retro_bow=False),
         )
         shuffled_pots = generate_pot_shuffle(world)
+        key_positions = [
+            (pot.x, pot.y)
+            for pot in shuffled_pots[0x36]
+            if pot.item == POT_KEY
+        ]
 
         self.assertEqual(
             get_unique_pot_item_position(shuffled_pots, 0x36, POT_KEY),
-            (114, 16),
+            key_positions[0],
         )
 
     def test_reserved_hole_room_keeps_hole_fixed(self) -> None:

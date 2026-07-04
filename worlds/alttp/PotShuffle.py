@@ -149,7 +149,7 @@ def generate_pot_shuffle(world: "ALTTPWorld") -> dict[int, tuple[FilledPot, ...]
                 empty_pots.append(pot)
 
         while POT_KEY in room_items:
-            candidate_indices = [index for index, pot in enumerate(empty_pots) if pot.reserved == 1]
+            candidate_indices = list(range(len(empty_pots)))
             if not candidate_indices:
                 break
             pot_index = world.random.choice(candidate_indices)

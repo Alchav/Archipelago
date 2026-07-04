@@ -83,12 +83,31 @@ def has_reachable_dungeons(state: CollectionState, player: int, count: int) -> b
 
 SWAMP_HOOKSHOT_ROOM_ID = 0x36
 SWAMP_HOOKSHOT_TOP_RIGHT_POTS = frozenset(((108, 4), (112, 4)))
+SWAMP_TRENCH_2_ROOM_ID = 0x35
+SWAMP_TRENCH_2_TOP_LEFT_KEY_POTS = frozenset(((20, 8), (24, 8), (28, 8), (32, 8), (36, 8)))
 SWAMP_WATERWAY_ROOM_ID = 0x16
 SWAMP_WATERWAY_VANILLA_POT = (188, 3)
+SKULL_WEST_LOBBY_ROOM_ID = 0x56
+SKULL_WEST_LOBBY_TOP_LEFT_POTS = frozenset((
+    (20, 6), (40, 6),
+    (24, 7), (36, 7),
+    (12, 8), (48, 8),
+    (24, 9), (36, 9),
+    (20, 10), (40, 10),
+))
+THIEVES_TOWN_HALLWAY_ROOM_ID = 0xBC
+THIEVES_TOWN_HALLWAY_BOMBS_ONLY_POTS = frozenset(((28, 27), (32, 27)))
+THIEVES_TOWN_HALLWAY_TOP_RIGHT_POTS = frozenset(((86, 4), (102, 4)))
+THIEVES_TOWN_HALLWAY_BIG_KEY_AND_SMALL_KEY_POTS = frozenset(((48, 20), (48, 28), (12, 28), (12, 20)))
+THIEVES_TOWN_HALLWAY_SWITCH_ACCESS_POTS = frozenset((
+    (138, 3), (178, 3), (138, 12), (178, 12),
+    (28, 21), (32, 21),
+))
 POD_STALFOS_BASEMENT_ROOM_ID = 0x0A
 POD_STALFOS_BASEMENT_BOMB_SWITCH_POTS = frozenset(((156, 17), (160, 17)))
 GT_CONVEYOR_CROSS_ROOM_ID = 0x8B
 GT_CONVEYOR_CROSS_TOP_RIGHT_POTS = frozenset(((76, 12), (112, 12)))
+GT_CONVEYOR_CROSS_BOTTOM_RIGHT_POTS = frozenset(((76, 20), (76, 28)))
 EP_BIG_KEY_ROOM_ID = 0xB8
 EP_BIG_KEY_VANILLA_SWITCH_POT = (104, 16)
 
@@ -526,10 +545,34 @@ def global_rules(multiworld: MultiWorld, player: int):
         forbid_item(multiworld.get_location('Swamp Palace - Entrance', player), 'Big Key (Swamp Palace)', player)
     add_rule(multiworld.get_location('Swamp Palace - Prize', player), lambda state: state._lttp_has_key('Small Key (Swamp Palace)', player, 6))
     add_rule(multiworld.get_location('Swamp Palace - Boss', player), lambda state: state._lttp_has_key('Small Key (Swamp Palace)', player, 6))
+    if world.options.pot_shuffle and _get_shuffled_pot_item_position(world, SWAMP_TRENCH_2_ROOM_ID, POT_KEY) in SWAMP_TRENCH_2_TOP_LEFT_KEY_POTS:
+        add_rule(multiworld.get_location('Swamp Palace - Trench 2 Pot Key', player),
+                 lambda state: state._lttp_has_key('Small Key (Swamp Palace)', player, 6))
     if world.options.pot_shuffle and _get_shuffled_pot_item_position(world, SWAMP_WATERWAY_ROOM_ID, POT_KEY) != SWAMP_WATERWAY_VANILLA_POT:
         set_rule(multiworld.get_location('Swamp Palace - Waterway Pot Key', player), lambda state: can_use_bombs(state, player))
 
     set_rule(multiworld.get_entrance('Thieves Town Big Key Door', player), lambda state: state.has('Big Key (Thieves Town)', player))
+    thieves_town_hallway_pot_key = multiworld.get_location('Thieves\' Town - Hallway Pot Key', player)
+    if world.options.pot_shuffle:
+        thieves_town_hallway_pot_key_position = _get_shuffled_pot_item_position(
+            world, THIEVES_TOWN_HALLWAY_ROOM_ID, POT_KEY)
+        if thieves_town_hallway_pot_key_position in THIEVES_TOWN_HALLWAY_BOMBS_ONLY_POTS:
+            set_rule(thieves_town_hallway_pot_key, lambda state: can_use_bombs(state, player))
+        elif thieves_town_hallway_pot_key_position in THIEVES_TOWN_HALLWAY_TOP_RIGHT_POTS:
+            set_rule(thieves_town_hallway_pot_key, lambda state: state.has('Big Key (Thieves Town)', player))
+        elif thieves_town_hallway_pot_key_position in THIEVES_TOWN_HALLWAY_BIG_KEY_AND_SMALL_KEY_POTS:
+            set_rule(thieves_town_hallway_pot_key,
+                     lambda state: state.has('Big Key (Thieves Town)', player)
+                     and state._lttp_has_key('Small Key (Thieves Town)', player))
+        elif thieves_town_hallway_pot_key_position in THIEVES_TOWN_HALLWAY_SWITCH_ACCESS_POTS:
+            set_rule(thieves_town_hallway_pot_key,
+                     lambda state: state.has('Big Key (Thieves Town)', player)
+                     and state._lttp_has_key('Small Key (Thieves Town)', player)
+                     and can_activate_crystal_switch(state, player))
+        else:
+            set_rule(thieves_town_hallway_pot_key, lambda state: state.has('Big Key (Thieves Town)', player))
+    else:
+        set_rule(thieves_town_hallway_pot_key, lambda state: state.has('Big Key (Thieves Town)', player))
     thieves_town_jail_cells_rule = (
         lambda state: can_lift_rocks(state, player)
         or can_clear_enemy_region(state, player, THIEVES_TOWN_JAIL_CELLS_TOP_LEFT)
@@ -580,6 +623,9 @@ def global_rules(multiworld: MultiWorld, player: int):
     if world.options.accessibility != 'full':
         allow_self_locking_items(multiworld.get_location('Skull Woods - Big Chest', player), 'Big Key (Skull Woods)')
     set_rule(multiworld.get_entrance('Skull Woods Torch Room', player), lambda state: state._lttp_has_key('Small Key (Skull Woods)', player, 4) and state.has('Fire Rod', player) and has_sword(state, player))  # sword required for curtain
+    if world.options.pot_shuffle and _get_shuffled_pot_item_position(world, SKULL_WEST_LOBBY_ROOM_ID, POT_KEY) in SKULL_WEST_LOBBY_TOP_LEFT_POTS:
+        add_rule(multiworld.get_location('Skull Woods - West Lobby Pot Key', player),
+                 lambda state: state._lttp_has_key('Small Key (Skull Woods)', player, 5))
 
     def has_skull_woods_boss_keys(state: CollectionState) -> bool:
         return state._lttp_has_key('Small Key (Skull Woods)', player, 5) or has_skull_woods_spike_key_self_lock(state)
@@ -728,8 +774,14 @@ def global_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Ganons Tower (Hookshot Room)', player), lambda state: state.has('Hammer', player) and (state.has('Hookshot', player) or state.has('Pegasus Boots', player)))
     set_rule(multiworld.get_location('Ganons Tower - Double Switch Pot Key', player), lambda state: state.has('Cane of Somaria', player) or can_use_bombs(state, player))
     set_rule(multiworld.get_entrance('Ganons Tower (Double Switch Room)', player), lambda state: state.has('Cane of Somaria', player) or can_use_bombs(state, player))
-    if world.options.pot_shuffle and _get_shuffled_pot_item_position(world, GT_CONVEYOR_CROSS_ROOM_ID, POT_KEY) not in GT_CONVEYOR_CROSS_TOP_RIGHT_POTS:
-        set_rule(multiworld.get_location('Ganons Tower - Conveyor Cross Pot Key', player), lambda state: state.has('Hammer', player) and (state.has('Hookshot', player) or state.has('Pegasus Boots', player)))
+    if world.options.pot_shuffle:
+        gt_conveyor_cross_pot_key_position = _get_shuffled_pot_item_position(world, GT_CONVEYOR_CROSS_ROOM_ID, POT_KEY)
+        if gt_conveyor_cross_pot_key_position not in GT_CONVEYOR_CROSS_TOP_RIGHT_POTS:
+            set_rule(multiworld.get_location('Ganons Tower - Conveyor Cross Pot Key', player),
+                     lambda state: state.has('Hammer', player) and (state.has('Hookshot', player) or state.has('Pegasus Boots', player)))
+        if gt_conveyor_cross_pot_key_position in GT_CONVEYOR_CROSS_BOTTOM_RIGHT_POTS:
+            add_rule(multiworld.get_location('Ganons Tower - Conveyor Cross Pot Key', player),
+                     lambda state: state._lttp_has_key('Small Key (Ganons Tower)', player, 6))
     set_rule(multiworld.get_entrance('Ganons Tower (Map Room)', player), lambda state: state._lttp_has_key('Small Key (Ganons Tower)', player, 8) or (
                 location_item_name(state, 'Ganons Tower - Map Chest', player) in [('Big Key (Ganons Tower)', player)] and state._lttp_has_key('Small Key (Ganons Tower)', player, 6)))
 
