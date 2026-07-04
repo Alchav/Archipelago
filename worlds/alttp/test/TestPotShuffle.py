@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from worlds.alttp.PotShuffle import (
     POT_BLUE_RUPEE,
+    POT_ITEM_ADDRESSES,
     POT_KEY,
     POT_HOLE,
     POT_SWITCH,
@@ -13,7 +14,6 @@ from worlds.alttp.PotShuffle import (
     get_vanilla_pot_items,
 )
 from worlds.alttp.enemizer_data.pot_shuffle_data import POT_ROOMS
-from worlds.alttp.enemizer_data.vanilla_pot_data import VANILLA_POT_ITEMS
 
 
 class TestPotShuffle(unittest.TestCase):
@@ -74,6 +74,14 @@ class TestPotShuffle(unittest.TestCase):
         self.assertEqual(get_vanilla_pot_item(0x8B, 76, 28), 0x0B)
         self.assertIsNone(get_vanilla_pot_item(0x8B, 76, 20))
 
+    def test_get_vanilla_pot_item_returns_exact_room_141_items(self) -> None:
+        self.assertEqual(POT_ITEM_ADDRESSES[0x8D], 0xE2AA)
+        self.assertIsNone(get_vanilla_pot_item(0x8D, 204, 11))
+        self.assertEqual(get_vanilla_pot_item(0x8D, 204, 14), 0x0D)
+        self.assertEqual(get_vanilla_pot_item(0x8D, 28, 23), 0x0B)
+        self.assertEqual(get_vanilla_pot_item(0x8D, 36, 23), 0x0B)
+        self.assertEqual(get_vanilla_pot_item(0x8D, 32, 24), 0x0D)
+
     def test_get_vanilla_pot_items_returns_filled_pots(self) -> None:
         items = get_vanilla_pot_items(0x8B)
 
@@ -89,7 +97,7 @@ class TestPotShuffle(unittest.TestCase):
 
         for room in POT_ROOMS:
             candidate_positions = {(pot.x, pot.y) for pot in room.pots}
-            for record in VANILLA_POT_ITEMS.get(room.room_id, ()):
+            for record in get_vanilla_pot_items(room.room_id):
                 if (room.room_id, record.x, record.y) in vanilla_orphan_items:
                     continue
                 self.assertIn((record.x, record.y), candidate_positions, room.room_id)

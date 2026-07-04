@@ -22,6 +22,12 @@ from .Items import (item_init_table, item_name_groups, item_table, GetBeemizerIt
                     small_key_name_to_key_ring_option)
 from .Options import ALTTPOptions, big_key_shuffle, small_key_shuffle
 from .PotShuffle import generate_pot_shuffle
+from .PuzzleShuffle import (
+    apply_puzzle_pot_modifications,
+    decode_puzzle_shuffle,
+    encode_puzzle_shuffle,
+    generate_puzzle_shuffle,
+)
 from .Regions import lookup_name_to_id, create_regions, mark_light_world_regions, lookup_vanilla_location_to_entrance, \
     is_main_entrance, key_drop_data
 from .Rom import TokenRom, patch_rom, apply_rom_settings, \
@@ -89,6 +95,7 @@ ALTTP_UT_LOGIC_OPTION_NAMES = (
     "bombless_start",
     "shuffle_prizes",
     "boss_prize_shuffle",
+    "randomize_puzzles",
     "tile_shuffle",
     "glitch_boots",
     "timer",
@@ -479,6 +486,7 @@ class ALTTPWorld(World):
         self.ut_replay_data = None
         self.ut_pending_entrance_connections = None
         self.pot_shuffle_state = None
+        self.puzzle_shuffle_state = None
         self.logical_heart_containers = 10
         self.logical_heart_pieces = 24
         super(ALTTPWorld, self).__init__(*args, **kwargs)
@@ -926,6 +934,16 @@ class ALTTPWorld(World):
             if hyrule_castle_key_item:
                 self.multiworld.local_early_items[self.player][hyrule_castle_key_item] = 1
 
+    def setup_puzzle_shuffle(self) -> None:
+        if not self.options.randomize_puzzles:
+            return
+        puzzle_shuffle = _get_ut_replay_value(self.ut_replay_data, "ut_puzzle_shuffle", "puzzle_shuffle")
+        if puzzle_shuffle is not None:
+            self.puzzle_shuffle_state = decode_puzzle_shuffle(puzzle_shuffle)
+        elif self.puzzle_shuffle_state is None:
+            self.puzzle_shuffle_state = generate_puzzle_shuffle(self)
+        self.pot_shuffle_state = apply_puzzle_pot_modifications(self.pot_shuffle_state, self.puzzle_shuffle_state)
+
     def post_fill(self) -> None:
         location_items = _get_ut_replay_value(self.ut_replay_data, "ut_location_items", "location_items")
         if location_items is not None:
@@ -1299,6 +1317,7 @@ class ALTTPWorld(World):
                 "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
                 "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
                 "boss_prize_shuffle", "randomize_damage_classes", "max_attacks_in_logic",
+                "randomize_puzzles",
                 "entrance_shuffle",
                 "dark_room_logic", "goal", "mode",
                 "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
@@ -1361,6 +1380,7 @@ class ALTTPWorld(World):
             "ut_key_ring_data": dict(self.key_ring_data),
             "ut_location_items": _encode_ut_location_items(self),
             "ut_pot_shuffle": _encode_ut_pot_shuffle(self.pot_shuffle_state),
+            "ut_puzzle_shuffle": encode_puzzle_shuffle(self.puzzle_shuffle_state),
             "ut_shop_inventories": _encode_ut_shop_inventories(self),
             "ut_shop_locations": _encode_ut_shop_locations(self),
             "ut_take_any_caves": _encode_ut_take_any_caves(self),

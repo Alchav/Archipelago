@@ -4,6 +4,7 @@ import random
 from unittest.mock import patch
 
 from worlds.alttp.EnemyLogicTargets import (
+    ENEMY_CLEAR_TARGETS,
     GANONS_TOWER_GAUNTLET_123_ROOM,
     GANONS_TOWER_GAUNTLET_45_ROOM,
     GANONS_TOWER_MIMICS_BOTTOM_HALF,
@@ -121,6 +122,15 @@ def _build_combat_model_with_sprite_subclass(sprite_id: int, damage_class: int, 
 
 
 class TestEnemyShuffleValidation(unittest.TestCase):
+    def test_enemy_clear_targets_reference_known_rooms(self) -> None:
+        unknown_rooms = [
+            target.room_name
+            for target in ENEMY_CLEAR_TARGETS
+            if get_room_id(target.room_name) is None
+        ]
+
+        self.assertEqual(unknown_rooms, [])
+
     def test_enemy_sprite_requirements_use_readable_names(self) -> None:
         requirements = {
             requirement.sprite_name: requirement

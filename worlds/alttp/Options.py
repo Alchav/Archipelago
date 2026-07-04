@@ -41,7 +41,7 @@ class DarkRoomLogic(Choice):
 class Goal(Choice):
     """Ganon: Climb GT, defeat Agahnim 2, and then kill Ganon
     Crystals: Only killing Ganon is required. However, items may still be placed in GT
-    Dungeons: Clear the required number of dungeons, including Agahnim's tower and GT (Aga 2), then kill Ganon
+    Dungeons: Clear the required number of dungeons, including Agahnim's tower and GT, then kill Ganon
     Pedestal: Pull the Triforce from the Master Sword pedestal
     Ganon Pedestal: Pull the Master Sword pedestal, then kill Ganon
     Triforce Hunt: Collect Triforce pieces spread throughout the worlds, then turn them in to Murahadala in front of Hyrule Castle
@@ -351,6 +351,11 @@ class ShufflePrizes(Choice):
 class BossPrizeShuffle(Toggle):
     """Shuffle dungeon prizes into the regular item pool and allow any item on boss prize locations."""
     display_name = "Boss Prize Shuffle"
+
+
+class RandomizePuzzles(Toggle):
+    """Randomize selected dungeon room tags, changing the conditions that open doors or spawn chests."""
+    display_name = "Randomize Puzzles"
 
 
 class Medallion(Choice):
@@ -864,6 +869,7 @@ class ALTTPOptions(PerGameCommonOptions):
     bombless_start: BomblessStart
     shuffle_prizes: ShufflePrizes
     boss_prize_shuffle: BossPrizeShuffle
+    randomize_puzzles: RandomizePuzzles
     tile_shuffle: TileShuffle
     misery_mire_medallion: MiseryMireMedallion
     turtle_rock_medallion: TurtleRockMedallion

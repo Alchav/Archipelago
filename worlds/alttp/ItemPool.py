@@ -742,12 +742,17 @@ def generate_itempool(world: "ALTTPWorld"):
             world,
             enemy_shuffle_item_names,
         )
-        world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
+        has_ut_enemy_shuffle = False
         if getattr(world, "ut_replay_data", None):
             from . import _apply_ut_enemy_shuffle_state, _get_ut_replay_value
 
-            if _get_ut_replay_value(world.ut_replay_data, "ut_enemy_shuffle", "enemy_shuffle") is not None:
-                _apply_ut_enemy_shuffle_state(world)
+            has_ut_enemy_shuffle = _get_ut_replay_value(world.ut_replay_data, "ut_enemy_shuffle", "enemy_shuffle") is not None
+        if world.enemy_shuffle_state is None or has_ut_enemy_shuffle:
+            world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
+        if has_ut_enemy_shuffle:
+            _apply_ut_enemy_shuffle_state(world)
+
+    world.setup_puzzle_shuffle()
 
     multiworld.itempool += items
 

@@ -940,6 +940,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
                     or local_world.options.enemy_health != 'default' or local_world.options.enemy_damage != 'default'
                     or local_world.options.randomize_damage_classes != 'vanilla'
                     or local_world.options.pot_shuffle or local_world.options.bush_shuffle
+                    or local_world.options.randomize_puzzles
                     or local_world.options.killable_thieves)
 
     # patch items
@@ -1937,6 +1938,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         from . import EnemizerPatches as enemizer_patches
         from .EnemyShuffle import apply_enemy_shuffle
         from .PotShuffle import apply_pot_shuffle
+        from .PuzzleShuffle import apply_puzzle_shuffle
 
         enemizer_patches.apply_enemizer_base_patch(rom)
         enemy_shuffle_state = getattr(local_world, "enemy_shuffle_state", None)
@@ -2010,6 +2012,10 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         pot_shuffle_state = getattr(local_world, "pot_shuffle_state", None)
         if local_world.options.pot_shuffle and pot_shuffle_state is not None:
             apply_pot_shuffle(rom, pot_shuffle_state)
+
+        puzzle_shuffle_state = getattr(local_world, "puzzle_shuffle_state", None)
+        if local_world.options.randomize_puzzles and puzzle_shuffle_state is not None:
+            apply_puzzle_shuffle(rom, puzzle_shuffle_state, pot_shuffle_state)
 
     # Write title screen Code
     hashint = int(rom.get_hash(), 16)

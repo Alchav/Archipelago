@@ -88,7 +88,7 @@ def create_dungeons(world: "ALTTPWorld"):
                       item_factory('Big Key (Hyrule Castle)', world),
                       small_keys('Small Key (Hyrule Castle)'),
                       [item_factory('Map (Hyrule Castle)', world)])
-    EP = make_dungeon('Eastern Palace', 'Armos Knights', ['Eastern Palace'],
+    EP = make_dungeon('Eastern Palace', 'Armos Knights', ['Eastern Palace', 'Eastern Palace (Beyond Stalfos Room)'],
                       item_factory('Big Key (Eastern Palace)', world),
                       small_keys('Small Key (Eastern Palace)'),
                       item_factory(['Map (Eastern Palace)', 'Compass (Eastern Palace)'], world))

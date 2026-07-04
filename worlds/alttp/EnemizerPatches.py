@@ -30,6 +30,9 @@ if TYPE_CHECKING:
     from . import ALTTPWorld
     from .Rom import LocalRom
 
+DUNGEON_HEADER_POINTER_TABLE_BASE = 0x271E2
+ROOM_HEADER_BANK_LOCATION = 0xB5E7
+
 
 @dataclass(frozen=True)
 class BossPatchData:
@@ -334,7 +337,6 @@ def apply_enemy_combat_data(
 
 
 def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
-    dungeon_header_base = _get_enemizer_symbol("room_header_table")
     moved_room_object_base = _get_enemizer_symbol("modified_room_object_table")
     gt_dungeon_name = "Ganons Tower" if world.options.mode != "inverted" else "Inverted Ganons Tower"
     gt_dungeon = world.dungeons[gt_dungeon_name]
@@ -359,8 +361,9 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
 
     for boss_name, dungeon_data in placements:
         boss_data = BOSS_PATCH_DATA[boss_name]
+        dungeon_header_address = get_dungeon_room_header_address(rom, dungeon_data.room_id)
         rom.write_bytes(dungeon_data.sprite_pointer_address, boss_data.pointer)
-        rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 3, boss_data.graphics)
+        rom.write_byte(dungeon_header_address + 3, boss_data.graphics)
 
         if boss_name == "Trinexx" and dungeon_data.room_id != TRINEXX_VANILLA_ROOM_ID:
             room_table = _get_room_object_table(modified_room_tables, dungeon_data.room_id)
@@ -370,8 +373,8 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
                 dungeon_data.clear_layer2,
                 TRINEXX_SHELL_OBJECT_ID,
             )
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14), 0x60)
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 4, 0x04)
+            rom.write_byte(dungeon_header_address, 0x60)
+            rom.write_byte(dungeon_header_address + 4, 0x04)
 
         if boss_name == "Kholdstare" and dungeon_data.room_id != KHOLDSTARE_VANILLA_ROOM_ID:
             room_table = _get_room_object_table(modified_room_tables, dungeon_data.room_id)
@@ -381,8 +384,8 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
                 dungeon_data.clear_layer2,
                 KHOLDSTARE_SHELL_OBJECT_ID,
             )
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14), 0xE0)
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 4, 0x01)
+            rom.write_byte(dungeon_header_address, 0xE0)
+            rom.write_byte(dungeon_header_address + 4, 0x01)
 
         if boss_name != "Trinexx" and dungeon_data.room_id == TRINEXX_VANILLA_ROOM_ID:
             _get_room_object_table(modified_room_tables, dungeon_data.room_id).remove_shell(TRINEXX_SHELL_OBJECT_ID)
@@ -588,6 +591,14 @@ def _get_enemizer_symbol(symbol_name: str) -> int:
     if _ENEMIZER_SYMBOLS is None:
         _ENEMIZER_SYMBOLS = _load_enemizer_symbols()
     return _ENEMIZER_SYMBOLS[symbol_name]
+
+
+def get_dungeon_room_header_address(rom: "LocalRom", room_id: int) -> int:
+    moved_header_bank = rom.read_byte(_get_enemizer_symbol("moved_room_header_bank_value_address"))
+    room_header_bank = moved_header_bank or rom.read_byte(ROOM_HEADER_BANK_LOCATION)
+    pointer_address = DUNGEON_HEADER_POINTER_TABLE_BASE + (room_id * 2)
+    header_pointer = rom.read_byte(pointer_address) | (rom.read_byte(pointer_address + 1) << 8)
+    return snes_to_pc(header_pointer | (room_header_bank << 16))
 
 
 def _load_enemizer_symbols() -> dict[str, int]:

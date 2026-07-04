@@ -1,6 +1,18 @@
 from types import SimpleNamespace
 
 from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
+from worlds.alttp.PuzzleShuffle import (
+    DESERT_BIG_CHEST_ROOM_ID,
+    DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID,
+    PuzzleShuffleState,
+    TAG_LIGHT_TORCHES_TO_GET_CHEST,
+    TAG_N_KILL_ENEMY_FOR_CHEST,
+    TAG_NW_KILL_ENEMY_TO_OPEN,
+    TAG_SW_KILL_ENEMY_TO_OPEN,
+    TAG_SWITCH_OPENS_DOOR_HOLD,
+    TAG_SWITCH_OPENS_DOOR_TOGGLE,
+    TAG_TRIGGER_ACTIVATED_CHEST,
+)
 
 from .TestDungeon import TestDungeon
 
@@ -54,6 +66,124 @@ class TestDesertPalace(TestDungeon):
             ["Desert Palace - Boss", True, ['Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Big Key (Desert Palace)', 'Lamp', 'Hammer']],
             ["Desert Palace - Boss", True, ['Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Big Key (Desert Palace)', 'Lamp', 'Cane of Somaria']],
             ["Desert Palace - Boss", True, ['Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Small Key (Desert Palace)', 'Big Key (Desert Palace)', 'Lamp', 'Cane of Byrna']],
+        ])
+
+    def testMapChestCanRequireNorthQuadrantEnemyClear(self):
+        self.starting_regions = ['Desert Palace North', 'Desert Palace Main (Inner)', 'Desert Palace Main (Outer)']
+        self.rebuild_with_puzzle_shuffle(PuzzleShuffleState(
+            desert_map_chest_tag=TAG_N_KILL_ENEMY_FOR_CHEST,
+            desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+        ))
+
+        self.run_tests([
+            ["Desert Palace - Map Chest", False, []],
+            ["Desert Palace - Map Chest", True, ['Progressive Sword']],
+        ])
+
+    def testMapChestCanRequireFireSource(self):
+        self.starting_regions = ['Desert Palace North', 'Desert Palace Main (Inner)', 'Desert Palace Main (Outer)']
+        self.rebuild_with_puzzle_shuffle(PuzzleShuffleState(
+            desert_map_chest_tag=TAG_LIGHT_TORCHES_TO_GET_CHEST,
+            desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+        ))
+
+        self.run_tests([
+            ["Desert Palace - Map Chest", False, []],
+            ["Desert Palace - Map Chest", True, ['Lamp']],
+            ["Desert Palace - Map Chest", True, ['Fire Rod']],
+        ])
+
+    def testBigChestCanRequireHeldSwitch(self):
+        self.starting_regions = ['Desert Palace North', 'Desert Palace Main (Inner)', 'Desert Palace Main (Outer)']
+        self.rebuild_with_puzzle_shuffle(PuzzleShuffleState(
+            desert_map_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
+            desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_HOLD,
+        ))
+
+        self.run_tests([
+            ["Desert Palace - Big Chest", False, ['Big Key (Desert Palace)']],
+            ["Desert Palace - Big Chest", True, ['Big Key (Desert Palace)', 'Cane of Somaria']],
+        ])
+
+    def testBigChestCanRequireBottomLeftEnemyClear(self):
+        self.starting_regions = ['Desert Palace North', 'Desert Palace Main (Inner)', 'Desert Palace Main (Outer)']
+        enemy_shuffle_state = SimpleNamespace(
+            randomized_dungeon_rooms={
+                DESERT_BIG_CHEST_ROOM_ID: RandomizedDungeonEnemyRoom(
+                    room_id=DESERT_BIG_CHEST_ROOM_ID,
+                    room_header_address=0,
+                    sprite_table_address=0,
+                    original_graphics_block_id=0,
+                    graphics_block_id=0,
+                    tag_1=0,
+                    tag_2=0,
+                    sort_sprites_value=0,
+                    sprites=(
+                        RandomizedDungeonEnemySprite(0, 0x17, 0x09, 0x4F, 0x84, False, False),
+                    ),
+                    skipped_randomization=False,
+                )
+            }
+        )
+        self.rebuild_with_puzzle_shuffle(
+            PuzzleShuffleState(
+                desert_map_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
+                desert_big_chest_tag=TAG_NW_KILL_ENEMY_TO_OPEN,
+            ),
+            enemy_shuffle_state=enemy_shuffle_state,
+        )
+
+        self.run_tests([
+            ["Desert Palace - Big Chest", False, ['Bow']],
+            ["Desert Palace - Big Chest", True, ['Big Key (Desert Palace)', 'Bow']],
+        ])
+
+    def testFinalSectionEntranceCanRequireSouthwestEnemyClear(self):
+        self.starting_regions = ['Desert Palace North', 'Desert Palace Main (Inner)', 'Desert Palace Main (Outer)']
+        enemy_shuffle_state = SimpleNamespace(
+            randomized_dungeon_rooms={
+                DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID: RandomizedDungeonEnemyRoom(
+                    room_id=DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID,
+                    room_header_address=0,
+                    sprite_table_address=0,
+                    original_graphics_block_id=0,
+                    graphics_block_id=0,
+                    tag_1=0,
+                    tag_2=0,
+                    sort_sprites_value=0,
+                    sprites=(
+                        RandomizedDungeonEnemySprite(0, 0x17, 0x09, 0x63, 0x8E, False, False),
+                    ),
+                    skipped_randomization=False,
+                )
+            }
+        )
+        self.rebuild_with_puzzle_shuffle(
+            PuzzleShuffleState(
+                desert_map_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
+                desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+                desert_final_section_entrance_tag=TAG_SW_KILL_ENEMY_TO_OPEN,
+            ),
+            enemy_shuffle_state=enemy_shuffle_state,
+        )
+
+        self.run_tests([
+            ["Desert Palace - Boss", False, ['Bow',
+                                             'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                             'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                             'Big Key (Desert Palace)', 'Lamp']],
+            ["Desert Palace - Boss", True, ['Hammer',
+                                            'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                            'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                            'Big Key (Desert Palace)', 'Lamp']],
+            ["Desert Palace - Prize", False, ['Bow',
+                                              'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                              'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                              'Big Key (Desert Palace)', 'Lamp']],
+            ["Desert Palace - Prize", True, ['Hammer',
+                                             'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                             'Small Key (Desert Palace)', 'Small Key (Desert Palace)',
+                                             'Big Key (Desert Palace)', 'Lamp']],
         ])
 
     def testBigKeyChestUsesTopRightSubroomEnemies(self):
