@@ -645,7 +645,6 @@ class MarioColor(NamedRange):
         "black": 0,
         "white": 16777215,
         "gray": 8421504,
-        "grey": 8421504,
         "red": 16711680,
         "green": 65280,
         "blue": 255,
