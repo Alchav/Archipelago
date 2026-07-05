@@ -2892,10 +2892,10 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
 
 
-class BigBooHauntCoinStar88AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+class BigBooHauntCoinStar78AccessTestBase(BigBooHauntCoinStarAccessTestBase):
     options = {
         **BigBooHauntCoinStarAccessTestBase.options,
-        "big_boos_haunt_coin_star_requirement": 88,
+        "big_boos_haunt_coin_star_requirement": 78,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -2903,10 +2903,10 @@ class BigBooHauntCoinStar88AccessTestBase(BigBooHauntCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
 
 
-class BigBooHauntCoinStar89AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+class BigBooHauntCoinStar79AccessTestBase(BigBooHauntCoinStarAccessTestBase):
     options = {
         **BigBooHauntCoinStarAccessTestBase.options,
-        "big_boos_haunt_coin_star_requirement": 89,
+        "big_boos_haunt_coin_star_requirement": 79,
     }
 
     def test_second_floor_coins_reach_coin_star(self):
@@ -2935,10 +2935,10 @@ class BigBooHauntCoinStar102AccessTestBase(BigBooHauntCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
 
 
-class BigBooHauntCoinStar113AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+class BigBooHauntCoinStar103AccessTestBase(BigBooHauntCoinStarAccessTestBase):
     options = {
         **BigBooHauntCoinStarAccessTestBase.options,
-        "big_boos_haunt_coin_star_requirement": 113,
+        "big_boos_haunt_coin_star_requirement": 103,
     }
 
     def test_merry_go_round_coins_reach_coin_star(self):

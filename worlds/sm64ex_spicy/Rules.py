@@ -204,14 +204,18 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
 
 def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Big Boo's Haunt"
-    reachable_coins = 88
+    reachable_coins = 78
     if state.can_reach("Big Boo's Haunt - Second Floor", "Region", player):
-        reachable_coins += 13
+        # two bookends (10), one Mr I (5), 4 red coins (8)
+        reachable_coins += 23
     if state.can_reach("Big Boo's Haunt - Third Floor", "Region", player):
+        # one boo, spawns behind vanish cap barrier but can follow Mario out
         reachable_coins += 5
         if has_action(state, player, "Ground Pound", level_name):
+            # blue coin block
             reachable_coins += 20
     if state.has("Big Boo's Haunt - Merry-go-round", player):
+        # 5 boos
         reachable_coins += 25
     return coins <= reachable_coins
 
