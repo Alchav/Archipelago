@@ -1,6 +1,5 @@
 from .bases import SM64TestBase
 from BaseClasses import ItemClassification
-from Options import OptionError
 from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
@@ -645,38 +644,46 @@ class GroupedCastleKeyPoolTestBase(SM64TestBase):
 
 class MarioColorsTestBase(SM64TestBase):
     options = {
-        "mario_colors": {
-            "shirt": [1, 2, 3],
-            "hair": [4, 5, 6],
-        }
+        "mario_hat_color": 0x010203,
+        "mario_shirt_color": "green",
+        "mario_overalls_color": "purple",
+        "mario_gloves_color": "black",
+        "mario_shoes_color": "default_brown",
+        "mario_skin_color": "default_skin",
+        "mario_hair_color": "default_brown",
     }
 
     def test_mario_colors_slot_data(self):
         self.assertEqual(self.world.fill_slot_data()["MarioColors"], {
-            "shirt": [1, 2, 3],
-            "hair": [4, 5, 6],
+            "hat": [1, 2, 3],
+            "shirt": [0, 255, 0],
+            "overalls": [255, 0, 255],
+            "gloves": [0, 0, 0],
+            "shoes": [114, 28, 14],
+            "skin": [254, 193, 121],
+            "hair": [115, 6, 0],
         })
 
 
 class MarioColorsValidationTestBase(SM64TestBase):
     auto_construct = False
 
-    def assert_mario_colors_invalid(self, value):
-        option = Options.MarioColors.from_any(value)
-        with self.assertRaises(OptionError):
-            option.verify(None, "Tester", None)
+    def test_named_color_values(self):
+        self.assertEqual(Options.MarioShirtColor.from_any("red").value, 16711680)
+        self.assertEqual(Options.MarioShirtColor.from_any("green").value, 65280)
+        self.assertEqual(Options.MarioShirtColor.from_any("purple").value, 16711935)
 
-    def test_unknown_color_key_is_invalid(self):
-        self.assert_mario_colors_invalid({"unknown": [1, 2, 3]})
+    def test_exact_decimal_color_value(self):
+        self.assertEqual(Options.MarioHatColor.from_any(0x123456).value, 1193046)
 
-    def test_color_channels_must_be_rgb_triplets(self):
-        self.assert_mario_colors_invalid({"shirt": [1, 2]})
+    def test_part_specific_default_color_values(self):
+        self.assertEqual(Options.MarioShoesColor.from_any("default_brown").value, 7478286)
+        self.assertEqual(Options.MarioSkinColor.from_any("default_skin").value, 16695673)
+        self.assertEqual(Options.MarioHairColor.from_any("default_brown").value, 7538176)
 
-    def test_color_channels_must_be_ints(self):
-        self.assert_mario_colors_invalid({"shirt": [True, 2, 3]})
-
-    def test_color_channels_must_be_in_range(self):
-        self.assert_mario_colors_invalid({"shirt": [256, 2, 3]})
+    def test_color_value_must_be_in_rgb_range(self):
+        with self.assertRaises(Exception):
+            Options.MarioHatColor.from_any(16777216)
 
 
 class MusicShuffleOffTestBase(SM64TestBase):

@@ -103,7 +103,13 @@ class SM64World(World):
         "strict_cannon_requirements",
         "strict_move_requirements",
         "marios_hat",
-        "mario_colors",
+        "mario_hat_color",
+        "mario_shirt_color",
+        "mario_overalls_color",
+        "mario_gloves_color",
+        "mario_shoes_color",
+        "mario_skin_color",
+        "mario_hair_color",
         "music_shuffle",
         "coinsanity",
         "secret_stage_coinsanity",
@@ -422,8 +428,20 @@ class SM64World(World):
     def get_filler_item_name(self) -> str:
         return "1-Up Mushroom"
 
+    @staticmethod
+    def get_rgb_color(value: int) -> typing.List[int]:
+        return [(value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF]
+
     def get_mario_colors_slot_data(self) -> typing.Dict[str, typing.List[int]]:
-        return {color_name: list(channels) for color_name, channels in self.options.mario_colors.value.items()}
+        return {
+            "hat": self.get_rgb_color(self.options.mario_hat_color.value),
+            "shirt": self.get_rgb_color(self.options.mario_shirt_color.value),
+            "overalls": self.get_rgb_color(self.options.mario_overalls_color.value),
+            "gloves": self.get_rgb_color(self.options.mario_gloves_color.value),
+            "shoes": self.get_rgb_color(self.options.mario_shoes_color.value),
+            "skin": self.get_rgb_color(self.options.mario_skin_color.value),
+            "hair": self.get_rgb_color(self.options.mario_hair_color.value),
+        }
 
     def get_coin_star_requirements_slot_data(self) -> typing.List[int]:
         return [

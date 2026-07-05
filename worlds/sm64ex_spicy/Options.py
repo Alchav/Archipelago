@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, OptionError, PerGameCommonOptions, OptionDict, \
-    OptionGroup
+from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup
 
 
 class CoinStarRequirement(Range):
@@ -634,39 +633,75 @@ move_randomizer_option_name_by_action = {
 }
 
 
-class MarioColors(OptionDict):
+class MarioColor(NamedRange):
     """
-    Cosmetic Mario palette. Keys may be shirt, overalls, gloves, shoes, skin, or hair, with each value being
-    an RGB array.
+    Cosmetic Mario palette color. Use a named color or a decimal RGB value from 0 through 16777215.
+
+    To use an exact hex color, convert it to decimal first. For example, FF0000 is 16711680.
     """
-    display_name = "Mario Colors"
-    valid_keys = {"shirt", "overalls", "gloves", "shoes", "skin", "hair"}
-    default = {
-        "shirt": [255, 0, 0],
-        "overalls": [0, 0, 255],
-        "gloves": [255, 255, 255],
-        "shoes": [114, 28, 14],
-        "skin": [254, 193, 121],
-        "hair": [115, 6, 0]
+    range_start = 0
+    range_end = 16777215
+    special_range_names = {
+        "black": 0,
+        "white": 16777215,
+        "gray": 8421504,
+        "grey": 8421504,
+        "red": 16711680,
+        "green": 65280,
+        "blue": 255,
+        "yellow": 16776960,
+        "cyan": 65535,
+        "magenta": 16711935,
+        "purple": 16711935,
+        "orange": 16753920,
+        "pink": 16761035,
+        "brown": 10824234,
     }
 
-    def verify(self, world, player_name: str, plando_options) -> None:
-        super().verify(world, player_name, plando_options)
-        errors = []
-        if self.value.keys() != self.valid_keys:
-            errors.append(f"Color keys must be {self.valid_keys}. Keys used: {set(self.value.keys())}")
-        for color_name, channels in self.value.items():
-            if not isinstance(channels, (list, tuple)) or len(channels) != 3:
-                errors.append(f"{color_name} must be an RGB array with exactly three channels.")
-                continue
-            invalid_channels = [
-                channel for channel in channels
-                if isinstance(channel, bool) or not isinstance(channel, int) or channel < 0 or channel > 255
-            ]
-            if invalid_channels:
-                errors.append(f"{color_name} channels must be integers from 0 through 255.")
-        if errors:
-            raise OptionError(f"Player {player_name} has invalid Mario Colors:\n" + "\n".join(errors))
+
+class MarioHatColor(MarioColor):
+    """Mario's hat color."""
+    display_name = "Mario Hat Color"
+    default = 16711680
+
+
+class MarioShirtColor(MarioColor):
+    """Mario's shirt color."""
+    display_name = "Mario Shirt Color"
+    default = 16711680
+
+
+class MarioOverallsColor(MarioColor):
+    """Mario's overalls color."""
+    display_name = "Mario Overalls Color"
+    default = 255
+
+
+class MarioGlovesColor(MarioColor):
+    """Mario's gloves color."""
+    display_name = "Mario Gloves Color"
+    default = 16777215
+
+
+class MarioShoesColor(MarioColor):
+    """Mario's shoes color."""
+    display_name = "Mario Shoes Color"
+    default = 7478286
+    special_range_names = {**MarioColor.special_range_names, "default_brown": 7478286}
+
+
+class MarioSkinColor(MarioColor):
+    """Mario's skin color."""
+    display_name = "Mario Skin Color"
+    default = 16695673
+    special_range_names = {**MarioColor.special_range_names, "default_skin": 16695673}
+
+
+class MarioHairColor(MarioColor):
+    """Mario's hair color."""
+    display_name = "Mario Hair Color"
+    default = 7538176
+    special_range_names = {**MarioColor.special_range_names, "default_brown": 7538176}
 
 
 class MusicShuffle(Choice):
@@ -728,7 +763,13 @@ sm64_options_groups = [
         StrictMoveRequirements,
     ]),
     OptionGroup("Cosmetic Options", [
-        MarioColors,
+        MarioHatColor,
+        MarioShirtColor,
+        MarioOverallsColor,
+        MarioGlovesColor,
+        MarioShoesColor,
+        MarioSkinColor,
+        MarioHairColor,
         MusicShuffle,
     ]),
 
@@ -771,7 +812,13 @@ class SM64Options(PerGameCommonOptions):
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
     marios_hat: MariosHat
-    mario_colors: MarioColors
+    mario_hat_color: MarioHatColor
+    mario_shirt_color: MarioShirtColor
+    mario_overalls_color: MarioOverallsColor
+    mario_gloves_color: MarioGlovesColor
+    mario_shoes_color: MarioShoesColor
+    mario_skin_color: MarioSkinColor
+    mario_hair_color: MarioHairColor
     music_shuffle: MusicShuffle
     coinsanity: Coinsanity
     secret_stage_coinsanity: SecretStageCoinsanity
