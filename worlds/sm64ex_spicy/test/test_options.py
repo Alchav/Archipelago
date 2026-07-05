@@ -1081,6 +1081,13 @@ class EntranceRandoCourseTestBase(SM64TestBase):
     def test_princess_slide_source_has_reachable_check(self):
         self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
 
+    def test_event_locations_are_not_entrance_hinted(self):
+        hint_data = {}
+        self.world.extend_hint_information(hint_data)
+        self.assertIn(self.player, hint_data)
+        self.assertNotIn(None, hint_data[self.player])
+        self.assertIsNone(self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player).address)
+
 
 class EntranceRandoSeparateTestBase(SM64TestBase):
     options = {

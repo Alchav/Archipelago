@@ -574,5 +574,7 @@ class SM64World(World):
                     regions += region.subregions
                 for region in regions:
                     for location in region.locations:
+                        if location.address is None:
+                            continue
                         er_hint_data[location.address] = entrance_name
             hint_data[self.player] = er_hint_data
