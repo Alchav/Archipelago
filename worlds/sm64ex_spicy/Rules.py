@@ -913,8 +913,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 rf.build_rule("", painting_lvl_name="Huge Island"))
     connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Piranha Area", "Tiny-Huge Island - Huge Piranha Area",
                     name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
-    connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island (Tiny)",
-                    name="Tiny-Huge Island - Huge Island to Tiny Island")
+    connect_regions(multiworld, player, "Tiny-Huge Island - Huge Piranha Area", "Tiny-Huge Island - Tiny Piranha Area",
+                    name="Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area")
+    connect_regions(multiworld, player, "Tiny-Huge Island - Huge Piranha Area", "Tiny-Huge Island (Huge)",
+                    name="Tiny-Huge Island - Huge Piranha Area to Huge Island")
+    connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Piranha Area", "Tiny-Huge Island (Tiny)",
+                    name="Tiny-Huge Island - Tiny Piranha Area to Tiny Island")
+    connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Main", "Tiny-Huge Island (Huge)",
+                    name="Tiny-Huge Island - Tiny Main to Huge Island")
+    connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island - Tiny Main",
+                    name="Tiny-Huge Island - Huge Island to Tiny Main")
 
     connect_regions(multiworld, player, "Second Floor", "Third Floor", has_third_floor_key)
 
@@ -1061,7 +1069,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
     rf.assign_rule("Tiny-Huge Island - Tiny Main", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Huge Island to Tiny Island", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Tiny Main to Huge Island", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Huge Island to Tiny Main", "THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Huge Piranha Area", "THI_WARP_PIPES & PURPLE_SWITCHES | TJ | LJ+SF | LJ+LG")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     add_rule(multiworld.get_location("Tiny-Huge Island - Rematch with Koopa the Quick", player),

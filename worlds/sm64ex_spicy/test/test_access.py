@@ -854,13 +854,42 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
         self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+
+    def test_tiny_huge_island_main_regions_connect_with_warp_pipes(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+            lambda state: False
+
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Purple Switches"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+
+    def test_tiny_huge_island_huge_main_connects_to_tiny_main_with_warp_pipes(self):
+        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
+            lambda state: False
+
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
 
     def test_tiny_huge_island_rematch_accepts_long_jump_or_dive(self):
         self.collect_second_floor_access()
@@ -981,7 +1010,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
-    def test_tiny_huge_island_five_secrets_from_huge_requires_pipes_and_purple_switches(self):
+    def test_tiny_huge_island_five_secrets_from_huge_requires_warp_pipes(self):
         self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
             lambda state: False
 
@@ -994,12 +1023,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
         self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
-        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
-
-        self.collect([
-            self.get_item_by_name("Long Jump"),
-        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
     def test_rainbow_ride_tricky_triangles_requires_purple_switches(self):
@@ -1962,7 +1986,7 @@ class TinyHugeIslandCoinStar66FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
-        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
