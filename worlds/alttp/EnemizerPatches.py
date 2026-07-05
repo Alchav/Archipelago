@@ -28,7 +28,11 @@ from .enemizer_data.symbols import ENEMIZER_SYMBOLS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
-    from .Rom import LocalRom
+    from .Rom import ProcedureRom, TokenRom
+
+# These patch helpers are intentionally shared by generation and patch application:
+# generation records writes through TokenRom, while boss shuffle is finalized as a
+# procedure step using ProcedureRom after the player supplies their base ROM.
 
 DUNGEON_HEADER_POINTER_TABLE_BASE = 0x271E2
 ROOM_HEADER_BANK_LOCATION = 0xB5E7
@@ -319,14 +323,14 @@ SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS = snes_to_pc(SPRITE_DAMAGE_SUBCLASS_TABLE_S
 HARDHAT_BEETLE_HP_TABLE_ADDRESS = 0x3111F
 
 
-def apply_enemizer_base_patch(rom: "LocalRom") -> None:
+def apply_enemizer_base_patch(rom: "TokenRom | ProcedureRom") -> None:
     for address, patch_data in _load_enemizer_base_patches():
         rom.write_bytes(address, patch_data)
     _apply_trinexx_room_fixes(rom)
 
 
 def apply_enemy_combat_data(
-    rom: "LocalRom",
+    rom: "TokenRom | ProcedureRom",
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> None:
     rom.write_bytes(DAMAGE_SOURCE_TABLE_ADDRESS, build_damage_source_table_bytes(combat_model.damage_sources))
@@ -336,7 +340,7 @@ def apply_enemy_combat_data(
     )
 
 
-def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
+def patch_bosses(world: "ALTTPWorld", rom: "TokenRom | ProcedureRom") -> None:
     moved_room_object_base = _get_enemizer_symbol("modified_room_object_table")
     gt_dungeon_name = "Ganons Tower" if world.options.mode != "inverted" else "Inverted Ganons Tower"
     gt_dungeon = world.dungeons[gt_dungeon_name]
@@ -420,7 +424,7 @@ def _get_room_object_table(cache: dict[int, RoomObjectTable], room_id: int) -> R
     return room_table
 
 
-def _write_gt_boss_sprite_block(rom: "LocalRom", dungeon_data: DungeonBossPatchData, boss_data: BossPatchData) -> None:
+def _write_gt_boss_sprite_block(rom: "TokenRom | ProcedureRom", dungeon_data: DungeonBossPatchData, boss_data: BossPatchData) -> None:
     assert dungeon_data.gt_sprite_write_address is not None
     rom.write_int16(dungeon_data.sprite_pointer_address, dungeon_data.gt_sprite_write_address)
 
@@ -434,7 +438,7 @@ def _write_gt_boss_sprite_block(rom: "LocalRom", dungeon_data: DungeonBossPatchD
     rom.write_bytes(dungeon_data.gt_sprite_write_address, sprite_block)
 
 
-def _write_room_object_pointer(rom: "LocalRom", room_id: int, pc_address: int) -> None:
+def _write_room_object_pointer(rom: "TokenRom | ProcedureRom", room_id: int, pc_address: int) -> None:
     snes_address = pc_to_snes(pc_address)
     pointer_address = 0xF8000 + (room_id * 3)
     rom.write_bytes(pointer_address, (
@@ -462,17 +466,17 @@ def _object_id(object_bytes: bytes) -> Optional[int]:
     return object_bytes[2]
 
 
-def _set_enemizer_flag(rom: "LocalRom", symbol_name: str, enabled: bool) -> None:
+def _set_enemizer_flag(rom: "TokenRom | ProcedureRom", symbol_name: str, enabled: bool) -> None:
     rom.write_byte(_get_enemizer_symbol(symbol_name), 0x01 if enabled else 0x00)
 
 
-def _apply_killable_thief(rom: "LocalRom") -> None:
+def _apply_killable_thief(rom: "TokenRom | ProcedureRom") -> None:
     rom.write_byte(_get_enemizer_symbol("notItemSprite_Mimic") + 4, THIEF_SPRITE_ID)
     rom.write_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID, THIEF_DEFAULT_HP)
 
 
 def _randomize_enemy_health(
-    rom: "LocalRom",
+    rom: "TokenRom | ProcedureRom",
     rng: random.Random,
     enemy_health_key: str,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
@@ -496,7 +500,7 @@ def _randomize_enemy_health(
     )
 
 
-def _randomize_enemy_damage(rom: "LocalRom", rng: random.Random, allow_zero_damage: bool) -> None:
+def _randomize_enemy_damage(rom: "TokenRom | ProcedureRom", rng: random.Random, allow_zero_damage: bool) -> None:
     for sprite_id in range(0xF3):
         if sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
             continue
@@ -508,7 +512,7 @@ def _randomize_enemy_damage(rom: "LocalRom", rng: random.Random, allow_zero_dama
 
 
 def _shuffle_damage_groups(
-    rom: "LocalRom",
+    rom: "TokenRom | ProcedureRom",
     rng: random.Random,
     *,
     chaos_mode: bool,
@@ -529,7 +533,7 @@ def _shuffle_damage_groups(
         rom.write_bytes(group_address, (green_mail_damage, blue_mail_damage, red_mail_damage))
 
 
-def _update_hidden_enemy_item_table_for_retro_mode(rom: "LocalRom") -> None:
+def _update_hidden_enemy_item_table_for_retro_mode(rom: "TokenRom | ProcedureRom") -> None:
     if rom.read_byte(RETRO_ARROW_REPLACEMENT_CHECK_ADDRESS) != RETRO_RUPEE_REPLACEMENT_SPRITE_ID:
         return
 
@@ -543,13 +547,13 @@ def _update_hidden_enemy_item_table_for_retro_mode(rom: "LocalRom") -> None:
             rom.write_byte(item_table_address + index, RETRO_RUPEE_REPLACEMENT_SPRITE_ID)
 
 
-def _apply_trinexx_room_fixes(rom: "LocalRom") -> None:
+def _apply_trinexx_room_fixes(rom: "TokenRom | ProcedureRom") -> None:
     # Match original Enemizer's unconditional Trinexx ice-floor removal so
     # blue-head projectiles do not create solid walls in non-vanilla rooms.
     rom.write_bytes(TRINEXX_ICE_FLOOR_ROUTINE_ADDRESS, (0xEA, 0xEA, 0xEA, 0xEA))
 
 
-def _apply_randomized_tile_trap_floor_tile(rom: "LocalRom") -> None:
+def _apply_randomized_tile_trap_floor_tile(rom: "TokenRom | ProcedureRom") -> None:
     # Original Enemizer's RandomizeTileTrapFloorTile option changes the tile
     # left behind by flying floor tile traps. AP does not currently expose or
     # call this option, so keep the implementation isolated and unused.
@@ -593,7 +597,7 @@ def _get_enemizer_symbol(symbol_name: str) -> int:
     return _ENEMIZER_SYMBOLS[symbol_name]
 
 
-def get_dungeon_room_header_address(rom: "LocalRom", room_id: int) -> int:
+def get_dungeon_room_header_address(rom: "TokenRom | ProcedureRom", room_id: int) -> int:
     moved_header_bank = rom.read_byte(_get_enemizer_symbol("moved_room_header_bank_value_address"))
     room_header_bank = moved_header_bank or rom.read_byte(ROOM_HEADER_BANK_LOCATION)
     pointer_address = DUNGEON_HEADER_POINTER_TABLE_BASE + (room_id * 2)

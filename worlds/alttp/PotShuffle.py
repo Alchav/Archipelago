@@ -7,7 +7,7 @@ from .enemizer_data.pot_shuffle_data import POT_ROOMS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
-    from .Rom import LocalRom
+    from .Rom import TokenRom
 
 
 POT_ITEM_POINTER_TABLE = 0xDB67
@@ -254,7 +254,7 @@ def generate_pot_shuffle(world: "ALTTPWorld") -> dict[int, tuple[FilledPot, ...]
     return shuffled_pots
 
 
-def apply_pot_shuffle(rom: "LocalRom", shuffled_pots: dict[int, tuple[FilledPot, ...]]) -> None:
+def apply_pot_shuffle(rom: "TokenRom", shuffled_pots: dict[int, tuple[FilledPot, ...]]) -> None:
     for room_id, pots in shuffled_pots.items():
         address = POT_ITEM_ADDRESSES[room_id]
         for index, pot in enumerate(pots):

@@ -18,7 +18,7 @@ from .enemizer_data.vanilla_room_tags import VANILLA_ROOM_TAGS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
-    from .Rom import LocalRom
+    from .Rom import TokenRom
 
 
 DESERT_MAP_CHEST_ROOM_ID = 0x74
@@ -1286,7 +1286,7 @@ def apply_puzzle_pot_modifications(
 
 
 def apply_puzzle_shuffle(
-    rom: "LocalRom",
+    rom: "TokenRom",
     state: PuzzleShuffleState,
     pot_shuffle_state: dict[int, tuple[FilledPot, ...]] | None = None,
 ) -> None:
@@ -1453,7 +1453,7 @@ def apply_puzzle_shuffle(
 
 
 def apply_desert_map_chest_switch_removal(
-    rom: "LocalRom",
+    rom: "TokenRom",
     pot_shuffle_state: dict[int, tuple[FilledPot, ...]] | None = None,
 ) -> None:
     if pot_shuffle_state and DESERT_MAP_CHEST_ROOM_ID in pot_shuffle_state:
@@ -1467,20 +1467,20 @@ def apply_desert_map_chest_switch_removal(
     write_pot_room_items(rom, DESERT_MAP_CHEST_ROOM_ID, pots)
 
 
-def write_pot_room_items(rom: "LocalRom", room_id: int, pots: tuple[FilledPot, ...]) -> None:
+def write_pot_room_items(rom: "TokenRom", room_id: int, pots: tuple[FilledPot, ...]) -> None:
     address = POT_ITEM_ADDRESSES[room_id]
     for index, pot in enumerate(pots):
         rom.write_bytes(address + (index * 3), (pot.x, pot.y, pot.item))
     rom.write_bytes(address + (len(pots) * 3), (0xFF, 0xFF))
 
 
-def patch_somaria_star_tile_switch_check(rom: "LocalRom") -> None:
+def patch_somaria_star_tile_switch_check(rom: "TokenRom") -> None:
     for branch_address in SOMARIAN_BLOCK_STAR_TILE_BRANCH_ADDRESSES:
         rom.write_bytes(branch_address, (0xEA, 0xEA))
     rom.write_bytes(SOMARIAN_BLOCK_FINAL_STAR_TILE_BRANCH_ADDRESS, (0x80, 0x0E))
 
 
-def write_puzzle_object_swaps(rom: "LocalRom", state: PuzzleShuffleState) -> None:
+def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> None:
     _write_puzzle_object_swap(
         rom,
         GT_BLOCK_PUZZLE_ROOM_ID,
@@ -1550,7 +1550,7 @@ def write_puzzle_object_swaps(rom: "LocalRom", state: PuzzleShuffleState) -> Non
 
 
 def _write_puzzle_object_swap(
-    rom: "LocalRom",
+    rom: "TokenRom",
     room_id: int,
     source_position: tuple[int, int],
     source_object_id: int,
@@ -1574,7 +1574,7 @@ def _encode_room_object_position(position: tuple[int, int], object_id: int) -> b
     ))
 
 
-def _write_hyrule_castle_switch_room_sprites(rom: "LocalRom", variant: int) -> None:
+def _write_hyrule_castle_switch_room_sprites(rom: "TokenRom", variant: int) -> None:
     if variant == ROOM_VARIANT_SWAP_PULL_SWITCHES:
         trap_switch = PULL_SWITCH_GOOD
         good_switch = PULL_SWITCH_TRAP
@@ -1588,7 +1588,7 @@ def _write_hyrule_castle_switch_room_sprites(rom: "LocalRom", variant: int) -> N
     rom.write_byte(HYRULE_CASTLE_SWITCH_ROOM_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS, good_switch)
 
 
-def _write_turtle_rock_crystaroller_sprites(rom: "LocalRom", variant: int) -> None:
+def _write_turtle_rock_crystaroller_sprites(rom: "TokenRom", variant: int) -> None:
     if variant == ROOM_VARIANT_SWAP_PULL_SWITCHES:
         good_switch = PULL_SWITCH_TRAP
         trap_switch = PULL_SWITCH_GOOD

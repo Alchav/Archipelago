@@ -38,7 +38,7 @@ from .enemizer_data.symbols import ENEMIZER_SYMBOLS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
-    from .Rom import LocalRom
+    from .Rom import TokenRom
 
 
 DUNGEON_HEADER_POINTER_TABLE_BASE = 0x271E2
@@ -2143,7 +2143,7 @@ def _validate_overworld_area(
         raise ValueError(f"Enemy shuffle placed illegal bush enemy {hex(randomized_area.bush_sprite_id)} in area {hex(area.area_id)}")
 
 
-def apply_enemy_shuffle(rom: "LocalRom", state: EnemyShuffleState) -> None:
+def apply_enemy_shuffle(rom: "TokenRom", state: EnemyShuffleState) -> None:
     for group in state.sprite_groups.values():
         _write_sprite_group(rom, group)
 
@@ -2163,7 +2163,7 @@ def apply_enemy_shuffle(rom: "LocalRom", state: EnemyShuffleState) -> None:
         rom.write_byte(bush_spawn_table_address + area.area_id, area.bush_sprite_id)
 
 
-def _write_sprite_group(rom: "LocalRom", group: DungeonSpriteGroup) -> None:
+def _write_sprite_group(rom: "TokenRom", group: DungeonSpriteGroup) -> None:
     address = SPRITE_GROUP_BASE_ADDRESS + (group.group_id * 4)
     rom.write_byte(address, group.subgroup_0)
     rom.write_byte(address + 1, group.subgroup_1)
@@ -2171,7 +2171,7 @@ def _write_sprite_group(rom: "LocalRom", group: DungeonSpriteGroup) -> None:
     rom.write_byte(address + 3, group.subgroup_3)
 
 
-def _write_dungeon_sprite(rom: "LocalRom", sprite: RandomizedDungeonEnemySprite) -> None:
+def _write_dungeon_sprite(rom: "TokenRom", sprite: RandomizedDungeonEnemySprite) -> None:
     sprite_id = sprite.sprite_id
     byte_1 = sprite.byte_1
 
@@ -2184,7 +2184,7 @@ def _write_dungeon_sprite(rom: "LocalRom", sprite: RandomizedDungeonEnemySprite)
     rom.write_byte(sprite.address + 2, sprite_id & 0xFF)
 
 
-def _write_overworld_sprite(rom: "LocalRom", sprite: RandomizedOverworldEnemySprite) -> None:
+def _write_overworld_sprite(rom: "TokenRom", sprite: RandomizedOverworldEnemySprite) -> None:
     sprite_id = sprite.sprite_id
     if sprite_id == OW_FALLING_ROCKS_SPRITE_ID:
         rom.write_byte(sprite.address, 0)

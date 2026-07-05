@@ -23,7 +23,7 @@ from urllib.request import urlopen
 import ModuleUpdate
 ModuleUpdate.update()
 
-from worlds.alttp.Rom import Sprite, LocalRom, apply_rom_settings, get_base_rom_bytes
+from worlds.alttp.Rom import AdjusterRom, Sprite, apply_rom_settings, get_base_rom_bytes
 from Utils import output_path, local_path, user_path, open_file, get_cert_none_ssl_context, persistent_store, \
     get_adjuster_settings, get_adjuster_settings_no_defaults, tkinter_center_window, init_logging
 
@@ -213,7 +213,7 @@ def adjust(args):
         meta, args.rom = Patch.create_rom_file(args.rom)
 
     if os.stat(args.rom).st_size in (0x200000, 0x400000) and os.path.splitext(args.rom)[-1].lower() == '.sfc':
-        rom = LocalRom(args.rom, patch=False, vanillaRom=vanillaRom)
+        rom = AdjusterRom(args.rom, vanilla_rom=vanillaRom)
     else:
         raise RuntimeError(
             'Provided Rom is not a valid Link to the Past Randomizer Rom. Please provide one for adjusting.')
