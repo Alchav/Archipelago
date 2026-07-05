@@ -343,7 +343,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                    "Bowser in the Fire Sea - Swaying Stairs 1-Up",
                                    "Bowser in the Fire Sea - Near Poles Block 1-Up",
                                    "Bowser in the Fire Sea - Elevator Pole 1-Up",
-                                   "Bowser in the Fire Sea - Moving Platform Trigger 1-Up",
+                                   "Bowser in the Fire Sea - Stretching Platform Trigger 1-Up",
                                    "Bowser in the Fire Sea - Near Poles 1-Up",
                                    "Bowser in the Fire Sea - Swaying Stairs 1-Up Block",
                                    "Bowser in the Fire Sea - 10 Coins Block",

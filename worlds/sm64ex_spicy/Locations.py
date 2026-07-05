@@ -370,7 +370,7 @@ locFreestanding1Up_table = {
 
     "Bowser in the Fire Sea - First Stone Structure 1-Up": 3629105,
     "Bowser in the Fire Sea - Elevator Pole 1-Up": 3629106,
-    "Bowser in the Fire Sea - Moving Platform Trigger 1-Up": 3629107,
+    "Bowser in the Fire Sea - Stretching Platform Trigger 1-Up": 3629107,
     "Bowser in the Fire Sea - Near Poles 1-Up": 3629108,
     "Bowser in the Fire Sea - Second Stone Structure 1-Up": 3629109,
 
