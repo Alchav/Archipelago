@@ -339,6 +339,7 @@ class EnemyShuffleState:
     max_attacks_in_logic: int = 16
     killable_thieves: bool = False
     available_damage_classes: frozenset[int] = frozenset(range(16))
+    hammer_available_for_freeze: bool = False
 
 
 def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
@@ -402,6 +403,7 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
     )
     validate_enemy_shuffle_state(state, is_standard_mode=world.options.mode == "standard")
     return state
@@ -423,6 +425,10 @@ def _get_world_killable_thieves(world: "ALTTPWorld") -> bool:
 
 def _get_world_available_damage_classes(world: "ALTTPWorld") -> frozenset[int]:
     return frozenset(getattr(world, "enemy_shuffle_available_damage_classes", frozenset(range(16))))
+
+
+def _get_world_hammer_available_for_freeze(world: "ALTTPWorld") -> bool:
+    return bool(getattr(world, "enemy_shuffle_hammer_available_for_freeze", False))
 
 
 def _get_base_patched_rom_bytes() -> bytes:
@@ -1377,7 +1383,13 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     else:
         delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
         if delivery_override is None:
-            candidate_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+            candidate_damage_classes = set(
+                get_killing_damage_classes(
+                    combat_reference_id,
+                    state.combat_model,
+                    include_freeze_hammer=state.hammer_available_for_freeze,
+                )
+            )
         else:
             candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
@@ -1399,7 +1411,13 @@ def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: Enem
 
     delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
     if delivery_override is None:
-        candidate_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+        candidate_damage_classes = set(
+            get_killing_damage_classes(
+                combat_reference_id,
+                state.combat_model,
+                include_freeze_hammer=state.hammer_available_for_freeze,
+            )
+        )
     else:
         candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
@@ -1422,6 +1440,7 @@ def _damage_class_kills_within_enemy_shuffle_logic(
         state.enemy_health_key,
         killable_thieves=state.killable_thieves,
         combat_model=state.combat_model,
+        allow_frozen_hammer_kill=state.hammer_available_for_freeze,
     )
     return hit_count is not None and hit_count <= state.max_attacks_in_logic
 
@@ -1666,6 +1685,7 @@ def _randomize_dungeon_rooms(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
     )
     randomized_rooms: dict[int, RandomizedDungeonEnemyRoom] = {}
 
@@ -1722,6 +1742,7 @@ def _randomize_overworld_areas(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
     )
     randomized_areas: dict[int, RandomizedOverworldEnemyArea] = {}
 

@@ -53,9 +53,11 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     FAIRY_TRANSFORM_EFFECT,
     FIGHTER_SWORD_DAMAGE_CLASSES,
+    FREEZE_EFFECT,
     GOLDEN_SWORD_SPIN_DAMAGE_CLASS,
     GOLDEN_SWORD_DAMAGE_CLASSES,
     GANON_D7_SPRITE_ID,
+    GANON_D6_SPRITE_ID,
     HELMASAUR_KING_SPRITE_ID,
     INCINERATE_EFFECT,
     LANMOLAS_SPRITE_ID,
@@ -77,6 +79,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
     build_randomized_damage_class_combat_model,
+    can_shatter_frozen_sprite_with_hammer,
     get_blob_transform_damage_classes,
     get_damage_classes_with_effects,
     get_damage_effect,
@@ -529,6 +532,7 @@ class TestEnemizerPatches(unittest.TestCase):
             random.Random(9),
             NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES,
             max_attacks_in_logic=4,
+            hammer_available_for_freeze=True,
         )
 
         for sprite_id in range(len(combat_model.sprite_damage_subclasses)):
@@ -558,6 +562,48 @@ class TestEnemizerPatches(unittest.TestCase):
                     self.assertEqual(set(defeat_classes), {LOST_SWORD_UPGRADE_DAMAGE_CLASS, GOLDEN_SWORD_SPIN_DAMAGE_CLASS})
                 else:
                     self.assertEqual(len(defeat_classes), 1)
+
+    def test_freeze_counts_as_nightmare_defeat_effect(self) -> None:
+        self.assertTrue(is_defeating_damage_effect_for_nightmare(FREEZE_EFFECT))
+
+    def test_freeze_hammer_shatter_counts_as_one_hit_when_allowed(self) -> None:
+        sprite_id = 0x00
+        damage_class = 1
+        damage_sources = list(VANILLA_COMBAT_MODEL.damage_sources)
+        subclasses = list(damage_sources[damage_class].subclasses)
+        subclasses[0] = FREEZE_EFFECT
+        damage_sources[damage_class] = damage_sources[damage_class]._replace(subclasses=tuple(subclasses))
+
+        sprite_damage_subclasses = list(VANILLA_COMBAT_MODEL.sprite_damage_subclasses)
+        sprite_damage_subclasses[sprite_id] = tuple(0 for _ in range(16))
+
+        enemy_health_table = list(VANILLA_COMBAT_MODEL.enemy_health_table)
+        enemy_health_table[sprite_id] = 4
+
+        combat_model = EnemyCombatModel(
+            damage_sources=tuple(damage_sources),
+            sprite_damage_subclasses=tuple(sprite_damage_subclasses),
+            enemy_health_table=tuple(enemy_health_table),
+        )
+
+        self.assertTrue(can_shatter_frozen_sprite_with_hammer(sprite_id))
+        self.assertFalse(can_shatter_frozen_sprite_with_hammer(GANON_D6_SPRITE_ID))
+        self.assertIsNone(get_hits_to_kill(sprite_id, damage_class, "default", combat_model=combat_model))
+        self.assertEqual(
+            get_hits_to_kill(
+                sprite_id,
+                damage_class,
+                "default",
+                combat_model=combat_model,
+                allow_frozen_hammer_kill=True,
+            ),
+            1,
+        )
+        self.assertNotIn(damage_class, get_killing_damage_classes(sprite_id, combat_model))
+        self.assertIn(
+            damage_class,
+            get_killing_damage_classes(sprite_id, combat_model, include_freeze_hammer=True),
+        )
 
     def test_randomized_damage_classes_change_non_boss_rows(self) -> None:
         vanilla_effects = {

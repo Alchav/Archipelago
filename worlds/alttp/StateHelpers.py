@@ -1152,6 +1152,7 @@ def _get_best_hit_count(
             hp_override=hp_override,
             killable_thieves=killable_thieves,
             combat_model=combat_model,
+            allow_frozen_hammer_kill=state.has("Hammer", player),
         )
         for damage_class in damage_classes
         if damage_class in allowed_damage_classes

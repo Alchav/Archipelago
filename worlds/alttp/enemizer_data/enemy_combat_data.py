@@ -600,6 +600,7 @@ def build_randomized_damage_class_combat_model(
     enemy_health_key: str = "default",
     item_pool_key: str = "normal",
     available_damage_classes: frozenset[int] | None = None,
+    hammer_available_for_freeze: bool = False,
     swordless: bool = False,
 ) -> EnemyCombatModel:
     if mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
@@ -623,6 +624,7 @@ def build_randomized_damage_class_combat_model(
             max_attacks=None,
             enemy_health_key=enemy_health_key,
             available_damage_classes=available_damage_classes,
+            hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=(
                 available_damage_classes is not None
                 and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
@@ -645,6 +647,7 @@ def build_randomized_damage_class_combat_model(
             max_attacks=max_attacks,
             enemy_health_key=enemy_health_key,
             available_damage_classes=available_damage_classes,
+            hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=(
                 available_damage_classes is not None
                 and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
@@ -675,6 +678,7 @@ def build_randomized_damage_class_combat_model(
                 max_attacks_in_logic=max_attacks_in_logic,
                 enemy_health_key=enemy_health_key,
                 available_damage_classes=nightmare_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
                 swordless=swordless,
             )
 
@@ -693,6 +697,7 @@ def build_randomized_damage_class_combat_model(
             max_attacks_in_logic=max_attacks_in_logic,
             enemy_health_key=enemy_health_key,
             available_damage_classes=available_damage_classes,
+            hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=(
                 available_damage_classes is not None
                 and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
@@ -788,6 +793,7 @@ def _build_valid_damage_class_permutation(
     max_attacks: int | None,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
 ) -> tuple[int, ...]:
@@ -798,6 +804,7 @@ def _build_valid_damage_class_permutation(
         max_attacks=max_attacks,
         enemy_health_key=enemy_health_key,
         available_damage_classes=available_damage_classes,
+        hammer_available_for_freeze=hammer_available_for_freeze,
         enforce_non_silver_guarantee=enforce_non_silver_guarantee,
         swordless=swordless,
     )
@@ -837,6 +844,7 @@ def _build_valid_damage_class_permutation(
         max_attacks=max_attacks,
         enemy_health_key=enemy_health_key,
         available_damage_classes=available_damage_classes,
+        hammer_available_for_freeze=hammer_available_for_freeze,
         enforce_non_silver_guarantee=enforce_non_silver_guarantee,
         swordless=swordless,
     ):
@@ -852,6 +860,7 @@ def _build_damage_class_permutation_constraints(
     max_attacks: int | None,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
 ) -> list[tuple[frozenset[int], frozenset[int]]]:
@@ -867,7 +876,13 @@ def _build_damage_class_permutation_constraints(
         source_damage_classes = frozenset(
             damage_class
             for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
-            if _effect_is_allowed_logic_kill(sprite_id, randomized_effects[sprite_id][damage_class], hp, max_attacks)
+            if _effect_is_allowed_logic_kill(
+                sprite_id,
+                randomized_effects[sprite_id][damage_class],
+                hp,
+                max_attacks,
+                allow_frozen_hammer_kill=hammer_available_for_freeze,
+            )
         )
         if not source_damage_classes:
             continue
@@ -1011,6 +1026,7 @@ def _damage_class_permutation_preserves_logic(
     max_attacks: int | None,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
 ) -> bool:
@@ -1020,7 +1036,13 @@ def _damage_class_permutation_preserves_logic(
             sprite_id != LIGHTNING_GATE_SPRITE_ID
             and hp is not None
             and not any(
-                _effect_is_allowed_logic_kill(sprite_id, randomized_effects[sprite_id][damage_class], hp, max_attacks)
+                _effect_is_allowed_logic_kill(
+                    sprite_id,
+                    randomized_effects[sprite_id][damage_class],
+                    hp,
+                    max_attacks,
+                    allow_frozen_hammer_kill=hammer_available_for_freeze,
+                )
                 for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
             )
         ):
@@ -1039,6 +1061,7 @@ def _damage_class_permutation_preserves_logic(
             max_attacks=max_attacks,
             enemy_health_key=enemy_health_key,
             available_damage_classes=available_damage_classes,
+            hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=enforce_non_silver_guarantee,
             swordless=swordless,
         ):
@@ -1070,6 +1093,7 @@ def _swap_enemy_damage_profiles(
     max_attacks: int | None,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
 ) -> list[list[int]]:
@@ -1101,6 +1125,7 @@ def _swap_enemy_damage_profiles(
                 max_attacks=max_attacks,
                 enemy_health_key=enemy_health_key,
                 available_damage_classes=available_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
                 enforce_non_silver_guarantee=enforce_non_silver_guarantee,
                 swordless=swordless,
             )
@@ -1120,6 +1145,7 @@ def _swap_enemy_damage_profiles(
                 max_attacks=max_attacks,
                 enemy_health_key=enemy_health_key,
                 available_damage_classes=available_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
                 enforce_non_silver_guarantee=enforce_non_silver_guarantee,
                 swordless=swordless,
             )
@@ -1177,6 +1203,7 @@ def _row_compatible_for_sprite_logic(
     max_attacks: int | None,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
 ) -> bool:
@@ -1200,6 +1227,7 @@ def _row_compatible_for_sprite_logic(
         hp,
         guarantee_attacks,
         candidate_damage_classes,
+        allow_frozen_hammer_kill=hammer_available_for_freeze,
     ):
         return False
 
@@ -1214,6 +1242,7 @@ def _row_compatible_for_sprite_logic(
             hp,
             guarantee_attacks,
             non_silver_candidate_damage_classes,
+            allow_frozen_hammer_kill=hammer_available_for_freeze,
         ):
             return False
 
@@ -1229,6 +1258,7 @@ def _row_compatible_for_sprite_logic(
             hp,
             guarantee_attacks,
             required_damage_classes,
+            allow_frozen_hammer_kill=hammer_available_for_freeze,
         ):
             return False
 
@@ -1266,6 +1296,7 @@ def _ensure_damage_class_logic_guarantees(
     max_attacks_in_logic: int,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
 ) -> None:
@@ -1282,7 +1313,14 @@ def _ensure_damage_class_logic_guarantees(
             get_progression_kill_damage_classes(sprite_id),
             available_damage_classes,
         )
-        if not _has_direct_kill_within_attack_limit(row, sprite_id, hp, guarantee_attacks, candidate_damage_classes):
+        if not _has_direct_kill_within_attack_limit(
+            row,
+            sprite_id,
+            hp,
+            guarantee_attacks,
+            candidate_damage_classes,
+            allow_frozen_hammer_kill=hammer_available_for_freeze,
+        ):
             _set_guaranteed_logic_kill_effect_for_row(
                 row,
                 effect_palettes,
@@ -1290,6 +1328,7 @@ def _ensure_damage_class_logic_guarantees(
                 hp,
                 guarantee_attacks,
                 candidate_damage_classes,
+                allow_frozen_hammer_kill=hammer_available_for_freeze,
             )
 
         if enforce_non_silver_guarantee:
@@ -1305,6 +1344,7 @@ def _ensure_damage_class_logic_guarantees(
                     hp,
                     guarantee_attacks,
                     non_silver_candidate_damage_classes,
+                    allow_frozen_hammer_kill=hammer_available_for_freeze,
                 )
             ):
                 _set_guaranteed_logic_kill_effect_for_row(
@@ -1314,6 +1354,7 @@ def _ensure_damage_class_logic_guarantees(
                     hp,
                     guarantee_attacks,
                     non_silver_candidate_damage_classes,
+                    allow_frozen_hammer_kill=hammer_available_for_freeze,
                 )
 
         for required_damage_classes in _get_required_logic_kill_damage_class_groups(sprite_id, swordless):
@@ -1330,6 +1371,7 @@ def _ensure_damage_class_logic_guarantees(
                 hp,
                 guarantee_attacks,
                 required_damage_classes,
+                allow_frozen_hammer_kill=hammer_available_for_freeze,
             ):
                 continue
             _set_guaranteed_logic_kill_effect_for_row(
@@ -1339,6 +1381,7 @@ def _ensure_damage_class_logic_guarantees(
                 hp,
                 guarantee_attacks,
                 required_damage_classes,
+                allow_frozen_hammer_kill=hammer_available_for_freeze,
             )
 
     if RED_BARI_SPRITE_ID in eligible_sprite_ids:
@@ -1442,19 +1485,34 @@ def _has_direct_kill_within_attack_limit(
     hp: int,
     max_attacks: int | None,
     damage_classes: tuple[int, ...],
+    *,
+    allow_frozen_hammer_kill: bool = False,
 ) -> bool:
     return any(
-        _effect_is_allowed_logic_kill(sprite_id, row[damage_class], hp, max_attacks)
+        _effect_is_allowed_logic_kill(
+            sprite_id,
+            row[damage_class],
+            hp,
+            max_attacks,
+            allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+        )
         for damage_class in damage_classes
     )
 
 
-def _effect_is_allowed_logic_kill(sprite_id: int, effect: int, hp: int, max_attacks: int | None) -> bool:
-    return _damage_effect_allowed_for_sprite(sprite_id, effect) and _effect_kills_within_attack_limit(
-        effect,
-        hp,
-        max_attacks,
-    )
+def _effect_is_allowed_logic_kill(
+    sprite_id: int,
+    effect: int,
+    hp: int,
+    max_attacks: int | None,
+    *,
+    allow_frozen_hammer_kill: bool = False,
+) -> bool:
+    if not _damage_effect_allowed_for_sprite(sprite_id, effect):
+        return False
+    if effect == FREEZE_EFFECT:
+        return allow_frozen_hammer_kill and can_shatter_frozen_sprite_with_hammer(sprite_id)
+    return _effect_kills_within_attack_limit(effect, hp, max_attacks)
 
 
 def _effect_kills_within_attack_limit(effect: int, hp: int, max_attacks: int | None) -> bool:
@@ -1486,10 +1544,18 @@ def _set_guaranteed_logic_kill_effect_for_row(
     hp: int,
     max_attacks: int | None,
     damage_classes: tuple[int, ...],
+    *,
+    allow_frozen_hammer_kill: bool = False,
 ) -> None:
     for damage_class in damage_classes:
         if (
-            _effect_is_allowed_logic_kill(sprite_id, GUARANTEED_LOGIC_KILL_EFFECT, hp, max_attacks)
+            _effect_is_allowed_logic_kill(
+                sprite_id,
+                GUARANTEED_LOGIC_KILL_EFFECT,
+                hp,
+                max_attacks,
+                allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+            )
             and _effect_fits_palette(GUARANTEED_LOGIC_KILL_EFFECT, effect_palettes[damage_class])
         ):
             _set_guaranteed_logic_kill_effect(
@@ -1501,7 +1567,13 @@ def _set_guaranteed_logic_kill_effect_for_row(
             return
 
         for effect in sorted(effect_palettes[damage_class], reverse=True):
-            if _effect_is_allowed_logic_kill(sprite_id, effect, hp, max_attacks):
+            if _effect_is_allowed_logic_kill(
+                sprite_id,
+                effect,
+                hp,
+                max_attacks,
+                allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+            ):
                 _set_guaranteed_logic_kill_effect(
                     row,
                     effect_palettes,
@@ -1511,9 +1583,15 @@ def _set_guaranteed_logic_kill_effect_for_row(
                 return
 
     for damage_class in damage_classes:
-        for effect in (0x64, 0x40, 0x20, 0x10, 0x08, 0x04, 0x03, 0x02, 0x01, INCINERATE_EFFECT):
+        for effect in (0x64, 0x40, 0x20, 0x10, 0x08, 0x04, 0x03, 0x02, 0x01, INCINERATE_EFFECT, FREEZE_EFFECT):
             if (
-                _effect_is_allowed_logic_kill(sprite_id, effect, hp, max_attacks)
+                _effect_is_allowed_logic_kill(
+                    sprite_id,
+                    effect,
+                    hp,
+                    max_attacks,
+                    allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+                )
                 and _effect_fits_palette(effect, effect_palettes[damage_class])
             ):
                 _set_guaranteed_logic_kill_effect(row, effect_palettes, damage_class, effect)
@@ -1522,13 +1600,25 @@ def _set_guaranteed_logic_kill_effect_for_row(
     raise ValueError(f"Could not guarantee a logical damage class for sprite 0x{sprite_id:02X}")
 
 
-def _get_guaranteed_logic_kill_effect_candidates(sprite_id: int, hp: int, max_attacks: int | None) -> tuple[int, ...]:
+def _get_guaranteed_logic_kill_effect_candidates(
+    sprite_id: int,
+    hp: int,
+    max_attacks: int | None,
+    *,
+    allow_frozen_hammer_kill: bool = False,
+) -> tuple[int, ...]:
     candidates = [GUARANTEED_LOGIC_KILL_EFFECT]
-    candidates.extend((0x64, 0x40, 0x20, 0x10, 0x08, 0x04, 0x03, 0x02, 0x01, INCINERATE_EFFECT))
+    candidates.extend((0x64, 0x40, 0x20, 0x10, 0x08, 0x04, 0x03, 0x02, 0x01, INCINERATE_EFFECT, FREEZE_EFFECT))
     return tuple(
         effect
         for effect in candidates
-        if _effect_is_allowed_logic_kill(sprite_id, effect, hp, max_attacks)
+        if _effect_is_allowed_logic_kill(
+            sprite_id,
+            effect,
+            hp,
+            max_attacks,
+            allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+        )
     )
 
 
@@ -1627,6 +1717,7 @@ def _build_nightmare_sprite_damage_effects(
     max_attacks_in_logic: int,
     enemy_health_key: str,
     available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
     swordless: bool,
 ) -> list[int]:
     row = [
@@ -1672,6 +1763,7 @@ def _build_nightmare_sprite_damage_effects(
             max_attacks,
             candidate_damage_classes,
             preferred_effect=INCINERATE_EFFECT,
+            allow_frozen_hammer_kill=hammer_available_for_freeze,
         )
     else:
         _set_nightmare_defeat_effect_for_row(
@@ -1681,6 +1773,7 @@ def _build_nightmare_sprite_damage_effects(
             hp,
             max_attacks,
             candidate_damage_classes,
+            allow_frozen_hammer_kill=hammer_available_for_freeze,
         )
     _add_row_to_effect_palettes(row, effect_palettes)
     return row
@@ -1721,11 +1814,18 @@ def _set_nightmare_defeat_effect_for_row(
     damage_classes: tuple[int, ...],
     *,
     preferred_effect: int | None = None,
+    allow_frozen_hammer_kill: bool = False,
 ) -> None:
     if preferred_effect is not None:
         for damage_class in damage_classes:
             if (
-                _effect_is_allowed_logic_kill(sprite_id, preferred_effect, hp, max_attacks)
+                _effect_is_allowed_logic_kill(
+                    sprite_id,
+                    preferred_effect,
+                    hp,
+                    max_attacks,
+                    allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+                )
                 and _effect_fits_palette(preferred_effect, effect_palettes[damage_class])
             ):
                 _set_guaranteed_logic_kill_effect(row, effect_palettes, damage_class, preferred_effect)
@@ -1733,13 +1833,24 @@ def _set_nightmare_defeat_effect_for_row(
 
     if LOST_SWORD_UPGRADE_DAMAGE_CLASS in damage_classes:
         paired_damage_classes = (LOST_SWORD_UPGRADE_DAMAGE_CLASS, GOLDEN_SWORD_SPIN_DAMAGE_CLASS)
-        effects = _get_guaranteed_logic_kill_effect_candidates(sprite_id, hp, max_attacks) + tuple(
+        effects = _get_guaranteed_logic_kill_effect_candidates(
+            sprite_id,
+            hp,
+            max_attacks,
+            allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+        ) + tuple(
             effect
             for effect in sorted(
                 effect_palettes[LOST_SWORD_UPGRADE_DAMAGE_CLASS] & effect_palettes[GOLDEN_SWORD_SPIN_DAMAGE_CLASS],
                 reverse=True,
             )
-            if _effect_is_allowed_logic_kill(sprite_id, effect, hp, max_attacks)
+            if _effect_is_allowed_logic_kill(
+                sprite_id,
+                effect,
+                hp,
+                max_attacks,
+                allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+            )
         )
         for effect in effects:
             if all(_effect_fits_palette(effect, effect_palettes[damage_class]) for damage_class in paired_damage_classes):
@@ -1747,7 +1858,15 @@ def _set_nightmare_defeat_effect_for_row(
                     _set_guaranteed_logic_kill_effect(row, effect_palettes, damage_class, effect)
                 return
 
-    _set_guaranteed_logic_kill_effect_for_row(row, effect_palettes, sprite_id, hp, max_attacks, damage_classes)
+    _set_guaranteed_logic_kill_effect_for_row(
+        row,
+        effect_palettes,
+        sprite_id,
+        hp,
+        max_attacks,
+        damage_classes,
+        allow_frozen_hammer_kill=allow_frozen_hammer_kill,
+    )
 
 
 def _row_fits_effect_palettes(row: list[int], effect_palettes: list[set[int]]) -> bool:
@@ -1922,7 +2041,7 @@ _DAMAGE_CLASS_EFFECT_CACHE: dict[
     int,
     tuple[EnemyCombatModel, dict[tuple[int, frozenset[int]], tuple[int, ...]]],
 ] = {}
-_KILLING_DAMAGE_CLASS_CACHE: dict[int, tuple[EnemyCombatModel, dict[int, tuple[int, ...]]]] = {}
+_KILLING_DAMAGE_CLASS_CACHE: dict[int, tuple[EnemyCombatModel, dict[tuple[int, bool], tuple[int, ...]]]] = {}
 
 
 def get_damage_classes_with_effects(
@@ -1953,21 +2072,28 @@ def is_killing_damage_effect(effect: int) -> bool:
     return 0 < effect < FAIRY_TRANSFORM_EFFECT or effect == INCINERATE_EFFECT
 
 
+def can_shatter_frozen_sprite_with_hammer(sprite_id: int) -> bool:
+    return sprite_id < GANON_D6_SPRITE_ID and _damage_effect_allowed_for_sprite(sprite_id, FREEZE_EFFECT)
+
+
 def is_defeating_damage_effect_for_nightmare(effect: int) -> bool:
-    return is_killing_damage_effect(effect) or effect in TRANSFORM_DAMAGE_EFFECTS
+    return is_killing_damage_effect(effect) or effect in TRANSFORM_DAMAGE_EFFECTS or effect == FREEZE_EFFECT
 
 
 def get_killing_damage_classes(
     sprite_id: int,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+    *,
+    include_freeze_hammer: bool = False,
 ) -> tuple[int, ...]:
     model_id = id(combat_model)
     cached_model, cache = _KILLING_DAMAGE_CLASS_CACHE.get(model_id, (None, {}))
     if cached_model is not combat_model:
         cache = {}
         _KILLING_DAMAGE_CLASS_CACHE[model_id] = (combat_model, cache)
-    if sprite_id in cache:
-        return cache[sprite_id]
+    cache_key = (sprite_id, include_freeze_hammer)
+    if cache_key in cache:
+        return cache[cache_key]
 
     matching_damage_classes = []
     for damage_class in range(len(combat_model.damage_sources)):
@@ -1975,13 +2101,18 @@ def get_killing_damage_classes(
         if _damage_effect_allowed_for_sprite(sprite_id, effect) and (
             is_killing_damage_effect(effect)
             or (
+                include_freeze_hammer
+                and effect == FREEZE_EFFECT
+                and can_shatter_frozen_sprite_with_hammer(sprite_id)
+            )
+            or (
                 sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
                 and effect in TRANSFORM_DAMAGE_EFFECTS
             )
         ):
             matching_damage_classes.append(damage_class)
     result = tuple(matching_damage_classes)
-    cache[sprite_id] = result
+    cache[cache_key] = result
     return result
 
 
@@ -2053,10 +2184,13 @@ def get_hits_to_kill(
     hp_override: int | None = None,
     killable_thieves: bool = False,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+    allow_frozen_hammer_kill: bool = False,
 ) -> int | None:
     effect = get_damage_effect(sprite_id, damage_class, combat_model)
     if not _damage_effect_allowed_for_sprite(sprite_id, effect):
         return None
+    if effect == FREEZE_EFFECT and allow_frozen_hammer_kill and can_shatter_frozen_sprite_with_hammer(sprite_id):
+        return 1
     if effect == INCINERATE_EFFECT or (
         sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
         and effect in TRANSFORM_DAMAGE_EFFECTS

@@ -324,6 +324,7 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
             if item_names is not None
             else None
         )
+        hammer_available_for_freeze = item_names is not None and "Hammer" in item_names
         world.enemy_combat_model = build_randomized_damage_class_combat_model(
             _make_native_enemizer_rng(world),
             damage_class_mode,
@@ -331,6 +332,7 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
             enemy_health_key=world.options.enemy_health.current_key,
             item_pool_key=getattr(getattr(world.options, "item_pool", None), "current_key", "normal"),
             available_damage_classes=item_pool_damage_classes,
+            hammer_available_for_freeze=hammer_available_for_freeze,
             swordless=bool(getattr(world.options, "swordless", False)),
         )
 
@@ -738,6 +740,7 @@ def generate_itempool(world: "ALTTPWorld"):
         enemy_shuffle_item_names = [item.name for item in items]
         enemy_shuffle_item_names.extend(placed_items.values())
         enemy_shuffle_item_names.extend(precollected_items)
+        world.enemy_shuffle_hammer_available_for_freeze = "Hammer" in enemy_shuffle_item_names
         world.enemy_shuffle_available_damage_classes = get_enemy_shuffle_available_damage_classes(
             world,
             enemy_shuffle_item_names,
