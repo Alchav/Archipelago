@@ -1,8 +1,10 @@
 import random
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 
 from worlds.alttp.PotShuffle import (
+    FilledPot,
     POT_BLUE_RUPEE,
     POT_ITEM_ADDRESSES,
     POT_KEY,
@@ -17,6 +19,8 @@ from worlds.alttp.enemizer_data.pot_shuffle_data import POT_ROOMS
 
 
 class TestPotShuffle(unittest.TestCase):
+    BASEPATCH_ROM = Path(__file__).resolve().parents[3] / "basepatch.sfc"
+
     def test_key_rooms_place_actual_keys(self) -> None:
         for seed in range(10):
             world = SimpleNamespace(
@@ -101,6 +105,53 @@ class TestPotShuffle(unittest.TestCase):
                 if (room.room_id, record.x, record.y) in vanilla_orphan_items:
                     continue
                 self.assertIn((record.x, record.y), candidate_positions, room.room_id)
+
+    def test_pot_item_records_fit_before_next_room_pointer(self) -> None:
+        room_data = {room.room_id: room for room in POT_ROOMS}
+        sorted_addresses = sorted(POT_ITEM_ADDRESSES.items(), key=lambda entry: entry[1])
+
+        for (room_id, address), (next_room_id, next_address) in zip(sorted_addresses, sorted_addresses[1:]):
+            room = room_data[room_id]
+            entry_count = sum(
+                1
+                for pot in room.pots
+                if pot.item is not None and pot.item != POT_HOLE
+            )
+            entry_count += sum(1 for pot in room.pots if pot.reserved == 3)
+            required_end = address + entry_count * 3
+
+            with self.subTest(room=room_id, next_room=next_room_id):
+                self.assertLessEqual(
+                    required_end,
+                    next_address,
+                    f"room {room_id:#04x} has {entry_count} pot item records requiring "
+                    f"{required_end - address} record bytes at {address:#06x}, but room "
+                    f"{next_room_id:#04x} starts at {next_address:#06x}",
+                )
+
+    def test_vanilla_pot_items_match_basepatch_rom(self) -> None:
+        if not self.BASEPATCH_ROM.exists():
+            self.skipTest(f"{self.BASEPATCH_ROM} is not present")
+
+        rom = self.BASEPATCH_ROM.read_bytes()
+
+        for room_id, address in sorted(POT_ITEM_ADDRESSES.items()):
+            with self.subTest(room=room_id):
+                self.assertEqual(
+                    get_vanilla_pot_items(room_id),
+                    self._read_pot_items_from_rom(rom, address),
+                )
+
+    @staticmethod
+    def _read_pot_items_from_rom(rom: bytes, address: int) -> tuple:
+        pots = []
+        offset = address
+        while True:
+            x, y = rom[offset], rom[offset + 1]
+            if x == 0xFF and y == 0xFF:
+                return tuple(pots)
+            pots.append(FilledPot(x, y, rom[offset + 2]))
+            offset += 3
 
 
 if __name__ == "__main__":

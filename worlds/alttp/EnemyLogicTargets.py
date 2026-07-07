@@ -82,11 +82,13 @@ MISERY_MIRE_WIZZROBES_ROOM = "Misery Mire (Wizzrobes Room)"
 MISERY_MIRE_MAIN_LOBBY_ROOM = "Misery Mire (Main Lobby)"
 MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST = "Misery Mire (Bridge Chest Room) - Southeast"
 MISERY_MIRE_SPIKE_CHEST_ROOM = "Misery Mire (Spike Chest Room)"
+MISERY_MIRE_DARK_CANE_ROOM_NORTH = "Misery Mire (Dark Cane Room) - North"
 GANONS_TOWER_WIZZROBES_TOP_HALF = "Ganon's Tower (Wizzrobes Rooms)"
 GANONS_TOWER_GAUNTLET_123_ROOM = "Ganon's Tower (Gauntlet 1/2/3)"
 GANONS_TOWER_GAUNTLET_123_NORTH = "Ganon's Tower (Gauntlet 1/2/3) - North"
 GANONS_TOWER_GAUNTLET_123_NORTHEAST = "Ganon's Tower (Gauntlet 1/2/3) - Northeast"
 GANONS_TOWER_GAUNTLET_45_ROOM = "Ganon's Tower (Gauntlet 4/5)"
+GANONS_TOWER_GAUNTLET_45_NORTHWEST = "Ganon's Tower (Gauntlet 4/5) - Northwest"
 GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST = "Ganon's Tower (Block Puzzle Room) - Northeast"
 GANONS_TOWER_BIG_CHEST_ROOM_NORTHEAST = "Ganon's Tower (Big Chest Room) - Northeast"
 GANONS_TOWER_SPIKE_PIT_EAST = "Ganon's Tower (Spike Pit Room) - East"
@@ -94,9 +96,9 @@ GANONS_TOWER_MIMICS_BOTTOM_HALF = "Ganon's Tower (Mimics Rooms) - Bottom Half"
 GANONS_TOWER_MIMICS_NORTHWEST = "Ganon's Tower (Mimics Rooms) - Northwest"
 GANONS_TOWER_MIMICS_SOUTHWEST = "Ganon's Tower (Mimics Rooms) - Southwest"
 GANONS_TOWER_MIMICS_WEST = "Ganon's Tower (Mimics Rooms) - West"
-GANONS_TOWER_LANMOLAS_NORTHWEST = "Ganon's Tower (Lanmolas Room) - Northwest"
 GANONS_TOWER_TILE_TORCH_PUZZLE_TOP_LEFT = "Ganon's Tower (Tile / Torch Puzzle Room) - Top Left"
 GANONS_TOWER_WINDER_WARP_MAZE_NORTH = "Ganon's Tower (Winder / Warp Maze Room) - North"
+ICE_PALACE_ICE_FLOOR_ROOM_SOUTHWEST = "Ice Palace (Room with ice floor, key, and 4 wall rats) - Southwest"
 HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM = "Hyrule Castle (Pre-Boomerang Chest Room)"
 HYRULE_CASTLE_SWITCH_ROOM_SOUTH = "Hyrule Castle (Switch Room) - South"
 THIEVES_TOWN_JAIL_CELLS_TOP_LEFT = "Thieves Town (Basement)"
@@ -269,6 +271,11 @@ ENEMY_CLEAR_TARGETS = (
     ),
     EnemyClearTarget(name=MISERY_MIRE_SPIKE_CHEST_ROOM, room_name="Misery Mire (Spike Key Chest Room)"),
     EnemyClearTarget(
+        name=MISERY_MIRE_DARK_CANE_ROOM_NORTH,
+        room_name="Misery Mire (Dark Cane Floor Switch Puzzle Room)",
+        max_y=256,
+    ),
+    EnemyClearTarget(
         name=GANONS_TOWER_GAUNTLET_123_ROOM,
         room_name="Ganon's Tower (Gauntlet 1/2/3)",
     ),
@@ -282,6 +289,12 @@ ENEMY_CLEAR_TARGETS = (
     EnemyClearTarget(
         name=GANONS_TOWER_GAUNTLET_45_ROOM,
         room_name="Ganon's Tower (Gauntlet 4/5)",
+    ),
+    EnemyClearTarget(
+        name=GANONS_TOWER_GAUNTLET_45_NORTHWEST,
+        room_name="Ganon's Tower (Gauntlet 4/5)",
+        max_x=256,
+        max_y=256,
     ),
     EnemyClearTarget(
         name=GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST,
@@ -315,12 +328,6 @@ ENEMY_CLEAR_TARGETS = (
     ),
     EnemyClearTarget(name=GANONS_TOWER_MIMICS_WEST, room_name="Ganon's Tower (Mimics Rooms)", max_x=256),
     EnemyClearTarget(
-        name=GANONS_TOWER_LANMOLAS_NORTHWEST,
-        room_name="Ganon's Tower (Lanmolas Room)",
-        max_x=256,
-        max_y=256,
-    ),
-    EnemyClearTarget(
         name=GANONS_TOWER_TILE_TORCH_PUZZLE_TOP_LEFT,
         room_name="Ganon's Tower (Tile / Torch Puzzle Room)",
         max_x=256,
@@ -330,6 +337,12 @@ ENEMY_CLEAR_TARGETS = (
         name=GANONS_TOWER_WINDER_WARP_MAZE_NORTH,
         room_name="Ganon's Tower (Winder / Warp Maze Room)",
         max_y=256,
+    ),
+    EnemyClearTarget(
+        name=ICE_PALACE_ICE_FLOOR_ROOM_SOUTHWEST,
+        room_name="Ice Palace (Room with ice floor, key, and 4 wall rats)",
+        max_x=256,
+        min_y=256,
     ),
     EnemyClearTarget(
         name=THIEVES_TOWN_JAIL_CELLS_TOP_LEFT,

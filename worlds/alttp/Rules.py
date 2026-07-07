@@ -27,13 +27,13 @@ from .EnemyLogicTargets import (
     DESERT_MAP_CHEST_NORTH_HALF,
     GANONS_TOWER_BIG_CHEST_ROOM_NORTHEAST,
     GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST,
-    GANONS_TOWER_LANMOLAS_NORTHWEST,
     GANONS_TOWER_MIMICS_NORTHWEST,
     GANONS_TOWER_MINI_HELMASAUR_KEY_DROP,
     GANONS_TOWER_GAUNTLET_123_ROOM,
     GANONS_TOWER_GAUNTLET_123_NORTH,
     GANONS_TOWER_GAUNTLET_123_NORTHEAST,
     GANONS_TOWER_GAUNTLET_45_ROOM,
+    GANONS_TOWER_GAUNTLET_45_NORTHWEST,
     GANONS_TOWER_MIMICS_BOTTOM_HALF,
     GANONS_TOWER_MIMICS_SOUTHWEST,
     GANONS_TOWER_MIMICS_WEST,
@@ -48,6 +48,7 @@ from .EnemyLogicTargets import (
     ICE_PALACE_BOMB_JUMP_ROOM_NORTHWEST,
     ICE_PALACE_BLOCK_PUZZLE_SOUTHEAST,
     ICE_PALACE_HIDDEN_CHEST_ROOM,
+    ICE_PALACE_ICE_FLOOR_ROOM_SOUTHWEST,
     ICE_PALACE_ICED_T_ROOM_SOUTHWEST,
     ICE_PALACE_MAP_ROOM_WEST,
     ICE_PALACE_PENGATORS_ROOM,
@@ -60,6 +61,7 @@ from .EnemyLogicTargets import (
     HERA_TILE_ROOM_SOUTHEAST,
     HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM,
     MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST,
+    MISERY_MIRE_DARK_CANE_ROOM_NORTH,
     MISERY_MIRE_MAIN_LOBBY_ROOM,
     MISERY_MIRE_SPIKE_CHEST_ROOM,
     MISERY_MIRE_WIZZROBES_ROOM,
@@ -96,11 +98,9 @@ from .PuzzleShuffle import (
     TAG_NE_KILL_ENEMY_FOR_CHEST,
     TAG_NE_KILL_ENEMY_TO_OPEN,
     TAG_NE_MOVE_BLOCK_TO_OPEN,
-    TAG_N_KILL_ENEMY_TO_OPEN,
     TAG_N_KILL_ENEMY_FOR_CHEST,
     TAG_NW_KILL_ENEMY_TO_OPEN,
     TAG_S_KILL_ENEMY_TO_OPEN,
-    TAG_NW_KILL_ENEMY_FOR_CHEST,
     TAG_SW_KILL_ENEMY_FOR_CHEST,
     TAG_SW_KILL_ENEMY_TO_OPEN,
     TAG_SW_MOVE_BLOCK_TO_OPEN,
@@ -115,7 +115,6 @@ from .PuzzleShuffle import (
     TAG_NOTHING,
     ROOM_VARIANT_KILL_ENEMIES,
     ROOM_VARIANT_TOGGLE_SWITCH,
-    ROOM_VARIANT_HOLD_SWITCH,
     ROOM_VARIANT_VANILLA,
 )
 from .Regions import LTTPRegionType, location_table
@@ -508,23 +507,8 @@ def global_rules(multiworld: MultiWorld, player: int):
              lambda state: state._lttp_has_key('Small Key (Hyrule Castle)', player, 4))
     set_rule(multiworld.get_entrance('Sewers Secret Room', player), lambda state: can_bomb_or_bonk(state, player))
 
-    aga_tower_circle_of_pots_tag_1 = (
-        world.puzzle_shuffle_state.aga_tower_circle_of_pots_tag_1
-        if world.puzzle_shuffle_state is not None
-        else TAG_W_KILL_ENEMY_TO_OPEN
-    )
-    aga_tower_circle_of_pots_tag_2 = (
-        world.puzzle_shuffle_state.aga_tower_circle_of_pots_tag_2
-        if world.puzzle_shuffle_state is not None
-        else None
-    )
-
     def can_solve_aga_tower_circle_of_pots_puzzle(state: CollectionState) -> bool:
-        if aga_tower_circle_of_pots_tag_1 == TAG_W_KILL_ENEMY_TO_OPEN:
-            return can_clear_enemy_region(state, player, AGA_TOWER_CIRCLE_OF_POTS_SOUTHWEST)
-        if aga_tower_circle_of_pots_tag_2 == TAG_SWITCH_OPENS_DOOR_HOLD:
-            return state.has('Cane of Somaria', player)
-        return True
+        return can_clear_enemy_region(state, player, AGA_TOWER_CIRCLE_OF_POTS_SOUTHWEST)
 
     set_rule(multiworld.get_entrance('Agahnim 1', player),
              lambda state: has_sword(state, player)
@@ -992,6 +976,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_TRIGGER_ACTIVATED_CHEST
     )
+    ice_palace_ice_floor_room_tag = (
+        world.puzzle_shuffle_state.ice_palace_ice_floor_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_SWITCH_OPENS_DOOR_TOGGLE
+    )
 
     def can_clear_ice_palace_bomb_floor_puzzle(state: CollectionState) -> bool:
         return (
@@ -1075,6 +1064,15 @@ def global_rules(multiworld: MultiWorld, player: int):
     if ice_palace_spike_room_tag == TAG_SW_KILL_ENEMY_FOR_CHEST:
         add_rule(multiworld.get_location('Ice Palace - Spike Room', player),
                  lambda state: can_clear_enemy_region(state, player, ICE_PALACE_SPIKE_ROOM_SOUTHWEST))
+
+    def can_pass_ice_palace_ice_floor_room_puzzle(state: CollectionState) -> bool:
+        if ice_palace_ice_floor_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
+        if ice_palace_ice_floor_room_tag == TAG_SW_KILL_ENEMY_TO_OPEN:
+            return can_clear_enemy_region(state, player, ICE_PALACE_ICE_FLOOR_ROOM_SOUTHWEST)
+        return True
+
+    add_rule(multiworld.get_location('Ice Palace - Iced T Room', player), can_pass_ice_palace_ice_floor_room_puzzle)
     # This is a complicated rule, so let's break it down.
     # Hookshot always suffices to get to the right side.
     # Also, once you get over there, you have to cross the spikes, so that's the last line.
@@ -1091,7 +1089,8 @@ def global_rules(multiworld: MultiWorld, player: int):
                 ('Ice Palace - Big Key Chest', player),
                 ('Ice Palace - Map Chest', player)])
             else state._lttp_has_key('Small Key (Ice Palace)', player, 6))) and (
-            world.can_take_damage or state.has('Hookshot', player) or state.has('Cape', player) or state.has('Cane of Byrna', player)))
+            world.can_take_damage or state.has('Hookshot', player) or state.has('Cape', player) or state.has('Cane of Byrna', player))
+                                                                                  and can_pass_ice_palace_ice_floor_room_puzzle(state))
     set_rule(multiworld.get_entrance('Ice Palace (East Top)', player), lambda state: can_lift_rocks(state, player) and state.has('Hammer', player))
 
     set_rule(multiworld.get_entrance('Misery Mire Entrance Gap', player), lambda state: (state.has('Pegasus Boots', player) or state.has('Hookshot', player)) and can_clear_enemy_region(state, player, MISERY_MIRE_WIZZROBES_ROOM))
@@ -1117,6 +1116,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         world.puzzle_shuffle_state.misery_mire_main_lobby_tag
         if world.puzzle_shuffle_state is not None
         else TAG_TRIGGER_ACTIVATED_CHEST
+    )
+    misery_mire_dark_cane_room_tag = (
+        world.puzzle_shuffle_state.misery_mire_dark_cane_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_SWITCH_OPENS_DOOR_HOLD
     )
     if misery_mire_bridge_chest_tag_2 == TAG_SE_KILL_ENEMY_TO_OPEN:
         add_rule(multiworld.get_location('Misery Mire - Bridge Chest', player),
@@ -1153,7 +1157,16 @@ def global_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_location('Misery Mire - Compass Chest', player),
              lambda state: misery_mire_tile_room_tag != TAG_LIGHT_TORCHES_TO_OPEN or has_fire_source(state, player))
     set_rule(multiworld.get_location('Misery Mire - Big Key Chest', player), lambda state: has_fire_source(state, player))
-    set_rule(multiworld.get_entrance('Misery Mire (Vitreous)', player), lambda state: state.has('Cane of Somaria', player) and can_use_bombs(state, player))
+
+    def can_pass_misery_mire_dark_cane_room_puzzle(state: CollectionState) -> bool:
+        if misery_mire_dark_cane_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
+        if misery_mire_dark_cane_room_tag == TAG_N_KILL_ENEMY_FOR_CHEST:
+            return can_clear_enemy_region(state, player, MISERY_MIRE_DARK_CANE_ROOM_NORTH)
+        return True
+
+    set_rule(multiworld.get_entrance('Misery Mire (Vitreous)', player),
+             lambda state: can_use_bombs(state, player) and can_pass_misery_mire_dark_cane_room_puzzle(state))
 
     set_rule(multiworld.get_entrance('Turtle Rock Entrance Gap', player), lambda state: state.has('Cane of Somaria', player))
     set_rule(multiworld.get_entrance('Turtle Rock Entrance Gap Reverse', player), lambda state: state.has('Cane of Somaria', player))
@@ -1323,10 +1336,15 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_NE_MOVE_BLOCK_TO_OPEN
     )
-    gt_block_puzzle_push_block_target = (
-        world.puzzle_shuffle_state.gt_block_puzzle_push_block_target
+    gt_tile_torch_puzzle_tag = (
+        world.puzzle_shuffle_state.gt_tile_torch_puzzle_tag
         if world.puzzle_shuffle_state is not None
-        else None
+        else TAG_LIGHT_TORCHES_TO_OPEN
+    )
+    gt_torches_1_tag = (
+        world.puzzle_shuffle_state.gt_torches_1_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_LIGHT_TORCHES_TO_OPEN
     )
     gt_big_chest_room_tag = (
         world.puzzle_shuffle_state.gt_big_chest_room_tag
@@ -1348,8 +1366,8 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else ROOM_VARIANT_VANILLA
     )
-    gt_lanmolas_room_variant = (
-        world.puzzle_shuffle_state.gt_lanmolas_room_variant
+    gt_gauntlet_45_room_variant = (
+        world.puzzle_shuffle_state.gt_gauntlet_45_room_variant
         if world.puzzle_shuffle_state is not None
         else ROOM_VARIANT_VANILLA
     )
@@ -1368,10 +1386,26 @@ def global_rules(multiworld: MultiWorld, player: int):
 
     def can_solve_gt_hookshot_room_puzzle(state: CollectionState) -> bool:
         if gt_block_puzzle_tag == TAG_NE_MOVE_BLOCK_TO_OPEN:
-            return gt_block_puzzle_push_block_target is not None or state.has('Hammer', player)
-        if gt_block_puzzle_tag == TAG_NE_KILL_ENEMY_FOR_CHEST:
+            return state.has('Hammer', player)
+        if not (state.has('Hammer', player) or state.has('Pegasus Boots', player)):
+            return False
+        if gt_block_puzzle_tag == TAG_NE_KILL_ENEMY_TO_OPEN:
             return can_clear_enemy_region(state, player, GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST)
         if gt_block_puzzle_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
+        return True
+
+    def can_pass_gt_tile_torch_key_door_puzzle(state: CollectionState) -> bool:
+        if gt_tile_torch_puzzle_tag == TAG_LIGHT_TORCHES_TO_OPEN:
+            return state.has('Fire Rod', player)
+        if gt_tile_torch_puzzle_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
+        return True
+
+    def can_pass_gt_torches_1_puzzle(state: CollectionState) -> bool:
+        if gt_torches_1_tag == TAG_LIGHT_TORCHES_TO_OPEN:
+            return has_fire_source(state, player)
+        if gt_torches_1_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
             return state.has('Cane of Somaria', player)
         return True
 
@@ -1385,52 +1419,25 @@ def global_rules(multiworld: MultiWorld, player: int):
     def can_pass_gt_gauntlet_123_puzzle(state: CollectionState) -> bool:
         if gt_gauntlet_123_room_variant == ROOM_VARIANT_VANILLA:
             return can_clear_enemy_region(state, player, GANONS_TOWER_GAUNTLET_123_ROOM)
-        if gt_gauntlet_123_room_variant in (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH):
-            return (
-                can_clear_enemy_region(state, player, GANONS_TOWER_GAUNTLET_123_NORTHEAST)
-                and (
-                    gt_gauntlet_123_room_variant != ROOM_VARIANT_HOLD_SWITCH
-                    or state.has('Cane of Somaria', player)
-                )
-            )
-        return (
-            can_clear_enemy_regions(state, player, GANONS_TOWER_GAUNTLET_123_NORTH)
-            and (
-                gt_gauntlet_123_room_variant != ROOM_VARIANT_KILL_ENEMIES + 10
-                or state.has('Cane of Somaria', player)
-            )
-        )
+        if gt_gauntlet_123_room_variant == ROOM_VARIANT_TOGGLE_SWITCH:
+            return can_clear_enemy_region(state, player, GANONS_TOWER_GAUNTLET_123_NORTHEAST)
+        return can_clear_enemy_regions(state, player, GANONS_TOWER_GAUNTLET_123_NORTH)
 
     def can_pass_gt_mimics_puzzle(state: CollectionState) -> bool:
         if gt_mimics_room_variant == ROOM_VARIANT_VANILLA:
             return can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_BOTTOM_HALF)
         if gt_mimics_room_variant == 1:
             return can_clear_enemy_regions(state, player, GANONS_TOWER_MIMICS_BOTTOM_HALF, GANONS_TOWER_MIMICS_NORTHWEST)
-        if gt_mimics_room_variant in (2, 3):
-            return (
-                can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_BOTTOM_HALF)
-                and (gt_mimics_room_variant != 3 or state.has('Cane of Somaria', player))
-            )
-        if gt_mimics_room_variant in (4, 5):
-            return (
-                can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_SOUTHWEST)
-                and (gt_mimics_room_variant != 5 or state.has('Cane of Somaria', player))
-            )
-        return (
-            can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_WEST)
-            and (gt_mimics_room_variant != 7 or state.has('Cane of Somaria', player))
-        )
+        if gt_mimics_room_variant == 2:
+            return can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_BOTTOM_HALF)
+        if gt_mimics_room_variant == 4:
+            return can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_SOUTHWEST)
+        return can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_WEST)
 
-    def can_pass_gt_lanmolas_puzzle(state: CollectionState) -> bool:
-        if gt_lanmolas_room_variant in (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH):
-            return (
-                can_clear_enemy_region(state, player, GANONS_TOWER_LANMOLAS_NORTHWEST)
-                and (
-                    gt_lanmolas_room_variant != ROOM_VARIANT_HOLD_SWITCH
-                    or state.has('Cane of Somaria', player)
-                )
-            )
-        return True
+    def can_pass_gt_gauntlet_45_puzzle(state: CollectionState) -> bool:
+        if gt_gauntlet_45_room_variant == ROOM_VARIANT_VANILLA:
+            return can_clear_enemy_region(state, player, GANONS_TOWER_GAUNTLET_45_ROOM)
+        return can_clear_enemy_region(state, player, GANONS_TOWER_GAUNTLET_45_NORTHWEST)
 
     def can_enter_gt_firesnake_room(state: CollectionState) -> bool:
         return gt_winder_warp_maze_tag_2 != TAG_N_KILL_ENEMY_FOR_CHEST or can_clear_enemy_region(
@@ -1475,7 +1482,7 @@ def global_rules(multiworld: MultiWorld, player: int):
                     item_name_in_location_names(state, 'Big Key (Ganons Tower)', player, zip(randomizer_room_chests, [player] * len(randomizer_room_chests))) and state._lttp_has_key('Small Key (Ganons Tower)', player, 6))))
 
     # Once again it is possible to need more than 7 keys...
-    set_rule(multiworld.get_entrance('Ganons Tower (Tile Room) Key Door', player), lambda state: state.has('Fire Rod', player)
+    set_rule(multiworld.get_entrance('Ganons Tower (Tile Room) Key Door', player), lambda state: can_pass_gt_tile_torch_key_door_puzzle(state)
              and can_clear_enemy_region(state, player, GANONS_TOWER_TILE_TORCH_PUZZLE_TOP_LEFT)
              and (state._lttp_has_key('Small Key (Ganons Tower)', player, 7) or (
                     item_name_in_location_names(state, 'Big Key (Ganons Tower)', player, zip(compass_room_chests, [player] * len(compass_room_chests))) and state._lttp_has_key('Small Key (Ganons Tower)', player, 5)) or (
@@ -1484,7 +1491,7 @@ def global_rules(multiworld: MultiWorld, player: int):
                     item_name_in_location_names(state, 'Big Key (Ganons Tower)', player, zip(back_chests, [player] * len(back_chests))) and state._lttp_has_key('Small Key (Ganons Tower)', player, 5)))
     # Actual requirements
     for location in compass_room_chests:
-        set_rule(multiworld.get_location(location, player), lambda state: (can_use_bombs(state, player) or state.has("Cane of Somaria", player)) and state.has('Fire Rod', player) and (state._lttp_has_key('Small Key (Ganons Tower)', player, 7) or (
+        set_rule(multiworld.get_location(location, player), lambda state: (can_use_bombs(state, player) or state.has("Cane of Somaria", player)) and can_pass_gt_tile_torch_key_door_puzzle(state) and (state._lttp_has_key('Small Key (Ganons Tower)', player, 7) or (
                     item_name_in_location_names(state, 'Big Key (Ganons Tower)', player, zip(compass_room_chests, [player] * len(compass_room_chests))) and state._lttp_has_key('Small Key (Ganons Tower)', player, 5)) or (
                     small_key_or_ring_in_location_names(state, 'Small Key (Ganons Tower)', player, zip(compass_room_chests, [player] * len(compass_room_chests))) and state._lttp_has_key('Small Key (Ganons Tower)', player, 6))))
 
@@ -1501,10 +1508,10 @@ def global_rules(multiworld: MultiWorld, player: int):
              and can_pass_gt_spike_pit_puzzle(state)
              and can_pass_gt_mimics_puzzle(state))
     set_rule(multiworld.get_entrance('Ganons Tower Torch Rooms', player),
-             lambda state: can_clear_enemy_regions(state, player, GANONS_TOWER_WIZZROBES_TOP_HALF, GANONS_TOWER_GAUNTLET_45_ROOM)
+             lambda state: can_clear_enemy_region(state, player, GANONS_TOWER_WIZZROBES_TOP_HALF)
              and can_pass_gt_gauntlet_123_puzzle(state)
-             and can_pass_gt_lanmolas_puzzle(state)
-             and has_fire_source(state, player)
+             and can_pass_gt_gauntlet_45_puzzle(state)
+             and can_pass_gt_torches_1_puzzle(state)
              and state.multiworld.get_entrance('Ganons Tower Torch Rooms', player).parent_region.dungeon.bosses['middle'].can_defeat(state))
     set_rule(multiworld.get_location('Ganons Tower - Mini Helmasaur Key Drop', player), lambda state: can_kill_key_drop_enemy(state, player, GANONS_TOWER_MINI_HELMASAUR_KEY_DROP))
     set_rule(multiworld.get_location('Ganons Tower - Pre-Moldorm Chest', player),

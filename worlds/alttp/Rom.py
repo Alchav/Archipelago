@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "902f840986705336c637e25d6b654315"
+RANDOMIZERBASEHASH: str = "3338ebcdb1c5918d1fcc285628aa4380"
 ROM_PLAYER_LIMIT: int = 255
 HINT_READ_TABLE_ADDRESS: int = 0x1863B0
 HINT_READ_TABLE_SIZE: int = 0x100
@@ -1912,12 +1912,18 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
         enemy_shuffle_state = getattr(local_world, "enemy_shuffle_state", None)
         combat_model = getattr(local_world, "enemy_combat_model", None)
         combat_model = getattr(enemy_shuffle_state, "combat_model", None) or combat_model
+        existing_combat_model = combat_model
+        base_combat_model = combat_model or enemizer_patches.VANILLA_COMBAT_MODEL
+        if local_world.options.killable_thieves:
+            base_combat_model = enemizer_patches.with_killable_thief_combat_model(base_combat_model)
+            combat_model = base_combat_model
         damage_class_key = enemizer_patches._option_key(local_world.options.randomize_damage_classes)
         enemy_health_key = enemizer_patches._option_key(local_world.options.enemy_health)
-        if combat_model is None and damage_class_key != enemizer_patches.VANILLA_RANDOMIZE_DAMAGE_CLASSES:
+        if existing_combat_model is None and damage_class_key != enemizer_patches.VANILLA_RANDOMIZE_DAMAGE_CLASSES:
             combat_model = enemizer_patches.build_randomized_damage_class_combat_model(
                 enemizer_patches._make_native_enemizer_rng(local_world),
                 damage_class_key,
+                base_combat_model,
                 max_attacks_in_logic=local_world.options.max_attacks_in_logic.value,
                 enemy_health_key=enemy_health_key,
                 item_pool_key=enemizer_patches._option_key(getattr(local_world.options, "item_pool", "normal")),
@@ -1946,9 +1952,6 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
             rom.write_bytes(0x1F2D5, (0x54, 0x9C))
             rom.write_byte(0x1F2E5, 0xB0)
             rom.write_byte(0x1F2EB, 0xD0)
-
-        if local_world.options.killable_thieves:
-            enemizer_patches._apply_killable_thief(rom)
 
         if enemy_health_key != "default" or enemy_damage_key != "default":
             rng = enemizer_patches._make_native_enemizer_rng(local_world)

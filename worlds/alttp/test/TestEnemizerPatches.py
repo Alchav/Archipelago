@@ -16,15 +16,12 @@ from worlds.alttp.EnemizerPatches import (
     RANDOMIZED_HIDDEN_ENEMY_CHANCE_POOL,
     RETRO_ARROW_REPLACEMENT_CHECK_ADDRESS,
     RETRO_RUPEE_REPLACEMENT_SPRITE_ID,
-    THIEF_DEFAULT_HP,
-    THIEF_SPRITE_ID,
     TILE_TRAP_FLOOR_TILE_ADDRESS,
     TRINEXX_ICE_FLOOR_ROUTINE_ADDRESS,
     TRINEXX_ICE_PROJECTILE_TILE_ADDRESS,
     VANILLA_HIDDEN_ENEMY_CHANCE_POOL,
     SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS,
     apply_enemy_combat_data,
-    _apply_killable_thief,
     _apply_randomized_tile_trap_floor_tile,
     _get_enemizer_symbol,
     _make_native_enemizer_rng,
@@ -75,6 +72,8 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES,
     SWORD_BEAM_DAMAGE_CLASS,
     TEMPERED_SWORD_DAMAGE_CLASSES,
+    THIEF_DEFAULT_HP,
+    THIEF_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
@@ -88,6 +87,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     get_incinerating_damage_classes,
     get_killing_damage_classes,
     is_defeating_damage_effect_for_nightmare,
+    with_killable_thief_combat_model,
     _swap_damage_class_effects,
 )
 
@@ -672,13 +672,14 @@ class TestEnemizerPatches(unittest.TestCase):
             RANDOMIZED_HIDDEN_ENEMY_CHANCE_POOL,
         )
         self.assertEqual(rom.read_byte(item_table_address + 5), RETRO_RUPEE_REPLACEMENT_SPRITE_ID)
-        self.assertEqual(rom.read_byte(not_item_sprite_address + 4), THIEF_SPRITE_ID)
-        self.assertNotEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID), 0x08)
-        self.assertGreaterEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID), 2)
-        self.assertLess(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID), 25)
+        self.assertEqual(rom.read_byte(not_item_sprite_address + 4), 0)
+        self.assertEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID), THIEF_DEFAULT_HP)
         self.assertGreaterEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + included_hp_sprite_id), 2)
         self.assertLess(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + included_hp_sprite_id), 25)
-        self.assertEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + excluded_sprite_id), 0x07)
+        self.assertEqual(
+            rom.read_byte(ENEMY_HP_TABLE_ADDRESS + excluded_sprite_id),
+            VANILLA_COMBAT_MODEL.enemy_health_table[excluded_sprite_id],
+        )
         red_hardhat_hp, blue_hardhat_hp = rom.read_bytes(HARDHAT_BEETLE_HP_TABLE_ADDRESS, 2)
         self.assertGreaterEqual(red_hardhat_hp, 2)
         self.assertLess(red_hardhat_hp, 25)
@@ -734,6 +735,29 @@ class TestEnemizerPatches(unittest.TestCase):
         self._apply_native_enemizer_features(world, rom)
 
         self.assertEqual(rom.read_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID), THIEF_DEFAULT_HP)
+        self.assertEqual(
+            tuple(rom.read_bytes(
+                SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS + (THIEF_SPRITE_ID * 8),
+                8,
+            )),
+            tuple(rom.read_bytes(
+                SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS + (0x83 * 8),
+                8,
+            )),
+        )
+
+    def test_killable_thief_row_is_available_before_damage_class_shuffle(self) -> None:
+        combat_model = build_randomized_damage_class_combat_model(
+            random.Random(12345),
+            DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
+            with_killable_thief_combat_model(),
+        )
+
+        self.assertEqual(combat_model.enemy_health_table[THIEF_SPRITE_ID], THIEF_DEFAULT_HP)
+        self.assertTrue(any(
+            get_damage_effect(THIEF_SPRITE_ID, damage_class, combat_model)
+            for damage_class in range(16)
+        ))
 
     def test_bush_shuffle_without_enemy_shuffle_does_not_enable_sprite_randomization_flags(self) -> None:
         rom = FakeRom()
@@ -827,6 +851,10 @@ class TestEnemizerPatches(unittest.TestCase):
         bush_shuffle_enabled = bool(world.options.bush_shuffle)
         enemy_health_key = _option_key(world.options.enemy_health)
         enemy_damage_key = _option_key(world.options.enemy_damage)
+        combat_model = VANILLA_COMBAT_MODEL
+        if world.options.killable_thieves:
+            combat_model = with_killable_thief_combat_model(combat_model)
+        apply_enemy_combat_data(rom, combat_model)
 
         if enemy_shuffle_enabled or bush_shuffle_enabled:
             _set_enemizer_flag(rom, "EnemizerFlags_randomize_bushes", True)
@@ -844,9 +872,6 @@ class TestEnemizerPatches(unittest.TestCase):
             rom.write_byte(0x1F2E5, 0xB0)
             rom.write_byte(0x1F2EB, 0xD0)
 
-        if world.options.killable_thieves:
-            _apply_killable_thief(rom)
-
         if enemy_health_key != "default" or enemy_damage_key != "default":
             rng = _make_native_enemizer_rng(world)
         else:
@@ -854,7 +879,7 @@ class TestEnemizerPatches(unittest.TestCase):
 
         if enemy_health_key != "default":
             assert rng is not None
-            _randomize_enemy_health(rom, rng, enemy_health_key)
+            _randomize_enemy_health(rom, rng, enemy_health_key, combat_model)
 
         if enemy_damage_key != "default":
             assert rng is not None

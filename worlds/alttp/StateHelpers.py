@@ -30,6 +30,7 @@ from .enemizer_data.enemy_combat_data import (
     get_killing_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
     is_killing_damage_effect,
+    with_killable_thief_combat_model,
 )
 from BaseClasses import CollectionState
 
@@ -1045,6 +1046,8 @@ def _get_active_combat_model(state: CollectionState, player: int) -> EnemyCombat
     combat_model = getattr(enemy_shuffle_state, "combat_model", None)
     if combat_model is None:
         combat_model = getattr(world, "enemy_combat_model", None)
+    if combat_model is None and bool(getattr(world.options, "killable_thieves", False)):
+        return with_killable_thief_combat_model()
     return combat_model or VANILLA_COMBAT_MODEL
 
 

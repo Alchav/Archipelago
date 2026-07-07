@@ -259,6 +259,7 @@ def apply_pot_shuffle(rom: "TokenRom", shuffled_pots: dict[int, tuple[FilledPot,
         address = POT_ITEM_ADDRESSES[room_id]
         for index, pot in enumerate(pots):
             rom.write_bytes(address + (index * 3), (pot.x, pot.y, pot.item))
+        rom.write_bytes(address + (len(pots) * 3), (0xFF, 0xFF))
 
 
 def get_unique_pot_item_position(

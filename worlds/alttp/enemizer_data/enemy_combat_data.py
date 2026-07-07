@@ -40,6 +40,7 @@ HARDHAT_BEETLE_BLUE_HP = 6
 RED_BARI_SPRITE_ID = 0x23
 BUZZBLOB_SPRITE_ID = 0x0D
 FLOATING_STALFOS_HEAD_SPRITE_ID = 0x7C
+GREEN_EYEGORE_SPRITE_ID = 0x83
 THIEF_SPRITE_ID = 0xC4
 THIEF_DEFAULT_HP = 4
 YELLOW_SLIME_SPRITE_ID = 0x8F
@@ -589,6 +590,20 @@ VANILLA_COMBAT_MODEL = EnemyCombatModel(
     sprite_damage_subclasses=SPRITE_DAMAGE_SUBCLASSES,
     enemy_health_table=VANILLA_ENEMY_HEALTH,
 )
+
+
+def with_killable_thief_combat_model(
+    combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
+) -> EnemyCombatModel:
+    sprite_damage_subclasses = [tuple(row) for row in combat_model.sprite_damage_subclasses]
+    enemy_health_table = bytearray(combat_model.enemy_health_table)
+    sprite_damage_subclasses[THIEF_SPRITE_ID] = sprite_damage_subclasses[GREEN_EYEGORE_SPRITE_ID]
+    enemy_health_table[THIEF_SPRITE_ID] = THIEF_DEFAULT_HP
+    return EnemyCombatModel(
+        damage_sources=combat_model.damage_sources,
+        sprite_damage_subclasses=tuple(sprite_damage_subclasses),
+        enemy_health_table=bytes(enemy_health_table),
+    )
 
 
 def build_randomized_damage_class_combat_model(

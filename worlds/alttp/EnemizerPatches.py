@@ -16,13 +16,12 @@ from .enemizer_data.enemy_combat_data import (
     EnemyCombatModel,
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SNES_ADDRESS,
-    THIEF_DEFAULT_HP,
-    THIEF_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
     VANILLA_RANDOMIZE_DAMAGE_CLASSES,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
     build_randomized_damage_class_combat_model,
+    with_killable_thief_combat_model,
 )
 from .enemizer_data.symbols import ENEMIZER_SYMBOLS
 
@@ -333,6 +332,7 @@ def apply_enemy_combat_data(
     rom: "TokenRom | ProcedureRom",
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> None:
+    rom.write_bytes(ENEMY_HP_TABLE_ADDRESS, combat_model.enemy_health_table)
     rom.write_bytes(DAMAGE_SOURCE_TABLE_ADDRESS, build_damage_source_table_bytes(combat_model.damage_sources))
     rom.write_bytes(
         SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS,
@@ -468,11 +468,6 @@ def _object_id(object_bytes: bytes) -> Optional[int]:
 
 def _set_enemizer_flag(rom: "TokenRom | ProcedureRom", symbol_name: str, enabled: bool) -> None:
     rom.write_byte(_get_enemizer_symbol(symbol_name), 0x01 if enabled else 0x00)
-
-
-def _apply_killable_thief(rom: "TokenRom | ProcedureRom") -> None:
-    rom.write_byte(_get_enemizer_symbol("notItemSprite_Mimic") + 4, THIEF_SPRITE_ID)
-    rom.write_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID, THIEF_DEFAULT_HP)
 
 
 def _randomize_enemy_health(

@@ -18,6 +18,7 @@ from .enemizer_data.enemy_combat_data import (
     get_killing_damage_classes,
     get_hits_to_kill,
     get_progression_kill_damage_classes,
+    with_killable_thief_combat_model,
 )
 from .enemizer_data.enemy_room_metadata import (
     BOSS_ROOM_IDS,
@@ -398,7 +399,7 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         dont_randomize_overworld_area_ids=overworld_metadata["do_not_randomize_area_ids"],
         randomized_dungeon_rooms=randomized_dungeon_rooms,
         randomized_overworld_areas=randomized_overworld_areas,
-        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        combat_model=_get_world_combat_model(world),
         enemy_health_key=_get_world_enemy_health_key(world),
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
@@ -421,6 +422,15 @@ def _get_world_max_attacks_in_logic(world: "ALTTPWorld") -> int:
 
 def _get_world_killable_thieves(world: "ALTTPWorld") -> bool:
     return bool(getattr(world.options, "killable_thieves", False))
+
+
+def _get_world_combat_model(world: "ALTTPWorld") -> EnemyCombatModel:
+    combat_model = getattr(world, "enemy_combat_model", None)
+    if combat_model is not None:
+        return combat_model
+    if _get_world_killable_thieves(world):
+        return with_killable_thief_combat_model()
+    return VANILLA_COMBAT_MODEL
 
 
 def _get_world_available_damage_classes(world: "ALTTPWorld") -> frozenset[int]:
@@ -1680,7 +1690,7 @@ def _randomize_dungeon_rooms(
         dont_randomize_overworld_area_ids=frozenset(),
         randomized_dungeon_rooms={},
         randomized_overworld_areas={},
-        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        combat_model=_get_world_combat_model(world),
         enemy_health_key=_get_world_enemy_health_key(world),
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
@@ -1737,7 +1747,7 @@ def _randomize_overworld_areas(
         dont_randomize_overworld_area_ids=frozenset(area.area_id for area in overworld_areas.values() if area.do_not_randomize),
         randomized_dungeon_rooms={},
         randomized_overworld_areas={},
-        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        combat_model=_get_world_combat_model(world),
         enemy_health_key=_get_world_enemy_health_key(world),
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
