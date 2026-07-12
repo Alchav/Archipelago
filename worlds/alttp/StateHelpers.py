@@ -4,7 +4,6 @@ from typing import NamedTuple
 from .SubClasses import LTTPRegion
 from .enemizer_data.enemy_combat_data import (
     BLOB_TRANSFORM_EFFECT,
-    DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
     DIRECT_KILL_DELIVERY_OVERRIDES,
     EnemyCombatModel,
     FAIRY_TRANSFORM_EFFECT,
@@ -552,18 +551,14 @@ def can_kill_enemy_sprite(state: CollectionState, player: int, sprite_name: str)
 
 
 def _enemy_requirement_counts_for_room_clear(enemy_or_requirement) -> bool:
-    return _get_enemy_requirement(enemy_or_requirement).killable
+    return _get_enemy_requirement(enemy_or_requirement).counts_for_enemy_clear
 
 
 def _enemy_requirement_can_be_killed(state: CollectionState, player: int, requirement) -> bool:
     requirement = _get_enemy_requirement(requirement)
-    if requirement.killable:
-        return True
-
-    combat_model = _get_active_combat_model(state, player)
-    combat_reference_id = _get_combat_reference_id(requirement, combat_model)
-    if combat_reference_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
+    if not requirement.killable:
         return False
+    combat_model = _get_active_combat_model(state, player)
     return bool(_get_direct_kill_damage_classes(requirement, combat_model))
 
 
@@ -1092,6 +1087,11 @@ def _get_direct_kill_context(
         if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
             direct_kill_damage_classes = set(get_incinerating_damage_classes(combat_reference_id, combat_model))
             direct_kill_delivery_override = None
+        else:
+            direct_kill_damage_classes = {
+                damage_class for damage_class in direct_kill_damage_classes
+                if get_damage_effect(combat_reference_id, damage_class, combat_model) != FAIRY_TRANSFORM_EFFECT
+            }
     return direct_kill_damage_classes, direct_kill_delivery_override
 
 
@@ -1727,10 +1727,7 @@ def _get_transform_source_plans(
     player: int,
     transform_damage_classes: set[int],
 ) -> tuple[ResourceCosts, ...]:
-    plans: set[ResourceCosts] = set()
-    if 10 in transform_damage_classes and state.has("Magic Powder", player):
-        plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST))
-    return _prune_dominated_resource_costs(plans)
+    return _build_single_hit_plans_for_damage_classes(state, player, transform_damage_classes)
 
 
 def _get_buzzblob_disable_follow_up_plans(

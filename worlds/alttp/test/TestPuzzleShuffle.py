@@ -27,6 +27,7 @@ from worlds.alttp.PuzzleShuffle import (
     get_gt_block_puzzle_tag_choices,
     get_hera_big_key_chest_tag_choices,
     get_hera_tile_room_tag_choices,
+    get_ice_palace_map_room_tag_choices,
     get_eastern_pre_armos_tag_choices,
     get_desert_big_chest_tag_choices,
     get_desert_final_section_entrance_tag_choices,
@@ -115,7 +116,7 @@ class TestPuzzleShuffle(unittest.TestCase):
             ),
         )
 
-        self.assertIn(TAG_NW_KILL_ENEMY_TO_OPEN, get_desert_big_chest_tag_choices(world))
+        self.assertIn(TAG_SW_KILL_ENEMY_TO_OPEN, get_desert_big_chest_tag_choices(world))
 
     def test_desert_final_section_kill_enemy_tag_is_not_available_with_vanilla_beamos(self) -> None:
         world = SimpleNamespace(
@@ -188,7 +189,13 @@ class TestPuzzleShuffle(unittest.TestCase):
             ),
         )
 
-        self.assertEqual(state[DESERT_MAP_CHEST_ROOM_ID], (FilledPot(30, 5, 0x0C),))
+        self.assertEqual(
+            state[DESERT_MAP_CHEST_ROOM_ID],
+            (
+                FilledPot(62, 5, POT_HEART),
+                FilledPot(30, 5, 0x0C),
+            ),
+        )
 
     def test_hera_trigger_chest_tag_requires_item_in_bottom_right_pots(self) -> None:
         world = SimpleNamespace(
@@ -224,8 +231,8 @@ class TestPuzzleShuffle(unittest.TestCase):
             )
         }
 
-        self.assertIn(TAG_SWITCH_OPENS_DOOR_TOGGLE, get_hera_tile_room_tag_choices(world))
-        self.assertIn(TAG_SWITCH_OPENS_DOOR_HOLD, get_hera_tile_room_tag_choices(world))
+        self.assertNotIn(TAG_SWITCH_OPENS_DOOR_TOGGLE, get_hera_tile_room_tag_choices(world))
+        self.assertNotIn(TAG_SWITCH_OPENS_DOOR_HOLD, get_hera_tile_room_tag_choices(world))
 
     def test_hera_switch_tags_replace_existing_pot_items(self) -> None:
         state = {
@@ -268,7 +275,7 @@ class TestPuzzleShuffle(unittest.TestCase):
 
         self.assertEqual(
             get_gt_block_puzzle_tag_choices(world),
-            (TAG_NE_MOVE_BLOCK_TO_OPEN, TAG_NE_KILL_ENEMY_FOR_CHEST),
+            (TAG_NE_MOVE_BLOCK_TO_OPEN, TAG_NE_KILL_ENEMY_TO_OPEN),
         )
 
         world.pot_shuffle_state = {
@@ -409,7 +416,10 @@ class TestPuzzleShuffle(unittest.TestCase):
             enemy_shuffle_state=None,
         )
 
-        self.assertEqual(get_eastern_pre_armos_tag_choices(world), (TAG_E_KILL_ENEMY_TO_OPEN,))
+        self.assertEqual(
+            get_eastern_pre_armos_tag_choices(world),
+            (TAG_E_KILL_ENEMY_TO_OPEN, TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD),
+        )
 
     def test_ice_palace_block_puzzle_non_switch_tag_removes_pot_switch(self) -> None:
         state = {
@@ -433,6 +443,14 @@ class TestPuzzleShuffle(unittest.TestCase):
                 FilledPot(92, 25, POT_HEART),
             ),
         )
+
+    def test_ice_palace_map_room_kill_chest_tag_requires_shuffled_killable_enemy(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=False),
+            enemy_shuffle_state=None,
+        )
+
+        self.assertEqual(get_ice_palace_map_room_tag_choices(world), (TAG_TRIGGER_ACTIVATED_CHEST,))
 
     def test_pod_mimics_moving_wall_switch_tag_adds_pot_switch(self) -> None:
         state = {

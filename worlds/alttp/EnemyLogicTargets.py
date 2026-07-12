@@ -52,6 +52,7 @@ EASTERN_MAP_CHEST_ROOM_NORTHEAST = "Eastern Palace (Map Chest Room) - Northeast"
 EASTERN_DARK_SQUARE_NORTHWEST = "Eastern Palace (Dark Square Room) - Northwest"
 EASTERN_PRE_ARMOS_ROOM = "Eastern Palace (Pre-Armos Knights Rooms)"
 ICE_PALACE_BLOCK_PUZZLE_SOUTHEAST = "Ice Palace (Block Puzzle Room) - Southeast"
+ICE_PALACE_HOLE_TO_KHOLDSTARE_NORTHEAST = "Ice Palace (Hole to Kholdstare Room) - Northeast"
 ICE_PALACE_BOMB_FLOOR_SOUTHWEST = "Ice Palace (Bomb Floor / Bari Room) - Southwest"
 ICE_PALACE_BIG_KEY_ROOM_SOUTHWEST = "Ice Palace (Pengator / Big Key Room) - Southwest"
 DESERT_EAST_ENTRANCE_TOP_RIGHT = "Desert Palace (Compass Room)"
@@ -95,6 +96,7 @@ ICE_PALACE_ICE_FLOOR_ROOM_SOUTHWEST = "Ice Palace (Room with ice floor, key, and
 HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM = "Hyrule Castle (Pre-Boomerang Chest Room)"
 HYRULE_CASTLE_SWITCH_ROOM_SOUTH = "Hyrule Castle (Switch Room) - South"
 THIEVES_TOWN_JAIL_CELLS_TOP_LEFT = "Thieves Town (Basement)"
+THIEVES_TOWN_CONVEYOR_TOILET_NORTHWEST = "Thieves Town (Conveyor Toilet) - Northwest"
 THIEVES_TOWN_WEST_ATTIC_SOUTHWEST = "Thieves Town (West Attic Room) - Southwest"
 SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST = "Skull Woods (Big Key Room) - Southwest"
 SWAMP_STATUE_ROOM_SOUTHEAST = "Swamp Palace (Statue Room) - Southeast"
@@ -154,6 +156,12 @@ ENEMY_CLEAR_TARGETS = (
         room_name="Ice Palace (Block Puzzle Room)",
         min_x=256,
         min_y=256,
+    ),
+    EnemyClearTarget(
+        name=ICE_PALACE_HOLE_TO_KHOLDSTARE_NORTHEAST,
+        room_name="Ice Palace (Hole to Kholdstare Room)",
+        min_x=256,
+        max_y=256,
     ),
     EnemyClearTarget(
         name=ICE_PALACE_BOMB_FLOOR_SOUTHWEST,
@@ -344,6 +352,12 @@ ENEMY_CLEAR_TARGETS = (
     EnemyClearTarget(
         name=THIEVES_TOWN_JAIL_CELLS_TOP_LEFT,
         room_name="Thieves Town (Jail Cells Room)",
+        max_x=256,
+        max_y=256,
+    ),
+    EnemyClearTarget(
+        name=THIEVES_TOWN_CONVEYOR_TOILET_NORTHWEST,
+        room_name="Thieves Town (Conveyor Toilet)",
         max_x=256,
         max_y=256,
     ),

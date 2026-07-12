@@ -9,11 +9,15 @@ from .enemizer_data.default_dungeon_room_enemies import DEFAULT_DUNGEON_ROOM_ENE
 from .enemizer_data.dungeon_sprite_addresses import DUNGEON_SPRITE_ADDRESSES, KEYED_SPRITE_ID_ADDRESSES
 from .enemizer_data.enemy_shuffle_base_data import DUNGEON_ENEMY_ROOMS, DUNGEON_SPRITE_GROUPS, OVERWORLD_ENEMY_AREAS
 from .enemizer_data.enemy_combat_data import (
-    DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
+    BLOB_TRANSFORM_EFFECT,
     DIRECT_KILL_DELIVERY_OVERRIDES,
+    FAIRY_TRANSFORM_EFFECT,
     KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
     EnemyCombatModel,
     VANILLA_COMBAT_MODEL,
+    YELLOW_SLIME_SPRITE_ID,
+    get_blob_transform_damage_classes,
+    get_damage_effect,
     get_incinerating_damage_classes,
     get_killing_damage_classes,
     get_hits_to_kill,
@@ -62,6 +66,17 @@ FLOPPING_FISH_SPRITE_ID = 0xD2
 OW_FALLING_ROCKS_SPRITE_ID = 0xF4
 OW_WALLMASTER_TO_HOULIHAN_SPRITE_ID = 0xFB
 WATER_TEKTITE_SPRITE_ID = 0x81
+ROOM_CLEAR_IGNORED_SPRITE_IDS = frozenset({
+    0x15,  # Anti-Fairy
+    0x5B,  # Spark (clockwise)
+    0x5C,  # Spark (counter-clockwise)
+    0x61,  # Beamos
+    0x7D,  # Big Spike Trap
+    0x82,  # Anti-Fairy Circle
+    0x8A,  # Spike Trap
+    0x9A,  # Kyameron
+    0xE8,  # Fake Master Sword
+})
 KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM = {
     "Fighter Sword": frozenset((1, 2)),
     "Master Sword": frozenset((1, 2, 3)),
@@ -152,6 +167,7 @@ class EnemySpriteRequirement:
     overlord: bool
     do_not_randomize: bool
     killable: bool
+    counts_for_enemy_clear: bool
     npc: bool
     never_use_dungeon: bool
     never_use_overworld: bool
@@ -1074,6 +1090,7 @@ def _load_enemy_sprite_requirements() -> tuple[EnemySpriteRequirement, ...]:
             overlord=entry.overlord,
             do_not_randomize=entry.do_not_randomize,
             killable=entry.killable,
+            counts_for_enemy_clear=_entry_counts_for_enemy_clear(entry),
             npc=entry.npc,
             never_use_dungeon=entry.never_use_dungeon,
             never_use_overworld=entry.never_use_overworld,
@@ -1095,6 +1112,21 @@ def _load_enemy_sprite_requirements() -> tuple[EnemySpriteRequirement, ...]:
             combat_reference_id=entry.combat_reference_id,
         )
         for entry in ENEMY_SPRITE_REQUIREMENTS
+    )
+
+
+def _entry_counts_for_enemy_clear(entry) -> bool:
+    if entry.counts_for_enemy_clear is not None:
+        return entry.counts_for_enemy_clear
+    return (
+        entry.is_enemy_sprite
+        and not entry.boss
+        and not entry.overlord
+        and not entry.npc
+        and not entry.is_object
+        and not entry.absorbable
+        and not entry.never_use_dungeon
+        and entry.sprite_id not in ROOM_CLEAR_IGNORED_SPRITE_IDS
     )
 
 
@@ -1375,7 +1407,29 @@ def _filter_requirements_for_room_water_state(
 
 
 def _is_effectively_killable(requirement: EnemySpriteRequirement) -> bool:
-    return requirement.killable or requirement.sprite_id == WATER_TEKTITE_SPRITE_ID
+    return requirement.killable
+
+
+def _damage_class_is_fairy_transform(
+    combat_reference_id: int,
+    damage_class: int,
+    combat_model: EnemyCombatModel,
+) -> bool:
+    return get_damage_effect(combat_reference_id, damage_class, combat_model) == FAIRY_TRANSFORM_EFFECT
+
+
+def _has_yellow_slime_follow_up_for_key_drop(state: EnemyShuffleState) -> bool:
+    candidate_damage_classes = set(get_killing_damage_classes(
+        YELLOW_SLIME_SPRITE_ID,
+        state.combat_model,
+        include_freeze_hammer=state.hammer_available_for_freeze,
+    ))
+    candidate_damage_classes &= set(get_progression_kill_damage_classes(YELLOW_SLIME_SPRITE_ID))
+    candidate_damage_classes &= state.available_damage_classes
+    return any(
+        _damage_class_kills_within_enemy_shuffle_logic(state, YELLOW_SLIME_SPRITE_ID, damage_class)
+        for damage_class in candidate_damage_classes
+    )
 
 
 def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
@@ -1385,7 +1439,7 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     combat_reference_id = _get_combat_reference_id(requirement, state.combat_model)
     if combat_reference_id is None:
         return False
-    if not _is_effectively_killable(requirement) and combat_reference_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
+    if not _is_effectively_killable(requirement):
         return False
 
     if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
@@ -1400,18 +1454,33 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
                     include_freeze_hammer=state.hammer_available_for_freeze,
                 )
             )
+            candidate_damage_classes |= set(get_blob_transform_damage_classes(combat_reference_id, state.combat_model))
         else:
             candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+            candidate_damage_classes |= (
+                set(get_blob_transform_damage_classes(combat_reference_id, state.combat_model))
+                & _get_deliverable_damage_classes(delivery_override)
+            )
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
     candidate_damage_classes &= state.available_damage_classes
+    candidate_damage_classes = {
+        damage_class for damage_class in candidate_damage_classes
+        if not _damage_class_is_fairy_transform(combat_reference_id, damage_class, state.combat_model)
+    }
 
     return any(
-        _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
+        (
+            get_damage_effect(combat_reference_id, damage_class, state.combat_model) == BLOB_TRANSFORM_EFFECT
+            and _has_yellow_slime_follow_up_for_key_drop(state)
+        )
+        or _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
         for damage_class in candidate_damage_classes
     )
 
 
 def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    if not requirement.counts_for_enemy_clear:
+        return False
     if not _is_effectively_killable(requirement) or requirement.sprite_id == STAL_SPRITE_ID:
         return False
 
@@ -1439,6 +1508,14 @@ def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: Enem
     )
 
 
+def _is_enemy_clear_dealbreaker(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    return requirement.counts_for_enemy_clear and not _can_be_shutter_room_clear_enemy(state, requirement)
+
+
+def _is_safe_for_enemy_clear_room(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    return not _is_enemy_clear_dealbreaker(state, requirement)
+
+
 def _damage_class_kills_within_enemy_shuffle_logic(
     state: EnemyShuffleState,
     combat_reference_id: int,
@@ -1453,6 +1530,16 @@ def _damage_class_kills_within_enemy_shuffle_logic(
         allow_frozen_hammer_kill=state.hammer_available_for_freeze,
     )
     return hit_count is not None and hit_count <= state.max_attacks_in_logic
+
+
+def _get_requirement_for_sprite_id(
+    state: EnemyShuffleState,
+    sprite_id: int,
+) -> EnemySpriteRequirement | None:
+    for requirement in state.sprite_requirements:
+        if requirement.sprite_id == sprite_id:
+            return requirement
+    return None
 
 
 def _get_combat_reference_id(requirement: EnemySpriteRequirement, combat_model: EnemyCombatModel) -> Optional[int]:
@@ -1821,8 +1908,7 @@ def _randomize_room_sprites(
                         killable_water_sprite_ids = [
                             requirement.sprite_id for requirement in possible_requirements
                             if requirement.is_water_sprite
-                            and _is_effectively_killable(requirement)
-                            and requirement.sprite_id != STAL_SPRITE_ID
+                            and _can_be_shutter_room_clear_enemy(state, requirement)
                         ]
                         if killable_water_sprite_ids:
                             replacement_water_sprite_ids = killable_water_sprite_ids
@@ -1836,19 +1922,23 @@ def _randomize_room_sprites(
                 return _build_randomized_room(room, selected_group, randomized_sprites, False)
 
             non_water_requirements = _filter_requirements_for_room_water_state(room, possible_requirements)
-            possible_sprite_ids = [requirement.sprite_id for requirement in non_water_requirements]
+            safe_non_water_requirements = [
+                requirement for requirement in non_water_requirements
+                if not room.is_shutter_room or _is_safe_for_enemy_clear_room(state, requirement)
+            ]
+            possible_sprite_ids = [requirement.sprite_id for requirement in safe_non_water_requirements]
             if not possible_sprite_ids:
                 return _build_randomized_room(room, selected_group, randomized_sprites, False)
             killable_sprite_ids = [
-                requirement.sprite_id for requirement in non_water_requirements
+                requirement.sprite_id for requirement in safe_non_water_requirements
                 if _can_be_shutter_room_clear_enemy(state, requirement)
             ]
             killable_key_sprite_ids = [
-                requirement.sprite_id for requirement in non_water_requirements
+                requirement.sprite_id for requirement in safe_non_water_requirements
                 if _can_be_key_drop_enemy(state, requirement)
             ]
             killable_shutter_key_sprite_ids = [
-                requirement.sprite_id for requirement in non_water_requirements
+                requirement.sprite_id for requirement in safe_non_water_requirements
                 if _can_be_key_drop_enemy(state, requirement)
                 and _can_be_shutter_room_clear_enemy(state, requirement)
             ]
@@ -2098,8 +2188,10 @@ def _validate_dungeon_room(
                 raise ValueError(f"Enemy shuffle placed non-killable shutter key enemy {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
             continue
 
-        if room.is_shutter_room and randomized_sprite.sprite_id not in killable_sprite_ids:
-            raise ValueError(f"Enemy shuffle placed non-killable shutter enemy {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
+        if room.is_shutter_room:
+            randomized_requirement = _get_requirement_for_sprite_id(state, randomized_sprite.sprite_id)
+            if randomized_requirement is not None and _is_enemy_clear_dealbreaker(state, randomized_requirement):
+                raise ValueError(f"Enemy shuffle placed enemy-clear blocker {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
 
         if randomized_sprite.sprite_id != STAL_SPRITE_ID and randomized_sprite.sprite_id not in possible_sprite_ids:
             raise ValueError(f"Enemy shuffle placed illegal sprite {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
@@ -2109,7 +2201,13 @@ def _validate_dungeon_room(
             requirement.sprite_id for requirement in _filter_requirements_for_room_water_state(room, state.sprite_requirements)
             if _can_be_shutter_room_clear_enemy(state, requirement)
         }
-        randomized_sprite_ids = {sprite.sprite_id for sprite in randomized_room.sprites}
+        randomized_sprite_ids = {
+            sprite.sprite_id for sprite in randomized_room.sprites
+            if (
+                (requirement := _get_requirement_for_sprite_id(state, sprite.sprite_id)) is not None
+                and requirement.counts_for_enemy_clear
+            )
+        }
         if not (randomized_sprite_ids & all_killable_sprite_ids):
             raise ValueError(f"Enemy shuffle left shutter room {room.room_id} without any killable enemies")
 

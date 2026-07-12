@@ -35,6 +35,7 @@ from worlds.alttp.EnemizerPatches import (
     apply_enemizer_base_patch,
 )
 from worlds.alttp.enemizer_data.enemy_combat_data import (
+    AGAHNIM_SPRITE_ID,
     ANTI_FAIRY_SPRITE_ID,
     BLOB_TRANSFORM_EFFECT,
     BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS,
@@ -276,6 +277,12 @@ class TestEnemizerPatches(unittest.TestCase):
                             get_damage_effect(sprite_id, damage_class, combat_model),
                             get_damage_effect(sprite_id, damage_class),
                         )
+                self.assertEqual(
+                    tuple(get_damage_effect(AGAHNIM_SPRITE_ID, damage_class, combat_model)
+                          for damage_class in range(16)),
+                    tuple(get_damage_effect(AGAHNIM_SPRITE_ID, damage_class)
+                          for damage_class in range(16)),
+                )
 
     def test_randomized_damage_classes_change_boss_rows(self) -> None:
         for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
@@ -417,6 +424,29 @@ class TestEnemizerPatches(unittest.TestCase):
                 for sprite_id in all_zero_sprite_ids:
                     for damage_class in range(16):
                         self.assertEqual(get_damage_effect(sprite_id, damage_class, combat_model), 0)
+
+    def test_randomized_damage_classes_only_include_thief_when_killable_thieves_enabled(self) -> None:
+        for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
+            with self.subTest(mode=mode, killable_thieves=False):
+                combat_model = build_randomized_damage_class_combat_model(random.Random(7), mode)
+                self.assertEqual(
+                    tuple(get_damage_effect(THIEF_SPRITE_ID, damage_class, combat_model)
+                          for damage_class in range(16)),
+                    tuple(get_damage_effect(THIEF_SPRITE_ID, damage_class)
+                          for damage_class in range(16)),
+                )
+
+            with self.subTest(mode=mode, killable_thieves=True):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(7),
+                    mode,
+                    killable_thieves=True,
+                )
+                self.assertEqual(combat_model.enemy_health_table[THIEF_SPRITE_ID], THIEF_DEFAULT_HP)
+                self.assertTrue(any(
+                    get_damage_effect(THIEF_SPRITE_ID, damage_class, combat_model)
+                    for damage_class in range(16)
+                ))
 
     def test_randomized_damage_classes_preserve_lost_sword_class_2(self) -> None:
         for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES:
@@ -751,6 +781,7 @@ class TestEnemizerPatches(unittest.TestCase):
             random.Random(12345),
             DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
             with_killable_thief_combat_model(),
+            killable_thieves=True,
         )
 
         self.assertEqual(combat_model.enemy_health_table[THIEF_SPRITE_ID], THIEF_DEFAULT_HP)

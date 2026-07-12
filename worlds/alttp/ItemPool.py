@@ -334,6 +334,8 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
             available_damage_classes=item_pool_damage_classes,
             hammer_available_for_freeze=hammer_available_for_freeze,
             swordless=bool(getattr(world.options, "swordless", False)),
+            killable_thieves=bool(getattr(world.options, "killable_thieves", False)),
+            enemy_shuffle=bool(getattr(world.options, "enemy_shuffle", False)),
         )
 
 

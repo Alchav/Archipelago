@@ -1891,7 +1891,12 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         water_tektite = requirements["Water Tektite"]
         kyameron = requirements["Kyameron"]
         floating_stalfos_head = requirements["Floating Stalfos Head"]
+        anti_fairy = requirements["Anti-Fairy"]
         spark = requirements["Spark (clockwise)"]
+        cucco = requirements["Cucco"]
+        thief = requirements["Thief"]
+        crystal_switch = requirements["Crystal Switch"]
+        agahnim = requirements["Agahnim"]
 
         self.assertTrue(deadrock.killable)
         self.assertEqual(deadrock.combat_reference_id, 39)
@@ -1920,8 +1925,28 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             ("Blue Boomerang", "Red Boomerang", "Cane of Somaria", "Cane of Byrna"),
         )
         self.assertEqual(floating_stalfos_head_override.abilities, tuple())
+        self.assertTrue(anti_fairy.killable)
+        self.assertFalse(anti_fairy.counts_for_enemy_clear)
         self.assertFalse(spark.killable)
+        self.assertFalse(spark.counts_for_enemy_clear)
         self.assertTrue(spark.cannot_have_key)
+        self.assertFalse(cucco.killable)
+        self.assertTrue(cucco.counts_for_enemy_clear)
+        for sprite_name in (
+            "Roller (vertical up)",
+            "Roller (vertical down)",
+            "Roller",
+            "Roller (horizontal)",
+            "Fire Bar (clockwise)",
+            "Fire Bar (counter-clockwise)",
+            "Chain Chomp",
+        ):
+            self.assertFalse(requirements[sprite_name].killable)
+            self.assertTrue(requirements[sprite_name].counts_for_enemy_clear)
+        self.assertTrue(thief.killable)
+        self.assertTrue(thief.cannot_have_key)
+        self.assertTrue(crystal_switch.killable)
+        self.assertTrue(agahnim.killable)
 
     def test_killable_sprites_have_reachable_combat_reference_data(self) -> None:
         for requirement in _load_enemy_sprite_requirements():
@@ -3093,7 +3118,10 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         excluded_rooms: tuple[int, ...] = tuple(),
         dont_randomize_rooms: tuple[int, ...] = tuple(),
         combat_reference_id: int | None = None,
+        counts_for_enemy_clear: bool | None = None,
     ) -> EnemySpriteRequirement:
+        if counts_for_enemy_clear is None:
+            counts_for_enemy_clear = not never_use_dungeon and not absorbable
         return EnemySpriteRequirement(
             sprite_name=sprite_name or f"sprite_{sprite_id:02x}",
             sprite_id=sprite_id,
@@ -3101,6 +3129,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             overlord=False,
             do_not_randomize=False,
             killable=killable,
+            counts_for_enemy_clear=counts_for_enemy_clear,
             npc=False,
             never_use_dungeon=never_use_dungeon,
             never_use_overworld=never_use_overworld,

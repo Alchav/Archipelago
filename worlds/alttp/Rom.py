@@ -1928,6 +1928,8 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
                 enemy_health_key=enemy_health_key,
                 item_pool_key=enemizer_patches._option_key(getattr(local_world.options, "item_pool", "normal")),
                 swordless=bool(getattr(local_world.options, "swordless", False)),
+                killable_thieves=bool(local_world.options.killable_thieves),
+                enemy_shuffle=bool(local_world.options.enemy_shuffle),
             )
         enemizer_patches.apply_enemy_combat_data(rom, combat_model or enemizer_patches.VANILLA_COMBAT_MODEL)
 
