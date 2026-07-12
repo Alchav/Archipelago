@@ -1155,6 +1155,41 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
 
+    def test_synthetic_mimic_uses_green_eyegore_damage_logic(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_enemy_shuffle = world.options.enemy_shuffle
+        original_enemy_shuffle_state = world.enemy_shuffle_state
+        try:
+            world.options.enemy_shuffle = True
+            world.enemy_shuffle_state = SimpleNamespace(
+                randomized_dungeon_rooms={
+                    75: RandomizedDungeonEnemyRoom(
+                        room_id=75,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0x04, 0x07, 0xB8, 0xB8, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            )
+
+            hammer_state = logic_test.get_state(item_factory(["Hammer"], world))
+            self.assertTrue(
+                can_clear_enemy_region(hammer_state, 1, POD_SOUTH_MIMICS_TOP_LEFT)
+            )
+        finally:
+            world.options.enemy_shuffle = original_enemy_shuffle
+            world.enemy_shuffle_state = original_enemy_shuffle_state
+
     def test_red_bari_key_enemy_requires_incineration_for_drop(self) -> None:
         logic_test = TestLightWorld()
         logic_test.setUp()
