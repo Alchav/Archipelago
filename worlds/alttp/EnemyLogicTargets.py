@@ -48,6 +48,7 @@ AGA_TOWER_CIRCLE_OF_POTS_TOP_HALF = "Agahnim's Tower (Pre-Circle of Pots)"
 AGA_TOWER_CIRCLE_OF_POTS_SOUTHWEST = "Agahnim's Tower (Pre-Circle of Pots) - Southwest"
 EASTERN_BIG_KEY_ROOM = "Eastern Palace (Big Key Room)"
 EASTERN_STALFOS_ROOM_SOUTHWEST = "Eastern Palace (Stalfos Spawn Room) - Southwest"
+EASTERN_MAP_CHEST_ROOM_NORTHEAST = "Eastern Palace (Map Chest Room) - Northeast"
 EASTERN_DARK_SQUARE_NORTHWEST = "Eastern Palace (Dark Square Room) - Northwest"
 EASTERN_PRE_ARMOS_ROOM = "Eastern Palace (Pre-Armos Knights Rooms)"
 ICE_PALACE_BLOCK_PUZZLE_SOUTHEAST = "Ice Palace (Block Puzzle Room) - Southeast"
@@ -129,6 +130,12 @@ ENEMY_CLEAR_TARGETS = (
         room_name="Eastern Palace (Stalfos Spawn Room)",
         max_x=256,
         min_y=256,
+    ),
+    EnemyClearTarget(
+        name=EASTERN_MAP_CHEST_ROOM_NORTHEAST,
+        room_name="Eastern Palace (Map Chest Room)",
+        min_x=256,
+        max_y=256,
     ),
     EnemyClearTarget(
         name=EASTERN_DARK_SQUARE_NORTHWEST,

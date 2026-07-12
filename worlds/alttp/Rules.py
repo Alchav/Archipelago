@@ -17,6 +17,7 @@ from .EnemyLogicTargets import (
     EASTERN_BIG_KEY_ROOM,
     EASTERN_DARK_EYEGORE_KEY_DROP,
     EASTERN_DARK_SQUARE_NORTHWEST,
+    EASTERN_MAP_CHEST_ROOM_NORTHEAST,
     EASTERN_PRE_ARMOS_ROOM,
     EASTERN_STALFOS_ROOM_SOUTHWEST,
     DESERT_BEAMOS_HELLWAY_BOTTOM_LEFT,
@@ -525,6 +526,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else None
     )
+    eastern_entrance_room_tag = (
+        world.puzzle_shuffle_state.eastern_entrance_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_SWITCH_OPENS_DOOR_TOGGLE
+    )
     eastern_dark_square_room_tag = (
         world.puzzle_shuffle_state.eastern_dark_square_room_tag
         if world.puzzle_shuffle_state is not None
@@ -561,6 +567,13 @@ def global_rules(multiworld: MultiWorld, player: int):
     def can_solve_eastern_map_chest_room_puzzle(state: CollectionState) -> bool:
         if eastern_map_chest_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
             return state.has('Cane of Somaria', player)
+        if eastern_map_chest_room_tag == TAG_NE_KILL_ENEMY_TO_OPEN:
+            return can_clear_enemy_region(state, player, EASTERN_MAP_CHEST_ROOM_NORTHEAST)
+        return True
+
+    def can_pass_eastern_entrance_room_puzzle(state: CollectionState) -> bool:
+        if eastern_entrance_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
         return True
 
     def can_solve_eastern_dark_square_room_puzzle(state: CollectionState) -> bool:
@@ -588,9 +601,14 @@ def global_rules(multiworld: MultiWorld, player: int):
         return True
 
     set_rule(multiworld.get_entrance('Eastern Palace Beyond Stalfos Room', player),
-             lambda state: can_pass_eastern_stalfos_room_puzzle(state)
+             lambda state: can_pass_eastern_entrance_room_puzzle(state)
+             and can_pass_eastern_stalfos_room_puzzle(state)
              and can_pass_eastern_big_chest_room_puzzle(state))
-    set_rule(multiworld.get_location('Eastern Palace - Map Chest', player), can_solve_eastern_map_chest_room_puzzle)
+    set_rule(multiworld.get_location('Eastern Palace - Cannonball Chest', player),
+             can_pass_eastern_entrance_room_puzzle)
+    set_rule(multiworld.get_location('Eastern Palace - Map Chest', player),
+             lambda state: can_pass_eastern_entrance_room_puzzle(state)
+             and can_solve_eastern_map_chest_room_puzzle(state))
     set_always_allow(multiworld.get_location('Eastern Palace - Big Key Chest', player),
                      lambda state, item: item.name == 'Big Key (Eastern Palace)' and item.player == player)
     eastern_big_key_chest_needs_room_clear = _eastern_big_key_chest_needs_room_clear(world)
