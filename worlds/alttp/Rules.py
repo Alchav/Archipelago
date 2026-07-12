@@ -70,6 +70,7 @@ from .EnemyLogicTargets import (
     SEWERS_KEY_RAT_KEY_DROP,
     SKULL_WOODS_SPIKE_CORNER_KEY_DROP,
     SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST,
+    SWAMP_STATUE_ROOM_SOUTHEAST,
     THIEVES_TOWN_JAIL_CELLS_TOP_LEFT,
     THIEVES_TOWN_WEST_ATTIC_SOUTHWEST,
     TURTLE_ROCK_POKEY_1_KEY_DROP,
@@ -772,10 +773,24 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_SWITCH_OPENS_DOOR_HOLD
     )
+    swamp_statue_room_switch_pot = (
+        world.puzzle_shuffle_state.swamp_statue_room_switch_pot
+        if world.puzzle_shuffle_state is not None
+        else None
+    )
+
+    def can_pass_swamp_statue_room_puzzle(state: CollectionState) -> bool:
+        if swamp_statue_room_tag == TAG_SE_KILL_ENEMY_TO_OPEN:
+            return can_clear_enemy_region(state, player, SWAMP_STATUE_ROOM_SOUTHEAST)
+        return (
+            swamp_statue_room_tag != TAG_SWITCH_OPENS_DOOR_HOLD
+            and swamp_statue_room_switch_pot is None
+        ) or state.has('Cane of Somaria', player)
+
     set_rule(multiworld.get_entrance('Swamp Palace (North)', player),
              lambda state: state.has('Hookshot', player)
              and state._lttp_has_key('Small Key (Swamp Palace)', player, 5)
-             and (swamp_statue_room_tag != TAG_SWITCH_OPENS_DOOR_HOLD or state.has('Cane of Somaria', player)))
+             and can_pass_swamp_statue_room_puzzle(state))
     if not world.options.small_key_shuffle and world.options.glitches_required not in ['hybrid_major_glitches', 'no_logic']:
         forbid_item(multiworld.get_location('Swamp Palace - Entrance', player), 'Big Key (Swamp Palace)', player)
     add_rule(multiworld.get_location('Swamp Palace - Prize', player), lambda state: state._lttp_has_key('Small Key (Swamp Palace)', player, 6))
@@ -1239,8 +1254,6 @@ def global_rules(multiworld: MultiWorld, player: int):
     )
 
     def can_pass_pod_final_section_puzzle(state: CollectionState) -> bool:
-        if pod_map_chest_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD and not state.has('Cane of Somaria', player):
-            return False
         if pod_map_chest_room_switch_pot is not None and not (
             state.can_reach('Palace of Darkness (Bonk Section)', 'Region', player)
             and state.has('Hammer', player)

@@ -97,6 +97,7 @@ HYRULE_CASTLE_SWITCH_ROOM_SOUTH = "Hyrule Castle (Switch Room) - South"
 THIEVES_TOWN_JAIL_CELLS_TOP_LEFT = "Thieves Town (Basement)"
 THIEVES_TOWN_WEST_ATTIC_SOUTHWEST = "Thieves Town (West Attic Room) - Southwest"
 SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST = "Skull Woods (Big Key Room) - Southwest"
+SWAMP_STATUE_ROOM_SOUTHEAST = "Swamp Palace (Statue Room) - Southeast"
 
 HYRULE_CASTLE_MAP_GUARD_KEY_DROP = "Hyrule Castle - Map Guard Key Drop"
 HYRULE_CASTLE_BOOMERANG_GUARD_KEY_DROP = "Hyrule Castle - Boomerang Guard Key Drop"
@@ -249,6 +250,12 @@ ENEMY_CLEAR_TARGETS = (
         room_name="Palace of Darkness (Warps / South Mimics Room)",
         max_x=256,
         max_y=256,
+    ),
+    EnemyClearTarget(
+        name=SWAMP_STATUE_ROOM_SOUTHEAST,
+        room_name="Swamp Palace (Statue Room)",
+        min_x=256,
+        min_y=256,
     ),
     EnemyClearTarget(
         name=MISERY_MIRE_WIZZROBES_ROOM,

@@ -324,7 +324,9 @@ TURTLE_ROCK_BIG_CHEST_TAG_CHOICES = (
 SWAMP_STATUE_ROOM_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_HOLD,
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
+    TAG_SE_KILL_ENEMY_TO_OPEN,
 )
+SWAMP_STATUE_ROOM_RIGHT_SWITCH_POT = (220, 26)
 POD_MAP_CHEST_ROOM_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_HOLD,
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
@@ -525,6 +527,7 @@ class PuzzleShuffleState:
     turtle_rock_big_chest_room_tag: int = TAG_NW_KILL_ENEMY_TO_OPEN
     turtle_rock_big_chest_room_switch_pot: tuple[int, int] | None = None
     swamp_statue_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
+    swamp_statue_room_switch_pot: tuple[int, int] | None = None
     pod_map_chest_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
     pod_map_chest_room_switch_pot: tuple[int, int] | None = None
     hera_hardhat_beetles_room_tag_2: int = TAG_SE_KILL_ENEMY_TO_OPEN
@@ -614,6 +617,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
     turtle_rock_chain_chomps_push_block_target = world.random.choice(TURTLE_ROCK_CHAIN_CHOMPS_PUSH_BLOCK_TARGETS)
     eastern_big_chest_room_tag = choice(get_eastern_big_chest_room_tag_choices(world))
     turtle_rock_crystaroller_room_variant = choice(get_turtle_rock_crystaroller_variants(world))
+    swamp_statue_room_tag = choice(SWAMP_STATUE_ROOM_TAG_CHOICES)
     pod_map_chest_room_tag = choice(POD_MAP_CHEST_ROOM_TAG_CHOICES)
     pod_map_chest_room_switch_pot = _choose_optional_switch_pot(
         world,
@@ -737,7 +741,9 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             TURTLE_ROCK_BIG_CHEST_ROOM_ID,
             frozenset((pot.x, pot.y) for pot in _get_current_pot_items(world, TURTLE_ROCK_BIG_CHEST_ROOM_ID)),
         ) if turtle_rock_big_chest_room_tag in HERA_SWITCH_TAG_CHOICES else None,
-        swamp_statue_room_tag=choice(SWAMP_STATUE_ROOM_TAG_CHOICES),
+        swamp_statue_room_tag=swamp_statue_room_tag,
+        swamp_statue_room_switch_pot=choice((None, SWAMP_STATUE_ROOM_RIGHT_SWITCH_POT))
+        if swamp_statue_room_tag in HERA_SWITCH_TAG_CHOICES else None,
         pod_map_chest_room_tag=pod_map_chest_room_tag,
         pod_map_chest_room_switch_pot=pod_map_chest_room_switch_pot,
         hera_hardhat_beetles_room_tag_2=hera_hardhat_beetles_room_tag_2,
@@ -906,6 +912,7 @@ def encode_puzzle_shuffle(state: PuzzleShuffleState | None) -> dict[str, int] | 
         "turtle_rock_big_chest_room_tag": state.turtle_rock_big_chest_room_tag,
         "turtle_rock_big_chest_room_switch_pot": state.turtle_rock_big_chest_room_switch_pot,
         "swamp_statue_room_tag": state.swamp_statue_room_tag,
+        "swamp_statue_room_switch_pot": state.swamp_statue_room_switch_pot,
         "pod_map_chest_room_tag": state.pod_map_chest_room_tag,
         "pod_map_chest_room_switch_pot": state.pod_map_chest_room_switch_pot,
         "hera_hardhat_beetles_room_tag_2": state.hera_hardhat_beetles_room_tag_2,
@@ -1015,6 +1022,7 @@ def decode_puzzle_shuffle(data: dict[str, int] | None) -> PuzzleShuffleState | N
         turtle_rock_big_chest_room_tag=int(data.get("turtle_rock_big_chest_room_tag", TAG_NW_KILL_ENEMY_TO_OPEN)),
         turtle_rock_big_chest_room_switch_pot=_decode_position(data.get("turtle_rock_big_chest_room_switch_pot")),
         swamp_statue_room_tag=int(data.get("swamp_statue_room_tag", TAG_SWITCH_OPENS_DOOR_HOLD)),
+        swamp_statue_room_switch_pot=_decode_position(data.get("swamp_statue_room_switch_pot")),
         pod_map_chest_room_tag=int(data.get("pod_map_chest_room_tag", TAG_SWITCH_OPENS_DOOR_HOLD)),
         pod_map_chest_room_switch_pot=_decode_position(data.get("pod_map_chest_room_switch_pot")),
         hera_hardhat_beetles_room_tag_2=int(data.get("hera_hardhat_beetles_room_tag_2", TAG_SE_KILL_ENEMY_TO_OPEN)),
@@ -2073,7 +2081,7 @@ def _replace_switch_pots_for_puzzle_state(
             state.turtle_rock_crystaroller_room_switch_pot,
             state.turtle_rock_crystaroller_room_variant in (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH),
         ),
-        (SWAMP_STATUE_ROOM_ID, None, state.swamp_statue_room_tag in HERA_SWITCH_TAG_CHOICES),
+        (SWAMP_STATUE_ROOM_ID, state.swamp_statue_room_switch_pot, state.swamp_statue_room_tag in HERA_SWITCH_TAG_CHOICES),
         (POD_MAP_CHEST_ROOM_ID, None, state.pod_map_chest_room_tag in HERA_SWITCH_TAG_CHOICES),
         (GT_TILE_TORCH_PUZZLE_ROOM_ID, state.gt_tile_torch_puzzle_switch_pot, state.gt_tile_torch_puzzle_tag in HERA_SWITCH_TAG_CHOICES),
         (GT_TORCHES_1_ROOM_ID, state.gt_torches_1_switch_pot, state.gt_torches_1_tag in HERA_SWITCH_TAG_CHOICES),
@@ -2106,6 +2114,18 @@ def _replace_switch_pots_for_puzzle_state(
             pot_state[room_id] = _replace_pot_item(pots, switch_pot, POT_SWITCH)
         elif not keep_switch:
             pot_state[room_id] = _replace_pot_item_value(pots, POT_SWITCH, state.switch_replacement_item)
+    if (
+        state.swamp_statue_room_tag in HERA_SWITCH_TAG_CHOICES
+        and state.swamp_statue_room_switch_pot is not None
+    ):
+        pots = pot_state.get(SWAMP_STATUE_ROOM_ID)
+        if pots is not None:
+            pots = _replace_pot_item_value(pots, POT_SWITCH, state.switch_replacement_item)
+            pot_state[SWAMP_STATUE_ROOM_ID] = _replace_pot_item(
+                pots,
+                state.swamp_statue_room_switch_pot,
+                POT_SWITCH,
+            )
     if (
         state.pod_map_chest_room_tag == TAG_SWITCH_OPENS_DOOR_TOGGLE
         and state.pod_map_chest_room_switch_pot is not None
