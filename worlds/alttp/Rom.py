@@ -2441,6 +2441,11 @@ def get_hint_text(multiworld: MultiWorld, player: int, dest, ped_hint: bool = Fa
     return hint
 
 
+def find_item_hint_location(multiworld: MultiWorld, item_name: str, player: int) -> Optional[Location]:
+    locations = multiworld.find_item_locations(item_name, player)
+    return locations[0] if locations else None
+
+
 def build_hint_read_table(hint_entries) -> bytearray:
     if len(hint_entries) > HINT_READ_FLAGS_SIZE * 8:
         raise Exception(f"Too many in-game item hints to track: {len(hint_entries)}")
@@ -2709,10 +2714,12 @@ def get_in_game_hint_data(multiworld: MultiWorld, player: int):
     track_item_hint("tablet_ether_book", [multiworld.get_location("Ether Tablet", player)])
     track_item_hint("tablet_bombos_book", [multiworld.get_location("Bombos Tablet", player)])
     track_item_hint("bomb_shop", [
-        multiworld.find_item("Crystal (Ice Palace)", player),
-        multiworld.find_item("Crystal (Misery Mire)", player),
+        find_item_hint_location(multiworld, "Crystal (Ice Palace)", player),
+        find_item_hint_location(multiworld, "Crystal (Misery Mire)", player),
     ])
-    track_item_hint("sahasrahla_bring_courage", [multiworld.find_item("Pendant of Courage", player)])
+    track_item_hint("sahasrahla_bring_courage", [
+        find_item_hint_location(multiworld, "Pendant of Courage", player)
+    ])
 
     hint_entries = []
     for flag, (text_key, locations) in enumerate(item_hint_locations_by_text.items()):
@@ -2783,17 +2790,29 @@ def write_strings(rom: TokenRom, multiworld: MultiWorld, player: int):
             silverarrow_hint = (' %s?' % hint_text(bow_loc).replace('Ganon\'s', 'my'))
             tt[target] = 'Did you find the silver arrows%s' % silverarrow_hint
 
-    crystal5 = multiworld.find_item('Crystal (Ice Palace)', player)
-    crystal6 = multiworld.find_item('Crystal (Misery Mire)', player)
-    if multiworld.worlds[player].options.boss_prize_shuffle:
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until the crystals are found %s and %s.' % (
-            hint_text(crystal5), hint_text(crystal6))
-    else:
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
-            clear_hint_text(crystal5), clear_hint_text(crystal6))
+    bomb_shop_crystal_locations = [
+        find_item_hint_location(multiworld, 'Crystal (Ice Palace)', player),
+        find_item_hint_location(multiworld, 'Crystal (Misery Mire)', player),
+    ]
+    bomb_shop_crystal_locations = [location for location in bomb_shop_crystal_locations if location]
+    if len(bomb_shop_crystal_locations) == 2:
+        if multiworld.worlds[player].options.boss_prize_shuffle:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until the crystals are found %s and %s.' % (
+                hint_text(bomb_shop_crystal_locations[0]), hint_text(bomb_shop_crystal_locations[1]))
+        else:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
+                clear_hint_text(bomb_shop_crystal_locations[0]), clear_hint_text(bomb_shop_crystal_locations[1]))
+    elif bomb_shop_crystal_locations:
+        if multiworld.worlds[player].options.boss_prize_shuffle:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until a crystal is found %s.' % (
+                hint_text(bomb_shop_crystal_locations[0]))
+        else:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s.' % (
+                clear_hint_text(bomb_shop_crystal_locations[0]))
 
-    courage_pendant = multiworld.find_item('Pendant of Courage', player)
-    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % hint_text(courage_pendant)
+    courage_pendant = find_item_hint_location(multiworld, 'Pendant of Courage', player)
+    if courage_pendant:
+        tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % hint_text(courage_pendant)
 
     if multiworld.worlds[player].options.crystals_needed_for_gt == 1:
         tt['sign_ganons_tower'] = 'You need a crystal to enter.'
