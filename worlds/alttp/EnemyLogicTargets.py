@@ -47,7 +47,6 @@ AGA_TOWER_ENTRANCE_TOP_LEFT = "Agahnim's Tower (Second Room)"
 AGA_TOWER_CIRCLE_OF_POTS_TOP_HALF = "Agahnim's Tower (Pre-Circle of Pots)"
 AGA_TOWER_CIRCLE_OF_POTS_SOUTHWEST = "Agahnim's Tower (Pre-Circle of Pots) - Southwest"
 EASTERN_BIG_KEY_ROOM = "Eastern Palace (Big Key Room)"
-EASTERN_BIG_KEY_ROOM_EAST = "Eastern Palace (Big Key Room) - East"
 EASTERN_STALFOS_ROOM_SOUTHWEST = "Eastern Palace (Stalfos Spawn Room) - Southwest"
 EASTERN_DARK_SQUARE_NORTHWEST = "Eastern Palace (Dark Square Room) - Northwest"
 EASTERN_PRE_ARMOS_ROOM = "Eastern Palace (Pre-Armos Knights Rooms)"
@@ -62,24 +61,18 @@ DESERT_FINAL_SECTION_ENTRANCE_SOUTHWEST = "Desert Palace (Final Section Entrance
 HERA_HARDHAT_BEETLES_BOTTOM_RIGHT = "Tower of Hera (Hardhat Beetles Room)"
 HERA_TILE_ROOM_SOUTHEAST = "Tower of Hera (Tile Room) - Southeast"
 TURTLE_ROCK_BIG_CHEST_ROOM_TOP_LEFT = "Turtle Rock (Double Hokku-Bokku Room)"
-SWAMP_STATUE_ROOM_SOUTH = "Swamp Palace (Statue Room) - South"
-SWAMP_COMPASS_CHEST_NORTH = "Swamp Palace (Compass Chest Room) - North"
-SWAMP_HIDDEN_DOOR_ROOM_SOUTH = "Swamp Palace (Hidden Door Room) - South"
 ICE_PALACE_COMPASS_ROOM = "Ice Palace (Compass Room)"
 ICE_PALACE_MAP_ROOM_WEST = "Ice Palace (Map Chest Room) - West"
 ICE_PALACE_HIDDEN_CHEST_ROOM = "Ice Palace (Hidden Chest Room)"
 ICE_PALACE_SPIKE_ROOM_SOUTHWEST = "Ice Palace (Spike Room) - Southwest"
 ICE_PALACE_BOMB_JUMP_ROOM_NORTHWEST = "Ice Palace (Bomb Jump Room) - Northwest"
-ICE_PALACE_ICED_T_ROOM_SOUTHWEST = "Ice Palace (Iced T Room) - Southwest"
+ICE_PALACE_ICED_T_ROOM_NORTHEAST = "Ice Palace (Iced T Room) - Northeast"
 ICE_PALACE_PENGATORS_ROOM = "Ice Palace (Pengators Room)"
 ICE_PALACE_CONVEYOR_HELLWAY_TOP_RIGHT = "Ice Palace (Conveyor Hellway)"
 POD_NORTH_MIMICS_BOTTOM_LEFT = "Palace of Darkness (North Mimics Room)"
-POD_MAP_CHEST_ROOM_WEST = "Palace of Darkness (Map Chest Room) - West"
 POD_TURTLE_ROOM_BOTTOM_LEFT = "Palace of Darkness (Turtle Room)"
 POD_SOUTH_MIMICS_TOP_LEFT = "Palace of Darkness (South Mimics Room)"
-POD_STALFOS_TRAP_ROOM = "Palace of Darkness (Stalfos Trap Room)"
 MISERY_MIRE_WIZZROBES_ROOM = "Misery Mire (Wizzrobes Room)"
-MISERY_MIRE_MAIN_LOBBY_ROOM = "Misery Mire (Main Lobby)"
 MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST = "Misery Mire (Bridge Chest Room) - Southeast"
 MISERY_MIRE_SPIKE_CHEST_ROOM = "Misery Mire (Spike Chest Room)"
 MISERY_MIRE_DARK_CANE_ROOM_NORTH = "Misery Mire (Dark Cane Room) - North"
@@ -91,7 +84,6 @@ GANONS_TOWER_GAUNTLET_45_ROOM = "Ganon's Tower (Gauntlet 4/5)"
 GANONS_TOWER_GAUNTLET_45_NORTHWEST = "Ganon's Tower (Gauntlet 4/5) - Northwest"
 GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST = "Ganon's Tower (Block Puzzle Room) - Northeast"
 GANONS_TOWER_BIG_CHEST_ROOM_NORTHEAST = "Ganon's Tower (Big Chest Room) - Northeast"
-GANONS_TOWER_SPIKE_PIT_EAST = "Ganon's Tower (Spike Pit Room) - East"
 GANONS_TOWER_MIMICS_BOTTOM_HALF = "Ganon's Tower (Mimics Rooms) - Bottom Half"
 GANONS_TOWER_MIMICS_NORTHWEST = "Ganon's Tower (Mimics Rooms) - Northwest"
 GANONS_TOWER_MIMICS_SOUTHWEST = "Ganon's Tower (Mimics Rooms) - Southwest"
@@ -103,7 +95,6 @@ HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM = "Hyrule Castle (Pre-Boomerang Chest Roo
 HYRULE_CASTLE_SWITCH_ROOM_SOUTH = "Hyrule Castle (Switch Room) - South"
 THIEVES_TOWN_JAIL_CELLS_TOP_LEFT = "Thieves Town (Basement)"
 THIEVES_TOWN_WEST_ATTIC_SOUTHWEST = "Thieves Town (West Attic Room) - Southwest"
-SKULL_WOODS_GIBDO_TORCH_EAST = "Skull Woods (Gibdo Torch Puzzle Room) - East"
 SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST = "Skull Woods (Big Key Room) - Southwest"
 
 HYRULE_CASTLE_MAP_GUARD_KEY_DROP = "Hyrule Castle - Map Guard Key Drop"
@@ -133,7 +124,6 @@ ENEMY_CLEAR_TARGETS = (
         min_y=256,
     ),
     EnemyClearTarget(name=EASTERN_BIG_KEY_ROOM, room_name="Eastern Palace (Big Key Room)"),
-    EnemyClearTarget(name=EASTERN_BIG_KEY_ROOM_EAST, room_name="Eastern Palace (Big Key Room)", min_x=256),
     EnemyClearTarget(
         name=EASTERN_STALFOS_ROOM_SOUTHWEST,
         room_name="Eastern Palace (Stalfos Spawn Room)",
@@ -207,9 +197,6 @@ ENEMY_CLEAR_TARGETS = (
         max_x=256,
         max_y=256,
     ),
-    EnemyClearTarget(name=SWAMP_STATUE_ROOM_SOUTH, room_name="Swamp Palace (Statue Room)", min_y=256),
-    EnemyClearTarget(name=SWAMP_COMPASS_CHEST_NORTH, room_name="Swamp Palace (Compass Chest Room)", max_y=256),
-    EnemyClearTarget(name=SWAMP_HIDDEN_DOOR_ROOM_SOUTH, room_name="Swamp Palace (Hidden Chest / Hidden Door Room)", min_y=256),
     EnemyClearTarget(name=ICE_PALACE_COMPASS_ROOM, room_name="Ice Palace (Compass Room)"),
     EnemyClearTarget(name=ICE_PALACE_MAP_ROOM_WEST, room_name="Ice Palace (Map Chest Room)", max_x=256),
     EnemyClearTarget(name=ICE_PALACE_HIDDEN_CHEST_ROOM, room_name="Ice Palace (2 Blue Bari and Hidden Chest)"),
@@ -226,10 +213,10 @@ ENEMY_CLEAR_TARGETS = (
         max_y=256,
     ),
     EnemyClearTarget(
-        name=ICE_PALACE_ICED_T_ROOM_SOUTHWEST,
+        name=ICE_PALACE_ICED_T_ROOM_NORTHEAST,
         room_name="Ice Palace (Room with ice floor, key, and 4 wall rats)",
-        max_x=256,
-        min_y=256,
+        min_x=256,
+        max_y=256,
     ),
     EnemyClearTarget(name=ICE_PALACE_PENGATORS_ROOM, room_name="Ice Palace (Pengators Room)"),
     EnemyClearTarget(
@@ -244,7 +231,6 @@ ENEMY_CLEAR_TARGETS = (
         max_x=256,
         min_y=256,
     ),
-    EnemyClearTarget(name=POD_MAP_CHEST_ROOM_WEST, room_name="Palace of Darkness (Map Chest / Fairy Room)", max_x=256),
     EnemyClearTarget(
         name=POD_TURTLE_ROOM_BOTTOM_LEFT,
         room_name="Palace of Darkness (Turtle Room)",
@@ -257,12 +243,10 @@ ENEMY_CLEAR_TARGETS = (
         max_x=256,
         max_y=256,
     ),
-    EnemyClearTarget(name=POD_STALFOS_TRAP_ROOM, room_name="Palace of Darkness (Stalfos Trap Room)"),
     EnemyClearTarget(
         name=MISERY_MIRE_WIZZROBES_ROOM,
         room_name="Misery Mire (Mire02 / Wizzrobes Room)",
     ),
-    EnemyClearTarget(name=MISERY_MIRE_MAIN_LOBBY_ROOM, room_name="Misery Mire (Big Hub Room)"),
     EnemyClearTarget(
         name=MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST,
         room_name="Misery Mire (Slug Room)",
@@ -308,7 +292,6 @@ ENEMY_CLEAR_TARGETS = (
         min_x=256,
         max_y=256,
     ),
-    EnemyClearTarget(name=GANONS_TOWER_SPIKE_PIT_EAST, room_name="Ganon's Tower (Spike Pit Room)", min_x=256),
     EnemyClearTarget(
         name=GANONS_TOWER_MIMICS_BOTTOM_HALF,
         room_name="Ganon's Tower (Mimics Rooms)",
@@ -368,7 +351,6 @@ ENEMY_CLEAR_TARGETS = (
         max_x=256,
         min_y=256,
     ),
-    EnemyClearTarget(name=SKULL_WOODS_GIBDO_TORCH_EAST, room_name="Skull Woods (Gibdo Torch Puzzle Room)", min_x=256),
     EnemyClearTarget(
         name=SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST,
         room_name="Skull Woods (Big Key Room)",

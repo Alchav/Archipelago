@@ -17,6 +17,15 @@ POT_BLUE_RUPEE = 0x07
 POT_HEART = 0x0B
 POT_SWITCH = 0x88
 POT_HOLE = 0x80
+ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID = 31
+ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS = frozenset(((28, 23), (28, 25)))
+POD_ENTRANCE_ROOM_ID = 74
+POD_ENTRANCE_LEFT_SWITCH_POTS = frozenset(((14, 5), (32, 5), (14, 11), (32, 11)))
+POD_ENTRANCE_RIGHT_SWITCH_POTS = frozenset(((92, 5), (110, 5), (92, 11), (110, 11)))
+SWITCH_POT_GROUPS = {
+    ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID: (ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS,),
+    POD_ENTRANCE_ROOM_ID: (POD_ENTRANCE_LEFT_SWITCH_POTS, POD_ENTRANCE_RIGHT_SWITCH_POTS),
+}
 POT_ITEM_ADDRESSES = {
     2: 0xDDE7,
     4: 0xDDE9,
@@ -233,6 +242,8 @@ def generate_pot_shuffle(world: "ALTTPWorld") -> dict[int, tuple[FilledPot, ...]
             room_items.remove(POT_KEY)
             filled_pots.append(FilledPot(pot.x, pot.y, POT_KEY))
 
+        _place_grouped_switches(world, room.room_id, room_items, empty_pots, filled_pots)
+
         while POT_SWITCH in room_items:
             candidate_indices = [index for index, pot in enumerate(empty_pots) if pot.reserved == 2]
             if not candidate_indices:
@@ -252,6 +263,29 @@ def generate_pot_shuffle(world: "ALTTPWorld") -> dict[int, tuple[FilledPot, ...]
         shuffled_pots[room.room_id] = tuple(filled_pots)
 
     return shuffled_pots
+
+
+def _place_grouped_switches(
+    world: "ALTTPWorld",
+    room_id: int,
+    room_items: list[int],
+    empty_pots: list[PotData],
+    filled_pots: list[FilledPot],
+) -> None:
+    for switch_group in SWITCH_POT_GROUPS.get(room_id, ()):
+        if POT_SWITCH not in room_items:
+            return
+        candidate_indices = [
+            index
+            for index, pot in enumerate(empty_pots)
+            if (pot.x, pot.y) in switch_group
+        ]
+        if not candidate_indices:
+            continue
+        pot_index = world.random.choice(candidate_indices)
+        pot = empty_pots.pop(pot_index)
+        room_items.remove(POT_SWITCH)
+        filled_pots.append(FilledPot(pot.x, pot.y, POT_SWITCH))
 
 
 def apply_pot_shuffle(rom: "TokenRom", shuffled_pots: dict[int, tuple[FilledPot, ...]]) -> None:

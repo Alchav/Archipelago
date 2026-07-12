@@ -5,6 +5,11 @@ from types import SimpleNamespace
 
 from worlds.alttp.PotShuffle import (
     FilledPot,
+    ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID,
+    ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS,
+    POD_ENTRANCE_LEFT_SWITCH_POTS,
+    POD_ENTRANCE_RIGHT_SWITCH_POTS,
+    POD_ENTRANCE_ROOM_ID,
     POT_BLUE_RUPEE,
     POT_ITEM_ADDRESSES,
     POT_KEY,
@@ -33,6 +38,47 @@ class TestPotShuffle(unittest.TestCase):
                 if pot.item == POT_KEY
             ]
             self.assertEqual(len(conveyor_cross_keys), 1)
+
+    def test_pod_entrance_keeps_one_switch_per_side(self) -> None:
+        middle_pots = {(56, 8), (68, 8)}
+
+        for seed in range(100):
+            world = SimpleNamespace(
+                random=random.Random(seed),
+                options=SimpleNamespace(retro_bow=False),
+            )
+            shuffled_pots = generate_pot_shuffle(world)
+            switch_positions = {
+                (pot.x, pot.y)
+                for pot in shuffled_pots[POD_ENTRANCE_ROOM_ID]
+                if pot.item == POT_SWITCH
+            }
+
+            with self.subTest(seed=seed):
+                self.assertEqual(len(switch_positions), 2)
+                self.assertEqual(len(switch_positions & POD_ENTRANCE_LEFT_SWITCH_POTS), 1)
+                self.assertEqual(len(switch_positions & POD_ENTRANCE_RIGHT_SWITCH_POTS), 1)
+                self.assertFalse(switch_positions & middle_pots)
+
+    def test_ice_palace_pengator_big_key_switch_stays_out_of_southeast_pots(self) -> None:
+        southeast_pots = {(86, 26), (86, 27)}
+
+        for seed in range(100):
+            world = SimpleNamespace(
+                random=random.Random(seed),
+                options=SimpleNamespace(retro_bow=False),
+            )
+            shuffled_pots = generate_pot_shuffle(world)
+            switch_positions = {
+                (pot.x, pot.y)
+                for pot in shuffled_pots[ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID]
+                if pot.item == POT_SWITCH
+            }
+
+            with self.subTest(seed=seed):
+                self.assertEqual(len(switch_positions), 1)
+                self.assertTrue(switch_positions <= ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS)
+                self.assertFalse(switch_positions & southeast_pots)
 
     def test_get_unique_pot_item_position_returns_single_match(self) -> None:
         world = SimpleNamespace(
