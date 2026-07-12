@@ -23,7 +23,7 @@ from .EnemyLogicTargets import (
     ICE_PALACE_BOMB_JUMP_ROOM_NORTHWEST,
     get_enemy_clear_target_enemies,
 )
-from .enemizer_data.vanilla_room_tags import VANILLA_ROOM_TAGS
+from .enemizer_data.room_tags import ROOM_TAGS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
@@ -1910,102 +1910,102 @@ def _get_gt_gauntlet_45_tags(variant: int) -> tuple[int, int]:
 
 
 def validate_puzzle_shuffle_data() -> None:
-    desert_map_chest_tags = VANILLA_ROOM_TAGS[DESERT_MAP_CHEST_ROOM_ID]
+    desert_map_chest_tags = ROOM_TAGS[DESERT_MAP_CHEST_ROOM_ID]
     if desert_map_chest_tags.tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Desert Palace Map Chest vanilla tag is not Trigger activated chest")
-    desert_big_chest_tags = VANILLA_ROOM_TAGS[DESERT_BIG_CHEST_ROOM_ID]
+        raise ValueError("Desert Palace Map Chest room tag is not Trigger-activated chest")
+    desert_big_chest_tags = ROOM_TAGS[DESERT_BIG_CHEST_ROOM_ID]
     if desert_big_chest_tags.tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Desert Palace Big Chest vanilla tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID].tag_1 != TAG_SW_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Desert Palace Final Section Entrance vanilla first tag is not SW Move block to open")
-    hera_tile_room_tags = VANILLA_ROOM_TAGS[HERA_TILE_ROOM_ID]
+        raise ValueError("Desert Palace Big Chest room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID].tag_1 != TAG_SW_MOVE_BLOCK_TO_OPEN:
+        raise ValueError("Desert Palace Final Section Entrance first room tag is not SW Move a block to open")
+    hera_tile_room_tags = ROOM_TAGS[HERA_TILE_ROOM_ID]
     if hera_tile_room_tags.tag_1 != TAG_LIGHT_TORCHES_TO_GET_CHEST:
-        raise ValueError("Tower of Hera Big Key Chest vanilla tag is not Light torches to get chest")
+        raise ValueError("Tower of Hera Big Key Chest room tag is not Light torches to get chest")
     if hera_tile_room_tags.tag_2 != TAG_NW_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Tower of Hera Tile Room vanilla second tag is not NW Kill enemy to open")
-    gt_block_puzzle_tags = VANILLA_ROOM_TAGS[GT_BLOCK_PUZZLE_ROOM_ID]
+        raise ValueError("Tower of Hera Tile Room second room tag is not NW Kill enemies to open")
+    gt_block_puzzle_tags = ROOM_TAGS[GT_BLOCK_PUZZLE_ROOM_ID]
     if gt_block_puzzle_tags.tag_2 != TAG_NE_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Ganon's Tower Block Puzzle vanilla second tag is not NE Move block to open")
-    gt_big_chest_room_tags = VANILLA_ROOM_TAGS[GT_BIG_CHEST_ROOM_ID]
+        raise ValueError("Ganon's Tower Block Puzzle second room tag is not NE Move a block to open")
+    gt_big_chest_room_tags = ROOM_TAGS[GT_BIG_CHEST_ROOM_ID]
     if gt_big_chest_room_tags.tag_1 != TAG_SWITCH_OPENS_DOOR_HOLD:
-        raise ValueError("Ganon's Tower Big Chest Room vanilla first tag is not Switch opens door(Hold)")
-    if VANILLA_ROOM_TAGS[GT_TILE_TORCH_PUZZLE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
-        raise ValueError("Ganon's Tower Tile/Torch Puzzle vanilla first tag is not Light torches to open")
-    if VANILLA_ROOM_TAGS[GT_TILE_TORCH_PUZZLE_ROOM_ID].tag_2 != TAG_NW_KILL_ENEMY_FOR_CHEST:
-        raise ValueError("Ganon's Tower Tile/Torch Puzzle vanilla second tag is not NW Kill enemy for chest")
-    if VANILLA_ROOM_TAGS[MISERY_MIRE_DARK_CANE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_HOLD:
-        raise ValueError("Misery Mire Dark Cane Room vanilla first tag is not Switch opens door(Hold)")
-    if VANILLA_ROOM_TAGS[GT_TORCHES_1_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
-        raise ValueError("Ganon's Tower Torches 1 vanilla first tag is not Light torches to open")
-    if VANILLA_ROOM_TAGS[ICE_PALACE_ICE_FLOOR_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Ice Palace Ice Floor Room vanilla first tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[EASTERN_STALFOS_ROOM_ID].tag_1 != TAG_SW_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Eastern Palace Stalfos Room vanilla first tag is not SW Kill enemy to open")
-    if VANILLA_ROOM_TAGS[EASTERN_BIG_CHEST_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Eastern Palace Big Chest Room vanilla first tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[EASTERN_MAP_CHEST_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Eastern Palace Map Chest Room vanilla first tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[ICE_PALACE_HIDDEN_CHEST_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Ice Palace Hidden Chest Room vanilla first tag is not Trigger activated chest")
-    if VANILLA_ROOM_TAGS[AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID].tag_1 != TAG_W_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Agahnim's Tower Circle of Pots vanilla first tag is not W Kill enemy to open")
-    if VANILLA_ROOM_TAGS[AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID].tag_2 != TAG_NE_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Agahnim's Tower Circle of Pots vanilla second tag is not NE Kill enemy to open")
-    if VANILLA_ROOM_TAGS[MISERY_MIRE_BRIDGE_CHEST_ROOM_ID].tag_2 != TAG_SE_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Misery Mire Bridge Chest vanilla second tag is not SE Move block to open")
-    if VANILLA_ROOM_TAGS[MISERY_MIRE_SPIKE_CHEST_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Misery Mire Spike Chest vanilla first tag is not Trigger activated chest")
-    if VANILLA_ROOM_TAGS[EASTERN_BIG_KEY_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Eastern Palace Big Key Room vanilla first tag is not Trigger activated chest")
-    if VANILLA_ROOM_TAGS[EASTERN_DARK_SQUARE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Eastern Palace Dark Square Room vanilla first tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[THIEVES_TOWN_CONVEYOR_TOILET_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Thieves' Town Conveyor Toilet vanilla first tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[ICE_PALACE_BLOCK_PUZZLE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_HOLD:
-        raise ValueError("Ice Palace Block Puzzle vanilla first tag is not Switch opens door(Hold)")
-    if VANILLA_ROOM_TAGS[AGA_TOWER_DARK_BRIDGE_ROOM_ID].tag_1 != TAG_NE_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Agahnim's Tower Dark Bridge vanilla first tag is not NE Kill enemy to open")
-    if VANILLA_ROOM_TAGS[AGA_TOWER_DARK_BRIDGE_ROOM_ID].tag_2 != TAG_W_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Agahnim's Tower Dark Bridge vanilla second tag is not W Move block to open")
-    if VANILLA_ROOM_TAGS[MISERY_MIRE_TILE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
-        raise ValueError("Misery Mire Tile Room vanilla first tag is not Light torches to open")
-    if VANILLA_ROOM_TAGS[MISERY_MIRE_MAIN_LOBBY_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Misery Mire Main Lobby vanilla first tag is not Trigger activated chest")
-    if VANILLA_ROOM_TAGS[TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
-        raise ValueError("Turtle Rock Torch Puzzle vanilla first tag is not Light torches to open")
-    if VANILLA_ROOM_TAGS[ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID].tag_1 != TAG_PULL_LEVER_TO_OPEN:
-        raise ValueError("Ice Palace Hole to Kholdstare vanilla first tag is not Pull lever to open")
-    if VANILLA_ROOM_TAGS[AGA_TOWER_DARK_MAZE_ROOM_ID].tag_1 != TAG_W_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Agahnim's Tower Dark Maze vanilla first tag is not W Move block to open")
-    if VANILLA_ROOM_TAGS[EASTERN_PRE_ARMOS_ROOM_ID].tag_1 != TAG_E_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Eastern Palace Pre-Armos vanilla first tag is not E Kill enemy to open")
-    if VANILLA_ROOM_TAGS[EASTERN_SWITCH_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Eastern Palace Switch Room vanilla first tag is not Switch opens door(Toggle)")
-    if VANILLA_ROOM_TAGS[HYRULE_CASTLE_SWITCH_ROOM_ID].tag_1 != TAG_PULL_LEVER_TO_OPEN:
-        raise ValueError("Hyrule Castle Switch Room vanilla first tag is not Pull lever to open")
-    turtle_rock_crystaroller_tags = VANILLA_ROOM_TAGS[TURTLE_ROCK_CRYSTAROLLER_ROOM_ID]
+        raise ValueError("Ganon's Tower Big Chest Room first room tag is not Switch opens door (hold)")
+    if ROOM_TAGS[GT_TILE_TORCH_PUZZLE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
+        raise ValueError("Ganon's Tower Tile/Torch Puzzle first room tag is not Light torches to open")
+    if ROOM_TAGS[GT_TILE_TORCH_PUZZLE_ROOM_ID].tag_2 != TAG_NW_KILL_ENEMY_FOR_CHEST:
+        raise ValueError("Ganon's Tower Tile/Torch Puzzle second room tag is not NW Kill enemies for chest")
+    if ROOM_TAGS[MISERY_MIRE_DARK_CANE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_HOLD:
+        raise ValueError("Misery Mire Dark Cane Room first room tag is not Switch opens door (hold)")
+    if ROOM_TAGS[GT_TORCHES_1_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
+        raise ValueError("Ganon's Tower Torches 1 first room tag is not Light torches to open")
+    if ROOM_TAGS[ICE_PALACE_ICE_FLOOR_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Ice Palace Ice Floor Room first room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[EASTERN_STALFOS_ROOM_ID].tag_1 != TAG_SW_KILL_ENEMY_TO_OPEN:
+        raise ValueError("Eastern Palace Stalfos Room first room tag is not SW Kill enemies to open")
+    if ROOM_TAGS[EASTERN_BIG_CHEST_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Eastern Palace Big Chest Room first room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[EASTERN_MAP_CHEST_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Eastern Palace Map Chest Room first room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[ICE_PALACE_HIDDEN_CHEST_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
+        raise ValueError("Ice Palace Hidden Chest Room first room tag is not Trigger-activated chest")
+    if ROOM_TAGS[AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID].tag_1 != TAG_W_KILL_ENEMY_TO_OPEN:
+        raise ValueError("Agahnim's Tower Circle of Pots first room tag is not W Kill enemies to open")
+    if ROOM_TAGS[AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID].tag_2 != TAG_NE_KILL_ENEMY_TO_OPEN:
+        raise ValueError("Agahnim's Tower Circle of Pots second room tag is not NE Kill enemies to open")
+    if ROOM_TAGS[MISERY_MIRE_BRIDGE_CHEST_ROOM_ID].tag_2 != TAG_SE_MOVE_BLOCK_TO_OPEN:
+        raise ValueError("Misery Mire Bridge Chest second room tag is not SE Move a block to open")
+    if ROOM_TAGS[MISERY_MIRE_SPIKE_CHEST_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
+        raise ValueError("Misery Mire Spike Chest first room tag is not Trigger-activated chest")
+    if ROOM_TAGS[EASTERN_BIG_KEY_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
+        raise ValueError("Eastern Palace Big Key Room first room tag is not Trigger-activated chest")
+    if ROOM_TAGS[EASTERN_DARK_SQUARE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Eastern Palace Dark Square Room first room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[THIEVES_TOWN_CONVEYOR_TOILET_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Thieves' Town Conveyor Toilet first room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[ICE_PALACE_BLOCK_PUZZLE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_HOLD:
+        raise ValueError("Ice Palace Block Puzzle first room tag is not Switch opens door (hold)")
+    if ROOM_TAGS[AGA_TOWER_DARK_BRIDGE_ROOM_ID].tag_1 != TAG_NE_KILL_ENEMY_TO_OPEN:
+        raise ValueError("Agahnim's Tower Dark Bridge first room tag is not NE Kill enemies to open")
+    if ROOM_TAGS[AGA_TOWER_DARK_BRIDGE_ROOM_ID].tag_2 != TAG_W_MOVE_BLOCK_TO_OPEN:
+        raise ValueError("Agahnim's Tower Dark Bridge second room tag is not W Move a block to open")
+    if ROOM_TAGS[MISERY_MIRE_TILE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
+        raise ValueError("Misery Mire Tile Room first room tag is not Light torches to open")
+    if ROOM_TAGS[MISERY_MIRE_MAIN_LOBBY_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
+        raise ValueError("Misery Mire Main Lobby first room tag is not Trigger-activated chest")
+    if ROOM_TAGS[TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
+        raise ValueError("Turtle Rock Torch Puzzle first room tag is not Light torches to open")
+    if ROOM_TAGS[ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID].tag_1 != TAG_PULL_LEVER_TO_OPEN:
+        raise ValueError("Ice Palace Hole to Kholdstare first room tag is not Pull a lever to open")
+    if ROOM_TAGS[AGA_TOWER_DARK_MAZE_ROOM_ID].tag_1 != TAG_W_MOVE_BLOCK_TO_OPEN:
+        raise ValueError("Agahnim's Tower Dark Maze first room tag is not W Move a block to open")
+    if ROOM_TAGS[EASTERN_PRE_ARMOS_ROOM_ID].tag_1 != TAG_E_KILL_ENEMY_TO_OPEN:
+        raise ValueError("Eastern Palace Pre-Armos first room tag is not E Kill enemies to open")
+    if ROOM_TAGS[EASTERN_SWITCH_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Eastern Palace Switch Room first room tag is not Switch opens door (toggle)")
+    if ROOM_TAGS[HYRULE_CASTLE_SWITCH_ROOM_ID].tag_1 != TAG_PULL_LEVER_TO_OPEN:
+        raise ValueError("Hyrule Castle Switch Room first room tag is not Pull a lever to open")
+    turtle_rock_crystaroller_tags = ROOM_TAGS[TURTLE_ROCK_CRYSTAROLLER_ROOM_ID]
     if turtle_rock_crystaroller_tags.tag_1 != TAG_SE_KILL_ENEMY_TO_MOVE_BLOCK:
-        raise ValueError("Turtle Rock Crystaroller vanilla first tag is not SE Kill enemy to move block")
+        raise ValueError("Turtle Rock Crystaroller first room tag is not SE Kill enemies to move block")
     if turtle_rock_crystaroller_tags.tag_2 != TAG_PULL_LEVER_TO_OPEN:
-        raise ValueError("Turtle Rock Crystaroller vanilla second tag is not Pull lever to open")
-    if VANILLA_ROOM_TAGS[SWAMP_FLOODWAY_ROOM_ID].tag_2 != TAG_WATER_TWIN:
-        raise ValueError("Swamp Floodway vanilla second tag is not Water twin")
-    if VANILLA_ROOM_TAGS[POD_STALFOS_TRAP_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Palace of Darkness Stalfos Trap vanilla first tag is not Trigger activated chest")
-    if VANILLA_ROOM_TAGS[POD_TURTLE_ROOM_ID].tag_1 != TAG_SW_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Palace of Darkness Turtle Room vanilla first tag is not SW Kill enemy to open")
-    pod_mimics_moving_wall_tags = VANILLA_ROOM_TAGS[POD_MIMICS_MOVING_WALL_ROOM_ID]
+        raise ValueError("Turtle Rock Crystaroller second room tag is not Pull a lever to open")
+    if ROOM_TAGS[SWAMP_FLOODWAY_ROOM_ID].tag_2 != TAG_WATER_TWIN:
+        raise ValueError("Swamp Floodway second room tag is not Water twin")
+    if ROOM_TAGS[POD_STALFOS_TRAP_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
+        raise ValueError("Palace of Darkness Stalfos Trap first room tag is not Trigger-activated chest")
+    if ROOM_TAGS[POD_TURTLE_ROOM_ID].tag_1 != TAG_SW_KILL_ENEMY_TO_OPEN:
+        raise ValueError("Palace of Darkness Turtle Room first room tag is not SW Kill enemies to open")
+    pod_mimics_moving_wall_tags = ROOM_TAGS[POD_MIMICS_MOVING_WALL_ROOM_ID]
     if pod_mimics_moving_wall_tags.tag_1 != TAG_SW_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Palace of Darkness Mimics Moving Wall vanilla first tag is not SW Kill enemy to open")
+        raise ValueError("Palace of Darkness Mimics Moving Wall first room tag is not SW Kill enemies to open")
     if pod_mimics_moving_wall_tags.tag_2 != TAG_SECRET_WALL_RIGHT:
-        raise ValueError("Palace of Darkness Mimics Moving Wall vanilla second tag is not Secret wall (Right)")
-    ice_palace_bomb_floor_tags = VANILLA_ROOM_TAGS[ICE_PALACE_BOMB_FLOOR_ROOM_ID]
+        raise ValueError("Palace of Darkness Mimics Moving Wall second room tag is not Secret wall (right)")
+    ice_palace_bomb_floor_tags = ROOM_TAGS[ICE_PALACE_BOMB_FLOOR_ROOM_ID]
     if ice_palace_bomb_floor_tags.tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Ice Palace Bomb Floor vanilla first tag is not Switch opens door(Toggle)")
+        raise ValueError("Ice Palace Bomb Floor first room tag is not Switch opens door (toggle)")
     if ice_palace_bomb_floor_tags.tag_2 != 0:
-        raise ValueError("Ice Palace Bomb Floor vanilla second tag is not Nothing")
-    if VANILLA_ROOM_TAGS[ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
-        raise ValueError("Ice Palace Pengator Big Key Room vanilla first tag is not Switch opens door(Toggle)")
+        raise ValueError("Ice Palace Bomb Floor second room tag is not Nothing")
+    if ROOM_TAGS[ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Ice Palace Pengator Big Key Room first room tag is not Switch opens door (toggle)")
 
 
 def _decode_position(position) -> tuple[int, int] | None:
