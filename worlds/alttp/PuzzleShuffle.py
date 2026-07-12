@@ -195,21 +195,12 @@ SKULL_WOODS_BIG_CHEST_PULL_SWITCH_GOOD_SPRITE_ADDRESS = SKULL_WOODS_BIG_CHEST_PU
 SKULL_WOODS_BIG_CHEST_ROPE_TRAP_COMPATIBLE_SUBGROUP_2 = frozenset((28, 36))
 SKULL_WOODS_BIG_CHEST_ROPE_TRAP_RECORD_BYTES = (0x0C, 0xE8, 0x06)
 THIEVES_TOWN_WEST_ATTIC_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4E0EA
-DESERT_MAP_CHEST_TAG_CHOICES = (
-    TAG_TRIGGER_ACTIVATED_CHEST,
-    TAG_N_KILL_ENEMY_FOR_CHEST,
-    TAG_LIGHT_TORCHES_TO_GET_CHEST,
-)
 DESERT_BIG_CHEST_BASE_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
 )
 DESERT_FINAL_SECTION_ENTRANCE_BASE_TAG_CHOICES = (
     TAG_SW_MOVE_BLOCK_TO_OPEN,
-)
-HERA_BIG_KEY_CHEST_BASE_TAG_CHOICES = (
-    TAG_LIGHT_TORCHES_TO_GET_CHEST,
-    TAG_SE_KILL_ENEMY_FOR_CHEST,
 )
 HERA_TILE_ROOM_BASE_TAG_2_CHOICES = (
     TAG_NW_KILL_ENEMY_TO_OPEN,
@@ -240,11 +231,6 @@ GT_TORCHES_1_TAG_CHOICES = (
 )
 GT_TORCHES_1_SWITCH_POTS = frozenset(((14, 18), (14, 24), (32, 5), (32, 17), (32, 24), (46, 11)))
 GT_TORCHES_1_HOLD_SWITCH_POTS = frozenset(((14, 18), (14, 24), (32, 24)))
-ICE_PALACE_ICE_FLOOR_ROOM_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_SW_KILL_ENEMY_TO_OPEN,
-)
 EASTERN_STALFOS_ROOM_HOLD_SWITCH_POTS = frozenset(((138, 19), (178, 19), (138, 28), (178, 28)))
 EASTERN_BIG_CHEST_ROOM_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
@@ -257,33 +243,6 @@ EASTERN_MAP_CHEST_ROOM_TAG_CHOICES = (
 EASTERN_ENTRANCE_ROOM_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
-)
-ICE_PALACE_HIDDEN_CHEST_ROOM_TAG_CHOICES = (
-    TAG_TRIGGER_ACTIVATED_CHEST,
-    TAG_NE_KILL_ENEMY_FOR_CHEST,
-)
-MISERY_MIRE_BRIDGE_CHEST_TAG_2_CHOICES = (
-    TAG_SE_MOVE_BLOCK_TO_OPEN,
-    TAG_SE_KILL_ENEMY_TO_OPEN,
-)
-MISERY_MIRE_SPIKE_CHEST_TAG_CHOICES = (
-    TAG_TRIGGER_ACTIVATED_CHEST,
-    TAG_SW_KILL_ENEMY_FOR_CHEST,
-)
-EASTERN_DARK_SQUARE_ROOM_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_NW_KILL_ENEMY_TO_OPEN,
-)
-THIEVES_TOWN_CONVEYOR_TOILET_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_NW_KILL_ENEMY_TO_OPEN,
-)
-ICE_PALACE_BLOCK_PUZZLE_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SE_KILL_ENEMY_TO_OPEN,
 )
 MISERY_MIRE_TILE_ROOM_TAG_CHOICES = (
     TAG_LIGHT_TORCHES_TO_OPEN,
@@ -301,29 +260,9 @@ EASTERN_SWITCH_ROOM_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
 )
-HYRULE_CASTLE_SWITCH_ROOM_VARIANTS = (
-    ROOM_VARIANT_VANILLA,
-    ROOM_VARIANT_SWAP_PULL_SWITCHES,
-    ROOM_VARIANT_KILL_ENEMIES,
-)
-TURTLE_ROCK_CRYSTAROLLER_VARIANTS = (
-    ROOM_VARIANT_VANILLA,
-    ROOM_VARIANT_SWAP_PULL_SWITCHES,
-    ROOM_VARIANT_TOGGLE_SWITCH,
-    ROOM_VARIANT_HOLD_SWITCH,
-)
 SWAMP_FLOODWAY_VARIANTS = (
     ROOM_VARIANT_VANILLA,
     ROOM_VARIANT_SWAP_PULL_SWITCHES,
-)
-POD_TURTLE_ROOM_TAG_CHOICES = (
-    TAG_SW_KILL_ENEMY_TO_OPEN,
-    TAG_LIGHT_TORCHES_TO_OPEN,
-)
-POD_MIMICS_MOVING_WALL_TAG_CHOICES = (
-    TAG_SW_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
 )
 POD_MIMICS_MOVING_WALL_SWITCH_POTS = frozenset(((20, 23), (40, 23)))
 POD_TURTLE_ROOM_PUSH_BLOCK_SOURCE = (48, 46)
@@ -339,54 +278,15 @@ TURTLE_ROCK_CHAIN_CHOMPS_PUSH_BLOCK_SOURCES = ((11, 21), (19, 21))
 TURTLE_ROCK_CHAIN_CHOMPS_PUSH_BLOCK_TARGETS = ((19, 23),)
 CHECKERBOARD_CAVE_REGULAR_BLOCK_POSITION = (54, 46)
 CHECKERBOARD_CAVE_PUSH_BLOCK_SOURCES = (None, (48, 48), (46, 46), (52, 48), (48, 44))
-ICE_PALACE_BOMB_FLOOR_VARIANTS = (
-    ROOM_VARIANT_VANILLA,
-    ROOM_VARIANT_KILL_ENEMIES,
-    ROOM_VARIANT_HOLD_SWITCH,
-)
 ICE_PALACE_BOMB_FLOOR_PUSH_BLOCK_POSITION_ADDRESS = 0x26F30
 ICE_PALACE_BOMB_FLOOR_DOOR_TRIGGER_PUSH_BLOCK_POSITION = 0x185E
-ICE_PALACE_PENGATOR_BIG_KEY_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SW_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-)
-TURTLE_ROCK_BIG_CHEST_TAG_CHOICES = (
-    TAG_NW_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-)
-SWAMP_STATUE_ROOM_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SE_KILL_ENEMY_TO_OPEN,
-)
 SWAMP_STATUE_ROOM_RIGHT_SWITCH_POT = (220, 26)
 POD_MAP_CHEST_ROOM_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_HOLD,
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
 )
 POD_MAP_CHEST_BOTTOM_SWITCH_POTS = frozenset(((146, 21), (170, 21), (146, 22), (170, 22)))
-HERA_HARDHAT_BEETLES_TAG_2_CHOICES = (
-    TAG_SE_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-)
 HERA_HARDHAT_BEETLES_SWITCH_POTS = frozenset(((92, 28),))
-ICE_PALACE_CONVEYOR_HELLWAY_TAG_CHOICES = (
-    TAG_NE_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-)
-ICE_PALACE_MAP_ROOM_TAG_CHOICES = (
-    TAG_TRIGGER_ACTIVATED_CHEST,
-    TAG_W_KILL_ENEMY_FOR_CHEST,
-)
-THIEVES_TOWN_JAIL_CELLS_TAG_CHOICES = (
-    TAG_NW_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_NOTHING,
-)
 THIEVES_TOWN_JAIL_CELLS_NORTHWEST_SWITCH_POTS = frozenset(((12, 4), (108, 11), (48, 12)))
 SKULL_WOODS_GIBDO_TORCH_BASE_TAG_CHOICES = (
     TAG_LIGHT_TORCHES_TO_OPEN,
@@ -396,38 +296,14 @@ SKULL_WOODS_GIBDO_TORCH_EAST_SWITCH_POTS = frozenset(((144, 19), (172, 20), (144
 SKULL_WOODS_GIBDO_TORCH_SWITCH_POTS = (
     SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS | SKULL_WOODS_GIBDO_TORCH_EAST_SWITCH_POTS
 )
-POD_SOUTH_MIMICS_TAG_CHOICES = (
-    TAG_NW_KILL_ENEMY_TO_OPEN,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-)
 POD_SOUTH_MIMICS_SWITCH_POTS = frozenset(((20, 6), (40, 6)))
 ICE_PALACE_BOMB_JUMP_BASE_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
 )
-SKULL_WOODS_BIG_KEY_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SW_KILL_ENEMY_TO_OPEN,
-)
-SKULL_WOODS_BIG_CHEST_TAG_2_CHOICES = (
-    TAG_USE_LEVER_TO_BOMB_WALL,
-    TAG_USE_SWITCH_TO_BOMB_WALL,
-)
 SKULL_WOODS_BIG_CHEST_NORTHWEST_SWITCH_POTS = frozenset(((12, 7), (16, 7), (16, 8), (12, 12)))
 GT_GAUNTLET_123_NORTHWEST_SWITCH_POTS = frozenset(((16, 5), (44, 5), (16, 11), (44, 11)))
 GT_GAUNTLET_123_SOUTHWEST_SWITCH_POTS = frozenset(((12, 20), (48, 20), (12, 28), (48, 28)))
-ICE_PALACE_SPIKE_ROOM_TAG_CHOICES = (
-    TAG_TRIGGER_ACTIVATED_CHEST,
-    TAG_SW_KILL_ENEMY_FOR_CHEST,
-)
-THIEVES_TOWN_WEST_ATTIC_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
-    TAG_SWITCH_OPENS_DOOR_HOLD,
-    TAG_PULL_LEVER_TO_OPEN,
-    TAG_SW_KILL_ENEMY_TO_OPEN,
-)
 GT_MIMICS_NORTHWEST_SWITCH_POTS = frozenset(((28, 5), (44, 8), (28, 11)))
 GT_MIMICS_SOUTHEAST_SWITCH_POTS = frozenset(((98, 25),))
 GT_GAUNTLET_45_VARIANTS = (
@@ -438,10 +314,6 @@ GT_GAUNTLET_45_SOUTHWEST_SWITCH_POTS = frozenset(((28, 26), (32, 26), (28, 27), 
 GT_WINDER_WARP_MAZE_TAG_1_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
-)
-GT_WINDER_WARP_MAZE_TAG_2_CHOICES = (
-    TAG_TRIGGER_ACTIVATED_CHEST,
-    TAG_MOVE_BLOCK_TO_GET_CHEST,
 )
 GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS = frozenset(((114, 20), (76, 28)))
 GT_WINDER_WARP_MAZE_NORTH_SWITCH_POTS = frozenset(((44, 12), (44, 6), (112, 6)))
@@ -503,9 +375,6 @@ JP_PUSH_BLOCK_RECORDS = {
     (CHECKERBOARD_CAVE_ROOM_ID, (48, 44)): (0x2702E, 0x0000),
 }
 HOLD_SWITCH_TILE_DETECTOR_CALL_ADDRESS = 0xC570
-FORCE_NON_VANILLA_PUZZLES_FOR_TESTING = True
-
-
 @dataclass(frozen=True)
 class PuzzleShuffleState:
     desert_map_chest_tag: int
@@ -606,17 +475,14 @@ class PuzzleShuffleState:
 
 
 def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
-    def choice(choices, forced=None, vanilla=None):
-        return _choose_puzzle_test_variant(world, choices, forced, vanilla)
+    def choice(choices):
+        return world.random.choice(tuple(choices))
 
     hera_big_key_chest_tag = choice(get_hera_big_key_chest_tag_choices(world))
     hera_tile_room_tag = choice(get_hera_tile_room_tag_choices(world))
     gt_block_puzzle_tag = choice(get_gt_block_puzzle_tag_choices(world))
     gt_tile_torch_puzzle_tag = choice(get_gt_tile_torch_puzzle_tag_choices(world))
-    misery_mire_dark_cane_room_tag = choice(
-        get_misery_mire_dark_cane_room_tag_choices(world),
-        vanilla=TAG_SWITCH_OPENS_DOOR_HOLD,
-    )
+    misery_mire_dark_cane_room_tag = choice(get_misery_mire_dark_cane_room_tag_choices(world))
     gt_torches_1_tag = choice(get_gt_torches_1_tag_choices(world))
     ice_palace_ice_floor_room_tag = choice(get_ice_palace_ice_floor_room_tag_choices(world))
     eastern_stalfos_room_tag = choice(get_eastern_stalfos_room_tag_choices(world))
@@ -660,7 +526,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         allow_key=False,
     ) if pod_map_chest_room_tag == TAG_SWITCH_OPENS_DOOR_TOGGLE else None
     return PuzzleShuffleState(
-        desert_map_chest_tag=choice(get_desert_map_chest_tag_choices(world), forced=TAG_LIGHT_TORCHES_TO_GET_CHEST),
+        desert_map_chest_tag=choice(get_desert_map_chest_tag_choices(world)),
         desert_big_chest_tag=choice(get_desert_big_chest_tag_choices(world)),
         switch_replacement_item=choice(_get_normal_switch_replacement_pot_items(world)),
         desert_final_section_entrance_tag=choice(get_desert_final_section_entrance_tag_choices(world)),
@@ -874,19 +740,6 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         turtle_rock_chain_chomps_push_block_target=turtle_rock_chain_chomps_push_block_target,
         checkerboard_cave_push_block_source=world.random.choice(CHECKERBOARD_CAVE_PUSH_BLOCK_SOURCES),
     )
-
-
-def _choose_puzzle_test_variant(world: "ALTTPWorld", choices, forced=None, vanilla=None):
-    choices = tuple(choices)
-    if forced is not None and forced in choices:
-        return forced
-    if not FORCE_NON_VANILLA_PUZZLES_FOR_TESTING or len(choices) < 2:
-        return world.random.choice(choices)
-    if vanilla is not None:
-        non_vanilla_choices = tuple(choice for choice in choices if choice != vanilla)
-        if non_vanilla_choices:
-            return world.random.choice(non_vanilla_choices)
-    return world.random.choice(choices[1:])
 
 
 def encode_puzzle_shuffle(state: PuzzleShuffleState | None) -> dict[str, int] | None:
@@ -1158,8 +1011,6 @@ def get_hera_tile_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
     # layout can trap the player behind a shut door, and keeping NW kill-open
     # forces the flying floor tile overlord to finish before the room opens.
     # A higher-difficulty puzzle option may re-enable this later.
-    # if _filled_pot_positions_in_target(world, HERA_TILE_ROOM_ID, HERA_TILE_ROOM_WEST_SWITCH_POTS):
-    #     choices.extend(HERA_SWITCH_TAG_CHOICES)
     return tuple(choices)
 
 

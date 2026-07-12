@@ -17,7 +17,6 @@ from worlds.alttp.PuzzleShuffle import (
     DESERT_FINAL_SECTION_ENTRANCE_BASE_TAG_CHOICES,
     DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID,
     DESERT_MAP_CHEST_ROOM_ID,
-    DESERT_MAP_CHEST_TAG_CHOICES,
     PuzzleShuffleState,
     TAG_LIGHT_TORCHES_TO_GET_CHEST,
     decode_puzzle_shuffle,
@@ -29,6 +28,7 @@ from worlds.alttp.PuzzleShuffle import (
     get_hera_tile_room_tag_choices,
     get_ice_palace_map_room_tag_choices,
     get_eastern_pre_armos_tag_choices,
+    get_desert_map_chest_tag_choices,
     get_desert_big_chest_tag_choices,
     get_desert_final_section_entrance_tag_choices,
     apply_puzzle_pot_modifications,
@@ -64,7 +64,7 @@ class TestPuzzleShuffle(unittest.TestCase):
 
             state = generate_puzzle_shuffle(world)
 
-            self.assertIn(state.desert_map_chest_tag, DESERT_MAP_CHEST_TAG_CHOICES)
+            self.assertIn(state.desert_map_chest_tag, get_desert_map_chest_tag_choices(world))
             self.assertIn(state.desert_big_chest_tag, DESERT_BIG_CHEST_BASE_TAG_CHOICES)
             self.assertIn(
                 state.desert_final_section_entrance_tag,
@@ -73,7 +73,7 @@ class TestPuzzleShuffle(unittest.TestCase):
 
     def test_puzzle_shuffle_state_round_trips(self) -> None:
         state = PuzzleShuffleState(
-            desert_map_chest_tag=DESERT_MAP_CHEST_TAG_CHOICES[-1],
+            desert_map_chest_tag=TAG_LIGHT_TORCHES_TO_GET_CHEST,
             desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_HOLD,
             hera_big_key_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
             hera_tile_room_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,

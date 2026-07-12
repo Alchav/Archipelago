@@ -1188,8 +1188,6 @@ def global_rules(multiworld: MultiWorld, player: int):
     def can_pass_turtle_rock_big_chest_room_puzzle(state: CollectionState) -> bool:
         if turtle_rock_big_chest_room_tag == TAG_NW_KILL_ENEMY_TO_OPEN:
             return can_clear_enemy_region(state, player, TURTLE_ROCK_BIG_CHEST_ROOM_TOP_LEFT)
-        if turtle_rock_big_chest_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
-            return state.has('Cane of Somaria', player)
         return True
 
     set_rule(multiworld.get_entrance('Turtle Rock Big Key Door', player),
@@ -1410,10 +1408,6 @@ def global_rules(multiworld: MultiWorld, player: int):
                      lambda state: state._lttp_has_key('Small Key (Ganons Tower)', player, 6))
     set_rule(multiworld.get_entrance('Ganons Tower (Map Room)', player), lambda state: state._lttp_has_key('Small Key (Ganons Tower)', player, 8) or (
                 location_item_name(state, 'Ganons Tower - Map Chest', player) in [('Big Key (Ganons Tower)', player)] and state._lttp_has_key('Small Key (Ganons Tower)', player, 6)))
-
-    # this seemed to be causing generation failure, disable for now
-    # if world.worlds[player].options.accessibility != 'full':
-    #     set_always_allow(world.get_location('Ganons Tower - Map Chest', player), lambda state, item: item.name == 'Small Key (Ganons Tower)' and item.player == player and state._lttp_has_key('Small Key (Ganons Tower)', player, 7) and state.can_reach('Ganons Tower (Hookshot Room)', 'region', player))
 
     # It is possible to need more than 6 keys to get through this entrance if you spend keys elsewhere. We reflect this in the chest requirements.
     # However we need to leave these at the lower values to derive that with 7 keys it is always possible to reach Bob and Ice Armos.
