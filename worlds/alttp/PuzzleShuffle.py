@@ -140,6 +140,12 @@ HYRULE_CASTLE_SWITCH_ROOM_MIRRORED_BOMB_DROP_X_BYTES = (
     (0x4D953, 0xF6),
     (0x4D956, 0xF4),
 )
+HYRULE_CASTLE_SWITCH_ROOM_SPLIT_BOMB_DROP_X_BYTES = (
+    HYRULE_CASTLE_SWITCH_ROOM_MIRRORED_BOMB_DROP_X_BYTES[0],
+    HYRULE_CASTLE_SWITCH_ROOM_MIRRORED_BOMB_DROP_X_BYTES[2],
+    HYRULE_CASTLE_SWITCH_ROOM_MIRRORED_BOMB_DROP_X_BYTES[4],
+    HYRULE_CASTLE_SWITCH_ROOM_MIRRORED_BOMB_DROP_X_BYTES[6],
+)
 TURTLE_ROCK_CRYSTAROLLER_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS = 0x4D97A
 TURTLE_ROCK_CRYSTAROLLER_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4D97D
 SWAMP_FLOODWAY_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4EBAC
@@ -1724,6 +1730,7 @@ def _write_hyrule_castle_switch_room_sprites(rom: "TokenRom", variant: int) -> N
     elif variant == ROOM_VARIANT_KILL_ENEMIES:
         trap_switch = PULL_SWITCH_TRAP
         good_switch = PULL_SWITCH_TRAP
+        _split_hyrule_castle_switch_room_bomb_drops(rom)
     else:
         trap_switch = PULL_SWITCH_TRAP
         good_switch = PULL_SWITCH_GOOD
@@ -1733,6 +1740,11 @@ def _write_hyrule_castle_switch_room_sprites(rom: "TokenRom", variant: int) -> N
 
 def _mirror_hyrule_castle_switch_room_bomb_drops(rom: "TokenRom") -> None:
     for address, mirrored_x in HYRULE_CASTLE_SWITCH_ROOM_MIRRORED_BOMB_DROP_X_BYTES:
+        rom.write_byte(address, mirrored_x)
+
+
+def _split_hyrule_castle_switch_room_bomb_drops(rom: "TokenRom") -> None:
+    for address, mirrored_x in HYRULE_CASTLE_SWITCH_ROOM_SPLIT_BOMB_DROP_X_BYTES:
         rom.write_byte(address, mirrored_x)
 
 
