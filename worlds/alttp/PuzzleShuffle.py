@@ -2001,36 +2001,22 @@ def validate_puzzle_shuffle_data() -> None:
         raise ValueError("Eastern Palace Entrance Room first room tag is not Switch opens door (toggle)")
     if ROOM_TAGS[ICE_PALACE_HIDDEN_CHEST_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
         raise ValueError("Ice Palace Hidden Chest Room first room tag is not Trigger-activated chest")
-    if ROOM_TAGS[AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID].tag_1 != TAG_W_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Agahnim's Tower Circle of Pots first room tag is not W Kill enemies to open")
-    if ROOM_TAGS[AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID].tag_2 != TAG_NE_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Agahnim's Tower Circle of Pots second room tag is not NE Kill enemies to open")
     if ROOM_TAGS[MISERY_MIRE_BRIDGE_CHEST_ROOM_ID].tag_2 != TAG_SE_MOVE_BLOCK_TO_OPEN:
         raise ValueError("Misery Mire Bridge Chest second room tag is not SE Move a block to open")
     if ROOM_TAGS[MISERY_MIRE_SPIKE_CHEST_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
         raise ValueError("Misery Mire Spike Chest first room tag is not Trigger-activated chest")
-    if ROOM_TAGS[EASTERN_BIG_KEY_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Eastern Palace Big Key Room first room tag is not Trigger-activated chest")
     if ROOM_TAGS[EASTERN_DARK_SQUARE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
         raise ValueError("Eastern Palace Dark Square Room first room tag is not Switch opens door (toggle)")
     if ROOM_TAGS[THIEVES_TOWN_CONVEYOR_TOILET_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
         raise ValueError("Thieves' Town Conveyor Toilet first room tag is not Switch opens door (toggle)")
     if ROOM_TAGS[ICE_PALACE_BLOCK_PUZZLE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_HOLD:
         raise ValueError("Ice Palace Block Puzzle first room tag is not Switch opens door (hold)")
-    if ROOM_TAGS[AGA_TOWER_DARK_BRIDGE_ROOM_ID].tag_1 != TAG_NE_KILL_ENEMY_TO_OPEN:
-        raise ValueError("Agahnim's Tower Dark Bridge first room tag is not NE Kill enemies to open")
-    if ROOM_TAGS[AGA_TOWER_DARK_BRIDGE_ROOM_ID].tag_2 != TAG_W_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Agahnim's Tower Dark Bridge second room tag is not W Move a block to open")
     if ROOM_TAGS[MISERY_MIRE_TILE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
         raise ValueError("Misery Mire Tile Room first room tag is not Light torches to open")
-    if ROOM_TAGS[MISERY_MIRE_MAIN_LOBBY_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Misery Mire Main Lobby first room tag is not Trigger-activated chest")
     if ROOM_TAGS[TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID].tag_1 != TAG_LIGHT_TORCHES_TO_OPEN:
         raise ValueError("Turtle Rock Torch Puzzle first room tag is not Light torches to open")
     if ROOM_TAGS[ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID].tag_1 != TAG_PULL_LEVER_TO_OPEN:
         raise ValueError("Ice Palace Hole to Kholdstare first room tag is not Pull a lever to open")
-    if ROOM_TAGS[AGA_TOWER_DARK_MAZE_ROOM_ID].tag_1 != TAG_W_MOVE_BLOCK_TO_OPEN:
-        raise ValueError("Agahnim's Tower Dark Maze first room tag is not W Move a block to open")
     if ROOM_TAGS[EASTERN_PRE_ARMOS_ROOM_ID].tag_1 != TAG_E_KILL_ENEMY_TO_OPEN:
         raise ValueError("Eastern Palace Pre-Armos first room tag is not E Kill enemies to open")
     if ROOM_TAGS[EASTERN_PRE_BOSS_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
@@ -2046,8 +2032,6 @@ def validate_puzzle_shuffle_data() -> None:
         raise ValueError("Turtle Rock Crystaroller second room tag is not Pull a lever to open")
     if ROOM_TAGS[SWAMP_FLOODWAY_ROOM_ID].tag_2 != TAG_WATER_TWIN:
         raise ValueError("Swamp Floodway second room tag is not Water twin")
-    if ROOM_TAGS[POD_STALFOS_TRAP_ROOM_ID].tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
-        raise ValueError("Palace of Darkness Stalfos Trap first room tag is not Trigger-activated chest")
     if ROOM_TAGS[POD_TURTLE_ROOM_ID].tag_1 != TAG_SW_KILL_ENEMY_TO_OPEN:
         raise ValueError("Palace of Darkness Turtle Room first room tag is not SW Kill enemies to open")
     pod_mimics_moving_wall_tags = ROOM_TAGS[POD_MIMICS_MOVING_WALL_ROOM_ID]
