@@ -5,6 +5,9 @@ from types import SimpleNamespace
 from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
 from worlds.alttp.PotShuffle import FilledPot, POT_HEART, POT_KEY, POT_SWITCH, generate_pot_shuffle
 from worlds.alttp.PuzzleShuffle import (
+    CANE_PUZZLE_DUNGEON_CANDIDATES,
+    DUNGEON_EASTERN,
+    DUNGEON_ICE_PALACE,
     GT_BIG_CHEST_ROOM_ID,
     GT_BLOCK_PUZZLE_ROOM_ID,
     HERA_TILE_ROOM_ID,
@@ -18,7 +21,11 @@ from worlds.alttp.PuzzleShuffle import (
     DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID,
     DESERT_MAP_CHEST_ROOM_ID,
     PuzzleShuffleState,
+    ROOM_VARIANT_HOLD_SWITCH,
+    ROOM_VARIANT_TOGGLE_SWITCH,
     TAG_LIGHT_TORCHES_TO_GET_CHEST,
+    _choose_cane_puzzle_dungeons,
+    _filter_cane_puzzle_choices,
     decode_puzzle_shuffle,
     encode_puzzle_shuffle,
     generate_puzzle_shuffle,
@@ -53,6 +60,32 @@ from worlds.alttp.PuzzleShuffle import (
 class TestPuzzleShuffle(unittest.TestCase):
     def test_desert_map_chest_vanilla_data_matches_expected_puzzle(self) -> None:
         validate_puzzle_shuffle_data()
+
+    def test_cane_puzzle_dungeon_selection_picks_two_or_three_candidate_dungeons(self) -> None:
+        for seed in range(20):
+            selected = _choose_cane_puzzle_dungeons(SimpleNamespace(random=random.Random(seed)))
+
+            self.assertIn(len(selected), (2, 3))
+            self.assertLessEqual(selected, frozenset(CANE_PUZZLE_DUNGEON_CANDIDATES))
+
+    def test_cane_puzzle_filter_removes_hold_results_for_unselected_dungeon(self) -> None:
+        self.assertEqual(
+            _filter_cane_puzzle_choices(
+                (TAG_SW_KILL_ENEMY_TO_OPEN, TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD),
+                frozenset((DUNGEON_ICE_PALACE,)),
+                DUNGEON_EASTERN,
+            ),
+            (TAG_SW_KILL_ENEMY_TO_OPEN, TAG_SWITCH_OPENS_DOOR_TOGGLE),
+        )
+        self.assertEqual(
+            _filter_cane_puzzle_choices(
+                (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH),
+                frozenset((DUNGEON_ICE_PALACE,)),
+                DUNGEON_EASTERN,
+                ROOM_VARIANT_HOLD_SWITCH,
+            ),
+            (ROOM_VARIANT_TOGGLE_SWITCH,),
+        )
 
     def test_generate_puzzle_shuffle_uses_known_desert_map_chest_tags(self) -> None:
         for seed in range(20):
