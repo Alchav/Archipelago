@@ -60,11 +60,13 @@ from .EnemyLogicTargets import (
     HYRULE_CASTLE_PRE_BOOMERANG_CHEST_ROOM,
     MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST,
     MISERY_MIRE_DARK_CANE_ROOM_NORTH,
+    MISERY_MIRE_MAIN_LOBBY_ROOM,
     MISERY_MIRE_SPIKE_CHEST_ROOM,
     MISERY_MIRE_WIZZROBES_ROOM,
     MIMIC_CAVE_ROOM,
     MINI_MOLDORM_CAVE_ROOM,
     POD_NORTH_MIMICS_BOTTOM_LEFT,
+    POD_STALFOS_TRAP_ROOM,
     POD_TURTLE_ROOM_BOTTOM_LEFT,
     POD_SOUTH_MIMICS_TOP_LEFT,
     SEWERS_KEY_RAT_KEY_DROP,
@@ -89,6 +91,7 @@ from .PuzzleShuffle import (
     TAG_NE_KILL_ENEMY_TO_OPEN,
     TAG_NE_MOVE_BLOCK_TO_OPEN,
     TAG_N_KILL_ENEMY_FOR_CHEST,
+    TAG_N_KILL_ENEMY_TO_OPEN,
     TAG_NW_KILL_ENEMY_TO_OPEN,
     TAG_S_KILL_ENEMY_TO_OPEN,
     TAG_SW_KILL_ENEMY_FOR_CHEST,
@@ -100,6 +103,7 @@ from .PuzzleShuffle import (
     TAG_SWITCH_OPENS_DOOR_HOLD,
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_TRIGGER_ACTIVATED_CHEST,
+    TAG_CLEAR_ROOM_FOR_CHEST,
     TAG_NOTHING,
     ROOM_VARIANT_HOLD_SWITCH,
     ROOM_VARIANT_KILL_ENEMIES,
@@ -986,6 +990,8 @@ def global_rules(multiworld: MultiWorld, player: int):
         return True
 
     def can_pass_ice_palace_pengator_room_puzzle(state: CollectionState) -> bool:
+        if ice_palace_bomb_floor_room_variant == ROOM_VARIANT_KILL_ENEMIES:
+            return True
         if ice_palace_pengator_big_key_room_tag == TAG_SW_KILL_ENEMY_TO_OPEN:
             return can_clear_enemy_region(state, player, ICE_PALACE_BIG_KEY_ROOM_SOUTHWEST)
         if ice_palace_pengator_big_key_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
@@ -1025,6 +1031,7 @@ def global_rules(multiworld: MultiWorld, player: int):
              )
              and (
                  ice_palace_bomb_jump_room_tag != TAG_NW_KILL_ENEMY_TO_OPEN
+                 and ice_palace_bomb_jump_room_tag != TAG_N_KILL_ENEMY_TO_OPEN
                  or can_clear_enemy_region(state, player, ICE_PALACE_BOMB_JUMP_ROOM_NORTHWEST)
              ))
     set_rule(multiworld.get_location('Ice Palace - Big Chest', player), lambda state: state.has('Big Key (Ice Palace)', player))
@@ -1110,6 +1117,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_LIGHT_TORCHES_TO_OPEN
     )
+    misery_mire_main_lobby_room_tag = (
+        world.puzzle_shuffle_state.misery_mire_main_lobby_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_TRIGGER_ACTIVATED_CHEST
+    )
     misery_mire_dark_cane_room_tag = (
         world.puzzle_shuffle_state.misery_mire_dark_cane_room_tag
         if world.puzzle_shuffle_state is not None
@@ -1132,6 +1144,11 @@ def global_rules(multiworld: MultiWorld, player: int):
     # one more key.
     def can_reach_misery_mire_main_lobby_chest(state: CollectionState) -> bool:
         if not ((state._lttp_has_key('Small Key (Misery Mire)', player, 3) and can_activate_crystal_switch(state, player)) or state._lttp_has_key('Small Key (Misery Mire)', player, 5)):
+            return False
+        if (
+            misery_mire_main_lobby_room_tag == TAG_CLEAR_ROOM_FOR_CHEST
+            and not can_clear_enemy_region(state, player, MISERY_MIRE_MAIN_LOBBY_ROOM)
+        ):
             return False
         return True
 
@@ -1235,6 +1252,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_SW_KILL_ENEMY_TO_OPEN
     )
+    pod_stalfos_trap_room_tag = (
+        world.puzzle_shuffle_state.pod_stalfos_trap_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_TRIGGER_ACTIVATED_CHEST
+    )
     pod_mimics_moving_wall_room_tag = (
         world.puzzle_shuffle_state.pod_mimics_moving_wall_room_tag
         if world.puzzle_shuffle_state is not None
@@ -1286,6 +1308,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         in POD_STALFOS_BASEMENT_BOMB_SWITCH_POTS
     ):
         set_rule(multiworld.get_location('Palace of Darkness - Stalfos Basement', player), lambda state: can_use_bombs(state, player))
+    if pod_stalfos_trap_room_tag == TAG_CLEAR_ROOM_FOR_CHEST:
+        add_rule(
+            multiworld.get_location('Palace of Darkness - Stalfos Basement', player),
+            lambda state: can_clear_enemy_region(state, player, POD_STALFOS_TRAP_ROOM),
+        )
     set_rule(multiworld.get_entrance('Palace of Darkness Big Key Chest Staircase', player), lambda state: can_use_bombs(state, player) and (state._lttp_has_key('Small Key (Palace of Darkness)', player, 6) or (
             location_has_small_key_or_ring(state, 'Palace of Darkness - Big Key Chest', 'Small Key (Palace of Darkness)', player) and state._lttp_has_key('Small Key (Palace of Darkness)', player, 3))))
     if world.options.accessibility != 'full':

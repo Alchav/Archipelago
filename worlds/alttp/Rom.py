@@ -105,6 +105,7 @@ from .Items import item_table, item_name_groups, progression_items, key_ring_tab
 from .EntranceShuffle import door_addresses
 from .Graphics import patch_boss_prize_crystal_sprite_data
 from .Options import small_key_shuffle
+from .PuzzleShuffle import get_turtle_rock_peg_order_hint
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
@@ -2679,6 +2680,9 @@ def get_in_game_hint_data(multiworld: MultiWorld, player: int):
                 hinted_location = multiworld.get_location(location, player)
                 this_hint = location + " contains " + hint_text(hinted_location.item) + "."
                 set_item_hint(text_key, this_hint, [hinted_location])
+
+        if w.options.randomize_puzzles and hint_locations:
+            set_text(hint_locations.pop(0), get_turtle_rock_peg_order_hint(w.puzzle_shuffle_state))
 
         # Lastly we write hints to show where certain interesting items are.
         items_to_hint = RelevantItems.copy()

@@ -72,11 +72,13 @@ ICE_PALACE_ICED_T_ROOM_NORTHEAST = "Ice Palace (Iced T Room) - Northeast"
 ICE_PALACE_PENGATORS_ROOM = "Ice Palace (Pengators Room)"
 ICE_PALACE_CONVEYOR_HELLWAY_TOP_RIGHT = "Ice Palace (Conveyor Hellway)"
 POD_NORTH_MIMICS_BOTTOM_LEFT = "Palace of Darkness (North Mimics Room)"
+POD_STALFOS_TRAP_ROOM = "Palace of Darkness (Stalfos Trap Room)"
 POD_TURTLE_ROOM_BOTTOM_LEFT = "Palace of Darkness (Turtle Room)"
 POD_SOUTH_MIMICS_TOP_LEFT = "Palace of Darkness (South Mimics Room)"
 MISERY_MIRE_WIZZROBES_ROOM = "Misery Mire (Wizzrobes Room)"
 MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST = "Misery Mire (Bridge Chest Room) - Southeast"
 MISERY_MIRE_SPIKE_CHEST_ROOM = "Misery Mire (Spike Chest Room)"
+MISERY_MIRE_MAIN_LOBBY_ROOM = "Misery Mire (Main Lobby Room)"
 MISERY_MIRE_DARK_CANE_ROOM_NORTH = "Misery Mire (Dark Cane Room) - North"
 GANONS_TOWER_WIZZROBES_TOP_HALF = "Ganon's Tower (Wizzrobes Rooms)"
 GANONS_TOWER_GAUNTLET_123_ROOM = "Ganon's Tower (Gauntlet 1/2/3)"
@@ -247,6 +249,7 @@ ENEMY_CLEAR_TARGETS = (
         max_x=256,
         min_y=256,
     ),
+    EnemyClearTarget(name=POD_STALFOS_TRAP_ROOM, room_name="Palace of Darkness (Stalfos Trap Room)"),
     EnemyClearTarget(
         name=POD_TURTLE_ROOM_BOTTOM_LEFT,
         room_name="Palace of Darkness (Turtle Room)",
@@ -276,6 +279,7 @@ ENEMY_CLEAR_TARGETS = (
         min_y=256,
     ),
     EnemyClearTarget(name=MISERY_MIRE_SPIKE_CHEST_ROOM, room_name="Misery Mire (Spike Key Chest Room)"),
+    EnemyClearTarget(name=MISERY_MIRE_MAIN_LOBBY_ROOM, room_name="Misery Mire (Big Hub Room)"),
     EnemyClearTarget(
         name=MISERY_MIRE_DARK_CANE_ROOM_NORTH,
         room_name="Misery Mire (Dark Cane Floor Switch Puzzle Room)",

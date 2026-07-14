@@ -23,12 +23,15 @@ from worlds.alttp.PuzzleShuffle import (
     PuzzleShuffleState,
     ROOM_VARIANT_HOLD_SWITCH,
     ROOM_VARIANT_TOGGLE_SWITCH,
+    TURTLE_ROCK_PEG_ORDER_ADDRESS,
+    TURTLE_ROCK_VANILLA_PEG_ORDER,
     TAG_LIGHT_TORCHES_TO_GET_CHEST,
     _choose_cane_puzzle_dungeons,
     _filter_cane_puzzle_choices,
     decode_puzzle_shuffle,
     encode_puzzle_shuffle,
     generate_puzzle_shuffle,
+    get_turtle_rock_peg_order_hint,
     get_gt_big_chest_room_tag_choices,
     get_gt_block_puzzle_tag_choices,
     get_hera_big_key_chest_tag_choices,
@@ -54,7 +57,16 @@ from worlds.alttp.PuzzleShuffle import (
     TAG_SWITCH_OPENS_DOOR_HOLD,
     TAG_TRIGGER_ACTIVATED_CHEST,
     validate_puzzle_shuffle_data,
+    write_turtle_rock_peg_order,
 )
+
+
+class RecordingRom:
+    def __init__(self) -> None:
+        self.writes = {}
+
+    def write_bytes(self, address: int, data: bytes) -> None:
+        self.writes[address] = bytes(data)
 
 
 class TestPuzzleShuffle(unittest.TestCase):
@@ -114,9 +126,49 @@ class TestPuzzleShuffle(unittest.TestCase):
             hera_tile_room_switch_pot=(12, 11),
             eastern_pre_armos_northeast_switch_pot=(202, 8),
             eastern_pre_armos_southeast_switch_pot=(92, 24),
+            turtle_rock_peg_order=(0x081A, 0x0826, 0x05A0),
         )
 
         self.assertEqual(decode_puzzle_shuffle(encode_puzzle_shuffle(state)), state)
+
+    def test_turtle_rock_peg_order_hint_names_pegs_in_order(self) -> None:
+        state = PuzzleShuffleState(
+            desert_map_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
+            desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            turtle_rock_peg_order=(0x081A, 0x0826, 0x05A0),
+        )
+
+        self.assertEqual(
+            get_turtle_rock_peg_order_hint(state),
+            "The Turtle Rock portal opens by hammering the right peg, left peg, top peg.",
+        )
+
+    def test_write_turtle_rock_peg_order_replaces_vanilla_order_table(self) -> None:
+        rom = RecordingRom()
+        state = PuzzleShuffleState(
+            desert_map_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
+            desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            turtle_rock_peg_order=(0x081A, 0x0826, 0x05A0),
+        )
+
+        write_turtle_rock_peg_order(rom, state)
+
+        self.assertEqual(
+            rom.writes[TURTLE_ROCK_PEG_ORDER_ADDRESS],
+            b"\x1A\x08\x26\x08\xA0\x05",
+        )
+
+    def test_generate_puzzle_shuffle_keeps_turtle_rock_peg_order_to_vanilla_pegs(self) -> None:
+        for seed in range(20):
+            world = SimpleNamespace(
+                random=random.Random(seed),
+                options=SimpleNamespace(enemy_shuffle=False),
+                enemy_shuffle_state=None,
+            )
+
+            state = generate_puzzle_shuffle(world)
+
+            self.assertEqual(sorted(state.turtle_rock_peg_order), sorted(TURTLE_ROCK_VANILLA_PEG_ORDER))
 
     def test_desert_big_chest_kill_enemy_tag_is_not_available_with_vanilla_beamos(self) -> None:
         world = SimpleNamespace(
