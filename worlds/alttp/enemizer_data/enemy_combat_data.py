@@ -60,7 +60,7 @@ TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3, 4))
 GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((1, 3, 4, 5))
 LOST_SWORD_UPGRADE_DAMAGE_CLASS = 2
 GOLDEN_SWORD_SPIN_DAMAGE_CLASS = 5
-SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES = (1, 3, 4, 5)
+SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES = (3, 4, 5)
 NORMAL_ARROW_DAMAGE_CLASS = 6
 SILVER_ARROW_DAMAGE_CLASS = 9
 VANILLA_RANDOMIZE_DAMAGE_CLASSES = "vanilla"
@@ -169,8 +169,8 @@ BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS = {
     VITREOUS_SMALL_EYE_SPRITE_ID: ((3,),),
     VITREOUS_SPRITE_ID: ((3,),),
     TRINEXX_MAIN_HEAD_SPRITE_ID: ((3,),),
-    TRINEXX_RED_HEAD_SPRITE_ID: ((3,),),
-    TRINEXX_BLUE_HEAD_SPRITE_ID: ((3,),),
+    TRINEXX_RED_HEAD_SPRITE_ID: ((0, 1, 6, 7, 8, 9, 10, 11, 12, 13, 14),),
+    TRINEXX_BLUE_HEAD_SPRITE_ID: ((0, 1, 6, 7, 8, 9, 10, 11, 12, 13, 14),),
     BLIND_SPRITE_ID: ((3,),),
     GANON_D6_SPRITE_ID: ((3,),),
     GANON_D7_SPRITE_ID: ((9,),),
@@ -644,12 +644,15 @@ def build_randomized_damage_class_combat_model(
     max_attacks = max(1, max_attacks_in_logic)
 
     if mode in {DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
+        permutation_logic_required_sprite_ids = tuple(sorted(
+            set(logic_required_sprite_ids) | set(eligible_sprite_ids)
+        ))
         damage_class_permutation = _build_valid_damage_class_permutation(
             rng,
             locked_damage_classes,
             randomized_effects,
             eligible_sprite_ids,
-            logic_required_sprite_ids,
+            permutation_logic_required_sprite_ids,
             combat_model,
             max_attacks=None,
             enemy_health_key=enemy_health_key,
@@ -666,7 +669,6 @@ def build_randomized_damage_class_combat_model(
             eligible_sprite_ids,
             damage_class_permutation,
         )
-        _sanitize_randomized_damage_effects(randomized_effects, eligible_sprite_ids, rng)
 
     if mode in {ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
         randomized_effects = _swap_enemy_damage_profiles(
@@ -685,7 +687,12 @@ def build_randomized_damage_class_combat_model(
             ),
             swordless=swordless,
         )
-        _sanitize_randomized_damage_effects(randomized_effects, eligible_sprite_ids, rng)
+        _sanitize_randomized_damage_effects(
+            randomized_effects,
+            eligible_sprite_ids,
+            rng,
+            enforce_upgrade_damage_safety=False,
+        )
 
     elif mode == CHAOS_RANDOMIZE_DAMAGE_CLASSES:
         effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
@@ -844,48 +851,53 @@ def _build_valid_damage_class_permutation(
         enforce_non_silver_guarantee=enforce_non_silver_guarantee,
         swordless=swordless,
     )
-    locked_assignments = {
-        damage_class: damage_class
-        for damage_class in locked_damage_classes
-    }
-    unused_source_classes = set(range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)) - set(locked_assignments.values())
-    target_damage_classes = [
-        damage_class
-        for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
-        if damage_class not in locked_assignments
-    ]
-    target_damage_classes.sort(
-        key=lambda damage_class: -sum(
-            damage_class in target_damage_classes
-            for target_damage_classes, _ in constraints
+
+    for _ in range(512):
+        permutation = _build_damage_class_permutation(rng, locked_damage_classes)
+        if (
+            _damage_class_permutation_constraints_are_satisfied(
+                constraints,
+                dict(enumerate(permutation)),
+            )
+            and _damage_class_permutation_preserves_logic(
+                permutation,
+                randomized_effects,
+                logic_required_sprite_ids,
+                combat_model,
+                max_attacks=max_attacks,
+                enemy_health_key=enemy_health_key,
+                available_damage_classes=available_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
+                enforce_non_silver_guarantee=enforce_non_silver_guarantee,
+                swordless=swordless,
+            )
+        ):
+            return permutation
+
+    identity_permutation = tuple(range(RANDOMIZABLE_DAMAGE_CLASS_COUNT))
+    if (
+        all(damage_class not in locked_damage_classes or identity_permutation[damage_class] == damage_class
+            for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT))
+        and _damage_class_permutation_constraints_are_satisfied(
+            constraints,
+            dict(enumerate(identity_permutation)),
         )
-    )
-
-    assignment = _solve_damage_class_permutation(
-        rng,
-        constraints,
-        locked_assignments,
-        target_damage_classes,
-        unused_source_classes,
-    )
-    if assignment is None:
-        return _build_damage_class_permutation(rng, locked_damage_classes)
-
-    permutation = tuple(assignment[damage_class] for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT))
-    if not _damage_class_permutation_preserves_logic(
-        permutation,
-        randomized_effects,
-        logic_required_sprite_ids,
-        combat_model,
-        max_attacks=max_attacks,
-        enemy_health_key=enemy_health_key,
-        available_damage_classes=available_damage_classes,
-        hammer_available_for_freeze=hammer_available_for_freeze,
-        enforce_non_silver_guarantee=enforce_non_silver_guarantee,
-        swordless=swordless,
+        and _damage_class_permutation_preserves_logic(
+            identity_permutation,
+            randomized_effects,
+            logic_required_sprite_ids,
+            combat_model,
+            max_attacks=max_attacks,
+            enemy_health_key=enemy_health_key,
+            available_damage_classes=available_damage_classes,
+            hammer_available_for_freeze=hammer_available_for_freeze,
+            enforce_non_silver_guarantee=enforce_non_silver_guarantee,
+            swordless=swordless,
+        )
     ):
-        return _build_damage_class_permutation(rng, locked_damage_classes)
-    return permutation
+        return identity_permutation
+
+    raise ValueError("Could not build a valid damage class swap permutation")
 
 
 def _build_damage_class_permutation_constraints(
@@ -986,42 +998,6 @@ def _add_damage_class_permutation_constraint(
         constraints.append((frozenset(target_damage_classes), source_damage_classes))
 
 
-def _solve_damage_class_permutation(
-    rng: random.Random,
-    constraints: list[tuple[frozenset[int], frozenset[int]]],
-    assignment: dict[int, int],
-    target_damage_classes: list[int],
-    unused_source_classes: set[int],
-) -> dict[int, int] | None:
-    if not _damage_class_permutation_constraints_remain_possible(constraints, assignment, unused_source_classes):
-        return None
-    if not target_damage_classes:
-        if _damage_class_permutation_constraints_are_satisfied(constraints, assignment):
-            return assignment.copy()
-        return None
-
-    target_damage_class = target_damage_classes[0]
-    candidate_source_classes = list(unused_source_classes)
-    rng.shuffle(candidate_source_classes)
-    candidate_source_classes.sort(key=lambda source_damage_class: source_damage_class == target_damage_class)
-
-    for source_damage_class in candidate_source_classes:
-        assignment[target_damage_class] = source_damage_class
-        remaining_source_classes = unused_source_classes - {source_damage_class}
-        solution = _solve_damage_class_permutation(
-            rng,
-            constraints,
-            assignment,
-            target_damage_classes[1:],
-            remaining_source_classes,
-        )
-        if solution is not None:
-            return solution
-        del assignment[target_damage_class]
-
-    return None
-
-
 def _damage_class_permutation_constraints_are_satisfied(
     constraints: list[tuple[frozenset[int], frozenset[int]]],
     assignment: dict[int, int],
@@ -1031,26 +1007,6 @@ def _damage_class_permutation_constraints_are_satisfied(
             for target_damage_class in target_damage_classes)
         for target_damage_classes, source_damage_classes in constraints
     )
-
-
-def _damage_class_permutation_constraints_remain_possible(
-    constraints: list[tuple[frozenset[int], frozenset[int]]],
-    assignment: dict[int, int],
-    unused_source_classes: set[int],
-) -> bool:
-    for target_damage_classes, source_damage_classes in constraints:
-        satisfied = False
-        possible = False
-        for target_damage_class in target_damage_classes:
-            if target_damage_class in assignment:
-                if assignment[target_damage_class] in source_damage_classes:
-                    satisfied = True
-                    break
-            elif unused_source_classes & source_damage_classes:
-                possible = True
-        if not satisfied and not possible:
-            return False
-    return True
 
 
 def _damage_class_permutation_preserves_logic(
@@ -1087,12 +1043,15 @@ def _damage_class_permutation_preserves_logic(
             randomized_effects[sprite_id][permutation[damage_class]]
             for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
         ]
-        for damage_class, effect in enumerate(row):
-            if not _damage_effect_allowed_for_sprite(sprite_id, effect):
-                row[damage_class] = 0
+        if not _sword_class_2_loss_is_safe(row):
+            return False
+        logic_row = [
+            effect if _damage_effect_allowed_for_sprite(sprite_id, effect) else 0
+            for effect in row
+        ]
         if not _row_compatible_for_sprite_logic(
             sprite_id,
-            tuple(row),
+            tuple(logic_row),
             combat_model,
             max_attacks=max_attacks,
             enemy_health_key=enemy_health_key,
@@ -1206,6 +1165,8 @@ def _sanitize_randomized_damage_effects(
     randomized_effects: list[list[int]],
     eligible_sprite_ids: tuple[int, ...],
     rng: random.Random,
+    *,
+    enforce_upgrade_damage_safety: bool = True,
 ) -> None:
     effect_palettes = _build_effect_palettes(tuple(tuple(row) for row in randomized_effects))
     for sprite_id in eligible_sprite_ids:
@@ -1213,7 +1174,8 @@ def _sanitize_randomized_damage_effects(
         for damage_class, effect in enumerate(row):
             if not _damage_effect_allowed_for_sprite(sprite_id, effect):
                 row[damage_class] = 0
-        _enforce_upgrade_damage_safety(row, rng, effect_palettes)
+        if enforce_upgrade_damage_safety:
+            _enforce_upgrade_damage_safety(row, rng, effect_palettes)
 
 
 def _fit_randomized_damage_effects_to_locked_palettes(
@@ -1500,7 +1462,7 @@ def get_progression_kill_damage_classes(sprite_id: int) -> tuple[int, ...]:
     if sprite_id == KHOLDSTARE_SPRITE_ID:
         return (1, 2, 3, 4, 5, 11, 13)
     if sprite_id in {TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID}:
-        return (1, 2, 3, 4, 5, 11, 12)
+        return (0, 1, 6, 7, 8, 9, 10, 11, 12, 13, 14)
     if sprite_id == GANON_D6_SPRITE_ID:
         return (1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15)
     if sprite_id == GANON_D7_SPRITE_ID:

@@ -75,6 +75,9 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     TEMPERED_SWORD_DAMAGE_CLASSES,
     THIEF_DEFAULT_HP,
     THIEF_SPRITE_ID,
+    TRINEXX_BLUE_HEAD_SPRITE_ID,
+    TRINEXX_MAIN_HEAD_SPRITE_ID,
+    TRINEXX_RED_HEAD_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
@@ -89,6 +92,8 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     get_killing_damage_classes,
     is_defeating_damage_effect_for_nightmare,
     with_killable_thief_combat_model,
+    _get_damage_class_randomizable_sprite_ids,
+    _resolve_sprite_damage_effects,
     _swap_damage_class_effects,
 )
 
@@ -503,6 +508,49 @@ class TestEnemizerPatches(unittest.TestCase):
         self.assertEqual(swapped_rows[0], list(reversed(range(16))))
         self.assertEqual(swapped_rows[1], list(reversed(range(0x10, 0x20))))
         self.assertEqual(swapped_rows[2], [0xEE] * 16)
+
+    def test_damage_class_swap_preserves_trinexx_effect_multisets(self) -> None:
+        expected_effects = {
+            TRINEXX_MAIN_HEAD_SPRITE_ID: sorted((4, 8, 16, 16)),
+            TRINEXX_RED_HEAD_SPRITE_ID: sorted((4, 4, 8, 16, 16)),
+            TRINEXX_BLUE_HEAD_SPRITE_ID: sorted((4, 4, 8, 16, 16)),
+        }
+
+        for seed in range(10):
+            combat_model = build_randomized_damage_class_combat_model(
+                random.Random(seed),
+                DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
+            )
+
+            for sprite_id, expected_nonzero_effects in expected_effects.items():
+                with self.subTest(seed=seed, sprite_id=sprite_id):
+                    actual_nonzero_effects = sorted(
+                        effect
+                        for damage_class in range(16)
+                        if (effect := get_damage_effect(sprite_id, damage_class, combat_model)) != 0
+                    )
+                    self.assertEqual(actual_nonzero_effects, expected_nonzero_effects)
+
+    def test_damage_class_swap_preserves_each_eligible_enemy_effect_multiset(self) -> None:
+        vanilla_effects = _resolve_sprite_damage_effects(VANILLA_COMBAT_MODEL)
+        eligible_sprite_ids = _get_damage_class_randomizable_sprite_ids(
+            VANILLA_COMBAT_MODEL,
+            vanilla_effects,
+        )
+
+        for seed in range(10):
+            combat_model = build_randomized_damage_class_combat_model(
+                random.Random(seed),
+                DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
+            )
+            randomized_effects = _resolve_sprite_damage_effects(combat_model)
+
+            for sprite_id in eligible_sprite_ids:
+                with self.subTest(seed=seed, sprite_id=sprite_id):
+                    self.assertEqual(
+                        sorted(randomized_effects[sprite_id]),
+                        sorted(vanilla_effects[sprite_id]),
+                    )
 
     def test_randomized_damage_classes_include_selected_hp_255_enemies(self) -> None:
         combat_model = build_randomized_damage_class_combat_model(random.Random(2), CHAOS_RANDOMIZE_DAMAGE_CLASSES)

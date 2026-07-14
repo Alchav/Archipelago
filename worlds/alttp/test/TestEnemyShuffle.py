@@ -47,11 +47,13 @@ from worlds.alttp.EnemyShuffle import (
     _load_default_dungeon_room_sprites,
     _load_enemy_sprite_requirements,
     _apply_selected_boss_group_requirements,
+    _randomize_dungeon_groups,
     _randomize_overworld_areas,
     _randomize_overworld_groups,
     _randomize_room_sprites,
     _restore_standard_beginning_overworld_sprite_groups,
     _restore_skipped_room_sprite_groups,
+    _setup_combined_dungeon_room_graphics_groups,
     _setup_required_overworld_groups,
     can_spawn_in_room,
     validate_enemy_shuffle_state,
@@ -2911,6 +2913,108 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertTrue(group.preserve_subgroup_2)
         self.assertTrue(group.preserve_subgroup_3)
 
+    def test_combined_room_graphics_requirements_preserve_fixed_sprite_subgroups(self) -> None:
+        room = DungeonEnemyRoom(
+            room_id=4,
+            room_header_address=0,
+            sprite_table_address=0,
+            graphics_block_id=38,
+            tag_1=0,
+            tag_2=0,
+            sort_sprites_value=0,
+            sprites=(
+                DungeonEnemySprite(address=0x2000, byte_0=0, byte_1=0, sprite_id=0x40, is_overlord=False, has_key=False),
+            ),
+            required_group_id=None,
+            required_subgroup_0=tuple(),
+            required_subgroup_1=tuple(),
+            required_subgroup_2=tuple(),
+            required_subgroup_3=(83,),
+            is_shutter_room=True,
+            is_water_room=False,
+            do_not_randomize=False,
+            no_special_enemies_standard=False,
+            all_sprites=(
+                DungeonEnemySprite(address=0x1000, byte_0=0, byte_1=0, sprite_id=0x1E, is_overlord=False, has_key=False),
+                DungeonEnemySprite(address=0x1003, byte_0=0, byte_1=0, sprite_id=0x116, is_overlord=True, has_key=False),
+                DungeonEnemySprite(address=0x2000, byte_0=0, byte_1=0, sprite_id=0x40, is_overlord=False, has_key=False),
+            ),
+        )
+        sprite_groups = {
+            0x51: DungeonSpriteGroup(
+                group_id=0x51, dungeon_group_id=17, subgroup_0=31, subgroup_1=32, subgroup_2=46, subgroup_3=17,
+            ),
+            0x60: DungeonSpriteGroup(
+                group_id=0x60, dungeon_group_id=32, subgroup_0=47, subgroup_1=44, subgroup_2=59, subgroup_3=83,
+            ),
+            0x66: DungeonSpriteGroup(
+                group_id=0x66, dungeon_group_id=38, subgroup_0=31, subgroup_1=44, subgroup_2=42, subgroup_3=27,
+            ),
+        }
+        sprite_requirements = (
+            self._requirement(0x1E, subgroup_3=(82, 83)),
+            self._requirement(0x116, subgroup_1=(32,)),
+        )
+
+        _setup_combined_dungeon_room_graphics_groups(
+            SimpleNamespace(random=random.Random(0)),
+            {room.room_id: room},
+            sprite_groups,
+            sprite_requirements,
+        )
+        _randomize_dungeon_groups(SimpleNamespace(random=random.Random(1)), sprite_groups)
+
+        self.assertTrue(any(
+            group.subgroup_1 == 32
+            and group.subgroup_3 == 83
+            and group.preserve_subgroup_1
+            and group.preserve_subgroup_3
+            for group in sprite_groups.values()
+        ))
+
+    def test_combined_room_graphics_requirements_union_fixed_sprite_alternatives(self) -> None:
+        room = DungeonEnemyRoom(
+            room_id=292,
+            room_header_address=0,
+            sprite_table_address=0,
+            graphics_block_id=40,
+            tag_1=0,
+            tag_2=0,
+            sort_sprites_value=0,
+            sprites=tuple(),
+            required_group_id=40,
+            required_subgroup_0=(14,),
+            required_subgroup_1=tuple(),
+            required_subgroup_2=(74,),
+            required_subgroup_3=(80,),
+            is_shutter_room=False,
+            is_water_room=False,
+            do_not_randomize=False,
+            no_special_enemies_standard=False,
+            all_sprites=(
+                DungeonEnemySprite(address=0x2000, byte_0=0, byte_1=0, sprite_id=0xBB, is_overlord=False, has_key=False),
+            ),
+        )
+        sprite_groups = {
+            0x68: DungeonSpriteGroup(
+                group_id=0x68, dungeon_group_id=40, subgroup_0=14, subgroup_1=0, subgroup_2=74, subgroup_3=80,
+            ),
+        }
+        sprite_requirements = (
+            self._requirement(0xBB, subgroup_0=(14,), spawnable_rooms=(291, 292)),
+            self._requirement(0xBB, subgroup_0=(14,), subgroup_2=(74,), subgroup_3=(90,), spawnable_rooms=(291, 292)),
+        )
+
+        _setup_combined_dungeon_room_graphics_groups(
+            SimpleNamespace(random=random.Random(0)),
+            {room.room_id: room},
+            sprite_groups,
+            sprite_requirements,
+        )
+
+        self.assertEqual(sprite_groups[0x68].subgroup_3, 80)
+        self.assertTrue(sprite_groups[0x68].preserve_subgroup_3)
+
     def test_skipped_standard_rooms_restore_original_graphics_group(self) -> None:
         room = DungeonEnemyRoom(
             room_id=80,
@@ -3117,6 +3221,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         is_water_sprite: bool = False,
         excluded_rooms: tuple[int, ...] = tuple(),
         dont_randomize_rooms: tuple[int, ...] = tuple(),
+        spawnable_rooms: tuple[int, ...] = tuple(),
         combat_reference_id: int | None = None,
         counts_for_enemy_clear: bool | None = None,
     ) -> EnemySpriteRequirement:
@@ -3147,7 +3252,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             special_glitched=False,
             excluded_rooms=excluded_rooms,
             dont_randomize_rooms=dont_randomize_rooms,
-            spawnable_rooms=tuple(),
+            spawnable_rooms=spawnable_rooms,
             combat_reference_id=combat_reference_id,
         )
 
