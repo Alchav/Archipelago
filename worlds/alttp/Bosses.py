@@ -16,6 +16,7 @@ from .StateHelpers import (
     has_sword,
     can_use_bombs,
     _get_boss_attack_plans,
+    _get_trinexx_side_head_attack_plans,
 )
 from .enemizer_data.enemy_combat_data import (
     ARRGHUS_FUZZ_SPRITE_ID,
@@ -119,9 +120,22 @@ KHOLDSTARE_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
 # No item delivery is excluded here; Vitreous and small eyes call damage checks at
 # sprite_vitreous.asm:19 and sprite_vitreolus.asm:47, and ordinary ancillas use the shared paths above.
 VITREOUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
-# No item delivery is excluded from the side heads; they call Sprite4_CheckDamage at
-# sprite_trinexx.asm:177 and :568, and ordinary ancillas use the shared paths above.
-TRINEXX_HEAD_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Trinexx side heads use a boss-specific vulnerable state. Before that state,
+# sword and hammer contact is repulsed by $0CAA bit 2 in Bank06.asm:5900-5903.
+# Non-melee ancilla/medallion hits can set $0EF0 and trigger the 0x80-frame
+# vulnerable state at sprite_sidenexx.asm:43-54; Quake is excluded because
+# Bank06.asm:4737-4744 rejects sprites with nonzero altitude.
+TRINEXX_HEAD_OPENER_ITEMS = (
+    BOSS_ARROW_ITEMS
+    + BOSS_BOOMERANG_ITEMS
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder",)
+    + BOSS_ROD_ITEMS
+    + ("Bombos", "Ether")
+)
+TRINEXX_HEAD_OPENER_ABILITIES = ("bombs", "sword_beams")
+TRINEXX_HEAD_FOLLOW_UP_ITEMS = BOSS_MELEE_ITEMS
 # Projectiles, rods, canes, powder, medallions, and bombs are excluded from the final
 # Trinexx body: it temporarily clears impervious status only around
 # Sprite_CheckDamageFromPlayerLong, then restores it. See sprite_trinexx.asm:408-420.
@@ -267,22 +281,21 @@ def VitreousDefeatRule(state, player: int) -> bool:
 
 
 def TrinexxDefeatRule(state, player: int) -> bool:
-    if not (state.has('Fire Rod', player) and state.has('Ice Rod', player)):
-        return False
-
-    red_head_plans = _get_boss_attack_plans(
+    red_head_plans = _get_trinexx_side_head_attack_plans(
         state,
         player,
         TRINEXX_RED_HEAD_SPRITE_ID,
-        allowed_items=TRINEXX_HEAD_ATTACK_ITEMS,
-        include_transform_removal=True,
+        opener_items=TRINEXX_HEAD_OPENER_ITEMS,
+        opener_abilities=TRINEXX_HEAD_OPENER_ABILITIES,
+        follow_up_items=TRINEXX_HEAD_FOLLOW_UP_ITEMS,
     )
-    blue_head_plans = _get_boss_attack_plans(
+    blue_head_plans = _get_trinexx_side_head_attack_plans(
         state,
         player,
         TRINEXX_BLUE_HEAD_SPRITE_ID,
-        allowed_items=TRINEXX_HEAD_ATTACK_ITEMS,
-        include_transform_removal=True,
+        opener_items=TRINEXX_HEAD_OPENER_ITEMS,
+        opener_abilities=TRINEXX_HEAD_OPENER_ABILITIES,
+        follow_up_items=TRINEXX_HEAD_FOLLOW_UP_ITEMS,
     )
     body_plans = _get_boss_attack_plans(
         state,

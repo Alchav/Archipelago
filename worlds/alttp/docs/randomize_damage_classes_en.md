@@ -155,7 +155,9 @@ Trinexx's head can be hit by many non-melee sources before the middle section st
 
 ### Trinexx Red and Blue Heads
 
-The red and blue heads use their damage tables once their vulnerability rules are satisfied. Randomized tables can therefore change what damages them.
+The red and blue heads have a boss-specific vulnerability state. Before that state, sword and hammer contact bounces off. Non-melee attacks such as arrows, boomerangs, hookshot, bombs, sword beams, canes, Magic Powder, Fire Rod, Ice Rod, Bombos, and Ether can make a side head vulnerable if that damage class has a damage, stun, or freeze effect. Quake is not considered logical for this because the generic Quake damage path rejects airborne sprites.
+
+Once a side head is vulnerable, melee attacks can damage it. Logic assumes up to three melee hits during each vulnerability window before another non-melee vulnerability hit is needed.
 
 ### Blind
 

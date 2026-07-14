@@ -15,8 +15,13 @@ from .enemizer_data.enemy_combat_data import (
     LIGHTNING_GATE_SPRITE_ID,
     MASTER_SWORD_DAMAGE_CLASSES,
     SWORD_BEAM_DAMAGE_CLASS,
+    STUN_32_FRAMES_EFFECT,
+    STUN_128_FRAMES_EFFECT,
     STUN_255_FRAMES_EFFECT,
     TEMPERED_SWORD_DAMAGE_CLASSES,
+    TRANSFORM_DAMAGE_EFFECTS,
+    TRINEXX_BLUE_HEAD_SPRITE_ID,
+    TRINEXX_RED_HEAD_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
     YELLOW_SLIME_SPRITE_ID,
     get_blob_transform_damage_classes,
@@ -270,6 +275,13 @@ LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
     ("Tempered Sword", frozenset((2, 3, 4))),
     ("Golden Sword", frozenset((3, 4, 5))),
 )
+TRINEXX_SIDE_HEAD_VULNERABLE_MELEE_HITS_PER_OPENER = 3
+TRINEXX_SIDE_HEAD_OPENER_EFFECTS = frozenset((
+    FREEZE_EFFECT,
+    STUN_32_FRAMES_EFFECT,
+    STUN_128_FRAMES_EFFECT,
+    STUN_255_FRAMES_EFFECT,
+))
 ENEMY_COMBAT_STATE_VERSION_ATTRIBUTE = "_alttp_enemy_combat_logic_version"
 
 
@@ -362,6 +374,14 @@ def _add_resource_costs(left: ResourceCosts, right: ResourceCosts) -> ResourceCo
         left.bombs + right.bombs,
         left.arrows + right.arrows,
         left.magic + right.magic,
+    )
+
+
+def _multiply_resource_costs(costs: ResourceCosts, count: int) -> ResourceCosts:
+    return ResourceCosts(
+        costs.bombs * count,
+        costs.arrows * count,
+        costs.magic * count,
     )
 
 
@@ -1618,6 +1638,150 @@ def can_damage_blind_sprite(
     )
     cache[cache_key] = plans
     return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
+
+
+def _get_trinexx_side_head_attack_plans(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    *,
+    opener_items: tuple[str, ...],
+    opener_abilities: tuple[str, ...],
+    follow_up_items: tuple[str, ...],
+) -> tuple[ResourceCosts, ...]:
+    if sprite_id not in (TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID):
+        raise ValueError(f"Expected Trinexx side head sprite, got 0x{sprite_id:02X}")
+
+    cache = _get_enemy_combat_cache(state, player)
+    cache_key = ("trinexx_side_head_attack_plans", sprite_id, opener_items, opener_abilities, follow_up_items)
+    if cache_key in cache:
+        return cache[cache_key]
+
+    combat_model = _get_active_combat_model(state, player)
+    hp = get_enemy_health_for_logic(
+        sprite_id,
+        _get_enemy_health_key(state, player),
+        killable_thieves=bool(state.multiworld.worlds[player].options.killable_thieves),
+        combat_model=combat_model,
+    )
+    if hp is None:
+        cache[cache_key] = tuple()
+        return tuple()
+
+    opener_classes = {
+        damage_class
+        for damage_class in range(len(combat_model.damage_sources))
+        if damage_class != ROOM_WIDE_MEDALLION_DAMAGE_CLASSES["Quake"]
+        and _trinexx_side_head_opener_effect(get_damage_effect(sprite_id, damage_class, combat_model))
+    }
+    follow_up_classes = {
+        damage_class
+        for damage_class in range(len(combat_model.damage_sources))
+        if _trinexx_side_head_effect_damage(get_damage_effect(sprite_id, damage_class, combat_model), hp) > 0
+    }
+
+    plans: set[ResourceCosts] = set()
+    for opener_class in opener_classes:
+        opener_plans = _build_single_hit_plans_for_damage_classes(
+            state,
+            player,
+            {opener_class},
+            allowed_items=opener_items,
+            allowed_abilities=opener_abilities,
+        )
+        if not opener_plans:
+            continue
+
+        opener_effect = get_damage_effect(sprite_id, opener_class, combat_model)
+        opener_damage = _trinexx_side_head_effect_damage(opener_effect, hp)
+        if opener_effect in TRANSFORM_DAMAGE_EFFECTS:
+            for opener_plan in opener_plans:
+                plans.add(opener_plan)
+            continue
+
+        for opener_plan in opener_plans:
+            plans.update(_get_trinexx_side_head_window_plans(
+                state,
+                player,
+                sprite_id,
+                hp,
+                opener_plan,
+                opener_damage,
+                follow_up_classes,
+                follow_up_items,
+                combat_model,
+            ))
+
+    result = _prune_dominated_resource_costs(plans)
+    cache[cache_key] = result
+    return result
+
+
+def _trinexx_side_head_opener_effect(effect: int) -> bool:
+    return (
+        is_killing_damage_effect(effect)
+        or effect in TRANSFORM_DAMAGE_EFFECTS
+        or effect in TRINEXX_SIDE_HEAD_OPENER_EFFECTS
+    )
+
+
+def _trinexx_side_head_effect_damage(effect: int, hp: int) -> int:
+    if effect == INCINERATE_EFFECT or effect in TRANSFORM_DAMAGE_EFFECTS:
+        return hp
+    if 0 < effect < FAIRY_TRANSFORM_EFFECT:
+        return effect
+    return 0
+
+
+def _get_trinexx_side_head_window_plans(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    hp: int,
+    opener_plan: ResourceCosts,
+    opener_damage: int,
+    follow_up_classes: set[int],
+    follow_up_items: tuple[str, ...],
+    combat_model: EnemyCombatModel,
+) -> set[ResourceCosts]:
+    plans: set[ResourceCosts] = set()
+    max_cycle_damage = opener_damage
+    follow_up_damage_by_class = {
+        damage_class: _trinexx_side_head_effect_damage(get_damage_effect(sprite_id, damage_class, combat_model), hp)
+        for damage_class in follow_up_classes
+    }
+    if follow_up_damage_by_class:
+        max_cycle_damage += TRINEXX_SIDE_HEAD_VULNERABLE_MELEE_HITS_PER_OPENER * max(follow_up_damage_by_class.values())
+    if max_cycle_damage <= 0:
+        return plans
+
+    for opener_count in range(1, hp + 1):
+        remaining_hp = hp - (opener_damage * opener_count)
+        if remaining_hp <= 0:
+            plans.add(_multiply_resource_costs(opener_plan, opener_count))
+            continue
+
+        max_follow_up_hits = opener_count * TRINEXX_SIDE_HEAD_VULNERABLE_MELEE_HITS_PER_OPENER
+        for damage_class, follow_up_damage in follow_up_damage_by_class.items():
+            if follow_up_damage <= 0:
+                continue
+            follow_up_hits = (remaining_hp + follow_up_damage - 1) // follow_up_damage
+            if follow_up_hits > max_follow_up_hits:
+                continue
+            follow_up_plans = _build_fixed_hit_plans_for_damage_classes(
+                state,
+                player,
+                {damage_class},
+                follow_up_hits,
+                allowed_items=follow_up_items,
+            )
+            for follow_up_plan in follow_up_plans:
+                plans.add(_add_resource_costs(
+                    _multiply_resource_costs(opener_plan, opener_count),
+                    follow_up_plan,
+                ))
+
+    return plans
 
 
 def can_damage_boss_sprite(
