@@ -109,7 +109,8 @@ def can_lift_heavy_rocks(state: CollectionState, player: int) -> bool:
 
 
 def bottle_count(state: CollectionState, player: int) -> int:
-    return min(state.multiworld.worlds[player].difficulty_requirements.progressive_bottle_limit,
+    return min(4,
+               state.multiworld.worlds[player].difficulty_requirements.progressive_bottle_limit,
                state.count_group("Bottles", player))
 
 

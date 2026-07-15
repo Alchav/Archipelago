@@ -1217,13 +1217,15 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
 
     difficulty = local_world.difficulty_requirements
 
-    # Set overflow items for progressive equipment
+    # Set overflow items for progressive equipment. The game only has four bottle slots,
+    # even when Easy mode keeps extra bottles in the item pool as overflow pickups.
+    progressive_bottle_limit = min(difficulty.progressive_bottle_limit, 4)
     rom.write_bytes(0x180090,
                     [difficulty.progressive_sword_limit if not local_world.options.swordless else 0,
                      item_table[difficulty.basicsword[-1]].item_code,
                      difficulty.progressive_shield_limit, item_table[difficulty.basicshield[-1]].item_code,
                      difficulty.progressive_armor_limit, item_table[difficulty.basicarmor[-1]].item_code,
-                     difficulty.progressive_bottle_limit, overflow_replacement,
+                     progressive_bottle_limit, overflow_replacement,
                      difficulty.progressive_bow_limit, item_table[difficulty.basicbow[-1]].item_code])
 
     if difficulty.progressive_bow_limit < 2 and (
@@ -1595,7 +1597,7 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
             for address in addresses:
                 equip[address] = min(equip[address] + quantity, 99)
         elif item.name in bottles:
-            if equip[0x34F] < local_world.difficulty_requirements.progressive_bottle_limit:
+            if equip[0x34F] < 4:
                 equip[0x35C + equip[0x34F]] = bottles[item.name]
                 equip[0x34F] += 1
         elif item.name in rupees:
