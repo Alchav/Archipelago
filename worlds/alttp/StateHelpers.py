@@ -234,6 +234,7 @@ ENEMY_COMBAT_STATE_ITEMS = (
     "Cane of Somaria",
     "Cane of Byrna",
     "Magic Powder",
+    "Lamp",
     "Bow",
     "Silver Bow",
     "Silver Arrows",
@@ -578,8 +579,7 @@ def _enemy_requirement_can_be_killed(state: CollectionState, player: int, requir
     requirement = _get_enemy_requirement(requirement)
     if not requirement.killable:
         return False
-    combat_model = _get_active_combat_model(state, player)
-    return bool(_get_direct_kill_damage_classes(requirement, combat_model))
+    return bool(_get_enemy_kill_plans(state, player, requirement))
 
 
 def _get_enemy_requirement(enemy_or_requirement):
@@ -1201,6 +1201,7 @@ def _build_attack_plans_for_damage_classes(
     allowed_abilities: tuple[str, ...] | None = None,
     bypass_damage_class_filter: bool = False,
     ignore_attack_limit: bool = False,
+    extra_magic_per_two_hits: int = 0,
 ) -> tuple[ResourceCosts, ...]:
     allowed_items_set = set(allowed_items) if allowed_items is not None else None
     allowed_abilities_set = set(allowed_abilities) if allowed_abilities is not None else None
@@ -1212,6 +1213,12 @@ def _build_attack_plans_for_damage_classes(
         return allowed_abilities_set is None or ability_name in allowed_abilities_set
 
     plans: set[ResourceCosts] = set()
+
+    def add_plan(costs: ResourceCosts, hit_count: int) -> None:
+        if extra_magic_per_two_hits:
+            vulnerability_windows = (hit_count + 1) // 2
+            costs = costs._replace(magic=costs.magic + (extra_magic_per_two_hits * vulnerability_windows))
+        plans.add(costs)
 
     zero_cost_damage_class_items = (
         ("Fighter Sword", FIGHTER_SWORD_DAMAGE_CLASSES, state.has("Fighter Sword", player)),
@@ -1238,7 +1245,7 @@ def _build_attack_plans_for_damage_classes(
                 ignore_attack_limit=ignore_attack_limit,
             )
             if hit_count is not None:
-                plans.add(FREE_RESOURCE_COSTS)
+                add_plan(FREE_RESOURCE_COSTS, hit_count)
 
     if item_allowed("Cane of Somaria") and state.has("Cane of Somaria", player):
         hit_count = _get_best_hit_count(
@@ -1252,7 +1259,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=SOMARIA_MAGIC_COST * hit_count))
+            add_plan(ResourceCosts(magic=SOMARIA_MAGIC_COST * hit_count), hit_count)
 
     if item_allowed("Cane of Byrna") and state.has("Cane of Byrna", player):
         hit_count = _get_best_hit_count(
@@ -1266,7 +1273,10 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST + (BYRNA_DRAIN_MAGIC_COST * max(0, hit_count - 1))))
+            add_plan(
+                ResourceCosts(magic=BYRNA_INITIAL_MAGIC_COST + (BYRNA_DRAIN_MAGIC_COST * max(0, hit_count - 1))),
+                hit_count,
+            )
 
     if item_allowed("Magic Powder") and state.has("Magic Powder", player):
         hit_count = _get_best_hit_count(
@@ -1280,7 +1290,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST * hit_count))
+            add_plan(ResourceCosts(magic=MAGIC_POWDER_MAGIC_COST * hit_count), hit_count)
 
     if item_allowed("Bow") and state.has("Bow", player) and can_shoot_arrows(state, player, 1):
         hit_count = _get_best_hit_count(
@@ -1294,7 +1304,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(arrows=hit_count))
+            add_plan(ResourceCosts(arrows=hit_count), hit_count)
 
     if item_allowed("Silver Bow") and _has_silver_arrow_attack(state, player) and can_shoot_arrows(state, player, 1):
         hit_count = _get_best_hit_count(
@@ -1308,7 +1318,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(arrows=hit_count))
+            add_plan(ResourceCosts(arrows=hit_count), hit_count)
 
     if ability_allowed("bombs") and can_use_bombs(state, player, 1):
         hit_count = _get_best_hit_count(
@@ -1322,7 +1332,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(bombs=hit_count))
+            add_plan(ResourceCosts(bombs=hit_count), hit_count)
 
     if ability_allowed("sword_beams") and _has_sword_beam_attack(state, player):
         hit_count = _get_best_hit_count(
@@ -1336,7 +1346,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(FREE_RESOURCE_COSTS)
+            add_plan(FREE_RESOURCE_COSTS, hit_count)
 
     if item_allowed("Fire Rod") and state.has("Fire Rod", player):
         hit_count = _get_best_hit_count(
@@ -1350,7 +1360,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=FIRE_ROD_MAGIC_COST * hit_count))
+            add_plan(ResourceCosts(magic=FIRE_ROD_MAGIC_COST * hit_count), hit_count)
 
     if item_allowed("Ice Rod") and state.has("Ice Rod", player):
         hit_count = _get_best_hit_count(
@@ -1364,7 +1374,7 @@ def _build_attack_plans_for_damage_classes(
             ignore_attack_limit=ignore_attack_limit,
         )
         if hit_count is not None:
-            plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
+            add_plan(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count), hit_count)
 
     if _can_ready_medallion(state, player):
         for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
@@ -1380,7 +1390,7 @@ def _build_attack_plans_for_damage_classes(
                     ignore_attack_limit=ignore_attack_limit,
                 )
                 if hit_count is not None:
-                    plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST * hit_count))
+                    add_plan(ResourceCosts(magic=MEDALLION_MAGIC_COST * hit_count), hit_count)
 
     return _prune_dominated_resource_costs(plans)
 
@@ -1559,6 +1569,7 @@ def _get_boss_attack_plans(
     allowed_abilities: tuple[str, ...] | None = None,
     hp_override: int | None = None,
     include_transform_removal: bool = False,
+    extra_magic_per_two_hits: int = 0,
 ) -> tuple[ResourceCosts, ...]:
     boss_allowed_abilities = allowed_abilities if allowed_abilities is not None else tuple()
     cache = _get_enemy_combat_cache(state, player)
@@ -1569,6 +1580,7 @@ def _get_boss_attack_plans(
         boss_allowed_abilities,
         hp_override,
         include_transform_removal,
+        extra_magic_per_two_hits,
     )
     if cache_key in cache:
         return cache[cache_key]
@@ -1584,6 +1596,7 @@ def _get_boss_attack_plans(
         allowed_items=allowed_items,
         allowed_abilities=boss_allowed_abilities,
         ignore_attack_limit=True,
+        extra_magic_per_two_hits=extra_magic_per_two_hits,
     ))
 
     if include_transform_removal:
@@ -1793,6 +1806,7 @@ def can_damage_boss_sprite(
     allowed_abilities: tuple[str, ...] | None = None,
     hp_override: int | None = None,
     include_transform_removal: bool = False,
+    extra_magic_per_two_hits: int = 0,
 ) -> bool:
     return _can_execute_enemy_kill_plans(
         (_get_boss_attack_plans(
@@ -1803,6 +1817,7 @@ def can_damage_boss_sprite(
             allowed_abilities=allowed_abilities,
             hp_override=hp_override,
             include_transform_removal=include_transform_removal,
+            extra_magic_per_two_hits=extra_magic_per_two_hits,
         ),),
         _get_enemy_clear_resource_budget(state, player),
     )
@@ -1942,8 +1957,6 @@ def _get_yellow_slime_follow_up_plans(
     combat_model: EnemyCombatModel,
 ) -> tuple[ResourceCosts, ...]:
     follow_up_override = get_yellow_slime_follow_up_delivery_override(combat_reference_id)
-    if follow_up_override is None:
-        return tuple()
 
     return _build_attack_plans_for_damage_classes(
         state,
@@ -1951,8 +1964,8 @@ def _get_yellow_slime_follow_up_plans(
         YELLOW_SLIME_SPRITE_ID,
         set(get_killing_damage_classes(YELLOW_SLIME_SPRITE_ID, combat_model)),
         combat_model,
-        allowed_items=follow_up_override.items,
-        allowed_abilities=follow_up_override.abilities,
+        allowed_items=follow_up_override.items if follow_up_override is not None else None,
+        allowed_abilities=follow_up_override.abilities if follow_up_override is not None else None,
     )
 
 

@@ -237,11 +237,11 @@ class LttPPatchExtensions(worlds.Files.APPatchExtension):
             if mode in ("good", "random"):
                 mode = "maseya"
 
-            rng = random.Random(patch["seed"])
+            palette_random = random.Random(patch["seed"])
 
             def next_color_generator():
                 while True:
-                    yield ColorF(rng.random(), rng.random(), rng.random())
+                    yield ColorF(palette_random.random(), palette_random.random(), palette_random.random())
 
             data_dir = local_path("data") if is_frozen() else None
             offsets_array = build_offsets({patch["option_name"]: True}, data_dir)
@@ -437,11 +437,11 @@ class AdjusterRom:
         if mode in ("good", "random"):
             mode = "maseya"
 
-        rng = random.Random(seed)
+        palette_random = random.Random(seed)
 
         def next_color_generator():
             while True:
-                yield ColorF(rng.random(), rng.random(), rng.random())
+                yield ColorF(palette_random.random(), palette_random.random(), palette_random.random())
 
         data_dir = local_path("data") if is_frozen() else None
         offsets_array = build_offsets({option_name: True}, data_dir)
@@ -1922,7 +1922,7 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
         enemy_health_key = enemizer_patches._option_key(local_world.options.enemy_health)
         if existing_combat_model is None and damage_class_key != enemizer_patches.VANILLA_RANDOMIZE_DAMAGE_CLASSES:
             combat_model = enemizer_patches.build_randomized_damage_class_combat_model(
-                enemizer_patches._make_native_enemizer_rng(local_world),
+                local_world.random,
                 damage_class_key,
                 base_combat_model,
                 max_attacks_in_logic=local_world.options.max_attacks_in_logic.value,
@@ -1956,21 +1956,14 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
             rom.write_byte(0x1F2E5, 0xB0)
             rom.write_byte(0x1F2EB, 0xD0)
 
-        if enemy_health_key != "default" or enemy_damage_key != "default":
-            rng = enemizer_patches._make_native_enemizer_rng(local_world)
-        else:
-            rng = None
-
         if enemy_health_key != "default":
-            assert rng is not None
-            enemizer_patches._randomize_enemy_health(rom, rng, enemy_health_key, combat_model)
+            enemizer_patches._randomize_enemy_health(rom, local_world.random, enemy_health_key, combat_model)
 
         if enemy_damage_key != "default":
-            assert rng is not None
-            enemizer_patches._randomize_enemy_damage(rom, rng, allow_zero_damage=True)
+            enemizer_patches._randomize_enemy_damage(rom, local_world.random, allow_zero_damage=True)
             enemizer_patches._shuffle_damage_groups(
                 rom,
-                rng,
+                local_world.random,
                 chaos_mode=enemy_damage_key == "chaos",
                 allow_zero_damage=True,
             )

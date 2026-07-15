@@ -143,3 +143,13 @@ class TestSwampPalace(TestDungeon):
             ["Swamp Palace - Trench 2 Pot Key", False, swamp_keys[:5]],
             ["Swamp Palace - Trench 2 Pot Key", True, swamp_keys],
         ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0x35: (FilledPot(76, 28, POT_KEY),),
+        }))
+        self.starting_regions = ['Swamp Palace (Center)']
+        self.run_tests([
+            ["Swamp Palace - Trench 2 Pot Key", False, []],
+            ["Swamp Palace - Trench 2 Pot Key", False, swamp_keys[:5]],
+            ["Swamp Palace - Trench 2 Pot Key", True, swamp_keys],
+        ])

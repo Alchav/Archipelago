@@ -22,6 +22,7 @@ from .enemizer_data.enemy_combat_data import (
     get_killing_damage_classes,
     get_hits_to_kill,
     get_progression_kill_damage_classes,
+    get_yellow_slime_follow_up_delivery_override,
     with_killable_thief_combat_model,
 )
 from .enemizer_data.enemy_room_metadata import (
@@ -107,6 +108,12 @@ POTENTIAL_SUBGROUP_2 = (12, 18, 23, 24, 28, 46, 34, 35, 39, 40, 38, 41, 36, 37, 
 POTENTIAL_SUBGROUP_3 = (17, 16, 27, 20, 82, 83)
 IMPOSSIBLE_GRAPHICS_VALUE = -1
 STANDARD_ESCAPE_OVERWORLD_AREA_IDS = frozenset((0x1B, 0x2B, 0x2C))
+STANDARD_ESCAPE_DUNGEON_ROOM_IDS = frozenset((
+    0x21,  # Hyrule Castle (Key-rat Room)
+    0x71,  # Hyrule Castle (Boomerang Chest Room)
+    0x72,  # Hyrule Castle (Map Chest Room)
+    0x80,  # Hyrule Castle (Jail Cell Room)
+))
 # Standard opening escape uses the separate Beginning-mode overworld sheets rather than
 # the ordinary area graphics-block bytes. The three relevant groups are the runtime
 # Beginning sheet observed in Hyrule Castle courtyard (group 2) plus the first-part
@@ -357,7 +364,7 @@ class EnemyShuffleState:
     max_attacks_in_logic: int = 16
     killable_thieves: bool = False
     available_damage_classes: frozenset[int] = frozenset(range(16))
-    hammer_available_for_freeze: bool = False
+    hammer_available_for_freeze: bool = True
 
 
 def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
@@ -429,7 +436,7 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
-        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
+        hammer_available_for_freeze=True,
     )
     validate_enemy_shuffle_state(state, is_standard_mode=world.options.mode == "standard")
     return state
@@ -460,10 +467,6 @@ def _get_world_combat_model(world: "ALTTPWorld") -> EnemyCombatModel:
 
 def _get_world_available_damage_classes(world: "ALTTPWorld") -> frozenset[int]:
     return frozenset(getattr(world, "enemy_shuffle_available_damage_classes", frozenset(range(16))))
-
-
-def _get_world_hammer_available_for_freeze(world: "ALTTPWorld") -> bool:
-    return bool(getattr(world, "enemy_shuffle_hammer_available_for_freeze", False))
 
 
 def _get_base_patched_rom_bytes() -> bytes:
@@ -1104,7 +1107,7 @@ def _restore_original_groups_for_rooms_without_possible_groups(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
-        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
+        hammer_available_for_freeze=True,
     )
 
     for _ in range(len(dungeon_rooms)):
@@ -1726,7 +1729,7 @@ def _damage_class_is_fairy_transform(
     return get_damage_effect(combat_reference_id, damage_class, combat_model) == FAIRY_TRANSFORM_EFFECT
 
 
-def _has_yellow_slime_follow_up_for_key_drop(state: EnemyShuffleState) -> bool:
+def _has_yellow_slime_follow_up_for_key_drop(state: EnemyShuffleState, source_combat_reference_id: int) -> bool:
     candidate_damage_classes = set(get_killing_damage_classes(
         YELLOW_SLIME_SPRITE_ID,
         state.combat_model,
@@ -1734,6 +1737,9 @@ def _has_yellow_slime_follow_up_for_key_drop(state: EnemyShuffleState) -> bool:
     ))
     candidate_damage_classes &= set(get_progression_kill_damage_classes(YELLOW_SLIME_SPRITE_ID))
     candidate_damage_classes &= state.available_damage_classes
+    follow_up_override = get_yellow_slime_follow_up_delivery_override(source_combat_reference_id)
+    if follow_up_override is not None:
+        candidate_damage_classes &= _get_deliverable_damage_classes(follow_up_override)
     return any(
         _damage_class_kills_within_enemy_shuffle_logic(state, YELLOW_SLIME_SPRITE_ID, damage_class)
         for damage_class in candidate_damage_classes
@@ -1779,7 +1785,7 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     return any(
         (
             get_damage_effect(combat_reference_id, damage_class, state.combat_model) == BLOB_TRANSFORM_EFFECT
-            and _has_yellow_slime_follow_up_for_key_drop(state)
+            and _has_yellow_slime_follow_up_for_key_drop(state, combat_reference_id)
         )
         or _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
         for damage_class in candidate_damage_classes
@@ -2090,7 +2096,7 @@ def _randomize_dungeon_rooms(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
-        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
+        hammer_available_for_freeze=True,
     )
     randomized_rooms: dict[int, RandomizedDungeonEnemyRoom] = {}
 
@@ -2145,7 +2151,7 @@ def _randomize_overworld_areas(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
-        hammer_available_for_freeze=_get_world_hammer_available_for_freeze(world),
+        hammer_available_for_freeze=True,
     )
     randomized_areas: dict[int, RandomizedOverworldEnemyArea] = {}
 
@@ -2182,6 +2188,7 @@ def _dungeon_room_skips_enemy_randomization(
 ) -> bool:
     return (
         room.do_not_randomize
+        or (world.options.mode == "standard" and room.room_id in STANDARD_ESCAPE_DUNGEON_ROOM_IDS)
         or (world.options.mode == "standard" and room.no_special_enemies_standard)
         or not _get_randomizable_sprites_in_room(state, room)
     )
@@ -2519,7 +2526,7 @@ def _validate_dungeon_room(
         if randomized_sprite.sprite_id != STAL_SPRITE_ID and randomized_sprite.sprite_id not in possible_sprite_ids:
             raise ValueError(f"Enemy shuffle placed illegal sprite {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
 
-    if room.is_shutter_room and _get_randomizable_sprites_in_room(state, room):
+    if not skipped and room.is_shutter_room and _get_randomizable_sprites_in_room(state, room):
         all_killable_sprite_ids = {
             requirement.sprite_id for requirement in _filter_requirements_for_room_water_state(room, state.sprite_requirements)
             if _can_be_shutter_room_clear_enemy(state, requirement)

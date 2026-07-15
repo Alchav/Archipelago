@@ -6,6 +6,7 @@ from typing import Optional, Union, List, Tuple, Callable, Dict, TYPE_CHECKING
 from Fill import FillError
 from .Options import LTTPBosses as Bosses
 from .StateHelpers import (
+    FIRE_ROD_MAGIC_COST,
     can_damage_boss_sprite,
     can_damage_boss_sprite_phases,
     can_damage_blind_sprite,
@@ -171,6 +172,10 @@ GANON_HP_FOR_LOGIC = 0x60
 GANON_D6_PHASE_SKIP_DAMAGE = 0x64
 
 
+def _ganon_torch_relight_magic_per_two_hits(state, player: int) -> int:
+    return 0 if state.has("Lamp", player) else FIRE_ROD_MAGIC_COST * 2
+
+
 def ArmosKnightsDefeatRule(state, player: int) -> bool:
     return can_damage_boss_sprite(
         state,
@@ -311,6 +316,7 @@ def AgahnimDefeatRule(state, player: int) -> bool:
 
 
 def GanonDefeatRule(state, player: int) -> bool:
+    torch_relight_magic = _ganon_torch_relight_magic_per_two_hits(state, player)
     if state.multiworld.worlds[player].options.swordless:
         return (
             state.has('Hammer', player)
@@ -321,6 +327,7 @@ def GanonDefeatRule(state, player: int) -> bool:
                 GANON_D7_SPRITE_ID,
                 allowed_items=GANON_D7_SWORDLESS_ATTACK_ITEMS,
                 hp_override=GANON_HP_FOR_LOGIC,
+                extra_magic_per_two_hits=torch_relight_magic,
             )
         )
 
@@ -348,6 +355,7 @@ def GanonDefeatRule(state, player: int) -> bool:
         GANON_D7_SPRITE_ID,
         allowed_items=GANON_D7_ATTACK_ITEMS,
         hp_override=GANON_HP_FOR_LOGIC,
+        extra_magic_per_two_hits=torch_relight_magic,
     )
     if state.multiworld.worlds[player].options.glitches_required == 'no_glitches':
         return d7_kill
@@ -358,6 +366,7 @@ def GanonDefeatRule(state, player: int) -> bool:
         GANON_D6_SPRITE_ID,
         allowed_items=GANON_D6_ATTACK_ITEMS,
         hp_override=GANON_HP_FOR_LOGIC,
+        extra_magic_per_two_hits=torch_relight_magic,
     )
     return d7_kill or d6_kill
 
@@ -375,6 +384,19 @@ boss_table: Dict[str, Tuple[str, Optional[Callable]]] = {
     'Trinexx': ('Trinexx', TrinexxDefeatRule),
     'Agahnim': ('Agahnim', AgahnimDefeatRule),
     'Agahnim2': ('Agahnim2', AgahnimDefeatRule)
+}
+
+BOSS_DAMAGE_CLASS_SPRITE_IDS_BY_BOSS_NAME = {
+    "Armos Knights": frozenset({ARMOS_KNIGHTS_SPRITE_ID}),
+    "Lanmolas": frozenset({LANMOLAS_SPRITE_ID}),
+    "Moldorm": frozenset({MOLDORM_SPRITE_ID}),
+    "Helmasaur King": frozenset({HELMASAUR_KING_SPRITE_ID}),
+    "Arrghus": frozenset({ARRGHUS_SPRITE_ID, ARRGHUS_FUZZ_SPRITE_ID}),
+    "Mothula": frozenset({MOTHULA_SPRITE_ID}),
+    "Blind": frozenset({BLIND_SPRITE_ID}),
+    "Kholdstare": frozenset({KHOLDSTARE_SPRITE_ID, KHOLDSTARE_ICE_BLOCK_SPRITE_ID}),
+    "Vitreous": frozenset({VITREOUS_SPRITE_ID, VITREOUS_SMALL_EYE_SPRITE_ID}),
+    "Trinexx": frozenset({TRINEXX_MAIN_HEAD_SPRITE_ID, TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID}),
 }
 
 boss_location_table: List[Tuple[str, str]] = [
@@ -458,6 +480,22 @@ def place_boss(world: "ALTTPWorld", boss: str, location: str, level: Optional[st
         location = 'Inverted Ganons Tower'
     logging.debug('Placing boss %s at %s', boss, location + (' (' + level + ')' if level else ''))
     world.dungeons[location].bosses[level] = BossFactory(boss, player)
+
+
+def get_gt_only_boss_damage_class_sprite_ids(world: "ALTTPWorld") -> frozenset[int]:
+    gt_dungeon_names = {"Ganons Tower", "Inverted Ganons Tower"}
+    placements_by_boss: dict[str, set[str]] = {}
+    for dungeon_name, dungeon in world.dungeons.items():
+        for boss in dungeon.bosses.values():
+            if boss is None or boss.name not in BOSS_DAMAGE_CLASS_SPRITE_IDS_BY_BOSS_NAME:
+                continue
+            placements_by_boss.setdefault(boss.name, set()).add(dungeon_name)
+
+    allowed_sprite_ids: set[int] = set()
+    for boss_name, dungeon_names in placements_by_boss.items():
+        if dungeon_names and dungeon_names <= gt_dungeon_names:
+            allowed_sprite_ids.update(BOSS_DAMAGE_CLASS_SPRITE_IDS_BY_BOSS_NAME[boss_name])
+    return frozenset(allowed_sprite_ids)
 
 
 def format_boss_location(location_name: str, level: str) -> str:

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
-import hashlib
 import random
 from typing import TYPE_CHECKING, Optional
 
@@ -472,7 +471,7 @@ def _set_enemizer_flag(rom: "TokenRom | ProcedureRom", symbol_name: str, enabled
 
 def _randomize_enemy_health(
     rom: "TokenRom | ProcedureRom",
-    rng: random.Random,
+    random: random.Random,
     enemy_health_key: str,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> None:
@@ -485,22 +484,22 @@ def _randomize_enemy_health(
             or sprite_id not in ENEMY_HEALTH_RANDOMIZER_INCLUDED_SPRITE_IDS
         ):
             continue
-        rom.write_byte(hp_address, rng.randrange(min_hp, max_hp))
+        rom.write_byte(hp_address, random.randrange(min_hp, max_hp))
     rom.write_bytes(
         HARDHAT_BEETLE_HP_TABLE_ADDRESS,
         (
-            rng.randrange(min_hp, max_hp),
-            rng.randrange(min_hp, max_hp),
+            random.randrange(min_hp, max_hp),
+            random.randrange(min_hp, max_hp),
         ),
     )
 
 
-def _randomize_enemy_damage(rom: "TokenRom | ProcedureRom", rng: random.Random, allow_zero_damage: bool) -> None:
+def _randomize_enemy_damage(rom: "TokenRom | ProcedureRom", random: random.Random, allow_zero_damage: bool) -> None:
     for sprite_id in range(0xF3):
         if sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
             continue
         damage_address = ENEMY_DAMAGE_TABLE_ADDRESS + sprite_id
-        new_damage = rng.randrange(8)
+        new_damage = random.randrange(8)
         if not allow_zero_damage and new_damage == 2:
             continue
         rom.write_byte(damage_address, VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES[sprite_id] | new_damage)
@@ -508,7 +507,7 @@ def _randomize_enemy_damage(rom: "TokenRom | ProcedureRom", rng: random.Random, 
 
 def _shuffle_damage_groups(
     rom: "TokenRom | ProcedureRom",
-    rng: random.Random,
+    random: random.Random,
     *,
     chaos_mode: bool,
     allow_zero_damage: bool,
@@ -517,10 +516,10 @@ def _shuffle_damage_groups(
     max_damage = 64 if chaos_mode else 32
 
     for group_id in range(10):
-        green_mail_damage = rng.randrange(min_damage, max_damage)
+        green_mail_damage = random.randrange(min_damage, max_damage)
         if chaos_mode:
-            blue_mail_damage = rng.randrange(min_damage, max_damage)
-            red_mail_damage = rng.randrange(min_damage, max_damage)
+            blue_mail_damage = random.randrange(min_damage, max_damage)
+            red_mail_damage = random.randrange(min_damage, max_damage)
         else:
             blue_mail_damage = green_mail_damage * 3 // 4
             red_mail_damage = green_mail_damage * 3 // 8
@@ -554,23 +553,6 @@ def _apply_randomized_tile_trap_floor_tile(rom: "TokenRom | ProcedureRom") -> No
     # call this option, so keep the implementation isolated and unused.
     rom.write_bytes(TRINEXX_ICE_PROJECTILE_TILE_ADDRESS, (0x88, 0x01))
     rom.write_byte(TILE_TRAP_FLOOR_TILE_ADDRESS, 0x12)
-
-
-def _make_native_enemizer_rng(world: "ALTTPWorld") -> random.Random:
-    seed_material = "|".join((
-        str(world.multiworld.seed),
-        world.multiworld.seed_name,
-        str(world.player),
-        _option_key(world.options.enemy_health),
-        _option_key(world.options.enemy_damage),
-        _option_key(getattr(world.options, "randomize_damage_classes", "vanilla")),
-        str(getattr(getattr(world.options, "max_attacks_in_logic", 16), "value", 16)),
-        str(int(bool(world.options.enemy_shuffle))),
-        str(int(bool(world.options.bush_shuffle))),
-        str(int(bool(world.options.killable_thieves))),
-    ))
-    seed = int.from_bytes(hashlib.sha256(seed_material.encode("utf-8")).digest()[:8], "big")
-    return random.Random(seed)
 
 
 @lru_cache(maxsize=1)

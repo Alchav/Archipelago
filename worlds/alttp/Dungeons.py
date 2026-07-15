@@ -4,11 +4,11 @@ import typing
 from typing import List, Optional
 
 from BaseClasses import CollectionState, Region, MultiWorld
-from Fill import fill_restrictive
+from Fill import FillError, fill_restrictive
 
 from .Bosses import BossFactory, Boss
 from .Items import item_factory, key_ring_table
-from .Regions import lookup_boss_drops, key_drop_data
+from .Regions import lookup_boss_drops
 from .Options import small_key_shuffle
 
 if typing.TYPE_CHECKING:
@@ -255,18 +255,7 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
                     pass
             for item in pre_fill_items:
                 multiworld.worlds[item.player].collect(all_state_base, item)
-            locked_key_drop_locations = {
-                multiworld.get_location(key_loc, lttp_world.player)
-                for lttp_world in multiworld.get_game_worlds("A Link to the Past")
-                if not lttp_world.options.key_drop_shuffle and lttp_world.player not in multiworld.groups
-                for key_loc in key_drop_data
-            }
-            all_state_base.sweep_for_advancements(
-                locations=[
-                    location for location in multiworld.get_filled_locations()
-                    if location not in locked_key_drop_locations
-                ]
-            )
+            all_state_base.sweep_for_advancements()
 
             # Remove completion condition so that minimal-accessibility worlds place keys properly
             for player in {item.player for item in in_dungeon_items}:
@@ -274,7 +263,27 @@ def fill_dungeons_restrictive(multiworld: MultiWorld):
                     all_state_base.remove(multiworld.worlds[player].create_item("Triforce"))
 
             fill_restrictive(multiworld, all_state_base, locations, in_dungeon_items, lock=True, allow_excluded=True,
-                             name="LttP Dungeon Items")
+                             allow_partial=True, name="LttP Dungeon Items")
+            if in_dungeon_items:
+                retry_state = all_state_base.copy()
+                retry_state.sweep_for_advancements()
+                fill_restrictive(multiworld, retry_state, locations, in_dungeon_items, lock=True, allow_excluded=True,
+                                 allow_partial=True, name="LttP Dungeon Items Retry")
+            remaining_dungeon_progression = [item for item in in_dungeon_items if item.advancement]
+            if remaining_dungeon_progression:
+                raise FillError(
+                    f"Could not place dungeon progression items: "
+                    f"{', '.join(str(item) for item in remaining_dungeon_progression)}",
+                    multiworld=multiworld,
+                )
+            for item in list(in_dungeon_items):
+                for index, location in enumerate(locations):
+                    if location.item_rule(item):
+                        locations.pop(index)
+                        in_dungeon_items.remove(item)
+                        multiworld.push_item(location, item, False)
+                        location.locked = True
+                        break
 
 
 dungeon_music_addresses = {'Eastern Palace - Prize': [0x1559A],

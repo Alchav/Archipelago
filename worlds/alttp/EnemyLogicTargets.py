@@ -101,6 +101,7 @@ THIEVES_TOWN_JAIL_CELLS_TOP_LEFT = "Thieves Town (Basement)"
 THIEVES_TOWN_CONVEYOR_TOILET_NORTHWEST = "Thieves Town (Conveyor Toilet) - Northwest"
 THIEVES_TOWN_WEST_ATTIC_SOUTHWEST = "Thieves Town (West Attic Room) - Southwest"
 SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST = "Skull Woods (Big Key Room) - Southwest"
+SWAMP_ENTRANCE_ROOM = "Swamp Palace (Entrance Room)"
 SWAMP_STATUE_ROOM_SOUTHEAST = "Swamp Palace (Statue Room) - Southeast"
 
 HYRULE_CASTLE_MAP_GUARD_KEY_DROP = "Hyrule Castle - Map Guard Key Drop"
@@ -262,6 +263,7 @@ ENEMY_CLEAR_TARGETS = (
         max_x=256,
         max_y=256,
     ),
+    EnemyClearTarget(name=SWAMP_ENTRANCE_ROOM, room_name="Swamp Palace (Entrance Room)"),
     EnemyClearTarget(
         name=SWAMP_STATUE_ROOM_SOUTHEAST,
         room_name="Swamp Palace (Statue Room)",

@@ -7,11 +7,12 @@ from typing import TYPE_CHECKING
 
 from .SubClasses import ALttPLocation, LTTPRegion, LTTPRegionType
 from .Shops import TakeAny, total_shop_slots, set_up_shops, shop_table_by_location, ShopType
-from .Bosses import place_bosses
+from .Bosses import get_gt_only_boss_damage_class_sprite_ids, place_bosses
 from .Dungeons import get_dungeon_item_pool_player
 from .EnemyShuffle import generate_enemy_shuffle_state
 from .EntranceShuffle import connect_entrance
 from .enemizer_data.enemy_combat_data import (
+    EnemyCombatModel,
     FIGHTER_SWORD_DAMAGE_CLASSES,
     GOLDEN_SWORD_DAMAGE_CLASSES,
     MASTER_SWORD_DAMAGE_CLASSES,
@@ -29,6 +30,21 @@ from .Regions import key_drop_data
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
+
+
+STANDARD_ESCAPE_DAMAGE_ROW_SPRITE_IDS = frozenset((0x41, 0x42, 0x6A, 0x6D, 0x6F))
+
+
+def _with_vanilla_standard_escape_damage_rows(combat_model: EnemyCombatModel) -> EnemyCombatModel:
+    sprite_damage_subclasses = [tuple(row) for row in combat_model.sprite_damage_subclasses]
+    for sprite_id in STANDARD_ESCAPE_DAMAGE_ROW_SPRITE_IDS:
+        sprite_damage_subclasses[sprite_id] = VANILLA_COMBAT_MODEL.sprite_damage_subclasses[sprite_id]
+    return EnemyCombatModel(
+        damage_sources=combat_model.damage_sources,
+        sprite_damage_subclasses=tuple(sprite_damage_subclasses),
+        enemy_health_table=combat_model.enemy_health_table,
+        gt_only_boss_special_allowed_sprite_ids=combat_model.gt_only_boss_special_allowed_sprite_ids,
+    )
 
 # This file sets the item pools for various modes. Timed modes and triforce hunt are enforced first, and then extra items are specified per mode to fill in the remaining space.
 # Some basic items that various modes require are placed here, including pendants and crystals. Medallion requirements for the two relevant entrances are also decided.
@@ -317,25 +333,23 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
     if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
         world.enemy_combat_model = VANILLA_COMBAT_MODEL
     else:
-        from .EnemizerPatches import _make_native_enemizer_rng
-
         item_pool_damage_classes = (
             get_enemy_shuffle_available_damage_classes(world, item_names)
             if item_names is not None
             else None
         )
-        hammer_available_for_freeze = item_names is not None and "Hammer" in item_names
         world.enemy_combat_model = build_randomized_damage_class_combat_model(
-            _make_native_enemizer_rng(world),
+            world.random,
             damage_class_mode,
             max_attacks_in_logic=world.options.max_attacks_in_logic.value,
             enemy_health_key=world.options.enemy_health.current_key,
             item_pool_key=getattr(getattr(world.options, "item_pool", None), "current_key", "normal"),
             available_damage_classes=item_pool_damage_classes,
-            hammer_available_for_freeze=hammer_available_for_freeze,
+            hammer_available_for_freeze=True,
             swordless=bool(getattr(world.options, "swordless", False)),
             killable_thieves=bool(getattr(world.options, "killable_thieves", False)),
             enemy_shuffle=bool(getattr(world.options, "enemy_shuffle", False)),
+            gt_only_boss_special_allowed_sprite_ids=get_gt_only_boss_damage_class_sprite_ids(world),
         )
 
 
@@ -413,10 +427,20 @@ def generate_itempool(world: "ALTTPWorld"):
     for item in precollected_items:
         multiworld.push_precollected(item_factory(item, world))
 
+    place_bosses(world)
+
     enemy_combat_item_names = list(pool)
     enemy_combat_item_names.extend(placed_items.values())
     enemy_combat_item_names.extend(precollected_items)
     set_enemy_combat_model(world, enemy_combat_item_names)
+    if world.options.mode == 'standard':
+        world.enemy_combat_model = _with_vanilla_standard_escape_damage_rows(world.enemy_combat_model)
+    if world.options.enemy_shuffle and world.enemy_shuffle_state is None and not getattr(world, "ut_replay_data", None):
+        world.enemy_shuffle_available_damage_classes = get_enemy_shuffle_available_damage_classes(
+            world,
+            enemy_combat_item_names,
+        )
+        world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
 
     if world.options.mode == 'standard' and not has_melee_weapon(multiworld.state, player):
         if "Link's Uncle" not in placed_items:
@@ -441,9 +465,6 @@ def generate_itempool(world: "ALTTPWorld"):
                     'Magic Powder',
                     'Fire Rod',
                     'Ice Rod',
-                    'Bombos',
-                    'Ether',
-                    'Quake',
                 ]:
                     if item not in possible_weapons:
                         possible_weapons.append(item)
@@ -461,7 +482,7 @@ def generate_itempool(world: "ALTTPWorld"):
             secret_passage_item = None
             if damage_class_weapons:
                 possible_weapons = damage_class_weapons
-            elif "Secret Passage" not in placed_items:
+            else:
                 possible_escape_pairs = [
                     (uncle_item, secret_item)
                     for uncle_item in possible_weapons
@@ -470,6 +491,8 @@ def generate_itempool(world: "ALTTPWorld"):
                     and starting_items_can_clear_standard_escape(world, (uncle_item, secret_item))
                 ]
                 if possible_escape_pairs:
+                    if "Secret Passage" in placed_items:
+                        pool.append(placed_items.pop("Secret Passage"))
                     starting_weapon, secret_passage_item = multiworld.random.choice(possible_escape_pairs)
                     possible_weapons = [starting_weapon]
 
@@ -477,6 +500,7 @@ def generate_itempool(world: "ALTTPWorld"):
                 world.options.enemy_shuffle
                 and world.options.bombless_start
                 and "Hammer" in possible_weapons
+                and starting_items_can_clear_standard_escape(world, ("Hammer",))
             ):
                 starting_weapon = "Hammer"
             else:
@@ -496,7 +520,9 @@ def generate_itempool(world: "ALTTPWorld"):
             else:
                 world.escape_assist.append('bombs')
 
-    if world.options.mode == 'standard' and "Big Key (Hyrule Castle)" in pool:
+    if (world.options.mode == 'standard'
+            and not world.options.small_key_shuffle
+            and "Big Key (Hyrule Castle)" in pool):
         multiworld.local_early_items[player]["Big Key (Hyrule Castle)"] = 1
 
     for (location, item) in placed_items.items():
@@ -518,6 +544,8 @@ def generate_itempool(world: "ALTTPWorld"):
 
     dungeon_items = [item for item in get_dungeon_item_pool_player(world)
                      if item.name not in world.dungeon_local_item_names]
+    dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
+    multiworld.random.shuffle(dungeon_item_replacements)
 
     def dungeon_name_for_small_key(small_key_name: str) -> str:
         dungeon_name = small_key_name.split("(")[1].split(")")[0]
@@ -528,29 +556,31 @@ def generate_itempool(world: "ALTTPWorld"):
                 return "Inverted Ganons Tower"
         return dungeon_name
 
-    def fixed_key_drop_can_be_required(key_location: str, item) -> bool:
-        if world.options.accessibility == "full":
-            return True
-        return key_location != "Skull Woods - Spike Corner Key Drop"
+    def fixed_key_drop_starts_with_item(item) -> bool:
+        return (
+            (world.options.small_key_shuffle == small_key_shuffle.option_start_with and item.type == 'SmallKey')
+            or (world.options.big_key_shuffle == big_key_shuffle.option_start_with and item.type == 'BigKey')
+        )
 
     for key_loc in key_drop_data:
         key_data = key_drop_data[key_loc]
         drop_item = item_factory(key_data[3], world)
         if not world.options.key_drop_shuffle:
-            if not fixed_key_drop_can_be_required(key_loc, drop_item):
-                drop_item.classification = ItemClassification.filler
             if drop_item in dungeon_items:
                 dungeon_items.remove(drop_item)
-            else:
-                dungeon = dungeon_name_for_small_key(drop_item.name)
-                if drop_item in world.dungeons[dungeon].small_keys:
-                    world.dungeons[dungeon].small_keys.remove(drop_item)
-                elif world.dungeons[dungeon].big_key is not None and world.dungeons[dungeon].big_key == drop_item:
-                    world.dungeons[dungeon].big_key = None
+            dungeon = dungeon_name_for_small_key(drop_item.name)
+            if drop_item in world.dungeons[dungeon].small_keys:
+                world.dungeons[dungeon].small_keys.remove(drop_item)
+            elif world.dungeons[dungeon].big_key is not None and world.dungeons[dungeon].big_key == drop_item:
+                world.dungeons[dungeon].big_key = None
 
             loc = multiworld.get_location(key_loc, player)
-            loc.place_locked_item(drop_item)
-            loc.address = None
+            if fixed_key_drop_starts_with_item(drop_item):
+                multiworld.push_precollected(drop_item)
+                loc.place_locked_item(item_factory(dungeon_item_replacements.pop(), world))
+            else:
+                loc.place_locked_item(drop_item)
+                loc.address = None
         elif "Small" in key_data[3] and world.options.small_key_shuffle == small_key_shuffle.option_universal:
             # key drop shuffle and universal keys are on. Add universal keys in place of key drop keys.
             multiworld.itempool.append(item_factory(GetBeemizerItem(multiworld, player, 'Small Key (Universal)'), world))
@@ -575,9 +605,6 @@ def generate_itempool(world: "ALTTPWorld"):
             dungeon.small_keys.append(key_ring_item)
             if key_ring_item.name not in world.dungeon_local_item_names:
                 dungeon_items.append(key_ring_item)
-
-    dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
-    multiworld.random.shuffle(dungeon_item_replacements)
 
     if world.options.small_key_shuffle != small_key_shuffle.option_universal:
         collapsed_small_keys = sum(
@@ -737,12 +764,10 @@ def generate_itempool(world: "ALTTPWorld"):
         world.required_medallions = (world.options.misery_mire_medallion.current_key.title(),
                                      world.options.turtle_rock_medallion.current_key.title())
 
-    place_bosses(world)
     if world.options.enemy_shuffle:
         enemy_shuffle_item_names = [item.name for item in items]
         enemy_shuffle_item_names.extend(placed_items.values())
         enemy_shuffle_item_names.extend(precollected_items)
-        world.enemy_shuffle_hammer_available_for_freeze = "Hammer" in enemy_shuffle_item_names
         world.enemy_shuffle_available_damage_classes = get_enemy_shuffle_available_damage_classes(
             world,
             enemy_shuffle_item_names,

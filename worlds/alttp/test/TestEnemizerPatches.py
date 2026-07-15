@@ -24,7 +24,6 @@ from worlds.alttp.EnemizerPatches import (
     apply_enemy_combat_data,
     _apply_randomized_tile_trap_floor_tile,
     _get_enemizer_symbol,
-    _make_native_enemizer_rng,
     _option_key,
     patch_bosses,
     _randomize_enemy_damage,
@@ -40,7 +39,6 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     BLOB_TRANSFORM_EFFECT,
     BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS,
     BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS,
-    BOSS_SPRITE_IDS_FORBID_SPECIAL_DAMAGE_EFFECTS,
     CHAOS_RANDOMIZE_DAMAGE_CLASSES,
     DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
     DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
@@ -231,7 +229,6 @@ class TestEnemizerPatches(unittest.TestCase):
             enemy_health_table=VANILLA_COMBAT_MODEL.enemy_health_table,
         )
 
-        self.assertIn(LANMOLAS_SPRITE_ID, BOSS_SPRITE_IDS_FORBID_SPECIAL_DAMAGE_EFFECTS)
         self.assertEqual(
             get_damage_classes_with_effects(
                 LANMOLAS_SPRITE_ID,
@@ -320,7 +317,7 @@ class TestEnemizerPatches(unittest.TestCase):
             with self.subTest(mode=mode):
                 combat_model = build_randomized_damage_class_combat_model(random.Random(3), mode)
 
-                for sprite_id in BOSS_SPRITE_IDS_FORBID_SPECIAL_DAMAGE_EFFECTS:
+                for sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS:
                     with self.subTest(mode=mode, sprite_id=sprite_id):
                         self.assertFalse(any(
                             get_damage_effect(sprite_id, damage_class, combat_model) in SPECIAL_DAMAGE_EFFECTS
@@ -916,14 +913,6 @@ class TestEnemizerPatches(unittest.TestCase):
         self.assertIn(0xF8000 + (eastern_dungeon_data.room_id * 3), rom.bytes)
         self.assertIn(0xF8000 + (turtle_rock_dungeon_data.room_id * 3), rom.bytes)
 
-    def test_native_enemizer_rng_is_deterministic_for_same_world_settings(self) -> None:
-        world = self._build_world(enemy_health="hard", enemy_damage="chaos", bush_shuffle=True)
-
-        rng_a = _make_native_enemizer_rng(world)
-        rng_b = _make_native_enemizer_rng(world)
-
-        self.assertEqual([rng_a.randrange(256) for _ in range(8)], [rng_b.randrange(256) for _ in range(8)])
-
     @staticmethod
     def _apply_native_enemizer_features(world: SimpleNamespace, rom: FakeRom) -> None:
         enemy_shuffle_enabled = bool(world.options.enemy_shuffle)
@@ -951,19 +940,12 @@ class TestEnemizerPatches(unittest.TestCase):
             rom.write_byte(0x1F2E5, 0xB0)
             rom.write_byte(0x1F2EB, 0xD0)
 
-        if enemy_health_key != "default" or enemy_damage_key != "default":
-            rng = _make_native_enemizer_rng(world)
-        else:
-            rng = None
-
         if enemy_health_key != "default":
-            assert rng is not None
-            _randomize_enemy_health(rom, rng, enemy_health_key, combat_model)
+            _randomize_enemy_health(rom, world.random, enemy_health_key, combat_model)
 
         if enemy_damage_key != "default":
-            assert rng is not None
-            _randomize_enemy_damage(rom, rng, allow_zero_damage=True)
-            _shuffle_damage_groups(rom, rng, chaos_mode=enemy_damage_key == "chaos", allow_zero_damage=True)
+            _randomize_enemy_damage(rom, world.random, allow_zero_damage=True)
+            _shuffle_damage_groups(rom, world.random, chaos_mode=enemy_damage_key == "chaos", allow_zero_damage=True)
 
     @staticmethod
     def _build_world(
@@ -978,6 +960,7 @@ class TestEnemizerPatches(unittest.TestCase):
     ) -> SimpleNamespace:
         return SimpleNamespace(
             player=1,
+            random=random.Random(0),
             multiworld=SimpleNamespace(seed=12345, seed_name="native-enemizer-test"),
             options=SimpleNamespace(
                 enemy_shuffle=enemy_shuffle,

@@ -15,6 +15,8 @@ from worlds.alttp.PotShuffle import (
     POT_KEY,
     POT_HOLE,
     POT_SWITCH,
+    SWAMP_TRENCH_2_PAST_TRENCH_KEY_POTS,
+    SWAMP_TRENCH_2_ROOM_ID,
     generate_pot_shuffle,
     get_unique_pot_item_position,
     get_vanilla_pot_item,
@@ -38,6 +40,18 @@ class TestPotShuffle(unittest.TestCase):
                 if pot.item == POT_KEY
             ]
             self.assertEqual(len(conveyor_cross_keys), 1)
+
+    def test_fixed_key_drop_swamp_trench_2_key_stays_before_trench(self) -> None:
+        for seed in range(100):
+            world = SimpleNamespace(
+                random=random.Random(seed),
+                options=SimpleNamespace(retro_bow=False, key_drop_shuffle=False),
+            )
+            shuffled_pots = generate_pot_shuffle(world)
+            key_position = get_unique_pot_item_position(shuffled_pots, SWAMP_TRENCH_2_ROOM_ID, POT_KEY)
+
+            with self.subTest(seed=seed):
+                self.assertNotIn(key_position, SWAMP_TRENCH_2_PAST_TRENCH_KEY_POTS)
 
     def test_pod_entrance_keeps_one_switch_per_side(self) -> None:
         middle_pots = {(56, 8), (68, 8)}

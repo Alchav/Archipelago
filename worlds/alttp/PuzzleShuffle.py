@@ -45,8 +45,10 @@ from .EnemyLogicTargets import (
     HYRULE_CASTLE_SWITCH_ROOM_SOUTH,
     MISERY_MIRE_BRIDGE_CHEST_SOUTHEAST,
     MISERY_MIRE_DARK_CANE_ROOM_NORTH,
+    MISERY_MIRE_MAIN_LOBBY_ROOM,
     MISERY_MIRE_SPIKE_CHEST_ROOM,
     POD_NORTH_MIMICS_BOTTOM_LEFT,
+    POD_STALFOS_TRAP_ROOM,
     POD_SOUTH_MIMICS_TOP_LEFT,
     POD_TURTLE_ROOM_BOTTOM_LEFT,
     SKULL_WOODS_BIG_KEY_ROOM_SOUTHWEST,
@@ -106,20 +108,16 @@ EASTERN_STALFOS_ROOM_ID = 0xA8
 EASTERN_BIG_CHEST_ROOM_ID = 0xA9
 EASTERN_MAP_CHEST_ROOM_ID = 0xAA
 ICE_PALACE_HIDDEN_CHEST_ROOM_ID = 0xAE
-AGA_TOWER_CIRCLE_OF_POTS_ROOM_ID = 0xB0
 MISERY_MIRE_BRIDGE_CHEST_ROOM_ID = 0xB2
 MISERY_MIRE_SPIKE_CHEST_ROOM_ID = 0xB3
-EASTERN_BIG_KEY_ROOM_ID = 0xB8
 EASTERN_DARK_SQUARE_ROOM_ID = 0xBA
 THIEVES_TOWN_CONVEYOR_TOILET_ROOM_ID = 0xBC
 ICE_PALACE_BLOCK_PUZZLE_ROOM_ID = 0xBE
-AGA_TOWER_DARK_BRIDGE_ROOM_ID = 0xC0
 MISERY_MIRE_TILE_ROOM_ID = 0xC1
 MISERY_MIRE_MAIN_LOBBY_ROOM_ID = 0xC2
 TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID = 0xC7
 EASTERN_ENTRANCE_ROOM_ID = 0xC9
 ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID = 0xCE
-AGA_TOWER_DARK_MAZE_ROOM_ID = 0xD0
 EASTERN_PRE_ARMOS_ROOM_ID = 0xD8
 EASTERN_PRE_BOSS_ROOM_ID = 0xD9
 EASTERN_SWITCH_ROOM_ID = 0xDA
@@ -197,7 +195,7 @@ CANE_PUZZLE_DUNGEON_CANDIDATES = (
     DUNGEON_PALACE_OF_DARKNESS,
     DUNGEON_GANONS_TOWER,
 )
-FORCE_NON_VANILLA_PUZZLES_FOR_TESTING = True
+FORCE_NON_VANILLA_PUZZLES_FOR_TESTING = False
 _NO_VANILLA_CHOICE = object()
 HYRULE_CASTLE_SWITCH_ROOM_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4D95A
 HYRULE_CASTLE_SWITCH_ROOM_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS = 0x4D95D
@@ -2547,7 +2545,7 @@ def _enemy_clear_target_has_valid_kill_tag_enemies(world: "ALTTPWorld", target_n
         max_attacks_in_logic=getattr(enemy_shuffle_state, "max_attacks_in_logic", 16),
         killable_thieves=getattr(enemy_shuffle_state, "killable_thieves", False),
         available_damage_classes=getattr(enemy_shuffle_state, "available_damage_classes", frozenset(range(16))),
-        hammer_available_for_freeze=getattr(enemy_shuffle_state, "hammer_available_for_freeze", False),
+        hammer_available_for_freeze=getattr(enemy_shuffle_state, "hammer_available_for_freeze", True),
     )
 
     target_enemies = get_enemy_clear_target_enemies(world, target_name)

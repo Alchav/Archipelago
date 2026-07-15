@@ -22,6 +22,8 @@ ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS = frozenset(((28, 23), (28, 25)))
 POD_ENTRANCE_ROOM_ID = 74
 POD_ENTRANCE_LEFT_SWITCH_POTS = frozenset(((14, 5), (32, 5), (14, 11), (32, 11)))
 POD_ENTRANCE_RIGHT_SWITCH_POTS = frozenset(((92, 5), (110, 5), (92, 11), (110, 11)))
+SWAMP_TRENCH_2_ROOM_ID = 0x35
+SWAMP_TRENCH_2_PAST_TRENCH_KEY_POTS = frozenset(((20, 8), (24, 8), (28, 8), (32, 8), (36, 8), (76, 28)))
 SWITCH_POT_GROUPS = {
     ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID: (ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS,),
     POD_ENTRANCE_ROOM_ID: (POD_ENTRANCE_LEFT_SWITCH_POTS, POD_ENTRANCE_RIGHT_SWITCH_POTS),
@@ -234,7 +236,12 @@ def generate_pot_shuffle(world: "ALTTPWorld") -> dict[int, tuple[FilledPot, ...]
                 empty_pots.append(pot)
 
         while POT_KEY in room_items:
-            candidate_indices = list(range(len(empty_pots)))
+            excluded_positions = _get_forbidden_key_pot_positions(world, room.room_id)
+            candidate_indices = [
+                index
+                for index, pot in enumerate(empty_pots)
+                if (pot.x, pot.y) not in excluded_positions
+            ]
             if not candidate_indices:
                 break
             pot_index = world.random.choice(candidate_indices)
@@ -263,6 +270,12 @@ def generate_pot_shuffle(world: "ALTTPWorld") -> dict[int, tuple[FilledPot, ...]
         shuffled_pots[room.room_id] = tuple(filled_pots)
 
     return shuffled_pots
+
+
+def _get_forbidden_key_pot_positions(world: "ALTTPWorld", room_id: int) -> frozenset[tuple[int, int]]:
+    if room_id == SWAMP_TRENCH_2_ROOM_ID and not getattr(world.options, "key_drop_shuffle", True):
+        return SWAMP_TRENCH_2_PAST_TRENCH_KEY_POTS
+    return frozenset()
 
 
 def _place_grouped_switches(
