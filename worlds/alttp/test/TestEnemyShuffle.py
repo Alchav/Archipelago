@@ -34,6 +34,7 @@ from worlds.alttp.EnemyShuffle import (
     RandomizedOverworldEnemyArea,
     RandomizedOverworldEnemySprite,
     WALLMASTER_SPRITE_ID,
+    generate_enemy_shuffle_state,
     get_effective_dungeon_room_sprite_requirements,
     get_effective_dungeon_room_enemies,
     get_room_id,
@@ -150,6 +151,34 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             with self.subTest(sprite=requirement.sprite_name):
                 self.assertNotIn("Sprite", requirement.sprite_name)
                 self.assertNotIn("_", requirement.sprite_name)
+
+    def test_skipped_dungeon_rooms_preserve_original_sprite_groups(self) -> None:
+        world = SimpleNamespace(
+            random=random.Random(48898229158454759300),
+            options=SimpleNamespace(
+                mode="open",
+                enemy_health="default",
+                killable_thieves=False,
+                max_attacks_in_logic=16,
+            ),
+            dungeons={},
+        )
+
+        state = generate_enemy_shuffle_state(world)
+        sanctuary = state.randomized_dungeon_rooms[18]
+        sanctuary_group = state.sprite_groups[0x46]
+
+        self.assertTrue(sanctuary.skipped_randomization)
+        self.assertEqual(sanctuary.graphics_block_id, 6)
+        self.assertEqual(
+            (
+                sanctuary_group.subgroup_0,
+                sanctuary_group.subgroup_1,
+                sanctuary_group.subgroup_2,
+                sanctuary_group.subgroup_3,
+            ),
+            (71, 73, 28, 82),
+        )
 
     def test_effective_room_enemy_requirements_fall_back_to_default_room_data(self) -> None:
         world = SimpleNamespace(
@@ -3052,6 +3081,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             SimpleNamespace(options=SimpleNamespace(mode="standard")),
             {room.room_id: room},
             sprite_groups,
+            tuple(),
             {0x44: (70, 73, 19, 82)},
         )
 
@@ -3065,7 +3095,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertTrue(group.preserve_subgroup_2)
         self.assertTrue(group.preserve_subgroup_3)
 
-    def test_non_standard_mode_does_not_restore_standard_escape_group(self) -> None:
+    def test_skipped_non_standard_rooms_restore_original_graphics_group(self) -> None:
         room = DungeonEnemyRoom(
             room_id=80,
             room_header_address=0,
@@ -3102,18 +3132,19 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             SimpleNamespace(options=SimpleNamespace(mode="open")),
             {room.room_id: room},
             sprite_groups,
+            tuple(),
             {0x44: (70, 73, 19, 82)},
         )
 
         group = sprite_groups[0x44]
         self.assertEqual(
             (group.subgroup_0, group.subgroup_1, group.subgroup_2, group.subgroup_3),
-            (22, 30, 35, 17),
+            (70, 73, 19, 82),
         )
-        self.assertFalse(group.preserve_subgroup_0)
-        self.assertFalse(group.preserve_subgroup_1)
-        self.assertFalse(group.preserve_subgroup_2)
-        self.assertFalse(group.preserve_subgroup_3)
+        self.assertTrue(group.preserve_subgroup_0)
+        self.assertTrue(group.preserve_subgroup_1)
+        self.assertTrue(group.preserve_subgroup_2)
+        self.assertTrue(group.preserve_subgroup_3)
 
     def test_standard_beginning_overworld_uses_original_graphics_groups(self) -> None:
         sprite_groups = {

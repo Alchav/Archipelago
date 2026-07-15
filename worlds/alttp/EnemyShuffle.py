@@ -388,7 +388,7 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
     _apply_selected_boss_group_requirements(world, sprite_groups, sprite_requirements)
     _setup_combined_dungeon_room_graphics_groups(world, dungeon_rooms, sprite_groups, sprite_requirements)
     _randomize_dungeon_groups(world, sprite_groups)
-    _restore_skipped_room_sprite_groups(world, dungeon_rooms, sprite_groups, original_sprite_groups)
+    _restore_skipped_room_sprite_groups(world, dungeon_rooms, sprite_groups, sprite_requirements, original_sprite_groups)
     _restore_original_groups_for_rooms_without_possible_groups(
         world,
         dungeon_rooms,
@@ -1056,15 +1056,38 @@ def _restore_skipped_room_sprite_groups(
     world: "ALTTPWorld",
     dungeon_rooms: dict[int, DungeonEnemyRoom],
     sprite_groups: dict[int, DungeonSpriteGroup],
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
     original_sprite_groups: dict[int, tuple[int, int, int, int]],
 ) -> None:
-    if world.options.mode != "standard":
-        return
+    state = EnemyShuffleState(
+        dungeon_rooms=dungeon_rooms,
+        overworld_areas={},
+        sprite_groups=sprite_groups,
+        sprite_requirements=sprite_requirements,
+        room_group_requirements=tuple(),
+        overworld_group_requirements=tuple(),
+        shutter_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.is_shutter_room),
+        water_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.is_water_room),
+        dont_randomize_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.do_not_randomize),
+        no_special_enemies_standard_room_ids=frozenset(
+            room.room_id for room in dungeon_rooms.values() if room.no_special_enemies_standard
+        ),
+        boss_room_ids=frozenset(),
+        dont_randomize_overworld_area_ids=frozenset(),
+        randomized_dungeon_rooms={},
+        randomized_overworld_areas={},
+        combat_model=_get_world_combat_model(world),
+        enemy_health_key=_get_world_enemy_health_key(world),
+        max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
+        killable_thieves=_get_world_killable_thieves(world),
+        available_damage_classes=_get_world_available_damage_classes(world),
+        hammer_available_for_freeze=True,
+    )
 
     skipped_group_ids = {
         room.graphics_block_id + 0x40
         for room in dungeon_rooms.values()
-        if room.no_special_enemies_standard
+        if _dungeon_room_skips_enemy_randomization(world, state, room)
     }
     for group_id in skipped_group_ids:
         group = sprite_groups.get(group_id)
