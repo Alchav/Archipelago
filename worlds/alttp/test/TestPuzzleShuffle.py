@@ -207,6 +207,19 @@ class TestPuzzleShuffle(unittest.TestCase):
 
         self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[ICE_PALACE_SPIKE_ROOM_ID]])
 
+    def test_eastern_switch_room_kill_tag_removes_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            eastern_switch_room_tag=TAG_SW_KILL_ENEMY_TO_OPEN,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {EASTERN_SWITCH_ROOM_ID: get_vanilla_pot_items(EASTERN_SWITCH_ROOM_ID)},
+            state,
+        )
+
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[EASTERN_SWITCH_ROOM_ID]])
+
     def test_pod_map_chest_room_can_use_clear_room_tag_with_shuffled_killable_enemies(self) -> None:
         world = SimpleNamespace(
             options=SimpleNamespace(enemy_shuffle=True),
