@@ -12,7 +12,8 @@ from .Locations import location_table, SM64Location, coinsanity_course_data, get
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
-    move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names
+    move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names, \
+    trap_weight_option_names, trap_item_name_by_option_name
 from .Rules import set_rules
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
 from BaseClasses import Item, Tutorial
@@ -115,6 +116,8 @@ class SM64World(World):
         "secret_stage_coinsanity",
         *secret_stage_coinsanity_max_coin_option_names,
         *coin_star_requirement_option_names,
+        "traps_filler_percentage",
+        *trap_weight_option_names,
         "death_link",
         "completion_type",
     )
@@ -392,6 +395,22 @@ class SM64World(World):
         if not self.options.buddy_checks:
             locked_count += len(cannon_item_data_table)
         return locked_count
+        
+    def get_filler_replacements(self, filler_count: int) -> typing.List[str]:
+        replacement_names: typing.List[str] = []
+
+        trap_items = []
+        trap_weights = []
+        for option_name in trap_weight_option_names:
+            weight = getattr(self.options, option_name).value
+            if weight > 0:
+                trap_items.append(trap_item_name_by_option_name[option_name])
+                trap_weights.append(weight)
+
+        trap_count = (filler_count * self.options.traps_filler_percentage.value) // 100
+        if trap_items: replacement_names.extend(self.random.choices(trap_items, weights=trap_weights, k=trap_count,))
+        self.random.shuffle(replacement_names)
+        return replacement_names
 
     def create_items(self):
         item_names = self.get_progression_item_names()
@@ -402,8 +421,11 @@ class SM64World(World):
             raise OptionError(f"{self.player_name}'s Spicy Mycena 64 world has {abs(self.filler_count)} more "
                               f"required items than randomized locations.")
 
+        replacement_item_names = self.get_filler_replacements(self.filler_count)
+        plain_filler_count = self.filler_count - len(replacement_item_names)
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
-        self.multiworld.itempool += [self.create_item("1-Up Mushroom") for i in range(0, self.filler_count)]
+        self.multiworld.itempool += [self.create_item(item_name) for item_name in replacement_item_names]
+        self.multiworld.itempool += [self.create_item("1-Up Mushroom") for i in range(plain_filler_count)]
 
     def generate_basic(self):
         if not self.options.buddy_checks:

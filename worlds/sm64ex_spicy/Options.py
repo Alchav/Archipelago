@@ -453,6 +453,128 @@ class CombinedProgressiveKeys(DefaultOnToggle):
     """
     display_name = "Combined Progressive Castle Keys"
 
+class TrapsFillerPercentage(NamedRange):
+    """
+    Replaces this percentage of filler items with trap items.
+    Trap types are selected according to their configured weights.
+    It is recommended to keep this at a low percentage so the majority of the pool aren't all traps.
+    """
+    default = 0
+    range_start = 0
+    range_end = 100
+    display_name = "Replace Filler With Traps"
+    special_range_names = {
+        "disabled": 0,
+        "light": 10,
+        "normal": 25,
+        "extreme": 50,
+    }
+
+
+class BonkTrapWeight(Range):
+    """
+    Relative weight for Bonk Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Bonk Trap Weight"
+
+
+class FireTrapWeight(Range):
+    """
+    Relative weight for Burn Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Burn Trap Weight"
+
+
+class ElectricTrapWeight(Range):
+    """
+    Relative weight for Shock Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Shock Trap Weight"
+
+
+class ChuckyaTrapWeight(Range):
+    """
+    Relative weight for Chuckya Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Chuckya Trap Weight"
+
+
+class SpinTrapWeight(Range):
+    """
+    Relative weight for Spin Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Spin Trap Weight"
+
+
+class GustTrapWeight(Range):
+    """
+    Relative weight for Gust Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Gust Trap Weight"
+
+
+trap_weight_options = (
+    BonkTrapWeight,
+    FireTrapWeight,
+    ElectricTrapWeight,
+    ChuckyaTrapWeight,
+    SpinTrapWeight,
+    GustTrapWeight,
+)
+
+trap_weight_option_names = (
+    "bonk_trap_weight",
+    "fire_trap_weight",
+    "electric_trap_weight",
+    "chuckya_trap_weight",
+    "spin_trap_weight",
+    "gust_trap_weight",
+)
+
+trap_item_name_by_option_name = {
+    "bonk_trap_weight": "Bonk Trap",
+    "fire_trap_weight": "Burn Trap",
+    "electric_trap_weight": "Shock Trap",
+    "chuckya_trap_weight": "Chuckya Trap",
+    "spin_trap_weight": "Spin Trap",
+    "gust_trap_weight": "Gust Trap",
+}
 class StrictMoveRequirements(DefaultOnToggle):
     """If disabled, Stars that expect certain moves may have to be acquired without them.
     Only makes a difference for movement abilities that are shuffled."""
@@ -761,6 +883,10 @@ sm64_options_groups = [
         *move_randomizer_options,
         StrictMoveRequirements,
     ]),
+    OptionGroup("Trap Options", [
+        TrapsFillerPercentage,
+        *trap_weight_options,
+    ]),
     OptionGroup("Cosmetic Options", [
         MarioHatColor,
         MarioShirtColor,
@@ -845,5 +971,12 @@ class SM64Options(PerGameCommonOptions):
     bowser_in_the_dark_world_coinsanity_max_coins: BowserInTheDarkWorldCoinsanityMaxCoins
     bowser_in_the_fire_sea_coinsanity_max_coins: BowserInTheFireSeaCoinsanityMaxCoins
     bowser_in_the_sky_coinsanity_max_coins: BowserInTheSkyCoinsanityMaxCoins
+    traps_filler_percentage: TrapsFillerPercentage
+    bonk_trap_weight: BonkTrapWeight
+    fire_trap_weight: FireTrapWeight
+    electric_trap_weight: ElectricTrapWeight
+    chuckya_trap_weight: ChuckyaTrapWeight
+    spin_trap_weight: SpinTrapWeight
+    gust_trap_weight: GustTrapWeight
     death_link: DeathLink
     completion_type: CompletionType
