@@ -8,6 +8,7 @@ from .PotShuffle import (
     POT_ARROW,
     POT_BLUE_RUPEE,
     POT_HEART,
+    POT_HOLE,
     POT_ITEM_ADDRESSES,
     POT_KEY,
     POT_SWITCH,
@@ -286,7 +287,7 @@ MISERY_MIRE_TILE_ROOM_TAG_CHOICES = (
     TAG_SW_KILL_ENEMY_TO_OPEN,
 )
 TURTLE_ROCK_TORCH_PUZZLE_SWITCH_POTS = frozenset(((12, 10), (12, 11)))
-ICE_PALACE_HOLE_TO_KHOLDSTARE_SWITCH_POTS = frozenset(((76, 8), (80, 8), (108, 12), (112, 12), (204, 11)))
+ICE_PALACE_HOLE_TO_KHOLDSTARE_SWITCH_POTS = frozenset(((76, 8), (80, 8), (108, 12), (112, 12)))
 EASTERN_PRE_ARMOS_NORTHEAST_SWITCH_POTS = frozenset(((202, 8), (242, 8), (202, 10), (242, 10), (202, 12), (242, 12)))
 EASTERN_PRE_ARMOS_SOUTHEAST_SWITCH_POTS = frozenset(((92, 24), (96, 24)))
 EASTERN_PRE_BOSS_ROOM_TAG_CHOICES = (
@@ -2418,6 +2419,7 @@ def _filled_pot_positions_in_target(
         (pot.x, pot.y)
         for pot in _get_current_pot_items(world, room_id)
         if (pot.x, pot.y) in target_positions
+        and pot.item != POT_HOLE
         and (allow_key or pot.item != POT_KEY)
     ]
 
@@ -2433,6 +2435,7 @@ def _filled_pot_item_positions_in_target(
         for pot in _get_current_pot_items(world, room_id)
         if (pot.x, pot.y) in target_positions
         and pot.item is not None
+        and pot.item != POT_HOLE
         and (allow_key or pot.item != POT_KEY)
     ]
 
@@ -2477,7 +2480,7 @@ def get_turtle_rock_crystaroller_variants(world: "ALTTPWorld") -> tuple[int, ...
 def _replace_pot_item(pots: tuple[FilledPot, ...], position: tuple[int, int], item: int) -> tuple[FilledPot, ...]:
     x, y = position
     return tuple(
-        FilledPot(pot.x, pot.y, item if (pot.x, pot.y) == (x, y) else pot.item)
+        FilledPot(pot.x, pot.y, item if (pot.x, pot.y) == (x, y) and pot.item != POT_HOLE else pot.item)
         for pot in pots
     )
 

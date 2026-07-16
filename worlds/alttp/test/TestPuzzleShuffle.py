@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
-from worlds.alttp.PotShuffle import FilledPot, POT_HEART, POT_KEY, POT_SWITCH, generate_pot_shuffle, get_vanilla_pot_items
+from worlds.alttp.PotShuffle import FilledPot, POT_HEART, POT_HOLE, POT_KEY, POT_SWITCH, generate_pot_shuffle, get_vanilla_pot_items
 from worlds.alttp.PuzzleShuffle import (
     CANE_PUZZLE_DUNGEON_CANDIDATES,
     DUNGEON_EASTERN,
@@ -18,6 +18,7 @@ from worlds.alttp.PuzzleShuffle import (
     EASTERN_SWITCH_ROOM_ID,
     ICE_PALACE_BLOCK_PUZZLE_ROOM_ID,
     ICE_PALACE_BOMB_JUMP_ROOM_ID,
+    ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID,
     ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID,
     ICE_PALACE_SPIKE_ROOM_ID,
     POD_MAP_CHEST_ROOM_ID,
@@ -140,6 +141,24 @@ class TestPuzzleShuffle(unittest.TestCase):
         )
 
         self.assertIn(POT_SWITCH, [pot.item for pot in modified[ICE_PALACE_BOMB_JUMP_ROOM_ID]])
+
+    def test_ice_palace_hole_to_kholdstare_switch_never_replaces_hole(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            ice_palace_hole_to_kholdstare_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            ice_palace_hole_to_kholdstare_switch_pot=(204, 11),
+        )
+        modified = apply_puzzle_pot_modifications(
+            {ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID: get_vanilla_pot_items(ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID)},
+            state,
+        )
+
+        self.assertIn(
+            FilledPot(204, 11, POT_HOLE),
+            modified[ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID],
+        )
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID]])
 
     def test_eastern_map_chest_non_switch_tag_removes_switch(self) -> None:
         state = PuzzleShuffleState(
