@@ -20,10 +20,10 @@ from .EnemyLogicTargets import (
     EASTERN_MAP_CHEST_ROOM_NORTHEAST,
     EASTERN_PRE_ARMOS_ROOM,
     EASTERN_STALFOS_ROOM_SOUTHWEST,
+    EASTERN_SWITCH_ROOM_SOUTHWEST,
     DESERT_BEAMOS_HELLWAY_BOTTOM_LEFT,
     DESERT_BIG_CHEST_BOTTOM_LEFT,
     DESERT_EAST_ENTRANCE_TOP_RIGHT,
-    DESERT_FINAL_SECTION_ENTRANCE_SOUTHWEST,
     DESERT_MAP_CHEST_NORTH_HALF,
     GANONS_TOWER_BIG_CHEST_ROOM_NORTHEAST,
     GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST,
@@ -36,6 +36,7 @@ from .EnemyLogicTargets import (
     GANONS_TOWER_GAUNTLET_45_NORTHWEST,
     GANONS_TOWER_MIMICS_BOTTOM_HALF,
     GANONS_TOWER_MIMICS_SOUTHWEST,
+    GANONS_TOWER_SPIKE_PIT_ROOM,
     GANONS_TOWER_MIMICS_WEST,
     GANONS_TOWER_TILE_TORCH_PUZZLE_TOP_LEFT,
     GANONS_TOWER_WIZZROBES_TOP_HALF,
@@ -65,6 +66,7 @@ from .EnemyLogicTargets import (
     MISERY_MIRE_WIZZROBES_ROOM,
     MIMIC_CAVE_ROOM,
     MINI_MOLDORM_CAVE_ROOM,
+    POD_MAP_CHEST_ROOM,
     POD_NORTH_MIMICS_BOTTOM_LEFT,
     POD_STALFOS_TRAP_ROOM,
     POD_TURTLE_ROOM_BOTTOM_LEFT,
@@ -110,6 +112,7 @@ from .PuzzleShuffle import (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_TRIGGER_ACTIVATED_CHEST,
     TAG_CLEAR_ROOM_FOR_CHEST,
+    TAG_CLEAR_ROOM_TO_OPEN,
     TAG_NOTHING,
     ROOM_VARIANT_HOLD_SWITCH,
     ROOM_VARIANT_KILL_ENEMIES,
@@ -510,6 +513,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else None
     )
+    eastern_big_key_room_tag = (
+        world.puzzle_shuffle_state.eastern_big_key_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_TRIGGER_ACTIVATED_CHEST
+    )
     eastern_entrance_room_tag = (
         world.puzzle_shuffle_state.eastern_entrance_room_tag
         if world.puzzle_shuffle_state is not None
@@ -580,6 +588,8 @@ def global_rules(multiworld: MultiWorld, player: int):
         return True
 
     def can_pass_eastern_switch_room_puzzle(state: CollectionState) -> bool:
+        if eastern_switch_room_tag == TAG_SW_KILL_ENEMY_TO_OPEN:
+            return can_clear_enemy_region(state, player, EASTERN_SWITCH_ROOM_SOUTHWEST)
         if eastern_switch_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
             return state.has('Cane of Somaria', player)
         return True
@@ -595,7 +605,10 @@ def global_rules(multiworld: MultiWorld, player: int):
              and can_solve_eastern_map_chest_room_puzzle(state))
     set_always_allow(multiworld.get_location('Eastern Palace - Big Key Chest', player),
                      lambda state, item: item.name == 'Big Key (Eastern Palace)' and item.player == player)
-    eastern_big_key_chest_needs_room_clear = _eastern_big_key_chest_needs_room_clear(world)
+    eastern_big_key_chest_needs_room_clear = (
+        eastern_big_key_room_tag == TAG_CLEAR_ROOM_FOR_CHEST
+        or _eastern_big_key_chest_needs_room_clear(world)
+    )
     set_rule(multiworld.get_location('Eastern Palace - Big Key Chest', player),
              lambda state: can_solve_eastern_dark_square_room_puzzle(state)
              and (not eastern_big_key_chest_needs_room_clear or can_clear_enemy_region(state, player, EASTERN_BIG_KEY_ROOM)) and
@@ -628,12 +641,6 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else None
     )
-    desert_final_section_entrance_tag = (
-        world.puzzle_shuffle_state.desert_final_section_entrance_tag
-        if world.puzzle_shuffle_state is not None
-        else TAG_SW_MOVE_BLOCK_TO_OPEN
-    )
-
     def can_open_desert_big_chest_puzzle(state: CollectionState) -> bool:
         if desert_big_chest_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
             return state.has('Cane of Somaria', player)
@@ -666,24 +673,17 @@ def global_rules(multiworld: MultiWorld, player: int):
              lambda state: state._lttp_has_key('Small Key (Desert Palace)', player, 3)
              and can_clear_enemy_region(state, player, DESERT_BEAMOS_HELLWAY_BOTTOM_LEFT))
 
-    def can_pass_desert_final_section_entrance_puzzle(state: CollectionState) -> bool:
-        if desert_final_section_entrance_tag == TAG_SW_KILL_ENEMY_TO_OPEN:
-            return can_clear_enemy_region(state, player, DESERT_FINAL_SECTION_ENTRANCE_SOUTHWEST)
-        return True
-
     add_rule(multiworld.get_location('Desert Palace - Prize', player),
              lambda state: state._lttp_has_key('Small Key (Desert Palace)', player, 4)
              and state.has('Big Key (Desert Palace)', player)
              and has_fire_source(state, player)
              and can_clear_enemy_region(state, player, DESERT_BEAMOS_HELLWAY_BOTTOM_LEFT)
-             and can_pass_desert_final_section_entrance_puzzle(state)
              and state.multiworld.get_location('Desert Palace - Prize', player).parent_region.dungeon.boss.can_defeat(state))
     add_rule(multiworld.get_location('Desert Palace - Boss', player),
              lambda state: state._lttp_has_key('Small Key (Desert Palace)', player, 4)
              and state.has('Big Key (Desert Palace)', player)
              and has_fire_source(state, player)
              and can_clear_enemy_region(state, player, DESERT_BEAMOS_HELLWAY_BOTTOM_LEFT)
-             and can_pass_desert_final_section_entrance_puzzle(state)
              and state.multiworld.get_location('Desert Palace - Boss', player).parent_region.dungeon.boss.can_defeat(state))
 
     # logic patch to prevent placing a crystal in Desert that's required to reach the required keys
@@ -1249,6 +1249,12 @@ def global_rules(multiworld: MultiWorld, player: int):
             and state.has('Hammer', player)
         ):
             return False
+        if pod_map_chest_room_tag == TAG_CLEAR_ROOM_TO_OPEN and not (
+            state.can_reach('Palace of Darkness (Bonk Section)', 'Region', player)
+            and state.has('Hammer', player)
+            and can_clear_enemy_region(state, player, POD_MAP_CHEST_ROOM)
+        ):
+            return False
         if pod_turtle_room_tag == TAG_SW_KILL_ENEMY_TO_OPEN and not can_clear_enemy_region(
             state, player, POD_TURTLE_ROOM_BOTTOM_LEFT
         ):
@@ -1337,6 +1343,11 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else ROOM_VARIANT_VANILLA
     )
+    gt_spike_pit_room_tag = (
+        world.puzzle_shuffle_state.gt_spike_pit_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_SWITCH_OPENS_DOOR_TOGGLE
+    )
     def can_solve_gt_tile_room_puzzle(state: CollectionState) -> bool:
         if gt_big_chest_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
             return state.has('Cane of Somaria', player)
@@ -1375,6 +1386,10 @@ def global_rules(multiworld: MultiWorld, player: int):
         return can_clear_enemy_regions(state, player, GANONS_TOWER_GAUNTLET_123_NORTH)
 
     def can_pass_gt_mimics_puzzle(state: CollectionState) -> bool:
+        if gt_spike_pit_room_tag == TAG_CLEAR_ROOM_TO_OPEN and not can_clear_enemy_region(
+            state, player, GANONS_TOWER_SPIKE_PIT_ROOM
+        ):
+            return False
         if gt_mimics_room_variant == ROOM_VARIANT_VANILLA:
             return can_clear_enemy_region(state, player, GANONS_TOWER_MIMICS_BOTTOM_HALF)
         if gt_mimics_room_variant == 1:

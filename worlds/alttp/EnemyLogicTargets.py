@@ -51,6 +51,7 @@ EASTERN_STALFOS_ROOM_SOUTHWEST = "Eastern Palace (Stalfos Spawn Room) - Southwes
 EASTERN_MAP_CHEST_ROOM_NORTHEAST = "Eastern Palace (Map Chest Room) - Northeast"
 EASTERN_DARK_SQUARE_NORTHWEST = "Eastern Palace (Dark Square Room) - Northwest"
 EASTERN_PRE_ARMOS_ROOM = "Eastern Palace (Pre-Armos Knights Rooms)"
+EASTERN_SWITCH_ROOM_SOUTHWEST = "Eastern Palace (Switch Room) - Southwest"
 ICE_PALACE_BLOCK_PUZZLE_SOUTHEAST = "Ice Palace (Block Puzzle Room) - Southeast"
 ICE_PALACE_HOLE_TO_KHOLDSTARE_NORTHEAST = "Ice Palace (Hole to Kholdstare Room) - Northeast"
 ICE_PALACE_BOMB_FLOOR_SOUTHWEST = "Ice Palace (Bomb Floor / Bari Room) - Southwest"
@@ -72,6 +73,7 @@ ICE_PALACE_ICED_T_ROOM_NORTHEAST = "Ice Palace (Iced T Room) - Northeast"
 ICE_PALACE_PENGATORS_ROOM = "Ice Palace (Pengators Room)"
 ICE_PALACE_CONVEYOR_HELLWAY_TOP_RIGHT = "Ice Palace (Conveyor Hellway)"
 POD_NORTH_MIMICS_BOTTOM_LEFT = "Palace of Darkness (North Mimics Room)"
+POD_MAP_CHEST_ROOM = "Palace of Darkness (Map Chest Room)"
 POD_STALFOS_TRAP_ROOM = "Palace of Darkness (Stalfos Trap Room)"
 POD_TURTLE_ROOM_BOTTOM_LEFT = "Palace of Darkness (Turtle Room)"
 POD_SOUTH_MIMICS_TOP_LEFT = "Palace of Darkness (South Mimics Room)"
@@ -86,6 +88,7 @@ GANONS_TOWER_GAUNTLET_123_NORTH = "Ganon's Tower (Gauntlet 1/2/3) - North"
 GANONS_TOWER_GAUNTLET_123_NORTHEAST = "Ganon's Tower (Gauntlet 1/2/3) - Northeast"
 GANONS_TOWER_GAUNTLET_45_ROOM = "Ganon's Tower (Gauntlet 4/5)"
 GANONS_TOWER_GAUNTLET_45_NORTHWEST = "Ganon's Tower (Gauntlet 4/5) - Northwest"
+GANONS_TOWER_SPIKE_PIT_ROOM = "Ganon's Tower (Spike Pit Room)"
 GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST = "Ganon's Tower (Block Puzzle Room) - Northeast"
 GANONS_TOWER_BIG_CHEST_ROOM_NORTHEAST = "Ganon's Tower (Big Chest Room) - Northeast"
 GANONS_TOWER_MIMICS_BOTTOM_HALF = "Ganon's Tower (Mimics Rooms) - Bottom Half"
@@ -155,6 +158,12 @@ ENEMY_CLEAR_TARGETS = (
         min_x=256,
     ),
     EnemyClearTarget(
+        name=EASTERN_SWITCH_ROOM_SOUTHWEST,
+        room_name="Eastern Palace (2 Bubble With Switch Under Pot)",
+        max_x=256,
+        min_y=256,
+    ),
+    EnemyClearTarget(
         name=ICE_PALACE_BLOCK_PUZZLE_SOUTHEAST,
         room_name="Ice Palace (Block Puzzle Room)",
         min_x=256,
@@ -210,12 +219,14 @@ ENEMY_CLEAR_TARGETS = (
         min_x=256,
         min_y=256,
     ),
+    EnemyClearTarget(name=POD_MAP_CHEST_ROOM, room_name="Palace of Darkness (Map Chest / Fairy Room)"),
     EnemyClearTarget(
         name=TURTLE_ROCK_BIG_CHEST_ROOM_TOP_LEFT,
         room_name="Turtle Rock (Double Hokku-Bokku / Big chest Room)",
         max_x=256,
         max_y=256,
     ),
+    EnemyClearTarget(name=GANONS_TOWER_SPIKE_PIT_ROOM, room_name="Ganon's Tower (Spike Pit Room)"),
     EnemyClearTarget(name=ICE_PALACE_COMPASS_ROOM, room_name="Ice Palace (Compass Room)"),
     EnemyClearTarget(name=ICE_PALACE_MAP_ROOM_WEST, room_name="Ice Palace (Map Chest Room)", max_x=256),
     EnemyClearTarget(name=ICE_PALACE_HIDDEN_CHEST_ROOM, room_name="Ice Palace (2 Blue Bari and Hidden Chest)"),

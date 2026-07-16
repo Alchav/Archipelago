@@ -3,17 +3,24 @@ import unittest
 from types import SimpleNamespace
 
 from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
-from worlds.alttp.PotShuffle import FilledPot, POT_HEART, POT_KEY, POT_SWITCH, generate_pot_shuffle
+from worlds.alttp.PotShuffle import FilledPot, POT_HEART, POT_KEY, POT_SWITCH, generate_pot_shuffle, get_vanilla_pot_items
 from worlds.alttp.PuzzleShuffle import (
     CANE_PUZZLE_DUNGEON_CANDIDATES,
     DUNGEON_EASTERN,
     DUNGEON_ICE_PALACE,
     GT_BIG_CHEST_ROOM_ID,
     GT_BLOCK_PUZZLE_ROOM_ID,
+    GT_SPIKE_PIT_ROOM_ID,
     HERA_TILE_ROOM_ID,
     EASTERN_PRE_ARMOS_ROOM_ID,
+    EASTERN_MAP_CHEST_ROOM_ID,
+    EASTERN_BIG_KEY_ROOM_ID,
+    EASTERN_SWITCH_ROOM_ID,
     ICE_PALACE_BLOCK_PUZZLE_ROOM_ID,
+    ICE_PALACE_BOMB_JUMP_ROOM_ID,
     ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID,
+    ICE_PALACE_SPIKE_ROOM_ID,
+    POD_MAP_CHEST_ROOM_ID,
     POD_MIMICS_MOVING_WALL_ROOM_ID,
     DESERT_BIG_CHEST_BASE_TAG_CHOICES,
     DESERT_BIG_CHEST_ROOM_ID,
@@ -34,10 +41,14 @@ from worlds.alttp.PuzzleShuffle import (
     get_turtle_rock_peg_order_hint,
     get_gt_big_chest_room_tag_choices,
     get_gt_block_puzzle_tag_choices,
+    get_gt_spike_pit_room_tag_choices,
     get_hera_big_key_chest_tag_choices,
     get_hera_tile_room_tag_choices,
     get_ice_palace_map_room_tag_choices,
+    get_eastern_big_key_room_tag_choices,
     get_eastern_pre_armos_tag_choices,
+    get_eastern_switch_room_tag_choices,
+    get_pod_map_chest_room_tag_choices,
     get_desert_map_chest_tag_choices,
     get_desert_big_chest_tag_choices,
     get_desert_final_section_entrance_tag_choices,
@@ -52,10 +63,14 @@ from worlds.alttp.PuzzleShuffle import (
     TAG_SE_KILL_ENEMY_FOR_CHEST,
     TAG_SE_KILL_ENEMY_TO_OPEN,
     TAG_SW_KILL_ENEMY_TO_OPEN,
+    TAG_SW_KILL_ENEMY_FOR_CHEST,
     TAG_SW_MOVE_BLOCK_TO_OPEN,
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
     TAG_TRIGGER_ACTIVATED_CHEST,
+    TAG_CLEAR_ROOM_FOR_CHEST,
+    TAG_CLEAR_ROOM_TO_OPEN,
+    TAG_NOTHING,
     validate_puzzle_shuffle_data,
     write_turtle_rock_peg_order,
 )
@@ -98,6 +113,172 @@ class TestPuzzleShuffle(unittest.TestCase):
             ),
             (ROOM_VARIANT_TOGGLE_SWITCH,),
         )
+
+    def test_eastern_stalfos_toggle_tag_gets_switch_pot(self) -> None:
+        world = SimpleNamespace(
+            random=random.Random(65723850656880413407),
+            options=SimpleNamespace(retro_bow=False, enemy_shuffle=False),
+            pot_shuffle_state=None,
+            enemy_shuffle_state=None,
+        )
+
+        state = generate_puzzle_shuffle(world)
+
+        self.assertEqual(state.eastern_stalfos_room_tag, TAG_SWITCH_OPENS_DOOR_TOGGLE)
+        self.assertIsNotNone(state.eastern_stalfos_room_switch_pot)
+
+    def test_ice_palace_bomb_jump_tag_2_toggle_keeps_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            ice_palace_bomb_jump_room_tag=TAG_NW_KILL_ENEMY_TO_OPEN,
+            ice_palace_bomb_jump_room_tag_2=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {ICE_PALACE_BOMB_JUMP_ROOM_ID: get_vanilla_pot_items(ICE_PALACE_BOMB_JUMP_ROOM_ID)},
+            state,
+        )
+
+        self.assertIn(POT_SWITCH, [pot.item for pot in modified[ICE_PALACE_BOMB_JUMP_ROOM_ID]])
+
+    def test_eastern_map_chest_non_switch_tag_removes_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            eastern_map_chest_room_tag=TAG_NE_KILL_ENEMY_TO_OPEN,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {EASTERN_MAP_CHEST_ROOM_ID: get_vanilla_pot_items(EASTERN_MAP_CHEST_ROOM_ID)},
+            state,
+        )
+
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[EASTERN_MAP_CHEST_ROOM_ID]])
+
+    def test_eastern_big_key_room_can_use_clear_room_chest_tag(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=False),
+            enemy_shuffle_state=None,
+        )
+
+        self.assertIn(TAG_CLEAR_ROOM_FOR_CHEST, get_eastern_big_key_room_tag_choices(world))
+
+    def test_eastern_big_key_room_clear_room_tag_removes_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            eastern_big_key_room_tag=TAG_CLEAR_ROOM_FOR_CHEST,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {EASTERN_BIG_KEY_ROOM_ID: get_vanilla_pot_items(EASTERN_BIG_KEY_ROOM_ID)},
+            state,
+        )
+
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[EASTERN_BIG_KEY_ROOM_ID]])
+
+    def test_ice_palace_spike_non_switch_tag_removes_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            ice_palace_spike_room_tag=TAG_SW_KILL_ENEMY_FOR_CHEST,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {ICE_PALACE_SPIKE_ROOM_ID: get_vanilla_pot_items(ICE_PALACE_SPIKE_ROOM_ID)},
+            state,
+        )
+
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[ICE_PALACE_SPIKE_ROOM_ID]])
+
+    def test_pod_map_chest_room_can_use_clear_room_tag_with_shuffled_killable_enemies(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=True),
+            enemy_shuffle_state=SimpleNamespace(
+                randomized_dungeon_rooms={
+                    POD_MAP_CHEST_ROOM_ID: RandomizedDungeonEnemyRoom(
+                        room_id=POD_MAP_CHEST_ROOM_ID,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0x17, 0x09, 0x63, 0x8E, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            ),
+        )
+
+        self.assertIn(TAG_CLEAR_ROOM_TO_OPEN, get_pod_map_chest_room_tag_choices(world))
+
+    def test_pod_map_chest_clear_room_tag_removes_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            pod_map_chest_room_tag=TAG_CLEAR_ROOM_TO_OPEN,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {POD_MAP_CHEST_ROOM_ID: get_vanilla_pot_items(POD_MAP_CHEST_ROOM_ID)},
+            state,
+        )
+
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[POD_MAP_CHEST_ROOM_ID]])
+
+    def test_gt_spike_pit_room_can_use_clear_room_tag_with_shuffled_killable_enemies(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=True),
+            enemy_shuffle_state=SimpleNamespace(
+                randomized_dungeon_rooms={
+                    GT_SPIKE_PIT_ROOM_ID: RandomizedDungeonEnemyRoom(
+                        room_id=GT_SPIKE_PIT_ROOM_ID,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0x17, 0x09, 0x63, 0x8E, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            ),
+        )
+
+        self.assertIn(TAG_CLEAR_ROOM_TO_OPEN, get_gt_spike_pit_room_tag_choices(world))
+
+    def test_gt_spike_pit_clear_room_tag_removes_switch(self) -> None:
+        state = PuzzleShuffleState(
+            TAG_TRIGGER_ACTIVATED_CHEST,
+            TAG_SWITCH_OPENS_DOOR_TOGGLE,
+            gt_spike_pit_room_tag=TAG_CLEAR_ROOM_TO_OPEN,
+        )
+        modified = apply_puzzle_pot_modifications(
+            {GT_SPIKE_PIT_ROOM_ID: get_vanilla_pot_items(GT_SPIKE_PIT_ROOM_ID)},
+            state,
+        )
+
+        self.assertNotIn(POT_SWITCH, [pot.item for pot in modified[GT_SPIKE_PIT_ROOM_ID]])
+
+    def test_skull_woods_gibdo_torch_switches_use_east_side_pots(self) -> None:
+        for seed in range(50):
+            world = SimpleNamespace(
+                random=random.Random(seed),
+                options=SimpleNamespace(retro_bow=False, enemy_shuffle=False),
+                pot_shuffle_state=None,
+                enemy_shuffle_state=None,
+            )
+
+            state = generate_puzzle_shuffle(world)
+
+            if state.skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+                self.assertEqual((104, 15), state.skull_woods_gibdo_torch_room_switch_pot)
+            elif state.skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_TOGGLE:
+                self.assertIn(state.skull_woods_gibdo_torch_room_switch_pot, ((144, 19), (172, 20)))
 
     def test_generate_puzzle_shuffle_uses_known_desert_map_chest_tags(self) -> None:
         for seed in range(20):
@@ -214,7 +395,7 @@ class TestPuzzleShuffle(unittest.TestCase):
             get_desert_final_section_entrance_tag_choices(world),
         )
 
-    def test_desert_final_section_kill_enemy_tag_is_available_with_shuffled_killable_enemy(self) -> None:
+    def test_desert_final_section_kill_enemy_tag_is_not_available_with_shuffled_killable_enemy(self) -> None:
         world = SimpleNamespace(
             options=SimpleNamespace(enemy_shuffle=True),
             enemy_shuffle_state=SimpleNamespace(
@@ -237,7 +418,10 @@ class TestPuzzleShuffle(unittest.TestCase):
             ),
         )
 
-        self.assertIn(TAG_SW_KILL_ENEMY_TO_OPEN, get_desert_final_section_entrance_tag_choices(world))
+        self.assertEqual(
+            (TAG_SW_MOVE_BLOCK_TO_OPEN,),
+            get_desert_final_section_entrance_tag_choices(world),
+        )
 
     def test_desert_map_chest_switch_is_removed_from_pot_shuffle_state(self) -> None:
         world = SimpleNamespace(
@@ -504,6 +688,44 @@ class TestPuzzleShuffle(unittest.TestCase):
         self.assertEqual(
             get_eastern_pre_armos_tag_choices(world),
             (TAG_E_KILL_ENEMY_TO_OPEN, TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD),
+        )
+
+    def test_eastern_switch_room_sw_kill_tag_requires_shuffled_killable_enemy(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=False),
+            enemy_shuffle_state=None,
+        )
+
+        self.assertEqual(
+            get_eastern_switch_room_tag_choices(world),
+            (TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD),
+        )
+
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=True),
+            enemy_shuffle_state=SimpleNamespace(
+                randomized_dungeon_rooms={
+                    EASTERN_SWITCH_ROOM_ID: RandomizedDungeonEnemyRoom(
+                        room_id=EASTERN_SWITCH_ROOM_ID,
+                        room_header_address=0,
+                        sprite_table_address=0,
+                        original_graphics_block_id=0,
+                        graphics_block_id=0,
+                        tag_1=0,
+                        tag_2=0,
+                        sort_sprites_value=0,
+                        sprites=(
+                            RandomizedDungeonEnemySprite(0, 0x18, 0x09, 0x63, 0x8E, False, False),
+                        ),
+                        skipped_randomization=False,
+                    )
+                }
+            ),
+        )
+
+        self.assertEqual(
+            get_eastern_switch_room_tag_choices(world),
+            (TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD, TAG_SW_KILL_ENEMY_TO_OPEN),
         )
 
     def test_ice_palace_block_puzzle_non_switch_tag_removes_pot_switch(self) -> None:
