@@ -54,6 +54,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     GOLDEN_SWORD_DAMAGE_CLASSES,
     GANON_D7_SPRITE_ID,
     GANON_D6_SPRITE_ID,
+    KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
     HELMASAUR_KING_SPRITE_ID,
     INCINERATE_EFFECT,
     LANMOLAS_SPRITE_ID,
@@ -527,6 +528,24 @@ class TestEnemizerPatches(unittest.TestCase):
                         if (effect := get_damage_effect(sprite_id, damage_class, combat_model)) != 0
                     )
                     self.assertEqual(actual_nonzero_effects, expected_nonzero_effects)
+
+    def test_damage_class_swap_does_not_pin_kholdstare_shell_breaking_effect_to_fire_rod(self) -> None:
+        fire_rod_shell_effects = set()
+
+        for seed in range(20):
+            combat_model = build_randomized_damage_class_combat_model(
+                random.Random(seed),
+                DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
+            )
+            fire_rod_shell_effects.add(get_damage_effect(KHOLDSTARE_ICE_BLOCK_SPRITE_ID, 11, combat_model))
+            self.assertTrue(
+                any(
+                    get_damage_effect(KHOLDSTARE_ICE_BLOCK_SPRITE_ID, damage_class, combat_model) in {8, 64}
+                    for damage_class in range(16)
+                )
+            )
+
+        self.assertIn(0, fire_rod_shell_effects)
 
     def test_damage_class_swap_preserves_each_eligible_enemy_effect_multiset(self) -> None:
         vanilla_effects = _resolve_sprite_damage_effects(VANILLA_COMBAT_MODEL)

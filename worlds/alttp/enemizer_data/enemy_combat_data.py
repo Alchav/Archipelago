@@ -136,7 +136,6 @@ BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS = {
     ARRGHUS_SPRITE_ID: ((3,),),
     ARRGHUS_FUZZ_SPRITE_ID: ((3,),),
     HELMASAUR_KING_SPRITE_ID: ((3,), (9,)),
-    KHOLDSTARE_ICE_BLOCK_SPRITE_ID: ((11,),),
     KHOLDSTARE_SPRITE_ID: ((3,),),
     VITREOUS_SMALL_EYE_SPRITE_ID: ((3,),),
     VITREOUS_SPRITE_ID: ((3,),),
@@ -1637,7 +1636,7 @@ def get_progression_kill_damage_classes(sprite_id: int) -> tuple[int, ...]:
     }:
         return (1, 2, 3, 4, 5, 6, 9, 11, 12)
     if sprite_id == KHOLDSTARE_ICE_BLOCK_SPRITE_ID:
-        return (11, 13)
+        return tuple(range(RANDOMIZABLE_DAMAGE_CLASS_COUNT))
     if sprite_id == KHOLDSTARE_SPRITE_ID:
         return (1, 2, 3, 4, 5, 11, 13)
     if sprite_id in {TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID}:
