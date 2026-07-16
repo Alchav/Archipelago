@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+from Utils import snes_to_pc
 from worlds.alttp.PotShuffle import (
     FilledPot,
     ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID,
@@ -27,6 +28,18 @@ from worlds.alttp.enemizer_data.pot_shuffle_data import POT_ROOMS
 
 class TestPotShuffle(unittest.TestCase):
     BASEPATCH_ROM = Path(__file__).resolve().parents[3] / "basepatch.sfc"
+    ROOM_OBJECT_POINTER_TABLE = 0xF8000
+    POT_OBJECT_ID = 0xFAF
+    NON_POT_ITEM_RECORDS = frozenset({
+        (0x35, 112, 23),  # Vanilla orphan item: one row below its physical pot.
+        (0x3F, 28, 23),   # Block marker item.
+        (0x44, 204, 7),   # Block marker item.
+        (0x45, 156, 7),   # Block marker item.
+        (0x93, 156, 23),  # Block marker item.
+        (0xCE, 108, 8),   # Block marker item.
+        (0xCE, 204, 11),  # Reserved hole marker.
+        (0x117, 24, 8),   # Block marker item.
+    })
 
     def test_key_rooms_place_actual_keys(self) -> None:
         for seed in range(10):
@@ -202,6 +215,42 @@ class TestPotShuffle(unittest.TestCase):
                     self._read_pot_items_from_rom(rom, address),
                 )
 
+    def test_pot_candidates_match_basepatch_room_objects(self) -> None:
+        if not self.BASEPATCH_ROM.exists():
+            self.skipTest(f"{self.BASEPATCH_ROM} is not present")
+
+        rom = self.BASEPATCH_ROM.read_bytes()
+
+        for room in POT_ROOMS:
+            pot_records = [
+                pot for pot in room.pots
+                if (room.room_id, pot.x, pot.y) not in self.NON_POT_ITEM_RECORDS
+            ]
+            if not pot_records:
+                continue
+
+            room_pot_objects = self._read_room_pot_object_positions(rom, room.room_id)
+            seen_pots = {}
+            with self.subTest(room=room.room_id):
+                self.assertTrue(room_pot_objects, f"room {room.room_id:#04x} has no 0xFAF pot objects")
+
+            for pot in pot_records:
+                physical_position = self._pot_record_physical_position(pot.x, pot.y)
+                with self.subTest(room=room.room_id, x=pot.x, y=pot.y):
+                    self.assertIn(
+                        physical_position,
+                        room_pot_objects,
+                        f"room {room.room_id:#04x} pot candidate {(pot.x, pot.y)} does not map to a "
+                        "0xFAF room object",
+                    )
+                    self.assertNotIn(
+                        physical_position,
+                        seen_pots,
+                        f"room {room.room_id:#04x} has duplicate pot candidates {seen_pots.get(physical_position)} "
+                        f"and {(pot.x, pot.y)} for the same physical 0xFAF room object",
+                    )
+                seen_pots[physical_position] = (pot.x, pot.y)
+
     @staticmethod
     def _read_pot_items_from_rom(rom: bytes, address: int) -> tuple:
         pots = []
@@ -212,6 +261,59 @@ class TestPotShuffle(unittest.TestCase):
                 return tuple(pots)
             pots.append(FilledPot(x, y, rom[offset + 2]))
             offset += 3
+
+    @classmethod
+    def _read_room_pot_object_positions(cls, rom: bytes, room_id: int) -> frozenset[tuple[int, int]]:
+        pointer_address = cls.ROOM_OBJECT_POINTER_TABLE + (room_id * 3)
+        snes_address = (
+            rom[pointer_address]
+            | (rom[pointer_address + 1] << 8)
+            | (rom[pointer_address + 2] << 16)
+        )
+        offset = snes_to_pc(snes_address) + 2
+        positions: set[tuple[int, int]] = set()
+
+        for layer in range(3):
+            is_door_layer = False
+            while True:
+                if rom[offset:offset + 2] == bytes((0xF0, 0xFF)):
+                    is_door_layer = True
+                    offset += 2
+                    continue
+                if rom[offset:offset + 2] == bytes((0xFF, 0xFF)):
+                    offset += 2
+                    break
+                if is_door_layer:
+                    offset += 2
+                    continue
+
+                object_bytes = rom[offset:offset + 3]
+                if cls._room_object_id(object_bytes) == cls.POT_OBJECT_ID:
+                    positions.add(cls._room_object_to_pot_position(object_bytes, layer))
+                offset += 3
+
+        return frozenset(positions)
+
+    @staticmethod
+    def _room_object_id(object_bytes: bytes) -> int:
+        if object_bytes[0] >= 0xFC:
+            return (object_bytes[2] & 0x3F) + 0x100
+        if object_bytes[2] >= 0xF8:
+            return 0xF00 | ((object_bytes[2] & 0x0F) << 4) | ((object_bytes[1] & 0x03) << 2) | (object_bytes[0] & 0x03)
+        return object_bytes[2]
+
+    @staticmethod
+    def _room_object_to_pot_position(object_bytes: bytes, layer: int) -> tuple[int, int]:
+        hm_x = (object_bytes[0] & 0xFC) >> 2
+        hm_y = (object_bytes[1] & 0xFC) >> 2
+        pot_x = hm_x * 2
+        if hm_y & 1:
+            pot_x |= 0x80
+        return pot_x, hm_y // 2
+
+    @staticmethod
+    def _pot_record_physical_position(x: int, y: int) -> tuple[int, int]:
+        return x, y & 0x1F
 
 
 if __name__ == "__main__":
