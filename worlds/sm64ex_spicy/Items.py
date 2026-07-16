@@ -34,6 +34,9 @@ def progression_deprioritized_skip_balancing_if_blocksanity(options):
     if options.blocksanity:
         return ItemClassification.progression_deprioritized_skip_balancing
     return ItemClassification.filler
+    
+def trap(options):
+    return ItemClassification.trap
 
 
 class SM64Item(Item):
@@ -181,6 +184,15 @@ bowser_stage_1up_item_data_table: dict[str, SM64ItemData] = {
     "Bowser Stage Extra 1-Ups": SM64ItemData(sm64ex_base_id + 556, progression_deprioritized),
     "Bowser in the Dark World - Extra 1-Ups": SM64ItemData(sm64ex_base_id + 557, progression_deprioritized),
     "Bowser in the Fire Sea - Extra 1-Ups": SM64ItemData(sm64ex_base_id + 558, progression_deprioritized),
+}
+
+trap_item_data_table: dict[str, SM64ItemData] = {
+    "Bonk Trap": SM64ItemData(sm64ex_base_id + 1760, trap),
+    "Burn Trap": SM64ItemData(sm64ex_base_id + 1761, trap),
+    "Shock Trap": SM64ItemData(sm64ex_base_id + 1762, trap),
+    "Chuckya Trap": SM64ItemData(sm64ex_base_id + 1763, trap),
+    "Spin Trap": SM64ItemData(sm64ex_base_id + 1764, trap),
+    "Gust Trap": SM64ItemData(sm64ex_base_id + 1765, trap),
 }
 
 arbitrary_item_data_table: dict[str, SM64ItemData] = {
@@ -459,7 +471,8 @@ item_data_table = {
     **action_item_data_table,
     **per_level_action_item_data_table,
     **cannon_item_data_table,
-    **painting_unlock_item_data_table
+    **painting_unlock_item_data_table,
+    **trap_item_data_table
 }
 
 item_table = {name: data.code for name, data in item_data_table.items() if data.code is not None}
@@ -484,4 +497,5 @@ item_name_groups: dict[str, set[str]] = {
     "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
     "Optional Items": set(optional_item_data_table),
     "Filler": {"1-Up Mushroom"},
+     "Traps": set(trap_item_data_table),
 }
