@@ -180,6 +180,72 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             (71, 73, 28, 82),
         )
 
+    def test_rejects_dungeon_room_with_bad_sprite_graphics(self) -> None:
+        room = DungeonEnemyRoom(
+            room_id=147,
+            room_header_address=0,
+            sprite_table_address=0,
+            graphics_block_id=1,
+            tag_1=0,
+            tag_2=0,
+            sort_sprites_value=0,
+            sprites=(
+                DungeonEnemySprite(address=0x1000, byte_0=0, byte_1=0, sprite_id=0x10, is_overlord=False, has_key=False),
+            ),
+            required_group_id=None,
+            required_subgroup_0=tuple(),
+            required_subgroup_1=tuple(),
+            required_subgroup_2=tuple(),
+            required_subgroup_3=tuple(),
+            is_shutter_room=False,
+            is_water_room=False,
+            do_not_randomize=False,
+            no_special_enemies_standard=False,
+        )
+        state = self._build_state(
+            dungeon_rooms={147: room},
+            randomized_dungeon_rooms={
+                147: RandomizedDungeonEnemyRoom(
+                    room_id=147,
+                    room_header_address=0,
+                    sprite_table_address=0,
+                    original_graphics_block_id=1,
+                    graphics_block_id=1,
+                    tag_1=0,
+                    tag_2=0,
+                    sort_sprites_value=0,
+                    sprites=(
+                        RandomizedDungeonEnemySprite(
+                            address=0x1000,
+                            byte_0=0,
+                            byte_1=0,
+                            original_sprite_id=0x10,
+                            sprite_id=0x10,
+                            is_overlord=False,
+                            has_key=False,
+                        ),
+                        RandomizedDungeonEnemySprite(
+                            address=0x1003,
+                            byte_0=0,
+                            byte_1=0,
+                            original_sprite_id=0x00,
+                            sprite_id=0x18,
+                            is_overlord=False,
+                            has_key=False,
+                        ),
+                    ),
+                    skipped_randomization=False,
+                )
+            },
+            sprite_requirements=(
+                self._requirement(0x10, killable=True, subgroup_1=(1,)),
+                self._requirement(0x18, sprite_name="Mini Moldorm", killable=True, subgroup_1=(0x1E,)),
+            ),
+        )
+
+        with self.assertRaisesRegex(ValueError, "bad graphics.*room 147.*Mini Moldorm"):
+            validate_enemy_shuffle_state(state, is_standard_mode=False)
+
     def test_effective_room_enemy_requirements_fall_back_to_default_room_data(self) -> None:
         world = SimpleNamespace(
             options=SimpleNamespace(enemy_shuffle=False),

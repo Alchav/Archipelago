@@ -2494,6 +2494,7 @@ def _validate_dungeon_room(
         assert possible_groups, f"Enemy shuffle found no legal dungeon sprite group for room {room.room_id}"
         if possible_groups and selected_group not in possible_groups:
             raise ValueError(f"Enemy shuffle selected illegal sprite group {selected_group.group_id} for room {room.room_id}")
+        _validate_dungeon_room_sprite_graphics(state, room, randomized_room, selected_group)
 
     possible_requirements = _get_possible_enemy_requirements_for_group(state, room, selected_group)
     possible_sprite_ids = {requirement.sprite_id for requirement in possible_requirements}
@@ -2563,6 +2564,62 @@ def _validate_dungeon_room(
         }
         if not (randomized_sprite_ids & all_killable_sprite_ids):
             raise ValueError(f"Enemy shuffle left shutter room {room.room_id} without any killable enemies")
+
+
+def _validate_dungeon_room_sprite_graphics(
+    state: EnemyShuffleState,
+    room: DungeonEnemyRoom,
+    randomized_room: RandomizedDungeonEnemyRoom,
+    selected_group: DungeonSpriteGroup,
+) -> None:
+    for sprite in randomized_room.sprites:
+        requirement = _get_requirement_for_sprite_id(state, sprite.sprite_id)
+        if requirement is None:
+            continue
+        if not _dungeon_sprite_group_supports_requirement(selected_group, requirement):
+            raise ValueError(
+                "Enemy shuffle produced bad graphics in room "
+                f"{room.room_id}: {requirement.sprite_name} ({sprite.sprite_id:#04x}) "
+                f"uses graphics block {randomized_room.graphics_block_id} "
+                f"(group {selected_group.group_id:#04x}, subgroups "
+                f"{selected_group.subgroup_0:#04x}/"
+                f"{selected_group.subgroup_1:#04x}/"
+                f"{selected_group.subgroup_2:#04x}/"
+                f"{selected_group.subgroup_3:#04x})"
+                f"{_format_sprite_graphics_requirement(requirement)}"
+            )
+
+
+def _dungeon_sprite_group_supports_requirement(
+    group: DungeonSpriteGroup,
+    requirement: EnemySpriteRequirement,
+) -> bool:
+    return (
+        (not requirement.group_ids or group.group_id in requirement.group_ids)
+        and (not requirement.subgroup_0 or group.subgroup_0 in requirement.subgroup_0)
+        and (not requirement.subgroup_1 or group.subgroup_1 in requirement.subgroup_1)
+        and (not requirement.subgroup_2 or group.subgroup_2 in requirement.subgroup_2)
+        and (not requirement.subgroup_3 or group.subgroup_3 in requirement.subgroup_3)
+    )
+
+
+def _format_sprite_graphics_requirement(requirement: EnemySpriteRequirement) -> str:
+    parts = []
+    if requirement.group_ids:
+        parts.append(f"group in {_format_int_tuple(requirement.group_ids)}")
+    if requirement.subgroup_0:
+        parts.append(f"subgroup 0 in {_format_int_tuple(requirement.subgroup_0)}")
+    if requirement.subgroup_1:
+        parts.append(f"subgroup 1 in {_format_int_tuple(requirement.subgroup_1)}")
+    if requirement.subgroup_2:
+        parts.append(f"subgroup 2 in {_format_int_tuple(requirement.subgroup_2)}")
+    if requirement.subgroup_3:
+        parts.append(f"subgroup 3 in {_format_int_tuple(requirement.subgroup_3)}")
+    return "" if not parts else "; requires " + ", ".join(parts)
+
+
+def _format_int_tuple(values: tuple[int, ...]) -> str:
+    return "(" + ", ".join(f"{value:#04x}" for value in values) + ")"
 
 
 def _validate_overworld_area(
