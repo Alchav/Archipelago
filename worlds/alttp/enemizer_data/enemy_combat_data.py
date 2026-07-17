@@ -129,21 +129,9 @@ SPECIAL_DAMAGE_EFFECTS = frozenset({
     STUN_255_FRAMES_EFFECT,
 })
 BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS = {
-    MOLDORM_SPRITE_ID: ((3,),),
-    ARMOS_KNIGHTS_SPRITE_ID: ((3,),),
-    LANMOLAS_SPRITE_ID: ((3,),),
-    MOTHULA_SPRITE_ID: ((3,),),
-    ARRGHUS_SPRITE_ID: ((3,),),
-    ARRGHUS_FUZZ_SPRITE_ID: ((3,),),
-    HELMASAUR_KING_SPRITE_ID: ((3,), (9,)),
-    KHOLDSTARE_SPRITE_ID: ((3,),),
-    VITREOUS_SMALL_EYE_SPRITE_ID: ((3,),),
-    VITREOUS_SPRITE_ID: ((3,),),
-    TRINEXX_MAIN_HEAD_SPRITE_ID: ((3,),),
+    HELMASAUR_KING_SPRITE_ID: ((9,),),
     TRINEXX_RED_HEAD_SPRITE_ID: ((0, 1, 6, 7, 8, 9, 10, 11, 12, 13, 14),),
     TRINEXX_BLUE_HEAD_SPRITE_ID: ((0, 1, 6, 7, 8, 9, 10, 11, 12, 13, 14),),
-    BLIND_SPRITE_ID: ((3,),),
-    GANON_D6_SPRITE_ID: ((3,),),
     GANON_D7_SPRITE_ID: ((9,),),
 }
 GANON_D7_SWORDLESS_LOGIC_DAMAGE_CLASSES = (0, 3, 6, 9, 10, 11, 12, 13, 14, 15)
@@ -155,8 +143,6 @@ BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES = {
     ARRGHUS_FUZZ_SPRITE_ID: (6, 9, 11, 12, 3),
     MOTHULA_SPRITE_ID: (11, 1, 3),
     BLIND_SPRITE_ID: (1, 3),
-    KHOLDSTARE_ICE_BLOCK_SPRITE_ID: (11, 13),
-    KHOLDSTARE_SPRITE_ID: (11, 13, 1, 3),
     VITREOUS_SMALL_EYE_SPRITE_ID: (6, 9, 3),
     VITREOUS_SPRITE_ID: (6, 9, 3),
     TRINEXX_RED_HEAD_SPRITE_ID: (11, 12, 1, 3),
@@ -1638,7 +1624,7 @@ def get_progression_kill_damage_classes(sprite_id: int) -> tuple[int, ...]:
     if sprite_id == KHOLDSTARE_ICE_BLOCK_SPRITE_ID:
         return tuple(range(RANDOMIZABLE_DAMAGE_CLASS_COUNT))
     if sprite_id == KHOLDSTARE_SPRITE_ID:
-        return (1, 2, 3, 4, 5, 11, 13)
+        return tuple(range(RANDOMIZABLE_DAMAGE_CLASS_COUNT))
     if sprite_id in {TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID}:
         return (0, 1, 6, 7, 8, 9, 10, 11, 12, 13, 14)
     if sprite_id == GANON_D6_SPRITE_ID:
