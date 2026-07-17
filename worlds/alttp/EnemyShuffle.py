@@ -2572,14 +2572,15 @@ def _validate_dungeon_room_sprite_graphics(
     randomized_room: RandomizedDungeonEnemyRoom,
     selected_group: DungeonSpriteGroup,
 ) -> None:
-    for sprite in randomized_room.sprites:
-        requirement = _get_requirement_for_sprite_id(state, sprite.sprite_id)
+    for address, sprite_id in _get_final_room_sprite_ids(room, randomized_room):
+        requirement = _get_requirement_for_sprite_id(state, sprite_id)
         if requirement is None:
             continue
         if not _dungeon_sprite_group_supports_requirement(selected_group, requirement):
             raise ValueError(
                 "Enemy shuffle produced bad graphics in room "
-                f"{room.room_id}: {requirement.sprite_name} ({sprite.sprite_id:#04x}) "
+                f"{room.room_id}: {requirement.sprite_name} ({sprite_id:#04x}) "
+                f"at {address:#06x} "
                 f"uses graphics block {randomized_room.graphics_block_id} "
                 f"(group {selected_group.group_id:#04x}, subgroups "
                 f"{selected_group.subgroup_0:#04x}/"
@@ -2588,6 +2589,32 @@ def _validate_dungeon_room_sprite_graphics(
                 f"{selected_group.subgroup_3:#04x})"
                 f"{_format_sprite_graphics_requirement(requirement)}"
             )
+
+
+def _get_final_room_sprite_ids(
+    room: DungeonEnemyRoom,
+    randomized_room: RandomizedDungeonEnemyRoom,
+) -> tuple[tuple[int, int], ...]:
+    randomized_by_address = {
+        sprite.address: sprite.sprite_id
+        for sprite in randomized_room.sprites
+    }
+    validate_fixed_sprites = randomized_room.graphics_block_id != room.graphics_block_id
+    final_sprites: list[tuple[int, int]] = []
+    seen_addresses: set[int] = set()
+
+    for sprite in (room.all_sprites or room.sprites):
+        seen_addresses.add(sprite.address)
+        if sprite.address in randomized_by_address:
+            final_sprites.append((sprite.address, randomized_by_address[sprite.address]))
+        elif validate_fixed_sprites:
+            final_sprites.append((sprite.address, sprite.sprite_id))
+
+    for sprite in randomized_room.sprites:
+        if sprite.address not in seen_addresses:
+            final_sprites.append((sprite.address, sprite.sprite_id))
+
+    return tuple(final_sprites)
 
 
 def _dungeon_sprite_group_supports_requirement(
