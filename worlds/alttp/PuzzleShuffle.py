@@ -1353,7 +1353,7 @@ def get_gt_torches_1_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
 def get_misery_mire_dark_cane_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
     choices = [TAG_SWITCH_OPENS_DOOR_HOLD, TAG_SWITCH_OPENS_DOOR_TOGGLE]
     if _enemy_clear_target_has_valid_kill_tag_enemies(world, MISERY_MIRE_DARK_CANE_ROOM_NORTH):
-        choices.append(TAG_N_KILL_ENEMY_FOR_CHEST)
+        choices.append(TAG_N_KILL_ENEMY_TO_OPEN)
     return tuple(choices)
 
 

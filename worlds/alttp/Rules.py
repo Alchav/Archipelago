@@ -1139,7 +1139,7 @@ def global_rules(multiworld: MultiWorld, player: int):
     def can_pass_misery_mire_dark_cane_room_puzzle(state: CollectionState) -> bool:
         if misery_mire_dark_cane_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
             return state.has('Cane of Somaria', player)
-        if misery_mire_dark_cane_room_tag == TAG_N_KILL_ENEMY_FOR_CHEST:
+        if misery_mire_dark_cane_room_tag == TAG_N_KILL_ENEMY_TO_OPEN:
             return can_clear_enemy_region(state, player, MISERY_MIRE_DARK_CANE_ROOM_NORTH)
         return True
 
