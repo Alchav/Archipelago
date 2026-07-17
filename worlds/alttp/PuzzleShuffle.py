@@ -1365,10 +1365,7 @@ def get_gt_big_chest_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
 
 
 def get_eastern_stalfos_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
-    choices = [TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD]
-    if _enemy_clear_target_has_valid_kill_tag_enemies(world, EASTERN_STALFOS_ROOM_SOUTHWEST):
-        choices.insert(0, TAG_SW_KILL_ENEMY_TO_OPEN)
-    return tuple(choices)
+    return TAG_SW_KILL_ENEMY_TO_OPEN, TAG_SWITCH_OPENS_DOOR_TOGGLE, TAG_SWITCH_OPENS_DOOR_HOLD
 
 
 def get_hyrule_castle_switch_room_variants(world: "ALTTPWorld") -> tuple[int, ...]:

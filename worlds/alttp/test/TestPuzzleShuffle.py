@@ -250,6 +250,137 @@ class TestPuzzleShuffle(unittest.TestCase):
             families = {tag_family(tag) for tag in choices} - {"neutral"}
             self.assertLessEqual(len(families), 1, f"{name} mixes tag families: {sorted(families)}")
 
+    def test_puzzle_tag_choices_include_vanilla_result(self) -> None:
+        ps = PuzzleShuffleModule
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=False, retro_bow=False),
+            enemy_shuffle_state=None,
+            pot_shuffle_state=None,
+        )
+        tag_choice_groups = (
+            ("desert_map_chest_tag", ps.get_desert_map_chest_tag_choices(world), ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("desert_big_chest_tag", ps.get_desert_big_chest_tag_choices(world), ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("desert_final_section_entrance_tag", ps.get_desert_final_section_entrance_tag_choices(world),
+             ps.TAG_SW_MOVE_BLOCK_TO_OPEN),
+            ("hera_big_key_chest_tag", ps.get_hera_big_key_chest_tag_choices(world),
+             ps.TAG_LIGHT_TORCHES_TO_GET_CHEST),
+            ("hera_tile_room_tag", ps.get_hera_tile_room_tag_choices(world), ps.TAG_NW_KILL_ENEMY_TO_OPEN),
+            ("gt_block_puzzle_tag", ps.get_gt_block_puzzle_tag_choices(world), ps.TAG_NE_MOVE_BLOCK_TO_OPEN),
+            ("gt_big_chest_room_tag", ps.get_gt_big_chest_room_tag_choices(world), ps.TAG_SWITCH_OPENS_DOOR_HOLD),
+            ("gt_tile_torch_puzzle_tag", ps.get_gt_tile_torch_puzzle_tag_choices(world),
+             ps.TAG_LIGHT_TORCHES_TO_OPEN),
+            ("misery_mire_dark_cane_room_tag", ps.get_misery_mire_dark_cane_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_HOLD),
+            ("gt_torches_1_tag", ps.get_gt_torches_1_tag_choices(world), ps.TAG_LIGHT_TORCHES_TO_OPEN),
+            ("ice_palace_ice_floor_room_tag", ps.get_ice_palace_ice_floor_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("eastern_stalfos_room_tag", ps.get_eastern_stalfos_room_tag_choices(world),
+             ps.TAG_SW_KILL_ENEMY_TO_OPEN),
+            ("eastern_big_chest_room_tag", ps.get_eastern_big_chest_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("eastern_map_chest_room_tag", ps.get_eastern_map_chest_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("eastern_big_key_room_tag", ps.get_eastern_big_key_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("eastern_entrance_room_tag", ps.EASTERN_ENTRANCE_ROOM_TAG_CHOICES, ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("ice_palace_hidden_chest_room_tag", ps.get_ice_palace_hidden_chest_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("misery_mire_bridge_chest_tag_2", ps.get_misery_mire_bridge_chest_tag_2_choices(world),
+             ps.TAG_SE_MOVE_BLOCK_TO_OPEN),
+            ("misery_mire_spike_chest_room_tag", ps.get_misery_mire_spike_chest_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("eastern_dark_square_room_tag", ps.get_eastern_dark_square_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("thieves_town_conveyor_toilet_tag", ps.get_thieves_town_conveyor_toilet_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("ice_palace_block_puzzle_tag", ps.get_ice_palace_block_puzzle_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_HOLD),
+            ("misery_mire_tile_room_tag", ps.get_misery_mire_tile_room_tag_choices(world),
+             ps.TAG_LIGHT_TORCHES_TO_OPEN),
+            ("turtle_rock_torch_puzzle_tag", ps.get_turtle_rock_torch_puzzle_tag_choices(world),
+             ps.TAG_LIGHT_TORCHES_TO_OPEN),
+            ("ice_palace_hole_to_kholdstare_tag", ps.get_ice_palace_hole_to_kholdstare_tag_choices(world),
+             ps.TAG_PULL_LEVER_TO_OPEN),
+            ("eastern_pre_armos_tag", ps.get_eastern_pre_armos_tag_choices(world), ps.TAG_E_KILL_ENEMY_TO_OPEN),
+            ("eastern_pre_boss_room_tag", ps.EASTERN_PRE_BOSS_ROOM_TAG_CHOICES, ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("eastern_switch_room_tag", ps.get_eastern_switch_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("pod_turtle_room_tag", ps.get_pod_turtle_room_tag_choices(world), ps.TAG_SW_KILL_ENEMY_TO_OPEN),
+            ("pod_stalfos_trap_room_tag", ps.get_pod_stalfos_trap_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("pod_mimics_moving_wall_room_tag", ps.get_pod_mimics_moving_wall_tag_choices(world),
+             ps.TAG_SW_KILL_ENEMY_TO_OPEN),
+            ("ice_palace_pengator_big_key_room_tag", ps.get_ice_palace_pengator_big_key_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("turtle_rock_big_chest_room_tag", ps.get_turtle_rock_big_chest_room_tag_choices(world),
+             ps.TAG_NW_KILL_ENEMY_TO_OPEN),
+            ("swamp_statue_room_tag", ps.get_swamp_statue_room_tag_choices(world), ps.TAG_SWITCH_OPENS_DOOR_HOLD),
+            ("pod_map_chest_room_tag", ps.get_pod_map_chest_room_tag_choices(world), ps.TAG_SWITCH_OPENS_DOOR_HOLD),
+            ("hera_hardhat_beetles_room_tag_2", ps.get_hera_hardhat_beetles_room_tag_2_choices(world),
+             ps.TAG_SE_KILL_ENEMY_TO_OPEN),
+            ("ice_palace_conveyor_hellway_tag", ps.get_ice_palace_conveyor_hellway_tag_choices(world),
+             ps.TAG_NE_KILL_ENEMY_TO_OPEN),
+            ("ice_palace_map_room_tag", ps.get_ice_palace_map_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("thieves_town_jail_cells_tag", ps.get_thieves_town_jail_cells_tag_choices(world),
+             ps.TAG_NW_KILL_ENEMY_TO_OPEN),
+            ("skull_woods_gibdo_torch_room_tag", ps.get_skull_woods_gibdo_torch_tag_choices(world),
+             ps.TAG_LIGHT_TORCHES_TO_OPEN),
+            ("pod_south_mimics_room_tag", ps.get_pod_south_mimics_tag_choices(world),
+             ps.TAG_NW_KILL_ENEMY_TO_OPEN),
+            ("ice_palace_bomb_jump_room_tag", ps.get_ice_palace_bomb_jump_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("ice_palace_bomb_jump_room_tag_2", (ps.TAG_NOTHING, ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+             ps.TAG_NOTHING),
+            ("skull_woods_big_key_room_tag", ps.get_skull_woods_big_key_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_HOLD),
+            ("ice_palace_spike_room_tag", ps.get_ice_palace_spike_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("thieves_town_west_attic_room_tag", ps.get_thieves_town_west_attic_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("misery_mire_main_lobby_room_tag", ps.get_misery_mire_main_lobby_room_tag_choices(world),
+             ps.TAG_TRIGGER_ACTIVATED_CHEST),
+            ("gt_spike_pit_room_tag", ps.get_gt_spike_pit_room_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("gt_winder_warp_maze_tag_1", ps.get_gt_winder_warp_maze_tag_1_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+            ("gt_winder_warp_maze_tag_2", ps.get_gt_winder_warp_maze_tag_2_choices(world),
+             ps.TAG_MOVE_BLOCK_TO_GET_CHEST),
+            ("desert_west_entrance_tag", ps.get_desert_west_entrance_tag_choices(world),
+             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+        )
+        variant_choice_groups = (
+            ("hyrule_castle_switch_room_variant", ps.get_hyrule_castle_switch_room_variants(world),
+             ps.ROOM_VARIANT_VANILLA),
+            ("turtle_rock_crystaroller_room_variant", ps.get_turtle_rock_crystaroller_variants(world),
+             ps.ROOM_VARIANT_VANILLA),
+            ("ice_palace_bomb_floor_room_variant", ps.get_ice_palace_bomb_floor_room_variants(world),
+             ps.ROOM_VARIANT_VANILLA),
+            ("gt_gauntlet_123_room_variant", ps.get_gt_gauntlet_123_variants(world), ps.ROOM_VARIANT_VANILLA),
+            ("gt_mimics_room_variant", ps.get_gt_mimics_variants(world), ps.ROOM_VARIANT_VANILLA),
+            ("gt_gauntlet_45_room_variant", ps.get_gt_gauntlet_45_variants(world), ps.ROOM_VARIANT_VANILLA),
+            ("swamp_floodway_room_variant", ps.SWAMP_FLOODWAY_VARIANTS, ps.ROOM_VARIANT_VANILLA),
+        )
+
+        for name, choices, vanilla_choice in tag_choice_groups + variant_choice_groups:
+            with self.subTest(name=name):
+                self.assertIn(vanilla_choice, choices, f"{name} does not include its vanilla result")
+
+        self.assertEqual(
+            ps._get_gt_gauntlet_123_tags(ps.ROOM_VARIANT_VANILLA),
+            (ps.TAG_CLEAR_QUADRANT_TO_OPEN, ps.TAG_NOTHING),
+        )
+        self.assertEqual(
+            ps._get_gt_mimics_tags(ps.ROOM_VARIANT_VANILLA),
+            (ps.TAG_S_KILL_ENEMY_TO_OPEN, ps.TAG_NW_MOVE_BLOCK_TO_OPEN),
+        )
+        self.assertEqual(
+            ps._get_gt_gauntlet_45_tags(ps.ROOM_VARIANT_VANILLA),
+            (ps.TAG_W_KILL_ENEMY_TO_OPEN, ps.TAG_NOTHING),
+        )
+        # Skull Woods Big Chest tag 2 intentionally forces the non-vanilla switch-bomb-wall result
+        # when both the switch pot and trap sprite candidates are available.
+
     def test_cane_puzzle_dungeon_selection_picks_two_or_three_candidate_dungeons(self) -> None:
         for seed in range(20):
             selected = _choose_cane_puzzle_dungeons(SimpleNamespace(random=random.Random(seed)))
