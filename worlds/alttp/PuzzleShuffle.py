@@ -260,6 +260,8 @@ GT_TILE_TORCH_PUZZLE_TAG_CHOICES = (
 )
 GT_TILE_TORCH_PUZZLE_PUSH_BLOCK_SOURCE = (0x37, 0x15)
 GT_TILE_TORCH_PUZZLE_EAST_SWITCH_POTS = frozenset(((204, 11), (204, 14)))
+GT_BIG_CHEST_PUSH_BLOCK_SOURCE = (0x0A, 0x28)
+GT_BIG_CHEST_PUSH_BLOCK_TARGETS = (None, (0x08, 0x2A))
 MISERY_MIRE_DARK_CANE_ROOM_VANILLA_SWITCH_POT = (28, 7)
 MISERY_MIRE_DARK_CANE_ROOM_TOGGLE_SWITCH_POTS = frozenset((
     MISERY_MIRE_DARK_CANE_ROOM_VANILLA_SWITCH_POT,
@@ -311,6 +313,26 @@ SWAMP_HIDDEN_DOOR_PUSH_BLOCK_SOURCE = (30, 48)
 SWAMP_HIDDEN_DOOR_PUSH_BLOCK_TARGETS = ((18, 48), (24, 48), (38, 48), (44, 48), (50, 48))
 GT_MIMICS_PUSH_BLOCK_SOURCE = (6, 12)
 GT_MIMICS_PUSH_BLOCK_TARGETS = ((6, 20),)
+GT_INVISIBLE_FLOOR_BA_ADDRESS = 0xFF663
+GT_INVISIBLE_FLOOR_BA_X_TARGETS = ((0x26, 0x28), (0x28, 0x28))
+GT_INVISIBLE_FLOOR_BA_Y_TARGETS = tuple((0x22, y) for y in range(0x1E, 0x2A, 2))
+GT_INVISIBLE_FLOOR_TOP_OBJECT_ADDRESS = 0xFF66F
+GT_INVISIBLE_FLOOR_LEFT_OBJECT_ADDRESS = 0xFF65A
+GT_INVISIBLE_FLOOR_TOP_TARGET = (0x28, 0x1C)
+GT_INVISIBLE_FLOOR_LEFT_TARGET = (0x1E, 0x24)
+GT_BIG_CHEST_BOMB_FLOOR_OBJECTS = (
+    (0xFF34D, (0x34, 0x36)),
+    (0xFF3B0, (0x28, 0x28)),
+    (0xFF3B3, (0x34, 0x28)),
+    (0xFF3B6, (0x28, 0x36)),
+)
+GT_RANDOMIZER_ROOM_BARRIER_ADDRESS = 0xFF0D1
+GT_RANDOMIZER_ROOM_FLOOR_ADDRESS = 0xFF0E3
+GT_RANDOMIZER_ROOM_FLOOR_TARGETS = tuple(
+    (x, y)
+    for y in (0x2A, 0x2C, 0x2E, 0x30, 0x32, 0x34, 0x36)
+    for x in ((0x2A, 0x2E, 0x32) if y in (0x2A, 0x2E, 0x32, 0x36) else (0x28, 0x2C, 0x30, 0x34))
+)
 TURTLE_ROCK_CHAIN_CHOMPS_PUSH_BLOCK_SOURCES = ((11, 21), (19, 21))
 TURTLE_ROCK_CHAIN_CHOMPS_PUSH_BLOCK_TARGETS = ((19, 23),)
 CHECKERBOARD_CAVE_REGULAR_BLOCK_POSITION = (54, 46)
@@ -371,6 +393,7 @@ ROOM_OBJECT_RECORD_ADDRESSES = {
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (38, 48), 0x5E, 2): 0xF9FAE,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (44, 48), 0x5E, 2): 0xF9FB1,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (50, 48), 0x5E, 2): 0xF9FB4,
+    (GT_BIG_CHEST_ROOM_ID, (8, 42), 0x5E, 1): 0xFF386,
     (GT_MIMICS_ROOM_ID, GT_MIMICS_PUSH_BLOCK_SOURCE, 0xB8, 1): 0xFF7B8,
     (GT_MIMICS_ROOM_ID, (6, 20), 0x5E, 1): 0xFF7E5,
     (TURTLE_ROCK_CHAIN_CHOMPS_ROOM_ID, (3, 21), 0xB8, 1): 0xFDD08,
@@ -388,6 +411,7 @@ ROOM_OBJECT_RECORD_SUBTYPES = {
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (38, 48), 0x5E, 2): 0,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (44, 48), 0x5E, 2): 0,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (50, 48), 0x5E, 2): 0,
+    (GT_BIG_CHEST_ROOM_ID, (8, 42), 0x5E, 1): 0,
     (GT_MIMICS_ROOM_ID, (6, 20), 0x5E, 1): 0,
     (TURTLE_ROCK_CHAIN_CHOMPS_ROOM_ID, (19, 23), 0x89, 1): 0,
     (CHECKERBOARD_CAVE_ROOM_ID, CHECKERBOARD_CAVE_REGULAR_BLOCK_POSITION, 0x5E, 1): 0,
@@ -395,6 +419,7 @@ ROOM_OBJECT_RECORD_SUBTYPES = {
 JP_PUSH_BLOCK_RECORDS = {
     (POD_TURTLE_ROOM_ID, POD_TURTLE_ROOM_PUSH_BLOCK_SOURCE): (0x26F72, 0x4000),
     (SWAMP_HIDDEN_DOOR_ROOM_ID, SWAMP_HIDDEN_DOOR_PUSH_BLOCK_SOURCE): (0x26EF6, 0x2000),
+    (GT_BIG_CHEST_ROOM_ID, GT_BIG_CHEST_PUSH_BLOCK_SOURCE): (0x26FCA, 0x4000),
     (GT_MIMICS_ROOM_ID, GT_MIMICS_PUSH_BLOCK_SOURCE): (0x26FC2, 0x0000),
     (GT_TILE_TORCH_PUZZLE_ROOM_ID, GT_TILE_TORCH_PUZZLE_PUSH_BLOCK_SOURCE): (0x26F6A, 0x0000),
     (DESERT_WEST_ENTRANCE_ROOM_ID, DESERT_WEST_ENTRANCE_PUSH_BLOCK_SOURCE): (0x26ECE, 0x0000),
@@ -496,6 +521,12 @@ class PuzzleShuffleState:
     gt_mimics_room_northwest_switch_pot: tuple[int, int] | None = None
     gt_mimics_room_southeast_switch_pot: tuple[int, int] | None = None
     gt_mimics_push_block_target: tuple[int, int] | None = None
+    gt_invisible_floor_ba_target: tuple[int, int] = (0x22, 0x28)
+    gt_invisible_floor_top_target: tuple[int, int] | None = None
+    gt_invisible_floor_left_target: tuple[int, int] | None = None
+    gt_big_chest_bomb_floor_position: tuple[int, int] = (0x34, 0x36)
+    gt_big_chest_push_block_target: tuple[int, int] | None = None
+    gt_randomizer_room_floor_target: tuple[int, int] = (0x28, 0x2C)
     gt_gauntlet_45_room_variant: int = ROOM_VARIANT_VANILLA
     gt_gauntlet_45_room_switch_pot: tuple[int, int] | None = None
     gt_winder_warp_maze_tag_1: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
@@ -1011,6 +1042,20 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             GT_MIMICS_SOUTHEAST_SWITCH_POTS,
         ) if gt_mimics_room_variant == 4 else None,
         gt_mimics_push_block_target=choice(GT_MIMICS_PUSH_BLOCK_TARGETS),
+        gt_invisible_floor_ba_target=world.random.choice(
+            GT_INVISIBLE_FLOOR_BA_X_TARGETS
+            if world.random.choice((False, True))
+            else GT_INVISIBLE_FLOOR_BA_Y_TARGETS
+        ),
+        gt_invisible_floor_top_target=GT_INVISIBLE_FLOOR_TOP_TARGET
+        if world.random.choice((False, True)) else None,
+        gt_invisible_floor_left_target=GT_INVISIBLE_FLOOR_LEFT_TARGET
+        if world.random.choice((False, True)) else None,
+        gt_big_chest_bomb_floor_position=world.random.choice(
+            tuple(position for _, position in GT_BIG_CHEST_BOMB_FLOOR_OBJECTS)
+        ),
+        gt_big_chest_push_block_target=world.random.choice(GT_BIG_CHEST_PUSH_BLOCK_TARGETS),
+        gt_randomizer_room_floor_target=world.random.choice(GT_RANDOMIZER_ROOM_FLOOR_TARGETS),
         gt_gauntlet_45_room_variant=gt_gauntlet_45_room_variant,
         gt_gauntlet_45_room_switch_pot=_choose_switch_pot(
             world,
@@ -1137,6 +1182,12 @@ def encode_puzzle_shuffle(state: PuzzleShuffleState | None) -> dict[str, int] | 
         "gt_mimics_room_northwest_switch_pot": state.gt_mimics_room_northwest_switch_pot,
         "gt_mimics_room_southeast_switch_pot": state.gt_mimics_room_southeast_switch_pot,
         "gt_mimics_push_block_target": state.gt_mimics_push_block_target,
+        "gt_invisible_floor_ba_target": state.gt_invisible_floor_ba_target,
+        "gt_invisible_floor_top_target": state.gt_invisible_floor_top_target,
+        "gt_invisible_floor_left_target": state.gt_invisible_floor_left_target,
+        "gt_big_chest_bomb_floor_position": state.gt_big_chest_bomb_floor_position,
+        "gt_big_chest_push_block_target": state.gt_big_chest_push_block_target,
+        "gt_randomizer_room_floor_target": state.gt_randomizer_room_floor_target,
         "gt_gauntlet_45_room_variant": state.gt_gauntlet_45_room_variant,
         "gt_gauntlet_45_room_switch_pot": state.gt_gauntlet_45_room_switch_pot,
         "gt_winder_warp_maze_tag_1": state.gt_winder_warp_maze_tag_1,
@@ -1257,6 +1308,16 @@ def decode_puzzle_shuffle(data: dict[str, int] | None) -> PuzzleShuffleState | N
         gt_mimics_room_northwest_switch_pot=_decode_position(data.get("gt_mimics_room_northwest_switch_pot")),
         gt_mimics_room_southeast_switch_pot=_decode_position(data.get("gt_mimics_room_southeast_switch_pot")),
         gt_mimics_push_block_target=_decode_position(data.get("gt_mimics_push_block_target")),
+        gt_invisible_floor_ba_target=_decode_position(data.get("gt_invisible_floor_ba_target")) or (0x22, 0x28),
+        gt_invisible_floor_top_target=_decode_position(data.get("gt_invisible_floor_top_target")),
+        gt_invisible_floor_left_target=_decode_position(data.get("gt_invisible_floor_left_target")),
+        gt_big_chest_bomb_floor_position=(
+            _decode_position(data.get("gt_big_chest_bomb_floor_position")) or (0x34, 0x36)
+        ),
+        gt_big_chest_push_block_target=_decode_position(data.get("gt_big_chest_push_block_target")),
+        gt_randomizer_room_floor_target=(
+            _decode_position(data.get("gt_randomizer_room_floor_target")) or (0x28, 0x2C)
+        ),
         gt_gauntlet_45_room_variant=int(data.get("gt_gauntlet_45_room_variant", ROOM_VARIANT_VANILLA)),
         gt_gauntlet_45_room_switch_pot=_decode_position(data.get("gt_gauntlet_45_room_switch_pot")),
         gt_winder_warp_maze_tag_1=int(data.get("gt_winder_warp_maze_tag_1", TAG_SWITCH_OPENS_DOOR_TOGGLE)),
@@ -2106,6 +2167,13 @@ def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> Non
         state.gt_mimics_push_block_target,
         0x5E,
     )
+    _write_push_block_swap(
+        rom,
+        GT_BIG_CHEST_ROOM_ID,
+        GT_BIG_CHEST_PUSH_BLOCK_SOURCE,
+        state.gt_big_chest_push_block_target,
+        0x5E,
+    )
     if state.gt_tile_torch_puzzle_tag == TAG_E_MOVE_BLOCK_TO_OPEN:
         _write_push_block_position(rom, GT_TILE_TORCH_PUZZLE_ROOM_ID, GT_TILE_TORCH_PUZZLE_PUSH_BLOCK_SOURCE)
     _write_push_block_swap(
@@ -2129,6 +2197,7 @@ def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> Non
         CHECKERBOARD_CAVE_REGULAR_BLOCK_POSITION,
         0x5E,
     )
+    _write_randomized_floor_objects(rom, state)
 
 
 def _write_push_block_swap(
@@ -2156,6 +2225,31 @@ def _write_push_block_swap(
 def _write_push_block_position(rom: "TokenRom", room_id: int, position: tuple[int, int]) -> None:
     push_block_address, preserved_flags = JP_PUSH_BLOCK_RECORDS[(room_id, position)]
     rom.write_bytes(push_block_address + 2, _encode_push_block_position(position, preserved_flags))
+
+
+def _write_randomized_floor_objects(rom: "TokenRom", state: PuzzleShuffleState) -> None:
+    _write_room_object_record(rom, GT_INVISIBLE_FLOOR_BA_ADDRESS, state.gt_invisible_floor_ba_target, 0xBA, 1)
+    if state.gt_invisible_floor_top_target is not None:
+        _write_room_object_record(rom, GT_INVISIBLE_FLOOR_TOP_OBJECT_ADDRESS, state.gt_invisible_floor_top_target, 0x94, 0)
+    if state.gt_invisible_floor_left_target is not None:
+        _write_room_object_record(rom, GT_INVISIBLE_FLOOR_LEFT_OBJECT_ADDRESS, state.gt_invisible_floor_left_target, 0x94, 2)
+
+    for address, position in GT_BIG_CHEST_BOMB_FLOOR_OBJECTS:
+        subtype = 7 if position == state.gt_big_chest_bomb_floor_position else 8
+        _write_room_object_record(rom, address, position, 0xFC, subtype)
+
+    _write_room_object_record(rom, GT_RANDOMIZER_ROOM_BARRIER_ADDRESS, (0x28, 0x2C), 0xBB, 3)
+    _write_room_object_record(rom, GT_RANDOMIZER_ROOM_FLOOR_ADDRESS, state.gt_randomizer_room_floor_target, 0xFD, 0)
+
+
+def _write_room_object_record(
+    rom: "TokenRom",
+    address: int,
+    position: tuple[int, int],
+    object_id: int,
+    subtype: int,
+) -> None:
+    rom.write_bytes(address, _encode_room_object_position(position, object_id, subtype))
 
 
 def _write_room_object_position(
