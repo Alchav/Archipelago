@@ -508,6 +508,7 @@ def apply_random_sprite_on_event(rom: TokenRom | AdjusterRom, sprite, local_rand
                         logging.info(f"Sprite {spritename} was not found.")
             else:
                 sprites = list(set(_sprite_table.values()))  # convert to list and remove dupes
+                sprites.sort(key=lambda x: x.name)
         else:
             sprites.append(sprite)
         if sprites:
