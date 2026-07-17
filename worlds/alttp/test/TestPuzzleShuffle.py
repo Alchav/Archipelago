@@ -381,6 +381,52 @@ class TestPuzzleShuffle(unittest.TestCase):
         # Skull Woods Big Chest tag 2 intentionally forces the non-vanilla switch-bomb-wall result
         # when both the switch pot and trap sprite candidates are available.
 
+    def test_ice_palace_many_pots_can_use_static_enemy_kill_tag(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=False),
+            enemy_shuffle_state=None,
+            pot_shuffle_state=None,
+        )
+
+        self.assertIn(
+            PuzzleShuffleModule.TAG_W_KILL_ENEMY_FOR_CHEST,
+            PuzzleShuffleModule.get_ice_palace_map_room_tag_choices(world),
+        )
+
+    def test_hera_hardhat_room_does_not_offer_switch_without_switch_pot(self) -> None:
+        world = SimpleNamespace(
+            options=SimpleNamespace(enemy_shuffle=False),
+            enemy_shuffle_state=None,
+            pot_shuffle_state={PuzzleShuffleModule.HERA_HARDHAT_BEETLES_ROOM_ID: tuple()},
+        )
+
+        choices = PuzzleShuffleModule.get_hera_hardhat_beetles_room_tag_2_choices(world)
+
+        self.assertEqual(choices, (PuzzleShuffleModule.TAG_SE_KILL_ENEMY_TO_OPEN,))
+
+    def test_skull_woods_gibdo_hold_switch_uses_east_pot(self) -> None:
+        self.assertEqual(
+            PuzzleShuffleModule.SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS,
+            frozenset(((172, 20),)),
+        )
+        self.assertNotIn((104, 15), PuzzleShuffleModule.SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS)
+
+    def test_gt_winder_warp_maze_never_combines_two_switch_tags(self) -> None:
+        for seed in range(100):
+            world = SimpleNamespace(
+                random=random.Random(seed),
+                options=SimpleNamespace(enemy_shuffle=False, retro_bow=False),
+                enemy_shuffle_state=None,
+                pot_shuffle_state=None,
+            )
+
+            state = generate_puzzle_shuffle(world)
+
+            self.assertFalse(
+                state.gt_winder_warp_maze_tag_1 in PuzzleShuffleModule.HERA_SWITCH_TAG_CHOICES
+                and state.gt_winder_warp_maze_tag_2 == PuzzleShuffleModule.TAG_TRIGGER_ACTIVATED_CHEST
+            )
+
     def test_cane_puzzle_dungeon_selection_picks_two_or_three_candidate_dungeons(self) -> None:
         for seed in range(20):
             selected = _choose_cane_puzzle_dungeons(SimpleNamespace(random=random.Random(seed)))
@@ -600,7 +646,7 @@ class TestPuzzleShuffle(unittest.TestCase):
             state = generate_puzzle_shuffle(world)
 
             if state.skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
-                self.assertEqual((104, 15), state.skull_woods_gibdo_torch_room_switch_pot)
+                self.assertEqual((172, 20), state.skull_woods_gibdo_torch_room_switch_pot)
             elif state.skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_TOGGLE:
                 self.assertIn(state.skull_woods_gibdo_torch_room_switch_pot, ((144, 19), (172, 20)))
 
@@ -1075,13 +1121,13 @@ class TestPuzzleShuffle(unittest.TestCase):
             ),
         )
 
-    def test_ice_palace_map_room_kill_chest_tag_requires_shuffled_killable_enemy(self) -> None:
+    def test_ice_palace_map_room_kill_chest_tag_can_use_static_enemies(self) -> None:
         world = SimpleNamespace(
             options=SimpleNamespace(enemy_shuffle=False),
             enemy_shuffle_state=None,
         )
 
-        self.assertEqual(get_ice_palace_map_room_tag_choices(world), (TAG_TRIGGER_ACTIVATED_CHEST,))
+        self.assertIn(PuzzleShuffleModule.TAG_W_KILL_ENEMY_FOR_CHEST, get_ice_palace_map_room_tag_choices(world))
 
     def test_pod_mimics_moving_wall_switch_tag_adds_pot_switch(self) -> None:
         state = {
