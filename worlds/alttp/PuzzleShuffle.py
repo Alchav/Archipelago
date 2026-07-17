@@ -258,6 +258,7 @@ GT_TILE_TORCH_PUZZLE_TAG_CHOICES = (
     TAG_LIGHT_TORCHES_TO_OPEN,
     TAG_E_MOVE_BLOCK_TO_OPEN,
 )
+GT_TILE_TORCH_PUZZLE_PUSH_BLOCK_SOURCE = (0x37, 0x15)
 GT_TILE_TORCH_PUZZLE_EAST_SWITCH_POTS = frozenset(((204, 11), (204, 14)))
 MISERY_MIRE_DARK_CANE_ROOM_VANILLA_SWITCH_POT = (28, 7)
 MISERY_MIRE_DARK_CANE_ROOM_TOGGLE_SWITCH_POTS = frozenset((
@@ -395,6 +396,7 @@ JP_PUSH_BLOCK_RECORDS = {
     (POD_TURTLE_ROOM_ID, POD_TURTLE_ROOM_PUSH_BLOCK_SOURCE): (0x26F72, 0x4000),
     (SWAMP_HIDDEN_DOOR_ROOM_ID, SWAMP_HIDDEN_DOOR_PUSH_BLOCK_SOURCE): (0x26EF6, 0x2000),
     (GT_MIMICS_ROOM_ID, GT_MIMICS_PUSH_BLOCK_SOURCE): (0x26FC2, 0x0000),
+    (GT_TILE_TORCH_PUZZLE_ROOM_ID, GT_TILE_TORCH_PUZZLE_PUSH_BLOCK_SOURCE): (0x26F6A, 0x0000),
     (DESERT_WEST_ENTRANCE_ROOM_ID, DESERT_WEST_ENTRANCE_PUSH_BLOCK_SOURCE): (0x26ECE, 0x0000),
     (TURTLE_ROCK_CHAIN_CHOMPS_ROOM_ID, (11, 21)): (0x26FBA, 0x0000),
     (TURTLE_ROCK_CHAIN_CHOMPS_ROOM_ID, (19, 21)): (0x26FCE, 0x0000),
@@ -2104,6 +2106,8 @@ def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> Non
         state.gt_mimics_push_block_target,
         0x5E,
     )
+    if state.gt_tile_torch_puzzle_tag == TAG_E_MOVE_BLOCK_TO_OPEN:
+        _write_push_block_position(rom, GT_TILE_TORCH_PUZZLE_ROOM_ID, GT_TILE_TORCH_PUZZLE_PUSH_BLOCK_SOURCE)
     _write_push_block_swap(
         rom,
         DESERT_WEST_ENTRANCE_ROOM_ID,
@@ -2147,6 +2151,11 @@ def _write_push_block_swap(
         layer,
         source_position,
     )
+
+
+def _write_push_block_position(rom: "TokenRom", room_id: int, position: tuple[int, int]) -> None:
+    push_block_address, preserved_flags = JP_PUSH_BLOCK_RECORDS[(room_id, position)]
+    rom.write_bytes(push_block_address + 2, _encode_push_block_position(position, preserved_flags))
 
 
 def _write_room_object_position(
