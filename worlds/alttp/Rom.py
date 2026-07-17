@@ -970,6 +970,8 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
             location_address = old_location_address_to_new_location_address.get(location.address, location.address)
             rom.write_byte(location_address, itemid)
 
+    rom.write_byte(0x18018F, 0x01 if local_world.options.wallmasters_stay_dead else 0x00)
+
     rom.write_byte(0x18018E, 0x01 if local_world.options.boss_prize_shuffle else 0x00)
     if local_world.options.boss_prize_shuffle:
         rom.token_patch.add_boss_prize_crystal_sprite_patch()

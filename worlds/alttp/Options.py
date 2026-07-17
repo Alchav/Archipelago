@@ -653,6 +653,11 @@ class KillableThieves(Toggle):
     display_name = "Killable Thieves"
 
 
+class WallmastersStayDead(Toggle):
+    """After killing a Wallmaster, no more Wallmasters spawn in that room visit."""
+    display_name = "Wallmasters Stay Dead"
+
+
 class BushShuffle(Toggle):
     """Randomize chance that a bush contains an enemy as well as which enemy may spawn."""
     display_name = "Bush Shuffle"
@@ -857,6 +862,7 @@ class ALTTPOptions(PerGameCommonOptions):
     pot_shuffle: PotShuffle
     enemy_shuffle: EnemyShuffle
     killable_thieves: KillableThieves
+    wallmasters_stay_dead: WallmastersStayDead
     bush_shuffle: BushShuffle
     shop_item_slots: ShopItemSlots
     randomize_shop_inventories: RandomizeShopInventories
