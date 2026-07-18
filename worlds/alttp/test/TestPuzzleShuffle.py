@@ -33,6 +33,7 @@ from worlds.alttp.PuzzleShuffle import (
     DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID,
     DESERT_MAP_CHEST_ROOM_ID,
     PuzzleShuffleState,
+    PUZZLE_SHUFFLE_LOGIC_FIELDS,
     ROOM_VARIANT_HOLD_SWITCH,
     ROOM_VARIANT_TOGGLE_SWITCH,
     TURTLE_ROCK_PEG_ORDER_ADDRESS,
@@ -684,7 +685,7 @@ class TestPuzzleShuffle(unittest.TestCase):
                 DESERT_FINAL_SECTION_ENTRANCE_BASE_TAG_CHOICES,
             )
 
-    def test_puzzle_shuffle_state_round_trips(self) -> None:
+    def test_puzzle_shuffle_slot_data_round_trips_logic_fields_only(self) -> None:
         state = PuzzleShuffleState(
             desert_map_chest_tag=TAG_LIGHT_TORCHES_TO_GET_CHEST,
             desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_HOLD,
@@ -696,8 +697,17 @@ class TestPuzzleShuffle(unittest.TestCase):
             eastern_pre_armos_southeast_switch_pot=(92, 24),
             turtle_rock_peg_order=(0x081A, 0x0826, 0x05A0),
         )
+        encoded = encode_puzzle_shuffle(state)
+        decoded = decode_puzzle_shuffle(encoded)
 
-        self.assertEqual(decode_puzzle_shuffle(encode_puzzle_shuffle(state)), state)
+        self.assertEqual(set(encoded), set(PUZZLE_SHUFFLE_LOGIC_FIELDS))
+        for field_name in PUZZLE_SHUFFLE_LOGIC_FIELDS:
+            with self.subTest(field_name=field_name):
+                self.assertEqual(getattr(decoded, field_name), getattr(state, field_name))
+        self.assertNotIn("hera_big_key_chest_switch_pot", encoded)
+        self.assertNotIn("turtle_rock_peg_order", encoded)
+        self.assertIsNone(decoded.hera_big_key_chest_switch_pot)
+        self.assertEqual(decoded.turtle_rock_peg_order, TURTLE_ROCK_VANILLA_PEG_ORDER)
 
     def test_turtle_rock_peg_order_hint_names_pegs_in_order(self) -> None:
         state = PuzzleShuffleState(
