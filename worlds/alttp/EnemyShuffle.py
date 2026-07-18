@@ -1879,6 +1879,18 @@ def _get_requirement_for_sprite_id(
     return None
 
 
+def _get_room_requirements_for_sprite_id(
+    state: EnemyShuffleState,
+    room: DungeonEnemyRoom,
+    sprite_id: int,
+) -> tuple[EnemySpriteRequirement, ...]:
+    return tuple(
+        requirement for requirement in state.sprite_requirements
+        if requirement.sprite_id == sprite_id
+        and can_spawn_in_room(requirement, room)
+    )
+
+
 def _get_combat_reference_id(requirement: EnemySpriteRequirement, combat_model: EnemyCombatModel) -> Optional[int]:
     combat_reference_id = requirement.combat_reference_id
     if combat_reference_id is None:
@@ -2573,10 +2585,11 @@ def _validate_dungeon_room_sprite_graphics(
     selected_group: DungeonSpriteGroup,
 ) -> None:
     for address, sprite_id in _get_final_room_sprite_ids(room, randomized_room):
-        requirement = _get_requirement_for_sprite_id(state, sprite_id)
-        if requirement is None:
+        requirements = _get_room_requirements_for_sprite_id(state, room, sprite_id)
+        if not requirements:
             continue
-        if not _dungeon_sprite_group_supports_requirement(selected_group, requirement):
+        if not any(_dungeon_sprite_group_supports_requirement(selected_group, requirement) for requirement in requirements):
+            requirement = requirements[0]
             raise ValueError(
                 "Enemy shuffle produced bad graphics in room "
                 f"{room.room_id}: {requirement.sprite_name} ({sprite_id:#04x}) "

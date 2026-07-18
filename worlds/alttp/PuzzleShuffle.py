@@ -231,7 +231,10 @@ ICE_PALACE_HOLE_TO_KHOLDSTARE_PULL_SWITCH_MOVED_X = 0x13
 SKULL_WOODS_BIG_CHEST_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS = 0x4E018
 SKULL_WOODS_BIG_CHEST_PULL_SWITCH_GOOD_SPRITE_ADDRESS = SKULL_WOODS_BIG_CHEST_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS - 2
 SKULL_WOODS_BIG_CHEST_ROPE_TRAP_COMPATIBLE_SUBGROUP_2 = frozenset((28, 36))
-SKULL_WOODS_BIG_CHEST_ROPE_TRAP_RECORD_BYTES = (0x0C, 0xE8, 0x06)
+SKULL_WOODS_BIG_CHEST_TRAP_RECORD_Y = 0x0C
+SKULL_WOODS_BIG_CHEST_TRAP_RECORD_X = 0xE8
+SKULL_WOODS_BIG_CHEST_ROPE_TRAP_ID = 0x06
+SKULL_WOODS_BIG_CHEST_BOMB_TRAP_ID = 0x1A
 THIEVES_TOWN_WEST_ATTIC_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4E0EA
 DESERT_BIG_CHEST_BASE_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
@@ -509,7 +512,8 @@ class PuzzleShuffleState:
     skull_woods_big_key_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
     skull_woods_big_chest_room_tag_2: int = TAG_USE_LEVER_TO_BOMB_WALL
     skull_woods_big_chest_room_switch_pot: tuple[int, int] | None = None
-    skull_woods_big_chest_rope_trap_sprite_address: int | None = None
+    skull_woods_big_chest_trap_sprite_address: int | None = None
+    skull_woods_big_chest_trap_id: int | None = None
     gt_gauntlet_123_room_variant: int = ROOM_VARIANT_VANILLA
     gt_gauntlet_123_room_northwest_switch_pot: tuple[int, int] | None = None
     gt_gauntlet_123_room_southwest_switch_pot: tuple[int, int] | None = None
@@ -668,12 +672,18 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         vanilla_choice=TAG_LIGHT_TORCHES_TO_OPEN,
     )
     skull_woods_big_chest_room_switch_pot = _choose_skull_woods_big_chest_switch_pot(world)
-    skull_woods_big_chest_rope_trap_sprite_address = _choose_skull_woods_big_chest_rope_trap_sprite(world)
+    skull_woods_big_chest_trap_sprite_address = _choose_skull_woods_big_chest_trap_sprite(world)
+    skull_woods_big_chest_trap_id = (
+        SKULL_WOODS_BIG_CHEST_ROPE_TRAP_ID
+        if _skull_woods_big_chest_has_rope_trap_compatible_sprite_group(world)
+        else SKULL_WOODS_BIG_CHEST_BOMB_TRAP_ID
+    )
     skull_woods_big_chest_room_tag_2 = (
         TAG_USE_SWITCH_TO_BOMB_WALL
         if (
             skull_woods_big_chest_room_switch_pot is not None
-            and skull_woods_big_chest_rope_trap_sprite_address is not None
+            and skull_woods_big_chest_trap_sprite_address is not None
+            and world.random.choice((False, True))
         )
         else TAG_USE_LEVER_TO_BOMB_WALL
     )
@@ -1000,7 +1010,9 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         skull_woods_big_chest_room_tag_2=skull_woods_big_chest_room_tag_2,
         skull_woods_big_chest_room_switch_pot=skull_woods_big_chest_room_switch_pot
         if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL else None,
-        skull_woods_big_chest_rope_trap_sprite_address=skull_woods_big_chest_rope_trap_sprite_address
+        skull_woods_big_chest_trap_sprite_address=skull_woods_big_chest_trap_sprite_address
+        if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL else None,
+        skull_woods_big_chest_trap_id=skull_woods_big_chest_trap_id
         if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL else None,
         gt_gauntlet_123_room_variant=gt_gauntlet_123_room_variant,
         gt_gauntlet_123_room_northwest_switch_pot=_choose_switch_pot(
@@ -1170,7 +1182,8 @@ def encode_puzzle_shuffle(state: PuzzleShuffleState | None) -> dict[str, int] | 
         "skull_woods_big_key_room_tag": state.skull_woods_big_key_room_tag,
         "skull_woods_big_chest_room_tag_2": state.skull_woods_big_chest_room_tag_2,
         "skull_woods_big_chest_room_switch_pot": state.skull_woods_big_chest_room_switch_pot,
-        "skull_woods_big_chest_rope_trap_sprite_address": state.skull_woods_big_chest_rope_trap_sprite_address,
+        "skull_woods_big_chest_trap_sprite_address": state.skull_woods_big_chest_trap_sprite_address,
+        "skull_woods_big_chest_trap_id": state.skull_woods_big_chest_trap_id,
         "gt_gauntlet_123_room_variant": state.gt_gauntlet_123_room_variant,
         "gt_gauntlet_123_room_northwest_switch_pot": state.gt_gauntlet_123_room_northwest_switch_pot,
         "gt_gauntlet_123_room_southwest_switch_pot": state.gt_gauntlet_123_room_southwest_switch_pot,
@@ -1291,8 +1304,16 @@ def decode_puzzle_shuffle(data: dict[str, int] | None) -> PuzzleShuffleState | N
         skull_woods_big_key_room_tag=int(data.get("skull_woods_big_key_room_tag", TAG_SWITCH_OPENS_DOOR_HOLD)),
         skull_woods_big_chest_room_tag_2=int(data.get("skull_woods_big_chest_room_tag_2", TAG_USE_LEVER_TO_BOMB_WALL)),
         skull_woods_big_chest_room_switch_pot=_decode_position(data.get("skull_woods_big_chest_room_switch_pot")),
-        skull_woods_big_chest_rope_trap_sprite_address=(
-            int(data["skull_woods_big_chest_rope_trap_sprite_address"])
+        skull_woods_big_chest_trap_sprite_address=(
+            int(data["skull_woods_big_chest_trap_sprite_address"])
+            if data.get("skull_woods_big_chest_trap_sprite_address") is not None
+            else int(data["skull_woods_big_chest_rope_trap_sprite_address"])
+            if data.get("skull_woods_big_chest_rope_trap_sprite_address") is not None else None
+        ),
+        skull_woods_big_chest_trap_id=(
+            int(data["skull_woods_big_chest_trap_id"])
+            if data.get("skull_woods_big_chest_trap_id") is not None
+            else SKULL_WOODS_BIG_CHEST_ROPE_TRAP_ID
             if data.get("skull_woods_big_chest_rope_trap_sprite_address") is not None else None
         ),
         gt_gauntlet_123_room_variant=int(data.get("gt_gauntlet_123_room_variant", ROOM_VARIANT_VANILLA)),
@@ -2092,10 +2113,14 @@ def apply_puzzle_shuffle(
         rom.write_byte(GT_BIG_CHEST_ROOM_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS, GT_BIG_CHEST_ROOM_PULL_SWITCH_GOOD)
     if state.skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL:
         rom.write_byte(SKULL_WOODS_BIG_CHEST_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS, PULL_SWITCH_TRAP)
-        if state.skull_woods_big_chest_rope_trap_sprite_address is not None:
+        if state.skull_woods_big_chest_trap_sprite_address is not None:
             rom.write_bytes(
-                state.skull_woods_big_chest_rope_trap_sprite_address,
-                SKULL_WOODS_BIG_CHEST_ROPE_TRAP_RECORD_BYTES,
+                state.skull_woods_big_chest_trap_sprite_address,
+                (
+                    SKULL_WOODS_BIG_CHEST_TRAP_RECORD_Y,
+                    SKULL_WOODS_BIG_CHEST_TRAP_RECORD_X,
+                    state.skull_woods_big_chest_trap_id or SKULL_WOODS_BIG_CHEST_ROPE_TRAP_ID,
+                ),
             )
     if state.thieves_town_west_attic_room_tag == TAG_PULL_LEVER_TO_OPEN:
         rom.write_byte(THIEVES_TOWN_WEST_ATTIC_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS, PULL_SWITCH_GOOD)
@@ -2501,8 +2526,6 @@ def _choose_switch_pot_with_item(
 
 
 def _choose_skull_woods_big_chest_switch_pot(world: "ALTTPWorld") -> tuple[int, int] | None:
-    if not _skull_woods_big_chest_has_rope_trap_compatible_sprite_group(world):
-        return None
     return _choose_switch_pot(
         world,
         SKULL_WOODS_BIG_CHEST_ROOM_ID,
@@ -2511,10 +2534,10 @@ def _choose_skull_woods_big_chest_switch_pot(world: "ALTTPWorld") -> tuple[int, 
     )
 
 
-def _choose_skull_woods_big_chest_rope_trap_sprite(world: "ALTTPWorld") -> int | None:
-    if not _skull_woods_big_chest_has_rope_trap_compatible_sprite_group(world):
-        return None
+def _choose_skull_woods_big_chest_trap_sprite(world: "ALTTPWorld") -> int | None:
     enemy_shuffle_state = getattr(world, "enemy_shuffle_state", None)
+    if enemy_shuffle_state is None:
+        return None
     room = enemy_shuffle_state.randomized_dungeon_rooms.get(SKULL_WOODS_BIG_CHEST_ROOM_ID)
     if room is None:
         return None
