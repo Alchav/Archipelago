@@ -1207,6 +1207,15 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_NW_KILL_ENEMY_TO_OPEN
     )
+    pod_entrance_room_tag = (
+        world.puzzle_shuffle_state.pod_entrance_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_SWITCH_OPENS_DOOR_TOGGLE
+    )
+    pod_entrance_statues_swapped = bool(
+        world.puzzle_shuffle_state is not None
+        and world.puzzle_shuffle_state.pod_entrance_statues_swapped
+    )
 
     def can_pass_pod_south_mimics_puzzle(state: CollectionState) -> bool:
         if pod_south_mimics_room_tag == TAG_NW_KILL_ENEMY_TO_OPEN:
@@ -1215,8 +1224,22 @@ def global_rules(multiworld: MultiWorld, player: int):
             return state.has('Cane of Somaria', player)
         return True
 
+    def can_pass_pod_entrance_room_puzzle(state: CollectionState) -> bool:
+        return (
+            pod_entrance_room_tag != TAG_SWITCH_OPENS_DOOR_HOLD
+            or not pod_entrance_statues_swapped
+            or state.has('Cane of Somaria', player)
+        )
+
+    if pod_entrance_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD and not pod_entrance_statues_swapped:
+        add_rule(
+            multiworld.get_location('Palace of Darkness - Shooter Room', player),
+            lambda state: state.has('Cane of Somaria', player),
+        )
+
     set_rule(multiworld.get_entrance('Palace of Darkness Bonk Wall', player),
              lambda state: can_bomb_or_bonk(state, player)
+             and can_pass_pod_entrance_room_puzzle(state)
              and can_pass_pod_south_mimics_puzzle(state))
     set_rule(multiworld.get_entrance('Palace of Darkness Hammer Peg Drop', player), lambda state: state.has('Hammer', player))
     set_rule(multiworld.get_entrance('Palace of Darkness Bridge Room', player), lambda state: state._lttp_has_key('Small Key (Palace of Darkness)', player, 1))  # If we can reach any other small key door, we already have back door access to this area

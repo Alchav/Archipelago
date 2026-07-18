@@ -87,6 +87,7 @@ HERA_HARDHAT_BEETLES_ROOM_ID = 0x31
 ICE_PALACE_CONVEYOR_HELLWAY_ROOM_ID = 0x3E
 ICE_PALACE_MAP_ROOM_ID = 0x3F
 THIEVES_TOWN_JAIL_CELLS_ROOM_ID = 0x45
+POD_ENTRANCE_ROOM_ID = 0x4A
 SKULL_WOODS_GIBDO_TORCH_ROOM_ID = 0x49
 POD_SOUTH_MIMICS_ROOM_ID = 0x4B
 ICE_PALACE_BOMB_JUMP_ROOM_ID = 0x4E
@@ -406,6 +407,16 @@ DESERT_WEST_ENTRANCE_TAG_CHOICES = (
 )
 DESERT_WEST_ENTRANCE_PUSH_BLOCK_SOURCE = (10, 42)
 DESERT_WEST_ENTRANCE_PUSH_BLOCK_TARGETS = ((6, 42),)
+POD_ENTRANCE_ROOM_TAG_CHOICES = (
+    TAG_SWITCH_OPENS_DOOR_TOGGLE,
+    TAG_SWITCH_OPENS_DOOR_HOLD,
+)
+POD_ENTRANCE_MOVABLE_STATUE_SPRITE_X_ADDRESS = 0x4DEE1
+POD_ENTRANCE_MOVABLE_STATUE_VANILLA_X = 0x14
+POD_ENTRANCE_MOVABLE_STATUE_SWAPPED_X = 0x0B
+POD_ENTRANCE_STATIONARY_STATUE_OBJECT_ADDRESS = 0xFA1A7
+POD_ENTRANCE_STATIONARY_STATUE_VANILLA_POSITION = (0x16, 0x0E)
+POD_ENTRANCE_STATIONARY_STATUE_SWAPPED_POSITION = (0x28, 0x0E)
 ROOM_OBJECT_RECORD_ADDRESSES = {
     (DESERT_WEST_ENTRANCE_ROOM_ID, (6, 36), 0x05, 1): 0xF8B60,
     (DESERT_WEST_ENTRANCE_ROOM_ID, (6, 42), 0x5E, 1): 0xF8B6C,
@@ -506,6 +517,8 @@ class PuzzleShuffleState:
     turtle_rock_crystaroller_room_variant: int = ROOM_VARIANT_VANILLA
     turtle_rock_crystaroller_room_switch_pot: tuple[int, int] | None = None
     swamp_floodway_room_variant: int = ROOM_VARIANT_VANILLA
+    pod_entrance_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
+    pod_entrance_statues_swapped: bool = False
     pod_turtle_room_tag: int = TAG_SW_KILL_ENEMY_TO_OPEN
     pod_stalfos_trap_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
     pod_mimics_moving_wall_room_tag: int = TAG_SW_KILL_ENEMY_TO_OPEN
@@ -806,14 +819,12 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         if _skull_woods_big_chest_has_rope_trap_compatible_sprite_group(world)
         else SKULL_WOODS_BIG_CHEST_BOMB_TRAP_ID
     )
-    skull_woods_big_chest_room_tag_2 = (
-        TAG_USE_SWITCH_TO_BOMB_WALL
-        if (
-            skull_woods_big_chest_switch_pot_candidates
-            and skull_woods_big_chest_trap_sprite_address is not None
-            and world.random.choice((False, True))
-        )
-        else TAG_USE_LEVER_TO_BOMB_WALL
+    skull_woods_big_chest_tag_2_choices = (TAG_USE_LEVER_TO_BOMB_WALL,)
+    if skull_woods_big_chest_switch_pot_candidates and skull_woods_big_chest_trap_sprite_address is not None:
+        skull_woods_big_chest_tag_2_choices += (TAG_USE_SWITCH_TO_BOMB_WALL,)
+    skull_woods_big_chest_room_tag_2 = choice(
+        skull_woods_big_chest_tag_2_choices,
+        vanilla_choice=TAG_USE_LEVER_TO_BOMB_WALL,
     )
     skull_woods_big_chest_room_switch_pot = (
         world.random.choice(skull_woods_big_chest_switch_pot_candidates)
@@ -847,6 +858,11 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         get_pod_mimics_moving_wall_tag_choices(world),
         DUNGEON_PALACE_OF_DARKNESS,
         vanilla_choice=TAG_SW_KILL_ENEMY_TO_OPEN,
+    )
+    pod_entrance_room_tag = choice(
+        POD_ENTRANCE_ROOM_TAG_CHOICES,
+        DUNGEON_PALACE_OF_DARKNESS,
+        vanilla_choice=TAG_SWITCH_OPENS_DOOR_TOGGLE,
     )
     gt_mimics_room_variant = choice(
         get_gt_mimics_variants(
@@ -1075,6 +1091,8 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             turtle_rock_crystaroller_switch_pot_candidates,
         ) if turtle_rock_crystaroller_room_variant in (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH) else None,
         swamp_floodway_room_variant=choice(SWAMP_FLOODWAY_VARIANTS, vanilla_choice=ROOM_VARIANT_VANILLA),
+        pod_entrance_room_tag=pod_entrance_room_tag,
+        pod_entrance_statues_swapped=choice((False, True), vanilla_choice=False),
         pod_turtle_room_tag=choice(get_pod_turtle_room_tag_choices(world), vanilla_choice=TAG_SW_KILL_ENEMY_TO_OPEN),
         pod_stalfos_trap_room_tag=choice(
             get_pod_stalfos_trap_room_tag_choices(world),
@@ -1211,20 +1229,22 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             gt_mimics_southeast_switch_pot_candidates,
         ) if gt_mimics_room_variant == 4 else None,
         gt_mimics_push_block_target=choice(GT_MIMICS_PUSH_BLOCK_TARGETS),
-        gt_invisible_floor_ba_target=world.random.choice(
-            GT_INVISIBLE_FLOOR_BA_X_TARGETS
-            if world.random.choice((False, True))
-            else GT_INVISIBLE_FLOOR_BA_Y_TARGETS
+        gt_invisible_floor_ba_target=choice(
+            (
+                GT_INVISIBLE_FLOOR_BA_X_TARGETS
+                if world.random.choice((False, True))
+                else GT_INVISIBLE_FLOOR_BA_Y_TARGETS
+            ),
+            vanilla_choice=(0x22, 0x28),
         ),
-        gt_invisible_floor_top_target=GT_INVISIBLE_FLOOR_TOP_TARGET
-        if world.random.choice((False, True)) else None,
-        gt_invisible_floor_left_target=GT_INVISIBLE_FLOOR_LEFT_TARGET
-        if world.random.choice((False, True)) else None,
-        gt_big_chest_bomb_floor_position=world.random.choice(
-            tuple(position for _, position in GT_BIG_CHEST_BOMB_FLOOR_OBJECTS)
+        gt_invisible_floor_top_target=choice((None, GT_INVISIBLE_FLOOR_TOP_TARGET), vanilla_choice=None),
+        gt_invisible_floor_left_target=choice((None, GT_INVISIBLE_FLOOR_LEFT_TARGET), vanilla_choice=None),
+        gt_big_chest_bomb_floor_position=choice(
+            tuple(position for _, position in GT_BIG_CHEST_BOMB_FLOOR_OBJECTS),
+            vanilla_choice=(0x34, 0x36),
         ),
-        gt_big_chest_push_block_target=world.random.choice(GT_BIG_CHEST_PUSH_BLOCK_TARGETS),
-        gt_randomizer_room_floor_target=world.random.choice(GT_RANDOMIZER_ROOM_FLOOR_TARGETS),
+        gt_big_chest_push_block_target=choice(GT_BIG_CHEST_PUSH_BLOCK_TARGETS, vanilla_choice=None),
+        gt_randomizer_room_floor_target=choice(GT_RANDOMIZER_ROOM_FLOOR_TARGETS, vanilla_choice=(0x28, 0x2C)),
         gt_gauntlet_45_room_variant=gt_gauntlet_45_room_variant,
         gt_gauntlet_45_room_switch_pot=_choose_switch_pot_from_candidates(
             world,
@@ -1313,6 +1333,8 @@ def encode_puzzle_shuffle(state: PuzzleShuffleState | None) -> dict[str, int] | 
         "turtle_rock_crystaroller_room_variant": state.turtle_rock_crystaroller_room_variant,
         "turtle_rock_crystaroller_room_switch_pot": state.turtle_rock_crystaroller_room_switch_pot,
         "swamp_floodway_room_variant": state.swamp_floodway_room_variant,
+        "pod_entrance_room_tag": state.pod_entrance_room_tag,
+        "pod_entrance_statues_swapped": state.pod_entrance_statues_swapped,
         "pod_turtle_room_tag": state.pod_turtle_room_tag,
         "pod_stalfos_trap_room_tag": state.pod_stalfos_trap_room_tag,
         "pod_mimics_moving_wall_room_tag": state.pod_mimics_moving_wall_room_tag,
@@ -1435,6 +1457,8 @@ def decode_puzzle_shuffle(data: dict[str, int] | None) -> PuzzleShuffleState | N
             data.get("turtle_rock_crystaroller_room_switch_pot")
         ),
         swamp_floodway_room_variant=int(data.get("swamp_floodway_room_variant", ROOM_VARIANT_VANILLA)),
+        pod_entrance_room_tag=int(data.get("pod_entrance_room_tag", TAG_SWITCH_OPENS_DOOR_TOGGLE)),
+        pod_entrance_statues_swapped=bool(data.get("pod_entrance_statues_swapped", False)),
         pod_turtle_room_tag=int(data.get("pod_turtle_room_tag", TAG_SW_KILL_ENEMY_TO_OPEN)),
         pod_stalfos_trap_room_tag=int(data.get("pod_stalfos_trap_room_tag", TAG_TRIGGER_ACTIVATED_CHEST)),
         pod_mimics_moving_wall_room_tag=int(data.get("pod_mimics_moving_wall_room_tag", TAG_SW_KILL_ENEMY_TO_OPEN)),
@@ -2238,6 +2262,7 @@ def apply_puzzle_shuffle(
         else TAG_PULL_LEVER_TO_OPEN,
     )
     write_room_header_byte(POD_TURTLE_ROOM_ID, 5, state.pod_turtle_room_tag)
+    write_room_header_byte(POD_ENTRANCE_ROOM_ID, 5, state.pod_entrance_room_tag)
     write_room_header_byte(POD_STALFOS_TRAP_ROOM_ID, 5, state.pod_stalfos_trap_room_tag)
     write_room_header_byte(POD_MIMICS_MOVING_WALL_ROOM_ID, 5, state.pod_mimics_moving_wall_room_tag)
     write_room_header_byte(
@@ -2467,7 +2492,29 @@ def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> Non
         CHECKERBOARD_CAVE_REGULAR_BLOCK_POSITION,
         0x5E,
     )
+    _write_pod_entrance_statues(rom, state.pod_entrance_statues_swapped)
     _write_randomized_floor_objects(rom, state)
+
+
+def _write_pod_entrance_statues(rom: "TokenRom", swapped: bool) -> None:
+    if swapped:
+        rom.write_byte(POD_ENTRANCE_MOVABLE_STATUE_SPRITE_X_ADDRESS, POD_ENTRANCE_MOVABLE_STATUE_SWAPPED_X)
+        _write_room_object_record(
+            rom,
+            POD_ENTRANCE_STATIONARY_STATUE_OBJECT_ADDRESS,
+            POD_ENTRANCE_STATIONARY_STATUE_SWAPPED_POSITION,
+            0x38,
+            0,
+        )
+    else:
+        rom.write_byte(POD_ENTRANCE_MOVABLE_STATUE_SPRITE_X_ADDRESS, POD_ENTRANCE_MOVABLE_STATUE_VANILLA_X)
+        _write_room_object_record(
+            rom,
+            POD_ENTRANCE_STATIONARY_STATUE_OBJECT_ADDRESS,
+            POD_ENTRANCE_STATIONARY_STATUE_VANILLA_POSITION,
+            0x38,
+            0,
+        )
 
 
 def _write_push_block_swap(
@@ -2701,6 +2748,7 @@ def _get_puzzle_room_tag_pairs(state: PuzzleShuffleState) -> tuple[tuple[int, tu
         tags(EASTERN_SWITCH_ROOM_ID, state.eastern_switch_room_tag),
         tags(HYRULE_CASTLE_SWITCH_ROOM_ID, hyrule_castle_switch_room_tag_1),
         tags(TURTLE_ROCK_CRYSTAROLLER_ROOM_ID, tag_2=turtle_rock_crystaroller_tag_2),
+        tags(POD_ENTRANCE_ROOM_ID, state.pod_entrance_room_tag),
         tags(POD_TURTLE_ROOM_ID, state.pod_turtle_room_tag),
         tags(POD_STALFOS_TRAP_ROOM_ID, state.pod_stalfos_trap_room_tag),
         tags(POD_MIMICS_MOVING_WALL_ROOM_ID, state.pod_mimics_moving_wall_room_tag),
@@ -2862,6 +2910,8 @@ def validate_puzzle_shuffle_data() -> None:
         raise ValueError("Palace of Darkness Mimics Moving Wall first room tag is not SW Kill enemies to open")
     if pod_mimics_moving_wall_tags.tag_2 != TAG_SECRET_WALL_RIGHT:
         raise ValueError("Palace of Darkness Mimics Moving Wall second room tag is not Secret wall (right)")
+    if ROOM_TAGS[POD_ENTRANCE_ROOM_ID].tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
+        raise ValueError("Palace of Darkness Entrance first room tag is not Switch opens door (toggle)")
     ice_palace_bomb_floor_tags = ROOM_TAGS[ICE_PALACE_BOMB_FLOOR_ROOM_ID]
     if ice_palace_bomb_floor_tags.tag_1 != TAG_SWITCH_OPENS_DOOR_TOGGLE:
         raise ValueError("Ice Palace Bomb Floor first room tag is not Switch opens door (toggle)")
