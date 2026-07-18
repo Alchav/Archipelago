@@ -22,6 +22,7 @@ LANMOLAS_SPRITE_ID = 0x54
 ARRGHUS_SPRITE_ID = 0x8C
 ARRGHUS_FUZZ_SPRITE_ID = 0x8D
 HELMASAUR_KING_SPRITE_ID = 0x92
+FREEZOR_SPRITE_ID = 0xA1
 KHOLDSTARE_SPRITE_ID = 0xA2
 KHOLDSTARE_ICE_BLOCK_SPRITE_ID = 0xA3
 VITREOUS_SMALL_EYE_SPRITE_ID = 0xBD
@@ -81,6 +82,12 @@ PROGRESSION_LOGIC_KILL_DAMAGE_CLASSES = frozenset((1, 3, 6, 7, 9, 10, 11, 12, 13
 NON_SILVER_PROGRESSION_LOGIC_KILL_DAMAGE_CLASSES = PROGRESSION_LOGIC_KILL_DAMAGE_CLASSES - {
     SILVER_ARROW_DAMAGE_CLASS
 }
+MEDALLION_DAMAGE_CLASSES = frozenset((13, 14, 15))
+SWORDLESS_MEDALLION_EXCEPTION_SPRITE_IDS = frozenset((
+    FREEZOR_SPRITE_ID,
+    KHOLDSTARE_SPRITE_ID,
+    KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
+))
 GUARANTEED_LOGIC_KILL_EFFECT = 0x64
 KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES = frozenset({"Red Bari"})
 BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS = frozenset({
@@ -136,6 +143,7 @@ BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS = {
 }
 GANON_D7_SWORDLESS_LOGIC_DAMAGE_CLASSES = (0, 3, 6, 9, 10, 11, 12, 13, 14, 15)
 BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES = {
+    MOLDORM_SPRITE_ID: (3, 10),
     ARMOS_KNIGHTS_SPRITE_ID: (6, 9, 11, 12, 1, 0),
     LANMOLAS_SPRITE_ID: (6, 9, 11, 12, 1),
     HELMASAUR_KING_SPRITE_ID: (6, 9),
@@ -145,6 +153,7 @@ BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES = {
     BLIND_SPRITE_ID: (1, 3),
     VITREOUS_SMALL_EYE_SPRITE_ID: (6, 9, 3),
     VITREOUS_SPRITE_ID: (6, 9, 3),
+    TRINEXX_MAIN_HEAD_SPRITE_ID: (3,),
     TRINEXX_RED_HEAD_SPRITE_ID: (11, 12, 1, 3),
     TRINEXX_BLUE_HEAD_SPRITE_ID: (11, 12, 1, 3),
     GANON_D7_SPRITE_ID: GANON_D7_SWORDLESS_LOGIC_DAMAGE_CLASSES,
@@ -577,6 +586,7 @@ def build_randomized_damage_class_combat_model(
     available_damage_classes: frozenset[int] | None = None,
     hammer_available_for_freeze: bool = False,
     swordless: bool = False,
+    allow_swordless_medallion_damage: bool = False,
     killable_thieves: bool = False,
     enemy_shuffle: bool = False,
     gt_only_boss_special_allowed_sprite_ids: frozenset[int] = frozenset(),
@@ -632,6 +642,7 @@ def build_randomized_damage_class_combat_model(
                 and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
             ),
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
         randomized_effects = _swap_damage_class_effects(
             randomized_effects,
@@ -655,6 +666,7 @@ def build_randomized_damage_class_combat_model(
                 and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
             ),
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
         _sanitize_randomized_damage_effects(
             randomized_effects,
@@ -688,6 +700,7 @@ def build_randomized_damage_class_combat_model(
                 available_damage_classes=nightmare_damage_classes,
                 hammer_available_for_freeze=hammer_available_for_freeze,
                 swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
 
     elif mode not in {
@@ -712,6 +725,7 @@ def build_randomized_damage_class_combat_model(
                 and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
             ),
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
     elif mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
         _ensure_damage_class_logic_guarantees(
@@ -725,6 +739,7 @@ def build_randomized_damage_class_combat_model(
             hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=False,
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
 
     return _encode_sprite_damage_effects(combat_model, tuple(tuple(row) for row in randomized_effects))
@@ -822,6 +837,7 @@ def _build_valid_damage_class_permutation(
     hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> tuple[int, ...]:
     constraints = _build_damage_class_permutation_constraints(
         randomized_effects,
@@ -833,6 +849,7 @@ def _build_valid_damage_class_permutation(
         hammer_available_for_freeze=hammer_available_for_freeze,
         enforce_non_silver_guarantee=enforce_non_silver_guarantee,
         swordless=swordless,
+        allow_swordless_medallion_damage=allow_swordless_medallion_damage,
     )
 
     for _ in range(512):
@@ -853,6 +870,7 @@ def _build_valid_damage_class_permutation(
                 hammer_available_for_freeze=hammer_available_for_freeze,
                 enforce_non_silver_guarantee=enforce_non_silver_guarantee,
                 swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
         ):
             return permutation
@@ -869,6 +887,7 @@ def _build_valid_damage_class_permutation(
             hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=enforce_non_silver_guarantee,
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         ):
             return permutation
 
@@ -891,6 +910,7 @@ def _build_valid_damage_class_permutation(
             hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=enforce_non_silver_guarantee,
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
     ):
         return identity_permutation
@@ -991,6 +1011,7 @@ def _build_damage_class_permutation_constraints(
     hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> list[tuple[frozenset[int], frozenset[int]]]:
     constraints = []
     for sprite_id in logic_required_sprite_ids:
@@ -1020,6 +1041,12 @@ def _build_damage_class_permutation_constraints(
             get_progression_kill_damage_classes(sprite_id),
             available_damage_classes,
         )
+        candidate_damage_classes = _filter_swordless_medallion_damage_classes(
+            candidate_damage_classes,
+            sprite_id,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+        )
         _add_damage_class_permutation_constraint(
             constraints,
             candidate_damage_classes,
@@ -1030,6 +1057,12 @@ def _build_damage_class_permutation_constraints(
             non_silver_candidate_damage_classes = _filter_available_logic_damage_classes(
                 get_non_silver_progression_kill_damage_classes(sprite_id),
                 available_damage_classes,
+            )
+            non_silver_candidate_damage_classes = _filter_swordless_medallion_damage_classes(
+                non_silver_candidate_damage_classes,
+                sprite_id,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
             _add_damage_class_permutation_constraint(
                 constraints,
@@ -1043,6 +1076,12 @@ def _build_damage_class_permutation_constraints(
                 available_damage_classes,
                 fallback_to_original=False,
             )
+            required_damage_classes = _filter_swordless_medallion_damage_classes(
+                required_damage_classes,
+                sprite_id,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+            )
             _add_damage_class_permutation_constraint(
                 constraints,
                 required_damage_classes,
@@ -1054,6 +1093,12 @@ def _build_damage_class_permutation_constraints(
                 get_progression_kill_damage_classes(RED_BARI_SPRITE_ID),
                 available_damage_classes,
                 fallback_to_original=False,
+            )
+            red_bari_incineration_classes = _filter_swordless_medallion_damage_classes(
+                red_bari_incineration_classes,
+                RED_BARI_SPRITE_ID,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
             red_bari_source_damage_classes = frozenset(
                 damage_class
@@ -1102,6 +1147,7 @@ def _damage_class_permutation_preserves_logic(
     hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> bool:
     for sprite_id in logic_required_sprite_ids:
         hp = get_enemy_health_for_logic(sprite_id, enemy_health_key, combat_model=combat_model)
@@ -1141,6 +1187,7 @@ def _damage_class_permutation_preserves_logic(
             hammer_available_for_freeze=hammer_available_for_freeze,
             enforce_non_silver_guarantee=enforce_non_silver_guarantee,
             swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         ):
             return False
     return True
@@ -1174,6 +1221,7 @@ def _swap_enemy_damage_profiles(
     hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> list[list[int]]:
     logic_required_sprite_id_set = set(logic_required_sprite_ids)
     profiles = [
@@ -1208,6 +1256,7 @@ def _swap_enemy_damage_profiles(
                 hammer_available_for_freeze=hammer_available_for_freeze,
                 enforce_non_silver_guarantee=enforce_non_silver_guarantee,
                 swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
         ]
         if candidate_indexes:
@@ -1229,6 +1278,7 @@ def _swap_enemy_damage_profiles(
                 hammer_available_for_freeze=hammer_available_for_freeze,
                 enforce_non_silver_guarantee=enforce_non_silver_guarantee,
                 swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
         ]
         if compatible_profiles:
@@ -1304,6 +1354,7 @@ def _row_compatible_for_sprite_logic(
     hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> bool:
     if not _row_allowed_for_sprite(sprite_id, row, combat_model):
         return False
@@ -1320,6 +1371,12 @@ def _row_compatible_for_sprite_logic(
     candidate_damage_classes = _filter_available_logic_damage_classes(
         get_progression_kill_damage_classes(sprite_id),
         available_damage_classes,
+    )
+    candidate_damage_classes = _filter_swordless_medallion_damage_classes(
+        candidate_damage_classes,
+        sprite_id,
+        swordless=swordless,
+        allow_swordless_medallion_damage=allow_swordless_medallion_damage,
     )
     if sprite_id in {TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID}:
         if not _trinexx_side_head_row_has_logic_kill(
@@ -1346,6 +1403,12 @@ def _row_compatible_for_sprite_logic(
             get_non_silver_progression_kill_damage_classes(sprite_id),
             available_damage_classes,
         )
+        non_silver_candidate_damage_classes = _filter_swordless_medallion_damage_classes(
+            non_silver_candidate_damage_classes,
+            sprite_id,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+        )
         if non_silver_candidate_damage_classes and not _has_direct_kill_within_attack_limit(
             list(row),
             sprite_id,
@@ -1368,6 +1431,12 @@ def _row_compatible_for_sprite_logic(
             available_damage_classes,
             fallback_to_original=False,
         )
+        required_damage_classes = _filter_swordless_medallion_damage_classes(
+            required_damage_classes,
+            sprite_id,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+        )
         if required_damage_classes and not _has_direct_kill_within_attack_limit(
             list(row),
             sprite_id,
@@ -1384,6 +1453,12 @@ def _row_compatible_for_sprite_logic(
             get_progression_kill_damage_classes(RED_BARI_SPRITE_ID),
             available_damage_classes,
             fallback_to_original=False,
+        )
+        red_bari_incineration_classes = _filter_swordless_medallion_damage_classes(
+            red_bari_incineration_classes,
+            RED_BARI_SPRITE_ID,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
         if red_bari_incineration_classes and not any(
             row[damage_class] == INCINERATE_EFFECT
@@ -1463,6 +1538,7 @@ def _ensure_damage_class_logic_guarantees(
     hammer_available_for_freeze: bool,
     enforce_non_silver_guarantee: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> None:
     max_attacks = max(1, max_attacks_in_logic)
     effect_palettes = _build_effect_palettes(tuple(tuple(row) for row in randomized_effects))
@@ -1477,6 +1553,12 @@ def _ensure_damage_class_logic_guarantees(
         candidate_damage_classes = _filter_available_logic_damage_classes(
             get_progression_kill_damage_classes(sprite_id),
             available_damage_classes,
+        )
+        candidate_damage_classes = _filter_swordless_medallion_damage_classes(
+            candidate_damage_classes,
+            sprite_id,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
         )
         if not _has_direct_kill_within_attack_limit(
             row,
@@ -1502,6 +1584,12 @@ def _ensure_damage_class_logic_guarantees(
             non_silver_candidate_damage_classes = _filter_available_logic_damage_classes(
                 get_non_silver_progression_kill_damage_classes(sprite_id),
                 available_damage_classes,
+            )
+            non_silver_candidate_damage_classes = _filter_swordless_medallion_damage_classes(
+                non_silver_candidate_damage_classes,
+                sprite_id,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
             if (
                 non_silver_candidate_damage_classes
@@ -1531,6 +1619,12 @@ def _ensure_damage_class_logic_guarantees(
                 required_damage_classes,
                 available_damage_classes,
                 fallback_to_original=False,
+            )
+            required_damage_classes = _filter_swordless_medallion_damage_classes(
+                required_damage_classes,
+                sprite_id,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
             if not required_damage_classes:
                 continue
@@ -1562,6 +1656,12 @@ def _ensure_damage_class_logic_guarantees(
             available_damage_classes,
             fallback_to_original=False,
         )
+        red_bari_incineration_classes = _filter_swordless_medallion_damage_classes(
+            red_bari_incineration_classes,
+            RED_BARI_SPRITE_ID,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+        )
         if red_bari_incineration_classes and not any(
             red_bari_row[damage_class] == INCINERATE_EFFECT
             for damage_class in red_bari_incineration_classes
@@ -1570,6 +1670,11 @@ def _ensure_damage_class_logic_guarantees(
 
 
 def _get_required_logic_kill_damage_class_groups(sprite_id: int, swordless: bool) -> tuple[tuple[int, ...], ...]:
+    if swordless and sprite_id in {
+        MOLDORM_SPRITE_ID,
+        TRINEXX_MAIN_HEAD_SPRITE_ID,
+    }:
+        return (BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES[sprite_id],)
     if swordless and sprite_id == HELMASAUR_KING_SPRITE_ID:
         return ((6,), (9,))
     if swordless and sprite_id == GANON_D7_SPRITE_ID:
@@ -1591,6 +1696,22 @@ def _filter_available_logic_damage_classes(
         if damage_class in available_damage_classes
     )
     return filtered_damage_classes or (damage_classes if fallback_to_original else tuple())
+
+
+def _filter_swordless_medallion_damage_classes(
+    damage_classes: tuple[int, ...],
+    sprite_id: int,
+    *,
+    swordless: bool,
+    allow_swordless_medallion_damage: bool,
+) -> tuple[int, ...]:
+    if (
+        not swordless
+        or allow_swordless_medallion_damage
+        or sprite_id in SWORDLESS_MEDALLION_EXCEPTION_SPRITE_IDS
+    ):
+        return damage_classes
+    return tuple(damage_class for damage_class in damage_classes if damage_class not in MEDALLION_DAMAGE_CLASSES)
 
 
 def _set_red_bari_incineration_guarantee(
@@ -1897,6 +2018,7 @@ def _build_nightmare_sprite_damage_effects(
     available_damage_classes: frozenset[int] | None,
     hammer_available_for_freeze: bool,
     swordless: bool,
+    allow_swordless_medallion_damage: bool,
 ) -> list[int]:
     row = [
         _get_nightmare_non_defeating_effect(sprite_id, effect_palettes[damage_class], combat_model, random)
@@ -1908,7 +2030,11 @@ def _build_nightmare_sprite_damage_effects(
         _add_row_to_effect_palettes(row, effect_palettes)
         return row
 
-    progression_damage_classes = _get_nightmare_progression_damage_classes(sprite_id, swordless)
+    progression_damage_classes = _get_nightmare_progression_damage_classes(
+        sprite_id,
+        swordless,
+        allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+    )
 
     candidate_damage_classes = tuple(
         damage_class
@@ -1959,12 +2085,30 @@ def _build_nightmare_sprite_damage_effects(
     return row
 
 
-def _get_nightmare_progression_damage_classes(sprite_id: int, swordless: bool) -> tuple[int, ...]:
+def _get_nightmare_progression_damage_classes(
+    sprite_id: int,
+    swordless: bool,
+    *,
+    allow_swordless_medallion_damage: bool,
+) -> tuple[int, ...]:
     if swordless and sprite_id in BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES:
-        return BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES[sprite_id]
+        damage_classes = BOSS_SWORDLESS_NIGHTMARE_LOGIC_DAMAGE_CLASSES[sprite_id]
+        return _filter_swordless_medallion_damage_classes(
+            damage_classes,
+            sprite_id,
+            swordless=swordless,
+            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+        )
     if sprite_id in BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS:
-        return tuple(BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS[sprite_id][0])
-    return get_progression_kill_damage_classes(sprite_id)
+        damage_classes = tuple(BOSS_REQUIRED_LOGIC_KILL_DAMAGE_CLASS_GROUPS[sprite_id][0])
+    else:
+        damage_classes = get_progression_kill_damage_classes(sprite_id)
+    return _filter_swordless_medallion_damage_classes(
+        damage_classes,
+        sprite_id,
+        swordless=swordless,
+        allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+    )
 
 
 def _get_nightmare_non_defeating_effect(

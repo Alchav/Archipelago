@@ -364,6 +364,8 @@ class EnemyShuffleState:
     max_attacks_in_logic: int = 16
     killable_thieves: bool = False
     available_damage_classes: frozenset[int] = frozenset(range(16))
+    available_damage_delivery_items: frozenset[str] = frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM)
+    available_damage_delivery_abilities: frozenset[str] = frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY)
     hammer_available_for_freeze: bool = True
 
 
@@ -436,6 +438,8 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
         hammer_available_for_freeze=True,
     )
     validate_enemy_shuffle_state(state, is_standard_mode=world.options.mode == "standard")
@@ -467,6 +471,22 @@ def _get_world_combat_model(world: "ALTTPWorld") -> EnemyCombatModel:
 
 def _get_world_available_damage_classes(world: "ALTTPWorld") -> frozenset[int]:
     return frozenset(getattr(world, "enemy_shuffle_available_damage_classes", frozenset(range(16))))
+
+
+def _get_world_available_damage_delivery_items(world: "ALTTPWorld") -> frozenset[str]:
+    return frozenset(getattr(
+        world,
+        "enemy_shuffle_available_damage_delivery_items",
+        frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM),
+    ))
+
+
+def _get_world_available_damage_delivery_abilities(world: "ALTTPWorld") -> frozenset[str]:
+    return frozenset(getattr(
+        world,
+        "enemy_shuffle_available_damage_delivery_abilities",
+        frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY),
+    ))
 
 
 def _get_base_patched_rom_bytes() -> bytes:
@@ -1081,6 +1101,8 @@ def _restore_skipped_room_sprite_groups(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
         hammer_available_for_freeze=True,
     )
 
@@ -1130,6 +1152,8 @@ def _restore_original_groups_for_rooms_without_possible_groups(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
         hammer_available_for_freeze=True,
     )
 
@@ -1762,7 +1786,7 @@ def _has_yellow_slime_follow_up_for_key_drop(state: EnemyShuffleState, source_co
     candidate_damage_classes &= state.available_damage_classes
     follow_up_override = get_yellow_slime_follow_up_delivery_override(source_combat_reference_id)
     if follow_up_override is not None:
-        candidate_damage_classes &= _get_deliverable_damage_classes(follow_up_override)
+        candidate_damage_classes &= _get_available_deliverable_damage_classes(state, follow_up_override)
     return any(
         _damage_class_kills_within_enemy_shuffle_logic(state, YELLOW_SLIME_SPRITE_ID, damage_class)
         for damage_class in candidate_damage_classes
@@ -1793,10 +1817,10 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
             )
             candidate_damage_classes |= set(get_blob_transform_damage_classes(combat_reference_id, state.combat_model))
         else:
-            candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+            candidate_damage_classes = _get_available_deliverable_damage_classes(state, delivery_override)
             candidate_damage_classes |= (
                 set(get_blob_transform_damage_classes(combat_reference_id, state.combat_model))
-                & _get_deliverable_damage_classes(delivery_override)
+                & _get_available_deliverable_damage_classes(state, delivery_override)
             )
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
     candidate_damage_classes &= state.available_damage_classes
@@ -1835,7 +1859,7 @@ def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: Enem
             )
         )
     else:
-        candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+        candidate_damage_classes = _get_available_deliverable_damage_classes(state, delivery_override)
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
     candidate_damage_classes &= state.available_damage_classes
 
@@ -1906,6 +1930,18 @@ def _get_deliverable_damage_classes(delivery_override) -> set[int]:
         damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM.get(item_name, tuple()))
     for ability_name in delivery_override.abilities:
         damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY.get(ability_name, tuple()))
+    return damage_classes
+
+
+def _get_available_deliverable_damage_classes(state: EnemyShuffleState, delivery_override) -> set[int]:
+    damage_classes: set[int] = set()
+    for item_name in delivery_override.items:
+        if item_name in state.available_damage_delivery_items:
+            damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM.get(item_name, tuple()))
+    for ability_name in delivery_override.abilities:
+        if ability_name in state.available_damage_delivery_abilities:
+            damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY.get(ability_name, tuple()))
+    damage_classes &= state.available_damage_classes
     return damage_classes
 
 
@@ -2131,6 +2167,8 @@ def _randomize_dungeon_rooms(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
         hammer_available_for_freeze=True,
     )
     randomized_rooms: dict[int, RandomizedDungeonEnemyRoom] = {}
@@ -2186,6 +2224,8 @@ def _randomize_overworld_areas(
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
         hammer_available_for_freeze=True,
     )
     randomized_areas: dict[int, RandomizedOverworldEnemyArea] = {}

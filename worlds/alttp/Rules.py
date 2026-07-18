@@ -49,6 +49,7 @@ from .EnemyLogicTargets import (
     ICE_PALACE_HIDDEN_CHEST_ROOM,
     ICE_PALACE_ICE_FLOOR_ROOM_SOUTHWEST,
     ICE_PALACE_ICED_T_ROOM_NORTHEAST,
+    ICE_PALACE_JELLY_KEY_DROP,
     ICE_PALACE_MAP_ROOM_WEST,
     ICE_PALACE_PENGATORS_ROOM,
     ICE_PALACE_SPIKE_ROOM_SOUTHWEST,
@@ -128,7 +129,7 @@ from .StateHelpers import (can_extend_magic, can_clear_enemy_region, can_clear_e
                            can_pass_evil_barrier, can_shoot_arrows, has_beam_sword, has_crystals,
                            has_fire_source, has_hearts,
                            has_misery_mire_medallion, has_sword, has_turtle_rock_medallion,
-                           has_triforce_pieces, can_use_bombs, can_bomb_or_bonk,
+                           has_triforce_pieces, can_use_bombs, can_bomb_or_bonk, can_use_medallions,
                            can_activate_crystal_switch, can_kill_standard_start)
 from .SubClasses import ALttPLocation
 from .UnderworldGlitchRules import underworld_glitches_rules
@@ -733,7 +734,8 @@ def global_rules(multiworld: MultiWorld, player: int):
 
     set_rule(multiworld.get_location('Tower of Hera - Big Key Chest', player), can_open_hera_big_key_chest_puzzle)
     if world.options.accessibility != 'full':
-        set_always_allow(multiworld.get_location('Tower of Hera - Big Key Chest', player), lambda state, item: item.name == 'Small Key (Tower of Hera)' and item.player == player)
+        allow_self_locking_items(multiworld.get_location('Tower of Hera - Big Key Chest', player),
+                                 'Small Key (Tower of Hera)')
 
     set_rule(multiworld.get_entrance('Swamp Palace Moat', player), lambda state: state.has('Flippers', player) and state.has('Open Floodgate', player))
     set_rule(multiworld.get_entrance('Swamp Palace Small Key Door', player), lambda state: state._lttp_has_key('Small Key (Swamp Palace)', player))
@@ -915,7 +917,8 @@ def global_rules(multiworld: MultiWorld, player: int):
     add_rule(multiworld.get_location('Skull Woods - Prize', player), lambda state: state._lttp_has_key('Small Key (Skull Woods)', player, 5))
     add_rule(multiworld.get_location('Skull Woods - Boss', player), lambda state: state._lttp_has_key('Small Key (Skull Woods)', player, 5))
 
-    set_rule(multiworld.get_location('Ice Palace - Jelly Key Drop', player), lambda state: can_melt_things(state, player))
+    set_rule(multiworld.get_location('Ice Palace - Jelly Key Drop', player),
+             lambda state: can_kill_key_drop_enemy(state, player, ICE_PALACE_JELLY_KEY_DROP))
     ice_palace_bomb_floor_room_variant = (
         world.puzzle_shuffle_state.ice_palace_bomb_floor_room_variant
         if world.puzzle_shuffle_state is not None
@@ -1581,7 +1584,7 @@ def default_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Bumper Cave Exit (Bottom)', player), lambda state: state.has('Cape', player) or state.has('Hookshot', player))
 
     set_rule(multiworld.get_entrance('Skull Woods Final Section', player), lambda state: state.has('Fire Rod', player) and state.has('Moon Pearl', player)) # bunny cannot use fire rod
-    set_rule(multiworld.get_entrance('Misery Mire', player), lambda state: state.has('Moon Pearl', player) and has_sword(state, player) and has_misery_mire_medallion(state, player))  # sword required to cast magic (!)
+    set_rule(multiworld.get_entrance('Misery Mire', player), lambda state: state.has('Moon Pearl', player) and can_use_medallions(state, player) and has_misery_mire_medallion(state, player))
     set_rule(multiworld.get_entrance('Desert Ledge (Northeast) Mirror Spot', player), lambda state: state.has('Magic Mirror', player))
 
     set_rule(multiworld.get_entrance('Desert Ledge Mirror Spot', player), lambda state: state.has('Magic Mirror', player))
@@ -1597,7 +1600,7 @@ def default_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Isolated Ledge Mirror Spot', player), lambda state: state.has('Magic Mirror', player))
     set_rule(multiworld.get_entrance('Superbunny Cave Exit (Bottom)', player), lambda state: False)  # Cannot get to bottom exit from top. Just exists for shuffling
     set_rule(multiworld.get_entrance('Floating Island Mirror Spot', player), lambda state: state.has('Magic Mirror', player))
-    set_rule(multiworld.get_entrance('Turtle Rock', player), lambda state: state.has('Moon Pearl', player) and has_sword(state, player) and has_turtle_rock_medallion(state, player) and state.can_reach('Turtle Rock (Top)', 'Region', player))  # sword required to cast magic (!)
+    set_rule(multiworld.get_entrance('Turtle Rock', player), lambda state: state.has('Moon Pearl', player) and can_use_medallions(state, player) and has_turtle_rock_medallion(state, player) and state.can_reach('Turtle Rock (Top)', 'Region', player))
 
     set_rule(multiworld.get_entrance('Pyramid Hole', player), lambda state: state.has('Beat Agahnim 2', player) or multiworld.worlds[player].options.open_pyramid.to_bool(multiworld, player))
 
@@ -1711,7 +1714,7 @@ def inverted_rules(multiworld: MultiWorld, player: int):
 
 
     set_rule(multiworld.get_entrance('Skull Woods Final Section', player), lambda state: state.has('Fire Rod', player))
-    set_rule(multiworld.get_entrance('Misery Mire', player), lambda state: has_sword(state, player) and has_misery_mire_medallion(state, player))  # sword required to cast magic (!)
+    set_rule(multiworld.get_entrance('Misery Mire', player), lambda state: can_use_medallions(state, player) and has_misery_mire_medallion(state, player))
 
     set_rule(multiworld.get_entrance('Hookshot Cave', player), lambda state: can_lift_rocks(state, player))
 
@@ -1723,7 +1726,7 @@ def inverted_rules(multiworld: MultiWorld, player: int):
     set_rule(multiworld.get_entrance('Dark Death Mountain Ledge Mirror Spot (West)', player), lambda state: state.has('Magic Mirror', player))
     set_rule(multiworld.get_entrance('Laser Bridge Mirror Spot', player), lambda state: state.has('Magic Mirror', player))
     set_rule(multiworld.get_entrance('Floating Island Mirror Spot', player), lambda state: state.has('Magic Mirror', player))
-    set_rule(multiworld.get_entrance('Turtle Rock', player), lambda state: has_sword(state, player) and has_turtle_rock_medallion(state, player) and state.can_reach('Turtle Rock (Top)', 'Region', player)) # sword required to cast magic (!)
+    set_rule(multiworld.get_entrance('Turtle Rock', player), lambda state: can_use_medallions(state, player) and has_turtle_rock_medallion(state, player) and state.can_reach('Turtle Rock (Top)', 'Region', player))
 
     # new inverted spots
     set_rule(multiworld.get_entrance('Post Aga Teleporter', player), lambda state: state.has('Beat Agahnim 1', player))
@@ -1949,20 +1952,67 @@ def open_rules(multiworld: MultiWorld, player: int):
 
 
 def swordless_rules(multiworld: MultiWorld, player: int):
+    world = multiworld.worlds[player]
+    ice_palace_bomb_floor_room_variant = (
+        world.puzzle_shuffle_state.ice_palace_bomb_floor_room_variant
+        if world.puzzle_shuffle_state is not None
+        else None
+    )
+    ice_palace_pengator_big_key_room_tag = (
+        world.puzzle_shuffle_state.ice_palace_pengator_big_key_room_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_SWITCH_OPENS_DOOR_TOGGLE
+    )
+    ice_palace_conveyor_hellway_tag = (
+        world.puzzle_shuffle_state.ice_palace_conveyor_hellway_tag
+        if world.puzzle_shuffle_state is not None
+        else TAG_NE_KILL_ENEMY_TO_OPEN
+    )
+
+    def can_clear_ice_palace_bomb_floor_puzzle(state: CollectionState) -> bool:
+        if ice_palace_bomb_floor_room_variant == ROOM_VARIANT_KILL_ENEMIES:
+            return can_clear_enemy_region(state, player, ICE_PALACE_BOMB_FLOOR_SOUTHWEST)
+        if ice_palace_bomb_floor_room_variant == ROOM_VARIANT_HOLD_SWITCH:
+            return state.has('Cane of Somaria', player)
+        return True
+
+    def can_pass_ice_palace_pengator_room_puzzle(state: CollectionState) -> bool:
+        if ice_palace_bomb_floor_room_variant == ROOM_VARIANT_KILL_ENEMIES:
+            return True
+        if ice_palace_pengator_big_key_room_tag == TAG_SW_KILL_ENEMY_TO_OPEN:
+            return can_clear_enemy_region(state, player, ICE_PALACE_BIG_KEY_ROOM_SOUTHWEST)
+        if ice_palace_pengator_big_key_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
+        return True
+
+    def can_pass_ice_palace_conveyor_hellway_puzzle(state: CollectionState) -> bool:
+        if ice_palace_conveyor_hellway_tag == TAG_NE_KILL_ENEMY_TO_OPEN:
+            return can_clear_enemy_region(state, player, ICE_PALACE_CONVEYOR_HELLWAY_TOP_RIGHT)
+        if ice_palace_conveyor_hellway_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
+            return state.has('Cane of Somaria', player)
+        return True
+
     set_rule(multiworld.get_entrance('Agahnim 1', player), lambda state: (state.has('Hammer', player) or state.has('Fire Rod', player) or can_shoot_arrows(state, player) or state.has('Cane of Somaria', player)) and state._lttp_has_key('Small Key (Agahnims Tower)', player, 4))
     set_rule(multiworld.get_entrance('Skull Woods Torch Room', player), lambda state: state._lttp_has_key('Small Key (Skull Woods)', player, 4) and state.has('Fire Rod', player))  # no curtain
 
-    set_rule(multiworld.get_location('Ice Palace - Jelly Key Drop', player), lambda state: state.has('Fire Rod', player) or state.has('Bombos', player))
-    set_rule(multiworld.get_location('Ice Palace - Compass Chest', player), lambda state: (state.has('Fire Rod', player) or state.has('Bombos', player)) and state._lttp_has_key('Small Key (Ice Palace)', player))
-    set_rule(multiworld.get_entrance('Ice Palace (Second Section)', player),
-             lambda state: (state.has('Fire Rod', player) or state.has('Bombos', player))
+    set_rule(multiworld.get_location('Ice Palace - Jelly Key Drop', player),
+             lambda state: can_kill_key_drop_enemy(state, player, ICE_PALACE_JELLY_KEY_DROP))
+    set_rule(multiworld.get_location('Ice Palace - Compass Chest', player),
+             lambda state: can_melt_things(state, player)
              and state._lttp_has_key('Small Key (Ice Palace)', player)
+             and can_clear_ice_palace_bomb_floor_puzzle(state))
+    set_rule(multiworld.get_entrance('Ice Palace (Second Section)', player),
+             lambda state: can_melt_things(state, player)
+             and state._lttp_has_key('Small Key (Ice Palace)', player)
+             and can_use_bombs(state, player)
+             and can_clear_ice_palace_bomb_floor_puzzle(state)
+             and can_pass_ice_palace_pengator_room_puzzle(state)
              and can_clear_enemy_regions(
                  state,
                  player,
                  ICE_PALACE_COMPASS_ROOM,
-                 ICE_PALACE_CONVEYOR_HELLWAY_TOP_RIGHT,
-             ))
+             )
+             and can_pass_ice_palace_conveyor_hellway_puzzle(state))
 
     set_rule(multiworld.get_entrance('Ganon Drop', player), lambda state: state.has('Hammer', player))  # need to damage ganon to get tiles to drop
 

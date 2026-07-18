@@ -9,9 +9,12 @@ from .enemizer_data.enemy_combat_data import (
     FAIRY_TRANSFORM_EFFECT,
     FIGHTER_SWORD_DAMAGE_CLASSES,
     FREEZE_EFFECT,
+    FREEZOR_SPRITE_ID,
     GOLDEN_SWORD_DAMAGE_CLASSES,
     INCINERATE_EFFECT,
     KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
+    KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
+    KHOLDSTARE_SPRITE_ID,
     LIGHTNING_GATE_SPRITE_ID,
     MASTER_SWORD_DAMAGE_CLASSES,
     SWORD_BEAM_DAMAGE_CLASS,
@@ -268,6 +271,11 @@ ROOM_WIDE_MEDALLION_DAMAGE_CLASSES = {
     "Ether": 14,
     "Quake": 15,
 }
+SWORDLESS_MEDALLION_EXCEPTION_SPRITE_IDS = frozenset((
+    FREEZOR_SPRITE_ID,
+    KHOLDSTARE_SPRITE_ID,
+    KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
+))
 THROWN_OBJECT_DAMAGE_CLASS = 3
 LIGHTNING_GATE_MAGIC_POWDER_DAMAGE_CLASS = 10
 LIGHTNING_GATE_REMOVAL_EFFECTS = frozenset((FAIRY_TRANSFORM_EFFECT, BLOB_TRANSFORM_EFFECT, FREEZE_EFFECT))
@@ -480,52 +488,66 @@ def can_clear_enemy_room(state: CollectionState, player: int, room_name_or_id: s
         player,
         room_enemies,
         thrown_object_hits_by_quadrant=_get_thrown_object_hits_by_quadrant(room_id, effective_room_enemies),
+        medallion_cast_context_enemies=effective_room_enemies,
     )
 
 
 def can_clear_enemy_region(state: CollectionState, player: int, target_name: str) -> bool:
     from .EnemyLogicTargets import get_enemy_clear_target, get_enemy_clear_target_enemies
-    from .EnemyShuffle import get_room_id
+    from .EnemyShuffle import get_effective_dungeon_room_enemies, get_room_id
 
     target = get_enemy_clear_target(target_name)
     room_id = get_room_id(target.room_name)
+    if room_id is None:
+        raise ValueError(f"Unknown ALTTP room {target.room_name!r}")
+    target_enemies = tuple(get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name))
     room_enemies = tuple(
         enemy
-        for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
+        for enemy in target_enemies
         if _enemy_requirement_counts_for_room_clear(enemy)
     )
-    effective_room_enemies = tuple(get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name))
+    effective_room_enemies = tuple(get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id))
     return _can_clear_enemy_requirements(
         state,
         player,
         room_enemies,
-        thrown_object_hits_by_quadrant=_get_thrown_object_hits_by_quadrant(room_id, effective_room_enemies, target),
+        thrown_object_hits_by_quadrant=_get_thrown_object_hits_by_quadrant(room_id, target_enemies, target),
+        medallion_cast_context_enemies=effective_room_enemies,
     )
 
 
 def can_clear_enemy_regions(state: CollectionState, player: int, *target_names: str) -> bool:
     from .EnemyLogicTargets import get_enemy_clear_target, get_enemy_clear_target_enemies
-    from .EnemyShuffle import get_room_id
+    from .EnemyShuffle import get_effective_dungeon_room_enemies, get_room_id
 
+    target_data = tuple(
+        (target_name, get_enemy_clear_target(target_name))
+        for target_name in target_names
+    )
     enemy_groups = tuple(
         tuple(
             enemy
             for enemy in get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name)
             if _enemy_requirement_counts_for_room_clear(enemy)
         )
-        for target_name in target_names
+        for target_name, _target in target_data
     )
     thrown_object_hits_by_group = []
-    for target_name in target_names:
-        target = get_enemy_clear_target(target_name)
+    medallion_cast_context_groups = []
+    for target_name, target in target_data:
         room_id = get_room_id(target.room_name)
-        effective_room_enemies = tuple(get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name))
-        thrown_object_hits_by_group.append(_get_thrown_object_hits_by_quadrant(room_id, effective_room_enemies, target))
+        if room_id is None:
+            raise ValueError(f"Unknown ALTTP room {target.room_name!r}")
+        target_enemies = tuple(get_enemy_clear_target_enemies(state.multiworld.worlds[player], target_name))
+        effective_room_enemies = tuple(get_effective_dungeon_room_enemies(state.multiworld.worlds[player], room_id))
+        thrown_object_hits_by_group.append(_get_thrown_object_hits_by_quadrant(room_id, target_enemies, target))
+        medallion_cast_context_groups.append(effective_room_enemies)
     return _can_clear_enemy_requirement_groups(
         state,
         player,
         enemy_groups,
         thrown_object_hits_by_group=tuple(thrown_object_hits_by_group),
+        medallion_cast_context_groups=tuple(medallion_cast_context_groups),
     )
 
 
@@ -553,6 +575,7 @@ def can_kill_key_drop_enemy(state: CollectionState, player: int, location_name: 
         (enemy,),
         key_drop_enemy=True,
         freeze_throw_context_enemies=context_enemies,
+        medallion_cast_context_enemies=room_enemies,
     )
 
 
@@ -689,6 +712,7 @@ def _can_clear_enemy_requirements(
     key_drop_enemy: bool = False,
     thrown_object_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
     freeze_throw_context_enemies: tuple = tuple(),
+    medallion_cast_context_enemies: tuple = tuple(),
 ) -> bool:
     return _can_clear_enemy_requirement_groups(
         state,
@@ -697,6 +721,7 @@ def _can_clear_enemy_requirements(
         key_drop_enemy=key_drop_enemy,
         thrown_object_hits_by_group=(thrown_object_hits_by_quadrant,),
         freeze_throw_context_groups=((freeze_throw_context_enemies or room_enemies),),
+        medallion_cast_context_groups=((medallion_cast_context_enemies or room_enemies),),
     )
 
 
@@ -708,12 +733,15 @@ def _can_clear_enemy_requirement_groups(
     key_drop_enemy: bool = False,
     thrown_object_hits_by_group: tuple[tuple[tuple[tuple[int, int], int], ...], ...] | None = None,
     freeze_throw_context_groups: tuple[tuple, ...] | None = None,
+    medallion_cast_context_groups: tuple[tuple, ...] | None = None,
 ) -> bool:
     budget = _get_enemy_clear_resource_budget(state, player)
     if thrown_object_hits_by_group is None:
         thrown_object_hits_by_group = (tuple(),) * len(enemy_groups)
     if freeze_throw_context_groups is None:
         freeze_throw_context_groups = enemy_groups
+    if medallion_cast_context_groups is None:
+        medallion_cast_context_groups = enemy_groups
     group_clear_plans = tuple(
         _get_enemy_group_clear_plans(
             state,
@@ -723,9 +751,10 @@ def _can_clear_enemy_requirement_groups(
             key_drop_enemy=key_drop_enemy,
             thrown_object_hits_by_quadrant=thrown_object_hits_by_quadrant,
             freeze_throw_context_enemies=freeze_throw_context_enemies,
+            medallion_cast_context_enemies=medallion_cast_context_enemies,
         )
-        for enemy_group, thrown_object_hits_by_quadrant, freeze_throw_context_enemies
-        in zip(enemy_groups, thrown_object_hits_by_group, freeze_throw_context_groups)
+        for enemy_group, thrown_object_hits_by_quadrant, freeze_throw_context_enemies, medallion_cast_context_enemies
+        in zip(enemy_groups, thrown_object_hits_by_group, freeze_throw_context_groups, medallion_cast_context_groups)
     )
     return _can_execute_enemy_kill_plans(group_clear_plans, budget)
 
@@ -739,6 +768,7 @@ def _get_enemy_group_clear_plans(
     key_drop_enemy: bool = False,
     thrown_object_hits_by_quadrant: tuple[tuple[tuple[int, int], int], ...] = tuple(),
     freeze_throw_context_enemies: tuple = tuple(),
+    medallion_cast_context_enemies: tuple = tuple(),
 ) -> tuple[ResourceCosts, ...]:
     if not room_enemies:
         return (FREE_RESOURCE_COSTS,)
@@ -750,6 +780,7 @@ def _get_enemy_group_clear_plans(
         key_drop_enemy,
         thrown_object_hits_by_quadrant,
         tuple(_get_enemy_requirement_cache_key(requirement) for requirement in freeze_throw_context_enemies),
+        tuple(_get_enemy_requirement_cache_key(requirement) for requirement in medallion_cast_context_enemies),
         budget,
     )
     if cache_key in cache:
@@ -763,7 +794,11 @@ def _get_enemy_group_clear_plans(
         thrown_object_hits_by_quadrant,
         key_drop_enemy=key_drop_enemy,
     )
-    available_medallions = _get_available_room_wide_medallions(state, player)
+    available_medallions = _get_available_room_wide_medallions(
+        state,
+        player,
+        medallion_cast_context_enemies or room_enemies,
+    )
     pre_adjusted_group_plans = []
     for adjusted_enemy_group in thrown_object_adjusted_enemy_groups:
         pre_adjusted_group_plans.append((adjusted_enemy_group, FREE_RESOURCE_COSTS))
@@ -985,7 +1020,15 @@ def _get_frozen_throw_adjusted_enemy_group_plans(
         ))
         if not freeze_damage_classes:
             continue
-        freeze_plans = _build_single_hit_plans_for_damage_classes(state, player, freeze_damage_classes)
+        freeze_plans = _build_single_hit_plans_for_damage_classes(
+            state,
+            player,
+            freeze_damage_classes,
+            medallion_exception_sprite_ids=frozenset(
+                _get_enemy_requirement(context_enemy).sprite_id
+                for context_enemy in freeze_throw_context_enemies
+            ),
+        )
         if not freeze_plans:
             continue
         for target_index, target_enemy, hp, effect, target_quadrant in target_entries:
@@ -1377,7 +1420,7 @@ def _build_attack_plans_for_damage_classes(
         if hit_count is not None:
             add_plan(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count), hit_count)
 
-    if _can_ready_medallion(state, player):
+    if _can_use_medallion_damage_against_sprite(state, player, sprite_id):
         for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
             if item_allowed(medallion) and state.has(medallion, player):
                 hit_count = _get_best_hit_count(
@@ -1403,6 +1446,7 @@ def _build_single_hit_plans_for_damage_classes(
     *,
     allowed_items: tuple[str, ...] | None = None,
     allowed_abilities: tuple[str, ...] | None = None,
+    medallion_exception_sprite_ids: frozenset[int] = frozenset(),
 ) -> tuple[ResourceCosts, ...]:
     allowed_items_set = set(allowed_items) if allowed_items is not None else None
     allowed_abilities_set = set(allowed_abilities) if allowed_abilities is not None else None
@@ -1470,7 +1514,7 @@ def _build_single_hit_plans_for_damage_classes(
     if item_allowed("Ice Rod") and state.has("Ice Rod", player) and 12 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST))
 
-    if _can_ready_medallion(state, player):
+    if _can_use_medallion_damage_with_exception_sprites(state, player, medallion_exception_sprite_ids):
         for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
             if item_allowed(medallion) and state.has(medallion, player) and damage_class in allowed_damage_classes:
                 plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST))
@@ -1486,6 +1530,7 @@ def _build_fixed_hit_plans_for_damage_classes(
     *,
     allowed_items: tuple[str, ...] | None = None,
     allowed_abilities: tuple[str, ...] | None = None,
+    medallion_exception_sprite_ids: frozenset[int] = frozenset(),
 ) -> tuple[ResourceCosts, ...]:
     allowed_items_set = set(allowed_items) if allowed_items is not None else None
     allowed_abilities_set = set(allowed_abilities) if allowed_abilities is not None else None
@@ -1553,7 +1598,7 @@ def _build_fixed_hit_plans_for_damage_classes(
     if item_allowed("Ice Rod") and state.has("Ice Rod", player) and 12 in allowed_damage_classes:
         plans.add(ResourceCosts(magic=ICE_ROD_MAGIC_COST * hit_count))
 
-    if _can_ready_medallion(state, player):
+    if _can_use_medallion_damage_with_exception_sprites(state, player, medallion_exception_sprite_ids):
         for medallion, damage_class in ROOM_WIDE_MEDALLION_DAMAGE_CLASSES.items():
             if item_allowed(medallion) and state.has(medallion, player) and damage_class in allowed_damage_classes:
                 plans.add(ResourceCosts(magic=MEDALLION_MAGIC_COST * hit_count))
@@ -1612,6 +1657,7 @@ def _get_boss_attack_plans(
             transform_damage_classes,
             allowed_items=allowed_items,
             allowed_abilities=boss_allowed_abilities,
+            medallion_exception_sprite_ids=frozenset((sprite_id,)),
         ))
 
     result = _prune_dominated_resource_costs(plans)
@@ -1649,6 +1695,7 @@ def can_damage_blind_sprite(
         9,
         allowed_items=allowed_items,
         allowed_abilities=boss_allowed_abilities,
+        medallion_exception_sprite_ids=frozenset((sprite_id,)),
     )
     cache[cache_key] = plans
     return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
@@ -1702,6 +1749,7 @@ def _get_trinexx_side_head_attack_plans(
             {opener_class},
             allowed_items=opener_items,
             allowed_abilities=opener_abilities,
+            medallion_exception_sprite_ids=frozenset((sprite_id,)),
         )
         if not opener_plans:
             continue
@@ -1788,6 +1836,7 @@ def _get_trinexx_side_head_window_plans(
                 {damage_class},
                 follow_up_hits,
                 allowed_items=follow_up_items,
+                medallion_exception_sprite_ids=frozenset((sprite_id,)),
             )
             for follow_up_plan in follow_up_plans:
                 plans.add(_add_resource_costs(
@@ -1855,6 +1904,7 @@ def can_hit_boss_sprite(
         damage_classes,
         allowed_items=allowed_items,
         allowed_abilities=boss_allowed_abilities,
+        medallion_exception_sprite_ids=frozenset((sprite_id,)),
     )
     cache[cache_key] = plans
     return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
@@ -1897,6 +1947,7 @@ def can_hit_boss_sprite_for_at_least_damage(
         damage_classes,
         allowed_items=allowed_items,
         allowed_abilities=boss_allowed_abilities,
+        medallion_exception_sprite_ids=frozenset((sprite_id,)),
     )
     cache[cache_key] = plans
     return _can_execute_enemy_kill_plans((plans,), _get_enemy_clear_resource_budget(state, player))
@@ -1906,8 +1957,14 @@ def _get_transform_source_plans(
     state: CollectionState,
     player: int,
     transform_damage_classes: set[int],
+    sprite_id: int | None = None,
 ) -> tuple[ResourceCosts, ...]:
-    return _build_single_hit_plans_for_damage_classes(state, player, transform_damage_classes)
+    return _build_single_hit_plans_for_damage_classes(
+        state,
+        player,
+        transform_damage_classes,
+        medallion_exception_sprite_ids=frozenset((sprite_id,)) if sprite_id is not None else frozenset(),
+    )
 
 
 def _get_buzzblob_disable_follow_up_plans(
@@ -1929,6 +1986,7 @@ def _get_buzzblob_disable_follow_up_plans(
         disable_damage_classes,
         allowed_items=BUZZBLOB_DISABLE_ITEMS,
         allowed_abilities=BUZZBLOB_DISABLE_ABILITIES,
+        medallion_exception_sprite_ids=frozenset((combat_reference_id,)),
     )
     if not disable_plans:
         return tuple()
@@ -1985,6 +2043,7 @@ def _get_transform_attack_plans(
         state,
         player,
         _get_blob_transform_damage_classes(requirement, combat_model),
+        combat_reference_id,
     )
     if not transform_source_plans:
         return tuple()
@@ -2066,7 +2125,12 @@ def _get_enemy_kill_plans(
             frozenset({FREEZE_EFFECT}),
             combat_model,
         ))
-        plans.update(_build_single_hit_plans_for_damage_classes(state, player, freeze_damage_classes))
+        plans.update(_build_single_hit_plans_for_damage_classes(
+            state,
+            player,
+            freeze_damage_classes,
+            medallion_exception_sprite_ids=frozenset((requirement.sprite_id,)),
+        ))
     if requirement.sprite_name == "Floating Stalfos Head" and direct_kill_delivery_override is not None:
         plans.update(_build_single_hit_plans_for_damage_classes(
             state,
@@ -2074,6 +2138,7 @@ def _get_enemy_kill_plans(
             {0, 1},
             allowed_items=direct_kill_delivery_override.items,
             allowed_abilities=direct_kill_delivery_override.abilities,
+            medallion_exception_sprite_ids=frozenset((requirement.sprite_id,)),
         ))
     if requirement.sprite_name == "Buzzblob":
         plans.update(
@@ -2129,8 +2194,8 @@ def _get_enemy_kill_plans_after_room_wide_medallions(
     return result
 
 
-def _get_available_room_wide_medallions(state: CollectionState, player: int) -> tuple[str, ...]:
-    if not _can_ready_medallion(state, player):
+def _get_available_room_wide_medallions(state: CollectionState, player: int, room_enemies: tuple) -> tuple[str, ...]:
+    if not _can_use_medallion_damage_in_room(state, player, room_enemies):
         return tuple()
     return tuple(
         medallion
@@ -2363,11 +2428,41 @@ def _get_executable_enemy_kill_costs(
 
 
 def _can_ready_medallion(state: CollectionState, player: int) -> bool:
-    return state.multiworld.worlds[player].options.swordless or has_sword(state, player)
+    world = state.multiworld.worlds[player]
+    return world.options.item_functionality == 'easy' or has_sword(state, player)
+
+
+def _can_use_medallion_damage_against_sprite(state: CollectionState, player: int, sprite_id: int) -> bool:
+    return _can_use_medallion_damage_with_exception_sprites(state, player, frozenset((sprite_id,)))
+
+
+def _can_use_medallion_damage_with_exception_sprites(
+    state: CollectionState,
+    player: int,
+    sprite_ids: frozenset[int],
+) -> bool:
+    if _can_ready_medallion(state, player):
+        return True
+    return (
+        state.multiworld.worlds[player].options.swordless
+        and bool(sprite_ids.intersection(SWORDLESS_MEDALLION_EXCEPTION_SPRITE_IDS))
+    )
+
+
+def _can_use_medallion_damage_in_room(state: CollectionState, player: int, room_enemies: tuple) -> bool:
+    return _can_use_medallion_damage_with_exception_sprites(
+        state,
+        player,
+        frozenset(_get_enemy_requirement(enemy).sprite_id for enemy in room_enemies),
+    )
 
 
 def _can_cast_medallion(state: CollectionState, player: int) -> bool:
     return _can_ready_medallion(state, player) and can_extend_magic(state, player, 16)
+
+
+def can_use_medallions(state: CollectionState, player: int) -> bool:
+    return _can_ready_medallion(state, player)
 
 
 def can_clear_standard_escape(state: CollectionState, player: int) -> bool:
@@ -2436,9 +2531,7 @@ def has_fire_source(state: CollectionState, player: int) -> bool:
 
 def can_melt_things(state: CollectionState, player: int) -> bool:
     return state.has('Fire Rod', player) or \
-        (state.has('Bombos', player) and
-         (state.multiworld.worlds[player].options.swordless or
-          has_sword(state, player)))
+        (state.has('Bombos', player) and _can_ready_medallion(state, player))
 
 
 def has_misery_mire_medallion(state: CollectionState, player: int) -> bool:

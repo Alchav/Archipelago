@@ -63,7 +63,7 @@ from .EnemyLogicTargets import (
     TURTLE_ROCK_BIG_CHEST_ROOM_TOP_LEFT,
     get_enemy_clear_target_enemies,
 )
-from .enemizer_data.room_tags import ROOM_TAGS
+from .enemizer_data.room_tags import ROOM_TAG_NAMES, ROOM_TAGS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
@@ -250,6 +250,31 @@ HERA_SWITCH_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
     TAG_SWITCH_OPENS_DOOR_HOLD,
 )
+POT_SWITCH_TAGS = frozenset((
+    TAG_SWITCH_OPENS_DOOR_TOGGLE,
+    TAG_SWITCH_OPENS_DOOR_HOLD,
+    TAG_TRIGGER_ACTIVATED_CHEST,
+    TAG_USE_SWITCH_TO_BOMB_WALL,
+))
+POT_SWITCH_EXCEPTION_ROOMS = frozenset((
+    EASTERN_BIG_CHEST_ROOM_ID,
+    EASTERN_DARK_SQUARE_ROOM_ID,
+    EASTERN_ENTRANCE_ROOM_ID,
+    EASTERN_PRE_BOSS_ROOM_ID,
+    ICE_PALACE_BOMB_FLOOR_ROOM_ID,
+))
+KILL_ENEMY_TO_OPEN_TAGS = frozenset((
+    TAG_NW_KILL_ENEMY_TO_OPEN,
+    TAG_NE_KILL_ENEMY_TO_OPEN,
+    TAG_SW_KILL_ENEMY_TO_OPEN,
+    TAG_SE_KILL_ENEMY_TO_OPEN,
+    TAG_W_KILL_ENEMY_TO_OPEN,
+    TAG_E_KILL_ENEMY_TO_OPEN,
+    TAG_N_KILL_ENEMY_TO_OPEN,
+    TAG_S_KILL_ENEMY_TO_OPEN,
+    TAG_CLEAR_QUADRANT_TO_OPEN,
+    TAG_CLEAR_ROOM_TO_OPEN,
+))
 HERA_BIG_KEY_CHEST_SWITCH_POTS = frozenset(((76, 20), (112, 20)))
 HERA_TILE_ROOM_WEST_SWITCH_POTS = frozenset(((12, 11), (16, 11), (16, 12), (24, 12), (32, 12), (40, 12)))
 GT_BLOCK_PUZZLE_TOP_RIGHT_SWITCH_POTS = frozenset(((76, 12), (112, 12)))
@@ -572,6 +597,98 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
     cane_puzzle_dungeons = _choose_cane_puzzle_dungeons(world)
     turtle_rock_peg_order = list(TURTLE_ROCK_VANILLA_PEG_ORDER)
     world.random.shuffle(turtle_rock_peg_order)
+    hera_big_key_chest_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        HERA_TILE_ROOM_ID,
+        HERA_BIG_KEY_CHEST_SWITCH_POTS,
+    )
+    gt_block_puzzle_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_BLOCK_PUZZLE_ROOM_ID,
+        GT_BLOCK_PUZZLE_TOP_RIGHT_SWITCH_POTS,
+        allow_key=False,
+    )
+    gt_tile_torch_puzzle_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_TILE_TORCH_PUZZLE_ROOM_ID,
+        GT_TILE_TORCH_PUZZLE_EAST_SWITCH_POTS,
+        allow_key=False,
+    )
+    gt_torches_1_toggle_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_TORCHES_1_ROOM_ID,
+        GT_TORCHES_1_SWITCH_POTS,
+        allow_key=False,
+    )
+    gt_torches_1_hold_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_TORCHES_1_ROOM_ID,
+        GT_TORCHES_1_HOLD_SWITCH_POTS,
+        allow_key=False,
+    )
+    turtle_rock_crystaroller_switch_pot_candidates = _switch_item_pot_candidates(
+        world,
+        TURTLE_ROCK_CRYSTAROLLER_ROOM_ID,
+        TURTLE_ROCK_CRYSTAROLLER_SWITCH_POTS,
+        allow_key=False,
+    )
+    gt_gauntlet_123_northwest_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_GAUNTLET_123_ROOM_ID,
+        GT_GAUNTLET_123_NORTHWEST_SWITCH_POTS,
+    )
+    gt_gauntlet_123_southwest_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_GAUNTLET_123_ROOM_ID,
+        GT_GAUNTLET_123_SOUTHWEST_SWITCH_POTS,
+    )
+    gt_mimics_northwest_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_MIMICS_ROOM_ID,
+        GT_MIMICS_NORTHWEST_SWITCH_POTS,
+    )
+    gt_mimics_southeast_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_MIMICS_ROOM_ID,
+        GT_MIMICS_SOUTHEAST_SWITCH_POTS,
+    )
+    gt_gauntlet_45_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_GAUNTLET_45_ROOM_ID,
+        GT_GAUNTLET_45_SOUTHWEST_SWITCH_POTS,
+    )
+    gt_winder_warp_maze_southeast_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_WINDER_WARP_MAZE_ROOM_ID,
+        GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS,
+    )
+    gt_winder_warp_maze_north_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        GT_WINDER_WARP_MAZE_ROOM_ID,
+        GT_WINDER_WARP_MAZE_NORTH_SWITCH_POTS,
+    )
+    ice_palace_hole_to_kholdstare_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID,
+        ICE_PALACE_HOLE_TO_KHOLDSTARE_SWITCH_POTS,
+    )
+    skull_woods_gibdo_torch_hold_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
+        SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS,
+        allow_key=False,
+    )
+    skull_woods_gibdo_torch_toggle_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
+        SKULL_WOODS_GIBDO_TORCH_TOGGLE_SWITCH_POTS,
+        allow_key=False,
+    )
+    hera_hardhat_beetles_switch_pot_candidates = _switch_pot_candidates(
+        world,
+        HERA_HARDHAT_BEETLES_ROOM_ID,
+        HERA_HARDHAT_BEETLES_SWITCH_POTS,
+    )
 
     def filtered_choices(
         choices,
@@ -601,17 +718,17 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         return world.random.choice(choices)
 
     hera_big_key_chest_tag = choice(
-        get_hera_big_key_chest_tag_choices(world),
+        get_hera_big_key_chest_tag_choices(world, hera_big_key_chest_switch_pot_candidates),
         vanilla_choice=TAG_LIGHT_TORCHES_TO_GET_CHEST,
     )
     hera_tile_room_tag = choice(get_hera_tile_room_tag_choices(world), vanilla_choice=TAG_NW_KILL_ENEMY_TO_OPEN)
     gt_block_puzzle_tag = choice(
-        get_gt_block_puzzle_tag_choices(world),
+        get_gt_block_puzzle_tag_choices(world, gt_block_puzzle_switch_pot_candidates),
         DUNGEON_GANONS_TOWER,
         vanilla_choice=TAG_NE_MOVE_BLOCK_TO_OPEN,
     )
     gt_tile_torch_puzzle_tag = choice(
-        get_gt_tile_torch_puzzle_tag_choices(world),
+        get_gt_tile_torch_puzzle_tag_choices(world, gt_tile_torch_puzzle_switch_pot_candidates),
         vanilla_choice=TAG_LIGHT_TORCHES_TO_OPEN,
     )
     misery_mire_dark_cane_room_tag = choice(
@@ -620,7 +737,11 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         vanilla_choice=TAG_SWITCH_OPENS_DOOR_HOLD,
     )
     gt_torches_1_tag = choice(
-        get_gt_torches_1_tag_choices(world),
+        get_gt_torches_1_tag_choices(
+            world,
+            gt_torches_1_toggle_switch_pot_candidates,
+            gt_torches_1_hold_switch_pot_candidates,
+        ),
         DUNGEON_GANONS_TOWER,
         vanilla_choice=TAG_LIGHT_TORCHES_TO_OPEN,
     )
@@ -649,7 +770,10 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         vanilla_choice=TAG_LIGHT_TORCHES_TO_OPEN,
     )
     ice_palace_hole_to_kholdstare_tag = choice(
-        get_ice_palace_hole_to_kholdstare_tag_choices(world),
+        get_ice_palace_hole_to_kholdstare_tag_choices(
+            world,
+            ice_palace_hole_to_kholdstare_switch_pot_candidates,
+        ),
         vanilla_choice=TAG_PULL_LEVER_TO_OPEN,
     )
     eastern_pre_armos_tag = choice(
@@ -667,11 +791,15 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         vanilla_choice=TAG_NW_KILL_ENEMY_TO_OPEN,
     )
     skull_woods_gibdo_torch_room_tag = choice(
-        get_skull_woods_gibdo_torch_tag_choices(world),
+        get_skull_woods_gibdo_torch_tag_choices(
+            world,
+            skull_woods_gibdo_torch_hold_switch_pot_candidates,
+            skull_woods_gibdo_torch_toggle_switch_pot_candidates,
+        ),
         DUNGEON_SKULL_WOODS,
         vanilla_choice=TAG_LIGHT_TORCHES_TO_OPEN,
     )
-    skull_woods_big_chest_room_switch_pot = _choose_skull_woods_big_chest_switch_pot(world)
+    skull_woods_big_chest_switch_pot_candidates = _skull_woods_big_chest_switch_pot_candidates(world)
     skull_woods_big_chest_trap_sprite_address = _choose_skull_woods_big_chest_trap_sprite(world)
     skull_woods_big_chest_trap_id = (
         SKULL_WOODS_BIG_CHEST_ROPE_TRAP_ID
@@ -681,14 +809,23 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
     skull_woods_big_chest_room_tag_2 = (
         TAG_USE_SWITCH_TO_BOMB_WALL
         if (
-            skull_woods_big_chest_room_switch_pot is not None
+            skull_woods_big_chest_switch_pot_candidates
             and skull_woods_big_chest_trap_sprite_address is not None
             and world.random.choice((False, True))
         )
         else TAG_USE_LEVER_TO_BOMB_WALL
     )
+    skull_woods_big_chest_room_switch_pot = (
+        world.random.choice(skull_woods_big_chest_switch_pot_candidates)
+        if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL
+        else None
+    )
     gt_gauntlet_123_room_variant = choice(
-        get_gt_gauntlet_123_variants(world),
+        get_gt_gauntlet_123_variants(
+            world,
+            gt_gauntlet_123_northwest_switch_pot_candidates,
+            gt_gauntlet_123_southwest_switch_pot_candidates,
+        ),
         vanilla_choice=ROOM_VARIANT_VANILLA,
     )
     ice_palace_conveyor_hellway_tag = choice(
@@ -697,7 +834,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         vanilla_choice=TAG_NE_KILL_ENEMY_TO_OPEN,
     )
     hera_hardhat_beetles_room_tag_2 = choice(
-        get_hera_hardhat_beetles_room_tag_2_choices(world),
+        get_hera_hardhat_beetles_room_tag_2_choices(world, hera_hardhat_beetles_switch_pot_candidates),
         DUNGEON_HERA,
         vanilla_choice=TAG_SE_KILL_ENEMY_TO_OPEN,
     )
@@ -711,17 +848,26 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         DUNGEON_PALACE_OF_DARKNESS,
         vanilla_choice=TAG_SW_KILL_ENEMY_TO_OPEN,
     )
-    gt_mimics_room_variant = choice(get_gt_mimics_variants(world), vanilla_choice=ROOM_VARIANT_VANILLA)
+    gt_mimics_room_variant = choice(
+        get_gt_mimics_variants(
+            world,
+            gt_mimics_northwest_switch_pot_candidates,
+            gt_mimics_southeast_switch_pot_candidates,
+        ),
+        vanilla_choice=ROOM_VARIANT_VANILLA,
+    )
     gt_gauntlet_45_room_variant = choice(
-        get_gt_gauntlet_45_variants(world),
+        get_gt_gauntlet_45_variants(world, gt_gauntlet_45_switch_pot_candidates),
         vanilla_choice=ROOM_VARIANT_VANILLA,
     )
     gt_winder_warp_maze_tag_1_choices = _filter_cane_puzzle_choices(
-        tuple(get_gt_winder_warp_maze_tag_1_choices(world)),
+        tuple(get_gt_winder_warp_maze_tag_1_choices(world, gt_winder_warp_maze_southeast_switch_pot_candidates)),
         cane_puzzle_dungeons,
         None,
     )
-    gt_winder_warp_maze_tag_2_choices = tuple(get_gt_winder_warp_maze_tag_2_choices(world))
+    gt_winder_warp_maze_tag_2_choices = tuple(
+        get_gt_winder_warp_maze_tag_2_choices(world, gt_winder_warp_maze_north_switch_pot_candidates)
+    )
     gt_winder_warp_maze_tag_pairs = tuple(
         (tag_1, tag_2)
         for tag_1 in gt_winder_warp_maze_tag_1_choices
@@ -744,7 +890,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         vanilla_choice=TAG_SWITCH_OPENS_DOOR_TOGGLE,
     )
     turtle_rock_crystaroller_room_variant = choice(
-        get_turtle_rock_crystaroller_variants(world),
+        get_turtle_rock_crystaroller_variants(world, turtle_rock_crystaroller_switch_pot_candidates),
         vanilla_choice=ROOM_VARIANT_VANILLA,
     )
     swamp_statue_room_tag = choice(
@@ -773,7 +919,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             ice_palace_bomb_jump_room_tag = TAG_N_KILL_ENEMY_TO_OPEN
         else:
             ice_palace_bomb_jump_room_tag_2 = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    return PuzzleShuffleState(
+    state = PuzzleShuffleState(
         desert_map_chest_tag=choice(
             get_desert_map_chest_tag_choices(world),
             vanilla_choice=TAG_TRIGGER_ACTIVATED_CHEST,
@@ -790,10 +936,11 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         ),
         hera_big_key_chest_tag=hera_big_key_chest_tag,
         hera_tile_room_tag=hera_tile_room_tag,
-        hera_big_key_chest_switch_pot=_choose_switch_pot(
+        hera_big_key_chest_switch_pot=_choose_switch_pot_from_candidates(
             world,
             HERA_TILE_ROOM_ID,
             HERA_BIG_KEY_CHEST_SWITCH_POTS,
+            hera_big_key_chest_switch_pot_candidates,
         ) if hera_big_key_chest_tag == TAG_TRIGGER_ACTIVATED_CHEST else None,
         hera_tile_room_switch_pot=_choose_switch_pot(
             world,
@@ -806,18 +953,18 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             DUNGEON_GANONS_TOWER,
             vanilla_choice=TAG_SWITCH_OPENS_DOOR_HOLD,
         ),
-        gt_block_puzzle_switch_pot=_choose_switch_pot(
+        gt_block_puzzle_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_BLOCK_PUZZLE_ROOM_ID,
             GT_BLOCK_PUZZLE_TOP_RIGHT_SWITCH_POTS,
-            allow_key=False,
+            gt_block_puzzle_switch_pot_candidates,
         ) if gt_block_puzzle_tag in HERA_SWITCH_TAG_CHOICES else None,
         gt_tile_torch_puzzle_tag=gt_tile_torch_puzzle_tag,
-        gt_tile_torch_puzzle_switch_pot=_choose_switch_pot(
+        gt_tile_torch_puzzle_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_TILE_TORCH_PUZZLE_ROOM_ID,
             GT_TILE_TORCH_PUZZLE_EAST_SWITCH_POTS,
-            allow_key=False,
+            gt_tile_torch_puzzle_switch_pot_candidates,
         ) if gt_tile_torch_puzzle_tag in HERA_SWITCH_TAG_CHOICES else None,
         misery_mire_dark_cane_room_tag=misery_mire_dark_cane_room_tag,
         misery_mire_dark_cane_room_switch_pot=_choose_switch_pot(
@@ -827,13 +974,15 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             allow_key=False,
         ) if misery_mire_dark_cane_room_tag == TAG_SWITCH_OPENS_DOOR_TOGGLE else None,
         gt_torches_1_tag=gt_torches_1_tag,
-        gt_torches_1_switch_pot=_choose_switch_pot(
+        gt_torches_1_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_TORCHES_1_ROOM_ID,
             GT_TORCHES_1_HOLD_SWITCH_POTS
             if gt_torches_1_tag == TAG_SWITCH_OPENS_DOOR_HOLD
             else GT_TORCHES_1_SWITCH_POTS,
-            allow_key=False,
+            gt_torches_1_hold_switch_pot_candidates
+            if gt_torches_1_tag == TAG_SWITCH_OPENS_DOOR_HOLD
+            else gt_torches_1_toggle_switch_pot_candidates,
         ) if gt_torches_1_tag in HERA_SWITCH_TAG_CHOICES else None,
         ice_palace_ice_floor_room_tag=ice_palace_ice_floor_room_tag,
         eastern_stalfos_room_tag=eastern_stalfos_room_tag,
@@ -886,10 +1035,11 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             TURTLE_ROCK_TORCH_PUZZLE_SWITCH_POTS,
         ) if turtle_rock_torch_puzzle_tag in HERA_SWITCH_TAG_CHOICES else None,
         ice_palace_hole_to_kholdstare_tag=ice_palace_hole_to_kholdstare_tag,
-        ice_palace_hole_to_kholdstare_switch_pot=_choose_switch_pot(
+        ice_palace_hole_to_kholdstare_switch_pot=_choose_switch_pot_from_candidates(
             world,
             ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID,
             ICE_PALACE_HOLE_TO_KHOLDSTARE_SWITCH_POTS,
+            ice_palace_hole_to_kholdstare_switch_pot_candidates,
         ) if ice_palace_hole_to_kholdstare_tag in HERA_SWITCH_TAG_CHOICES else None,
         ice_palace_hole_to_kholdstare_pull_switch_moved=choice((False, True), vanilla_choice=False),
         eastern_pre_armos_tag=eastern_pre_armos_tag,
@@ -918,11 +1068,11 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             vanilla_choice=ROOM_VARIANT_VANILLA,
         ),
         turtle_rock_crystaroller_room_variant=turtle_rock_crystaroller_room_variant,
-        turtle_rock_crystaroller_room_switch_pot=_choose_switch_pot_with_item(
+        turtle_rock_crystaroller_room_switch_pot=_choose_switch_pot_from_candidates(
             world,
             TURTLE_ROCK_CRYSTAROLLER_ROOM_ID,
             TURTLE_ROCK_CRYSTAROLLER_SWITCH_POTS,
-            allow_key=False,
+            turtle_rock_crystaroller_switch_pot_candidates,
         ) if turtle_rock_crystaroller_room_variant in (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH) else None,
         swamp_floodway_room_variant=choice(SWAMP_FLOODWAY_VARIANTS, vanilla_choice=ROOM_VARIANT_VANILLA),
         pod_turtle_room_tag=choice(get_pod_turtle_room_tag_choices(world), vanilla_choice=TAG_SW_KILL_ENEMY_TO_OPEN),
@@ -963,10 +1113,11 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         pod_map_chest_room_tag=pod_map_chest_room_tag,
         pod_map_chest_room_switch_pot=pod_map_chest_room_switch_pot,
         hera_hardhat_beetles_room_tag_2=hera_hardhat_beetles_room_tag_2,
-        hera_hardhat_beetles_room_switch_pot=_choose_switch_pot(
+        hera_hardhat_beetles_room_switch_pot=_choose_switch_pot_from_candidates(
             world,
             HERA_HARDHAT_BEETLES_ROOM_ID,
             HERA_HARDHAT_BEETLES_SWITCH_POTS,
+            hera_hardhat_beetles_switch_pot_candidates,
         ) if hera_hardhat_beetles_room_tag_2 in HERA_SWITCH_TAG_CHOICES else None,
         ice_palace_conveyor_hellway_tag=ice_palace_conveyor_hellway_tag,
         ice_palace_conveyor_hellway_switch_pot=_choose_switch_pot(
@@ -985,13 +1136,15 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             THIEVES_TOWN_JAIL_CELLS_NORTHWEST_SWITCH_POTS,
         ) if thieves_town_jail_cells_tag in HERA_SWITCH_TAG_CHOICES else None,
         skull_woods_gibdo_torch_room_tag=skull_woods_gibdo_torch_room_tag,
-        skull_woods_gibdo_torch_room_switch_pot=_choose_switch_pot(
+        skull_woods_gibdo_torch_room_switch_pot=_choose_switch_pot_from_candidates(
             world,
             SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
             SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS
             if skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD
             else SKULL_WOODS_GIBDO_TORCH_TOGGLE_SWITCH_POTS,
-            allow_key=False,
+            skull_woods_gibdo_torch_hold_switch_pot_candidates
+            if skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD
+            else skull_woods_gibdo_torch_toggle_switch_pot_candidates,
         ) if skull_woods_gibdo_torch_room_tag in HERA_SWITCH_TAG_CHOICES else None,
         pod_south_mimics_room_tag=pod_south_mimics_room_tag,
         pod_south_mimics_room_switch_pot=_choose_switch_pot(
@@ -1015,15 +1168,17 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         skull_woods_big_chest_trap_id=skull_woods_big_chest_trap_id
         if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL else None,
         gt_gauntlet_123_room_variant=gt_gauntlet_123_room_variant,
-        gt_gauntlet_123_room_northwest_switch_pot=_choose_switch_pot(
+        gt_gauntlet_123_room_northwest_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_GAUNTLET_123_ROOM_ID,
             GT_GAUNTLET_123_NORTHWEST_SWITCH_POTS,
+            gt_gauntlet_123_northwest_switch_pot_candidates,
         ) if gt_gauntlet_123_room_variant == ROOM_VARIANT_TOGGLE_SWITCH else None,
-        gt_gauntlet_123_room_southwest_switch_pot=_choose_switch_pot(
+        gt_gauntlet_123_room_southwest_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_GAUNTLET_123_ROOM_ID,
             GT_GAUNTLET_123_SOUTHWEST_SWITCH_POTS,
+            gt_gauntlet_123_southwest_switch_pot_candidates,
         ) if gt_gauntlet_123_room_variant in (ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_KILL_ENEMIES) else None,
         ice_palace_spike_room_tag=choice(
             get_ice_palace_spike_room_tag_choices(world),
@@ -1043,15 +1198,17 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             vanilla_choice=TAG_SWITCH_OPENS_DOOR_TOGGLE,
         ),
         gt_mimics_room_variant=gt_mimics_room_variant,
-        gt_mimics_room_northwest_switch_pot=_choose_switch_pot(
+        gt_mimics_room_northwest_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_MIMICS_ROOM_ID,
             GT_MIMICS_NORTHWEST_SWITCH_POTS,
+            gt_mimics_northwest_switch_pot_candidates,
         ) if gt_mimics_room_variant in (2, 4) else None,
-        gt_mimics_room_southeast_switch_pot=_choose_switch_pot(
+        gt_mimics_room_southeast_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_MIMICS_ROOM_ID,
             GT_MIMICS_SOUTHEAST_SWITCH_POTS,
+            gt_mimics_southeast_switch_pot_candidates,
         ) if gt_mimics_room_variant == 4 else None,
         gt_mimics_push_block_target=choice(GT_MIMICS_PUSH_BLOCK_TARGETS),
         gt_invisible_floor_ba_target=world.random.choice(
@@ -1069,22 +1226,25 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         gt_big_chest_push_block_target=world.random.choice(GT_BIG_CHEST_PUSH_BLOCK_TARGETS),
         gt_randomizer_room_floor_target=world.random.choice(GT_RANDOMIZER_ROOM_FLOOR_TARGETS),
         gt_gauntlet_45_room_variant=gt_gauntlet_45_room_variant,
-        gt_gauntlet_45_room_switch_pot=_choose_switch_pot(
+        gt_gauntlet_45_room_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_GAUNTLET_45_ROOM_ID,
             GT_GAUNTLET_45_SOUTHWEST_SWITCH_POTS,
+            gt_gauntlet_45_switch_pot_candidates,
         ) if gt_gauntlet_45_room_variant == ROOM_VARIANT_TOGGLE_SWITCH else None,
         gt_winder_warp_maze_tag_1=gt_winder_warp_maze_tag_1,
         gt_winder_warp_maze_tag_2=gt_winder_warp_maze_tag_2,
-        gt_winder_warp_maze_southeast_switch_pot=_choose_switch_pot(
+        gt_winder_warp_maze_southeast_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_WINDER_WARP_MAZE_ROOM_ID,
             GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS,
+            gt_winder_warp_maze_southeast_switch_pot_candidates,
         ) if gt_winder_warp_maze_tag_1 in HERA_SWITCH_TAG_CHOICES else None,
-        gt_winder_warp_maze_north_switch_pot=_choose_switch_pot(
+        gt_winder_warp_maze_north_switch_pot=_choose_switch_pot_from_candidates(
             world,
             GT_WINDER_WARP_MAZE_ROOM_ID,
             GT_WINDER_WARP_MAZE_NORTH_SWITCH_POTS,
+            gt_winder_warp_maze_north_switch_pot_candidates,
         ) if gt_winder_warp_maze_tag_2 == TAG_TRIGGER_ACTIVATED_CHEST else None,
         desert_west_entrance_tag=desert_west_entrance_tag,
         desert_west_entrance_push_block_target=choice(DESERT_WEST_ENTRANCE_PUSH_BLOCK_TARGETS),
@@ -1094,6 +1254,8 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         checkerboard_cave_push_block_source=choice(CHECKERBOARD_CAVE_PUSH_BLOCK_SOURCES, vanilla_choice=None),
         turtle_rock_peg_order=tuple(turtle_rock_peg_order),
     )
+    validate_puzzle_shuffle_switch_pots(world, state)
+    return state
 
 
 def get_turtle_rock_peg_order_hint(state: PuzzleShuffleState | None) -> str:
@@ -1395,11 +1557,16 @@ def get_desert_final_section_entrance_tag_choices(world: "ALTTPWorld") -> tuple[
     return DESERT_FINAL_SECTION_ENTRANCE_BASE_TAG_CHOICES
 
 
-def get_hera_big_key_chest_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_hera_big_key_chest_tag_choices(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [TAG_LIGHT_TORCHES_TO_GET_CHEST]
     if _enemy_clear_target_has_valid_kill_tag_enemies(world, HERA_TILE_ROOM_SOUTHEAST):
         choices.append(TAG_SE_KILL_ENEMY_FOR_CHEST)
-    if _filled_pot_positions_in_target(world, HERA_TILE_ROOM_ID, HERA_BIG_KEY_CHEST_SWITCH_POTS):
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_pot_candidates(world, HERA_TILE_ROOM_ID, HERA_BIG_KEY_CHEST_SWITCH_POTS)
+    if switch_pot_candidates:
         choices.append(TAG_TRIGGER_ACTIVATED_CHEST)
     return tuple(choices)
 
@@ -1413,47 +1580,65 @@ def get_hera_tile_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
     return tuple(choices)
 
 
-def get_gt_block_puzzle_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_block_puzzle_tag_choices(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [TAG_NE_MOVE_BLOCK_TO_OPEN]
     if _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST):
         choices.append(TAG_NE_KILL_ENEMY_TO_OPEN)
-    if _filled_pot_positions_in_target(
-        world,
-        GT_BLOCK_PUZZLE_ROOM_ID,
-        GT_BLOCK_PUZZLE_TOP_RIGHT_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_BLOCK_PUZZLE_ROOM_ID,
+            GT_BLOCK_PUZZLE_TOP_RIGHT_SWITCH_POTS,
+            allow_key=False,
+        )
+    if switch_pot_candidates:
         choices.extend(HERA_SWITCH_TAG_CHOICES)
     return tuple(choices)
 
 
-def get_gt_tile_torch_puzzle_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_tile_torch_puzzle_tag_choices(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = list(GT_TILE_TORCH_PUZZLE_TAG_CHOICES)
-    if _filled_pot_positions_in_target(
-        world,
-        GT_TILE_TORCH_PUZZLE_ROOM_ID,
-        GT_TILE_TORCH_PUZZLE_EAST_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_TILE_TORCH_PUZZLE_ROOM_ID,
+            GT_TILE_TORCH_PUZZLE_EAST_SWITCH_POTS,
+            allow_key=False,
+        )
+    if switch_pot_candidates:
         choices.append(TAG_SWITCH_OPENS_DOOR_TOGGLE)
     return tuple(choices)
 
 
-def get_gt_torches_1_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_torches_1_tag_choices(
+    world: "ALTTPWorld",
+    toggle_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+    hold_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = list(GT_TORCHES_1_TAG_CHOICES)
-    if _filled_pot_positions_in_target(
-        world,
-        GT_TORCHES_1_ROOM_ID,
-        GT_TORCHES_1_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if toggle_switch_pot_candidates is None:
+        toggle_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_TORCHES_1_ROOM_ID,
+            GT_TORCHES_1_SWITCH_POTS,
+            allow_key=False,
+        )
+    if hold_switch_pot_candidates is None:
+        hold_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_TORCHES_1_ROOM_ID,
+            GT_TORCHES_1_HOLD_SWITCH_POTS,
+            allow_key=False,
+        )
+    if toggle_switch_pot_candidates:
         choices.append(TAG_SWITCH_OPENS_DOOR_TOGGLE)
-    if _filled_pot_positions_in_target(
-        world,
-        GT_TORCHES_1_ROOM_ID,
-        GT_TORCHES_1_HOLD_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if hold_switch_pot_candidates:
         choices.append(TAG_SWITCH_OPENS_DOOR_HOLD)
     return tuple(choices)
 
@@ -1483,57 +1668,69 @@ def get_hyrule_castle_switch_room_variants(world: "ALTTPWorld") -> tuple[int, ..
     return tuple(choices)
 
 
-def get_gt_gauntlet_123_variants(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_gauntlet_123_variants(
+    world: "ALTTPWorld",
+    northwest_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+    southwest_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [ROOM_VARIANT_VANILLA]
-    has_northwest_switch_pot = bool(_filled_pot_positions_in_target(
-        world,
-        GT_GAUNTLET_123_ROOM_ID,
-        GT_GAUNTLET_123_NORTHWEST_SWITCH_POTS,
-    ))
-    has_southwest_switch_pot = bool(_filled_pot_positions_in_target(
-        world,
-        GT_GAUNTLET_123_ROOM_ID,
-        GT_GAUNTLET_123_SOUTHWEST_SWITCH_POTS,
-    ))
+    if northwest_switch_pot_candidates is None:
+        northwest_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_GAUNTLET_123_ROOM_ID,
+            GT_GAUNTLET_123_NORTHWEST_SWITCH_POTS,
+        )
+    if southwest_switch_pot_candidates is None:
+        southwest_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_GAUNTLET_123_ROOM_ID,
+            GT_GAUNTLET_123_SOUTHWEST_SWITCH_POTS,
+        )
     if (
-        has_northwest_switch_pot
-        and has_southwest_switch_pot
+        northwest_switch_pot_candidates
+        and southwest_switch_pot_candidates
         and _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_GAUNTLET_123_NORTHEAST)
     ):
         choices.append(ROOM_VARIANT_TOGGLE_SWITCH)
     if (
-        has_southwest_switch_pot
+        southwest_switch_pot_candidates
         and _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_GAUNTLET_123_NORTH)
     ):
         choices.append(ROOM_VARIANT_KILL_ENEMIES)
     return tuple(choices)
 
 
-def get_gt_mimics_variants(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_mimics_variants(
+    world: "ALTTPWorld",
+    northwest_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+    southeast_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [ROOM_VARIANT_VANILLA]
-    has_northwest_switch_pot = bool(_filled_pot_positions_in_target(
-        world,
-        GT_MIMICS_ROOM_ID,
-        GT_MIMICS_NORTHWEST_SWITCH_POTS,
-    ))
-    has_southeast_switch_pot = bool(_filled_pot_positions_in_target(
-        world,
-        GT_MIMICS_ROOM_ID,
-        GT_MIMICS_SOUTHEAST_SWITCH_POTS,
-    ))
+    if northwest_switch_pot_candidates is None:
+        northwest_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_MIMICS_ROOM_ID,
+            GT_MIMICS_NORTHWEST_SWITCH_POTS,
+        )
+    if southeast_switch_pot_candidates is None:
+        southeast_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_MIMICS_ROOM_ID,
+            GT_MIMICS_SOUTHEAST_SWITCH_POTS,
+        )
     if (
         _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_MIMICS_BOTTOM_HALF)
         and _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_MIMICS_NORTHWEST)
     ):
         choices.append(1)
     if (
-        has_northwest_switch_pot
+        northwest_switch_pot_candidates
         and _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_MIMICS_BOTTOM_HALF)
     ):
         choices.append(2)
     if (
-        has_northwest_switch_pot
-        and has_southeast_switch_pot
+        northwest_switch_pot_candidates
+        and southeast_switch_pot_candidates
         and _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_MIMICS_SOUTHWEST)
     ):
         choices.append(4)
@@ -1547,25 +1744,52 @@ def get_gt_spike_pit_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
     return tuple(choices)
 
 
-def get_gt_gauntlet_45_variants(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_gauntlet_45_variants(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [GT_GAUNTLET_45_VARIANTS[0]]
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_GAUNTLET_45_ROOM_ID,
+            GT_GAUNTLET_45_SOUTHWEST_SWITCH_POTS,
+        )
     if (
-        _filled_pot_positions_in_target(world, GT_GAUNTLET_45_ROOM_ID, GT_GAUNTLET_45_SOUTHWEST_SWITCH_POTS)
+        switch_pot_candidates
         and _enemy_clear_target_has_valid_kill_tag_enemies(world, GANONS_TOWER_GAUNTLET_45_NORTHWEST)
     ):
         choices.extend(GT_GAUNTLET_45_VARIANTS[1:])
     return tuple(choices)
 
 
-def get_gt_winder_warp_maze_tag_1_choices(world: "ALTTPWorld") -> tuple[int, ...]:
-    if _filled_pot_positions_in_target(world, GT_WINDER_WARP_MAZE_ROOM_ID, GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS):
+def get_gt_winder_warp_maze_tag_1_choices(
+    world: "ALTTPWorld",
+    southeast_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
+    if southeast_switch_pot_candidates is None:
+        southeast_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_WINDER_WARP_MAZE_ROOM_ID,
+            GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS,
+        )
+    if southeast_switch_pot_candidates:
         return GT_WINDER_WARP_MAZE_TAG_1_CHOICES
-    return (TAG_SWITCH_OPENS_DOOR_TOGGLE,)
+    return (TAG_NOTHING,)
 
 
-def get_gt_winder_warp_maze_tag_2_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_gt_winder_warp_maze_tag_2_choices(
+    world: "ALTTPWorld",
+    north_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [TAG_MOVE_BLOCK_TO_GET_CHEST]
-    if _filled_pot_positions_in_target(world, GT_WINDER_WARP_MAZE_ROOM_ID, GT_WINDER_WARP_MAZE_NORTH_SWITCH_POTS):
+    if north_switch_pot_candidates is None:
+        north_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            GT_WINDER_WARP_MAZE_ROOM_ID,
+            GT_WINDER_WARP_MAZE_NORTH_SWITCH_POTS,
+        )
+    if north_switch_pot_candidates:
         choices.append(TAG_TRIGGER_ACTIVATED_CHEST)
     return tuple(choices)
 
@@ -1581,30 +1805,47 @@ def get_turtle_rock_torch_puzzle_tag_choices(world: "ALTTPWorld") -> tuple[int, 
     return TAG_LIGHT_TORCHES_TO_OPEN, TAG_SWITCH_OPENS_DOOR_TOGGLE
 
 
-def get_ice_palace_hole_to_kholdstare_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_ice_palace_hole_to_kholdstare_tag_choices(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [TAG_PULL_LEVER_TO_OPEN]
     if _enemy_clear_target_has_valid_kill_tag_enemies(world, ICE_PALACE_HOLE_TO_KHOLDSTARE_NORTHEAST):
         choices.append(TAG_NE_KILL_ENEMY_TO_OPEN)
-    if _filled_pot_positions_in_target(world, ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID, ICE_PALACE_HOLE_TO_KHOLDSTARE_SWITCH_POTS):
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_pot_candidates(
+            world,
+            ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID,
+            ICE_PALACE_HOLE_TO_KHOLDSTARE_SWITCH_POTS,
+        )
+    if switch_pot_candidates:
         choices.extend(HERA_SWITCH_TAG_CHOICES)
     return tuple(choices)
 
 
-def get_skull_woods_gibdo_torch_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_skull_woods_gibdo_torch_tag_choices(
+    world: "ALTTPWorld",
+    hold_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+    toggle_switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = list(SKULL_WOODS_GIBDO_TORCH_BASE_TAG_CHOICES)
-    if _filled_pot_positions_in_target(
-        world,
-        SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
-        SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if hold_switch_pot_candidates is None:
+        hold_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
+            SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS,
+            allow_key=False,
+        )
+    if toggle_switch_pot_candidates is None:
+        toggle_switch_pot_candidates = _switch_pot_candidates(
+            world,
+            SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
+            SKULL_WOODS_GIBDO_TORCH_TOGGLE_SWITCH_POTS,
+            allow_key=False,
+        )
+    if hold_switch_pot_candidates:
         choices.append(TAG_SWITCH_OPENS_DOOR_HOLD)
-    if _filled_pot_positions_in_target(
-        world,
-        SKULL_WOODS_GIBDO_TORCH_ROOM_ID,
-        SKULL_WOODS_GIBDO_TORCH_TOGGLE_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if toggle_switch_pot_candidates:
         choices.append(TAG_SWITCH_OPENS_DOOR_TOGGLE)
     return tuple(choices)
 
@@ -1755,16 +1996,20 @@ def get_pod_map_chest_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
     return tuple(choices)
 
 
-def get_hera_hardhat_beetles_room_tag_2_choices(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_hera_hardhat_beetles_room_tag_2_choices(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = []
-    has_switch_pot = bool(_filled_pot_positions_in_target(
-        world,
-        HERA_HARDHAT_BEETLES_ROOM_ID,
-        HERA_HARDHAT_BEETLES_SWITCH_POTS,
-    ))
-    if _enemy_clear_target_has_valid_kill_tag_enemies(world, HERA_HARDHAT_BEETLES_BOTTOM_RIGHT) or not has_switch_pot:
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_pot_candidates(
+            world,
+            HERA_HARDHAT_BEETLES_ROOM_ID,
+            HERA_HARDHAT_BEETLES_SWITCH_POTS,
+        )
+    if _enemy_clear_target_has_valid_kill_tag_enemies(world, HERA_HARDHAT_BEETLES_BOTTOM_RIGHT) or not switch_pot_candidates:
         choices.append(TAG_SE_KILL_ENEMY_TO_OPEN)
-    if has_switch_pot:
+    if switch_pot_candidates:
         choices.extend(HERA_SWITCH_TAG_CHOICES)
     return tuple(choices)
 
@@ -2386,6 +2631,153 @@ def _get_gt_gauntlet_45_tags(variant: int) -> tuple[int, int]:
     return TAG_W_KILL_ENEMY_TO_OPEN, TAG_NOTHING
 
 
+def _get_puzzle_room_tag_pairs(state: PuzzleShuffleState) -> tuple[tuple[int, tuple[int, int]], ...]:
+    def tags(room_id: int, tag_1: int | None = None, tag_2: int | None = None) -> tuple[int, tuple[int, int]]:
+        vanilla_tags = ROOM_TAGS[room_id]
+        return room_id, (
+            vanilla_tags.tag_1 if tag_1 is None else tag_1,
+            vanilla_tags.tag_2 if tag_2 is None else tag_2,
+        )
+
+    gt_gauntlet_123_tag_1, gt_gauntlet_123_tag_2 = _get_gt_gauntlet_123_tags(
+        state.gt_gauntlet_123_room_variant
+    )
+    gt_mimics_tag_1, gt_mimics_tag_2 = _get_gt_mimics_tags(state.gt_mimics_room_variant)
+    gt_gauntlet_45_tag_1, gt_gauntlet_45_tag_2 = _get_gt_gauntlet_45_tags(
+        state.gt_gauntlet_45_room_variant
+    )
+    ice_palace_bomb_floor_tag_1 = (
+        TAG_SW_KILL_ENEMY_TO_OPEN
+        if state.ice_palace_bomb_floor_room_variant == ROOM_VARIANT_KILL_ENEMIES
+        else TAG_SWITCH_OPENS_DOOR_HOLD
+        if state.ice_palace_bomb_floor_room_variant == ROOM_VARIANT_HOLD_SWITCH
+        else TAG_SWITCH_OPENS_DOOR_TOGGLE
+    )
+    ice_palace_bomb_floor_tag_2 = (
+        TAG_SE_MOVE_BLOCK_TO_OPEN
+        if state.ice_palace_bomb_floor_room_variant == ROOM_VARIANT_KILL_ENEMIES
+        else TAG_NOTHING
+    )
+    turtle_rock_crystaroller_tag_2 = (
+        TAG_SWITCH_OPENS_DOOR_TOGGLE
+        if state.turtle_rock_crystaroller_room_variant == ROOM_VARIANT_TOGGLE_SWITCH
+        else TAG_SWITCH_OPENS_DOOR_HOLD
+        if state.turtle_rock_crystaroller_room_variant == ROOM_VARIANT_HOLD_SWITCH
+        else TAG_PULL_LEVER_TO_OPEN
+    )
+    hyrule_castle_switch_room_tag_1 = (
+        TAG_S_KILL_ENEMY_TO_OPEN
+        if state.hyrule_castle_switch_room_variant == ROOM_VARIANT_KILL_ENEMIES
+        else TAG_PULL_LEVER_TO_OPEN
+    )
+
+    return (
+        tags(DESERT_MAP_CHEST_ROOM_ID, state.desert_map_chest_tag),
+        tags(DESERT_BIG_CHEST_ROOM_ID, state.desert_big_chest_tag),
+        tags(DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID, state.desert_final_section_entrance_tag),
+        tags(HERA_TILE_ROOM_ID, state.hera_big_key_chest_tag, state.hera_tile_room_tag),
+        tags(GT_BLOCK_PUZZLE_ROOM_ID, tag_2=state.gt_block_puzzle_tag),
+        tags(GT_BIG_CHEST_ROOM_ID, state.gt_big_chest_room_tag),
+        tags(GT_TILE_TORCH_PUZZLE_ROOM_ID, state.gt_tile_torch_puzzle_tag),
+        tags(MISERY_MIRE_DARK_CANE_ROOM_ID, state.misery_mire_dark_cane_room_tag),
+        tags(GT_TORCHES_1_ROOM_ID, state.gt_torches_1_tag),
+        tags(ICE_PALACE_ICE_FLOOR_ROOM_ID, state.ice_palace_ice_floor_room_tag),
+        tags(EASTERN_STALFOS_ROOM_ID, state.eastern_stalfos_room_tag),
+        tags(EASTERN_BIG_CHEST_ROOM_ID, state.eastern_big_chest_room_tag),
+        tags(EASTERN_MAP_CHEST_ROOM_ID, state.eastern_map_chest_room_tag),
+        tags(EASTERN_BIG_KEY_ROOM_ID, state.eastern_big_key_room_tag),
+        tags(EASTERN_ENTRANCE_ROOM_ID, state.eastern_entrance_room_tag),
+        tags(ICE_PALACE_HIDDEN_CHEST_ROOM_ID, state.ice_palace_hidden_chest_room_tag),
+        tags(MISERY_MIRE_BRIDGE_CHEST_ROOM_ID, tag_2=state.misery_mire_bridge_chest_tag_2),
+        tags(MISERY_MIRE_SPIKE_CHEST_ROOM_ID, state.misery_mire_spike_chest_room_tag),
+        tags(EASTERN_DARK_SQUARE_ROOM_ID, state.eastern_dark_square_room_tag),
+        tags(THIEVES_TOWN_CONVEYOR_TOILET_ROOM_ID, state.thieves_town_conveyor_toilet_tag),
+        tags(ICE_PALACE_BLOCK_PUZZLE_ROOM_ID, state.ice_palace_block_puzzle_tag),
+        tags(MISERY_MIRE_TILE_ROOM_ID, state.misery_mire_tile_room_tag),
+        tags(TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID, state.turtle_rock_torch_puzzle_tag),
+        tags(ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID, state.ice_palace_hole_to_kholdstare_tag),
+        tags(EASTERN_PRE_ARMOS_ROOM_ID, state.eastern_pre_armos_tag),
+        tags(EASTERN_PRE_BOSS_ROOM_ID, state.eastern_pre_boss_room_tag),
+        tags(EASTERN_SWITCH_ROOM_ID, state.eastern_switch_room_tag),
+        tags(HYRULE_CASTLE_SWITCH_ROOM_ID, hyrule_castle_switch_room_tag_1),
+        tags(TURTLE_ROCK_CRYSTAROLLER_ROOM_ID, tag_2=turtle_rock_crystaroller_tag_2),
+        tags(POD_TURTLE_ROOM_ID, state.pod_turtle_room_tag),
+        tags(POD_STALFOS_TRAP_ROOM_ID, state.pod_stalfos_trap_room_tag),
+        tags(POD_MIMICS_MOVING_WALL_ROOM_ID, state.pod_mimics_moving_wall_room_tag),
+        tags(ICE_PALACE_BOMB_FLOOR_ROOM_ID, ice_palace_bomb_floor_tag_1, ice_palace_bomb_floor_tag_2),
+        tags(ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID, state.ice_palace_pengator_big_key_room_tag),
+        tags(TURTLE_ROCK_BIG_CHEST_ROOM_ID, state.turtle_rock_big_chest_room_tag),
+        tags(SWAMP_STATUE_ROOM_ID, state.swamp_statue_room_tag),
+        tags(POD_MAP_CHEST_ROOM_ID, state.pod_map_chest_room_tag),
+        tags(HERA_HARDHAT_BEETLES_ROOM_ID, tag_2=state.hera_hardhat_beetles_room_tag_2),
+        tags(ICE_PALACE_CONVEYOR_HELLWAY_ROOM_ID, state.ice_palace_conveyor_hellway_tag),
+        tags(ICE_PALACE_MAP_ROOM_ID, state.ice_palace_map_room_tag),
+        tags(THIEVES_TOWN_JAIL_CELLS_ROOM_ID, state.thieves_town_jail_cells_tag),
+        tags(SKULL_WOODS_GIBDO_TORCH_ROOM_ID, state.skull_woods_gibdo_torch_room_tag),
+        tags(POD_SOUTH_MIMICS_ROOM_ID, state.pod_south_mimics_room_tag),
+        tags(ICE_PALACE_BOMB_JUMP_ROOM_ID, state.ice_palace_bomb_jump_room_tag, state.ice_palace_bomb_jump_room_tag_2),
+        tags(SKULL_WOODS_BIG_KEY_ROOM_ID, state.skull_woods_big_key_room_tag),
+        tags(SKULL_WOODS_BIG_CHEST_ROOM_ID, tag_2=state.skull_woods_big_chest_room_tag_2),
+        tags(GT_GAUNTLET_123_ROOM_ID, gt_gauntlet_123_tag_1, gt_gauntlet_123_tag_2),
+        tags(ICE_PALACE_SPIKE_ROOM_ID, state.ice_palace_spike_room_tag),
+        tags(THIEVES_TOWN_WEST_ATTIC_ROOM_ID, state.thieves_town_west_attic_room_tag),
+        tags(MISERY_MIRE_MAIN_LOBBY_ROOM_ID, state.misery_mire_main_lobby_room_tag),
+        tags(GT_SPIKE_PIT_ROOM_ID, state.gt_spike_pit_room_tag),
+        tags(GT_MIMICS_ROOM_ID, gt_mimics_tag_1, gt_mimics_tag_2),
+        tags(GT_GAUNTLET_45_ROOM_ID, gt_gauntlet_45_tag_1, gt_gauntlet_45_tag_2),
+        tags(GT_WINDER_WARP_MAZE_ROOM_ID, state.gt_winder_warp_maze_tag_1, state.gt_winder_warp_maze_tag_2),
+        tags(DESERT_WEST_ENTRANCE_ROOM_ID, state.desert_west_entrance_tag),
+    )
+
+
+def _switch_tag_without_pot_is_allowed(room_id: int, room_tags: tuple[int, int]) -> bool:
+    if room_id in POT_SWITCH_EXCEPTION_ROOMS:
+        return True
+    return (
+        room_id == ICE_PALACE_BOMB_JUMP_ROOM_ID
+        and room_tags[0] in KILL_ENEMY_TO_OPEN_TAGS
+        and room_tags[1] in HERA_SWITCH_TAG_CHOICES
+    )
+
+
+def _format_tag_name(tag: int) -> str:
+    if 0 <= tag < len(ROOM_TAG_NAMES):
+        return ROOM_TAG_NAMES[tag]
+    return f"Unknown tag {tag:#04x}"
+
+
+def validate_puzzle_shuffle_switch_pots(world: "ALTTPWorld", state: PuzzleShuffleState) -> None:
+    room_tags_by_room = _get_puzzle_room_tag_pairs(state)
+    rooms_with_switch_tags = {
+        room_id for room_id, room_tags in room_tags_by_room
+        if any(tag in POT_SWITCH_TAGS for tag in room_tags)
+    }
+    pot_state = {
+        room_id: _get_current_pot_items(world, room_id)
+        for room_id in rooms_with_switch_tags
+    }
+    _replace_switch_pots_for_puzzle_state(pot_state, state)
+
+    failures = []
+    for room_id, room_tags in room_tags_by_room:
+        if not any(tag in POT_SWITCH_TAGS for tag in room_tags):
+            continue
+        if _switch_tag_without_pot_is_allowed(room_id, room_tags):
+            continue
+        pots = pot_state.get(room_id, ())
+        if any(pot.item == POT_SWITCH for pot in pots):
+            continue
+        formatted_tags = ", ".join(_format_tag_name(tag) for tag in room_tags)
+        formatted_pots = ", ".join(f"({pot.x:#04x},{pot.y:#04x})={pot.item:#04x}" for pot in pots) or "no pots"
+        failures.append(f"room {room_id} tags [{formatted_tags}] pots [{formatted_pots}]")
+
+    if failures:
+        raise ValueError(
+            "Puzzle shuffle selected switch tags without pot switches: "
+            + "; ".join(failures)
+        )
+
+
 def validate_puzzle_shuffle_data() -> None:
     desert_map_chest_tags = ROOM_TAGS[DESERT_MAP_CHEST_ROOM_ID]
     if desert_map_chest_tags.tag_1 != TAG_TRIGGER_ACTIVATED_CHEST:
@@ -2491,15 +2883,46 @@ def _decode_position(position) -> tuple[int, int] | None:
     return int(position[0]), int(position[1])
 
 
+def _switch_pot_candidates(
+    world: "ALTTPWorld",
+    room_id: int,
+    target_positions: frozenset[tuple[int, int]],
+    allow_key: bool = True,
+) -> tuple[tuple[int, int], ...]:
+    return tuple(_filled_pot_positions_in_target(world, room_id, target_positions, allow_key=allow_key))
+
+
+def _switch_item_pot_candidates(
+    world: "ALTTPWorld",
+    room_id: int,
+    target_positions: frozenset[tuple[int, int]],
+    allow_key: bool = True,
+) -> tuple[tuple[int, int], ...]:
+    return tuple(_filled_pot_item_positions_in_target(world, room_id, target_positions, allow_key=allow_key))
+
+
 def _choose_switch_pot(
     world: "ALTTPWorld",
     room_id: int,
     target_positions: frozenset[tuple[int, int]],
     allow_key: bool = True,
 ) -> tuple[int, int] | None:
-    candidates = _filled_pot_positions_in_target(world, room_id, target_positions, allow_key=allow_key)
+    candidates = _switch_pot_candidates(world, room_id, target_positions, allow_key=allow_key)
+    return _choose_switch_pot_from_candidates(world, room_id, target_positions, candidates)
+
+
+def _choose_switch_pot_from_candidates(
+    world: "ALTTPWorld",
+    room_id: int,
+    target_positions: frozenset[tuple[int, int]],
+    candidates: tuple[tuple[int, int], ...],
+) -> tuple[int, int]:
     if not candidates:
-        return None
+        formatted_positions = ", ".join(f"({x:#04x},{y:#04x})" for x, y in sorted(target_positions))
+        raise ValueError(
+            f"Puzzle shuffle selected a mandatory switch pot in room {room_id} with no candidates "
+            f"among [{formatted_positions}]"
+        )
     return world.random.choice(candidates)
 
 
@@ -2509,7 +2932,7 @@ def _choose_optional_switch_pot(
     target_positions: frozenset[tuple[int, int]],
     allow_key: bool = True,
 ) -> tuple[int, int] | None:
-    candidates = _filled_pot_positions_in_target(world, room_id, target_positions, allow_key=allow_key)
+    candidates = _switch_pot_candidates(world, room_id, target_positions, allow_key=allow_key)
     return world.random.choice((None,) + tuple(candidates))
 
 
@@ -2519,14 +2942,12 @@ def _choose_switch_pot_with_item(
     target_positions: frozenset[tuple[int, int]],
     allow_key: bool = True,
 ) -> tuple[int, int] | None:
-    candidates = _filled_pot_item_positions_in_target(world, room_id, target_positions, allow_key=allow_key)
-    if not candidates:
-        return None
-    return world.random.choice(candidates)
+    candidates = _switch_item_pot_candidates(world, room_id, target_positions, allow_key=allow_key)
+    return _choose_switch_pot_from_candidates(world, room_id, target_positions, candidates)
 
 
-def _choose_skull_woods_big_chest_switch_pot(world: "ALTTPWorld") -> tuple[int, int] | None:
-    return _choose_switch_pot(
+def _skull_woods_big_chest_switch_pot_candidates(world: "ALTTPWorld") -> tuple[tuple[int, int], ...]:
+    return _switch_pot_candidates(
         world,
         SKULL_WOODS_BIG_CHEST_ROOM_ID,
         SKULL_WOODS_BIG_CHEST_NORTHWEST_SWITCH_POTS,
@@ -2620,14 +3041,19 @@ def get_ice_palace_map_room_tag_choices(world: "ALTTPWorld") -> tuple[int, ...]:
     return tuple(choices)
 
 
-def get_turtle_rock_crystaroller_variants(world: "ALTTPWorld") -> tuple[int, ...]:
+def get_turtle_rock_crystaroller_variants(
+    world: "ALTTPWorld",
+    switch_pot_candidates: tuple[tuple[int, int], ...] | None = None,
+) -> tuple[int, ...]:
     choices = [ROOM_VARIANT_VANILLA, ROOM_VARIANT_SWAP_PULL_SWITCHES]
-    if _filled_pot_item_positions_in_target(
-        world,
-        TURTLE_ROCK_CRYSTAROLLER_ROOM_ID,
-        TURTLE_ROCK_CRYSTAROLLER_SWITCH_POTS,
-        allow_key=False,
-    ):
+    if switch_pot_candidates is None:
+        switch_pot_candidates = _switch_item_pot_candidates(
+            world,
+            TURTLE_ROCK_CRYSTAROLLER_ROOM_ID,
+            TURTLE_ROCK_CRYSTAROLLER_SWITCH_POTS,
+            allow_key=False,
+        )
+    if switch_pot_candidates:
         choices.extend((ROOM_VARIANT_TOGGLE_SWITCH, ROOM_VARIANT_HOLD_SWITCH))
     return tuple(choices)
 
@@ -2660,6 +3086,8 @@ def _replace_switch_pots_for_puzzle_state(
         ),
         (SWAMP_STATUE_ROOM_ID, state.swamp_statue_room_switch_pot, state.swamp_statue_room_tag in HERA_SWITCH_TAG_CHOICES),
         (DESERT_BIG_CHEST_ROOM_ID, None, state.desert_big_chest_tag in HERA_SWITCH_TAG_CHOICES),
+        (HERA_TILE_ROOM_ID, state.hera_big_key_chest_switch_pot, state.hera_big_key_chest_tag == TAG_TRIGGER_ACTIVATED_CHEST),
+        (HERA_TILE_ROOM_ID, state.hera_tile_room_switch_pot, state.hera_tile_room_tag in HERA_SWITCH_TAG_CHOICES),
         (
             POD_STALFOS_TRAP_ROOM_ID,
             None,
@@ -2671,14 +3099,20 @@ def _replace_switch_pots_for_puzzle_state(
             state.misery_mire_main_lobby_room_tag == TAG_TRIGGER_ACTIVATED_CHEST,
         ),
         (POD_MAP_CHEST_ROOM_ID, None, state.pod_map_chest_room_tag in HERA_SWITCH_TAG_CHOICES),
+        (GT_BLOCK_PUZZLE_ROOM_ID, state.gt_block_puzzle_switch_pot, state.gt_block_puzzle_tag in HERA_SWITCH_TAG_CHOICES),
         (GT_TILE_TORCH_PUZZLE_ROOM_ID, state.gt_tile_torch_puzzle_switch_pot, state.gt_tile_torch_puzzle_tag in HERA_SWITCH_TAG_CHOICES),
         (GT_TORCHES_1_ROOM_ID, state.gt_torches_1_switch_pot, state.gt_torches_1_tag in HERA_SWITCH_TAG_CHOICES),
+        (TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID, state.turtle_rock_torch_puzzle_switch_pot, state.turtle_rock_torch_puzzle_tag in HERA_SWITCH_TAG_CHOICES),
         (HERA_HARDHAT_BEETLES_ROOM_ID, state.hera_hardhat_beetles_room_switch_pot, state.hera_hardhat_beetles_room_tag_2 in HERA_SWITCH_TAG_CHOICES),
         (ICE_PALACE_CONVEYOR_HELLWAY_ROOM_ID, state.ice_palace_conveyor_hellway_switch_pot, state.ice_palace_conveyor_hellway_tag in HERA_SWITCH_TAG_CHOICES),
         (ICE_PALACE_HIDDEN_CHEST_ROOM_ID, None, state.ice_palace_hidden_chest_room_tag == TAG_TRIGGER_ACTIVATED_CHEST),
         (ICE_PALACE_MAP_ROOM_ID, None, state.ice_palace_map_room_tag == TAG_TRIGGER_ACTIVATED_CHEST),
+        (ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID, state.ice_palace_hole_to_kholdstare_switch_pot, state.ice_palace_hole_to_kholdstare_tag in HERA_SWITCH_TAG_CHOICES),
+        (EASTERN_STALFOS_ROOM_ID, state.eastern_stalfos_room_switch_pot, state.eastern_stalfos_room_tag in HERA_SWITCH_TAG_CHOICES),
         (EASTERN_MAP_CHEST_ROOM_ID, None, state.eastern_map_chest_room_tag in HERA_SWITCH_TAG_CHOICES),
         (EASTERN_BIG_KEY_ROOM_ID, None, state.eastern_big_key_room_tag == TAG_TRIGGER_ACTIVATED_CHEST),
+        (EASTERN_PRE_ARMOS_ROOM_ID, state.eastern_pre_armos_northeast_switch_pot, state.eastern_pre_armos_tag in HERA_SWITCH_TAG_CHOICES),
+        (EASTERN_PRE_ARMOS_ROOM_ID, state.eastern_pre_armos_southeast_switch_pot, state.eastern_pre_armos_tag in HERA_SWITCH_TAG_CHOICES),
         (THIEVES_TOWN_JAIL_CELLS_ROOM_ID, state.thieves_town_jail_cells_switch_pot, state.thieves_town_jail_cells_tag in HERA_SWITCH_TAG_CHOICES),
         (SKULL_WOODS_GIBDO_TORCH_ROOM_ID, state.skull_woods_gibdo_torch_room_switch_pot, state.skull_woods_gibdo_torch_room_tag in HERA_SWITCH_TAG_CHOICES),
         (POD_SOUTH_MIMICS_ROOM_ID, state.pod_south_mimics_room_switch_pot, state.pod_south_mimics_room_tag in HERA_SWITCH_TAG_CHOICES),
@@ -2705,13 +3139,23 @@ def _replace_switch_pots_for_puzzle_state(
         (GT_WINDER_WARP_MAZE_ROOM_ID, state.gt_winder_warp_maze_southeast_switch_pot, state.gt_winder_warp_maze_tag_1 in HERA_SWITCH_TAG_CHOICES),
         (GT_WINDER_WARP_MAZE_ROOM_ID, state.gt_winder_warp_maze_north_switch_pot, state.gt_winder_warp_maze_tag_2 == TAG_TRIGGER_ACTIVATED_CHEST),
     )
+    replacements_by_room: dict[int, list[tuple[tuple[int, int] | None, bool]]] = {}
     for room_id, switch_pot, keep_switch in replacements:
+        replacements_by_room.setdefault(room_id, []).append((switch_pot, keep_switch))
+    for room_id, room_replacements in replacements_by_room.items():
         pots = pot_state.get(room_id)
         if pots is None:
             continue
-        if switch_pot is not None and keep_switch:
-            pot_state[room_id] = _replace_pot_item(pots, switch_pot, POT_SWITCH)
-        elif not keep_switch:
+        kept_switch_pots = tuple(
+            switch_pot for switch_pot, keep_switch in room_replacements
+            if keep_switch and switch_pot is not None
+        )
+        if kept_switch_pots:
+            pots = _replace_pot_item_value(pots, POT_SWITCH, state.switch_replacement_item)
+            for switch_pot in kept_switch_pots:
+                pots = _replace_pot_item(pots, switch_pot, POT_SWITCH)
+            pot_state[room_id] = pots
+        elif not any(keep_switch for _, keep_switch in room_replacements):
             pot_state[room_id] = _replace_pot_item_value(pots, POT_SWITCH, state.switch_replacement_item)
     if (
         state.swamp_statue_room_tag in HERA_SWITCH_TAG_CHOICES
@@ -2741,20 +3185,46 @@ def _replace_switch_pots_for_puzzle_state(
 
 def _enemy_clear_target_has_valid_kill_tag_enemies(world: "ALTTPWorld", target_name: str) -> bool:
     from types import SimpleNamespace
-    from .EnemyShuffle import _can_be_shutter_room_clear_enemy, _is_enemy_clear_dealbreaker
+    from .EnemyShuffle import (
+        KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY,
+        KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM,
+        _can_be_shutter_room_clear_enemy,
+        _is_enemy_clear_dealbreaker,
+    )
     from .enemizer_data.enemy_combat_data import VANILLA_COMBAT_MODEL
 
     enemy_shuffle_state = getattr(world, "enemy_shuffle_state", None)
+    enemy_health_option = getattr(world.options, "enemy_health", "default")
+    max_attacks_option = getattr(world.options, "max_attacks_in_logic", 16)
+    killable_thieves_option = getattr(world.options, "killable_thieves", False)
     enemy_shuffle_state = SimpleNamespace(
         combat_model=getattr(
             enemy_shuffle_state,
             "combat_model",
             getattr(world, "enemy_combat_model", VANILLA_COMBAT_MODEL),
         ),
-        enemy_health_key=getattr(enemy_shuffle_state, "enemy_health_key", "default"),
-        max_attacks_in_logic=getattr(enemy_shuffle_state, "max_attacks_in_logic", 16),
-        killable_thieves=getattr(enemy_shuffle_state, "killable_thieves", False),
+        enemy_health_key=getattr(
+            enemy_shuffle_state,
+            "enemy_health_key",
+            str(getattr(enemy_health_option, "current_key", enemy_health_option)),
+        ),
+        max_attacks_in_logic=getattr(
+            enemy_shuffle_state,
+            "max_attacks_in_logic",
+            int(getattr(max_attacks_option, "value", max_attacks_option)),
+        ),
+        killable_thieves=getattr(enemy_shuffle_state, "killable_thieves", bool(killable_thieves_option)),
         available_damage_classes=getattr(enemy_shuffle_state, "available_damage_classes", frozenset(range(16))),
+        available_damage_delivery_items=getattr(
+            enemy_shuffle_state,
+            "available_damage_delivery_items",
+            frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM),
+        ),
+        available_damage_delivery_abilities=getattr(
+            enemy_shuffle_state,
+            "available_damage_delivery_abilities",
+            frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY),
+        ),
         hammer_available_for_freeze=getattr(enemy_shuffle_state, "hammer_available_for_freeze", True),
     )
 

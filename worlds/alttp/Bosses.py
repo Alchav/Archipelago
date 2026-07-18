@@ -89,10 +89,9 @@ BOSS_BOMB_ABILITIES = ("bombs",)
 # No item delivery is excluded here; contact is checked by Sprite_CheckDamageFromPlayerLong
 # at sprite_armos_knight.asm:142 and ordinary ancillas use the shared damage paths above.
 ARMOS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
-# No item delivery is excluded here; Lanmolas calls Sprite2_CheckDamage at
-# sprite_lanmola.asm:153 and :212, and Sprite2_CheckDamage includes contact damage
-# at sprite_cannon_trooper.asm:36-39 while ordinary ancillas use the shared paths above.
-LANMOLAS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Quake is excluded because Ancilla_CheckSpriteDamage rejects damage class 0x0F
+# unless $0F70 is exactly zero, and Lanmolas only has narrow ground-crossing frames.
+LANMOLAS_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if item != "Quake")
 # Bombs are excluded from the body phase: Bomb_CheckSpriteDamage explicitly skips
 # Helmasaur King when $0DB0 >= 3, i.e. after the mask is gone. See Bank08.asm:458-464.
 # Other basic ancillas skip only the mask and can hit the body; see Bank08.asm:1295-1316
@@ -109,9 +108,8 @@ ARRGHUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
 # Magic Powder can affect Moldorm's head, while sustained tail damage remains
 # player-contact only. See alttp_sprite_weapon_vulnerability_audit.md.
 MOLDORM_ATTACK_ITEMS = BOSS_MELEE_ITEMS + ("Magic Powder",)
-# No item delivery is excluded here; Mothula calls Sprite3_CheckDamage at
-# sprite_mothula.asm:215 and :255, and ordinary ancillas use the shared paths above.
-MOTHULA_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Quake is excluded because Mothula ascends to and fights at nonzero altitude.
+MOTHULA_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if item != "Quake")
 # No item delivery is excluded here; Blind calls Sprite4_CheckDamage at
 # sprite_blind_entities.asm:259 and :1175, and ordinary ancillas use the shared paths above.
 BLIND_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
@@ -258,13 +256,15 @@ def KholdstareDefeatRule(state, player: int) -> bool:
         state,
         player,
         KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
-        allowed_items=("Fire Rod", "Bombos"),
+        allowed_items=KHOLDSTARE_ATTACK_ITEMS,
+        allowed_abilities=BOSS_BOMB_ABILITIES,
     )
     body_plans = _get_boss_attack_plans(
         state,
         player,
         KHOLDSTARE_SPRITE_ID,
-        allowed_items=BOSS_MELEE_ITEMS + ("Fire Rod", "Bombos", "Cane of Somaria"),
+        allowed_items=KHOLDSTARE_ATTACK_ITEMS,
+        allowed_abilities=BOSS_BOMB_ABILITIES,
     )
     return can_damage_boss_sprite_phases(state, player, shell_plans, body_plans)
 

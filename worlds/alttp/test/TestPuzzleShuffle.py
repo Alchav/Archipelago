@@ -1,5 +1,6 @@
 import random
 import unittest
+from dataclasses import replace
 from types import SimpleNamespace
 
 from worlds.alttp import PuzzleShuffle as PuzzleShuffleModule
@@ -12,6 +13,8 @@ from worlds.alttp.PuzzleShuffle import (
     GT_BIG_CHEST_ROOM_ID,
     GT_BLOCK_PUZZLE_ROOM_ID,
     GT_SPIKE_PIT_ROOM_ID,
+    GT_WINDER_WARP_MAZE_ROOM_ID,
+    GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS,
     HERA_TILE_ROOM_ID,
     EASTERN_PRE_ARMOS_ROOM_ID,
     EASTERN_MAP_CHEST_ROOM_ID,
@@ -43,6 +46,7 @@ from worlds.alttp.PuzzleShuffle import (
     get_turtle_rock_peg_order_hint,
     get_gt_big_chest_room_tag_choices,
     get_gt_block_puzzle_tag_choices,
+    get_gt_winder_warp_maze_tag_1_choices,
     get_gt_spike_pit_room_tag_choices,
     get_hera_big_key_chest_tag_choices,
     get_hera_tile_room_tag_choices,
@@ -74,8 +78,10 @@ from worlds.alttp.PuzzleShuffle import (
     TAG_TRIGGER_ACTIVATED_CHEST,
     TAG_CLEAR_ROOM_FOR_CHEST,
     TAG_CLEAR_ROOM_TO_OPEN,
+    TAG_MOVE_BLOCK_TO_GET_CHEST,
     TAG_NOTHING,
     validate_puzzle_shuffle_data,
+    validate_puzzle_shuffle_switch_pots,
     write_turtle_rock_peg_order,
 )
 
@@ -427,6 +433,17 @@ class TestPuzzleShuffle(unittest.TestCase):
                 and state.gt_winder_warp_maze_tag_2 == PuzzleShuffleModule.TAG_TRIGGER_ACTIVATED_CHEST
             )
 
+    def test_gt_winder_warp_maze_tag_1_uses_non_switch_without_southeast_switch_pot(self) -> None:
+        pot_shuffle_state = {
+            GT_WINDER_WARP_MAZE_ROOM_ID: tuple(
+                pot for pot in get_vanilla_pot_items(GT_WINDER_WARP_MAZE_ROOM_ID)
+                if (pot.x, pot.y) not in GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS
+            )
+        }
+        world = SimpleNamespace(pot_shuffle_state=pot_shuffle_state)
+
+        self.assertEqual(get_gt_winder_warp_maze_tag_1_choices(world), (TAG_NOTHING,))
+
     def test_cane_puzzle_dungeon_selection_picks_two_or_three_candidate_dungeons(self) -> None:
         for seed in range(20):
             selected = _choose_cane_puzzle_dungeons(SimpleNamespace(random=random.Random(seed)))
@@ -720,6 +737,37 @@ class TestPuzzleShuffle(unittest.TestCase):
             state = generate_puzzle_shuffle(world)
 
             self.assertEqual(sorted(state.turtle_rock_peg_order), sorted(TURTLE_ROCK_VANILLA_PEG_ORDER))
+
+    def test_switch_tag_validation_rejects_room_without_pot_switch(self) -> None:
+        world = SimpleNamespace(
+            random=random.Random(65723850656880413407),
+            options=SimpleNamespace(retro_bow=False, enemy_shuffle=False),
+            pot_shuffle_state=None,
+            enemy_shuffle_state=None,
+        )
+        state = replace(
+            generate_puzzle_shuffle(world),
+            gt_mimics_room_variant=2,
+            gt_mimics_room_northwest_switch_pot=None,
+        )
+
+        with self.assertRaisesRegex(ValueError, "room 107"):
+            validate_puzzle_shuffle_switch_pots(world, state)
+
+    def test_switch_tag_validation_allows_ice_bomb_jump_kill_switch_exception(self) -> None:
+        world = SimpleNamespace(
+            random=random.Random(65723850656880413407),
+            options=SimpleNamespace(retro_bow=False, enemy_shuffle=False),
+            pot_shuffle_state=None,
+            enemy_shuffle_state=None,
+        )
+        state = replace(
+            generate_puzzle_shuffle(world),
+            ice_palace_bomb_jump_room_tag=TAG_NW_KILL_ENEMY_TO_OPEN,
+            ice_palace_bomb_jump_room_tag_2=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+        )
+
+        validate_puzzle_shuffle_switch_pots(world, state)
 
     def test_desert_big_chest_kill_enemy_tag_is_not_available_with_vanilla_beamos(self) -> None:
         world = SimpleNamespace(

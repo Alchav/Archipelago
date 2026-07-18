@@ -320,6 +320,76 @@ def get_enemy_shuffle_available_damage_classes(world: "ALTTPWorld", item_names) 
     return frozenset(damage_classes)
 
 
+def get_enemy_shuffle_available_damage_delivery_context(world: "ALTTPWorld", item_names) -> tuple[frozenset[str], frozenset[str]]:
+    item_counts = Counter(item_names)
+    items: set[str] = set()
+    abilities: set[str] = set()
+
+    def has_item(item_name: str) -> bool:
+        return item_counts[item_name] > 0
+
+    progressive_sword_count = min(
+        item_counts["Progressive Sword"],
+        world.difficulty_requirements.progressive_sword_limit,
+    )
+    has_fighter_sword = has_item("Fighter Sword") or progressive_sword_count >= 1
+    has_master_sword = has_item("Master Sword") or progressive_sword_count >= 2
+    has_tempered_sword = has_item("Tempered Sword") or progressive_sword_count >= 3
+    has_golden_sword = has_item("Golden Sword") or progressive_sword_count >= 4
+    if has_fighter_sword:
+        items.add("Fighter Sword")
+    if has_master_sword:
+        items.add("Master Sword")
+        abilities.add("sword_beams")
+    if has_tempered_sword:
+        items.add("Tempered Sword")
+        abilities.add("sword_beams")
+    if has_golden_sword:
+        items.add("Golden Sword")
+        abilities.add("sword_beams")
+
+    for item_name in (
+        "Hammer",
+        "Blue Boomerang",
+        "Red Boomerang",
+        "Hookshot",
+        "Cane of Somaria",
+        "Cane of Byrna",
+        "Magic Powder",
+        "Fire Rod",
+        "Ice Rod",
+        "Bombos",
+        "Ether",
+        "Quake",
+    ):
+        if has_item(item_name):
+            items.add(item_name)
+
+    if (
+        not world.options.bombless_start
+        or has_item("Bomb Upgrade (+5)")
+        or has_item("Bomb Upgrade (+10)")
+        or has_item("Bomb Upgrade (50)")
+        or (
+            not world.options.shuffle_capacity_upgrades
+            and has_item("Capacity Upgrade Shop")
+        )
+    ):
+        abilities.add("bombs")
+
+    progressive_bow_count = min(
+        item_counts["Progressive Bow"] + item_counts["Progressive Bow (Alt)"],
+        world.difficulty_requirements.progressive_bow_limit,
+    )
+    has_bow = has_item("Bow") or has_item("Silver Bow") or progressive_bow_count >= 1
+    if has_bow:
+        items.add("Bow")
+    if has_item("Silver Bow") or progressive_bow_count >= 2 or (has_bow and has_item("Silver Arrows")):
+        items.add("Silver Bow")
+
+    return frozenset(items), frozenset(abilities)
+
+
 def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
     if getattr(world, "ut_replay_data", None):
         from . import _decode_ut_enemy_combat_model, _get_ut_replay_value
@@ -347,6 +417,7 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
             available_damage_classes=item_pool_damage_classes,
             hammer_available_for_freeze=True,
             swordless=bool(getattr(world.options, "swordless", False)),
+            allow_swordless_medallion_damage=world.options.item_functionality == "easy",
             killable_thieves=bool(getattr(world.options, "killable_thieves", False)),
             enemy_shuffle=bool(getattr(world.options, "enemy_shuffle", False)),
             gt_only_boss_special_allowed_sprite_ids=get_gt_only_boss_damage_class_sprite_ids(world),
@@ -440,6 +511,10 @@ def generate_itempool(world: "ALTTPWorld"):
             world,
             enemy_combat_item_names,
         )
+        (
+            world.enemy_shuffle_available_damage_delivery_items,
+            world.enemy_shuffle_available_damage_delivery_abilities,
+        ) = get_enemy_shuffle_available_damage_delivery_context(world, enemy_combat_item_names)
         world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
 
     if world.options.mode == 'standard' and not has_melee_weapon(multiworld.state, player):
@@ -772,6 +847,10 @@ def generate_itempool(world: "ALTTPWorld"):
             world,
             enemy_shuffle_item_names,
         )
+        (
+            world.enemy_shuffle_available_damage_delivery_items,
+            world.enemy_shuffle_available_damage_delivery_abilities,
+        ) = get_enemy_shuffle_available_damage_delivery_context(world, enemy_shuffle_item_names)
         has_ut_enemy_shuffle = False
         if getattr(world, "ut_replay_data", None):
             from . import _apply_ut_enemy_shuffle_state, _get_ut_replay_value

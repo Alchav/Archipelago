@@ -62,6 +62,7 @@ from worlds.alttp.EnemyShuffle import (
 from worlds.alttp.Items import item_table
 from worlds.alttp.StateHelpers import (
     can_damage_blind_sprite,
+    can_damage_boss_sprite,
     can_clear_enemy_room,
     can_clear_enemy_region,
     can_clear_enemy_regions,
@@ -77,6 +78,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     DamageSource,
     EnemyCombatModel,
     FREEZE_EFFECT,
+    KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
     KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
     REACHABLE_SPRITE_DAMAGE_SUBCLASS_COUNT,
     VANILLA_COMBAT_MODEL,
@@ -1328,6 +1330,28 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         finally:
             world.options.enemy_shuffle = original_enemy_shuffle
             world.enemy_shuffle_state = original_enemy_shuffle_state
+
+    def test_swordless_medallion_damage_matches_rom_cast_exceptions(self) -> None:
+        logic_test = TestLightWorld()
+        logic_test.setUp()
+        world = logic_test.multiworld.worlds[1]
+        original_swordless = world.options.swordless.value
+        original_item_functionality = world.options.item_functionality.value
+        try:
+            world.options.swordless.value = True
+            world.options.item_functionality.value = world.options.item_functionality.option_normal
+            bombos_state = logic_test.get_state(item_factory(["Bombos"], world))
+
+            self.assertFalse(can_kill_enemy_sprite(bombos_state, 1, "Red Bari"))
+            self.assertTrue(can_damage_boss_sprite(bombos_state, 1, KHOLDSTARE_ICE_BLOCK_SPRITE_ID))
+
+            world.options.item_functionality.value = world.options.item_functionality.option_easy
+            logic_test._state_cache.clear()
+            easy_bombos_state = logic_test.get_state(item_factory(["Bombos"], world))
+            self.assertTrue(can_kill_enemy_sprite(easy_bombos_state, 1, "Red Bari"))
+        finally:
+            world.options.swordless.value = original_swordless
+            world.options.item_functionality.value = original_item_functionality
 
     def test_turtle_rock_pokey_1_key_enemy_uses_chain_chomps_room(self) -> None:
         logic_test = TestLightWorld()
