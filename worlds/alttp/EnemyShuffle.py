@@ -69,10 +69,13 @@ OW_WALLMASTER_TO_HOULIHAN_SPRITE_ID = 0xFB
 WATER_TEKTITE_SPRITE_ID = 0x81
 ROOM_CLEAR_IGNORED_SPRITE_IDS = frozenset({
     0x15,  # Anti-Fairy
+    0x55,  # Fireball Zora
     0x5B,  # Spark (clockwise)
     0x5C,  # Spark (counter-clockwise)
     0x61,  # Beamos
+    0x6F,  # Keese
     0x7D,  # Big Spike Trap
+    0x80,  # Fire Snake
     0x82,  # Anti-Fairy Circle
     0x8A,  # Spike Trap
     0x9A,  # Kyameron

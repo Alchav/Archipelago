@@ -2013,7 +2013,10 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         kyameron = requirements["Kyameron"]
         floating_stalfos_head = requirements["Floating Stalfos Head"]
         anti_fairy = requirements["Anti-Fairy"]
+        fireball_zora = requirements["Fireball Zora"]
         spark = requirements["Spark (clockwise)"]
+        keese = requirements["Keese"]
+        fire_snake = requirements["Fire Snake"]
         cucco = requirements["Cucco"]
         thief = requirements["Thief"]
         crystal_switch = requirements["Crystal Switch"]
@@ -2048,9 +2051,14 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         self.assertEqual(floating_stalfos_head_override.abilities, tuple())
         self.assertTrue(anti_fairy.killable)
         self.assertFalse(anti_fairy.counts_for_enemy_clear)
+        self.assertFalse(fireball_zora.counts_for_enemy_clear)
         self.assertFalse(spark.killable)
         self.assertFalse(spark.counts_for_enemy_clear)
         self.assertTrue(spark.cannot_have_key)
+        self.assertTrue(keese.killable)
+        self.assertFalse(keese.counts_for_enemy_clear)
+        self.assertFalse(fire_snake.killable)
+        self.assertFalse(fire_snake.counts_for_enemy_clear)
         self.assertFalse(cucco.killable)
         self.assertTrue(cucco.counts_for_enemy_clear)
         for sprite_name in (
@@ -2758,6 +2766,22 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         )
 
         self.assertFalse(can_spawn_in_room(self._requirement(WALLMASTER_SPRITE_ID), room))
+
+    def test_wallmaster_metadata_matches_runtime_behavior(self) -> None:
+        requirements = {
+            requirement.sprite_id: requirement
+            for requirement in _load_enemy_sprite_requirements()
+        }
+        wallmaster = requirements[WALLMASTER_SPRITE_ID]
+        wallmaster_overlord = requirements[0x109]
+
+        self.assertTrue(wallmaster.killable)
+        self.assertTrue(wallmaster.cannot_have_key)
+        self.assertFalse(wallmaster.counts_for_enemy_clear)
+        self.assertFalse(wallmaster.overlord)
+
+        self.assertTrue(wallmaster_overlord.overlord)
+        self.assertFalse(wallmaster_overlord.killable)
 
     def test_room_specific_do_not_randomize_sprites_are_not_updated(self) -> None:
         room = DungeonEnemyRoom(

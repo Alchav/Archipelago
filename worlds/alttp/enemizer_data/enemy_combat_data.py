@@ -47,6 +47,7 @@ THIEF_SPRITE_ID = 0xC4
 THIEF_DEFAULT_HP = 4
 YELLOW_SLIME_SPRITE_ID = 0x8F
 LIGHTNING_GATE_SPRITE_ID = 0x40
+WALLMASTER_SPRITE_ID = 0x90
 FAIRY_TRANSFORM_EFFECT = 0xF9
 BLOB_TRANSFORM_EFFECT = 0xFA
 STUN_32_FRAMES_EFFECT = 0xFB
@@ -167,6 +168,10 @@ DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS = frozenset({
 DAMAGE_CLASS_RANDOMIZER_FORCE_INCLUDED_SPRITE_IDS = frozenset({
     LIGHTNING_GATE_SPRITE_ID,
 })
+ENEMY_REQUIREMENTS_BY_SPRITE_ID = {
+    requirement.sprite_id: requirement
+    for requirement in ENEMY_SPRITE_REQUIREMENTS
+}
 ENEMY_HEALTH_RANGE_BY_KEY = {
     "easy": (1, 4),
     "normal": (2, 15),
@@ -770,14 +775,51 @@ def _get_damage_class_randomizable_sprite_ids(
     return tuple(
         sprite_id
         for sprite_id in range(max_sprite_id)
-        if sprite_id not in EXCLUDED_ENEMY_TABLE_SPRITE_IDS
-        and (sprite_id != THIEF_SPRITE_ID or killable_thieves)
-        and _has_nonzero_damage_profile(resolved_effects[sprite_id])
-        and (
-            combat_model.enemy_health_table[sprite_id] != 0xFF
-            or sprite_id in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
-            or sprite_id in DAMAGE_CLASS_RANDOMIZER_FORCE_INCLUDED_SPRITE_IDS
+        if _sprite_can_have_randomized_damage_row(
+            sprite_id,
+            combat_model,
+            resolved_effects[sprite_id],
+            killable_thieves=killable_thieves,
         )
+    )
+
+
+def _sprite_can_have_randomized_damage_row(
+    sprite_id: int,
+    combat_model: EnemyCombatModel,
+    resolved_effects: tuple[int, ...],
+    *,
+    killable_thieves: bool,
+) -> bool:
+    if sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
+        return False
+    if sprite_id == THIEF_SPRITE_ID:
+        if not killable_thieves:
+            return False
+    elif (
+        sprite_id not in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
+        and sprite_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
+        and sprite_id not in DAMAGE_CLASS_RANDOMIZER_FORCE_INCLUDED_SPRITE_IDS
+    ):
+        requirement = ENEMY_REQUIREMENTS_BY_SPRITE_ID.get(sprite_id)
+        if (
+            requirement is None
+            or not requirement.is_enemy_sprite
+            or requirement.overlord
+            or requirement.npc
+            or requirement.is_object
+            or requirement.absorbable
+            or not requirement.killable
+        ):
+            return False
+
+    if not _has_nonzero_damage_profile(resolved_effects):
+        return False
+
+    return (
+        combat_model.enemy_health_table[sprite_id] != 0xFF
+        or sprite_id in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
+        or sprite_id in DAMAGE_CLASS_RANDOMIZER_FORCE_INCLUDED_SPRITE_IDS
     )
 
 

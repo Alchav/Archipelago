@@ -78,6 +78,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     TRINEXX_MAIN_HEAD_SPRITE_ID,
     TRINEXX_RED_HEAD_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
+    WALLMASTER_SPRITE_ID,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
     build_randomized_damage_class_combat_model,
@@ -98,6 +99,8 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
 
 
 SPIKE_BLOCK_SPRITE_ID = 0x8A
+MEDUSA_SPRITE_ID = 0xC5
+FOUR_WAY_FIREBALL_SPITTER_SPRITE_ID = 0xC6
 
 
 class FakeRom:
@@ -567,6 +570,17 @@ class TestEnemizerPatches(unittest.TestCase):
                         sorted(randomized_effects[sprite_id]),
                         sorted(vanilla_effects[sprite_id]),
                     )
+
+    def test_enemy_swap_excludes_object_damage_rows(self) -> None:
+        vanilla_effects = _resolve_sprite_damage_effects(VANILLA_COMBAT_MODEL)
+        eligible_sprite_ids = _get_damage_class_randomizable_sprite_ids(
+            VANILLA_COMBAT_MODEL,
+            vanilla_effects,
+        )
+
+        self.assertIn(WALLMASTER_SPRITE_ID, eligible_sprite_ids)
+        self.assertNotIn(MEDUSA_SPRITE_ID, eligible_sprite_ids)
+        self.assertNotIn(FOUR_WAY_FIREBALL_SPITTER_SPRITE_ID, eligible_sprite_ids)
 
     def test_randomized_damage_classes_include_selected_hp_255_enemies(self) -> None:
         combat_model = build_randomized_damage_class_combat_model(random.Random(2), CHAOS_RANDOMIZE_DAMAGE_CLASSES)
