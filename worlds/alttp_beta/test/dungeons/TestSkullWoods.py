@@ -1,4 +1,5 @@
 from .TestDungeon import TestDungeon
+from worlds.alttp.PotShuffle import FilledPot, POT_KEY
 
 
 class TestSkullWoods(TestDungeon):
@@ -87,6 +88,24 @@ class TestSkullWoods(TestDungeon):
         self.starting_regions = ['Skull Woods Second Section']
         self.remove_exits = ['Skull Woods Second Section Exit (East)', 'Skull Woods Second Section Exit (West)']
         self.run_tests([["Skull Woods - Big Key Chest", True, []]])
+
+    def testSkullWoodsPotShuffleWestLobbyKeyLogic(self):
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state())
+        self.starting_regions = ['Skull Woods Second Section']
+        self.run_tests([
+            ["Skull Woods - West Lobby Pot Key", True, []],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0x56: (FilledPot(20, 6, POT_KEY),),
+        }))
+        self.starting_regions = ['Skull Woods Second Section']
+        skull_keys = ['Small Key (Skull Woods)'] * 5
+        self.run_tests([
+            ["Skull Woods - West Lobby Pot Key", False, []],
+            ["Skull Woods - West Lobby Pot Key", False, skull_keys[:4]],
+            ["Skull Woods - West Lobby Pot Key", True, skull_keys],
+        ])
 
     def testSkullWoodsBack(self):
         self.starting_regions = ['Skull Woods Final Section (Entrance)']

@@ -15,7 +15,13 @@ class TestDungeon(LTTPTestBase):
         self.remove_exits = []      # Block dungeon exits
         self._build_dungeon_world()
 
-    def _build_dungeon_world(self, pot_shuffle_state=None, enemy_health_value=None):
+    def _build_dungeon_world(
+        self,
+        pot_shuffle_state=None,
+        enemy_health_value=None,
+        puzzle_shuffle_state=None,
+        enemy_shuffle_state=None,
+    ):
         self.world_setup()
         self.multiworld.worlds[1].difficulty_requirements = difficulties['normal']
         self.multiworld.worlds[1].options.bombless_start.value = True
@@ -25,6 +31,12 @@ class TestDungeon(LTTPTestBase):
         if pot_shuffle_state is not None:
             self.multiworld.worlds[1].options.pot_shuffle.value = True
             self.multiworld.worlds[1].pot_shuffle_state = pot_shuffle_state
+        if puzzle_shuffle_state is not None:
+            self.multiworld.worlds[1].options.randomize_puzzles.value = True
+            self.multiworld.worlds[1].puzzle_shuffle_state = puzzle_shuffle_state
+        if enemy_shuffle_state is not None:
+            self.multiworld.worlds[1].options.enemy_shuffle.value = True
+            self.multiworld.worlds[1].enemy_shuffle_state = enemy_shuffle_state
         create_regions(self.multiworld, 1)
         self.multiworld.worlds[1].create_dungeons()
         create_shops(self.multiworld, 1)
@@ -44,13 +56,19 @@ class TestDungeon(LTTPTestBase):
     def rebuild_with_enemy_health(self, enemy_health_value):
         self._build_dungeon_world(enemy_health_value=enemy_health_value)
 
+    def rebuild_with_puzzle_shuffle(self, puzzle_shuffle_state, enemy_shuffle_state=None):
+        self._build_dungeon_world(puzzle_shuffle_state=puzzle_shuffle_state, enemy_shuffle_state=enemy_shuffle_state)
+
     @staticmethod
     def get_test_pot_shuffle_state(overrides=None):
         state = {
             0x36: (FilledPot(10, 16, POT_KEY),),
+            0x35: (FilledPot(60, 6, POT_KEY),),
             0x16: (FilledPot(188, 3, POT_KEY),),
             0x0A: (FilledPot(100, 7, POT_SWITCH),),
             0x8B: (FilledPot(112, 12, POT_KEY),),
+            0x56: (FilledPot(100, 6, POT_KEY),),
+            0xBC: (FilledPot(102, 4, POT_KEY),),
             0xB8: (
                 FilledPot(96, 13, 11),
                 FilledPot(88, 16, 11),

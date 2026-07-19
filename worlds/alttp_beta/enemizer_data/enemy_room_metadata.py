@@ -13,7 +13,7 @@ class RoomGroupRequirementData(NamedTuple):
 
 SHUTTER_ROOM_IDS = frozenset((184, 11, 27, 75, 4, 36, 182, 40, 14, 46, 62, 110, 49, 135, 68, 69, 83, 117, 133, 61, 93, 107, 109, 123, 125, 141, 150, 165, 113, 168, 216, 176, 192, 224, 178, 210, 239, 268, 291))
 WATER_ROOM_IDS = frozenset((22, 40, 52, 54, 56, 70, 102))
-DONT_RANDOMIZE_ROOM_IDS = frozenset((0, 1, 3, 13, 20, 32, 48, 127))
+DONT_RANDOMIZE_ROOM_IDS = frozenset((0, 1, 3, 13, 20, 32, 40, 48, 127))
 NO_SPECIAL_ENEMIES_STANDARD_ROOM_IDS = frozenset((1, 2, 17, 33, 34, 50, 65, 66, 80, 81, 82, 85, 96, 97, 98, 112, 113, 114, 128, 129, 130))
 BOSS_ROOM_IDS = frozenset((200, 51, 108, 7, 77, 90, 6, 41, 172, 222, 144, 164, 32, 13, 0))
 

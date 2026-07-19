@@ -6,9 +6,25 @@ from .TestDungeon import TestDungeon
 from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite, get_room_id
 from worlds.alttp.Items import item_factory
 from worlds.alttp.PotShuffle import FilledPot, POT_KEY
+from worlds.alttp.PuzzleShuffle import (
+    PuzzleShuffleState,
+    TAG_LIGHT_TORCHES_TO_GET_CHEST,
+    TAG_NE_KILL_ENEMY_FOR_CHEST,
+    TAG_NE_KILL_ENEMY_TO_OPEN,
+    TAG_PULL_LEVER_TO_OPEN,
+    TAG_SWITCH_OPENS_DOOR_HOLD,
+    TAG_SWITCH_OPENS_DOOR_TOGGLE,
+)
 
 
 class TestGanonsTower(TestDungeon):
+    @staticmethod
+    def gt_puzzle_state(**kwargs):
+        return PuzzleShuffleState(
+            desert_map_chest_tag=TAG_LIGHT_TORCHES_TO_GET_CHEST,
+            desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_HOLD,
+            **kwargs,
+        )
 
     def testGanonsTower(self):
         self.starting_regions = ['Ganons Tower (Entrance)']
@@ -173,6 +189,97 @@ class TestGanonsTower(TestDungeon):
             ["Ganons Tower - Conveyor Cross Pot Key", False, [], ['Hookshot', 'Pegasus Boots']],
             ["Ganons Tower - Conveyor Cross Pot Key", True, ['Hammer', 'Hookshot']],
             ["Ganons Tower - Conveyor Cross Pot Key", True, ['Hammer', 'Pegasus Boots']],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0x8B: (FilledPot(76, 20, POT_KEY),),
+        }))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        gt_keys = ['Small Key (Ganons Tower)'] * 6
+        self.run_tests([
+            ["Ganons Tower - Conveyor Cross Pot Key", False, ['Hammer', 'Hookshot']],
+            ["Ganons Tower - Conveyor Cross Pot Key", False, ['Hammer', 'Hookshot'] + gt_keys[:5]],
+            ["Ganons Tower - Conveyor Cross Pot Key", True, ['Hammer', 'Hookshot'] + gt_keys],
+        ])
+
+    def testGanonsTowerHookshotRoomPuzzleTags(self):
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_block_puzzle_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        self.run_tests([
+            ["Ganons Tower - DMs Room - Top Left", False, []],
+            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot']],
+        ])
+
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_block_puzzle_tag=TAG_SWITCH_OPENS_DOOR_HOLD))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        self.run_tests([
+            ["Ganons Tower - DMs Room - Top Left", False, ['Hookshot']],
+            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Cane of Somaria']],
+        ])
+
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_block_puzzle_tag=TAG_NE_KILL_ENEMY_FOR_CHEST),
+                                         SimpleNamespace(
+                                             randomized_dungeon_rooms={
+                                                 0x8B: RandomizedDungeonEnemyRoom(
+                                                     room_id=0x8B,
+                                                     room_header_address=0,
+                                                     sprite_table_address=0,
+                                                     original_graphics_block_id=0,
+                                                     graphics_block_id=0,
+                                                     tag_1=0,
+                                                     tag_2=0,
+                                                     sort_sprites_value=0,
+                                                     sprites=(
+                                                         RandomizedDungeonEnemySprite(
+                                                             0, 0x05, 0x17, 0x63, 0x84, False, False),
+                                                     ),
+                                                     skipped_randomization=False,
+                                                 )
+                                             },
+                                         ))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        self.run_tests([
+            ["Ganons Tower - DMs Room - Top Left", False, ['Hookshot']],
+            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Progressive Bow']],
+        ])
+
+    def testGanonsTowerTileRoomPuzzleTags(self):
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_big_chest_room_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        self.run_tests([
+            ["Ganons Tower - Tile Room", True, []],
+        ])
+
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_big_chest_room_tag=TAG_PULL_LEVER_TO_OPEN))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        self.run_tests([
+            ["Ganons Tower - Tile Room", True, []],
+        ])
+
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_big_chest_room_tag=TAG_NE_KILL_ENEMY_TO_OPEN),
+                                         SimpleNamespace(
+                                             randomized_dungeon_rooms={
+                                                 0x8C: RandomizedDungeonEnemyRoom(
+                                                     room_id=0x8C,
+                                                     room_header_address=0,
+                                                     sprite_table_address=0,
+                                                     original_graphics_block_id=0,
+                                                     graphics_block_id=0,
+                                                     tag_1=0,
+                                                     tag_2=0,
+                                                     sort_sprites_value=0,
+                                                     sprites=(
+                                                         RandomizedDungeonEnemySprite(
+                                                             0, 0x05, 0x17, 0x63, 0x84, False, False),
+                                                     ),
+                                                     skipped_randomization=False,
+                                                 )
+                                             },
+                                         ))
+        self.starting_regions = ['Ganons Tower (Entrance)']
+        self.run_tests([
+            ["Ganons Tower - Tile Room", False, []],
+            ["Ganons Tower - Tile Room", True, ['Progressive Bow']],
         ])
 
     def testGanonsTowerTorchRoomsRequireWizzrobesAndGauntletRooms(self):

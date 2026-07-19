@@ -6,8 +6,10 @@ from typing import Optional, Union, List, Tuple, Callable, Dict, TYPE_CHECKING
 from Fill import FillError
 from .Options import LTTPBosses as Bosses
 from .StateHelpers import (
+    FIRE_ROD_MAGIC_COST,
     can_damage_boss_sprite,
     can_damage_boss_sprite_phases,
+    can_damage_blind_sprite,
     can_get_good_bee,
     can_hit_boss_sprite,
     can_hit_boss_sprite_for_at_least_damage,
@@ -15,6 +17,7 @@ from .StateHelpers import (
     has_sword,
     can_use_bombs,
     _get_boss_attack_plans,
+    _get_trinexx_side_head_attack_plans,
 )
 from .enemizer_data.enemy_combat_data import (
     ARRGHUS_FUZZ_SPRITE_ID,
@@ -86,10 +89,9 @@ BOSS_BOMB_ABILITIES = ("bombs",)
 # No item delivery is excluded here; contact is checked by Sprite_CheckDamageFromPlayerLong
 # at sprite_armos_knight.asm:142 and ordinary ancillas use the shared damage paths above.
 ARMOS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
-# No item delivery is excluded here; Lanmolas calls Sprite2_CheckDamage at
-# sprite_lanmola.asm:153 and :212, and Sprite2_CheckDamage includes contact damage
-# at sprite_cannon_trooper.asm:36-39 while ordinary ancillas use the shared paths above.
-LANMOLAS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Quake is excluded because Ancilla_CheckSpriteDamage rejects damage class 0x0F
+# unless $0F70 is exactly zero, and Lanmolas only has narrow ground-crossing frames.
+LANMOLAS_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if item != "Quake")
 # Bombs are excluded from the body phase: Bomb_CheckSpriteDamage explicitly skips
 # Helmasaur King when $0DB0 >= 3, i.e. after the mask is gone. See Bank08.asm:458-464.
 # Other basic ancillas skip only the mask and can hit the body; see Bank08.asm:1295-1316
@@ -103,9 +105,11 @@ ARRGHUS_FUZZ_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if 
 # impervious status before contact damage at sprite_arrghus.asm:193-198, and ordinary
 # ancillas use the shared damage paths above.
 ARRGHUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
-# No item delivery is excluded here; Mothula calls Sprite3_CheckDamage at
-# sprite_mothula.asm:215 and :255, and ordinary ancillas use the shared paths above.
-MOTHULA_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Magic Powder can affect Moldorm's head, while sustained tail damage remains
+# player-contact only. See alttp_sprite_weapon_vulnerability_audit.md.
+MOLDORM_ATTACK_ITEMS = BOSS_MELEE_ITEMS + ("Magic Powder",)
+# Quake is excluded because Mothula ascends to and fights at nonzero altitude.
+MOTHULA_ATTACK_ITEMS = tuple(item for item in BOSS_GENERIC_ATTACK_ITEMS if item != "Quake")
 # No item delivery is excluded here; Blind calls Sprite4_CheckDamage at
 # sprite_blind_entities.asm:259 and :1175, and ordinary ancillas use the shared paths above.
 BLIND_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
@@ -115,32 +119,48 @@ KHOLDSTARE_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
 # No item delivery is excluded here; Vitreous and small eyes call damage checks at
 # sprite_vitreous.asm:19 and sprite_vitreolus.asm:47, and ordinary ancillas use the shared paths above.
 VITREOUS_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
-# No item delivery is excluded from the side heads; they call Sprite4_CheckDamage at
-# sprite_trinexx.asm:177 and :568, and ordinary ancillas use the shared paths above.
-TRINEXX_HEAD_ATTACK_ITEMS = BOSS_GENERIC_ATTACK_ITEMS
+# Trinexx side heads use a boss-specific vulnerable state. Before that state,
+# sword and hammer contact is repulsed by $0CAA bit 2 in Bank06.asm:5900-5903.
+# Non-melee ancilla/medallion hits can set $0EF0 and trigger the 0x80-frame
+# vulnerable state at sprite_sidenexx.asm:43-54; Quake is excluded because
+# Bank06.asm:4737-4744 rejects sprites with nonzero altitude.
+TRINEXX_HEAD_OPENER_ITEMS = (
+    BOSS_ARROW_ITEMS
+    + BOSS_BOOMERANG_ITEMS
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder",)
+    + BOSS_ROD_ITEMS
+    + ("Bombos", "Ether")
+)
+TRINEXX_HEAD_OPENER_ABILITIES = ("bombs", "sword_beams")
+TRINEXX_HEAD_FOLLOW_UP_ITEMS = BOSS_MELEE_ITEMS
 # Projectiles, rods, canes, powder, medallions, and bombs are excluded from the final
 # Trinexx body: it temporarily clears impervious status only around
 # Sprite_CheckDamageFromPlayerLong, then restores it. See sprite_trinexx.asm:408-420.
 TRINEXX_BODY_ATTACK_ITEMS = BOSS_MELEE_ITEMS
 # Hammer is excluded by the hardcoded Ganon contact check at Bank06.asm:5784-5791.
 # Arrows are excluded from D6 logic because the Ganon-specific silver-arrow vulnerability
-# branch only recognizes sprite D7; see Bank06.asm:4712-4724. Cane of Byrna is excluded
-# because its persistent sparkle is not part of the basic projectile damage paths, and
-# in-game testing found it does not damage Ganon.
+# branch only recognizes sprite D7; see Bank06.asm:4712-4724. Both canes can deliver
+# class 1 damage to Ganon when his table row permits it.
 GANON_D6_ATTACK_ITEMS = (
     BOSS_SWORD_ITEMS
     + BOSS_BOOMERANG_ITEMS
-    + ("Hookshot", "Cane of Somaria", "Magic Powder", "Fire Rod", "Ice Rod")
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder", "Fire Rod", "Ice Rod")
     + BOSS_MEDALLION_ITEMS
 )
 # Hammer is excluded by the hardcoded Ganon contact check at Bank06.asm:5784-5791.
-# Cane of Byrna is excluded for the same reason as D6. Arrows are allowed here because
-# D7 is the sprite handled by the silver-arrow vulnerability branch at Bank06.asm:4718-4724.
+# Arrows are allowed here because D7 is the sprite handled by the silver-arrow
+# vulnerability branch at Bank06.asm:4718-4724.
 GANON_D7_ATTACK_ITEMS = (
     BOSS_SWORD_ITEMS
     + BOSS_ARROW_ITEMS
     + BOSS_BOOMERANG_ITEMS
-    + ("Hookshot", "Cane of Somaria", "Magic Powder", "Fire Rod", "Ice Rod")
+    + ("Hookshot",)
+    + BOSS_CANE_ITEMS
+    + ("Magic Powder", "Fire Rod", "Ice Rod")
     + BOSS_MEDALLION_ITEMS
 )
 # Swordless Ganon keeps Hammer because Archipelago patches the swordless fight around it;
@@ -148,6 +168,10 @@ GANON_D7_ATTACK_ITEMS = (
 GANON_D7_SWORDLESS_ATTACK_ITEMS = ("Hammer",) + GANON_D7_ATTACK_ITEMS
 GANON_HP_FOR_LOGIC = 0x60
 GANON_D6_PHASE_SKIP_DAMAGE = 0x64
+
+
+def _ganon_torch_relight_magic_per_two_hits(state, player: int) -> int:
+    return 0 if state.has("Lamp", player) else FIRE_ROD_MAGIC_COST * 2
 
 
 def ArmosKnightsDefeatRule(state, player: int) -> bool:
@@ -173,7 +197,7 @@ def MoldormDefeatRule(state, player: int) -> bool:
         state,
         player,
         MOLDORM_SPRITE_ID,
-        allowed_items=BOSS_MELEE_ITEMS,
+        allowed_items=MOLDORM_ATTACK_ITEMS,
     )
 
 
@@ -197,7 +221,7 @@ def ArrghusDefeatRule(state, player: int) -> bool:
         state,
         player,
         ARRGHUS_FUZZ_SPRITE_ID,
-        allowed_items=("Hookshot",) + ARRGHUS_ATTACK_ITEMS,
+        allowed_items=ARRGHUS_FUZZ_ATTACK_ITEMS,
         include_transform_removal=True,
     )
     body_plans = _get_boss_attack_plans(
@@ -219,16 +243,11 @@ def MothulaDefeatRule(state, player: int) -> bool:
 
 
 def BlindDefeatRule(state, player: int) -> bool:
-    return can_damage_boss_sprite(
+    return can_damage_blind_sprite(
         state,
         player,
         BLIND_SPRITE_ID,
-        allowed_items=BOSS_MELEE_ITEMS,
-    ) or can_hit_boss_sprite(
-        state,
-        player,
-        BLIND_SPRITE_ID,
-        allowed_items=BOSS_CANE_ITEMS,
+        allowed_items=BLIND_ATTACK_ITEMS,
     )
 
 
@@ -237,13 +256,15 @@ def KholdstareDefeatRule(state, player: int) -> bool:
         state,
         player,
         KHOLDSTARE_ICE_BLOCK_SPRITE_ID,
-        allowed_items=("Fire Rod", "Bombos"),
+        allowed_items=KHOLDSTARE_ATTACK_ITEMS,
+        allowed_abilities=BOSS_BOMB_ABILITIES,
     )
     body_plans = _get_boss_attack_plans(
         state,
         player,
         KHOLDSTARE_SPRITE_ID,
-        allowed_items=BOSS_MELEE_ITEMS + ("Fire Rod", "Bombos", "Cane of Somaria"),
+        allowed_items=KHOLDSTARE_ATTACK_ITEMS,
+        allowed_abilities=BOSS_BOMB_ABILITIES,
     )
     return can_damage_boss_sprite_phases(state, player, shell_plans, body_plans)
 
@@ -265,22 +286,21 @@ def VitreousDefeatRule(state, player: int) -> bool:
 
 
 def TrinexxDefeatRule(state, player: int) -> bool:
-    if not (state.has('Fire Rod', player) and state.has('Ice Rod', player)):
-        return False
-
-    red_head_plans = _get_boss_attack_plans(
+    red_head_plans = _get_trinexx_side_head_attack_plans(
         state,
         player,
         TRINEXX_RED_HEAD_SPRITE_ID,
-        allowed_items=TRINEXX_HEAD_ATTACK_ITEMS,
-        include_transform_removal=True,
+        opener_items=TRINEXX_HEAD_OPENER_ITEMS,
+        opener_abilities=TRINEXX_HEAD_OPENER_ABILITIES,
+        follow_up_items=TRINEXX_HEAD_FOLLOW_UP_ITEMS,
     )
-    blue_head_plans = _get_boss_attack_plans(
+    blue_head_plans = _get_trinexx_side_head_attack_plans(
         state,
         player,
         TRINEXX_BLUE_HEAD_SPRITE_ID,
-        allowed_items=TRINEXX_HEAD_ATTACK_ITEMS,
-        include_transform_removal=True,
+        opener_items=TRINEXX_HEAD_OPENER_ITEMS,
+        opener_abilities=TRINEXX_HEAD_OPENER_ABILITIES,
+        follow_up_items=TRINEXX_HEAD_FOLLOW_UP_ITEMS,
     )
     body_plans = _get_boss_attack_plans(
         state,
@@ -296,6 +316,7 @@ def AgahnimDefeatRule(state, player: int) -> bool:
 
 
 def GanonDefeatRule(state, player: int) -> bool:
+    torch_relight_magic = _ganon_torch_relight_magic_per_two_hits(state, player)
     if state.multiworld.worlds[player].options.swordless:
         return (
             state.has('Hammer', player)
@@ -306,6 +327,7 @@ def GanonDefeatRule(state, player: int) -> bool:
                 GANON_D7_SPRITE_ID,
                 allowed_items=GANON_D7_SWORDLESS_ATTACK_ITEMS,
                 hp_override=GANON_HP_FOR_LOGIC,
+                extra_magic_per_two_hits=torch_relight_magic,
             )
         )
 
@@ -333,6 +355,7 @@ def GanonDefeatRule(state, player: int) -> bool:
         GANON_D7_SPRITE_ID,
         allowed_items=GANON_D7_ATTACK_ITEMS,
         hp_override=GANON_HP_FOR_LOGIC,
+        extra_magic_per_two_hits=torch_relight_magic,
     )
     if state.multiworld.worlds[player].options.glitches_required == 'no_glitches':
         return d7_kill
@@ -343,6 +366,7 @@ def GanonDefeatRule(state, player: int) -> bool:
         GANON_D6_SPRITE_ID,
         allowed_items=GANON_D6_ATTACK_ITEMS,
         hp_override=GANON_HP_FOR_LOGIC,
+        extra_magic_per_two_hits=torch_relight_magic,
     )
     return d7_kill or d6_kill
 
@@ -360,6 +384,19 @@ boss_table: Dict[str, Tuple[str, Optional[Callable]]] = {
     'Trinexx': ('Trinexx', TrinexxDefeatRule),
     'Agahnim': ('Agahnim', AgahnimDefeatRule),
     'Agahnim2': ('Agahnim2', AgahnimDefeatRule)
+}
+
+BOSS_DAMAGE_CLASS_SPRITE_IDS_BY_BOSS_NAME = {
+    "Armos Knights": frozenset({ARMOS_KNIGHTS_SPRITE_ID}),
+    "Lanmolas": frozenset({LANMOLAS_SPRITE_ID}),
+    "Moldorm": frozenset({MOLDORM_SPRITE_ID}),
+    "Helmasaur King": frozenset({HELMASAUR_KING_SPRITE_ID}),
+    "Arrghus": frozenset({ARRGHUS_SPRITE_ID, ARRGHUS_FUZZ_SPRITE_ID}),
+    "Mothula": frozenset({MOTHULA_SPRITE_ID}),
+    "Blind": frozenset({BLIND_SPRITE_ID}),
+    "Kholdstare": frozenset({KHOLDSTARE_SPRITE_ID, KHOLDSTARE_ICE_BLOCK_SPRITE_ID}),
+    "Vitreous": frozenset({VITREOUS_SPRITE_ID, VITREOUS_SMALL_EYE_SPRITE_ID}),
+    "Trinexx": frozenset({TRINEXX_MAIN_HEAD_SPRITE_ID, TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID}),
 }
 
 boss_location_table: List[Tuple[str, str]] = [
@@ -443,6 +480,22 @@ def place_boss(world: "ALTTPWorld", boss: str, location: str, level: Optional[st
         location = 'Inverted Ganons Tower'
     logging.debug('Placing boss %s at %s', boss, location + (' (' + level + ')' if level else ''))
     world.dungeons[location].bosses[level] = BossFactory(boss, player)
+
+
+def get_gt_only_boss_damage_class_sprite_ids(world: "ALTTPWorld") -> frozenset[int]:
+    gt_dungeon_names = {"Ganons Tower", "Inverted Ganons Tower"}
+    placements_by_boss: dict[str, set[str]] = {}
+    for dungeon_name, dungeon in world.dungeons.items():
+        for boss in dungeon.bosses.values():
+            if boss is None or boss.name not in BOSS_DAMAGE_CLASS_SPRITE_IDS_BY_BOSS_NAME:
+                continue
+            placements_by_boss.setdefault(boss.name, set()).add(dungeon_name)
+
+    allowed_sprite_ids: set[int] = set()
+    for boss_name, dungeon_names in placements_by_boss.items():
+        if dungeon_names and dungeon_names <= gt_dungeon_names:
+            allowed_sprite_ids.update(BOSS_DAMAGE_CLASS_SPRITE_IDS_BY_BOSS_NAME[boss_name])
+    return frozenset(allowed_sprite_ids)
 
 
 def format_boss_location(location_name: str, level: str) -> str:

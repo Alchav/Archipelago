@@ -1,4 +1,4 @@
-from collections import Counter, namedtuple
+from collections import namedtuple
 import logging
 
 from BaseClasses import ItemClassification, MultiWorld
@@ -8,18 +8,15 @@ from typing import TYPE_CHECKING
 from .SubClasses import ALttPLocation, LTTPRegion, LTTPRegionType
 from .Shops import TakeAny, total_shop_slots, set_up_shops, shop_table_by_location, ShopType
 from .Bosses import place_bosses
+from .DamageClasses import (
+    get_enemy_shuffle_available_damage_classes,
+    get_enemy_shuffle_available_damage_delivery_context,
+    set_enemy_combat_model,
+    with_vanilla_standard_escape_damage_rows,
+)
 from .Dungeons import get_dungeon_item_pool_player
 from .EnemyShuffle import generate_enemy_shuffle_state
 from .EntranceShuffle import connect_entrance
-from .enemizer_data.enemy_combat_data import (
-    FIGHTER_SWORD_DAMAGE_CLASSES,
-    GOLDEN_SWORD_DAMAGE_CLASSES,
-    MASTER_SWORD_DAMAGE_CLASSES,
-    TEMPERED_SWORD_DAMAGE_CLASSES,
-    VANILLA_COMBAT_MODEL,
-    VANILLA_RANDOMIZE_DAMAGE_CLASSES,
-    build_randomized_damage_class_combat_model,
-)
 from .BossPrizeData import boss_prize_items
 from .Items import (item_factory, GetBeemizerItem, trap_replaceable, item_name_groups, key_ring_table,
                     small_key_name_to_key_ring)
@@ -238,103 +235,6 @@ items_reduction_table = (
 )
 
 
-def get_enemy_shuffle_available_damage_classes(world: "ALTTPWorld", item_names) -> frozenset[int]:
-    item_counts = Counter(item_names)
-    damage_classes: set[int] = set()
-
-    def has_item(item_name: str) -> bool:
-        return item_counts[item_name] > 0
-
-    progressive_sword_count = min(
-        item_counts["Progressive Sword"],
-        world.difficulty_requirements.progressive_sword_limit,
-    )
-    if has_item("Fighter Sword") or progressive_sword_count >= 1:
-        damage_classes.update(FIGHTER_SWORD_DAMAGE_CLASSES)
-    if has_item("Master Sword") or progressive_sword_count >= 2:
-        damage_classes.update(MASTER_SWORD_DAMAGE_CLASSES)
-    if has_item("Tempered Sword") or progressive_sword_count >= 3:
-        damage_classes.update(TEMPERED_SWORD_DAMAGE_CLASSES)
-    if has_item("Golden Sword") or progressive_sword_count >= 4:
-        damage_classes.update(GOLDEN_SWORD_DAMAGE_CLASSES)
-
-    if has_item("Hammer"):
-        damage_classes.add(3)
-    if has_item("Blue Boomerang") or has_item("Red Boomerang"):
-        damage_classes.add(0)
-    if has_item("Hookshot"):
-        damage_classes.add(7)
-    if has_item("Cane of Somaria") or has_item("Cane of Byrna"):
-        damage_classes.add(1)
-    if has_item("Magic Powder"):
-        damage_classes.add(10)
-    if has_item("Fire Rod"):
-        damage_classes.add(11)
-    if has_item("Ice Rod"):
-        damage_classes.add(12)
-    if has_item("Bombos"):
-        damage_classes.add(13)
-    if has_item("Ether"):
-        damage_classes.add(14)
-    if has_item("Quake"):
-        damage_classes.add(15)
-
-    if (
-        not world.options.bombless_start
-        or has_item("Bomb Upgrade (+5)")
-        or has_item("Bomb Upgrade (+10)")
-        or has_item("Bomb Upgrade (50)")
-        or (
-            not world.options.shuffle_capacity_upgrades
-            and has_item("Capacity Upgrade Shop")
-        )
-    ):
-        damage_classes.add(8)
-
-    progressive_bow_count = min(
-        item_counts["Progressive Bow"] + item_counts["Progressive Bow (Alt)"],
-        world.difficulty_requirements.progressive_bow_limit,
-    )
-    has_bow = has_item("Bow") or has_item("Silver Bow") or progressive_bow_count >= 1
-    if has_bow:
-        damage_classes.add(6)
-    if has_item("Silver Bow") or progressive_bow_count >= 2 or (has_bow and has_item("Silver Arrows")):
-        damage_classes.add(9)
-
-    return frozenset(damage_classes)
-
-
-def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
-    if getattr(world, "ut_replay_data", None):
-        from . import _decode_ut_enemy_combat_model, _get_ut_replay_value
-
-        enemy_combat_model = _get_ut_replay_value(world.ut_replay_data, "ut_enemy_combat_model", "enemy_combat_model")
-        if enemy_combat_model is not None:
-            world.enemy_combat_model = _decode_ut_enemy_combat_model(enemy_combat_model)
-            return
-
-    damage_class_mode = world.options.randomize_damage_classes.current_key
-    if damage_class_mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
-        world.enemy_combat_model = VANILLA_COMBAT_MODEL
-    else:
-        from .EnemizerPatches import _make_native_enemizer_rng
-
-        item_pool_damage_classes = (
-            get_enemy_shuffle_available_damage_classes(world, item_names)
-            if item_names is not None
-            else None
-        )
-        world.enemy_combat_model = build_randomized_damage_class_combat_model(
-            _make_native_enemizer_rng(world),
-            damage_class_mode,
-            max_attacks_in_logic=world.options.max_attacks_in_logic.value,
-            enemy_health_key=world.options.enemy_health.current_key,
-            item_pool_key=getattr(getattr(world.options, "item_pool", None), "current_key", "normal"),
-            available_damage_classes=item_pool_damage_classes,
-            swordless=bool(getattr(world.options, "swordless", False)),
-        )
-
-
 def starting_items_can_clear_standard_escape(world: "ALTTPWorld", item_names) -> bool:
     state = world.multiworld.state.copy()
     for item_name in item_names:
@@ -409,10 +309,24 @@ def generate_itempool(world: "ALTTPWorld"):
     for item in precollected_items:
         multiworld.push_precollected(item_factory(item, world))
 
+    place_bosses(world)
+
     enemy_combat_item_names = list(pool)
     enemy_combat_item_names.extend(placed_items.values())
     enemy_combat_item_names.extend(precollected_items)
     set_enemy_combat_model(world, enemy_combat_item_names)
+    if world.options.mode == 'standard':
+        world.enemy_combat_model = with_vanilla_standard_escape_damage_rows(world.enemy_combat_model)
+    if world.options.enemy_shuffle and world.enemy_shuffle_state is None and not getattr(world, "ut_replay_data", None):
+        world.enemy_shuffle_available_damage_classes = get_enemy_shuffle_available_damage_classes(
+            world,
+            enemy_combat_item_names,
+        )
+        (
+            world.enemy_shuffle_available_damage_delivery_items,
+            world.enemy_shuffle_available_damage_delivery_abilities,
+        ) = get_enemy_shuffle_available_damage_delivery_context(world, enemy_combat_item_names)
+        world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
 
     if world.options.mode == 'standard' and not has_melee_weapon(multiworld.state, player):
         if "Link's Uncle" not in placed_items:
@@ -437,9 +351,6 @@ def generate_itempool(world: "ALTTPWorld"):
                     'Magic Powder',
                     'Fire Rod',
                     'Ice Rod',
-                    'Bombos',
-                    'Ether',
-                    'Quake',
                 ]:
                     if item not in possible_weapons:
                         possible_weapons.append(item)
@@ -457,7 +368,7 @@ def generate_itempool(world: "ALTTPWorld"):
             secret_passage_item = None
             if damage_class_weapons:
                 possible_weapons = damage_class_weapons
-            elif "Secret Passage" not in placed_items:
+            else:
                 possible_escape_pairs = [
                     (uncle_item, secret_item)
                     for uncle_item in possible_weapons
@@ -466,6 +377,8 @@ def generate_itempool(world: "ALTTPWorld"):
                     and starting_items_can_clear_standard_escape(world, (uncle_item, secret_item))
                 ]
                 if possible_escape_pairs:
+                    if "Secret Passage" in placed_items:
+                        pool.append(placed_items.pop("Secret Passage"))
                     starting_weapon, secret_passage_item = multiworld.random.choice(possible_escape_pairs)
                     possible_weapons = [starting_weapon]
 
@@ -473,6 +386,7 @@ def generate_itempool(world: "ALTTPWorld"):
                 world.options.enemy_shuffle
                 and world.options.bombless_start
                 and "Hammer" in possible_weapons
+                and starting_items_can_clear_standard_escape(world, ("Hammer",))
             ):
                 starting_weapon = "Hammer"
             else:
@@ -492,7 +406,9 @@ def generate_itempool(world: "ALTTPWorld"):
             else:
                 world.escape_assist.append('bombs')
 
-    if world.options.mode == 'standard' and "Big Key (Hyrule Castle)" in pool:
+    if (world.options.mode == 'standard'
+            and not world.options.small_key_shuffle
+            and "Big Key (Hyrule Castle)" in pool):
         multiworld.local_early_items[player]["Big Key (Hyrule Castle)"] = 1
 
     for (location, item) in placed_items.items():
@@ -514,6 +430,8 @@ def generate_itempool(world: "ALTTPWorld"):
 
     dungeon_items = [item for item in get_dungeon_item_pool_player(world)
                      if item.name not in world.dungeon_local_item_names]
+    dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
+    multiworld.random.shuffle(dungeon_item_replacements)
 
     def dungeon_name_for_small_key(small_key_name: str) -> str:
         dungeon_name = small_key_name.split("(")[1].split(")")[0]
@@ -524,29 +442,31 @@ def generate_itempool(world: "ALTTPWorld"):
                 return "Inverted Ganons Tower"
         return dungeon_name
 
-    def fixed_key_drop_can_be_required(key_location: str, item) -> bool:
-        if world.options.accessibility == "full":
-            return True
-        return key_location != "Skull Woods - Spike Corner Key Drop"
+    def fixed_key_drop_starts_with_item(item) -> bool:
+        return (
+            (world.options.small_key_shuffle == small_key_shuffle.option_start_with and item.type == 'SmallKey')
+            or (world.options.big_key_shuffle == big_key_shuffle.option_start_with and item.type == 'BigKey')
+        )
 
     for key_loc in key_drop_data:
         key_data = key_drop_data[key_loc]
         drop_item = item_factory(key_data[3], world)
         if not world.options.key_drop_shuffle:
-            if not fixed_key_drop_can_be_required(key_loc, drop_item):
-                drop_item.classification = ItemClassification.filler
             if drop_item in dungeon_items:
                 dungeon_items.remove(drop_item)
-            else:
-                dungeon = dungeon_name_for_small_key(drop_item.name)
-                if drop_item in world.dungeons[dungeon].small_keys:
-                    world.dungeons[dungeon].small_keys.remove(drop_item)
-                elif world.dungeons[dungeon].big_key is not None and world.dungeons[dungeon].big_key == drop_item:
-                    world.dungeons[dungeon].big_key = None
+            dungeon = dungeon_name_for_small_key(drop_item.name)
+            if drop_item in world.dungeons[dungeon].small_keys:
+                world.dungeons[dungeon].small_keys.remove(drop_item)
+            elif world.dungeons[dungeon].big_key is not None and world.dungeons[dungeon].big_key == drop_item:
+                world.dungeons[dungeon].big_key = None
 
             loc = multiworld.get_location(key_loc, player)
-            loc.place_locked_item(drop_item)
-            loc.address = None
+            if fixed_key_drop_starts_with_item(drop_item):
+                multiworld.push_precollected(drop_item)
+                loc.place_locked_item(item_factory(dungeon_item_replacements.pop(), world))
+            else:
+                loc.place_locked_item(drop_item)
+                loc.address = None
         elif "Small" in key_data[3] and world.options.small_key_shuffle == small_key_shuffle.option_universal:
             # key drop shuffle and universal keys are on. Add universal keys in place of key drop keys.
             multiworld.itempool.append(item_factory(GetBeemizerItem(multiworld, player, 'Small Key (Universal)'), world))
@@ -571,9 +491,6 @@ def generate_itempool(world: "ALTTPWorld"):
             dungeon.small_keys.append(key_ring_item)
             if key_ring_item.name not in world.dungeon_local_item_names:
                 dungeon_items.append(key_ring_item)
-
-    dungeon_item_replacements = sum(difficulties[world.options.item_pool.current_key].extras, []) * 2
-    multiworld.random.shuffle(dungeon_item_replacements)
 
     if world.options.small_key_shuffle != small_key_shuffle.option_universal:
         collapsed_small_keys = sum(
@@ -733,7 +650,6 @@ def generate_itempool(world: "ALTTPWorld"):
         world.required_medallions = (world.options.misery_mire_medallion.current_key.title(),
                                      world.options.turtle_rock_medallion.current_key.title())
 
-    place_bosses(world)
     if world.options.enemy_shuffle:
         enemy_shuffle_item_names = [item.name for item in items]
         enemy_shuffle_item_names.extend(placed_items.values())
@@ -742,12 +658,21 @@ def generate_itempool(world: "ALTTPWorld"):
             world,
             enemy_shuffle_item_names,
         )
-        world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
+        (
+            world.enemy_shuffle_available_damage_delivery_items,
+            world.enemy_shuffle_available_damage_delivery_abilities,
+        ) = get_enemy_shuffle_available_damage_delivery_context(world, enemy_shuffle_item_names)
+        has_ut_enemy_shuffle = False
         if getattr(world, "ut_replay_data", None):
             from . import _apply_ut_enemy_shuffle_state, _get_ut_replay_value
 
-            if _get_ut_replay_value(world.ut_replay_data, "ut_enemy_shuffle", "enemy_shuffle") is not None:
-                _apply_ut_enemy_shuffle_state(world)
+            has_ut_enemy_shuffle = _get_ut_replay_value(world.ut_replay_data, "ut_enemy_shuffle", "enemy_shuffle") is not None
+        if world.enemy_shuffle_state is None or has_ut_enemy_shuffle:
+            world.enemy_shuffle_state = generate_enemy_shuffle_state(world)
+        if has_ut_enemy_shuffle:
+            _apply_ut_enemy_shuffle_state(world)
+
+    world.setup_puzzle_shuffle()
 
     multiworld.itempool += items
 
