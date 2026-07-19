@@ -191,6 +191,33 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
             if item_names is not None
             else None
         )
+        logic_required_sprite_ids = None
+        if not world.options.enemy_shuffle:
+            from .EnemyLogicTargets import (
+                ENEMY_CLEAR_TARGETS,
+                KEY_DROP_ENEMY_TARGETS,
+                get_enemy_clear_target_enemies,
+                get_key_drop_enemy,
+            )
+
+            required_enemies = [
+                enemy
+                for target in ENEMY_CLEAR_TARGETS
+                for enemy in get_enemy_clear_target_enemies(world, target.name)
+            ]
+            required_enemies.extend(
+                enemy
+                for target in KEY_DROP_ENEMY_TARGETS
+                if (enemy := get_key_drop_enemy(world, target.location_name)) is not None
+            )
+            logic_required_sprite_ids = frozenset(
+                requirement.combat_reference_id
+                if requirement.combat_reference_id is not None
+                else requirement.sprite_id
+                for enemy in required_enemies
+                for requirement in (enemy.requirement,)
+            )
+
         world.enemy_combat_model = build_randomized_damage_class_combat_model(
             world.random,
             damage_class_mode,
@@ -205,4 +232,5 @@ def set_enemy_combat_model(world: "ALTTPWorld", item_names=None) -> None:
             enemy_shuffle=bool(getattr(world.options, "enemy_shuffle", False)),
             preserve_melee_damage_classes=bool(getattr(world.options, "preserve_melee_damage_classes", False)),
             gt_only_boss_special_allowed_sprite_ids=get_gt_only_boss_damage_class_sprite_ids(world),
+            logic_required_sprite_ids=logic_required_sprite_ids,
         )

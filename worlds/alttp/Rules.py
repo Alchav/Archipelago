@@ -734,7 +734,7 @@ def global_rules(multiworld: MultiWorld, player: int):
 
     set_rule(multiworld.get_location('Tower of Hera - Big Key Chest', player), can_open_hera_big_key_chest_puzzle)
     if world.options.accessibility != 'full':
-        allow_self_locking_items(multiworld.get_location('Tower of Hera - Big Key Chest', player),
+        allow_self_locking_items(multiworld.get_region('Tower of Hera (Basement)', player),
                                  'Small Key (Tower of Hera)')
 
     set_rule(multiworld.get_entrance('Swamp Palace Moat', player), lambda state: state.has('Flippers', player) and state.has('Open Floodgate', player))

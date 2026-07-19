@@ -485,86 +485,93 @@ JP_PUSH_BLOCK_RECORDS = {
     (CHECKERBOARD_CAVE_ROOM_ID, (48, 44)): (0x2702E, 0x0000),
 }
 HOLD_SWITCH_TILE_DETECTOR_CALL_ADDRESS = 0xC570
+
+
+def _default_room_tag(room_id: int, tag_number: int = 1) -> int:
+    room_tags = ROOM_TAGS[room_id]
+    return room_tags.tag_1 if tag_number == 1 else room_tags.tag_2
+
+
 @dataclass(frozen=True)
 class PuzzleShuffleState:
-    desert_map_chest_tag: int
-    desert_big_chest_tag: int
+    desert_map_chest_tag: int = _default_room_tag(DESERT_MAP_CHEST_ROOM_ID)
+    desert_big_chest_tag: int = _default_room_tag(DESERT_BIG_CHEST_ROOM_ID)
     switch_replacement_item: int = POT_HEART
-    desert_final_section_entrance_tag: int = TAG_SW_MOVE_BLOCK_TO_OPEN
-    hera_big_key_chest_tag: int = TAG_LIGHT_TORCHES_TO_GET_CHEST
-    hera_tile_room_tag: int = TAG_NW_KILL_ENEMY_TO_OPEN
+    desert_final_section_entrance_tag: int = _default_room_tag(DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID)
+    hera_big_key_chest_tag: int = _default_room_tag(HERA_TILE_ROOM_ID)
+    hera_tile_room_tag: int = _default_room_tag(HERA_TILE_ROOM_ID, 2)
     hera_big_key_chest_switch_pot: tuple[int, int] | None = None
     hera_tile_room_switch_pot: tuple[int, int] | None = None
-    gt_block_puzzle_tag: int = TAG_NE_MOVE_BLOCK_TO_OPEN
+    gt_block_puzzle_tag: int = _default_room_tag(GT_BLOCK_PUZZLE_ROOM_ID, 2)
     gt_block_puzzle_push_block_target: tuple[int, int] | None = None
-    gt_big_chest_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
+    gt_big_chest_room_tag: int = _default_room_tag(GT_BIG_CHEST_ROOM_ID)
     gt_block_puzzle_switch_pot: tuple[int, int] | None = None
-    gt_tile_torch_puzzle_tag: int = TAG_LIGHT_TORCHES_TO_OPEN
+    gt_tile_torch_puzzle_tag: int = _default_room_tag(GT_TILE_TORCH_PUZZLE_ROOM_ID)
     gt_tile_torch_puzzle_switch_pot: tuple[int, int] | None = None
-    misery_mire_dark_cane_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
+    misery_mire_dark_cane_room_tag: int = _default_room_tag(MISERY_MIRE_DARK_CANE_ROOM_ID)
     misery_mire_dark_cane_room_switch_pot: tuple[int, int] | None = None
-    gt_torches_1_tag: int = TAG_LIGHT_TORCHES_TO_OPEN
+    gt_torches_1_tag: int = _default_room_tag(GT_TORCHES_1_ROOM_ID)
     gt_torches_1_switch_pot: tuple[int, int] | None = None
-    ice_palace_ice_floor_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    eastern_stalfos_room_tag: int = TAG_SW_KILL_ENEMY_TO_OPEN
+    ice_palace_ice_floor_room_tag: int = _default_room_tag(ICE_PALACE_ICE_FLOOR_ROOM_ID)
+    eastern_stalfos_room_tag: int = _default_room_tag(EASTERN_STALFOS_ROOM_ID)
     eastern_stalfos_room_switch_pot: tuple[int, int] | None = None
-    eastern_big_chest_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    eastern_map_chest_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    eastern_big_key_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    eastern_entrance_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    ice_palace_hidden_chest_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    misery_mire_bridge_chest_tag_2: int = TAG_SE_MOVE_BLOCK_TO_OPEN
-    misery_mire_spike_chest_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    eastern_dark_square_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    thieves_town_conveyor_toilet_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    ice_palace_block_puzzle_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
-    misery_mire_tile_room_tag: int = TAG_LIGHT_TORCHES_TO_OPEN
-    turtle_rock_torch_puzzle_tag: int = TAG_LIGHT_TORCHES_TO_OPEN
+    eastern_big_chest_room_tag: int = _default_room_tag(EASTERN_BIG_CHEST_ROOM_ID)
+    eastern_map_chest_room_tag: int = _default_room_tag(EASTERN_MAP_CHEST_ROOM_ID)
+    eastern_big_key_room_tag: int = _default_room_tag(EASTERN_BIG_KEY_ROOM_ID)
+    eastern_entrance_room_tag: int = _default_room_tag(EASTERN_ENTRANCE_ROOM_ID)
+    ice_palace_hidden_chest_room_tag: int = _default_room_tag(ICE_PALACE_HIDDEN_CHEST_ROOM_ID)
+    misery_mire_bridge_chest_tag_2: int = _default_room_tag(MISERY_MIRE_BRIDGE_CHEST_ROOM_ID, 2)
+    misery_mire_spike_chest_room_tag: int = _default_room_tag(MISERY_MIRE_SPIKE_CHEST_ROOM_ID)
+    eastern_dark_square_room_tag: int = _default_room_tag(EASTERN_DARK_SQUARE_ROOM_ID)
+    thieves_town_conveyor_toilet_tag: int = _default_room_tag(THIEVES_TOWN_CONVEYOR_TOILET_ROOM_ID)
+    ice_palace_block_puzzle_tag: int = _default_room_tag(ICE_PALACE_BLOCK_PUZZLE_ROOM_ID)
+    misery_mire_tile_room_tag: int = _default_room_tag(MISERY_MIRE_TILE_ROOM_ID)
+    turtle_rock_torch_puzzle_tag: int = _default_room_tag(TURTLE_ROCK_TORCH_PUZZLE_ROOM_ID)
     turtle_rock_torch_puzzle_switch_pot: tuple[int, int] | None = None
-    ice_palace_hole_to_kholdstare_tag: int = TAG_PULL_LEVER_TO_OPEN
+    ice_palace_hole_to_kholdstare_tag: int = _default_room_tag(ICE_PALACE_HOLE_TO_KHOLDSTARE_ROOM_ID)
     ice_palace_hole_to_kholdstare_switch_pot: tuple[int, int] | None = None
     ice_palace_hole_to_kholdstare_pull_switch_moved: bool = False
-    eastern_pre_armos_tag: int = TAG_E_KILL_ENEMY_TO_OPEN
+    eastern_pre_armos_tag: int = _default_room_tag(EASTERN_PRE_ARMOS_ROOM_ID)
     eastern_pre_armos_northeast_switch_pot: tuple[int, int] | None = None
     eastern_pre_armos_southeast_switch_pot: tuple[int, int] | None = None
-    eastern_pre_boss_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    eastern_switch_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
+    eastern_pre_boss_room_tag: int = _default_room_tag(EASTERN_PRE_BOSS_ROOM_ID)
+    eastern_switch_room_tag: int = _default_room_tag(EASTERN_SWITCH_ROOM_ID)
     hyrule_castle_switch_room_variant: int = ROOM_VARIANT_VANILLA
     turtle_rock_crystaroller_room_variant: int = ROOM_VARIANT_VANILLA
     turtle_rock_crystaroller_room_switch_pot: tuple[int, int] | None = None
     swamp_floodway_room_variant: int = ROOM_VARIANT_VANILLA
-    pod_entrance_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
+    pod_entrance_room_tag: int = _default_room_tag(POD_ENTRANCE_ROOM_ID)
     pod_entrance_statues_swapped: bool = False
-    pod_turtle_room_tag: int = TAG_SW_KILL_ENEMY_TO_OPEN
-    pod_stalfos_trap_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    pod_mimics_moving_wall_room_tag: int = TAG_SW_KILL_ENEMY_TO_OPEN
+    pod_turtle_room_tag: int = _default_room_tag(POD_TURTLE_ROOM_ID)
+    pod_stalfos_trap_room_tag: int = _default_room_tag(POD_STALFOS_TRAP_ROOM_ID)
+    pod_mimics_moving_wall_room_tag: int = _default_room_tag(POD_MIMICS_MOVING_WALL_ROOM_ID)
     pod_mimics_moving_wall_switch_pot: tuple[int, int] | None = None
     pod_turtle_room_push_block_target: tuple[int, int] | None = None
     ice_palace_bomb_floor_room_variant: int = ROOM_VARIANT_VANILLA
-    ice_palace_pengator_big_key_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    turtle_rock_big_chest_room_tag: int = TAG_NW_KILL_ENEMY_TO_OPEN
+    ice_palace_pengator_big_key_room_tag: int = _default_room_tag(ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID)
+    turtle_rock_big_chest_room_tag: int = _default_room_tag(TURTLE_ROCK_BIG_CHEST_ROOM_ID)
     turtle_rock_big_chest_room_switch_pot: tuple[int, int] | None = None
-    swamp_statue_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
+    swamp_statue_room_tag: int = _default_room_tag(SWAMP_STATUE_ROOM_ID)
     swamp_statue_room_switch_pot: tuple[int, int] | None = None
-    pod_map_chest_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
+    pod_map_chest_room_tag: int = _default_room_tag(POD_MAP_CHEST_ROOM_ID)
     pod_map_chest_room_switch_pot: tuple[int, int] | None = None
-    hera_hardhat_beetles_room_tag_2: int = TAG_SE_KILL_ENEMY_TO_OPEN
+    hera_hardhat_beetles_room_tag_2: int = _default_room_tag(HERA_HARDHAT_BEETLES_ROOM_ID, 2)
     hera_hardhat_beetles_room_switch_pot: tuple[int, int] | None = None
-    ice_palace_conveyor_hellway_tag: int = TAG_NE_KILL_ENEMY_TO_OPEN
+    ice_palace_conveyor_hellway_tag: int = _default_room_tag(ICE_PALACE_CONVEYOR_HELLWAY_ROOM_ID)
     ice_palace_conveyor_hellway_switch_pot: tuple[int, int] | None = None
-    ice_palace_map_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    thieves_town_jail_cells_tag: int = TAG_NW_KILL_ENEMY_TO_OPEN
+    ice_palace_map_room_tag: int = _default_room_tag(ICE_PALACE_MAP_ROOM_ID)
+    thieves_town_jail_cells_tag: int = _default_room_tag(THIEVES_TOWN_JAIL_CELLS_ROOM_ID)
     thieves_town_jail_cells_switch_pot: tuple[int, int] | None = None
-    skull_woods_gibdo_torch_room_tag: int = TAG_LIGHT_TORCHES_TO_OPEN
+    skull_woods_gibdo_torch_room_tag: int = _default_room_tag(SKULL_WOODS_GIBDO_TORCH_ROOM_ID)
     skull_woods_gibdo_torch_room_switch_pot: tuple[int, int] | None = None
-    pod_south_mimics_room_tag: int = TAG_NW_KILL_ENEMY_TO_OPEN
+    pod_south_mimics_room_tag: int = _default_room_tag(POD_SOUTH_MIMICS_ROOM_ID)
     pod_south_mimics_room_switch_pot: tuple[int, int] | None = None
     pod_south_mimics_push_block_target: tuple[int, int] | None = None
     swamp_hidden_door_push_block_target: tuple[int, int] | None = None
-    ice_palace_bomb_jump_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    ice_palace_bomb_jump_room_tag_2: int = TAG_NOTHING
-    skull_woods_big_key_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
-    skull_woods_big_chest_room_tag_2: int = TAG_USE_LEVER_TO_BOMB_WALL
+    ice_palace_bomb_jump_room_tag: int = _default_room_tag(ICE_PALACE_BOMB_JUMP_ROOM_ID)
+    ice_palace_bomb_jump_room_tag_2: int = _default_room_tag(ICE_PALACE_BOMB_JUMP_ROOM_ID, 2)
+    skull_woods_big_key_room_tag: int = _default_room_tag(SKULL_WOODS_BIG_KEY_ROOM_ID)
+    skull_woods_big_chest_room_tag_2: int = _default_room_tag(SKULL_WOODS_BIG_CHEST_ROOM_ID, 2)
     skull_woods_big_chest_room_switch_pot: tuple[int, int] | None = None
     skull_woods_big_chest_trap_sprite_address: int | None = None
     skull_woods_big_chest_trap_id: int | None = None
@@ -572,10 +579,10 @@ class PuzzleShuffleState:
     gt_gauntlet_123_room_variant: int = ROOM_VARIANT_VANILLA
     gt_gauntlet_123_room_northwest_switch_pot: tuple[int, int] | None = None
     gt_gauntlet_123_room_southwest_switch_pot: tuple[int, int] | None = None
-    ice_palace_spike_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    thieves_town_west_attic_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    misery_mire_main_lobby_room_tag: int = TAG_TRIGGER_ACTIVATED_CHEST
-    gt_spike_pit_room_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
+    ice_palace_spike_room_tag: int = _default_room_tag(ICE_PALACE_SPIKE_ROOM_ID)
+    thieves_town_west_attic_room_tag: int = _default_room_tag(THIEVES_TOWN_WEST_ATTIC_ROOM_ID)
+    misery_mire_main_lobby_room_tag: int = _default_room_tag(MISERY_MIRE_MAIN_LOBBY_ROOM_ID)
+    gt_spike_pit_room_tag: int = _default_room_tag(GT_SPIKE_PIT_ROOM_ID)
     gt_mimics_room_variant: int = ROOM_VARIANT_VANILLA
     gt_mimics_room_northwest_switch_pot: tuple[int, int] | None = None
     gt_mimics_room_southeast_switch_pot: tuple[int, int] | None = None
@@ -588,11 +595,11 @@ class PuzzleShuffleState:
     gt_randomizer_room_floor_target: tuple[int, int] = (0x28, 0x2C)
     gt_gauntlet_45_room_variant: int = ROOM_VARIANT_VANILLA
     gt_gauntlet_45_room_switch_pot: tuple[int, int] | None = None
-    gt_winder_warp_maze_tag_1: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
-    gt_winder_warp_maze_tag_2: int = TAG_MOVE_BLOCK_TO_GET_CHEST
+    gt_winder_warp_maze_tag_1: int = _default_room_tag(GT_WINDER_WARP_MAZE_ROOM_ID)
+    gt_winder_warp_maze_tag_2: int = _default_room_tag(GT_WINDER_WARP_MAZE_ROOM_ID, 2)
     gt_winder_warp_maze_southeast_switch_pot: tuple[int, int] | None = None
     gt_winder_warp_maze_north_switch_pot: tuple[int, int] | None = None
-    desert_west_entrance_tag: int = TAG_SWITCH_OPENS_DOOR_TOGGLE
+    desert_west_entrance_tag: int = _default_room_tag(DESERT_WEST_ENTRANCE_ROOM_ID)
     desert_west_entrance_push_block_target: tuple[int, int] | None = None
     turtle_rock_chain_chomps_push_block_source: tuple[int, int] | None = None
     turtle_rock_chain_chomps_push_block_target: tuple[int, int] | None = None
@@ -1376,6 +1383,15 @@ def encode_puzzle_shuffle(state: PuzzleShuffleState | None) -> dict[str, object]
 def decode_puzzle_shuffle(data: dict[str, object] | None) -> PuzzleShuffleState | None:
     if not data:
         return None
+    default_state = PuzzleShuffleState()
+    data = {
+        **{
+            field_name: getattr(default_state, field_name)
+            for field_name in PuzzleShuffleState.__dataclass_fields__
+            if "tag" in field_name
+        },
+        **data,
+    }
     return PuzzleShuffleState(
         desert_map_chest_tag=int(data["desert_map_chest_tag"]),
         desert_big_chest_tag=int(data["desert_big_chest_tag"]),
@@ -1505,7 +1521,9 @@ def decode_puzzle_shuffle(data: dict[str, object] | None) -> PuzzleShuffleState 
         gt_winder_warp_maze_tag_2=int(data.get("gt_winder_warp_maze_tag_2", TAG_MOVE_BLOCK_TO_GET_CHEST)),
         gt_winder_warp_maze_southeast_switch_pot=_decode_position(data.get("gt_winder_warp_maze_southeast_switch_pot")),
         gt_winder_warp_maze_north_switch_pot=_decode_position(data.get("gt_winder_warp_maze_north_switch_pot")),
-        desert_west_entrance_tag=int(data.get("desert_west_entrance_tag", TAG_SWITCH_OPENS_DOOR_TOGGLE)),
+        desert_west_entrance_tag=int(data.get(
+            "desert_west_entrance_tag", _default_room_tag(DESERT_WEST_ENTRANCE_ROOM_ID)
+        )),
         desert_west_entrance_push_block_target=_decode_position(data.get("desert_west_entrance_push_block_target")),
         turtle_rock_chain_chomps_push_block_source=_decode_position(
             data.get("turtle_rock_chain_chomps_push_block_source")
