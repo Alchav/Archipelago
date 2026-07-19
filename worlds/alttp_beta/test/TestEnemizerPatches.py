@@ -2,7 +2,7 @@ import unittest
 import random
 from types import SimpleNamespace
 
-from worlds.alttp.EnemizerPatches import (
+from worlds.alttp_beta.EnemizerPatches import (
     ARROW_REFILL_5_SPRITE_ID,
     BOSS_GFX_SHEET_INDEXES,
     BOSS_PATCH_DATA,
@@ -33,7 +33,7 @@ from worlds.alttp.EnemizerPatches import (
     _update_hidden_enemy_item_table_for_retro_mode,
     apply_enemizer_base_patch,
 )
-from worlds.alttp.enemizer_data.enemy_combat_data import (
+from worlds.alttp_beta.enemizer_data.enemy_combat_data import (
     AGAHNIM_SPRITE_ID,
     ANTI_FAIRY_SPRITE_ID,
     BLOB_TRANSFORM_EFFECT,

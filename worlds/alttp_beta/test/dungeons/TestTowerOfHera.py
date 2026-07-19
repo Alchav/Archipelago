@@ -1,4 +1,4 @@
-from worlds.alttp.PuzzleShuffle import (
+from worlds.alttp_beta.PuzzleShuffle import (
     PuzzleShuffleState,
     TAG_LIGHT_TORCHES_TO_GET_CHEST,
     TAG_NW_KILL_ENEMY_TO_OPEN,

@@ -3,10 +3,10 @@ from types import SimpleNamespace
 from BaseClasses import CollectionState, ItemClassification
 
 from .TestDungeon import TestDungeon
-from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite, get_room_id
-from worlds.alttp.Items import item_factory
-from worlds.alttp.PotShuffle import FilledPot, POT_KEY
-from worlds.alttp.PuzzleShuffle import (
+from worlds.alttp_beta.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite, get_room_id
+from worlds.alttp_beta.Items import item_factory
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_KEY
+from worlds.alttp_beta.PuzzleShuffle import (
     PuzzleShuffleState,
     TAG_LIGHT_TORCHES_TO_GET_CHEST,
     TAG_NE_KILL_ENEMY_FOR_CHEST,

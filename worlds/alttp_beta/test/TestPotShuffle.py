@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from Utils import snes_to_pc
-from worlds.alttp.PotShuffle import (
+from worlds.alttp_beta.PotShuffle import (
     FilledPot,
     ICE_PALACE_PENGATOR_BIG_KEY_ROOM_ID,
     ICE_PALACE_PENGATOR_BIG_KEY_SWITCH_POTS,
@@ -23,7 +23,7 @@ from worlds.alttp.PotShuffle import (
     get_vanilla_pot_item,
     get_vanilla_pot_items,
 )
-from worlds.alttp.enemizer_data.pot_shuffle_data import POT_ROOMS
+from worlds.alttp_beta.enemizer_data.pot_shuffle_data import POT_ROOMS
 
 
 class TestPotShuffle(unittest.TestCase):

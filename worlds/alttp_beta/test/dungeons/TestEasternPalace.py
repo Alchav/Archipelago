@@ -1,4 +1,4 @@
-from worlds.alttp.PotShuffle import FilledPot, POT_SWITCH
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_SWITCH
 
 from .TestDungeon import TestDungeon
 

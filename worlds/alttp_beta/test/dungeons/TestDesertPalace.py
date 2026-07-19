@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 
-from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
-from worlds.alttp.PuzzleShuffle import (
+from worlds.alttp_beta.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
+from worlds.alttp_beta.PuzzleShuffle import (
     DESERT_BIG_CHEST_ROOM_ID,
     DESERT_FINAL_SECTION_ENTRANCE_ROOM_ID,
     PuzzleShuffleState,

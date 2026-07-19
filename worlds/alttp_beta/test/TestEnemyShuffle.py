@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import random
 from unittest.mock import patch
 
-from worlds.alttp.EnemyLogicTargets import (
+from worlds.alttp_beta.EnemyLogicTargets import (
     ENEMY_CLEAR_TARGETS,
     GANONS_TOWER_GAUNTLET_123_ROOM,
     GANONS_TOWER_GAUNTLET_45_ROOM,
@@ -21,7 +21,7 @@ from worlds.alttp.EnemyLogicTargets import (
     POD_TURTLE_ROOM_BOTTOM_LEFT,
     TURTLE_ROCK_BIG_CHEST_ROOM_TOP_LEFT,
 )
-from worlds.alttp.EnemyShuffle import (
+from worlds.alttp_beta.EnemyShuffle import (
     DungeonEnemyRoom,
     DungeonEnemySprite,
     DungeonSpriteGroup,
@@ -59,8 +59,8 @@ from worlds.alttp.EnemyShuffle import (
     can_spawn_in_room,
     validate_enemy_shuffle_state,
 )
-from worlds.alttp.Items import item_table
-from worlds.alttp.StateHelpers import (
+from worlds.alttp_beta.Items import item_table
+from worlds.alttp_beta.StateHelpers import (
     can_damage_blind_sprite,
     can_damage_boss_sprite,
     can_clear_enemy_room,
@@ -70,7 +70,7 @@ from worlds.alttp.StateHelpers import (
     can_kill_key_drop_enemy,
     _get_available_damage_classes,
 )
-from worlds.alttp.enemizer_data.enemy_combat_data import (
+from worlds.alttp_beta.enemizer_data.enemy_combat_data import (
     ANTI_FAIRY_SPRITE_ID,
     BLIND_SPRITE_ID,
     DIRECT_KILL_DELIVERY_OVERRIDES,
@@ -87,8 +87,8 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     get_incinerating_damage_classes,
     get_yellow_slime_follow_up_delivery_override,
 )
-from worlds.alttp.test.bases import item_factory
-from worlds.alttp.test.owg.TestLightWorld import TestLightWorld
+from worlds.alttp_beta.test.bases import item_factory
+from worlds.alttp_beta.test.owg.TestLightWorld import TestLightWorld
 
 SUPPORTED_OVERRIDE_ITEMS = {
     "Blue Boomerang",
@@ -257,7 +257,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
         if hasattr(_load_default_dungeon_room_sprites, "room_sprites"):
             delattr(_load_default_dungeon_room_sprites, "room_sprites")
 
-        with patch("worlds.alttp.EnemyShuffle._get_base_patched_rom_bytes", side_effect=AssertionError("logic should not read the base ROM")):
+        with patch("worlds.alttp_beta.EnemyShuffle._get_base_patched_rom_bytes", side_effect=AssertionError("logic should not read the base ROM")):
             requirements = get_effective_dungeon_room_sprite_requirements(world, 291)
 
         self.assertEqual(
@@ -559,7 +559,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             self.assertFalse(can_clear_enemy_room(fire_rod_state, 1, "Mini-Moldorm Cave"))
 
             bottle_fire_rod_state = logic_test.get_state(item_factory(["Fire Rod", "Bottle"], world))
-            with patch("worlds.alttp.StateHelpers.can_buy_unlimited", return_value=True):
+            with patch("worlds.alttp_beta.StateHelpers.can_buy_unlimited", return_value=True):
                 self.assertTrue(can_clear_enemy_room(bottle_fire_rod_state, 1, "Mini-Moldorm Cave"))
         finally:
             world.options.enemy_shuffle = original_enemy_shuffle
@@ -3333,7 +3333,7 @@ class TestEnemyShuffleValidation(unittest.TestCase):
             ),
         }
 
-        with patch("worlds.alttp.EnemyShuffle.get_possible_overworld_sprite_groups", return_value=(sprite_groups[0x03],)):
+        with patch("worlds.alttp_beta.EnemyShuffle.get_possible_overworld_sprite_groups", return_value=(sprite_groups[0x03],)):
             randomized_areas = _randomize_overworld_areas(
                 SimpleNamespace(options=SimpleNamespace(mode="standard"), random=random.Random(0)),
                 {area.area_id: area},

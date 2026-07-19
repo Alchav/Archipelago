@@ -3,10 +3,10 @@ import unittest
 from dataclasses import replace
 from types import SimpleNamespace
 
-from worlds.alttp import PuzzleShuffle as PuzzleShuffleModule
-from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
-from worlds.alttp.PotShuffle import FilledPot, POT_HEART, POT_HOLE, POT_KEY, POT_SWITCH, generate_pot_shuffle, get_vanilla_pot_items
-from worlds.alttp.PuzzleShuffle import (
+from worlds.alttp_beta import PuzzleShuffle as PuzzleShuffleModule
+from worlds.alttp_beta.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_HEART, POT_HOLE, POT_KEY, POT_SWITCH, generate_pot_shuffle, get_vanilla_pot_items
+from worlds.alttp_beta.PuzzleShuffle import (
     CANE_PUZZLE_DUNGEON_CANDIDATES,
     DUNGEON_EASTERN,
     DUNGEON_ICE_PALACE,

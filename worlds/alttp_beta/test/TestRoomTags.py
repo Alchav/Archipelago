@@ -1,6 +1,6 @@
 import unittest
 
-from worlds.alttp.enemizer_data.room_tags import ROOM_TAG_NAMES, ROOM_TAGS
+from worlds.alttp_beta.enemizer_data.room_tags import ROOM_TAG_NAMES, ROOM_TAGS
 
 
 class TestRoomTags(unittest.TestCase):

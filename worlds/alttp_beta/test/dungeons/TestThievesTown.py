@@ -1,5 +1,5 @@
 from .TestDungeon import TestDungeon
-from worlds.alttp.PotShuffle import FilledPot, POT_KEY
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_KEY
 
 
 class TestThievesTown(TestDungeon):

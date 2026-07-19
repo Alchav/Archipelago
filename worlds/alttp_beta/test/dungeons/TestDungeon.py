@@ -1,12 +1,12 @@
 from BaseClasses import CollectionState, ItemClassification
-from worlds.alttp.Dungeons import get_dungeon_item_pool
-from worlds.alttp.EntranceShuffle import mandatory_connections, connect_simple
-from worlds.alttp.ItemPool import difficulties
-from worlds.alttp.Items import item_factory
-from worlds.alttp.PotShuffle import FilledPot, POT_KEY, POT_SWITCH
-from worlds.alttp.Regions import create_regions
-from worlds.alttp.Shops import create_shops
-from worlds.alttp.test.bases import LTTPTestBase
+from worlds.alttp_beta.Dungeons import get_dungeon_item_pool
+from worlds.alttp_beta.EntranceShuffle import mandatory_connections, connect_simple
+from worlds.alttp_beta.ItemPool import difficulties
+from worlds.alttp_beta.Items import item_factory
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_KEY, POT_SWITCH
+from worlds.alttp_beta.Regions import create_regions
+from worlds.alttp_beta.Shops import create_shops
+from worlds.alttp_beta.test.bases import LTTPTestBase
 
 
 class TestDungeon(LTTPTestBase):

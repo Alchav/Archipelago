@@ -1,10 +1,10 @@
-from worlds.alttp.Dungeons import create_dungeons
-from worlds.alttp.EntranceShuffle import connect_entrance, Inverted_LW_Entrances, Inverted_LW_Dungeon_Entrances, Inverted_LW_Single_Cave_Doors, Inverted_Old_Man_Entrances, Inverted_DW_Entrances, Inverted_DW_Dungeon_Entrances, Inverted_DW_Single_Cave_Doors, \
+from worlds.alttp_beta.Dungeons import create_dungeons
+from worlds.alttp_beta.EntranceShuffle import connect_entrance, Inverted_LW_Entrances, Inverted_LW_Dungeon_Entrances, Inverted_LW_Single_Cave_Doors, Inverted_Old_Man_Entrances, Inverted_DW_Entrances, Inverted_DW_Dungeon_Entrances, Inverted_DW_Single_Cave_Doors, \
     Inverted_LW_Entrances_Must_Exit, Inverted_LW_Dungeon_Entrances_Must_Exit, Inverted_Bomb_Shop_Multi_Cave_Doors, Inverted_Bomb_Shop_Single_Cave_Doors, Blacksmith_Single_Cave_Doors, Inverted_Blacksmith_Multi_Cave_Doors
-from worlds.alttp.InvertedRegions import create_inverted_regions
-from worlds.alttp.ItemPool import difficulties
-from worlds.alttp.Rules import set_inverted_big_bomb_rules
-from worlds.alttp.test.bases import LTTPTestBase
+from worlds.alttp_beta.InvertedRegions import create_inverted_regions
+from worlds.alttp_beta.ItemPool import difficulties
+from worlds.alttp_beta.Rules import set_inverted_big_bomb_rules
+from worlds.alttp_beta.test.bases import LTTPTestBase
 
 
 class TestInvertedBombRules(LTTPTestBase):

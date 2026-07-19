@@ -1,5 +1,5 @@
 from .TestDungeon import TestDungeon
-from worlds.alttp.PotShuffle import FilledPot, POT_SWITCH
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_SWITCH
 
 
 class TestDarkPalace(TestDungeon):
