@@ -392,6 +392,12 @@ ICE_PALACE_BOMB_JUMP_BASE_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_HOLD,
 )
 SKULL_WOODS_BIG_CHEST_NORTHWEST_SWITCH_POTS = frozenset(((12, 7), (16, 7), (16, 8), (12, 12)))
+SKULL_WOODS_FINAL_SECTION_ENTRANCE_WALL_ADDRESS = 0xFBFAE
+SKULL_WOODS_FINAL_SECTION_ENTRANCE_WALL_TARGETS = tuple(
+    (x, y)
+    for x in (0x0E, 0x10)
+    for y in (0x1F, 0x16)
+)
 GT_GAUNTLET_123_NORTHWEST_SWITCH_POTS = frozenset(((16, 5), (44, 5), (16, 11), (44, 11)))
 GT_GAUNTLET_123_SOUTHWEST_SWITCH_POTS = frozenset(((12, 20), (48, 20), (12, 28), (48, 28)))
 GT_MIMICS_NORTHWEST_SWITCH_POTS = frozenset(((28, 5), (44, 8), (28, 11)))
@@ -561,6 +567,7 @@ class PuzzleShuffleState:
     skull_woods_big_chest_room_switch_pot: tuple[int, int] | None = None
     skull_woods_big_chest_trap_sprite_address: int | None = None
     skull_woods_big_chest_trap_id: int | None = None
+    skull_woods_final_section_entrance_wall_target: tuple[int, int] = (0x0E, 0x1F)
     gt_gauntlet_123_room_variant: int = ROOM_VARIANT_VANILLA
     gt_gauntlet_123_room_northwest_switch_pot: tuple[int, int] | None = None
     gt_gauntlet_123_room_southwest_switch_pot: tuple[int, int] | None = None
@@ -1195,6 +1202,10 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
         if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL else None,
         skull_woods_big_chest_trap_id=skull_woods_big_chest_trap_id
         if skull_woods_big_chest_room_tag_2 == TAG_USE_SWITCH_TO_BOMB_WALL else None,
+        skull_woods_final_section_entrance_wall_target=choice(
+            SKULL_WOODS_FINAL_SECTION_ENTRANCE_WALL_TARGETS,
+            vanilla_choice=(0x0E, 0x1F),
+        ),
         gt_gauntlet_123_room_variant=gt_gauntlet_123_room_variant,
         gt_gauntlet_123_room_northwest_switch_pot=_choose_switch_pot_from_candidates(
             world,
@@ -2468,6 +2479,13 @@ def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> Non
         CHECKERBOARD_CAVE_REGULAR_BLOCK_POSITION,
         0x5E,
     )
+    _write_sized_room_object_record(
+        rom,
+        SKULL_WOODS_FINAL_SECTION_ENTRANCE_WALL_ADDRESS,
+        state.skull_woods_final_section_entrance_wall_target,
+        0x88,
+        3,
+    )
     _write_pod_entrance_statues(rom, state.pod_entrance_statues_swapped)
     _write_randomized_floor_objects(rom, state)
 
@@ -2561,6 +2579,16 @@ def _write_subtype3_room_object_record(
     rom.write_bytes(address, _encode_subtype3_room_object_position(position, object_id))
 
 
+def _write_sized_room_object_record(
+    rom: "TokenRom",
+    address: int,
+    position: tuple[int, int],
+    object_id: int,
+    size: int,
+) -> None:
+    rom.write_bytes(address, _encode_sized_room_object_position(position, object_id, size))
+
+
 def _write_room_object_position(
     rom: "TokenRom",
     room_id: int,
@@ -2588,6 +2616,16 @@ def _encode_subtype3_room_object_position(position: tuple[int, int], object_id: 
         0xFC | ((dm_x >> 4) & 0x03),
         ((dm_x >> 8) & 0x0F) | ((dm_x << 4) & 0xF0),
         (object_id - 0x100) | (dm_x & 0xC0),
+    ))
+
+
+def _encode_sized_room_object_position(position: tuple[int, int], object_id: int, size: int) -> bytes:
+    x, y = position
+    dm_x = x | (y << 6)
+    return bytes((
+        ((dm_x << 2) | (size >> 2)) & 0xFF,
+        ((dm_x >> 4) & 0xFC) | (size & 0x03),
+        object_id,
     ))
 
 

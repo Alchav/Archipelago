@@ -739,6 +739,30 @@ class TestPuzzleShuffle(unittest.TestCase):
             b"\x1A\x08\x26\x08\xA0\x05",
         )
 
+    def test_skull_woods_final_section_entrance_wall_uses_hm_coordinates(self) -> None:
+        expected_writes = {
+            (0x0E, 0x1F): bytes.fromhex("387f88"),
+            (0x10, 0x1F): bytes.fromhex("407f88"),
+            (0x0E, 0x16): bytes.fromhex("385b88"),
+            (0x10, 0x16): bytes.fromhex("405b88"),
+        }
+
+        for target_position, expected_bytes in expected_writes.items():
+            with self.subTest(target_position=target_position):
+                rom = RecordingRom()
+                state = PuzzleShuffleState(
+                    desert_map_chest_tag=TAG_TRIGGER_ACTIVATED_CHEST,
+                    desert_big_chest_tag=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+                    skull_woods_final_section_entrance_wall_target=target_position,
+                )
+
+                PuzzleShuffleModule.write_puzzle_object_swaps(rom, state)
+
+                self.assertEqual(
+                    rom.writes[PuzzleShuffleModule.SKULL_WOODS_FINAL_SECTION_ENTRANCE_WALL_ADDRESS],
+                    expected_bytes,
+                )
+
     def test_generate_puzzle_shuffle_keeps_turtle_rock_peg_order_to_vanilla_pegs(self) -> None:
         for seed in range(20):
             world = SimpleNamespace(
