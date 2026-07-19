@@ -362,7 +362,8 @@ class BossPrizeShuffle(Toggle):
 
 
 class RandomizePuzzles(Toggle):
-    """Randomize selected dungeon room tags, changing the conditions that open doors or spawn chests."""
+    """Randomize the conditions that open doors or chests spawn, the locations of pushable blocks, and various other
+    puzzles throughout the game."""
     display_name = "Randomize Puzzles"
 
 
