@@ -94,6 +94,9 @@ class RecordingRom:
     def write_bytes(self, address: int, data: bytes) -> None:
         self.writes[address] = bytes(data)
 
+    def write_byte(self, address: int, value: int) -> None:
+        self.writes[address] = value
+
 
 class TestPuzzleShuffle(unittest.TestCase):
     def test_desert_map_chest_vanilla_data_matches_expected_puzzle(self) -> None:
@@ -414,9 +417,9 @@ class TestPuzzleShuffle(unittest.TestCase):
     def test_skull_woods_gibdo_hold_switch_uses_east_pot(self) -> None:
         self.assertEqual(
             PuzzleShuffleModule.SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS,
-            frozenset(((172, 20),)),
+            frozenset(((104, 15),)),
         )
-        self.assertNotIn((104, 15), PuzzleShuffleModule.SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS)
+        self.assertNotIn((144, 19), PuzzleShuffleModule.SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS)
 
     def test_gt_winder_warp_maze_never_combines_two_switch_tags(self) -> None:
         for seed in range(100):
@@ -664,9 +667,9 @@ class TestPuzzleShuffle(unittest.TestCase):
             state = generate_puzzle_shuffle(world)
 
             if state.skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_HOLD:
-                self.assertEqual((172, 20), state.skull_woods_gibdo_torch_room_switch_pot)
+                self.assertEqual((104, 15), state.skull_woods_gibdo_torch_room_switch_pot)
             elif state.skull_woods_gibdo_torch_room_tag == TAG_SWITCH_OPENS_DOOR_TOGGLE:
-                self.assertIn(state.skull_woods_gibdo_torch_room_switch_pot, ((144, 19), (172, 20)))
+                self.assertIn(state.skull_woods_gibdo_torch_room_switch_pot, ((104, 15), (104, 16)))
 
     def test_generate_puzzle_shuffle_uses_known_desert_map_chest_tags(self) -> None:
         for seed in range(20):

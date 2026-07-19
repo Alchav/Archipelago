@@ -279,6 +279,10 @@ KILL_ENEMY_TO_OPEN_TAGS = frozenset((
 HERA_BIG_KEY_CHEST_SWITCH_POTS = frozenset(((76, 20), (112, 20)))
 HERA_TILE_ROOM_WEST_SWITCH_POTS = frozenset(((12, 11), (16, 11), (16, 12), (24, 12), (32, 12), (40, 12)))
 GT_BLOCK_PUZZLE_TOP_RIGHT_SWITCH_POTS = frozenset(((76, 12), (112, 12)))
+GT_BLOCK_PUZZLE_PUSH_BLOCK_SOURCE = (0x30, 0x10)
+GT_BLOCK_PUZZLE_PUSH_BLOCK_TARGETS = (None, (0x28, 0x10))
+GT_BLOCK_PUZZLE_PUSH_BLOCK_STAR_TILE_ADDRESS = 0xFF2EE
+GT_BLOCK_PUZZLE_PUSH_BLOCK_STAR_TILE_TARGET = (0x30, 0x2E)
 GT_BIG_CHEST_ROOM_SWITCH_POT_ITEM = POT_SWITCH
 NORMAL_SWITCH_REPLACEMENT_POT_ITEMS = (POT_ARROW, POT_BLUE_RUPEE, POT_HEART)
 GT_BIG_CHEST_ROOM_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4E3E5
@@ -355,6 +359,7 @@ GT_BIG_CHEST_BOMB_FLOOR_OBJECTS = (
     (0xFF3B3, (0x34, 0x28)),
     (0xFF3B6, (0x28, 0x36)),
 )
+GT_BIG_CHEST_BOMB_FLOOR_ADDRESS, GT_BIG_CHEST_BOMB_FLOOR_VANILLA_POSITION = GT_BIG_CHEST_BOMB_FLOOR_OBJECTS[0]
 GT_RANDOMIZER_ROOM_BARRIER_ADDRESS = 0xFF0D1
 GT_RANDOMIZER_ROOM_FLOOR_ADDRESS = 0xFF0E3
 GT_RANDOMIZER_ROOM_FLOOR_TARGETS = tuple(
@@ -379,8 +384,8 @@ THIEVES_TOWN_JAIL_CELLS_NORTHWEST_SWITCH_POTS = frozenset(((12, 4), (108, 11), (
 SKULL_WOODS_GIBDO_TORCH_BASE_TAG_CHOICES = (
     TAG_LIGHT_TORCHES_TO_OPEN,
 )
-SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS = frozenset(((172, 20),))
-SKULL_WOODS_GIBDO_TORCH_TOGGLE_SWITCH_POTS = frozenset(((144, 19), (172, 20)))
+SKULL_WOODS_GIBDO_TORCH_HOLD_SWITCH_POTS = frozenset(((104, 15),))
+SKULL_WOODS_GIBDO_TORCH_TOGGLE_SWITCH_POTS = frozenset(((104, 15), (104, 16)))
 POD_SOUTH_MIMICS_SWITCH_POTS = frozenset(((20, 6), (40, 6)))
 ICE_PALACE_BOMB_JUMP_BASE_TAG_CHOICES = (
     TAG_SWITCH_OPENS_DOOR_TOGGLE,
@@ -426,6 +431,7 @@ ROOM_OBJECT_RECORD_ADDRESSES = {
     (POD_TURTLE_ROOM_ID, (46, 52), 0x5E, 1): 0xFAB87,
     (POD_SOUTH_MIMICS_ROOM_ID, POD_SOUTH_MIMICS_PUSH_BLOCK_SOURCE, 0x05, 1): 0xFA857,
     (POD_SOUTH_MIMICS_ROOM_ID, (46, 16), 0x5E, 1): 0xFA872,
+    (GT_BLOCK_PUZZLE_ROOM_ID, (0x28, 0x10), 0x5E, 1): 0xFF2E5,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, SWAMP_HIDDEN_DOOR_PUSH_BLOCK_SOURCE, 0xF99, 2): 0xF9FAB,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (18, 48), 0x5E, 2): 0xF9FA5,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (24, 48), 0x5E, 2): 0xF9FA8,
@@ -445,6 +451,7 @@ ROOM_OBJECT_RECORD_SUBTYPES = {
     (POD_TURTLE_ROOM_ID, (44, 46), 0x5E, 1): 0,
     (POD_TURTLE_ROOM_ID, (46, 44), 0x5E, 1): 0,
     (POD_TURTLE_ROOM_ID, (46, 52), 0x5E, 1): 0,
+    (GT_BLOCK_PUZZLE_ROOM_ID, (0x28, 0x10), 0x5E, 1): 0,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (18, 48), 0x5E, 2): 0,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (24, 48), 0x5E, 2): 0,
     (SWAMP_HIDDEN_DOOR_ROOM_ID, (38, 48), 0x5E, 2): 0,
@@ -457,6 +464,7 @@ ROOM_OBJECT_RECORD_SUBTYPES = {
 }
 JP_PUSH_BLOCK_RECORDS = {
     (POD_TURTLE_ROOM_ID, POD_TURTLE_ROOM_PUSH_BLOCK_SOURCE): (0x26F72, 0x4000),
+    (GT_BLOCK_PUZZLE_ROOM_ID, GT_BLOCK_PUZZLE_PUSH_BLOCK_SOURCE): (0x26FB6, 0x0000),
     (SWAMP_HIDDEN_DOOR_ROOM_ID, SWAMP_HIDDEN_DOOR_PUSH_BLOCK_SOURCE): (0x26EF6, 0x2000),
     (GT_BIG_CHEST_ROOM_ID, GT_BIG_CHEST_PUSH_BLOCK_SOURCE): (0x26FCA, 0x4000),
     (GT_MIMICS_ROOM_ID, GT_MIMICS_PUSH_BLOCK_SOURCE): (0x26FC2, 0x0000),
@@ -481,6 +489,7 @@ class PuzzleShuffleState:
     hera_big_key_chest_switch_pot: tuple[int, int] | None = None
     hera_tile_room_switch_pot: tuple[int, int] | None = None
     gt_block_puzzle_tag: int = TAG_NE_MOVE_BLOCK_TO_OPEN
+    gt_block_puzzle_push_block_target: tuple[int, int] | None = None
     gt_big_chest_room_tag: int = TAG_SWITCH_OPENS_DOOR_HOLD
     gt_block_puzzle_switch_pot: tuple[int, int] | None = None
     gt_tile_torch_puzzle_tag: int = TAG_LIGHT_TORCHES_TO_OPEN
@@ -964,6 +973,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
             HERA_TILE_ROOM_WEST_SWITCH_POTS,
         ) if hera_tile_room_tag in HERA_SWITCH_TAG_CHOICES else None,
         gt_block_puzzle_tag=gt_block_puzzle_tag,
+        gt_block_puzzle_push_block_target=choice(GT_BLOCK_PUZZLE_PUSH_BLOCK_TARGETS, vanilla_choice=None),
         gt_big_chest_room_tag=choice(
             get_gt_big_chest_room_tag_choices(world),
             DUNGEON_GANONS_TOWER,
@@ -1298,6 +1308,7 @@ PUZZLE_SHUFFLE_LOGIC_FIELDS = (
     "eastern_switch_room_tag",
     "gt_big_chest_room_tag",
     "gt_block_puzzle_tag",
+    "gt_block_puzzle_push_block_target",
     "gt_gauntlet_123_room_variant",
     "gt_gauntlet_45_room_variant",
     "gt_mimics_room_variant",
@@ -1365,6 +1376,7 @@ def decode_puzzle_shuffle(data: dict[str, object] | None) -> PuzzleShuffleState 
         hera_big_key_chest_switch_pot=_decode_position(data.get("hera_big_key_chest_switch_pot")),
         hera_tile_room_switch_pot=_decode_position(data.get("hera_tile_room_switch_pot")),
         gt_block_puzzle_tag=int(data.get("gt_block_puzzle_tag", TAG_NE_MOVE_BLOCK_TO_OPEN)),
+        gt_block_puzzle_push_block_target=_decode_position(data.get("gt_block_puzzle_push_block_target")),
         gt_big_chest_room_tag=int(data.get("gt_big_chest_room_tag", TAG_SWITCH_OPENS_DOOR_HOLD)),
         gt_block_puzzle_switch_pot=_decode_position(data.get("gt_block_puzzle_switch_pot")),
         gt_tile_torch_puzzle_tag=int(data.get("gt_tile_torch_puzzle_tag", TAG_LIGHT_TORCHES_TO_OPEN)),
@@ -2407,6 +2419,20 @@ def write_puzzle_object_swaps(rom: "TokenRom", state: PuzzleShuffleState) -> Non
     )
     _write_push_block_swap(
         rom,
+        GT_BLOCK_PUZZLE_ROOM_ID,
+        GT_BLOCK_PUZZLE_PUSH_BLOCK_SOURCE,
+        state.gt_block_puzzle_push_block_target,
+        0x5E,
+    )
+    if state.gt_block_puzzle_push_block_target is not None:
+        _write_subtype3_room_object_record(
+            rom,
+            GT_BLOCK_PUZZLE_PUSH_BLOCK_STAR_TILE_ADDRESS,
+            GT_BLOCK_PUZZLE_PUSH_BLOCK_STAR_TILE_TARGET,
+            0x11F,
+        )
+    _write_push_block_swap(
+        rom,
         GT_MIMICS_ROOM_ID,
         GT_MIMICS_PUSH_BLOCK_SOURCE,
         state.gt_mimics_push_block_target,
@@ -2502,8 +2528,15 @@ def _write_randomized_floor_objects(rom: "TokenRom", state: PuzzleShuffleState) 
         _write_room_object_record(rom, GT_INVISIBLE_FLOOR_LEFT_OBJECT_ADDRESS, state.gt_invisible_floor_left_target, 0x94, 2)
 
     for address, position in GT_BIG_CHEST_BOMB_FLOOR_OBJECTS:
-        subtype = 7 if position == state.gt_big_chest_bomb_floor_position else 8
-        _write_room_object_record(rom, address, position, 0xFC, subtype)
+        if address == GT_BIG_CHEST_BOMB_FLOOR_ADDRESS:
+            _write_room_object_record(rom, address, state.gt_big_chest_bomb_floor_position, 0xFC, 7)
+        else:
+            swapped_position = (
+                GT_BIG_CHEST_BOMB_FLOOR_VANILLA_POSITION
+                if position == state.gt_big_chest_bomb_floor_position
+                else position
+            )
+            _write_room_object_record(rom, address, swapped_position, 0xFC, 8)
 
     _write_room_object_record(rom, GT_RANDOMIZER_ROOM_BARRIER_ADDRESS, (0x28, 0x2C), 0xBB, 3)
     _write_room_object_record(rom, GT_RANDOMIZER_ROOM_FLOOR_ADDRESS, state.gt_randomizer_room_floor_target, 0xFD, 0)
@@ -2517,6 +2550,15 @@ def _write_room_object_record(
     subtype: int,
 ) -> None:
     rom.write_bytes(address, _encode_room_object_position(position, object_id, subtype))
+
+
+def _write_subtype3_room_object_record(
+    rom: "TokenRom",
+    address: int,
+    position: tuple[int, int],
+    object_id: int,
+) -> None:
+    rom.write_bytes(address, _encode_subtype3_room_object_position(position, object_id))
 
 
 def _write_room_object_position(
@@ -2537,6 +2579,16 @@ def _encode_push_block_position(position: tuple[int, int], preserved_flags: int)
     x, y = position
     raw = preserved_flags | (((y << 6) | x) << 1)
     return raw.to_bytes(2, "little")
+
+
+def _encode_subtype3_room_object_position(position: tuple[int, int], object_id: int) -> bytes:
+    x, y = position
+    dm_x = x | (y << 6)
+    return bytes((
+        0xFC | ((dm_x >> 4) & 0x03),
+        ((dm_x >> 8) & 0x0F) | ((dm_x << 4) & 0xF0),
+        (object_id - 0x100) | (dm_x & 0xC0),
+    ))
 
 
 def _encode_room_object_position(position: tuple[int, int], object_id: int, subtype: int) -> bytes:
