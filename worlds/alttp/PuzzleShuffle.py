@@ -203,7 +203,7 @@ CANE_PUZZLE_DUNGEON_CANDIDATES = (
     DUNGEON_PALACE_OF_DARKNESS,
     DUNGEON_GANONS_TOWER,
 )
-FORCE_NON_VANILLA_PUZZLES_FOR_TESTING = True
+FORCE_NON_VANILLA_PUZZLES_FOR_TESTING = False
 _NO_VANILLA_CHOICE = object()
 HYRULE_CASTLE_SWITCH_ROOM_PULL_SWITCH_TRAP_SPRITE_ID_ADDRESS = 0x4D95A
 HYRULE_CASTLE_SWITCH_ROOM_PULL_SWITCH_GOOD_SPRITE_ID_ADDRESS = 0x4D95D
@@ -414,7 +414,8 @@ GT_WINDER_WARP_MAZE_TAG_1_CHOICES = (
 GT_WINDER_WARP_MAZE_SOUTHEAST_SWITCH_POTS = frozenset(((114, 20), (76, 28)))
 GT_WINDER_WARP_MAZE_NORTH_SWITCH_POTS = frozenset(((44, 12), (44, 6), (112, 6)))
 DESERT_WEST_ENTRANCE_TAG_CHOICES = (
-    TAG_SWITCH_OPENS_DOOR_TOGGLE,
+    TAG_SW_MOVE_BLOCK_TO_OPEN,
+    TAG_LIGHT_TORCHES_TO_OPEN,
 )
 DESERT_WEST_ENTRANCE_PUSH_BLOCK_SOURCE = (10, 42)
 DESERT_WEST_ENTRANCE_PUSH_BLOCK_TARGETS = ((6, 42),)
@@ -913,7 +914,7 @@ def generate_puzzle_shuffle(world: "ALTTPWorld") -> PuzzleShuffleState:
     gt_winder_warp_maze_tag_1, gt_winder_warp_maze_tag_2 = world.random.choice(gt_winder_warp_maze_tag_pairs)
     desert_west_entrance_tag = choice(
         get_desert_west_entrance_tag_choices(world),
-        vanilla_choice=TAG_SWITCH_OPENS_DOOR_TOGGLE,
+        vanilla_choice=TAG_SW_MOVE_BLOCK_TO_OPEN,
     )
     turtle_rock_chain_chomps_push_block_target = world.random.choice(TURTLE_ROCK_CHAIN_CHOMPS_PUSH_BLOCK_TARGETS)
     eastern_big_chest_room_tag = choice(

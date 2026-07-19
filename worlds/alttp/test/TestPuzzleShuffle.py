@@ -357,7 +357,7 @@ class TestPuzzleShuffle(unittest.TestCase):
             ("gt_winder_warp_maze_tag_2", ps.get_gt_winder_warp_maze_tag_2_choices(world),
              ps.TAG_MOVE_BLOCK_TO_GET_CHEST),
             ("desert_west_entrance_tag", ps.get_desert_west_entrance_tag_choices(world),
-             ps.TAG_SWITCH_OPENS_DOOR_TOGGLE),
+             ps.TAG_SW_MOVE_BLOCK_TO_OPEN),
         )
         variant_choice_groups = (
             ("hyrule_castle_switch_room_variant", ps.get_hyrule_castle_switch_room_variants(world),
