@@ -9,7 +9,6 @@ from worlds.alttp_beta.PotShuffle import FilledPot, POT_KEY
 from worlds.alttp_beta.PuzzleShuffle import (
     PuzzleShuffleState,
     TAG_LIGHT_TORCHES_TO_GET_CHEST,
-    TAG_NE_KILL_ENEMY_FOR_CHEST,
     TAG_NE_KILL_ENEMY_TO_OPEN,
     TAG_PULL_LEVER_TO_OPEN,
     TAG_SWITCH_OPENS_DOOR_HOLD,
@@ -207,17 +206,17 @@ class TestGanonsTower(TestDungeon):
         self.starting_regions = ['Ganons Tower (Entrance)']
         self.run_tests([
             ["Ganons Tower - DMs Room - Top Left", False, []],
-            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot']],
+            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Hammer']],
         ])
 
         self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_block_puzzle_tag=TAG_SWITCH_OPENS_DOOR_HOLD))
         self.starting_regions = ['Ganons Tower (Entrance)']
         self.run_tests([
-            ["Ganons Tower - DMs Room - Top Left", False, ['Hookshot']],
-            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Cane of Somaria']],
+            ["Ganons Tower - DMs Room - Top Left", False, ['Hookshot', 'Hammer']],
+            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Hammer', 'Cane of Somaria']],
         ])
 
-        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_block_puzzle_tag=TAG_NE_KILL_ENEMY_FOR_CHEST),
+        self.rebuild_with_puzzle_shuffle(self.gt_puzzle_state(gt_block_puzzle_tag=TAG_NE_KILL_ENEMY_TO_OPEN),
                                          SimpleNamespace(
                                              randomized_dungeon_rooms={
                                                  0x8B: RandomizedDungeonEnemyRoom(
@@ -239,8 +238,8 @@ class TestGanonsTower(TestDungeon):
                                          ))
         self.starting_regions = ['Ganons Tower (Entrance)']
         self.run_tests([
-            ["Ganons Tower - DMs Room - Top Left", False, ['Hookshot']],
-            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Progressive Bow']],
+            ["Ganons Tower - DMs Room - Top Left", False, ['Hookshot', 'Hammer']],
+            ["Ganons Tower - DMs Room - Top Left", True, ['Hookshot', 'Hammer', 'Progressive Bow']],
         ])
 
     def testGanonsTowerTileRoomPuzzleTags(self):

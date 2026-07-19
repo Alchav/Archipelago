@@ -597,6 +597,7 @@ def build_randomized_damage_class_combat_model(
     enemy_shuffle: bool = False,
     preserve_melee_damage_classes: bool = False,
     gt_only_boss_special_allowed_sprite_ids: frozenset[int] = frozenset(),
+    logic_required_sprite_ids: frozenset[int] | None = None,
 ) -> EnemyCombatModel:
     if mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
         return combat_model
@@ -616,10 +617,17 @@ def build_randomized_damage_class_combat_model(
         resolved_effects,
         killable_thieves=killable_thieves,
     )
-    logic_required_sprite_ids = (
-        eligible_sprite_ids
-        if not enemy_shuffle
-        else tuple(sprite_id for sprite_id in eligible_sprite_ids if sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS)
+    logic_required_sprite_ids = tuple(
+        sprite_id
+        for sprite_id in eligible_sprite_ids
+        if (
+            sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
+            or (
+                not enemy_shuffle
+                and logic_required_sprite_ids is not None
+                and sprite_id in logic_required_sprite_ids
+            )
+        )
     )
     locked_sprite_ids = _get_locked_damage_class_sprite_ids(resolved_effects, eligible_sprite_ids)
     locked_damage_classes = _get_locked_damage_classes_for_item_pool(item_pool_key)
@@ -635,19 +643,13 @@ def build_randomized_damage_class_combat_model(
 
     max_attacks = max(1, max_attacks_in_logic)
 
-    if mode in {DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
-        _clear_disallowed_damage_effects(randomized_effects, eligible_sprite_ids, combat_model)
-        permutation_logic_required_sprite_ids = (
-            logic_required_sprite_ids
-            if mode == DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES
-            else tuple(sprite_id for sprite_id in eligible_sprite_ids if sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS)
-        )
+    if mode == DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES:
         damage_class_permutation = _build_valid_damage_class_permutation(
             random,
             locked_damage_classes,
             randomized_effects,
             eligible_sprite_ids,
-            permutation_logic_required_sprite_ids,
+            logic_required_sprite_ids,
             combat_model,
             max_attacks=None,
             enemy_health_key=enemy_health_key,
@@ -666,7 +668,54 @@ def build_randomized_damage_class_combat_model(
             damage_class_permutation,
         )
 
-    if mode in {ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES, MIXED_RANDOMIZE_DAMAGE_CLASSES}:
+    if mode == MIXED_RANDOMIZE_DAMAGE_CLASSES:
+        for _ in range(1000):
+            damage_class_permutation = _build_valid_damage_class_permutation(
+                random,
+                locked_damage_classes,
+                randomized_effects,
+                eligible_sprite_ids,
+                tuple(),
+                combat_model,
+                max_attacks=None,
+                enemy_health_key=enemy_health_key,
+                available_damage_classes=available_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
+                enforce_non_silver_guarantee=False,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+            )
+            permuted_effects = _swap_damage_class_effects(
+                randomized_effects,
+                eligible_sprite_ids,
+                damage_class_permutation,
+            )
+            try:
+                randomized_effects = _swap_enemy_damage_profiles(
+                    permuted_effects,
+                    eligible_sprite_ids,
+                    logic_required_sprite_ids,
+                    random,
+                    combat_model,
+                    max_attacks=max_attacks,
+                    enemy_health_key=enemy_health_key,
+                    available_damage_classes=available_damage_classes,
+                    hammer_available_for_freeze=hammer_available_for_freeze,
+                    enforce_non_silver_guarantee=(
+                        available_damage_classes is not None
+                        and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
+                    ),
+                    swordless=swordless,
+                    allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+                    preserved_damage_classes=preserved_damage_classes,
+                )
+            except ValueError:
+                continue
+            break
+        else:
+            raise ValueError("Could not construct compatible mixed damage classes")
+
+    if mode == ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES:
         randomized_effects = _swap_enemy_damage_profiles(
             randomized_effects,
             eligible_sprite_ids,
@@ -685,21 +734,36 @@ def build_randomized_damage_class_combat_model(
             allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             preserved_damage_classes=preserved_damage_classes,
         )
-        _sanitize_randomized_damage_effects(
-            randomized_effects,
-            eligible_sprite_ids,
-            combat_model,
-            random,
-            enforce_upgrade_damage_safety=False,
-        )
 
     elif mode == CHAOS_RANDOMIZE_DAMAGE_CLASSES:
         effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
+        for damage_class in preserved_damage_classes:
+            effect_palettes[damage_class] = {
+                row[damage_class]
+                for row in resolved_effects
+            }
         _fill_effect_palettes(effect_palettes, resolved_effects, random)
+        logic_required_sprite_id_set = set(logic_required_sprite_ids)
         for sprite_id in eligible_sprite_ids:
-            randomized_effects[sprite_id] = _build_chaos_sprite_damage_effects(effect_palettes, random)
-        _sanitize_randomized_damage_effects(randomized_effects, eligible_sprite_ids, combat_model, random)
-        _restore_preserved_damage_classes(randomized_effects, resolved_effects, preserved_damage_classes)
+            randomized_effects[sprite_id] = _build_chaos_sprite_damage_effects(
+                sprite_id,
+                effect_palettes,
+                random,
+                combat_model,
+                require_logic_guarantee=sprite_id in logic_required_sprite_id_set,
+                max_attacks=max_attacks,
+                enemy_health_key=enemy_health_key,
+                available_damage_classes=available_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
+                enforce_non_silver_guarantee=(
+                    available_damage_classes is not None
+                    and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
+                ),
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+                original_row=resolved_effects[sprite_id],
+                preserved_damage_classes=preserved_damage_classes,
+            )
 
     elif mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
         effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
@@ -720,46 +784,12 @@ def build_randomized_damage_class_combat_model(
                 swordless=swordless,
                 allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
-        _restore_preserved_damage_classes(randomized_effects, resolved_effects, preserved_damage_classes)
-
     elif mode not in {
         DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
         ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES,
         MIXED_RANDOMIZE_DAMAGE_CLASSES,
     }:
         raise ValueError(f"Unknown damage class randomization mode: {mode}")
-
-    if mode == CHAOS_RANDOMIZE_DAMAGE_CLASSES:
-        _ensure_damage_class_logic_guarantees(
-            randomized_effects,
-            eligible_sprite_ids,
-            logic_required_sprite_ids,
-            combat_model,
-            max_attacks_in_logic=max_attacks_in_logic,
-            enemy_health_key=enemy_health_key,
-            available_damage_classes=available_damage_classes,
-            hammer_available_for_freeze=hammer_available_for_freeze,
-            enforce_non_silver_guarantee=(
-                available_damage_classes is not None
-                and SILVER_ARROW_DAMAGE_CLASS not in available_damage_classes
-            ),
-            swordless=swordless,
-            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-        )
-    elif mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
-        _ensure_damage_class_logic_guarantees(
-            randomized_effects,
-            eligible_sprite_ids,
-            tuple(sprite_id for sprite_id in logic_required_sprite_ids if sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS),
-            combat_model,
-            max_attacks_in_logic=max_attacks_in_logic,
-            enemy_health_key=enemy_health_key,
-            available_damage_classes=available_damage_classes,
-            hammer_available_for_freeze=hammer_available_for_freeze,
-            enforce_non_silver_guarantee=False,
-            swordless=swordless,
-            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-        )
 
     return _encode_sprite_damage_effects(combat_model, tuple(tuple(row) for row in randomized_effects))
 
@@ -832,6 +862,7 @@ def _sprite_can_have_randomized_damage_row(
 
     return (
         combat_model.enemy_health_table[sprite_id] != 0xFF
+        or sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS
         or sprite_id in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS
         or sprite_id in DAMAGE_CLASS_RANDOMIZER_FORCE_INCLUDED_SPRITE_IDS
     )
@@ -918,6 +949,7 @@ def _build_valid_damage_class_permutation(
             and _damage_class_permutation_preserves_logic(
                 permutation,
                 randomized_effects,
+                eligible_sprite_ids,
                 logic_required_sprite_ids,
                 combat_model,
                 max_attacks=max_attacks,
@@ -935,6 +967,7 @@ def _build_valid_damage_class_permutation(
         if _damage_class_permutation_preserves_logic(
             permutation,
             randomized_effects,
+            eligible_sprite_ids,
             logic_required_sprite_ids,
             combat_model,
             max_attacks=max_attacks,
@@ -958,6 +991,7 @@ def _build_valid_damage_class_permutation(
         and _damage_class_permutation_preserves_logic(
             identity_permutation,
             randomized_effects,
+            eligible_sprite_ids,
             logic_required_sprite_ids,
             combat_model,
             max_attacks=max_attacks,
@@ -971,7 +1005,7 @@ def _build_valid_damage_class_permutation(
     ):
         return identity_permutation
 
-    return identity_permutation
+    raise ValueError("Could not find a compatible global damage class permutation")
 
 
 def _build_constrained_damage_class_permutations(
@@ -1194,6 +1228,7 @@ def _damage_class_permutation_constraints_are_satisfied(
 def _damage_class_permutation_preserves_logic(
     permutation: tuple[int, ...],
     randomized_effects: list[list[int]],
+    eligible_sprite_ids: tuple[int, ...],
     logic_required_sprite_ids: tuple[int, ...],
     combat_model: EnemyCombatModel,
     *,
@@ -1205,7 +1240,19 @@ def _damage_class_permutation_preserves_logic(
     swordless: bool,
     allow_swordless_medallion_damage: bool,
 ) -> bool:
-    for sprite_id in logic_required_sprite_ids:
+    eligible_sprite_id_set = set(eligible_sprite_ids)
+    for target_damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT):
+        effects = {
+            row[permutation[target_damage_class]]
+            if sprite_id in eligible_sprite_id_set
+            else row[target_damage_class]
+            for sprite_id, row in enumerate(randomized_effects)
+        }
+        if len(effects) > 8:
+            return False
+
+    logic_required_sprite_id_set = set(logic_required_sprite_ids)
+    for sprite_id in eligible_sprite_ids:
         hp = get_enemy_health_for_logic(sprite_id, enemy_health_key, combat_model=combat_model)
         if (
             sprite_id != LIGHTNING_GATE_SPRITE_ID
@@ -1229,14 +1276,12 @@ def _damage_class_permutation_preserves_logic(
         ]
         if not _sword_class_2_loss_is_safe(row):
             return False
-        logic_row = [
-            effect if _damage_effect_allowed_for_sprite(sprite_id, effect, combat_model=combat_model) else 0
-            for effect in row
-        ]
         if not _row_compatible_for_sprite_logic(
             sprite_id,
-            tuple(logic_row),
+            tuple(row),
             combat_model,
+            require_allowed_effects=False,
+            require_logic_guarantee=sprite_id in logic_required_sprite_id_set,
             max_attacks=max_attacks,
             enemy_health_key=enemy_health_key,
             available_damage_classes=available_damage_classes,
@@ -1285,60 +1330,14 @@ def _swap_enemy_damage_profiles(
         (sprite_id, tuple(randomized_effects[sprite_id]))
         for sprite_id in eligible_sprite_ids
     ]
-    remaining_profiles = profiles.copy()
-    random.shuffle(remaining_profiles)
-
     target_sprite_ids = list(eligible_sprite_ids)
     random.shuffle(target_sprite_ids)
-    target_sprite_ids.sort(
-        key=lambda sprite_id: sum(
-            int(_row_allowed_for_sprite(sprite_id, profile, combat_model))
-            for _, profile in profiles
-        )
-    )
-
-    assigned_profiles: dict[int, list[int]] = {}
+    candidate_profile_ids: dict[int, list[int]] = {}
+    profile_rows = dict(profiles)
     for target_sprite_id in target_sprite_ids:
-        candidate_indexes = [
-            index
-            for index, (_, profile) in enumerate(remaining_profiles)
-            if (
-                candidate_profile := _with_preserved_damage_classes(
-                    profile,
-                    randomized_effects[target_sprite_id],
-                    preserved_damage_classes,
-                )
-            )
-            if _row_compatible_for_sprite_logic(
-                target_sprite_id,
-                candidate_profile,
-                combat_model,
-                require_logic_guarantee=target_sprite_id in logic_required_sprite_id_set,
-                max_attacks=max_attacks,
-                enemy_health_key=enemy_health_key,
-                available_damage_classes=available_damage_classes,
-                hammer_available_for_freeze=hammer_available_for_freeze,
-                enforce_non_silver_guarantee=enforce_non_silver_guarantee,
-                swordless=swordless,
-                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-            )
-        ]
-        if candidate_indexes:
-            _, profile = remaining_profiles.pop(random.choice(candidate_indexes))
-            assigned_profiles[target_sprite_id] = list(_with_preserved_damage_classes(
-                profile,
-                randomized_effects[target_sprite_id],
-                preserved_damage_classes,
-            ))
-            continue
-
-        compatible_profiles = [
-            _with_preserved_damage_classes(
-                profile,
-                randomized_effects[target_sprite_id],
-                preserved_damage_classes,
-            )
-            for _, profile in profiles
+        candidates = [
+            profile_sprite_id
+            for profile_sprite_id, profile in profiles
             if _row_compatible_for_sprite_logic(
                 target_sprite_id,
                 _with_preserved_damage_classes(
@@ -1357,15 +1356,36 @@ def _swap_enemy_damage_profiles(
                 allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
         ]
-        if compatible_profiles:
-            assigned_profiles[target_sprite_id] = list(random.choice(compatible_profiles))
-            continue
+        random.shuffle(candidates)
+        candidate_profile_ids[target_sprite_id] = candidates
 
-        assigned_profiles[target_sprite_id] = list(randomized_effects[target_sprite_id])
+    target_sprite_ids.sort(key=lambda sprite_id: len(candidate_profile_ids[sprite_id]))
+    assigned_profile_ids: dict[int, int] = {}
+    profile_target_ids: dict[int, int] = {}
+
+    def assign(target_sprite_id: int, visited_profile_ids: set[int]) -> bool:
+        for profile_sprite_id in candidate_profile_ids[target_sprite_id]:
+            if profile_sprite_id in visited_profile_ids:
+                continue
+            visited_profile_ids.add(profile_sprite_id)
+            previous_target_sprite_id = profile_target_ids.get(profile_sprite_id)
+            if previous_target_sprite_id is None or assign(previous_target_sprite_id, visited_profile_ids):
+                profile_target_ids[profile_sprite_id] = target_sprite_id
+                assigned_profile_ids[target_sprite_id] = profile_sprite_id
+                return True
+        return False
+
+    for target_sprite_id in target_sprite_ids:
+        if not assign(target_sprite_id, set()):
+            raise ValueError("Could not assign compatible enemy damage profiles")
 
     output = [list(row) for row in randomized_effects]
-    for sprite_id, profile in assigned_profiles.items():
-        output[sprite_id] = profile
+    for target_sprite_id, profile_sprite_id in assigned_profile_ids.items():
+        output[target_sprite_id] = list(_with_preserved_damage_classes(
+            profile_rows[profile_sprite_id],
+            randomized_effects[target_sprite_id],
+            preserved_damage_classes,
+        ))
     return output
 
 
@@ -1382,64 +1402,6 @@ def _with_preserved_damage_classes(
     return tuple(merged)
 
 
-def _restore_preserved_damage_classes(
-    randomized_effects: list[list[int]],
-    resolved_effects: tuple[tuple[int, ...], ...],
-    preserved_damage_classes: frozenset[int],
-) -> None:
-    if not preserved_damage_classes:
-        return
-    for sprite_id, row in enumerate(randomized_effects):
-        original_row = resolved_effects[sprite_id]
-        for damage_class in preserved_damage_classes:
-            row[damage_class] = original_row[damage_class]
-
-
-def _clear_disallowed_damage_effects(
-    randomized_effects: list[list[int]],
-    eligible_sprite_ids: tuple[int, ...],
-    combat_model: EnemyCombatModel,
-) -> None:
-    for sprite_id in eligible_sprite_ids:
-        row = randomized_effects[sprite_id]
-        for damage_class, effect in enumerate(row):
-            if not _damage_effect_allowed_for_sprite(sprite_id, effect, combat_model=combat_model):
-                row[damage_class] = 0
-
-
-def _sanitize_randomized_damage_effects(
-    randomized_effects: list[list[int]],
-    eligible_sprite_ids: tuple[int, ...],
-    combat_model: EnemyCombatModel,
-    random: random.Random,
-    *,
-    enforce_upgrade_damage_safety: bool = True,
-) -> None:
-    effect_palettes = _build_effect_palettes(tuple(tuple(row) for row in randomized_effects))
-    for sprite_id in eligible_sprite_ids:
-        row = randomized_effects[sprite_id]
-        for damage_class, effect in enumerate(row):
-            if not _damage_effect_allowed_for_sprite(sprite_id, effect, combat_model=combat_model):
-                row[damage_class] = 0
-        if enforce_upgrade_damage_safety:
-            _enforce_upgrade_damage_safety(row, random, effect_palettes)
-
-
-def _fit_randomized_damage_effects_to_locked_palettes(
-    randomized_effects: list[list[int]],
-    eligible_sprite_ids: tuple[int, ...],
-    locked_sprite_ids: tuple[int, ...],
-    random: random.Random,
-) -> None:
-    effect_palettes = _build_effect_palettes(tuple(tuple(row) for row in randomized_effects), locked_sprite_ids)
-    for sprite_id in eligible_sprite_ids:
-        randomized_effects[sprite_id] = _fit_sprite_damage_effects(
-            randomized_effects[sprite_id],
-            effect_palettes,
-            random,
-        )
-
-
 def _row_allowed_for_sprite(sprite_id: int, row: tuple[int, ...], combat_model: EnemyCombatModel) -> bool:
     return all(_damage_effect_allowed_for_sprite(sprite_id, effect, combat_model=combat_model) for effect in row)
 
@@ -1449,6 +1411,7 @@ def _row_compatible_for_sprite_logic(
     row: tuple[int, ...],
     combat_model: EnemyCombatModel,
     *,
+    require_allowed_effects: bool = True,
     require_logic_guarantee: bool = True,
     max_attacks: int | None,
     enemy_health_key: str,
@@ -1458,7 +1421,7 @@ def _row_compatible_for_sprite_logic(
     swordless: bool,
     allow_swordless_medallion_damage: bool,
 ) -> bool:
-    if not _row_allowed_for_sprite(sprite_id, row, combat_model):
+    if require_allowed_effects and not _row_allowed_for_sprite(sprite_id, row, combat_model):
         return False
     if not require_logic_guarantee:
         return True
@@ -1628,149 +1591,6 @@ def _build_effect_palettes(
     ]
 
 
-def _ensure_damage_class_logic_guarantees(
-    randomized_effects: list[list[int]],
-    eligible_sprite_ids: tuple[int, ...],
-    logic_required_sprite_ids: tuple[int, ...],
-    combat_model: EnemyCombatModel,
-    *,
-    max_attacks_in_logic: int,
-    enemy_health_key: str,
-    available_damage_classes: frozenset[int] | None,
-    hammer_available_for_freeze: bool,
-    enforce_non_silver_guarantee: bool,
-    swordless: bool,
-    allow_swordless_medallion_damage: bool,
-) -> None:
-    max_attacks = max(1, max_attacks_in_logic)
-    effect_palettes = _build_effect_palettes(tuple(tuple(row) for row in randomized_effects))
-
-    logic_required_sprite_id_set = set(logic_required_sprite_ids)
-    for sprite_id in logic_required_sprite_ids:
-        guarantee_attacks = None if sprite_id in BOSS_DAMAGE_CLASS_RANDOMIZER_SPRITE_IDS else max_attacks
-        hp = get_enemy_health_for_logic(sprite_id, enemy_health_key, combat_model=combat_model)
-        if hp is None:
-            continue
-        row = randomized_effects[sprite_id]
-        candidate_damage_classes = _filter_available_logic_damage_classes(
-            get_progression_kill_damage_classes(sprite_id),
-            available_damage_classes,
-        )
-        candidate_damage_classes = _filter_swordless_medallion_damage_classes(
-            candidate_damage_classes,
-            sprite_id,
-            swordless=swordless,
-            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-        )
-        if not _has_direct_kill_within_attack_limit(
-            row,
-            sprite_id,
-            hp,
-            guarantee_attacks,
-            candidate_damage_classes,
-            combat_model,
-            allow_frozen_hammer_kill=hammer_available_for_freeze,
-        ):
-            _set_guaranteed_logic_kill_effect_for_row(
-                row,
-                effect_palettes,
-                sprite_id,
-                hp,
-                guarantee_attacks,
-                candidate_damage_classes,
-                combat_model,
-                allow_frozen_hammer_kill=hammer_available_for_freeze,
-            )
-
-        if enforce_non_silver_guarantee:
-            non_silver_candidate_damage_classes = _filter_available_logic_damage_classes(
-                get_non_silver_progression_kill_damage_classes(sprite_id),
-                available_damage_classes,
-            )
-            non_silver_candidate_damage_classes = _filter_swordless_medallion_damage_classes(
-                non_silver_candidate_damage_classes,
-                sprite_id,
-                swordless=swordless,
-                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-            )
-            if (
-                non_silver_candidate_damage_classes
-                and not _has_direct_kill_within_attack_limit(
-                    row,
-                    sprite_id,
-                    hp,
-                    guarantee_attacks,
-                    non_silver_candidate_damage_classes,
-                    combat_model,
-                    allow_frozen_hammer_kill=hammer_available_for_freeze,
-                )
-            ):
-                _set_guaranteed_logic_kill_effect_for_row(
-                    row,
-                    effect_palettes,
-                    sprite_id,
-                    hp,
-                    guarantee_attacks,
-                    non_silver_candidate_damage_classes,
-                    combat_model,
-                    allow_frozen_hammer_kill=hammer_available_for_freeze,
-                )
-
-        for required_damage_classes in _get_required_logic_kill_damage_class_groups(sprite_id, swordless):
-            required_damage_classes = _filter_available_logic_damage_classes(
-                required_damage_classes,
-                available_damage_classes,
-                fallback_to_original=False,
-            )
-            required_damage_classes = _filter_swordless_medallion_damage_classes(
-                required_damage_classes,
-                sprite_id,
-                swordless=swordless,
-                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-            )
-            if not required_damage_classes:
-                continue
-            if _has_direct_kill_within_attack_limit(
-                row,
-                sprite_id,
-                hp,
-                guarantee_attacks,
-                required_damage_classes,
-                combat_model,
-                allow_frozen_hammer_kill=hammer_available_for_freeze,
-            ):
-                continue
-            _set_guaranteed_logic_kill_effect_for_row(
-                row,
-                effect_palettes,
-                sprite_id,
-                hp,
-                guarantee_attacks,
-                required_damage_classes,
-                combat_model,
-                allow_frozen_hammer_kill=hammer_available_for_freeze,
-            )
-
-    if RED_BARI_SPRITE_ID in logic_required_sprite_id_set:
-        red_bari_row = randomized_effects[RED_BARI_SPRITE_ID]
-        red_bari_incineration_classes = _filter_available_logic_damage_classes(
-            get_progression_kill_damage_classes(RED_BARI_SPRITE_ID),
-            available_damage_classes,
-            fallback_to_original=False,
-        )
-        red_bari_incineration_classes = _filter_swordless_medallion_damage_classes(
-            red_bari_incineration_classes,
-            RED_BARI_SPRITE_ID,
-            swordless=swordless,
-            allow_swordless_medallion_damage=allow_swordless_medallion_damage,
-        )
-        if red_bari_incineration_classes and not any(
-            red_bari_row[damage_class] == INCINERATE_EFFECT
-            for damage_class in red_bari_incineration_classes
-        ):
-            _set_red_bari_incineration_guarantee(red_bari_row, effect_palettes, red_bari_incineration_classes)
-
-
 def _get_required_logic_kill_damage_class_groups(sprite_id: int, swordless: bool) -> tuple[tuple[int, ...], ...]:
     if swordless and sprite_id in {
         MOLDORM_SPRITE_ID,
@@ -1905,6 +1725,8 @@ def _effect_is_allowed_logic_kill(
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
     allow_frozen_hammer_kill: bool = False,
 ) -> bool:
+    if not _damage_effect_allowed_for_sprite(sprite_id, effect, combat_model=combat_model):
+        return False
     if effect == FREEZE_EFFECT:
         return allow_frozen_hammer_kill and can_shatter_frozen_sprite_with_hammer(sprite_id)
     return _effect_kills_within_attack_limit(effect, hp, max_attacks)
@@ -2089,24 +1911,62 @@ def _fit_sprite_damage_effects(
     return fallback
 
 
-def _build_chaos_sprite_damage_effects(effect_palettes: list[set[int]], random: random.Random) -> list[int]:
-    ordered_palettes = [tuple(sorted(palette)) for palette in effect_palettes]
-    for _ in range(100):
+def _build_chaos_sprite_damage_effects(
+    sprite_id: int,
+    effect_palettes: list[set[int]],
+    random: random.Random,
+    combat_model: EnemyCombatModel,
+    *,
+    require_logic_guarantee: bool,
+    max_attacks: int,
+    enemy_health_key: str,
+    available_damage_classes: frozenset[int] | None,
+    hammer_available_for_freeze: bool,
+    enforce_non_silver_guarantee: bool,
+    swordless: bool,
+    allow_swordless_medallion_damage: bool,
+    original_row: tuple[int, ...],
+    preserved_damage_classes: frozenset[int],
+) -> list[int]:
+    ordered_palettes = [
+        tuple(
+            effect
+            for effect in sorted(palette)
+            if _damage_effect_allowed_for_sprite(sprite_id, effect, combat_model=combat_model)
+        )
+        for palette in effect_palettes
+    ]
+    if any(not palette for palette in ordered_palettes):
+        raise ValueError(f"No allowed Chaos effect exists for sprite 0x{sprite_id:02X}")
+    for _ in range(4096):
         candidate = [
             random.choice(ordered_palettes[damage_class])
             for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
         ]
-        _enforce_upgrade_damage_safety(candidate, random)
-        if _row_fits_effect_palettes(candidate, effect_palettes):
+        _enforce_upgrade_damage_safety(candidate, random, effect_palettes)
+        candidate = list(_with_preserved_damage_classes(
+            tuple(candidate),
+            original_row,
+            preserved_damage_classes,
+        ))
+        if (
+            _row_fits_effect_palettes(candidate, effect_palettes)
+            and _row_compatible_for_sprite_logic(
+                sprite_id,
+                tuple(candidate),
+                combat_model,
+                require_logic_guarantee=require_logic_guarantee,
+                max_attacks=max_attacks,
+                enemy_health_key=enemy_health_key,
+                available_damage_classes=available_damage_classes,
+                hammer_available_for_freeze=hammer_available_for_freeze,
+                enforce_non_silver_guarantee=enforce_non_silver_guarantee,
+                swordless=swordless,
+                allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+            )
+        ):
             return candidate
-
-    candidate = [
-        random.choice(ordered_palettes[damage_class])
-        for damage_class in range(RANDOMIZABLE_DAMAGE_CLASS_COUNT)
-    ]
-    if not _sword_class_2_loss_is_safe(candidate):
-        candidate[LOST_SWORD_UPGRADE_DAMAGE_CLASS] = 0
-    return candidate
+    raise ValueError(f"Could not generate a compatible Chaos damage row for sprite 0x{sprite_id:02X}")
 
 
 def _build_nightmare_sprite_damage_effects(

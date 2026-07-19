@@ -134,7 +134,8 @@ TRINEXX_HEAD_OPENER_ITEMS = (
     + ("Bombos", "Ether")
 )
 TRINEXX_HEAD_OPENER_ABILITIES = ("bombs", "sword_beams")
-TRINEXX_HEAD_FOLLOW_UP_ITEMS = BOSS_MELEE_ITEMS
+TRINEXX_HEAD_FOLLOW_UP_ITEMS = TRINEXX_HEAD_OPENER_ITEMS + BOSS_MELEE_ITEMS
+TRINEXX_HEAD_FOLLOW_UP_ABILITIES = TRINEXX_HEAD_OPENER_ABILITIES
 # Projectiles, rods, canes, powder, medallions, and bombs are excluded from the final
 # Trinexx body: it temporarily clears impervious status only around
 # Sprite_CheckDamageFromPlayerLong, then restores it. See sprite_trinexx.asm:408-420.
@@ -293,6 +294,7 @@ def TrinexxDefeatRule(state, player: int) -> bool:
         opener_items=TRINEXX_HEAD_OPENER_ITEMS,
         opener_abilities=TRINEXX_HEAD_OPENER_ABILITIES,
         follow_up_items=TRINEXX_HEAD_FOLLOW_UP_ITEMS,
+        follow_up_abilities=TRINEXX_HEAD_FOLLOW_UP_ABILITIES,
     )
     blue_head_plans = _get_trinexx_side_head_attack_plans(
         state,
@@ -301,6 +303,7 @@ def TrinexxDefeatRule(state, player: int) -> bool:
         opener_items=TRINEXX_HEAD_OPENER_ITEMS,
         opener_abilities=TRINEXX_HEAD_OPENER_ABILITIES,
         follow_up_items=TRINEXX_HEAD_FOLLOW_UP_ITEMS,
+        follow_up_abilities=TRINEXX_HEAD_FOLLOW_UP_ABILITIES,
     )
     body_plans = _get_boss_attack_plans(
         state,

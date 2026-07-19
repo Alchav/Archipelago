@@ -285,7 +285,33 @@ LIGHTNING_GATE_CONTACT_SWORD_DAMAGE_CLASSES = (
     ("Tempered Sword", frozenset((2, 3, 4))),
     ("Golden Sword", frozenset((3, 4, 5))),
 )
-TRINEXX_SIDE_HEAD_VULNERABLE_MELEE_HITS_PER_OPENER = 3
+TRINEXX_SWORD_TECHNIQUES = (
+    ("Fighter Sword", ((1, 3), (2, 1))),
+    ("Master Sword", ((1, 2), (2, 3), (3, 1))),
+    ("Tempered Sword", ((2, 2), (3, 3), (4, 1))),
+    ("Golden Sword", ((3, 2), (4, 3), (5, 1))),
+)
+# Treat Trinexx heads as though they have +50% hp since logic accounts for maximum possible hits in each vulnerability
+# window, but this is a best case scenario. Trinexx moves around randomly. This also keeps existing unit tests
+# succeeding, so under normal damage conditions the logic lines up with what it was before.
+TRINEXX_SIDE_HEAD_LOGIC_HP = 60
+# Numerator and denominator describe damaging follow-up hits per vulnerability window.
+TRINEXX_SIDE_HEAD_FOLLOW_UP_ATTACKS = (
+    ("Blue Boomerang", None, 0, 4, 1),
+    ("Red Boomerang", None, 0, 4, 1),
+    ("Cane of Somaria", None, 1, 3, 1),
+    ("Cane of Byrna", None, 1, 5, 1),
+    (None, "sword_beams", SWORD_BEAM_DAMAGE_CLASS, 4, 1),
+    ("Bow", None, 6, 2, 1),
+    ("Hookshot", None, 7, 6, 1),
+    (None, "bombs", 8, 1, 2),
+    ("Silver Bow", None, 9, 2, 1),
+    ("Magic Powder", None, 10, 3, 1),
+    ("Fire Rod", None, 11, 4, 1),
+    ("Ice Rod", None, 12, 3, 1),
+    ("Bombos", None, 13, 64, 1),
+    ("Ether", None, 14, 64, 1),
+)
 TRINEXX_SIDE_HEAD_OPENER_EFFECTS = frozenset((
     FREEZE_EFFECT,
     STUN_32_FRAMES_EFFECT,
@@ -1709,12 +1735,16 @@ def _get_trinexx_side_head_attack_plans(
     opener_items: tuple[str, ...],
     opener_abilities: tuple[str, ...],
     follow_up_items: tuple[str, ...],
+    follow_up_abilities: tuple[str, ...],
 ) -> tuple[ResourceCosts, ...]:
     if sprite_id not in (TRINEXX_RED_HEAD_SPRITE_ID, TRINEXX_BLUE_HEAD_SPRITE_ID):
         raise ValueError(f"Expected Trinexx side head sprite, got 0x{sprite_id:02X}")
 
     cache = _get_enemy_combat_cache(state, player)
-    cache_key = ("trinexx_side_head_attack_plans", sprite_id, opener_items, opener_abilities, follow_up_items)
+    cache_key = (
+        "trinexx_side_head_attack_plans", sprite_id, opener_items, opener_abilities,
+        follow_up_items, follow_up_abilities,
+    )
     if cache_key in cache:
         return cache[cache_key]
 
@@ -1728,6 +1758,7 @@ def _get_trinexx_side_head_attack_plans(
     if hp is None:
         cache[cache_key] = tuple()
         return tuple()
+    hp = max(hp, TRINEXX_SIDE_HEAD_LOGIC_HP)
 
     opener_classes = {
         damage_class
@@ -1755,7 +1786,6 @@ def _get_trinexx_side_head_attack_plans(
             continue
 
         opener_effect = get_damage_effect(sprite_id, opener_class, combat_model)
-        opener_damage = _trinexx_side_head_effect_damage(opener_effect, hp)
         if opener_effect in TRANSFORM_DAMAGE_EFFECTS:
             for opener_plan in opener_plans:
                 plans.add(opener_plan)
@@ -1768,9 +1798,9 @@ def _get_trinexx_side_head_attack_plans(
                 sprite_id,
                 hp,
                 opener_plan,
-                opener_damage,
                 follow_up_classes,
                 follow_up_items,
+                follow_up_abilities,
                 combat_model,
             ))
 
@@ -1801,50 +1831,106 @@ def _get_trinexx_side_head_window_plans(
     sprite_id: int,
     hp: int,
     opener_plan: ResourceCosts,
-    opener_damage: int,
     follow_up_classes: set[int],
     follow_up_items: tuple[str, ...],
+    follow_up_abilities: tuple[str, ...],
     combat_model: EnemyCombatModel,
 ) -> set[ResourceCosts]:
     plans: set[ResourceCosts] = set()
-    max_cycle_damage = opener_damage
-    follow_up_damage_by_class = {
-        damage_class: _trinexx_side_head_effect_damage(get_damage_effect(sprite_id, damage_class, combat_model), hp)
-        for damage_class in follow_up_classes
-    }
-    if follow_up_damage_by_class:
-        max_cycle_damage += TRINEXX_SIDE_HEAD_VULNERABLE_MELEE_HITS_PER_OPENER * max(follow_up_damage_by_class.values())
-    if max_cycle_damage <= 0:
-        return plans
+    melee_damage_per_window = _get_trinexx_guaranteed_melee_damage_per_window(
+        state,
+        player,
+        sprite_id,
+        hp,
+        follow_up_classes,
+        follow_up_items,
+        combat_model,
+    )
+    if melee_damage_per_window > 0:
+        opener_count = (hp + melee_damage_per_window - 1) // melee_damage_per_window
+        plans.add(_multiply_resource_costs(opener_plan, opener_count))
 
-    for opener_count in range(1, hp + 1):
-        remaining_hp = hp - (opener_damage * opener_count)
-        if remaining_hp <= 0:
-            plans.add(_multiply_resource_costs(opener_plan, opener_count))
+    allowed_items = set(follow_up_items)
+    allowed_abilities = set(follow_up_abilities)
+    for item_name, ability_name, damage_class, hit_numerator, hit_denominator in (
+        TRINEXX_SIDE_HEAD_FOLLOW_UP_ATTACKS
+    ):
+        if damage_class not in follow_up_classes:
+            continue
+        if item_name is not None and item_name not in allowed_items:
+            continue
+        if ability_name is not None and ability_name not in allowed_abilities:
             continue
 
-        max_follow_up_hits = opener_count * TRINEXX_SIDE_HEAD_VULNERABLE_MELEE_HITS_PER_OPENER
-        for damage_class, follow_up_damage in follow_up_damage_by_class.items():
-            if follow_up_damage <= 0:
-                continue
-            follow_up_hits = (remaining_hp + follow_up_damage - 1) // follow_up_damage
-            if follow_up_hits > max_follow_up_hits:
-                continue
-            follow_up_plans = _build_fixed_hit_plans_for_damage_classes(
-                state,
-                player,
-                {damage_class},
-                follow_up_hits,
-                allowed_items=follow_up_items,
-                medallion_exception_sprite_ids=frozenset((sprite_id,)),
-            )
-            for follow_up_plan in follow_up_plans:
-                plans.add(_add_resource_costs(
-                    _multiply_resource_costs(opener_plan, opener_count),
-                    follow_up_plan,
-                ))
+        damage = _trinexx_side_head_effect_damage(
+            get_damage_effect(sprite_id, damage_class, combat_model), hp
+        )
+        if damage <= 0:
+            continue
+        hit_count = (hp + damage - 1) // damage
+        opener_count = (hit_count * hit_denominator + hit_numerator - 1) // hit_numerator
+        follow_up_plans = _build_fixed_hit_plans_for_damage_classes(
+            state,
+            player,
+            {damage_class},
+            hit_count,
+            allowed_items=(item_name,) if item_name is not None else tuple(),
+            allowed_abilities=(ability_name,) if ability_name is not None else tuple(),
+            medallion_exception_sprite_ids=frozenset((sprite_id,)),
+        )
+        for follow_up_plan in follow_up_plans:
+            plans.add(_add_resource_costs(
+                _multiply_resource_costs(opener_plan, opener_count),
+                follow_up_plan,
+            ))
 
     return plans
+
+
+def _get_trinexx_guaranteed_melee_damage_per_window(
+    state: CollectionState,
+    player: int,
+    sprite_id: int,
+    hp: int,
+    follow_up_classes: set[int],
+    follow_up_items: tuple[str, ...],
+    combat_model: EnemyCombatModel,
+) -> int:
+    allowed_items = set(follow_up_items)
+    sword_window_damage = []
+    for sword_name, techniques in TRINEXX_SWORD_TECHNIQUES:
+        sword_window_damage.append(max(
+            (
+                _trinexx_side_head_effect_damage(
+                    get_damage_effect(sprite_id, damage_class, combat_model), hp
+                ) * hit_limit
+                for damage_class, hit_limit in techniques
+                if damage_class in follow_up_classes
+            ),
+            default=0,
+        ))
+
+    guaranteed_sword_damage: int | None = None
+    for sword_index in range(len(TRINEXX_SWORD_TECHNIQUES) - 1, -1, -1):
+        sword_name = TRINEXX_SWORD_TECHNIQUES[sword_index][0]
+        if sword_name not in allowed_items:
+            continue
+        guaranteed_sword_damage = (
+            sword_window_damage[sword_index]
+            if guaranteed_sword_damage is None
+            else min(guaranteed_sword_damage, sword_window_damage[sword_index])
+        )
+        if state.has(sword_name, player):
+            break
+    else:
+        guaranteed_sword_damage = 0
+
+    hammer_damage = 0
+    if "Hammer" in allowed_items and state.has("Hammer", player) and 3 in follow_up_classes:
+        hammer_damage = 3 * _trinexx_side_head_effect_damage(
+            get_damage_effect(sprite_id, 3, combat_model), hp
+        )
+    return max(guaranteed_sword_damage, hammer_damage)
 
 
 def can_damage_boss_sprite(
