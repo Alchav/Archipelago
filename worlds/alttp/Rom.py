@@ -1441,7 +1441,7 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
         rom.write_byte(0x180169, 0x02)  # lock aga/ganon tower door with crystals in inverted
     rom.write_byte(0x180171,
                    0x01 if local_world.ganon_at_pyramid else 0x00)  # Enable respawning on pyramid after ganon death
-    rom.write_byte(0x180173, 0x01)  # Bob is enabled
+    rom.write_byte(0x180173, 0x00)  # Bob is disabled
     rom.write_byte(0x180168, 0x08)  # Spike Cave Damage
     rom.write_bytes(0x18016B, [0x04, 0x02, 0x01])  # Set spike cave and MM spike room Cape usage
     rom.write_bytes(0x18016E, [0x04, 0x08, 0x10])  # Set spike cave and MM spike room Cape usage
