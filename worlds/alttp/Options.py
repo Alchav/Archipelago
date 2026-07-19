@@ -329,6 +329,14 @@ class RandomizeDamageClasses(Choice):
     option_nightmare = 5
 
 
+class PreserveMeleeDamageClasses(Toggle):
+    """Keep sword and hammer damage classes out of Randomize Damage Classes.
+    When enabled, damage classes used by melee weapons keep their normal behavior.
+    When disabled, higher level swords may be less capable than lower level swords.
+    Ignored on the Enemy Swap and Nightmare options."""
+    display_name = "Preserve Melee Damage Classes"
+
+
 class MaxAttacksInLogic(Range):
     """Maximum number of attacks required to kill one enemy for that kill method to be considered logical.
     Lower values opt out of tedious high-hit kills, such as very low-damage weapons against high-health enemies."""
@@ -850,6 +858,7 @@ class ALTTPOptions(PerGameCommonOptions):
     enemy_health: EnemyHealth
     enemy_damage: EnemyDamage
     randomize_damage_classes: RandomizeDamageClasses
+    preserve_melee_damage_classes: PreserveMeleeDamageClasses
     max_attacks_in_logic: MaxAttacksInLogic
     progressive: Progressive
     swordless: Swordless

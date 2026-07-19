@@ -45,6 +45,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     DAMAGE_SOURCE_TABLE_ADDRESS,
     DAMAGE_SOURCE_TABLE_SIZE,
     DEADROCK_SPRITE_ID,
+    ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES,
     EnemyCombatModel,
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     FAIRY_TRANSFORM_EFFECT,
@@ -61,6 +62,7 @@ from worlds.alttp.enemizer_data.enemy_combat_data import (
     LIGHTNING_GATE_SPRITE_ID,
     LOST_SWORD_UPGRADE_DAMAGE_CLASS,
     MASTER_SWORD_DAMAGE_CLASSES,
+    MELEE_WEAPON_DAMAGE_CLASSES,
     MIXED_RANDOMIZE_DAMAGE_CLASSES,
     MOTHULA_SPRITE_ID,
     NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES,
@@ -313,6 +315,42 @@ class TestEnemizerPatches(unittest.TestCase):
                     ) != get_damage_effect(LIGHTNING_GATE_SPRITE_ID, damage_class)
                     for seed in range(10)
                     for damage_class in range(16)
+                )
+                self.assertTrue(changed)
+
+    def test_preserve_melee_damage_classes_keeps_melee_columns_vanilla(self) -> None:
+        for mode in tuple(
+            mode
+            for mode in NON_VANILLA_RANDOMIZE_DAMAGE_CLASS_MODES
+            if mode not in {ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES, NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES}
+        ):
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(2),
+                    mode,
+                    preserve_melee_damage_classes=True,
+                )
+
+                for sprite_id in range(len(VANILLA_COMBAT_MODEL.sprite_damage_subclasses)):
+                    for damage_class in MELEE_WEAPON_DAMAGE_CLASSES:
+                        self.assertEqual(
+                            get_damage_effect(sprite_id, damage_class, combat_model),
+                            get_damage_effect(sprite_id, damage_class),
+                        )
+
+    def test_preserve_melee_damage_classes_is_ignored_on_enemy_swap_and_nightmare(self) -> None:
+        for mode in (ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES, NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES):
+            with self.subTest(mode=mode):
+                combat_model = build_randomized_damage_class_combat_model(
+                    random.Random(2),
+                    mode,
+                    preserve_melee_damage_classes=True,
+                )
+
+                changed = any(
+                    get_damage_effect(sprite_id, damage_class, combat_model) != get_damage_effect(sprite_id, damage_class)
+                    for sprite_id in range(len(VANILLA_COMBAT_MODEL.sprite_damage_subclasses))
+                    for damage_class in MELEE_WEAPON_DAMAGE_CLASSES
                 )
                 self.assertTrue(changed)
 

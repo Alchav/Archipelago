@@ -60,6 +60,7 @@ FIGHTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2))
 MASTER_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3))
 TEMPERED_SWORD_DAMAGE_CLASSES = frozenset((1, 2, 3, 4))
 GOLDEN_SWORD_DAMAGE_CLASSES = frozenset((1, 3, 4, 5))
+MELEE_WEAPON_DAMAGE_CLASSES = frozenset((1, 2, 3, 4, 5))
 LOST_SWORD_UPGRADE_DAMAGE_CLASS = 2
 GOLDEN_SWORD_SPIN_DAMAGE_CLASS = 5
 SWORD_CLASS_2_REPLACEMENT_DAMAGE_CLASSES = (3, 4, 5)
@@ -594,6 +595,7 @@ def build_randomized_damage_class_combat_model(
     allow_swordless_medallion_damage: bool = False,
     killable_thieves: bool = False,
     enemy_shuffle: bool = False,
+    preserve_melee_damage_classes: bool = False,
     gt_only_boss_special_allowed_sprite_ids: frozenset[int] = frozenset(),
 ) -> EnemyCombatModel:
     if mode == VANILLA_RANDOMIZE_DAMAGE_CLASSES:
@@ -621,6 +623,15 @@ def build_randomized_damage_class_combat_model(
     )
     locked_sprite_ids = _get_locked_damage_class_sprite_ids(resolved_effects, eligible_sprite_ids)
     locked_damage_classes = _get_locked_damage_classes_for_item_pool(item_pool_key)
+    preserved_damage_classes = (
+        MELEE_WEAPON_DAMAGE_CLASSES
+        if (
+            preserve_melee_damage_classes
+            and mode not in {ENEMY_SWAP_RANDOMIZE_DAMAGE_CLASSES, NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES}
+        )
+        else frozenset()
+    )
+    locked_damage_classes |= preserved_damage_classes
 
     max_attacks = max(1, max_attacks_in_logic)
 
@@ -672,6 +683,7 @@ def build_randomized_damage_class_combat_model(
             ),
             swordless=swordless,
             allow_swordless_medallion_damage=allow_swordless_medallion_damage,
+            preserved_damage_classes=preserved_damage_classes,
         )
         _sanitize_randomized_damage_effects(
             randomized_effects,
@@ -687,6 +699,7 @@ def build_randomized_damage_class_combat_model(
         for sprite_id in eligible_sprite_ids:
             randomized_effects[sprite_id] = _build_chaos_sprite_damage_effects(effect_palettes, random)
         _sanitize_randomized_damage_effects(randomized_effects, eligible_sprite_ids, combat_model, random)
+        _restore_preserved_damage_classes(randomized_effects, resolved_effects, preserved_damage_classes)
 
     elif mode == NIGHTMARE_RANDOMIZE_DAMAGE_CLASSES:
         effect_palettes = _build_effect_palettes(resolved_effects, locked_sprite_ids)
@@ -707,6 +720,7 @@ def build_randomized_damage_class_combat_model(
                 swordless=swordless,
                 allow_swordless_medallion_damage=allow_swordless_medallion_damage,
             )
+        _restore_preserved_damage_classes(randomized_effects, resolved_effects, preserved_damage_classes)
 
     elif mode not in {
         DAMAGE_CLASS_SWAP_RANDOMIZE_DAMAGE_CLASSES,
@@ -1264,6 +1278,7 @@ def _swap_enemy_damage_profiles(
     enforce_non_silver_guarantee: bool,
     swordless: bool,
     allow_swordless_medallion_damage: bool,
+    preserved_damage_classes: frozenset[int] = frozenset(),
 ) -> list[list[int]]:
     logic_required_sprite_id_set = set(logic_required_sprite_ids)
     profiles = [
@@ -1287,9 +1302,16 @@ def _swap_enemy_damage_profiles(
         candidate_indexes = [
             index
             for index, (_, profile) in enumerate(remaining_profiles)
+            if (
+                candidate_profile := _with_preserved_damage_classes(
+                    profile,
+                    randomized_effects[target_sprite_id],
+                    preserved_damage_classes,
+                )
+            )
             if _row_compatible_for_sprite_logic(
                 target_sprite_id,
-                profile,
+                candidate_profile,
                 combat_model,
                 require_logic_guarantee=target_sprite_id in logic_required_sprite_id_set,
                 max_attacks=max_attacks,
@@ -1303,15 +1325,27 @@ def _swap_enemy_damage_profiles(
         ]
         if candidate_indexes:
             _, profile = remaining_profiles.pop(random.choice(candidate_indexes))
-            assigned_profiles[target_sprite_id] = list(profile)
+            assigned_profiles[target_sprite_id] = list(_with_preserved_damage_classes(
+                profile,
+                randomized_effects[target_sprite_id],
+                preserved_damage_classes,
+            ))
             continue
 
         compatible_profiles = [
-            profile
+            _with_preserved_damage_classes(
+                profile,
+                randomized_effects[target_sprite_id],
+                preserved_damage_classes,
+            )
             for _, profile in profiles
             if _row_compatible_for_sprite_logic(
                 target_sprite_id,
-                profile,
+                _with_preserved_damage_classes(
+                    profile,
+                    randomized_effects[target_sprite_id],
+                    preserved_damage_classes,
+                ),
                 combat_model,
                 require_logic_guarantee=target_sprite_id in logic_required_sprite_id_set,
                 max_attacks=max_attacks,
@@ -1333,6 +1367,32 @@ def _swap_enemy_damage_profiles(
     for sprite_id, profile in assigned_profiles.items():
         output[sprite_id] = profile
     return output
+
+
+def _with_preserved_damage_classes(
+    row: tuple[int, ...],
+    original_row: list[int] | tuple[int, ...],
+    preserved_damage_classes: frozenset[int],
+) -> tuple[int, ...]:
+    if not preserved_damage_classes:
+        return row
+    merged = list(row)
+    for damage_class in preserved_damage_classes:
+        merged[damage_class] = original_row[damage_class]
+    return tuple(merged)
+
+
+def _restore_preserved_damage_classes(
+    randomized_effects: list[list[int]],
+    resolved_effects: tuple[tuple[int, ...], ...],
+    preserved_damage_classes: frozenset[int],
+) -> None:
+    if not preserved_damage_classes:
+        return
+    for sprite_id, row in enumerate(randomized_effects):
+        original_row = resolved_effects[sprite_id]
+        for damage_class in preserved_damage_classes:
+            row[damage_class] = original_row[damage_class]
 
 
 def _clear_disallowed_damage_effects(

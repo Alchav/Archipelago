@@ -1,6 +1,6 @@
 # Randomize Damage Classes
 
-`randomize_damage_classes` changes how enemies respond to Link's weapons and items. It is an advanced option. A seed can still be completed, but the combat rules may stop matching player muscle memory from vanilla A Link to the Past.
+`Randomize Damage Classes` changes how enemies respond to Link's weapons and items. It is an advanced option. A seed can still be completed, but the combat rules may stop matching player muscle memory from vanilla A Link to the Past.
 
 ## What is a damage class?
 
@@ -52,8 +52,6 @@ Sword beams require full health in-game. Logic assumes Link can be at full healt
 
 Class 2 is special because it can be lost when upgrading to Golden Sword. The randomizer protects logic from that by making sure an important class 2 result is also covered by another sword class, or by removing that unsafe class 2 result.
 
-Normal arrows and silver arrows are separate classes. In this randomizer they are not constrained to behave the same way.
-
 ## Option Values
 
 ### Vanilla
@@ -68,9 +66,7 @@ Some profiles are not allowed on some bosses because they can break phase change
 
 ### Damage Class Swap
 
-Damage class meanings are globally shuffled across enemies. For example, Fire Rod might inherit what Ice Rod would have done, and Ice Rod might inherit what arrows would have done.
-
-This is the mode where it is most useful to think "what class does this item deliver?" rather than "what does this item usually do?"
+Damage class meanings are globally shuffled across enemies. For example, Fire Rod might inherit what Ice Rod would have done to each enemy, and Ice Rod might inherit what arrows would have done.
 
 ### Mixed
 
@@ -86,13 +82,21 @@ Each enemy has no more than one concurrently available damage class that can def
 
 This is intended to make combat logic very visible and punishing. It is possible for different enemies in the same seed to require very different tools.
 
+## Preserve Melee Damage Classes
+
+The Preserve Melee Damage Classes option keeps sword and hammer damage classes out of Randomize Damage Classes. When enabled, classes 1-5 are not randomized.
+
+When this option is disabled, higher level swords may do less damage than lower level swords against some enemies because their damage classes can be randomized independently.
+
+Ignored on Enemy Swap and Nightmare.
+
 ## Logic Guarantees
 
 The generator tries to keep required combat possible.
 
 - Required enemy kills must have at least one logical kill method.
 - Enemies with no meaningful damage table are not included in damage class randomization.
-- The `max_attacks_in_logic` option limits how many hits a regular enemy kill may require. It does not apply to bosses.
+- The `Max Attacks In Logic` option limits how many hits a regular enemy kill may require. It does not apply to bosses.
 - Key drop enemies must be truly defeatable. Transforming an enemy into something else only counts when that actually allows the key drop to be obtained.
 - Red Bari key drops require an incinerating kill method.
 - Bosses are allowed to take more hits than regular enemies.
@@ -104,19 +108,15 @@ These guarantees are about logic, not comfort. A seed may ask you to use awkward
 
 ### Pots, Fake Master Sword, and Frozen Enemies
 
-Thrown pots deal class 3 damage.
-
-A Fake Master Sword can also deal class 3 damage once.
+Thrown pots and Fake Master Sword deal class 3 damage once each.
 
 Frozen enemies can be picked up and thrown. A thrown frozen enemy deals class 3 damage to other enemies. Logic may expect this. The frozen enemy does not kill itself, so a room may still require another way to finish the enemy you froze.
 
 Hammer always destroys frozen enemies regardless of Hammer's damage class.
 
-### Medallions
+### Quake
 
-Bombos, Ether, and Quake are room-wide effects. If their class can affect several enemies in a room, one cast can count against all of them.
-
-Quake generally does not affect enemies that are airborne at the time it resolves. This matters for enemies that spend time off the ground.
+Quake does not affect enemies that are considered airborne at the time it resolves. Quake is not in logic for enemies that only contact the ground very briefly, such as Armos Knights and Lanmolas, although a well-timed hit may be possible.
 
 ### Magic and Consumables
 
@@ -135,67 +135,38 @@ Most projectiles and medallions cannot affect the Lightning Gate even if its dam
 The logical ways through are:
 
 - Cape
-- a sword contact class that removes the barrier
-- Magic Powder if class 10 removes the barrier
-- swordless Hammer behavior where applicable
+- Master Sword or a better sword if its damage class can damages the barrier. Note the ways to deal different classes of damage with the same sword.
+- Magic Powder if class 10 damages the barrier
+- on Swordless mode: Hammer if class 3 damages the barrier
 
-Master Sword or better can normally contact the barrier. Fighter Sword contact is rejected by the game.
+### Moldorm
 
-### Moldorm and Giant Moldorm
-
-Moldorm's tail is a special contact target and is effectively a melee surface.
-
-Magic Powder can affect Moldorm's head. If class 10 can defeat Moldorm, Magic Powder can be a logical alternate route. This is not something players normally care about with vanilla tables, but it can matter when classes are randomized.
+Moldorm's tail can only be affected by melee weapons, but Magic Powder can affect Moldorm's head.
 
 ### Trinexx Main Body
 
 During Trinexx's final phase, the middle body section is treated as melee-only for logic.
 
-Trinexx's head can be hit by many non-melee sources before the middle section starts blinking, but that window is very short. The randomizer may allow the table to contain those effects, but that head-window damage is not considered logical.
+Trinexx's head can be hit by non-melee sources before the middle section starts blinking, but that window is very short. The randomizer may allow the table to contain those effects, but that head-window damage is not considered in logic.
 
 ### Trinexx Red and Blue Heads
 
-The red and blue heads have a boss-specific vulnerability state. Before that state, sword and hammer contact bounces off. Non-melee attacks such as arrows, boomerangs, hookshot, bombs, sword beams, canes, Magic Powder, Fire Rod, Ice Rod, Bombos, and Ether can make a side head vulnerable if that damage class has a damage, stun, or freeze effect. Quake is not considered logical for this because the generic Quake damage path rejects airborne sprites.
+The red and blue heads have a boss-specific vulnerability state. Before that state, sword and hammer contact bounces off. Non-melee attacks such as arrows, boomerangs, hookshot, bombs, sword beams, canes, Magic Powder, Fire Rod, Ice Rod, Bombos, and Ether can make a side head vulnerable if that damage class has a damage or stun effect.
 
 Once a side head is vulnerable, melee attacks can damage it. Logic assumes up to three melee hits during each vulnerability window before another non-melee vulnerability hit is needed.
 
-### Blind
-
-Blind does not use normal HP depletion. Any damage source that successfully connects and has a nonzero, non-transform effect counts as one hit. Blind needs 3 hits per phase and has 3 phases, so logic treats Blind as needing 9 successful hits.
-
-The amount in Blind's damage table does not change that hit count.
-
-### Arrghus
-
-Hookshot is required to pull Arrghus fuzz, but Hookshot does not count as damaging the fuzz through its normal damage class.
-
-### Terrorpins
-
-Terrorpins must be flipped with Hammer before ordinary damage matters. Even if another class could damage a flipped Terrorpin, Hammer access is still required.
-
 ### Buzzblobs
 
-Sword and Hammer contact can trigger Buzzblob's shock behavior. Logic distinguishes safe delivery methods from unsafe contact methods, even if they share a damage class.
+Sword and Hammer contact triggers Buzzblob's shock behavior unless you have the Golden Sword.
 
 ### Anti-Fairies
 
-Normal melee contact is not a reliable way to damage Anti-Fairies. Sword beams and projectile-like sources can matter if their classes have damage effects.
+Melee weapons are ignored by Anti-Fairies.
 
-### Floating Stalfos Heads
+### Terrorpin
 
-Some positive damage table results only knock the enemy back instead of killing it. Logic uses explicit delivery rules for these.
+Hammer is always required to flip Terrorpins before they are vulnerable to damage.
 
-### Boss Special Effects
+### Red Bari
 
-Many bosses do not tolerate transformations, incineration, or permanent freeze effects safely. Those effects can prevent phase changes or reward drops. The randomizer sanitizes boss rows so unsafe special effects are avoided on bosses where they are known to cause problems.
-
-## Practical Advice
-
-Read enemy behavior from what happens in-game. If an enemy is not taking damage from your usual weapon, try thinking in damage classes:
-
-- another sword technique may be a different class
-- Hammer and thrown objects are class 3
-- rods, arrows, powder, and medallions are all separate classes
-- freezing an enemy may create a class 3 thrown object
-
-In Nightmare especially, it is normal for one enemy to require a very specific class.
+If a Red Bari is holding a Key Drop location item, it must be incinerated to obtain the item.

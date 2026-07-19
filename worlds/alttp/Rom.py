@@ -1936,6 +1936,7 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
                 swordless=bool(getattr(local_world.options, "swordless", False)),
                 killable_thieves=bool(local_world.options.killable_thieves),
                 enemy_shuffle=bool(local_world.options.enemy_shuffle),
+                preserve_melee_damage_classes=bool(getattr(local_world.options, "preserve_melee_damage_classes", False)),
             )
         enemizer_patches.apply_enemy_combat_data(rom, combat_model or enemizer_patches.VANILLA_COMBAT_MODEL)
 
