@@ -1027,7 +1027,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
-    rf.assign_rule("Snowman's Land - Inside Igloo 1-Up", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
+    rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     # Wet-Dry World
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
@@ -1062,7 +1062,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & VC & TJ | "
                    "WDW_WATER_LEVEL_DIAMOND & MOVELESS & DJ/SF/BF & KK")
-    rf.assign_rule("Wet-Dry World - Downtown 1-Up", "WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Downtown Block 1-Up", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
                    "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
                    "{Wet-Dry World - Highest Water} & BF/SF")
@@ -1095,7 +1095,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Upper", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
-    rf.assign_rule("Tick Tock Clock - Midway Up 1-Up", "TTC_SPINNERS | LJ+LG")
+    rf.assign_rule("Tick Tock Clock - Midway Up Block 1-Up", "TTC_SPINNERS | LJ+LG")
     rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "TTC_SPINNERS")
     rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
     # Rainbow Ride
@@ -1156,7 +1156,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     wmotr_flight_rule = "WC & TJ | WC & {Wing Mario Over the Rainbow - Bob-omb Buddy Platform} & CANN"
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform", "WC+TJ | LJ+CAPLESS")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
-    rf.assign_rule("Wing Mario Over the Rainbow - 1-Up", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", wmotr_flight_rule)
     # Bowser in the Sky

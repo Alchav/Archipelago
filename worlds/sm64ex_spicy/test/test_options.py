@@ -108,7 +108,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                       self.world.location_name_groups["Secret Stages"])
         self.assertIn("Wet-Dry World - Downtown 1-Up Block",
                       self.world.location_name_groups["Blocksanity"])
-        self.assertIn("Wet-Dry World - Downtown 1-Up",
+        self.assertIn("Wet-Dry World - Downtown Block 1-Up",
                       self.world.location_name_groups["1-Ups"])
         self.assertIn("Wet-Dry World - Downtown 1-Up Block",
                       self.world.location_name_groups["1-Up Blocks"])
