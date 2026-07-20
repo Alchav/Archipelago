@@ -163,17 +163,72 @@ def has_checkerboard_platforms(state: CollectionState, player: int, level_name: 
 
 def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bob-omb Battlefield"
-    reachable_coins = 99
+    has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Bob-omb_Battlefield&oldid=19916
+
+    # Inside the large breakable block near start
+    reachable_coins = 3
+    # Inside the two throwable cork boxes
+    reachable_coins += 6
+    # Row of coins under the bridge
+    reachable_coins += 5
+    # 5 Posts (Run around them)
+    reachable_coins += 25
+    # Coins around flowerbed
+    reachable_coins += 8
+    # Line of coins by the cannon on the mountain
+    reachable_coins += 5
+    # Other line of coins on the mountain
+    reachable_coins += 5
+    # 12 Bob-ombs
+    reachable_coins += 12
+    # 11 Goombas
+    reachable_coins += 11
+    # 7 red coins, excluding the Island one
+    reachable_coins += 14
+    # 1 Koopa
+    reachable_coins += 5
+
     if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
-        reachable_coins += 3
-        if has_action(state, player, "Climb", level_name):
+
+        if has_cannon: # AND WING MARIO TO THE SKY TRICK
+
+            # 5 Rings of coins in the sky (8 each)
+            # 5 coins in the middle of the sky rings
+            reachable_coins += 45
+
+            # The 8th red coin
             reachable_coins += 2
-        if any(has_action(state, player, action, level_name) for action in ("Side Flip", "Backflip", "Triple Jump")):
-            reachable_coins += 5
-        if has_action(state, player, "Triple Jump", level_name):
-            reachable_coins += 1
-    if state.can_reach("Bob-omb Battlefield - Mario Wings to the Sky", "Location", player):
-        reachable_coins += 46
+        else:
+            # 3 coins from the first coin ring are easily reachable
+            reachable_coins += 3
+
+            if has_wing_cap(state, player, level_name) and has_action(state, player, "Triple Jump", level_name):
+                # 4 Rings of coins in the sky (8 each)
+                # 4 coins in the middle of the sky rings
+                reachable_coins += 36
+                if False: # CHANGE TO THE WING MARIO TO THE SKY WITHOUT CANNON TRICK AND HAS GROUND POUND
+                    # All but the highest two coins
+                    reachable_coins += 7
+            else:
+                # the 8th red coin
+                if any(has_action(state, player, action, level_name) for action in ("Climb", "Side Flip", "Backflip",
+                                                                                    "Triple Jump")): # OR GROUND POUND IF TRICK ENABLED
+                    reachable_coins += 2
+
+                # more coins from the first coin ring
+                if any(has_action(state, player, action, level_name) for action in ("Side Flip", "Backflip", "Triple Jump")):
+                    reachable_coins += 3  # OR GROUND POUND IF TRICK ENABLED
+
+                if any(has_action(state, player, action, level_name) for action in ("Side Flip", "Backflip", "Triple Jump")):
+                    reachable_coins += 2 # GROUND POUND DOESN'T REACH
+
+                # another coin from the first coin ring
+                if has_action(state, player, "Triple Jump", level_name):
+                    reachable_coins += 1
+
+    assert reachable_coins <= 146
     return coins <= min(reachable_coins, 146)
 
 
