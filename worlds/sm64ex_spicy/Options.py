@@ -608,6 +608,14 @@ class LogicTricks(OptionSet):
     valid_keys = logic_trick_option_keys
 
 
+class UniversalTrackerGlitchedLogic(OptionSet):
+    """Choose tricks that the Universal Tracker should show as glitched logic.
+    The All Easy, All Medium, and All Hard entries include every trick at that difficulty and below.
+    """
+    display_name = "Universal Tracker Glitched Logic"
+    valid_keys = logic_trick_option_keys
+
+
 class MoveRandomizerMode(Choice):
     option_not_shuffled = 0
     option_global = 1
@@ -883,6 +891,7 @@ sm64_options_groups = [
         PerLevelCapItems,
         StrictCannonRequirements,
         LogicTricks,
+        UniversalTrackerGlitchedLogic,
     ]),
     OptionGroup("Level Feature Unlocks", [
         HazyMazeCaveSwimmingBeast,
@@ -965,6 +974,7 @@ class SM64Options(PerGameCommonOptions):
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
     logic_tricks: LogicTricks
+    universal_tracker_glitched_logic: UniversalTrackerGlitchedLogic
     marios_hat: MariosHat
     mario_hat_color: MarioHatColor
     mario_shirt_color: MarioShirtColor

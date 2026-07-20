@@ -112,7 +112,10 @@ def allows_capless(state: CollectionState, player: int) -> bool:
 
 def has_logic_trick(state: CollectionState, player: int, trick_name: str) -> bool:
     world = state.multiworld.worlds[player]
-    return getattr(world, trick_name, False) or state.has(ut_glitch_item_name, player)
+    return (
+        getattr(world, trick_name, False)
+        or getattr(world, f"{trick_name}_ut_glitch", False) and state.has(ut_glitch_item_name, player)
+    )
 
 
 def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
@@ -1776,7 +1779,12 @@ class RuleFactory:
         if token == "MOVELESS":
             return True if self.moveless else ut_glitch_item_name
         if token in logic_trick_names:
-            return True if getattr(self.multiworld.worlds[self.player], token, False) else ut_glitch_item_name
+            world = self.multiworld.worlds[self.player]
+            if getattr(world, token, False):
+                return True
+            if getattr(world, f"{token}_ut_glitch", False):
+                return ut_glitch_item_name
+            return False
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)

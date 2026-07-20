@@ -167,6 +167,7 @@ class UTGlitchLogicTestBase(SM64TestBase):
     options = {
         "buddy_checks": Options.BuddyChecks.option_true,
         "ground_pound": Options.GroundPound.option_global,
+        "universal_tracker_glitched_logic": {"All Hard Tricks"},
     }
 
     def test_ut_glitch_satisfies_moveless(self):
@@ -185,6 +186,35 @@ class UTGlitchLogicTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Shoot to the Island in the Sky"))
         self.collect(self.world.create_item("ut_glitch"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Shoot to the Island in the Sky"))
+
+
+class SelectiveUTGlitchLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "logic_tricks": {"All Easy Tricks"},
+        "universal_tracker_glitched_logic": {"All Medium Tricks"},
+    }
+
+    def test_regular_logic_trick_does_not_require_ut_glitch(self):
+        self.collect([self.get_item_by_name("Wing Cap"), self.get_item_by_name("Triple Jump")])
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+    def test_selected_tracker_trick_requires_ut_glitch(self):
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+        self.collect(self.world.create_item("ut_glitch"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+    def test_unselected_hard_trick_remains_out_of_logic_with_ut_glitch(self):
+        self.collect([self.get_item_by_name("Long Jump"), self.world.create_item("ut_glitch")])
+        self.assertFalse(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+    def test_tracker_trick_selection_is_in_slot_data(self):
+        options = self.world.fill_slot_data()["Options"]
+        self.assertEqual(options["logic_tricks"], ["All Easy Tricks"])
+        self.assertEqual(options["universal_tracker_glitched_logic"], ["All Medium Tricks"])
 
 
 class BobOmbBattlefieldEasyLogicTricksTestBase(SM64TestBase):

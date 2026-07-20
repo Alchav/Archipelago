@@ -105,6 +105,7 @@ class SM64World(World):
         "strict_cannon_requirements",
         "strict_move_requirements",
         "logic_tricks",
+        "universal_tracker_glitched_logic",
         "marios_hat",
         "mario_hat_color",
         "mario_shirt_color",
@@ -138,8 +139,10 @@ class SM64World(World):
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
 
         enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
+        tracker_logic_tricks = get_enabled_logic_tricks(self.options.universal_tracker_glitched_logic.value)
         for trick, data in logic_tricks.items():
             setattr(self, data["name"], trick in enabled_logic_tricks)
+            setattr(self, f"{data['name']}_ut_glitch", trick in tracker_logic_tricks)
 
         self.move_rando_bitvec = 0
         double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
