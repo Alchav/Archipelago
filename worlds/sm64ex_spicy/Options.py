@@ -10,8 +10,21 @@ class CoinStarRequirement(Range):
 
 class Coinsanity(Range):
     """
-    Adds extra location checks for collecting a percentage of each course's possible coin thresholds below that
-    course's Coin Star requirement.
+    Adds extra location checks for collecting coins.
+
+    The value is a percentage from 0 to 100. For each main course, the game looks at every possible coin count below
+    that course's Coin Star requirement, then creates that percentage of them as checks, rounded up. The checks are
+    spread evenly below the Coin Star requirement and never duplicate the Coin Star check itself.
+
+    Number of checks per main course:
+    ceil((Coin Star Requirement - 1) * Coinsanity / 100)
+
+    Example: if Bob-omb Battlefield requires 50 coins for its Coin Star, there are 49 possible Coinsanity checks
+    from 1 to 49 coins. Coinsanity 2 creates 1 check, at 25 coins. Coinsanity 50 creates 25 checks. Coinsanity 100
+    creates all 49 checks.
+
+    If Secret Stage Coinsanity is enabled, secret stages use the same percentage based on their Coinsanity Max Coins
+    option. At 100, every coin count from 1 through that stage's max is a check.
 
     Some Coinsanity locations may be created regardless of this option if there are too many items in the item pool.
     """
