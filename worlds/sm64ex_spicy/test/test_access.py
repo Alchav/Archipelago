@@ -187,6 +187,108 @@ class UTGlitchLogicTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Shoot to the Island in the Sky"))
 
 
+class BobOmbBattlefieldEasyLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "logic_tricks": {"All Easy Tricks"},
+    }
+
+    def test_island_with_wing_cap(self):
+        self.collect([self.get_item_by_name("Wing Cap"), self.get_item_by_name("Triple Jump")])
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+    def test_island_red_coin_with_ground_pound_does_not_unlock_island(self):
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertFalse(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+
+class BobOmbBattlefieldMediumLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "logic_tricks": {"All Medium Tricks"},
+    }
+
+    def test_mario_wings_without_wing_cap(self):
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+
+class BobOmbBattlefieldHardLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "logic_tricks": {"All Hard Tricks"},
+    }
+
+    def test_island_with_long_jump(self):
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+    def test_island_with_koopa_shell(self):
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+    def test_chain_chomp_gate_without_ground_pound(self):
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+
+    def test_mario_wings_without_cannon(self):
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+
+class BobOmbBattlefieldCannonlessMarioWingsCoinTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "bob_omb_battlefield_coin_star_requirement": 146,
+        "logic_tricks": {"Bob-omb Battlefield Mario Wings to the Sky without Cannon"},
+    }
+
+    def test_cannonless_mario_wings_puts_every_coin_in_logic(self):
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class BobOmbBattlefieldKoopaShellCoinTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "bob_omb_battlefield_coin_star_requirement": 104,
+        "logic_tricks": {"Bob-omb Battlefield Island with Koopa Shell"},
+    }
+
+    def test_koopa_shell_adds_only_island_and_red_coin_coins(self):
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
+class BobOmbBattlefieldKoopaShellCoinLimitTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "bob_omb_battlefield_coin_star_requirement": 105,
+        "logic_tricks": {"Bob-omb Battlefield Island with Koopa Shell"},
+    }
+
+    def test_koopa_shell_does_not_add_other_nearby_coins(self):
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+
+
 class CastleFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -1667,10 +1769,10 @@ class BobOmbBattlefieldCoinStar107AccessTestBase(BobOmbBattlefieldCoinStarAccess
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 
-class BobOmbBattlefieldCoinStar108AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
+class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccessTestBase):
     options = {
         **BobOmbBattlefieldCoinStarAccessTestBase.options,
-        "bob_omb_battlefield_coin_star_requirement": 108,
+        "bob_omb_battlefield_coin_star_requirement": 110,
     }
 
     def test_triple_jump_extra_coin_reaches_coin_star(self):

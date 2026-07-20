@@ -1,3 +1,5 @@
+import unittest
+
 from .bases import SM64TestBase
 from BaseClasses import ItemClassification
 from .. import Options
@@ -11,6 +13,7 @@ from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
+from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
 
@@ -22,6 +25,27 @@ def world_has_reachable_starting_check(test_base: SM64TestBase, allowed_source_e
 
 wdw_variant_ids = {SM64_WDW_LOW, SM64_WDW_MIDDLE, SM64_WDW_HIGH}
 ttc_variant_ids = {SM64_TTC_STOPPED, SM64_TTC_SLOW, SM64_TTC_RANDOM, SM64_TTC_FAST}
+
+
+class LogicTrickOptionTest(unittest.TestCase):
+    def test_presets_are_first_in_option_keys(self):
+        self.assertEqual(logic_trick_option_keys[:3], (
+            "All Easy Tricks",
+            "All Medium Tricks",
+            "All Hard Tricks",
+        ))
+
+    def test_difficulty_presets_include_lower_difficulties(self):
+        for preset, maximum_difficulty in (("All Easy Tricks", "easy"),
+                                           ("All Medium Tricks", "medium"),
+                                           ("All Hard Tricks", "hard")):
+            enabled = get_enabled_logic_tricks({preset})
+            expected = {
+                trick for trick, data in logic_tricks.items()
+                if ("easy", "medium", "hard").index(data["difficulty"])
+                <= ("easy", "medium", "hard").index(maximum_difficulty)
+            }
+            self.assertEqual(enabled, expected)
 
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
     "triple_jump": Options.TripleJump.option_global,

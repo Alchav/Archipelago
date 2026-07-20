@@ -15,6 +15,7 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
     move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names, \
     trap_weight_option_names, trap_item_name_by_option_name
 from .Rules import set_rules
+from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
 from BaseClasses import Item, Tutorial
 from Options import OptionError
@@ -103,6 +104,7 @@ class SM64World(World):
         "tick_tock_clock_spinners",
         "strict_cannon_requirements",
         "strict_move_requirements",
+        "logic_tricks",
         "marios_hat",
         "mario_hat_color",
         "mario_shirt_color",
@@ -134,6 +136,10 @@ class SM64World(World):
                 for entrance, destination in slot_data.get("AreaRando", {}).items()
             }
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
+
+        enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
+        for trick, data in logic_tricks.items():
+            setattr(self, data["name"], trick in enabled_logic_tricks)
 
         self.move_rando_bitvec = 0
         double_jump_bitvec_offset = action_item_data_table['Double Jump'].code

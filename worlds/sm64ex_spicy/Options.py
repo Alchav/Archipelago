@@ -1,5 +1,8 @@
 from dataclasses import dataclass
-from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup
+from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup, \
+    OptionSet
+
+from .LogicTricks import logic_trick_option_keys
 
 
 class CoinStarRequirement(Range):
@@ -282,7 +285,8 @@ class EnableLockedPaintings(Toggle):
 
 
 class StrictCapRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect special caps may have to be acquired without the caps"""
+    """If disabled, Stars that expect special caps may have to be acquired without the caps.
+    Bob-omb Battlefield cap tricks are instead controlled by Logic Tricks."""
     display_name = "Strict Cap Requirements"
 
 
@@ -409,7 +413,8 @@ class BowserStage1Ups(Choice):
 
 class StrictCannonRequirements(DefaultOnToggle):
     """If disabled, Stars that expect cannons may have to be acquired without them.
-    Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled."""
+    Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled.
+    Bob-omb Battlefield cannon tricks are instead controlled by Logic Tricks."""
     display_name = "Strict Cannon Requirements"
 
 
@@ -590,8 +595,17 @@ trap_item_name_by_option_name = {
 }
 class StrictMoveRequirements(DefaultOnToggle):
     """If disabled, Stars that expect certain moves may have to be acquired without them.
-    Only makes a difference for movement abilities that are shuffled."""
+    Only makes a difference for movement abilities that are shuffled.
+    Bob-omb Battlefield movement tricks are instead controlled by Logic Tricks."""
     display_name = "Strict Move Requirements"
+
+
+class LogicTricks(OptionSet):
+    """Choose specific advanced techniques to include in logic. The All Easy, All Medium, and All Hard entries
+    include every trick at that difficulty and below. Details and videos for each trick are documented in
+    LogicTricks.py."""
+    display_name = "Logic Tricks"
+    valid_keys = logic_trick_option_keys
 
 
 class MoveRandomizerMode(Choice):
@@ -868,6 +882,7 @@ sm64_options_groups = [
         StrictCapRequirements,
         PerLevelCapItems,
         StrictCannonRequirements,
+        LogicTricks,
     ]),
     OptionGroup("Level Feature Unlocks", [
         HazyMazeCaveSwimmingBeast,
@@ -949,6 +964,7 @@ class SM64Options(PerGameCommonOptions):
     tick_tock_clock_spinners: TickTockClockSpinners
     strict_cannon_requirements: StrictCannonRequirements
     strict_move_requirements: StrictMoveRequirements
+    logic_tricks: LogicTricks
     marios_hat: MariosHat
     mario_hat_color: MarioHatColor
     mario_shirt_color: MarioShirtColor

@@ -9,6 +9,10 @@ from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
     sm64_ttc_entrances, sm64_wdw_entrances
 from .Items import action_item_data_table, cap_item_data_table, per_level_move_area_names, ut_glitch_item_name
+from .LogicTricks import logic_tricks
+
+
+logic_trick_names = {data["name"] for data in logic_tricks.values()}
 
 
 initial_reachable_entrances = (
@@ -106,6 +110,11 @@ def allows_capless(state: CollectionState, player: int) -> bool:
     return not state.multiworld.worlds[player].options.strict_cap_requirements or state.has(ut_glitch_item_name, player)
 
 
+def has_logic_trick(state: CollectionState, player: int, trick_name: str) -> bool:
+    world = state.multiworld.worlds[player]
+    return getattr(world, trick_name, False) or state.has(ut_glitch_item_name, player)
+
+
 def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
     options = state.multiworld.worlds[player].options
     item_name = f"{level_name} - Metal Cap" if options.per_level_cap_items else "Metal Cap"
@@ -191,45 +200,53 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
     reachable_coins += 5
 
     if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
-
-        if has_cannon: # AND WING MARIO TO THE SKY TRICK
-
-            # 5 Rings of coins in the sky (8 each)
-            # 5 coins in the middle of the sky rings
-            reachable_coins += 45
-
-            # The 8th red coin
+        # 3 coins from the first coin ring are easily reachable.
+        reachable_coins += 3
+        if (
+                has_logic_trick(state, player, "logic_bob_mario_wings_to_the_sky_without_cannon")
+                and has_wing_cap(state, player, level_name)
+                and has_action(state, player, "Triple Jump", level_name)
+                and has_action(state, player, "Ground Pound", level_name)):
+            # This route collects every coin on and above the island without using the cannon.
+            reachable_coins += 42
+            reachable_coins += 2
+        elif has_cannon and state.can_reach(
+                "Bob-omb Battlefield - Mario Wings to the Sky", "Location", player):
+            # 5 rings of 8 coins, plus the coin in the middle of each ring.
+            reachable_coins += 42
+            # Flying from the cannon can also reach the 8th red coin.
             reachable_coins += 2
         else:
-            # 3 coins from the first coin ring are easily reachable
-            reachable_coins += 3
-
             if has_wing_cap(state, player, level_name) and has_action(state, player, "Triple Jump", level_name):
-                # 4 Rings of coins in the sky (8 each)
-                # 4 coins in the middle of the sky rings
+                # 4 rings of 8 coins, plus the coin in the middle of each ring.
                 reachable_coins += 36
-                if False: # CHANGE TO THE WING MARIO TO THE SKY WITHOUT CANNON TRICK AND HAS GROUND POUND
-                    # All but the highest two coins
-                    reachable_coins += 7
-            else:
-                # the 8th red coin
-                if any(has_action(state, player, action, level_name) for action in ("Climb", "Side Flip", "Backflip",
-                                                                                    "Triple Jump")): # OR GROUND POUND IF TRICK ENABLED
-                    reachable_coins += 2
 
-                # more coins from the first coin ring
-                if any(has_action(state, player, action, level_name) for action in ("Side Flip", "Backflip", "Triple Jump")):
-                    reachable_coins += 3  # OR GROUND POUND IF TRICK ENABLED
+            has_island_red_coin_movement = any(
+                has_action(state, player, action, level_name)
+                for action in ("Climb", "Side Flip", "Backflip", "Triple Jump")
+            )
+            has_island_red_coin_ground_pound = (
+                has_logic_trick(state, player, "logic_bob_island_red_coin_with_ground_pound")
+                and has_action(state, player, "Ground Pound", level_name)
+            )
+            if (has_island_red_coin_movement
+                    or has_island_red_coin_ground_pound
+                    or has_logic_trick(state, player, "logic_bob_island_koopa_shell")):
+                reachable_coins += 2
 
-                if any(has_action(state, player, action, level_name) for action in ("Side Flip", "Backflip", "Triple Jump")):
-                    reachable_coins += 2 # GROUND POUND DOESN'T REACH
-
-                # another coin from the first coin ring
-                if has_action(state, player, "Triple Jump", level_name):
-                    reachable_coins += 1
+            has_first_ring_jump = any(
+                has_action(state, player, action, level_name)
+                for action in ("Side Flip", "Backflip", "Triple Jump")
+            )
+            if has_first_ring_jump or has_island_red_coin_ground_pound:
+                reachable_coins += 3
+            if has_first_ring_jump:
+                reachable_coins += 2  # Ground Pound does not reach these two.
+            if has_action(state, player, "Triple Jump", level_name):
+                reachable_coins += 1
 
     assert reachable_coins <= 146
-    return coins <= min(reachable_coins, 146)
+    return coins <= reachable_coins
 
 
 def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bool:
@@ -997,9 +1014,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Bob-omb Battlefield
     rf.assign_rule("Bob-omb Battlefield - Big Bob-Omb on the Summit", "BOB_KING")
     rf.assign_rule("Bob-omb Battlefield - Footrace with Koopa The Quick", "BOB_KOOPA")
-    rf.assign_rule("Bob-omb Battlefield - Island", "CANN | CANNLESS & WC & TJ | CAPLESS & CANNLESS & LJ")
-    rf.assign_rule("Bob-omb Battlefield - Mario Wings to the Sky",  "CANN & WC | CAPLESS & CANN")
-    rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate", "GP | MOVELESS")
+    rf.assign_rule("Bob-omb Battlefield - Island",
+                   "CANN | logic_bob_island_without_cannon & WC & TJ | logic_bob_island_long_jump & LJ | "
+                   "logic_bob_island_koopa_shell | "
+                   "logic_bob_mario_wings_to_the_sky_without_cannon & WC+TJ+GP")
+    rf.assign_rule("Bob-omb Battlefield - Mario Wings to the Sky",
+                   "CANN & WC | logic_bob_mario_wings_capless & CANN | "
+                   "logic_bob_mario_wings_to_the_sky_without_cannon & WC+TJ+GP")
+    rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
+                   "GP | logic_bob_chain_chomp_gate_without_ground_pound")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
     rf.assign_rule("Bob-omb Battlefield - Cannon Tree 1-Up", "CL/TJ/BF/SF")
     # Whomp's Fortress
@@ -1752,6 +1775,8 @@ class RuleFactory:
             return True if self.cannonless else ut_glitch_item_name
         if token == "MOVELESS":
             return True if self.moveless else ut_glitch_item_name
+        if token in logic_trick_names:
+            return True if getattr(self.multiworld.worlds[self.player], token, False) else ut_glitch_item_name
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)
