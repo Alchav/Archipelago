@@ -787,7 +787,22 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
+    def test_whomps_fortress_top_access_with_climb_and_dive_or_ledge_grab(self):
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+        self.collect(self.get_item_by_name("Dive"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+
+    def test_whomps_fortress_top_access_with_climb_and_ledge_grab(self):
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+
     def test_whomps_fortress_red_coins_on_floating_isle_does_not_require_fortress(self):
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
+        self.collect(self.world.create_item("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
 
     def test_whomps_fortress_caged_island_hoot_route_requires_climb(self):
@@ -944,6 +959,30 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
+    def test_dire_dire_docks_board_bowser_sub_triple_jump_requires_moveless(self):
+        self.collect([
+            self.get_item_by_name("Progressive Basement Key"),
+            self.get_item_by_name("Progressive Basement Key"),
+            self.get_item_by_name("Dire, Dire Docks - Bowser's Sub"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+        self.collect(self.world.create_item("ut_glitch"))
+        self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
+
+    def test_hmc_metal_head_capless_route_requires_purple_switches(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Triple Jump"),
+            self.world.create_item("ut_glitch"),
+        ])
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+
+        self.collect(self.world.create_item("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
+
     def test_wet_dry_world_express_elevator_requires_purple_switches_and_access_method(self):
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
@@ -1019,12 +1058,25 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Tiny)"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
-        self.collect(self.get_item_by_name("Purple Switches"))
-        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
-
         self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
+
+    def test_tiny_huge_island_make_wiggler_requires_warp_pipes(self):
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
 
     def test_rainbow_ride_tricky_triangles_requires_purple_switches(self):
         self.collect_third_floor_access()
@@ -1048,7 +1100,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
-    def test_bitdw_red_coins_and_key_accept_moveless_triple_jump(self):
+    def test_bitdw_key_accepts_moveless_triple_jump_but_red_coins_require_purple_switches(self):
         self.collect(self.get_item_by_name("Dark World Key"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
@@ -1058,8 +1110,11 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
         self.collect(self.world.create_item("ut_glitch"))
-        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
 
     def test_bowser_in_the_sky_region_chain(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
@@ -2212,6 +2267,8 @@ class HazyMazeCaveCoinStar78AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
         self.collect(self.get_item_by_name("Metal Cap"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
@@ -3041,9 +3098,15 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
 
     def test_downtown_requires_high_entrance_without_cannon(self):
         self.collect_second_floor_access()
+        self.multiworld.get_entrance("Second Floor -> Wet-Dry World High", self.player).access_rule = \
+            lambda state: True
         self.assertFalse(self.can_reach_region("Wet-Dry World - Downtown"))
 
-        self.collect([self.get_item_by_name("Ledge Grab"), self.get_item_by_name("Triple Jump")])
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Downtown"))
+
+        self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
 
     def test_downtown_checks_require_water_level_diamond(self):
@@ -3347,7 +3410,9 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect([
             self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Side Flip"),
+            self.world.create_item("ut_glitch"),
         ])
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
 
@@ -3468,6 +3533,64 @@ class WMotRCaplessBuddyAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up"))
+
+
+class WingMarioOverTheRainbowBlocksanityAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_cloud_blocks_require_flight(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertFalse(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+        self.assertFalse(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+        self.assertTrue(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block"))
+
+    def test_cloud_blocks_accept_buddy_platform_and_cannon_flight(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Side Flip"),
+            self.world.create_item("ut_glitch"),
+        ])
+        self.assertFalse(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+        self.assertTrue(self.can_reach_location(
+            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block"))
+
+    def test_highest_cloud_block_and_one_up_are_in_cannon_region(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect([
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 1-Up"))
+
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 1-Up"))
 
 
 class TTCVariantAccessTestBase(SM64TestBase):

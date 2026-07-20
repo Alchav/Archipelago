@@ -158,10 +158,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regWhomp, "Whomp's Fortress - Shoot into the Wild Blue",
                           "Whomp's Fortress - Fall onto the Caged Island", "Whomp's Fortress - Blast Away the Wall",
                           "Whomp's Fortress - Bob-omb Buddy", "Whomp's Fortress - Flower Patch Butterfly 1-Up",
-                          "Whomp's Fortress - Red Coins on the Floating Isle",
                           "Whomp's Fortress - Metal Cap Block")
     wf_top = create_subregion(regWhomp, "Whomp's Fortress - Top",
                               "Whomp's Fortress - Chip Off Whomp's Block",
+                              "Whomp's Fortress - Red Coins on the Floating Isle",
                               "Whomp's Fortress - To the Top of the Fortress",
                               "Whomp's Fortress - Flagpole 1-Up",
                               "Whomp's Fortress - Rotating Platform Coins 1-Up",
@@ -552,9 +552,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regRR, "Rainbow Ride - Coins Star")
 
     regWMotR = create_region("Wing Mario Over the Rainbow", player, multiworld)
-    create_locs(regWMotR, "Wing Mario Over the Rainbow - 1-Up",
+    create_locs(regWMotR,
                 "Wing Mario Over the Rainbow - Cloud 1-Up",
-                "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block",
                 "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block",
                 "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block",
                 "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block")
@@ -565,7 +564,9 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block")
     wmotr_cannon = create_subregion(wmotr_buddy_platform, "Wing Mario Over the Rainbow - Cannon",
                                     "Wing Mario Over the Rainbow - Red Coins",
+                                    "Wing Mario Over the Rainbow - 1-Up",
                                     "Wing Mario Over the Rainbow - Hanging Pole 1-Up",
+                                    "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block",
                                     "Wing Mario Over the Rainbow - 1-Up Block")
     regWMotR.subregions = [wmotr_buddy_platform, wmotr_cannon]
 

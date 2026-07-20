@@ -245,8 +245,9 @@ def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> boo
         reachable_coins += 8
     if state.can_reach("Hazy Maze Cave - Navigating the Toxic Maze", "Location", player):
         reachable_coins += 5
-    if has_metal_cap(state, player, "Hazy Maze Cave") or (
-            allows_capless(state, player) and has_action(state, player, "Triple Jump", level_name)):
+    if has_purple_switches(state, player, level_name) and (
+            has_metal_cap(state, player, "Hazy Maze Cave")
+            or allows_capless(state, player) and has_action(state, player, "Triple Jump", level_name)):
         reachable_coins += 3
     if has_action(state, player, "Ground Pound", level_name):
         reachable_coins += 35
@@ -458,7 +459,9 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
             if can_reach_tiny_piranha_area:
                 route_total += 1
             if can_reach_tiny_main:
-                route_total += 31
+                route_total += 30
+                if has_thi_purple_switches:
+                    route_total += 1
         if has_huge_side:
             route_total += 54
             if has_huge_top_gate:
@@ -946,7 +949,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Whomp's Fortress
     rf.assign_rule("Whomp's Fortress - To the Top of the Fortress", "WF_FORTRESS")
     rf.assign_rule("Whomp's Fortress - Chip Off Whomp's Block", "WF_KING & GP")
-    rf.assign_rule("Whomp's Fortress - Top", "CHECKERBOARD_PLATFORMS | WF_HOOT | WK & SF/TJ")
+    rf.assign_rule("Whomp's Fortress - Top", "CHECKERBOARD_PLATFORMS | WF_HOOT | WK & SF/TJ | CL & DV/LG")
     rf.assign_rule("Whomp's Fortress - Shoot into the Wild Blue", "WK & TJ/SF | CANN")
     rf.assign_rule("Whomp's Fortress - Fall onto the Caged Island",
                    "WF_HOOT & CL | "
@@ -988,8 +991,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | CHECKERBOARD_PLATFORMS & MOVELESS & WK")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | MOVELESS & WK & TJ/LJ | MOVELESS & WK+SF+LG")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
-                   "PURPLE_SWITCHES & LJ+MC | CAPLESS & LJ+TJ | "
-                   "CAPLESS & MOVELESS & LJ/TJ/WK")
+                   "PURPLE_SWITCHES & LJ+MC | PURPLE_SWITCHES & CAPLESS & LJ+TJ | "
+                   "PURPLE_SWITCHES & CAPLESS & MOVELESS & LJ/TJ/WK")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     # Lethal Lava Land
@@ -1008,7 +1011,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "TJ/LG/BF/SF")
     rf.assign_rule("Shifting Sand Land - Pyramid Right Path 1-Up", "TJ/LG/BF/SF")
     # Dire, Dire Docks
-    rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub", "PURPLE_SWITCHES/TJ & DDD_BOWSER_SUB")
+    rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub",
+                   "PURPLE_SWITCHES & DDD_BOWSER_SUB | TJ & MOVELESS & DDD_BOWSER_SUB")
     rf.assign_rule("Dire, Dire Docks - Pole-Jumping for Red Coins",
                    "PURPLE_SWITCHES & DDD_POLES & CL | "
                    # "PURPLE_SWITCHES & DDD_POLES & TJ+DV+LG+WK & MOVELESS |"  # I don't understand this and don't know if it is supposed to involve the sub
@@ -1038,7 +1042,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Top",
                    "WK/TJ/SF/BF | MOVELESS | {Wet-Dry World - Top of the Express Elevator} & LJ/MOVELESS | "
                    "{Wet-Dry World - Highest Water}")
-    rf.assign_rule("Wet-Dry World - Downtown", "{Wet-Dry World - Highest Water} | CANN | {Wet-Dry World - Top} & MOVELESS & TJ+DV")
+    rf.assign_rule("Wet-Dry World - Downtown",
+                   "{Wet-Dry World - Highest Water} & LG | CANN | {Wet-Dry World - Top} & MOVELESS & TJ+DV")
     rf.assign_rule("Wet-Dry World - Go to Town for Red Coins",
                    "WDW_WATER_LEVEL_DIAMOND & WK | WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
@@ -1073,11 +1078,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Tiny Main to Huge Island", "THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Huge Island to Tiny Main", "THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Huge Piranha Area", "THI_WARP_PIPES & PURPLE_SWITCHES | TJ | LJ+SF | LJ+LG")
+    rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     add_rule(multiworld.get_location("Tiny-Huge Island - Rematch with Koopa the Quick", player),
              lambda state: has_tiny_huge_island_rematch_movement(state, player))
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
-    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "{Tiny-Huge Island - Tiny Main} & GP")
+    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm",
+                   "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Cannon Tree Butterfly 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
@@ -1118,7 +1125,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
     # Bowser in the Dark World
-    rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES | TJ+MOVELESS")
+    rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES | TJ+MOVELESS")
     if options.one_up_checks:
         for location_name in (
@@ -1145,11 +1152,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                      lambda state: has_bowser_stage_1up_unlock(
                          state, "Bowser in the Fire Sea - Extra 1-Ups", has_second_floor_key))
     # Wing Mario Over the Rainbow
+    wmotr_flight_rule = "WC & TJ | WC & {Wing Mario Over the Rainbow - Bob-omb Buddy Platform} & CANN"
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform", "WC+TJ | LJ+CAPLESS")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
-    rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", "WC & TJ/CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", wmotr_flight_rule)
     # Bowser in the Sky
     rf.assign_rule("Bowser in the Sky - Chuckya",
                    "TJ/SF/LG/BF/MOVELESS")
@@ -1206,11 +1214,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Whomp's Fortress - Metal Cap Block": "MC",
             "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block":
-                "WC+TJ | {Wing Mario Over the Rainbow - Cannon}",
+                wmotr_flight_rule,
             "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block": "WC+TJ | WC+MOVELESS | WC+LJ+CAPLESS",
             "Wing Mario Over the Rainbow - Bob-omb Buddy Platform Wing Cap Block": "WC",
-            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block": "WC",
+            "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block": wmotr_flight_rule,
         }
         for location_name, rule in blocksanity_rules.items():
             rf.assign_rule(location_name, rule)
