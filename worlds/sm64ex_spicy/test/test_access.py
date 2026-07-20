@@ -350,12 +350,9 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Snowman Tree 1-Up"))
 
     def test_ccm_slide_1ups_have_no_extra_rule(self):
-        for location_name in (
-                "Cool, Cool Mountain - Slide Shortcut First 1-Up",
-                "Cool, Cool Mountain - Slide Shortcut Second 1-Up",
-        ):
-            with self.subTest(location=location_name):
-                self.assertTrue(self.can_reach_location(location_name))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Slide Shortcut First 1-Up"))
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertNotIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
 
     def test_bbh_shed_roof_1up_accepts_side_flip(self):
         self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
@@ -415,6 +412,17 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         ):
             with self.subTest(location=location_name):
                 self.assertTrue(self.can_reach_location(location_name))
+
+
+class NoDespawnCourseOneUpAccessTestBase(CourseOneUpAccessTestBase):
+    options = {
+        **CourseOneUpAccessTestBase.options,
+        "no_despawns": Options.NoDespawns.option_true,
+    }
+
+    def test_ccm_slide_1ups_have_no_extra_rule(self):
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Slide Shortcut First 1-Up"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Slide Shortcut Second 1-Up"))
 
 
 class VanillaBowserStageOneUpAccessTestBase(SM64TestBase):
@@ -2633,6 +2641,18 @@ class SnowmansLandCoinStar105AccessTestBase(SnowmansLandCoinStarAccessTestBase):
         self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
 
         self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandCoinStar105NoDespawnsAccessTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "snowmans_land_coin_star_requirement": 105,
+        "no_despawns": Options.NoDespawns.option_true,
+    }
+
+    def test_no_despawns_coins_reach_coin_star_without_cannon(self):
+        self.collect_second_floor_access()
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
 
 

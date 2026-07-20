@@ -503,8 +503,22 @@ class OneUpChecksOnTestBase(SM64TestBase):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertEqual(self.world.fill_slot_data()["OneUpChecks"], 1)
         for location_name in locOneUp_table:
+            if location_name == "Cool, Cool Mountain - Slide Shortcut Second 1-Up":
+                continue
             with self.subTest("1-Up location generated", location=location_name):
                 self.assertIn(location_name, active_locations)
+        self.assertNotIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
+
+
+class OneUpChecksNoDespawnsOnTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "no_despawns": Options.NoDespawns.option_true,
+    }
+
+    def test_impossible_one_up_location_is_generated_with_no_despawns(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
 
 
 class BlocksanityOnTestBase(SM64TestBase):

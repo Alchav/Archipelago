@@ -323,7 +323,8 @@ def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool:
     reachable_coins = 102
-    if state.has("Snowman's Land - Cannon Unlock", player):
+    if state.has("Snowman's Land - Cannon Unlock", player) or \
+            state.multiworld.worlds[player].options.no_despawns.value:
         reachable_coins += 3
     if state.can_reach("Snowman's Land - Snowman's Big Head", "Location", player):
         reachable_coins += 2
