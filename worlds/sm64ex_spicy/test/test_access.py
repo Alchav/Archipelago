@@ -92,6 +92,166 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Second Floor"))
 
 
+class CastleAquariumLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Secret Aquarium Entrance with Triple Jump Only"},
+    }
+
+    def test_triple_jump_reaches_aquarium_and_lobby_one_up(self):
+        self.assertFalse(self.can_reach_region("The Secret Aquarium"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("The Secret Aquarium"))
+        self.assertTrue(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
+
+
+class CastleTTCLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Tick Tock Clock Entrance With Long Jump and Kick"},
+    }
+
+    def test_long_jump_and_kick_reach_ttc(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock"))
+        self.collect(self.get_item_by_name("Kick"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock"))
+
+
+class CastleThirdFloorAlcoveLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Third Floor Alcoves With Dive and Ledge Grab"},
+    }
+
+    def test_dive_and_ledge_grab_reach_both_alcoves(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect(self.get_item_by_name("Dive"))
+        self.assertFalse(self.can_reach_region("Rainbow Ride"))
+        self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride"))
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
+
+
+class CastleThirtyStarDoorLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Crackslide Through the 30 Star Door With Backflip, Kick, Double Jump, and Ledge grab"},
+    }
+
+    def test_crackslide_requires_every_listed_move(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        for item_name in ("Backflip", "Kick", "Triple Jump"):
+            self.collect(self.get_item_by_name(item_name))
+        self.assertFalse(self.can_reach_region("Dire, Dire Docks"))
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_region("Dire, Dire Docks"))
+
+
+class CastleThirtyStarDoorSBLJLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Side Backwards Long Jump Through the 30 Star Door"},
+    }
+
+    def test_sblj_requires_only_long_jump(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+
+
+class CastleThirtyStarDoorDoubleJumpLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Crackslide Through the 30 Star Door With Double Jump Setup"},
+    }
+
+    def test_double_jump_setup_uses_triple_jump_item(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+
+
+class CastleMIPSSkipLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle MIPS Skip Through the 30 Star Door"},
+    }
+
+    def test_mips_skip_requires_one_mips_and_dive(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
+        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.collect(self.get_item_by_name("Dive"))
+        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+
+
+class CastleMIPSSkipWithoutDiveLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {
+            "Castle MIPS Skip Through the 30 Star Door",
+            "Castle MIPS Without Dive",
+        },
+    }
+
+    def test_mips_without_dive_trick_removes_dive_requirement(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
+        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertTrue(self.can_reach_location("Castle - MIPS 1"))
+
+
+class CastleDoorBLJLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {
+            "Castle Backwards Long Jump Through the 50 Star Door",
+            "Castle Backwards Long Jump Through the 70 Star Door",
+        },
+    }
+
+    def test_fifty_and_seventy_star_door_blj_require_long_jump(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.assertFalse(self.can_reach_region("Third Floor"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Third Floor"))
+        self.assertTrue(self.can_reach_region("Bowser in the Sky"))
+
+
 class SingleProgressiveKeyAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {

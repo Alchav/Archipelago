@@ -929,6 +929,45 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     def has_endless_stairs_key(state):
         return state.has("Progressive Upstairs Key", player, 3) or state.has("Progressive Key", player, 6)
 
+    def can_mips_skip_thirty_star_door(state):
+        return (
+            has_logic_trick(state, player, "logic_castle_30_star_door_mips_skip")
+            and state.has("Castle - Progressive MIPS", player)
+            and (
+                has_action(state, player, "Dive")
+                or has_logic_trick(state, player, "logic_castle_mips_without_dive")
+            )
+        )
+
+    def can_bypass_thirty_star_door(state):
+        return (
+            has_thirty_star_key(state)
+            or has_logic_trick(state, player, "logic_castle_30_star_door_sblj")
+            and has_action(state, player, "Long Jump")
+            or has_logic_trick(state, player, "logic_castle_30_star_door_crackslide")
+            and all(has_action(state, player, action)
+                    for action in ("Backflip", "Kick", "Triple Jump", "Ledge Grab"))
+            or has_logic_trick(state, player, "logic_castle_30_star_door_crackslide_double_jump")
+            and has_action(state, player, "Triple Jump") and has_action(state, player, "Ledge Grab")
+            or has_logic_trick(state, player, "logic_castle_30_star_door_crackslide_yolo")
+            and has_action(state, player, "Ledge Grab") and has_action(state, player, "Backflip")
+            or can_mips_skip_thirty_star_door(state)
+        )
+
+    def can_bypass_fifty_star_door(state):
+        return (
+            has_third_floor_key(state)
+            or has_logic_trick(state, player, "logic_castle_50_star_door_blj")
+            and has_action(state, player, "Long Jump")
+        )
+
+    def can_bypass_seventy_star_door(state):
+        return (
+            has_endless_stairs_key(state)
+            or has_logic_trick(state, player, "logic_castle_70_star_door_blj")
+            and has_action(state, player, "Long Jump")
+        )
+
     def has_bowser_stage_1up_unlock(state, stage_item_name: str, vanilla_key_rule: Callable) -> bool:
         option = options.bowser_stage_1ups
         if option.value == option.option_always_spawn:
@@ -952,7 +991,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 lambda state: state.has("Unlock Big Boo's Haunt", player))
     connect_randomized_entrance("Menu", "The Princess's Secret Slide")
     connect_randomized_entrance("Jolly Roger Bay Door", "The Secret Aquarium",
-                                rf.build_rule("SF/BF | TJ & LG | MOVELESS & TJ"))
+                                rf.build_rule(
+                                    "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump & TJ | "
+                                    "logic_secret_aquarium_wall_kick_and_ledge_grab & WK+LG | "
+                                    "logic_secret_aquarium_wall_kick & WK | "
+                                    "logic_secret_aquarium_ledge_grab & LG"))
     connect_randomized_entrance("Menu", "Tower of the Wing Cap",
                                 lambda state: state.has("Unlock Tower of the Wing Cap", player))
     connect_randomized_entrance("Menu", "Bowser in the Dark World", has_first_floor_key)
@@ -967,13 +1010,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 rf.build_rule("", painting_lvl_name="Shifting Sand Land"))
     ddd_entry_rule = rf.build_rule("", painting_lvl_name="Dire, Dire Docks")
     connect_randomized_entrance("Basement", "Dire, Dire Docks",
-                                lambda state: has_thirty_star_key(state) and ddd_entry_rule(state))
+                                lambda state: can_bypass_thirty_star_door(state) and ddd_entry_rule(state))
     connect_randomized_entrance("Hazy Maze Cave", "Cavern of the Metal Cap",
                                 rf.build_rule("HMC_SWIMMING_BEAST"))
     connect_randomized_entrance("Menu", "Vanish Cap Under the Moat",
                                 lambda state: state.has("Unlock Vanish Cap Under the Moat", player))
     connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
-                                lambda state: has_thirty_star_key(state) and
+                                lambda state: can_bypass_thirty_star_door(state) and
                                 state.has("Unlock Bowser in the Fire Sea", player))
 
     connect_regions(multiworld, player, "Menu", "Second Floor", has_second_floor_key)
@@ -1003,15 +1046,24 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island - Tiny Main",
                     name="Tiny-Huge Island - Huge Island to Tiny Main")
 
-    connect_regions(multiworld, player, "Second Floor", "Third Floor", has_third_floor_key)
+    connect_regions(multiworld, player, "Second Floor", "Third Floor", can_bypass_fifty_star_door)
 
+    ttc_entrance_rule = rf.build_rule(
+        "LG/TJ/SF/BF | logic_castle_ttc_with_wall_kick & WK | "
+        "logic_castle_ttc_with_long_jump_and_kick & LJ+KK | "
+        "logic_castle_ttc_with_dive_and_kick & DV+KK",
+        painting_lvl_name="Tick Tock Clock")
     for ttc_entrance in sm64_ttc_entrances:
-        connect_randomized_entrance("Third Floor", ttc_entrance,
-                                    rf.build_rule("LG/TJ/SF/BF/WK", painting_lvl_name="Tick Tock Clock"))
-    connect_randomized_entrance("Third Floor", "Rainbow Ride", rf.build_rule("TJ/SF/BF"))
+        connect_randomized_entrance("Third Floor", ttc_entrance, ttc_entrance_rule)
+    third_floor_alcove_rule = rf.build_rule(
+        "TJ/SF/BF | logic_castle_3f_alcoves_with_wall_kick & WK | "
+        "logic_castle_3f_alcoves_with_dive_and_kick & DV+KK | "
+        "logic_castle_3f_alcoves_with_dive_and_ledge_grab & DV+LG | "
+        "logic_castle_3f_alcoves_with_long_jump_and_ledge_grab & LJ+LG")
+    connect_randomized_entrance("Third Floor", "Rainbow Ride", third_floor_alcove_rule)
     connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
-                                rf.build_rule("TJ/SF/BF"))
-    connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", has_endless_stairs_key)
+                                third_floor_alcove_rule)
+    connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", can_bypass_seventy_star_door)
 
     # Course Rules
     # Bob-omb Battlefield
@@ -1417,10 +1469,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     rf.assign_rule("Castle - Third Tree From Waterfall 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF")
-    rf.assign_rule("Castle - Jolly Roger Bay Lobby 1-Up", "SF/BF | TJ & LG | MOVELESS & TJ")
+    rf.assign_rule("Castle - Jolly Roger Bay Lobby 1-Up",
+                   "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump & TJ | "
+                   "logic_secret_aquarium_wall_kick_and_ledge_grab & WK+LG | "
+                   "logic_secret_aquarium_wall_kick & WK | logic_secret_aquarium_ledge_grab & LG")
     rf.assign_rule("Castle - Drain the Moat", "GP")
-    rf.assign_rule("Castle - MIPS 1", "DV | MOVELESS")
-    rf.assign_rule("Castle - MIPS 2", "DV | MOVELESS")
+    rf.assign_rule("Castle - MIPS 1", "DV | logic_castle_mips_without_dive")
+    rf.assign_rule("Castle - MIPS 2", "DV | logic_castle_mips_without_dive")
     add_rule(multiworld.get_location("Castle - MIPS 1", player),
              lambda state: state.can_reach("Basement", 'Region', player) and state.has("Castle - Progressive MIPS", player))
     add_rule(multiworld.get_location("Castle - MIPS 2", player),
