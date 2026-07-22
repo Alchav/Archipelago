@@ -254,13 +254,48 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
 
 def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Whomp's Fortress"
-    reachable_coins = 73
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Whomp%27s_Fortress&oldid=19913
+
+    # The two throwable cork boxes (near start/blue coin block)
+    reachable_coins = 6
+    # Coins around the flower near the start
+    reachable_coins += 8
+    # Line of coins near the beginning
+    reachable_coins += 5
+    # Line of coins on bridge past the falling bridge
+    reachable_coins += 5
+    # Coins around the rotating plank
+    reachable_coins += 4
+    # Line of coins on slope leading from the water
+    reachable_coins += 5
+    # Ring of coins in water
+    reachable_coins += 8
+    # Line of coins near the bob-omb buddy
+    reachable_coins += 5
+    # 2 Whomps (jump on back)
+    reachable_coins += 10
+    # 3 Piranha Plants
+    reachable_coins += 15
+    # 6 Red Coins
+    reachable_coins += 12
+
     if state.can_reach("Whomp's Fortress - Shoot into the Wild Blue", "Location", player):
+        # Ring of coins above the "Shoot into the Blue" Star
         reachable_coins += 8
     if has_action(state, player, "Ground Pound", level_name):
-        reachable_coins += 40
-    if state.can_reach("Whomp's Fortress - Top", "Region", player):
+        # 2 Whomps (ground pound)
+        reachable_coins += 10
+        # Blue Coin Block
         reachable_coins += 20
+    if state.can_reach("Whomp's Fortress - Top", "Region", player):
+        # Ring of coins on the floating isle
+        reachable_coins += 8
+        # Arrow of coins on the floating arrow
+        reachable_coins += 8
+        # 2 Red Coins
+        reachable_coins += 4
+    assert coins <= 141
     return coins <= reachable_coins
 
 

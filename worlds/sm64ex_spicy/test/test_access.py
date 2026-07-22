@@ -1845,20 +1845,20 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
     }
 
 
-class WhompsFortressCoinStar73AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+class WhompsFortressCoinStar83AccessTestBase(WhompsFortressCoinStarAccessTestBase):
     options = {
         **WhompsFortressCoinStarAccessTestBase.options,
-        "whomps_fortress_coin_star_requirement": 73,
+        "whomps_fortress_coin_star_requirement": 83,
     }
 
     def test_start_coins_reach_coin_star(self):
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
 
-class WhompsFortressCoinStar74AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+class WhompsFortressCoinStar84AccessTestBase(WhompsFortressCoinStarAccessTestBase):
     options = {
         **WhompsFortressCoinStarAccessTestBase.options,
-        "whomps_fortress_coin_star_requirement": 74,
+        "whomps_fortress_coin_star_requirement": 84,
     }
 
     def test_shoot_into_the_wild_blue_coins_reach_coin_star(self):
@@ -1868,10 +1868,10 @@ class WhompsFortressCoinStar74AccessTestBase(WhompsFortressCoinStarAccessTestBas
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
 
-class WhompsFortressCoinStar82AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+class WhompsFortressCoinStar92AccessTestBase(WhompsFortressCoinStarAccessTestBase):
     options = {
         **WhompsFortressCoinStarAccessTestBase.options,
-        "whomps_fortress_coin_star_requirement": 82,
+        "whomps_fortress_coin_star_requirement": 92,
     }
 
     def test_top_coins_reach_coin_star(self):
@@ -1881,10 +1881,10 @@ class WhompsFortressCoinStar82AccessTestBase(WhompsFortressCoinStarAccessTestBas
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Coins Star"))
 
 
-class WhompsFortressCoinStar94AccessTestBase(WhompsFortressCoinStarAccessTestBase):
+class WhompsFortressCoinStar104AccessTestBase(WhompsFortressCoinStarAccessTestBase):
     options = {
         **WhompsFortressCoinStarAccessTestBase.options,
-        "whomps_fortress_coin_star_requirement": 94,
+        "whomps_fortress_coin_star_requirement": 104,
     }
 
     def test_ground_pound_coins_reach_coin_star(self):

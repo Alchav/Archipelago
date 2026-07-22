@@ -178,6 +178,82 @@ logic_tricks = {
                        "the gate.",
         "video": "https://www.youtube.com/watch?v=-dZKkhB30LY"
     },
+    # Whomp's Fortress
+    "Whomp's Fortress Caged Island from the Top from the Floating Island with Triple Jump Off of Whomp King": {
+        "name": "logic_wf_caged_island_top_triple_jump",
+        "tags": ("Whomp's Fortress", "Movement"),
+        "affected_rules": (
+            ("Whomp's Fortress - Fall onto the Caged Island", "MOVELESS & TJ & WF_KING & {Whomp's Fortress - Top}"),
+        ),
+        "difficulty": "medium",
+        "notes for codex": "this requires access to {TOP} and Whomp King",
+        "description": "Allows Fall onto the Caged Island from the top of the Fortress with Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=-faflqwXu94"
+    },
+    "Whomp's Fortress Caged Island from the Top from the Floating Island with Jump Off of Whomp King": {
+        "name": "logic_wf_caged_island_top_triple_jump",
+        "tags": ("Whomp's Fortress", "Movement"),
+        "affected_rules": (
+            ("Whomp's Fortress - Fall onto the Caged Island", "MOVELESS & TJ & WF_KING & {Whomp's Fortress - Top}"),
+        ),
+        "difficulty": "hard",
+        "notes for codex": "this requires access to {TOP} and Whomp King",
+        "description": "Allows Fall onto the Caged Island from the top of the Fortress by jumping off of his back"
+                       "while he is getting up from the ground.",
+        "video": "https://www.youtube.com/watch?v=Uc9FQkt65BY"
+    },
+    "Whomp's Fortress Caged Island from the Top of the Fortress with Long Jump": {
+        "name": "logic_wf_caged_island_top_long_jump",
+        "tags": ("Whomp's Fortress", "Movement"),
+        "affected_rules": (
+            ("Whomp's Fortress - Fall onto the Caged Island", "MOVELESS & LJ & WF_FORTRESS & {Whomp's Fortress - Top}"),
+        ),
+        "difficulty": "medium",
+        "notes for codex": "this requires access to {TOP} as well as WF_FORTRESS",
+        "tooltip": "Allows Fall onto the Caged Island from fortress top access with Long Jump.",
+        "rationale": "The playlist has WF - Only Long Jump - Fall onto the Caged Island. The fortress/top requirements come from the current rule branch.",
+        "confidence": "high",
+    },
+    "Whomp's Fortress Top Access with Cannon Only": {
+        "name": "logic_wf_caged_top_access_with_cannon_only",
+        "notes for codex": "access to {TOP} only requires cannon",
+        "description": "Allows accessing the top area with the cannon.",
+        "difficulty": "medium",
+    },
+    "Whomp's Fortress Top Access with Side Flip and Ledge Grab": {
+        "name": "logic_wf_caged_top_access_with_sf_lg",
+        "notes for codex": "access to {TOP}",
+        "difficulty": "medium",
+        "description": "Allows accessing the top area by jumping on a Whomp as it stands up, and doing a Side Flip"
+                       "off of it and a Ledge Grab.",
+    },
+    "Whomp's Fortress Top Access with Triple Jump": {
+        "name": "logic_wf_caged_top_access_with_tj",
+        "notes for codex": "access to {TOP}",
+        "difficulty": "medium",
+        "description": "Allows accessing the top area by jumping on a Whomp as it stands up, and doing a Triple Jump."
+    },
+    "Whomp's Fortress Blast Away the Wall with Backflip and Ledge Grab": {
+        "name": "logic_wf_blast_away_wall_cannonless_backflip",
+        "tags": ("Whomp's Fortress", "Cannonless", "Movement"),
+        "affected_rules": (
+            ("Whomp's Fortress - Blast Away the Wall", "CANNLESS & LG"),
+        ),
+        "difficulty": "hard",
+        "description": "Allows Blast Away the Wall without the cannon using Ledge Grab, with a Backflip for setup.",
+        "video": "https://www.youtube.com/watch?v=ngQ4Y8aMb-U"
+    },
+    "Whomp's Fortress Blast Away the Wall with Ledge Grab": {
+        "name": "logic_wf_blast_away_wall_cannonless",
+        "tags": ("Whomp's Fortress", "Cannonless", "Movement"),
+        "affected_rules": (
+            ("Whomp's Fortress - Blast Away the Wall", "CANNLESS & LG"),
+        ),
+        "difficulty": "hard",
+        "description": "Allows Blast Away the Wall without the cannon using Ledge Grab, without Backflip for setup.",
+        "video": "https://www.youtube.com/watch?v=TqAwAOZGScY"
+    },
+
 }
 
 
