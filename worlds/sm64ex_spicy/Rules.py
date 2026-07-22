@@ -280,6 +280,7 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
     # 6 Red Coins
     reachable_coins += 12
 
+    # CODEX: Change this to "has cannon" or one of the qualifying tricks
     if state.can_reach("Whomp's Fortress - Shoot into the Wild Blue", "Location", player):
         # Ring of coins above the "Shoot into the Blue" Star
         reachable_coins += 8
@@ -388,7 +389,26 @@ def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) ->
 
 def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Jolly Roger Bay"
-    reachable_coins = 50
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Jolly_Roger_Bay&oldid=20489
+
+    # The yellow [!] block near start
+    reachable_coins = 3
+    # Ring of underwater coins near clams
+    reachable_coins += 8
+    # Ring of coins around the tall spike
+    reachable_coins += 8
+    # Vertical line of coins before the purple switch (3 of them)
+    reachable_coins += 3
+    # Ring of coins near jet stream
+    reachable_coins += 8
+    # Ring of coins near cave treasure chests
+    reachable_coins += 8
+    # 3 Goombas
+    reachable_coins += 3
+    # 4 Red Coins
+    reachable_coins += 8
+
     if (
             has_action(state, player, "Climb", level_name)
             or has_action(state, player, "Triple Jump", level_name)
@@ -397,17 +417,24 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
                 has_action(state, player, "Backflip", level_name)
                 or has_action(state, player, "Wall Kick", level_name)
             )):
+        # Pillar Red Coin
         reachable_coins += 2
     has_upper = state.can_reach("Jolly Roger Bay - Upper", "Region", player)
     has_raised_ship = state.has("Jolly Roger Bay - Raised Ship", player)
     if has_upper:
-        reachable_coins += 16
-        if has_action(state, player, "Long Jump", level_name) or has_purple_switches(
-                state, player, level_name) or has_raised_ship:
-            reachable_coins += 2
+        # Vertical line of coins before the purple switch (2 of them)
+        reachable_coins += 2
+        # The lines of coins before the ship
+        reachable_coins += 15
         if has_raised_ship:
-            reachable_coins += 4
+            # 3 Red Coins
+            reachable_coins += 6
+        elif has_action(state, player, "Long Jump", level_name) or has_purple_switches(
+                state, player, level_name) or has_raised_ship:
+            # 1 Red Coin
+            reachable_coins += 2
     if has_action(state, player, "Ground Pound", level_name):
+        # Blue coin block
         reachable_coins += 30
     return coins <= reachable_coins
 
