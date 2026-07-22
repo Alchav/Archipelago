@@ -108,6 +108,19 @@ class CastleAquariumLogicTricksTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
 
 
+class CastleWaterfallTreeLogicTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Third Tree From Waterfall 1-Up With No Movement"},
+    }
+
+    def test_no_movement_trick_reaches_tree_one_up(self):
+        self.assertTrue(self.can_reach_location("Castle - Third Tree From Waterfall 1-Up"))
+
+
 class CastleTTCLogicTricksTestBase(SM64TestBase):
     run_default_tests = False
     options = {

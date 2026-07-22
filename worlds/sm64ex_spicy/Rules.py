@@ -1467,7 +1467,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     add_rule(multiworld.get_location("Castle - Yoshi", player),
              lambda state: state.has("Castle - Yoshi", player))
 
-    rf.assign_rule("Castle - Third Tree From Waterfall 1-Up", "CL/TJ/BF/SF")
+    rf.assign_rule("Castle - Third Tree From Waterfall 1-Up",
+                   "CL/TJ/BF/SF | logic_castle_waterfall_tree_1up_with_no_movement")
     rf.assign_rule("Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF")
     rf.assign_rule("Castle - Jolly Roger Bay Lobby 1-Up",
                    "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump & TJ | "

@@ -1,5 +1,11 @@
 logic_tricks = {
     # Castle
+    "Castle Third Tree From Waterfall 1-Up With No Movement": {
+        "name": "logic_castle_waterfall_tree_1up_with_no_movement",
+        "difficulty": "medium",
+        "description": "Reaching the Castle Third Tree From Waterfall 1-Up with no movement abilities by jumping"
+                       "backwards onto the slope, sliding down and using the momentum to jump up to the top of the tree.",
+    },
     "Castle Secret Aquarium Entrance with Triple Jump Only": {
         "name": "logic_secret_aquarium_triple_jump",
         "difficulty": "medium",
@@ -119,6 +125,12 @@ logic_tricks = {
         "video": "https://www.youtube.com/watch?v=cb-7NZoNaBg"
     },
     # Bob-omb Battlefield
+    "Bob-omb Battlefield Cannon Tree 1-Up With No Movement": {
+        "name": "logic_bob_cannon_tree_1up_with_no_movement",
+        "difficulty": "medium",
+        "description": "Reaching the Bob-omb Battlefield Cannon Tree 1-Up no movement abilities by sliding down the"
+                       "cannon slope and using the momentum to jump up to the top of the tree.",
+    },
     "Bob-omb Battlefield Island with Wing Cap": {
         "name": "logic_bob_island_without_cannon",
         "difficulty": "easy",
