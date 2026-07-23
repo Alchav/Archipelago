@@ -375,9 +375,10 @@ class SelectiveUTGlitchLogicTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
 
     def test_selected_tracker_trick_requires_ut_glitch(self):
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("ut_glitch"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
     def test_unselected_hard_trick_remains_out_of_logic_with_ut_glitch(self):

@@ -12,7 +12,7 @@ from .Items import action_item_data_table, cap_item_data_table, per_level_move_a
 from .LogicTricks import logic_tricks
 
 
-logic_trick_names = {data["name"] for data in logic_tricks.values()}
+logic_tricks_by_name = {data["name"]: data for data in logic_tricks.values()}
 
 
 initial_reachable_entrances = (
@@ -118,6 +118,21 @@ def has_logic_trick(state: CollectionState, player: int, trick_name: str) -> boo
     )
 
 
+def can_use_logic_trick(
+        state: CollectionState, player: int, trick_name: str, target_name: str) -> bool:
+    if not has_logic_trick(state, player, trick_name):
+        return False
+    world = state.multiworld.worlds[player]
+    rule_factory = RuleFactory(state.multiworld, world.options, player, world.move_rando_bitvec)
+    return rule_factory.build_rule(
+        trick_name,
+        rule_factory.get_cannon_item_name(target_name),
+        rule_factory.get_cap_item_names(target_name),
+        rule_factory.get_arbitrary_item_names(target_name),
+        rule_factory.get_action_item_names(target_name),
+    )(state)
+
+
 def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
     options = state.multiworld.worlds[player].options
     item_name = f"{level_name} - Metal Cap" if options.per_level_cap_items else "Metal Cap"
@@ -205,11 +220,9 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
     if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
         # 3 coins from the first coin ring are easily reachable.
         reachable_coins += 3
-        if (
-                has_logic_trick(state, player, "logic_bob_mario_wings_to_the_sky_without_cannon")
-                and has_wing_cap(state, player, level_name)
-                and has_action(state, player, "Triple Jump", level_name)
-                and has_action(state, player, "Ground Pound", level_name)):
+        if can_use_logic_trick(
+                state, player, "logic_bob_mario_wings_to_the_sky_without_cannon",
+                "Bob-omb Battlefield - Coins Star"):
             # This route collects every coin on and above the island without using the cannon.
             reachable_coins += 42
             reachable_coins += 2
@@ -229,12 +242,15 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
                 for action in ("Climb", "Side Flip", "Backflip", "Triple Jump")
             )
             has_island_red_coin_ground_pound = (
-                has_logic_trick(state, player, "logic_bob_island_red_coin_with_ground_pound")
-                and has_action(state, player, "Ground Pound", level_name)
+                can_use_logic_trick(
+                    state, player, "logic_bob_island_red_coin_with_ground_pound",
+                    "Bob-omb Battlefield - Coins Star")
             )
             if (has_island_red_coin_movement
                     or has_island_red_coin_ground_pound
-                    or has_logic_trick(state, player, "logic_bob_island_koopa_shell")):
+                    or can_use_logic_trick(
+                        state, player, "logic_bob_island_koopa_shell",
+                        "Bob-omb Battlefield - Coins Star")):
                 reachable_coins += 2
 
             has_first_ring_jump = any(
@@ -325,8 +341,9 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
     reachable_coins += 5
 
     has_cannon = state.has("Cool, Cool Mountain - Cannon Unlock", player)
-    has_spin_jump_route = has_logic_trick(
-        state, player, "logic_ccm_wall_kicks_will_work_spin_jump")
+    has_spin_jump_route = can_use_logic_trick(
+        state, player, "logic_ccm_wall_kicks_will_work_spin_jump",
+        "Cool, Cool Mountain - Coins Star")
     if has_cannon or has_spin_jump_route:
         # Arrow of coins near "Wall Kicks will Work"
         reachable_coins += 8
@@ -463,13 +480,14 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     reachable_coins += 8
 
     has_pillar_red_coin_moves = (
-        has_logic_trick(state, player, "logic_jrb_pillar_red_coin_moves")
-        and any(has_action(state, player, action, level_name)
-                for action in ("Triple Jump", "Backflip", "Wall Kick"))
+        can_use_logic_trick(
+            state, player, "logic_jrb_pillar_red_coin_moves",
+            "Jolly Roger Bay - Coins Star")
     )
     has_pillar_red_coin_cannon = (
-        has_logic_trick(state, player, "logic_jrb_pillar_red_coin_cannon")
-        and state.has("Jolly Roger Bay - Cannon Unlock", player)
+        can_use_logic_trick(
+            state, player, "logic_jrb_pillar_red_coin_cannon",
+            "Jolly Roger Bay - Coins Star")
     )
     if (has_action(state, player, "Climb", level_name)
             or has_pillar_red_coin_moves
@@ -487,8 +505,9 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
             # 3 Red Coins
             reachable_coins += 6
         elif (
-                has_logic_trick(state, player, "logic_jrb_ship_red_coin_with_long_jump")
-                and has_action(state, player, "Long Jump", level_name)
+                can_use_logic_trick(
+                    state, player, "logic_jrb_ship_red_coin_with_long_jump",
+                    "Jolly Roger Bay - Coins Star")
                 or has_purple_switches(state, player, level_name)):
             # 1 Red Coin
             reachable_coins += 2
@@ -1052,42 +1071,30 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         return state.has("Progressive Upstairs Key", player, 3) or state.has("Progressive Key", player, 6)
 
     def can_mips_skip_thirty_star_door(state):
-        return (
-            has_logic_trick(state, player, "logic_castle_30_star_door_mips_skip")
-            and state.has("Castle - Progressive MIPS", player)
-            and (
-                has_action(state, player, "Dive")
-                or has_logic_trick(state, player, "logic_castle_mips_without_dive")
-            )
-        )
+        return can_use_logic_trick(
+            state, player, "logic_castle_30_star_door_mips_skip", "Castle")
 
     def can_bypass_thirty_star_door(state):
         return (
             has_thirty_star_key(state)
-            or has_logic_trick(state, player, "logic_castle_30_star_door_sblj")
-            and has_action(state, player, "Long Jump")
-            or has_logic_trick(state, player, "logic_castle_30_star_door_crackslide")
-            and all(has_action(state, player, action)
-                    for action in ("Backflip", "Kick", "Triple Jump", "Ledge Grab"))
-            or has_logic_trick(state, player, "logic_castle_30_star_door_crackslide_double_jump")
-            and has_action(state, player, "Triple Jump") and has_action(state, player, "Ledge Grab")
-            or has_logic_trick(state, player, "logic_castle_30_star_door_crackslide_yolo")
-            and has_action(state, player, "Ledge Grab") and has_action(state, player, "Backflip")
+            or can_use_logic_trick(state, player, "logic_castle_30_star_door_sblj", "Castle")
+            or can_use_logic_trick(state, player, "logic_castle_30_star_door_crackslide", "Castle")
+            or can_use_logic_trick(
+                state, player, "logic_castle_30_star_door_crackslide_double_jump", "Castle")
+            or can_use_logic_trick(state, player, "logic_castle_30_star_door_crackslide_yolo", "Castle")
             or can_mips_skip_thirty_star_door(state)
         )
 
     def can_bypass_fifty_star_door(state):
         return (
             has_third_floor_key(state)
-            or has_logic_trick(state, player, "logic_castle_50_star_door_blj")
-            and has_action(state, player, "Long Jump")
+            or can_use_logic_trick(state, player, "logic_castle_50_star_door_blj", "Castle")
         )
 
     def can_bypass_seventy_star_door(state):
         return (
             has_endless_stairs_key(state)
-            or has_logic_trick(state, player, "logic_castle_70_star_door_blj")
-            and has_action(state, player, "Long Jump")
+            or can_use_logic_trick(state, player, "logic_castle_70_star_door_blj", "Castle")
         )
 
     def has_bowser_stage_1up_unlock(state, stage_item_name: str, vanilla_key_rule: Callable) -> bool:
@@ -1114,10 +1121,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance("Menu", "The Princess's Secret Slide")
     connect_randomized_entrance("Jolly Roger Bay Door", "The Secret Aquarium",
                                 rf.build_rule(
-                                    "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump & TJ | "
-                                    "logic_secret_aquarium_wall_kick_and_ledge_grab & WK+LG | "
-                                    "logic_secret_aquarium_wall_kick & WK | "
-                                    "logic_secret_aquarium_ledge_grab & LG"))
+                                    "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
+                                    "logic_secret_aquarium_wall_kick_and_ledge_grab | "
+                                    "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab"))
     connect_randomized_entrance("Menu", "Tower of the Wing Cap",
                                 lambda state: state.has("Unlock Tower of the Wing Cap", player))
     connect_randomized_entrance("Menu", "Bowser in the Dark World", has_first_floor_key)
@@ -1171,17 +1177,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_regions(multiworld, player, "Second Floor", "Third Floor", can_bypass_fifty_star_door)
 
     ttc_entrance_rule = rf.build_rule(
-        "LG/TJ/SF/BF | logic_castle_ttc_with_wall_kick & WK | "
-        "logic_castle_ttc_with_long_jump_and_kick & LJ+KK | "
-        "logic_castle_ttc_with_dive_and_kick & DV+KK",
+        "LG/TJ/SF/BF | logic_castle_ttc_with_wall_kick | "
+        "logic_castle_ttc_with_long_jump_and_kick | logic_castle_ttc_with_dive_and_kick",
         painting_lvl_name="Tick Tock Clock")
     for ttc_entrance in sm64_ttc_entrances:
         connect_randomized_entrance("Third Floor", ttc_entrance, ttc_entrance_rule)
     third_floor_alcove_rule = rf.build_rule(
-        "TJ/SF/BF | logic_castle_3f_alcoves_with_wall_kick & WK | "
-        "logic_castle_3f_alcoves_with_dive_and_kick & DV+KK | "
-        "logic_castle_3f_alcoves_with_dive_and_ledge_grab & DV+LG | "
-        "logic_castle_3f_alcoves_with_long_jump_and_ledge_grab & LJ+LG")
+        "TJ/SF/BF | logic_castle_3f_alcoves_with_wall_kick | "
+        "logic_castle_3f_alcoves_with_dive_and_kick | "
+        "logic_castle_3f_alcoves_with_dive_and_ledge_grab | "
+        "logic_castle_3f_alcoves_with_long_jump_and_ledge_grab")
     connect_randomized_entrance("Third Floor", "Rainbow Ride", third_floor_alcove_rule)
     connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
                                 third_floor_alcove_rule)
@@ -1192,12 +1197,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bob-omb Battlefield - Big Bob-Omb on the Summit", "BOB_KING")
     rf.assign_rule("Bob-omb Battlefield - Footrace with Koopa The Quick", "BOB_KOOPA")
     rf.assign_rule("Bob-omb Battlefield - Island",
-                   "CANN | logic_bob_island_without_cannon & WC & TJ | logic_bob_island_long_jump & LJ | "
+                   "CANN | logic_bob_island_without_cannon | logic_bob_island_long_jump | "
                    "logic_bob_island_koopa_shell | "
-                   "logic_bob_mario_wings_to_the_sky_without_cannon & WC+TJ+GP")
+                   "logic_bob_mario_wings_to_the_sky_without_cannon")
     rf.assign_rule("Bob-omb Battlefield - Mario Wings to the Sky",
-                   "CANN & WC | logic_bob_mario_wings_capless & CANN | "
-                   "logic_bob_mario_wings_to_the_sky_without_cannon & WC+TJ+GP")
+                   "CANN & WC | logic_bob_mario_wings_capless | "
+                   "logic_bob_mario_wings_to_the_sky_without_cannon")
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
                    "GP | logic_bob_chain_chomp_gate_without_ground_pound")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
@@ -1220,15 +1225,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Jolly Roger Bay - Can the Eel Come Out to Play?", "JRB_UNAGI")
     rf.assign_rule(
         "Jolly Roger Bay - Upper",
-        "TJ/BF/SF/WK | logic_jrb_upper_ledge_grab & LG | "
-        "logic_jrb_upper_dive_and_kick & DV+KK | logic_jrb_upper_cannon & CANN")
+        "TJ/BF/SF/WK | logic_jrb_upper_ledge_grab | "
+        "logic_jrb_upper_dive_and_kick | logic_jrb_upper_cannon")
     rf.assign_rule("Jolly Roger Bay - Red Coins on the Ship Afloat",
                    "JRB_RAISED_SHIP & CL | "
-                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_moves & TJ/BF/WK | "
-                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_cannon & CANN")
+                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_moves | "
+                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_cannon")
     rf.assign_rule("Jolly Roger Bay - Blast to the Stone Pillar",
                    "CANN+CL | logic_jrb_stone_pillar_cannonless | "
-                   "logic_jrb_stone_pillar_cannon_no_climb & CANN")
+                   "logic_jrb_stone_pillar_cannon_no_climb")
     rf.assign_rule(
         "Jolly Roger Bay - Through the Jet Stream",
         "JRB_JET_STREAM & MC | JRB_JET_STREAM & logic_jrb_jet_stream_capless")
@@ -1245,11 +1250,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", "BBH_MERRY_GO_ROUND")
     rf.assign_rule(
         "Big Boo's Haunt - Second Floor",
-        "BBH_STAIRCASE | logic_bbh_third_floor_triple_jump_wall_kick & TJ+WK | "
-        "logic_bbh_third_floor_side_flip_wall_kick & SF+WK")
+        "BBH_STAIRCASE | logic_bbh_third_floor_triple_jump_wall_kick | "
+        "logic_bbh_third_floor_side_flip_wall_kick")
     rf.assign_rule(
         "Big Boo's Haunt - Third Floor",
-        "WK+LG | logic_bbh_third_floor_wall_kick & WK | logic_bbh_third_floor_side_flip & SF")
+        "WK+LG | logic_bbh_third_floor_wall_kick | logic_bbh_third_floor_side_flip")
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
     rf.assign_rule("Big Boo's Haunt - Secret of the Haunted Books", "KK")
     rf.assign_rule("Big Boo's Haunt - Seek the 8 Red Coins", "BF/WK/TJ/SF")
@@ -1458,7 +1463,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Jolly Roger Bay - Ocean Cave Metal Cap Block": "MC",
             "Jolly Roger Bay - Blast to the Stone Pillar Star Block":
                 "CANN+CL | logic_jrb_stone_pillar_cannonless | "
-                "logic_jrb_stone_pillar_cannon_no_climb & CANN",
+                "logic_jrb_stone_pillar_cannon_no_climb",
             "Jolly Roger Bay - Purple Switch Metal Cap Block": "MC",
             "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "JRB_SUNKEN_SHIP",
             "Lethal Lava Land - Wing Cap Block": "WC",
@@ -1609,9 +1614,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CL/TJ/BF/SF | logic_castle_waterfall_tree_1up_with_no_movement")
     rf.assign_rule("Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF")
     rf.assign_rule("Castle - Jolly Roger Bay Lobby 1-Up",
-                   "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump & TJ | "
-                   "logic_secret_aquarium_wall_kick_and_ledge_grab & WK+LG | "
-                   "logic_secret_aquarium_wall_kick & WK | logic_secret_aquarium_ledge_grab & LG")
+                   "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
+                   "logic_secret_aquarium_wall_kick_and_ledge_grab | "
+                   "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab")
     rf.assign_rule("Castle - Drain the Moat", "GP")
     rf.assign_rule("Castle - MIPS 1", "DV | logic_castle_mips_without_dive")
     rf.assign_rule("Castle - MIPS 2", "DV | logic_castle_mips_without_dive")
@@ -1668,6 +1673,7 @@ class RuleFactory:
         "KK": "Kick",
         "CL": "Climb",
         "LG": "Ledge Grab",
+        "MIPS1": "Castle - Progressive MIPS",
         "BOB_KING": "Bob-omb Battlefield - King Bob-omb",
         "BOB_KOOPA": "Bob-omb Battlefield - Koopa the Quick",
         "BOB_BUDDY": "Bob-omb Battlefield - Bob-omb Buddy",
@@ -1763,9 +1769,20 @@ class RuleFactory:
         if rule:
             set_rule(target, rule)
         if isinstance(target, Entrance):
-            for region_name in re.findall(r"(?<!\{)\{([^{}]+)\}(?!\})", rule_expr):
+            for region_name in self.get_indirect_condition_region_names(rule_expr):
                 self.multiworld.register_indirect_condition(
                     self.multiworld.get_region(region_name, self.player), target)
+
+    def get_indirect_condition_region_names(
+            self, rule_expr: str, seen_tricks: set[str] | None = None) -> set[str]:
+        region_names = set(re.findall(r"(?<!\{)\{([^{}]+)\}(?!\})", rule_expr))
+        seen_tricks = set() if seen_tricks is None else seen_tricks
+        for trick_name in re.findall(r"\blogic_[a-z0-9_]+\b", rule_expr):
+            if trick_name in logic_tricks_by_name and trick_name not in seen_tricks:
+                seen_tricks.add(trick_name)
+                region_names.update(self.get_indirect_condition_region_names(
+                    logic_tricks_by_name[trick_name].get("rule", ""), seen_tricks))
+        return region_names
 
     def build_rule(
             self, rule_expr: str, cannon_name: str = '', cap_item_names: dict[str, str] | None = None,
@@ -1916,6 +1933,18 @@ class RuleFactory:
             self, expression: str, cannon_name: str, cap_item_names: dict[str, str],
             arbitrary_item_names: dict[str, str | bool],
             action_item_names: dict[str, str | bool]) -> Union[Callable, bool]:
+        if expression in logic_tricks_by_name:
+            world = self.multiworld.worlds[self.player]
+            enabled = getattr(world, expression, False)
+            enabled_for_ut = getattr(world, f"{expression}_ut_glitch", False)
+            if not enabled and not enabled_for_ut:
+                return False
+            trick_rule = self.build_rule(
+                logic_tricks_by_name[expression].get("rule", ""),
+                cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
+            if enabled:
+                return trick_rule
+            return lambda state: state.has(ut_glitch_item_name, self.player) and trick_rule(state)
         if '+' in expression:
             tokens = expression.split('+')
             items = set()
@@ -1972,13 +2001,6 @@ class RuleFactory:
             return True if self.cannonless else ut_glitch_item_name
         if token == "MOVELESS":
             return True if self.moveless else ut_glitch_item_name
-        if token in logic_trick_names:
-            world = self.multiworld.worlds[self.player]
-            if getattr(world, token, False):
-                return True
-            if getattr(world, f"{token}_ut_glitch", False):
-                return ut_glitch_item_name
-            return False
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)
