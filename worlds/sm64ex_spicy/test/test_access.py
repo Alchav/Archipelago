@@ -1,8 +1,8 @@
 from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
-from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, jolly_roger_bay_coins, \
-    get_per_level_action_item_name
+from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
+    jolly_roger_bay_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -1885,6 +1885,80 @@ class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
+
+
+class CoolCoolMountainIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+    }
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Cool, Cool Mountain - Single Yellow Coins": 27,
+            "Cool, Cool Mountain - Red Coins": 16,
+            "Cool, Cool Mountain - Moving Blue Coins": 5,
+            "Cool, Cool Mountain - Horizontal Coin Lines": 65,
+            "Cool, Cool Mountain - Vertical Coin Lines": 5,
+            "Cool, Cool Mountain - Mr Blizzards": 3,
+            "Cool, Cool Mountain - Spindrifts": 9,
+        }
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(cool_cool_mountain_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(cool_cool_mountain_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_wall_kicks_route_sources(self):
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Cannon Unlock"))
+
+        coin_arrow = self.get_item_by_name("Cool, Cool Mountain - Coin Arrows")
+        self.collect(coin_arrow)
+        self.assertTrue(cool_cool_mountain_coins(self.multiworld.state, self.player, 8))
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 9))
+        self.remove(coin_arrow)
+
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Spindrifts"))
+        self.assertTrue(cool_cool_mountain_coins(self.multiworld.state, self.player, 15))
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 16))
+
+    def test_blue_coin_switch_requires_ground_pound(self):
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Blue Coin Switches"))
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 1))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(cool_cool_mountain_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 11))
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Frosty Slide for 8 Red Coins"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Red Coins"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Frosty Slide for 8 Red Coins"))
+
+
+class CoolCoolMountainSpinJumpUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "logic_tricks": {"Cool, Cool Mountain Wall Kicks Will Work With Spin Jump"},
+    }
+
+    def test_spin_jump_trick_requires_spindrifts(self):
+        self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Wall Kicks Will Work"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Spindrifts"))
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Wall Kicks Will Work"))
+        self.assertTrue(cool_cool_mountain_coins(self.multiworld.state, self.player, 12))
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 13))
 
 
 class CoolCoolMountainCoinStar130AccessTestBase(CoolCoolMountainCoinStarAccessTestBase):

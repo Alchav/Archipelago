@@ -445,27 +445,59 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Cool, Cool Mountain"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_moving_blue_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Moving Blue Coins", f"{level_name} - Moving Blue Coins")
+    has_blue_coin_switches = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Switches", f"{level_name} - Blue Coin Switches")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_coin_arrows = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Coin Arrows", f"{level_name} - Coin Arrows")
+    has_vertical_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_mr_blizzards = has_unlock(
+        state, player, "enemy_unlocks",
+        "Mr Blizzards", f"{level_name} - Mr Blizzards")
+    has_spindrifts = has_unlock(
+        state, player, "enemy_unlocks",
+        "Spindrifts", f"{level_name} - Spindrifts")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Cool,_Cool_Mountain&oldid=19915
 
-    # Coins on the Penguins Slide
-    reachable_coins = 72
+    # 27 individual coins and 9 lines of coins on the Penguin Slide
+    reachable_coins = 27 if has_single_yellow_coins else 0
+    if has_horizontal_coin_lines:
+        reachable_coins += 45
     # Vertical line of coins into chimney
-    reachable_coins += 5
-    # Line of coins near top of the mountain
-    reachable_coins += 5
-    # Line of coins between fences, in the snowman's head route
-    reachable_coins += 5
-    # Two lines of coins later in the snowman's head route
-    reachable_coins += 10
-    # Mr. Blizzard
-    reachable_coins += 3
-    # 3 Spindrifts
-    reachable_coins += 9
-    # 8 Red Coins
-    reachable_coins += 16
+    if has_vertical_coin_lines:
+        reachable_coins += 5
+    if has_horizontal_coin_lines:
+        # Four lines along the main mountain route
+        reachable_coins += 20
+    if has_mr_blizzards:
+        # Only the standard Mr. Blizzard is normally defeatable. The two
+        # jumping Mr. Blizzards on the bridge require Metal Cap.
+        reachable_coins += 3
+    if has_spindrifts:
+        # 3 Spindrifts
+        reachable_coins += 9
+    if has_red_coins:
+        # 8 Red Coins
+        reachable_coins += 16
     # Blue Coin at the start of the slide
-    reachable_coins += 5
+    if has_moving_blue_coins:
+        reachable_coins += 5
 
     has_cannon = state.has("Cool, Cool Mountain - Cannon Unlock", player)
     has_spin_jump_route = can_use_logic_trick(
@@ -473,13 +505,15 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
         "Cool, Cool Mountain - Coins Star")
     if has_cannon or has_spin_jump_route:
         # Arrow of coins near "Wall Kicks will Work"
-        reachable_coins += 8
-        # 2 Spindrifts
-        reachable_coins += 6
-        if not has_cannon:
+        if has_coin_arrows:
+            reachable_coins += 8
+        if has_spindrifts:
+            # 2 Spindrifts
+            reachable_coins += 6
+        if has_spindrifts and not has_cannon:
             # If you use a spindrift to get down, you must leave its 3 coins behind.
             reachable_coins -= 3
-    if has_action(state, player, "Ground Pound", level_name):
+    if has_blue_coin_switches and has_action(state, player, "Ground Pound", level_name):
         # Blue Coin Block
         reachable_coins += 10
     assert reachable_coins <= 154
@@ -1570,6 +1604,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Cool, Cool Mountain - Big Penguin Race", "CCM_BIG_PENGUIN")
     rf.assign_rule("Cool, Cool Mountain - Snowman's Lost His Head", "CCM_SNOWMAN_HEAD")
     rf.assign_rule("Cool, Cool Mountain - Li'l Penguin Lost", "CCM_BABY_PENGUINS")
+    rf.assign_rule("Cool, Cool Mountain - Frosty Slide for 8 Red Coins", "RED_COINS")
     rf.assign_rule(
         "Cool, Cool Mountain - Wall Kicks Will Work",
         "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
@@ -2255,6 +2290,9 @@ class RuleFactory:
         item_names["WHOMPS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Whomps", f"{level_name} - Whomps")
+        item_names["SPINDRIFTS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Spindrifts", f"{level_name} - Spindrifts")
         return item_names
 
     def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:

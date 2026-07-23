@@ -364,7 +364,7 @@ logic_tricks = {
     # Cool, Cool Mountain
     "Cool, Cool Mountain Wall Kicks Will Work With Spin Jump": {
         "name": "logic_ccm_wall_kicks_will_work_spin_jump",
-        "rule": "",
+        "rule": "SPINDRIFTS",
         "difficulty": "medium",
         "description": "Reaching Wall Kicks Will Work, and the coins below it, without any movement abilities, by spin"
                        "jumping off of a Spindrift and gliding down directly to the star.",
