@@ -352,9 +352,6 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
     has_coin_arrows = has_unlock(
         state, player, "coin_object_unlocks",
         "Coin Arrows", f"{level_name} - Coin Arrows")
-    has_floating_coin_rings = has_unlock(
-        state, player, "coin_object_unlocks",
-        "Floating Coin Rings", f"{level_name} - Floating Coin Rings")
     has_throwable_cork_boxes = has_unlock(
         state, player, "coin_object_unlocks",
         "Throwable Cork Boxes", f"{level_name} - Throwable Cork Boxes")
@@ -422,7 +419,7 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
             )
         )
     )
-    if can_reach_wild_blue_coins and has_floating_coin_rings:
+    if can_reach_wild_blue_coins and has_horizontal_coin_rings:
         # Ring of coins above the "Shoot into the Blue" Star
         reachable_coins += 8
     if has_action(state, player, "Ground Pound", level_name):
@@ -730,6 +727,30 @@ def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) ->
 
 def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Jolly Roger Bay"
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_switches = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Switches", f"{level_name} - Blue Coin Switches")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_vertical_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
+    has_three_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
     has_pillar_red_coin_moves = (
         can_use_logic_trick(
             state, player, "logic_jrb_pillar_red_coin_moves",
@@ -746,40 +767,53 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     # https://ukikipedia.net/mediawiki/index.php?title=Jolly_Roger_Bay&oldid=20489
 
     # The yellow [!] block near start
-    reachable_coins = 3
+    reachable_coins = 3 if has_three_coin_block else 0
     # Ring of underwater coins near clams
-    reachable_coins += 8
+    if has_vertical_coin_rings:
+        reachable_coins += 8
     # Ring of coins around the tall spike
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Vertical line of coins before the purple switch (3 of them)
-    reachable_coins += 3
+    if has_vertical_coin_lines:
+        reachable_coins += 3
     # Ring of coins near jet stream
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Ring of coins near cave treasure chests
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # 3 Goombas
-    reachable_coins += 3
+    if has_goombas:
+        reachable_coins += 3
     # 4 Red Coins
-    reachable_coins += 8
+    if has_red_coins:
+        reachable_coins += 8
 
 
-    if has_action(state, player, "Climb", level_name) or has_pillar_red_coin_moves or has_pillar_red_coin_cannon:
+    if has_red_coins and (
+            has_action(state, player, "Climb", level_name)
+            or has_pillar_red_coin_moves
+            or has_pillar_red_coin_cannon):
         # Pillar Red Coin
         reachable_coins += 2
     if has_upper:
         # Vertical line of coins before the purple switch (2 of them)
-        reachable_coins += 2
+        if has_vertical_coin_lines:
+            reachable_coins += 2
         # The lines of coins before the ship
-        reachable_coins += 15
-        if has_raised_ship:
+        if has_horizontal_coin_lines:
+            reachable_coins += 15
+        if has_red_coins and has_raised_ship:
             # 3 Red Coins
             reachable_coins += 6
-        elif (can_use_logic_trick(state, player, "logic_jrb_ship_red_coin_with_long_jump",
-                                  "Jolly Roger Bay - Coins Star")
-              or has_purple_switches(state, player, level_name)):
+        elif has_red_coins and (
+                can_use_logic_trick(state, player, "logic_jrb_ship_red_coin_with_long_jump",
+                                    "Jolly Roger Bay - Coins Star")
+                or has_purple_switches(state, player, level_name)):
             # 1 Red Coin
             reachable_coins += 2
-    if has_action(state, player, "Ground Pound", level_name):
+    if has_blue_coin_switches and has_action(state, player, "Ground Pound", level_name):
         # Blue coin block
         reachable_coins += 30
     assert reachable_coins <= 104
@@ -1521,9 +1555,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "TJ/BF/SF/WK | logic_jrb_upper_ledge_grab | "
         "logic_jrb_upper_dive_and_kick | logic_jrb_upper_cannon")
     rf.assign_rule("Jolly Roger Bay - Red Coins on the Ship Afloat",
-                   "JRB_RAISED_SHIP & CL | "
-                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_moves | "
-                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_cannon")
+                   "RED_COINS & JRB_RAISED_SHIP & CL | "
+                   "RED_COINS & JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_moves | "
+                   "RED_COINS & JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_cannon")
     rf.assign_rule("Jolly Roger Bay - Blast to the Stone Pillar",
                    "CANN+CL | logic_jrb_stone_pillar_cannonless | "
                    "logic_jrb_stone_pillar_cannon_no_climb")

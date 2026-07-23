@@ -1,7 +1,8 @@
 from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
-from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, get_per_level_action_item_name
+from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, jolly_roger_bay_coins, \
+    get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -2019,12 +2020,12 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
                     self.multiworld.state, self.player, expected_coins + 1))
                 self.remove(item)
 
-    def test_wild_blue_coins_require_floating_ring_unlock(self):
+    def test_wild_blue_coins_require_horizontal_ring_unlock(self):
         self.collect(self.get_item_by_name("Whomp's Fortress - Cannon Unlock"))
         self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 1))
-        self.collect(self.get_item_by_name("Whomp's Fortress - Floating Coin Rings"))
-        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 8))
-        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 9))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Horizontal Coin Rings"))
+        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 24))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 25))
 
     def test_red_coin_star_requires_red_coins(self):
         self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
@@ -2224,6 +2225,85 @@ class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
+
+
+class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "purple_switches": Options.PurpleSwitches.option_individual,
+    }
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Jolly Roger Bay - Red Coins": 8,
+            "Jolly Roger Bay - Horizontal Coin Rings": 24,
+            "Jolly Roger Bay - Vertical Coin Lines": 3,
+            "Jolly Roger Bay - Vertical Coin Rings": 8,
+            "Jolly Roger Bay - Three-Coin Block": 3,
+            "Jolly Roger Bay - Goombas": 3,
+        }
+        self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(jolly_roger_bay_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(jolly_roger_bay_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_upper_sources_use_their_own_unlocks(self):
+        self.collect(self.get_item_by_name("Side Flip"))
+
+        source_coins = {
+            "Jolly Roger Bay - Horizontal Coin Lines": 15,
+            "Jolly Roger Bay - Vertical Coin Lines": 5,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(jolly_roger_bay_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(jolly_roger_bay_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_blue_coin_switch_requires_ground_pound(self):
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Blue Coin Switches"))
+        self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 1))
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(jolly_roger_bay_coins(self.multiworld.state, self.player, 30))
+        self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 31))
+
+    def test_red_coin_routes_total_sixteen(self):
+        self.collect([
+            self.get_item_by_name("Jolly Roger Bay - Red Coins"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(jolly_roger_bay_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 11))
+
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Jolly Roger Bay - Raised Ship"),
+        ])
+        self.assertTrue(jolly_roger_bay_coins(self.multiworld.state, self.player, 16))
+        self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 17))
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.collect([
+            self.get_item_by_name("Jolly Roger Bay - Raised Ship"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Red Coins on the Ship Afloat"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Red Coins"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Red Coins on the Ship Afloat"))
 
 
 class JollyRogerBayLogicTricksTestBase(JollyRogerBayCoinStarAccessTestBase):
