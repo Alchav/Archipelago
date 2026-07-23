@@ -2591,20 +2591,20 @@ class HazyMazeCaveCoinsanityAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         **HazyMazeCaveCoinStarAccessTestBase.options,
         **ONE_COIN_STAR_REQUIREMENTS,
         "coinsanity": 100,
-        "hazy_maze_cave_coin_star_requirement": 80,
+        "hazy_maze_cave_coin_star_requirement": 79,
     }
 
     def test_coinsanity_location_uses_hmc_coin_logic(self):
         self.collect_basement_access()
-        self.assertFalse(self.can_reach_location("Hazy Maze Cave - 79 Coins"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - 78 Coins"))
         self.collect(self.get_item_by_name("Wall Kick"))
-        self.assertTrue(self.can_reach_location("Hazy Maze Cave - 79 Coins"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - 78 Coins"))
 
 
-class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar51AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 75,
+        "hazy_maze_cave_coin_star_requirement": 51,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -2612,10 +2612,10 @@ class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar78AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar54AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 78,
+        "hazy_maze_cave_coin_star_requirement": 54,
     }
 
     def test_metal_cap_coins_reach_coin_star(self):
@@ -2627,10 +2627,10 @@ class HazyMazeCaveCoinStar78AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar79AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar71AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 79,
+        "hazy_maze_cave_coin_star_requirement": 71,
     }
 
     def test_basic_movement_coins_reach_coin_star(self):
@@ -2640,10 +2640,10 @@ class HazyMazeCaveCoinStar79AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar81AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 81,
+        "hazy_maze_cave_coin_star_requirement": 75,
     }
 
     def test_long_jump_platform_route_coins_reach_coin_star(self):
@@ -2657,10 +2657,10 @@ class HazyMazeCaveCoinStar81AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar83CheckerboardAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar81CheckerboardAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 83,
+        "hazy_maze_cave_coin_star_requirement": 81,
     }
 
     def test_checkerboard_platform_route_coins_reach_coin_star(self):
@@ -2675,11 +2675,11 @@ class HazyMazeCaveCoinStar83CheckerboardAccessTestBase(HazyMazeCaveCoinStarAcces
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar86CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar54CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
         "strict_cap_requirements": Options.StrictCapRequirements.option_false,
-        "hazy_maze_cave_coin_star_requirement": 86,
+        "hazy_maze_cave_coin_star_requirement": 54,
     }
 
     def test_capless_triple_jump_coins_reach_coin_star(self):
@@ -2692,10 +2692,10 @@ class HazyMazeCaveCoinStar86CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTest
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar84AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar78AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 84,
+        "hazy_maze_cave_coin_star_requirement": 78,
     }
 
     def test_toxic_maze_coins_reach_coin_star(self):
@@ -2706,10 +2706,10 @@ class HazyMazeCaveCoinStar84AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar89AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar83AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 89,
+        "hazy_maze_cave_coin_star_requirement": 83,
     }
 
     def test_pit_islands_climb_coins_reach_coin_star(self):
@@ -2723,10 +2723,10 @@ class HazyMazeCaveCoinStar89AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar83SwimmingBeastAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar59SwimmingBeastAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 83,
+        "hazy_maze_cave_coin_star_requirement": 59,
     }
 
     def test_swimming_beast_coins_reach_coin_star(self):
@@ -2736,10 +2736,10 @@ class HazyMazeCaveCoinStar83SwimmingBeastAccessTestBase(HazyMazeCaveCoinStarAcce
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar110AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar86AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 110,
+        "hazy_maze_cave_coin_star_requirement": 86,
     }
 
     def test_ground_pound_coins_reach_coin_star(self):
@@ -2785,6 +2785,83 @@ class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
 
     def collect_basement_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+
+class LethalLavaLandLogicTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {
+            "Lethal Lava Land Bouncing Off Lava",
+            "Lethal Lava Land Long Jump or Dive From Above to Elevator Tour Poles",
+            "Lethal Lava Land Triple Jump From Above to Elevator Tour Poles",
+        },
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_bouncing_off_lava_reaches_log_star_and_one_ups(self):
+        self.collect_basement_access()
+        for location_name in (
+                "Lethal Lava Land - Red-Hot Log Rolling",
+                "Lethal Lava Land - Northeast Brown Platform 1-Up",
+                "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up",
+                "Lethal Lava Land - Northwest Curve 1-Up",
+        ):
+            self.assertTrue(self.can_reach_location(location_name))
+
+    def test_long_jump_elevator_tour_trick_still_requires_climb(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+
+    def test_triple_jump_elevator_tour_trick_still_requires_climb(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+
+
+class LethalLavaLandKoopaShellAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_koopa_shell_reaches_lava_crossing_one_ups_without_trick(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Northeast Brown Platform 1-Up"))
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Northeast Brown Platform 1-Up"))
+
+
+class LethalLavaLandCoinStar130BouncingOffLavaAccessTestBase(LethalLavaLandCoinStarAccessTestBase):
+    options = {
+        **LethalLavaLandCoinStarAccessTestBase.options,
+        "logic_tricks": {"Lethal Lava Land Bouncing Off Lava"},
+        "lethal_lava_land_coin_star_requirement": 130,
+    }
+
+    def test_bouncing_off_lava_reaches_bridge_coins(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
 class LethalLavaLandCoinStar125AccessTestBase(LethalLavaLandCoinStarAccessTestBase):
@@ -3698,22 +3775,6 @@ class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
     def test_top_of_express_elevator_accepts_no_movement_jump(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
-
-
-class NoStrictMoveCapLethalLavaLandAccessTestBase(SM64TestBase):
-    run_default_tests = False
-    options = {
-        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
-        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
-        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
-        "area_rando": Options.AreaRandomizer.option_Off,
-    }
-
-    def test_log_rolling_accepts_moveless_capless(self):
-        self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
 
 class GlobalCapAccessTestBase(SM64TestBase):

@@ -512,9 +512,9 @@ def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> b
     # 2 Mr Is
     reachable_coins += 10
 
-    if state.has("Lethal Lava Land - Koopa Shell", player):
+    if (state.has("Lethal Lava Land - Koopa Shell", player)
+            or can_use_logic_trick(state, player, "logic_lll_bouncing_off_lava", "Lethal Lava Land - Coins Star")):
         # Line of coins under bridge
-        # Technically possible without the shell, but no current option fits that logic.
         reachable_coins += 5
 
     # (Inside the Volcano) Three coins on S-shaped island at bottom of volcano, by lavafall
@@ -1363,9 +1363,20 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     # Lethal Lava Land
-    rf.assign_rule("Lethal Lava Land - Red-Hot Log Rolling", "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | MOVELESS+CAPLESS")
+    rf.assign_rule(
+        "Lethal Lava Land - Red-Hot Log Rolling",
+        "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | logic_lll_bouncing_off_lava")
+    for location_name in (
+            "Lethal Lava Land - Northeast Brown Platform 1-Up",
+            "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up",
+            "Lethal Lava Land - Northwest Curve 1-Up",
+    ):
+        rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_lll_bouncing_off_lava")
     rf.assign_rule("Lethal Lava Land - Upper Volcano", "CL")
-    rf.assign_rule("Lethal Lava Land - Elevator Tour in the Volcano", "CHECKERBOARD_PLATFORMS/DV/TJ/LJ")
+    rf.assign_rule(
+        "Lethal Lava Land - Elevator Tour in the Volcano",
+        "CHECKERBOARD_PLATFORMS | logic_lll_elevator_tour_long_jump_or_dive | "
+        "logic_lll_elevator_tour_triple_jump")
     # Shifting Sand Land
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
     rf.assign_rule("Shifting Sand Land - Upper Pyramid", "CL & TJ/BF/SF/LG | SSL_PYRAMID_ELEVATOR")

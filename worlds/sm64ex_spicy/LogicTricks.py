@@ -423,12 +423,6 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Jumping in and bouncing off of lava to get across it for coins, 1-ups, and to bypass the rolling"
                        "log.",
-        "codex notes": "Lethal Lava Land - Northeast Brown Platform 1-Up,"
-                       "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up"
-                       "Lethal Lava Land - Northwest Curve 1-Up"
-                       "5 coins under bridge"
-                       "Red-Hot Log Rolling"
-                       "These all need to require Koopa shell or this trick, or rolling log for the Red-Hot Log Rolling star."
     },
     "Lethal Lava Land Long Jump or Dive From Above to Elevator Tour Poles": {
         "name": "logic_lll_elevator_tour_long_jump_or_dive",
@@ -436,7 +430,6 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Using a Long Jump or Dive from the Hot-Foot-It into the Volcano ledge down to the poles leading"
                        "to Elevator Tour in the Volcano (and three coins).",
-        "codex notes": "This is a bypass for Checkerboard Platforms, you still need Climb."
     },
     "Lethal Lava Land Triple Jump From Above to Elevator Tour Poles": {
         "name": "logic_lll_elevator_tour_triple_jump",
@@ -444,7 +437,6 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Using a Triple Jump from the Hot-Foot-It into the Volcano ledge down to the poles leading"
                        "to Elevator Tour in the Volcano (and three coins).",
-        "codex notes": "This is a bypass for Checkerboard Platforms, you still need Climb."
     },
 }
 
