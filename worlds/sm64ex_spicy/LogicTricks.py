@@ -183,50 +183,50 @@ logic_tricks = {
         "name": "logic_wf_caged_island_cage_triple_jump",
         "difficulty": "medium",
         "notes for codex": "this requires access to {TOP} and Whomp King",
-        "description": "Allows Fall onto the Caged Island from the top of the Fortress with Triple Jump.",
+        "description": "Reaching Fall onto the Caged Island from the top of the Fortress with Triple Jump.",
         "video": "https://www.youtube.com/watch?v=-faflqwXu94"
     },
     "Whomp's Fortress Caged Island With Long Jump From on Top of Whomp King's Head": {
-        "name": "logic_wf_caged_island_top_long_jump",
+        "name": "logic_wf_caged_island_cage_wk_long_jump",
         "difficulty": "medium",
         "notes for codex": "this requires access to {TOP} as well as Whomp King",
-        "description": "Allows Fall onto the Caged Island from the top of Whomp King's head with Long Jump.",
+        "description": "Reaching Fall onto the Caged Island from the top of Whomp King's head with Long Jump.",
         "video": "https://www.youtube.com/watch?v=1uJPTb9LhLE"
     },
     "Whomp's Fortress Caged Island With Jump Off of Whomp King": {
-        "name": "logic_wf_caged_island_cage_jump",
+        "name": "logic_wf_caged_island_cage_wk_jump",
         "difficulty": "hard",
         "notes for codex": "this requires access to {TOP} and Whomp King",
-        "description": "Allows Fall onto the Caged Island from the top of the Fortress by jumping off of the Whomp"
+        "description": "Reaching Fall onto the Caged Island from the top of the Fortress by jumping off of the Whomp"
                        "King's back while he is standing up from the ground.",
         "video": "https://www.youtube.com/watch?v=Uc9FQkt65BY"
     },
     "Whomp's Fortress Caged Island from the Top of the Fortress with Long Jump": {
-        "name": "logic_wf_caged_island_top_long_jump",
+        "name": "logic_wf_caged_island_top_fortress_long_jump",
         "difficulty": "medium",
         "notes for codex": "this requires access to {TOP} as well as WF_FORTRESS",
-        "description": "Allows Fall onto the Caged Island from fortress top access with Long Jump.",
+        "description": "Reaching Fall onto the Caged Island from fortress top access with Long Jump.",
         # title says Long Jump and Ground Pound. Ground Pound not needed in Spicy Mycena 64
         "video": "https://www.youtube.com/watch?v=DTieM0YZ-DY"
     },
     "Whomp's Fortress Top Access with Cannon": {
         "name": "logic_wf_caged_top_access_with_cannon",
         "notes for codex": "access to {TOP} only requires cannon",
-        "description": "Allows accessing the top area with the cannon.",
+        "description": "Accessing the top area with the cannon.",
         "difficulty": "medium",
     },
     "Whomp's Fortress Top Access with Side Flip and Ledge Grab": {
         "name": "logic_wf_caged_top_access_with_sf_lg",
         "notes for codex": "access to {TOP}",
         "difficulty": "medium",
-        "description": "Allows accessing the top area by jumping on a Whomp as it stands up, and doing a Side Flip"
+        "description": "Accessing the top area by jumping on a Whomp as it stands up, and doing a Side Flip"
                        "off of it and a Ledge Grab.",
     },
     "Whomp's Fortress Top Access with Triple Jump": {
         "name": "logic_wf_caged_top_access_with_tj",
         "notes for codex": "access to {TOP}",
         "difficulty": "medium",
-        "description": "Allows accessing the top area by jumping on a Whomp as it stands up, and doing a Triple Jump."
+        "description": "Accessing the top area by jumping on a Whomp as it stands up, and doing a Triple Jump."
     },
     "Whomp's Fortress Blast Away the Wall with Backflip and Ledge Grab": {
         "name": "logic_wf_blast_away_wall_cannonless_backflip",
@@ -235,7 +235,7 @@ logic_tricks = {
             ("Whomp's Fortress - Blast Away the Wall", "CANNLESS & LG"),
         ),
         "difficulty": "hard",
-        "description": "Allows Blast Away the Wall without the cannon using Ledge Grab, with a Backflip for setup.",
+        "description": "Reaching Blast Away the Wall without the cannon using Ledge Grab, with a Backflip for setup.",
         "video": "https://www.youtube.com/watch?v=ngQ4Y8aMb-U"
     },
     "Whomp's Fortress Blast Away the Wall with Ledge Grab": {
@@ -245,52 +245,52 @@ logic_tricks = {
             ("Whomp's Fortress - Blast Away the Wall", "CANNLESS & LG"),
         ),
         "difficulty": "hard",
-        "description": "Allows Blast Away the Wall without the cannon using Ledge Grab, without Backflip for setup.",
+        "description": "Reaching Blast Away the Wall without the cannon using Ledge Grab, without Backflip for setup.",
         "video": "https://www.youtube.com/watch?v=TqAwAOZGScY"
+    },
+    "Whomp's Fortress Shoot Into the Wild Blue with Triple Jump or Side Flip, and Wall Kick": {
+        "name": "logic_wf_into_the_wild_blue_yonder_wall_kick",
+        "difficulty": "easy",
+        "description": "Reaching Shoot Into the Wild Blue, and the coins above, with a Triple Jump or Side Flip into a"
+                       "Wall Kick.",
     },
     "Whomp's Fortress Shoot Into the Wild Blue with Long Jump": {
         "name": "logic_wf_into_the_wild_blue_yonder_long_jump",
         "difficulty": "medium",
-        "description": "Allows Shoot Into the Wild Blue, and the coins above, with a Long Jump.",
+        "description": "Reaching Shoot Into the Wild Blue, and the coins above, with a Long Jump.",
         "video": "https://www.youtube.com/watch?v=E7qv8EsIr5E"
     },
     "Whomp's Fortress Shoot Into the Wild Blue with Jump": {
         "name": "logic_wf_into_the_wild_blue_yonder_moveless",
         "difficulty": "hard",
-        "notes for codex": "the coins above would require Climb with this.",
-        "description": "Allows Shoot Into the Wild Blue with a jump.",
+        "notes for codex": "the coins above would require Climb, Side Flip, or TJ+LG with this.",
+        "description": "Reaching Shoot Into the Wild Blue with a jump.",
         "video": "https://www.youtube.com/watch?v=E7qv8EsIr5E"
-    },
-    "Whomp's Fortress Shoot Into the Wild Blue with Triple Jump or Side Flip, and Wall Kick": {
-        "name": "logic_wf_into_the_wild_blue_yonder_wall_kick",
-        "difficulty": "easy",
-        "notes for codex": "the coins above would require Climb with this.",
-        "description": "Allows Shoot Into the Wild Blue with a Triple Jump or Side Flip into a Wall Kick.",
     },
     # Jolly Roger Bay
     "Jolly Roger Bay Upper Platform with Ledge Grab": {
         "name": "logic_jrb_upper_ledge_grab",
         "notes for codex": "the upper region",
         "difficulty": "easy",
-        "description": "Allows reaching the upper platform using Ledge Grab.",
+        "description": "Reaching the upper platform using Ledge Grab.",
     },
     "Jolly Roger Bay Upper Platform with Dive and Kick": {
         "name": "logic_jrb_upper_dive_and_kick",
         "notes for codex": "the upper region",
         "difficulty": "medium",
-        "description": "Allows reaching the upper platform using Dive and Kick.",
+        "description": "Reaching the upper platform using Dive and Kick.",
         "video": "https://www.youtube.com/watch?v=cfgz6terknE"
     },
     "Jolly Roger Bay Upper Platform with Cannon": {
         "name": "logic_jrb_upper_cannon",
         "notes for codex": "the upper region",
         "difficulty": "easy",
-        "description": "Allows reaching the upper platform using Cannon.",
+        "description": "Reaching the upper platform using Cannon.",
     },
     "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick": {
         "name": "logic_jrb_pillar_red_coin_moves",
         "difficulty": "medium",
-        "description": "Allows collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
+        "description": "Collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
         "video": ("https://www.youtube.com/watch?v=5Xs6S9jAMNk", # Triple Jump
                   "https://www.youtube.com/watch?v=fMelf6eB5Tw", # Wall Kick
                   "https://www.youtube.com/watch?v=VvjgL_dP1NQ") # Backflip
@@ -298,32 +298,41 @@ logic_tricks = {
     "Jolly Roger Bay Pillar Red Coin with Cannon": {
         "name": "logic_jrb_pillar_red_coin_cannon",
         "difficulty": "medium",
-        "description": "Allows collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
+        "description": "Reaching collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
         "video": "https://www.youtube.com/watch?v=W7a8oRaTWZs"
     },
     "Jolly Roger Bay Stone Pillar without Cannon": {
         "name": "logic_jrb_stone_pillar_cannonless",
         "difficulty": "hard",
-        "description": "Allows Blast to the Stone Pillar without cannon access.",
+        "description": "Reaching Blast to the Stone Pillar without cannon access.",
         "video": "https://www.youtube.com/watch?v=fFPtqC71E6M"
     },
     "Jolly Roger Bay Stone Pillar with Cannon but without Climb": {
         "name": "logic_jrb_stone_pillar_cannon_no_climb",
         "difficulty": "medium",
-        "description": "Allows reaching the stone pillar with cannon access but without Climb.",
+        "description": "Reaching the stone pillar with cannon access but without Climb.",
         "video": "https://www.youtube.com/watch?v=GX9xZ6xwikI"
     },
     "Jolly Roger Bay Through the Jet Stream without Metal Cap": {
         "name": "logic_jrb_jet_stream_capless",
         "difficulty": "medium",
-        "description": "Allows Through the Jet Stream without Metal Cap.",
+        "description": "Reaching Through the Jet Stream without Metal Cap, by swimming skillfully into the jet stream.",
         "video": "https://www.youtube.com/watch?v=k2gdwI4XEoM"
     },
     "Jolly Roger Bay Ship Red Coin With Long Jump": {
         "name": "logic_jrb_ship_red_coin_with_long_jump",
         "difficulty": "easy",
-        "description": "Allows collecting the first raised ship Red Coin using Long Jump, without the Raised Ship.",
+        "description": "Collecting the first raised ship Red Coin using Long Jump, without the Raised Ship.",
     },
+    # Cool, Cool Mountain
+    "Cool, Cool Mountain Wall Kicks Will Work With Spin Jump": {
+        "name": "logic_ccm_wall_kicks_will_work_spin_jump",
+        "difficulty": "medium",
+        "description": "Reaching Wall Kicks Will Work, and the coins below it, without any movement abilities, by spin"
+                       "jumping off of a Spindrift and gliding down directly to the star.",
+        "video": "https://www.youtube.com/watch?v=FzUJDEIhEiQ"
+    },
+
 }
 
 

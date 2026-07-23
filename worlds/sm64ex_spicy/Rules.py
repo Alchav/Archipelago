@@ -302,14 +302,41 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Cool, Cool Mountain"
-    reachable_coins = 130
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Cool,_Cool_Mountain&oldid=19915
+
+    # Coins on the Penguins Slide
+    reachable_coins = 72
+    # Vertical line of coins into chimney
+    reachable_coins += 5
+    # Line of coins near top of the mountain
+    reachable_coins += 5
+    # Line of coins between fences, in the snowman's head route
+    reachable_coins += 5
+    # Two lines of coins later in the snowman's head route
+    reachable_coins += 10
+    # Mr. Blizzard
+    reachable_coins += 3
+    # 3 Spindrifts
+    reachable_coins += 9
+    # 8 Red Coins
+    reachable_coins += 16
+    # Blue Coin at the start of the slide
+    reachable_coins += 5
+
     has_cannon = state.has("Cool, Cool Mountain - Cannon Unlock", player)
     if has_cannon or allows_moveless(state, player):
-        reachable_coins += 11
-    if has_cannon:
-        reachable_coins += 3
+        # Arrow of coins near "Wall Kicks will Work"
+        reachable_coins += 8
+        # 2 Spindrifts
+        reachable_coins += 6
+        if not has_cannon:
+            # If you use a spindrift to get down, you must leave its 3 coins behind.
+            reachable_coins -= 3
     if has_action(state, player, "Ground Pound", level_name):
+        # Blue Coin Block
         reachable_coins += 10
+    assert coins <= 154
     return coins <= reachable_coins
 
 
@@ -436,6 +463,7 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     if has_action(state, player, "Ground Pound", level_name):
         # Blue coin block
         reachable_coins += 30
+    assert coins <= 104
     return coins <= reachable_coins
 
 
