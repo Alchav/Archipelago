@@ -1,7 +1,7 @@
 from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
-from ..Rules import bob_omb_battlefield_coins, get_per_level_action_item_name
+from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -1956,6 +1956,105 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
+
+
+class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+    }
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Whomp's Fortress - Single Yellow Coins": 4,
+            "Whomp's Fortress - Red Coins": 12,
+            "Whomp's Fortress - Horizontal Coin Lines": 20,
+            "Whomp's Fortress - Horizontal Coin Rings": 16,
+            "Whomp's Fortress - Throwable Cork Boxes": 6,
+            "Whomp's Fortress - Piranha Plants": 15,
+            "Whomp's Fortress - Whomps": 10,
+        }
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(whomps_fortress_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(whomps_fortress_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_ground_pound_sources_use_their_own_unlocks(self):
+        self.collect(self.get_item_by_name("Ground Pound"))
+
+        whomps = self.get_item_by_name("Whomp's Fortress - Whomps")
+        self.collect(whomps)
+        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 20))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 21))
+        self.remove(whomps)
+
+        self.collect(self.get_item_by_name("Whomp's Fortress - Blue Coin Switches"))
+        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 20))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 21))
+
+    def test_top_sources_use_their_own_unlocks(self):
+        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
+
+        source_coins = {
+            "Whomp's Fortress - Red Coins": 16,
+            "Whomp's Fortress - Horizontal Coin Rings": 24,
+            "Whomp's Fortress - Coin Arrows": 8,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(whomps_fortress_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(whomps_fortress_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_wild_blue_coins_require_floating_ring_unlock(self):
+        self.collect(self.get_item_by_name("Whomp's Fortress - Cannon Unlock"))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 1))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Floating Coin Rings"))
+        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 8))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 9))
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
+        self.assertFalse(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Red Coins"))
+        self.assertTrue(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
+
+
+class WhompsFortressWhompTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+        "logic_tricks": {
+            "Whomp's Fortress Top Access with Side Flip and Ledge Grab",
+            "Whomp's Fortress Top Access with Triple Jump",
+        },
+    }
+
+    def test_top_access_tricks_require_whomps(self):
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Triple Jump"),
+        ])
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+
+        self.collect(self.get_item_by_name("Whomp's Fortress - Whomps"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
 
 class WhompsFortressCoinStar83AccessTestBase(WhompsFortressCoinStarAccessTestBase):

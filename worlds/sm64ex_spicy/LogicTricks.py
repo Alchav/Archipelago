@@ -250,17 +250,17 @@ logic_tricks = {
         "description": "Accessing the top area with the cannon.",
         "difficulty": "medium",
     },
-    "Whomp's Fortress Top Access with Side Flip and Ledge Grab": {
+    "Whomp's Fortress Top Access with Side Flip and Ledge Grab Off of Whomp": {
         "name": "logic_wf_caged_top_access_with_sf_lg",
-        "rule": "SF+LG",
+        "rule": "WHOMPS+SF+LG",
         "difficulty": "medium",
         "description": "Accessing the top area by jumping on a Whomp as it stands up, and doing a Side Flip"
                        "off of it and a Ledge Grab.",
     },
-    "Whomp's Fortress Top Access with Triple Jump": {
+    "Whomp's Fortress Top Access with Triple Jump Off of Whomp": {
         "name": "logic_wf_caged_top_access_with_tj",
-        "rule": "TJ",
-        "difficulty": "medium",
+        "rule": "WHOMPS+TJ",
+        "difficulty": "hard",
         "description": "Accessing the top area by jumping on a Whomp as it stands up, and doing a Triple Jump."
     },
     "Whomp's Fortress Blast Away the Wall with Backflip and Ledge Grab": {

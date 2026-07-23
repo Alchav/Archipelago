@@ -334,31 +334,71 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
 
 def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Whomp's Fortress"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_switches = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Switches", f"{level_name} - Blue Coin Switches")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_coin_arrows = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Coin Arrows", f"{level_name} - Coin Arrows")
+    has_floating_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Floating Coin Rings", f"{level_name} - Floating Coin Rings")
+    has_throwable_cork_boxes = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Throwable Cork Boxes", f"{level_name} - Throwable Cork Boxes")
+    has_piranha_plants = has_unlock(
+        state, player, "enemy_unlocks",
+        f"{level_name} - Piranha Plants", f"{level_name} - Piranha Plants")
+    has_whomps = has_unlock(
+        state, player, "enemy_unlocks",
+        "Whomps", f"{level_name} - Whomps")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Whomp%27s_Fortress&oldid=19913
 
     # The two throwable cork boxes (near start/blue coin block)
-    reachable_coins = 6
+    reachable_coins = 6 if has_throwable_cork_boxes else 0
     # Coins around the flower near the start
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Line of coins near the beginning
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # Line of coins on bridge past the falling bridge
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # Coins around the rotating plank
-    reachable_coins += 4
+    if has_single_yellow_coins:
+        reachable_coins += 4
     # Line of coins on slope leading from the water
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # Ring of coins in water
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Line of coins near the bob-omb buddy
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # 2 Whomps (jump on back)
-    reachable_coins += 10
+    if has_whomps:
+        reachable_coins += 10
     # 3 Piranha Plants
-    reachable_coins += 15
+    if has_piranha_plants:
+        reachable_coins += 15
     # 6 Red Coins
-    reachable_coins += 12
+    if has_red_coins:
+        reachable_coins += 12
 
     can_reach_wild_blue_coins = (
         state.has("Whomp's Fortress - Cannon Unlock", player)
@@ -382,21 +422,26 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
             )
         )
     )
-    if can_reach_wild_blue_coins:
+    if can_reach_wild_blue_coins and has_floating_coin_rings:
         # Ring of coins above the "Shoot into the Blue" Star
         reachable_coins += 8
     if has_action(state, player, "Ground Pound", level_name):
         # 2 Whomps (ground pound)
-        reachable_coins += 10
+        if has_whomps:
+            reachable_coins += 10
         # Blue Coin Block
-        reachable_coins += 20
+        if has_blue_coin_switches:
+            reachable_coins += 20
     if state.can_reach("Whomp's Fortress - Top", "Region", player):
         # Ring of coins on the floating isle
-        reachable_coins += 8
+        if has_horizontal_coin_rings:
+            reachable_coins += 8
         # Arrow of coins on the floating arrow
-        reachable_coins += 8
+        if has_coin_arrows:
+            reachable_coins += 8
         # 2 Red Coins
-        reachable_coins += 4
+        if has_red_coins:
+            reachable_coins += 4
     assert reachable_coins <= 141
     return coins <= reachable_coins
 
@@ -1465,6 +1510,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Whomp's Fortress - Blast Away the Wall",
         "CANN | logic_wf_blast_away_wall_cannonless_backflip | logic_wf_blast_away_wall_cannonless")
     rf.assign_rule("Whomp's Fortress - Bob-omb Buddy", "WF_BUDDY")
+    rf.assign_rule("Whomp's Fortress - Red Coins on the Floating Isle", "RED_COINS")
     rf.assign_rule("Whomp's Fortress - Flagpole 1-Up", "CL")
     rf.assign_rule("Whomp's Fortress - Tower Alcove 1-Up", "WF_FORTRESS")
     # Jolly Roger Bay
@@ -2172,6 +2218,9 @@ class RuleFactory:
         item_names["KOOPA_TROOPA"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Koopa Troopas", f"{level_name} - Koopa Troopa")
+        item_names["WHOMPS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Whomps", f"{level_name} - Whomps")
         return item_names
 
     def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:
