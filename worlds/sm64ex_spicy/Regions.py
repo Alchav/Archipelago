@@ -277,11 +277,15 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                         "Lethal Lava Land - Northwest Curve 1-Up",
                         "Lethal Lava Land - Wing Cap Block",
                         "Lethal Lava Land - Koopa Shell Block")
-    lll_upper_volcano = create_subregion(regLLL, "Lethal Lava Land - Upper Volcano",
-                                         "Lethal Lava Land - Hot-Foot-It into the Volcano",
-                                         "Lethal Lava Land - Elevator Tour in the Volcano",
-                                         "Lethal Lava Land - Volcano Pole 1-Up")
-    regLLL.subregions = [lll_upper_volcano]
+    lll_hot_foot_ledge = create_subregion(
+        regLLL, "Lethal Lava Land - Hot-Foot-It Ledge",
+        "Lethal Lava Land - Hot-Foot-It into the Volcano")
+    lll_upper_volcano = create_subregion(
+        regLLL, "Lethal Lava Land - Upper Volcano",
+        "Lethal Lava Land - Volcano Pole 1-Up")
+    lll_elevator_tour = create_region("Lethal Lava Land - Elevator Tour", player, multiworld)
+    create_locs(lll_elevator_tour, "Lethal Lava Land - Elevator Tour in the Volcano")
+    regLLL.subregions = [lll_hot_foot_ledge, lll_upper_volcano, lll_elevator_tour]
     create_locs(regLLL, "Lethal Lava Land - Coins Star")
 
     regSSL = create_region("Shifting Sand Land", player, multiworld)

@@ -421,22 +421,93 @@ logic_tricks = {
         "name": "logic_lll_bouncing_off_lava",
         "rule": "",
         "difficulty": "medium",
-        "description": "Jumping in and bouncing off of lava to get across it for coins, 1-ups, and to bypass the rolling"
-                       "log.",
+        "description": "Jumping in and bouncing off of lava to get across it for coins, 1-ups, and to bypass the"
+                       "rolling log.",
     },
-    "Lethal Lava Land Long Jump or Dive From Above to Elevator Tour Poles": {
-        "name": "logic_lll_elevator_tour_long_jump_or_dive",
-        "rule": "LJ/DV",
-        "difficulty": "medium",
-        "description": "Using a Long Jump or Dive from the Hot-Foot-It into the Volcano ledge down to the poles leading"
-                       "to Elevator Tour in the Volcano (and three coins).",
+    "Lethal Lava Land Hot-Foot it Into the Volcano With Wall Kick": {
+        "name": "logic_lll_hot_foot_it_with_wall_kick",
+        "rule": "WK",
+        "difficulty": "hard",
+        "description": "Reaching Hot-Foot it Into the Volcano with Wall Kick and no Climb.",
     },
-    "Lethal Lava Land Triple Jump From Above to Elevator Tour Poles": {
-        "name": "logic_lll_elevator_tour_triple_jump",
+    "Lethal Lava Land Hot-Foot it Into the Volcano With Triple Jump": {
+        "name": "logic_lll_hot_foot_it_with_triple_jump",
         "rule": "TJ",
         "difficulty": "hard",
-        "description": "Using a Triple Jump from the Hot-Foot-It into the Volcano ledge down to the poles leading"
-                       "to Elevator Tour in the Volcano (and three coins).",
+        "description": "Reaching Hot-Foot it Into the Volcano with Triple Jump and no Climb.",
+    },
+    "Lethal Lava Land Hot-Foot it Into the Volcano With Side Flip": {
+        "name": "logic_lll_hot_foot_it_with_side_flip",
+        "rule": "SF",
+        "difficulty": "hard",
+        "description": "Reaching Hot-Foot it Into the Volcano with Side Flip and no Climb, using the lavafall.",
+    },
+    "Lethal Lava Land Hot-Foot it Into the Volcano With Backflip": {
+        "name": "logic_lll_hot_foot_it_with_backflip",
+        "rule": "BF",
+        "difficulty": "hard",
+        "description": "Reaching Hot-Foot it Into the Volcano ledge with Backflip and no Climb, using the lavafall.",
+    },
+    "Lethal Lava Land Hot-Foot it Into the Volcano With No Movement Abilities": {
+        "name": "logic_lll_hot_foot_it_with_no_movement",
+        "rule": "",
+        "difficulty": "hard",
+        "description": "Reaching Hot-Foot it Into the Volcano ledge with no movement abilities, using the lavafall.",
+    },
+    "Lethal Lava Land Long Jump From Hot-Foot-It into the Volcano to Elevator Tour in the Volcano": {
+        "name": "logic_lll_elevator_tour_long_jump",
+        "rule": "LJ",
+        "difficulty": "medium",
+        "description": "Using a Long Jump from the Hot-Foot-It into the Volcano ledge down to Elevator Tour in"
+                       "the Volcano (and three coins).",
+    },
+    "Lethal Lava Land Triple Jump or Dive From Hot-Foot-It into the Volcano to Elevator Tour in the Volcano": {
+        "name": "logic_lll_elevator_tour_triple_jump_or_dive",
+        "rule": "TJ/DV",
+        "difficulty": "hard",
+        "description": "Using a Triple Jump or Dive from the Hot-Foot-It into the Volcano ledge down to the poles"
+                       "leading to Elevator Tour in the Volcano (and three coins).",
+    },
+    # Shifting Sand Land
+    "Shifting Sand Land Pillars without Wing Cap": {
+        "name": "logic_ssl_pillars_capless",
+        "tags": ("Shifting Sand Land", "Capless", "Movement"),
+        "affected_rules": (
+            ("Shifting Sand Land - Stand Tall on the Four Pillars", "SSL_PYRAMID_ELEVATOR & TJ/SF/BF & CAPLESS"),
+        ),
+        "tooltip": "Allows Stand Tall on the Four Pillars without Wing Cap using Pyramid Elevator and movement.",
+        "rationale": "The playlist has SSL - Only Triple Jump/Side Flip/Backflip - Stand Tall on the Four Pillars, matching the capless movement branch.",
+        "confidence": "high",
+    },
+    "Shifting Sand Land Pillars without Movement Items": {
+        "name": "logic_ssl_pillars_no_movement",
+        "tags": ("Shifting Sand Land", "Movement"),
+        "affected_rules": (
+            ("Shifting Sand Land - Stand Tall on the Four Pillars", "MOVELESS & LG/KK"),
+        ),
+        "tooltip": "Allows Stand Tall on the Four Pillars with Ledge Grab or Kick as the only required move.",
+        "rationale": "The playlist has SSL - No Movement - Stand Tall on the Four Pillars. The Ledge Grab/Kick detail comes from current logic.",
+        "confidence": "high",
+    },
+    "Shifting Sand Land Free Flying without Wing Cap": {
+        "name": "logic_ssl_free_flying_capless",
+        "tags": ("Shifting Sand Land", "Capless", "Movement"),
+        "affected_rules": (
+            ("Shifting Sand Land - Free Flying for 8 Red Coins", "TJ/SF/BF & CAPLESS"),
+        ),
+        "tooltip": "Allows Free Flying for 8 Red Coins without Wing Cap using movement.",
+        "rationale": "The playlist has SSL - No Movement - Free Flying for 8 Red Coins; the non-Wing movement alternatives are inferred from current logic.",
+        "confidence": "medium",
+    },
+    "Shifting Sand Land Free Flying without Wing Cap or Movement Items": {
+        "name": "logic_ssl_free_flying_capless_no_movement",
+        "tags": ("Shifting Sand Land", "Capless", "Movement"),
+        "affected_rules": (
+            ("Shifting Sand Land - Free Flying for 8 Red Coins", "MOVELESS & CAPLESS"),
+        ),
+        "tooltip": "Allows Free Flying for 8 Red Coins without Wing Cap and without movement items.",
+        "rationale": "The playlist has SSL - No Movement - Free Flying for 8 Red Coins, matching the current MOVELESS & CAPLESS branch.",
+        "confidence": "high",
     },
 }
 

@@ -2796,11 +2796,7 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
-        "logic_tricks": {
-            "Lethal Lava Land Bouncing Off Lava",
-            "Lethal Lava Land Long Jump or Dive From Above to Elevator Tour Poles",
-            "Lethal Lava Land Triple Jump From Above to Elevator Tour Poles",
-        },
+        "logic_tricks": {"Lethal Lava Land Bouncing Off Lava"},
     }
 
     def collect_basement_access(self):
@@ -2816,18 +2812,70 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
         ):
             self.assertTrue(self.can_reach_location(location_name))
 
-    def test_long_jump_elevator_tour_trick_still_requires_climb(self):
+
+class LethalLavaLandLongJumpElevatorTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {
+            "Lethal Lava Land Hot-Foot it Into the Volcano With Wall Kick",
+            "Lethal Lava Land Long Jump From Hot-Foot-It into the Volcano to Elevator Tour in the Volcano",
+        },
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_long_jump_and_ledge_trick_bypass_climb(self):
         self.collect_basement_access()
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
-        self.collect(self.get_item_by_name("Climb"))
+
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_region("Lethal Lava Land - Hot-Foot-It Ledge"))
+        self.assertFalse(self.can_reach_region("Lethal Lava Land - Upper Volcano"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Volcano Pole 1-Up"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
 
-    def test_triple_jump_elevator_tour_trick_still_requires_climb(self):
+    def test_climb_and_long_jump_reach_elevator_without_ledge_trick_move(self):
         self.collect_basement_access()
-        self.collect(self.get_item_by_name("Climb"))
-        self.assertFalse(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Long Jump"),
+        ])
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+
+
+class LethalLavaLandTripleJumpDiveElevatorTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {
+            "Lethal Lava Land Hot-Foot it Into the Volcano With No Movement Abilities",
+            "Lethal Lava Land Triple Jump or Dive From Hot-Foot-It into the Volcano to Elevator Tour in the Volcano",
+        },
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_triple_jump_or_dive_elevator_trick_always_requires_climb(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_region("Lethal Lava Land - Hot-Foot-It Ledge"))
         self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+
+        self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
 
 

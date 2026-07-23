@@ -542,13 +542,59 @@ def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> b
 
 def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Shifting Sand Land"
-    reachable_coins = 89
+
+    # Inside the throwing box under the stone building
+    reachable_coins = 3
+    # One coin on top of each of the four pillars
+    reachable_coins += 4
+    # Line of coins between the two pillars behind the pyramid
+    reachable_coins += 5
+    # Line of coins on the pyramid
+    reachable_coins += 5
+    # 3 Fly Guys
+    reachable_coins += 6
+    # 2 Crazy Boxes
+    reachable_coins += 10
+    # 2 Bob-ombs
+    reachable_coins += 2
+    # 4 Pokeys
+    reachable_coins += 20
+    # 4 Red Coins
+    reachable_coins += 8
+    # (In the Pyramid) 2 coins just before first floor staircase at back of pyramid
+    reachable_coins += 2
+    # (In the Pyramid) Line of coins under the second wire grid
+    reachable_coins += 5
+    # (In the Pyramid) 4 coins on steps just after second wire frame
+    reachable_coins += 4
+    # (In the Pyramid) 2 pairs of coins, on moving steps
+    reachable_coins += 4
+    # Goombas inside the pyramid
+    reachable_coins += 8
+
+    if has_action(state, player, "Climb", level_name):
+        # (In the Pyramid) Ring of coins under the first wire grid
+        reachable_coins += 8
+
     if state.can_reach("Shifting Sand Land - Free Flying for 8 Red Coins", "Location", player):
-        reachable_coins += 4
-    if has_action(state, player, "Ground Pound", level_name):
-        reachable_coins += 15
+        # 4 Red Coins
+        reachable_coins += 8
+
     if state.can_reach("Shifting Sand Land - Upper Pyramid", "Region", player):
-        reachable_coins += 28
+
+        # (In the Pyramid) 10 coins at very top of pyramid
+        reachable_coins += 10
+        # (In the Pyramid) 5 coins in "Pyramid Puzzle" secrets
+        reachable_coins += 5
+
+        if has_action(state, player, "Ground Pound", level_name):
+            # (In the Pyramid) Blue coin block
+            reachable_coins += 15
+
+    # Goombas outside the pyramid
+    reachable_coins += 4
+
+    assert reachable_coins <= 136
     return coins <= reachable_coins
 
 
@@ -1372,11 +1418,26 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Lethal Lava Land - Northwest Curve 1-Up",
     ):
         rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_lll_bouncing_off_lava")
-    rf.assign_rule("Lethal Lava Land - Upper Volcano", "CL")
     rf.assign_rule(
-        "Lethal Lava Land - Elevator Tour in the Volcano",
-        "CHECKERBOARD_PLATFORMS | logic_lll_elevator_tour_long_jump_or_dive | "
-        "logic_lll_elevator_tour_triple_jump")
+        "Lethal Lava Land - Hot-Foot-It Ledge",
+        "CL | logic_lll_hot_foot_it_with_wall_kick | logic_lll_hot_foot_it_with_triple_jump | "
+        "logic_lll_hot_foot_it_with_side_flip | logic_lll_hot_foot_it_with_backflip | "
+        "logic_lll_hot_foot_it_with_no_movement")
+    rf.assign_rule("Lethal Lava Land - Upper Volcano", "CL")
+    connect_regions(
+        multiworld, player, "Lethal Lava Land - Upper Volcano", "Lethal Lava Land - Elevator Tour",
+        rf.build_rule(
+            "CHECKERBOARD_PLATFORMS",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Lethal Lava Land"),
+            action_item_names=rf.get_action_item_names("Lethal Lava Land")),
+        name="Lethal Lava Land - Upper Volcano to Elevator Tour")
+    connect_regions(
+        multiworld, player, "Lethal Lava Land - Hot-Foot-It Ledge", "Lethal Lava Land - Elevator Tour",
+        rf.build_rule(
+            "logic_lll_elevator_tour_long_jump | CL & logic_lll_elevator_tour_triple_jump_or_dive",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Lethal Lava Land"),
+            action_item_names=rf.get_action_item_names("Lethal Lava Land")),
+        name="Lethal Lava Land - Hot-Foot-It Ledge to Elevator Tour")
     # Shifting Sand Land
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
     rf.assign_rule("Shifting Sand Land - Upper Pyramid", "CL & TJ/BF/SF/LG | SSL_PYRAMID_ELEVATOR")
@@ -1914,8 +1975,9 @@ class RuleFactory:
                 return lambda state: base_rule(state) and rules[0](state)
             else:
                 return lambda state: base_rule(state) and any(rule(state) for rule in rules)
-        else:
-            return base_rule
+        if expressions:
+            return lambda state: False
+        return base_rule
 
     def build_star_painting_entry_requirements(self, painting_lvl_name: str = None, star_num_req: int = None) -> Callable:
         nop_condition = lambda state: True
