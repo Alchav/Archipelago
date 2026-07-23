@@ -342,19 +342,43 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
 
 def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Big Boo's Haunt"
-    reachable_coins = 78
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Big_Boo%27s_Haunt&oldid=20246
+
+    # Yellow [!] behind mansion
+    reachable_coins = 10
+    # Two cork boxes near shed
+    reachable_coins += 6
+    # Crazy Box outside
+    reachable_coins += 5
+    # 3 Scuttlebugs (outside)
+    reachable_coins += 9
+    # 5 Boos
+    reachable_coins += 25
+    # 2 Mr. Is
+    reachable_coins += 10
+    # 1 Bookend
+    reachable_coins += 5
+    # 4 Red Coins
+    reachable_coins += 8
+
     if state.can_reach("Big Boo's Haunt - Second Floor", "Region", player):
-        # two bookends (10), one Mr I (5), 4 red coins (8)
-        reachable_coins += 23
+        # 2 Bookends
+        reachable_coins += 10
+        # 1 Mr. I
+        reachable_coins += 5
+        # 4 Red Coins
+        reachable_coins += 8
     if state.can_reach("Big Boo's Haunt - Third Floor", "Region", player):
-        # one boo, spawns behind vanish cap barrier but can follow Mario out
+        # 1 Boo, spawns behind vanish cap barrier but can follow Mario out
         reachable_coins += 5
         if has_action(state, player, "Ground Pound", level_name):
-            # blue coin block
+            # Blue coin block (attic)
             reachable_coins += 20
     if state.has("Big Boo's Haunt - Merry-go-round", player):
-        # 5 boos
+        # 5 Boos
         reachable_coins += 25
+    assert coins <= 151
     return coins <= reachable_coins
 
 
