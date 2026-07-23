@@ -2,7 +2,8 @@ from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
 from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
-    big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, get_per_level_action_item_name
+    big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
+    get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -813,21 +814,16 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Above Quicksand Pit 1-Up"))
 
-    def test_ssl_pyramid_1ups_accept_movement(self):
+    def test_ssl_pyramid_1up_access(self):
         self.collect_basement_access()
-        for location_name in (
-                "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
-                "Shifting Sand Land - Pyramid Right Path 1-Up",
-        ):
-            with self.subTest(location=location_name):
-                self.assertFalse(self.can_reach_location(location_name))
+        self.assertTrue(
+            self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
+        self.assertFalse(
+            self.can_reach_location("Shifting Sand Land - Pyramid Right Path 1-Up"))
+
         self.collect(self.get_item_by_name("Side Flip"))
-        for location_name in (
-                "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
-                "Shifting Sand Land - Pyramid Right Path 1-Up",
-        ):
-            with self.subTest(location=location_name):
-                self.assertTrue(self.can_reach_location(location_name))
+        self.assertTrue(
+            self.can_reach_location("Shifting Sand Land - Pyramid Right Path 1-Up"))
 
 
 class NoDespawnCourseOneUpAccessTestBase(CourseOneUpAccessTestBase):
@@ -1597,6 +1593,11 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
     def test_shifting_sand_land_upper_pyramid_accepts_pyramid_elevator(self):
         self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Ground Pound"),
+        ])
         self.assertFalse(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
 
         self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
@@ -3442,6 +3443,261 @@ class LethalLavaLandCoinStar133AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
+class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "blocksanity": Options.Blocksanity.option_true,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "logic_tricks": {
+            "Shifting Sand Land Stone Structure with Shy Guy Bounce",
+            "Shifting Sand Land Pillars with Koopa Shell",
+            "Shifting Sand Land Pillars with Side Flip or Kick",
+            "Stand Tall on the Four Pyramids Without Pyramid Elevator",
+        },
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_stone_structure_requires_movement(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_region("Shifting Sand Land - Stone Structure"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Stone Structure"))
+
+    def test_shy_guy_bounce_requires_fly_guy(self):
+        self.collect_basement_access()
+        self.assertTrue(self.world.logic_ssl_stone_structure_shy_guy_bounce)
+        self.assertFalse(self.can_reach_region("Shifting Sand Land - Stone Structure"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
+        self.assertTrue(self.multiworld.state.has("Shifting Sand Land - Fly Guy", self.player))
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Stone Structure"))
+
+    def test_stone_structure_contains_both_blocks(self):
+        region = self.multiworld.get_region("Shifting Sand Land - Stone Structure", self.player)
+        self.assertEqual(
+            {
+                "Shifting Sand Land - Stone Structure Koopa Shell Block",
+                "Shifting Sand Land - Stone Structure Wing Cap Block",
+            },
+            {location.name for location in region.locations})
+
+    def test_stone_structure_shell_route_reaches_upper_pyramid(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Stone Structure"))
+        self.assertFalse(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+
+    def test_side_flip_trick_reaches_upper_pyramid(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertFalse(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+
+    def test_stand_tall_requires_eyerok(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"),
+            self.get_item_by_name("Climb"),
+        ])
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Eyerok"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
+
+    def test_stand_tall_trick_bypasses_upper_pyramid_and_elevator(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Shifting Sand Land - Eyerok"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertFalse(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
+
+    def test_stand_tall_is_in_main_region(self):
+        location = self.multiworld.get_location(
+            "Shifting Sand Land - Stand Tall on the Four Pillars", self.player)
+        self.assertEqual("Shifting Sand Land", location.parent_region.name)
+
+
+class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "logic_tricks": {
+            "Shifting Sand Land Three Red Coins with Tweesters",
+            "Shifting Sand Land One Red Coin with Shy Guy Spin Jump",
+        },
+    }
+
+    def test_red_coin_tricks_are_counted_independently(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Shifting Sand Land - Bob-ombs",
+            "Shifting Sand Land - Goombas",
+            "Shifting Sand Land - Pokeys",
+        ])
+        self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 77))
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 78))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
+        self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 83))
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 84))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+
+
+class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "no_despawns": Options.NoDespawns.option_true,
+        "logic_tricks": {
+            "Shifting Sand Land Three Red Coins with Tweesters",
+            "Shifting Sand Land One Red Coin with Shy Guy Spin Jump",
+        },
+    }
+
+    def test_shy_guy_red_coin_counts_with_no_despawns(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Shifting Sand Land - Bob-ombs",
+            "Shifting Sand Land - Fly Guy",
+            "Shifting Sand Land - Goombas",
+            "Shifting Sand Land - Pokeys",
+        ])
+        self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 85))
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 86))
+
+
+class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Shifting Sand Land - Single Yellow Coins": 6,
+            "Shifting Sand Land - Horizontal Coin Lines": 5,
+            "Shifting Sand Land - Vertical Coin Lines": 5,
+            "Shifting Sand Land - Throwable Cork Box": 3,
+            "Shifting Sand Land - Crazy Boxes": 10,
+            "Shifting Sand Land - Red Coins": 8,
+            "Shifting Sand Land - Bob-ombs": 2,
+            "Shifting Sand Land - Fly Guy": 6,
+            "Shifting Sand Land - Goombas": 12,
+            "Shifting Sand Land - Pokeys": 20,
+        }
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(shifting_sand_land_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(shifting_sand_land_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_upper_pyramid_coin_sources(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Climb",
+        ])
+        self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+
+        source_coins = {
+            "Shifting Sand Land - Single Yellow Coins": 19,
+            "Shifting Sand Land - Horizontal Coin Lines": 20,
+            "Shifting Sand Land - Horizontal Coin Rings": 8,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(shifting_sand_land_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(shifting_sand_land_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_blue_coin_block_requires_ground_pound(self):
+        self.collect(self.get_item_by_name("Shifting Sand Land - Blue Coin Block"))
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 1))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 15))
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 16))
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Triple Jump",
+            "Wing Cap",
+        ])
+        self.assertFalse(
+            self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Red Coins"))
+        self.assertTrue(
+            self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+        self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 16))
+        self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 17))
+
+    def test_all_unlocks_total_136_coins(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Climb",
+            "Ground Pound",
+            "Triple Jump",
+            "Wing Cap",
+            "Shifting Sand Land - Single Yellow Coins",
+            "Shifting Sand Land - Red Coins",
+            "Shifting Sand Land - Blue Coin Block",
+            "Shifting Sand Land - Horizontal Coin Lines",
+            "Shifting Sand Land - Horizontal Coin Rings",
+            "Shifting Sand Land - Vertical Coin Lines",
+            "Shifting Sand Land - Throwable Cork Box",
+            "Shifting Sand Land - Crazy Boxes",
+            "Shifting Sand Land - Bob-ombs",
+            "Shifting Sand Land - Fly Guy",
+            "Shifting Sand Land - Goombas",
+            "Shifting Sand Land - Pokeys",
+        ])
+        self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 136))
+
+
 class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -3450,16 +3706,18 @@ class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
+        "enemy_unlocks": Options.EnemyUnlocks.option_not_shuffled,
     }
 
     def collect_basement_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
 
 
-class ShiftingSandLandCoinStar89AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+class ShiftingSandLandCoinStar77AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
     options = {
         **ShiftingSandLandCoinStarAccessTestBase.options,
-        "shifting_sand_land_coin_star_requirement": 89,
+        "shifting_sand_land_coin_star_requirement": 77,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -3467,10 +3725,10 @@ class ShiftingSandLandCoinStar89AccessTestBase(ShiftingSandLandCoinStarAccessTes
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
-class ShiftingSandLandCoinStar93AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+class ShiftingSandLandCoinStar85AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
     options = {
         **ShiftingSandLandCoinStarAccessTestBase.options,
-        "shifting_sand_land_coin_star_requirement": 93,
+        "shifting_sand_land_coin_star_requirement": 85,
     }
 
     def test_red_coin_star_coins_reach_coin_star(self):
@@ -3485,10 +3743,10 @@ class ShiftingSandLandCoinStar93AccessTestBase(ShiftingSandLandCoinStarAccessTes
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
-class ShiftingSandLandCoinStar104AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+class ShiftingSandLandCoinStar92AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
     options = {
         **ShiftingSandLandCoinStarAccessTestBase.options,
-        "shifting_sand_land_coin_star_requirement": 104,
+        "shifting_sand_land_coin_star_requirement": 92,
     }
 
     def test_ground_pound_coins_reach_coin_star(self):
@@ -3499,17 +3757,22 @@ class ShiftingSandLandCoinStar104AccessTestBase(ShiftingSandLandCoinStarAccessTe
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
-class ShiftingSandLandCoinStar117AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
+class ShiftingSandLandCoinStar121AccessTestBase(ShiftingSandLandCoinStarAccessTestBase):
     options = {
         **ShiftingSandLandCoinStarAccessTestBase.options,
-        "shifting_sand_land_coin_star_requirement": 117,
+        "shifting_sand_land_coin_star_requirement": 121,
     }
 
     def test_upper_pyramid_coins_reach_coin_star(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
-        self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
+        self.collect([
+            self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Wing Cap"),
+        ])
         self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
@@ -3526,6 +3789,7 @@ class ShiftingSandLandCoinStar136AccessTestBase(ShiftingSandLandCoinStarAccessTe
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"),
             self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Climb"),
         ])
         self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
 

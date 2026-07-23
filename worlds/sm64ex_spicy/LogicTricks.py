@@ -460,45 +460,42 @@ logic_tricks = {
                        "leading to Elevator Tour in the Volcano (and three coins).",
     },
     # Shifting Sand Land
-    "Shifting Sand Land Pillars without Wing Cap": {
-        "name": "logic_ssl_pillars_capless",
-        "tags": ("Shifting Sand Land", "Capless", "Movement"),
-        "affected_rules": (
-            ("Shifting Sand Land - Stand Tall on the Four Pillars", "SSL_PYRAMID_ELEVATOR & TJ/SF/BF & CAPLESS"),
-        ),
-        "tooltip": "Allows Stand Tall on the Four Pillars without Wing Cap using Pyramid Elevator and movement.",
-        "rationale": "The playlist has SSL - Only Triple Jump/Side Flip/Backflip - Stand Tall on the Four Pillars, matching the capless movement branch.",
-        "confidence": "high",
+    "Shifting Sand Land Stone Structure with Shy Guy Bounce": {
+        "name": "logic_ssl_stone_structure_shy_guy_bounce",
+        "rule": "FLY_GUY",
+        "difficulty": "medium",
+        "description": "Reaching the top of the Stone Structure by bouncing off of a Shy Guy.",
     },
-    "Shifting Sand Land Pillars without Movement Items": {
-        "name": "logic_ssl_pillars_no_movement",
-        "tags": ("Shifting Sand Land", "Movement"),
-        "affected_rules": (
-            ("Shifting Sand Land - Stand Tall on the Four Pillars", "MOVELESS & LG/KK"),
-        ),
-        "tooltip": "Allows Stand Tall on the Four Pillars with Ledge Grab or Kick as the only required move.",
-        "rationale": "The playlist has SSL - No Movement - Stand Tall on the Four Pillars. The Ledge Grab/Kick detail comes from current logic.",
-        "confidence": "high",
+    "Shifting Sand Land Three Red Coins with Tweesters": {
+        "name": "logic_ssl_three_red_coins_with_tweesters",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Using Tweesters to collect three of the elevated Red Coins.",
     },
-    "Shifting Sand Land Free Flying without Wing Cap": {
-        "name": "logic_ssl_free_flying_capless",
-        "tags": ("Shifting Sand Land", "Capless", "Movement"),
-        "affected_rules": (
-            ("Shifting Sand Land - Free Flying for 8 Red Coins", "TJ/SF/BF & CAPLESS"),
-        ),
-        "tooltip": "Allows Free Flying for 8 Red Coins without Wing Cap using movement.",
-        "rationale": "The playlist has SSL - No Movement - Free Flying for 8 Red Coins; the non-Wing movement alternatives are inferred from current logic.",
-        "confidence": "medium",
+    "Shifting Sand Land One Red Coin with Shy Guy Spin Jump": {
+        "name": "logic_ssl_one_red_coin_with_shy_guy_spin_jump",
+        "rule": "FLY_GUY",
+        "difficulty": "medium",
+        "description": "Using a spin jump from a Shy Guy to collect one elevated Red Coin.",
     },
-    "Shifting Sand Land Free Flying without Wing Cap or Movement Items": {
-        "name": "logic_ssl_free_flying_capless_no_movement",
-        "tags": ("Shifting Sand Land", "Capless", "Movement"),
-        "affected_rules": (
-            ("Shifting Sand Land - Free Flying for 8 Red Coins", "MOVELESS & CAPLESS"),
-        ),
-        "tooltip": "Allows Free Flying for 8 Red Coins without Wing Cap and without movement items.",
-        "rationale": "The playlist has SSL - No Movement - Free Flying for 8 Red Coins, matching the current MOVELESS & CAPLESS branch.",
-        "confidence": "high",
+    "Shifting Sand Land Pillars with Koopa Shell": {
+        "name": "logic_ssl_pillars_shell",
+        "rule": "{Shifting Sand Land - Stone Structure}",
+        "difficulty": "medium",
+        "description": "Reaching the Upper Pyramid entrance using a Koopa Shell to access the quicksand pillar.",
+    },
+    "Shifting Sand Land Pillars with Side Flip or Kick": {
+        "name": "logic_ssl_pillars_side_flip_or_kick",
+        "rule": "MOVELESS & SF/KK",
+        "difficulty": "medium",
+        "description": "Reaching the Upper Pyramid entrance using a Side Flip or Kick to access the quicksand pillar."
+                       # "It's likely possible with other moves, but I have not been able to do it myself."
+    },
+    "Stand Tall on the Four Pyramids Without Pyramid Elevator": {
+        "name": "logic_ssl_stand_tall_without_pyramid_elevator",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Reaching Stand Tall on the Four Pillars without using the Pyramid Elevator.",
     },
 }
 

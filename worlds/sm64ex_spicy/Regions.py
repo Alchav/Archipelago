@@ -290,25 +290,28 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     regSSL = create_region("Shifting Sand Land", player, multiworld)
     create_locs(regSSL, "Shifting Sand Land - In the Talons of the Big Bird", "Shifting Sand Land - Shining Atop the Pyramid",
-                        "Shifting Sand Land - Free Flying for 8 Red Coins", "Shifting Sand Land - Bob-omb Buddy",
+                        "Shifting Sand Land - Free Flying for 8 Red Coins",
+                        "Shifting Sand Land - Stand Tall on the Four Pillars",
+                        "Shifting Sand Land - Bob-omb Buddy",
                         "Shifting Sand Land - Outside Pyramid Block 1-Up", "Shifting Sand Land - Pyramid Left Path Block 1-Up", "Shifting Sand Land - Pyramid Back Block 1-Up",
                         "Shifting Sand Land - Oasis Tree 1-Up",
                         "Shifting Sand Land - Near Quicksand Pits 1-Up",
                         "Shifting Sand Land - Above Quicksand Pit 1-Up",
+                        "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
+                        "Shifting Sand Land - Pyramid Right Path 1-Up",
                         "Shifting Sand Land - Outside Pyramid Wing Cap Block",
                         "Shifting Sand Land - Outside Pyramid 1-Up Block",
-                        "Shifting Sand Land - Stone Structure Koopa Shell Block",
-                        "Shifting Sand Land - Stone Structure Wing Cap Block",
                         "Shifting Sand Land - Cannon Wing Cap Block",
                         "Shifting Sand Land - Pyramid Left Path 1-Up Block",
                         "Shifting Sand Land - Pyramid Back 1-Up Block")
+    ssl_stone_structure = create_subregion(
+        regSSL, "Shifting Sand Land - Stone Structure",
+        "Shifting Sand Land - Stone Structure Koopa Shell Block",
+        "Shifting Sand Land - Stone Structure Wing Cap Block")
     ssl_upper_pyramid = create_subregion(regSSL, "Shifting Sand Land - Upper Pyramid", "Shifting Sand Land - Inside the Ancient Pyramid",
-                                         "Shifting Sand Land - Stand Tall on the Four Pillars",
                                          "Shifting Sand Land - Pyramid Puzzle",
-                                         "Shifting Sand Land - Pyramid Platform Triggers 1-Up",
-                                         "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
-                                         "Shifting Sand Land - Pyramid Right Path 1-Up")
-    regSSL.subregions = [ssl_upper_pyramid]
+                                         "Shifting Sand Land - Pyramid Platform Triggers 1-Up")
+    regSSL.subregions = [ssl_stone_structure, ssl_upper_pyramid]
     create_locs(regSSL, "Shifting Sand Land - Coins Star")
 
     regDDD = create_region("Dire, Dire Docks", player, multiworld)

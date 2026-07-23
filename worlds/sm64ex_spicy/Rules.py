@@ -864,57 +864,110 @@ def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> b
 
 def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Shifting Sand Land"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_ring = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_line = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_throwable_cork_box = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Throwable Cork Boxes", f"{level_name} - Throwable Cork Box")
+    has_crazy_boxes = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Crazy Boxes", f"{level_name} - Crazy Boxes")
+    has_bob_ombs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-ombs")
+    has_fly_guys = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fly Guys", f"{level_name} - Fly Guy")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_pokeys = has_unlock(
+        state, player, "enemy_unlocks",
+        "Pokeys", f"{level_name} - Pokeys")
 
-    # Inside the throwing box under the stone building
-    reachable_coins = 3
-    # One coin on top of each of the four pillars
-    reachable_coins += 4
-    # Line of coins between the two pillars behind the pyramid
-    reachable_coins += 5
-    # Line of coins on the pyramid
-    reachable_coins += 5
-    # 3 Fly Guys
-    reachable_coins += 6
-    # 2 Crazy Boxes
-    reachable_coins += 10
-    # 2 Bob-ombs
-    reachable_coins += 2
-    # 4 Pokeys
-    reachable_coins += 20
-    # 4 Red Coins
-    reachable_coins += 8
-    # (In the Pyramid) 2 coins just before first floor staircase at back of pyramid
-    reachable_coins += 2
-    # (In the Pyramid) Line of coins under the second wire grid
-    reachable_coins += 5
-    # (In the Pyramid) 4 coins on steps just after second wire frame
-    reachable_coins += 4
-    # (In the Pyramid) 2 pairs of coins, on moving steps
-    reachable_coins += 4
-    # Goombas inside the pyramid
-    reachable_coins += 8
+    reachable_coins = 0
+    if has_throwable_cork_box:
+        # Inside the throwing box under the stone building
+        reachable_coins += 3
+    if has_single_yellow_coins:
+        # One coin on top of each pillar and two inside the pyramid
+        reachable_coins += 6
+    if has_horizontal_coin_lines:
+        # Line between the two pillars behind the pyramid
+        reachable_coins += 5
+    if has_vertical_coin_line:
+        # Line up the side of the pyramid
+        reachable_coins += 5
+    if has_fly_guys:
+        # One normal Fly Guy and two fire Fly Guys
+        reachable_coins += 6
+    if has_crazy_boxes:
+        reachable_coins += 10
+    if has_bob_ombs:
+        reachable_coins += 2
+    if has_pokeys:
+        reachable_coins += 20
+    if has_goombas:
+        # Eight inside the pyramid and four outside
+        reachable_coins += 12
+    if has_red_coins:
+        # Four low Red Coins
+        reachable_coins += 8
 
-    if has_action(state, player, "Climb", level_name):
+    if has_horizontal_coin_ring and has_action(state, player, "Climb", level_name):
         # (In the Pyramid) Ring of coins under the first wire grid
         reachable_coins += 8
 
-    if state.can_reach("Shifting Sand Land - Free Flying for 8 Red Coins", "Location", player):
+    has_normal_red_coin_route = (
+        has_wing_cap(state, player, level_name)
+        and (
+            has_action(state, player, "Triple Jump", level_name)
+            or state.has("Shifting Sand Land - Cannon Unlock", player)
+        )
+    )
+    if has_red_coins and has_normal_red_coin_route:
         # 4 Red Coins
         reachable_coins += 8
+    elif has_red_coins:
+        if can_use_logic_trick(
+                state, player, "logic_ssl_three_red_coins_with_tweesters",
+                "Shifting Sand Land - Coins Star"):
+            # 3 Red Coins
+            reachable_coins += 6
+        if (can_use_logic_trick(
+                state, player, "logic_ssl_one_red_coin_with_shy_guy_spin_jump",
+                "Shifting Sand Land - Coins Star")
+                and state.multiworld.worlds[player].options.no_despawns.value):
+            # 1 Red Coin
+            reachable_coins += 2
 
     if state.can_reach("Shifting Sand Land - Upper Pyramid", "Region", player):
-
-        # (In the Pyramid) 10 coins at very top of pyramid
-        reachable_coins += 10
-        # (In the Pyramid) 5 coins in "Pyramid Puzzle" secrets
-        reachable_coins += 5
-
-        if has_action(state, player, "Ground Pound", level_name):
-            # (In the Pyramid) Blue coin block
+        if has_horizontal_coin_lines:
+            # One line under the second wire grid and two at the top
             reachable_coins += 15
+        if has_single_yellow_coins:
+            # Coins on moving steps and the Pyramid Puzzle secrets
+            reachable_coins += 13
 
-    # Goombas outside the pyramid
-    reachable_coins += 4
+    if has_blue_coin_block and has_action(state, player, "Ground Pound", level_name):
+        # (In the Pyramid) Blue coin block
+        reachable_coins += 15
 
     assert reachable_coins <= 136
     return coins <= reachable_coins
@@ -1846,15 +1899,28 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         name="Lethal Lava Land - Hot-Foot-It Ledge to Elevator Tour")
     # Shifting Sand Land
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
-    rf.assign_rule("Shifting Sand Land - Upper Pyramid", "CL & TJ/BF/SF/LG | SSL_PYRAMID_ELEVATOR")
+    rf.assign_rule(
+        "Shifting Sand Land - Stone Structure",
+        "TJ/SF/BF | logic_ssl_stone_structure_shy_guy_bounce")
+    rf.assign_rule(
+        "Shifting Sand Land - Upper Pyramid",
+        "SSL_PYRAMID_ELEVATOR & TJ+WC+GP | SSL_PYRAMID_ELEVATOR & CANN+WC+GP | "
+        "SSL_PYRAMID_ELEVATOR & logic_ssl_pillars_shell | "
+        "SSL_PYRAMID_ELEVATOR & logic_ssl_pillars_side_flip_or_kick | CL")
     rf.assign_rule("Shifting Sand Land - Stand Tall on the Four Pillars",
-                   "SSL_PYRAMID_ELEVATOR & TJ+WC+GP | SSL_PYRAMID_ELEVATOR & CANN+WC+GP | "
-                   "SSL_PYRAMID_ELEVATOR & TJ/SF/BF & CAPLESS | MOVELESS & LG/KK")
-    rf.assign_rule("Shifting Sand Land - Free Flying for 8 Red Coins", "TJ+WC | CANN+WC | TJ/SF/BF & CAPLESS | MOVELESS & CAPLESS")
+                   "{Shifting Sand Land - Upper Pyramid} & SSL_PYRAMID_ELEVATOR & EYEROK | "
+                   "logic_ssl_stand_tall_without_pyramid_elevator & EYEROK & LG/KK")
+    # TODO: Verify what the old "TJ/SF/BF & CAPLESS" route represents before restoring it.
+    rf.assign_rule(
+        "Shifting Sand Land - Free Flying for 8 Red Coins",
+        "RED_COINS & TJ+WC | RED_COINS & CANN+WC | "
+        "RED_COINS & logic_ssl_three_red_coins_with_tweesters & "
+        "logic_ssl_one_red_coin_with_shy_guy_spin_jump")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
-    rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "TJ/LG/BF/SF")
-    rf.assign_rule("Shifting Sand Land - Pyramid Right Path 1-Up", "TJ/LG/BF/SF")
+    rf.assign_rule(
+        "Shifting Sand Land - Pyramid Right Path 1-Up",
+        "{Shifting Sand Land - Upper Pyramid} | CL/TJ/SF/BF")
     # Dire, Dire Docks
     rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub",
                    "PURPLE_SWITCHES & DDD_BOWSER_SUB | TJ & MOVELESS & DDD_BOWSER_SUB")
@@ -2475,6 +2541,12 @@ class RuleFactory:
         item_names["SPINDRIFTS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Spindrifts", f"{level_name} - Spindrifts")
+        item_names["FLY_GUY"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Fly Guys", f"{level_name} - Fly Guy")
+        item_names["EYEROK"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Shifting Sand Land - Eyerok", "Shifting Sand Land - Eyerok")
         item_names["BOOS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Boos", f"{level_name} - Boos")
