@@ -312,7 +312,7 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
         reachable_coins += 8
         # 2 Red Coins
         reachable_coins += 4
-    assert coins <= 141
+    assert reachable_coins <= 141
     return coins <= reachable_coins
 
 
@@ -355,7 +355,7 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
     if has_action(state, player, "Ground Pound", level_name):
         # Blue Coin Block
         reachable_coins += 10
-    assert coins <= 154
+    assert reachable_coins <= 154
     return coins <= reachable_coins
 
 
@@ -397,7 +397,7 @@ def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> boo
     if state.has("Big Boo's Haunt - Merry-go-round", player):
         # 5 Boos
         reachable_coins += 25
-    assert coins <= 151
+    assert reachable_coins <= 151
     return coins <= reachable_coins
 
 
@@ -471,17 +471,72 @@ def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> boo
     if has_action(state, player, "Ground Pound", level_name):
         # Blue coin block (in maze)
         reachable_coins += 35
-    assert coins <= 139
+    assert reachable_coins <= 139
     return coins <= reachable_coins
 
 
 def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 125
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Lethal_Lava_Land&oldid=19919
+
+    # Line of coins on tilting platform past first Mr. I
+    reachable_coins = 5
+    # Three coins on grey ramp near tilting platform
+    reachable_coins += 3
+    # Five coins for completing Bowser puzzle
+    reachable_coins += 5
+    # Line of coins on sinking platform right before first Big Bully
+    reachable_coins += 5
+    # Ring of coins on second Big Bully platform
+    reachable_coins += 8
+    # Five coins on high brown ramp in north-west corner
+    reachable_coins += 5
+    # Four coins on sinking platforms, between crazy box & second Big Bully
+    reachable_coins += 4
+    # Line of coins on sinking platform, north of volcano
+    reachable_coins += 5
+    # "Four Ring of coins on platform with 2 bullies" (it's just one ring?)
+    reachable_coins += 8
+    # Three coins on spinning platform around volcano
+    reachable_coins += 3
+    # Four coins on small grey ramp, south-east from volcano (with 1UP)
+    reachable_coins += 4
+    # Ring of coins with second Mr. I
+    reachable_coins += 8
+    # Crazy Box
+    reachable_coins += 5
+    # 8 Red Coins
+    reachable_coins += 16
+    # 8 Bullies outside
+    reachable_coins += 8
+    # 2 Mr Is
+    reachable_coins += 10
+
     if state.has("Lethal Lava Land - Koopa Shell", player):
+        # Line of coins under bridge
         # Technically possible without the shell, but no current option fits that logic.
         reachable_coins += 5
+
+    # (Inside the Volcano) Three coins on S-shaped island at bottom of volcano, by lavafall
+    reachable_coins += 3
+    # (Inside the Volcano) Five coins on first ridge going up
+    reachable_coins += 5
+    # (Inside the Volcano) Two coins on second ridge going up (with first bully)
+    reachable_coins += 2
+    # (Inside the Volcano) Four coins on floating platforms (with the spinning heart)
+    reachable_coins += 4
+    # (Inside the Volcano) Singular coin after the floating platforms (from above line)
+    reachable_coins += 1
+    # (Inside the Volcano) Line of coins, with the second bully, on platform beside waterfall
+    reachable_coins += 5
+    # (Inside the Volcano) Singular coin by checker-board lift, left from beginning
+    reachable_coins += 1
+    # Bullies inside
+    reachable_coins += 2
     if state.can_reach("Lethal Lava Land - Elevator Tour in the Volcano", "Location", player):
+        # (Inside the Volcano) Three coins on tiny floating platforms, by "Elevator Tour in the Volcano"
         reachable_coins += 3
+    assert reachable_coins <= 133
     return coins <= reachable_coins
 
 
@@ -551,7 +606,7 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     if has_action(state, player, "Ground Pound", level_name):
         # Blue coin block
         reachable_coins += 30
-    assert coins <= 104
+    assert reachable_coins <= 104
     return coins <= reachable_coins
 
 
