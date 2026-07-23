@@ -218,7 +218,6 @@ logic_tricks = {
         "name": "logic_wf_caged_island_cage_triple_jump",
         "rule": "TJ & WF_KING & {Whomp's Fortress - Top}",
         "difficulty": "medium",
-        "notes for codex": "this requires access to {TOP} and Whomp King",
         "description": "Reaching Fall onto the Caged Island from the top of the Fortress with Triple Jump.",
         "video": "https://www.youtube.com/watch?v=-faflqwXu94"
     },
@@ -226,7 +225,6 @@ logic_tricks = {
         "name": "logic_wf_caged_island_cage_wk_long_jump",
         "rule": "LJ & WF_KING & {Whomp's Fortress - Top}",
         "difficulty": "medium",
-        "notes for codex": "this requires access to {TOP} as well as Whomp King",
         "description": "Reaching Fall onto the Caged Island from the top of Whomp King's head with Long Jump.",
         "video": "https://www.youtube.com/watch?v=1uJPTb9LhLE"
     },
@@ -234,7 +232,6 @@ logic_tricks = {
         "name": "logic_wf_caged_island_cage_wk_jump",
         "rule": "WF_KING & {Whomp's Fortress - Top}",
         "difficulty": "hard",
-        "notes for codex": "this requires access to {TOP} and Whomp King",
         "description": "Reaching Fall onto the Caged Island from the top of the Fortress by jumping off of the Whomp"
                        "King's back while he is standing up from the ground.",
         "video": "https://www.youtube.com/watch?v=Uc9FQkt65BY"
@@ -243,7 +240,6 @@ logic_tricks = {
         "name": "logic_wf_caged_island_top_fortress_long_jump",
         "rule": "LJ & WF_FORTRESS & {Whomp's Fortress - Top}",
         "difficulty": "medium",
-        "notes for codex": "this requires access to {TOP} as well as WF_FORTRESS",
         "description": "Reaching Fall onto the Caged Island from fortress top access with Long Jump.",
         # title says Long Jump and Ground Pound. Ground Pound not needed in Spicy Mycena 64
         "video": "https://www.youtube.com/watch?v=DTieM0YZ-DY"
@@ -251,14 +247,12 @@ logic_tricks = {
     "Whomp's Fortress Top Access with Cannon": {
         "name": "logic_wf_caged_top_access_with_cannon",
         "rule": "CANN",
-        "notes for codex": "access to {TOP} only requires cannon",
         "description": "Accessing the top area with the cannon.",
         "difficulty": "medium",
     },
     "Whomp's Fortress Top Access with Side Flip and Ledge Grab": {
         "name": "logic_wf_caged_top_access_with_sf_lg",
         "rule": "SF+LG",
-        "notes for codex": "access to {TOP}",
         "difficulty": "medium",
         "description": "Accessing the top area by jumping on a Whomp as it stands up, and doing a Side Flip"
                        "off of it and a Ledge Grab.",
@@ -266,17 +260,12 @@ logic_tricks = {
     "Whomp's Fortress Top Access with Triple Jump": {
         "name": "logic_wf_caged_top_access_with_tj",
         "rule": "TJ",
-        "notes for codex": "access to {TOP}",
         "difficulty": "medium",
         "description": "Accessing the top area by jumping on a Whomp as it stands up, and doing a Triple Jump."
     },
     "Whomp's Fortress Blast Away the Wall with Backflip and Ledge Grab": {
         "name": "logic_wf_blast_away_wall_cannonless_backflip",
         "rule": "BF+LG",
-        "tags": ("Whomp's Fortress", "Cannonless", "Movement"),
-        "affected_rules": (
-            ("Whomp's Fortress - Blast Away the Wall", "CANNLESS & LG"),
-        ),
         "difficulty": "hard",
         "description": "Reaching Blast Away the Wall without the cannon using Ledge Grab, with a Backflip for setup.",
         "video": "https://www.youtube.com/watch?v=ngQ4Y8aMb-U"
@@ -284,10 +273,6 @@ logic_tricks = {
     "Whomp's Fortress Blast Away the Wall with Ledge Grab": {
         "name": "logic_wf_blast_away_wall_cannonless",
         "rule": "LG",
-        "tags": ("Whomp's Fortress", "Cannonless", "Movement"),
-        "affected_rules": (
-            ("Whomp's Fortress - Blast Away the Wall", "CANNLESS & LG"),
-        ),
         "difficulty": "hard",
         "description": "Reaching Blast Away the Wall without the cannon using Ledge Grab, without Backflip for setup.",
         "video": "https://www.youtube.com/watch?v=TqAwAOZGScY"
@@ -310,7 +295,6 @@ logic_tricks = {
         "name": "logic_wf_into_the_wild_blue_yonder_moveless",
         "rule": "",
         "difficulty": "hard",
-        "notes for codex": "the coins above would require Climb, Side Flip, or TJ+LG with this.",
         "description": "Reaching Shoot Into the Wild Blue with a jump.",
         "video": "https://www.youtube.com/watch?v=E7qv8EsIr5E"
     },

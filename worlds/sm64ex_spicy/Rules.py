@@ -360,8 +360,29 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
     # 6 Red Coins
     reachable_coins += 12
 
-    # CODEX: Change this to "has cannon" or one of the qualifying tricks
-    if state.can_reach("Whomp's Fortress - Shoot into the Wild Blue", "Location", player):
+    can_reach_wild_blue_coins = (
+        state.has("Whomp's Fortress - Cannon Unlock", player)
+        or can_use_logic_trick(
+            state, player, "logic_wf_into_the_wild_blue_yonder_wall_kick",
+            "Whomp's Fortress - Coins Star")
+        or can_use_logic_trick(
+            state, player, "logic_wf_into_the_wild_blue_yonder_long_jump",
+            "Whomp's Fortress - Coins Star")
+        or (
+            can_use_logic_trick(
+                state, player, "logic_wf_into_the_wild_blue_yonder_moveless",
+                "Whomp's Fortress - Coins Star")
+            and (
+                has_action(state, player, "Climb", level_name)
+                or has_action(state, player, "Side Flip", level_name)
+                or (
+                    has_action(state, player, "Triple Jump", level_name)
+                    and has_action(state, player, "Ledge Grab", level_name)
+                )
+            )
+        )
+    )
+    if can_reach_wild_blue_coins:
         # Ring of coins above the "Shoot into the Blue" Star
         reachable_coins += 8
     if has_action(state, player, "Ground Pound", level_name):
@@ -1425,13 +1446,24 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Whomp's Fortress
     rf.assign_rule("Whomp's Fortress - To the Top of the Fortress", "WF_FORTRESS")
     rf.assign_rule("Whomp's Fortress - Chip Off Whomp's Block", "WF_KING & GP")
-    rf.assign_rule("Whomp's Fortress - Top", "CHECKERBOARD_PLATFORMS | WF_HOOT | WK & SF/TJ | CL & DV/LG")
-    rf.assign_rule("Whomp's Fortress - Shoot into the Wild Blue", "WK & TJ/SF | CANN")
+    rf.assign_rule(
+        "Whomp's Fortress - Top",
+        "CHECKERBOARD_PLATFORMS | WF_HOOT | WK & SF/TJ | CL & DV/LG | "
+        "logic_wf_caged_top_access_with_cannon | logic_wf_caged_top_access_with_sf_lg | "
+        "logic_wf_caged_top_access_with_tj")
+    rf.assign_rule(
+        "Whomp's Fortress - Shoot into the Wild Blue",
+        "CANN | logic_wf_into_the_wild_blue_yonder_wall_kick | "
+        "logic_wf_into_the_wild_blue_yonder_long_jump | logic_wf_into_the_wild_blue_yonder_moveless")
     rf.assign_rule("Whomp's Fortress - Fall onto the Caged Island",
                    "WF_HOOT & CL | "
-                   "MOVELESS & TJ & WF_KING & {Whomp's Fortress - Top} | "
-                   "MOVELESS & LJ & WF_FORTRESS & {Whomp's Fortress - Top} | MOVELESS & CANN")
-    rf.assign_rule("Whomp's Fortress - Blast Away the Wall", "CANN | CANNLESS & LG")
+                   "logic_wf_caged_island_cage_triple_jump | "
+                   "logic_wf_caged_island_cage_wk_long_jump | "
+                   "logic_wf_caged_island_cage_wk_jump | "
+                   "logic_wf_caged_island_top_fortress_long_jump")
+    rf.assign_rule(
+        "Whomp's Fortress - Blast Away the Wall",
+        "CANN | logic_wf_blast_away_wall_cannonless_backflip | logic_wf_blast_away_wall_cannonless")
     rf.assign_rule("Whomp's Fortress - Bob-omb Buddy", "WF_BUDDY")
     rf.assign_rule("Whomp's Fortress - Flagpole 1-Up", "CL")
     rf.assign_rule("Whomp's Fortress - Tower Alcove 1-Up", "WF_FORTRESS")
