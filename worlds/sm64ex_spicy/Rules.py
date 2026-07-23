@@ -1364,16 +1364,41 @@ def tower_of_the_wing_cap_coins(state: CollectionState, player: int, coins: int)
 
 def vanish_cap_under_the_moat_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Vanish Cap Under the Moat"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_three_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
     has_movement = any(has_action(state, player, action, level_name)
                        for action in ("Triple Jump", "Ledge Grab", "Side Flip", "Backflip"))
     has_checkerboards = has_checkerboard_platforms(state, player, level_name)
-    reachable_coins = 13
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Vanish_Cap_under_the_Moat&oldid=19286
+
+    # Line of coins at bottom of slide, around the corner to left
+    reachable_coins = 5 if has_horizontal_coin_lines else 0
+    # 4 Red Coins
+    if has_red_coins:
+        reachable_coins += 8
+
     if has_movement:
-        reachable_coins += 3
-        if has_checkerboards:
+        # 3 coins in an ! block right before all the turning lifts
+        if has_three_coin_block:
+            reachable_coins += 3
+        if has_checkerboards and has_red_coins:
+            # 4 Red Coins
             reachable_coins += 8
-            if has_vanish_cap(state, player, level_name):
-                reachable_coins += 3
+        if has_checkerboards and has_single_yellow_coins and has_vanish_cap(state, player, level_name):
+            # 3 coins by star marker at very end
+            reachable_coins += 3
+    assert reachable_coins <= 27
     return coins <= reachable_coins
 
 
@@ -2042,9 +2067,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Vanish Cap Under the Moat - Switch",
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coins",
-                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
+                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | "
+                   "CHECKERBOARD_PLATFORMS & logic_vcutm_wall_kick_over_vanish_cap_grate")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
-                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | CHECKERBOARD_PLATFORMS & CAPLESS & WK")
+                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | "
+                   "CHECKERBOARD_PLATFORMS & logic_vcutm_wall_kick_over_vanish_cap_grate")
     # Bowser in the Dark World
     rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES | TJ+MOVELESS")
@@ -2124,7 +2151,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Tick Tock Clock - Midway Up 1-Up Block": "TTC_SPINNERS | LJ+LG",
             "Vanish Cap Under the Moat - Bottom of Slide Vanish Cap Block": "VC",
             "Vanish Cap Under the Moat - 3 Coins Block": "LG/TJ/BF/SF",
-            "Vanish Cap Under the Moat - Near Switch Vanish Cap Block": "VC",
+            "Vanish Cap Under the Moat - Near Switch Vanish Cap Block":
+                "VC & CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | "
+                "VC & CHECKERBOARD_PLATFORMS & MOVELESS",
             "Wet-Dry World - Shocking Arrow Lifts Star Block":
                 "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                 "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ",

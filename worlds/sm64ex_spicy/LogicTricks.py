@@ -497,6 +497,13 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Reaching Stand Tall on the Four Pillars without using the Pyramid Elevator.",
     },
+    # Vanish Cap Under the Moat
+    "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {
+        "name": "logic_vcutm_wall_kick_over_vanish_cap_grate",
+        "rule": "WK",
+        "difficulty": "hard",
+        "description": "Wall Kicking over the Vanish Cap grate without using the Vanish Cap.",
+    },
 }
 
 logic_trick_difficulty_order = {

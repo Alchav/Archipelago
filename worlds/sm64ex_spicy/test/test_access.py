@@ -3,7 +3,7 @@ from .. import Options
 from ..Regions import sm64_ttc_entrances
 from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
     big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
-    get_per_level_action_item_name
+    vanish_cap_under_the_moat_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -1733,6 +1733,131 @@ class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
+
+
+class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    }
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Vanish Cap Under the Moat - Horizontal Coin Lines": 5,
+            "Vanish Cap Under the Moat - Red Coins": 8,
+        }
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(vanish_cap_under_the_moat_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(vanish_cap_under_the_moat_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_three_coin_block_requires_movement(self):
+        self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Three-Coin Block"))
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 1))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 3))
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 4))
+
+    def test_upper_red_coins_require_movement_and_checkerboards(self):
+        self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Red Coins"))
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 8))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 9))
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 16))
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 17))
+
+    def test_end_coins_require_vanish_cap(self):
+        self.collect_by_name([
+            "Triple Jump",
+            "Checkerboard Platforms",
+            "Vanish Cap Under the Moat - Single Yellow Coins",
+        ])
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 1))
+
+        self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Vanish Cap"))
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 3))
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 4))
+
+    def test_all_unlocks_total_27_coins(self):
+        self.collect_by_name([
+            "Triple Jump",
+            "Checkerboard Platforms",
+            "Vanish Cap Under the Moat - Vanish Cap",
+            "Vanish Cap Under the Moat - Single Yellow Coins",
+            "Vanish Cap Under the Moat - Red Coins",
+            "Vanish Cap Under the Moat - Horizontal Coin Lines",
+            "Vanish Cap Under the Moat - Three-Coin Block",
+        ])
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 27))
+
+
+class VanishCapUnderTheMoatTrickAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "blocksanity": Options.Blocksanity.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "logic_tricks": {"Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate"},
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    }
+
+    def collect_stage_access(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Unlock Vanish Cap Under the Moat",
+        ])
+
+    def test_wall_kick_trick_bypasses_vanish_cap(self):
+        self.collect_stage_access()
+        self.collect_by_name([
+            "Checkerboard Platforms",
+            "Wall Kick",
+        ])
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
+        self.assertTrue(self.can_reach_location(
+            "Vanish Cap Under the Moat - Red Coin Platform 1-Up"))
+
+    def test_near_switch_block_copies_switch_access_and_requires_vanish_cap(self):
+        self.collect_stage_access()
+        self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Vanish Cap"))
+        self.assertFalse(self.can_reach_location(
+            "Vanish Cap Under the Moat - Near Switch Vanish Cap Block"))
+
+        self.collect(self.get_item_by_name("Checkerboard Platforms"))
+        self.assertFalse(self.can_reach_location(
+            "Vanish Cap Under the Moat - Near Switch Vanish Cap Block"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
+        self.assertTrue(self.can_reach_location(
+            "Vanish Cap Under the Moat - Near Switch Vanish Cap Block"))
 
 
 class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
