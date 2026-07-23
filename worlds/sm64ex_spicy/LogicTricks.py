@@ -183,6 +183,13 @@ logic_tricks = {
                        "using a Ground Pound just under the highest trigger coin.",
         "video": "https://www.youtube.com/watch?v=vsrevAfIvMA"
     },
+    "Bob-omb Battlefield Mario Wings to the Sky without Coin Markers": {
+        "name": "logic_bob_mario_wings_without_coin_markers",
+        "rule": "",
+        "difficulty": "hard",
+        "description": "Collecting Mario Wings to the Sky without the Single Yellow Coins or Vertical Coin Rings "
+                       "that indicate the five invisible trigger positions.",
+    },
     "Bob-omb Battlefield Island with Long Jump": {
         "name": "logic_bob_island_long_jump",
         "rule": "LJ",
@@ -192,15 +199,15 @@ logic_tricks = {
     },
     "Bob-omb Battlefield Island with Koopa Shell": {
         "name": "logic_bob_island_koopa_shell",
-        "rule": "",
+        "rule": "KOOPA_TROOPA",
         "difficulty": "hard",
         "description": "Reaching the floating island (and collecting the red coin on it) without the cannon by"
                        "using the Koopa shell.",
         "video": "https://www.youtube.com/watch?v=l_Xrf8jIyy8"
     },
-    "Bob-omb Battlefield Chain Chomp Gate without Ground Pound": {
+    "Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip": {
         "name": "logic_bob_chain_chomp_gate_without_ground_pound",
-        "rule": "",
+        "rule": "BOBOMBS",
         "difficulty": "hard",
         "description": "Collecting Behind Chain Chomp's Gate without Ground Pound, using a Bob-omb to clip through"
                        "the gate.",

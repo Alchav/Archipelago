@@ -188,54 +188,118 @@ def has_checkerboard_platforms(state: CollectionState, player: int, level_name: 
     return item_name is None or state.has(item_name, player)
 
 
+def get_unlock_item_name(options, option_name: str, global_item_name: str, per_level_item_name: str) -> str | bool:
+    option = getattr(options, option_name)
+    if option.value == option.option_not_shuffled:
+        return True
+    if option.value == option.option_global:
+        return global_item_name
+    return per_level_item_name
+
+
+def has_unlock(
+        state: CollectionState, player: int, option_name: str,
+        global_item_name: str, per_level_item_name: str) -> bool:
+    item_name = get_unlock_item_name(
+        state.multiworld.worlds[player].options, option_name, global_item_name, per_level_item_name)
+    return item_name is True or state.has(item_name, player)
+
+
 def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bob-omb Battlefield"
     has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
-
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
+    has_breakable_coin_box = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Breakable Coin Boxes", f"{level_name} - Breakable Coin Box")
+    has_throwable_cork_boxes = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Throwable Cork Boxes", f"{level_name} - Throwable Cork Boxes")
+    has_wooden_posts = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Wooden Posts", f"{level_name} - Wooden Posts")
+    has_bob_ombs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-ombs")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_koopa_troopa = has_unlock(
+        state, player, "enemy_unlocks",
+        "Koopa Troopas", f"{level_name} - Koopa Troopa")
     # https://ukikipedia.net/mediawiki/index.php?title=Bob-omb_Battlefield&oldid=19916
 
     # Inside the large breakable block near start
-    reachable_coins = 3
+    reachable_coins = 3 if has_breakable_coin_box else 0
     # Inside the two throwable cork boxes
-    reachable_coins += 6
-    # Row of coins under the bridge
-    reachable_coins += 5
+    if has_throwable_cork_boxes:
+        reachable_coins += 6
+    # Three horizontal coin lines
+    if has_horizontal_coin_lines:
+        reachable_coins += 15
     # 5 Posts (Run around them)
-    reachable_coins += 25
+    if has_wooden_posts:
+        reachable_coins += 25
     # Coins around flowerbed
-    reachable_coins += 8
-    # Line of coins by the cannon on the mountain
-    reachable_coins += 5
-    # Other line of coins on the mountain
-    reachable_coins += 5
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # 12 Bob-ombs
-    reachable_coins += 12
+    if has_bob_ombs:
+        reachable_coins += 12
     # 11 Goombas
-    reachable_coins += 11
+    if has_goombas:
+        reachable_coins += 11
     # 7 red coins, excluding the Island one
-    reachable_coins += 14
+    if has_red_coins:
+        reachable_coins += 14
     # 1 Koopa
-    reachable_coins += 5
+    if has_koopa_troopa:
+        reachable_coins += 5
 
     if state.can_reach("Bob-omb Battlefield - Island", "Region", player):
         # 3 coins from the first coin ring are easily reachable.
-        reachable_coins += 3
+        if has_vertical_coin_rings:
+            reachable_coins += 3
         if can_use_logic_trick(
                 state, player, "logic_bob_mario_wings_to_the_sky_without_cannon",
                 "Bob-omb Battlefield - Coins Star"):
             # This route collects every coin on and above the island without using the cannon.
-            reachable_coins += 42
-            reachable_coins += 2
+            if has_vertical_coin_rings:
+                reachable_coins += 37
+            if has_single_yellow_coins:
+                reachable_coins += 5
+            if has_red_coins:
+                reachable_coins += 2
         elif has_cannon and state.can_reach(
                 "Bob-omb Battlefield - Mario Wings to the Sky", "Location", player):
-            # 5 rings of 8 coins, plus the coin in the middle of each ring.
-            reachable_coins += 42
+            if has_vertical_coin_rings:
+                reachable_coins += 37
+            if has_single_yellow_coins:
+                reachable_coins += 5
             # Flying from the cannon can also reach the 8th red coin.
-            reachable_coins += 2
+            if has_red_coins:
+                reachable_coins += 2
         else:
             if has_wing_cap(state, player, level_name) and has_action(state, player, "Triple Jump", level_name):
                 # 4 rings of 8 coins, plus the coin in the middle of each ring.
-                reachable_coins += 36
+                if has_vertical_coin_rings:
+                    reachable_coins += 32
+                if has_single_yellow_coins:
+                    reachable_coins += 4
 
             has_island_red_coin_movement = any(
                 has_action(state, player, action, level_name)
@@ -246,7 +310,7 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
                     state, player, "logic_bob_island_red_coin_with_ground_pound",
                     "Bob-omb Battlefield - Coins Star")
             )
-            if (has_island_red_coin_movement
+            if has_red_coins and (has_island_red_coin_movement
                     or has_island_red_coin_ground_pound
                     or can_use_logic_trick(
                         state, player, "logic_bob_island_koopa_shell",
@@ -257,11 +321,11 @@ def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -
                 has_action(state, player, action, level_name)
                 for action in ("Side Flip", "Backflip", "Triple Jump")
             )
-            if has_first_ring_jump or has_island_red_coin_ground_pound:
+            if has_vertical_coin_rings and (has_first_ring_jump or has_island_red_coin_ground_pound):
                 reachable_coins += 3
-            if has_first_ring_jump:
+            if has_vertical_coin_rings and has_first_ring_jump:
                 reachable_coins += 2  # Ground Pound does not reach these two.
-            if has_action(state, player, "Triple Jump", level_name):
+            if has_single_yellow_coins and has_action(state, player, "Triple Jump", level_name):
                 reachable_coins += 1
 
     assert reachable_coins <= 146
@@ -1342,9 +1406,22 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CANN & WC | logic_bob_mario_wings_capless | "
                    "logic_bob_mario_wings_to_the_sky_without_cannon")
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
-                   "GP | logic_bob_chain_chomp_gate_without_ground_pound")
+                   "WOODEN_POSTS & GP | logic_bob_chain_chomp_gate_without_ground_pound")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
     rf.assign_rule("Bob-omb Battlefield - Cannon Tree 1-Up", "CL/TJ/BF/SF")
+    add_rule(
+        multiworld.get_location("Bob-omb Battlefield - Mario Wings to the Sky", player),
+        lambda state: (
+            has_unlock(
+                state, player, "coin_object_unlocks",
+                "Single Yellow Coins", "Bob-omb Battlefield - Single Yellow Coins")
+            or has_unlock(
+                state, player, "coin_object_unlocks",
+                "Vertical Coin Rings", "Bob-omb Battlefield - Vertical Coin Rings")
+            or can_use_logic_trick(
+                state, player, "logic_bob_mario_wings_without_coin_markers",
+                "Bob-omb Battlefield - Mario Wings to the Sky")))
+    rf.assign_rule("Bob-omb Battlefield - Find the 8 Red Coins", "RED_COINS")
     # Whomp's Fortress
     rf.assign_rule("Whomp's Fortress - To the Top of the Fortress", "WF_FORTRESS")
     rf.assign_rule("Whomp's Fortress - Chip Off Whomp's Block", "WF_KING & GP")
@@ -2045,6 +2122,24 @@ class RuleFactory:
             "Purple Switches",
             purple_switch_item_name_by_level,
             level_name)
+        item_names["SINGLE_YELLOW_COINS"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+        item_names["VERTICAL_COIN_RINGS"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
+        item_names["RED_COINS"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Red Coins", f"{level_name} - Red Coins")
+        item_names["WOODEN_POSTS"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Wooden Posts", f"{level_name} - Wooden Posts")
+        item_names["BOBOMBS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Bob-ombs", f"{level_name} - Bob-ombs")
+        item_names["KOOPA_TROOPA"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Koopa Troopas", f"{level_name} - Koopa Troopa")
         return item_names
 
     def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:

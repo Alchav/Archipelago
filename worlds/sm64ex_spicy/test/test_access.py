@@ -1,7 +1,7 @@
 from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
-from ..Rules import get_per_level_action_item_name
+from ..Rules import bob_omb_battlefield_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -446,6 +446,115 @@ class BobOmbBattlefieldHardLogicTricksTestBase(SM64TestBase):
             self.get_item_by_name("Ground Pound"),
         ])
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+
+class BobOmbBattlefieldIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+    }
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Bob-omb Battlefield - Red Coins": 14,
+            "Bob-omb Battlefield - Horizontal Coin Lines": 15,
+            "Bob-omb Battlefield - Horizontal Coin Rings": 8,
+            "Bob-omb Battlefield - Breakable Coin Box": 3,
+            "Bob-omb Battlefield - Throwable Cork Boxes": 6,
+            "Bob-omb Battlefield - Wooden Posts": 25,
+            "Bob-omb Battlefield - Bob-ombs": 12,
+            "Bob-omb Battlefield - Goombas": 11,
+            "Bob-omb Battlefield - Koopa Troopa": 5,
+        }
+        self.assertFalse(bob_omb_battlefield_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(bob_omb_battlefield_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(bob_omb_battlefield_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Find the 8 Red Coins"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Red Coins"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Find the 8 Red Coins"))
+
+    def test_mario_wings_requires_visible_coin_markers(self):
+        self.collect([
+            self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"),
+            self.get_item_by_name("Wing Cap"),
+        ])
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Vertical Coin Rings"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+    def test_single_yellow_coins_are_also_valid_markers(self):
+        self.collect([
+            self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"),
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Bob-omb Battlefield - Single Yellow Coins"),
+        ])
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+    def test_single_yellow_and_vertical_ring_coins_are_counted_separately(self):
+        self.collect([
+            self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"),
+            self.get_item_by_name("Wing Cap"),
+            self.get_item_by_name("Bob-omb Battlefield - Single Yellow Coins"),
+        ])
+        self.assertTrue(bob_omb_battlefield_coins(self.multiworld.state, self.player, 5))
+        self.assertFalse(bob_omb_battlefield_coins(self.multiworld.state, self.player, 6))
+
+        self.remove_by_name("Bob-omb Battlefield - Single Yellow Coins")
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Vertical Coin Rings"))
+        self.assertTrue(bob_omb_battlefield_coins(self.multiworld.state, self.player, 40))
+        self.assertFalse(bob_omb_battlefield_coins(self.multiworld.state, self.player, 41))
+
+    def test_chain_chomp_normal_route_requires_wooden_posts(self):
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Wooden Posts"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+
+
+class BobOmbBattlefieldUnlockTricksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "logic_tricks": {
+            "Bob-omb Battlefield Mario Wings to the Sky without Coin Markers",
+            "Bob-omb Battlefield Island with Koopa Shell",
+            "Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip",
+        },
+    }
+
+    def test_markerless_trick_still_requires_a_mario_wings_movement_route(self):
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+        self.collect([
+            self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"),
+            self.get_item_by_name("Wing Cap"),
+        ])
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
+
+    def test_koopa_shell_trick_requires_koopa_troopa(self):
+        self.assertFalse(self.can_reach_region("Bob-omb Battlefield - Island"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Koopa Troopa"))
+        self.assertTrue(self.can_reach_region("Bob-omb Battlefield - Island"))
+
+    def test_chain_chomp_clip_requires_bob_ombs(self):
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Bob-ombs"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
 
 
 class BobOmbBattlefieldCannonlessMarioWingsCoinTestBase(SM64TestBase):
