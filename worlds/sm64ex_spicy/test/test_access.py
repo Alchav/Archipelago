@@ -2,7 +2,7 @@ from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
 from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
-    jolly_roger_bay_coins, get_per_level_action_item_name
+    big_boos_haunt_coins, jolly_roger_bay_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -1900,7 +1900,7 @@ class CoolCoolMountainIndividualUnlockLogicTestBase(SM64TestBase):
         source_coins = {
             "Cool, Cool Mountain - Single Yellow Coins": 27,
             "Cool, Cool Mountain - Red Coins": 16,
-            "Cool, Cool Mountain - Moving Blue Coins": 5,
+            "Cool, Cool Mountain - Single Blue Coin": 5,
             "Cool, Cool Mountain - Horizontal Coin Lines": 65,
             "Cool, Cool Mountain - Vertical Coin Lines": 5,
             "Cool, Cool Mountain - Mr Blizzards": 3,
@@ -1931,7 +1931,7 @@ class CoolCoolMountainIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 16))
 
     def test_blue_coin_switch_requires_ground_pound(self):
-        self.collect(self.get_item_by_name("Cool, Cool Mountain - Blue Coin Switches"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Blue Coin Block"))
         self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 1))
         self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(cool_cool_mountain_coins(self.multiworld.state, self.player, 10))
@@ -2072,7 +2072,7 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 21))
         self.remove(whomps)
 
-        self.collect(self.get_item_by_name("Whomp's Fortress - Blue Coin Switches"))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Blue Coin Block"))
         self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 20))
         self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 21))
 
@@ -2115,8 +2115,8 @@ class WhompsFortressWhompTricksTestBase(SM64TestBase):
         "enemy_unlocks": Options.EnemyUnlocks.option_individual,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
         "logic_tricks": {
-            "Whomp's Fortress Top Access with Side Flip and Ledge Grab",
-            "Whomp's Fortress Top Access with Triple Jump",
+            "Whomp's Fortress Top Access with Side Flip and Ledge Grab Off of Whomp",
+            "Whomp's Fortress Top Access with Triple Jump Off of Whomp",
         },
     }
 
@@ -2348,7 +2348,7 @@ class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
                 self.remove(item)
 
     def test_blue_coin_switch_requires_ground_pound(self):
-        self.collect(self.get_item_by_name("Jolly Roger Bay - Blue Coin Switches"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Blue Coin Block"))
         self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 1))
         self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(jolly_roger_bay_coins(self.multiworld.state, self.player, 30))
@@ -3785,7 +3785,7 @@ class BigBooHauntAccessTestBase(SM64TestBase):
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "logic_tricks": {
             "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick",
-            "Big Boo's Haunt Third Floor with Side Flip",
+            "Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends",
             "Big Boo's Haunt Roof without Long Jump",
         },
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -3839,6 +3839,147 @@ class BigBooHauntAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Roof"))
 
 
+class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "logic_tricks": {"Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends"},
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_bbh_access(self):
+        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Big Boo's Haunt - Red Coins": 8,
+            "Big Boo's Haunt - Breakable Coin Boxes": 6,
+            "Big Boo's Haunt - Crazy Box": 5,
+            "Big Boo's Haunt - Ten-Coin Block": 10,
+            "Big Boo's Haunt - Boos": 25,
+            "Big Boo's Haunt - Flying Bookends": 5,
+            "Big Boo's Haunt - Mr. Is": 10,
+            "Big Boo's Haunt - Scuttlebugs": 9,
+        }
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(big_boos_haunt_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(big_boos_haunt_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_second_floor_sources(self):
+        self.collect_bbh_access()
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
+
+        source_coins = {
+            "Big Boo's Haunt - Red Coins": 16,
+            "Big Boo's Haunt - Flying Bookends": 15,
+            "Big Boo's Haunt - Mr. Is": 15,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(big_boos_haunt_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(big_boos_haunt_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_side_flip_third_floor_trick_requires_flying_bookends(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Side Flip"),
+        ])
+        self.assertFalse(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Flying Bookends"))
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 15))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 16))
+
+        self.collect([
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 15))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 16))
+
+    def test_bookend_route_cost_only_reduces_third_floor_yield(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Big Boo's Haunt - Flying Bookends"),
+            self.get_item_by_name("Big Boo's Haunt - Blue Coin Block"),
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        # 5 from the downstairs Bookend, 10 from the two Bookends upstairs,
+        # and 10 net additional coins from the third-floor blue coin block.
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 25))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 26))
+
+    def test_third_floor_sources(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Boos"))
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 30))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 31))
+
+        self.remove(self.get_item_by_name("Big Boo's Haunt - Boos"))
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Blue Coin Block"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 20))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 21))
+
+    def test_merry_go_round_coins_require_boos(self):
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Merry-go-round"))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 1))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Boos"))
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 50))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 51))
+
+    def test_enemy_and_red_coin_stars_require_unlocks(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Merry-go-round"),
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Backflip"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Vanish Cap"),
+        ])
+
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Boos"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
+
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Seek the 8 Red Coins"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Red Coins"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Seek the 8 Red Coins"))
+
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Eye to Eye in the Secret Room"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Mr. Is"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Eye to Eye in the Secret Room"))
+
+
 class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -3850,6 +3991,32 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
 
     def collect_bbh_access(self):
         self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
+
+
+class BigBooHauntBookendTrickNoDespawnsTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "logic_tricks": {"Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends"},
+        "no_despawns": Options.NoDespawns.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_no_despawns_preserves_bookend_coins(self):
+        self.collect([
+            self.get_item_by_name("Unlock Big Boo's Haunt"),
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Big Boo's Haunt - Flying Bookends"),
+            self.get_item_by_name("Big Boo's Haunt - Blue Coin Block"),
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 35))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 36))
 
 
 class BigBooHauntCoinStar78AccessTestBase(BigBooHauntCoinStarAccessTestBase):

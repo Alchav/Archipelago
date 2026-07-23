@@ -393,9 +393,9 @@ logic_tricks = {
         "description": "Reaching the third floor with Wall Kick and no Ledge Grab.",
         "video": "https://www.youtube.com/watch?v=Fpf28uUrR1U"
     },
-    "Big Boo's Haunt Third Floor with Side Flip": {
+    "Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends": {
         "name": "logic_bbh_third_floor_side_flip",
-        "rule": "SF",
+        "rule": "SF+FLYING_BOOKENDS",
         "difficulty": "hard",
         "description": "Reaching the third floor with a Side Flip and bouncing off the Bookends.",
         "video": "https://www.youtube.com/watch?v=EBkJr83BlL4"

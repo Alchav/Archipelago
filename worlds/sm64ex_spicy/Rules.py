@@ -342,7 +342,7 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
         "Red Coins", f"{level_name} - Red Coins")
     has_blue_coin_switches = has_unlock(
         state, player, "coin_object_unlocks",
-        "Blue Coin Switches", f"{level_name} - Blue Coin Switches")
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
     has_horizontal_coin_lines = has_unlock(
         state, player, "coin_object_unlocks",
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
@@ -451,12 +451,12 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
     has_red_coins = has_unlock(
         state, player, "coin_object_unlocks",
         "Red Coins", f"{level_name} - Red Coins")
-    has_moving_blue_coins = has_unlock(
+    has_single_blue_coin = has_unlock(
         state, player, "coin_object_unlocks",
-        "Moving Blue Coins", f"{level_name} - Moving Blue Coins")
+        "Single Blue Coins", f"{level_name} - Single Blue Coin")
     has_blue_coin_switches = has_unlock(
         state, player, "coin_object_unlocks",
-        "Blue Coin Switches", f"{level_name} - Blue Coin Switches")
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
     has_horizontal_coin_lines = has_unlock(
         state, player, "coin_object_unlocks",
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
@@ -496,7 +496,7 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
         # 8 Red Coins
         reachable_coins += 16
     # Blue Coin at the start of the slide
-    if has_moving_blue_coins:
+    if has_single_blue_coin:
         reachable_coins += 5
 
     has_cannon = state.has("Cool, Cool Mountain - Cannon Unlock", player)
@@ -522,40 +522,99 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
 
 def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Big Boo's Haunt"
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_switches = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_breakable_coin_boxes = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Breakable Coin Boxes", f"{level_name} - Breakable Coin Boxes")
+    has_crazy_box = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Crazy Boxes", f"{level_name} - Crazy Box")
+    has_ten_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Block")
+    has_boos = has_unlock(
+        state, player, "enemy_unlocks",
+        "Boos", f"{level_name} - Boos")
+    has_flying_bookends = has_unlock(
+        state, player, "enemy_unlocks",
+        f"{level_name} - Flying Bookends", f"{level_name} - Flying Bookends")
+    has_mr_is = has_unlock(
+        state, player, "enemy_unlocks",
+        "Mr. Is", f"{level_name} - Mr. Is")
+    has_scuttlebugs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Scuttlebugs", f"{level_name} - Scuttlebugs")
+    has_normal_third_floor_route = (
+        has_action(state, player, "Wall Kick", level_name)
+        and has_action(state, player, "Ledge Grab", level_name)
+    )
+    has_wall_kick_third_floor_trick = can_use_logic_trick(
+        state, player, "logic_bbh_third_floor_wall_kick",
+        "Big Boo's Haunt - Coins Star")
+    has_bookend_third_floor_trick = can_use_logic_trick(
+        state, player, "logic_bbh_third_floor_side_flip",
+        "Big Boo's Haunt - Coins Star")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Big_Boo%27s_Haunt&oldid=20246
 
     # Yellow [!] behind mansion
-    reachable_coins = 10
+    reachable_coins = 10 if has_ten_coin_block else 0
     # Two cork boxes near shed
-    reachable_coins += 6
+    if has_breakable_coin_boxes:
+        reachable_coins += 6
     # Crazy Box outside
-    reachable_coins += 5
+    if has_crazy_box:
+        reachable_coins += 5
     # 3 Scuttlebugs (outside)
-    reachable_coins += 9
+    if has_scuttlebugs:
+        reachable_coins += 9
     # 5 Boos
-    reachable_coins += 25
+    if has_boos:
+        reachable_coins += 25
     # 2 Mr. Is
-    reachable_coins += 10
+    if has_mr_is:
+        reachable_coins += 10
     # 1 Bookend
-    reachable_coins += 5
+    if has_flying_bookends:
+        reachable_coins += 5
     # 4 Red Coins
-    reachable_coins += 8
+    if has_red_coins:
+        reachable_coins += 8
 
     if state.can_reach("Big Boo's Haunt - Second Floor", "Region", player):
         # 2 Bookends
-        reachable_coins += 10
+        if has_flying_bookends:
+            reachable_coins += 10
         # 1 Mr. I
-        reachable_coins += 5
+        if has_mr_is:
+            reachable_coins += 5
         # 4 Red Coins
-        reachable_coins += 8
+        if has_red_coins:
+            reachable_coins += 8
     if state.can_reach("Big Boo's Haunt - Third Floor", "Region", player):
+        third_floor_coins = 0
         # 1 Boo, spawns behind vanish cap barrier but can follow Mario out
-        reachable_coins += 5
-        if has_action(state, player, "Ground Pound", level_name):
+        if has_boos:
+            third_floor_coins += 5
+        if has_blue_coin_switches and has_action(state, player, "Ground Pound", level_name):
             # Blue coin block (attic)
-            reachable_coins += 20
-    if state.has("Big Boo's Haunt - Merry-go-round", player):
+            third_floor_coins += 20
+        if (
+                has_flying_bookends
+                and has_bookend_third_floor_trick
+                and not has_normal_third_floor_route
+                and not has_wall_kick_third_floor_trick
+                and not state.multiworld.worlds[player].options.no_despawns.value):
+            # Taking this route leaves the two Bookends' 10 coins below to
+            # despawn.
+            third_floor_coins = max(0, third_floor_coins - 10)
+        reachable_coins += third_floor_coins
+    if has_boos and state.has("Big Boo's Haunt - Merry-go-round", player):
         # 5 Boos
         reachable_coins += 25
     assert reachable_coins <= 151
@@ -766,7 +825,7 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
         "Red Coins", f"{level_name} - Red Coins")
     has_blue_coin_switches = has_unlock(
         state, player, "coin_object_unlocks",
-        "Blue Coin Switches", f"{level_name} - Blue Coin Switches")
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
     has_horizontal_coin_lines = has_unlock(
         state, player, "coin_object_unlocks",
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
@@ -1609,7 +1668,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Cool, Cool Mountain - Wall Kicks Will Work",
         "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
     # Big Boo's Haunt
-    rf.assign_rule("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", "BBH_MERRY_GO_ROUND")
+    rf.assign_rule("Big Boo's Haunt - Go on a Ghost Hunt", "BOOS")
+    rf.assign_rule("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", "BBH_MERRY_GO_ROUND & BOOS")
     rf.assign_rule(
         "Big Boo's Haunt - Second Floor",
         "BBH_STAIRCASE | logic_bbh_third_floor_triple_jump_wall_kick | "
@@ -1619,8 +1679,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "WK+LG | logic_bbh_third_floor_wall_kick | logic_bbh_third_floor_side_flip")
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
     rf.assign_rule("Big Boo's Haunt - Secret of the Haunted Books", "KK")
-    rf.assign_rule("Big Boo's Haunt - Seek the 8 Red Coins", "BF/WK/TJ/SF")
-    rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC")
+    rf.assign_rule("Big Boo's Haunt - Seek the 8 Red Coins", "RED_COINS & BF/WK/TJ/SF")
+    rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
     rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ/SF/WK")
     # Haze Maze Cave
     rf.assign_rule("Hazy Maze Cave - Swimming Beast in the Cavern", "HMC_SWIMMING_BEAST")
@@ -2293,6 +2353,15 @@ class RuleFactory:
         item_names["SPINDRIFTS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Spindrifts", f"{level_name} - Spindrifts")
+        item_names["BOOS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Boos", f"{level_name} - Boos")
+        item_names["MR_IS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Mr. Is", f"{level_name} - Mr. Is")
+        item_names["FLYING_BOOKENDS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            f"{level_name} - Flying Bookends", f"{level_name} - Flying Bookends")
         return item_names
 
     def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:
