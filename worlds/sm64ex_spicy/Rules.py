@@ -325,7 +325,9 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
     reachable_coins += 5
 
     has_cannon = state.has("Cool, Cool Mountain - Cannon Unlock", player)
-    if has_cannon or allows_moveless(state, player):
+    has_spin_jump_route = has_logic_trick(
+        state, player, "logic_ccm_wall_kicks_will_work_spin_jump")
+    if has_cannon or has_spin_jump_route:
         # Arrow of coins near "Wall Kicks will Work"
         reachable_coins += 8
         # 2 Spindrifts
@@ -460,14 +462,18 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     # 4 Red Coins
     reachable_coins += 8
 
-    if (
-            has_action(state, player, "Climb", level_name)
-            or has_action(state, player, "Triple Jump", level_name)
-            or state.has("Jolly Roger Bay - Cannon Unlock", player)
-            or allows_moveless(state, player) and (
-                has_action(state, player, "Backflip", level_name)
-                or has_action(state, player, "Wall Kick", level_name)
-            )):
+    has_pillar_red_coin_moves = (
+        has_logic_trick(state, player, "logic_jrb_pillar_red_coin_moves")
+        and any(has_action(state, player, action, level_name)
+                for action in ("Triple Jump", "Backflip", "Wall Kick"))
+    )
+    has_pillar_red_coin_cannon = (
+        has_logic_trick(state, player, "logic_jrb_pillar_red_coin_cannon")
+        and state.has("Jolly Roger Bay - Cannon Unlock", player)
+    )
+    if (has_action(state, player, "Climb", level_name)
+            or has_pillar_red_coin_moves
+            or has_pillar_red_coin_cannon):
         # Pillar Red Coin
         reachable_coins += 2
     has_upper = state.can_reach("Jolly Roger Bay - Upper", "Region", player)
@@ -480,8 +486,10 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
         if has_raised_ship:
             # 3 Red Coins
             reachable_coins += 6
-        elif has_action(state, player, "Long Jump", level_name) or has_purple_switches(
-                state, player, level_name) or has_raised_ship:
+        elif (
+                has_logic_trick(state, player, "logic_jrb_ship_red_coin_with_long_jump")
+                and has_action(state, player, "Long Jump", level_name)
+                or has_purple_switches(state, player, level_name)):
             # 1 Red Coin
             reachable_coins += 2
     if has_action(state, player, "Ground Pound", level_name):
@@ -1210,26 +1218,40 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Jolly Roger Bay
     rf.assign_rule("Jolly Roger Bay - Plunder in the Sunken Ship", "JRB_SUNKEN_SHIP")
     rf.assign_rule("Jolly Roger Bay - Can the Eel Come Out to Play?", "JRB_UNAGI")
-    rf.assign_rule("Jolly Roger Bay - Upper", "TJ/BF/SF/WK | MOVELESS & LG")
+    rf.assign_rule(
+        "Jolly Roger Bay - Upper",
+        "TJ/BF/SF/WK | logic_jrb_upper_ledge_grab & LG | "
+        "logic_jrb_upper_dive_and_kick & DV+KK | logic_jrb_upper_cannon & CANN")
     rf.assign_rule("Jolly Roger Bay - Red Coins on the Ship Afloat",
-                   "JRB_RAISED_SHIP & CL/TJ | JRB_RAISED_SHIP & CANN | "
-                   "JRB_RAISED_SHIP & MOVELESS & BF/WK")
+                   "JRB_RAISED_SHIP & CL | "
+                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_moves & TJ/BF/WK | "
+                   "JRB_RAISED_SHIP & logic_jrb_pillar_red_coin_cannon & CANN")
     rf.assign_rule("Jolly Roger Bay - Blast to the Stone Pillar",
-                   "CANN+CL | CANNLESS & MOVELESS | CANN & MOVELESS")
-    rf.assign_rule("Jolly Roger Bay - Through the Jet Stream", "JRB_JET_STREAM & MC/CAPLESS")
+                   "CANN+CL | logic_jrb_stone_pillar_cannonless | "
+                   "logic_jrb_stone_pillar_cannon_no_climb & CANN")
+    rf.assign_rule(
+        "Jolly Roger Bay - Through the Jet Stream",
+        "JRB_JET_STREAM & MC | JRB_JET_STREAM & logic_jrb_jet_stream_capless")
     rf.assign_rule("Jolly Roger Bay - Bob-omb Buddy", "JRB_BUDDY")
     rf.assign_rule("Jolly Roger Bay - Stone Pillar 1-Up", "CANN")
     # Cool, Cool Mountain
     rf.assign_rule("Cool, Cool Mountain - Big Penguin Race", "CCM_BIG_PENGUIN")
     rf.assign_rule("Cool, Cool Mountain - Snowman's Lost His Head", "CCM_SNOWMAN_HEAD")
     rf.assign_rule("Cool, Cool Mountain - Li'l Penguin Lost", "CCM_BABY_PENGUINS")
-    rf.assign_rule("Cool, Cool Mountain - Wall Kicks Will Work", "TJ/WK & CANN | CANNLESS & TJ/WK | MOVELESS")
+    rf.assign_rule(
+        "Cool, Cool Mountain - Wall Kicks Will Work",
+        "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
     # Big Boo's Haunt
     rf.assign_rule("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", "BBH_MERRY_GO_ROUND")
-    rf.assign_rule("Big Boo's Haunt - Second Floor", "BBH_STAIRCASE | WK & TJ/SF")
-    rf.assign_rule("Big Boo's Haunt - Third Floor", "WK+LG | MOVELESS & WK")
-    rf.assign_rule("Big Boo's Haunt - Roof", "LJ | MOVELESS")
-    rf.assign_rule("Big Boo's Haunt - Secret of the Haunted Books", "KK | MOVELESS")
+    rf.assign_rule(
+        "Big Boo's Haunt - Second Floor",
+        "BBH_STAIRCASE | logic_bbh_third_floor_triple_jump_wall_kick & TJ+WK | "
+        "logic_bbh_third_floor_side_flip_wall_kick & SF+WK")
+    rf.assign_rule(
+        "Big Boo's Haunt - Third Floor",
+        "WK+LG | logic_bbh_third_floor_wall_kick & WK | logic_bbh_third_floor_side_flip & SF")
+    rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
+    rf.assign_rule("Big Boo's Haunt - Secret of the Haunted Books", "KK")
     rf.assign_rule("Big Boo's Haunt - Seek the 8 Red Coins", "BF/WK/TJ/SF")
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC")
     rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ/SF/WK")
@@ -1434,7 +1456,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Hazy Maze Cave - Toxic Maze Near Twin Monty Mole Holes Metal Cap Block": "MC",
             "Jolly Roger Bay - Beginning Metal Cap Block": "MC",
             "Jolly Roger Bay - Ocean Cave Metal Cap Block": "MC",
-            "Jolly Roger Bay - Blast to the Stone Pillar Star Block": "CANN+CL | CANNLESS & MOVELESS | CANN & MOVELESS",
+            "Jolly Roger Bay - Blast to the Stone Pillar Star Block":
+                "CANN+CL | logic_jrb_stone_pillar_cannonless | "
+                "logic_jrb_stone_pillar_cannon_no_climb & CANN",
             "Jolly Roger Bay - Purple Switch Metal Cap Block": "MC",
             "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "JRB_SUNKEN_SHIP",
             "Lethal Lava Land - Wing Cap Block": "WC",

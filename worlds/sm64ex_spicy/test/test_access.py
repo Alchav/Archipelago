@@ -901,6 +901,8 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         "side_flip": Options.SideFlip.option_per_level,
         "wall_kick": Options.WallKick.option_per_level,
         "ledge_grab": Options.LedgeGrab.option_global,
+        "dive": Options.Dive.option_per_level,
+        "climb": Options.Climb.option_per_level,
     }
 
     def test_course_rule_requires_course_move_item(self):
@@ -1796,25 +1798,26 @@ class CoolCoolMountainCoinStar131AccessTestBase(CoolCoolMountainCoinStarAccessTe
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
 
 
-class CoolCoolMountainCoinStar141MovelessAccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+class CoolCoolMountainCoinStar141SpinJumpAccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
     options = {
         **CoolCoolMountainCoinStarAccessTestBase.options,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "logic_tricks": {"Cool, Cool Mountain Wall Kicks Will Work With Spin Jump"},
         "cool_cool_mountain_coin_star_requirement": 141,
     }
 
-    def test_moveless_wall_kicks_route_coins_reach_coin_star(self):
+    def test_spin_jump_wall_kicks_route_coins_reach_coin_star(self):
+        self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Wall Kicks Will Work"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
 
 
-class CoolCoolMountainCoinStar144MovelessAccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
+class CoolCoolMountainCoinStar144SpinJumpAccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
     options = {
         **CoolCoolMountainCoinStarAccessTestBase.options,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "logic_tricks": {"Cool, Cool Mountain Wall Kicks Will Work With Spin Jump"},
         "cool_cool_mountain_coin_star_requirement": 144,
     }
 
-    def test_moveless_wall_kicks_route_needs_cannon_for_extra_spindrift_coins(self):
+    def test_spin_jump_wall_kicks_route_needs_cannon_for_extra_spindrift_coins(self):
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
         self.collect(self.get_item_by_name("Cool, Cool Mountain - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Coins Star"))
@@ -2014,10 +2017,42 @@ class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
     }
 
 
-class JollyRogerBayCoinStar50AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayLogicTricksTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
-        "jolly_roger_bay_coin_star_requirement": 50,
+        "logic_tricks": {
+            "Jolly Roger Bay Upper Platform with Dive and Kick",
+            "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick",
+            "Jolly Roger Bay Stone Pillar without Cannon",
+            "Jolly Roger Bay Through the Jet Stream without Metal Cap",
+        },
+    }
+
+    def test_dive_and_kick_reach_upper(self):
+        self.collect(self.get_item_by_name("Dive"))
+        self.assertFalse(self.can_reach_region("Jolly Roger Bay - Upper"))
+        self.collect(self.get_item_by_name("Kick"))
+        self.assertTrue(self.can_reach_region("Jolly Roger Bay - Upper"))
+
+    def test_pillar_moves_reach_raised_ship_red_coins(self):
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Raised Ship"))
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Red Coins on the Ship Afloat"))
+        self.collect(self.get_item_by_name("Backflip"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Red Coins on the Ship Afloat"))
+
+    def test_stone_pillar_without_cannon(self):
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Blast to the Stone Pillar"))
+
+    def test_jet_stream_without_metal_cap(self):
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Through the Jet Stream"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Jet Stream"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Through the Jet Stream"))
+
+
+class JollyRogerBayCoinStar49AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+    options = {
+        **JollyRogerBayCoinStarAccessTestBase.options,
+        "jolly_roger_bay_coin_star_requirement": 49,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -2027,6 +2062,7 @@ class JollyRogerBayCoinStar50AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
 class JollyRogerBayCoinStar51AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
+        "logic_tricks": {"Jolly Roger Bay Pillar Red Coin with Cannon"},
         "jolly_roger_bay_coin_star_requirement": 51,
     }
 
@@ -2058,11 +2094,15 @@ class JollyRogerBayCoinStar55AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
-class JollyRogerBayCoinStar67AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayCoinStar68AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
         "purple_switches": Options.PurpleSwitches.option_global,
-        "jolly_roger_bay_coin_star_requirement": 67,
+        "logic_tricks": {"Jolly Roger Bay Ship Red Coin With Long Jump"},
+        "universal_tracker_glitched_logic": {
+            "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick"
+        },
+        "jolly_roger_bay_coin_star_requirement": 68,
     }
 
     def test_upper_long_jump_coins_reach_coin_star(self):
@@ -2084,10 +2124,10 @@ class JollyRogerBayCoinStar67AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
-class JollyRogerBayCoinStar71AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayCoinStar72AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
-        "jolly_roger_bay_coin_star_requirement": 71,
+        "jolly_roger_bay_coin_star_requirement": 72,
     }
 
     def test_raised_ship_coins_reach_coin_star(self):
@@ -2097,10 +2137,10 @@ class JollyRogerBayCoinStar71AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
-class JollyRogerBayCoinStar75AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayCoinStar79AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
-        "jolly_roger_bay_coin_star_requirement": 75,
+        "jolly_roger_bay_coin_star_requirement": 79,
     }
 
     def test_ground_pound_coins_reach_coin_star(self):
@@ -2109,10 +2149,10 @@ class JollyRogerBayCoinStar75AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
-class JollyRogerBayCoinStar85AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayCoinStar96AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
-        "jolly_roger_bay_coin_star_requirement": 85,
+        "jolly_roger_bay_coin_star_requirement": 96,
     }
 
     def test_ground_pound_and_upper_coins_reach_coin_star(self):
@@ -2122,16 +2162,17 @@ class JollyRogerBayCoinStar85AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
-class JollyRogerBayCoinStar101AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
+class JollyRogerBayCoinStar104AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
-        "jolly_roger_bay_coin_star_requirement": 101,
+        "jolly_roger_bay_coin_star_requirement": 104,
     }
 
     def test_all_jrb_coin_sources_reach_coin_star(self):
         self.collect([
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Climb"),
         ])
         self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
         self.collect(self.get_item_by_name("Jolly Roger Bay - Raised Ship"))
@@ -2198,7 +2239,7 @@ class TinyHugeIslandCoinStar56FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
         "tiny_huge_island_coin_star_requirement": 56,
     }
 
-    def test_tiny_pipe_reaches_huge_piranha_area_not_huge_main(self):
+    def test_tiny_pipe_reaches_huge_piranha_area_and_huge_main(self):
         self.disable_huge_entry()
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
@@ -2209,9 +2250,9 @@ class TinyHugeIslandCoinStar56FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
             self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
-        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
-        self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+        self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
 class TinyHugeIslandCoinStar54AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
@@ -2238,7 +2279,7 @@ class TinyHugeIslandCoinStar55FromHugeAccessTestBase(TinyHugeIslandCoinStarAcces
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
         self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
@@ -2303,13 +2344,13 @@ class TinyHugeIslandCoinStar134AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
 
-class TinyHugeIslandCoinStar65AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
+class TinyHugeIslandCoinStar86AccessTestBase(TinyHugeIslandCoinStarAccessTestBase):
     options = {
         **TinyHugeIslandCoinStarAccessTestBase.options,
-        "tiny_huge_island_coin_star_requirement": 65,
+        "tiny_huge_island_coin_star_requirement": 86,
     }
 
-    def test_huge_piranha_area_coins_require_pipes_and_purple_switches(self):
+    def test_huge_piranha_area_and_final_tiny_main_coin_require_purple_switches(self):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
@@ -2327,7 +2368,7 @@ class TinyHugeIslandCoinStar12FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
         "tiny_huge_island_coin_star_requirement": 12,
     }
 
-    def test_huge_piranha_area_coins_count_from_tiny_when_huge_entrance_is_not_reachable(self):
+    def test_huge_piranha_area_connects_to_huge_main_when_huge_entrance_is_disabled(self):
         self.disable_huge_entry()
         self.collect_second_floor_access()
         self.collect([
@@ -2335,7 +2376,7 @@ class TinyHugeIslandCoinStar12FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
             self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
-        self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
@@ -2643,7 +2684,10 @@ class HazyMazeCaveCoinStar86CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTest
     def test_capless_triple_jump_coins_reach_coin_star(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
-        self.collect(self.get_item_by_name("Triple Jump"))
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Purple Switches"),
+        ])
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
@@ -2717,6 +2761,7 @@ class HazyMazeCaveCoinStar139AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
             self.get_item_by_name("Triple Jump"),
             self.get_item_by_name("Metal Cap"),
             self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Purple Switches"),
         ])
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
@@ -3250,6 +3295,11 @@ class BigBooHauntAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "logic_tricks": {
+            "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick",
+            "Big Boo's Haunt Third Floor with Side Flip",
+            "Big Boo's Haunt Roof without Long Jump",
+        },
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3283,6 +3333,22 @@ class BigBooHauntAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Big Boo's Haunt - Third Floor"))
         self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+
+    def test_third_floor_side_flip_trick(self):
+        self.collect_bbh_access()
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
+        self.assertFalse(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+
+    def test_roof_without_long_jump_trick(self):
+        self.collect_bbh_access()
+        self.collect([
+            self.get_item_by_name("Big Boo's Haunt - Staircase"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Roof"))
 
 
 class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
@@ -4071,6 +4137,7 @@ class TTCMovelessWallKickAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
+        "logic_tricks": {"Castle Tick Tock Clock Entrance With Wall Kick"},
     }
 
     def collect_third_floor_access(self):

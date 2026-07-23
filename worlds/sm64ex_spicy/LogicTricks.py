@@ -270,20 +270,17 @@ logic_tricks = {
     # Jolly Roger Bay
     "Jolly Roger Bay Upper Platform with Ledge Grab": {
         "name": "logic_jrb_upper_ledge_grab",
-        "notes for codex": "the upper region",
         "difficulty": "easy",
         "description": "Reaching the upper platform using Ledge Grab.",
     },
     "Jolly Roger Bay Upper Platform with Dive and Kick": {
         "name": "logic_jrb_upper_dive_and_kick",
-        "notes for codex": "the upper region",
         "difficulty": "medium",
         "description": "Reaching the upper platform using Dive and Kick.",
         "video": "https://www.youtube.com/watch?v=cfgz6terknE"
     },
     "Jolly Roger Bay Upper Platform with Cannon": {
         "name": "logic_jrb_upper_cannon",
-        "notes for codex": "the upper region",
         "difficulty": "easy",
         "description": "Reaching the upper platform using Cannon.",
     },
@@ -298,7 +295,7 @@ logic_tricks = {
     "Jolly Roger Bay Pillar Red Coin with Cannon": {
         "name": "logic_jrb_pillar_red_coin_cannon",
         "difficulty": "medium",
-        "description": "Reaching collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
+        "description": "Collecting the pillar red coin using the cannon.",
         "video": "https://www.youtube.com/watch?v=W7a8oRaTWZs"
     },
     "Jolly Roger Bay Stone Pillar without Cannon": {
