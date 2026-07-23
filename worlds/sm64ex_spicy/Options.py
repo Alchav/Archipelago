@@ -389,6 +389,32 @@ class PurpleSwitches(LevelFeatureItemMode):
     display_name = "Purple Switch Items"
 
 
+class CoinObjectUnlocks(LevelFeatureItemMode):
+    """
+    Choose how placed coins, coin formations, and coin-producing object unlocks are handled.
+
+    Not Shuffled - The game starts with every coin object unlocked.
+
+    Global - Shuffle one item for each object type. Object types without a global item use their level-specific item.
+
+    Individual - Shuffle separate level-specific items for every applicable coin object type.
+    """
+    display_name = "Coin Object Unlocks"
+
+
+class EnemyUnlocks(LevelFeatureItemMode):
+    """
+    Choose how enemy unlocks are handled.
+
+    Not Shuffled - The game starts with every affected enemy unlocked.
+
+    Global - Shuffle one item for each enemy type. Enemy types without a global item use their level-specific item.
+
+    Individual - Shuffle separate level-specific items for every applicable enemy type.
+    """
+    display_name = "Enemy Unlocks"
+
+
 class BowserStage1Ups(Choice):
     """
     Choose how Bowser stage 1-Up objects that normally depend on Bowser key flags are handled.
@@ -903,6 +929,8 @@ sm64_options_groups = [
         ShiftingSandLandPyramidElevator,
         RollingLogs,
         PurpleSwitches,
+        CoinObjectUnlocks,
+        EnemyUnlocks,
         BowserStage1Ups,
         WetDryWorldWaterLevelDiamond,
         TickTockClockSpinners,
@@ -968,6 +996,8 @@ class SM64Options(PerGameCommonOptions):
     shifting_sand_land_pyramid_elevator: ShiftingSandLandPyramidElevator
     rolling_logs: RollingLogs
     purple_switches: PurpleSwitches
+    coin_object_unlocks: CoinObjectUnlocks
+    enemy_unlocks: EnemyUnlocks
     bowser_stage_1ups: BowserStage1Ups
     wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
     tick_tock_clock_spinners: TickTockClockSpinners

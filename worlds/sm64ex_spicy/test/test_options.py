@@ -8,7 +8,10 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
-    cannon_item_data_table, painting_unlock_item_data_table, item_name_groups
+    cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
+    global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
+    global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
+    global_mode_enemy_item_names
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -666,6 +669,58 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
                 self.assertNotIn(item_name, precollected_names)
+
+
+class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    def test_all_unlock_items_are_start_inventory_slot_data_only(self):
+        unlock_items = {
+            **global_coin_object_item_data_table,
+            **per_level_coin_object_item_data_table,
+            **global_enemy_item_data_table,
+            **per_level_enemy_item_data_table,
+        }
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
+
+        self.assertEqual(len(unlock_items), 251)
+        for item_name, item_data in unlock_items.items():
+            with self.subTest(item=item_name):
+                self.assertEqual(start_inventory[item_data.code], 1)
+                self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+                self.assertNotIn(item_name, precollected_names)
+
+
+class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
+        "enemy_unlocks": Options.EnemyUnlocks.option_global,
+    }
+
+    def test_global_mode_unlock_items_are_generated(self):
+        expected_names = set(global_mode_coin_object_item_names) | set(global_mode_enemy_item_names)
+        self.assertEqual(len(expected_names), 43)
+        for item_name in expected_names:
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+                self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
+
+
+class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+    }
+
+    def test_individual_unlock_items_are_generated(self):
+        individual_items = {
+            **per_level_coin_object_item_data_table,
+            **per_level_enemy_item_data_table,
+        }
+        self.assertEqual(len(individual_items), 216)
+        for item_name in individual_items:
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+                self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
 
 
 class GroupedCastleKeyPoolTestBase(SM64TestBase):

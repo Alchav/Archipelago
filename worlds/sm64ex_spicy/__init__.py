@@ -7,7 +7,9 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
-    item_name_groups
+    item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
+    global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
+    global_mode_enemy_item_names
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
@@ -99,6 +101,8 @@ class SM64World(World):
         "shifting_sand_land_pyramid_elevator",
         "rolling_logs",
         "purple_switches",
+        "coin_object_unlocks",
+        "enemy_unlocks",
         "bowser_stage_1ups",
         "wet_dry_world_water_level_diamond",
         "tick_tock_clock_spinners",
@@ -292,6 +296,36 @@ class SM64World(World):
             return []
         return list(optional_item_data_table)
 
+    @staticmethod
+    def get_unlock_item_names(option, global_mode_item_names, per_level_item_data_table) -> typing.List[str]:
+        if option.value == option.option_global:
+            return list(global_mode_item_names)
+        if option.value == option.option_individual:
+            return list(per_level_item_data_table)
+        return []
+
+    def get_coin_object_unlock_item_names(self) -> typing.List[str]:
+        return self.get_unlock_item_names(
+            self.options.coin_object_unlocks,
+            global_mode_coin_object_item_names,
+            per_level_coin_object_item_data_table)
+
+    def get_enemy_unlock_item_names(self) -> typing.List[str]:
+        return self.get_unlock_item_names(
+            self.options.enemy_unlocks,
+            global_mode_enemy_item_names,
+            per_level_enemy_item_data_table)
+
+    def get_unrandomized_unlock_item_names(self) -> typing.List[str]:
+        item_names = []
+        if self.options.coin_object_unlocks.value == self.options.coin_object_unlocks.option_not_shuffled:
+            item_names += list(global_coin_object_item_data_table)
+            item_names += list(per_level_coin_object_item_data_table)
+        if self.options.enemy_unlocks.value == self.options.enemy_unlocks.option_not_shuffled:
+            item_names += list(global_enemy_item_data_table)
+            item_names += list(per_level_enemy_item_data_table)
+        return item_names
+
     def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
         if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_global:
             return ["Bowser Stage Extra 1-Ups"]
@@ -338,6 +372,8 @@ class SM64World(World):
             item_names += list(painting_unlock_item_data_table)
 
         item_names += self.get_action_item_names()
+        item_names += self.get_coin_object_unlock_item_names()
+        item_names += self.get_enemy_unlock_item_names()
 
         return item_names
 
@@ -485,7 +521,8 @@ class SM64World(World):
         for item_name in (
                 self.get_unrandomized_arbitrary_item_names()
                 + self.get_unrandomized_optional_item_names()
-                + self.get_unrandomized_bowser_stage_1up_item_names()):
+                + self.get_unrandomized_bowser_stage_1up_item_names()
+                + self.get_unrandomized_unlock_item_names()):
             item_id = item_table[item_name]
             start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
         return start_inventory
