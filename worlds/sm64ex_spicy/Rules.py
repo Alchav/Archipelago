@@ -361,6 +361,9 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
     has_whomps = has_unlock(
         state, player, "enemy_unlocks",
         "Whomps", f"{level_name} - Whomps")
+    has_thwomp = has_unlock(
+        state, player, "enemy_unlocks",
+        "Thwomp", f"{level_name} - Thwomp")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Whomp%27s_Fortress&oldid=19913
 
@@ -393,9 +396,12 @@ def whomps_fortress_coins(state: CollectionState, player: int, coins: int) -> bo
     # 3 Piranha Plants
     if has_piranha_plants:
         reachable_coins += 15
-    # 6 Red Coins
+    # 5 initially reachable Red Coins
     if has_red_coins:
-        reachable_coins += 12
+        reachable_coins += 10
+    # Red Coin on a Thwomp
+    if has_red_coins and has_thwomp:
+        reachable_coins += 2
 
     can_reach_wild_blue_coins = (
         state.has("Whomp's Fortress - Cannon Unlock", player)
@@ -1823,8 +1829,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Cool, Cool Mountain - Wall Kicks Will Work",
         "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
     # Big Boo's Haunt
-    rf.assign_rule("Big Boo's Haunt - Go on a Ghost Hunt", "BOOS")
-    rf.assign_rule("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", "BBH_MERRY_GO_ROUND & BOOS")
+    rf.assign_rule("Big Boo's Haunt - Go on a Ghost Hunt", "BOOS & BIG_BOO")
+    rf.assign_rule(
+        "Big Boo's Haunt - Ride Big Boo's Merry-Go-Round",
+        "BBH_MERRY_GO_ROUND & BOOS & BIG_BOO")
     rf.assign_rule(
         "Big Boo's Haunt - Second Floor",
         "BBH_STAIRCASE | logic_bbh_third_floor_triple_jump_wall_kick | "
@@ -1833,6 +1841,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Big Boo's Haunt - Third Floor",
         "WK+LG | logic_bbh_third_floor_wall_kick | logic_bbh_third_floor_side_flip")
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
+    rf.assign_rule("Big Boo's Haunt - Big Boo's Balcony", "BIG_BOO")
     rf.assign_rule("Big Boo's Haunt - Secret of the Haunted Books", "KK")
     rf.assign_rule("Big Boo's Haunt - Seek the 8 Red Coins", "RED_COINS & BF/WK/TJ/SF")
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
@@ -1918,6 +1927,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "logic_ssl_one_red_coin_with_shy_guy_spin_jump")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
+    rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "THWOMP")
     rf.assign_rule(
         "Shifting Sand Land - Pyramid Right Path 1-Up",
         "{Shifting Sand Land - Upper Pyramid} | CL/TJ/SF/BF")
@@ -2007,7 +2017,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
     rf.assign_rule("Tick Tock Clock - Midway Up Block 1-Up", "TTC_SPINNERS | LJ+LG")
     rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "TTC_SPINNERS")
-    rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving}")
+    rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving} & THWOMP")
     # Rainbow Ride
     rf.assign_rule("Rainbow Ride - Beneath the Pole", "LJ/TJ/DV")
     rf.assign_rule("Rainbow Ride - Maze", "CL")
@@ -2547,6 +2557,12 @@ class RuleFactory:
         item_names["EYEROK"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Shifting Sand Land - Eyerok", "Shifting Sand Land - Eyerok")
+        item_names["BIG_BOO"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Big Boo's Haunt - Big Boo", "Big Boo's Haunt - Big Boo")
+        item_names["THWOMP"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Thwomp", f"{level_name} - Thwomp")
         item_names["BOOS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Boos", f"{level_name} - Boos")

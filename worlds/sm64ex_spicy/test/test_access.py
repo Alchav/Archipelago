@@ -2046,7 +2046,7 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
     def test_initial_coin_sources_are_counted_independently(self):
         source_coins = {
             "Whomp's Fortress - Single Yellow Coins": 4,
-            "Whomp's Fortress - Red Coins": 12,
+            "Whomp's Fortress - Red Coins": 10,
             "Whomp's Fortress - Horizontal Coin Lines": 20,
             "Whomp's Fortress - Horizontal Coin Rings": 16,
             "Whomp's Fortress - Throwable Cork Boxes": 6,
@@ -2063,6 +2063,15 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
                 self.assertFalse(whomps_fortress_coins(
                     self.multiworld.state, self.player, expected_coins + 1))
                 self.remove(item)
+
+    def test_thwomp_unlock_adds_its_red_coin(self):
+        self.collect(self.get_item_by_name("Whomp's Fortress - Red Coins"))
+        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 11))
+
+        self.collect(self.get_item_by_name("Whomp's Fortress - Thwomp"))
+        self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 12))
+        self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 13))
 
     def test_ground_pound_sources_use_their_own_unlocks(self):
         self.collect(self.get_item_by_name("Ground Pound"))
@@ -2081,7 +2090,7 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
 
         source_coins = {
-            "Whomp's Fortress - Red Coins": 16,
+            "Whomp's Fortress - Red Coins": 14,
             "Whomp's Fortress - Horizontal Coin Rings": 24,
             "Whomp's Fortress - Coin Arrows": 8,
         }
@@ -4340,6 +4349,9 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
         self.collect(self.get_item_by_name("Big Boo's Haunt - Boos"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Big Boo"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
 
@@ -4350,6 +4362,20 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Eye to Eye in the Secret Room"))
         self.collect(self.get_item_by_name("Big Boo's Haunt - Mr. Is"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Eye to Eye in the Secret Room"))
+
+    def test_balcony_requires_big_boo(self):
+        self.collect_bbh_access()
+        self.collect_by_name([
+            "Big Boo's Haunt - Staircase",
+            "Wall Kick",
+            "Ledge Grab",
+            "Long Jump",
+        ])
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Roof"))
+        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Big Boo's Balcony"))
+
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Big Boo"))
+        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Big Boo's Balcony"))
 
 
 class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
@@ -5041,6 +5067,34 @@ class TTCVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
         self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
+
+
+class ThwompUnlockAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def test_ssl_thwomp_1up_requires_thwomp(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.assertFalse(
+            self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
+
+        self.collect(self.get_item_by_name("Shifting Sand Land - Thwomp"))
+        self.assertTrue(
+            self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
+
+    def test_ttc_star_requires_thwomp(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Stomp on the Thwomp"))
+
+        self.collect(self.get_item_by_name("Tick Tock Clock - Thwomp"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Stomp on the Thwomp"))
 
 
 class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):

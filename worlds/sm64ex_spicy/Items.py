@@ -632,6 +632,7 @@ global_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Whomps": SM64ItemData(3626585, progression),
     "Monty Moles": SM64ItemData(3626838, useful),
     "Big Bully": SM64ItemData(3626839, progression),
+    "Thwomp": SM64ItemData(3626845, progression),
 }
 
 
@@ -696,6 +697,10 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Tall, Tall Mountain - Monty Moles": SM64ItemData(3626841, useful),
     "Lethal Lava Land - Big Bullies": SM64ItemData(3626842, progression),
     "Snowman's Land - Chill Bully": SM64ItemData(3626843, useful),
+    "Big Boo's Haunt - Big Boo": SM64ItemData(3626844, progression),
+    "Whomp's Fortress - Thwomp": SM64ItemData(3626846, progression),
+    "Shifting Sand Land - Thwomp": SM64ItemData(3626847, progression),
+    "Tick Tock Clock - Thwomp": SM64ItemData(3626848, progression),
 }
 
 
@@ -744,6 +749,8 @@ global_mode_enemy_item_names = (
     "Shifting Sand Land - Pokeys",
     "Wet-Dry World - Skeeters",
     "Hazy Maze Cave - Swoops",
+    "Big Boo's Haunt - Big Boo",
+    "Thwomp",
 )
 
 item_data_table = {
