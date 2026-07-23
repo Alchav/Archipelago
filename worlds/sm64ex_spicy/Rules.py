@@ -412,26 +412,66 @@ def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> boo
             has_basic_movement and has_climb
             or allows_moveless(state, player) and has_action(state, player, "Wall Kick", level_name))
 
-    reachable_coins = 75
+    # https://ukikipedia.net/mediawiki/index.php?title=Hazy_Maze_Cave&oldid=19918
+
+    # Line of coins right of start
+    reachable_coins = 5
+    # Line of coins before the maze
+    reachable_coins += 5
+    # Line of coins next to rolling rocks
+    reachable_coins += 5
+    # Ring of coins around exclamation block, before lake
+    reachable_coins += 8
+    # 2 Scuttlebugs in first room
+    reachable_coins += 6
+    # Scuttlebug in pit room
+    reachable_coins += 3
+    # Swooper in pit room
+    reachable_coins += 1
+    # 2 Scuttlebugs in Red Coin room
+    reachable_coins += 6
+    # 4 Snufits in Hazy Maze
+    reachable_coins += 8
+    # 4 Swoopers in Hazy Maze
+    reachable_coins += 4
+
     if has_basic_movement:
-        reachable_coins += 4
+        ## Red Coin room
+        # 4 Red Coins
+        reachable_coins += 8
+        #2 Mr Is
+        reachable_coins += 10
+        ## Pit Island elevator room
+        # 2 Swoopers
+        reachable_coins += 2
     if has_platform_route and (has_long_jump or has_checkerboards):
-        reachable_coins += 2
+        # 2 Red Coins
+        reachable_coins += 4
     if has_platform_route and has_checkerboards:
+        # 2 Red Coins
+        reachable_coins += 4
+        # 2 Swoopers
         reachable_coins += 2
-    if state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player) and has_action(
-            state, player, "Climb", level_name):
-        reachable_coins += 5
+    if (state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player)
+            and has_action(state, player, "Climb", level_name)):
+            # Line of coins on the hangable ceiling
+            reachable_coins += 5
     if has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST"):
+        # Ring of coins around the "Swimming Beast in the Cavern" star
         reachable_coins += 8
     if state.can_reach("Hazy Maze Cave - Navigating the Toxic Maze", "Location", player):
+        # Line of coins to "Navigating the Toxic Maze" Star
         reachable_coins += 5
+        # 2 Swoopers
+        reachable_coins += 2
     if has_purple_switches(state, player, level_name) and (
             has_metal_cap(state, player, "Hazy Maze Cave")
             or allows_capless(state, player) and has_action(state, player, "Triple Jump", level_name)):
         reachable_coins += 3
     if has_action(state, player, "Ground Pound", level_name):
+        # Blue coin block (in maze)
         reachable_coins += 35
+    assert coins <= 139
     return coins <= reachable_coins
 
 
@@ -459,6 +499,18 @@ def shifting_sand_land_coins(state: CollectionState, player: int, coins: int) ->
 
 def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Jolly Roger Bay"
+    has_pillar_red_coin_moves = (
+        can_use_logic_trick(
+            state, player, "logic_jrb_pillar_red_coin_moves",
+            "Jolly Roger Bay - Coins Star")
+    )
+    has_pillar_red_coin_cannon = (
+        can_use_logic_trick(
+            state, player, "logic_jrb_pillar_red_coin_cannon",
+            "Jolly Roger Bay - Coins Star")
+    )
+    has_upper = state.can_reach("Jolly Roger Bay - Upper", "Region", player)
+    has_raised_ship = state.has("Jolly Roger Bay - Raised Ship", player)
 
     # https://ukikipedia.net/mediawiki/index.php?title=Jolly_Roger_Bay&oldid=20489
 
@@ -479,23 +531,10 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
     # 4 Red Coins
     reachable_coins += 8
 
-    has_pillar_red_coin_moves = (
-        can_use_logic_trick(
-            state, player, "logic_jrb_pillar_red_coin_moves",
-            "Jolly Roger Bay - Coins Star")
-    )
-    has_pillar_red_coin_cannon = (
-        can_use_logic_trick(
-            state, player, "logic_jrb_pillar_red_coin_cannon",
-            "Jolly Roger Bay - Coins Star")
-    )
-    if (has_action(state, player, "Climb", level_name)
-            or has_pillar_red_coin_moves
-            or has_pillar_red_coin_cannon):
+
+    if has_action(state, player, "Climb", level_name) or has_pillar_red_coin_moves or has_pillar_red_coin_cannon:
         # Pillar Red Coin
         reachable_coins += 2
-    has_upper = state.can_reach("Jolly Roger Bay - Upper", "Region", player)
-    has_raised_ship = state.has("Jolly Roger Bay - Raised Ship", player)
     if has_upper:
         # Vertical line of coins before the purple switch (2 of them)
         reachable_coins += 2
@@ -504,11 +543,9 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
         if has_raised_ship:
             # 3 Red Coins
             reachable_coins += 6
-        elif (
-                can_use_logic_trick(
-                    state, player, "logic_jrb_ship_red_coin_with_long_jump",
-                    "Jolly Roger Bay - Coins Star")
-                or has_purple_switches(state, player, level_name)):
+        elif (can_use_logic_trick(state, player, "logic_jrb_ship_red_coin_with_long_jump",
+                                  "Jolly Roger Bay - Coins Star")
+              or has_purple_switches(state, player, level_name)):
             # 1 Red Coin
             reachable_coins += 2
     if has_action(state, player, "Ground Pound", level_name):
