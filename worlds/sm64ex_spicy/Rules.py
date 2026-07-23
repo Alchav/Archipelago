@@ -695,65 +695,167 @@ def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> boo
     return coins <= reachable_coins
 
 
+def has_lethal_lava_land_healing_coins(state: CollectionState, player: int) -> bool:
+    level_name = "Lethal Lava Land"
+    return any((
+        has_unlock(
+            state, player, "coin_object_unlocks",
+            "Single Yellow Coins", f"{level_name} - Single Yellow Coins"),
+        has_unlock(
+            state, player, "coin_object_unlocks",
+            "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines"),
+        has_unlock(
+            state, player, "coin_object_unlocks",
+            "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings"),
+        has_unlock(
+            state, player, "enemy_unlocks",
+            "Bullies", f"{level_name} - Bullies"),
+        has_unlock(
+            state, player, "enemy_unlocks",
+            "Mr. Is", f"{level_name} - Mr. Is"),
+    ))
+
+
+def can_collect_all_lethal_lava_land_red_coins(
+        state: CollectionState, player: int, target_name: str) -> bool:
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Lethal Lava Land - Bowser Puzzle", "Lethal Lava Land - Bowser Puzzle"):
+        return True
+    has_lava_crossing = (
+        state.has("Lethal Lava Land - Koopa Shell", player)
+        or can_use_logic_trick(state, player, "logic_lll_bouncing_off_lava", target_name)
+    )
+    return has_lava_crossing and has_lethal_lava_land_healing_coins(state, player)
+
+
+def can_reach_lethal_lava_land_red_coins(
+        state: CollectionState, player: int, target_name: str) -> bool:
+    return (
+        has_unlock(
+            state, player, "coin_object_unlocks",
+            "Lethal Lava Land - Bowser Puzzle", "Lethal Lava Land - Bowser Puzzle")
+        or state.has("Lethal Lava Land - Koopa Shell", player)
+        or can_use_logic_trick(state, player, "logic_lll_bouncing_off_lava", target_name)
+    )
+
+
 def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> bool:
+    level_name = "Lethal Lava Land"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_crazy_box = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Crazy Boxes", f"{level_name} - Crazy Box")
+    has_bowser_puzzle = has_unlock(
+        state, player, "coin_object_unlocks",
+        f"{level_name} - Bowser Puzzle", f"{level_name} - Bowser Puzzle")
+    has_bullies = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bullies", f"{level_name} - Bullies")
+    has_mr_is = has_unlock(
+        state, player, "enemy_unlocks",
+        "Mr. Is", f"{level_name} - Mr. Is")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Lethal_Lava_Land&oldid=19919
 
     # Line of coins on tilting platform past first Mr. I
-    reachable_coins = 5
+    reachable_coins = 5 if has_horizontal_coin_lines else 0
     # Three coins on grey ramp near tilting platform
-    reachable_coins += 3
+    if has_single_yellow_coins:
+        reachable_coins += 3
     # Five coins for completing Bowser puzzle
-    reachable_coins += 5
+    if has_bowser_puzzle:
+        reachable_coins += 5
     # Line of coins on sinking platform right before first Big Bully
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # Ring of coins on second Big Bully platform
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Five coins on high brown ramp in north-west corner
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # Four coins on sinking platforms, between crazy box & second Big Bully
-    reachable_coins += 4
+    if has_single_yellow_coins:
+        reachable_coins += 4
     # Line of coins on sinking platform, north of volcano
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # "Four Ring of coins on platform with 2 bullies" (it's just one ring?)
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Three coins on spinning platform around volcano
-    reachable_coins += 3
+    if has_single_yellow_coins:
+        reachable_coins += 3
     # Four coins on small grey ramp, south-east from volcano (with 1UP)
-    reachable_coins += 4
+    if has_single_yellow_coins:
+        reachable_coins += 4
     # Ring of coins with second Mr. I
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # Crazy Box
-    reachable_coins += 5
+    if has_crazy_box:
+        reachable_coins += 5
     # 8 Red Coins
-    reachable_coins += 16
+    if (has_red_coins
+            and can_reach_lethal_lava_land_red_coins(
+                state, player, "Lethal Lava Land - Coins Star")):
+        # Five do not require additional healing once the lava area is reachable.
+        reachable_coins += 10
+        if can_collect_all_lethal_lava_land_red_coins(
+                state, player, "Lethal Lava Land - Coins Star"):
+            reachable_coins += 6
     # 8 Bullies outside
-    reachable_coins += 8
+    if has_bullies:
+        reachable_coins += 8
     # 2 Mr Is
-    reachable_coins += 10
+    if has_mr_is:
+        reachable_coins += 10
 
-    if (state.has("Lethal Lava Land - Koopa Shell", player)
-            or can_use_logic_trick(state, player, "logic_lll_bouncing_off_lava", "Lethal Lava Land - Coins Star")):
+    if (has_single_yellow_coins
+            and (state.has("Lethal Lava Land - Koopa Shell", player)
+                 or can_use_logic_trick(
+                    state, player, "logic_lll_bouncing_off_lava", "Lethal Lava Land - Coins Star"))):
         # Line of coins under bridge
         reachable_coins += 5
 
     # (Inside the Volcano) Three coins on S-shaped island at bottom of volcano, by lavafall
-    reachable_coins += 3
+    if has_single_yellow_coins:
+        reachable_coins += 3
     # (Inside the Volcano) Five coins on first ridge going up
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # (Inside the Volcano) Two coins on second ridge going up (with first bully)
-    reachable_coins += 2
+    if has_single_yellow_coins:
+        reachable_coins += 2
     # (Inside the Volcano) Four coins on floating platforms (with the spinning heart)
-    reachable_coins += 4
+    if has_single_yellow_coins:
+        reachable_coins += 4
     # (Inside the Volcano) Singular coin after the floating platforms (from above line)
-    reachable_coins += 1
+    if has_single_yellow_coins:
+        reachable_coins += 1
     # (Inside the Volcano) Line of coins, with the second bully, on platform beside waterfall
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # (Inside the Volcano) Singular coin by checker-board lift, left from beginning
-    reachable_coins += 1
+    if has_single_yellow_coins:
+        reachable_coins += 1
     # Bullies inside
-    reachable_coins += 2
-    if state.can_reach("Lethal Lava Land - Elevator Tour in the Volcano", "Location", player):
+    if has_bullies:
+        reachable_coins += 2
+    if (has_single_yellow_coins
+            and state.can_reach("Lethal Lava Land - Elevator Tour in the Volcano", "Location", player)):
         # (Inside the Volcano) Three coins on tiny floating platforms, by "Elevator Tour in the Volcano"
         reachable_coins += 3
     assert reachable_coins <= 133
@@ -1693,6 +1795,26 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     # Lethal Lava Land
+    add_rule(
+        multiworld.get_location("Lethal Lava Land - Boil the Big Bully", player),
+        lambda state: has_unlock(
+            state, player, "enemy_unlocks",
+            "Big Bully", "Lethal Lava Land - Big Bullies"))
+    add_rule(
+        multiworld.get_location("Lethal Lava Land - Bully the Bullies", player),
+        lambda state: (
+            has_unlock(state, player, "enemy_unlocks", "Bullies", "Lethal Lava Land - Bullies")
+            and has_unlock(state, player, "enemy_unlocks", "Big Bully", "Lethal Lava Land - Big Bullies")
+        ))
+    add_rule(
+        multiworld.get_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces", player),
+        lambda state: (
+            has_unlock(
+                state, player, "coin_object_unlocks",
+                "Red Coins", "Lethal Lava Land - Red Coins")
+            and can_collect_all_lethal_lava_land_red_coins(
+                state, player, "Lethal Lava Land - 8-Coin Puzzle with 15 Pieces")
+        ))
     rf.assign_rule(
         "Lethal Lava Land - Red-Hot Log Rolling",
         "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | logic_lll_bouncing_off_lava")

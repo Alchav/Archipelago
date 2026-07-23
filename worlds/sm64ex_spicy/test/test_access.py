@@ -2,7 +2,7 @@ from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
 from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
-    big_boos_haunt_coins, jolly_roger_bay_coins, get_per_level_action_item_name
+    big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -3133,6 +3133,114 @@ class HazyMazeCaveCoinStar139AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+    }
+
+    def collect_basement_access(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+
+    def test_initial_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Lethal Lava Land - Single Yellow Coins": 25,
+            "Lethal Lava Land - Horizontal Coin Lines": 30,
+            "Lethal Lava Land - Horizontal Coin Rings": 24,
+            "Lethal Lava Land - Crazy Box": 5,
+            "Lethal Lava Land - Bowser Puzzle": 5,
+            "Lethal Lava Land - Bullies": 10,
+            "Lethal Lava Land - Mr. Is": 10,
+        }
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(lethal_lava_land_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(lethal_lava_land_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_red_coins_require_a_lava_route(self):
+        self.collect(self.get_item_by_name("Lethal Lava Land - Red Coins"))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 1))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 11))
+
+    def test_single_yellow_coin_routes(self):
+        self.collect(self.get_item_by_name("Lethal Lava Land - Single Yellow Coins"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 30))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 31))
+
+    def test_red_coin_star_requires_red_coins_and_bowser_puzzle(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Red Coins"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Bowser Puzzle"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 21))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 22))
+
+    def test_last_three_red_coins_need_a_route_and_healing_coins(self):
+        self.collect([
+            self.get_item_by_name("Lethal Lava Land - Red Coins"),
+            self.get_item_by_name("Lethal Lava Land - Koopa Shell"),
+        ])
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 11))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Crazy Box"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 15))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 16))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Horizontal Coin Rings"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 45))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 46))
+
+    def test_koopa_shell_red_coin_route_still_needs_healing_coins_for_star(self):
+        self.collect_basement_access()
+        self.collect([
+            self.get_item_by_name("Lethal Lava Land - Red Coins"),
+            self.get_item_by_name("Lethal Lava Land - Koopa Shell"),
+        ])
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Crazy Box"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Horizontal Coin Lines"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
+
+    def test_big_bully_stars_require_their_enemies(self):
+        self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Boil the Big Bully"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Bully the Bullies"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Big Bullies"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Boil the Big Bully"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Bully the Bullies"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Bullies"))
+        self.assertTrue(self.can_reach_location("Lethal Lava Land - Bully the Bullies"))
 
 
 class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
