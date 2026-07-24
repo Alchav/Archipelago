@@ -5,7 +5,8 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
-    wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, get_per_level_action_item_name
+    wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
+    get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -2122,26 +2123,98 @@ class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
 
     def test_bowser_in_the_sky_coin_sources(self):
         self.collect_bowser_in_the_sky_access()
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - 23 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - 24 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 27 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 28 Coins"))
 
         self.collect(self.get_item_by_name("Ground Pound"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - 33 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - 34 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 32 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 33 Coins"))
 
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Chuckya"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - 42 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - 43 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 44 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 45 Coins"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - 60 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - 61 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 61 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 62 Coins"))
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
         self.assertTrue(self.can_reach_location("Bowser in the Sky - 76 Coins"))
+
+
+class BowserInTheSkyIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_full_bowser_in_the_sky_route(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect_by_name([
+            "Ground Pound",
+            "Side Flip",
+            "Climb",
+            "Purple Switches",
+        ])
+        self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
+
+    def test_each_unlock_matches_documented_total(self):
+        self.collect_full_bowser_in_the_sky_route()
+        source_coins = {
+            "Bowser in the Sky - Single Yellow Coins": 12,
+            "Bowser in the Sky - Red Coins": 16,
+            "Bowser in the Sky - Horizontal Coin Lines": 20,
+            "Bowser in the Sky - Bob-ombs": 4,
+            "Bowser in the Sky - Chuckya": 5,
+            "Bowser in the Sky - Fire Piranha Plants": 2,
+            "Bowser in the Sky - Goombas": 7,
+            "Bowser in the Sky - Whomp": 10,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(bowser_in_the_sky_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(bowser_in_the_sky_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_whomp_ground_pound_adds_second_five_coins(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Bowser in the Sky - Whomp"))
+        self.assertTrue(bowser_in_the_sky_coins(
+            self.multiworld.state, self.player, 5))
+        self.assertFalse(bowser_in_the_sky_coins(
+            self.multiworld.state, self.player, 6))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(bowser_in_the_sky_coins(
+            self.multiworld.state, self.player, 10))
+
+    def test_all_unlocks_total_76_coins(self):
+        self.collect_full_bowser_in_the_sky_route()
+        self.collect([
+            self.get_item_by_name("Bowser in the Sky - Single Yellow Coins"),
+            self.get_item_by_name("Bowser in the Sky - Red Coins"),
+            self.get_item_by_name("Bowser in the Sky - Horizontal Coin Lines"),
+            self.get_item_by_name("Bowser in the Sky - Bob-ombs"),
+            self.get_item_by_name("Bowser in the Sky - Chuckya"),
+            self.get_item_by_name("Bowser in the Sky - Fire Piranha Plants"),
+            self.get_item_by_name("Bowser in the Sky - Goombas"),
+            self.get_item_by_name("Bowser in the Sky - Whomp"),
+        ])
+        self.assertTrue(bowser_in_the_sky_coins(
+            self.multiworld.state, self.player, 76))
 
 
 class BowserInTheFireSeaCoinsanityAccessTestBase(SM64TestBase):

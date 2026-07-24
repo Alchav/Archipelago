@@ -1697,52 +1697,93 @@ def bowser_in_the_fire_sea_coins(state: CollectionState, player: int, coins: int
 
 def bowser_in_the_sky_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bowser in the Sky"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_bob_ombs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-ombs")
+    has_chuckya = has_unlock(
+        state, player, "enemy_unlocks",
+        "Chuckyas", f"{level_name} - Chuckya")
+    has_fire_piranha_plants = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fire Piranha Plants", f"{level_name} - Fire Piranha Plants")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_whomp = has_unlock(
+        state, player, "enemy_unlocks",
+        "Whomps", f"{level_name} - Whomp")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Bowser_in_the_Sky&oldid=18921
 
     # 3 coins on the tilting "W" platform
-    reachable_coins = 3
+    reachable_coins = 3 if has_single_yellow_coins else 0
     # 2 Goombas
-    reachable_coins += 2
+    if has_goombas:
+        reachable_coins += 2
     # 3 Red Coins
-    reachable_coins += 6
+    if has_red_coins:
+        reachable_coins += 6
     # 1 Fire Piranha Plant
-    reachable_coins += 1
+    if has_fire_piranha_plants:
+        reachable_coins += 1
     # 2 lines of coins on the long platform under the whomp
-    reachable_coins += 10
-    # 1 Whomp
-    reachable_coins += 5
-
-    if has_action(state, player, "Ground Pound", level_name):
-        # Whomp ground pound
+    if has_horizontal_coin_lines:
+        reachable_coins += 10
+    if has_whomp:
+        # Jumping on the Whomp yields five coins; Ground Pound yields the other five.
         reachable_coins += 5
+        if has_action(state, player, "Ground Pound", level_name):
+            # Whomp ground pound
+            reachable_coins += 5
     if state.can_reach("Bowser in the Sky - Chuckya", "Region", player):
         # Chuckya
-        reachable_coins += 5
+        if has_chuckya:
+            reachable_coins += 5
         # 1 Goomba
-        reachable_coins += 1
-        # 6 coins after the first ! switch, on the raised steps (3 of them)
-        reachable_coins += 6
+        if has_goombas:
+            reachable_coins += 1
+        # 6 coins after the first ! switch, on the raised steps
+        if has_single_yellow_coins:
+            reachable_coins += 6
     if state.can_reach("Bowser in the Sky - Arrow Ride", "Region", player):
         # Line of coins on the suction-cup platform (by the 4th red coin)
-        reachable_coins += 5
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
         # 3 Red Coins
-        reachable_coins += 6
+        if has_red_coins:
+            reachable_coins += 6
         # After the 5th red coin, 3 coins on the edges of a spinning platform
-        reachable_coins += 3
+        if has_single_yellow_coins:
+            reachable_coins += 3
         # 2 Bob-ombs
-        reachable_coins += 2
+        if has_bob_ombs:
+            reachable_coins += 2
         # 1 Fire Piranha Plant
-        reachable_coins += 1
+        if has_fire_piranha_plants:
+            reachable_coins += 1
     if state.can_reach("Bowser in the Sky - Top", "Region", player):
         # 4 Goombas
-        reachable_coins += 4
+        if has_goombas:
+            reachable_coins += 4
         # 2 Bob-ombs
-        reachable_coins += 2
+        if has_bob_ombs:
+            reachable_coins += 2
         # 2 Red Coin
-        reachable_coins += 4
+        if has_red_coins:
+            reachable_coins += 4
         # Line of coins before the last rotating platforms
-        reachable_coins += 5
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+    assert reachable_coins <= 76
     return coins <= reachable_coins
 
 
