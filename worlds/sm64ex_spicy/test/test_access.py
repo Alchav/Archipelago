@@ -6,7 +6,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
-    get_per_level_action_item_name
+    hazy_maze_cave_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -3930,6 +3930,73 @@ class HazyMazeCaveCoinStar139AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
+class HazyMazeCaveIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_full_hazy_maze_cave_route(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
+        self.collect_by_name([
+            "Triple Jump",
+            "Long Jump",
+            "Ground Pound",
+            "Climb",
+            "Metal Cap",
+            "Checkerboard Platforms",
+            "Purple Switches",
+            "Hazy Maze Cave - Swimming Beast",
+        ])
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Pit Islands"))
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Navigating the Toxic Maze"))
+
+    def test_each_unlock_matches_documented_total(self):
+        self.collect_full_hazy_maze_cave_route()
+        source_coins = {
+            "Hazy Maze Cave - Single Yellow Coins": 5,
+            "Hazy Maze Cave - Red Coins": 16,
+            "Hazy Maze Cave - Blue Coin Block": 35,
+            "Hazy Maze Cave - Horizontal Coin Lines": 20,
+            "Hazy Maze Cave - Horizontal Coin Rings": 16,
+            "Hazy Maze Cave - Mr. Is": 10,
+            "Hazy Maze Cave - Scuttlebugs": 18,
+            "Hazy Maze Cave - Snufits": 8,
+            "Hazy Maze Cave - Swoops": 11,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(hazy_maze_cave_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(hazy_maze_cave_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_all_unlocks_total_139_coins(self):
+        self.collect_full_hazy_maze_cave_route()
+        self.collect_by_name([
+            "Hazy Maze Cave - Single Yellow Coins",
+            "Hazy Maze Cave - Red Coins",
+            "Hazy Maze Cave - Blue Coin Block",
+            "Hazy Maze Cave - Horizontal Coin Lines",
+            "Hazy Maze Cave - Horizontal Coin Rings",
+            "Hazy Maze Cave - Mr. Is",
+            "Hazy Maze Cave - Scuttlebugs",
+            "Hazy Maze Cave - Snufits",
+            "Hazy Maze Cave - Swoops",
+        ])
+        self.assertTrue(hazy_maze_cave_coins(
+            self.multiworld.state, self.player, 139))
 
 
 class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):

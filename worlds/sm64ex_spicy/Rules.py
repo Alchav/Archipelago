@@ -629,6 +629,33 @@ def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> boo
 
 def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Hazy Maze Cave"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Block", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_mr_is = has_unlock(
+        state, player, "enemy_unlocks",
+        "Mr. Is", f"{level_name} - Mr. Is")
+    has_scuttlebugs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Scuttlebugs", f"{level_name} - Scuttlebugs")
+    has_snufits = has_unlock(
+        state, player, "enemy_unlocks",
+        "Snufits", f"{level_name} - Snufits")
+    has_swoops = has_unlock(
+        state, player, "enemy_unlocks",
+        "Swoops", f"{level_name} - Swoops")
     has_basic_movement = any(has_action(state, player, action, level_name)
                              for action in ("Wall Kick", "Ledge Grab", "Backflip", "Side Flip", "Triple Jump"))
     has_long_jump = has_action(state, player, "Long Jump", level_name)
@@ -641,60 +668,79 @@ def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> boo
     # https://ukikipedia.net/mediawiki/index.php?title=Hazy_Maze_Cave&oldid=19918
 
     # Line of coins right of start
-    reachable_coins = 5
+    reachable_coins = 5 if has_horizontal_coin_lines else 0
     # Line of coins before the maze
-    reachable_coins += 5
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
     # Line of coins next to rolling rocks
-    reachable_coins += 5
+    if has_single_yellow_coins:
+        reachable_coins += 5
     # Ring of coins around exclamation block, before lake
-    reachable_coins += 8
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
     # 2 Scuttlebugs in first room
-    reachable_coins += 6
+    if has_scuttlebugs:
+        reachable_coins += 6
     # Scuttlebug in pit room
-    reachable_coins += 3
+    if has_scuttlebugs:
+        reachable_coins += 3
     # Swooper in pit room
-    reachable_coins += 1
+    if has_swoops:
+        reachable_coins += 1
     # 2 Scuttlebugs in Red Coin room
-    reachable_coins += 6
+    if has_scuttlebugs:
+        reachable_coins += 6
     # 4 Snufits in Hazy Maze
-    reachable_coins += 8
+    if has_snufits:
+        reachable_coins += 8
     # 4 Swoopers in Hazy Maze
-    reachable_coins += 4
+    if has_swoops:
+        reachable_coins += 4
 
     if has_basic_movement:
-        ## Red Coin room
+        # Red Coin room
         # 4 Red Coins
-        reachable_coins += 8
-        #2 Mr Is
-        reachable_coins += 10
-        ## Pit Island elevator room
+        if has_red_coins:
+            reachable_coins += 8
+        # 2 Mr Is
+        if has_mr_is:
+            reachable_coins += 10
+        # Pit Island elevator room
         # 2 Swoopers
-        reachable_coins += 2
-    if has_platform_route and (has_long_jump or has_checkerboards):
+        if has_swoops:
+            reachable_coins += 2
+    if has_red_coins and has_platform_route and (has_long_jump or has_checkerboards):
         # 2 Red Coins
         reachable_coins += 4
-    if has_platform_route and has_checkerboards:
+    if has_red_coins and has_platform_route and has_checkerboards:
         # 2 Red Coins
         reachable_coins += 4
+    if has_swoops and has_platform_route and has_checkerboards:
         # 2 Swoopers
         reachable_coins += 2
     if (state.can_reach("Hazy Maze Cave - Pit Islands", "Region", player)
-            and has_action(state, player, "Climb", level_name)):
-            # Line of coins on the hangable ceiling
-            reachable_coins += 5
-    if has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST"):
+            and has_action(state, player, "Climb", level_name)
+            and has_horizontal_coin_lines):
+        # Line of coins on the hangable ceiling
+        reachable_coins += 5
+    if (has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST")
+            and has_horizontal_coin_rings):
         # Ring of coins around the "Swimming Beast in the Cavern" star
         reachable_coins += 8
     if state.can_reach("Hazy Maze Cave - Navigating the Toxic Maze", "Location", player):
         # Line of coins to "Navigating the Toxic Maze" Star
-        reachable_coins += 5
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
         # 2 Swoopers
-        reachable_coins += 2
+        if has_swoops:
+            reachable_coins += 2
     if has_purple_switches(state, player, level_name) and (
             has_metal_cap(state, player, "Hazy Maze Cave")
             or allows_capless(state, player) and has_action(state, player, "Triple Jump", level_name)):
-        reachable_coins += 3
-    if has_action(state, player, "Ground Pound", level_name):
+        # 1 Scuttlebug
+        if has_scuttlebugs:
+            reachable_coins += 3
+    if has_blue_coin_block and has_action(state, player, "Ground Pound", level_name):
         # Blue coin block (in maze)
         reachable_coins += 35
     assert reachable_coins <= 139
