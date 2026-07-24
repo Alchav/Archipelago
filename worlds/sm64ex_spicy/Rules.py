@@ -1617,9 +1617,9 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
     has_tiny_piranha_movement = has_triple_jump or has_long_jump or has_ledge_grab
     has_cannonball_movement = has_ledge_grab or has_side_flip or has_backflip or has_triple_jump
     has_upper_movement = has_side_flip or has_backflip or has_triple_jump
-    has_fly_guy_ascent = has_fly_guy and can_use_logic_trick(
+    has_fly_guy_ascent = can_use_logic_trick(
         state, player, "logic_thi_windswept_valley_fly_guy_spin_jump", f"{level_name} - Coins Star")
-    has_koopa_shell_ascent = has_koopa_troopa and can_use_logic_trick(
+    has_koopa_shell_ascent = can_use_logic_trick(
         state, player, "logic_thi_scale_huge_mountain_koopa_shell", f"{level_name} - Coins Star")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Tiny-Huge_Island&oldid=19541
@@ -1785,26 +1785,53 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
 
 def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Tick Tock Clock"
-    reachable_coins = 17
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Tick_Tock_Clock&oldid=20426
+
+    # 10 coins in ! block behind start with spinning heart
+    reachable_coins = 10
+    # 2 Bob-ombs
+    reachable_coins += 2
+    # 2 coins above first turning cube
+    reachable_coins += 2
+    # 3 coins in ! block behind second pendulum
     if state.can_reach("Tick Tock Clock - Lower", "Region", player):
-        reachable_coins += 13
+        # 3 coins in ! block by the first moving hand
+        reachable_coins += 3
+        # 5 Red Coins
+        reachable_coins += 10
         if has_simple_arbitrary_feature(state, player, "TTC_SPINNERS"):
+            # 3 Red Coins
             reachable_coins += 6
         if state.can_reach("Tick Tock Clock Moving", "Region", player) or (
                 state.can_reach("Tick Tock Clock Stopped", "Region", player) and any(
                     has_action(state, player, action, level_name)
                     for action in ("Ledge Grab", "Backflip", "Triple Jump", "Wall Kick")
                 )):
+            # Slanted line of coins beside the first pole (with amp)
             reachable_coins += 5
     if state.can_reach("Tick Tock Clock - Upper", "Region", player):
+        # 3 coins in each ! block with Heave Ho (there are 2 blocks)
         reachable_coins += 6
         if has_action(state, player, "Ground Pound", level_name):
+            # 7 Blue coins from block (by "The Pit and the Pendulums" star)
             reachable_coins += 35
     if state.can_reach("Tick Tock Clock - Top", "Region", player):
-        reachable_coins += 16
+        # 3 coins in ! block on top of "Timed Jumps on Moving Bars" star
+        reachable_coins += 3
+        # 10 coins in ! block above the 4 "block pushers" in a row
+        reachable_coins += 10
+        # 3 coins in ! block, on main path, just past 3 spinning platforms
+        reachable_coins += 3
     if state.can_reach("Tick Tock Clock - Top Past Spinners", "Region", player):
-        reachable_coins += 30
-    return coins <= min(reachable_coins, 128)
+        # 10 coins in ! block underneath the Thwomp
+        reachable_coins += 10
+        # 10 coins in the first ! block at the very top of the clock
+        reachable_coins += 10
+        # 10 coins in ! block on the middle platform (drop from very top)
+        reachable_coins += 10
+    assert reachable_coins <= 128
+    return coins <= reachable_coins
 
 
 def rainbow_ride_coins(state: CollectionState, player: int, coins: int) -> bool:
@@ -2914,13 +2941,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Koopa the Quick to Tiny Main", "THI_WARP_PIPES")
     rf.assign_rule(
         "Tiny-Huge Island - Windswept Valley",
-        "TJ+DV | LJ | FLY_GUY & logic_thi_windswept_valley_fly_guy_spin_jump")
+        "TJ+DV | LJ | logic_thi_windswept_valley_fly_guy_spin_jump")
     rf.assign_rule("Tiny-Huge Island - Cannonball", "LG/SF/BF/TJ")
     rf.assign_rule("Tiny-Huge Island - Koopa the Quick", "SF/BF/TJ")
     rf.assign_rule("Tiny-Huge Island - Huge Top", "SF/BF/TJ")
     rf.assign_rule(
         "Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell",
-        "KOOPA_TROOPA & logic_thi_scale_huge_mountain_koopa_shell")
+        "logic_thi_scale_huge_mountain_koopa_shell")
     rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coins Area", "CANN")
     rf.assign_rule(
         "Tiny-Huge Island - Wiggler's Cave",

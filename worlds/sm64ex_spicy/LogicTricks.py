@@ -500,13 +500,13 @@ logic_tricks = {
     # Tiny-Huge Island
     "Tiny-Huge Island Windswept Valley with Fly Guy Spin Jump": {
         "name": "logic_thi_windswept_valley_fly_guy_spin_jump",
-        "rule": "",
+        "rule": "FLY_GUY",
         "difficulty": "medium",
         "description": "Reaching Windswept Valley by spin-jumping from a Fly Guy. The Fly Guy can only be used once.",
     },
     "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell": {
         "name": "logic_thi_scale_huge_mountain_koopa_shell",
-        "rule": "",
+        "rule": "KOOPA_TROOPA",
         "difficulty": "medium",
         "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
     },
