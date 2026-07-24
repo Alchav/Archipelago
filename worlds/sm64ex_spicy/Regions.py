@@ -469,32 +469,65 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(tinyTHI, "Tiny-Huge Island - Tiny Island Near Start Block 1-Up",
                 "Tiny-Huge Island - Tiny Island Near Start 1-Up Block",
                 "Tiny-Huge Island - Start Butterfly 1-Up")
-    create_locs(hugeTHI, "Tiny-Huge Island - Windy Area Block 1-Up", "Tiny-Huge Island - Windy Area 1-Up Block",
-                         "Tiny-Huge Island - The Tip Top of the Huge Island",
-                         "Tiny-Huge Island - The Tip Top of the Huge Island Star Block",
-                         "Tiny-Huge Island - Rematch with Koopa the Quick", "Tiny-Huge Island - Wiggler's Red Coins",
-                         "Tiny-Huge Island - Huge Island Near Start Block 1-Up", "Tiny-Huge Island - Huge Island Near Start 1-Up Block",
-                         "Tiny-Huge Island - Make Wiggler Squirm",
-                         "Tiny-Huge Island - Cannon Tree 1-Up",
-                         "Tiny-Huge Island - Beach Coins 1-Up",
-                         "Tiny-Huge Island - Boss Bass 1-Up",
-                         "Tiny-Huge Island - Koopa Area Butterfly 1-Up",
-                         "Tiny-Huge Island - Cannon Tree Butterfly 1-Up",
-                         "Tiny-Huge Island - Red Coin Cave 1-Up")
-    thi_windy = create_subregion(hugeTHI, "Tiny-Huge Island - Windy Area")
+    create_locs(hugeTHI, "Tiny-Huge Island - Beach Coins 1-Up",
+                         "Tiny-Huge Island - Boss Bass 1-Up")
+    thi_windswept_valley = create_subregion(
+        hugeTHI, "Tiny-Huge Island - Windswept Valley",
+        "Tiny-Huge Island - Windy Area Block 1-Up",
+        "Tiny-Huge Island - Windy Area 1-Up Block")
+    thi_cannonball = create_subregion(
+        thi_windswept_valley, "Tiny-Huge Island - Cannonball")
+    thi_koopa_the_quick = create_subregion(
+        thi_cannonball, "Tiny-Huge Island - Koopa the Quick",
+        "Tiny-Huge Island - Rematch with Koopa the Quick",
+        "Tiny-Huge Island - Huge Island Near Start Block 1-Up",
+        "Tiny-Huge Island - Huge Island Near Start 1-Up Block",
+        "Tiny-Huge Island - Koopa Area Butterfly 1-Up")
+    thi_huge_top = create_subregion(
+        thi_koopa_the_quick, "Tiny-Huge Island - Huge Top",
+        "Tiny-Huge Island - The Tip Top of the Huge Island",
+        "Tiny-Huge Island - The Tip Top of the Huge Island Star Block")
+    thi_wiggler_cave = create_subregion(
+        thi_huge_top, "Tiny-Huge Island - Wiggler's Cave",
+        "Tiny-Huge Island - Make Wiggler Squirm")
+    thi_red_coins = create_region("Tiny-Huge Island - Red Coins Area", player, multiworld)
+    create_locs(thi_red_coins,
+                "Tiny-Huge Island - Wiggler's Red Coins",
+                "Tiny-Huge Island - Cannon Tree 1-Up",
+                "Tiny-Huge Island - Red Coin Bridge Tree 1-Up",
+                "Tiny-Huge Island - Red Coin Cave 1-Up")
     thi_coins = create_region("Tiny-Huge Island - Coins", player, multiworld)
     create_locs(thi_coins, "Tiny-Huge Island - Coins Star")
     hugeTHI.connect(thi_coins)
     tinyTHI.connect(thi_coins)
-    thi_huge_piranha_area = create_subregion(hugeTHI, "Tiny-Huge Island - Huge Piranha Area",
-                                                      "Tiny-Huge Island - Pluck the Piranha Flower")
+    thi_huge_piranha_area = create_region("Tiny-Huge Island - Huge Piranha Area", player, multiworld)
+    create_locs(thi_huge_piranha_area, "Tiny-Huge Island - Pluck the Piranha Flower")
     thi_tiny_piranha_area = create_subregion(tinyTHI, "Tiny-Huge Island - Tiny Piranha Area")
     thi_tiny_main = create_subregion(thi_tiny_piranha_area, "Tiny-Huge Island - Tiny Main",
                                      "Tiny-Huge Island - Five Itty Bitty Secrets",
                                      "Tiny-Huge Island - Bob-omb Buddy",
                                      "Tiny-Huge Island - 3 Coins Block")
 
-    hugeTHI.subregions = [thi_coins, thi_huge_piranha_area, thi_windy]
+    thi_huge_top.connect(thi_koopa_the_quick, name="Tiny-Huge Island - Huge Top to Koopa the Quick")
+    thi_koopa_the_quick.connect(thi_cannonball, name="Tiny-Huge Island - Koopa the Quick to Cannonball")
+    thi_cannonball.connect(thi_windswept_valley, name="Tiny-Huge Island - Cannonball to Windswept Valley")
+    thi_koopa_the_quick.connect(hugeTHI, name="Tiny-Huge Island - Koopa the Quick to Huge Island")
+    thi_koopa_the_quick.connect(thi_huge_piranha_area,
+                                name="Tiny-Huge Island - Koopa the Quick to Huge Piranha Area")
+    hugeTHI.connect(thi_huge_top, name="Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell")
+    hugeTHI.connect(thi_red_coins, name="Tiny-Huge Island - Huge Island to Red Coins Area")
+    thi_huge_top.connect(thi_red_coins, name="Tiny-Huge Island - Huge Top to Red Coins Area")
+    thi_tiny_piranha_area.connect(tinyTHI, name="Tiny-Huge Island - Tiny Piranha Area to Tiny Island")
+    thi_tiny_piranha_area.connect(thi_huge_piranha_area,
+                                  name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
+    thi_huge_piranha_area.connect(thi_tiny_piranha_area,
+                                  name="Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area")
+    thi_tiny_main.connect(thi_koopa_the_quick, name="Tiny-Huge Island - Tiny Main to Koopa the Quick")
+    thi_koopa_the_quick.connect(thi_tiny_main, name="Tiny-Huge Island - Koopa the Quick to Tiny Main")
+
+    hugeTHI.subregions = [
+        thi_coins, thi_windswept_valley, thi_cannonball, thi_koopa_the_quick,
+        thi_huge_top, thi_wiggler_cave, thi_red_coins, thi_huge_piranha_area]
     tinyTHI.subregions = [thi_coins, thi_tiny_piranha_area, thi_tiny_main]
 
     regFloor3 = create_region("Third Floor", player, multiworld)

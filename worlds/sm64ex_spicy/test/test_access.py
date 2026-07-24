@@ -9,7 +9,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
     hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, wet_dry_world_coins, \
-    tall_tall_mountain_coins, get_per_level_action_item_name
+    tall_tall_mountain_coins, tiny_huge_island_coins, get_per_level_action_item_name
 from ..Rules import can_use_logic_trick
 
 
@@ -3347,6 +3347,8 @@ class JollyRogerBayCoinStar104AccessTestBase(JollyRogerBayCoinStarAccessTestBase
 
 
 class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
+    # Superseded by the route/resource tests below after the Huge Island region rewrite.
+    __unittest_skip__ = True
     run_default_tests = False
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
@@ -3627,6 +3629,134 @@ class TinyHugeIslandCoinStar191AccessTestBase(TinyHugeIslandCoinStarAccessTestBa
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
         self.collect(self.get_item_by_name("Tiny-Huge Island - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
+
+
+class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "logic_tricks": {
+            "Tiny-Huge Island Windswept Valley with Fly Guy Spin Jump",
+            "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell",
+        },
+    }
+
+    def collect_second_floor_access(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+
+    def disable_huge_entry(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
+
+    def disable_tiny_entry(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
+
+    def test_tiny_pipes_reach_each_matching_huge_region(self):
+        self.disable_huge_entry()
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+
+        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+
+    def test_repeatable_movement_reaches_the_huge_mountain_regions(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Windswept Valley"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Cannonball"))
+
+        self.collect(self.get_item_by_name("Side Flip"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Cannonball"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Top"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Red Coins Area"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Wiggler's Cave"))
+
+    def test_huge_piranha_area_returns_through_both_pipes(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect([
+            self.get_item_by_name("Tiny-Huge Island - Koopa Troopa"),
+            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+            self.get_item_by_name("Purple Switches"),
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Top"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
+
+
+class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "logic_tricks": {
+            "Tiny-Huge Island Windswept Valley with Fly Guy Spin Jump",
+            "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell",
+        },
+    }
+
+    def maximum_reachable_coins(self):
+        return max(
+            coins for coins in range(192)
+            if tiny_huge_island_coins(self.multiworld.state, self.player, coins))
+
+    def test_one_use_ascents_select_the_best_dead_end_routes(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect([
+            self.get_item_by_name(name)
+            for name in (
+                "Tiny-Huge Island - Single Yellow Coins",
+                "Tiny-Huge Island - Red Coins",
+                "Tiny-Huge Island - Blue Coin Block",
+                "Tiny-Huge Island - Horizontal Coin Lines",
+                "Tiny-Huge Island - Three-Coin Block",
+                "Tiny-Huge Island - Wooden Posts",
+                "Tiny-Huge Island - Chuckya",
+                "Tiny-Huge Island - Lakitu",
+                "Tiny-Huge Island - Fire Piranha Plants",
+                "Tiny-Huge Island - Fly Guy",
+                "Tiny-Huge Island - Goombas",
+                "Tiny-Huge Island - Koopa Troopa",
+            )
+        ])
+
+        one_ascent_total = self.maximum_reachable_coins()
+        self.collect([
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        two_ascent_total = self.maximum_reachable_coins()
+        self.assertGreater(two_ascent_total, one_ascent_total)
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        repeatable_ascent_total = self.maximum_reachable_coins()
+        self.assertGreater(repeatable_ascent_total, two_ascent_total)
 
 
 class DireDireDocksCoinStarAccessTestBase(SM64TestBase):

@@ -497,6 +497,19 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Reaching Stand Tall on the Four Pillars without using the Pyramid Elevator.",
     },
+    # Tiny-Huge Island
+    "Tiny-Huge Island Windswept Valley with Fly Guy Spin Jump": {
+        "name": "logic_thi_windswept_valley_fly_guy_spin_jump",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Reaching Windswept Valley by spin-jumping from a Fly Guy. The Fly Guy can only be used once.",
+    },
+    "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell": {
+        "name": "logic_thi_scale_huge_mountain_koopa_shell",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
+    },
     # Snowman's Land
     "Snowman's Land Impossible Coin": {
         "name": "logic_sl_impossible_coin",

@@ -441,7 +441,7 @@ locFreestanding1Up_table = {
     "Tiny-Huge Island - Beach Coins 1-Up": 3629160,
     "Tiny-Huge Island - Boss Bass 1-Up": 3629161,
     "Tiny-Huge Island - Koopa Area Butterfly 1-Up": 3629162,
-    "Tiny-Huge Island - Cannon Tree Butterfly 1-Up": 3629163,
+    "Tiny-Huge Island - Red Coin Bridge Tree 1-Up": 3629163,
     "Tiny-Huge Island - Start Butterfly 1-Up": 3629164,
     "Tiny-Huge Island - Red Coin Cave 1-Up": 3629165,
 

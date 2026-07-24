@@ -1566,119 +1566,220 @@ def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) ->
 
 def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Tiny-Huge Island"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_three_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+    has_wooden_posts = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Wooden Posts", f"{level_name} - Wooden Posts")
+    has_chuckya = has_unlock(
+        state, player, "enemy_unlocks",
+        "Chuckyas", f"{level_name} - Chuckya")
+    has_lakitu = has_unlock(
+        state, player, "enemy_unlocks",
+        "Lakitus", f"{level_name} - Lakitu")
+    has_fire_piranha_plants = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fire Piranha Plants", f"{level_name} - Fire Piranha Plants")
+    has_fly_guy = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fly Guys", f"{level_name} - Fly Guy")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_koopa_troopa = has_unlock(
+        state, player, "enemy_unlocks",
+        "Koopa Troopas", f"{level_name} - Koopa Troopa")
     has_warp_pipes = has_simple_arbitrary_feature(state, player, "THI_WARP_PIPES")
     has_thi_purple_switches = has_purple_switches(state, player, "Tiny-Huge Island")
+    has_triple_jump = has_action(state, player, "Triple Jump", level_name)
     has_long_jump = has_action(state, player, "Long Jump", level_name)
-    has_top_return_movement = has_tiny_huge_island_top_return_movement(state, player)
-    has_huge_piranha_area_reentry = (has_warp_pipes and has_thi_purple_switches) or has_top_return_movement
-    has_huge_top_gate = state.has("Tiny-Huge Island - Cannon Unlock", player) or has_top_return_movement
+    has_backflip = has_action(state, player, "Backflip", level_name)
+    has_side_flip = has_action(state, player, "Side Flip", level_name)
+    has_ledge_grab = has_action(state, player, "Ledge Grab", level_name)
+    has_dive = has_action(state, player, "Dive", level_name)
     has_ground_pound = has_action(state, player, "Ground Pound", level_name)
+    has_cannon = state.has("Tiny-Huge Island - Cannon Unlock", player)
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
-    can_reach_tiny_piranha_area = state.can_reach("Tiny-Huge Island - Tiny Piranha Area", "Region", player)
-    can_reach_tiny_main = state.can_reach("Tiny-Huge Island - Tiny Main", "Region", player)
-    can_reach_huge_piranha_area = state.can_reach("Tiny-Huge Island - Huge Piranha Area", "Region", player)
-    can_reach_wiggler = state.can_reach("Tiny-Huge Island - Make Wiggler Squirm", "Location", player)
+    has_tiny_piranha_movement = has_triple_jump or has_long_jump or has_ledge_grab
+    has_cannonball_movement = has_ledge_grab or has_side_flip or has_backflip or has_triple_jump
+    has_upper_movement = has_side_flip or has_backflip or has_triple_jump
+    has_fly_guy_ascent = has_fly_guy and can_use_logic_trick(
+        state, player, "logic_thi_windswept_valley_fly_guy_spin_jump", f"{level_name} - Coins Star")
+    has_koopa_shell_ascent = has_koopa_troopa and can_use_logic_trick(
+        state, player, "logic_thi_scale_huge_mountain_koopa_shell", f"{level_name} - Coins Star")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Tiny-Huge_Island&oldid=19541
 
-    def route_coins(has_tiny_side: bool, has_huge_side: bool) -> int:
+    def giant_goomba_coins(count: int) -> int:
+        if not has_goombas:
+            return 0
+        return count * (5 if has_ground_pound else 1)
+
+    def route_coins(start_tiny: bool) -> int:
         route_total = 0
-        if has_tiny_side:
+        has_tiny_piranha = start_tiny and has_tiny_piranha_movement
+        has_tiny_main_from_tiny = has_tiny_piranha and has_thi_purple_switches
+        has_huge_start = not start_tiny
+        has_huge_piranha_from_pipe = has_tiny_piranha and has_warp_pipes
+        has_koopa_from_pipe = has_tiny_main_from_tiny and has_warp_pipes
+
+        repeatable_windswept = has_huge_start and (
+            has_long_jump or has_triple_jump and has_dive)
+        fly_windswept = has_huge_start and has_fly_guy_ascent
+        has_windswept = repeatable_windswept or fly_windswept
+        has_cannonball = has_windswept and has_cannonball_movement
+        has_koopa_from_mountain = has_cannonball and has_upper_movement
+        has_koopa_region = has_koopa_from_pipe or has_koopa_from_mountain or has_koopa_shell_ascent and has_huge_start
+        has_top_from_mountain = has_koopa_region and has_upper_movement
+        has_top = has_top_from_mountain or has_koopa_shell_ascent and has_huge_start
+        has_tiny_main = has_tiny_main_from_tiny or has_koopa_region and has_warp_pipes
+
+        normal_repeatable_top = (
+            repeatable_windswept and has_cannonball_movement and has_upper_movement)
+        pipe_repeatable_top = has_koopa_from_pipe and has_upper_movement
+        repeatable_top = normal_repeatable_top or pipe_repeatable_top
+        if has_top and has_warp_pipes and has_upper_movement:
+            # Descend to Koopa's area, enter the pipe, then return through it.
+            repeatable_top = True
+
+        one_use_ascents = 0
+        if not repeatable_top:
+            if has_koopa_shell_ascent and has_huge_start:
+                one_use_ascents += 1
+            if fly_windswept and has_cannonball_movement and has_upper_movement:
+                one_use_ascents += 1
+
+        if start_tiny:
             # 1 Small-Goomba
-            route_total += 1
-            if can_reach_tiny_piranha_area:
+            if has_goombas:
+                route_total += 1
+            if has_tiny_piranha:
                 # 1 Piranha Plant
-                route_total += 1
-            if can_reach_tiny_main:
-                # (Tiny Island)1 coin with the small koopa, where Koopa the Quick would appear
-                route_total += 1
-                # (Tiny Island)Line of coins on wooden plank that you cross to reach the mountaintop
-                route_total += 5
-                # (Tiny Island)2 coins at the top of the beach, with fire-shooter
-                route_total += 2
-                # (Tiny Island)1 coin on curved wooden plank that leads to Wiggler's cave
-                route_total += 1
-                # (Tiny Island)3 coins in ! block connected to Windswept Valley by tiny wooden plank
-                route_total += 3
-                # (Tiny Island)2 coins on cliff that the small metal balls roll down
-                route_total += 2
-                # (Tiny Island)1 coin to the right of the hole where the small metal balls come from
-                route_total += 1
-                # (Tiny Island)1 hidden coin, walk over slope to the left of above coin to collect
-                route_total += 1
-                # 9 Small-Goombas
-                route_total += 9
-                # 1 Small Koopa
-                route_total += 5
-                if False: # IMPOSSIBLE COIN TRICK
-                    # (Tiny Island)1 impossible coin, (underground, to the left of the above coin)(Requires glitches to get to)
+                if has_fire_piranha_plants:
                     route_total += 1
-                if has_thi_purple_switches:
+            if has_tiny_main:
+                # (Tiny Island)8 individual coins
+                if has_single_yellow_coins:
+                    route_total += 8
+                # (Tiny Island)Line of coins on wooden plank that you cross to reach the mountaintop
+                if has_horizontal_coin_lines:
+                    route_total += 5
+                # (Tiny Island)3 coins in ! block connected to Windswept Valley by tiny wooden plank
+                if has_three_coin_block:
+                    route_total += 3
+                # 9 Small-Goombas
+                if has_goombas:
+                    route_total += 9
+                # 1 Small Koopa
+                if has_koopa_troopa:
+                    route_total += 5
+                if has_thi_purple_switches and has_single_yellow_coins:
                     # (Tiny Island)1 coin (at warp) on tiny separated island, use ! switch to reach
                     route_total += 1
-        if has_huge_side:
+
+        terminal_values = []
+        if has_huge_start or has_koopa_region:
             # 4 Giant Goombas
-            route_total += 20
+            route_total += giant_goomba_coins(4)
             # (Huge Island)Running around the post at start
-            route_total += 5
+            if has_wooden_posts:
+                route_total += 5
             # (Huge Island)2 coins at the top of the beach
-            route_total += 2
+            if has_single_yellow_coins:
+                route_total += 2
             # 2 Fly Guy
-            route_total += 4
+            if has_fly_guy:
+                route_total += 4
             # 1 Lakitu
-            route_total += 5
+            if has_lakitu:
+                route_total += 5
             # 1 Koopa Troopa
-            route_total += 5
-            if False: # Cannon from starting Huge region, or long jump from top region
+            if has_koopa_troopa:
+                route_total += 5
+            if has_wooden_posts and (has_cannon and has_huge_start or has_top and has_long_jump):
                 # (Huge Island)Running around the post on small island by Lakitu
                 route_total += 5
-            if False: # windswept valley
+            if has_windswept:
                 # (Huge Island)Line of coins on narrow plank attached to Windswept Valley
-                route_total += 5
+                if has_horizontal_coin_lines:
+                    route_total += 5
                 # 2 Giant Goombas
-                route_total += 10
-            if False: # cannonball region
+                route_total += giant_goomba_coins(2)
+            if has_cannonball:
                 # (Huge Island)Line of coins on cliff where the big metal balls roll down
-                route_total += 5
+                if has_horizontal_coin_lines:
+                    route_total += 5
                 # 1 Fly Guy
-                route_total += 2
-            if False: # koopa the quick region
-                # (Huge Island)Slanted line of 4 coins to right of hole where the balls come from
-                route_total += 4
-                # 3 Giant Goombas
-                route_total += 15
-            if False: # Top region
-                # (Huge Island)Line of coins on wooden plank that you cross to reach the mountaintop
-                route_total += 5
-                # (Huge Island)Line of coins on curved wooden plank that leads to Wiggler's cave
-                route_total += 5
-                # Chuckya
-                route_total += 5
-                if False: # can reach Wiggler's cave (upper, not the red coin cave) (must have pipes + GP)
-                    # (Inside Wiggler's cave)When you fight Wiggler, there are 2 slanted lines of coins in room
-                    route_total += 10
-            if False: # Red Coin area
-                # 2 Giant Goombas
-                route_total += 10
-                # (Inside Wiggler's cave)8 red coins
-                route_total += 14
-                if False: # wall kick
-                    # (Inside Wiggler's cave)8 red coins
+                if has_fly_guy:
                     route_total += 2
-                if False: # Ground Pound + blue coin block
-                    # (Inside Wiggler's cave)2 blue coins from block (on the platform with the fire-shooter)
-                    route_total += 10
-            if False: # Huge Piranha area
-                # 5 Giant Piranhas
-                route_total += 10
+            if has_koopa_region:
+                # (Huge Island)Slanted line of 4 coins to right of hole where the balls come from
+                if has_horizontal_coin_lines:
+                    route_total += 4
+                # 3 Giant Goombas
+                route_total += giant_goomba_coins(3)
+            if has_top:
+                # (Huge Island)Line of coins on wooden plank that you cross to reach the mountaintop
+                if has_horizontal_coin_lines:
+                    route_total += 5
+                # (Huge Island)Line of coins on curved wooden plank that leads to Wiggler's cave
+                if has_horizontal_coin_lines:
+                    route_total += 5
+                # Chuckya
+                if has_chuckya:
+                    route_total += 5
+
+            red_area_coins = giant_goomba_coins(2)
+            if has_red_coins:
+                red_area_coins += 14
+                if has_action(state, player, "Wall Kick", level_name):
+                    red_area_coins += 2
+            if has_ground_pound and has_blue_coin_block:
+                red_area_coins += 10
+            wiggler_cave_coins = (
+                10 if has_horizontal_coin_lines and has_tiny_main and has_warp_pipes and has_ground_pound else 0)
+
+            if has_cannon and has_huge_start:
+                route_total += red_area_coins
+            else:
+                terminal_values.append(red_area_coins)
+            terminal_values.append(wiggler_cave_coins)
+
+        if has_huge_piranha_from_pipe:
+            route_total += 10 if has_fire_piranha_plants else 0
+        elif has_koopa_region:
+            piranha_area_coins = 10 if has_fire_piranha_plants else 0
+            if has_warp_pipes and has_thi_purple_switches:
+                route_total += piranha_area_coins
+            else:
+                terminal_values.append(piranha_area_coins)
+
+        if terminal_values:
+            if repeatable_top:
+                route_total += sum(terminal_values)
+            elif has_top:
+                route_total += sum(sorted(terminal_values, reverse=True)[:one_use_ascents])
         return route_total
 
     reachable_totals = []
     if can_enter_tiny:
-        reachable_totals.append(route_coins(True, False))
+        reachable_totals.append(route_coins(True))
     if can_enter_huge:
-        reachable_totals.append(route_coins(has_warp_pipes, True))
+        reachable_totals.append(route_coins(False))
     return coins <= max(reachable_totals, default=0)
 
 
@@ -2523,18 +2624,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 rf.build_rule("", painting_lvl_name="Tiny Island"))
     connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Huge)",
                                 rf.build_rule("", painting_lvl_name="Huge Island"))
-    connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Piranha Area", "Tiny-Huge Island - Huge Piranha Area",
-                    name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
-    connect_regions(multiworld, player, "Tiny-Huge Island - Huge Piranha Area", "Tiny-Huge Island - Tiny Piranha Area",
-                    name="Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area")
-    connect_regions(multiworld, player, "Tiny-Huge Island - Huge Piranha Area", "Tiny-Huge Island (Huge)",
-                    name="Tiny-Huge Island - Huge Piranha Area to Huge Island")
-    connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Piranha Area", "Tiny-Huge Island (Tiny)",
-                    name="Tiny-Huge Island - Tiny Piranha Area to Tiny Island")
-    connect_regions(multiworld, player, "Tiny-Huge Island - Tiny Main", "Tiny-Huge Island (Huge)",
-                    name="Tiny-Huge Island - Tiny Main to Huge Island")
-    connect_regions(multiworld, player, "Tiny-Huge Island (Huge)", "Tiny-Huge Island - Tiny Main",
-                    name="Tiny-Huge Island - Huge Island to Tiny Main")
 
     connect_regions(multiworld, player, "Second Floor", "Third Floor", can_bypass_fifty_star_door)
 
@@ -2821,18 +2910,26 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Tiny Main", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area", "THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Tiny Main to Huge Island", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Huge Island to Tiny Main", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Huge Piranha Area", "THI_WARP_PIPES & PURPLE_SWITCHES | TJ | LJ+SF | LJ+LG")
+    rf.assign_rule("Tiny-Huge Island - Tiny Main to Koopa the Quick", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Koopa the Quick to Tiny Main", "THI_WARP_PIPES")
+    rf.assign_rule(
+        "Tiny-Huge Island - Windswept Valley",
+        "TJ+DV | LJ | FLY_GUY & logic_thi_windswept_valley_fly_guy_spin_jump")
+    rf.assign_rule("Tiny-Huge Island - Cannonball", "LG/SF/BF/TJ")
+    rf.assign_rule("Tiny-Huge Island - Koopa the Quick", "SF/BF/TJ")
+    rf.assign_rule("Tiny-Huge Island - Huge Top", "SF/BF/TJ")
+    rf.assign_rule(
+        "Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell",
+        "KOOPA_TROOPA & logic_thi_scale_huge_mountain_koopa_shell")
+    rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coins Area", "CANN")
+    rf.assign_rule(
+        "Tiny-Huge Island - Wiggler's Cave",
+        "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
-    add_rule(multiworld.get_location("Tiny-Huge Island - Rematch with Koopa the Quick", player),
-             lambda state: has_tiny_huge_island_rematch_movement(state, player))
     rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
-    rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm",
-                   "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up", "CANN | CANNLESS")
-    rf.assign_rule("Tiny-Huge Island - Cannon Tree Butterfly 1-Up", "CANN | CANNLESS")
+    rf.assign_rule("Tiny-Huge Island - Red Coin Bridge Tree 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - Lower", "LG/TJ/SF/BF | MOVELESS & WK | {Tick Tock Clock Stopped} & TTC_SPINNERS")
