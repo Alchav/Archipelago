@@ -511,6 +511,21 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Collecting the deep underwater coins and Red Coin Star without using the Metal Cap.",
     },
+    # Wing Mario Over the Rainbow
+    "Wing Mario Over the Rainbow Leap of Faith": {
+        "name": "logic_wmotr_leap_of_faith",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
+                       "Red Coin. Long Jump and Ledge Grab can reach the Buddy Platform",
+    },
+    "Wing Mario Over the Rainbow Leap of Faith Without Ledge Grab": {
+        "name": "logic_wmotr_leap_of_faith_without_ledge_grab",
+        "rule": "",
+        "difficulty": "hard",
+        "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
+                       "Red Coin. Long Jump can reach the Buddy Platform",
+    },
     # Vanish Cap Under the Moat
     "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {
         "name": "logic_vcutm_wall_kick_over_vanish_cap_grate",
@@ -519,14 +534,14 @@ logic_tricks = {
         "description": "Wall Kicking over the Vanish Cap grate without using the Vanish Cap.",
         "video": "https://www.youtube.com/watch?v=_u95-2TjRRI"
     },
-    "VCUTM Drop to Checkerboard Platforms From Above": {
+    "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above": {
         "name": "logic_vcutm_drop_to_checkerboard_platforms",
         "rule": "",
         "difficulty": "medium",
         "description": "Dropping from the slide to the Checkerboard Platforms without using a movement ability.",
         "video": "https://www.youtube.com/watch?v=72TsponCYvg"
     },
-    "VCUTM Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide": {
+    "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide": {
         "name": "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up",
         "rule": "",
         "difficulty": "medium",

@@ -248,17 +248,17 @@ class SM64World(World):
 
         if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_global:
             item_names += list(global_checkerboard_item_names)
-        elif self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_individual:
+        elif self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_per_level:
             item_names += list(checkerboard_item_data_table)
 
         if self.options.rolling_logs.value == self.options.rolling_logs.option_global:
             item_names += list(global_rolling_log_item_names)
-        elif self.options.rolling_logs.value == self.options.rolling_logs.option_individual:
+        elif self.options.rolling_logs.value == self.options.rolling_logs.option_per_level:
             item_names += list(rolling_log_item_data_table)
 
         if self.options.purple_switches.value == self.options.purple_switches.option_global:
             item_names += list(global_purple_switch_item_names)
-        elif self.options.purple_switches.value == self.options.purple_switches.option_individual:
+        elif self.options.purple_switches.value == self.options.purple_switches.option_per_level:
             item_names += list(purple_switch_item_data_table)
 
         return item_names
@@ -305,7 +305,7 @@ class SM64World(World):
     def get_unlock_item_names(option, global_mode_item_names, per_level_item_data_table) -> typing.List[str]:
         if option.value == option.option_global:
             return list(global_mode_item_names)
-        if option.value == option.option_individual:
+        if option.value == option.option_per_level:
             return list(per_level_item_data_table)
         return []
 
@@ -325,7 +325,7 @@ class SM64World(World):
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_global:
             return ["Progressive Bowser Arena Bomb"] * 4 + [
                 "Bowser in the Sky - Progressive Bowser Arena Bomb"]
-        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_individual:
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_per_level:
             return (
                 ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
                 + ["Bowser in the Fire Sea - Progressive Bowser Arena Bomb"] * 4
@@ -352,7 +352,7 @@ class SM64World(World):
     def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
         if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_global:
             return ["Bowser Stage Extra 1-Ups"]
-        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_individual:
+        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_per_level:
             return [
                 "Bowser in the Dark World - Extra 1-Ups",
                 "Bowser in the Fire Sea - Extra 1-Ups",

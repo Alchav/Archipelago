@@ -60,6 +60,24 @@ class BowserStageCollapseHitsOptionTest(unittest.TestCase):
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 6)
 
 
+class PerLevelOptionAliasTest(unittest.TestCase):
+    def test_individual_aliases_per_level(self):
+        option_classes = (
+            Options.CheckerboardPlatforms,
+            Options.RollingLogs,
+            Options.PurpleSwitches,
+            Options.CoinObjectUnlocks,
+            Options.EnemyUnlocks,
+            Options.BowserBombs,
+            Options.BowserStage1Ups,
+            Options.TripleJump,
+        )
+        for option_class in option_classes:
+            with self.subTest(option=option_class.__name__):
+                self.assertEqual(option_class.from_text("per_level").value, option_class.option_per_level)
+                self.assertEqual(option_class.from_text("individual").value, option_class.option_per_level)
+
+
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
@@ -453,7 +471,7 @@ class GlobalBowserStage1UpsItemPoolTestBase(SM64TestBase):
 
 class IndividualBowserStage1UpsItemPoolTestBase(SM64TestBase):
     options = {
-        "bowser_stage_1ups": Options.BowserStage1Ups.option_individual,
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_per_level,
     }
 
     def test_individual_bowser_stage_1up_items_are_generated(self):
@@ -628,9 +646,9 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     options = {
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
-        "rolling_logs": Options.RollingLogs.option_individual,
-        "purple_switches": Options.PurpleSwitches.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
     }
 
     def test_individual_arbitrary_items_are_generated(self):
@@ -717,8 +735,8 @@ class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 
 class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
     options = {
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     }
 
     def test_individual_unlock_items_are_generated(self):
@@ -757,7 +775,7 @@ class GlobalBowserArenaBombItemPoolTestBase(SM64TestBase):
 
 
 class IndividualBowserArenaBombItemPoolTestBase(SM64TestBase):
-    options = {"bowser_bombs": Options.BowserBombs.option_individual}
+    options = {"bowser_bombs": Options.BowserBombs.option_per_level}
 
     def test_individual_bowser_arena_bombs_are_generated(self):
         expected_counts = {
@@ -1095,9 +1113,9 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
         "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
         "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
         "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
-        "rolling_logs": Options.RollingLogs.option_individual,
-        "purple_switches": Options.PurpleSwitches.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
         "triple_jump": Options.TripleJump.option_per_level,
         "long_jump": Options.LongJump.option_per_level,
         "backflip": Options.Backflip.option_per_level,

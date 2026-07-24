@@ -1368,19 +1368,56 @@ def secret_aquarium_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Wing Mario Over the Rainbow"
-    reachable_coins = 2
     has_wing_cap_item = has_wing_cap(state, player, level_name)
-    has_long_jump_capless = has_action(state, player, "Long Jump", level_name) and allows_capless(state, player)
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
+    has_leap_of_faith = has_logic_trick(state, player, "logic_wmotr_leap_of_faith")
+    has_leap_without_ledge_grab = has_logic_trick(
+        state, player, "logic_wmotr_leap_of_faith_without_ledge_grab")
+    can_long_jump_leap = (
+        has_action(state, player, "Long Jump", level_name)
+        and (has_leap_of_faith or has_leap_without_ledge_grab)
+    )
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Wing_Mario_over_the_Rainbow&oldid=18926
+
+    # 1 Red Coin
+    reachable_coins = 2 if has_red_coins else 0
 
     if state.can_reach("Wing Mario Over the Rainbow - Cannon", "Region", player):
-        reachable_coins += 54
-    elif has_wing_cap_item and has_action(state, player, "Triple Jump", level_name):
-        reachable_coins += 46
+        # 4 Red Coins
+        if has_red_coins:
+            reachable_coins += 8
+    if (state.can_reach("Wing Mario Over the Rainbow - Cannon", "Region", player)
+            or (has_wing_cap_item and has_action(state, player, "Triple Jump", level_name))):
+        # 3 Red Coins
+        if has_red_coins:
+            reachable_coins += 6
+        # 4 coin rings around 4 (of the 5) rainbows
+        if has_vertical_coin_rings:
+            reachable_coins += 32
+        # Coin ring on cloud directly underneath the cloud with the poles
+        if has_horizontal_coin_rings:
+            reachable_coins += 8
     else:
-        if has_long_jump_capless:
-            reachable_coins += 4
-        elif has_wing_cap_item and allows_moveless(state, player):
+        if has_red_coins and can_long_jump_leap:
+            # 1 Red Coins
             reachable_coins += 2
+            if has_leap_without_ledge_grab or has_action(state, player, "Ledge Grab", level_name):
+                # 1 Red Coins
+                reachable_coins += 2
+        elif has_red_coins and has_wing_cap_item and (
+                has_leap_of_faith or has_leap_without_ledge_grab):
+            # 1 Red Coin
+            reachable_coins += 2
+    assert reachable_coins <= 56
     return coins <= reachable_coins
 
 
@@ -2348,7 +2385,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                          state, "Bowser in the Fire Sea - Extra 1-Ups", has_second_floor_key))
     # Wing Mario Over the Rainbow
     wmotr_flight_rule = "WC & TJ | WC & {Wing Mario Over the Rainbow - Bob-omb Buddy Platform} & CANN"
-    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy Platform", "WC+TJ | LJ+CAPLESS")
+    rf.assign_rule(
+        "Wing Mario Over the Rainbow - Bob-omb Buddy Platform",
+        "WC+TJ | LJ+LG & logic_wmotr_leap_of_faith | "
+        "LJ & logic_wmotr_leap_of_faith_without_ledge_grab")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
@@ -2415,7 +2455,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block":
                 wmotr_flight_rule,
             "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": "WC",
-            "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block": "WC+TJ | WC+MOVELESS | WC+LJ+CAPLESS",
+            "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block":
+                "WC+TJ | WC & logic_wmotr_leap_of_faith | "
+                "WC & logic_wmotr_leap_of_faith_without_ledge_grab | "
+                "LJ+LG & logic_wmotr_leap_of_faith | "
+                "LJ & logic_wmotr_leap_of_faith_without_ledge_grab",
             "Wing Mario Over the Rainbow - Bob-omb Buddy Platform Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block": wmotr_flight_rule,
         }

@@ -346,7 +346,8 @@ class TickTockClockSpinners(Toggle):
 class LevelFeatureItemMode(Choice):
     option_not_shuffled = 0
     option_global = 1
-    option_individual = 2
+    option_per_level = 2
+    alias_individual = 2
 
 
 
@@ -358,7 +359,7 @@ class CheckerboardPlatforms(LevelFeatureItemMode):
 
     Global - Shuffle one Checkerboard Platforms item that unlocks every applicable platform.
 
-    Individual - Shuffle separate level-specific Checkerboard Platforms items.
+    Per Level - Shuffle separate level-specific Checkerboard Platforms items.
     """
     display_name = "Checkerboard Platform Items"
 
@@ -371,7 +372,7 @@ class RollingLogs(LevelFeatureItemMode):
 
     Global - Shuffle one Rolling Logs item that unlocks every applicable log.
 
-    Individual - Shuffle separate level-specific Rolling Log items.
+    Per Level - Shuffle separate level-specific Rolling Log items.
     """
     display_name = "Rolling Log Items"
 
@@ -384,7 +385,7 @@ class PurpleSwitches(LevelFeatureItemMode):
 
     Global - Shuffle one Purple Switches item that unlocks every applicable switch.
 
-    Individual - Shuffle separate level-specific Purple Switch items.
+    Per Level - Shuffle separate level-specific Purple Switch items.
     """
     display_name = "Purple Switch Items"
 
@@ -397,7 +398,7 @@ class CoinObjectUnlocks(LevelFeatureItemMode):
 
     Global - Shuffle one item for each object type. Object types without a global item use their level-specific item.
 
-    Individual - Shuffle separate level-specific items for every applicable coin object type.
+    Per Level - Shuffle separate level-specific items for every applicable coin object type.
     """
     display_name = "Coin Object Unlocks"
 
@@ -410,7 +411,7 @@ class EnemyUnlocks(LevelFeatureItemMode):
 
     Global - Shuffle one item for each enemy type. Enemy types without a global item use their level-specific item.
 
-    Individual - Shuffle separate level-specific items for every applicable enemy type.
+    Per Level - Shuffle separate level-specific items for every applicable enemy type.
     """
     display_name = "Enemy Unlocks"
 
@@ -424,7 +425,7 @@ class BowserBombs(LevelFeatureItemMode):
     Global - Shuffle four Progressive Bowser Arena Bomb items that each add one bomb to every arena, plus one
     Bowser in the Sky item for its fifth bomb.
 
-    Individual - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
+    Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
     Fire Sea, and five for Bowser in the Sky.
     """
     display_name = "Progressive Bowser Arena Bomb Items"
@@ -475,14 +476,15 @@ class BowserStage1Ups(Choice):
     Global - Shuffle one Bowser Stage Extra 1-Ups item that spawns all affected Bowser in the Dark World and Bowser in the
     Fire Sea 1-Ups.
 
-    Individual - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
+    Per Level - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
 
     Always Spawn - All 1-Ups always spawn in the Bowser stages.
     """
     display_name = "Bowser Stage 1-Up Behavior"
     option_vanilla = 0
     option_global = 1
-    option_individual = 2
+    option_per_level = 2
+    alias_individual = 2
     option_always_spawn = 3
     default = 0
 
@@ -696,6 +698,7 @@ class MoveRandomizerMode(Choice):
     option_not_shuffled = 0
     option_global = 1
     option_per_level = 2
+    alias_individual = 2
 
 
 

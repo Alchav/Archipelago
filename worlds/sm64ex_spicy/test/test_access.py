@@ -5,7 +5,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
-    get_per_level_action_item_name
+    wing_mario_over_the_rainbow_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -457,8 +457,8 @@ class BobOmbBattlefieldIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -533,8 +533,8 @@ class BobOmbBattlefieldUnlockTricksTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
             "Bob-omb Battlefield Mario Wings to the Sky without Coin Markers",
             "Bob-omb Battlefield Island with Koopa Shell",
@@ -932,7 +932,7 @@ class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
 class IndividualBowserStageOneUpAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "bowser_stage_1ups": Options.BowserStage1Ups.option_individual,
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
@@ -1623,9 +1623,9 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **ArbitraryFeatureAccessTestBase.options,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
-        "rolling_logs": Options.RollingLogs.option_individual,
-        "purple_switches": Options.PurpleSwitches.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
     }
 
     def collect_basement_access(self):
@@ -1742,7 +1742,7 @@ class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
@@ -1822,7 +1822,7 @@ class PrincessSecretSlideIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     }
 
     def test_coin_sources_are_counted_independently(self):
@@ -1867,8 +1867,8 @@ class PrincessSecretSlideIndividualUnlockLogicTestBase(SM64TestBase):
 class BowserInTheDarkWorldIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_global,
     }
 
@@ -1924,8 +1924,8 @@ class BowserInTheDarkWorldIndividualUnlockLogicTestBase(SM64TestBase):
 class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "logic_tricks": {"Bowser in the Dark World Triple Jump up the Purple Switch Slope"},
         "purple_switches": Options.PurpleSwitches.option_global,
@@ -1963,7 +1963,7 @@ class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
 class SecretAquariumIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     }
 
     def test_coin_sources_are_counted_independently(self):
@@ -2043,11 +2043,11 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "logic_tricks": {"VCUTM Drop to Checkerboard Platforms From Above"},
+        "logic_tricks": {"Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above"},
         "one_up_checks": Options.OneUpChecks.option_true,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
@@ -2084,10 +2084,10 @@ class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
         "logic_tricks": {
-            "VCUTM Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide"
+            "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide"
         },
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
@@ -2186,8 +2186,8 @@ class BowserInTheFireSeaIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     }
 
     def test_each_unlock_matches_documented_total_with_climb(self):
@@ -2285,8 +2285,8 @@ class CavernOfTheMetalCapCoinLogicTestBase(SM64TestBase):
 class CavernOfTheMetalCapIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
 
@@ -2356,7 +2356,7 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect(self.get_item_by_name("Side Flip"))
 
-    def test_long_jump_fallback_coins_require_capless(self):
+    def test_long_jump_fallback_coins_do_not_use_capless(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 2 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
@@ -2365,13 +2365,9 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
         self.collect(self.world.create_item("ut_glitch"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
-        self.collect(self.get_item_by_name("Ledge Grab"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
-
-    def test_wing_cap_fallback_coins_require_moveless(self):
+    def test_wing_cap_fallback_coins_do_not_use_moveless(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 2 Coins"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
@@ -2380,19 +2376,16 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
         self.collect(self.world.create_item("ut_glitch"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 4 Coins"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 5 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
-    def test_wing_cap_does_not_remove_long_jump_coins(self):
+    def test_wing_cap_does_not_enable_long_jump_trick_without_trick_option(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.collect(self.get_item_by_name("Long Jump"))
         self.collect(self.world.create_item("ut_glitch"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
         self.collect(self.get_item_by_name("Wing Cap"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
     def test_cannon_coin_route_requires_cannon_movement(self):
         self.collect_wing_mario_over_the_rainbow_access()
@@ -2405,7 +2398,7 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Triple Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
 
-    def test_cannon_coin_route_accepts_capless_long_jump(self):
+    def test_cannon_coin_route_does_not_use_capless_long_jump(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.collect([
             self.get_item_by_name("Wing Cap"),
@@ -2415,7 +2408,113 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
 
         self.collect(self.world.create_item("ut_glitch"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
+
+
+class WingMarioOverTheRainbowLeapOfFaithTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WingMarioOverTheRainbowCoinsanityAccessTestBase.options,
+        "logic_tricks": {"Wing Mario Over the Rainbow Leap of Faith"},
+    }
+
+    def collect_wing_mario_over_the_rainbow_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Side Flip"))
+
+    def test_long_jump_coins_add_ledge_grab_for_second_coin(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 4 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 5 Coins"))
+
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+
+    def test_buddy_platform_requires_ledge_grab(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow - Bob-omb Buddy Platform"))
+
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow - Bob-omb Buddy Platform"))
+
+    def test_wing_cap_fallback_uses_trick(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 4 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 5 Coins"))
+
+
+class WingMarioOverTheRainbowLeapWithoutLedgeGrabTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WingMarioOverTheRainbowCoinsanityAccessTestBase.options,
+        "logic_tricks": {"Wing Mario Over the Rainbow Leap of Faith Without Ledge Grab"},
+    }
+
+    def collect_wing_mario_over_the_rainbow_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Side Flip"))
+
+    def test_long_jump_reaches_both_fallback_red_coins(self):
+        self.collect_wing_mario_over_the_rainbow_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - 6 Coins"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 7 Coins"))
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow - Bob-omb Buddy Platform"))
+
+
+class WingMarioOverTheRainbowIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+    }
+
+    def collect_full_wmotr_route(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect_by_name([
+            "Side Flip",
+            "Triple Jump",
+            "Wing Cap",
+            "Wing Mario Over the Rainbow - Cannon Unlock",
+        ])
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow - Cannon"))
+
+    def test_each_coin_object_unlock_matches_documented_total(self):
+        self.collect_full_wmotr_route()
+        for item_name, expected_coins in {
+            "Wing Mario Over the Rainbow - Red Coins": 16,
+            "Wing Mario Over the Rainbow - Horizontal Coin Rings": 8,
+            "Wing Mario Over the Rainbow - Vertical Coin Rings": 32,
+        }.items():
+            item = self.get_item_by_name(item_name)
+            self.collect(item)
+            self.assertTrue(self.multiworld.state.has(item_name, self.player))
+            self.assertTrue(wing_mario_over_the_rainbow_coins(
+                self.multiworld.state, self.player, expected_coins))
+            self.assertFalse(wing_mario_over_the_rainbow_coins(
+                self.multiworld.state, self.player, expected_coins + 1))
+            self.remove(item)
+
+    def test_all_unlocks_total_56_coins(self):
+        self.collect_full_wmotr_route()
+        self.collect([
+            self.get_item_by_name("Wing Mario Over the Rainbow - Red Coins"),
+            self.get_item_by_name("Wing Mario Over the Rainbow - Horizontal Coin Rings"),
+            self.get_item_by_name("Wing Mario Over the Rainbow - Vertical Coin Rings"),
+        ])
+        self.assertTrue(self.multiworld.state.has(
+            "Wing Mario Over the Rainbow - Red Coins", self.player))
+        self.assertTrue(wing_mario_over_the_rainbow_coins(
+            self.multiworld.state, self.player, 56))
 
 
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
@@ -2435,8 +2534,8 @@ class CoolCoolMountainIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -2491,8 +2590,8 @@ class CoolCoolMountainSpinJumpUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {"Cool, Cool Mountain Wall Kicks Will Work With Spin Jump"},
     }
 
@@ -2580,9 +2679,9 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -2664,8 +2763,8 @@ class WhompsFortressWhompTricksTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
         "logic_tricks": {
             "Whomp's Fortress Top Access with Side Flip and Ledge Grab Off of Whomp",
             "Whomp's Fortress Top Access with Triple Jump Off of Whomp",
@@ -2857,9 +2956,9 @@ class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
-        "purple_switches": Options.PurpleSwitches.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -3695,8 +3794,8 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     }
 
     def collect_basement_access(self):
@@ -4003,7 +4102,7 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "blocksanity": Options.Blocksanity.option_true,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
             "Shifting Sand Land Stone Structure with Shy Guy Bounce",
             "Shifting Sand Land Pillars with Koopa Shell",
@@ -4093,7 +4192,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
             "Shifting Sand Land Three Red Coins with Tweesters",
             "Shifting Sand Land One Red Coin with Shy Guy Spin Jump",
@@ -4126,7 +4225,7 @@ class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "no_despawns": Options.NoDespawns.option_true,
         "logic_tricks": {
             "Shifting Sand Land Three Red Coins with Tweesters",
@@ -4151,8 +4250,8 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -4767,8 +4866,8 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {"Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends"},
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -4938,8 +5037,8 @@ class BigBooHauntBookendTrickNoDespawnsTestBase(SM64TestBase):
     options = {
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {"Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends"},
         "no_despawns": Options.NoDespawns.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -5616,7 +5715,7 @@ class ThwompUnlockAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
-        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
