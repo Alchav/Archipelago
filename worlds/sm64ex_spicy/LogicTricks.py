@@ -497,6 +497,14 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Reaching Stand Tall on the Four Pillars without using the Pyramid Elevator.",
     },
+    # Snowman's Land
+    "Snowman's Land Impossible Coin": {
+        "name": "logic_sl_impossible_coin",
+        "rule": "CANN",
+        "difficulty": "hard",
+        "description": "Collecting the coin hidden inside the first wooden walkway on the snowman by shooting"
+                       " into it from the cannon.",
+    },
     # Bowser in the Dark World
     "Bowser in the Dark World Triple Jump up the Purple Switch Slope": {
         "name": "logic_bitdw_purple_switch_bypass",

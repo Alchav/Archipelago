@@ -1,3 +1,5 @@
+from BaseClasses import CollectionState
+
 from .bases import SM64TestBase
 from .. import Options
 from ..Regions import sm64_ttc_entrances
@@ -6,7 +8,8 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
-    hazy_maze_cave_coins, dire_dire_docks_coins, get_per_level_action_item_name
+    hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, get_per_level_action_item_name
+from ..Rules import can_use_logic_trick
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -4742,40 +4745,24 @@ class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
 
-class SnowmansLandCoinStar102AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+class SnowmansLandCoinStar97AccessTestBase(SnowmansLandCoinStarAccessTestBase):
     options = {
         **SnowmansLandCoinStarAccessTestBase.options,
-        "snowmans_land_coin_star_requirement": 102,
+        "snowmans_land_coin_star_requirement": 97,
     }
 
-    def test_start_coins_reach_coin_star(self):
+    def test_upper_region_coins_reach_coin_star(self):
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
 
 
-class SnowmansLandCoinStar104AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+class SnowmansLandCoinStar100AccessTestBase(SnowmansLandCoinStarAccessTestBase):
     options = {
         **SnowmansLandCoinStarAccessTestBase.options,
-        "snowmans_land_coin_star_requirement": 104,
+        "snowmans_land_coin_star_requirement": 100,
     }
 
-    def test_big_head_coins_reach_coin_star_without_cannon(self):
-        self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Backflip"))
-        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
-
-        self.collect(self.get_item_by_name("Snowman's Land - Penguin"))
-        self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
-        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
-
-
-class SnowmansLandCoinStar105AccessTestBase(SnowmansLandCoinStarAccessTestBase):
-    options = {
-        **SnowmansLandCoinStarAccessTestBase.options,
-        "snowmans_land_coin_star_requirement": 105,
-    }
-
-    def test_cannon_coins_reach_coin_star(self):
+    def test_cannon_reaches_last_mr_blizzard_coins(self):
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
 
@@ -4783,52 +4770,227 @@ class SnowmansLandCoinStar105AccessTestBase(SnowmansLandCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
 
 
-class SnowmansLandCoinStar105NoDespawnsAccessTestBase(SnowmansLandCoinStarAccessTestBase):
+class SnowmansLandCoinStar100NoDespawnsAccessTestBase(SnowmansLandCoinStarAccessTestBase):
     options = {
         **SnowmansLandCoinStarAccessTestBase.options,
-        "snowmans_land_coin_star_requirement": 105,
+        "snowmans_land_coin_star_requirement": 100,
         "no_despawns": Options.NoDespawns.option_true,
     }
 
-    def test_no_despawns_coins_reach_coin_star_without_cannon(self):
+    def test_no_despawns_reaches_last_mr_blizzard_coins_without_cannon(self):
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
 
 
-class SnowmansLandCoinStar122AccessTestBase(SnowmansLandCoinStarAccessTestBase):
+class SnowmansLandCoinStar126AccessTestBase(SnowmansLandCoinStarAccessTestBase):
     options = {
         **SnowmansLandCoinStarAccessTestBase.options,
-        "snowmans_land_coin_star_requirement": 122,
+        "snowmans_land_coin_star_requirement": 126,
     }
 
     def test_igloo_coins_reach_coin_star(self):
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Wall Kick"))
         self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
 
-        self.collect(self.get_item_by_name("Vanish Cap"))
-        self.assertTrue(self.can_reach_location("Snowman's Land - Into the Igloo"))
-        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
-
-
-class SnowmansLandCoinStar127AccessTestBase(SnowmansLandCoinStarAccessTestBase):
-    options = {
-        **SnowmansLandCoinStarAccessTestBase.options,
-        "snowmans_land_coin_star_requirement": 127,
-    }
-
-    def test_all_coin_sources_reach_coin_star(self):
-        self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
-        self.assertTrue(self.can_reach_location("Snowman's Land - Snowman's Big Head"))
-        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
-
-        self.collect([
-            self.get_item_by_name("Vanish Cap"),
-            self.get_item_by_name("Wall Kick"),
+        self.collect_by_name([
+            "Vanish Cap",
+            "Wall Kick",
+            "Snowman's Land - Cannon Unlock",
         ])
         self.assertTrue(self.can_reach_location("Snowman's Land - Into the Igloo"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandImpossibleCoinLogicTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "accessibility": "minimal",
+        "snowmans_land_coin_star_requirement": 127,
+    }
+
+    def test_127_coins_are_out_of_logic_without_trick(self):
+        self.collect_second_floor_access()
+        self.collect_by_name([
+            "Snowman's Land - Cannon Unlock",
+            "Vanish Cap",
+            "Wall Kick",
+        ])
+        self.assertTrue(self.can_reach_location("Snowman's Land - Into the Igloo"))
+        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandImpossibleCoinEnabledTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "accessibility": "minimal",
+        "logic_tricks": {"Snowman's Land Impossible Coin"},
+        "snowmans_land_coin_star_requirement": 127,
+    }
+
+    def test_trick_and_cannon_reach_127_coins(self):
+        self.collect_second_floor_access()
+        self.collect_by_name(["Vanish Cap", "Wall Kick"])
+        self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Coins Star"))
+
+
+class SnowmansLandImpossibleCoinFullAccessibilityCapTestBase(SnowmansLandCoinStarAccessTestBase):
+    options = {
+        **SnowmansLandCoinStarAccessTestBase.options,
+        "accessibility": "full",
+        "snowmans_land_coin_star_requirement": 127,
+    }
+
+    def test_full_accessibility_caps_requirement_at_126(self):
+        self.assertEqual(self.world.options.snowmans_land_coin_star_requirement.value, 126)
+        self.assertEqual(self.world.get_coin_star_requirements_slot_data()[9], 126)
+
+
+class SnowmansLandRegionAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "blocksanity": Options.Blocksanity.option_true,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_second_floor_access(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+
+    def test_spindrift_opens_whirl_and_upper(self):
+        self.collect_second_floor_access()
+        self.assertFalse(self.multiworld.state.has("Snowman's Land - Spindrifts", self.player))
+        self.assertFalse(self.multiworld.state.has("Snowman's Land - Cannon Unlock", self.player))
+        self.assertEqual(self.world.options.enemy_unlocks.value, Options.EnemyUnlocks.option_per_level)
+        self.assertFalse(
+            self.multiworld.get_region("Snowman's Land - Whirl from the Freezing Pond", self.player)
+            .entrances[0].access_rule(self.multiworld.state))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Upper"))
+
+        self.collect(self.get_item_by_name("Snowman's Land - Spindrifts"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Upper"))
+
+    def test_movement_can_reach_upper_without_whirl(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Upper"))
+
+    def test_locations_are_in_requested_regions(self):
+        whirl_locations = (
+            "Snowman's Land - Whirl from the Freezing Pond",
+            "Snowman's Land - Koopa Shell Block",
+            "Snowman's Land - Shell Shreddin' for Red Coins",
+            "Snowman's Land - Whirl from the Freezing Pond Star Block",
+        )
+        upper_locations = (
+            "Snowman's Land - Snowman's Big Head",
+            "Snowman's Land - Into the Igloo",
+            "Snowman's Land - Inside Igloo Block 1-Up",
+            "Snowman's Land - Igloo Ice Block 1-Up",
+            "Snowman's Land - Inside Igloo 1-Up Block",
+            "Snowman's Land - Vanish Cap Block",
+        )
+        for location_name in whirl_locations:
+            self.assertEqual(
+                self.multiworld.get_location(location_name, self.player).parent_region.name,
+                "Snowman's Land - Whirl from the Freezing Pond")
+        for location_name in upper_locations:
+            self.assertEqual(
+                self.multiworld.get_location(location_name, self.player).parent_region.name,
+                "Snowman's Land - Upper")
+
+
+class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "accessibility": "minimal",
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "logic_tricks": {"Snowman's Land Impossible Coin"},
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def get_full_snowmans_land_route_state(self):
+        state = CollectionState(self.multiworld)
+        for item_name in [
+            "Progressive Upstairs Key",
+            "Triple Jump",
+            "Wall Kick",
+            "Vanish Cap",
+            "Snowman's Land - Cannon Unlock",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        self.assertTrue(self.world.logic_sl_impossible_coin)
+        self.assertTrue(state.has("Snowman's Land - Cannon Unlock", self.player))
+        self.assertTrue(can_use_logic_trick(
+            state, self.player, "logic_sl_impossible_coin", "Snowman's Land - Coins Star"))
+        self.assertTrue(state.can_reach("Snowman's Land - Upper", "Region", self.player))
+        self.assertTrue(state.can_reach("Snowman's Land - Into the Igloo", "Location", self.player))
+        return state
+
+    def test_each_unlock_matches_documented_total(self):
+        source_coins = {
+            "Snowman's Land - Single Yellow Coins": 14,
+            "Snowman's Land - Red Coins": 16,
+            "Snowman's Land - Horizontal Coin Lines": 25,
+            "Snowman's Land - Three-Coin Block": 3,
+            "Snowman's Land - Fly Guy": 2,
+            "Snowman's Land - Goombas": 3,
+            "Snowman's Land - Moneybags": 10,
+            "Snowman's Land - Mr Blizzards": 12,
+            "Snowman's Land - Spindrifts": 42,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                state = self.get_full_snowmans_land_route_state()
+                state.collect(self.world.create_item(item_name))
+                actual_coins = max(
+                    coin_count for coin_count in range(128)
+                    if snowmans_land_coins(state, self.player, coin_count)
+                )
+                self.assertEqual(actual_coins, expected_coins)
+
+    def test_all_unlocks_total_127_coins(self):
+        state = self.get_full_snowmans_land_route_state()
+        for item_name in [
+            "Snowman's Land - Single Yellow Coins",
+            "Snowman's Land - Red Coins",
+            "Snowman's Land - Horizontal Coin Lines",
+            "Snowman's Land - Three-Coin Block",
+            "Snowman's Land - Fly Guy",
+            "Snowman's Land - Goombas",
+            "Snowman's Land - Moneybags",
+            "Snowman's Land - Mr Blizzards",
+            "Snowman's Land - Spindrifts",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        self.assertTrue(snowmans_land_coins(
+            state, self.player, 127))
+
+    def test_enemy_checks_require_their_unlocks(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+        self.collect(self.get_item_by_name("Snowman's Land - Spindrifts"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+
+        self.assertFalse(self.can_reach_location("Snowman's Land - Chill with the Bully"))
+        self.collect(self.get_item_by_name("Snowman's Land - Chill Bully"))
+        self.assertTrue(self.can_reach_location("Snowman's Land - Chill with the Bully"))
 
 
 class WetDryWorldCoinStarAccessTestBase(SM64TestBase):

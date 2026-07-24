@@ -162,6 +162,12 @@ class SM64World(World):
 
         self.filler_count = 0
         self.topology_present = self.options.area_rando
+        if (
+                self.options.accessibility == self.options.accessibility.option_full
+                and not self.logic_sl_impossible_coin
+        ):
+            self.options.snowmans_land_coin_star_requirement.value = min(
+                self.options.snowmans_land_coin_star_requirement.value, 126)
         coin_star_requirements = {
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names

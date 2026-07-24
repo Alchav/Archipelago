@@ -1189,14 +1189,103 @@ def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bo
 
 
 def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 102
-    if state.has("Snowman's Land - Cannon Unlock", player) or \
-            state.multiworld.worlds[player].options.no_despawns.value:
-        reachable_coins += 3
-    if state.can_reach("Snowman's Land - Snowman's Big Head", "Location", player):
+    level_name = "Snowman's Land"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_three_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+    has_fly_guy = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fly Guys", f"{level_name} - Fly Guy")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_moneybags = has_unlock(
+        state, player, "enemy_unlocks",
+        f"{level_name} - Moneybags", f"{level_name} - Moneybags")
+    has_mr_blizzards = has_unlock(
+        state, player, "enemy_unlocks",
+        "Mr Blizzards", f"{level_name} - Mr Blizzards")
+    has_spindrifts = has_unlock(
+        state, player, "enemy_unlocks",
+        "Spindrifts", f"{level_name} - Spindrifts")
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Snowman%27s_Land&oldid=18913
+
+    # 2 coins to left of start
+    reachable_coins = 2 if has_single_yellow_coins else 0
+    # 11 Spindrifts
+    if has_spindrifts:
+        reachable_coins += 33
+    # 3 Mr. Blizzards
+    if has_mr_blizzards:
+        reachable_coins += 9
+    # 2 Money Bags
+    if has_moneybags:
+        reachable_coins += 10
+    # 1 Fly Guy
+    if has_fly_guy:
         reachable_coins += 2
-    if state.can_reach("Snowman's Land - Into the Igloo", "Location", player):
-        reachable_coins += 20
+    if state.can_reach("Snowman's Land - Whirl from the Freezing Pond", "Region", player):
+        # 3 Red Coins
+        if has_red_coins:
+            reachable_coins += 6
+        if (
+                has_mr_blizzards
+                and (
+                    state.has("Snowman's Land - Cannon Unlock", player)
+                    or state.multiworld.worlds[player].options.no_despawns.value
+                )
+        ):
+            # 1 Mr. Blizzard
+            reachable_coins += 3
+    if state.can_reach("Snowman's Land - Upper", "Region", player):
+        # 8 coins on slope which leads from the water to the igloo
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        if has_single_yellow_coins:
+            reachable_coins += 3
+        # 3 coins by penguin and snowman's face
+        if has_single_yellow_coins:
+            reachable_coins += 3
+        # 3 Spindrifts
+        if has_spindrifts:
+            reachable_coins += 9
+        # 3 Goombas
+        if has_goombas:
+            reachable_coins += 3
+        # 5 Red Coins
+        if has_red_coins:
+            reachable_coins += 10
+        # 2 coins on on wooden plank before first tree on the snowman [sic]
+        if has_single_yellow_coins:
+            reachable_coins += 2
+        if state.can_reach("Snowman's Land - Into the Igloo", "Location", player):
+            # (Inside the Igloo) 20 coins frozen in ice which require vanish cap
+            if has_horizontal_coin_lines:
+                reachable_coins += 20
+            # (Inside the Igloo) 3 coins outside of ice, near the 20 coins inside the ice
+            if has_single_yellow_coins:
+                reachable_coins += 3
+            # (Inside the Igloo) 3 coins in ! block near bob-omb buddy
+            if has_three_coin_block:
+                reachable_coins += 3
+    if (
+            has_single_yellow_coins
+            and can_use_logic_trick(
+                state, player, "logic_sl_impossible_coin", f"{level_name} - Coins Star")
+    ):
+        # 1 coin hidden inside the first wooden plank on snowman
+        reachable_coins += 1
+    assert reachable_coins <= 127
     return coins <= reachable_coins
 
 
@@ -2422,7 +2511,21 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC")
     # Snowman's Land
+    set_rule(
+        multiworld.get_region("Snowman's Land - Whirl from the Freezing Pond", player).entrances[0],
+        rf.build_rule(
+            "SPINDRIFTS | CANN",
+            cannon_name=rf.get_cannon_item_name("Snowman's Land - Whirl from the Freezing Pond"),
+            cap_item_names=rf.get_cap_item_names("Snowman's Land - Whirl from the Freezing Pond"),
+            arbitrary_item_names=rf.get_arbitrary_item_names("Snowman's Land - Whirl from the Freezing Pond"),
+            action_item_names=rf.get_action_item_names("Snowman's Land - Whirl from the Freezing Pond")))
+    rf.assign_rule(
+        "Snowman's Land - Upper",
+        "{Snowman's Land - Whirl from the Freezing Pond} | TJ/SF/BF")
     rf.assign_rule("Snowman's Land - Top of Snowman's Head", "SL_PENGUIN & BF/SF/TJ | CANN")
+    rf.assign_rule("Snowman's Land - Snowman's Big Head", "SL_PENGUIN & BF/SF/TJ | CANN")
+    rf.assign_rule("Snowman's Land - Chill with the Bully", "BIG_BULLY")
+    rf.assign_rule("Snowman's Land - Shell Shreddin' for Red Coins", "RED_COINS")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG | MOVELESS & VC")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
@@ -3076,6 +3179,9 @@ class RuleFactory:
         item_names["SPINDRIFTS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Spindrifts", f"{level_name} - Spindrifts")
+        item_names["BIG_BULLY"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Big Bully", f"{level_name} - Chill Bully")
         item_names["FLY_GUY"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Fly Guys", f"{level_name} - Fly Guy")
