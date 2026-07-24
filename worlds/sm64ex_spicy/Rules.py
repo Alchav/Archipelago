@@ -1341,26 +1341,58 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
             or route_has_top(water_levels) and allows_moveless(state, player) and has_triple_jump and has_dive
         )
 
+    # https://ukikipedia.net/mediawiki/index.php?title=Wet-Dry_World&oldid=19487
+    #below top
+
+
     def route_coins(start_water_level: str) -> int:
         water_levels = route_water_levels(start_water_level)
         route_total = 0
+        # 2 Skeeters
+        route_total += 6
+        # Ring of coins around the pillar with the amp circling it (8)
+        route_total += 8
+        # 10 coins from the ! block on the pillar (10)
+        route_total += 10
+        # 3 coins in ! block underneath Chuckya platform (push block to get) (3)
+        route_total += 3
         if "low" in water_levels:
-            route_total += 22
+            # 12 coins in the 4 breakable boxes near start
+            route_total += 12
+            # 10 coins in ! block against wall near the map corner (under cannon)
+            route_total += 10
             if has_ground_pound:
+                # 6 blue coins from block (on very first level up, by fire-shooters)
                 route_total += 30
-        if "high" in water_levels:
-            route_total += 22
-        if water_levels.intersection({"low", "mid"}):
+        if "mid" in water_levels:
+            # 3 coins in ! block on a wooden platform with purple switch
             route_total += 3
         if water_levels.intersection({"mid", "highest"}) or has_wdw_purple_switches or (has_triple_jump and has_dive):
+            # Line of coins by the 4th highest water-level changer
             route_total += 5
         if route_has_top(water_levels):
-            route_total += 15
+            # Line of coins at highest level, by the highest water-level changer (5)
+            route_total += 5
+            # Chuckya (5)
+            route_total += 5
         if can_reach_top_of_express_elevator:
+            # 10 coins in ! block above the the "Express Elevators" star
             route_total += 10
         if route_has_downtown(water_levels):
-            route_total += 31
+            # (Inside the Town) Ring of coins around triangle statue in middle of town
+            route_total += 8
+            # (Inside the Town) Line of coins on high plank leading to metal cap
+            route_total += 5
+            # (Inside the Town) Line of coins on building between the entrance and trees
+            route_total += 5
+            # (Inside the Town) Line of coins on the other building beside the trees
+            route_total += 5
+            # 2 Skeeters
+            route_total += 6
+            # 1 Red Coin
+            route_total += 2
             if has_water_level_diamond:
+                # 7 Red Coins
                 route_total += 14
         return route_total
 
