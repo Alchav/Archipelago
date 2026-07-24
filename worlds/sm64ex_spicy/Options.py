@@ -415,6 +415,56 @@ class EnemyUnlocks(LevelFeatureItemMode):
     display_name = "Enemy Unlocks"
 
 
+class BowserBombs(LevelFeatureItemMode):
+    """
+    Choose how Progressive Bowser Arena Bombs are handled.
+
+    Not Shuffled - The game starts with all Bower Arena Bombs available.
+
+    Global - Shuffle four Progressive Bowser Arena Bomb items that each add one bomb to every arena, plus one
+    Bowser in the Sky item for its fifth bomb.
+
+    Individual - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
+    Fire Sea, and five for Bowser in the Sky.
+    """
+    display_name = "Progressive Bowser Arena Bomb Items"
+
+
+class BowserInTheDarkWorldHits(Range):
+    """Number of Bowser Bomb hits required to defeat Bowser in the Dark World."""
+    display_name = "Bowser in the Dark World Hits"
+    range_start = 1
+    range_end = 4
+    default = 1
+
+
+class BowserInTheFireSeaHits(Range):
+    """Number of Bowser Bomb hits required to defeat Bowser in the Fire Sea."""
+    display_name = "Bowser in the Fire Sea Hits"
+    range_start = 1
+    range_end = 4
+    default = 1
+
+
+class BowserInTheSkyHits(Range):
+    """Number of Bowser Bomb hits required to defeat Bowser in the Sky."""
+    display_name = "Bowser in the Sky Hits"
+    range_start = 1
+    range_end = 5
+    default = 3
+
+
+class BowserInTheSkyStageCollapseHits(NamedRange):
+    """
+    Number of hits Bowser must take before parts of the Bowser in the Sky arena begin falling.
+    """
+    display_name = "Bowser in the Sky Stage Collapse Hits"
+    range_start = 1
+    range_end = 6
+    default = 2
+    special_range_names = {"never": 6}
+
+
 class BowserStage1Ups(Choice):
     """
     Choose how Bowser stage 1-Up objects that normally depend on Bowser key flags are handled.
@@ -931,6 +981,7 @@ sm64_options_groups = [
         PurpleSwitches,
         CoinObjectUnlocks,
         EnemyUnlocks,
+        BowserBombs,
         BowserStage1Ups,
         WetDryWorldWaterLevelDiamond,
         TickTockClockSpinners,
@@ -943,6 +994,10 @@ sm64_options_groups = [
     ]),
     OptionGroup("Gameplay Options", [
         MariosHat,
+        BowserInTheDarkWorldHits,
+        BowserInTheFireSeaHits,
+        BowserInTheSkyHits,
+        BowserInTheSkyStageCollapseHits,
     ]),
     OptionGroup("Ability Options", [
         *move_randomizer_options,
@@ -998,6 +1053,11 @@ class SM64Options(PerGameCommonOptions):
     purple_switches: PurpleSwitches
     coin_object_unlocks: CoinObjectUnlocks
     enemy_unlocks: EnemyUnlocks
+    bowser_bombs: BowserBombs
+    bowser_in_the_dark_world_hits: BowserInTheDarkWorldHits
+    bowser_in_the_fire_sea_hits: BowserInTheFireSeaHits
+    bowser_in_the_sky_hits: BowserInTheSkyHits
+    bowser_in_the_sky_stage_collapse_hits: BowserInTheSkyStageCollapseHits
     bowser_stage_1ups: BowserStage1Ups
     wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
     tick_tock_clock_spinners: TickTockClockSpinners

@@ -11,7 +11,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
     global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
-    global_mode_enemy_item_names
+    global_mode_enemy_item_names, bowser_bomb_item_data_table
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -49,6 +49,16 @@ class LogicTrickOptionTest(unittest.TestCase):
                 <= ("easy", "medium", "hard").index(maximum_difficulty)
             }
             self.assertEqual(enabled, expected)
+
+
+class BowserStageCollapseHitsOptionTest(unittest.TestCase):
+    def test_never_alias(self):
+        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.from_text("never").value, 6)
+
+    def test_range(self):
+        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_start, 1)
+        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 6)
+
 
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
     "triple_jump": Options.TripleJump.option_global,
@@ -721,6 +731,43 @@ class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
                 self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
+
+
+class UnshuffledBowserArenaBombItemPoolTestBase(SM64TestBase):
+    def test_bowser_arena_bombs_are_start_inventory_slot_data_only(self):
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        self.assertEqual(start_inventory[item_table["Progressive Bowser Arena Bomb"]], 4)
+        self.assertEqual(
+            start_inventory[item_table["Bowser in the Sky - Progressive Bowser Arena Bomb"]], 1)
+        for item_name in bowser_bomb_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class GlobalBowserArenaBombItemPoolTestBase(SM64TestBase):
+    options = {"bowser_bombs": Options.BowserBombs.option_global}
+
+    def test_global_bowser_arena_bombs_are_generated(self):
+        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 4)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 1)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")), 0)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Fire Sea - Progressive Bowser Arena Bomb")), 0)
+
+
+class IndividualBowserArenaBombItemPoolTestBase(SM64TestBase):
+    options = {"bowser_bombs": Options.BowserBombs.option_individual}
+
+    def test_individual_bowser_arena_bombs_are_generated(self):
+        expected_counts = {
+            "Bowser in the Dark World - Progressive Bowser Arena Bomb": 4,
+            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": 4,
+            "Bowser in the Sky - Progressive Bowser Arena Bomb": 5,
+        }
+        for item_name, count in expected_counts.items():
+            self.assertEqual(len(self.get_items_by_name(item_name)), count)
+        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 0)
 
 
 class GroupedCastleKeyPoolTestBase(SM64TestBase):

@@ -703,6 +703,13 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Tick Tock Clock - Thwomp": SM64ItemData(3626848, progression),
 }
 
+bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
+    "Progressive Bowser Arena Bomb": SM64ItemData(3626849, progression),
+    "Bowser in the Dark World - Progressive Bowser Arena Bomb": SM64ItemData(3626850, progression),
+    "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": SM64ItemData(3626851, progression),
+    "Bowser in the Sky - Progressive Bowser Arena Bomb": SM64ItemData(3626852, progression),
+}
+
 
 global_mode_coin_object_item_names = (
     "Single Yellow Coins",
@@ -770,6 +777,7 @@ item_data_table = {
     **per_level_coin_object_item_data_table,
     **global_enemy_item_data_table,
     **per_level_enemy_item_data_table,
+    **bowser_bomb_item_data_table,
     **trap_item_data_table
 }
 
@@ -799,6 +807,7 @@ item_name_groups: dict[str, set[str]] = {
     "Enemy Unlocks": set(global_enemy_item_data_table) | set(per_level_enemy_item_data_table),
     "Global Enemy Unlocks": set(global_enemy_item_data_table),
     "Per-Level Enemy Unlocks": set(per_level_enemy_item_data_table),
+    "Progressive Bowser Arena Bombs": set(bowser_bomb_item_data_table),
     "Optional Items": set(optional_item_data_table),
     "Filler": {"1-Up Mushroom"},
      "Traps": set(trap_item_data_table),

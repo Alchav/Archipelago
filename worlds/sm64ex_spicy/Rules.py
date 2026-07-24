@@ -1897,6 +1897,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             return state.has("Bowser Stage Extra 1-Ups", player)
         return state.has(stage_item_name, player)
 
+    def has_bowser_arena_bombs(state, stage_name: str, required_hits: int) -> bool:
+        if options.bowser_bombs.value == options.bowser_bombs.option_not_shuffled:
+            return True
+        if options.bowser_bombs.value == options.bowser_bombs.option_global:
+            bomb_count = state.count("Progressive Bowser Arena Bomb", player)
+            if stage_name == "Bowser in the Sky":
+                bomb_count += state.count("Bowser in the Sky - Progressive Bowser Arena Bomb", player)
+            return bomb_count >= required_hits
+        return state.has(f"{stage_name} - Progressive Bowser Arena Bomb", player, required_hits)
+
     connect_randomized_entrance("Menu", "Bob-omb Battlefield")
     connect_randomized_entrance("Menu", "Whomp's Fortress",
                                 rf.build_rule("", painting_lvl_name="Whomp's Fortress"))
@@ -2304,6 +2314,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Dark World - Red Coins", "RED_COINS & PURPLE_SWITCHES")
     rf.assign_rule("Bowser in the Dark World - Key",
                    "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass")
+    add_rule(
+        multiworld.get_location("Bowser in the Dark World - Key", player),
+        lambda state: has_bowser_arena_bombs(
+            state, "Bowser in the Dark World", options.bowser_in_the_dark_world_hits.value))
     if options.one_up_checks:
         for location_name in (
                 "Bowser in the Dark World - Center Overhang 1-Up",
@@ -2320,6 +2334,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Fire Sea - Red Coins", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles Block 1-Up", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
+    add_rule(
+        multiworld.get_location("Bowser in the Fire Sea - Key", player),
+        lambda state: has_bowser_arena_bombs(
+            state, "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_hits.value))
     if options.one_up_checks:
         for location_name in (
                 "Bowser in the Fire Sea - Near Poles 1-Up",
@@ -2540,14 +2558,20 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     area_connections.update({int(entrance_lvl): int(sm64_entrances_to_level[destination])
                              for (entrance_lvl, destination) in randomized_entrances.items()})
 
-    multiworld.completion_condition[player] = lambda state: state.can_reach("Bowser in the Sky - Top", 'Region', player)
+    can_defeat_bowser_in_the_sky = lambda state: (
+        state.can_reach("Bowser in the Sky - Top", 'Region', player)
+        and has_bowser_arena_bombs(state, "Bowser in the Sky", options.bowser_in_the_sky_hits.value)
+    )
+    multiworld.completion_condition[player] = can_defeat_bowser_in_the_sky
 
     if options.completion_type == options.completion_type.option_Last_Bowser_Stage:
-        multiworld.completion_condition[player] = lambda state: state.can_reach("Bowser in the Sky - Top", 'Region', player)
+        multiworld.completion_condition[player] = can_defeat_bowser_in_the_sky
     elif options.completion_type == options.completion_type.option_All_Bowser_Stages:
-        multiworld.completion_condition[player] = lambda state: state.can_reach("Bowser in the Dark World", 'Region', player) and \
-                                                           state.can_reach("Bowser in the Fire Sea - Upper", 'Region', player) and \
-                                                           state.can_reach("Bowser in the Sky - Top", 'Region', player)
+        multiworld.completion_condition[player] = lambda state: (
+            state.can_reach("Bowser in the Dark World - Key", 'Location', player)
+            and state.can_reach("Bowser in the Fire Sea - Key", 'Location', player)
+            and can_defeat_bowser_in_the_sky(state)
+        )
 
 
 class RuleFactory:

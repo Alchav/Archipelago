@@ -9,7 +9,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
     item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
-    global_mode_enemy_item_names
+    global_mode_enemy_item_names, bowser_bomb_item_data_table
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
@@ -103,6 +103,11 @@ class SM64World(World):
         "purple_switches",
         "coin_object_unlocks",
         "enemy_unlocks",
+        "bowser_bombs",
+        "bowser_in_the_dark_world_hits",
+        "bowser_in_the_fire_sea_hits",
+        "bowser_in_the_sky_hits",
+        "bowser_in_the_sky_stage_collapse_hits",
         "bowser_stage_1ups",
         "wet_dry_world_water_level_diamond",
         "tick_tock_clock_spinners",
@@ -316,6 +321,24 @@ class SM64World(World):
             global_mode_enemy_item_names,
             per_level_enemy_item_data_table)
 
+    def get_bowser_arena_bomb_item_names(self) -> typing.List[str]:
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_global:
+            return ["Progressive Bowser Arena Bomb"] * 4 + [
+                "Bowser in the Sky - Progressive Bowser Arena Bomb"]
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_individual:
+            return (
+                ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
+                + ["Bowser in the Fire Sea - Progressive Bowser Arena Bomb"] * 4
+                + ["Bowser in the Sky - Progressive Bowser Arena Bomb"] * 5
+            )
+        return []
+
+    def get_unrandomized_bowser_arena_bomb_item_names(self) -> typing.List[str]:
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_not_shuffled:
+            return ["Progressive Bowser Arena Bomb"] * 4 + [
+                "Bowser in the Sky - Progressive Bowser Arena Bomb"]
+        return []
+
     def get_unrandomized_unlock_item_names(self) -> typing.List[str]:
         item_names = []
         if self.options.coin_object_unlocks.value == self.options.coin_object_unlocks.option_not_shuffled:
@@ -374,6 +397,7 @@ class SM64World(World):
         item_names += self.get_action_item_names()
         item_names += self.get_coin_object_unlock_item_names()
         item_names += self.get_enemy_unlock_item_names()
+        item_names += self.get_bowser_arena_bomb_item_names()
 
         return item_names
 
@@ -522,6 +546,7 @@ class SM64World(World):
                 self.get_unrandomized_arbitrary_item_names()
                 + self.get_unrandomized_optional_item_names()
                 + self.get_unrandomized_bowser_stage_1up_item_names()
+                + self.get_unrandomized_bowser_arena_bomb_item_names()
                 + self.get_unrandomized_unlock_item_names()):
             item_id = item_table[item_name]
             start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
@@ -571,6 +596,10 @@ class SM64World(World):
             "BuddyChecks": self.options.buddy_checks.value,
             "EasyButterflies": self.options.easy_butterflies.value,
             "NoDespawn": self.options.no_despawns.value,
+            "BowserInTheDarkWorldHits": self.options.bowser_in_the_dark_world_hits.value,
+            "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_hits.value,
+            "BowserInTheSkyHits": self.options.bowser_in_the_sky_hits.value,
+            "BowserInTheSkyStageCollapseHits": self.options.bowser_in_the_sky_stage_collapse_hits.value,
         }
         slot_data.update(self.get_music_slot_data())
         mario_colors = self.get_mario_colors_slot_data()

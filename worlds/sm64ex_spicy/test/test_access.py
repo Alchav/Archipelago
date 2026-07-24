@@ -6045,3 +6045,37 @@ class RainbowRideCoinStar146AccessTestBase(RainbowRideCoinStarAccessTestBase):
             self.get_item_by_name("Rainbow Ride - Cannon Unlock"),
         ])
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
+    options = {
+        "bowser_bombs": Options.BowserBombs.option_global,
+        "bowser_in_the_dark_world_hits": 4,
+        "bowser_in_the_fire_sea_hits": 4,
+        "bowser_in_the_sky_hits": 5,
+    }
+
+    def test_first_two_keys_require_four_global_bombs(self):
+        self.collect_all_but({
+            "Progressive Bowser Arena Bomb",
+            "Bowser in the Sky - Progressive Bowser Arena Bomb",
+        })
+        global_bomb = self.get_item_by_name("Progressive Bowser Arena Bomb")
+        self.collect([global_bomb] * 3)
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Key"))
+
+        self.collect(global_bomb)
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Key"))
+
+    def test_bowser_in_the_sky_uses_its_fifth_bomb(self):
+        self.collect_all_but({
+            "Progressive Bowser Arena Bomb",
+            "Bowser in the Sky - Progressive Bowser Arena Bomb",
+        })
+        self.collect([self.get_item_by_name("Progressive Bowser Arena Bomb")] * 4)
+        self.assertFalse(self.multiworld.can_beat_game(self.multiworld.state))
+
+        self.collect(self.get_item_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb"))
+        self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
