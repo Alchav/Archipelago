@@ -6,7 +6,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
-    hazy_maze_cave_coins, get_per_level_action_item_name
+    hazy_maze_cave_coins, dire_dire_docks_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -3728,6 +3728,72 @@ class DireDireDocksCoinStar76SubPolesMovementAccessTestBase(DireDireDocksCoinSta
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Coins Star"))
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Coins Star"))
+
+
+class DireDireDocksIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def collect_full_dire_dire_docks_route(self):
+        self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
+        self.collect_by_name([
+            "Triple Jump",
+            "Ground Pound",
+            "Climb",
+            "Purple Switches",
+            "Dire, Dire Docks - Bowser's Sub",
+            "Dire, Dire Docks - Poles",
+        ])
+
+    def test_each_unlock_matches_documented_total(self):
+        self.collect_full_dire_dire_docks_route()
+        source_coins = {
+            "Dire, Dire Docks - Single Yellow Coins": 3,
+            "Dire, Dire Docks - Red Coins": 16,
+            "Dire, Dire Docks - Blue Coin Block": 30,
+            "Dire, Dire Docks - Horizontal Coin Lines": 10,
+            "Dire, Dire Docks - Horizontal Coin Rings": 8,
+            "Dire, Dire Docks - Vertical Coin Lines": 15,
+            "Dire, Dire Docks - Vertical Coin Rings": 24,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(dire_dire_docks_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(dire_dire_docks_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_all_unlocks_total_106_coins(self):
+        self.collect_full_dire_dire_docks_route()
+        self.collect_by_name([
+            "Dire, Dire Docks - Single Yellow Coins",
+            "Dire, Dire Docks - Red Coins",
+            "Dire, Dire Docks - Blue Coin Block",
+            "Dire, Dire Docks - Horizontal Coin Lines",
+            "Dire, Dire Docks - Horizontal Coin Rings",
+            "Dire, Dire Docks - Vertical Coin Lines",
+            "Dire, Dire Docks - Vertical Coin Rings",
+        ])
+        self.assertTrue(dire_dire_docks_coins(
+            self.multiworld.state, self.player, 106))
+
+    def test_red_coin_star_requires_red_coin_unlock(self):
+        self.collect_full_dire_dire_docks_route()
+        self.assertFalse(self.can_reach_location(
+            "Dire, Dire Docks - Pole-Jumping for Red Coins"))
+        self.collect(self.get_item_by_name("Dire, Dire Docks - Red Coins"))
+        self.assertTrue(self.can_reach_location(
+            "Dire, Dire Docks - Pole-Jumping for Red Coins"))
 
 
 class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):

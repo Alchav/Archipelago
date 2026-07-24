@@ -637,7 +637,7 @@ def hazy_maze_cave_coins(state: CollectionState, player: int, coins: int) -> boo
         "Red Coins", f"{level_name} - Red Coins")
     has_blue_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Blue Coin Block", f"{level_name} - Blue Coin Block")
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
     has_horizontal_coin_lines = has_unlock(
         state, player, "coin_object_unlocks",
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
@@ -1122,7 +1122,27 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Dire, Dire Docks"
-    reachable_coins = 60
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_vertical_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
     has_poles = state.has("Dire, Dire Docks - Poles", player) and has_action(state, player, "Climb", level_name)
     has_purple_switch_route = has_purple_switches(state, player, "Dire, Dire Docks")
     has_sub_poles_movement_route = (
@@ -1130,12 +1150,41 @@ def dire_dire_docks_coins(state: CollectionState, player: int, coins: int) -> bo
             and has_poles
             and has_action(state, player, "Triple Jump", level_name)
     )
-    if has_purple_switch_route or has_sub_poles_movement_route:
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Dire,_Dire_Docks&oldid=20273
+
+    # Sloped line of coins underwater on the wall near start
+    reachable_coins = 5 if has_horizontal_coin_lines else 0
+    # 2 vertical lines of coins, by chests and first current
+    if has_vertical_coin_lines:
+        reachable_coins += 10
+    # 3 coins surrounding a chest on sea floor
+    if has_single_yellow_coins:
+        reachable_coins += 3
+    # 3 rings of coins leading to Bowser's sub area
+    if has_vertical_coin_rings:
+        reachable_coins += 24
+    # Ring of coins on sea floor, by clam with koopa shell
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
+    # Vertical line of coins, by the moat exit
+    if has_vertical_coin_lines:
+        reachable_coins += 5
+    # Line of coins on the wooden dock, in Bowser's sub area
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
+
+    if has_red_coins and (has_purple_switch_route or has_sub_poles_movement_route):
+        # 1 Red Coin
         reachable_coins += 2
         if has_poles:
+            # 7 Red Coins
             reachable_coins += 14
-            if has_purple_switch_route and has_action(state, player, "Ground Pound", level_name):
-                reachable_coins += 30
+    if (has_blue_coin_block and has_purple_switch_route and has_poles
+            and has_action(state, player, "Ground Pound", level_name)):
+        # Blue coin block
+        reachable_coins += 30
+    assert reachable_coins <= 106
     return coins <= reachable_coins
 
 
@@ -2366,9 +2415,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub",
                    "PURPLE_SWITCHES & DDD_BOWSER_SUB | TJ & MOVELESS & DDD_BOWSER_SUB")
     rf.assign_rule("Dire, Dire Docks - Pole-Jumping for Red Coins",
-                   "PURPLE_SWITCHES & DDD_POLES & CL | "
+                   "RED_COINS & PURPLE_SWITCHES & DDD_POLES & CL | "
                    # "PURPLE_SWITCHES & DDD_POLES & TJ+DV+LG+WK & MOVELESS |"  # I don't understand this and don't know if it is supposed to involve the sub
-                   "TJ & DDD_BOWSER_SUB & DDD_POLES & CL")
+                   "RED_COINS & TJ & DDD_BOWSER_SUB & DDD_POLES & CL")
     rf.assign_rule("Dire, Dire Docks - Through the Jet Stream", "MC | CAPLESS")
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC")
