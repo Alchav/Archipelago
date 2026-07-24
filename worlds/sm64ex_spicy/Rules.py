@@ -1785,51 +1785,84 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
 
 def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Tick Tock Clock"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_three_coin_blocks = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Blocks")
+    has_ten_coin_blocks = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Blocks")
+    has_bob_ombs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-ombs")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Tick_Tock_Clock&oldid=20426
 
     # 10 coins in ! block behind start with spinning heart
-    reachable_coins = 10
+    reachable_coins = 10 if has_ten_coin_blocks else 0
     # 2 Bob-ombs
-    reachable_coins += 2
+    if has_bob_ombs:
+        reachable_coins += 2
     # 2 coins above first turning cube
-    reachable_coins += 2
+    if has_single_yellow_coins:
+        reachable_coins += 2
     # 3 coins in ! block behind second pendulum
+    if has_three_coin_blocks:
+        reachable_coins += 3
     if state.can_reach("Tick Tock Clock - Lower", "Region", player):
         # 3 coins in ! block by the first moving hand
-        reachable_coins += 3
+        if has_three_coin_blocks:
+            reachable_coins += 3
         # 5 Red Coins
-        reachable_coins += 10
-        if has_simple_arbitrary_feature(state, player, "TTC_SPINNERS"):
+        if has_red_coins:
+            reachable_coins += 10
+        if has_red_coins and has_simple_arbitrary_feature(state, player, "TTC_SPINNERS"):
             # 3 Red Coins
             reachable_coins += 6
-        if state.can_reach("Tick Tock Clock Moving", "Region", player) or (
+        if has_horizontal_coin_lines and (
+                state.can_reach("Tick Tock Clock Moving", "Region", player) or (
                 state.can_reach("Tick Tock Clock Stopped", "Region", player) and any(
                     has_action(state, player, action, level_name)
                     for action in ("Ledge Grab", "Backflip", "Triple Jump", "Wall Kick")
-                )):
+                ))):
             # Slanted line of coins beside the first pole (with amp)
             reachable_coins += 5
     if state.can_reach("Tick Tock Clock - Upper", "Region", player):
         # 3 coins in each ! block with Heave Ho (there are 2 blocks)
-        reachable_coins += 6
-        if has_action(state, player, "Ground Pound", level_name):
+        if has_three_coin_blocks:
+            reachable_coins += 6
+        if has_blue_coin_block and has_action(state, player, "Ground Pound", level_name):
             # 7 Blue coins from block (by "The Pit and the Pendulums" star)
             reachable_coins += 35
     if state.can_reach("Tick Tock Clock - Top", "Region", player):
         # 3 coins in ! block on top of "Timed Jumps on Moving Bars" star
-        reachable_coins += 3
+        if has_three_coin_blocks:
+            reachable_coins += 3
         # 10 coins in ! block above the 4 "block pushers" in a row
-        reachable_coins += 10
+        if has_ten_coin_blocks:
+            reachable_coins += 10
         # 3 coins in ! block, on main path, just past 3 spinning platforms
-        reachable_coins += 3
+        if has_three_coin_blocks:
+            reachable_coins += 3
     if state.can_reach("Tick Tock Clock - Top Past Spinners", "Region", player):
-        # 10 coins in ! block underneath the Thwomp
-        reachable_coins += 10
-        # 10 coins in the first ! block at the very top of the clock
-        reachable_coins += 10
-        # 10 coins in ! block on the middle platform (drop from very top)
-        reachable_coins += 10
+        if has_ten_coin_blocks:
+            # 10 coins in ! block underneath the Thwomp
+            reachable_coins += 10
+            # 10 coins in the first ! block at the very top of the clock
+            reachable_coins += 10
+            # 10 coins in ! block on the middle platform (drop from very top)
+            reachable_coins += 10
     assert reachable_coins <= 128
     return coins <= reachable_coins
 
@@ -2965,8 +2998,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | MOVELESS & WK/TJ")
     rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
     rf.assign_rule("Tick Tock Clock - Midway Up Block 1-Up", "TTC_SPINNERS | LJ+LG")
-    rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "TTC_SPINNERS")
-    rf.assign_rule("Tick Tock Clock - Stomp on the Thwomp", "{Tick Tock Clock Moving} & THWOMP")
+    rf.assign_rule("Tick Tock Clock - Stop Time for Red Coins", "RED_COINS & TTC_SPINNERS")
+    rf.assign_rule(
+        "Tick Tock Clock - Stomp on the Thwomp",
+        "{Tick Tock Clock Moving} & THWOMP | "
+        "{Tick Tock Clock Moving} & logic_ttc_stomp_thwomp_triple_jump_wall_kick")
     # Rainbow Ride
     rf.assign_rule("Rainbow Ride - Beneath the Pole", "LJ/TJ/DV")
     rf.assign_rule("Rainbow Ride - Maze", "CL")
@@ -3103,6 +3139,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
             "Shifting Sand Land - Cannon Wing Cap Block": "WC",
             "Tower of the Wing Cap - Wing Cap Block": "WC",
+            "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block": "TEN_COIN_BLOCKS",
+            "Tick Tock Clock - First Pendulum 3 Coins Block": "THREE_COIN_BLOCKS",
+            "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block": "THREE_COIN_BLOCKS",
+            "Tick Tock Clock - Heave-ho First 3 Coins Block": "THREE_COIN_BLOCKS",
+            "Tick Tock Clock - Heave-ho Second 3 Coins Block": "THREE_COIN_BLOCKS",
+            "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block": "THREE_COIN_BLOCKS",
+            "Tick Tock Clock - Above Four Moving Bars 10 Coins Block": "TEN_COIN_BLOCKS",
+            "Tick Tock Clock - Past Three Spinners 3 Coins Block": "THREE_COIN_BLOCKS",
+            "Tick Tock Clock - Top Clock Hand 10 Coins Block": "TEN_COIN_BLOCKS",
+            "Tick Tock Clock - Top Central Platform 10 Coins Block": "TEN_COIN_BLOCKS",
+            "Tick Tock Clock - Beneath the Thwomp 10 Coins Block": "TEN_COIN_BLOCKS",
             "Tick Tock Clock - Midway Up 1-Up Block": "TTC_SPINNERS | LJ+LG",
             "Vanish Cap Under the Moat - Bottom of Slide Vanish Cap Block": "VC",
             "Vanish Cap Under the Moat - 3 Coins Block": "LG/TJ/BF/SF",
@@ -3548,6 +3595,12 @@ class RuleFactory:
         item_names["RED_COINS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Red Coins", f"{level_name} - Red Coins")
+        item_names["THREE_COIN_BLOCKS"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Three-Coin Blocks", f"{level_name} - Three-Coin Blocks")
+        item_names["TEN_COIN_BLOCKS"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Ten-Coin Blocks", f"{level_name} - Ten-Coin Blocks")
         item_names["WOODEN_POSTS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Wooden Posts", f"{level_name} - Wooden Posts")

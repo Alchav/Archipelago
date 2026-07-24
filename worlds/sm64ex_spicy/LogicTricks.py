@@ -510,6 +510,14 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
     },
+    # Tick Tock Clock
+    "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp": {
+        "name": "logic_ttc_stomp_thwomp_triple_jump_wall_kick",
+        "rule": "TJ+WK",
+        "difficulty": "medium",
+        "description": "Reaching the Stomp on the Thwomp star with a Triple Jump and Wall Kick without spawning"
+                       " the Thwomp.",
+    },
     # Snowman's Land
     "Snowman's Land Impossible Coin": {
         "name": "logic_sl_impossible_coin",

@@ -9,7 +9,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
     hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, wet_dry_world_coins, \
-    tall_tall_mountain_coins, tiny_huge_island_coins, get_per_level_action_item_name
+    tall_tall_mountain_coins, tiny_huge_island_coins, tick_tock_clock_coins, get_per_level_action_item_name
 from ..Rules import can_use_logic_trick
 
 
@@ -6799,6 +6799,98 @@ class TickTockClockCoinStar128AccessTestBase(TickTockClockCoinStarAccessTestBase
             self.get_item_by_name("Tick Tock Clock - Spinners"),
         ])
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
+
+
+class TickTockClockIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+    }
+
+    def test_coin_sources_are_counted_independently(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Tick Tock Clock - Spinners"),
+        ])
+        source_coins = {
+            "Tick Tock Clock - Single Yellow Coins": 2,
+            "Tick Tock Clock - Red Coins": 16,
+            "Tick Tock Clock - Blue Coin Block": 35,
+            "Tick Tock Clock - Horizontal Coin Lines": 5,
+            "Tick Tock Clock - Three-Coin Blocks": 18,
+            "Tick Tock Clock - Ten-Coin Blocks": 50,
+            "Tick Tock Clock - Bob-ombs": 2,
+        }
+        self.assertFalse(tick_tock_clock_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(tick_tock_clock_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(tick_tock_clock_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Tick Tock Clock - Spinners"),
+        ])
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
+        self.collect(self.get_item_by_name("Tick Tock Clock - Red Coins"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
+
+
+class TickTockClockStompThwompTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "logic_tricks": {"Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp"},
+    }
+
+    def collect_third_floor_access(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+
+    def test_triple_jump_and_wall_kick_bypass_thwomp(self):
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Stomp on the Thwomp"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Stomp on the Thwomp"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Stomp on the Thwomp"))
+
+    def test_trick_does_not_work_in_stopped_ttc(self):
+        for ttc_entrance in sm64_ttc_entrances[1:]:
+            self.multiworld.get_entrance(
+                f"Third Floor -> {ttc_entrance}", self.player).access_rule = lambda state: False
+        self.collect_third_floor_access()
+        self.collect([
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ledge Grab"),
+        ])
+        self.assertFalse(self.can_reach_location("Tick Tock Clock - Stomp on the Thwomp"))
 
 
 class RainbowRideCoinStarAccessTestBase(SM64TestBase):
