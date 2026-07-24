@@ -393,11 +393,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regWDW, "Wet-Dry World - Shocking Arrow Lifts!", "Wet-Dry World - Bob-omb Buddy",
                 "Wet-Dry World - Shocking Arrow Lifts Star Block",
                 "Wet-Dry World - Pedestal 10 Coins Block",
+                "Wet-Dry World - Push Block 3 Coins Block",
                 "Wet-Dry World - Wooden Structure 3 Coins Block")
     wdw_low_water = create_region("Wet-Dry World - Low Water", player, multiworld)
     create_locs(wdw_low_water, "Wet-Dry World - Secrets in the Shallows & Sky",
-                "Wet-Dry World - Push Block 10 Coins Block",
-                "Wet-Dry World - Push Block 3 Coins Block")
+                "Wet-Dry World - Push Block 10 Coins Block")
     wdw_mid_water = create_region("Wet-Dry World - Mid Water", player, multiworld)
     wdw_mid_high_water = create_region("Wet-Dry World - Mid-High Water", player, multiworld)
     wdw_high_water = create_region("Wet-Dry World - High Water", player, multiworld)

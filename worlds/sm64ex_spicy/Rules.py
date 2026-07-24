@@ -1291,6 +1291,33 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
 
 def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Wet-Dry World"
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_breakable_coin_boxes = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Breakable Coin Boxes", f"{level_name} - Breakable Coin Boxes")
+    has_three_coin_blocks = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Blocks")
+    has_ten_coin_blocks = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Blocks")
+    has_chuckya = has_unlock(
+        state, player, "enemy_unlocks",
+        "Chuckyas", f"{level_name} - Chuckya")
+    has_skeeters = has_unlock(
+        state, player, "enemy_unlocks",
+        f"{level_name} - Skeeters", f"{level_name} - Skeeters")
     has_ground_pound = has_action(state, player, "Ground Pound", level_name)
     has_wdw_purple_switches = has_purple_switches(state, player, "Wet-Dry World")
     has_water_level_diamond = has_simple_arbitrary_feature(state, player, "WDW_WATER_LEVEL_DIAMOND")
@@ -1342,56 +1369,70 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
         )
 
     # https://ukikipedia.net/mediawiki/index.php?title=Wet-Dry_World&oldid=19487
-    #below top
-
 
     def route_coins(start_water_level: str) -> int:
         water_levels = route_water_levels(start_water_level)
         route_total = 0
         # 2 Skeeters
-        route_total += 6
+        if has_skeeters:
+            route_total += 6
         # Ring of coins around the pillar with the amp circling it (8)
-        route_total += 8
+        if has_horizontal_coin_rings:
+            route_total += 8
         # 10 coins from the ! block on the pillar (10)
-        route_total += 10
+        if has_ten_coin_blocks:
+            route_total += 10
         # 3 coins in ! block underneath Chuckya platform (push block to get) (3)
-        route_total += 3
+        if has_three_coin_blocks:
+            route_total += 3
         if "low" in water_levels:
             # 12 coins in the 4 breakable boxes near start
-            route_total += 12
+            if has_breakable_coin_boxes:
+                route_total += 12
             # 10 coins in ! block against wall near the map corner (under cannon)
-            route_total += 10
-            if has_ground_pound:
+            if has_ten_coin_blocks:
+                route_total += 10
+            if has_ground_pound and has_blue_coin_block:
                 # 6 blue coins from block (on very first level up, by fire-shooters)
                 route_total += 30
-        if "mid" in water_levels:
+        if "mid" in water_levels and has_three_coin_blocks:
             # 3 coins in ! block on a wooden platform with purple switch
             route_total += 3
-        if water_levels.intersection({"mid", "highest"}) or has_wdw_purple_switches or (has_triple_jump and has_dive):
+        if has_horizontal_coin_lines and (
+                water_levels.intersection({"mid", "highest"})
+                or has_wdw_purple_switches
+                or has_triple_jump and has_dive
+        ):
             # Line of coins by the 4th highest water-level changer
             route_total += 5
         if route_has_top(water_levels):
             # Line of coins at highest level, by the highest water-level changer (5)
-            route_total += 5
+            if has_horizontal_coin_lines:
+                route_total += 5
             # Chuckya (5)
-            route_total += 5
-        if can_reach_top_of_express_elevator:
+            if has_chuckya:
+                route_total += 5
+        if can_reach_top_of_express_elevator and has_ten_coin_blocks:
             # 10 coins in ! block above the the "Express Elevators" star
             route_total += 10
         if route_has_downtown(water_levels):
             # (Inside the Town) Ring of coins around triangle statue in middle of town
-            route_total += 8
-            # (Inside the Town) Line of coins on high plank leading to metal cap
-            route_total += 5
-            # (Inside the Town) Line of coins on building between the entrance and trees
-            route_total += 5
-            # (Inside the Town) Line of coins on the other building beside the trees
-            route_total += 5
+            if has_horizontal_coin_rings:
+                route_total += 8
+            if has_horizontal_coin_lines:
+                # (Inside the Town) Line of coins on high plank leading to metal cap
+                route_total += 5
+                # (Inside the Town) Line of coins on building between the entrance and trees
+                route_total += 5
+                # (Inside the Town) Line of coins on the other building beside the trees
+                route_total += 5
             # 2 Skeeters
-            route_total += 6
+            if has_skeeters:
+                route_total += 6
             # 1 Red Coin
-            route_total += 2
-            if has_water_level_diamond:
+            if has_red_coins:
+                route_total += 2
+            if has_water_level_diamond and has_red_coins:
                 # 7 Red Coins
                 route_total += 14
         return route_total
@@ -2581,7 +2622,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Downtown",
                    "{Wet-Dry World - Highest Water} & LG | CANN | {Wet-Dry World - Top} & MOVELESS & TJ+DV")
     rf.assign_rule("Wet-Dry World - Go to Town for Red Coins",
-                   "WDW_WATER_LEVEL_DIAMOND & WK | WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
+                   "RED_COINS & WDW_WATER_LEVEL_DIAMOND & WK | "
+                   "RED_COINS & WDW_WATER_LEVEL_DIAMOND & MOVELESS & TJ")
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
                    "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                    "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ")
@@ -2778,8 +2820,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Wet-Dry World - Shocking Arrow Lifts Star Block":
                 "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
                 "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ",
-            "Wet-Dry World - Wooden Structure 3 Coins Block":
-                "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | PURPLE_SWITCHES & LJ",
+            "Wet-Dry World - Wooden Structure 3 Coins Block": "{Wet-Dry World - Mid Water}",
             "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Metal Cap Block": "MC",
             "Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
@@ -2799,6 +2840,24 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         }
         for location_name, rule in blocksanity_rules.items():
             rf.assign_rule(location_name, rule)
+        for location_name, global_item_name, per_level_item_name in (
+                ("Wet-Dry World - Push Block 10 Coins Block",
+                 "Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"),
+                ("Wet-Dry World - Pedestal 10 Coins Block",
+                 "Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"),
+                ("Wet-Dry World - Top of Express Elevator 10 Coins Block",
+                 "Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"),
+                ("Wet-Dry World - Push Block 3 Coins Block",
+                 "Three-Coin Blocks", "Wet-Dry World - Three-Coin Blocks"),
+                ("Wet-Dry World - Wooden Structure 3 Coins Block",
+                 "Three-Coin Blocks", "Wet-Dry World - Three-Coin Blocks"),
+        ):
+            add_rule(
+                multiworld.get_location(location_name, player),
+                lambda state, global_name=global_item_name, per_level_name=per_level_item_name:
+                    has_unlock(
+                        state, player, "coin_object_unlocks",
+                        global_name, per_level_name))
     # Coin Stars
     set_rule(
         multiworld.get_location("Bob-omb Battlefield - Coins Star", player),

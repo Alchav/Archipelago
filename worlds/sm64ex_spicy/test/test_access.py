@@ -8,7 +8,8 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
-    hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, get_per_level_action_item_name
+    hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, wet_dry_world_coins, \
+    get_per_level_action_item_name
 from ..Rules import can_use_logic_trick
 
 
@@ -5012,10 +5013,10 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
             lambda state: False
 
 
-class WetDryWorldCoinStar25AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+class WetDryWorldCoinStar49AccessTestBase(WetDryWorldCoinStarAccessTestBase):
     options = {
         **WetDryWorldCoinStarAccessTestBase.options,
-        "wet_dry_world_coin_star_requirement": 25,
+        "wet_dry_world_coin_star_requirement": 49,
     }
 
     def test_low_water_start_coins_reach_coin_star(self):
@@ -5026,10 +5027,10 @@ class WetDryWorldCoinStar25AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
 
 
-class WetDryWorldCoinStar26AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+class WetDryWorldCoinStar50AccessTestBase(WetDryWorldCoinStarAccessTestBase):
     options = {
         **WetDryWorldCoinStarAccessTestBase.options,
-        "wet_dry_world_coin_star_requirement": 26,
+        "wet_dry_world_coin_star_requirement": 50,
     }
 
     def test_low_water_ground_pound_coins_reach_coin_star(self):
@@ -5042,10 +5043,10 @@ class WetDryWorldCoinStar26AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
 
 
-class WetDryWorldCoinStar8AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+class WetDryWorldCoinStar35AccessTestBase(WetDryWorldCoinStarAccessTestBase):
     options = {
         **WetDryWorldCoinStarAccessTestBase.options,
-        "wet_dry_world_coin_star_requirement": 8,
+        "wet_dry_world_coin_star_requirement": 35,
     }
 
     def test_mid_water_start_coins_reach_coin_star(self):
@@ -5056,14 +5057,14 @@ class WetDryWorldCoinStar8AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
 
 
-class WetDryWorldCoinStar9AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+class WetDryWorldCoinStar50PurpleSwitchAccessTestBase(WetDryWorldCoinStarAccessTestBase):
     options = {
         **WetDryWorldCoinStarAccessTestBase.options,
-        "wet_dry_world_coin_star_requirement": 9,
+        "wet_dry_world_coin_star_requirement": 50,
     }
 
     def test_mid_water_purple_switch_coins_reach_coin_star(self):
-        self.disable_wdw_entrance("Wet-Dry World Low")
+        self.disable_wdw_entrance("Wet-Dry World Middle")
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
@@ -5072,10 +5073,10 @@ class WetDryWorldCoinStar9AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
 
 
-class WetDryWorldCoinStar65AccessTestBase(WetDryWorldCoinStarAccessTestBase):
+class WetDryWorldCoinStar84AccessTestBase(WetDryWorldCoinStarAccessTestBase):
     options = {
         **WetDryWorldCoinStarAccessTestBase.options,
-        "wet_dry_world_coin_star_requirement": 65,
+        "wet_dry_world_coin_star_requirement": 84,
     }
 
     def test_highest_water_downtown_diamond_coins_reach_coin_star(self):
@@ -5092,6 +5093,110 @@ class WetDryWorldCoinStar65AccessTestBase(WetDryWorldCoinStarAccessTestBase):
 
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+
+class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "accessibility": "minimal",
+        "blocksanity": Options.Blocksanity.option_true,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def get_full_wet_dry_world_route_state(self):
+        state = CollectionState(self.multiworld)
+        for item_name in [
+            "Progressive Upstairs Key",
+            "Ground Pound",
+            "Long Jump",
+            "Triple Jump",
+            "Dive",
+            "Ledge Grab",
+            "Wet-Dry World - Purple Switch",
+            "Wet-Dry World - Water Level Diamond",
+            "Wet-Dry World - Cannon Unlock",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        return state
+
+    def test_each_unlock_matches_documented_total(self):
+        source_coins = {
+            "Wet-Dry World - Red Coins": 16,
+            "Wet-Dry World - Blue Coin Block": 30,
+            "Wet-Dry World - Horizontal Coin Lines": 25,
+            "Wet-Dry World - Horizontal Coin Rings": 16,
+            "Wet-Dry World - Breakable Coin Boxes": 12,
+            "Wet-Dry World - Three-Coin Blocks": 6,
+            "Wet-Dry World - Ten-Coin Blocks": 30,
+            "Wet-Dry World - Chuckya": 5,
+            "Wet-Dry World - Skeeters": 12,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                state = self.get_full_wet_dry_world_route_state()
+                state.collect(self.world.create_item(item_name))
+                actual_coins = max(
+                    coin_count for coin_count in range(153)
+                    if wet_dry_world_coins(state, self.player, coin_count)
+                )
+                self.assertEqual(actual_coins, expected_coins)
+
+    def test_all_unlocks_total_152_coins(self):
+        state = self.get_full_wet_dry_world_route_state()
+        for item_name in [
+            "Wet-Dry World - Red Coins",
+            "Wet-Dry World - Blue Coin Block",
+            "Wet-Dry World - Horizontal Coin Lines",
+            "Wet-Dry World - Horizontal Coin Rings",
+            "Wet-Dry World - Breakable Coin Boxes",
+            "Wet-Dry World - Three-Coin Blocks",
+            "Wet-Dry World - Ten-Coin Blocks",
+            "Wet-Dry World - Chuckya",
+            "Wet-Dry World - Skeeters",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        self.assertTrue(wet_dry_world_coins(state, self.player, 152))
+
+    def test_coin_blocks_require_their_unlock(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Wet-Dry World Middle", self.player).access_rule = lambda state: False
+        self.multiworld.get_entrance(
+            "Second Floor -> Wet-Dry World High", self.player).access_rule = lambda state: False
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        three_coin_blocks = (
+            "Wet-Dry World - Push Block 3 Coins Block",
+            "Wet-Dry World - Wooden Structure 3 Coins Block",
+        )
+        ten_coin_blocks = (
+            "Wet-Dry World - Push Block 10 Coins Block",
+            "Wet-Dry World - Pedestal 10 Coins Block",
+            "Wet-Dry World - Top of Express Elevator 10 Coins Block",
+        )
+        for location_name in (*three_coin_blocks, *ten_coin_blocks):
+            self.assertFalse(self.can_reach_location(location_name))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Three-Coin Blocks"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Push Block 3 Coins Block"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Wooden Structure 3 Coins Block"))
+        for location_name in ten_coin_blocks:
+            self.assertFalse(self.can_reach_location(location_name))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.collect_by_name(["Triple Jump", "Dive"])
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Wooden Structure 3 Coins Block"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Wooden Structure 3 Coins Block"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Ten-Coin Blocks"))
+        for location_name in ten_coin_blocks:
+            self.assertTrue(self.can_reach_location(location_name))
 
 
 class WetDryWorldCoinStar152AccessTestBase(WetDryWorldCoinStarAccessTestBase):
