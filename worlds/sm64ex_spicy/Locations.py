@@ -18,7 +18,7 @@ coinsanity_course_data = (
     ("Snowman's Land", 1210, "snowmans_land_coin_star_requirement", 127),
     ("Wet-Dry World", 1337, "wet_dry_world_coin_star_requirement", 152),
     ("Tall, Tall Mountain", 1489, "tall_tall_mountain_coin_star_requirement", 137),
-    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 191),
+    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 192),
     ("Tick Tock Clock", 1817, "tick_tock_clock_coin_star_requirement", 128),
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )

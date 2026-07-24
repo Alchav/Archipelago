@@ -168,6 +168,12 @@ class SM64World(World):
         ):
             self.options.snowmans_land_coin_star_requirement.value = min(
                 self.options.snowmans_land_coin_star_requirement.value, 126)
+        if (
+                self.options.accessibility == self.options.accessibility.option_full
+                and not self.logic_thi_impossible_coin
+        ):
+            self.options.tiny_huge_island_coin_star_requirement.value = min(
+                self.options.tiny_huge_island_coin_star_requirement.value, 191)
         coin_star_requirements = {
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names

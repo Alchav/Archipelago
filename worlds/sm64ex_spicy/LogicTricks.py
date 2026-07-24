@@ -510,6 +510,13 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
     },
+    "Tiny-Huge Island Impossible Coin": {
+        "name": "logic_thi_impossible_coin",
+        "rule": "GP+TJ+DV+KK",
+        "difficulty": "hard",
+        "description": "Collecting the coin embedded underground on Tiny Island using Ground Pound, Triple Jump,"
+                       " Dive, and Kick.",
+    },
     # Tick Tock Clock
     "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp": {
         "name": "logic_ttc_stomp_thwomp_triple_jump_wall_kick",

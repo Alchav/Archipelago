@@ -1687,6 +1687,10 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
                 # 1 Small Koopa
                 if has_koopa_troopa:
                     route_total += 5
+                if has_single_yellow_coins and can_use_logic_trick(
+                        state, player, "logic_thi_impossible_coin", f"{level_name} - Coins Star"):
+                    # (Tiny Island)1 impossible coin underground to the left of the nearby visible coin.
+                    route_total += 1
                 if has_thi_purple_switches and has_single_yellow_coins:
                     # (Tiny Island)1 coin (at warp) on tiny separated island, use ! switch to reach
                     route_total += 1
@@ -1869,34 +1873,124 @@ def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bo
 
 def rainbow_ride_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Rainbow Ride"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_blue_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Blue Coin Blocks", f"{level_name} - Blue Coin Block")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_bob_ombs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-ombs")
+    has_chuckya = has_unlock(
+        state, player, "enemy_unlocks",
+        "Chuckyas", f"{level_name} - Chuckya")
+    has_lakitus = has_unlock(
+        state, player, "enemy_unlocks",
+        "Lakitus", f"{level_name} - Lakitus")
+    has_fly_guy = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fly Guys", f"{level_name} - Fly Guy")
+    has_goomba = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goomba")
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Rainbow_Ride&oldid=18918
+
     reachable_coins = 0
     has_carpets = has_simple_arbitrary_feature(state, player, "RR_CARPETS")
-    if has_carpets or (
+    if has_horizontal_coin_rings and (has_carpets or (
             allows_moveless(state, player) and has_action(state, player, "Long Jump", level_name) and
             has_action(state, player, "Triple Jump", level_name) and
-            has_action(state, player, "Ledge Grab", level_name)):
+            has_action(state, player, "Ledge Grab", level_name))):
+        # Ring of coins at first platform when riding carpet (has amp)
         reachable_coins += 8
     if state.can_reach("Rainbow Ride - Beneath the Pole", "Region", player):
-        reachable_coins += 27
-    if state.can_reach("Rainbow Ride - Maze", "Region", player):
-        reachable_coins += 23
-        if has_action(state, player, "Ground Pound", level_name):
+        # Line of coins with the Fly Guy
+        if has_horizontal_coin_lines:
             reachable_coins += 5
-        if has_action(state, player, "Long Jump", level_name) or has_action(state, player, "Wall Kick", level_name):
+        # 1 Fly Guy
+        if has_fly_guy:
             reachable_coins += 2
-    if has_action(state, player, "Ground Pound", level_name) and has_action(state, player, "Wall Kick", level_name):
-        reachable_coins += 25
-    if state.can_reach("Rainbow Ride - Coins Amassed in a Maze", "Location", player):
+        # Vertical line of coins with the first big "swing"
+        if has_vertical_coin_lines:
+            reachable_coins += 5
+        # After 1st swing, 2 pairs of coins, on "Donut Lifts" (that drop)
+        if has_single_yellow_coins:
+            reachable_coins += 4
+        # Line of coins before 2nd "swing" (higher part of Goomba platform)
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # Slanted line of coins on wooden platform (before Tricky Triangles)
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # 1 Goomba
+        if has_goomba:
+            reachable_coins += 1
+    if state.can_reach("Rainbow Ride - Maze", "Region", player):
+        # 2 rings of coins at the 4 spinning platforms (has Lakitu and heart)
+        if has_horizontal_coin_rings:
+            reachable_coins += 16
+        # 2 Lakitus
+        if has_lakitus:
+            reachable_coins += 10
+        # 2 Bob-ombs
+        if has_bob_ombs:
+            reachable_coins += 2
+        if has_blue_coin_block and has_action(state, player, "Ground Pound", level_name):
+            reachable_coins += 5
+            if has_action(state, player, "Wall Kick", level_name):
+                reachable_coins += 25
+        if has_red_coins and (
+                has_action(state, player, "Long Jump", level_name)
+                or has_action(state, player, "Wall Kick", level_name)):
+            # 1 Red Coin
+            reachable_coins += 2
+    if has_red_coins and state.can_reach("Rainbow Ride - Coins Amassed in a Maze", "Location", player):
+        # 7 Red Coins
         reachable_coins += 14
-    if state.can_reach("Rainbow Ride - Carpets", "Region", player):
-        reachable_coins += 2
+    if has_single_yellow_coins and state.can_reach("Rainbow Ride - Carpets", "Region", player):
+        # A single coin on a grey platform after taking the second carpet
+        reachable_coins += 1
+        # A single coin in the air, riding the 2nd carpet lets you get it
+        reachable_coins += 1
     if state.can_reach("Rainbow Ride - House", "Region", player):
-        reachable_coins += 20
+        # (Taking the Carpet to the Big House)Vertical line of coins on first group of "Donut Lifts"
+        if has_vertical_coin_lines:
+            reachable_coins += 5
+        # (Taking the Carpet to the Big House)Line of coins on the floor of the big house
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # (Taking the Carpet to the Big House)Line of coins on second glass platform (after the one with the amp)
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # (Taking the Carpet to the Big House)Line of coins in the air (just before coming into house for 2nd time)
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
     if state.can_reach("Rainbow Ride - Cruiser", "Region", player):
-        reachable_coins += 15
-    if state.can_reach("Rainbow Ride - Somewhere Over the Rainbow", "Location", player):
+        # 2 Bob-ombs
+        if has_bob_ombs:
+            reachable_coins += 2
+        # (Taking the Carpet to the Ship)Ring of coins around the ship's poll
+        if has_horizontal_coin_rings:
+            reachable_coins += 8
+    if has_chuckya and state.can_reach("Rainbow Ride - Somewhere Over the Rainbow", "Location", player):
+        # Chuckya
         reachable_coins += 5
-    return coins <= min(reachable_coins, 146)
+    assert coins <= 146
+    return coins <= reachable_coins
 
 
 def has_wing_cap(state: CollectionState, player: int, level_name: str) -> bool:
@@ -2811,6 +2905,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "PURPLE_SWITCHES & CAPLESS & MOVELESS & LJ/TJ/WK")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
+    rf.assign_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles", "MONTY_MOLES")
+    rf.assign_rule("Hazy Maze Cave - Twin Hole Monty Moles", "MONTY_MOLES")
     # Lethal Lava Land
     add_rule(
         multiworld.get_location("Lethal Lava Land - Boil the Big Bully", player),
@@ -3008,7 +3104,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - Maze", "CL")
     rf.assign_rule("Rainbow Ride - Initial to Maze", "RR_CARPETS")
     rf.assign_rule("Rainbow Ride - Carpets", "RR_CARPETS")
-    rf.assign_rule("Rainbow Ride - Coins Amassed in a Maze", "WK | LJ & SF/BF/TJ | MOVELESS & LG/TJ")
+    rf.assign_rule(
+        "Rainbow Ride - Coins Amassed in a Maze",
+        "RED_COINS & WK | RED_COINS & LJ & SF/BF/TJ | RED_COINS & MOVELESS & LG/TJ")
     rf.assign_rule("Rainbow Ride - Bob-omb Buddy", "WK | MOVELESS & LG")
     rf.assign_rule("Rainbow Ride - Swingin' in the Breeze", "LG/TJ/BF/SF | MOVELESS")
     rf.assign_rule("Rainbow Ride - Tricky Triangles!",

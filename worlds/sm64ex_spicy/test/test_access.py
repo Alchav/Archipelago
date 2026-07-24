@@ -9,7 +9,8 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
     hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, wet_dry_world_coins, \
-    tall_tall_mountain_coins, tiny_huge_island_coins, tick_tock_clock_coins, get_per_level_action_item_name
+    tall_tall_mountain_coins, tiny_huge_island_coins, tick_tock_clock_coins, rainbow_ride_coins, \
+    get_per_level_action_item_name
 from ..Rules import can_use_logic_trick
 
 
@@ -3721,7 +3722,7 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
 
     def maximum_reachable_coins(self):
         return max(
-            coins for coins in range(192)
+            coins for coins in range(193)
             if tiny_huge_island_coins(self.multiworld.state, self.player, coins))
 
     def test_one_use_ascents_select_the_best_dead_end_routes(self):
@@ -3757,6 +3758,51 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         repeatable_ascent_total = self.maximum_reachable_coins()
         self.assertGreater(repeatable_ascent_total, two_ascent_total)
+
+
+class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "accessibility": "minimal",
+        "logic_tricks": {"Tiny-Huge Island Impossible Coin"},
+    }
+
+    def test_impossible_coin_requires_every_trick_action(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect([
+            self.get_item_by_name("Tiny-Huge Island - Single Yellow Coins"),
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Dive"),
+            self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(tiny_huge_island_coins(self.multiworld.state, self.player, 9))
+        self.assertFalse(tiny_huge_island_coins(self.multiworld.state, self.player, 10))
+
+        self.collect(self.get_item_by_name("Kick"))
+        self.assertTrue(tiny_huge_island_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(tiny_huge_island_coins(self.multiworld.state, self.player, 11))
+
+
+class TinyHugeIslandImpossibleCoinFullAccessibilityCapTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": "full",
+        "tiny_huge_island_coin_star_requirement": 192,
+    }
+
+    def test_full_accessibility_caps_requirement_at_191(self):
+        self.assertEqual(self.world.options.tiny_huge_island_coin_star_requirement.value, 191)
+        self.assertEqual(self.world.get_coin_star_requirements_slot_data()[12], 191)
 
 
 class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
@@ -4144,6 +4190,7 @@ class HazyMazeCaveIndividualUnlockLogicTestBase(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -4200,6 +4247,21 @@ class HazyMazeCaveIndividualUnlockLogicTestBase(SM64TestBase):
         ])
         self.assertTrue(hazy_maze_cave_coins(
             self.multiworld.state, self.player, 139))
+
+    def test_monty_mole_checks_require_monty_moles(self):
+        self.collect_full_hazy_maze_cave_route()
+        for location_name in (
+                "Hazy Maze Cave - Blue Coin Trail Monty Moles",
+                "Hazy Maze Cave - Twin Hole Monty Moles",
+        ):
+            self.assertFalse(self.can_reach_location(location_name))
+
+        self.collect(self.get_item_by_name("Hazy Maze Cave - Monty Moles"))
+        for location_name in (
+                "Hazy Maze Cave - Blue Coin Trail Monty Moles",
+                "Hazy Maze Cave - Twin Hole Monty Moles",
+        ):
+            self.assertTrue(self.can_reach_location(location_name))
 
 
 class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
@@ -6939,10 +7001,10 @@ class RainbowRideCoinStar9AccessTestBase(RainbowRideCoinStarAccessTestBase):
         self.assertFalse(self.can_reach_location("Rainbow Ride - Coins Star"))
 
 
-class RainbowRideCoinStar50AccessTestBase(RainbowRideCoinStarAccessTestBase):
+class RainbowRideCoinStar55AccessTestBase(RainbowRideCoinStarAccessTestBase):
     options = {
         **RainbowRideCoinStarAccessTestBase.options,
-        "rainbow_ride_coin_star_requirement": 50,
+        "rainbow_ride_coin_star_requirement": 55,
     }
 
     def test_coin_star_access(self):
@@ -6954,10 +7016,10 @@ class RainbowRideCoinStar50AccessTestBase(RainbowRideCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
 
 
-class RainbowRideCoinStar51AccessTestBase(RainbowRideCoinStarAccessTestBase):
+class RainbowRideCoinStar56AccessTestBase(RainbowRideCoinStarAccessTestBase):
     options = {
         **RainbowRideCoinStarAccessTestBase.options,
-        "rainbow_ride_coin_star_requirement": 51,
+        "rainbow_ride_coin_star_requirement": 56,
     }
 
     def test_coin_star_access(self):
@@ -6969,10 +7031,10 @@ class RainbowRideCoinStar51AccessTestBase(RainbowRideCoinStarAccessTestBase):
         self.assertFalse(self.can_reach_location("Rainbow Ride - Coins Star"))
 
 
-class RainbowRideCoinStar96AccessTestBase(RainbowRideCoinStarAccessTestBase):
+class RainbowRideCoinStar101AccessTestBase(RainbowRideCoinStarAccessTestBase):
     options = {
         **RainbowRideCoinStarAccessTestBase.options,
-        "rainbow_ride_coin_star_requirement": 96,
+        "rainbow_ride_coin_star_requirement": 101,
     }
 
     def test_coin_star_access(self):
@@ -6986,10 +7048,10 @@ class RainbowRideCoinStar96AccessTestBase(RainbowRideCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
 
 
-class RainbowRideCoinStar97AccessTestBase(RainbowRideCoinStarAccessTestBase):
+class RainbowRideCoinStar102AccessTestBase(RainbowRideCoinStarAccessTestBase):
     options = {
         **RainbowRideCoinStarAccessTestBase.options,
-        "rainbow_ride_coin_star_requirement": 97,
+        "rainbow_ride_coin_star_requirement": 102,
     }
 
     def test_coin_star_access(self):
@@ -7020,6 +7082,63 @@ class RainbowRideCoinStar146AccessTestBase(RainbowRideCoinStarAccessTestBase):
             self.get_item_by_name("Rainbow Ride - Cannon Unlock"),
         ])
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
+
+
+class RainbowRideIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+    }
+
+    def collect_all_rr_routes(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Rainbow Ride - Carpets"),
+            self.get_item_by_name("Rainbow Ride - Cannon Unlock"),
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ground Pound"),
+            self.get_item_by_name("Wall Kick"),
+        ])
+
+    def test_coin_sources_are_counted_independently(self):
+        self.collect_all_rr_routes()
+        source_coins = {
+            "Rainbow Ride - Single Yellow Coins": 6,
+            "Rainbow Ride - Red Coins": 16,
+            "Rainbow Ride - Blue Coin Block": 30,
+            "Rainbow Ride - Horizontal Coin Lines": 30,
+            "Rainbow Ride - Horizontal Coin Rings": 32,
+            "Rainbow Ride - Vertical Coin Lines": 10,
+            "Rainbow Ride - Bob-ombs": 4,
+            "Rainbow Ride - Chuckya": 5,
+            "Rainbow Ride - Lakitus": 10,
+            "Rainbow Ride - Fly Guy": 2,
+            "Rainbow Ride - Goomba": 1,
+        }
+        self.assertFalse(rainbow_ride_coins(self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(rainbow_ride_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(rainbow_ride_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_red_coin_star_requires_red_coins(self):
+        self.collect_all_rr_routes()
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Coins Amassed in a Maze"))
+        self.collect(self.get_item_by_name("Rainbow Ride - Red Coins"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Amassed in a Maze"))
 
 
 class GlobalBowserArenaBombAccessTestBase(SM64TestBase):

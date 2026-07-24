@@ -222,7 +222,7 @@ class TallTallMountainCoinStarRequirement(CoinStarRequirement):
 class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
     """Coins needed for the Coin Star in Tiny-Huge Island."""
     display_name = "Tiny-Huge Island Coin Star Requirement"
-    range_end = 191
+    range_end = 192
 
 
 class TickTockClockCoinStarRequirement(CoinStarRequirement):

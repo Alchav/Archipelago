@@ -915,7 +915,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.SnowmansLandCoinStarRequirement: 127,
             Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
-            Options.TinyHugeIslandCoinStarRequirement: 191,
+            Options.TinyHugeIslandCoinStarRequirement: 192,
             Options.TickTockClockCoinStarRequirement: 128,
             Options.RainbowRideCoinStarRequirement: 146,
         }
@@ -1000,11 +1000,11 @@ class CoinsanityLocationTableTestBase(SM64TestBase):
             "Snowman's Land": 127,
             "Wet-Dry World": 152,
             "Tall, Tall Mountain": 137,
-            "Tiny-Huge Island": 191,
+            "Tiny-Huge Island": 192,
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coinsanity_location_table), 2641)
+        self.assertEqual(len(coinsanity_location_table), 2642)
         self.assertEqual(len(secret_stage_coinsanity_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):
