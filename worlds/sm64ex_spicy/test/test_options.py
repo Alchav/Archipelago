@@ -384,7 +384,6 @@ class FeatureItemPoolTestBase(SM64TestBase):
     def test_unused_individual_arbitrary_items_are_filler(self):
         for item_name in (
                 "Bob-omb Battlefield - Checkerboard Platform",
-                "Tall, Tall Mountain - Rolling Log",
                 "Bob-omb Battlefield - Purple Switch",
         ):
             with self.subTest("Unused individual arbitrary item is filler", item=item_name):

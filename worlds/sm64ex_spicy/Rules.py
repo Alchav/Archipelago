@@ -1450,18 +1450,116 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
 
 def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Tall, Tall Mountain"
-    reachable_coins = 15
-    if state.can_reach("Tall, Tall Mountain - Middle", "Region", player):
-        reachable_coins += 55
-    if has_action(state, player, "Climb", level_name) or allows_moveless(state, player):
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_single_blue_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Blue Coins", f"{level_name} - Single Blue Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_ring = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_line = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_crazy_box = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Crazy Boxes", f"{level_name} - Crazy Box")
+    has_bob_ombs = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-ombs")
+    has_chuckya = has_unlock(
+        state, player, "enemy_unlocks",
+        "Chuckyas", f"{level_name} - Chuckya")
+    has_fly_guy = has_unlock(
+        state, player, "enemy_unlocks",
+        "Fly Guys", f"{level_name} - Fly Guy")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Tall,_Tall_Mountain&oldid=19921
+
+    # Ring of coins at start, down the path by the crazy box
+    reachable_coins = 8 if has_horizontal_coin_ring else 0
+    # 1 Crazy Box
+    if has_crazy_box:
         reachable_coins += 5
-    if state.can_reach("Tall, Tall Mountain - Top", "Region", player):
-        reachable_coins += 59
-        if has_purple_switches(state, player, "Tall, Tall Mountain") or any(
-                has_action(state, player, action, level_name) for action in ("Triple Jump", "Backflip", "Side Flip")):
+    # 3 Goombas
+    if has_goombas:
+        reachable_coins += 2
+    if state.can_reach("Tall, Tall Mountain - Middle", "Region", player):
+        # 1 Goomba above the starting area
+        if has_goombas:
+            reachable_coins += 1
+        # 6 Red Coins
+        if has_red_coins:
+            reachable_coins += 12
+        # 3 Bob-ombs
+        if has_bob_ombs:
+            reachable_coins += 3
+        # Chuckya
+        if has_chuckya:
+            reachable_coins += 5
+        # Line of coins on bridge from Chuckya to bob-omb buddy
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # Fly Guy
+        if has_fly_guy:
             reachable_coins += 2
-        if has_purple_switches(state, player, "Tall, Tall Mountain") or has_action(
-                state, player, "Triple Jump", level_name):
+    if state.can_reach("Tall, Tall Mountain - Upper", "Region", player):
+        # 2 Red Coins
+        if has_red_coins:
+            reachable_coins += 4
+        # 6 Goombas
+        if has_goombas:
+            reachable_coins += 6
+        # 2 Bob-ombs
+        if has_bob_ombs:
+            reachable_coins += 2
+        if has_horizontal_coin_lines and (
+                has_action(state, player, "Climb", level_name) or allows_moveless(state, player)
+        ):
+            # Line of coins by moles, when you hang down from the leaves
+            reachable_coins += 5
+    if state.can_reach("Tall, Tall Mountain - Top", "Region", player):
+        # 27 single yellow coins and 4 lines of 5 coins on the slide
+        if has_single_yellow_coins:
+            reachable_coins += 27
+        if has_horizontal_coin_lines:
+            reachable_coins += 20
+        # 3 blue coins on the slide
+        if has_single_blue_coins:
+            reachable_coins += 15
+        # Line of coins by entrance to slide
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # Vertical line of coins by ! switch near top of mountain (2 of them)
+        if has_vertical_coin_line:
+            reachable_coins += 2
+        # Line of coins on rock bridge, beside waterfall, near the very top
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        if has_vertical_coin_line and (
+                has_purple_switches(state, player, "Tall, Tall Mountain")
+                or any(
+                    has_action(state, player, action, level_name)
+                    for action in ("Triple Jump", "Backflip", "Side Flip")
+                )
+        ):
+            # Vertical line of coins by ! switch near top of mountain (2 of them)
+            reachable_coins += 2
+        if has_vertical_coin_line and (
+                has_purple_switches(state, player, "Tall, Tall Mountain")
+                or has_action(state, player, "Triple Jump", level_name)
+        ):
+            # Vertical line of coins by ! switch near top of mountain (1 of them)
             reachable_coins += 1
     return coins <= reachable_coins
 
@@ -2644,10 +2742,14 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
                    "{Wet-Dry World - Highest Water} & BF/SF")
     # Tall, Tall Mountain
+    rf.assign_rule("Tall, Tall Mountain - Upper", "TJ/BF/SF/ROLLING_LOG")
     rf.assign_rule("Tall, Tall Mountain - Top", "MOVELESS & TJ | LJ/DV & LG/KK | MOVELESS & WK & SF/LG | MOVELESS & KK/DV")
     rf.assign_rule("Tall, Tall Mountain - Mystery of the Monkey Cage", "TTM_UKIKI")
-    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "TJ/DV/LG/PURPLE_SWITCHES")
+    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "PURPLE_SWITCHES")
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom", "CANN | CANNLESS & LJ | MOVELESS & CANNLESS")
+    rf.assign_rule("Tall, Tall Mountain - Scary 'Shrooms, Red Coins", "RED_COINS")
+    rf.assign_rule("Tall, Tall Mountain - Upper Monty Moles", "MONTY_MOLES")
+    rf.assign_rule("Tall, Tall Mountain - Lower Monty Moles", "MONTY_MOLES")
     # Tiny-Huge Island
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
     rf.assign_rule("Tiny-Huge Island - Tiny Main", "PURPLE_SWITCHES")
@@ -3239,6 +3341,7 @@ class RuleFactory:
             "Rolling Logs",
             rolling_log_item_name_by_level,
             level_name)
+        item_names["ROLLING_LOG"] = item_names["LLL_ROLLING_LOG"]
         item_names["PURPLE_SWITCHES"] = self.get_feature_family_item_name(
             self.options.purple_switches.value,
             self.options.purple_switches.option_not_shuffled,
@@ -3291,6 +3394,9 @@ class RuleFactory:
         item_names["MR_IS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Mr. Is", f"{level_name} - Mr. Is")
+        item_names["MONTY_MOLES"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Monty Moles", f"{level_name} - Monty Moles")
         item_names["FLYING_BOOKENDS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             f"{level_name} - Flying Bookends", f"{level_name} - Flying Bookends")

@@ -9,7 +9,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
     wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
     hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, wet_dry_world_coins, \
-    get_per_level_action_item_name
+    tall_tall_mountain_coins, get_per_level_action_item_name
 from ..Rules import can_use_logic_trick
 
 
@@ -1441,6 +1441,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
     def test_tall_tall_mountain_bridge_accepts_purple_switches(self):
         self.collect_second_floor_access()
         self.collect([
+            self.get_item_by_name("Rolling Logs"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Kick"),
         ])
@@ -1456,6 +1457,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Vine Platform Butterfly 1-Up"))
 
         self.collect([
+            self.get_item_by_name("Rolling Logs"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Kick"),
         ])
@@ -1686,6 +1688,7 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
     def test_tall_tall_mountain_uses_individual_purple_switch(self):
         self.collect([
             self.get_item_by_name("Progressive Upstairs Key"),
+            self.get_item_by_name("Tall, Tall Mountain - Rolling Log"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Kick"),
         ])
@@ -5251,10 +5254,10 @@ class TallTallMountainCoinStar16AccessTestBase(TallTallMountainCoinStarAccessTes
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
-class TallTallMountainCoinStar70AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+class TallTallMountainCoinStar43AccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
-        "tall_tall_mountain_coin_star_requirement": 70,
+        "tall_tall_mountain_coin_star_requirement": 43,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -5263,29 +5266,31 @@ class TallTallMountainCoinStar70AccessTestBase(TallTallMountainCoinStarAccessTes
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
-class TallTallMountainCoinStar75AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+class TallTallMountainCoinStar60AccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
-        "tall_tall_mountain_coin_star_requirement": 75,
+        "tall_tall_mountain_coin_star_requirement": 60,
     }
 
     def test_climb_coins_reach_coin_star(self):
         self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Backflip"))
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
-class TallTallMountainCoinStar75MovelessAccessTestBase(TallTallMountainCoinStarAccessTestBase):
+class TallTallMountainCoinStar60MovelessAccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,
-        "tall_tall_mountain_coin_star_requirement": 75,
+        "tall_tall_mountain_coin_star_requirement": 60,
     }
 
     def test_moveless_coins_reach_coin_star(self):
         self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Backflip"))
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
@@ -5300,6 +5305,7 @@ class TallTallMountainCoinStar129AccessTestBase(TallTallMountainCoinStarAccessTe
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
         self.collect([
+            self.get_item_by_name("Rolling Logs"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Ledge Grab"),
         ])
@@ -5316,6 +5322,7 @@ class TallTallMountainCoinStar131AccessTestBase(TallTallMountainCoinStarAccessTe
     def test_top_backflip_coins_reach_coin_star(self):
         self.collect_second_floor_access()
         self.collect([
+            self.get_item_by_name("Rolling Logs"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Ledge Grab"),
         ])
@@ -5336,15 +5343,116 @@ class TallTallMountainCoinStar137AccessTestBase(TallTallMountainCoinStarAccessTe
         self.collect_second_floor_access()
         self.collect([
             self.get_item_by_name("Climb"),
+            self.get_item_by_name("Rolling Logs"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Ledge Grab"),
-            self.get_item_by_name("Backflip"),
         ])
         self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Top"))
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
+
+
+class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "accessibility": "minimal",
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    def get_full_tall_tall_mountain_route_state(self):
+        state = CollectionState(self.multiworld)
+        for item_name in [
+            "Progressive Upstairs Key",
+            "Long Jump",
+            "Ledge Grab",
+            "Climb",
+            "Tall, Tall Mountain - Rolling Log",
+            "Tall, Tall Mountain - Purple Switch",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        return state
+
+    def test_each_unlock_matches_documented_total(self):
+        source_coins = {
+            "Tall, Tall Mountain - Single Yellow Coins": 27,
+            "Tall, Tall Mountain - Red Coins": 16,
+            "Tall, Tall Mountain - Single Blue Coins": 15,
+            "Tall, Tall Mountain - Horizontal Coin Lines": 40,
+            "Tall, Tall Mountain - Horizontal Coin Rings": 8,
+            "Tall, Tall Mountain - Vertical Coin Lines": 5,
+            "Tall, Tall Mountain - Crazy Box": 5,
+            "Tall, Tall Mountain - Bob-ombs": 5,
+            "Tall, Tall Mountain - Chuckya": 5,
+            "Tall, Tall Mountain - Fly Guy": 2,
+            "Tall, Tall Mountain - Goombas": 9,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                state = self.get_full_tall_tall_mountain_route_state()
+                state.collect(self.world.create_item(item_name))
+                actual_coins = max(
+                    coin_count for coin_count in range(138)
+                    if tall_tall_mountain_coins(state, self.player, coin_count)
+                )
+                self.assertEqual(actual_coins, expected_coins)
+
+    def test_all_unlocks_total_137_coins(self):
+        state = self.get_full_tall_tall_mountain_route_state()
+        for item_name in [
+            "Tall, Tall Mountain - Single Yellow Coins",
+            "Tall, Tall Mountain - Red Coins",
+            "Tall, Tall Mountain - Single Blue Coins",
+            "Tall, Tall Mountain - Horizontal Coin Lines",
+            "Tall, Tall Mountain - Horizontal Coin Rings",
+            "Tall, Tall Mountain - Vertical Coin Lines",
+            "Tall, Tall Mountain - Crazy Box",
+            "Tall, Tall Mountain - Bob-ombs",
+            "Tall, Tall Mountain - Chuckya",
+            "Tall, Tall Mountain - Fly Guy",
+            "Tall, Tall Mountain - Goombas",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        self.assertTrue(tall_tall_mountain_coins(state, self.player, 137))
+
+    def test_upper_region_and_monty_mole_checks(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Middle"))
+        self.assertFalse(self.can_reach_region("Tall, Tall Mountain - Upper"))
+        self.assertEqual(
+            self.multiworld.get_location(
+                "Tall, Tall Mountain - Lower Monty Moles", self.player).parent_region.name,
+            "Tall, Tall Mountain - Middle")
+        self.assertEqual(
+            self.multiworld.get_location(
+                "Tall, Tall Mountain - Upper Monty Moles", self.player).parent_region.name,
+            "Tall, Tall Mountain - Upper")
+        for location_name in (
+                "Tall, Tall Mountain - Scary 'Shrooms, Red Coins",
+                "Tall, Tall Mountain - Monty Mole Platform 1-Up",
+                "Tall, Tall Mountain - Waterfall Gap 1-Up",
+        ):
+            self.assertEqual(
+                self.multiworld.get_location(location_name, self.player).parent_region.name,
+                "Tall, Tall Mountain - Upper")
+
+        self.collect(self.get_item_by_name("Tall, Tall Mountain - Rolling Log"))
+        self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Upper"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Lower Monty Moles"))
+        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Upper Monty Moles"))
+
+        self.collect(self.get_item_by_name("Tall, Tall Mountain - Monty Moles"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Lower Monty Moles"))
+        self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Upper Monty Moles"))
 
 
 class BigBooHauntAccessTestBase(SM64TestBase):
