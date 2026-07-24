@@ -1580,32 +1580,98 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
     can_reach_huge_piranha_area = state.can_reach("Tiny-Huge Island - Huge Piranha Area", "Region", player)
     can_reach_wiggler = state.can_reach("Tiny-Huge Island - Make Wiggler Squirm", "Location", player)
 
+    # https://ukikipedia.net/mediawiki/index.php?title=Tiny-Huge_Island&oldid=19541
+
     def route_coins(has_tiny_side: bool, has_huge_side: bool) -> int:
         route_total = 0
         if has_tiny_side:
+            # 1 Small-Goomba
             route_total += 1
             if can_reach_tiny_piranha_area:
+                # 1 Piranha Plant
                 route_total += 1
             if can_reach_tiny_main:
-                route_total += 30
+                # (Tiny Island)1 coin with the small koopa, where Koopa the Quick would appear
+                route_total += 1
+                # (Tiny Island)Line of coins on wooden plank that you cross to reach the mountaintop
+                route_total += 5
+                # (Tiny Island)2 coins at the top of the beach, with fire-shooter
+                route_total += 2
+                # (Tiny Island)1 coin on curved wooden plank that leads to Wiggler's cave
+                route_total += 1
+                # (Tiny Island)3 coins in ! block connected to Windswept Valley by tiny wooden plank
+                route_total += 3
+                # (Tiny Island)2 coins on cliff that the small metal balls roll down
+                route_total += 2
+                # (Tiny Island)1 coin to the right of the hole where the small metal balls come from
+                route_total += 1
+                # (Tiny Island)1 hidden coin, walk over slope to the left of above coin to collect
+                route_total += 1
+                # 9 Small-Goombas
+                route_total += 9
+                # 1 Small Koopa
+                route_total += 5
+                if False: # IMPOSSIBLE COIN TRICK
+                    # (Tiny Island)1 impossible coin, (underground, to the left of the above coin)(Requires glitches to get to)
+                    route_total += 1
                 if has_thi_purple_switches:
+                    # (Tiny Island)1 coin (at warp) on tiny separated island, use ! switch to reach
                     route_total += 1
         if has_huge_side:
-            route_total += 54
-            if has_huge_top_gate:
-                route_total += 21
-            if has_ground_pound:
-                route_total += 46
-                if has_huge_top_gate:
-                    route_total += 8
-            if has_action(state, player, "Wall Kick", level_name) and has_huge_top_gate:
-                route_total += 4
-            if can_reach_wiggler:
-                route_total += 10
-            if state.has("Tiny-Huge Island - Cannon Unlock", player) or has_long_jump:
+            # 4 Giant Goombas
+            route_total += 20
+            # (Huge Island)Running around the post at start
+            route_total += 5
+            # (Huge Island)2 coins at the top of the beach
+            route_total += 2
+            # 2 Fly Guy
+            route_total += 4
+            # 1 Lakitu
+            route_total += 5
+            # 1 Koopa Troopa
+            route_total += 5
+            if False: # Cannon from starting Huge region, or long jump from top region
+                # (Huge Island)Running around the post on small island by Lakitu
                 route_total += 5
-        if can_reach_huge_piranha_area and (not has_huge_side or has_huge_piranha_area_reentry):
-            route_total += 10
+            if False: # windswept valley
+                # (Huge Island)Line of coins on narrow plank attached to Windswept Valley
+                route_total += 5
+                # 2 Giant Goombas
+                route_total += 10
+            if False: # cannonball region
+                # (Huge Island)Line of coins on cliff where the big metal balls roll down
+                route_total += 5
+                # 1 Fly Guy
+                route_total += 2
+            if False: # koopa the quick region
+                # (Huge Island)Slanted line of 4 coins to right of hole where the balls come from
+                route_total += 4
+                # 3 Giant Goombas
+                route_total += 15
+            if False: # Top region
+                # (Huge Island)Line of coins on wooden plank that you cross to reach the mountaintop
+                route_total += 5
+                # (Huge Island)Line of coins on curved wooden plank that leads to Wiggler's cave
+                route_total += 5
+                # Chuckya
+                route_total += 5
+                if False: # can reach Wiggler's cave (upper, not the red coin cave) (must have pipes + GP)
+                    # (Inside Wiggler's cave)When you fight Wiggler, there are 2 slanted lines of coins in room
+                    route_total += 10
+            if False: # Red Coin area
+                # 2 Giant Goombas
+                route_total += 10
+                # (Inside Wiggler's cave)8 red coins
+                route_total += 14
+                if False: # wall kick
+                    # (Inside Wiggler's cave)8 red coins
+                    route_total += 2
+                if False: # Ground Pound + blue coin block
+                    # (Inside Wiggler's cave)2 blue coins from block (on the platform with the fire-shooter)
+                    route_total += 10
+            if False: # Huge Piranha area
+                # 5 Giant Piranhas
+                route_total += 10
         return route_total
 
     reachable_totals = []
