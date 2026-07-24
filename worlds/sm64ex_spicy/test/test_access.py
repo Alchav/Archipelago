@@ -3,7 +3,9 @@ from .. import Options
 from ..Regions import sm64_ttc_entrances
 from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
     big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
-    vanish_cap_under_the_moat_coins, get_per_level_action_item_name
+    bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
+    princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
+    get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -1522,7 +1524,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
-    def test_bitdw_key_accepts_moveless_triple_jump_but_red_coins_require_purple_switches(self):
+    def test_bitdw_triple_jump_without_trick_does_not_bypass_purple_switches(self):
         self.collect(self.get_item_by_name("Dark World Key"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
@@ -1533,10 +1535,11 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect(self.world.create_item("ut_glitch"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
-        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
     def test_bowser_in_the_sky_region_chain(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
@@ -1815,6 +1818,182 @@ class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
             self.multiworld.state, self.player, 27))
 
 
+class PrincessSecretSlideIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+    }
+
+    def test_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Princess's Secret Slide - Single Yellow Coins": 20,
+            "Princess's Secret Slide - Horizontal Coin Lines": 30,
+        }
+        self.assertFalse(princess_secret_slide_coins(
+            self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(princess_secret_slide_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(princess_secret_slide_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_blue_coin_block_requires_ground_pound(self):
+        self.collect(self.get_item_by_name("Princess's Secret Slide - Blue Coin Block"))
+        self.assertFalse(princess_secret_slide_coins(
+            self.multiworld.state, self.player, 1))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertTrue(princess_secret_slide_coins(
+            self.multiworld.state, self.player, 30))
+        self.assertFalse(princess_secret_slide_coins(
+            self.multiworld.state, self.player, 31))
+
+    def test_all_unlocks_total_80_coins(self):
+        self.collect_by_name([
+            "Ground Pound",
+            "Princess's Secret Slide - Single Yellow Coins",
+            "Princess's Secret Slide - Blue Coin Block",
+            "Princess's Secret Slide - Horizontal Coin Lines",
+        ])
+        self.assertTrue(princess_secret_slide_coins(
+            self.multiworld.state, self.player, 80))
+
+
+class BowserInTheDarkWorldIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "purple_switches": Options.PurpleSwitches.option_global,
+    }
+
+    def test_coin_and_enemy_sources_are_counted_independently(self):
+        source_coins = {
+            "Bowser in the Dark World - Single Yellow Coins": 18,
+            "Bowser in the Dark World - Red Coins": 12,
+            "Bowser in the Dark World - Horizontal Coin Lines": 10,
+            "Bowser in the Dark World - Horizontal Coin Rings": 24,
+            "Bowser in the Dark World - Three-Coin Block": 3,
+            "Bowser in the Dark World - Goombas": 6,
+        }
+        self.assertFalse(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(bowser_in_the_dark_world_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(bowser_in_the_dark_world_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_purple_switches_add_final_seven_coins(self):
+        self.collect_by_name([
+            "Bowser in the Dark World - Single Yellow Coins",
+            "Bowser in the Dark World - Red Coins",
+        ])
+        self.assertTrue(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 30))
+        self.assertFalse(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 31))
+
+        self.collect(self.get_item_by_name("Purple Switches"))
+        self.assertTrue(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 37))
+
+    def test_all_unlocks_total_80_coins(self):
+        self.collect_by_name([
+            "Purple Switches",
+            "Bowser in the Dark World - Single Yellow Coins",
+            "Bowser in the Dark World - Red Coins",
+            "Bowser in the Dark World - Horizontal Coin Lines",
+            "Bowser in the Dark World - Horizontal Coin Rings",
+            "Bowser in the Dark World - Three-Coin Block",
+            "Bowser in the Dark World - Goombas",
+        ])
+        self.assertTrue(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 80))
+
+
+class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "logic_tricks": {"Bowser in the Dark World Triple Jump up the Purple Switch Slope"},
+        "purple_switches": Options.PurpleSwitches.option_global,
+    }
+
+    def collect_stage_access(self):
+        self.collect(self.get_item_by_name("Dark World Key"))
+
+    def test_trick_reaches_bowser_but_not_red_coin_star(self):
+        self.collect_stage_access()
+        self.collect_by_name([
+            "Triple Jump",
+            "Bowser in the Dark World - Red Coins",
+        ])
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
+        self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
+
+    def test_trick_adds_only_three_slope_coins(self):
+        self.collect_by_name([
+            "Triple Jump",
+            "Bowser in the Dark World - Single Yellow Coins",
+        ])
+        self.assertTrue(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 21))
+        self.assertFalse(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 22))
+
+        self.collect(self.get_item_by_name("Bowser in the Dark World - Red Coins"))
+        self.assertTrue(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 33))
+        self.assertFalse(bowser_in_the_dark_world_coins(
+            self.multiworld.state, self.player, 34))
+
+
+class SecretAquariumIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+    }
+
+    def test_coin_sources_are_counted_independently(self):
+        source_coins = {
+            "Secret Aquarium - Red Coins": 16,
+            "Secret Aquarium - Horizontal Coin Rings": 8,
+            "Secret Aquarium - Vertical Coin Rings": 32,
+        }
+        self.assertFalse(secret_aquarium_coins(
+            self.multiworld.state, self.player, 1))
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(secret_aquarium_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(secret_aquarium_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_all_unlocks_total_56_coins(self):
+        self.collect_by_name([
+            "Secret Aquarium - Red Coins",
+            "Secret Aquarium - Horizontal Coin Rings",
+            "Secret Aquarium - Vertical Coin Rings",
+        ])
+        self.assertTrue(secret_aquarium_coins(
+            self.multiworld.state, self.player, 56))
+
+
 class VanishCapUnderTheMoatTrickAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -1858,6 +2037,72 @@ class VanishCapUnderTheMoatTrickAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
         self.assertTrue(self.can_reach_location(
             "Vanish Cap Under the Moat - Near Switch Vanish Cap Block"))
+
+
+class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "logic_tricks": {"VCUTM Drop to Checkerboard Platforms From Above"},
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    }
+
+    def collect_all_coin_sources(self):
+        self.collect_by_name([
+            "Checkerboard Platforms",
+            "Vanish Cap Under the Moat - Vanish Cap",
+            "Vanish Cap Under the Moat - Single Yellow Coins",
+            "Vanish Cap Under the Moat - Red Coins",
+            "Vanish Cap Under the Moat - Horizontal Coin Lines",
+            "Vanish Cap Under the Moat - Three-Coin Block",
+        ])
+
+    def test_drop_counts_only_better_side_of_drop(self):
+        self.collect_all_coin_sources()
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 14))
+        self.assertFalse(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 15))
+
+    def test_drop_bypasses_movement_for_red_coin_checks(self):
+        self.collect_by_name([
+            "Unlock Vanish Cap Under the Moat",
+            "Checkerboard Platforms",
+            "Vanish Cap Under the Moat - Vanish Cap",
+        ])
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
+        self.assertTrue(self.can_reach_location(
+            "Vanish Cap Under the Moat - Red Coin Platform 1-Up"))
+
+
+class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "logic_tricks": {
+            "VCUTM Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide"
+        },
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    }
+
+    def test_crawl_back_then_drop_counts_both_sides(self):
+        self.collect_by_name([
+            "Checkerboard Platforms",
+            "Vanish Cap Under the Moat - Vanish Cap",
+            "Vanish Cap Under the Moat - Single Yellow Coins",
+            "Vanish Cap Under the Moat - Red Coins",
+            "Vanish Cap Under the Moat - Horizontal Coin Lines",
+            "Vanish Cap Under the Moat - Three-Coin Block",
+        ])
+        self.assertTrue(vanish_cap_under_the_moat_coins(
+            self.multiworld.state, self.player, 27))
 
 
 class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
@@ -1916,11 +2161,183 @@ class BowserInTheFireSeaCoinsanityAccessTestBase(SM64TestBase):
 
     def test_bowser_in_the_fire_sea_coin_sources(self):
         self.collect_bowser_in_the_fire_sea_access()
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 26 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - 27 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 23 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - 24 Coins"))
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 80 Coins"))
+
+
+class BowserInTheFireSeaJumpInLavaTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "logic_tricks": {"Jump in Lava"},
+    }
+
+    def test_jump_in_lava_reaches_only_marked_three_coins(self):
+        self.assertTrue(bowser_in_the_fire_sea_coins(
+            self.multiworld.state, self.player, 26))
+        self.assertFalse(bowser_in_the_fire_sea_coins(
+            self.multiworld.state, self.player, 27))
+
+
+class BowserInTheFireSeaIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+    }
+
+    def test_each_unlock_matches_documented_total_with_climb(self):
+        self.collect(self.get_item_by_name("Climb"))
+        source_coins = {
+            "Bowser in the Fire Sea - Single Yellow Coins": 2,
+            "Bowser in the Fire Sea - Red Coins": 16,
+            "Bowser in the Fire Sea - Horizontal Coin Lines": 20,
+            "Bowser in the Fire Sea - Horizontal Coin Rings": 16,
+            "Bowser in the Fire Sea - Vertical Coin Lines": 5,
+            "Bowser in the Fire Sea - Three-Coin Block": 3,
+            "Bowser in the Fire Sea - Ten-Coin Block": 10,
+            "Bowser in the Fire Sea - Bob-omb": 1,
+            "Bowser in the Fire Sea - Bullies": 4,
+            "Bowser in the Fire Sea - Goombas": 3,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(bowser_in_the_fire_sea_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(bowser_in_the_fire_sea_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_three_coin_block_requires_climb_without_trick(self):
+        self.collect(self.get_item_by_name("Bowser in the Fire Sea - Three-Coin Block"))
+        self.assertFalse(bowser_in_the_fire_sea_coins(
+            self.multiworld.state, self.player, 1))
+
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(bowser_in_the_fire_sea_coins(
+            self.multiworld.state, self.player, 3))
+
+    def test_all_unlocks_total_80_coins(self):
+        self.collect_by_name([
+            "Climb",
+            "Bowser in the Fire Sea - Single Yellow Coins",
+            "Bowser in the Fire Sea - Red Coins",
+            "Bowser in the Fire Sea - Horizontal Coin Lines",
+            "Bowser in the Fire Sea - Horizontal Coin Rings",
+            "Bowser in the Fire Sea - Vertical Coin Lines",
+            "Bowser in the Fire Sea - Three-Coin Block",
+            "Bowser in the Fire Sea - Ten-Coin Block",
+            "Bowser in the Fire Sea - Bob-omb",
+            "Bowser in the Fire Sea - Bullies",
+            "Bowser in the Fire Sea - Goombas",
+        ])
+        self.assertTrue(bowser_in_the_fire_sea_coins(
+            self.multiworld.state, self.player, 80))
+
+
+class CavernOfTheMetalCapDeepUnderwaterCoinsTrickTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "logic_tricks": {"Deep Underwater Coins Without Metal Cap"},
+    }
+
+    def collect_stage_access(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Hazy Maze Cave - Swimming Beast",
+        ])
+
+    def test_trick_reaches_red_coin_star_without_metal_cap(self):
+        self.collect_stage_access()
+        self.assertTrue(self.can_reach_location("Cavern of the Metal Cap - Red Coins"))
+
+    def test_trick_reaches_deep_underwater_coins_without_metal_cap(self):
+        self.assertTrue(cavern_of_the_metal_cap_coins(
+            self.multiworld.state, self.player, 47))
+
+
+class CavernOfTheMetalCapCoinLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    }
+
+    def test_deep_underwater_coins_require_metal_cap_without_trick(self):
+        self.assertTrue(cavern_of_the_metal_cap_coins(
+            self.multiworld.state, self.player, 26))
+        self.assertFalse(cavern_of_the_metal_cap_coins(
+            self.multiworld.state, self.player, 27))
+
+        self.collect(self.get_item_by_name("Cavern of the Metal Cap - Metal Cap"))
+        self.assertTrue(cavern_of_the_metal_cap_coins(
+            self.multiworld.state, self.player, 47))
+
+
+class CavernOfTheMetalCapIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_individual,
+        "enemy_unlocks": Options.EnemyUnlocks.option_individual,
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    }
+
+    def test_unlocks_without_metal_cap(self):
+        source_coins = {
+            "Cavern of the Metal Cap - Red Coins": 8,
+            "Cavern of the Metal Cap - Horizontal Coin Lines": 10,
+            "Cavern of the Metal Cap - Snufits": 8,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(cavern_of_the_metal_cap_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(cavern_of_the_metal_cap_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+        self.collect(self.get_item_by_name("Cavern of the Metal Cap - Horizontal Coin Rings"))
+        self.assertFalse(cavern_of_the_metal_cap_coins(
+            self.multiworld.state, self.player, 1))
+
+    def test_unlocks_with_metal_cap_match_documented_totals(self):
+        self.collect(self.get_item_by_name("Cavern of the Metal Cap - Metal Cap"))
+        source_coins = {
+            "Cavern of the Metal Cap - Red Coins": 16,
+            "Cavern of the Metal Cap - Horizontal Coin Lines": 15,
+            "Cavern of the Metal Cap - Horizontal Coin Rings": 8,
+            "Cavern of the Metal Cap - Snufits": 8,
+        }
+        for item_name, expected_coins in source_coins.items():
+            with self.subTest(item=item_name):
+                item = self.get_item_by_name(item_name)
+                self.collect(item)
+                self.assertTrue(cavern_of_the_metal_cap_coins(
+                    self.multiworld.state, self.player, expected_coins))
+                self.assertFalse(cavern_of_the_metal_cap_coins(
+                    self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_all_unlocks_total_47_coins(self):
+        self.collect_by_name([
+            "Cavern of the Metal Cap - Metal Cap",
+            "Cavern of the Metal Cap - Red Coins",
+            "Cavern of the Metal Cap - Horizontal Coin Lines",
+            "Cavern of the Metal Cap - Horizontal Coin Rings",
+            "Cavern of the Metal Cap - Snufits",
+        ])
+        self.assertTrue(cavern_of_the_metal_cap_coins(
+            self.multiworld.state, self.player, 47))
 
 
 class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
@@ -3401,7 +3818,7 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
-        "logic_tricks": {"Lethal Lava Land Bouncing Off Lava"},
+        "logic_tricks": {"Jump in Lava"},
     }
 
     def collect_basement_access(self):
@@ -3508,7 +3925,7 @@ class LethalLavaLandKoopaShellAccessTestBase(SM64TestBase):
 class LethalLavaLandCoinStar130BouncingOffLavaAccessTestBase(LethalLavaLandCoinStarAccessTestBase):
     options = {
         **LethalLavaLandCoinStarAccessTestBase.options,
-        "logic_tricks": {"Lethal Lava Land Bouncing Off Lava"},
+        "logic_tricks": {"Jump in Lava"},
         "lethal_lava_land_coin_star_requirement": 130,
     }
 

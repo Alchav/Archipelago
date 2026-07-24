@@ -1,4 +1,11 @@
 logic_tricks = {
+    # Non-level-specific tricks
+    "Jump in Lava": {
+        "name": "logic_jump_in_lava",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Jumping into and bouncing off lava to cross gaps or reach nearby platforms.",
+    },
     # Castle
     "Castle Third Tree From Waterfall 1-Up With No Movement": {
         "name": "logic_castle_waterfall_tree_1up_with_no_movement",
@@ -408,13 +415,6 @@ logic_tricks = {
         "video": "https://www.youtube.com/watch?v=Fpf28uUrR1U"
     },
     # Lethal Lava Land
-    "Lethal Lava Land Bouncing Off Lava": {
-        "name": "logic_lll_bouncing_off_lava",
-        "rule": "",
-        "difficulty": "medium",
-        "description": "Jumping in and bouncing off of lava to get across it for coins, 1-ups, and to bypass the"
-                       "rolling log.",
-    },
     "Lethal Lava Land Hot-Foot it Into the Volcano With Wall Kick": {
         "name": "logic_lll_hot_foot_it_with_wall_kick",
         "rule": "WK",
@@ -497,12 +497,42 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Reaching Stand Tall on the Four Pillars without using the Pyramid Elevator.",
     },
+    # Bowser in the Dark World
+    "Bowser in the Dark World Triple Jump up the Purple Switch Slope": {
+        "name": "logic_bitdw_purple_switch_bypass",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Bypassing the purple switch slope in Bowser in the Dark World with a Triple Jump.",
+    },
+    # Cavern of the Metal Cap
+    "Deep Underwater Coins Without Metal Cap": {
+        "name": "logic_cotmc_deep_underwater_coins_without_metal_cap",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Collecting the deep underwater coins and Red Coin Star without using the Metal Cap.",
+    },
     # Vanish Cap Under the Moat
     "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {
         "name": "logic_vcutm_wall_kick_over_vanish_cap_grate",
         "rule": "WK",
-        "difficulty": "hard",
+        "difficulty": "medium",
         "description": "Wall Kicking over the Vanish Cap grate without using the Vanish Cap.",
+        "video": "https://www.youtube.com/watch?v=_u95-2TjRRI"
+    },
+    "VCUTM Drop to Checkerboard Platforms From Above": {
+        "name": "logic_vcutm_drop_to_checkerboard_platforms",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Dropping from the slide to the Checkerboard Platforms without using a movement ability.",
+        "video": "https://www.youtube.com/watch?v=72TsponCYvg"
+    },
+    "VCUTM Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide": {
+        "name": "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Crawling back up the slide before dropping to the Checkerboard Platforms, allowing coins"
+                       " from both sides of the drop to be collected without a movement ability.",
+        "video": "https://www.youtube.com/watch?v=DelkR8OfJWk"
     },
 }
 

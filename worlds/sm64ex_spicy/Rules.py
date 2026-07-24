@@ -730,7 +730,7 @@ def can_collect_all_lethal_lava_land_red_coins(
         return True
     has_lava_crossing = (
         state.has("Lethal Lava Land - Koopa Shell", player)
-        or can_use_logic_trick(state, player, "logic_lll_bouncing_off_lava", target_name)
+        or can_use_logic_trick(state, player, "logic_jump_in_lava", target_name)
     )
     return has_lava_crossing and has_lethal_lava_land_healing_coins(state, player)
 
@@ -742,7 +742,7 @@ def can_reach_lethal_lava_land_red_coins(
             state, player, "coin_object_unlocks",
             "Lethal Lava Land - Bowser Puzzle", "Lethal Lava Land - Bowser Puzzle")
         or state.has("Lethal Lava Land - Koopa Shell", player)
-        or can_use_logic_trick(state, player, "logic_lll_bouncing_off_lava", target_name)
+        or can_use_logic_trick(state, player, "logic_jump_in_lava", target_name)
     )
 
 
@@ -832,7 +832,7 @@ def lethal_lava_land_coins(state: CollectionState, player: int, coins: int) -> b
     if (has_single_yellow_coins
             and (state.has("Lethal Lava Land - Koopa Shell", player)
                  or can_use_logic_trick(
-                    state, player, "logic_lll_bouncing_off_lava", "Lethal Lava Land - Coins Star"))):
+                    state, player, "logic_jump_in_lava", "Lethal Lava Land - Coins Star"))):
         # Line of coins under bridge
         reachable_coins += 5
 
@@ -1330,14 +1330,40 @@ def has_vanish_cap(state: CollectionState, player: int, level_name: str) -> bool
 
 
 def princess_secret_slide_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 50
-    if has_action(state, player, "Ground Pound", "The Princess's Secret Slide"):
+    level_name = "The Princess's Secret Slide"
+    reachable_coins = 0
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Single Yellow Coins", "Princess's Secret Slide - Single Yellow Coins"):
+        reachable_coins += 20
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Horizontal Coin Lines", "Princess's Secret Slide - Horizontal Coin Lines"):
         reachable_coins += 30
+    if has_action(state, player, "Ground Pound", level_name) and has_unlock(
+            state, player, "coin_object_unlocks",
+            "Blue Coin Blocks", "Princess's Secret Slide - Blue Coin Block"):
+        reachable_coins += 30
+    assert reachable_coins <= 80
     return coins <= reachable_coins
 
 
 def secret_aquarium_coins(state: CollectionState, player: int, coins: int) -> bool:
-    return coins <= 56
+    reachable_coins = 0
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Red Coins", "Secret Aquarium - Red Coins"):
+        reachable_coins += 16
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Horizontal Coin Rings", "Secret Aquarium - Horizontal Coin Rings"):
+        reachable_coins += 8
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Vertical Coin Rings", "Secret Aquarium - Vertical Coin Rings"):
+        reachable_coins += 32
+    assert reachable_coins <= 56
+    return coins <= reachable_coins
 
 
 def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins: int) -> bool:
@@ -1377,49 +1403,232 @@ def vanish_cap_under_the_moat_coins(state: CollectionState, player: int, coins: 
         state, player, "coin_object_unlocks",
         "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
     has_movement = any(has_action(state, player, action, level_name)
-                       for action in ("Triple Jump", "Ledge Grab", "Side Flip", "Backflip"))
+                       for action in ("Triple Jump", "Ledge Grab", "Side Flip", "Backflip", "Wall Kick"))
     has_checkerboards = has_checkerboard_platforms(state, player, level_name)
+    can_drop_to_checkerboards = can_use_logic_trick(
+        state, player, "logic_vcutm_drop_to_checkerboard_platforms", "Vanish Cap Under the Moat - Coins Star")
+    can_crawl_back_then_drop = can_use_logic_trick(
+        state, player, "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up",
+        "Vanish Cap Under the Moat - Coins Star")
 
     # https://ukikipedia.net/mediawiki/index.php?title=Vanish_Cap_under_the_Moat&oldid=19286
 
     # Line of coins at bottom of slide, around the corner to left
-    reachable_coins = 5 if has_horizontal_coin_lines else 0
+    earlier_coins = 5 if has_horizontal_coin_lines else 0
     # 4 Red Coins
     if has_red_coins:
-        reachable_coins += 8
+        earlier_coins += 8
 
-    if has_movement:
+    later_coins = 0
+    if has_movement or can_drop_to_checkerboards or can_crawl_back_then_drop:
         # 3 coins in an ! block right before all the turning lifts
         if has_three_coin_block:
-            reachable_coins += 3
+            later_coins += 3
         if has_checkerboards and has_red_coins:
             # 4 Red Coins
-            reachable_coins += 8
+            later_coins += 8
         if has_checkerboards and has_single_yellow_coins and has_vanish_cap(state, player, level_name):
             # 3 coins by star marker at very end
-            reachable_coins += 3
+            later_coins += 3
+
+    if has_movement or can_crawl_back_then_drop:
+        reachable_coins = earlier_coins + later_coins
+    elif can_drop_to_checkerboards:
+        reachable_coins = max(earlier_coins, later_coins)
+    else:
+        reachable_coins = earlier_coins
     assert reachable_coins <= 27
     return coins <= reachable_coins
 
 
 def cavern_of_the_metal_cap_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 31
-    if has_metal_cap(state, player, "Cavern of the Metal Cap") or allows_capless(state, player):
-        reachable_coins += 16
+    level_name = "Cavern of the Metal Cap"
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_snufits = has_unlock(
+        state, player, "enemy_unlocks",
+        "Snufits", f"{level_name} - Snufits")
+
+    # Sloped line of coins under the water after first metal cap block
+    reachable_coins = 5 if has_horizontal_coin_lines else 0
+    # Line of coins after rock bridge over the water
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
+    # 4 Snufits
+    if has_snufits:
+        reachable_coins += 8
+    # 4 Red Coins
+    if has_red_coins:
+        reachable_coins += 8
+
+    if (has_metal_cap(state, player, level_name)
+            or can_use_logic_trick(
+                state, player,
+                "logic_cotmc_deep_underwater_coins_without_metal_cap",
+                "Cavern of the Metal Cap - Coins Star")):
+        # Ring of coins around star marker under the water
+        if has_horizontal_coin_rings:
+            reachable_coins += 8
+        # Line of coins on bottom of stream under bridge
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # 4 Red Coins
+        if has_red_coins:
+            reachable_coins += 8
+    assert reachable_coins <= 47
     return coins <= reachable_coins
 
 
 def bowser_in_the_dark_world_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 73
-    if has_purple_switches(state, player, "Bowser in the Dark World"):
-        reachable_coins += 7
+    level_name = "Bowser in the Dark World"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_three_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_slope_access = (
+        has_purple_switches(state, player, level_name)
+        or can_use_logic_trick(state, player, "logic_bitdw_purple_switch_bypass", level_name)
+    )
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Bowser_in_the_Dark_World&oldid=18919
+
+    # Three rings of eight coins.
+    reachable_coins = 24 if has_horizontal_coin_rings else 0
+    # Two lines of five coins.
+    if has_horizontal_coin_lines:
+        reachable_coins += 10
+    if has_single_yellow_coins:
+        # Eighteen are before the Purple Switch slope.
+        reachable_coins += 18
+        # The final three are on the slope leading to Bowser.
+        if has_slope_access:
+            reachable_coins += 3
+    if has_three_coin_block:
+        reachable_coins += 3
+    if has_goombas:
+        reachable_coins += 6
+    if has_red_coins:
+        # Six Red Coins are reachable before the Purple Switch slope.
+        reachable_coins += 12
+        # The final two Red Coins cannot be collected with the slope trick.
+        if has_purple_switches(state, player, level_name):
+            reachable_coins += 4
+    assert reachable_coins <= 80
     return coins <= reachable_coins
 
 
 def bowser_in_the_fire_sea_coins(state: CollectionState, player: int, coins: int) -> bool:
-    reachable_coins = 26
-    if has_action(state, player, "Climb", "Bowser in the Fire Sea"):
-        reachable_coins += 54
+    level_name = "Bowser in the Fire Sea"
+    has_single_yellow_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
+    has_red_coins = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Red Coins", f"{level_name} - Red Coins")
+    has_horizontal_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
+    has_horizontal_coin_rings = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
+    has_vertical_coin_lines = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
+    has_three_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+    has_ten_coin_block = has_unlock(
+        state, player, "coin_object_unlocks",
+        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Block")
+    has_bob_omb = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bob-ombs", f"{level_name} - Bob-omb")
+    has_bullies = has_unlock(
+        state, player, "enemy_unlocks",
+        "Bullies", f"{level_name} - Bullies")
+    has_goombas = has_unlock(
+        state, player, "enemy_unlocks",
+        "Goombas", f"{level_name} - Goombas")
+    has_climb = has_action(state, player, "Climb", level_name)
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Bowser_in_the_Fire_Sea&oldid=18920
+
+    # 2 coins on the 2 platforms floating in lava at the very beginning
+    reachable_coins = 2 if has_single_yellow_coins else 0
+    # Line of coins on the second sinking platform at beginning
+    if has_horizontal_coin_lines:
+        reachable_coins += 5
+    # Ring of coins (along with red coin) up a platform to left of bully
+    if has_horizontal_coin_rings:
+        reachable_coins += 8
+    # 1 Bully
+    if has_bullies:
+        reachable_coins += 1
+    # 3 Goombas
+    if has_goombas:
+        reachable_coins += 3
+    # 2 Red Coins
+    if has_red_coins:
+        reachable_coins += 4
+
+    if ((has_climb
+            or can_use_logic_trick(
+                state, player, "logic_jump_in_lava", "Bowser in the Fire Sea - Coins Star"))
+            and has_three_coin_block):
+        # 3 coins in an ! block after rising platform with the poll
+        reachable_coins += 3
+
+    if has_climb:
+        # Line of coins after elevator (on big grey triangle platform)
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # Ring of coins under wire grid (hang on it to get them)
+        if has_horizontal_coin_rings:
+            reachable_coins += 8
+        # Vertical line of coins, past 2nd ! block (fall through hole to get)
+        if has_vertical_coin_lines:
+            reachable_coins += 5
+        # Sloped line of coins, just before the bob-omb
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # 10 coins in an ! block with the bob-omb
+        if has_ten_coin_block:
+            reachable_coins += 10
+        # Line of coins on third sinking platform after bob-omb
+        if has_horizontal_coin_lines:
+            reachable_coins += 5
+        # 1 Bob-omb
+        if has_bob_omb:
+            reachable_coins += 1
+        # 3 Bullies
+        if has_bullies:
+            reachable_coins += 3
+        # 6 Red Coins
+        if has_red_coins:
+            reachable_coins += 12
+
+    assert reachable_coins <= 80
     return coins <= reachable_coins
 
 
@@ -1904,13 +2113,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         ))
     rf.assign_rule(
         "Lethal Lava Land - Red-Hot Log Rolling",
-        "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | logic_lll_bouncing_off_lava")
+        "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | logic_jump_in_lava")
     for location_name in (
             "Lethal Lava Land - Northeast Brown Platform 1-Up",
             "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up",
             "Lethal Lava Land - Northwest Curve 1-Up",
     ):
-        rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_lll_bouncing_off_lava")
+        rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_jump_in_lava")
     rf.assign_rule(
         "Lethal Lava Land - Hot-Foot-It Ledge",
         "CL | logic_lll_hot_foot_it_with_wall_kick | logic_lll_hot_foot_it_with_triple_jump | "
@@ -2062,19 +2271,39 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Tower of the Wing Cap
     # rf.assign_rule("Tower of the Wing Cap - Red Coins", "WC") # ridiculous
     # Cavern of the Metal Cap
-    rf.assign_rule("Cavern of the Metal Cap - Red Coins", "MC | CAPLESS")
+    rf.assign_rule("Cavern of the Metal Cap - Red Coins",
+                   "MC | logic_cotmc_deep_underwater_coins_without_metal_cap")
     # Vanish Cap Under the Moat
     rf.assign_rule("Vanish Cap Under the Moat - Switch",
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coins",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | "
-                   "CHECKERBOARD_PLATFORMS & logic_vcutm_wall_kick_over_vanish_cap_grate")
+                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & "
+                   "logic_vcutm_wall_kick_over_vanish_cap_grate | "
+                   "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & VC | "
+                   "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & "
+                   "logic_vcutm_wall_kick_over_vanish_cap_grate | "
+                   "CHECKERBOARD_PLATFORMS & "
+                   "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up & VC | "
+                   "CHECKERBOARD_PLATFORMS & "
+                   "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up & "
+                   "logic_vcutm_wall_kick_over_vanish_cap_grate")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
                    "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | "
-                   "CHECKERBOARD_PLATFORMS & logic_vcutm_wall_kick_over_vanish_cap_grate")
+                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & "
+                   "logic_vcutm_wall_kick_over_vanish_cap_grate | "
+                   "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & VC | "
+                   "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & "
+                   "logic_vcutm_wall_kick_over_vanish_cap_grate | "
+                   "CHECKERBOARD_PLATFORMS & "
+                   "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up & VC | "
+                   "CHECKERBOARD_PLATFORMS & "
+                   "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up & "
+                   "logic_vcutm_wall_kick_over_vanish_cap_grate")
     # Bowser in the Dark World
-    rf.assign_rule("Bowser in the Dark World - Red Coins", "PURPLE_SWITCHES")
-    rf.assign_rule("Bowser in the Dark World - Key", "PURPLE_SWITCHES | TJ+MOVELESS")
+    rf.assign_rule("Bowser in the Dark World - Red Coins", "RED_COINS & PURPLE_SWITCHES")
+    rf.assign_rule("Bowser in the Dark World - Key",
+                   "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass")
     if options.one_up_checks:
         for location_name in (
                 "Bowser in the Dark World - Center Overhang 1-Up",
