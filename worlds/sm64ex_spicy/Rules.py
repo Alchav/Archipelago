@@ -1697,15 +1697,52 @@ def bowser_in_the_fire_sea_coins(state: CollectionState, player: int, coins: int
 
 def bowser_in_the_sky_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bowser in the Sky"
-    reachable_coins = 23
+
+    # https://ukikipedia.net/mediawiki/index.php?title=Bowser_in_the_Sky&oldid=18921
+
+    # 3 coins on the tilting "W" platform
+    reachable_coins = 3
+    # 2 Goombas
+    reachable_coins += 2
+    # 3 Red Coins
+    reachable_coins += 6
+    # 1 Fire Piranha Plant
+    reachable_coins += 1
+    # 2 lines of coins on the long platform under the whomp
+    reachable_coins += 10
+    # 1 Whomp
+    reachable_coins += 5
+
     if has_action(state, player, "Ground Pound", level_name):
-        reachable_coins += 10
+        # Whomp ground pound
+        reachable_coins += 5
     if state.can_reach("Bowser in the Sky - Chuckya", "Region", player):
-        reachable_coins += 9
+        # Chuckya
+        reachable_coins += 5
+        # 1 Goomba
+        reachable_coins += 1
+        # 6 coins after the first ! switch, on the raised steps (3 of them)
+        reachable_coins += 6
     if state.can_reach("Bowser in the Sky - Arrow Ride", "Region", player):
-        reachable_coins += 18
+        # Line of coins on the suction-cup platform (by the 4th red coin)
+        reachable_coins += 5
+        # 3 Red Coins
+        reachable_coins += 6
+        # After the 5th red coin, 3 coins on the edges of a spinning platform
+        reachable_coins += 3
+        # 2 Bob-ombs
+        reachable_coins += 2
+        # 1 Fire Piranha Plant
+        reachable_coins += 1
     if state.can_reach("Bowser in the Sky - Top", "Region", player):
-        reachable_coins += 16
+        # 4 Goombas
+        reachable_coins += 4
+        # 2 Bob-ombs
+        reachable_coins += 2
+        # 2 Red Coin
+        reachable_coins += 4
+        # Line of coins before the last rotating platforms
+        reachable_coins += 5
     return coins <= reachable_coins
 
 
