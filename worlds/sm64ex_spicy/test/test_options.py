@@ -1096,6 +1096,50 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
         self.assertEqual(location.parent_region.name, "Wing Mario Over the Rainbow")
 
 
+class TowerOfTheWingCapFullAccessibilityCapTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": Options.SM64Accessibility.option_full,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+    }
+
+    def test_full_accessibility_caps_locations_at_31_without_mastery(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Tower of the Wing Cap - 31 Coins", active_locations)
+        self.assertNotIn("Tower of the Wing Cap - 32 Coins", active_locations)
+
+
+class TowerOfTheWingCapItemsAccessibilityTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": Options.SM64Accessibility.option_items,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+    }
+
+    def test_items_accessibility_keeps_locations_above_31(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Tower of the Wing Cap - 63 Coins", active_locations)
+
+
+class TowerOfTheWingCapMinimalAccessibilityTestBase(TowerOfTheWingCapItemsAccessibilityTestBase):
+    options = {
+        **TowerOfTheWingCapItemsAccessibilityTestBase.options,
+        "accessibility": Options.SM64Accessibility.option_minimal,
+    }
+
+
+class TowerOfTheWingCapMasteryGenerationTestBase(TowerOfTheWingCapItemsAccessibilityTestBase):
+    options = {
+        **TowerOfTheWingCapItemsAccessibilityTestBase.options,
+        "accessibility": Options.SM64Accessibility.option_full,
+        "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
+    }
+
+
 class CoinsanityOverflowGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {

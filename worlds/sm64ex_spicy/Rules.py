@@ -1422,7 +1422,33 @@ def wing_mario_over_the_rainbow_coins(state: CollectionState, player: int, coins
 
 
 def tower_of_the_wing_cap_coins(state: CollectionState, player: int, coins: int) -> bool:
-    return coins <= state.multiworld.worlds[player].options.tower_of_the_wing_cap_coinsanity_max_coins.value
+    level_name = "Tower of the Wing Cap"
+    has_coin_mastery = has_logic_trick(state, player, "logic_totwc_coin_mastery")
+    reachable_coins = 0
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Single Yellow Coins", f"{level_name} - Single Yellow Coins"):
+        reachable_coins += 15
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Red Coins", f"{level_name} - Red Coins"):
+        reachable_coins += 16
+    if has_unlock(
+            state, player, "coin_object_unlocks",
+            "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings"):
+        if has_coin_mastery:
+            reachable_coins += 20
+            if has_wing_cap(state, player, level_name):
+                reachable_coins += 12
+        else:
+            reachable_coins += 16
+
+    assert reachable_coins <= 63
+    if not has_coin_mastery:
+        reachable_coins = min(reachable_coins, 31)
+    maximum_coins = state.multiworld.worlds[
+        player].options.tower_of_the_wing_cap_coinsanity_max_coins.value
+    return coins <= min(reachable_coins, maximum_coins)
 
 
 def vanish_cap_under_the_moat_coins(state: CollectionState, player: int, coins: int) -> bool:

@@ -5,7 +5,7 @@ from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_
     big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
     bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
     princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
-    wing_mario_over_the_rainbow_coins, get_per_level_action_item_name
+    wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, get_per_level_action_item_name
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -2515,6 +2515,79 @@ class WingMarioOverTheRainbowIndividualUnlockLogicTestBase(SM64TestBase):
             "Wing Mario Over the Rainbow - Red Coins", self.player))
         self.assertTrue(wing_mario_over_the_rainbow_coins(
             self.multiworld.state, self.player, 56))
+
+
+class TowerOfTheWingCapIndividualUnlockLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+    }
+
+    def test_each_coin_object_unlock_matches_documented_total(self):
+        for item_name, expected_coins in {
+            "Tower of the Wing Cap - Single Yellow Coins": 15,
+            "Tower of the Wing Cap - Red Coins": 16,
+            "Tower of the Wing Cap - Vertical Coin Rings": 16,
+        }.items():
+            item = self.get_item_by_name(item_name)
+            self.collect(item)
+            self.assertTrue(tower_of_the_wing_cap_coins(
+                self.multiworld.state, self.player, expected_coins))
+            self.assertFalse(tower_of_the_wing_cap_coins(
+                self.multiworld.state, self.player, expected_coins + 1))
+            self.remove(item)
+
+    def test_all_unlocks_are_capped_at_31_coins_without_mastery(self):
+        self.collect([
+            self.get_item_by_name("Tower of the Wing Cap - Single Yellow Coins"),
+            self.get_item_by_name("Tower of the Wing Cap - Red Coins"),
+            self.get_item_by_name("Tower of the Wing Cap - Vertical Coin Rings"),
+        ])
+        self.assertTrue(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 31))
+        self.assertFalse(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 32))
+
+
+class TowerOfTheWingCapCoinMasteryLogicTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "coinsanity": 100,
+        "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
+        "per_level_cap_items": Options.PerLevelCapItems.option_false,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+    }
+
+    def test_coin_rings_require_wing_cap_for_last_12_coins(self):
+        self.collect(self.get_item_by_name("Tower of the Wing Cap - Vertical Coin Rings"))
+        self.assertTrue(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 20))
+        self.assertFalse(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 21))
+
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 32))
+
+    def test_all_unlocks_reach_51_without_wing_cap_and_63_with_it(self):
+        self.collect([
+            self.get_item_by_name("Tower of the Wing Cap - Single Yellow Coins"),
+            self.get_item_by_name("Tower of the Wing Cap - Red Coins"),
+            self.get_item_by_name("Tower of the Wing Cap - Vertical Coin Rings"),
+        ])
+        self.assertTrue(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 51))
+        self.assertFalse(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 52))
+
+        self.collect(self.get_item_by_name("Wing Cap"))
+        self.assertTrue(tower_of_the_wing_cap_coins(
+            self.multiworld.state, self.player, 63))
 
 
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):

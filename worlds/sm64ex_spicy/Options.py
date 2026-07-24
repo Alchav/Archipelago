@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup, \
-    OptionSet
+    OptionSet, ItemsAccessibility
 
 from .LogicTricks import logic_trick_option_keys
 
@@ -35,6 +35,10 @@ class Coinsanity(Range):
     range_start = 0
     range_end = 100
     default = 0
+
+
+class SM64Accessibility(ItemsAccessibility):
+    default = ItemsAccessibility.option_full
 
 
 class SecretStageCoinsanity(Toggle):
@@ -1025,6 +1029,7 @@ sm64_options_groups = [
 
 @dataclass
 class SM64Options(PerGameCommonOptions):
+    accessibility: SM64Accessibility
     area_rando: AreaRandomizer
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks

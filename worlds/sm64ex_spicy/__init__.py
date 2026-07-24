@@ -177,6 +177,12 @@ class SM64World(World):
                     option_name: getattr(self.options, option_name).value
                     for option_name in secret_stage_coinsanity_max_coin_option_names
                 }
+                if (
+                        self.options.accessibility == self.options.accessibility.option_full
+                        and not self.logic_totwc_coin_mastery
+                ):
+                    secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"] = min(
+                        secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"], 31)
                 self.coinsanity_location_names += get_secret_stage_coinsanity_location_names(
                     secret_stage_coin_maxes, self.options.coinsanity.value)
         if "MoveRandoVec" in slot_data:

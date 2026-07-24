@@ -526,6 +526,14 @@ logic_tricks = {
         "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
                        "Red Coin. Long Jump can reach the Buddy Platform",
     },
+    # Tower of the Wing Cap
+    "Tower of the Wing Cap Coin Mastery": {
+        "name": "logic_totwc_coin_mastery",
+        "rule": "",
+        "difficulty": "hard",
+        "description": "Collecting the difficult coin rings in Tower of the Wing Cap. The final rings require"
+                       " restarting flight with the Wing Cap.",
+    },
     # Vanish Cap Under the Moat
     "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {
         "name": "logic_vcutm_wall_kick_over_vanish_cap_grate",
