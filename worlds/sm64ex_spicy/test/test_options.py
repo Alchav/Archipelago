@@ -11,7 +11,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
     global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
-    global_mode_enemy_item_names, bowser_bomb_item_data_table
+    global_mode_enemy_item_names, bowser_bomb_item_data_table, non_painting_level_unlock_item_data_table, \
+    special_level_unlock_item_names, global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -68,6 +69,7 @@ class PerLevelOptionAliasTest(unittest.TestCase):
             Options.PurpleSwitches,
             Options.CoinObjectUnlocks,
             Options.EnemyUnlocks,
+            Options.OneUpMushroomUnlocks,
             Options.BowserBombs,
             Options.BowserStage1Ups,
             Options.TripleJump,
@@ -76,6 +78,12 @@ class PerLevelOptionAliasTest(unittest.TestCase):
             with self.subTest(option=option_class.__name__):
                 self.assertEqual(option_class.from_text("per_level").value, option_class.option_per_level)
                 self.assertEqual(option_class.from_text("individual").value, option_class.option_per_level)
+
+
+class LevelUnlockOptionTest(unittest.TestCase):
+    def test_legacy_boolean_aliases(self):
+        self.assertEqual(Options.LevelUnlocks.from_any(False).value, Options.LevelUnlocks.option_special_only)
+        self.assertEqual(Options.LevelUnlocks.from_any(True).value, Options.LevelUnlocks.option_full)
 
 
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
@@ -400,6 +408,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                     self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
     def test_default_global_cap_items_are_generated(self):
+        self.assertTrue(self.world.fill_slot_data()["GlobalCapItems"])
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -503,6 +512,7 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
     def test_global_cap_items_are_not_generated(self):
+        self.assertFalse(self.world.fill_slot_data()["GlobalCapItems"])
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -573,6 +583,58 @@ class OneUpChecksNoDespawnsOnTestBase(SM64TestBase):
     def test_impossible_one_up_location_is_generated_with_no_despawns(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
+
+
+class GlobalOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+    }
+
+    def test_global_one_up_unlock_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["OneUpUnlockMode"], 1)
+        for item_name in global_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+        for item_name in per_level_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+        self.assertEqual(item_table["Butterflies"], 3626919)
+
+
+class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    }
+
+    def test_per_level_one_up_unlock_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["OneUpUnlockMode"], 2)
+        for item_name in global_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+        for item_name in per_level_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+        self.assertEqual(item_table["Castle - Butterflies"], 3626915)
+        self.assertEqual(item_table["Tall, Tall Mountain - Butterflies"], 3626918)
+
+
+class DisabledLevelUnlockItemPoolTestBase(SM64TestBase):
+    options = {"enable_locked_paintings": Options.LevelUnlocks.option_disabled}
+
+    def test_no_level_unlock_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["LevelUnlockMode"], 0)
+        for item_name in special_level_unlock_item_names:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class FullLevelUnlockItemPoolTestBase(SM64TestBase):
+    options = {"enable_locked_paintings": Options.LevelUnlocks.option_full}
+
+    def test_all_level_unlock_items_are_generated(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(slot_data["LevelUnlockMode"], 2)
+        self.assertEqual(slot_data["PaintingRando"], 1)
+        for item_name in (*special_level_unlock_item_names, *painting_unlock_item_data_table,
+                          *non_painting_level_unlock_item_data_table):
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
 
 class BlocksanityOnTestBase(SM64TestBase):

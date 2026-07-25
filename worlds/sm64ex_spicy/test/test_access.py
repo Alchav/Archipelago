@@ -167,6 +167,72 @@ class CastleThirdFloorAlcoveLogicTricksTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
 
 
+class FullLevelUnlockAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.LevelUnlocks.option_full,
+    }
+
+    def test_third_floor_levels_require_their_unlocks(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.assertFalse(self.can_reach_region("Rainbow Ride"))
+        self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
+        self.collect(self.get_item_by_name("Unlock Rainbow Ride"))
+        self.assertTrue(self.can_reach_region("Rainbow Ride"))
+        self.assertFalse(self.can_reach_region("Wing Mario Over the Rainbow"))
+        self.collect(self.get_item_by_name("Unlock Wing Mario Over the Rainbow"))
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
+
+
+class GlobalOneUpUnlockAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+    }
+
+    def test_each_global_item_controls_its_one_up_category(self):
+        checks = (
+            ("Bob-omb Battlefield - Switch Platform 1-Up", "Freestanding 1-Ups"),
+            ("Bob-omb Battlefield - Flower Ring 1-Up", "Trigger 1-Ups"),
+            ("Cool, Cool Mountain - Near Snowman Block 1-Up", "1-Up Blocks"),
+            ("Castle - Left Butterfly 1-Up", "Butterflies"),
+        )
+        for location_name, item_name in checks:
+            with self.subTest(location=location_name):
+                self.assertFalse(self.can_reach_location(location_name))
+                self.collect(self.get_item_by_name(item_name))
+                self.assertTrue(self.can_reach_location(location_name))
+
+
+class PerLevelOneUpUnlockAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    }
+
+    def test_per_level_item_only_unlocks_matching_level(self):
+        location_name = "Bob-omb Battlefield - Switch Platform 1-Up"
+        self.assertFalse(self.can_reach_location(location_name))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Freestanding 1-Ups"))
+        self.assertFalse(self.can_reach_location(location_name))
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Freestanding 1-Ups"))
+        self.assertTrue(self.can_reach_location(location_name))
+
+    def test_per_level_butterfly_item_only_unlocks_matching_level(self):
+        castle_location = "Castle - Left Butterfly 1-Up"
+        self.assertFalse(self.can_reach_location(castle_location))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Butterflies"))
+        self.assertFalse(self.can_reach_location(castle_location))
+        self.collect(self.get_item_by_name("Castle - Butterflies"))
+        self.assertTrue(self.can_reach_location(castle_location))
+
+
 class CastleThirtyStarDoorLogicTricksTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -1774,7 +1840,7 @@ class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
                 self.remove(item)
 
     def test_three_coin_block_requires_movement(self):
-        self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Three-Coin Block"))
+        self.collect(self.get_item_by_name("Vanish Cap Under the Moat - 3-Coin Block"))
         self.assertFalse(vanish_cap_under_the_moat_coins(
             self.multiworld.state, self.player, 1))
 
@@ -1821,7 +1887,7 @@ class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
             "Vanish Cap Under the Moat - Single Yellow Coins",
             "Vanish Cap Under the Moat - Red Coins",
             "Vanish Cap Under the Moat - Horizontal Coin Lines",
-            "Vanish Cap Under the Moat - Three-Coin Block",
+            "Vanish Cap Under the Moat - 3-Coin Block",
         ])
         self.assertTrue(vanish_cap_under_the_moat_coins(
             self.multiworld.state, self.player, 27))
@@ -1887,7 +1953,7 @@ class BowserInTheDarkWorldIndividualUnlockLogicTestBase(SM64TestBase):
             "Bowser in the Dark World - Red Coins": 12,
             "Bowser in the Dark World - Horizontal Coin Lines": 10,
             "Bowser in the Dark World - Horizontal Coin Rings": 24,
-            "Bowser in the Dark World - Three-Coin Block": 3,
+            "Bowser in the Dark World - 3-Coin Block": 3,
             "Bowser in the Dark World - Goombas": 6,
         }
         self.assertFalse(bowser_in_the_dark_world_coins(
@@ -1923,7 +1989,7 @@ class BowserInTheDarkWorldIndividualUnlockLogicTestBase(SM64TestBase):
             "Bowser in the Dark World - Red Coins",
             "Bowser in the Dark World - Horizontal Coin Lines",
             "Bowser in the Dark World - Horizontal Coin Rings",
-            "Bowser in the Dark World - Three-Coin Block",
+            "Bowser in the Dark World - 3-Coin Block",
             "Bowser in the Dark World - Goombas",
         ])
         self.assertTrue(bowser_in_the_dark_world_coins(
@@ -2068,7 +2134,7 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
             "Vanish Cap Under the Moat - Single Yellow Coins",
             "Vanish Cap Under the Moat - Red Coins",
             "Vanish Cap Under the Moat - Horizontal Coin Lines",
-            "Vanish Cap Under the Moat - Three-Coin Block",
+            "Vanish Cap Under the Moat - 3-Coin Block",
         ])
 
     def test_drop_counts_only_better_side_of_drop(self):
@@ -2108,7 +2174,7 @@ class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
             "Vanish Cap Under the Moat - Single Yellow Coins",
             "Vanish Cap Under the Moat - Red Coins",
             "Vanish Cap Under the Moat - Horizontal Coin Lines",
-            "Vanish Cap Under the Moat - Three-Coin Block",
+            "Vanish Cap Under the Moat - 3-Coin Block",
         ])
         self.assertTrue(vanish_cap_under_the_moat_coins(
             self.multiworld.state, self.player, 27))
@@ -2279,8 +2345,8 @@ class BowserInTheFireSeaIndividualUnlockLogicTestBase(SM64TestBase):
             "Bowser in the Fire Sea - Horizontal Coin Lines": 20,
             "Bowser in the Fire Sea - Horizontal Coin Rings": 16,
             "Bowser in the Fire Sea - Vertical Coin Lines": 5,
-            "Bowser in the Fire Sea - Three-Coin Block": 3,
-            "Bowser in the Fire Sea - Ten-Coin Block": 10,
+            "Bowser in the Fire Sea - 3-Coin Block": 3,
+            "Bowser in the Fire Sea - 10-Coin Block": 10,
             "Bowser in the Fire Sea - Bob-omb": 1,
             "Bowser in the Fire Sea - Bullies": 4,
             "Bowser in the Fire Sea - Goombas": 3,
@@ -2296,7 +2362,7 @@ class BowserInTheFireSeaIndividualUnlockLogicTestBase(SM64TestBase):
                 self.remove(item)
 
     def test_three_coin_block_requires_climb_without_trick(self):
-        self.collect(self.get_item_by_name("Bowser in the Fire Sea - Three-Coin Block"))
+        self.collect(self.get_item_by_name("Bowser in the Fire Sea - 3-Coin Block"))
         self.assertFalse(bowser_in_the_fire_sea_coins(
             self.multiworld.state, self.player, 1))
 
@@ -2312,8 +2378,8 @@ class BowserInTheFireSeaIndividualUnlockLogicTestBase(SM64TestBase):
             "Bowser in the Fire Sea - Horizontal Coin Lines",
             "Bowser in the Fire Sea - Horizontal Coin Rings",
             "Bowser in the Fire Sea - Vertical Coin Lines",
-            "Bowser in the Fire Sea - Three-Coin Block",
-            "Bowser in the Fire Sea - Ten-Coin Block",
+            "Bowser in the Fire Sea - 3-Coin Block",
+            "Bowser in the Fire Sea - 10-Coin Block",
             "Bowser in the Fire Sea - Bob-omb",
             "Bowser in the Fire Sea - Bullies",
             "Bowser in the Fire Sea - Goombas",
@@ -3134,7 +3200,7 @@ class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
             "Jolly Roger Bay - Horizontal Coin Rings": 24,
             "Jolly Roger Bay - Vertical Coin Lines": 3,
             "Jolly Roger Bay - Vertical Coin Rings": 8,
-            "Jolly Roger Bay - Three-Coin Block": 3,
+            "Jolly Roger Bay - 3-Coin Block": 3,
             "Jolly Roger Bay - Goombas": 3,
         }
         self.assertFalse(jolly_roger_bay_coins(self.multiworld.state, self.player, 1))
@@ -3749,7 +3815,7 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
                 "Tiny-Huge Island - Red Coins",
                 "Tiny-Huge Island - Blue Coin Block",
                 "Tiny-Huge Island - Horizontal Coin Lines",
-                "Tiny-Huge Island - Three-Coin Block",
+                "Tiny-Huge Island - 3-Coin Block",
                 "Tiny-Huge Island - Wooden Posts",
                 "Tiny-Huge Island - Chuckya",
                 "Tiny-Huge Island - Lakitu",
@@ -3799,7 +3865,7 @@ class TinyHugeIslandPermanentCoinCollectionTestBase(SM64TestBase):
             "Tiny-Huge Island - Red Coins",
             "Tiny-Huge Island - Blue Coin Block",
             "Tiny-Huge Island - Horizontal Coin Lines",
-            "Tiny-Huge Island - Three-Coin Block",
+            "Tiny-Huge Island - 3-Coin Block",
             "Tiny-Huge Island - Wooden Posts",
             "Tiny-Huge Island - Chuckya",
             "Tiny-Huge Island - Lakitu",
@@ -5225,7 +5291,7 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
             "Snowman's Land - Single Yellow Coins": 14,
             "Snowman's Land - Red Coins": 16,
             "Snowman's Land - Horizontal Coin Lines": 25,
-            "Snowman's Land - Three-Coin Block": 3,
+            "Snowman's Land - 3-Coin Block": 3,
             "Snowman's Land - Fly Guy": 2,
             "Snowman's Land - Goombas": 3,
             "Snowman's Land - Moneybags": 10,
@@ -5248,7 +5314,7 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
             "Snowman's Land - Single Yellow Coins",
             "Snowman's Land - Red Coins",
             "Snowman's Land - Horizontal Coin Lines",
-            "Snowman's Land - Three-Coin Block",
+            "Snowman's Land - 3-Coin Block",
             "Snowman's Land - Fly Guy",
             "Snowman's Land - Goombas",
             "Snowman's Land - Moneybags",
@@ -5296,7 +5362,7 @@ class SnowmansLandIglooShellCoinLossTestBase(SM64TestBase):
             if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
         )
 
-        self.collect(self.get_item_by_name("Snowman's Land - Three-Coin Block"))
+        self.collect(self.get_item_by_name("Snowman's Land - 3-Coin Block"))
         coins_after_igloo_block = max(
             coin_count for coin_count in range(128)
             if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
@@ -5329,7 +5395,7 @@ class SnowmansLandIglooPermanentCoinCollectionTestBase(SM64TestBase):
             if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
         )
 
-        self.collect(self.get_item_by_name("Snowman's Land - Three-Coin Block"))
+        self.collect(self.get_item_by_name("Snowman's Land - 3-Coin Block"))
         coins_after_igloo_block = max(
             coin_count for coin_count in range(128)
             if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
@@ -5475,8 +5541,8 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
             "Wet-Dry World - Horizontal Coin Lines": 25,
             "Wet-Dry World - Horizontal Coin Rings": 16,
             "Wet-Dry World - Breakable Coin Boxes": 12,
-            "Wet-Dry World - Three-Coin Blocks": 6,
-            "Wet-Dry World - Ten-Coin Blocks": 30,
+            "Wet-Dry World - 3-Coin Blocks": 6,
+            "Wet-Dry World - 10-Coin Blocks": 30,
             "Wet-Dry World - Chuckya": 5,
             "Wet-Dry World - Skeeters": 12,
         }
@@ -5498,8 +5564,8 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
             "Wet-Dry World - Horizontal Coin Lines",
             "Wet-Dry World - Horizontal Coin Rings",
             "Wet-Dry World - Breakable Coin Boxes",
-            "Wet-Dry World - Three-Coin Blocks",
-            "Wet-Dry World - Ten-Coin Blocks",
+            "Wet-Dry World - 3-Coin Blocks",
+            "Wet-Dry World - 10-Coin Blocks",
             "Wet-Dry World - Chuckya",
             "Wet-Dry World - Skeeters",
         ]:
@@ -5524,7 +5590,7 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
         for location_name in (*three_coin_blocks, *ten_coin_blocks):
             self.assertFalse(self.can_reach_location(location_name))
 
-        self.collect(self.get_item_by_name("Wet-Dry World - Three-Coin Blocks"))
+        self.collect(self.get_item_by_name("Wet-Dry World - 3-Coin Blocks"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Push Block 3 Coins Block"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Wooden Structure 3 Coins Block"))
         for location_name in ten_coin_blocks:
@@ -5537,7 +5603,7 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Wooden Structure 3 Coins Block"))
 
-        self.collect(self.get_item_by_name("Wet-Dry World - Ten-Coin Blocks"))
+        self.collect(self.get_item_by_name("Wet-Dry World - 10-Coin Blocks"))
         for location_name in ten_coin_blocks:
             self.assertTrue(self.can_reach_location(location_name))
 
@@ -5874,7 +5940,7 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
             "Big Boo's Haunt - Red Coins": 8,
             "Big Boo's Haunt - Breakable Coin Boxes": 6,
             "Big Boo's Haunt - Crazy Box": 5,
-            "Big Boo's Haunt - Ten-Coin Block": 10,
+            "Big Boo's Haunt - 10-Coin Block": 10,
             "Big Boo's Haunt - Boos": 25,
             "Big Boo's Haunt - Flying Bookends": 5,
             "Big Boo's Haunt - Mr. Is": 10,
@@ -7059,8 +7125,8 @@ class TickTockClockIndividualUnlockLogicTestBase(SM64TestBase):
             "Tick Tock Clock - Red Coins": 16,
             "Tick Tock Clock - Blue Coin Block": 35,
             "Tick Tock Clock - Horizontal Coin Lines": 5,
-            "Tick Tock Clock - Three-Coin Blocks": 18,
-            "Tick Tock Clock - Ten-Coin Blocks": 50,
+            "Tick Tock Clock - 3-Coin Blocks": 18,
+            "Tick Tock Clock - 10-Coin Blocks": 50,
             "Tick Tock Clock - Bob-ombs": 2,
         }
         self.assertFalse(tick_tock_clock_coins(self.multiworld.state, self.player, 1))
@@ -7325,22 +7391,22 @@ class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
     }
 
     coin_block_locations_by_item = {
-        "Bowser in the Dark World - Three-Coin Block": (
+        "Bowser in the Dark World - 3-Coin Block": (
             "Bowser in the Dark World - 3 Coins Block",
         ),
-        "Bowser in the Fire Sea - Three-Coin Block": (
+        "Bowser in the Fire Sea - 3-Coin Block": (
             "Bowser in the Fire Sea - 3 Coins Block",
         ),
-        "Jolly Roger Bay - Three-Coin Block": (
+        "Jolly Roger Bay - 3-Coin Block": (
             "Jolly Roger Bay - 3 Coins Block",
         ),
-        "Snowman's Land - Three-Coin Block": (
+        "Snowman's Land - 3-Coin Block": (
             "Snowman's Land - 3 Coins Block",
         ),
-        "Tiny-Huge Island - Three-Coin Block": (
+        "Tiny-Huge Island - 3-Coin Block": (
             "Tiny-Huge Island - 3 Coins Block",
         ),
-        "Tick Tock Clock - Three-Coin Blocks": (
+        "Tick Tock Clock - 3-Coin Blocks": (
             "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
             "Tick Tock Clock - First Pendulum 3 Coins Block",
             "Tick Tock Clock - Past Three Spinners 3 Coins Block",
@@ -7348,27 +7414,27 @@ class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
             "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block",
             "Tick Tock Clock - Heave-ho Second 3 Coins Block",
         ),
-        "Vanish Cap Under the Moat - Three-Coin Block": (
+        "Vanish Cap Under the Moat - 3-Coin Block": (
             "Vanish Cap Under the Moat - 3 Coins Block",
         ),
-        "Wet-Dry World - Three-Coin Blocks": (
+        "Wet-Dry World - 3-Coin Blocks": (
             "Wet-Dry World - Push Block 3 Coins Block",
             "Wet-Dry World - Wooden Structure 3 Coins Block",
         ),
-        "Big Boo's Haunt - Ten-Coin Block": (
+        "Big Boo's Haunt - 10-Coin Block": (
             "Big Boo's Haunt - 10 Coins Block",
         ),
-        "Bowser in the Fire Sea - Ten-Coin Block": (
+        "Bowser in the Fire Sea - 10-Coin Block": (
             "Bowser in the Fire Sea - 10 Coins Block",
         ),
-        "Tick Tock Clock - Ten-Coin Blocks": (
+        "Tick Tock Clock - 10-Coin Blocks": (
             "Tick Tock Clock - Top Clock Hand 10 Coins Block",
             "Tick Tock Clock - Above Four Moving Bars 10 Coins Block",
             "Tick Tock Clock - Top Central Platform 10 Coins Block",
             "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block",
             "Tick Tock Clock - Beneath the Thwomp 10 Coins Block",
         ),
-        "Wet-Dry World - Ten-Coin Blocks": (
+        "Wet-Dry World - 10-Coin Blocks": (
             "Wet-Dry World - Push Block 10 Coins Block",
             "Wet-Dry World - Pedestal 10 Coins Block",
             "Wet-Dry World - Top of Express Elevator 10 Coins Block",
@@ -7499,8 +7565,8 @@ class WetDryWorldPermanentCoinCollectionTestBase(SM64TestBase):
             "Wet-Dry World - Horizontal Coin Lines",
             "Wet-Dry World - Horizontal Coin Rings",
             "Wet-Dry World - Breakable Coin Boxes",
-            "Wet-Dry World - Three-Coin Blocks",
-            "Wet-Dry World - Ten-Coin Blocks",
+            "Wet-Dry World - 3-Coin Blocks",
+            "Wet-Dry World - 10-Coin Blocks",
             "Wet-Dry World - Chuckya",
             "Wet-Dry World - Skeeters",
         ]:

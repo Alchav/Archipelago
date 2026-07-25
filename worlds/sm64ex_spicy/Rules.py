@@ -3,7 +3,8 @@ from typing import Callable, Union, Dict, Set
 
 from BaseClasses import CollectionState, Entrance, MultiWorld
 from ..generic.Rules import add_rule, set_rule
-from .Locations import locOneUp_table, location_table, parse_coinsanity_location_name
+from .Locations import locOneUp_table, location_table, one_up_unlock_category_by_location, \
+    parse_coinsanity_location_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
@@ -12,7 +13,7 @@ from .Items import action_item_data_table, cap_item_data_table, per_level_move_a
 from .LogicTricks import logic_tricks
 
 
-logic_tricks_by_name = {data["name"]: data for data in logic_tricks.values()}
+logic_tricks_by_internal_id = {data["internal_id"]: data for data in logic_tricks.values()}
 
 
 initial_reachable_entrances = (
@@ -546,7 +547,7 @@ def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> boo
         "Crazy Boxes", f"{level_name} - Crazy Box")
     has_ten_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Block")
+        "10-Coin Blocks", f"{level_name} - 10-Coin Block")
     has_boos = has_unlock(
         state, player, "enemy_unlocks",
         "Boos", f"{level_name} - Boos")
@@ -1052,7 +1053,7 @@ def jolly_roger_bay_coins(state: CollectionState, player: int, coins: int) -> bo
         "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
     has_three_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Block")
     has_goombas = has_unlock(
         state, player, "enemy_unlocks",
         "Goombas", f"{level_name} - Goombas")
@@ -1206,7 +1207,7 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
     has_three_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Block")
     has_fly_guy = has_unlock(
         state, player, "enemy_unlocks",
         "Fly Guys", f"{level_name} - Fly Guy")
@@ -1324,10 +1325,10 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
         "Breakable Coin Boxes", f"{level_name} - Breakable Coin Boxes")
     has_three_coin_blocks = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Blocks")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Blocks")
     has_ten_coin_blocks = has_unlock(
         state, player, "coin_object_unlocks",
-        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Blocks")
+        "10-Coin Blocks", f"{level_name} - 10-Coin Blocks")
     has_chuckya = has_unlock(
         state, player, "enemy_unlocks",
         "Chuckyas", f"{level_name} - Chuckya")
@@ -1609,7 +1610,7 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
     has_three_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Block")
     has_wooden_posts = has_unlock(
         state, player, "coin_object_unlocks",
         "Wooden Posts", f"{level_name} - Wooden Posts")
@@ -1853,10 +1854,10 @@ def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bo
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
     has_three_coin_blocks = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Blocks")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Blocks")
     has_ten_coin_blocks = has_unlock(
         state, player, "coin_object_unlocks",
-        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Blocks")
+        "10-Coin Blocks", f"{level_name} - 10-Coin Blocks")
     has_bob_ombs = has_unlock(
         state, player, "enemy_unlocks",
         "Bob-ombs", f"{level_name} - Bob-ombs")
@@ -2190,7 +2191,7 @@ def vanish_cap_under_the_moat_coins(state: CollectionState, player: int, coins: 
         "Horizontal Coin Lines", f"{level_name} - Horizontal Coin Lines")
     has_three_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Block")
     has_movement = any(has_action(state, player, action, level_name)
                        for action in ("Triple Jump", "Ledge Grab", "Side Flip", "Backflip", "Wall Kick"))
     has_checkerboards = has_checkerboard_platforms(state, player, level_name)
@@ -2291,7 +2292,7 @@ def bowser_in_the_dark_world_coins(state: CollectionState, player: int, coins: i
         "Horizontal Coin Rings", f"{level_name} - Horizontal Coin Rings")
     has_three_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Block")
     has_goombas = has_unlock(
         state, player, "enemy_unlocks",
         "Goombas", f"{level_name} - Goombas")
@@ -2346,10 +2347,10 @@ def bowser_in_the_fire_sea_coins(state: CollectionState, player: int, coins: int
         "Vertical Coin Lines", f"{level_name} - Vertical Coin Lines")
     has_three_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Three-Coin Blocks", f"{level_name} - Three-Coin Block")
+        "3-Coin Blocks", f"{level_name} - 3-Coin Block")
     has_ten_coin_block = has_unlock(
         state, player, "coin_object_unlocks",
-        "Ten-Coin Blocks", f"{level_name} - Ten-Coin Block")
+        "10-Coin Blocks", f"{level_name} - 10-Coin Block")
     has_bob_omb = has_unlock(
         state, player, "enemy_unlocks",
         "Bob-ombs", f"{level_name} - Bob-omb")
@@ -2540,7 +2541,7 @@ def is_starting_check_location(location_name: str, options: SM64Options) -> bool
 
 
 def get_starting_check_sources(options: SM64Options) -> tuple[str, ...]:
-    if options.enable_locked_paintings:
+    if options.enable_locked_paintings.value == options.enable_locked_paintings.option_full:
         return ("Bob-omb Battlefield", "The Princess's Secret Slide")
     return initial_reachable_entrances
 
@@ -2774,6 +2775,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             return bomb_count >= required_hits
         return state.has(f"{stage_name} - Progressive Bowser Arena Bomb", player, required_hits)
 
+    def has_level_unlock(state, item_name: str) -> bool:
+        return (
+            options.enable_locked_paintings.value == options.enable_locked_paintings.option_disabled
+            or state.has(item_name, player)
+        )
+
     connect_randomized_entrance("Menu", "Bob-omb Battlefield")
     connect_randomized_entrance("Menu", "Whomp's Fortress",
                                 rf.build_rule("", painting_lvl_name="Whomp's Fortress"))
@@ -2784,7 +2791,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance("Menu", "Cool, Cool Mountain",
                                 rf.build_rule("", painting_lvl_name="Cool, Cool Mountain"))
     connect_randomized_entrance("Menu", "Big Boo's Haunt",
-                                lambda state: state.has("Unlock Big Boo's Haunt", player))
+                                lambda state: has_level_unlock(state, "Unlock Big Boo's Haunt"))
     connect_randomized_entrance("Menu", "The Princess's Secret Slide")
     connect_randomized_entrance("Jolly Roger Bay Door", "The Secret Aquarium",
                                 rf.build_rule(
@@ -2792,7 +2799,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                     "logic_secret_aquarium_wall_kick_and_ledge_grab | "
                                     "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab"))
     connect_randomized_entrance("Menu", "Tower of the Wing Cap",
-                                lambda state: state.has("Unlock Tower of the Wing Cap", player))
+                                lambda state: has_level_unlock(state, "Unlock Tower of the Wing Cap"))
     connect_randomized_entrance("Menu", "Bowser in the Dark World", has_first_floor_key)
 
     connect_regions(multiworld, player, "Menu", "Basement", has_basement_key)
@@ -2809,10 +2816,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance("Hazy Maze Cave", "Cavern of the Metal Cap",
                                 rf.build_rule("HMC_SWIMMING_BEAST"))
     connect_randomized_entrance("Menu", "Vanish Cap Under the Moat",
-                                lambda state: state.has("Unlock Vanish Cap Under the Moat", player))
+                                lambda state: has_level_unlock(state, "Unlock Vanish Cap Under the Moat"))
     connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
                                 lambda state: can_bypass_thirty_star_door(state) and
-                                state.has("Unlock Bowser in the Fire Sea", player))
+                                has_level_unlock(state, "Unlock Bowser in the Fire Sea"))
 
     connect_regions(multiworld, player, "Menu", "Second Floor", has_second_floor_key)
 
@@ -2842,9 +2849,20 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "logic_castle_3f_alcoves_with_dive_and_kick | "
         "logic_castle_3f_alcoves_with_dive_and_ledge_grab | "
         "logic_castle_3f_alcoves_with_long_jump_and_ledge_grab")
-    connect_randomized_entrance("Third Floor", "Rainbow Ride", third_floor_alcove_rule)
+    connect_randomized_entrance(
+        "Third Floor", "Rainbow Ride",
+        lambda state: third_floor_alcove_rule(state)
+        and (
+            options.enable_locked_paintings.value != options.enable_locked_paintings.option_full
+            or state.has("Unlock Rainbow Ride", player)
+        ))
     connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
-                                third_floor_alcove_rule)
+                                lambda state: third_floor_alcove_rule(state)
+                                and (
+                                    options.enable_locked_paintings.value !=
+                                    options.enable_locked_paintings.option_full
+                                    or state.has("Unlock Wing Mario Over the Rainbow", player)
+                                ))
     connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", can_bypass_seventy_star_door)
 
     # Course Rules
@@ -3338,22 +3356,22 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         for location_name, rule in blocksanity_rules.items():
             rf.assign_rule(location_name, rule)
         coin_block_unlock_locations = {
-            ("Three-Coin Blocks", "Bowser in the Dark World - Three-Coin Block"): (
+            ("3-Coin Blocks", "Bowser in the Dark World - 3-Coin Block"): (
                 "Bowser in the Dark World - 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Bowser in the Fire Sea - Three-Coin Block"): (
+            ("3-Coin Blocks", "Bowser in the Fire Sea - 3-Coin Block"): (
                 "Bowser in the Fire Sea - 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Jolly Roger Bay - Three-Coin Block"): (
+            ("3-Coin Blocks", "Jolly Roger Bay - 3-Coin Block"): (
                 "Jolly Roger Bay - 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Snowman's Land - Three-Coin Block"): (
+            ("3-Coin Blocks", "Snowman's Land - 3-Coin Block"): (
                 "Snowman's Land - 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Tiny-Huge Island - Three-Coin Block"): (
+            ("3-Coin Blocks", "Tiny-Huge Island - 3-Coin Block"): (
                 "Tiny-Huge Island - 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Tick Tock Clock - Three-Coin Blocks"): (
+            ("3-Coin Blocks", "Tick Tock Clock - 3-Coin Blocks"): (
                 "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
                 "Tick Tock Clock - First Pendulum 3 Coins Block",
                 "Tick Tock Clock - Past Three Spinners 3 Coins Block",
@@ -3361,27 +3379,27 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block",
                 "Tick Tock Clock - Heave-ho Second 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Vanish Cap Under the Moat - Three-Coin Block"): (
+            ("3-Coin Blocks", "Vanish Cap Under the Moat - 3-Coin Block"): (
                 "Vanish Cap Under the Moat - 3 Coins Block",
             ),
-            ("Three-Coin Blocks", "Wet-Dry World - Three-Coin Blocks"): (
+            ("3-Coin Blocks", "Wet-Dry World - 3-Coin Blocks"): (
                 "Wet-Dry World - Push Block 3 Coins Block",
                 "Wet-Dry World - Wooden Structure 3 Coins Block",
             ),
-            ("Ten-Coin Blocks", "Big Boo's Haunt - Ten-Coin Block"): (
+            ("10-Coin Blocks", "Big Boo's Haunt - 10-Coin Block"): (
                 "Big Boo's Haunt - 10 Coins Block",
             ),
-            ("Ten-Coin Blocks", "Bowser in the Fire Sea - Ten-Coin Block"): (
+            ("10-Coin Blocks", "Bowser in the Fire Sea - 10-Coin Block"): (
                 "Bowser in the Fire Sea - 10 Coins Block",
             ),
-            ("Ten-Coin Blocks", "Tick Tock Clock - Ten-Coin Blocks"): (
+            ("10-Coin Blocks", "Tick Tock Clock - 10-Coin Blocks"): (
                 "Tick Tock Clock - Top Clock Hand 10 Coins Block",
                 "Tick Tock Clock - Above Four Moving Bars 10 Coins Block",
                 "Tick Tock Clock - Top Central Platform 10 Coins Block",
                 "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block",
                 "Tick Tock Clock - Beneath the Thwomp 10 Coins Block",
             ),
-            ("Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"): (
+            ("10-Coin Blocks", "Wet-Dry World - 10-Coin Blocks"): (
                 "Wet-Dry World - Push Block 10 Coins Block",
                 "Wet-Dry World - Pedestal 10 Coins Block",
                 "Wet-Dry World - Top of Express Elevator 10 Coins Block",
@@ -3522,6 +3540,23 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
              lambda state: state.can_reach("Basement", 'Region', player) and
              state.has("Castle - Progressive MIPS", player, 2))
 
+    one_up_option = options.one_up_mushroom_unlocks
+    if options.one_up_checks and one_up_option.value != one_up_option.option_not_shuffled:
+        active_location_names = {
+            location.name for location in multiworld.get_locations(player)
+        }
+        for location_name, category_name in one_up_unlock_category_by_location.items():
+            if location_name not in active_location_names:
+                continue
+            item_name = (
+                category_name
+                if one_up_option.value == one_up_option.option_global
+                else f"{location_name.split(' - ', 1)[0]} - {category_name}"
+            )
+            add_rule(
+                multiworld.get_location(location_name, player),
+                lambda state, required_item=item_name: state.has(required_item, player))
+
     if options.area_rando > options.area_rando.option_Off and not using_slot_area_connections:
         ensure_reachable_starting_check(
             multiworld, options, player, randomized_entrances, randomized_entrances_s,
@@ -3650,7 +3685,8 @@ class RuleFactory:
         self.player = player
         self.move_rando_bitvec = move_rando_bitvec
         self.area_randomizer = options.area_rando > 0
-        self.painting_randomizer = options.enable_locked_paintings
+        self.painting_randomizer = (
+            options.enable_locked_paintings.value == options.enable_locked_paintings.option_full)
         self.capless = not options.strict_cap_requirements
         self.cannonless = not options.strict_cannon_requirements
         self.moveless = not options.strict_move_requirements
@@ -3680,10 +3716,10 @@ class RuleFactory:
         region_names = set(re.findall(r"(?<!\{)\{([^{}]+)\}(?!\})", rule_expr))
         seen_tricks = set() if seen_tricks is None else seen_tricks
         for trick_name in re.findall(r"\blogic_[a-z0-9_]+\b", rule_expr):
-            if trick_name in logic_tricks_by_name and trick_name not in seen_tricks:
+            if trick_name in logic_tricks_by_internal_id and trick_name not in seen_tricks:
                 seen_tricks.add(trick_name)
                 region_names.update(self.get_indirect_condition_region_names(
-                    logic_tricks_by_name[trick_name].get("rule", ""), seen_tricks))
+                    logic_tricks_by_internal_id[trick_name].get("rule", ""), seen_tricks))
         return region_names
 
     def build_rule(
@@ -3795,10 +3831,10 @@ class RuleFactory:
             "Red Coins", f"{level_name} - Red Coins")
         item_names["THREE_COIN_BLOCKS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
-            "Three-Coin Blocks", f"{level_name} - Three-Coin Blocks")
+            "3-Coin Blocks", f"{level_name} - 3-Coin Blocks")
         item_names["TEN_COIN_BLOCKS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
-            "Ten-Coin Blocks", f"{level_name} - Ten-Coin Blocks")
+            "10-Coin Blocks", f"{level_name} - 10-Coin Blocks")
         item_names["WOODEN_POSTS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Wooden Posts", f"{level_name} - Wooden Posts")
@@ -3894,14 +3930,14 @@ class RuleFactory:
             self, expression: str, cannon_name: str, cap_item_names: dict[str, str],
             arbitrary_item_names: dict[str, str | bool],
             action_item_names: dict[str, str | bool]) -> Union[Callable, bool]:
-        if expression in logic_tricks_by_name:
+        if expression in logic_tricks_by_internal_id:
             world = self.multiworld.worlds[self.player]
             enabled = getattr(world, expression, False)
             enabled_for_ut = getattr(world, f"{expression}_ut_glitch", False)
             if not enabled and not enabled_for_ut:
                 return False
             trick_rule = self.build_rule(
-                logic_tricks_by_name[expression].get("rule", ""),
+                logic_tricks_by_internal_id[expression].get("rule", ""),
                 cannon_name, cap_item_names, arbitrary_item_names, action_item_names)
             if enabled:
                 return trick_rule

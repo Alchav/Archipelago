@@ -273,24 +273,36 @@ coin_star_requirement_option_names = (
     "rainbow_ride_coin_star_requirement",
 )
 
-class EnableLockedPaintings(Toggle):
+class LevelUnlocks(Choice):
     """
-    Determine how paintings are treated.
+    Choose which level entrances require unlock items.
 
-    Off - Paintings are not locked, as long as you can access them you can enter them (Vanilla behavior).
+    Disabled - Start with every level entrance unlocked.
 
-    On - Paintings (other than Bob-omb Battlefield) are replaced in the pool with items to allow access to them.
-    Attempting to enter a locked painting will simply kick Mario out.
-    Does not affect secrets and levels that don't have a painting (Big Boo's Haunt, Rainbow Ride).
-    This only affects the ability for Mario to enter a painting, the destination of the painting may change due to
-    Entrance Randomization, if it is enabled.
+    Special Only - Shuffle the level unlocks that Spicy Mycena normally randomizes.
+
+    Full - Also shuffle the course painting unlocks, Rainbow Ride, and Wing Mario Over the Rainbow.
+
+    A locked entrance will reject Mario. Entrance Randomization may change the level reached through that entrance.
     """
-    display_name = "Enable Locked Paintings"
+    display_name = "Level Unlocks"
+    option_disabled = 0
+    option_special_only = 1
+    option_full = 2
+    alias_false = option_special_only
+    alias_true = option_full
+    default = 1
+
+
+# Retain the old Python name for integrations that import it directly.
+EnableLockedPaintings = LevelUnlocks
+EnableLockedPaintings.option_false = LevelUnlocks.option_special_only
+EnableLockedPaintings.option_true = LevelUnlocks.option_full
 
 
 class StrictCapRequirements(DefaultOnToggle):
     """If disabled, Stars that expect special caps may have to be acquired without the caps.
-    Bob-omb Battlefield cap tricks are instead controlled by Logic Tricks."""
+    Some, but not all, tricks have been migrated to the Logic Tricks setting."""
     display_name = "Strict Cap Requirements"
 
 
@@ -420,6 +432,21 @@ class EnemyUnlocks(LevelFeatureItemMode):
     display_name = "Enemy Unlocks"
 
 
+class OneUpMushroomUnlocks(LevelFeatureItemMode):
+    """
+    Choose how 1-Up Mushroom source unlocks are handled.
+
+    Not Shuffled - Start with freestanding, triggered, block-spawned, and butterfly 1-Ups unlocked.
+
+    Global - Shuffle one global item for each of those four 1-Up source types.
+
+    Per Level - Shuffle separate source-type unlock items for each level that contains matching 1-Up checks.
+
+    Butterfly unlocks also control harmless scenery butterflies and the other butterflies in each 1-Up triplet.
+    """
+    display_name = "1-Up Mushroom Unlocks"
+
+
 class BowserBombs(LevelFeatureItemMode):
     """
     Choose how Progressive Bowser Arena Bombs are handled.
@@ -496,7 +523,7 @@ class BowserStage1Ups(Choice):
 class StrictCannonRequirements(DefaultOnToggle):
     """If disabled, Stars that expect cannons may have to be acquired without them.
     Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled.
-    Bob-omb Battlefield cannon tricks are instead controlled by Logic Tricks."""
+    Some, but not all, tricks have been migrated to the Logic Tricks setting."""
     display_name = "Strict Cannon Requirements"
 
 
@@ -687,13 +714,13 @@ trap_item_name_by_option_name = {
 class StrictMoveRequirements(DefaultOnToggle):
     """If disabled, Stars that expect certain moves may have to be acquired without them.
     Only makes a difference for movement abilities that are shuffled.
-    Bob-omb Battlefield movement tricks are instead controlled by Logic Tricks."""
+    Some, but not all, tricks have been migrated to the Logic Tricks setting."""
     display_name = "Strict Move Requirements"
 
 
 class LogicTricks(OptionSet):
     """Choose specific advanced techniques to include in logic. The All Easy, All Medium, and All Hard entries
-    include every trick at that difficulty and below. Details and videos for each trick are documented in
+    include every trick at that difficulty and below. Details for each trick are documented in
     LogicTricks.py."""
     display_name = "Logic Tricks"
     valid_keys = logic_trick_option_keys
@@ -978,7 +1005,7 @@ sm64_options_groups = [
         EasyButterflies,
         NoDespawns,
         CombinedProgressiveKeys,
-        EnableLockedPaintings,
+        LevelUnlocks,
         StrictCapRequirements,
         PerLevelCapItems,
         StrictCannonRequirements,
@@ -997,6 +1024,7 @@ sm64_options_groups = [
         PurpleSwitches,
         CoinObjectUnlocks,
         EnemyUnlocks,
+        OneUpMushroomUnlocks,
         BowserBombs,
         BowserStage1Ups,
         WetDryWorldWaterLevelDiamond,
@@ -1048,7 +1076,7 @@ class SM64Options(PerGameCommonOptions):
     no_despawns: NoDespawns
     permanent_coin_collection: PermanentCoinCollection
     combined_progressive_keys: CombinedProgressiveKeys
-    enable_locked_paintings: EnableLockedPaintings
+    enable_locked_paintings: LevelUnlocks
     triple_jump: TripleJump
     long_jump: LongJump
     backflip: Backflip
@@ -1072,6 +1100,7 @@ class SM64Options(PerGameCommonOptions):
     purple_switches: PurpleSwitches
     coin_object_unlocks: CoinObjectUnlocks
     enemy_unlocks: EnemyUnlocks
+    one_up_mushroom_unlocks: OneUpMushroomUnlocks
     bowser_bombs: BowserBombs
     bowser_in_the_dark_world_hits: BowserInTheDarkWorldHits
     bowser_in_the_fire_sea_hits: BowserInTheFireSeaHits
