@@ -3277,24 +3277,64 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         }
         for location_name, rule in blocksanity_rules.items():
             rf.assign_rule(location_name, rule)
-        for location_name, global_item_name, per_level_item_name in (
-                ("Wet-Dry World - Push Block 10 Coins Block",
-                 "Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"),
-                ("Wet-Dry World - Pedestal 10 Coins Block",
-                 "Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"),
-                ("Wet-Dry World - Top of Express Elevator 10 Coins Block",
-                 "Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"),
-                ("Wet-Dry World - Push Block 3 Coins Block",
-                 "Three-Coin Blocks", "Wet-Dry World - Three-Coin Blocks"),
-                ("Wet-Dry World - Wooden Structure 3 Coins Block",
-                 "Three-Coin Blocks", "Wet-Dry World - Three-Coin Blocks"),
-        ):
-            add_rule(
-                multiworld.get_location(location_name, player),
-                lambda state, global_name=global_item_name, per_level_name=per_level_item_name:
-                    has_unlock(
-                        state, player, "coin_object_unlocks",
-                        global_name, per_level_name))
+        coin_block_unlock_locations = {
+            ("Three-Coin Blocks", "Bowser in the Dark World - Three-Coin Block"): (
+                "Bowser in the Dark World - 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Bowser in the Fire Sea - Three-Coin Block"): (
+                "Bowser in the Fire Sea - 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Jolly Roger Bay - Three-Coin Block"): (
+                "Jolly Roger Bay - 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Snowman's Land - Three-Coin Block"): (
+                "Snowman's Land - 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Tiny-Huge Island - Three-Coin Block"): (
+                "Tiny-Huge Island - 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Tick Tock Clock - Three-Coin Blocks"): (
+                "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
+                "Tick Tock Clock - First Pendulum 3 Coins Block",
+                "Tick Tock Clock - Past Three Spinners 3 Coins Block",
+                "Tick Tock Clock - Heave-ho First 3 Coins Block",
+                "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block",
+                "Tick Tock Clock - Heave-ho Second 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Vanish Cap Under the Moat - Three-Coin Block"): (
+                "Vanish Cap Under the Moat - 3 Coins Block",
+            ),
+            ("Three-Coin Blocks", "Wet-Dry World - Three-Coin Blocks"): (
+                "Wet-Dry World - Push Block 3 Coins Block",
+                "Wet-Dry World - Wooden Structure 3 Coins Block",
+            ),
+            ("Ten-Coin Blocks", "Big Boo's Haunt - Ten-Coin Block"): (
+                "Big Boo's Haunt - 10 Coins Block",
+            ),
+            ("Ten-Coin Blocks", "Bowser in the Fire Sea - Ten-Coin Block"): (
+                "Bowser in the Fire Sea - 10 Coins Block",
+            ),
+            ("Ten-Coin Blocks", "Tick Tock Clock - Ten-Coin Blocks"): (
+                "Tick Tock Clock - Top Clock Hand 10 Coins Block",
+                "Tick Tock Clock - Above Four Moving Bars 10 Coins Block",
+                "Tick Tock Clock - Top Central Platform 10 Coins Block",
+                "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block",
+                "Tick Tock Clock - Beneath the Thwomp 10 Coins Block",
+            ),
+            ("Ten-Coin Blocks", "Wet-Dry World - Ten-Coin Blocks"): (
+                "Wet-Dry World - Push Block 10 Coins Block",
+                "Wet-Dry World - Pedestal 10 Coins Block",
+                "Wet-Dry World - Top of Express Elevator 10 Coins Block",
+            ),
+        }
+        for (global_item_name, per_level_item_name), location_names in coin_block_unlock_locations.items():
+            for location_name in location_names:
+                add_rule(
+                    multiworld.get_location(location_name, player),
+                    lambda state, global_name=global_item_name, per_level_name=per_level_item_name:
+                        has_unlock(
+                            state, player, "coin_object_unlocks",
+                            global_name, per_level_name))
     # Coin Stars
     set_rule(
         multiworld.get_location("Bob-omb Battlefield - Coins Star", player),

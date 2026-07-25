@@ -7141,6 +7141,84 @@ class RainbowRideIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Amassed in a Maze"))
 
 
+class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": "minimal",
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "blocksanity": Options.Blocksanity.option_true,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
+        "strict_cannon_requirements": Options.StrictCannonRequirements.option_false,
+        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+    }
+
+    coin_block_locations_by_item = {
+        "Bowser in the Dark World - Three-Coin Block": (
+            "Bowser in the Dark World - 3 Coins Block",
+        ),
+        "Bowser in the Fire Sea - Three-Coin Block": (
+            "Bowser in the Fire Sea - 3 Coins Block",
+        ),
+        "Jolly Roger Bay - Three-Coin Block": (
+            "Jolly Roger Bay - 3 Coins Block",
+        ),
+        "Snowman's Land - Three-Coin Block": (
+            "Snowman's Land - 3 Coins Block",
+        ),
+        "Tiny-Huge Island - Three-Coin Block": (
+            "Tiny-Huge Island - 3 Coins Block",
+        ),
+        "Tick Tock Clock - Three-Coin Blocks": (
+            "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
+            "Tick Tock Clock - First Pendulum 3 Coins Block",
+            "Tick Tock Clock - Past Three Spinners 3 Coins Block",
+            "Tick Tock Clock - Heave-ho First 3 Coins Block",
+            "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block",
+            "Tick Tock Clock - Heave-ho Second 3 Coins Block",
+        ),
+        "Vanish Cap Under the Moat - Three-Coin Block": (
+            "Vanish Cap Under the Moat - 3 Coins Block",
+        ),
+        "Wet-Dry World - Three-Coin Blocks": (
+            "Wet-Dry World - Push Block 3 Coins Block",
+            "Wet-Dry World - Wooden Structure 3 Coins Block",
+        ),
+        "Big Boo's Haunt - Ten-Coin Block": (
+            "Big Boo's Haunt - 10 Coins Block",
+        ),
+        "Bowser in the Fire Sea - Ten-Coin Block": (
+            "Bowser in the Fire Sea - 10 Coins Block",
+        ),
+        "Tick Tock Clock - Ten-Coin Blocks": (
+            "Tick Tock Clock - Top Clock Hand 10 Coins Block",
+            "Tick Tock Clock - Above Four Moving Bars 10 Coins Block",
+            "Tick Tock Clock - Top Central Platform 10 Coins Block",
+            "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block",
+            "Tick Tock Clock - Beneath the Thwomp 10 Coins Block",
+        ),
+        "Wet-Dry World - Ten-Coin Blocks": (
+            "Wet-Dry World - Push Block 10 Coins Block",
+            "Wet-Dry World - Pedestal 10 Coins Block",
+            "Wet-Dry World - Top of Express Elevator 10 Coins Block",
+        ),
+    }
+
+    def test_all_coin_block_checks_require_their_unlock(self):
+        self.collect_all_but(set(self.coin_block_locations_by_item))
+        for location_names in self.coin_block_locations_by_item.values():
+            for location_name in location_names:
+                with self.subTest(location=location_name, state="locked"):
+                    self.assertFalse(self.can_reach_location(location_name))
+
+        for item_name, location_names in self.coin_block_locations_by_item.items():
+            self.collect(self.get_item_by_name(item_name))
+            for location_name in location_names:
+                with self.subTest(location=location_name, state="unlocked"):
+                    self.assertTrue(self.can_reach_location(location_name))
+
+
 class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
     options = {
         "bowser_bombs": Options.BowserBombs.option_global,
