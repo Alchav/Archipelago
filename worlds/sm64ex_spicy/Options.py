@@ -538,6 +538,15 @@ class NoDespawns(Toggle):
     display_name = "No Despawns"
 
 
+class PermanentCoinCollection(Toggle):
+    """
+    Coins collected in a course remain collected after leaving it. Re-entering a course restores the collected coin
+    total and prevents collected coin outputs from spawning again. Coin logic may combine coins obtainable across
+    separate visits and mutually exclusive routes.
+    """
+    display_name = "Permanent Coin Collection"
+
+
 class CompletionType(Choice):
     """Set goal for game completion"""
     display_name = "Completion Goal"
@@ -996,6 +1005,7 @@ sm64_options_groups = [
     OptionGroup("Coin Options", [
         Coinsanity,
         SecretStageCoinsanity,
+        PermanentCoinCollection,
         *secret_stage_coinsanity_max_coin_options,
         *coin_star_requirement_options,
     ]),
@@ -1036,6 +1046,7 @@ class SM64Options(PerGameCommonOptions):
     blocksanity: Blocksanity
     easy_butterflies: EasyButterflies
     no_despawns: NoDespawns
+    permanent_coin_collection: PermanentCoinCollection
     combined_progressive_keys: CombinedProgressiveKeys
     enable_locked_paintings: EnableLockedPaintings
     triple_jump: TripleJump

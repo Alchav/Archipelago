@@ -2757,6 +2757,19 @@ class CoolCoolMountainSpinJumpUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 13))
 
 
+class CoolCoolMountainSpinJumpPermanentCoinTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **CoolCoolMountainSpinJumpUnlockLogicTestBase.options,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def test_permanent_collection_preserves_spindrift_route_coins(self):
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Spindrifts"))
+        self.assertTrue(cool_cool_mountain_coins(self.multiworld.state, self.player, 15))
+        self.assertFalse(cool_cool_mountain_coins(self.multiworld.state, self.player, 16))
+
+
 class CoolCoolMountainCoinStar130AccessTestBase(CoolCoolMountainCoinStarAccessTestBase):
     options = {
         **CoolCoolMountainCoinStarAccessTestBase.options,
@@ -3758,6 +3771,52 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         repeatable_ascent_total = self.maximum_reachable_coins()
         self.assertGreater(repeatable_ascent_total, two_ascent_total)
+
+
+class TinyHugeIslandPermanentCoinCollectionTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TinyHugeIslandOneUseAscentCoinTestBase.options,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def maximum_reachable_coins(self):
+        return max(
+            coins for coins in range(193)
+            if tiny_huge_island_coins(self.multiworld.state, self.player, coins)
+        )
+
+    def test_permanent_collection_combines_tiny_and_huge_routes(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect_by_name([
+            "Triple Jump",
+            "Long Jump",
+            "Side Flip",
+            "Ledge Grab",
+            "Ground Pound",
+            "Purple Switches",
+            "Tiny-Huge Island - Single Yellow Coins",
+            "Tiny-Huge Island - Red Coins",
+            "Tiny-Huge Island - Blue Coin Block",
+            "Tiny-Huge Island - Horizontal Coin Lines",
+            "Tiny-Huge Island - Three-Coin Block",
+            "Tiny-Huge Island - Wooden Posts",
+            "Tiny-Huge Island - Chuckya",
+            "Tiny-Huge Island - Lakitu",
+            "Tiny-Huge Island - Fire Piranha Plants",
+            "Tiny-Huge Island - Fly Guy",
+            "Tiny-Huge Island - Goombas",
+            "Tiny-Huge Island - Koopa Troopa",
+        ])
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
+
+        self.world.options.permanent_coin_collection.value = 0
+        normal_total = self.maximum_reachable_coins()
+        self.world.options.permanent_coin_collection.value = 1
+        permanent_total = self.maximum_reachable_coins()
+
+        self.assertGreater(permanent_total, normal_total)
 
 
 class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
@@ -5253,6 +5312,31 @@ class SnowmansLandIglooShellCoinLossTestBase(SM64TestBase):
         self.assertEqual(coins_after_cannon, coins_before_igloo_block + 3)
 
 
+class SnowmansLandIglooPermanentCoinCollectionTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SnowmansLandIglooShellCoinLossTestBase.options,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def test_permanent_collection_preserves_spindrift_coins_across_igloo_transition(self):
+        self.collect_by_name([
+            "Progressive Upstairs Key",
+            "Snowman's Land - Spindrifts",
+        ])
+        coins_before_igloo_block = max(
+            coin_count for coin_count in range(128)
+            if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
+        )
+
+        self.collect(self.get_item_by_name("Snowman's Land - Three-Coin Block"))
+        coins_after_igloo_block = max(
+            coin_count for coin_count in range(128)
+            if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
+        )
+        self.assertEqual(coins_after_igloo_block, coins_before_igloo_block + 3)
+
+
 class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -5962,6 +6046,28 @@ class BigBooHauntBookendTrickNoDespawnsTestBase(SM64TestBase):
             self.get_item_by_name("Big Boo's Haunt - Blue Coin Block"),
             self.get_item_by_name("Side Flip"),
             self.get_item_by_name("Ground Pound"),
+        ])
+        self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 35))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 36))
+
+
+class BigBooHauntBookendTrickPermanentCoinTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BigBooHauntBookendTrickNoDespawnsTestBase.options,
+        "no_despawns": Options.NoDespawns.option_false,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def test_permanent_collection_preserves_bookend_coins(self):
+        self.collect_by_name([
+            "Unlock Big Boo's Haunt",
+            "Big Boo's Haunt - Staircase",
+            "Big Boo's Haunt - Flying Bookends",
+            "Big Boo's Haunt - Blue Coin Block",
+            "Side Flip",
+            "Ground Pound",
         ])
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
         self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 35))
@@ -7361,3 +7467,52 @@ class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb"))
         self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
+
+
+class WetDryWorldPermanentCoinCollectionTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WetDryWorldIndividualUnlockLogicTestBase.options,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    @staticmethod
+    def maximum_reachable_coins(state, player):
+        return max(
+            coins for coins in range(153)
+            if wet_dry_world_coins(state, player, coins)
+        )
+
+    def test_permanent_collection_combines_reachable_water_level_variants(self):
+        state = CollectionState(self.multiworld)
+        for item_name in [
+            "Progressive Upstairs Key",
+            "Ground Pound",
+            "Long Jump",
+            "Triple Jump",
+            "Dive",
+            "Ledge Grab",
+            "Wet-Dry World - Purple Switch",
+            "Wet-Dry World - Cannon Unlock",
+            "Wet-Dry World - Red Coins",
+            "Wet-Dry World - Blue Coin Block",
+            "Wet-Dry World - Horizontal Coin Lines",
+            "Wet-Dry World - Horizontal Coin Rings",
+            "Wet-Dry World - Breakable Coin Boxes",
+            "Wet-Dry World - Three-Coin Blocks",
+            "Wet-Dry World - Ten-Coin Blocks",
+            "Wet-Dry World - Chuckya",
+            "Wet-Dry World - Skeeters",
+        ]:
+            state.collect(self.world.create_item(item_name))
+        self.assertFalse(state.has("Wet-Dry World - Water Level Diamond", self.player))
+        self.assertTrue(state.can_reach("Wet-Dry World Low", "Region", self.player))
+        self.assertTrue(state.can_reach("Wet-Dry World Middle", "Region", self.player))
+        self.assertTrue(state.can_reach("Wet-Dry World High", "Region", self.player))
+
+        self.world.options.permanent_coin_collection.value = 0
+        normal_total = self.maximum_reachable_coins(state, self.player)
+        self.world.options.permanent_coin_collection.value = 1
+        permanent_total = self.maximum_reachable_coins(state, self.player)
+
+        self.assertGreater(permanent_total, normal_total)

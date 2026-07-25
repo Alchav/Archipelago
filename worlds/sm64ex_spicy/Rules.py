@@ -205,6 +205,10 @@ def has_unlock(
     return item_name is True or state.has(item_name, player)
 
 
+def permanent_coin_collection_enabled(state: CollectionState, player: int) -> bool:
+    return bool(state.multiworld.worlds[player].options.permanent_coin_collection.value)
+
+
 def bob_omb_battlefield_coins(state: CollectionState, player: int, coins: int) -> bool:
     level_name = "Bob-omb Battlefield"
     has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
@@ -516,7 +520,7 @@ def cool_cool_mountain_coins(state: CollectionState, player: int, coins: int) ->
         if has_spindrifts:
             # 2 Spindrifts
             reachable_coins += 6
-        if has_spindrifts and not has_cannon:
+        if has_spindrifts and not has_cannon and not permanent_coin_collection_enabled(state, player):
             # If you use a spindrift to get down, you must leave its 3 coins behind.
             reachable_coins -= 3
     if has_blue_coin_switches and has_action(state, player, "Ground Pound", level_name):
@@ -615,7 +619,8 @@ def big_boos_haunt_coins(state: CollectionState, player: int, coins: int) -> boo
                 and has_bookend_third_floor_trick
                 and not has_normal_third_floor_route
                 and not has_wall_kick_third_floor_trick
-                and not state.multiworld.worlds[player].options.no_despawns.value):
+                and not state.multiworld.worlds[player].options.no_despawns.value
+                and not permanent_coin_collection_enabled(state, player)):
             # Taking this route leaves the two Bookends' 10 coins below to
             # despawn.
             third_floor_coins = max(0, third_floor_coins - 10)
@@ -1284,6 +1289,7 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
                 has_spindrifts
                 and not state.can_reach("Snowman's Land - Top of Snowman's Head", "Region", player)
                 and not state.has("Snowman's Land - Cannon Unlock", player)
+                and not permanent_coin_collection_enabled(state, player)
         ):
             # Shell access forces an immediate area transition, losing the Spindrift's three coins.
             igloo_coins = max(0, igloo_coins - 3)
@@ -1380,82 +1386,95 @@ def wet_dry_world_coins(state: CollectionState, player: int, coins: int) -> bool
 
     # https://ukikipedia.net/mediawiki/index.php?title=Wet-Dry_World&oldid=19487
 
-    def route_coins(start_water_level: str) -> int:
+    def route_coin_sources(start_water_level: str) -> Dict[str, int]:
         water_levels = route_water_levels(start_water_level)
-        route_total = 0
+        sources: Dict[str, int] = {}
+
+        def add(key: str, value: int) -> None:
+            sources[key] = value
+
         # 2 Skeeters
         if has_skeeters:
-            route_total += 6
+            add("main_skeeters", 6)
         # Ring of coins around the pillar with the amp circling it (8)
         if has_horizontal_coin_rings:
-            route_total += 8
+            add("amp_ring", 8)
         # 10 coins from the ! block on the pillar (10)
         if has_ten_coin_blocks:
-            route_total += 10
+            add("pillar_ten_coin_block", 10)
         # 3 coins in ! block underneath Chuckya platform (push block to get) (3)
         if has_three_coin_blocks:
-            route_total += 3
+            add("push_block_three_coin_block", 3)
         if "low" in water_levels:
             # 12 coins in the 4 breakable boxes near start
             if has_breakable_coin_boxes:
-                route_total += 12
+                add("low_breakable_boxes", 12)
             # 10 coins in ! block against wall near the map corner (under cannon)
             if has_ten_coin_blocks:
-                route_total += 10
+                add("low_ten_coin_block", 10)
             if has_ground_pound and has_blue_coin_block:
                 # 6 blue coins from block (on very first level up, by fire-shooters)
-                route_total += 30
+                add("low_blue_coins", 30)
         if "mid" in water_levels and has_three_coin_blocks:
             # 3 coins in ! block on a wooden platform with purple switch
-            route_total += 3
+            add("wooden_structure_three_coin_block", 3)
         if has_horizontal_coin_lines and (
                 water_levels.intersection({"mid", "highest"})
                 or has_wdw_purple_switches
                 or has_triple_jump and has_dive
         ):
             # Line of coins by the 4th highest water-level changer
-            route_total += 5
+            add("fourth_diamond_coin_line", 5)
         if route_has_top(water_levels):
             # Line of coins at highest level, by the highest water-level changer (5)
             if has_horizontal_coin_lines:
-                route_total += 5
+                add("top_coin_line", 5)
             # Chuckya (5)
             if has_chuckya:
-                route_total += 5
+                add("top_chuckya", 5)
         if can_reach_top_of_express_elevator and has_ten_coin_blocks:
             # 10 coins in ! block above the the "Express Elevators" star
-            route_total += 10
+            add("express_elevator_ten_coin_block", 10)
         if route_has_downtown(water_levels):
             # (Inside the Town) Ring of coins around triangle statue in middle of town
             if has_horizontal_coin_rings:
-                route_total += 8
+                add("downtown_ring", 8)
             if has_horizontal_coin_lines:
                 # (Inside the Town) Line of coins on high plank leading to metal cap
-                route_total += 5
+                add("downtown_metal_cap_line", 5)
                 # (Inside the Town) Line of coins on building between the entrance and trees
-                route_total += 5
+                add("downtown_first_building_line", 5)
                 # (Inside the Town) Line of coins on the other building beside the trees
-                route_total += 5
+                add("downtown_second_building_line", 5)
             # 2 Skeeters
             if has_skeeters:
-                route_total += 6
+                add("downtown_skeeters", 6)
             # 1 Red Coin
             if has_red_coins:
-                route_total += 2
+                add("downtown_initial_red_coin", 2)
             if has_water_level_diamond and has_red_coins:
                 # 7 Red Coins
-                route_total += 14
-        return route_total
+                add("downtown_diamond_red_coins", 14)
+        return sources
 
     reachable_variant_starts = (
         ("Wet-Dry World Low", "low"),
         ("Wet-Dry World Middle", "mid"),
         ("Wet-Dry World High", "highest"),
     )
-    reachable_totals = [route_coins(start_water_level)
-                        for variant_region, start_water_level in reachable_variant_starts
-                        if state.can_reach(variant_region, "Region", player)]
-    return coins <= min(max(reachable_totals, default=0), 152)
+    reachable_routes = [
+        route_coin_sources(start_water_level)
+        for variant_region, start_water_level in reachable_variant_starts
+        if state.can_reach(variant_region, "Region", player)
+    ]
+    if permanent_coin_collection_enabled(state, player):
+        reachable_sources: Dict[str, int] = {}
+        for route in reachable_routes:
+            reachable_sources.update(route)
+        reachable_total = sum(reachable_sources.values())
+    else:
+        reachable_total = max((sum(route.values()) for route in reachable_routes), default=0)
+    return coins <= min(reachable_total, 152)
 
 
 def tall_tall_mountain_coins(state: CollectionState, player: int, coins: int) -> bool:
@@ -1639,8 +1658,13 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
             return 0
         return count * (5 if has_ground_pound else 1)
 
-    def route_coins(start_tiny: bool) -> int:
-        route_total = 0
+    def route_coin_sources(start_tiny: bool) -> Dict[str, int]:
+        sources: Dict[str, int] = {}
+
+        def add(key: str, value: int) -> None:
+            if value:
+                sources[key] = value
+
         has_tiny_piranha = start_tiny and has_tiny_piranha_movement
         has_tiny_main_from_tiny = has_tiny_piranha and has_thi_purple_switches
         has_huge_start = not start_tiny
@@ -1676,125 +1700,141 @@ def tiny_huge_island_coins(state: CollectionState, player: int, coins: int) -> b
         if start_tiny:
             # 1 Small-Goomba
             if has_goombas:
-                route_total += 1
+                add("tiny_start_goomba", 1)
             if has_tiny_piranha:
                 # 1 Piranha Plant
                 if has_fire_piranha_plants:
-                    route_total += 1
+                    add("tiny_piranha_area_plant", 1)
             if has_tiny_main:
                 # (Tiny Island)8 individual coins
                 if has_single_yellow_coins:
-                    route_total += 8
+                    add("tiny_main_individual_coins", 8)
                 # (Tiny Island)Line of coins on wooden plank that you cross to reach the mountaintop
                 if has_horizontal_coin_lines:
-                    route_total += 5
+                    add("tiny_main_coin_line", 5)
                 # (Tiny Island)3 coins in ! block connected to Windswept Valley by tiny wooden plank
                 if has_three_coin_block:
-                    route_total += 3
+                    add("tiny_main_three_coin_block", 3)
                 # 9 Small-Goombas
                 if has_goombas:
-                    route_total += 9
+                    add("tiny_main_goombas", 9)
                 # 1 Small Koopa
                 if has_koopa_troopa:
-                    route_total += 5
+                    add("tiny_main_koopa", 5)
                 if has_single_yellow_coins and can_use_logic_trick(
                         state, player, "logic_thi_impossible_coin", f"{level_name} - Coins Star"):
                     # (Tiny Island)1 impossible coin underground to the left of the nearby visible coin.
-                    route_total += 1
+                    add("tiny_impossible_coin", 1)
                 if has_thi_purple_switches and has_single_yellow_coins:
                     # (Tiny Island)1 coin (at warp) on tiny separated island, use ! switch to reach
-                    route_total += 1
+                    add("tiny_purple_switch_coin", 1)
 
-        terminal_values = []
+        terminal_source_groups: list[Dict[str, int]] = []
         if has_huge_start or has_koopa_region:
             # 4 Giant Goombas
-            route_total += giant_goomba_coins(4)
+            add("huge_lower_giant_goombas", giant_goomba_coins(4))
             # (Huge Island)Running around the post at start
             if has_wooden_posts:
-                route_total += 5
+                add("huge_start_post", 5)
             # (Huge Island)2 coins at the top of the beach
             if has_single_yellow_coins:
-                route_total += 2
+                add("huge_beach_coins", 2)
             # 2 Fly Guy
             if has_fly_guy:
-                route_total += 4
+                add("huge_lower_fly_guys", 4)
             # 1 Lakitu
             if has_lakitu:
-                route_total += 5
+                add("huge_lakitu", 5)
             # 1 Koopa Troopa
             if has_koopa_troopa:
-                route_total += 5
+                add("huge_koopa_troopa", 5)
             if has_wooden_posts and (has_cannon and has_huge_start or has_top and has_long_jump):
                 # (Huge Island)Running around the post on small island by Lakitu
-                route_total += 5
+                add("huge_lakitu_island_post", 5)
             if has_windswept:
                 # (Huge Island)Line of coins on narrow plank attached to Windswept Valley
                 if has_horizontal_coin_lines:
-                    route_total += 5
+                    add("huge_windswept_line", 5)
                 # 2 Giant Goombas
-                route_total += giant_goomba_coins(2)
+                add("huge_windswept_giant_goombas", giant_goomba_coins(2))
             if has_cannonball:
                 # (Huge Island)Line of coins on cliff where the big metal balls roll down
                 if has_horizontal_coin_lines:
-                    route_total += 5
+                    add("huge_cannonball_line", 5)
                 # 1 Fly Guy
                 if has_fly_guy:
-                    route_total += 2
+                    add("huge_cannonball_fly_guy", 2)
             if has_koopa_region:
                 # (Huge Island)Slanted line of 4 coins to right of hole where the balls come from
                 if has_horizontal_coin_lines:
-                    route_total += 4
+                    add("huge_koopa_region_line", 4)
                 # 3 Giant Goombas
-                route_total += giant_goomba_coins(3)
+                add("huge_koopa_region_giant_goombas", giant_goomba_coins(3))
             if has_top:
                 # (Huge Island)Line of coins on wooden plank that you cross to reach the mountaintop
                 if has_horizontal_coin_lines:
-                    route_total += 5
+                    add("huge_top_wooden_plank_line", 5)
                 # (Huge Island)Line of coins on curved wooden plank that leads to Wiggler's cave
                 if has_horizontal_coin_lines:
-                    route_total += 5
+                    add("huge_top_curved_plank_line", 5)
                 # Chuckya
                 if has_chuckya:
-                    route_total += 5
+                    add("huge_top_chuckya", 5)
 
-            red_area_coins = giant_goomba_coins(2)
+            red_area_sources: Dict[str, int] = {}
+            red_area_sources["red_area_giant_goombas"] = giant_goomba_coins(2)
             if has_red_coins:
-                red_area_coins += 14
+                red_area_sources["red_area_red_coins"] = 14
                 if has_action(state, player, "Wall Kick", level_name):
-                    red_area_coins += 2
+                    red_area_sources["red_area_wall_kick_red_coin"] = 2
             if has_ground_pound and has_blue_coin_block:
-                red_area_coins += 10
-            wiggler_cave_coins = (
-                10 if has_horizontal_coin_lines and has_tiny_main and has_warp_pipes and has_ground_pound else 0)
+                red_area_sources["red_area_blue_coins"] = 10
+            red_area_sources = {key: value for key, value in red_area_sources.items() if value}
+            wiggler_cave_sources = {
+                "wiggler_cave_coin_lines": 10
+            } if has_horizontal_coin_lines and has_tiny_main and has_warp_pipes and has_ground_pound else {}
 
             if has_cannon and has_huge_start:
-                route_total += red_area_coins
-            else:
-                terminal_values.append(red_area_coins)
-            terminal_values.append(wiggler_cave_coins)
+                sources.update(red_area_sources)
+            elif has_top:
+                terminal_source_groups.append(red_area_sources)
+            terminal_source_groups.append(wiggler_cave_sources)
 
         if has_huge_piranha_from_pipe:
-            route_total += 10 if has_fire_piranha_plants else 0
+            add("huge_piranha_area_plants", 10 if has_fire_piranha_plants else 0)
         elif has_koopa_region:
-            piranha_area_coins = 10 if has_fire_piranha_plants else 0
+            piranha_area_sources = {
+                "huge_piranha_area_plants": 10
+            } if has_fire_piranha_plants else {}
             if has_warp_pipes and has_thi_purple_switches:
-                route_total += piranha_area_coins
+                sources.update(piranha_area_sources)
             else:
-                terminal_values.append(piranha_area_coins)
+                terminal_source_groups.append(piranha_area_sources)
 
-        if terminal_values:
-            if repeatable_top:
-                route_total += sum(terminal_values)
+        if terminal_source_groups:
+            if repeatable_top or permanent_coin_collection_enabled(state, player):
+                for group in terminal_source_groups:
+                    sources.update(group)
             elif has_top:
-                route_total += sum(sorted(terminal_values, reverse=True)[:one_use_ascents])
-        return route_total
+                ranked_groups = sorted(
+                    terminal_source_groups, key=lambda group: sum(group.values()), reverse=True)
+                for group in ranked_groups[:one_use_ascents]:
+                    sources.update(group)
+        return sources
 
-    reachable_totals = []
+    reachable_routes = []
     if can_enter_tiny:
-        reachable_totals.append(route_coins(True))
+        reachable_routes.append(route_coin_sources(True))
     if can_enter_huge:
-        reachable_totals.append(route_coins(False))
-    return coins <= max(reachable_totals, default=0)
+        reachable_routes.append(route_coin_sources(False))
+    if permanent_coin_collection_enabled(state, player):
+        reachable_sources: Dict[str, int] = {}
+        for route in reachable_routes:
+            reachable_sources.update(route)
+        reachable_total = sum(reachable_sources.values())
+    else:
+        reachable_total = max((sum(route.values()) for route in reachable_routes), default=0)
+    return coins <= reachable_total
 
 
 def tick_tock_clock_coins(state: CollectionState, player: int, coins: int) -> bool:
