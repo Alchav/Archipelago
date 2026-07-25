@@ -366,23 +366,27 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Snowman's Land - In the Deep Freeze",
                 "Snowman's Land - Bob-omb Buddy",
                 "Snowman's Land - Near Moneybags Block 1-Up",
-                "Snowman's Land - Near Moneybags 1-Up Block",
-                "Snowman's Land - 3 Coins Block")
+                "Snowman's Land - Near Moneybags 1-Up Block")
     sl_whirl = create_subregion(regSL, "Snowman's Land - Whirl from the Freezing Pond",
                                 "Snowman's Land - Whirl from the Freezing Pond",
                                 "Snowman's Land - Koopa Shell Block",
                                 "Snowman's Land - Shell Shreddin' for Red Coins",
                                 "Snowman's Land - Whirl from the Freezing Pond Star Block")
-    sl_upper = create_subregion(regSL, "Snowman's Land - Upper",
-                                "Snowman's Land - Snowman's Big Head",
+    sl_upper = create_subregion(regSL, "Snowman's Land - Upper")
+    sl_top_of_snowmans_head = create_subregion(
+        sl_upper, "Snowman's Land - Top of Snowman's Head",
+        "Snowman's Land - Snowman's Big Head",
+        "Snowman's Land - Snowman Tree 1-Up")
+    sl_igloo = create_subregion(regSL, "Snowman's Land - Igloo",
                                 "Snowman's Land - Into the Igloo",
                                 "Snowman's Land - Inside Igloo Block 1-Up",
                                 "Snowman's Land - Igloo Ice Block 1-Up",
                                 "Snowman's Land - Inside Igloo 1-Up Block",
-                                "Snowman's Land - Vanish Cap Block")
-    sl_top_of_snowmans_head = create_subregion(sl_upper, "Snowman's Land - Top of Snowman's Head",
-                                               "Snowman's Land - Snowman Tree 1-Up")
-    regSL.subregions = [sl_whirl, sl_upper, sl_top_of_snowmans_head]
+                                "Snowman's Land - Vanish Cap Block",
+                                "Snowman's Land - 3 Coins Block")
+    sl_top_of_snowmans_head.connect(
+        sl_igloo, name="Snowman's Land - Top of Snowman's Head to Igloo")
+    regSL.subregions = [sl_whirl, sl_upper, sl_top_of_snowmans_head, sl_igloo]
     create_locs(regSL, "Snowman's Land - Coins Star")
 
     regWDWLow = create_region("Wet-Dry World Low", player, multiworld)

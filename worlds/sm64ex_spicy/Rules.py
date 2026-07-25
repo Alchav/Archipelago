@@ -1265,19 +1265,29 @@ def snowmans_land_coins(state: CollectionState, player: int, coins: int) -> bool
         # 5 Red Coins
         if has_red_coins:
             reachable_coins += 10
+    if state.can_reach("Snowman's Land - Top of Snowman's Head", "Region", player):
         # 2 coins on on wooden plank before first tree on the snowman [sic]
         if has_single_yellow_coins:
             reachable_coins += 2
-        if state.can_reach("Snowman's Land - Into the Igloo", "Location", player):
-            # (Inside the Igloo) 20 coins frozen in ice which require vanish cap
-            if has_horizontal_coin_lines:
-                reachable_coins += 20
-            # (Inside the Igloo) 3 coins outside of ice, near the 20 coins inside the ice
-            if has_single_yellow_coins:
-                reachable_coins += 3
-            # (Inside the Igloo) 3 coins in ! block near bob-omb buddy
-            if has_three_coin_block:
-                reachable_coins += 3
+    if state.can_reach("Snowman's Land - Igloo", "Region", player):
+        igloo_coins = 0
+        # (Inside the Igloo) 20 coins frozen in ice which require vanish cap
+        if has_horizontal_coin_lines and has_vanish_cap(state, player, level_name):
+            igloo_coins += 20
+        # (Inside the Igloo) 3 coins outside of ice, near the 20 coins inside the ice
+        if has_single_yellow_coins:
+            igloo_coins += 3
+        # (Inside the Igloo) 3 coins in ! block near bob-omb buddy
+        if has_three_coin_block:
+            igloo_coins += 3
+        if (
+                has_spindrifts
+                and not state.can_reach("Snowman's Land - Top of Snowman's Head", "Region", player)
+                and not state.has("Snowman's Land - Cannon Unlock", player)
+        ):
+            # Shell access forces an immediate area transition, losing the Spindrift's three coins.
+            igloo_coins = max(0, igloo_coins - 3)
+        reachable_coins += igloo_coins
     if (
             has_single_yellow_coins
             and can_use_logic_trick(
@@ -3003,9 +3013,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             action_item_names=rf.get_action_item_names("Snowman's Land - Whirl from the Freezing Pond")))
     rf.assign_rule(
         "Snowman's Land - Upper",
-        "{Snowman's Land - Whirl from the Freezing Pond} | TJ/SF/BF")
+        "{Snowman's Land - Whirl from the Freezing Pond} | TJ/SF/BF | CANN")
     rf.assign_rule("Snowman's Land - Top of Snowman's Head", "SL_PENGUIN & BF/SF/TJ | CANN")
-    rf.assign_rule("Snowman's Land - Snowman's Big Head", "SL_PENGUIN & BF/SF/TJ | CANN")
+    rf.assign_rule("Snowman's Land - Igloo", "{Snowman's Land - Whirl from the Freezing Pond}")
     rf.assign_rule("Snowman's Land - Chill with the Bully", "BIG_BULLY")
     rf.assign_rule("Snowman's Land - Shell Shreddin' for Red Coins", "RED_COINS")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")

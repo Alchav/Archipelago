@@ -5081,6 +5081,20 @@ class SnowmansLandRegionAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
         self.assertTrue(self.can_reach_region("Snowman's Land - Upper"))
 
+    def test_cannon_reaches_upper_top_and_igloo(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Upper"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Igloo"))
+
+    def test_spindrift_shell_route_reaches_igloo(self):
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Snowman's Land - Spindrifts"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Igloo"))
+
     def test_locations_are_in_requested_regions(self):
         whirl_locations = (
             "Snowman's Land - Whirl from the Freezing Pond",
@@ -5088,22 +5102,30 @@ class SnowmansLandRegionAccessTestBase(SM64TestBase):
             "Snowman's Land - Shell Shreddin' for Red Coins",
             "Snowman's Land - Whirl from the Freezing Pond Star Block",
         )
-        upper_locations = (
+        top_locations = (
             "Snowman's Land - Snowman's Big Head",
+            "Snowman's Land - Snowman Tree 1-Up",
+        )
+        igloo_locations = (
             "Snowman's Land - Into the Igloo",
             "Snowman's Land - Inside Igloo Block 1-Up",
             "Snowman's Land - Igloo Ice Block 1-Up",
             "Snowman's Land - Inside Igloo 1-Up Block",
             "Snowman's Land - Vanish Cap Block",
+            "Snowman's Land - 3 Coins Block",
         )
         for location_name in whirl_locations:
             self.assertEqual(
                 self.multiworld.get_location(location_name, self.player).parent_region.name,
                 "Snowman's Land - Whirl from the Freezing Pond")
-        for location_name in upper_locations:
+        for location_name in top_locations:
             self.assertEqual(
                 self.multiworld.get_location(location_name, self.player).parent_region.name,
-                "Snowman's Land - Upper")
+                "Snowman's Land - Top of Snowman's Head")
+        for location_name in igloo_locations:
+            self.assertEqual(
+                self.multiworld.get_location(location_name, self.player).parent_region.name,
+                "Snowman's Land - Igloo")
 
 
 class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
@@ -5187,6 +5209,48 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Snowman's Land - Chill with the Bully"))
         self.collect(self.get_item_by_name("Snowman's Land - Chill Bully"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Chill with the Bully"))
+
+
+class SnowmansLandIglooShellCoinLossTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "buddy_checks": Options.BuddyChecks.option_true,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
+        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "no_despawns": Options.NoDespawns.option_true,
+        "strict_cannon_requirements": Options.StrictCannonRequirements.option_true,
+    }
+
+    def test_shell_transition_loses_spindrift_coins_even_with_no_despawns(self):
+        self.collect_by_name([
+            "Progressive Upstairs Key",
+            "Snowman's Land - Spindrifts",
+        ])
+        self.assertTrue(self.can_reach_region("Snowman's Land - Igloo"))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
+        coins_before_igloo_block = max(
+            coin_count for coin_count in range(128)
+            if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
+        )
+
+        self.collect(self.get_item_by_name("Snowman's Land - Three-Coin Block"))
+        coins_after_igloo_block = max(
+            coin_count for coin_count in range(128)
+            if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
+        )
+        self.assertEqual(coins_after_igloo_block, coins_before_igloo_block)
+
+        self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
+        coins_after_cannon = max(
+            coin_count for coin_count in range(128)
+            if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
+        )
+        self.assertEqual(coins_after_cannon, coins_before_igloo_block + 3)
 
 
 class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
