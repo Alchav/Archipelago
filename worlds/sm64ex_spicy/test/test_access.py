@@ -7283,6 +7283,52 @@ class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
                     self.assertTrue(self.can_reach_location(location_name))
 
 
+class RedCoinStarUnlockAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+    }
+
+    red_coin_item_by_location = {
+        "Bob-omb Battlefield - Find the 8 Red Coins": "Bob-omb Battlefield - Red Coins",
+        "Whomp's Fortress - Red Coins on the Floating Isle": "Whomp's Fortress - Red Coins",
+        "Jolly Roger Bay - Red Coins on the Ship Afloat": "Jolly Roger Bay - Red Coins",
+        "Cool, Cool Mountain - Frosty Slide for 8 Red Coins": "Cool, Cool Mountain - Red Coins",
+        "Big Boo's Haunt - Seek the 8 Red Coins": "Big Boo's Haunt - Red Coins",
+        "Hazy Maze Cave - Elevate for 8 Red Coins": "Hazy Maze Cave - Red Coins",
+        "Lethal Lava Land - 8-Coin Puzzle with 15 Pieces": "Lethal Lava Land - Red Coins",
+        "Shifting Sand Land - Free Flying for 8 Red Coins": "Shifting Sand Land - Red Coins",
+        "Dire, Dire Docks - Pole-Jumping for Red Coins": "Dire, Dire Docks - Red Coins",
+        "Snowman's Land - Shell Shreddin' for Red Coins": "Snowman's Land - Red Coins",
+        "Wet-Dry World - Go to Town for Red Coins": "Wet-Dry World - Red Coins",
+        "Tall, Tall Mountain - Scary 'Shrooms, Red Coins": "Tall, Tall Mountain - Red Coins",
+        "Tiny-Huge Island - Wiggler's Red Coins": "Tiny-Huge Island - Red Coins",
+        "Tick Tock Clock - Stop Time for Red Coins": "Tick Tock Clock - Red Coins",
+        "Rainbow Ride - Coins Amassed in a Maze": "Rainbow Ride - Red Coins",
+        "The Secret Aquarium - Red Coins": "Secret Aquarium - Red Coins",
+        "Bowser in the Dark World - Red Coins": "Bowser in the Dark World - Red Coins",
+        "Tower of the Wing Cap - Red Coins": "Tower of the Wing Cap - Red Coins",
+        "Cavern of the Metal Cap - Red Coins": "Cavern of the Metal Cap - Red Coins",
+        "Vanish Cap Under the Moat - Red Coins": "Vanish Cap Under the Moat - Red Coins",
+        "Bowser in the Fire Sea - Red Coins": "Bowser in the Fire Sea - Red Coins",
+        "Wing Mario Over the Rainbow - Red Coins": "Wing Mario Over the Rainbow - Red Coins",
+        "Bowser in the Sky - Red Coins": "Bowser in the Sky - Red Coins",
+    }
+
+    def test_red_coin_stars_require_their_per_level_red_coins(self):
+        self.collect_all_but(set(self.red_coin_item_by_location.values()))
+        for location_name in self.red_coin_item_by_location:
+            with self.subTest(location=location_name, state="locked"):
+                location = self.multiworld.get_location(location_name, self.player)
+                self.assertFalse(location.access_rule(self.multiworld.state))
+
+        for location_name, item_name in self.red_coin_item_by_location.items():
+            self.collect(self.get_item_by_name(item_name))
+            with self.subTest(location=location_name, state="unlocked"):
+                location = self.multiworld.get_location(location_name, self.player)
+                self.assertTrue(location.access_rule(self.multiworld.state))
+
+
 class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
     options = {
         "bowser_bombs": Options.BowserBombs.option_global,

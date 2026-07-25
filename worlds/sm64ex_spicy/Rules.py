@@ -2909,6 +2909,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Hazy Maze Cave - Swimming Beast in the Cavern", "HMC_SWIMMING_BEAST")
     rf.assign_rule("Hazy Maze Cave - Red Coin Area",
                    "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | CHECKERBOARD_PLATFORMS & MOVELESS & WK")
+    rf.assign_rule("Hazy Maze Cave - Elevate for 8 Red Coins", "RED_COINS")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | MOVELESS & WK & TJ/LJ | MOVELESS & WK+SF+LG")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
                    "PURPLE_SWITCHES & LJ+MC | PURPLE_SWITCHES & CAPLESS & LJ+TJ | "
@@ -3093,7 +3094,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
-    rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "WK")
+    rf.assign_rule("Tiny-Huge Island - Wiggler's Red Coins", "RED_COINS & WK")
     rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Bridge Tree 1-Up", "CANN | CANNLESS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
@@ -3127,24 +3128,31 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - Ship Pole 1-Up", "CL")
     rf.assign_rule("Rainbow Ride - House", "RR_CARPETS & TJ/SF/BF/LG")
     rf.assign_rule("Rainbow Ride - Somewhere Over the Rainbow", "CANN")
+    # Secret Aquarium
+    add_rule(
+        multiworld.get_location("The Secret Aquarium - Red Coins", player),
+        lambda state: has_unlock(
+            state, player, "coin_object_unlocks",
+            "Red Coins", "Secret Aquarium - Red Coins"))
     # Tower of the Wing Cap
+    rf.assign_rule("Tower of the Wing Cap - Red Coins", "RED_COINS")
     # rf.assign_rule("Tower of the Wing Cap - Red Coins", "WC") # ridiculous
     # Cavern of the Metal Cap
     rf.assign_rule("Cavern of the Metal Cap - Red Coins",
-                   "MC | logic_cotmc_deep_underwater_coins_without_metal_cap")
+                   "RED_COINS & MC | RED_COINS & logic_cotmc_deep_underwater_coins_without_metal_cap")
     # Vanish Cap Under the Moat
     rf.assign_rule("Vanish Cap Under the Moat - Switch",
                    "CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | CHECKERBOARD_PLATFORMS & MOVELESS")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coins",
-                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | "
-                   "CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & "
+                   "RED_COINS & CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & VC | "
+                   "RED_COINS & CHECKERBOARD_PLATFORMS & TJ/BF/SF/LG/WK & "
                    "logic_vcutm_wall_kick_over_vanish_cap_grate | "
-                   "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & VC | "
-                   "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & "
+                   "RED_COINS & CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & VC | "
+                   "RED_COINS & CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms & "
                    "logic_vcutm_wall_kick_over_vanish_cap_grate | "
-                   "CHECKERBOARD_PLATFORMS & "
+                   "RED_COINS & CHECKERBOARD_PLATFORMS & "
                    "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up & VC | "
-                   "CHECKERBOARD_PLATFORMS & "
+                   "RED_COINS & CHECKERBOARD_PLATFORMS & "
                    "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up & "
                    "logic_vcutm_wall_kick_over_vanish_cap_grate")
     rf.assign_rule("Vanish Cap Under the Moat - Red Coin Platform 1-Up",
@@ -3180,7 +3188,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                      state, "Bowser in the Dark World - Extra 1-Ups", has_second_floor_key))
     # Bowser in the Fire Sea
     rf.assign_rule("Bowser in the Fire Sea - Upper", "CL")
-    rf.assign_rule("Bowser in the Fire Sea - Red Coins", "LG/WK")
+    rf.assign_rule("Bowser in the Fire Sea - Red Coins", "RED_COINS & LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles Block 1-Up", "LG/WK")
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
     add_rule(
@@ -3202,6 +3210,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "WC+TJ | LJ+LG & logic_wmotr_leap_of_faith | "
         "LJ & logic_wmotr_leap_of_faith_without_ledge_grab")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Red Coins", "RED_COINS")
     rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", wmotr_flight_rule)
@@ -3212,6 +3221,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "PURPLE_SWITCHES | MOVELESS")
     rf.assign_rule("Bowser in the Sky - Top",
                    "CL | MOVELESS & TJ+WK+LG")
+    rf.assign_rule("Bowser in the Sky - Red Coins", "RED_COINS")
     if options.blocksanity:
         blocksanity_rules = {
             "Big Boo's Haunt - Back Entrance Vanish Cap Block": "VC",
