@@ -2898,7 +2898,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Whomp's Fortress - Chip Off Whomp's Block", "WF_KING & GP")
     rf.assign_rule(
         "Whomp's Fortress - Top",
-        "CHECKERBOARD_PLATFORMS | WF_HOOT | WK & SF/TJ | CL & DV/LG | "
+        "CHECKERBOARD_PLATFORMS | WF_HOOT & CL | WK & SF/TJ | CL & DV/LG | "
         "logic_wf_caged_top_access_with_cannon | logic_wf_caged_top_access_with_sf_lg | "
         "logic_wf_caged_top_access_with_tj")
     rf.assign_rule(

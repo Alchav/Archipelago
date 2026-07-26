@@ -1296,6 +1296,12 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         ])
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
+    def test_whomps_fortress_top_hoot_route_requires_climb(self):
+        self.collect(self.get_item_by_name("Whomp's Fortress - Hoot"))
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
+
     def test_whomps_fortress_red_coins_on_floating_isle_does_not_require_fortress(self):
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
         self.collect(self.world.create_item("Checkerboard Platforms"))
