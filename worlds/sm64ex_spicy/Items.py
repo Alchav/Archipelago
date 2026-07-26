@@ -458,9 +458,6 @@ painting_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Unlock Tiny Island": SM64ItemData(sm64ex_base_id + 242),
     "Unlock Tick Tock Clock": SM64ItemData(sm64ex_base_id + 243),
     "Unlock Huge Island": SM64ItemData(sm64ex_base_id + 559),
-}
-
-non_painting_level_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Unlock Rainbow Ride": SM64ItemData(sm64ex_base_id + 853),
     "Unlock Wing Mario Over the Rainbow": SM64ItemData(sm64ex_base_id + 854),
 }
@@ -868,7 +865,6 @@ item_data_table = {
     **per_level_action_item_data_table,
     **cannon_item_data_table,
     **painting_unlock_item_data_table,
-    **non_painting_level_unlock_item_data_table,
     **global_one_up_unlock_item_data_table,
     **per_level_one_up_unlock_item_data_table,
     **global_coin_object_item_data_table,
@@ -894,7 +890,6 @@ item_name_groups: dict[str, set[str]] = {
     "Level Unlocks": (
         set(special_level_unlock_item_names)
         | set(painting_unlock_item_data_table)
-        | set(non_painting_level_unlock_item_data_table)
     ),
     "1-Up Unlocks": (
         set(global_one_up_unlock_item_data_table)

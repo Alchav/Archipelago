@@ -50,7 +50,7 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -172,7 +172,7 @@ class FullLevelUnlockAccessTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.LevelUnlocks.option_full,
+        "level_unlocks": Options.LevelUnlocks.option_full,
     }
 
     def test_third_floor_levels_require_their_unlocks(self):
@@ -345,7 +345,7 @@ class SingleProgressiveKeyAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -389,7 +389,7 @@ class LockedPaintingAccessTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.EnableLockedPaintings.option_true,
     }
 
     def test_hazy_maze_cave_requires_unlock(self):
@@ -682,7 +682,7 @@ class CastleFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -776,7 +776,7 @@ class CastleOneUpAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -808,7 +808,7 @@ class CourseOneUpAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -915,7 +915,7 @@ class VanillaBowserStageOneUpAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -953,7 +953,7 @@ class GlobalBowserStageOneUpAccessTestBase(SM64TestBase):
     options = {
         "bowser_stage_1ups": Options.BowserStage1Ups.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -981,7 +981,7 @@ class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "bowser_stage_1ups": Options.BowserStage1Ups.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -1006,7 +1006,7 @@ class IndividualBowserStageOneUpAccessTestBase(SM64TestBase):
     options = {
         "bowser_stage_1ups": Options.BowserStage1Ups.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -1028,7 +1028,7 @@ class AlwaysSpawnBowserStageOneUpAccessTestBase(SM64TestBase):
     options = {
         "bowser_stage_1ups": Options.BowserStage1Ups.option_always_spawn,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -1048,7 +1048,7 @@ class AlwaysSpawnBowserStageOneUpAccessTestBase(SM64TestBase):
 class LevelFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -1074,7 +1074,7 @@ class LevelFeatureAccessTestBase(SM64TestBase):
 class PerLevelMoveAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
         "triple_jump": Options.TripleJump.option_per_level,
@@ -1147,7 +1147,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -2082,7 +2082,7 @@ class VanishCapUnderTheMoatTrickAccessTestBase(SM64TestBase):
         "blocksanity": Options.Blocksanity.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "logic_tricks": {"Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate"},
         "one_up_checks": Options.OneUpChecks.option_true,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
@@ -2127,7 +2127,7 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "logic_tricks": {"Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above"},
         "one_up_checks": Options.OneUpChecks.option_true,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
@@ -2191,7 +2191,7 @@ class BowserInTheSkyCoinsanityAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coinsanity": 100,
@@ -2232,7 +2232,7 @@ class BowserInTheSkyIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -2302,7 +2302,7 @@ class BowserInTheFireSeaCoinsanityAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coinsanity": 100,
         "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
@@ -2399,7 +2399,7 @@ class CavernOfTheMetalCapDeepUnderwaterCoinsTrickTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "logic_tricks": {"Deep Underwater Coins Without Metal Cap"},
     }
 
@@ -2498,7 +2498,7 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coinsanity": 100,
@@ -2624,7 +2624,7 @@ class WingMarioOverTheRainbowIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "coinsanity": 100,
@@ -2749,7 +2749,7 @@ class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -2908,7 +2908,7 @@ class WhompsFortressCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3094,7 +3094,7 @@ class BobOmbBattlefieldCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3185,7 +3185,7 @@ class JollyRogerBayCoinStarAccessTestBase(SM64TestBase):
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3440,7 +3440,7 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -3723,7 +3723,7 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
@@ -3795,7 +3795,7 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -3897,7 +3897,7 @@ class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -3942,7 +3942,7 @@ class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -4051,7 +4051,7 @@ class DireDireDocksIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -4116,7 +4116,7 @@ class HazyMazeCaveCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -4319,7 +4319,7 @@ class HazyMazeCaveIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -4400,7 +4400,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
@@ -4508,7 +4508,7 @@ class LethalLavaLandCoinStarAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -4522,7 +4522,7 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -4548,7 +4548,7 @@ class LethalLavaLandLongJumpElevatorTricksTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -4586,7 +4586,7 @@ class LethalLavaLandTripleJumpDiveElevatorTrickTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -4614,7 +4614,7 @@ class LethalLavaLandKoopaShellAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -4707,7 +4707,7 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "blocksanity": Options.Blocksanity.option_true,
@@ -4797,7 +4797,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
@@ -4830,7 +4830,7 @@ class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
@@ -4861,7 +4861,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -4962,7 +4962,7 @@ class ShiftingSandLandCoinStarAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
@@ -5063,7 +5063,7 @@ class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -5182,7 +5182,7 @@ class SnowmansLandRegionAccessTestBase(SM64TestBase):
         "blocksanity": Options.Blocksanity.option_true,
         "buddy_checks": Options.BuddyChecks.option_true,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -5268,7 +5268,7 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
         "buddy_checks": Options.BuddyChecks.option_true,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {"Snowman's Land Impossible Coin"},
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -5350,7 +5350,7 @@ class SnowmansLandIglooShellCoinLossTestBase(SM64TestBase):
         "buddy_checks": Options.BuddyChecks.option_true,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "no_despawns": Options.NoDespawns.option_true,
         "strict_cannon_requirements": Options.StrictCannonRequirements.option_true,
@@ -5414,7 +5414,7 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "strict_move_requirements": Options.StrictMoveRequirements.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -5519,7 +5519,7 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
         "blocksanity": Options.Blocksanity.option_true,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -5642,7 +5642,7 @@ class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -5773,7 +5773,7 @@ class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
         "accessibility": "minimal",
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
         "purple_switches": Options.PurpleSwitches.option_per_level,
@@ -5870,7 +5870,7 @@ class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
 class BigBooHauntAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "logic_tricks": {
             "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick",
             "Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends",
@@ -5930,7 +5930,7 @@ class BigBooHauntAccessTestBase(SM64TestBase):
 class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -6089,7 +6089,7 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -6101,7 +6101,7 @@ class BigBooHauntCoinStarAccessTestBase(SM64TestBase):
 class BigBooHauntBookendTrickNoDespawnsTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -6245,7 +6245,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -6455,7 +6455,7 @@ class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -6486,7 +6486,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -6594,7 +6594,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
@@ -6670,7 +6670,7 @@ class WMotRCaplessBuddyAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
         "strict_cap_requirements": Options.StrictCapRequirements.option_false,
@@ -6698,7 +6698,7 @@ class WingMarioOverTheRainbowBlocksanityAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "one_up_checks": Options.OneUpChecks.option_true,
         "blocksanity": Options.Blocksanity.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
@@ -6755,7 +6755,7 @@ class TTCVariantAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -6802,7 +6802,7 @@ class ThwompUnlockAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -6831,7 +6831,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -6927,7 +6927,7 @@ class TTCMovelessWallKickAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -6948,7 +6948,7 @@ class TickTockClockCoinStarAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -7111,7 +7111,7 @@ class TickTockClockIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -7162,7 +7162,7 @@ class TickTockClockStompThwompTrickTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {"Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp"},
@@ -7203,7 +7203,7 @@ class RainbowRideCoinStarAccessTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
@@ -7332,7 +7332,7 @@ class RainbowRideIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -7390,7 +7390,7 @@ class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Off,
         "blocksanity": Options.Blocksanity.option_true,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_false,
+        "level_unlocks": Options.EnableLockedPaintings.option_false,
         "strict_cap_requirements": Options.StrictCapRequirements.option_false,
         "strict_cannon_requirements": Options.StrictCannonRequirements.option_false,
         "strict_move_requirements": Options.StrictMoveRequirements.option_false,

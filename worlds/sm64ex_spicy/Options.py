@@ -279,7 +279,8 @@ class LevelUnlocks(Choice):
 
     Disabled - Start with every level entrance unlocked.
 
-    Special Only - Shuffle the level unlocks that Spicy Mycena normally randomizes.
+    Special Only - Shuffle level unlocks for Tower of the Wing Cap, Big Boo's Haunt, Bowser in the Fire Sea,
+    and Vanish Cap Under the Moat.
 
     Full - Also shuffle the course painting unlocks, Rainbow Ride, and Wing Mario Over the Rainbow.
 
@@ -289,15 +290,10 @@ class LevelUnlocks(Choice):
     option_disabled = 0
     option_special_only = 1
     option_full = 2
+    alias_default = option_special_only
     alias_false = option_special_only
     alias_true = option_full
     default = 1
-
-
-# Retain the old Python name for integrations that import it directly.
-EnableLockedPaintings = LevelUnlocks
-EnableLockedPaintings.option_false = LevelUnlocks.option_special_only
-EnableLockedPaintings.option_true = LevelUnlocks.option_full
 
 
 class StrictCapRequirements(DefaultOnToggle):
@@ -1097,7 +1093,7 @@ class SM64Options(PerGameCommonOptions):
     no_despawns: NoDespawns
     permanent_coin_collection: PermanentCoinCollection
     combined_progressive_keys: CombinedProgressiveKeys
-    enable_locked_paintings: LevelUnlocks
+    level_unlocks: LevelUnlocks
     triple_jump: TripleJump
     long_jump: LongJump
     backflip: Backflip

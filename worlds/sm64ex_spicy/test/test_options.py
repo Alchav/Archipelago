@@ -11,8 +11,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
     global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
-    global_mode_enemy_item_names, bowser_bomb_item_data_table, non_painting_level_unlock_item_data_table, \
-    special_level_unlock_item_names, global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table
+    global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
+    global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -321,7 +321,11 @@ class FeatureItemPoolTestBase(SM64TestBase):
             **arbitrary_item_data_table,
             **optional_item_data_table,
             **bowser_stage_1up_item_data_table,
-            **painting_unlock_item_data_table,
+            **{
+                item_name: item_data
+                for item_name, item_data in painting_unlock_item_data_table.items()
+                if item_data.code < 3626853
+            },
             **{item_name: generic_item_data_table[item_name] for item_name in global_cap_item_names},
         }
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)
@@ -649,24 +653,36 @@ class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
 
 
 class DisabledLevelUnlockItemPoolTestBase(SM64TestBase):
-    options = {"enable_locked_paintings": Options.LevelUnlocks.option_disabled}
+    options = {"level_unlocks": Options.LevelUnlocks.option_disabled}
 
     def test_no_level_unlock_items_are_generated(self):
-        self.assertEqual(self.world.fill_slot_data()["LevelUnlockMode"], 0)
-        for item_name in special_level_unlock_item_names:
+        slot_data = self.world.fill_slot_data()
+        for item_name in (*special_level_unlock_item_names, *painting_unlock_item_data_table):
             self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+            self.assertEqual(slot_data["StartInventory"][item_table[item_name]], 1)
+
+
+class DefaultLevelUnlockItemPoolTestBase(SM64TestBase):
+    options = {"level_unlocks": Options.LevelUnlocks.option_special_only}
+
+    def test_only_special_level_unlock_items_are_generated(self):
+        slot_data = self.world.fill_slot_data()
+        for item_name in special_level_unlock_item_names:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            self.assertNotIn(item_table[item_name], slot_data["StartInventory"])
+        for item_name in painting_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+            self.assertEqual(slot_data["StartInventory"][item_table[item_name]], 1)
 
 
 class FullLevelUnlockItemPoolTestBase(SM64TestBase):
-    options = {"enable_locked_paintings": Options.LevelUnlocks.option_full}
+    options = {"level_unlocks": Options.LevelUnlocks.option_full}
 
     def test_all_level_unlock_items_are_generated(self):
         slot_data = self.world.fill_slot_data()
-        self.assertEqual(slot_data["LevelUnlockMode"], 2)
-        self.assertEqual(slot_data["PaintingRando"], 1)
-        for item_name in (*special_level_unlock_item_names, *painting_unlock_item_data_table,
-                          *non_painting_level_unlock_item_data_table):
+        for item_name in (*special_level_unlock_item_names, *painting_unlock_item_data_table):
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            self.assertNotIn(item_table[item_name], slot_data["StartInventory"])
 
 
 class BlocksanityOnTestBase(SM64TestBase):
@@ -1239,7 +1255,7 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
@@ -1340,7 +1356,7 @@ class EntranceRandoOffTestBase(SM64TestBase):
 class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
 
@@ -1480,7 +1496,7 @@ class CourseEntrancesMoveTestBase(SM64TestBase):
 
 class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_Only
     }
@@ -1515,7 +1531,7 @@ class SeparateEntrancesMoveTestBase(SM64TestBase):
 
 class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
     }

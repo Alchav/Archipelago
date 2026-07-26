@@ -2541,7 +2541,7 @@ def is_starting_check_location(location_name: str, options: SM64Options) -> bool
 
 
 def get_starting_check_sources(options: SM64Options) -> tuple[str, ...]:
-    if options.enable_locked_paintings.value == options.enable_locked_paintings.option_full:
+    if options.level_unlocks.value == options.level_unlocks.option_full:
         return ("Bob-omb Battlefield", "The Princess's Secret Slide")
     return initial_reachable_entrances
 
@@ -2777,7 +2777,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     def has_level_unlock(state, item_name: str) -> bool:
         return (
-            options.enable_locked_paintings.value == options.enable_locked_paintings.option_disabled
+            options.level_unlocks.value == options.level_unlocks.option_disabled
             or state.has(item_name, player)
         )
 
@@ -2853,14 +2853,14 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Third Floor", "Rainbow Ride",
         lambda state: third_floor_alcove_rule(state)
         and (
-            options.enable_locked_paintings.value != options.enable_locked_paintings.option_full
+            options.level_unlocks.value != options.level_unlocks.option_full
             or state.has("Unlock Rainbow Ride", player)
         ))
     connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
                                 lambda state: third_floor_alcove_rule(state)
                                 and (
-                                    options.enable_locked_paintings.value !=
-                                    options.enable_locked_paintings.option_full
+                                    options.level_unlocks.value !=
+                                    options.level_unlocks.option_full
                                     or state.has("Unlock Wing Mario Over the Rainbow", player)
                                 ))
     connect_regions(multiworld, player, "Third Floor", "Bowser in the Sky", can_bypass_seventy_star_door)
@@ -3686,7 +3686,7 @@ class RuleFactory:
         self.move_rando_bitvec = move_rando_bitvec
         self.area_randomizer = options.area_rando > 0
         self.painting_randomizer = (
-            options.enable_locked_paintings.value == options.enable_locked_paintings.option_full)
+            options.level_unlocks.value == options.level_unlocks.option_full)
         self.capless = not options.strict_cap_requirements
         self.cannonless = not options.strict_cannon_requirements
         self.moveless = not options.strict_move_requirements

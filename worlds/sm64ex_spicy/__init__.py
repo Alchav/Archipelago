@@ -9,8 +9,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
     item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
-    global_mode_enemy_item_names, bowser_bomb_item_data_table, non_painting_level_unlock_item_data_table, \
-    special_level_unlock_item_names, global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
+    global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
+    global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
     per_level_one_up_unlock_item_data_table
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
@@ -82,7 +82,7 @@ class SM64World(World):
         "no_despawns",
         "permanent_coin_collection",
         "combined_progressive_keys",
-        "enable_locked_paintings",
+        "level_unlocks",
         "one_up_mushroom_unlocks",
         "triple_jump",
         "long_jump",
@@ -352,14 +352,13 @@ class SM64World(World):
             per_level_one_up_unlock_item_data_table)
 
     def get_level_unlock_item_names(self) -> typing.List[str]:
-        option = self.options.enable_locked_paintings
+        option = self.options.level_unlocks
         if option.value == option.option_disabled:
             return []
 
         item_names = list(special_level_unlock_item_names)
         if option.value == option.option_full:
             item_names += list(painting_unlock_item_data_table)
-            item_names += list(non_painting_level_unlock_item_data_table)
         return item_names
 
     def get_bowser_arena_bomb_item_names(self) -> typing.List[str]:
@@ -392,7 +391,9 @@ class SM64World(World):
                 self.options.one_up_mushroom_unlocks.option_not_shuffled:
             item_names += list(global_one_up_unlock_item_data_table)
             item_names += list(per_level_one_up_unlock_item_data_table)
-        if self.options.enable_locked_paintings.value == self.options.enable_locked_paintings.option_disabled:
+        if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
+            item_names += list(painting_unlock_item_data_table)
+        if self.options.level_unlocks.value == self.options.level_unlocks.option_disabled:
             item_names += list(special_level_unlock_item_names)
         return item_names
 
@@ -635,9 +636,6 @@ class SM64World(World):
             "Options": self.options.as_dict(*self.slot_option_names),
             "AreaRando": self.area_connections,
             "MoveRandoVec": self.move_rando_bitvec,
-            "PaintingRando": int(
-                self.options.enable_locked_paintings.value == self.options.enable_locked_paintings.option_full),
-            "LevelUnlockMode": self.options.enable_locked_paintings.value,
             "GlobalCapItems": not self.options.per_level_cap_items.value,
             "OneUpUnlockMode": self.options.one_up_mushroom_unlocks.value,
             "DeathLink": self.options.death_link.value,
@@ -669,7 +667,6 @@ class SM64World(World):
 
     def get_apsm64ex_slot_data(self):
         slot_data = self.fill_slot_data()
-        slot_data["StartInventory"] = slot_data["StartInventory"].copy()
         for item in self.multiworld.precollected_items[self.player]:
             if item.code is None:
                 continue
