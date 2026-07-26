@@ -685,6 +685,24 @@ class GustTrapWeight(Range):
     display_name = "Gust Trap Weight"
 
 
+class UncollectRandomCoinTrapWeight(Range):
+    """
+    Relative weight for Uncollect Random Coin Traps.
+
+    When Permanent Coin Collection is enabled, this trap randomly selects one previously collected coin and makes it
+    collectible again, and your starting coin total reduced, on a future course visit.
+
+    This weight is ignored when Permanent Coin Collection is disabled.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 0
+    display_name = "Uncollect Random Coin Trap Weight"
+
+
 trap_weight_options = (
     BonkTrapWeight,
     FireTrapWeight,
@@ -692,6 +710,7 @@ trap_weight_options = (
     ChuckyaTrapWeight,
     SpinTrapWeight,
     GustTrapWeight,
+    UncollectRandomCoinTrapWeight,
 )
 
 trap_weight_option_names = (
@@ -701,6 +720,7 @@ trap_weight_option_names = (
     "chuckya_trap_weight",
     "spin_trap_weight",
     "gust_trap_weight",
+    "uncollect_random_coin_trap_weight",
 )
 
 trap_item_name_by_option_name = {
@@ -710,6 +730,7 @@ trap_item_name_by_option_name = {
     "chuckya_trap_weight": "Chuckya Trap",
     "spin_trap_weight": "Spin Trap",
     "gust_trap_weight": "Gust Trap",
+    "uncollect_random_coin_trap_weight": "Uncollect Random Coin Trap",
 }
 class StrictMoveRequirements(DefaultOnToggle):
     """If disabled, Stars that expect certain moves may have to be acquired without them.
@@ -1155,5 +1176,6 @@ class SM64Options(PerGameCommonOptions):
     chuckya_trap_weight: ChuckyaTrapWeight
     spin_trap_weight: SpinTrapWeight
     gust_trap_weight: GustTrapWeight
+    uncollect_random_coin_trap_weight: UncollectRandomCoinTrapWeight
     death_link: DeathLink
     completion_type: CompletionType

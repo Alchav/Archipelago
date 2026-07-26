@@ -61,6 +61,35 @@ class BowserStageCollapseHitsOptionTest(unittest.TestCase):
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 6)
 
 
+UNCOLLECT_TRAP_ONLY_OPTIONS = {
+    "traps_filler_percentage": 100,
+    "bonk_trap_weight": 0,
+    "fire_trap_weight": 0,
+    "electric_trap_weight": 0,
+    "chuckya_trap_weight": 0,
+    "spin_trap_weight": 0,
+    "gust_trap_weight": 0,
+    "uncollect_random_coin_trap_weight": 100,
+}
+
+
+class UncollectTrapWithoutPermanentCoinsTestBase(SM64TestBase):
+    options = UNCOLLECT_TRAP_ONLY_OPTIONS
+
+    def test_uncollect_trap_weight_is_ignored(self):
+        self.assertEqual(len(self.get_items_by_name("Uncollect Random Coin Trap")), 0)
+
+
+class UncollectTrapWithPermanentCoinsTestBase(SM64TestBase):
+    options = {
+        **UNCOLLECT_TRAP_ONLY_OPTIONS,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def test_uncollect_trap_weight_is_used(self):
+        self.assertGreater(len(self.get_items_by_name("Uncollect Random Coin Trap")), 0)
+
+
 class PerLevelOptionAliasTest(unittest.TestCase):
     def test_individual_aliases_per_level(self):
         option_classes = (
@@ -148,6 +177,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_wmotr_cannon_unlock_item_id(self):
         self.assertEqual(cannon_item_data_table["Wing Mario Over the Rainbow - Cannon Unlock"].code, 3626525)
+
+    def test_uncollect_random_coin_trap_item_id(self):
+        self.assertEqual(item_table["Uncollect Random Coin Trap"], 3627766)
 
     def test_item_name_groups(self):
         for group_name, group_items in item_name_groups.items():

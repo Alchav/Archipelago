@@ -519,6 +519,9 @@ class SM64World(World):
         trap_items = []
         trap_weights = []
         for option_name in trap_weight_option_names:
+            if (option_name == "uncollect_random_coin_trap_weight"
+                    and not self.options.permanent_coin_collection):
+                continue
             weight = getattr(self.options, option_name).value
             if weight > 0:
                 trap_items.append(trap_item_name_by_option_name[option_name])

@@ -193,6 +193,7 @@ trap_item_data_table: dict[str, SM64ItemData] = {
     "Chuckya Trap": SM64ItemData(sm64ex_base_id + 1763, trap),
     "Spin Trap": SM64ItemData(sm64ex_base_id + 1764, trap),
     "Gust Trap": SM64ItemData(sm64ex_base_id + 1765, trap),
+    "Uncollect Random Coin Trap": SM64ItemData(sm64ex_base_id + 1766, trap),
 }
 
 arbitrary_item_data_table: dict[str, SM64ItemData] = {
