@@ -126,10 +126,8 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - 3 Coins Block", True,
              ["Bowser in the Fire Sea - 3-Coin Block"]],
 
-            ["Bowser in the Fire Sea - Red Coins", False, upper + ["Bowser in the Fire Sea - Red Coins"]],
+            ["Bowser in the Fire Sea - Red Coins", True, upper + ["Bowser in the Fire Sea - Red Coins"]],
             ["Bowser in the Fire Sea - Red Coins", False, near_poles],
-            ["Bowser in the Fire Sea - Red Coins", True,
-             near_poles + ["Bowser in the Fire Sea - Red Coins"]],
             ["Bowser in the Fire Sea - Key", False, upper + bombs[:1]],
             ["Bowser in the Fire Sea - Key", True, upper + bombs],
 

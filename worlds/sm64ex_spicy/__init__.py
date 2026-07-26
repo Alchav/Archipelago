@@ -72,6 +72,7 @@ class SM64World(World):
     coinsanity_location_names: typing.Tuple[str, ...]
     music_slot_data: typing.Dict[str, typing.Any] | None
     using_slot_coinsanity_locations: bool
+    start_inventory_item_ids: set[int]
 
     slot_option_names = (
         "area_rando",
@@ -105,8 +106,6 @@ class SM64World(World):
         "shifting_sand_land_pyramid_elevator",
         "rolling_logs",
         "purple_switches",
-        "coin_object_unlocks",
-        "enemy_unlocks",
         "bowser_bombs",
         "bowser_in_the_dark_world_hits",
         "bowser_in_the_fire_sea_hits",
@@ -150,6 +149,11 @@ class SM64World(World):
                 for entrance, destination in slot_data.get("AreaRando", {}).items()
             }
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
+            self.start_inventory_item_ids = {
+                int(item_id) for item_id in slot_data.get("StartInventory", {})
+            }
+        else:
+            self.start_inventory_item_ids = set(self.get_start_inventory_slot_data())
 
         enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
         tracker_logic_tricks = get_enabled_logic_tricks(self.options.universal_tracker_glitched_logic.value)

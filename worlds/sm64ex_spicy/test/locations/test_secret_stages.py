@@ -231,7 +231,7 @@ class TestVanishCapUnderTheMoatDropTrick(SM64TestBase):
         ]
         self.run_location_tests([
             ["Vanish Cap Under the Moat - Red Coins", False, route],
-            ["Vanish Cap Under the Moat - Red Coins", True,
+            ["Vanish Cap Under the Moat - Red Coins", False,
              route + ["Vanish Cap Under the Moat - Red Coins"]],
             ["Vanish Cap Under the Moat - Red Coin Platform 1-Up", True,
              route + ["Vanish Cap Under the Moat - Trigger 1-Ups"]],

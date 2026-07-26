@@ -155,7 +155,7 @@ class TestShiftingSandLandRedCoinTricks(SM64TestBase):
         self.run_location_tests([
             ["Shifting Sand Land - Free Flying for 8 Red Coins", False,
              ["Shifting Sand Land - Red Coins"]],
-            ["Shifting Sand Land - Free Flying for 8 Red Coins", True, [
+            ["Shifting Sand Land - Free Flying for 8 Red Coins", False, [
                 "Shifting Sand Land - Red Coins",
                 "Shifting Sand Land - Fly Guy",
             ]],

@@ -71,7 +71,7 @@ class TestBobOmbBattlefieldLocations(SM64TestBase):
             ["Bob-omb Battlefield - Shoot to the Island in the Sky", True, ISLAND],
             ["Bob-omb Battlefield - Find the 8 Red Coins", False, ISLAND],
             ["Bob-omb Battlefield - Find the 8 Red Coins", True,
-             ISLAND + ["Bob-omb Battlefield - Red Coins"]],
+             ISLAND + ["Bob-omb Battlefield - Red Coins", "Climb"]],
 
             ["Bob-omb Battlefield - Near Flower Patches Wing Cap Block", False, []],
             ["Bob-omb Battlefield - Near Flower Patches Wing Cap Block", True, WING_CAP],

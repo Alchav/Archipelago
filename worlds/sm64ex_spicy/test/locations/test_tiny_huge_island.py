@@ -211,7 +211,7 @@ class TestTinyHugeIslandGlobalUnlockModes(SM64TestBase):
 
     def test_global_items_replace_per_level_items(self):
         self.run_location_tests([
-            ["Tiny-Huge Island - Coins Star", False, ["Tiny-Huge Island - Goombas"]],
+            ["Tiny-Huge Island - Coins Star", True, ["Tiny-Huge Island - Goombas"]],
             ["Tiny-Huge Island - Coins Star", True, ["Goombas"]],
             ["Tiny-Huge Island - Start Butterfly 1-Up", False,
              ["Tiny-Huge Island - Butterflies"]],

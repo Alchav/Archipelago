@@ -2,6 +2,7 @@ import typing
 from enum import Enum
 
 from BaseClasses import MultiWorld, Region, Entrance, Location
+from rule_builder.rules import Rule
 from .Options import SM64Options
 from .Locations import SM64Location, location_table, locBoB_table, locWhomp_table, locJRB_table, locCCM_table, \
     locBBH_table, \
@@ -645,6 +646,8 @@ def connect_regions(multiworld: MultiWorld, player: int, source: str, target: st
                     name: str | None = None) -> Entrance:
     sourceRegion = multiworld.get_region(source, player)
     targetRegion = multiworld.get_region(target, player)
+    if isinstance(rule, Rule):
+        return multiworld.worlds[player].create_entrance(sourceRegion, targetRegion, rule, name=name)
     return sourceRegion.connect(targetRegion, name=name, rule=rule)
 
 

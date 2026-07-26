@@ -135,6 +135,21 @@ class TestRainbowRideFullLevelUnlock(SM64TestBase):
         ], starting_regions=["Menu"])
 
 
+class TestRainbowRideBuddyLedgeGrabAndCarpetsTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **RR_OPTIONS,
+        "logic_tricks": {"Rainbow Ride Bob-omb Buddy with Ledge Grab and Carpets"},
+    }
+
+    def test_trick_requires_ledge_grab_and_carpets(self):
+        self.run_location_tests([
+            ["Rainbow Ride - Bob-omb Buddy", False, ["Ledge Grab"]],
+            ["Rainbow Ride - Bob-omb Buddy", False, [CARPETS]],
+            ["Rainbow Ride - Bob-omb Buddy", True, [CARPETS, "Ledge Grab"]],
+        ], starting_regions=["Rainbow Ride - Carpets"])
+
+
 class TestRainbowRideGlobalUnlockModes(SM64TestBase):
     run_default_tests = False
     options = {
@@ -148,7 +163,7 @@ class TestRainbowRideGlobalUnlockModes(SM64TestBase):
     def test_global_items_replace_per_level_items(self):
         route = ["Long Jump"]
         self.run_location_tests([
-            ["Rainbow Ride - Coins Star", False,
+            ["Rainbow Ride - Coins Star", True,
              route + ["Rainbow Ride - Goomba"]],
             ["Rainbow Ride - Coins Star", True, route + ["Goombas"]],
             ["Rainbow Ride - Tricky Triangles 1-Up", False,

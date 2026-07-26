@@ -122,6 +122,51 @@ class TestTallTallMountainFullLevelUnlock(SM64TestBase):
         ], starting_regions=["Menu"])
 
 
+class TestTallTallMountainTopWithKickTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {"Tall, Tall Mountain Top with Kick"},
+    }
+
+    def test_kick_reaches_top(self):
+        upper = ["Tall, Tall Mountain - Rolling Log"]
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Scale the Mountain", False, upper],
+            ["Tall, Tall Mountain - Scale the Mountain", True, upper + ["Kick"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
+class TestTallTallMountainTopWithDiveTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {"Tall, Tall Mountain Top with Dive"},
+    }
+
+    def test_dive_reaches_top(self):
+        upper = ["Tall, Tall Mountain - Rolling Log"]
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Scale the Mountain", False, upper],
+            ["Tall, Tall Mountain - Scale the Mountain", True, upper + ["Dive"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
+class TestTallTallMountainLonelyMushroomFlyGuyTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {"Tall, Tall Mountain Lonely Mushroom with Spin Jump Off of Fly Guy"},
+    }
+
+    def test_spin_jump_requires_fly_guy(self):
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Blast to the Lonely Mushroom", False, []],
+            ["Tall, Tall Mountain - Blast to the Lonely Mushroom", True,
+             ["Tall, Tall Mountain - Fly Guy"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
 class TestTallTallMountainGlobalUnlockModes(SM64TestBase):
     run_default_tests = False
     options = {
@@ -135,10 +180,10 @@ class TestTallTallMountainGlobalUnlockModes(SM64TestBase):
 
     def test_global_items_replace_per_level_items(self):
         self.run_location_tests([
-            ["Tall, Tall Mountain - Coins Star", False,
+            ["Tall, Tall Mountain - Coins Star", True,
              ["Tall, Tall Mountain - Horizontal Coin Rings"]],
             ["Tall, Tall Mountain - Coins Star", True, ["Horizontal Coin Rings"]],
-            ["Tall, Tall Mountain - Lower Monty Moles", False,
+            ["Tall, Tall Mountain - Lower Monty Moles", True,
              ["Trigger 1-Ups", "Tall, Tall Mountain - Monty Moles"]],
             ["Tall, Tall Mountain - Lower Monty Moles", True,
              ["Trigger 1-Ups", "Monty Moles"]],

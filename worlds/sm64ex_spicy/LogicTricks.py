@@ -324,6 +324,7 @@ logic_tricks = {
         "rule": "CANN",
         "difficulty": "easy",
         "description": "Reaching the upper platform using Cannon.",
+        "video": "https://www.youtube.com/watch?v=W7a8oRaTWZs",
     },
     "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick": {
         "internal_id": "logic_jrb_pillar_red_coin_moves",
@@ -420,30 +421,35 @@ logic_tricks = {
         "rule": "WK",
         "difficulty": "hard",
         "description": "Reaching Hot-Foot it Into the Volcano with Wall Kick and no Climb.",
+        "video": "https://www.youtube.com/watch?v=TnLSM0o0_fw",
     },
     "Lethal Lava Land Hot-Foot it Into the Volcano With Triple Jump": {
         "internal_id": "logic_lll_hot_foot_it_with_triple_jump",
         "rule": "TJ",
         "difficulty": "hard",
         "description": "Reaching Hot-Foot it Into the Volcano with Triple Jump and no Climb.",
+        "video": "https://www.youtube.com/watch?v=Avd3bnVJmDg",
     },
     "Lethal Lava Land Hot-Foot it Into the Volcano With Side Flip": {
         "internal_id": "logic_lll_hot_foot_it_with_side_flip",
         "rule": "SF",
         "difficulty": "hard",
         "description": "Reaching Hot-Foot it Into the Volcano with Side Flip and no Climb, using the lavafall.",
+        "video": "https://www.youtube.com/watch?v=FtZoocFjxTA",
     },
     "Lethal Lava Land Hot-Foot it Into the Volcano With Backflip": {
         "internal_id": "logic_lll_hot_foot_it_with_backflip",
         "rule": "BF",
         "difficulty": "hard",
         "description": "Reaching Hot-Foot it Into the Volcano ledge with Backflip and no Climb, using the lavafall.",
+        "video": "https://www.youtube.com/watch?v=vSERJ4SANB8",
     },
     "Lethal Lava Land Hot-Foot it Into the Volcano With No Movement Abilities": {
         "internal_id": "logic_lll_hot_foot_it_with_no_movement",
         "rule": "",
         "difficulty": "hard",
         "description": "Reaching Hot-Foot it Into the Volcano ledge with no movement abilities, using the lavafall.",
+        "video": "https://www.youtube.com/watch?v=l4F7Jicgok4",
     },
     "Lethal Lava Land Long Jump From Hot-Foot-It into the Volcano to Elevator Tour in the Volcano": {
         "internal_id": "logic_lll_elevator_tour_long_jump",
@@ -451,6 +457,7 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Using a Long Jump from the Hot-Foot-It into the Volcano ledge down to Elevator Tour in"
                        "the Volcano (and three coins).",
+        "video": "https://www.youtube.com/watch?v=mGkOJS2MVsw",
     },
     "Lethal Lava Land Triple Jump or Dive From Hot-Foot-It into the Volcano to Elevator Tour in the Volcano": {
         "internal_id": "logic_lll_elevator_tour_triple_jump_or_dive",
@@ -458,6 +465,7 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Using a Triple Jump or Dive from the Hot-Foot-It into the Volcano ledge down to the poles"
                        "leading to Elevator Tour in the Volcano (and three coins).",
+        "video": "https://www.youtube.com/watch?v=RUipVl7XHbg",
     },
     # Shifting Sand Land
     "Shifting Sand Land Stone Structure with Shy Guy Bounce": {
@@ -486,7 +494,7 @@ logic_tricks = {
     },
     "Shifting Sand Land Pillars with Side Flip or Kick": {
         "internal_id": "logic_ssl_pillars_side_flip_or_kick",
-        "rule": "MOVELESS & SF/KK",
+        "rule": "SF/KK",
         "difficulty": "medium",
         "description": "Reaching the Upper Pyramid entrance using a Side Flip or Kick to access the quicksand pillar."
                        # "It's likely possible with other moves, but I have not been able to do it myself."
@@ -517,13 +525,39 @@ logic_tricks = {
         "description": "Collecting the coin embedded underground on Tiny Island using Ground Pound, Triple Jump,"
                        " Dive, and Kick.",
     },
+    "Tiny-Huge Island Cannon Trees without Cannon": {
+        "internal_id": "logic_thi_cannon_tree_cannonless",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Reaches the Cannon Tree and Red Coin Bridge Tree 1-Ups without cannon access.",
+    },
     # Tick Tock Clock
     "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp": {
         "internal_id": "logic_ttc_stomp_thwomp_triple_jump_wall_kick",
         "rule": "TJ+WK",
         "difficulty": "medium",
-        "description": "Reaching the Stomp on the Thwomp star with a Triple Jump and Wall Kick without spawning"
-                       " the Thwomp.",
+        "description": "Reaching the Stomp on the Thwomp star with a Triple Jump and Wall Kick without the Thwomp.",
+    },
+    "Tick Tock Clock Lower with Wall Kick": {
+        "internal_id": "logic_ttc_lower_wall_kick",
+        "rule": "WK",
+        "difficulty": "medium",
+        "description": "Reaches lower Tick Tock Clock using Wall Kick as the only movement item.",
+        "video": "https://www.youtube.com/watch?v=NfRb0epgZbo",
+    },
+    "Tick Tock Clock Mid with Wall Kick": {
+        "internal_id": "logic_ttc_upper_wall_kick",
+        "rule": "WK",
+        "difficulty": "medium",
+        "description": "Reaches mid Tick Tock Clock using Wall Kick instead of Climb.",
+        "video": "https://www.youtube.com/watch?v=NfRb0epgZbo",
+    },
+    "Tick Tock Clock Top with Wall Kick or Triple Jump": {
+        "internal_id": "logic_ttc_top_wall_kick_or_triple_jump",
+        "rule": "WK/TJ",
+        "difficulty": "medium",
+        "description": "Reaches the top of Tick Tock Clock using either Wall Kick or Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=63eenKoAxEo",
     },
     # Snowman's Land
     "Snowman's Land Impossible Coin": {
@@ -532,6 +566,13 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Collecting the coin hidden inside the first wooden walkway on the snowman by shooting"
                        " into it from the cannon.",
+    },
+    "Snowman's Land Igloo without Movement Items": {
+        "internal_id": "logic_sl_igloo_no_movement",
+        "rule": "VC",
+        "difficulty": "medium",
+        "description": "Enters the igloo and reaches its 1-Up checks using Vanish Cap without movement items.",
+        "video": "https://www.youtube.com/watch?v=QTZMq0fvTTo",
     },
     # Bowser in the Dark World
     "Bowser in the Dark World Triple Jump up the Purple Switch Slope": {
@@ -546,6 +587,7 @@ logic_tricks = {
         "rule": "",
         "difficulty": "medium",
         "description": "Collecting the deep underwater coins and Red Coin Star without using the Metal Cap.",
+        "video": "https://www.youtube.com/watch?v=qUWo05c5dkM",
     },
     # Wing Mario Over the Rainbow
     "Wing Mario Over the Rainbow Leap of Faith": {
@@ -561,6 +603,7 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
                        "Red Coin. Long Jump can reach the Buddy Platform",
+        "video": "https://www.youtube.com/watch?v=hAWQ97iT8wY",
     },
     # Tower of the Wing Cap
     "Tower of the Wing Cap Coin Mastery": {
@@ -592,6 +635,209 @@ logic_tricks = {
         "description": "Crawling back up the slide before dropping to the Checkerboard Platforms, allowing coins"
                        " from both sides of the drop to be collected without a movement ability.",
         "video": "https://www.youtube.com/watch?v=DelkR8OfJWk"
+    },
+    "Vanish Cap Under the Moat Switch without Movement Items": {
+        "internal_id": "logic_vcutm_switch_no_movement",
+        "rule": "CHECKERBOARD_PLATFORMS",
+        "difficulty": "medium",
+        "description": "Reaches the Vanish Cap switch using Checkerboard Platforms without movement items.",
+        "video": "https://www.youtube.com/watch?v=72TsponCYvg",
+    },
+    # Hazy Maze Cave
+    "Hazy Maze Cave Upper Red Coin Area with Wall Kick Only": {
+        "internal_id": "logic_hmc_upper_red_coin_area_wall_kick",
+        "rule": "CHECKERBOARD_PLATFORMS & WK",
+        "difficulty": "medium",
+        "description": "Reaches the upper red coin area and its platform coins using the Checkerboard Platform "
+                       "and Wall Kick.",
+        "video": "https://www.youtube.com/watch?v=EHx58IaW2uU",
+    },
+    "Hazy Maze Cave Pit Islands with Wall Kick": {
+        "internal_id": "logic_hmc_pit_islands_wall_kick",
+        "rule": "WK & TJ/LJ | WK+SF+LG",
+        "difficulty": "medium",
+        "description": "Reaches the pit islands using Wall Kick with either Triple Jump or Long Jump, or using "
+                       "Wall Kick, Side Flip, and Ledge Grab.",
+        "video": "https://www.youtube.com/watch?v=kPSHKBJxZdY",
+    },
+    "Hazy Maze Cave Metal-Head Mario without Metal Cap": {
+        "internal_id": "logic_hmc_metal_head_capless",
+        "rule": "PURPLE_SWITCHES & LJ+TJ",
+        "difficulty": "medium",
+        "description": "Completes Metal-Head Mario Can Move and reaches its related coins without Metal Cap, using "
+                       "Purple Switches, Long Jump, and Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=uBXWrnHZbpQ",
+    },
+    "Hazy Maze Cave Metal-Head Route Coins without Metal Cap": {
+        "internal_id": "logic_hmc_metal_head_coin_route_capless",
+        "rule": "PURPLE_SWITCHES & TJ",
+        "difficulty": "medium",
+        "description": "Collects the three coins on the Metal-Head Mario route without Metal Cap using Purple "
+                       "Switches and Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=ObSmoQ-Xyxo",
+    },
+    "Hazy Maze Cave Metal-Head Mario without Metal Cap or Full Movement": {
+        "internal_id": "logic_hmc_metal_head_capless_no_movement",
+        "rule": "PURPLE_SWITCHES & LJ/TJ/WK",
+        "difficulty": "medium",
+        "description": "Completes Metal-Head Mario Can Move without Metal Cap using Purple Switches and one of Long "
+                       "Jump, Triple Jump, or Wall Kick.",
+        "video": "https://www.youtube.com/watch?v=PiWdPfZBf4k",
+    },
+    # Dire, Dire Docks
+    "Dire, Dire Docks Through the Jet Stream without Metal Cap": {
+        "internal_id": "logic_ddd_jet_stream_capless",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Completes Through the Jet Stream without using Metal Cap.",
+        "video": "https://www.youtube.com/watch?v=qixVIy4sXSo",
+    },
+    "Dire, Dire Docks Board Bowser's Sub with Triple Jump": {
+        "internal_id": "logic_ddd_board_bowsers_sub_triple_jump",
+        "rule": "TJ & DDD_BOWSER_SUB",
+        "difficulty": "medium",
+        "description": "Triple Jumps up the back of Bowser's Sub without using Purple Switches.",
+    },
+    # Wet-Dry World
+    "Wet-Dry World Top Platforms to Express Elevator without Movement Items": {
+        "internal_id": "logic_wdw_top_platforms_to_express_elevator_no_movement",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Uses a tight running-speed jump from the top platforms to the top of the Express Elevator "
+                       "without movement items.",
+        "video": "https://www.youtube.com/watch?v=58X2zu3ldXs",
+    },
+    "Wet-Dry World Express Elevator to Top without Movement Items": {
+        "internal_id": "logic_wdw_express_elevator_to_top_no_movement",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Uses a tight running-speed jump from the top of the Express Elevator to Top o' the Town "
+                       "without movement items.",
+        "video": "https://www.youtube.com/watch?v=5P7OWuw9ZZM",
+    },
+    "Wet-Dry World Downtown with Triple Jump": {
+        "internal_id": "logic_wdw_downtown_triple_jump",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Reaches Downtown from Top o' the Town using Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=xQcvUoXie6c",
+    },
+    "Wet-Dry World High Red Coins with Triple Jump": {
+        "internal_id": "logic_wdw_high_red_coins_triple_jump",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Collects the two high Downtown Red Coins using Triple Jump instead of Wall Kick.",
+        "video": "https://www.youtube.com/watch?v=xQcvUoXie6c",
+    },
+    "Wet-Dry World Quick Race with Triple Jump": {
+        "internal_id": "logic_wdw_quick_race_triple_jump",
+        "rule": "WDW_WATER_LEVEL_DIAMOND & VC & TJ",
+        "difficulty": "medium",
+        "description": "Completes Quick Race Through Downtown using a Triple Jump from a nearby building.",
+        "video": "https://www.youtube.com/watch?v=F87VOiRxo98",
+    },
+    # Tall, Tall Mountain
+    "Tall, Tall Mountain Top with Triple Jump": {
+        "internal_id": "logic_ttm_top_triple_jump",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Reaches the top of Tall, Tall Mountain using Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=AEEDAqPGBjU",
+    },
+    "Tall, Tall Mountain Top with Wall Kick": {
+        "internal_id": "logic_ttm_top_wall_kick",
+        "rule": "WK & SF/LG",
+        "difficulty": "medium",
+        "description": "Reaches the top of Tall, Tall Mountain using Wall Kick with either Side Flip or Ledge Grab.",
+    },
+    "Tall, Tall Mountain Top with Kick": {
+        "internal_id": "logic_ttm_top_kick",
+        "rule": "KK",
+        "difficulty": "hard",
+        "description": "Reaches the top of Tall, Tall Mountain using Kick.",
+        "video": "https://www.youtube.com/watch?v=MSdWtuHUgLw",
+    },
+    "Tall, Tall Mountain Top with Dive": {
+        "internal_id": "logic_ttm_top_dive",
+        "rule": "DV",
+        "difficulty": "hard",
+        "description": "Reaches the top of Tall, Tall Mountain using Dive.",
+    },
+    "Tall, Tall Mountain Lonely Mushroom without Cannon": {
+        "internal_id": "logic_ttm_lonely_mushroom_cannonless",
+        "rule": "LJ",
+        "difficulty": "medium",
+        "description": "Reaches the Lonely Mushroom without cannon access using Long Jump.",
+    },
+    "Tall, Tall Mountain Lonely Mushroom with Spin Jump Off of Fly Guy": {
+        "internal_id": "logic_ttm_lonely_mushroom_fly_guy_spin_jump",
+        "rule": "FLY_GUY",
+        "difficulty": "medium",
+        "description": "Reaches the Lonely Mushroom by spin-jumping off of a Fly Guy.",
+        "video": "https://www.youtube.com/watch?v=AMbEM8me4p4",
+    },
+    "Tall, Tall Mountain Coins without Climb": {
+        "internal_id": "logic_ttm_coins_without_climb",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Collects the five coins on the bottom of the climbable vine ceiling without having Climb.",
+    },
+    # Rainbow Ride
+    "Rainbow Ride Maze Coins with Ledge Grab or Triple Jump": {
+        "internal_id": "logic_rr_maze_coins_ledge_grab_or_triple_jump",
+        "rule": "LG/TJ",
+        "difficulty": "medium",
+        "description": "Collects Coins Amassed in a Maze using either Ledge Grab or Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=JUHaYOh340o",
+    },
+    "Rainbow Ride Bob-omb Buddy with Ledge Grab and Carpets": {
+        "internal_id": "logic_rr_buddy_ledge_grab",
+        "rule": "LG & RR_CARPETS",
+        "difficulty": "medium",
+        "description": "Reaches the Rainbow Ride Bob-omb Buddy using Ledge Grab and the carpets.",
+        "video": "https://www.youtube.com/watch?v=MUTMWPHPBzM",
+    },
+    "Rainbow Ride Swingin' in the Breeze without Movement Items": {
+        "internal_id": "logic_rr_swingin_no_movement",
+        "rule": "",
+        "difficulty": "easy",
+        "description": "Completes Swingin' in the Breeze without movement items.",
+        "video": "https://www.youtube.com/watch?v=m1l8IY1zX0k",
+    },
+    "Rainbow Ride Tricky Triangles without Movement Items": {
+        "internal_id": "logic_rr_tricky_triangles_no_movement",
+        "rule": "PURPLE_SWITCHES",
+        "difficulty": "easy",
+        "description": "Completes Tricky Triangles and reaches its 1-Up using Purple Switches without movement items.",
+        "video": "https://www.youtube.com/watch?v=tJxuv2YGmaU",
+    },
+    "Rainbow Ride Initial Coins without Carpets": {
+        "internal_id": "logic_rr_initial_coins_without_carpets",
+        "rule": "LJ+TJ+LG",
+        "difficulty": "medium",
+        "description": "Collects the eight initial Rainbow Ride coins without Carpets using Long Jump, Triple Jump, "
+                       "and Ledge Grab.",
+    },
+    # Bowser in the Sky
+    "Bowser in the Sky Chuckya without Movement Items": {
+        "internal_id": "logic_bits_chuckya_no_movement",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Reaches the Bowser in the Sky Chuckya region without movement items.",
+    },
+    "Bowser in the Sky Arrow Ride without Purple Switches": {
+        "internal_id": "logic_bits_arrow_ride_no_purple_switch",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Reaches the Bowser in the Sky Arrow Ride region without Purple Switches.",
+    },
+    "Bowser in the Sky Top without Climb": {
+        "internal_id": "logic_bits_top_without_climb",
+        "rule": "TJ+WK+LG",
+        "difficulty": "medium",
+        "description": "Reaches the top of Bowser in the Sky without Climb using Triple Jump, Wall Kick, and Ledge "
+                       "Grab.",
+        "video": "https://www.youtube.com/watch?v=L6WadejjTGQ",
     },
 }
 

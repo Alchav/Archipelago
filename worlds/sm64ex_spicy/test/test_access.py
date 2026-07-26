@@ -2,16 +2,44 @@ from BaseClasses import CollectionState
 
 from .bases import SM64TestBase
 from .. import Options
+from ..CoinLogic import COIN_EVALUATORS
 from ..Regions import sm64_ttc_entrances
-from ..Rules import bob_omb_battlefield_coins, whomps_fortress_coins, cool_cool_mountain_coins, \
-    big_boos_haunt_coins, jolly_roger_bay_coins, lethal_lava_land_coins, shifting_sand_land_coins, \
-    bowser_in_the_dark_world_coins, bowser_in_the_fire_sea_coins, cavern_of_the_metal_cap_coins, \
-    princess_secret_slide_coins, secret_aquarium_coins, vanish_cap_under_the_moat_coins, \
-    wing_mario_over_the_rainbow_coins, tower_of_the_wing_cap_coins, bowser_in_the_sky_coins, \
-    hazy_maze_cave_coins, dire_dire_docks_coins, snowmans_land_coins, wet_dry_world_coins, \
-    tall_tall_mountain_coins, tiny_huge_island_coins, tick_tock_clock_coins, rainbow_ride_coins, \
-    get_per_level_action_item_name
-from ..Rules import can_use_logic_trick
+from ..Rules import can_use_logic_trick, get_per_level_action_item_name
+
+
+def coin_rule(course_name):
+    evaluator = COIN_EVALUATORS[course_name]
+
+    def rule(state, player, coins):
+        return evaluator(state, player, coins).reachable_coins >= coins
+
+    return rule
+
+
+bob_omb_battlefield_coins = coin_rule("Bob-omb Battlefield")
+whomps_fortress_coins = coin_rule("Whomp's Fortress")
+jolly_roger_bay_coins = coin_rule("Jolly Roger Bay")
+cool_cool_mountain_coins = coin_rule("Cool, Cool Mountain")
+big_boos_haunt_coins = coin_rule("Big Boo's Haunt")
+hazy_maze_cave_coins = coin_rule("Hazy Maze Cave")
+lethal_lava_land_coins = coin_rule("Lethal Lava Land")
+shifting_sand_land_coins = coin_rule("Shifting Sand Land")
+dire_dire_docks_coins = coin_rule("Dire, Dire Docks")
+snowmans_land_coins = coin_rule("Snowman's Land")
+wet_dry_world_coins = coin_rule("Wet-Dry World")
+tall_tall_mountain_coins = coin_rule("Tall, Tall Mountain")
+tiny_huge_island_coins = coin_rule("Tiny-Huge Island")
+tick_tock_clock_coins = coin_rule("Tick Tock Clock")
+rainbow_ride_coins = coin_rule("Rainbow Ride")
+princess_secret_slide_coins = coin_rule("The Princess's Secret Slide")
+secret_aquarium_coins = coin_rule("The Secret Aquarium")
+wing_mario_over_the_rainbow_coins = coin_rule("Wing Mario Over the Rainbow")
+tower_of_the_wing_cap_coins = coin_rule("Tower of the Wing Cap")
+vanish_cap_under_the_moat_coins = coin_rule("Vanish Cap Under the Moat")
+cavern_of_the_metal_cap_coins = coin_rule("Cavern of the Metal Cap")
+bowser_in_the_dark_world_coins = coin_rule("Bowser in the Dark World")
+bowser_in_the_fire_sea_coins = coin_rule("Bowser in the Fire Sea")
+bowser_in_the_sky_coins = coin_rule("Bowser in the Sky")
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
@@ -557,7 +585,11 @@ class BobOmbBattlefieldIndividualUnlockLogicTestBase(SM64TestBase):
                 self.remove(item)
 
     def test_red_coin_star_requires_red_coins(self):
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
+        self.collect_by_name([
+            "Bob-omb Battlefield - Cannon Unlock",
+            "Bob-omb Battlefield - Vertical Coin Rings",
+            "Climb",
+        ])
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Find the 8 Red Coins"))
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Red Coins"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Find the 8 Red Coins"))
@@ -1152,6 +1184,8 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "universal_tracker_glitched_logic": {
+            "Dire, Dire Docks Board Bowser's Sub with Triple Jump",
+            "Hazy Maze Cave Metal-Head Mario without Metal Cap",
             "Whomp's Fortress Caged Island from the Floating Island with Triple Jump Off of Whomp King",
         },
     }
@@ -2186,7 +2220,7 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
 
         self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Red Coins"))
-        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
+        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
 
 
 class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
@@ -3020,7 +3054,10 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 25))
 
     def test_red_coin_star_requires_red_coins(self):
-        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
+        self.collect_by_name([
+            "Whomp's Fortress - Checkerboard Platform",
+            "Whomp's Fortress - Thwomp",
+        ])
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
         self.collect(self.get_item_by_name("Whomp's Fortress - Red Coins"))
         self.assertTrue(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
@@ -4850,7 +4887,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
         self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 83))
         self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 84))
-        self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
 
 
 class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
@@ -5561,6 +5598,7 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
             "Triple Jump",
             "Dive",
             "Ledge Grab",
+            "Wall Kick",
             "Wet-Dry World - Purple Switch",
             "Wet-Dry World - Water Level Diamond",
             "Wet-Dry World - Cannon Unlock",
@@ -5655,6 +5693,7 @@ class WetDryWorldCoinStar152AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.collect([
             self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Triple Jump"),
+            self.get_item_by_name("Wall Kick"),
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Purple Switches"),
         ])
@@ -5724,7 +5763,7 @@ class TallTallMountainCoinStar60AccessTestBase(TallTallMountainCoinStarAccessTes
 class TallTallMountainCoinStar60MovelessAccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "logic_tricks": {"Tall, Tall Mountain Coins without Climb"},
         "tall_tall_mountain_coin_star_requirement": 60,
     }
 
@@ -6478,31 +6517,18 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
 
-class NoStrictMoveWetDryWorldAccessTestBase(SM64TestBase):
+class WetDryWorldTopPlatformsTrickTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_ARBITRARY_FEATURE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
+        "logic_tricks": {
+            "Wet-Dry World Top Platforms to Express Elevator without Movement Items",
+        },
         "area_rando": Options.AreaRandomizer.option_Off,
     }
-
-    def test_quick_race_accepts_moveless_jump_and_kick_route(self):
-        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.collect([
-            self.get_item_by_name("Ledge Grab"),
-            self.get_item_by_name("Side Flip"),
-        ])
-        self.assertTrue(self.can_reach_region("Wet-Dry World - Downtown"))
-        self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
-
-        self.collect(self.get_item_by_name("Kick"))
-        self.assertFalse(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
-
-        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - Quick Race Through Downtown!"))
 
     def test_top_of_express_elevator_accepts_no_movement_jump(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))

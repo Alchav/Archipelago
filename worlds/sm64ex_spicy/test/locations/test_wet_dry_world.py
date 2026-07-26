@@ -82,9 +82,9 @@ class TestWetDryWorldLowLocations(SM64TestBase):
             ["Wet-Dry World - Cylinder Upper 1-Up", True, top + [FREESTANDING_1UPS]],
 
             ["Wet-Dry World - Go to Town for Red Coins", False,
-             downtown + [DIAMOND, "Wall Kick"]],
+             downtown + [DIAMOND, "Wall Kick", "Kick"]],
             ["Wet-Dry World - Go to Town for Red Coins", True,
-             downtown + [DIAMOND, "Wall Kick", RED_COINS]],
+             downtown + [DIAMOND, "Wall Kick", "Kick", RED_COINS]],
             ["Wet-Dry World - Quick Race Through Downtown!", False,
              downtown + [DIAMOND, "Wall Kick"]],
             ["Wet-Dry World - Quick Race Through Downtown!", True,
@@ -139,6 +139,41 @@ class TestWetDryWorldHighLocations(SM64TestBase):
         ], starting_regions=["Wet-Dry World High"])
 
 
+class TestWetDryWorldDowntownTripleJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {"Wet-Dry World Downtown with Triple Jump"},
+    }
+
+    def test_top_connects_to_downtown_with_triple_jump(self):
+        top_access = [PURPLE_SWITCH, "Long Jump", TRIGGER_1UPS]
+        self.run_location_tests([
+            ["Wet-Dry World - Downtown Center Coin Ring 1-Up", False,
+             top_access],
+            ["Wet-Dry World - Downtown Center Coin Ring 1-Up", True,
+             top_access + ["Triple Jump"]],
+        ], starting_regions=["Wet-Dry World Low"])
+
+
+class TestWetDryWorldHighRedCoinsTripleJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {"Wet-Dry World High Red Coins with Triple Jump"},
+    }
+
+    def test_red_coin_star_accepts_triple_jump_instead_of_wall_kick(self):
+        requirements = [DIAMOND, RED_COINS]
+        self.run_location_tests([
+            ["Wet-Dry World - Go to Town for Red Coins", False, requirements],
+            ["Wet-Dry World - Go to Town for Red Coins", True,
+             requirements + ["Wall Kick"]],
+            ["Wet-Dry World - Go to Town for Red Coins", True,
+             requirements + ["Triple Jump"]],
+        ], starting_regions=["Wet-Dry World - Downtown"])
+
+
 class TestWetDryWorldFullLevelUnlock(SM64TestBase):
     run_default_tests = False
     options = WDW_OPTIONS
@@ -164,7 +199,7 @@ class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
     def test_global_items_replace_per_level_items(self):
         top = ["Purple Switches", "Long Jump"]
         self.run_location_tests([
-            ["Wet-Dry World - Coins Star", False,
+            ["Wet-Dry World - Coins Star", True,
              ["Wet-Dry World - Horizontal Coin Rings"]],
             ["Wet-Dry World - Coins Star", True, ["Horizontal Coin Rings"]],
             ["Wet-Dry World - Cylinder Lower 1-Up", False,
