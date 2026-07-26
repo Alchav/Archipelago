@@ -3765,6 +3765,8 @@ class RuleFactory:
     def get_level_name_from_target(self, target_name: str) -> str:
         if " - " in target_name:
             return target_name.split(" - ", 1)[0]
+        if target_name in per_level_move_area_names:
+            return target_name
         for level_name in (
                 "Tower of the Wing Cap",
                 "Cavern of the Metal Cap",

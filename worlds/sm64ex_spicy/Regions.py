@@ -518,6 +518,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     thi_koopa_the_quick.connect(hugeTHI, name="Tiny-Huge Island - Koopa the Quick to Huge Island")
     thi_koopa_the_quick.connect(thi_huge_piranha_area,
                                 name="Tiny-Huge Island - Koopa the Quick to Huge Piranha Area")
+    thi_huge_piranha_area.connect(hugeTHI,
+                                  name="Tiny-Huge Island - Huge Piranha Area to Huge Island")
     hugeTHI.connect(thi_huge_top, name="Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell")
     hugeTHI.connect(thi_red_coins, name="Tiny-Huge Island - Huge Island to Red Coins Area")
     thi_huge_top.connect(thi_red_coins, name="Tiny-Huge Island - Huge Top to Red Coins Area")

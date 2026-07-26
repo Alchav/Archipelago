@@ -1,0 +1,1 @@
+"""Declarative location logic tests."""

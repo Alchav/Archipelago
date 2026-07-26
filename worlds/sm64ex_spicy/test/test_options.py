@@ -1368,6 +1368,10 @@ class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
     def test_princess_slide_source_has_reachable_check(self):
         self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
 
+    def test_course_unlock_is_placed_early(self):
+        early_items = self.multiworld.local_early_items[self.player]
+        self.assertEqual(sum(early_items.get(item_name, 0) for item_name in painting_unlock_item_data_table), 1)
+
 
 class EntranceRandoCourseTestBase(SM64TestBase):
     options = {
