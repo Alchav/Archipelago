@@ -22,6 +22,12 @@ from .Items import (item_init_table, item_name_groups, item_table, GetBeemizerIt
                     small_key_name_to_key_ring_option)
 from .Options import ALTTPOptions, big_key_shuffle, small_key_shuffle
 from .PotShuffle import generate_pot_shuffle
+from .PuzzleShuffle import (
+    apply_puzzle_pot_modifications,
+    decode_puzzle_shuffle,
+    encode_puzzle_shuffle,
+    generate_puzzle_shuffle,
+)
 from .Regions import lookup_name_to_id, create_regions, mark_light_world_regions, lookup_vanilla_location_to_entrance, \
     is_main_entrance, key_drop_data
 from .Rom import TokenRom, patch_rom, apply_rom_settings, \
@@ -68,6 +74,7 @@ ALTTP_UT_LOGIC_OPTION_NAMES = (
     "item_functionality",
     "enemy_health",
     "randomize_damage_classes",
+    "preserve_melee_damage_classes",
     "progressive",
     "max_attacks_in_logic",
     "swordless",
@@ -89,6 +96,7 @@ ALTTP_UT_LOGIC_OPTION_NAMES = (
     "bombless_start",
     "shuffle_prizes",
     "boss_prize_shuffle",
+    "randomize_puzzles",
     "tile_shuffle",
     "glitch_boots",
     "timer",
@@ -287,7 +295,18 @@ class ALTTPWeb(WebWorld):
         ["Nyx Edelstein"]
     )
 
-    tutorials = [setup_en, setup_de, setup_es, setup_fr, msu, msu_es, msu_fr, plando, oof_sound]
+    randomize_damage_classes = Tutorial(
+        "Randomize Damage Classes Guide",
+        "A guide to how randomized enemy damage classes affect weapons, items, enemies, bosses, and logic.",
+        "English",
+        "randomize_damage_classes_en.md",
+        "randomize_damage_classes/en",
+        ["Alchav"]
+    )
+
+    tutorials = [
+        setup_en, setup_de, setup_es, setup_fr, msu, msu_es, msu_fr, plando, oof_sound, randomize_damage_classes
+    ]
     game_info_languages = ["en", "fr"]
 
 
@@ -468,6 +487,7 @@ class ALTTPWorld(World):
         self.ut_replay_data = None
         self.ut_pending_entrance_connections = None
         self.pot_shuffle_state = None
+        self.puzzle_shuffle_state = None
         self.logical_heart_containers = 10
         self.logical_heart_pieces = 24
         super(ALTTPWorld, self).__init__(*args, **kwargs)
@@ -536,12 +556,18 @@ class ALTTPWorld(World):
 
         if self.options.mode == 'standard':
             hyrule_castle_key_item = self.get_dungeon_small_key_item_name("Small Key (Hyrule Castle)")
-            if self.options.small_key_shuffle:
+            if self.options.small_key_shuffle or (self.key_rings and hyrule_castle_key_item):
                 if hyrule_castle_key_item:
                     if (self.options.small_key_shuffle not in
                             (small_key_shuffle.option_universal, small_key_shuffle.option_own_dungeons,
                              small_key_shuffle.option_start_with)):
                         self.multiworld.local_early_items[self.player][hyrule_castle_key_item] = 1
+                        early_items = self.multiworld.local_early_items[self.player]
+                        early_count = early_items.pop(hyrule_castle_key_item)
+                        previous_early_items = list(early_items.items())
+                        early_items.clear()
+                        early_items[hyrule_castle_key_item] = early_count
+                        early_items.update(previous_early_items)
                     self.options.local_items.value.add(hyrule_castle_key_item)
                 self.options.non_local_items.value -= {
                     "Small Key (Hyrule Castle)",
@@ -592,6 +618,10 @@ class ALTTPWorld(World):
                     self.dungeon_specific_item_names |= self.item_name_groups[option.item_name_group]
                 else:
                     self.options.local_items.value |= self.dungeon_local_item_names
+        if self.options.small_key_shuffle == "original_dungeon" and self.key_rings:
+            self.dungeon_local_item_names -= self.item_name_groups["Small Keys"]
+            self.dungeon_specific_item_names -= self.item_name_groups["Small Keys"]
+            self.options.local_items.value |= self.item_name_groups["Small Keys"]
 
         self.difficulty_requirements = difficulties[self.options.item_pool.current_key]
         self.logical_heart_pieces = self.difficulty_requirements.heart_piece_limit
@@ -780,14 +810,15 @@ class ALTTPWorld(World):
         if not self.options.boss_prize_shuffle:
             attempts = 5
             crystals = [self.create_item(name) for name in boss_prize_items]
-            all_state_with_prizes_base = self.multiworld.get_all_state(perform_sweep=False)
-            all_state_base = all_state_with_prizes_base.copy()
+            all_state = self.multiworld.get_all_state(perform_sweep=False)
+            if not self.options.key_drop_shuffle:
+                for key_data in key_drop_data.values():
+                    fixed_key_drop_item = self.create_item(key_data[3])
+                    if fixed_key_drop_item.type in {"SmallKey", "BigKey"}:
+                        self.collect(all_state, fixed_key_drop_item)
             for crystal in crystals:
-                all_state_base.remove(crystal)
-            all_state = all_state_base.copy()
-            all_state_with_prizes = all_state_with_prizes_base.copy()
+                all_state.remove(crystal)
             all_state.sweep_for_advancements()
-            all_state_with_prizes.sweep_for_advancements()
             crystal_locations = [self.get_location('Turtle Rock - Prize'),
                                  self.get_location('Eastern Palace - Prize'),
                                  self.get_location('Desert Palace - Prize'),
@@ -803,117 +834,49 @@ class ALTTPWorld(World):
             empty_crystal_locations = [loc for loc in crystal_locations if not loc.item]
             last_error = None
 
-            def place_prizes_without_self_locks(
-                fill_state: CollectionState,
-                removal_base_state: CollectionState,
-            ) -> bool:
-                def demote_fixed_key_drops_in_dungeon(location):
-                    if self.options.key_drop_shuffle:
-                        return
-                    dungeon = location.parent_region.dungeon
-                    if dungeon is None:
-                        return
-                    dungeon_key_names = {item.name for item in dungeon.small_keys}
-                    dungeon_key_names.update(
-                        key_ring_name
-                        for key_ring_name, small_key_name in key_ring_name_to_small_key.items()
-                        if small_key_name in dungeon_key_names
-                    )
-                    for region in dungeon.regions:
-                        for dungeon_location in region.locations:
-                            if (
-                                dungeon_location.name in key_drop_data
-                                and dungeon_location.item
-                                and dungeon_location.item.name in dungeon_key_names
-                            ):
-                                dungeon_location.item.classification = ItemClassification.filler
-
-                allowed_prizes = {}
-                for location in empty_crystal_locations:
-                    allowed_prizes[location] = []
-                    for prize in unplaced_prizes:
-                        state_without_prize = removal_base_state.copy()
-                        state_without_prize.remove(prize)
-                        state_without_prize.sweep_for_advancements()
-                        if location.can_fill(state_without_prize, prize):
-                            allowed_prizes[location].append((prize, False))
-                        elif (
-                            self.multiworld.has_beaten_game(state_without_prize, prize.player)
-                            and location.can_fill(fill_state, prize, check_access=False)
-                        ):
-                            allowed_prizes[location].append((prize, True))
-                    self.multiworld.random.shuffle(allowed_prizes[location])
-                    if not allowed_prizes[location]:
-                        return False
-                    allowed_prizes[location].sort(key=lambda candidate: candidate[1])
-
-                ordered_locations = empty_crystal_locations.copy()
-                self.multiworld.random.shuffle(ordered_locations)
-                ordered_locations.sort(key=lambda location: len(allowed_prizes[location]))
-
-                assigned_prizes = {}
-                assigned_names = set()
-
-                def assign_prize(location_index: int) -> bool:
-                    if location_index == len(ordered_locations):
-                        return True
-                    location = ordered_locations[location_index]
-                    for prize, demote in allowed_prizes[location]:
-                        if prize.name in assigned_names:
-                            continue
-                        assigned_names.add(prize.name)
-                        assigned_prizes[location] = (prize, demote)
-                        if assign_prize(location_index + 1):
-                            return True
-                        assigned_names.remove(prize.name)
-                        del assigned_prizes[location]
-                    return False
-
-                if not assign_prize(0):
-                    return False
-
-                for location, (prize, demote) in assigned_prizes.items():
-                    if demote:
-                        prize.classification = ItemClassification.filler
-                        demote_fixed_key_drops_in_dungeon(location)
-                    self.multiworld.push_item(location, prize, False)
-                    location.locked = True
-                return True
-
-            for fill_state, state_attempts, prevent_self_lock in (
-                    (all_state, 1, False),
-                    (all_state_with_prizes, attempts, True)):
-                for _ in range(state_attempts):
-                    try:
-                        if prevent_self_lock:
-                            if not place_prizes_without_self_locks(fill_state, all_state_with_prizes_base):
-                                raise FillError('Unable to place dungeon prizes without prize self-locks')
-                        else:
-                            prizepool = unplaced_prizes.copy()
-                            prize_locs = empty_crystal_locations.copy()
-                            self.multiworld.random.shuffle(prize_locs)
-                            fill_restrictive(self.multiworld, fill_state.copy(), prize_locs, prizepool, True,
-                                             lock=True, name="LttP Dungeon Prizes")
-                    except FillError as e:
-                        last_error = e
-                        for location in empty_crystal_locations:
-                            if location.item:
-                                location.item.location = None
-                            location.item = None
-                            location.locked = False
-                        continue
-                    break
-                else:
+            for _ in range(attempts):
+                try:
+                    prizepool = unplaced_prizes.copy()
+                    prize_locs = empty_crystal_locations.copy()
+                    self.multiworld.random.shuffle(prize_locs)
+                    fill_restrictive(self.multiworld, all_state.copy(), prize_locs, prizepool, True,
+                                     lock=True, name="LttP Dungeon Prizes")
+                except FillError as e:
+                    last_error = e
+                    for location in empty_crystal_locations:
+                        if location.item:
+                            location.item.location = None
+                        location.item = None
+                        location.locked = False
                     continue
                 break
             else:
                 raise FillError('Unable to place dungeon prizes') from last_error
-        if self.options.mode == 'standard' and self.options.small_key_shuffle \
-                and self.options.small_key_shuffle != small_key_shuffle.option_universal and \
-                self.options.small_key_shuffle != small_key_shuffle.option_own_dungeons:
+        if self.options.mode == 'standard' and (self.options.small_key_shuffle or self.key_rings) \
+                and self.options.small_key_shuffle not in (
+                    small_key_shuffle.option_universal,
+                    small_key_shuffle.option_own_dungeons,
+                    small_key_shuffle.option_start_with,
+                ):
             hyrule_castle_key_item = self.get_dungeon_small_key_item_name("Small Key (Hyrule Castle)")
             if hyrule_castle_key_item:
                 self.multiworld.local_early_items[self.player][hyrule_castle_key_item] = 1
+                early_items = self.multiworld.local_early_items[self.player]
+                early_count = early_items.pop(hyrule_castle_key_item)
+                previous_early_items = list(early_items.items())
+                early_items.clear()
+                early_items[hyrule_castle_key_item] = early_count
+                early_items.update(previous_early_items)
+
+    def setup_puzzle_shuffle(self) -> None:
+        if not self.options.randomize_puzzles:
+            return
+        puzzle_shuffle = _get_ut_replay_value(self.ut_replay_data, "ut_puzzle_shuffle", "puzzle_shuffle")
+        if puzzle_shuffle is not None:
+            self.puzzle_shuffle_state = decode_puzzle_shuffle(puzzle_shuffle)
+        elif self.puzzle_shuffle_state is None:
+            self.puzzle_shuffle_state = generate_puzzle_shuffle(self)
+        self.pot_shuffle_state = apply_puzzle_pot_modifications(self.pot_shuffle_state, self.puzzle_shuffle_state)
 
     def post_fill(self) -> None:
         location_items = _get_ut_replay_value(self.ut_replay_data, "ut_location_items", "location_items")
@@ -1265,7 +1228,7 @@ class ALTTPWorld(World):
         return GetBeemizerItem(self.multiworld, self.player, item)
 
     def get_pre_fill_items(self):
-        res = [] if self.options.boss_prize_shuffle else [self.create_item(name) for name in boss_prize_items]
+        res = []
         if self.dungeon_local_item_names:
             for dungeon in self.dungeons.values():
                 for item in dungeon.all_items:
@@ -1287,7 +1250,9 @@ class ALTTPWorld(World):
                 "progressive", "swordless", "retro_bow", "retro_caves", "shop_item_slots",
                 "boss_shuffle", "pot_shuffle", "enemy_shuffle", "key_drop_shuffle", "bombless_start",
                 "randomize_shop_inventories", "shuffle_shop_inventories", "shuffle_capacity_upgrades",
-                "boss_prize_shuffle", "randomize_damage_classes", "max_attacks_in_logic",
+                "boss_prize_shuffle", "randomize_damage_classes", "preserve_melee_damage_classes",
+                "max_attacks_in_logic",
+                "randomize_puzzles",
                 "entrance_shuffle",
                 "dark_room_logic", "goal", "mode",
                 "triforce_pieces_mode", "triforce_pieces_percentage", "triforce_pieces_required",
@@ -1350,6 +1315,7 @@ class ALTTPWorld(World):
             "ut_key_ring_data": dict(self.key_ring_data),
             "ut_location_items": _encode_ut_location_items(self),
             "ut_pot_shuffle": _encode_ut_pot_shuffle(self.pot_shuffle_state),
+            "ut_puzzle_shuffle": encode_puzzle_shuffle(self.puzzle_shuffle_state),
             "ut_shop_inventories": _encode_ut_shop_inventories(self),
             "ut_shop_locations": _encode_ut_shop_locations(self),
             "ut_take_any_caves": _encode_ut_take_any_caves(self),

@@ -98,7 +98,7 @@ class TestBase(unittest.TestCase):
 
 class LTTPTestBase(unittest.TestCase):
     def world_setup(self):
-        from worlds.alttp.Options import Medallion
+        from worlds.alttp_beta.Options import Medallion
         self.multiworld = MultiWorld(1)
         self.multiworld.game[1] = "A Link to the Past Beta"
         self.multiworld.set_seed(None)

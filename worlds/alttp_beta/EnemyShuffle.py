@@ -9,15 +9,21 @@ from .enemizer_data.default_dungeon_room_enemies import DEFAULT_DUNGEON_ROOM_ENE
 from .enemizer_data.dungeon_sprite_addresses import DUNGEON_SPRITE_ADDRESSES, KEYED_SPRITE_ID_ADDRESSES
 from .enemizer_data.enemy_shuffle_base_data import DUNGEON_ENEMY_ROOMS, DUNGEON_SPRITE_GROUPS, OVERWORLD_ENEMY_AREAS
 from .enemizer_data.enemy_combat_data import (
-    DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS,
+    BLOB_TRANSFORM_EFFECT,
     DIRECT_KILL_DELIVERY_OVERRIDES,
+    FAIRY_TRANSFORM_EFFECT,
     KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES,
     EnemyCombatModel,
     VANILLA_COMBAT_MODEL,
+    YELLOW_SLIME_SPRITE_ID,
+    get_blob_transform_damage_classes,
+    get_damage_effect,
     get_incinerating_damage_classes,
     get_killing_damage_classes,
     get_hits_to_kill,
     get_progression_kill_damage_classes,
+    get_yellow_slime_follow_up_delivery_override,
+    with_killable_thief_combat_model,
 )
 from .enemizer_data.enemy_room_metadata import (
     BOSS_ROOM_IDS,
@@ -38,7 +44,7 @@ from .enemizer_data.symbols import ENEMIZER_SYMBOLS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
-    from .Rom import LocalRom
+    from .Rom import TokenRom
 
 
 DUNGEON_HEADER_POINTER_TABLE_BASE = 0x271E2
@@ -61,6 +67,20 @@ FLOPPING_FISH_SPRITE_ID = 0xD2
 OW_FALLING_ROCKS_SPRITE_ID = 0xF4
 OW_WALLMASTER_TO_HOULIHAN_SPRITE_ID = 0xFB
 WATER_TEKTITE_SPRITE_ID = 0x81
+ROOM_CLEAR_IGNORED_SPRITE_IDS = frozenset({
+    0x15,  # Anti-Fairy
+    0x55,  # Fireball Zora
+    0x5B,  # Spark (clockwise)
+    0x5C,  # Spark (counter-clockwise)
+    0x61,  # Beamos
+    0x6F,  # Keese
+    0x7D,  # Big Spike Trap
+    0x80,  # Fire Snake
+    0x82,  # Anti-Fairy Circle
+    0x8A,  # Spike Trap
+    0x9A,  # Kyameron
+    0xE8,  # Fake Master Sword
+})
 KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM = {
     "Fighter Sword": frozenset((1, 2)),
     "Master Sword": frozenset((1, 2, 3)),
@@ -89,7 +109,14 @@ POTENTIAL_SUBGROUP_0 = (22, 31, 47, 14)
 POTENTIAL_SUBGROUP_1 = (44, 30, 32)
 POTENTIAL_SUBGROUP_2 = (12, 18, 23, 24, 28, 46, 34, 35, 39, 40, 38, 41, 36, 37, 42)
 POTENTIAL_SUBGROUP_3 = (17, 16, 27, 20, 82, 83)
+IMPOSSIBLE_GRAPHICS_VALUE = -1
 STANDARD_ESCAPE_OVERWORLD_AREA_IDS = frozenset((0x1B, 0x2B, 0x2C))
+STANDARD_ESCAPE_DUNGEON_ROOM_IDS = frozenset((
+    0x21,  # Hyrule Castle (Key-rat Room)
+    0x71,  # Hyrule Castle (Boomerang Chest Room)
+    0x72,  # Hyrule Castle (Map Chest Room)
+    0x80,  # Hyrule Castle (Jail Cell Room)
+))
 # Standard opening escape uses the separate Beginning-mode overworld sheets rather than
 # the ordinary area graphics-block bytes. The three relevant groups are the runtime
 # Beginning sheet observed in Hyrule Castle courtyard (group 2) plus the first-part
@@ -151,6 +178,7 @@ class EnemySpriteRequirement:
     overlord: bool
     do_not_randomize: bool
     killable: bool
+    counts_for_enemy_clear: bool
     npc: bool
     never_use_dungeon: bool
     never_use_overworld: bool
@@ -339,6 +367,9 @@ class EnemyShuffleState:
     max_attacks_in_logic: int = 16
     killable_thieves: bool = False
     available_damage_classes: frozenset[int] = frozenset(range(16))
+    available_damage_delivery_items: frozenset[str] = frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM)
+    available_damage_delivery_abilities: frozenset[str] = frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY)
+    hammer_available_for_freeze: bool = True
 
 
 def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
@@ -360,8 +391,16 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
     original_sprite_groups = _snapshot_sprite_groups(sprite_groups)
     _setup_required_dungeon_groups(world, sprite_groups, metadata["room_requirements"])
     _apply_selected_boss_group_requirements(world, sprite_groups, sprite_requirements)
+    _setup_combined_dungeon_room_graphics_groups(world, dungeon_rooms, sprite_groups, sprite_requirements)
     _randomize_dungeon_groups(world, sprite_groups)
-    _restore_skipped_room_sprite_groups(world, dungeon_rooms, sprite_groups, original_sprite_groups)
+    _restore_skipped_room_sprite_groups(world, dungeon_rooms, sprite_groups, sprite_requirements, original_sprite_groups)
+    _restore_original_groups_for_rooms_without_possible_groups(
+        world,
+        dungeon_rooms,
+        sprite_groups,
+        sprite_requirements,
+        original_sprite_groups,
+    )
     randomized_dungeon_rooms = _randomize_dungeon_rooms(
         world,
         dungeon_rooms,
@@ -397,11 +436,14 @@ def generate_enemy_shuffle_state(world: "ALTTPWorld") -> EnemyShuffleState:
         dont_randomize_overworld_area_ids=overworld_metadata["do_not_randomize_area_ids"],
         randomized_dungeon_rooms=randomized_dungeon_rooms,
         randomized_overworld_areas=randomized_overworld_areas,
-        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        combat_model=_get_world_combat_model(world),
         enemy_health_key=_get_world_enemy_health_key(world),
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
+        hammer_available_for_freeze=True,
     )
     validate_enemy_shuffle_state(state, is_standard_mode=world.options.mode == "standard")
     return state
@@ -421,8 +463,33 @@ def _get_world_killable_thieves(world: "ALTTPWorld") -> bool:
     return bool(getattr(world.options, "killable_thieves", False))
 
 
+def _get_world_combat_model(world: "ALTTPWorld") -> EnemyCombatModel:
+    combat_model = getattr(world, "enemy_combat_model", None)
+    if combat_model is not None:
+        return combat_model
+    if _get_world_killable_thieves(world):
+        return with_killable_thief_combat_model()
+    return VANILLA_COMBAT_MODEL
+
+
 def _get_world_available_damage_classes(world: "ALTTPWorld") -> frozenset[int]:
     return frozenset(getattr(world, "enemy_shuffle_available_damage_classes", frozenset(range(16))))
+
+
+def _get_world_available_damage_delivery_items(world: "ALTTPWorld") -> frozenset[str]:
+    return frozenset(getattr(
+        world,
+        "enemy_shuffle_available_damage_delivery_items",
+        frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM),
+    ))
+
+
+def _get_world_available_damage_delivery_abilities(world: "ALTTPWorld") -> frozenset[str]:
+    return frozenset(getattr(
+        world,
+        "enemy_shuffle_available_damage_delivery_abilities",
+        frozenset(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY),
+    ))
 
 
 def _get_base_patched_rom_bytes() -> bytes:
@@ -641,6 +708,31 @@ def _setup_required_dungeon_groups(
         _apply_merged_room_requirement(selected_group, merged_requirement)
 
 
+def _setup_combined_dungeon_room_graphics_groups(
+    world: "ALTTPWorld",
+    dungeon_rooms: dict[int, DungeonEnemyRoom],
+    sprite_groups: dict[int, DungeonSpriteGroup],
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
+) -> None:
+    for room in dungeon_rooms.values():
+        requirement = _build_combined_room_graphics_requirement(sprite_requirements, room)
+        if _combined_room_graphics_requirement_is_empty(requirement):
+            continue
+        if _has_preserved_group_for_combined_room_graphics_requirement(sprite_groups, requirement):
+            continue
+
+        possible_groups = [
+            group for group in sprite_groups.values()
+            if _group_can_accept_combined_room_graphics_requirement(group, requirement)
+        ]
+        assert possible_groups, f"Enemy shuffle found no reservable dungeon sprite group for room {room.room_id}"
+        if not possible_groups:
+            continue
+
+        selected_group = world.random.choice(possible_groups)
+        _apply_combined_room_graphics_requirement(selected_group, requirement)
+
+
 def _apply_selected_boss_group_requirements(
     world: "ALTTPWorld",
     sprite_groups: dict[int, DungeonSpriteGroup],
@@ -755,6 +847,198 @@ def _apply_merged_room_requirement(group: DungeonSpriteGroup, requirement: Merge
         group.preserve_subgroup_3 = True
 
 
+def _build_combined_room_graphics_requirement(
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
+    room: DungeonEnemyRoom,
+) -> CombinedRoomGraphicsRequirement:
+    group_ids: tuple[int, ...] = tuple()
+    subgroup_0 = room.required_subgroup_0
+    subgroup_1 = room.required_subgroup_1
+    subgroup_2 = room.required_subgroup_2
+    subgroup_3 = room.required_subgroup_3
+
+    for requirement in _get_room_do_not_update_alternative_requirements(sprite_requirements, room):
+        group_ids = _intersect_allowed_values(group_ids, requirement.group_ids)
+        subgroup_0 = _intersect_allowed_values(subgroup_0, requirement.subgroup_0)
+        subgroup_1 = _intersect_allowed_values(subgroup_1, requirement.subgroup_1)
+        subgroup_2 = _intersect_allowed_values(subgroup_2, requirement.subgroup_2)
+        subgroup_3 = _intersect_allowed_values(subgroup_3, requirement.subgroup_3)
+
+    return CombinedRoomGraphicsRequirement(
+        dungeon_group_id=room.required_group_id,
+        group_ids=group_ids,
+        subgroup_0=subgroup_0,
+        subgroup_1=subgroup_1,
+        subgroup_2=subgroup_2,
+        subgroup_3=subgroup_3,
+    )
+
+
+def _get_room_do_not_update_requirements(
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
+    room: DungeonEnemyRoom,
+) -> tuple[EnemySpriteRequirement, ...]:
+    editable_addresses = {sprite.address for sprite in room.sprites}
+    constraint_sprites = _get_room_constraint_sprites(room)
+    return tuple(
+        requirement for requirement in sprite_requirements
+        if any(
+            sprite.sprite_id == requirement.sprite_id
+            and (
+                sprite.address not in editable_addresses
+                or requirement.do_not_randomize
+                or room.room_id in requirement.dont_randomize_rooms
+            )
+            for sprite in constraint_sprites
+        )
+        and can_spawn_in_room(requirement, room)
+    )
+
+
+def _get_room_do_not_update_alternative_requirements(
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
+    room: DungeonEnemyRoom,
+) -> tuple[CombinedRoomGraphicsRequirement, ...]:
+    editable_addresses = {sprite.address for sprite in room.sprites}
+    sprite_requirements_by_id: dict[int, list[EnemySpriteRequirement]] = {}
+    for requirement in sprite_requirements:
+        sprite_requirements_by_id.setdefault(requirement.sprite_id, []).append(requirement)
+
+    fixed_sprite_requirements: list[CombinedRoomGraphicsRequirement] = []
+    for sprite in _get_room_constraint_sprites(room):
+        alternatives = tuple(
+            requirement for requirement in sprite_requirements_by_id.get(sprite.sprite_id, ())
+            if (
+                sprite.address not in editable_addresses
+                or requirement.do_not_randomize
+                or room.room_id in requirement.dont_randomize_rooms
+            )
+            and can_spawn_in_room(requirement, room)
+        )
+        if alternatives:
+            fixed_sprite_requirements.append(_merge_alternative_sprite_graphics_requirements(alternatives))
+
+    return tuple(fixed_sprite_requirements)
+
+
+def _merge_alternative_sprite_graphics_requirements(
+    alternatives: tuple[EnemySpriteRequirement, ...],
+) -> CombinedRoomGraphicsRequirement:
+    return CombinedRoomGraphicsRequirement(
+        dungeon_group_id=None,
+        group_ids=_union_alternative_allowed_values(tuple(requirement.group_ids for requirement in alternatives)),
+        subgroup_0=_union_alternative_allowed_values(tuple(requirement.subgroup_0 for requirement in alternatives)),
+        subgroup_1=_union_alternative_allowed_values(tuple(requirement.subgroup_1 for requirement in alternatives)),
+        subgroup_2=_union_alternative_allowed_values(tuple(requirement.subgroup_2 for requirement in alternatives)),
+        subgroup_3=_union_alternative_allowed_values(tuple(requirement.subgroup_3 for requirement in alternatives)),
+    )
+
+
+def _union_alternative_allowed_values(alternatives: tuple[tuple[int, ...], ...]) -> tuple[int, ...]:
+    if any(not values for values in alternatives):
+        return tuple()
+    result: list[int] = []
+    for values in alternatives:
+        for value in values:
+            if value not in result:
+                result.append(value)
+    return tuple(result)
+
+
+def _intersect_allowed_values(current: tuple[int, ...], incoming: tuple[int, ...]) -> tuple[int, ...]:
+    if not incoming:
+        return current
+    if not current:
+        return incoming
+    incoming_set = set(incoming)
+    intersection = tuple(value for value in current if value in incoming_set)
+    return intersection or (IMPOSSIBLE_GRAPHICS_VALUE,)
+
+
+def _combined_room_graphics_requirement_is_empty(requirement: CombinedRoomGraphicsRequirement) -> bool:
+    return (
+        requirement.dungeon_group_id is None
+        and not requirement.group_ids
+        and not requirement.subgroup_0
+        and not requirement.subgroup_1
+        and not requirement.subgroup_2
+        and not requirement.subgroup_3
+    )
+
+
+def _has_preserved_group_for_combined_room_graphics_requirement(
+    sprite_groups: dict[int, DungeonSpriteGroup],
+    requirement: CombinedRoomGraphicsRequirement,
+) -> bool:
+    return any(
+        _group_matches_combined_room_graphics_requirement(group, requirement, require_preserved=True)
+        for group in sprite_groups.values()
+    )
+
+
+def _group_can_accept_combined_room_graphics_requirement(
+    group: DungeonSpriteGroup,
+    requirement: CombinedRoomGraphicsRequirement,
+) -> bool:
+    return _group_matches_combined_room_graphics_requirement(group, requirement, require_preserved=False)
+
+
+def _group_matches_combined_room_graphics_requirement(
+    group: DungeonSpriteGroup,
+    requirement: CombinedRoomGraphicsRequirement,
+    *,
+    require_preserved: bool,
+) -> bool:
+    return (
+        0 < group.dungeon_group_id < 60
+        and (requirement.dungeon_group_id is None or group.dungeon_group_id == requirement.dungeon_group_id)
+        and (not requirement.group_ids or group.group_id in requirement.group_ids)
+        and _subgroup_can_satisfy_requirement(
+            group.subgroup_0, group.preserve_subgroup_0, requirement.subgroup_0, require_preserved
+        )
+        and _subgroup_can_satisfy_requirement(
+            group.subgroup_1, group.preserve_subgroup_1, requirement.subgroup_1, require_preserved
+        )
+        and _subgroup_can_satisfy_requirement(
+            group.subgroup_2, group.preserve_subgroup_2, requirement.subgroup_2, require_preserved
+        )
+        and _subgroup_can_satisfy_requirement(
+            group.subgroup_3, group.preserve_subgroup_3, requirement.subgroup_3, require_preserved
+        )
+    )
+
+
+def _subgroup_can_satisfy_requirement(
+    value: int,
+    preserved: bool,
+    allowed_values: tuple[int, ...],
+    require_preserved: bool,
+) -> bool:
+    if not allowed_values:
+        return True
+    if preserved or require_preserved:
+        return preserved and value in allowed_values
+    return True
+
+
+def _apply_combined_room_graphics_requirement(
+    group: DungeonSpriteGroup,
+    requirement: CombinedRoomGraphicsRequirement,
+) -> None:
+    if requirement.subgroup_0 and not group.preserve_subgroup_0:
+        group.subgroup_0 = requirement.subgroup_0[0]
+        group.preserve_subgroup_0 = True
+    if requirement.subgroup_1 and not group.preserve_subgroup_1:
+        group.subgroup_1 = requirement.subgroup_1[0]
+        group.preserve_subgroup_1 = True
+    if requirement.subgroup_2 and not group.preserve_subgroup_2:
+        group.subgroup_2 = requirement.subgroup_2[0]
+        group.preserve_subgroup_2 = True
+    if requirement.subgroup_3 and not group.preserve_subgroup_3:
+        group.subgroup_3 = requirement.subgroup_3[0]
+        group.preserve_subgroup_3 = True
+
+
 def _has_preserved_group_for_room_requirement(
     sprite_groups: dict[int, DungeonSpriteGroup],
     requirement: MergedRoomRequirement,
@@ -795,15 +1079,40 @@ def _restore_skipped_room_sprite_groups(
     world: "ALTTPWorld",
     dungeon_rooms: dict[int, DungeonEnemyRoom],
     sprite_groups: dict[int, DungeonSpriteGroup],
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
     original_sprite_groups: dict[int, tuple[int, int, int, int]],
 ) -> None:
-    if world.options.mode != "standard":
-        return
+    state = EnemyShuffleState(
+        dungeon_rooms=dungeon_rooms,
+        overworld_areas={},
+        sprite_groups=sprite_groups,
+        sprite_requirements=sprite_requirements,
+        room_group_requirements=tuple(),
+        overworld_group_requirements=tuple(),
+        shutter_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.is_shutter_room),
+        water_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.is_water_room),
+        dont_randomize_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.do_not_randomize),
+        no_special_enemies_standard_room_ids=frozenset(
+            room.room_id for room in dungeon_rooms.values() if room.no_special_enemies_standard
+        ),
+        boss_room_ids=frozenset(),
+        dont_randomize_overworld_area_ids=frozenset(),
+        randomized_dungeon_rooms={},
+        randomized_overworld_areas={},
+        combat_model=_get_world_combat_model(world),
+        enemy_health_key=_get_world_enemy_health_key(world),
+        max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
+        killable_thieves=_get_world_killable_thieves(world),
+        available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
+        hammer_available_for_freeze=True,
+    )
 
     skipped_group_ids = {
         room.graphics_block_id + 0x40
         for room in dungeon_rooms.values()
-        if room.no_special_enemies_standard
+        if _dungeon_room_skips_enemy_randomization(world, state, room)
     }
     for group_id in skipped_group_ids:
         group = sprite_groups.get(group_id)
@@ -815,6 +1124,73 @@ def _restore_skipped_room_sprite_groups(
         group.preserve_subgroup_1 = True
         group.preserve_subgroup_2 = True
         group.preserve_subgroup_3 = True
+
+
+def _restore_original_groups_for_rooms_without_possible_groups(
+    world: "ALTTPWorld",
+    dungeon_rooms: dict[int, DungeonEnemyRoom],
+    sprite_groups: dict[int, DungeonSpriteGroup],
+    sprite_requirements: tuple[EnemySpriteRequirement, ...],
+    original_sprite_groups: dict[int, tuple[int, int, int, int]],
+) -> None:
+    state = EnemyShuffleState(
+        dungeon_rooms=dungeon_rooms,
+        overworld_areas={},
+        sprite_groups=sprite_groups,
+        sprite_requirements=sprite_requirements,
+        room_group_requirements=tuple(),
+        overworld_group_requirements=tuple(),
+        shutter_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.is_shutter_room),
+        water_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.is_water_room),
+        dont_randomize_room_ids=frozenset(room.room_id for room in dungeon_rooms.values() if room.do_not_randomize),
+        no_special_enemies_standard_room_ids=frozenset(
+            room.room_id for room in dungeon_rooms.values() if room.no_special_enemies_standard
+        ),
+        boss_room_ids=frozenset(),
+        dont_randomize_overworld_area_ids=frozenset(),
+        randomized_dungeon_rooms={},
+        randomized_overworld_areas={},
+        combat_model=_get_world_combat_model(world),
+        enemy_health_key=_get_world_enemy_health_key(world),
+        max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
+        killable_thieves=_get_world_killable_thieves(world),
+        available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
+        hammer_available_for_freeze=True,
+    )
+
+    for _ in range(len(dungeon_rooms)):
+        changed = False
+        for room in dungeon_rooms.values():
+            if _dungeon_room_skips_enemy_randomization(world, state, room):
+                continue
+            if get_possible_dungeon_sprite_groups(state, room):
+                continue
+
+            group = sprite_groups.get(room.graphics_block_id + 0x40)
+            original_group = original_sprite_groups.get(room.graphics_block_id + 0x40)
+            assert group is not None and original_group is not None, (
+                f"Enemy shuffle found no restorable original sprite group for room {room.room_id}"
+            )
+            if group is None or original_group is None:
+                continue
+            if (group.subgroup_0, group.subgroup_1, group.subgroup_2, group.subgroup_3) == original_group:
+                continue
+            group.subgroup_0, group.subgroup_1, group.subgroup_2, group.subgroup_3 = original_group
+            group.preserve_subgroup_0 = True
+            group.preserve_subgroup_1 = True
+            group.preserve_subgroup_2 = True
+            group.preserve_subgroup_3 = True
+            changed = True
+        if not changed:
+            break
+
+    for room in dungeon_rooms.values():
+        if not _dungeon_room_skips_enemy_randomization(world, state, room):
+            assert get_possible_dungeon_sprite_groups(state, room), (
+                f"Enemy shuffle found no legal dungeon sprite group for room {room.room_id}"
+            )
 
 
 def _randomize_overworld_groups(world: "ALTTPWorld", sprite_groups: dict[int, DungeonSpriteGroup]) -> None:
@@ -1058,6 +1434,7 @@ def _load_enemy_sprite_requirements() -> tuple[EnemySpriteRequirement, ...]:
             overlord=entry.overlord,
             do_not_randomize=entry.do_not_randomize,
             killable=entry.killable,
+            counts_for_enemy_clear=_entry_counts_for_enemy_clear(entry),
             npc=entry.npc,
             never_use_dungeon=entry.never_use_dungeon,
             never_use_overworld=entry.never_use_overworld,
@@ -1079,6 +1456,21 @@ def _load_enemy_sprite_requirements() -> tuple[EnemySpriteRequirement, ...]:
             combat_reference_id=entry.combat_reference_id,
         )
         for entry in ENEMY_SPRITE_REQUIREMENTS
+    )
+
+
+def _entry_counts_for_enemy_clear(entry) -> bool:
+    if entry.counts_for_enemy_clear is not None:
+        return entry.counts_for_enemy_clear
+    return (
+        entry.is_enemy_sprite
+        and not entry.boss
+        and not entry.overlord
+        and not entry.npc
+        and not entry.is_object
+        and not entry.absorbable
+        and not entry.never_use_dungeon
+        and entry.sprite_id not in ROOM_CLEAR_IGNORED_SPRITE_IDS
     )
 
 
@@ -1209,6 +1601,16 @@ class MergedRoomRequirement:
     subgroup_3: tuple[int, ...]
 
 
+@dataclass(frozen=True)
+class CombinedRoomGraphicsRequirement:
+    dungeon_group_id: Optional[int]
+    group_ids: tuple[int, ...]
+    subgroup_0: tuple[int, ...]
+    subgroup_1: tuple[int, ...]
+    subgroup_2: tuple[int, ...]
+    subgroup_3: tuple[int, ...]
+
+
 def _merge_room_requirements(room_id: int, room_requirements: tuple[RoomGroupRequirement, ...]) -> MergedRoomRequirement:
     group_id: Optional[int] = None
     subgroup_0: list[int] = []
@@ -1240,21 +1642,7 @@ def _merge_room_requirements(room_id: int, room_requirements: tuple[RoomGroupReq
 
 
 def get_room_do_not_update_requirements(state: EnemyShuffleState, room: DungeonEnemyRoom) -> tuple[EnemySpriteRequirement, ...]:
-    editable_addresses = {sprite.address for sprite in room.sprites}
-    constraint_sprites = _get_room_constraint_sprites(room)
-    return tuple(
-        requirement for requirement in state.sprite_requirements
-        if any(
-            sprite.sprite_id == requirement.sprite_id
-            and (
-                sprite.address not in editable_addresses
-                or requirement.do_not_randomize
-                or room.room_id in requirement.dont_randomize_rooms
-            )
-            for sprite in constraint_sprites
-        )
-        and can_spawn_in_room(requirement, room)
-    )
+    return _get_room_do_not_update_requirements(state.sprite_requirements, room)
 
 
 def _get_room_constraint_sprites(room: DungeonEnemyRoom) -> tuple[DungeonEnemySprite, ...]:
@@ -1262,7 +1650,7 @@ def _get_room_constraint_sprites(room: DungeonEnemyRoom) -> tuple[DungeonEnemySp
 
 
 def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEnemyRoom) -> tuple[DungeonSpriteGroup, ...]:
-    do_not_update = get_room_do_not_update_requirements(state, room)
+    do_not_update = _get_room_do_not_update_alternative_requirements(state.sprite_requirements, room)
     usable_groups = tuple(
         group for group in state.sprite_groups.values()
         if 0 < group.dungeon_group_id < 60
@@ -1288,7 +1676,7 @@ def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEn
     return tuple(
         group for group in usable_groups
         if (
-            (not do_not_update or _build_requirement_group_matcher(do_not_update)(group))
+            (not do_not_update or _group_matches_fixed_sprite_graphics_requirements(group, do_not_update))
             and _group_matches_room_requirement(group, room)
             and (
                 lambda possible_requirements: (
@@ -1312,6 +1700,27 @@ def get_possible_dungeon_sprite_groups(state: EnemyShuffleState, room: DungeonEn
                 )
             )(_get_possible_enemy_requirements_for_group(state, room, group))
         )
+    )
+
+
+def _group_matches_fixed_sprite_graphics_requirements(
+    group: DungeonSpriteGroup,
+    requirements: tuple[CombinedRoomGraphicsRequirement, ...],
+) -> bool:
+    return all(_group_matches_fixed_sprite_graphics_requirement(group, requirement) for requirement in requirements)
+
+
+def _group_matches_fixed_sprite_graphics_requirement(
+    group: DungeonSpriteGroup,
+    requirement: CombinedRoomGraphicsRequirement,
+) -> bool:
+    return (
+        (requirement.dungeon_group_id is None or group.dungeon_group_id == requirement.dungeon_group_id)
+        and (not requirement.group_ids or group.group_id in requirement.group_ids)
+        and (not requirement.subgroup_0 or group.subgroup_0 in requirement.subgroup_0)
+        and (not requirement.subgroup_1 or group.subgroup_1 in requirement.subgroup_1)
+        and (not requirement.subgroup_2 or group.subgroup_2 in requirement.subgroup_2)
+        and (not requirement.subgroup_3 or group.subgroup_3 in requirement.subgroup_3)
     )
 
 
@@ -1359,7 +1768,32 @@ def _filter_requirements_for_room_water_state(
 
 
 def _is_effectively_killable(requirement: EnemySpriteRequirement) -> bool:
-    return requirement.killable or requirement.sprite_id == WATER_TEKTITE_SPRITE_ID
+    return requirement.killable
+
+
+def _damage_class_is_fairy_transform(
+    combat_reference_id: int,
+    damage_class: int,
+    combat_model: EnemyCombatModel,
+) -> bool:
+    return get_damage_effect(combat_reference_id, damage_class, combat_model) == FAIRY_TRANSFORM_EFFECT
+
+
+def _has_yellow_slime_follow_up_for_key_drop(state: EnemyShuffleState, source_combat_reference_id: int) -> bool:
+    candidate_damage_classes = set(get_killing_damage_classes(
+        YELLOW_SLIME_SPRITE_ID,
+        state.combat_model,
+        include_freeze_hammer=state.hammer_available_for_freeze,
+    ))
+    candidate_damage_classes &= set(get_progression_kill_damage_classes(YELLOW_SLIME_SPRITE_ID))
+    candidate_damage_classes &= state.available_damage_classes
+    follow_up_override = get_yellow_slime_follow_up_delivery_override(source_combat_reference_id)
+    if follow_up_override is not None:
+        candidate_damage_classes &= _get_available_deliverable_damage_classes(state, follow_up_override)
+    return any(
+        _damage_class_kills_within_enemy_shuffle_logic(state, YELLOW_SLIME_SPRITE_ID, damage_class)
+        for damage_class in candidate_damage_classes
+    )
 
 
 def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
@@ -1369,7 +1803,7 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     combat_reference_id = _get_combat_reference_id(requirement, state.combat_model)
     if combat_reference_id is None:
         return False
-    if not _is_effectively_killable(requirement) and combat_reference_id not in DAMAGE_CLASS_RANDOMIZER_HP_255_INCLUDED_SPRITE_IDS:
+    if not _is_effectively_killable(requirement):
         return False
 
     if requirement.sprite_name in KEY_DROP_INCINERATION_REQUIRED_SPRITE_NAMES:
@@ -1377,19 +1811,40 @@ def _can_be_key_drop_enemy(state: EnemyShuffleState, requirement: EnemySpriteReq
     else:
         delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
         if delivery_override is None:
-            candidate_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+            candidate_damage_classes = set(
+                get_killing_damage_classes(
+                    combat_reference_id,
+                    state.combat_model,
+                    include_freeze_hammer=state.hammer_available_for_freeze,
+                )
+            )
+            candidate_damage_classes |= set(get_blob_transform_damage_classes(combat_reference_id, state.combat_model))
         else:
-            candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+            candidate_damage_classes = _get_available_deliverable_damage_classes(state, delivery_override)
+            candidate_damage_classes |= (
+                set(get_blob_transform_damage_classes(combat_reference_id, state.combat_model))
+                & _get_available_deliverable_damage_classes(state, delivery_override)
+            )
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
     candidate_damage_classes &= state.available_damage_classes
+    candidate_damage_classes = {
+        damage_class for damage_class in candidate_damage_classes
+        if not _damage_class_is_fairy_transform(combat_reference_id, damage_class, state.combat_model)
+    }
 
     return any(
-        _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
+        (
+            get_damage_effect(combat_reference_id, damage_class, state.combat_model) == BLOB_TRANSFORM_EFFECT
+            and _has_yellow_slime_follow_up_for_key_drop(state, combat_reference_id)
+        )
+        or _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
         for damage_class in candidate_damage_classes
     )
 
 
 def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    if not requirement.counts_for_enemy_clear:
+        return False
     if not _is_effectively_killable(requirement) or requirement.sprite_id == STAL_SPRITE_ID:
         return False
 
@@ -1399,9 +1854,15 @@ def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: Enem
 
     delivery_override = DIRECT_KILL_DELIVERY_OVERRIDES.get(requirement.sprite_name)
     if delivery_override is None:
-        candidate_damage_classes = set(get_killing_damage_classes(combat_reference_id, state.combat_model))
+        candidate_damage_classes = set(
+            get_killing_damage_classes(
+                combat_reference_id,
+                state.combat_model,
+                include_freeze_hammer=state.hammer_available_for_freeze,
+            )
+        )
     else:
-        candidate_damage_classes = _get_deliverable_damage_classes(delivery_override)
+        candidate_damage_classes = _get_available_deliverable_damage_classes(state, delivery_override)
     candidate_damage_classes &= set(get_progression_kill_damage_classes(combat_reference_id))
     candidate_damage_classes &= state.available_damage_classes
 
@@ -1409,6 +1870,14 @@ def _can_be_shutter_room_clear_enemy(state: EnemyShuffleState, requirement: Enem
         _damage_class_kills_within_enemy_shuffle_logic(state, combat_reference_id, damage_class)
         for damage_class in candidate_damage_classes
     )
+
+
+def _is_enemy_clear_dealbreaker(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    return requirement.counts_for_enemy_clear and not _can_be_shutter_room_clear_enemy(state, requirement)
+
+
+def _is_safe_for_enemy_clear_room(state: EnemyShuffleState, requirement: EnemySpriteRequirement) -> bool:
+    return not _is_enemy_clear_dealbreaker(state, requirement)
 
 
 def _damage_class_kills_within_enemy_shuffle_logic(
@@ -1422,8 +1891,31 @@ def _damage_class_kills_within_enemy_shuffle_logic(
         state.enemy_health_key,
         killable_thieves=state.killable_thieves,
         combat_model=state.combat_model,
+        allow_frozen_hammer_kill=state.hammer_available_for_freeze,
     )
     return hit_count is not None and hit_count <= state.max_attacks_in_logic
+
+
+def _get_requirement_for_sprite_id(
+    state: EnemyShuffleState,
+    sprite_id: int,
+) -> EnemySpriteRequirement | None:
+    for requirement in state.sprite_requirements:
+        if requirement.sprite_id == sprite_id:
+            return requirement
+    return None
+
+
+def _get_room_requirements_for_sprite_id(
+    state: EnemyShuffleState,
+    room: DungeonEnemyRoom,
+    sprite_id: int,
+) -> tuple[EnemySpriteRequirement, ...]:
+    return tuple(
+        requirement for requirement in state.sprite_requirements
+        if requirement.sprite_id == sprite_id
+        and can_spawn_in_room(requirement, room)
+    )
 
 
 def _get_combat_reference_id(requirement: EnemySpriteRequirement, combat_model: EnemyCombatModel) -> Optional[int]:
@@ -1441,6 +1933,18 @@ def _get_deliverable_damage_classes(delivery_override) -> set[int]:
         damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM.get(item_name, tuple()))
     for ability_name in delivery_override.abilities:
         damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY.get(ability_name, tuple()))
+    return damage_classes
+
+
+def _get_available_deliverable_damage_classes(state: EnemyShuffleState, delivery_override) -> set[int]:
+    damage_classes: set[int] = set()
+    for item_name in delivery_override.items:
+        if item_name in state.available_damage_delivery_items:
+            damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ITEM.get(item_name, tuple()))
+    for ability_name in delivery_override.abilities:
+        if ability_name in state.available_damage_delivery_abilities:
+            damage_classes.update(KEY_DROP_DELIVERY_DAMAGE_CLASSES_BY_ABILITY.get(ability_name, tuple()))
+    damage_classes &= state.available_damage_classes
     return damage_classes
 
 
@@ -1661,19 +2165,20 @@ def _randomize_dungeon_rooms(
         dont_randomize_overworld_area_ids=frozenset(),
         randomized_dungeon_rooms={},
         randomized_overworld_areas={},
-        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        combat_model=_get_world_combat_model(world),
         enemy_health_key=_get_world_enemy_health_key(world),
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
+        hammer_available_for_freeze=True,
     )
     randomized_rooms: dict[int, RandomizedDungeonEnemyRoom] = {}
 
     for room_id in sorted(dungeon_rooms):
         room = dungeon_rooms[room_id]
-        skip_randomization = room.do_not_randomize or (
-            world.options.mode == "standard" and room.no_special_enemies_standard
-        )
+        skip_randomization = _dungeon_room_skips_enemy_randomization(world, state, room)
 
         selected_group = sprite_groups.get(room.graphics_block_id + 0x40)
         if not skip_randomization:
@@ -1717,11 +2222,14 @@ def _randomize_overworld_areas(
         dont_randomize_overworld_area_ids=frozenset(area.area_id for area in overworld_areas.values() if area.do_not_randomize),
         randomized_dungeon_rooms={},
         randomized_overworld_areas={},
-        combat_model=getattr(world, "enemy_combat_model", None) or VANILLA_COMBAT_MODEL,
+        combat_model=_get_world_combat_model(world),
         enemy_health_key=_get_world_enemy_health_key(world),
         max_attacks_in_logic=_get_world_max_attacks_in_logic(world),
         killable_thieves=_get_world_killable_thieves(world),
         available_damage_classes=_get_world_available_damage_classes(world),
+        available_damage_delivery_items=_get_world_available_damage_delivery_items(world),
+        available_damage_delivery_abilities=_get_world_available_damage_delivery_abilities(world),
+        hammer_available_for_freeze=True,
     )
     randomized_areas: dict[int, RandomizedOverworldEnemyArea] = {}
 
@@ -1749,6 +2257,19 @@ def _randomize_overworld_areas(
         )
 
     return randomized_areas
+
+
+def _dungeon_room_skips_enemy_randomization(
+    world: "ALTTPWorld",
+    state: EnemyShuffleState,
+    room: DungeonEnemyRoom,
+) -> bool:
+    return (
+        room.do_not_randomize
+        or (world.options.mode == "standard" and room.room_id in STANDARD_ESCAPE_DUNGEON_ROOM_IDS)
+        or (world.options.mode == "standard" and room.no_special_enemies_standard)
+        or not _get_randomizable_sprites_in_room(state, room)
+    )
 
 
 def _get_forced_overworld_group(
@@ -1790,8 +2311,7 @@ def _randomize_room_sprites(
                         killable_water_sprite_ids = [
                             requirement.sprite_id for requirement in possible_requirements
                             if requirement.is_water_sprite
-                            and _is_effectively_killable(requirement)
-                            and requirement.sprite_id != STAL_SPRITE_ID
+                            and _can_be_shutter_room_clear_enemy(state, requirement)
                         ]
                         if killable_water_sprite_ids:
                             replacement_water_sprite_ids = killable_water_sprite_ids
@@ -1805,19 +2325,23 @@ def _randomize_room_sprites(
                 return _build_randomized_room(room, selected_group, randomized_sprites, False)
 
             non_water_requirements = _filter_requirements_for_room_water_state(room, possible_requirements)
-            possible_sprite_ids = [requirement.sprite_id for requirement in non_water_requirements]
+            safe_non_water_requirements = [
+                requirement for requirement in non_water_requirements
+                if not room.is_shutter_room or _is_safe_for_enemy_clear_room(state, requirement)
+            ]
+            possible_sprite_ids = [requirement.sprite_id for requirement in safe_non_water_requirements]
             if not possible_sprite_ids:
                 return _build_randomized_room(room, selected_group, randomized_sprites, False)
             killable_sprite_ids = [
-                requirement.sprite_id for requirement in non_water_requirements
+                requirement.sprite_id for requirement in safe_non_water_requirements
                 if _can_be_shutter_room_clear_enemy(state, requirement)
             ]
             killable_key_sprite_ids = [
-                requirement.sprite_id for requirement in non_water_requirements
+                requirement.sprite_id for requirement in safe_non_water_requirements
                 if _can_be_key_drop_enemy(state, requirement)
             ]
             killable_shutter_key_sprite_ids = [
-                requirement.sprite_id for requirement in non_water_requirements
+                requirement.sprite_id for requirement in safe_non_water_requirements
                 if _can_be_key_drop_enemy(state, requirement)
                 and _can_be_shutter_room_clear_enemy(state, requirement)
             ]
@@ -2012,14 +2536,20 @@ def _validate_dungeon_room(
     if selected_group is None:
         raise ValueError(f"Enemy shuffle produced unknown dungeon sprite group {randomized_room.graphics_block_id} for room {room.room_id}")
 
-    skipped = room.do_not_randomize or (is_standard_mode and room.no_special_enemies_standard)
+    skipped = (
+        room.do_not_randomize
+        or (is_standard_mode and room.no_special_enemies_standard)
+        or not _get_randomizable_sprites_in_room(state, room)
+    )
     if skipped and randomized_room.graphics_block_id != room.graphics_block_id:
         raise ValueError(f"Enemy shuffle changed skipped room {room.room_id} graphics block")
 
     if not skipped:
         possible_groups = get_possible_dungeon_sprite_groups(state, room)
+        assert possible_groups, f"Enemy shuffle found no legal dungeon sprite group for room {room.room_id}"
         if possible_groups and selected_group not in possible_groups:
             raise ValueError(f"Enemy shuffle selected illegal sprite group {selected_group.group_id} for room {room.room_id}")
+        _validate_dungeon_room_sprite_graphics(state, room, randomized_room, selected_group)
 
     possible_requirements = _get_possible_enemy_requirements_for_group(state, room, selected_group)
     possible_sprite_ids = {requirement.sprite_id for requirement in possible_requirements}
@@ -2067,20 +2597,112 @@ def _validate_dungeon_room(
                 raise ValueError(f"Enemy shuffle placed non-killable shutter key enemy {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
             continue
 
-        if room.is_shutter_room and randomized_sprite.sprite_id not in killable_sprite_ids:
-            raise ValueError(f"Enemy shuffle placed non-killable shutter enemy {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
+        if room.is_shutter_room:
+            randomized_requirement = _get_requirement_for_sprite_id(state, randomized_sprite.sprite_id)
+            if randomized_requirement is not None and _is_enemy_clear_dealbreaker(state, randomized_requirement):
+                raise ValueError(f"Enemy shuffle placed enemy-clear blocker {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
 
         if randomized_sprite.sprite_id != STAL_SPRITE_ID and randomized_sprite.sprite_id not in possible_sprite_ids:
             raise ValueError(f"Enemy shuffle placed illegal sprite {hex(randomized_sprite.sprite_id)} in room {room.room_id}")
 
-    if room.is_shutter_room and _get_randomizable_sprites_in_room(state, room):
+    if not skipped and room.is_shutter_room and _get_randomizable_sprites_in_room(state, room):
         all_killable_sprite_ids = {
             requirement.sprite_id for requirement in _filter_requirements_for_room_water_state(room, state.sprite_requirements)
             if _can_be_shutter_room_clear_enemy(state, requirement)
         }
-        randomized_sprite_ids = {sprite.sprite_id for sprite in randomized_room.sprites}
+        randomized_sprite_ids = {
+            sprite.sprite_id for sprite in randomized_room.sprites
+            if (
+                (requirement := _get_requirement_for_sprite_id(state, sprite.sprite_id)) is not None
+                and requirement.counts_for_enemy_clear
+            )
+        }
         if not (randomized_sprite_ids & all_killable_sprite_ids):
             raise ValueError(f"Enemy shuffle left shutter room {room.room_id} without any killable enemies")
+
+
+def _validate_dungeon_room_sprite_graphics(
+    state: EnemyShuffleState,
+    room: DungeonEnemyRoom,
+    randomized_room: RandomizedDungeonEnemyRoom,
+    selected_group: DungeonSpriteGroup,
+) -> None:
+    for address, sprite_id in _get_final_room_sprite_ids(room, randomized_room):
+        requirements = _get_room_requirements_for_sprite_id(state, room, sprite_id)
+        if not requirements:
+            continue
+        if not any(_dungeon_sprite_group_supports_requirement(selected_group, requirement) for requirement in requirements):
+            requirement = requirements[0]
+            raise ValueError(
+                "Enemy shuffle produced bad graphics in room "
+                f"{room.room_id}: {requirement.sprite_name} ({sprite_id:#04x}) "
+                f"at {address:#06x} "
+                f"uses graphics block {randomized_room.graphics_block_id} "
+                f"(group {selected_group.group_id:#04x}, subgroups "
+                f"{selected_group.subgroup_0:#04x}/"
+                f"{selected_group.subgroup_1:#04x}/"
+                f"{selected_group.subgroup_2:#04x}/"
+                f"{selected_group.subgroup_3:#04x})"
+                f"{_format_sprite_graphics_requirement(requirement)}"
+            )
+
+
+def _get_final_room_sprite_ids(
+    room: DungeonEnemyRoom,
+    randomized_room: RandomizedDungeonEnemyRoom,
+) -> tuple[tuple[int, int], ...]:
+    randomized_by_address = {
+        sprite.address: sprite.sprite_id
+        for sprite in randomized_room.sprites
+    }
+    validate_fixed_sprites = randomized_room.graphics_block_id != room.graphics_block_id
+    final_sprites: list[tuple[int, int]] = []
+    seen_addresses: set[int] = set()
+
+    for sprite in (room.all_sprites or room.sprites):
+        seen_addresses.add(sprite.address)
+        if sprite.address in randomized_by_address:
+            final_sprites.append((sprite.address, randomized_by_address[sprite.address]))
+        elif validate_fixed_sprites:
+            final_sprites.append((sprite.address, sprite.sprite_id))
+
+    for sprite in randomized_room.sprites:
+        if sprite.address not in seen_addresses:
+            final_sprites.append((sprite.address, sprite.sprite_id))
+
+    return tuple(final_sprites)
+
+
+def _dungeon_sprite_group_supports_requirement(
+    group: DungeonSpriteGroup,
+    requirement: EnemySpriteRequirement,
+) -> bool:
+    return (
+        (not requirement.group_ids or group.group_id in requirement.group_ids)
+        and (not requirement.subgroup_0 or group.subgroup_0 in requirement.subgroup_0)
+        and (not requirement.subgroup_1 or group.subgroup_1 in requirement.subgroup_1)
+        and (not requirement.subgroup_2 or group.subgroup_2 in requirement.subgroup_2)
+        and (not requirement.subgroup_3 or group.subgroup_3 in requirement.subgroup_3)
+    )
+
+
+def _format_sprite_graphics_requirement(requirement: EnemySpriteRequirement) -> str:
+    parts = []
+    if requirement.group_ids:
+        parts.append(f"group in {_format_int_tuple(requirement.group_ids)}")
+    if requirement.subgroup_0:
+        parts.append(f"subgroup 0 in {_format_int_tuple(requirement.subgroup_0)}")
+    if requirement.subgroup_1:
+        parts.append(f"subgroup 1 in {_format_int_tuple(requirement.subgroup_1)}")
+    if requirement.subgroup_2:
+        parts.append(f"subgroup 2 in {_format_int_tuple(requirement.subgroup_2)}")
+    if requirement.subgroup_3:
+        parts.append(f"subgroup 3 in {_format_int_tuple(requirement.subgroup_3)}")
+    return "" if not parts else "; requires " + ", ".join(parts)
+
+
+def _format_int_tuple(values: tuple[int, ...]) -> str:
+    return "(" + ", ".join(f"{value:#04x}" for value in values) + ")"
 
 
 def _validate_overworld_area(
@@ -2143,7 +2765,7 @@ def _validate_overworld_area(
         raise ValueError(f"Enemy shuffle placed illegal bush enemy {hex(randomized_area.bush_sprite_id)} in area {hex(area.area_id)}")
 
 
-def apply_enemy_shuffle(rom: "LocalRom", state: EnemyShuffleState) -> None:
+def apply_enemy_shuffle(rom: "TokenRom", state: EnemyShuffleState) -> None:
     for group in state.sprite_groups.values():
         _write_sprite_group(rom, group)
 
@@ -2163,7 +2785,7 @@ def apply_enemy_shuffle(rom: "LocalRom", state: EnemyShuffleState) -> None:
         rom.write_byte(bush_spawn_table_address + area.area_id, area.bush_sprite_id)
 
 
-def _write_sprite_group(rom: "LocalRom", group: DungeonSpriteGroup) -> None:
+def _write_sprite_group(rom: "TokenRom", group: DungeonSpriteGroup) -> None:
     address = SPRITE_GROUP_BASE_ADDRESS + (group.group_id * 4)
     rom.write_byte(address, group.subgroup_0)
     rom.write_byte(address + 1, group.subgroup_1)
@@ -2171,7 +2793,7 @@ def _write_sprite_group(rom: "LocalRom", group: DungeonSpriteGroup) -> None:
     rom.write_byte(address + 3, group.subgroup_3)
 
 
-def _write_dungeon_sprite(rom: "LocalRom", sprite: RandomizedDungeonEnemySprite) -> None:
+def _write_dungeon_sprite(rom: "TokenRom", sprite: RandomizedDungeonEnemySprite) -> None:
     sprite_id = sprite.sprite_id
     byte_1 = sprite.byte_1
 
@@ -2184,7 +2806,7 @@ def _write_dungeon_sprite(rom: "LocalRom", sprite: RandomizedDungeonEnemySprite)
     rom.write_byte(sprite.address + 2, sprite_id & 0xFF)
 
 
-def _write_overworld_sprite(rom: "LocalRom", sprite: RandomizedOverworldEnemySprite) -> None:
+def _write_overworld_sprite(rom: "TokenRom", sprite: RandomizedOverworldEnemySprite) -> None:
     sprite_id = sprite.sprite_id
     if sprite_id == OW_FALLING_ROCKS_SPRITE_ID:
         rom.write_byte(sprite.address, 0)

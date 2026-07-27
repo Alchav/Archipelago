@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
-import hashlib
 import random
 from typing import TYPE_CHECKING, Optional
 
@@ -16,19 +15,25 @@ from .enemizer_data.enemy_combat_data import (
     EnemyCombatModel,
     EXCLUDED_ENEMY_TABLE_SPRITE_IDS,
     SPRITE_DAMAGE_SUBCLASS_TABLE_SNES_ADDRESS,
-    THIEF_DEFAULT_HP,
-    THIEF_SPRITE_ID,
     VANILLA_COMBAT_MODEL,
     VANILLA_RANDOMIZE_DAMAGE_CLASSES,
     build_damage_source_table_bytes,
     build_packed_sprite_damage_subclass_table,
     build_randomized_damage_class_combat_model,
+    with_killable_thief_combat_model,
 )
 from .enemizer_data.symbols import ENEMIZER_SYMBOLS
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
-    from .Rom import LocalRom
+    from .Rom import ProcedureRom, TokenRom
+
+# These patch helpers are intentionally shared by generation and patch application:
+# generation records writes through TokenRom, while boss shuffle is finalized as a
+# procedure step using ProcedureRom after the player supplies their base ROM.
+
+DUNGEON_HEADER_POINTER_TABLE_BASE = 0x271E2
+ROOM_HEADER_BANK_LOCATION = 0xB5E7
 
 
 @dataclass(frozen=True)
@@ -316,16 +321,17 @@ SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS = snes_to_pc(SPRITE_DAMAGE_SUBCLASS_TABLE_S
 HARDHAT_BEETLE_HP_TABLE_ADDRESS = 0x3111F
 
 
-def apply_enemizer_base_patch(rom: "LocalRom") -> None:
+def apply_enemizer_base_patch(rom: "TokenRom | ProcedureRom") -> None:
     for address, patch_data in _load_enemizer_base_patches():
         rom.write_bytes(address, patch_data)
     _apply_trinexx_room_fixes(rom)
 
 
 def apply_enemy_combat_data(
-    rom: "LocalRom",
+    rom: "TokenRom | ProcedureRom",
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> None:
+    rom.write_bytes(ENEMY_HP_TABLE_ADDRESS, combat_model.enemy_health_table)
     rom.write_bytes(DAMAGE_SOURCE_TABLE_ADDRESS, build_damage_source_table_bytes(combat_model.damage_sources))
     rom.write_bytes(
         SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS,
@@ -333,8 +339,7 @@ def apply_enemy_combat_data(
     )
 
 
-def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
-    dungeon_header_base = _get_enemizer_symbol("room_header_table")
+def patch_bosses(world: "ALTTPWorld", rom: "TokenRom | ProcedureRom") -> None:
     moved_room_object_base = _get_enemizer_symbol("modified_room_object_table")
     gt_dungeon_name = "Ganons Tower" if world.options.mode != "inverted" else "Inverted Ganons Tower"
     gt_dungeon = world.dungeons[gt_dungeon_name]
@@ -359,8 +364,9 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
 
     for boss_name, dungeon_data in placements:
         boss_data = BOSS_PATCH_DATA[boss_name]
+        dungeon_header_address = get_dungeon_room_header_address(rom, dungeon_data.room_id)
         rom.write_bytes(dungeon_data.sprite_pointer_address, boss_data.pointer)
-        rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 3, boss_data.graphics)
+        rom.write_byte(dungeon_header_address + 3, boss_data.graphics)
 
         if boss_name == "Trinexx" and dungeon_data.room_id != TRINEXX_VANILLA_ROOM_ID:
             room_table = _get_room_object_table(modified_room_tables, dungeon_data.room_id)
@@ -370,8 +376,8 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
                 dungeon_data.clear_layer2,
                 TRINEXX_SHELL_OBJECT_ID,
             )
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14), 0x60)
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 4, 0x04)
+            rom.write_byte(dungeon_header_address, 0x60)
+            rom.write_byte(dungeon_header_address + 4, 0x04)
 
         if boss_name == "Kholdstare" and dungeon_data.room_id != KHOLDSTARE_VANILLA_ROOM_ID:
             room_table = _get_room_object_table(modified_room_tables, dungeon_data.room_id)
@@ -381,8 +387,8 @@ def patch_bosses(world: "ALTTPWorld", rom: "LocalRom") -> None:
                 dungeon_data.clear_layer2,
                 KHOLDSTARE_SHELL_OBJECT_ID,
             )
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14), 0xE0)
-            rom.write_byte(dungeon_header_base + (dungeon_data.room_id * 14) + 4, 0x01)
+            rom.write_byte(dungeon_header_address, 0xE0)
+            rom.write_byte(dungeon_header_address + 4, 0x01)
 
         if boss_name != "Trinexx" and dungeon_data.room_id == TRINEXX_VANILLA_ROOM_ID:
             _get_room_object_table(modified_room_tables, dungeon_data.room_id).remove_shell(TRINEXX_SHELL_OBJECT_ID)
@@ -417,7 +423,7 @@ def _get_room_object_table(cache: dict[int, RoomObjectTable], room_id: int) -> R
     return room_table
 
 
-def _write_gt_boss_sprite_block(rom: "LocalRom", dungeon_data: DungeonBossPatchData, boss_data: BossPatchData) -> None:
+def _write_gt_boss_sprite_block(rom: "TokenRom | ProcedureRom", dungeon_data: DungeonBossPatchData, boss_data: BossPatchData) -> None:
     assert dungeon_data.gt_sprite_write_address is not None
     rom.write_int16(dungeon_data.sprite_pointer_address, dungeon_data.gt_sprite_write_address)
 
@@ -431,7 +437,7 @@ def _write_gt_boss_sprite_block(rom: "LocalRom", dungeon_data: DungeonBossPatchD
     rom.write_bytes(dungeon_data.gt_sprite_write_address, sprite_block)
 
 
-def _write_room_object_pointer(rom: "LocalRom", room_id: int, pc_address: int) -> None:
+def _write_room_object_pointer(rom: "TokenRom | ProcedureRom", room_id: int, pc_address: int) -> None:
     snes_address = pc_to_snes(pc_address)
     pointer_address = 0xF8000 + (room_id * 3)
     rom.write_bytes(pointer_address, (
@@ -459,18 +465,13 @@ def _object_id(object_bytes: bytes) -> Optional[int]:
     return object_bytes[2]
 
 
-def _set_enemizer_flag(rom: "LocalRom", symbol_name: str, enabled: bool) -> None:
+def _set_enemizer_flag(rom: "TokenRom | ProcedureRom", symbol_name: str, enabled: bool) -> None:
     rom.write_byte(_get_enemizer_symbol(symbol_name), 0x01 if enabled else 0x00)
 
 
-def _apply_killable_thief(rom: "LocalRom") -> None:
-    rom.write_byte(_get_enemizer_symbol("notItemSprite_Mimic") + 4, THIEF_SPRITE_ID)
-    rom.write_byte(ENEMY_HP_TABLE_ADDRESS + THIEF_SPRITE_ID, THIEF_DEFAULT_HP)
-
-
 def _randomize_enemy_health(
-    rom: "LocalRom",
-    rng: random.Random,
+    rom: "TokenRom | ProcedureRom",
+    random: random.Random,
     enemy_health_key: str,
     combat_model: EnemyCombatModel = VANILLA_COMBAT_MODEL,
 ) -> None:
@@ -483,30 +484,30 @@ def _randomize_enemy_health(
             or sprite_id not in ENEMY_HEALTH_RANDOMIZER_INCLUDED_SPRITE_IDS
         ):
             continue
-        rom.write_byte(hp_address, rng.randrange(min_hp, max_hp))
+        rom.write_byte(hp_address, random.randrange(min_hp, max_hp))
     rom.write_bytes(
         HARDHAT_BEETLE_HP_TABLE_ADDRESS,
         (
-            rng.randrange(min_hp, max_hp),
-            rng.randrange(min_hp, max_hp),
+            random.randrange(min_hp, max_hp),
+            random.randrange(min_hp, max_hp),
         ),
     )
 
 
-def _randomize_enemy_damage(rom: "LocalRom", rng: random.Random, allow_zero_damage: bool) -> None:
+def _randomize_enemy_damage(rom: "TokenRom | ProcedureRom", random: random.Random, allow_zero_damage: bool) -> None:
     for sprite_id in range(0xF3):
         if sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
             continue
         damage_address = ENEMY_DAMAGE_TABLE_ADDRESS + sprite_id
-        new_damage = rng.randrange(8)
+        new_damage = random.randrange(8)
         if not allow_zero_damage and new_damage == 2:
             continue
         rom.write_byte(damage_address, VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES[sprite_id] | new_damage)
 
 
 def _shuffle_damage_groups(
-    rom: "LocalRom",
-    rng: random.Random,
+    rom: "TokenRom | ProcedureRom",
+    random: random.Random,
     *,
     chaos_mode: bool,
     allow_zero_damage: bool,
@@ -515,10 +516,10 @@ def _shuffle_damage_groups(
     max_damage = 64 if chaos_mode else 32
 
     for group_id in range(10):
-        green_mail_damage = rng.randrange(min_damage, max_damage)
+        green_mail_damage = random.randrange(min_damage, max_damage)
         if chaos_mode:
-            blue_mail_damage = rng.randrange(min_damage, max_damage)
-            red_mail_damage = rng.randrange(min_damage, max_damage)
+            blue_mail_damage = random.randrange(min_damage, max_damage)
+            red_mail_damage = random.randrange(min_damage, max_damage)
         else:
             blue_mail_damage = green_mail_damage * 3 // 4
             red_mail_damage = green_mail_damage * 3 // 8
@@ -526,7 +527,7 @@ def _shuffle_damage_groups(
         rom.write_bytes(group_address, (green_mail_damage, blue_mail_damage, red_mail_damage))
 
 
-def _update_hidden_enemy_item_table_for_retro_mode(rom: "LocalRom") -> None:
+def _update_hidden_enemy_item_table_for_retro_mode(rom: "TokenRom | ProcedureRom") -> None:
     if rom.read_byte(RETRO_ARROW_REPLACEMENT_CHECK_ADDRESS) != RETRO_RUPEE_REPLACEMENT_SPRITE_ID:
         return
 
@@ -540,35 +541,18 @@ def _update_hidden_enemy_item_table_for_retro_mode(rom: "LocalRom") -> None:
             rom.write_byte(item_table_address + index, RETRO_RUPEE_REPLACEMENT_SPRITE_ID)
 
 
-def _apply_trinexx_room_fixes(rom: "LocalRom") -> None:
+def _apply_trinexx_room_fixes(rom: "TokenRom | ProcedureRom") -> None:
     # Match original Enemizer's unconditional Trinexx ice-floor removal so
     # blue-head projectiles do not create solid walls in non-vanilla rooms.
     rom.write_bytes(TRINEXX_ICE_FLOOR_ROUTINE_ADDRESS, (0xEA, 0xEA, 0xEA, 0xEA))
 
 
-def _apply_randomized_tile_trap_floor_tile(rom: "LocalRom") -> None:
+def _apply_randomized_tile_trap_floor_tile(rom: "TokenRom | ProcedureRom") -> None:
     # Original Enemizer's RandomizeTileTrapFloorTile option changes the tile
     # left behind by flying floor tile traps. AP does not currently expose or
     # call this option, so keep the implementation isolated and unused.
     rom.write_bytes(TRINEXX_ICE_PROJECTILE_TILE_ADDRESS, (0x88, 0x01))
     rom.write_byte(TILE_TRAP_FLOOR_TILE_ADDRESS, 0x12)
-
-
-def _make_native_enemizer_rng(world: "ALTTPWorld") -> random.Random:
-    seed_material = "|".join((
-        str(world.multiworld.seed),
-        world.multiworld.seed_name,
-        str(world.player),
-        _option_key(world.options.enemy_health),
-        _option_key(world.options.enemy_damage),
-        _option_key(getattr(world.options, "randomize_damage_classes", "vanilla")),
-        str(getattr(getattr(world.options, "max_attacks_in_logic", 16), "value", 16)),
-        str(int(bool(world.options.enemy_shuffle))),
-        str(int(bool(world.options.bush_shuffle))),
-        str(int(bool(world.options.killable_thieves))),
-    ))
-    seed = int.from_bytes(hashlib.sha256(seed_material.encode("utf-8")).digest()[:8], "big")
-    return random.Random(seed)
 
 
 @lru_cache(maxsize=1)
@@ -588,6 +572,14 @@ def _get_enemizer_symbol(symbol_name: str) -> int:
     if _ENEMIZER_SYMBOLS is None:
         _ENEMIZER_SYMBOLS = _load_enemizer_symbols()
     return _ENEMIZER_SYMBOLS[symbol_name]
+
+
+def get_dungeon_room_header_address(rom: "TokenRom | ProcedureRom", room_id: int) -> int:
+    moved_header_bank = rom.read_byte(_get_enemizer_symbol("moved_room_header_bank_value_address"))
+    room_header_bank = moved_header_bank or rom.read_byte(ROOM_HEADER_BANK_LOCATION)
+    pointer_address = DUNGEON_HEADER_POINTER_TABLE_BASE + (room_id * 2)
+    header_pointer = rom.read_byte(pointer_address) | (rom.read_byte(pointer_address + 1) << 8)
+    return snes_to_pc(header_pointer | (room_header_bank << 16))
 
 
 def _load_enemizer_symbols() -> dict[str, int]:

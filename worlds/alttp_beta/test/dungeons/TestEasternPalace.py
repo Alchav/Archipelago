@@ -1,4 +1,4 @@
-from worlds.alttp.PotShuffle import FilledPot, POT_SWITCH
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_SWITCH
 
 from .TestDungeon import TestDungeon
 
@@ -6,7 +6,7 @@ from .TestDungeon import TestDungeon
 class TestEasternPalace(TestDungeon):
 
     def testEastern(self):
-        self.starting_regions = ["Eastern Palace"]
+        self.starting_regions = ["Eastern Palace", "Eastern Palace (Beyond Stalfos Room)"]
         self.run_tests([
                 ["Eastern Palace - Compass Chest", True, []],
 
@@ -36,7 +36,7 @@ class TestEasternPalace(TestDungeon):
             ])
 
     def testEasternPalacePotShuffleBigKeyChestLogic(self):
-        self.starting_regions = ["Eastern Palace"]
+        self.starting_regions = ["Eastern Palace", "Eastern Palace (Beyond Stalfos Room)"]
 
         vanilla_switch_state = self.get_test_pot_shuffle_state({
             0xB8: (
