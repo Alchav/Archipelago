@@ -1758,7 +1758,7 @@ class Owner(TextChoice):
     option_Undefined = 9
     option_Ophilla = 10
     option_Factorio = 11
-    option_AlchavTetris = 12
+    option_Alchav64 = 12
     default = 9
 
 

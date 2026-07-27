@@ -935,7 +935,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 return 2
             return 1
 
-    option = "r"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
+    option = "o"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
