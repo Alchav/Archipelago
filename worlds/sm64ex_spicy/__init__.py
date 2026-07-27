@@ -153,6 +153,7 @@ class SM64World(World):
         "mario_skin_color",
         "mario_hair_color",
         "music_shuffle",
+        "skybox_shuffle",
         "coinsanity",
         "secret_stage_coinsanity",
         *secret_stage_coinsanity_max_coin_option_names,
@@ -167,6 +168,7 @@ class SM64World(World):
         slot_data = self.get_re_gen_slot_data()
         self.area_connections = {}
         self.music_slot_data = None
+        self.skybox_slot_data = None
         self.using_slot_coinsanity_locations = False
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
@@ -175,6 +177,7 @@ class SM64World(World):
                 for entrance, destination in slot_data.get("AreaRando", {}).items()
             }
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
+            self.skybox_slot_data = self.get_skybox_slot_data_from_slot_data(slot_data)
             self.start_inventory_item_ids = {
                 int(item_id) for item_id in slot_data.get("StartInventory", {})
             }
@@ -645,6 +648,8 @@ class SM64World(World):
             getattr(self.options, option_name).value = value
         if "MusicShuffleMode" in slot_data:
             self.options.music_shuffle.value = slot_data["MusicShuffleMode"]
+        if "SkyboxShuffleMode" in slot_data:
+            self.options.skybox_shuffle.value = slot_data["SkyboxShuffleMode"]
 
     def get_music_slot_data_from_slot_data(
             self, slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any] | None:
@@ -660,6 +665,23 @@ class SM64World(World):
             self.music_slot_data = build_music_slot_data(
                 self.options.music_shuffle.value, self.random)
         return self.music_slot_data.copy()
+
+    def get_skybox_slot_data(self) -> typing.Dict[str, typing.Any]:
+        if self.skybox_slot_data is None:
+            from .Skyboxes import build_skybox_slot_data
+            self.skybox_slot_data = build_skybox_slot_data(
+                self.options.skybox_shuffle.value, self.random)
+        return self.skybox_slot_data.copy()
+
+    @staticmethod
+    def get_skybox_slot_data_from_slot_data(
+            slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any] | None:
+        if "SkyboxShuffleMode" not in slot_data:
+            return None
+        skybox_slot_data = {"SkyboxShuffleMode": slot_data["SkyboxShuffleMode"]}
+        if "SkyboxMap" in slot_data:
+            skybox_slot_data["SkyboxMap"] = slot_data["SkyboxMap"]
+        return skybox_slot_data
 
     def fill_slot_data(self):
         slot_data = {
@@ -686,6 +708,7 @@ class SM64World(World):
             "BowserInTheSkyStageCollapseHits": self.options.bowser_in_the_sky_stage_collapse_hits.value,
         }
         slot_data.update(self.get_music_slot_data())
+        slot_data.update(self.get_skybox_slot_data())
         mario_colors = self.get_mario_colors_slot_data()
         if mario_colors:
             slot_data["MarioColors"] = mario_colors

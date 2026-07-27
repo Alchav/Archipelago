@@ -1013,6 +1013,23 @@ class MusicShuffle(Choice):
     alias_on = 1
 
 
+class SkyboxShuffle(Choice):
+    """
+    Control the textured skybox used by each outdoor area.
+
+    Off - Use vanilla skyboxes.
+
+    Shuffle - Archipelago sends a deterministic per-area skybox map.
+
+    Random on Load - The game picks a random skybox each time an area loads.
+    """
+    display_name = "Skybox Shuffle"
+    option_off = 0
+    option_shuffle = 1
+    option_random_on_load = 2
+    alias_on = 1
+
+
 sm64_options_groups = [
     OptionGroup("Logic Options", [
         AreaRandomizer,
@@ -1078,6 +1095,7 @@ sm64_options_groups = [
         MarioSkinColor,
         MarioHairColor,
         MusicShuffle,
+        SkyboxShuffle,
     ]),
 
 ]
@@ -1139,6 +1157,7 @@ class SM64Options(PerGameCommonOptions):
     mario_skin_color: MarioSkinColor
     mario_hair_color: MarioHairColor
     music_shuffle: MusicShuffle
+    skybox_shuffle: SkyboxShuffle
     coinsanity: Coinsanity
     secret_stage_coinsanity: SecretStageCoinsanity
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement

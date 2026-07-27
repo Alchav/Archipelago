@@ -63,7 +63,7 @@ class CoinTraceBuilder:
                 source.label,
                 source.coins,
                 counted and source.available,
-                source.available,
+                available and source.available,
                 source.children,
             )
             for source in sources

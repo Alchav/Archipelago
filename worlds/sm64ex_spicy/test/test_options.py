@@ -989,6 +989,35 @@ class MusicShuffleRandomOnLoadTestBase(SM64TestBase):
         self.assertNotIn("MusicMap", slot_data)
 
 
+class SkyboxShuffleOffTestBase(SM64TestBase):
+    options = {"skybox_shuffle": Options.SkyboxShuffle.option_off}
+
+    def test_skybox_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(0, slot_data["SkyboxShuffleMode"])
+        self.assertNotIn("SkyboxMap", slot_data)
+
+
+class SkyboxShuffleShuffleTestBase(SM64TestBase):
+    options = {"skybox_shuffle": Options.SkyboxShuffle.option_shuffle}
+
+    def test_skybox_shuffle_slot_data(self):
+        from ..Skyboxes import SM64_SKYBOX_AREAS, SM64_SKYBOX_IDS
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(1, slot_data["SkyboxShuffleMode"])
+        self.assertEqual({str(area) for area in SM64_SKYBOX_AREAS}, set(slot_data["SkyboxMap"]))
+        self.assertTrue(all(skybox in SM64_SKYBOX_IDS for skybox in slot_data["SkyboxMap"].values()))
+
+
+class SkyboxShuffleRandomOnLoadTestBase(SM64TestBase):
+    options = {"skybox_shuffle": Options.SkyboxShuffle.option_random_on_load}
+
+    def test_skybox_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(2, slot_data["SkyboxShuffleMode"])
+        self.assertNotIn("SkyboxMap", slot_data)
+
+
 class CoinStarRequirementTestBase(SM64TestBase):
     options = {
         "bob_omb_battlefield_coin_star_requirement": 100,

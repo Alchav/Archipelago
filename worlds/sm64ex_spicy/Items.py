@@ -3,7 +3,7 @@ from typing import NamedTuple, Callable
 from BaseClasses import Item, ItemClassification
 
 sm64ex_base_id: int = 3626000
-ut_glitch_item_name = "ut_glitch"
+ut_glitch_item_name = "Glitched Logic"
 
 
 def progression(options):

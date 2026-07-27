@@ -449,19 +449,19 @@ class UTGlitchLogicTestBase(SM64TestBase):
 
     def test_ut_glitch_satisfies_moveless(self):
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
 
     def test_ut_glitch_satisfies_capless(self):
         self.collect(self.world.create_item("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
     def test_ut_glitch_satisfies_cannonless(self):
         self.collect(self.world.create_item("Wing Cap"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Shoot to the Island in the Sky"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Shoot to the Island in the Sky"))
 
 
@@ -480,13 +480,13 @@ class SelectiveUTGlitchLogicTestBase(SM64TestBase):
 
     def test_selected_tracker_trick_requires_ut_glitch(self):
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
     def test_unselected_hard_trick_remains_out_of_logic_with_ut_glitch(self):
-        self.collect([self.get_item_by_name("Long Jump"), self.world.create_item("ut_glitch")])
+        self.collect([self.get_item_by_name("Long Jump"), self.world.create_item("Glitched Logic")])
         self.assertFalse(self.can_reach_region("Bob-omb Battlefield - Island"))
 
     def test_tracker_trick_selection_is_in_slot_data(self):
@@ -1357,7 +1357,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([
             self.world.create_item("Checkerboard Platforms"),
             self.get_item_by_name("Triple Jump"),
-            self.world.create_item("ut_glitch"),
+            self.world.create_item("Glitched Logic"),
         ])
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Fall onto the Caged Island"))
 
@@ -1522,7 +1522,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         ])
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
     def test_hmc_metal_head_capless_route_requires_purple_switches(self):
@@ -1530,7 +1530,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Triple Jump"),
-            self.world.create_item("ut_glitch"),
+            self.world.create_item("Glitched Logic"),
         ])
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
 
@@ -1672,7 +1672,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
@@ -2579,7 +2579,7 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
     def test_wing_cap_fallback_coins_do_not_use_moveless(self):
@@ -2590,13 +2590,13 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
     def test_wing_cap_does_not_enable_long_jump_trick_without_trick_option(self):
         self.collect_wing_mario_over_the_rainbow_access()
         self.collect(self.get_item_by_name("Long Jump"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 3 Coins"))
 
         self.collect(self.get_item_by_name("Wing Cap"))
@@ -2622,7 +2622,7 @@ class WingMarioOverTheRainbowCoinsanityAccessTestBase(SM64TestBase):
         ])
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
 
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - 56 Coins"))
 
 
@@ -3438,7 +3438,7 @@ class JollyRogerBayCoinStar68AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
     def test_moveless_start_coins_reach_coin_star(self):
         self.collect(self.get_item_by_name("Backflip"))
         self.assertFalse(self.can_reach_location("Jolly Roger Bay - Coins Star"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Coins Star"))
 
 
@@ -6590,7 +6590,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
         self.collect(self.get_item_by_name("Long Jump"))
-        self.collect(self.world.create_item("ut_glitch"))
+        self.collect(self.world.create_item("Glitched Logic"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
     def test_wmotr_buddy_wing_cap_route_accepts_triple_jump(self):
@@ -6626,7 +6626,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
             self.get_item_by_name("Wing Cap"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Side Flip"),
-            self.world.create_item("ut_glitch"),
+            self.world.create_item("Glitched Logic"),
         ])
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Cloud 1-Up"))
 
@@ -6787,7 +6787,7 @@ class WingMarioOverTheRainbowBlocksanityAccessTestBase(SM64TestBase):
             self.get_item_by_name("Wing Cap"),
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Side Flip"),
-            self.world.create_item("ut_glitch"),
+            self.world.create_item("Glitched Logic"),
         ])
         self.assertFalse(self.can_reach_location(
             "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))

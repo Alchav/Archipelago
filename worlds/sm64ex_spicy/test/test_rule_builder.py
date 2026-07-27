@@ -5,6 +5,7 @@ from typing import cast
 from BaseClasses import CollectionState
 
 from .. import SM64World
+from ..CoinLogic import CoinTraceBuilder, coin_source
 from ..RuleBuilder import CanCollectCoins, CoinEvaluation, CoinSourceTrace, \
     register_coin_evaluator, unregister_coin_evaluator
 
@@ -80,6 +81,20 @@ class CanCollectCoinsTest(unittest.TestCase):
         })
         json.dumps(serialized)
         self.assertEqual(SM64World.rule_from_dict(serialized), rule)
+
+    def test_unavailable_route_makes_unlocked_children_unavailable(self) -> None:
+        trace = CoinTraceBuilder()
+        trace.add_route(
+            "unavailable_route",
+            "Unavailable route",
+            False,
+            (coin_source("unlocked_source", "Unlocked source", 3, True),),
+        )
+
+        route = trace.evaluation().children[0]
+        self.assertFalse(route.available)
+        self.assertFalse(route.children[0].available)
+        self.assertFalse(route.children[0].counted)
 
     def test_structured_explanation_formatting(self) -> None:
         resolved = CanCollectCoins(TRACE_COURSE, 10).resolve(cast(SM64World, FakeWorld()))
