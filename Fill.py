@@ -606,6 +606,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     multiworld.random.shuffle(fill_locations)
     # get items to distribute
     itempool = sorted(multiworld.itempool)
+
+    itempool = [item for item in itempool if item.name not in ("Nothing", "1-Up Mushroom")]
+
     multiworld.random.shuffle(itempool)
 
     for player in multiworld.player_name:
@@ -890,6 +893,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if i.classification == ItemClassification.useful and game == "Terraria":
             return multiworld.random.randint(2, 3)
         if i.classification == ItemClassification.trap:
+            if i.name == "Uncollect Random Coin Trap":
+                return 1
             if game == "Super Mario Land 2":
                 return 1
             if game == "Tetris" and i.name == "Increase Speed":

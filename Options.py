@@ -1741,8 +1741,8 @@ class Removed(FreeText):
 
 class Owner(TextChoice):
     def __init__(self, value: str):
-        # if value == self.option_Undefined:
-        #     raise OptionError("Undefined owner.")
+        if value == self.option_Undefined:
+            raise OptionError("Undefined owner.")
         super().__init__(value)
     """Owner of the games slot. J means Jigsaw"""
     display_name = "Owner"

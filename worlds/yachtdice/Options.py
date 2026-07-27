@@ -22,14 +22,14 @@ class GameDifficulty(Choice):
 
 class ScoreForLastCheck(Range):
     """
-    The items in the item pool will always allow you to reach a score of 1000.
+    The items in the item pool will always allow you to reach a score of at least 1000.
     By default, the last check is also at a score of 1000.
-    However, you can set the score for the last check to be lower. This will make the game shorter and easier.
+    Lower scores make the game shorter and easier, while higher scores make it longer and harder.
     """
 
     display_name = "Score for last check"
     range_start = 500
-    range_end = 1000
+    range_end = 10000
     default = 1000
 
 
@@ -41,7 +41,7 @@ class ScoreForGoal(Range):
 
     display_name = "Score for goal"
     range_start = 500
-    range_end = 1000
+    range_end = 10000
     default = 777
 
 
@@ -72,7 +72,7 @@ class NumberDiceFragmentsPerDice(Range):
 
     display_name = "Number of dice fragments per dice"
     range_start = 1
-    range_end = 5
+    range_end = 25
     default = 4
 
 
@@ -86,7 +86,7 @@ class NumberRollFragmentsPerRoll(Range):
 
     display_name = "Number of roll fragments per roll"
     range_start = 1
-    range_end = 5
+    range_end = 25
     default = 4
 
 
