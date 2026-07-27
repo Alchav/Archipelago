@@ -543,22 +543,27 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regTTC,
                 "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block",
                 "Tick Tock Clock - First Pendulum 3 Coins Block")
-    ttc_lower = create_subregion(regTTC, "Tick Tock Clock - Lower", "Tick Tock Clock - Roll into the Cage",
-                                 "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins",
-                                 "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block")
-    ttc_mid = create_subregion(ttc_lower, "Tick Tock Clock - Mid",
+    ttc_lower = create_subregion(
+        regTTC, "Tick Tock Clock - First Clock Hand Area",
+        "Tick Tock Clock - Roll into the Cage",
+        "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins",
+        "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block")
+    ttc_mid = create_subregion(ttc_lower, "Tick Tock Clock - The Pit and the Pendulums Area",
                                "Tick Tock Clock - The Pit and the Pendulums",
                                "Tick Tock Clock - Heave-ho First 3 Coins Block",
                                "Tick Tock Clock - Heave-ho Second 3 Coins Block")
-    ttc_upper = create_subregion(ttc_mid, "Tick Tock Clock - Upper", "Tick Tock Clock - Timed Jumps on Moving Bars",
-                                 "Tick Tock Clock - Moving Bars Platform 1-Up",
-                                 "Tick Tock Clock - Pole 1-Up",
-                                 "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
-                                 "Tick Tock Clock - Above Four Moving Bars 10 Coins Block")
-    ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top", "Tick Tock Clock - Midway Up Block 1-Up",
-                               "Tick Tock Clock - Midway Up 1-Up Block",
-                               "Tick Tock Clock - Past Three Spinners 3 Coins Block")
+    ttc_upper = create_subregion(
+        ttc_mid, "Tick Tock Clock - Moving Bars Area",
+        "Tick Tock Clock - Timed Jumps on Moving Bars",
+        "Tick Tock Clock - Moving Bars Platform 1-Up",
+        "Tick Tock Clock - Pole 1-Up",
+        "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
+        "Tick Tock Clock - Above Four Moving Bars 10 Coins Block")
+    ttc_top = create_subregion(ttc_upper, "Tick Tock Clock - Top")
     ttc_top_past_spinners = create_subregion(ttc_top, "Tick Tock Clock - Top Past Spinners",
+                                             "Tick Tock Clock - Midway Up Block 1-Up",
+                                             "Tick Tock Clock - Midway Up 1-Up Block",
+                                             "Tick Tock Clock - Past Three Spinners 3 Coins Block",
                                              "Tick Tock Clock - Stomp on the Thwomp",
                                              "Tick Tock Clock - Top Block 1-Up",
                                              "Tick Tock Clock - Top 1-Up Block",

@@ -239,7 +239,7 @@ def can_collect_all_lethal_lava_land_red_coins(
         return True
     has_lava_crossing = (
         state.has("Lethal Lava Land - Koopa Shell", player)
-        or can_use_logic_trick(state, player, "logic_jump_in_lava", target_name)
+        or can_use_logic_trick(state, player, "logic_lava_damage_boosting", target_name)
     )
     return has_lava_crossing and has_lethal_lava_land_healing_coins(state, player)
 
@@ -251,7 +251,7 @@ def can_reach_lethal_lava_land_red_coins(
             state, player, "coin_object_unlocks",
             "Lethal Lava Land - Bowser Puzzle", "Lethal Lava Land - Bowser Puzzle")
         or state.has("Lethal Lava Land - Koopa Shell", player)
-        or can_use_logic_trick(state, player, "logic_jump_in_lava", target_name)
+        or can_use_logic_trick(state, player, "logic_lava_damage_boosting", target_name)
     )
 
 
@@ -683,13 +683,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Lethal Lava Land - Bully the Bullies", "BULLIES & BIG_BULLY")
     rf.assign_rule(
         "Lethal Lava Land - Red-Hot Log Rolling",
-        "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | logic_jump_in_lava")
+        "WC+TJ | LLL_ROLLING_LOG | LLL_KOOPA_SHELL | logic_lava_damage_boosting")
     for location_name in (
             "Lethal Lava Land - Northeast Brown Platform 1-Up",
             "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up",
             "Lethal Lava Land - Northwest Curve 1-Up",
     ):
-        rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_jump_in_lava")
+        rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_lava_damage_boosting")
     rf.assign_rule(
         "Lethal Lava Land - Hot-Foot-It Ledge",
         "CL | logic_lll_hot_foot_it_with_wall_kick | logic_lll_hot_foot_it_with_triple_jump | "
@@ -751,13 +751,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Igloo", "{Snowman's Land - Whirl from the Freezing Pond}")
     rf.assign_rule("Snowman's Land - Chill with the Bully", "BIG_BULLY")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
-    rf.assign_rule("Snowman's Land - Into the Igloo",
-                   "VC & TJ/SF/BF/WK/LG | logic_sl_igloo_no_movement")
+    rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
-    rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up",
-                   "VC & TJ/SF/BF/WK/LG | logic_sl_igloo_no_movement")
-    rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up",
-                   "VC & TJ/SF/BF/WK/LG | logic_sl_igloo_no_movement")
+    rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC & TJ/SF/BF/WK/LG")
+    rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC & TJ/SF/BF/WK/LG")
     # Wet-Dry World
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
@@ -831,24 +828,27 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
-    rf.assign_rule("Tiny-Huge Island - Cannon Tree 1-Up",
-                   "CANN | logic_thi_cannon_tree_cannonless")
-    rf.assign_rule("Tiny-Huge Island - Red Coin Bridge Tree 1-Up",
-                   "CANN | logic_thi_cannon_tree_cannonless")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
-    rf.assign_rule("Tick Tock Clock - Lower",
-                   "LG/TJ/SF/BF | logic_ttc_lower_wall_kick | "
+    rf.assign_rule("Tick Tock Clock - First Clock Hand Area",
+                   "LG/TJ/SF/BF | logic_ttc_first_clock_hand_area_wall_kick | "
                    "{Tick Tock Clock Stopped} & TTC_SPINNERS")
-    rf.assign_rule("Tick Tock Clock - Mid", "CL | logic_ttc_upper_wall_kick")
-    rf.assign_rule("Tick Tock Clock - Upper", "{Tick Tock Clock Moving} | WK")
-    rf.assign_rule("Tick Tock Clock - Top", "TJ+LG | logic_ttc_top_wall_kick_or_triple_jump")
-    rf.assign_rule("Tick Tock Clock - Top Past Spinners", "TTC_SPINNERS | SF+LG | TJ")
-    rf.assign_rule("Tick Tock Clock - Midway Up Block 1-Up", "TTC_SPINNERS | LJ+LG")
+    rf.assign_rule(
+        "Tick Tock Clock - The Pit and the Pendulums Area",
+        "CL | logic_ttc_pit_and_pendulums_area_wall_kick")
+    rf.assign_rule("Tick Tock Clock - Moving Bars Area", "{Tick Tock Clock Moving} | WK")
+    rf.assign_rule(
+        "Tick Tock Clock - Top",
+        "TJ+LG | {Tick Tock Clock Moving} & SF | logic_ttc_top_past_spinners_wall_kick")
+    rf.assign_rule(
+        "Tick Tock Clock - Top Past Spinners",
+        "TTC_SPINNERS | SF | TJ | logic_ttc_top_past_spinners_wall_kick")
     rf.assign_rule(
         "Tick Tock Clock - Stomp on the Thwomp",
         "{Tick Tock Clock Moving} & THWOMP | "
-        "{Tick Tock Clock Moving} & logic_ttc_stomp_thwomp_triple_jump_wall_kick")
+        "{Tick Tock Clock Moving} & logic_ttc_stomp_thwomp_triple_jump_wall_kick | "
+        "THWOMP & logic_ttc_stomp_thwomp_wall_kick | "
+        "logic_ttc_stomp_thwomp_triple_jump_wall_kick & logic_ttc_stomp_thwomp_wall_kick")
     # Rainbow Ride
     rf.assign_rule("Rainbow Ride - Beneath the Pole", "LJ/TJ/DV")
     rf.assign_rule("Rainbow Ride - Maze", "CL")
@@ -966,7 +966,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
             "Snowman's Land - Inside Igloo 1-Up Block":
-                "VC & TJ/SF/BF/WK/LG | logic_sl_igloo_no_movement",
+                "VC & TJ/SF/BF/WK/LG",
             "Snowman's Land - Vanish Cap Block": "VC",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
             "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
@@ -983,7 +983,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Tick Tock Clock - Top Clock Hand 10 Coins Block": "TEN_COIN_BLOCKS",
             "Tick Tock Clock - Top Central Platform 10 Coins Block": "TEN_COIN_BLOCKS",
             "Tick Tock Clock - Beneath the Thwomp 10 Coins Block": "TEN_COIN_BLOCKS",
-            "Tick Tock Clock - Midway Up 1-Up Block": "TTC_SPINNERS | LJ+LG",
             "Vanish Cap Under the Moat - Bottom of Slide Vanish Cap Block": "VC",
             "Vanish Cap Under the Moat - 3 Coins Block": "LG/TJ/BF/SF",
             "Vanish Cap Under the Moat - Near Switch Vanish Cap Block":

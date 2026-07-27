@@ -259,7 +259,8 @@ def _can_collect_all_ttc_red_coins(state: CollectionState, player: int) -> bool:
 
     return (
         _red_coins_and_region(
-            state, player, "Tick Tock Clock", "Tick Tock Clock - Lower")
+            state, player, "Tick Tock Clock",
+            "Tick Tock Clock - First Clock Hand Area")
         and Rules.has_simple_arbitrary_feature(state, player, "TTC_SPINNERS")
     )
 
@@ -277,7 +278,7 @@ def _can_collect_all_rr_red_coins(state: CollectionState, player: int) -> bool:
                     for action in ("Side Flip", "Backflip", "Triple Jump"))
         )
         or Rules.can_use_logic_trick(
-            state, player, "logic_rr_maze_coins_ledge_grab_or_triple_jump", target)
+            state, player, "logic_rr_maze_coins_ledge_grab_and_carpets", target)
     )
     return (
         _red_coins_and_region(state, player, level, f"{level} - Maze")
@@ -1315,8 +1316,8 @@ def lethal_lava_land_coins(
         "Mr. Is", f"{level_name} - Mr. Is")
 
     has_koopa_shell = state.has(f"{level_name} - Koopa Shell", player)
-    has_jump_in_lava_trick = Rules.can_use_logic_trick(
-        state, player, "logic_jump_in_lava", target_name)
+    has_lava_damage_boosting = Rules.can_use_logic_trick(
+        state, player, "logic_lava_damage_boosting", target_name)
     can_reach_red_coins = Rules.can_reach_lethal_lava_land_red_coins(
         state, player, target_name)
     has_healing_coins = Rules.has_lethal_lava_land_healing_coins(state, player)
@@ -1420,9 +1421,9 @@ def lethal_lava_land_coins(
             has_koopa_shell,
         ),
         coin_condition(
-            "lll_red_coin_jump_in_lava_route",
-            "Jump in Lava trick route",
-            has_jump_in_lava_trick,
+            "lll_red_coin_lava_damage_boosting_route",
+            "Lava Damage Boosting trick route",
+            has_lava_damage_boosting,
         ),
     )
     builder.add(
@@ -1463,7 +1464,7 @@ def lethal_lava_land_coins(
         "lll_under_bridge_coin_line",
         "Coin line under the bridge",
         5,
-        has_single_yellow_coins and (has_koopa_shell or has_jump_in_lava_trick),
+        has_single_yellow_coins and (has_koopa_shell or has_lava_damage_boosting),
         children=(
             coin_condition(
                 "lll_under_bridge_koopa_shell_route",
@@ -1471,9 +1472,9 @@ def lethal_lava_land_coins(
                 has_koopa_shell,
             ),
             coin_condition(
-                "lll_under_bridge_jump_in_lava_route",
-                "Jump in Lava trick route",
-                has_jump_in_lava_trick,
+                "lll_under_bridge_lava_damage_boosting_route",
+                "Lava Damage Boosting trick route",
+                has_lava_damage_boosting,
             ),
         ),
     )
@@ -3265,7 +3266,7 @@ def tick_tock_clock_coins(
     ))
 
     has_lower = state.can_reach(
-        "Tick Tock Clock - Lower", "Region", player)
+        "Tick Tock Clock - First Clock Hand Area", "Region", player)
     moving_line_route = (
         state.can_reach("Tick Tock Clock Moving", "Region", player)
         or (
@@ -3294,7 +3295,7 @@ def tick_tock_clock_coins(
     ))
 
     has_upper = state.can_reach(
-        "Tick Tock Clock - Upper", "Region", player)
+        "Tick Tock Clock - Moving Bars Area", "Region", player)
     trace.add_route("ttc_upper", "Upper region", has_upper, (
         coin_source("ttc_heave_ho_blocks",
                 "Two 3-Coin Blocks by the Heave-Hos", 6, has_three_coin_blocks),
@@ -3315,9 +3316,6 @@ def tick_tock_clock_coins(
         coin_source("ttc_four_moving_bars_block",
                 "10-Coin Block above Four Moving Bars",
                 10, has_ten_coin_blocks),
-        coin_source("ttc_past_three_spinners_block",
-                "3-Coin Block past the three spinners",
-                3, has_three_coin_blocks),
     ))
 
     has_top_past_spinners = state.can_reach(
@@ -3325,6 +3323,9 @@ def tick_tock_clock_coins(
     trace.add_route(
         "ttc_top_past_spinners", "Top Past Spinners region",
         has_top_past_spinners, (
+            coin_source("ttc_past_three_spinners_block",
+                    "3-Coin Block past the three spinners",
+                    3, has_three_coin_blocks),
             coin_source("ttc_beneath_thwomp_block",
                     "10-Coin Block beneath the Thwomp",
                     10, has_ten_coin_blocks),
@@ -3421,7 +3422,7 @@ def rainbow_ride_coins(
         state, player, "Ground Pound", level_name)
     has_wall_kick = rules.has_action(state, player, "Wall Kick", level_name)
     has_maze_red_coin_trick = rules.can_use_logic_trick(
-        state, player, "logic_rr_maze_coins_ledge_grab_or_triple_jump",
+        state, player, "logic_rr_maze_coins_ledge_grab_and_carpets",
         "Rainbow Ride - Coins Amassed in a Maze")
     trace.add_route("rr_maze", "Maze region", has_maze, (
         coin_source("rr_maze_coin_rings",
@@ -3966,8 +3967,8 @@ def bowser_in_the_fire_sea_coins(
         state, player, "enemy_unlocks",
         "Goombas", f"{level_name} - Goombas")
     has_climb = rules.has_action(state, player, "Climb", level_name)
-    has_lava_jump = rules.can_use_logic_trick(
-        state, player, "logic_jump_in_lava",
+    has_lava_damage_boosting = rules.can_use_logic_trick(
+        state, player, "logic_lava_damage_boosting",
         "Bowser in the Fire Sea - Coins Star")
 
     trace = CoinTraceBuilder()
@@ -3987,8 +3988,8 @@ def bowser_in_the_fire_sea_coins(
     ))
     trace.add_route(
         "bitfs_rising_platform_block",
-        "3-Coin Block after the rising pole platform (Climb or Jump in Lava)",
-        has_climb or has_lava_jump,
+        "3-Coin Block after the rising pole platform (Climb or Lava Damage Boosting)",
+        has_climb or has_lava_damage_boosting,
         (coin_source("bitfs_three_coin_block",
                  "3-Coin Block", 3, has_three_coin_block),),
     )

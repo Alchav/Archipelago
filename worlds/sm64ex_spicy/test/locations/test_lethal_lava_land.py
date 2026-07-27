@@ -107,14 +107,14 @@ class TestLethalLavaLandLocations(SM64TestBase):
         ], starting_regions=["Lethal Lava Land"])
 
 
-class TestLethalLavaLandJumpInLava(SM64TestBase):
+class TestLethalLavaLandLavaDamageBoosting(SM64TestBase):
     run_default_tests = False
     options = {
         **LLL_OPTIONS,
-        "logic_tricks": {"Jump in Lava"},
+        "logic_tricks": {"Lava Damage Boosting"},
     }
 
-    def test_jump_in_lava_routes(self):
+    def test_lava_damage_boosting_routes(self):
         freestanding = ["Lethal Lava Land - Freestanding 1-Ups"]
         self.run_location_tests([
             ["Lethal Lava Land - Red-Hot Log Rolling", True, []],

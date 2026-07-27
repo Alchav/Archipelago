@@ -150,6 +150,24 @@ class TestRainbowRideBuddyLedgeGrabAndCarpetsTrick(SM64TestBase):
         ], starting_regions=["Rainbow Ride - Carpets"])
 
 
+class TestRainbowRideMazeCoinsLedgeGrabAndCarpetsTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **RR_OPTIONS,
+        "logic_tricks": {"Rainbow Ride Maze Coins with Ledge Grab and Carpets"},
+    }
+
+    def test_trick_reaches_all_red_coins_with_ledge_grab_and_carpets(self):
+        self.run_location_tests([
+            ["Rainbow Ride - Coins Amassed in a Maze", False,
+             [RED_COINS, "Ledge Grab"]],
+            ["Rainbow Ride - Coins Amassed in a Maze", False,
+             [RED_COINS, CARPETS]],
+            ["Rainbow Ride - Coins Amassed in a Maze", True,
+             [RED_COINS, CARPETS, "Ledge Grab"]],
+        ], starting_regions=["Rainbow Ride"])
+
+
 class TestRainbowRideGlobalUnlockModes(SM64TestBase):
     run_default_tests = False
     options = {

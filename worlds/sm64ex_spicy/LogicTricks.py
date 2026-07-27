@@ -1,10 +1,11 @@
 logic_tricks = {
     # Non-level-specific tricks
-    "Jump in Lava": {
-        "internal_id": "logic_jump_in_lava",
+    "Lava Damage Boosting": {
+        "internal_id": "logic_lava_damage_boosting",
         "rule": "",
         "difficulty": "medium",
-        "description": "Jumping into and bouncing off lava to cross gaps or reach nearby platforms.",
+        "description": "Jumping into and bouncing off lava to cross gaps or reach nearby platforms."
+                       "If you don't have Mario's Hat, you may have to die!",
     },
     # Castle
     "Castle Third Tree From Waterfall 1-Up With No Movement": {
@@ -465,7 +466,6 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Using a Triple Jump or Dive from the Hot-Foot-It into the Volcano ledge down to the poles"
                        "leading to Elevator Tour in the Volcano (and three coins).",
-        "video": "https://www.youtube.com/watch?v=RUipVl7XHbg",
     },
     # Shifting Sand Land
     "Shifting Sand Land Stone Structure with Shy Guy Bounce": {
@@ -525,38 +525,39 @@ logic_tricks = {
         "description": "Collecting the coin embedded underground on Tiny Island using Ground Pound, Triple Jump,"
                        " Dive, and Kick.",
     },
-    "Tiny-Huge Island Cannon Trees without Cannon": {
-        "internal_id": "logic_thi_cannon_tree_cannonless",
-        "rule": "",
-        "difficulty": "medium",
-        "description": "Reaches the Cannon Tree and Red Coin Bridge Tree 1-Ups without cannon access.",
-    },
     # Tick Tock Clock
-    "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp": {
+    "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp without Thwomp": {
         "internal_id": "logic_ttc_stomp_thwomp_triple_jump_wall_kick",
         "rule": "TJ+WK",
         "difficulty": "medium",
         "description": "Reaching the Stomp on the Thwomp star with a Triple Jump and Wall Kick without the Thwomp.",
     },
-    "Tick Tock Clock Lower with Wall Kick": {
-        "internal_id": "logic_ttc_lower_wall_kick",
+    "Tick Tock Clock First Clock Hand Area with Wall Kick": {
+        "internal_id": "logic_ttc_first_clock_hand_area_wall_kick",
         "rule": "WK",
         "difficulty": "medium",
-        "description": "Reaches lower Tick Tock Clock using Wall Kick as the only movement item.",
+        "description": "Reaches the First Clock Hand Area using Wall Kick as the only movement item.",
         "video": "https://www.youtube.com/watch?v=NfRb0epgZbo",
     },
-    "Tick Tock Clock Mid with Wall Kick": {
-        "internal_id": "logic_ttc_upper_wall_kick",
+    "Tick Tock Clock The Pit and the Pendulums Area with Wall Kick": {
+        "internal_id": "logic_ttc_pit_and_pendulums_area_wall_kick",
         "rule": "WK",
         "difficulty": "medium",
-        "description": "Reaches mid Tick Tock Clock using Wall Kick instead of Climb.",
+        "description": "Reaches The Pit and the Pendulums Area using Wall Kick instead of Climb.",
         "video": "https://www.youtube.com/watch?v=NfRb0epgZbo",
     },
-    "Tick Tock Clock Top with Wall Kick or Triple Jump": {
-        "internal_id": "logic_ttc_top_wall_kick_or_triple_jump",
-        "rule": "WK/TJ",
+    "Tick Tock Clock Top Past Spinners with Wall Kick": {
+        "internal_id": "logic_ttc_top_past_spinners_wall_kick",
+        "rule": "WK",
         "difficulty": "medium",
-        "description": "Reaches the top of Tick Tock Clock using either Wall Kick or Triple Jump.",
+        "description": "Reaches both the Top and Top Past Spinners areas from the Moving Bars Area using Wall Kick.",
+        "video": "https://www.youtube.com/watch?v=63eenKoAxEo",
+    },
+    "Tick Tock Clock Stomp on the Thwomp with Wall Kick": {
+        "internal_id": "logic_ttc_stomp_thwomp_wall_kick",
+        "rule": "WK",
+        "difficulty": "medium",
+        "description": "Reaches Stomp on the Thwomp with Wall Kick without requiring moving clock objects.",
         "video": "https://www.youtube.com/watch?v=63eenKoAxEo",
     },
     # Snowman's Land
@@ -566,13 +567,6 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Collecting the coin hidden inside the first wooden walkway on the snowman by shooting"
                        " into it from the cannon.",
-    },
-    "Snowman's Land Igloo without Movement Items": {
-        "internal_id": "logic_sl_igloo_no_movement",
-        "rule": "VC",
-        "difficulty": "medium",
-        "description": "Enters the igloo and reaches its 1-Up checks using Vanish Cap without movement items.",
-        "video": "https://www.youtube.com/watch?v=QTZMq0fvTTo",
     },
     # Bowser in the Dark World
     "Bowser in the Dark World Triple Jump up the Purple Switch Slope": {
@@ -783,11 +777,11 @@ logic_tricks = {
         "description": "Collects the five coins on the bottom of the climbable vine ceiling without having Climb.",
     },
     # Rainbow Ride
-    "Rainbow Ride Maze Coins with Ledge Grab or Triple Jump": {
-        "internal_id": "logic_rr_maze_coins_ledge_grab_or_triple_jump",
-        "rule": "LG/TJ",
+    "Rainbow Ride Maze Coins with Ledge Grab and Carpets": {
+        "internal_id": "logic_rr_maze_coins_ledge_grab_and_carpets",
+        "rule": "LG & RR_CARPETS",
         "difficulty": "medium",
-        "description": "Collects Coins Amassed in a Maze using either Ledge Grab or Triple Jump.",
+        "description": "Collects all eight Red Coins in the maze using Ledge Grab and the Rainbow Ride Carpets.",
         "video": "https://www.youtube.com/watch?v=JUHaYOh340o",
     },
     "Rainbow Ride Bob-omb Buddy with Ledge Grab and Carpets": {
@@ -823,18 +817,19 @@ logic_tricks = {
         "internal_id": "logic_bits_chuckya_no_movement",
         "rule": "",
         "difficulty": "medium",
-        "description": "Reaches the Bowser in the Sky Chuckya region without movement items.",
+        "description": "Reaches the Bowser in the Sky Chuckya platform without movement items.",
     },
-    "Bowser in the Sky Arrow Ride without Purple Switches": {
+    "Bowser in the Sky Switch Slope without Purple Switches": {
         "internal_id": "logic_bits_arrow_ride_no_purple_switch",
         "rule": "",
         "difficulty": "medium",
-        "description": "Reaches the Bowser in the Sky Arrow Ride region without Purple Switches.",
+        "description": "Reaches the top of the Bowser in the Sky Switch Slope without Purple Switches or movement"
+                       "items."
     },
     "Bowser in the Sky Top without Climb": {
         "internal_id": "logic_bits_top_without_climb",
         "rule": "TJ+WK+LG",
-        "difficulty": "medium",
+        "difficulty": "hard",
         "description": "Reaches the top of Bowser in the Sky without Climb using Triple Jump, Wall Kick, and Ledge "
                        "Grab.",
         "video": "https://www.youtube.com/watch?v=L6WadejjTGQ",

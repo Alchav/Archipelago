@@ -2383,14 +2383,14 @@ class BowserInTheFireSeaCoinsanityAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 80 Coins"))
 
 
-class BowserInTheFireSeaJumpInLavaTrickTestBase(SM64TestBase):
+class BowserInTheFireSeaLavaDamageBoostingTrickTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "logic_tricks": {"Jump in Lava"},
+        "logic_tricks": {"Lava Damage Boosting"},
     }
 
-    def test_jump_in_lava_reaches_only_marked_three_coins(self):
+    def test_lava_damage_boosting_reaches_only_marked_three_coins(self):
         self.assertTrue(bowser_in_the_fire_sea_coins(
             self.multiworld.state, self.player, 26))
         self.assertFalse(bowser_in_the_fire_sea_coins(
@@ -4591,7 +4591,7 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
         "one_up_checks": Options.OneUpChecks.option_true,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
-        "logic_tricks": {"Jump in Lava"},
+        "logic_tricks": {"Lava Damage Boosting"},
     }
 
     def collect_basement_access(self):
@@ -4698,7 +4698,7 @@ class LethalLavaLandKoopaShellAccessTestBase(SM64TestBase):
 class LethalLavaLandCoinStar130BouncingOffLavaAccessTestBase(LethalLavaLandCoinStarAccessTestBase):
     options = {
         **LethalLavaLandCoinStarAccessTestBase.options,
-        "logic_tricks": {"Jump in Lava"},
+        "logic_tricks": {"Lava Damage Boosting"},
         "lethal_lava_land_coin_star_requirement": 130,
     }
 
@@ -6850,13 +6850,13 @@ class TTCVariantAccessTestBase(SM64TestBase):
         stopped_entrance = sm64_ttc_entrances[0]
         self.multiworld.get_entrance(f"Third Floor -> {stopped_entrance}", self.player).access_rule = \
             lambda state: False
-        self.multiworld.get_entrance("Tick Tock Clock - Lower", self.player).access_rule = \
+        self.multiworld.get_entrance("Tick Tock Clock - First Clock Hand Area", self.player).access_rule = \
             lambda state: False
 
         self.collect_third_floor_access()
         self.assertFalse(self.can_reach_region("Tick Tock Clock Stopped"))
         self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
-        self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - First Clock Hand Area"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
 
 
@@ -6914,15 +6914,15 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         self.use_stopped_ttc_without_entry_move()
         self.collect_third_floor_access()
         self.assertTrue(self.can_reach_region("Tick Tock Clock Stopped"))
-        self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - First Clock Hand Area"))
         self.collect(self.get_item_by_name("Tick Tock Clock - Spinners"))
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - First Clock Hand Area"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Stop Time for Red Coins"))
 
     def test_wall_kick_does_not_reach_lower_without_moveless_logic(self):
         self.collect_third_floor_access()
         self.collect(self.get_item_by_name("Wall Kick"))
-        self.assertFalse(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - First Clock Hand Area"))
 
     def test_timed_jumps_require_moving_ttc_or_wall_kick(self):
         self.use_stopped_ttc_without_entry_move()
@@ -6931,13 +6931,13 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Tick Tock Clock - Spinners"),
             self.get_item_by_name("Climb"),
         ])
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Mid"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - The Pit and the Pendulums Area"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - The Pit and the Pendulums"))
-        self.assertFalse(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - Moving Bars Area"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Moving Bars Platform 1-Up"))
         self.collect(self.get_item_by_name("Wall Kick"))
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Moving Bars Area"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Moving Bars Platform 1-Up"))
 
@@ -6948,30 +6948,28 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
         ])
         self.assertTrue(self.can_reach_region("Tick Tock Clock Moving"))
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Moving Bars Area"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Timed Jumps on Moving Bars"))
 
     def test_pole_1up_is_in_upper_region(self):
         self.collect_third_floor_access()
         self.collect(self.get_item_by_name("Triple Jump"))
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
-        self.assertFalse(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - First Clock Hand Area"))
+        self.assertFalse(self.can_reach_region("Tick Tock Clock - Moving Bars Area"))
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Pole 1-Up"))
 
         self.collect(self.get_item_by_name("Climb"))
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Upper"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Moving Bars Area"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Pole 1-Up"))
 
-    def test_midway_1up_requires_spinners_or_long_jump_and_ledge_grab(self):
+    def test_midway_1up_uses_top_past_spinners_region_access(self):
         self.collect_third_floor_access()
         self.collect([
             self.get_item_by_name("Triple Jump"),
             self.get_item_by_name("Ledge Grab"),
             self.get_item_by_name("Climb"),
         ])
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Top"))
-        self.assertFalse(self.can_reach_location("Tick Tock Clock - Midway Up Block 1-Up"))
-        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - Top Past Spinners"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up Block 1-Up"))
 
     def test_midway_1up_reachable_with_spinners(self):
@@ -7002,7 +7000,7 @@ class TTCMovelessWallKickAccessTestBase(SM64TestBase):
     def test_wall_kick_reaches_lower_with_moveless_logic(self):
         self.collect_third_floor_access()
         self.collect(self.get_item_by_name("Wall Kick"))
-        self.assertTrue(self.can_reach_region("Tick Tock Clock - Lower"))
+        self.assertTrue(self.can_reach_region("Tick Tock Clock - First Clock Hand Area"))
 
 
 class TickTockClockCoinStarAccessTestBase(SM64TestBase):
@@ -7117,10 +7115,10 @@ class TickTockClockCoinStar36MovingAccessTestBase(TickTockClockCoinStarAccessTes
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar76UpperGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar122SideFlipGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
-        "tick_tock_clock_coin_star_requirement": 76,
+        "tick_tock_clock_coin_star_requirement": 122,
     }
 
     def test_coin_star_access(self):
@@ -7133,10 +7131,10 @@ class TickTockClockCoinStar76UpperGroundPoundAccessTestBase(TickTockClockCoinSta
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar77UpperGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar123SideFlipGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
-        "tick_tock_clock_coin_star_requirement": 77,
+        "tick_tock_clock_coin_star_requirement": 123,
     }
 
     def test_coin_star_access(self):
@@ -7227,7 +7225,7 @@ class TickTockClockStompThwompTrickTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "area_rando": Options.AreaRandomizer.option_Off,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-        "logic_tricks": {"Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp"},
+        "logic_tricks": {"Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp without Thwomp"},
     }
 
     def collect_third_floor_access(self):
