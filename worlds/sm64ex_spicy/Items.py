@@ -3,7 +3,7 @@ from typing import NamedTuple, Callable
 from BaseClasses import Item, ItemClassification
 
 sm64ex_base_id: int = 3626000
-ut_glitch_item_name = "ut_glitch"
+ut_glitch_item_name = "Glitched Logic"
 
 
 def progression(options):
@@ -34,6 +34,9 @@ def progression_deprioritized_skip_balancing_if_blocksanity(options):
     if options.blocksanity:
         return ItemClassification.progression_deprioritized_skip_balancing
     return ItemClassification.filler
+    
+def trap(options):
+    return ItemClassification.trap
 
 
 class SM64Item(Item):
@@ -135,17 +138,51 @@ simple_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Shifting Sand Land - Pyramid Elevator": SM64ItemData(sm64ex_base_id + 301),
     "Wet-Dry World - Water Level Diamond": SM64ItemData(sm64ex_base_id + 305),
     "Tick Tock Clock - Spinners": SM64ItemData(sm64ex_base_id + 319),
+    "Cool, Cool Mountain - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 920, progression_deprioritized),
+    "Shifting Sand Land - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 921, progression_deprioritized),
+    "Snowman's Land - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 922, progression_deprioritized),
+    "Wet-Dry World - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 923, progression_deprioritized),
+    "Tall, Tall Mountain - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 924, progression_deprioritized),
+    "Tiny-Huge Island - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 925, progression_deprioritized),
+    "Rainbow Ride - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 926, progression_deprioritized),
+    "Wing Mario Over the Rainbow - Bob-omb Buddy": SM64ItemData(
+        sm64ex_base_id + 927, progression_deprioritized),
+    "Jolly Roger Bay - Treasure Chests": SM64ItemData(sm64ex_base_id + 929),
+    "Dire, Dire Docks - Treasure Chests": SM64ItemData(sm64ex_base_id + 930),
 }
 
 global_checkerboard_item_names = ("Checkerboard Platforms",)
 global_rolling_log_item_names = ("Rolling Logs",)
 global_purple_switch_item_names = ("Purple Switches",)
+global_bobomb_buddy_item_names = ("Bob-omb Buddies",)
+global_treasure_chest_item_names = ("Treasure Chests",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
     "Rolling Logs": SM64ItemData(sm64ex_base_id + 302),
     "Purple Switches": SM64ItemData(sm64ex_base_id + 303),
+    "Bob-omb Buddies": SM64ItemData(sm64ex_base_id + 928),
+    "Treasure Chests": SM64ItemData(sm64ex_base_id + 931),
 }
+
+per_level_bobomb_buddy_item_names = (
+    "Bob-omb Battlefield - Bob-omb Buddy",
+    "Whomp's Fortress - Bob-omb Buddy",
+    "Jolly Roger Bay - Bob-omb Buddy",
+    "Cool, Cool Mountain - Bob-omb Buddy",
+    "Shifting Sand Land - Bob-omb Buddy",
+    "Snowman's Land - Bob-omb Buddy",
+    "Wet-Dry World - Bob-omb Buddy",
+    "Tall, Tall Mountain - Bob-omb Buddy",
+    "Tiny-Huge Island - Bob-omb Buddy",
+    "Rainbow Ride - Bob-omb Buddy",
+    "Wing Mario Over the Rainbow - Bob-omb Buddy",
+)
+
+per_level_treasure_chest_item_names = (
+    "Jolly Roger Bay - Treasure Chests",
+    "Dire, Dire Docks - Treasure Chests",
+)
 
 checkerboard_item_data_table: dict[str, SM64ItemData] = {
     "Bob-omb Battlefield - Checkerboard Platform": SM64ItemData(sm64ex_base_id + 306, filler),
@@ -157,7 +194,7 @@ checkerboard_item_data_table: dict[str, SM64ItemData] = {
 
 rolling_log_item_data_table: dict[str, SM64ItemData] = {
     "Lethal Lava Land - Rolling Log": SM64ItemData(sm64ex_base_id + 311, progression_deprioritized_skip_balancing),
-    "Tall, Tall Mountain - Rolling Log": SM64ItemData(sm64ex_base_id + 312, filler),
+    "Tall, Tall Mountain - Rolling Log": SM64ItemData(sm64ex_base_id + 312, progression),
 }
 
 purple_switch_item_data_table: dict[str, SM64ItemData] = {
@@ -181,6 +218,16 @@ bowser_stage_1up_item_data_table: dict[str, SM64ItemData] = {
     "Bowser Stage Extra 1-Ups": SM64ItemData(sm64ex_base_id + 556, progression_deprioritized),
     "Bowser in the Dark World - Extra 1-Ups": SM64ItemData(sm64ex_base_id + 557, progression_deprioritized),
     "Bowser in the Fire Sea - Extra 1-Ups": SM64ItemData(sm64ex_base_id + 558, progression_deprioritized),
+}
+
+trap_item_data_table: dict[str, SM64ItemData] = {
+    "Bonk Trap": SM64ItemData(sm64ex_base_id + 1760, trap),
+    "Burn Trap": SM64ItemData(sm64ex_base_id + 1761, trap),
+    "Shock Trap": SM64ItemData(sm64ex_base_id + 1762, trap),
+    "Chuckya Trap": SM64ItemData(sm64ex_base_id + 1763, trap),
+    "Spin Trap": SM64ItemData(sm64ex_base_id + 1764, trap),
+    "Gust Trap": SM64ItemData(sm64ex_base_id + 1765, trap),
+    "Uncollect Random Coin Trap": SM64ItemData(sm64ex_base_id + 1766, trap),
 }
 
 arbitrary_item_data_table: dict[str, SM64ItemData] = {
@@ -291,7 +338,7 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Big Boo's Haunt - Dive": SM64ItemData(sm64ex_base_id + 370, useful),
     "Big Boo's Haunt - Ground Pound": SM64ItemData(sm64ex_base_id + 371, progression_deprioritized_skip_balancing),
     "Big Boo's Haunt - Kick": SM64ItemData(sm64ex_base_id + 372, progression_deprioritized_skip_balancing),
-    "Big Boo's Haunt - Climb": SM64ItemData(sm64ex_base_id + 373, useful),
+    "Big Boo's Haunt - Climb": SM64ItemData(sm64ex_base_id + 373, filler), # not used
     "Big Boo's Haunt - Ledge Grab": SM64ItemData(sm64ex_base_id + 374),
     # Hazy Maze Cave
     "Hazy Maze Cave - Triple Jump": SM64ItemData(sm64ex_base_id + 375),
@@ -445,7 +492,399 @@ painting_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Unlock Tiny Island": SM64ItemData(sm64ex_base_id + 242),
     "Unlock Tick Tock Clock": SM64ItemData(sm64ex_base_id + 243),
     "Unlock Huge Island": SM64ItemData(sm64ex_base_id + 559),
+    "Unlock Rainbow Ride": SM64ItemData(sm64ex_base_id + 853),
+    "Unlock Wing Mario Over the Rainbow": SM64ItemData(sm64ex_base_id + 854),
 }
+
+special_level_unlock_item_names = (
+    "Unlock Tower of the Wing Cap",
+    "Unlock Big Boo's Haunt",
+    "Unlock Bowser in the Fire Sea",
+    "Unlock Vanish Cap Under the Moat",
+)
+
+global_one_up_unlock_item_names = (
+    "Freestanding 1-Ups",
+    "Trigger 1-Ups",
+    "1-Up Blocks",
+    "Butterflies",
+)
+
+global_one_up_unlock_item_data_table: dict[str, SM64ItemData] = {
+    "Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 855),
+    "Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 856),
+    "1-Up Blocks": SM64ItemData(sm64ex_base_id + 857),
+    "Butterflies": SM64ItemData(sm64ex_base_id + 919),
+}
+
+per_level_one_up_unlock_item_data_table: dict[str, SM64ItemData] = {
+    # Freestanding 1-Ups
+    "Big Boo's Haunt - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 858),
+    "Bowser in the Dark World - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 859),
+    "Bowser in the Fire Sea - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 860),
+    "Bowser in the Sky - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 861),
+    "Bob-omb Battlefield - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 862),
+    "Castle - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 863),
+    "Cool, Cool Mountain - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 864),
+    "Cavern of the Metal Cap - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 865),
+    "Jolly Roger Bay - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 866),
+    "Lethal Lava Land - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 867),
+    "The Princess's Secret Slide - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 868),
+    "Rainbow Ride - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 869),
+    "Snowman's Land - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 870),
+    "Shifting Sand Land - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 871),
+    "Tiny-Huge Island - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 872),
+    "Tall, Tall Mountain - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 873),
+    "Vanish Cap Under the Moat - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 874),
+    "Wet-Dry World - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 875),
+    "Whomp's Fortress - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 876),
+    "Wing Mario Over the Rainbow - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 877),
+    # Trigger 1-Ups
+    "Bowser in the Fire Sea - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 878),
+    "Bowser in the Sky - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 879),
+    "Bob-omb Battlefield - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 880),
+    "Castle - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 881),
+    "Cool, Cool Mountain - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 882),
+    "Dire, Dire Docks - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 883),
+    "Hazy Maze Cave - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 884),
+    "Jolly Roger Bay - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 885),
+    "Lethal Lava Land - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 886),
+    "The Princess's Secret Slide - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 887),
+    "Rainbow Ride - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 888),
+    "The Secret Aquarium - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 889),
+    "Snowman's Land - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 890),
+    "Shifting Sand Land - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 891),
+    "Tiny-Huge Island - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 892),
+    "Tick Tock Clock - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 893),
+    "Tall, Tall Mountain - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 894),
+    "Vanish Cap Under the Moat - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 895),
+    "Wet-Dry World - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 896),
+    "Whomp's Fortress - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 897),
+    "Wing Mario Over the Rainbow - Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 898),
+    # 1-Up Blocks
+    "Big Boo's Haunt - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 899),
+    "Bowser in the Dark World - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 900),
+    "Bowser in the Fire Sea - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 901),
+    "Bowser in the Sky - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 902),
+    "Cool, Cool Mountain - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 903),
+    "Cavern of the Metal Cap - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 904),
+    "Hazy Maze Cave - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 905),
+    "Rainbow Ride - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 906),
+    "Snowman's Land - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 907),
+    "Shifting Sand Land - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 908),
+    "Tiny-Huge Island - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 909),
+    "Tick Tock Clock - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 910),
+    "Tall, Tall Mountain - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 911),
+    "Vanish Cap Under the Moat - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 912),
+    "Wet-Dry World - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 913),
+    "Wing Mario Over the Rainbow - 1-Up Blocks": SM64ItemData(sm64ex_base_id + 914),
+    # Butterflies
+    "Castle - Butterflies": SM64ItemData(sm64ex_base_id + 915),
+    "Whomp's Fortress - Butterflies": SM64ItemData(sm64ex_base_id + 916),
+    "Tiny-Huge Island - Butterflies": SM64ItemData(sm64ex_base_id + 917),
+    "Tall, Tall Mountain - Butterflies": SM64ItemData(sm64ex_base_id + 918),
+}
+
+global_coin_object_item_data_table: dict[str, SM64ItemData] = {
+    "Single Yellow Coins": SM64ItemData(3626560, progression),
+    "Red Coins": SM64ItemData(3626561, progression),
+    "Single Blue Coins": SM64ItemData(3626562, progression),
+    "Blue Coin Blocks": SM64ItemData(3626563, progression),
+    "Horizontal Coin Lines": SM64ItemData(3626564, progression),
+    "Horizontal Coin Rings": SM64ItemData(3626565, progression),
+    "Coin Arrows": SM64ItemData(3626566, progression),
+    "Vertical Coin Lines": SM64ItemData(3626568, progression),
+    "Vertical Coin Rings": SM64ItemData(3626570, progression),
+    "Breakable Coin Boxes": SM64ItemData(3626782, progression),
+    "Throwable Cork Boxes": SM64ItemData(3626783, progression),
+    "Crazy Boxes": SM64ItemData(3626784, progression),
+    "Wooden Posts": SM64ItemData(3626785, progression),
+    "3-Coin Blocks": SM64ItemData(3626816, progression),
+    "10-Coin Blocks": SM64ItemData(3626817, progression),
+}
+
+
+per_level_coin_object_item_data_table: dict[str, SM64ItemData] = {
+    "Bowser in the Dark World - Single Yellow Coins": SM64ItemData(3626600, progression),
+    "Bowser in the Fire Sea - Single Yellow Coins": SM64ItemData(3626601, progression),
+    "Bowser in the Sky - Single Yellow Coins": SM64ItemData(3626602, progression),
+    "Bob-omb Battlefield - Single Yellow Coins": SM64ItemData(3626603, progression),
+    "Castle Grounds - Single Yellow Coins": SM64ItemData(3626604, useful),
+    "Castle - Single Yellow Coins": SM64ItemData(3626605, useful),
+    "Cool, Cool Mountain - Single Yellow Coins": SM64ItemData(3626606, progression),
+    "Dire, Dire Docks - Single Yellow Coins": SM64ItemData(3626607, progression),
+    "Hazy Maze Cave - Single Yellow Coins": SM64ItemData(3626608, progression),
+    "Lethal Lava Land - Single Yellow Coins": SM64ItemData(3626609, progression),
+    "Princess's Secret Slide - Single Yellow Coins": SM64ItemData(3626610, progression),
+    "Rainbow Ride - Single Yellow Coins": SM64ItemData(3626611, progression),
+    "Snowman's Land - Single Yellow Coins": SM64ItemData(3626612, progression),
+    "Shifting Sand Land - Single Yellow Coins": SM64ItemData(3626613, progression),
+    "Tiny-Huge Island - Single Yellow Coins": SM64ItemData(3626614, progression),
+    "Tower of the Wing Cap - Single Yellow Coins": SM64ItemData(3626615, progression),
+    "Tick Tock Clock - Single Yellow Coins": SM64ItemData(3626616, progression),
+    "Tall, Tall Mountain - Single Yellow Coins": SM64ItemData(3626617, progression),
+    "Vanish Cap Under the Moat - Single Yellow Coins": SM64ItemData(3626618, progression),
+    "Whomp's Fortress - Single Yellow Coins": SM64ItemData(3626619, progression),
+    "Big Boo's Haunt - Red Coins": SM64ItemData(3626620, progression),
+    "Bowser in the Dark World - Red Coins": SM64ItemData(3626621, progression),
+    "Bowser in the Fire Sea - Red Coins": SM64ItemData(3626622, progression),
+    "Bowser in the Sky - Red Coins": SM64ItemData(3626623, progression),
+    "Bob-omb Battlefield - Red Coins": SM64ItemData(3626624, progression),
+    "Cool, Cool Mountain - Red Coins": SM64ItemData(3626625, progression),
+    "Cavern of the Metal Cap - Red Coins": SM64ItemData(3626626, progression),
+    "Dire, Dire Docks - Red Coins": SM64ItemData(3626627, progression),
+    "Hazy Maze Cave - Red Coins": SM64ItemData(3626628, progression),
+    "Jolly Roger Bay - Red Coins": SM64ItemData(3626629, progression),
+    "Lethal Lava Land - Red Coins": SM64ItemData(3626630, progression),
+    "Rainbow Ride - Red Coins": SM64ItemData(3626631, progression),
+    "Secret Aquarium - Red Coins": SM64ItemData(3626632, progression),
+    "Snowman's Land - Red Coins": SM64ItemData(3626633, progression),
+    "Shifting Sand Land - Red Coins": SM64ItemData(3626634, progression),
+    "Tiny-Huge Island - Red Coins": SM64ItemData(3626635, progression),
+    "Tower of the Wing Cap - Red Coins": SM64ItemData(3626636, progression),
+    "Tick Tock Clock - Red Coins": SM64ItemData(3626637, progression),
+    "Tall, Tall Mountain - Red Coins": SM64ItemData(3626638, progression),
+    "Vanish Cap Under the Moat - Red Coins": SM64ItemData(3626639, progression),
+    "Wet-Dry World - Red Coins": SM64ItemData(3626640, progression),
+    "Whomp's Fortress - Red Coins": SM64ItemData(3626641, progression),
+    "Wing Mario Over the Rainbow - Red Coins": SM64ItemData(3626642, progression),
+    "Cool, Cool Mountain - Single Blue Coin": SM64ItemData(3626643, progression),
+    "Tall, Tall Mountain - Single Blue Coins": SM64ItemData(3626644, progression),
+    "Big Boo's Haunt - Blue Coin Block": SM64ItemData(3626645, progression),
+    "Cool, Cool Mountain - Blue Coin Block": SM64ItemData(3626646, progression),
+    "Dire, Dire Docks - Blue Coin Block": SM64ItemData(3626647, progression),
+    "Hazy Maze Cave - Blue Coin Block": SM64ItemData(3626648, progression),
+    "Jolly Roger Bay - Blue Coin Block": SM64ItemData(3626649, progression),
+    "Princess's Secret Slide - Blue Coin Block": SM64ItemData(3626650, progression),
+    "Rainbow Ride - Blue Coin Block": SM64ItemData(3626651, progression),
+    "Shifting Sand Land - Blue Coin Block": SM64ItemData(3626652, progression),
+    "Tiny-Huge Island - Blue Coin Block": SM64ItemData(3626653, progression),
+    "Tick Tock Clock - Blue Coin Block": SM64ItemData(3626654, progression),
+    "Wet-Dry World - Blue Coin Block": SM64ItemData(3626655, progression),
+    "Whomp's Fortress - Blue Coin Block": SM64ItemData(3626656, progression),
+    "Bowser in the Dark World - Horizontal Coin Lines": SM64ItemData(3626657, progression),
+    "Bowser in the Fire Sea - Horizontal Coin Lines": SM64ItemData(3626658, progression),
+    "Bowser in the Sky - Horizontal Coin Lines": SM64ItemData(3626659, progression),
+    "Bob-omb Battlefield - Horizontal Coin Lines": SM64ItemData(3626660, progression),
+    "Cool, Cool Mountain - Horizontal Coin Lines": SM64ItemData(3626661, progression),
+    "Cavern of the Metal Cap - Horizontal Coin Lines": SM64ItemData(3626662, progression),
+    "Dire, Dire Docks - Horizontal Coin Lines": SM64ItemData(3626663, progression),
+    "Hazy Maze Cave - Horizontal Coin Lines": SM64ItemData(3626664, progression),
+    "Jolly Roger Bay - Horizontal Coin Lines": SM64ItemData(3626665, progression),
+    "Lethal Lava Land - Horizontal Coin Lines": SM64ItemData(3626666, progression),
+    "Princess's Secret Slide - Horizontal Coin Lines": SM64ItemData(3626667, progression),
+    "Rainbow Ride - Horizontal Coin Lines": SM64ItemData(3626668, progression),
+    "Snowman's Land - Horizontal Coin Lines": SM64ItemData(3626669, progression),
+    "Shifting Sand Land - Horizontal Coin Lines": SM64ItemData(3626670, progression),
+    "Tiny-Huge Island - Horizontal Coin Lines": SM64ItemData(3626671, progression),
+    "Tick Tock Clock - Horizontal Coin Lines": SM64ItemData(3626672, progression),
+    "Tall, Tall Mountain - Horizontal Coin Lines": SM64ItemData(3626673, progression),
+    "Vanish Cap Under the Moat - Horizontal Coin Lines": SM64ItemData(3626674, progression),
+    "Wet-Dry World - Horizontal Coin Lines": SM64ItemData(3626675, progression),
+    "Whomp's Fortress - Horizontal Coin Lines": SM64ItemData(3626676, progression),
+    "Bowser in the Dark World - Horizontal Coin Rings": SM64ItemData(3626677, progression),
+    "Bowser in the Fire Sea - Horizontal Coin Rings": SM64ItemData(3626678, progression),
+    "Bob-omb Battlefield - Horizontal Coin Rings": SM64ItemData(3626679, progression),
+    "Cavern of the Metal Cap - Horizontal Coin Rings": SM64ItemData(3626680, progression),
+    "Dire, Dire Docks - Horizontal Coin Rings": SM64ItemData(3626681, progression),
+    "Hazy Maze Cave - Horizontal Coin Rings": SM64ItemData(3626682, progression),
+    "Jolly Roger Bay - Horizontal Coin Rings": SM64ItemData(3626683, progression),
+    "Lethal Lava Land - Horizontal Coin Rings": SM64ItemData(3626684, progression),
+    "Rainbow Ride - Horizontal Coin Rings": SM64ItemData(3626685, progression),
+    "Secret Aquarium - Horizontal Coin Rings": SM64ItemData(3626686, progression),
+    "Shifting Sand Land - Horizontal Coin Rings": SM64ItemData(3626687, progression),
+    "Tall, Tall Mountain - Horizontal Coin Rings": SM64ItemData(3626688, progression),
+    "Wet-Dry World - Horizontal Coin Rings": SM64ItemData(3626689, progression),
+    "Whomp's Fortress - Horizontal Coin Rings": SM64ItemData(3626690, progression),
+    "Wing Mario Over the Rainbow - Horizontal Coin Rings": SM64ItemData(3626691, progression),
+    "Cool, Cool Mountain - Coin Arrows": SM64ItemData(3626692, progression),
+    "Whomp's Fortress - Coin Arrows": SM64ItemData(3626693, progression),
+    "Bowser in the Fire Sea - Vertical Coin Lines": SM64ItemData(3626701, progression),
+    "Cool, Cool Mountain - Vertical Coin Lines": SM64ItemData(3626702, progression),
+    "Dire, Dire Docks - Vertical Coin Lines": SM64ItemData(3626703, progression),
+    "Jolly Roger Bay - Vertical Coin Lines": SM64ItemData(3626704, progression),
+    "Rainbow Ride - Vertical Coin Lines": SM64ItemData(3626705, progression),
+    "Shifting Sand Land - Vertical Coin Lines": SM64ItemData(3626706, progression),
+    "Tall, Tall Mountain - Vertical Coin Lines": SM64ItemData(3626707, progression),
+    "Bob-omb Battlefield - Vertical Coin Rings": SM64ItemData(3626717, progression),
+    "Dire, Dire Docks - Vertical Coin Rings": SM64ItemData(3626718, progression),
+    "Jolly Roger Bay - Vertical Coin Rings": SM64ItemData(3626719, progression),
+    "Secret Aquarium - Vertical Coin Rings": SM64ItemData(3626720, progression),
+    "Tower of the Wing Cap - Vertical Coin Rings": SM64ItemData(3626721, progression),
+    "Wing Mario Over the Rainbow - Vertical Coin Rings": SM64ItemData(3626722, progression),
+    "Big Boo's Haunt - Breakable Coin Boxes": SM64ItemData(3626796, progression),
+    "Bob-omb Battlefield - Breakable Coin Box": SM64ItemData(3626797, progression),
+    "Wet-Dry World - Breakable Coin Boxes": SM64ItemData(3626798, progression),
+    "Bob-omb Battlefield - Throwable Cork Boxes": SM64ItemData(3626799, progression),
+    "Shifting Sand Land - Throwable Cork Box": SM64ItemData(3626800, progression),
+    "Whomp's Fortress - Throwable Cork Boxes": SM64ItemData(3626801, progression),
+    "Big Boo's Haunt - Crazy Box": SM64ItemData(3626802, progression),
+    "Lethal Lava Land - Crazy Box": SM64ItemData(3626803, progression),
+    "Shifting Sand Land - Crazy Boxes": SM64ItemData(3626804, progression),
+    "Tall, Tall Mountain - Crazy Box": SM64ItemData(3626805, progression),
+    "Bob-omb Battlefield - Wooden Posts": SM64ItemData(3626806, progression),
+    "Tiny-Huge Island - Wooden Posts": SM64ItemData(3626807, progression),
+    "Lethal Lava Land - Bowser Puzzle": SM64ItemData(3626814, progression),
+    "Bowser in the Dark World - 3-Coin Block": SM64ItemData(3626826, progression),
+    "Bowser in the Fire Sea - 3-Coin Block": SM64ItemData(3626827, progression),
+    "Jolly Roger Bay - 3-Coin Block": SM64ItemData(3626828, progression),
+    "Snowman's Land - 3-Coin Block": SM64ItemData(3626829, progression),
+    "Tiny-Huge Island - 3-Coin Block": SM64ItemData(3626830, progression),
+    "Tick Tock Clock - 3-Coin Blocks": SM64ItemData(3626831, progression),
+    "Vanish Cap Under the Moat - 3-Coin Block": SM64ItemData(3626832, progression),
+    "Wet-Dry World - 3-Coin Blocks": SM64ItemData(3626833, progression),
+    "Big Boo's Haunt - 10-Coin Block": SM64ItemData(3626834, progression),
+    "Bowser in the Fire Sea - 10-Coin Block": SM64ItemData(3626835, progression),
+    "Tick Tock Clock - 10-Coin Blocks": SM64ItemData(3626836, progression),
+    "Wet-Dry World - 10-Coin Blocks": SM64ItemData(3626837, progression),
+}
+
+
+global_enemy_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-ombs": SM64ItemData(3626571, progression),
+    "Boos": SM64ItemData(3626572, progression),
+    "Bullies": SM64ItemData(3626573, progression),
+    "Chuckyas": SM64ItemData(3626574, progression),
+    "Lakitus": SM64ItemData(3626575, progression),
+    "Fire Piranha Plants": SM64ItemData(3626576, progression),
+    "Fly Guys": SM64ItemData(3626577, progression),
+    "Goombas": SM64ItemData(3626578, progression),
+    "Koopa Troopas": SM64ItemData(3626579, progression),
+    "Mr Blizzards": SM64ItemData(3626580, progression),
+    "Mr. Is": SM64ItemData(3626581, progression),
+    "Scuttlebugs": SM64ItemData(3626582, progression),
+    "Snufits": SM64ItemData(3626583, progression),
+    "Spindrifts": SM64ItemData(3626584, progression),
+    "Whomps": SM64ItemData(3626585, progression),
+    "Monty Moles": SM64ItemData(3626838, progression),
+    "Big Bully": SM64ItemData(3626839, progression),
+    "Thwomp": SM64ItemData(3626845, progression),
+}
+
+
+per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
+    "Bowser in the Fire Sea - Bob-omb": SM64ItemData(3626723, progression),
+    "Bowser in the Sky - Bob-ombs": SM64ItemData(3626724, progression),
+    "Bob-omb Battlefield - Bob-ombs": SM64ItemData(3626725, progression),
+    "Rainbow Ride - Bob-ombs": SM64ItemData(3626726, progression),
+    "Shifting Sand Land - Bob-ombs": SM64ItemData(3626727, progression),
+    "Tick Tock Clock - Bob-ombs": SM64ItemData(3626728, progression),
+    "Tall, Tall Mountain - Bob-ombs": SM64ItemData(3626729, progression),
+    "Big Boo's Haunt - Boos": SM64ItemData(3626730, progression),
+    "Bowser in the Fire Sea - Bullies": SM64ItemData(3626733, progression),
+    "Lethal Lava Land - Bullies": SM64ItemData(3626734, progression),
+    "Bowser in the Sky - Chuckya": SM64ItemData(3626735, progression),
+    "Rainbow Ride - Chuckya": SM64ItemData(3626736, progression),
+    "Tiny-Huge Island - Chuckya": SM64ItemData(3626737, progression),
+    "Tall, Tall Mountain - Chuckya": SM64ItemData(3626738, progression),
+    "Wet-Dry World - Chuckya": SM64ItemData(3626739, progression),
+    "Rainbow Ride - Lakitus": SM64ItemData(3626740, progression),
+    "Tiny-Huge Island - Lakitu": SM64ItemData(3626741, progression),
+    "Shifting Sand Land - Eyerok": SM64ItemData(3626742, progression),
+    "Bowser in the Sky - Fire Piranha Plants": SM64ItemData(3626743, progression),
+    "Tiny-Huge Island - Fire Piranha Plants": SM64ItemData(3626744, progression),
+    "Rainbow Ride - Fly Guy": SM64ItemData(3626745, progression),
+    "Snowman's Land - Fly Guy": SM64ItemData(3626746, progression),
+    "Shifting Sand Land - Fly Guy": SM64ItemData(3626747, progression),
+    "Tiny-Huge Island - Fly Guy": SM64ItemData(3626748, progression),
+    "Tall, Tall Mountain - Fly Guy": SM64ItemData(3626749, progression),
+    "Big Boo's Haunt - Flying Bookends": SM64ItemData(3626750, progression),
+    "Bowser in the Dark World - Goombas": SM64ItemData(3626751, progression),
+    "Bowser in the Fire Sea - Goombas": SM64ItemData(3626752, progression),
+    "Bowser in the Sky - Goombas": SM64ItemData(3626753, progression),
+    "Bob-omb Battlefield - Goombas": SM64ItemData(3626754, progression),
+    "Jolly Roger Bay - Goombas": SM64ItemData(3626755, progression),
+    "Rainbow Ride - Goomba": SM64ItemData(3626756, progression),
+    "Snowman's Land - Goombas": SM64ItemData(3626757, progression),
+    "Shifting Sand Land - Goombas": SM64ItemData(3626758, progression),
+    "Tiny-Huge Island - Goombas": SM64ItemData(3626759, progression),
+    "Tall, Tall Mountain - Goombas": SM64ItemData(3626760, progression),
+    "Bob-omb Battlefield - Koopa Troopa": SM64ItemData(3626761, progression),
+    "Tiny-Huge Island - Koopa Troopa": SM64ItemData(3626762, progression),
+    "Snowman's Land - Moneybags": SM64ItemData(3626763, progression),
+    "Cool, Cool Mountain - Mr Blizzards": SM64ItemData(3626764, progression),
+    "Snowman's Land - Mr Blizzards": SM64ItemData(3626765, progression),
+    "Big Boo's Haunt - Mr. Is": SM64ItemData(3626766, progression),
+    "Hazy Maze Cave - Mr. Is": SM64ItemData(3626767, progression),
+    "Lethal Lava Land - Mr. Is": SM64ItemData(3626768, progression),
+    "Whomp's Fortress - Piranha Plants": SM64ItemData(3626769, progression),
+    "Shifting Sand Land - Pokeys": SM64ItemData(3626770, progression),
+    "Big Boo's Haunt - Scuttlebugs": SM64ItemData(3626771, progression),
+    "Hazy Maze Cave - Scuttlebugs": SM64ItemData(3626772, progression),
+    "Wet-Dry World - Skeeters": SM64ItemData(3626773, progression),
+    "Cavern of the Metal Cap - Snufits": SM64ItemData(3626774, progression),
+    "Hazy Maze Cave - Snufits": SM64ItemData(3626775, progression),
+    "Cool, Cool Mountain - Spindrifts": SM64ItemData(3626776, progression),
+    "Snowman's Land - Spindrifts": SM64ItemData(3626777, progression),
+    "Hazy Maze Cave - Swoops": SM64ItemData(3626778, progression),
+    "Bowser in the Sky - Whomp": SM64ItemData(3626779, progression),
+    "Whomp's Fortress - Whomps": SM64ItemData(3626780, progression),
+    "Hazy Maze Cave - Monty Moles": SM64ItemData(3626840, progression),
+    "Tall, Tall Mountain - Monty Moles": SM64ItemData(3626841, progression),
+    "Lethal Lava Land - Big Bullies": SM64ItemData(3626842, progression),
+    "Snowman's Land - Chill Bully": SM64ItemData(3626843, progression),
+    "Big Boo's Haunt - Big Boo": SM64ItemData(3626844, progression),
+    "Whomp's Fortress - Thwomp": SM64ItemData(3626846, progression),
+    "Shifting Sand Land - Thwomp": SM64ItemData(3626847, progression),
+    "Tick Tock Clock - Thwomp": SM64ItemData(3626848, progression),
+}
+
+bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
+    "Progressive Bowser Arena Bomb": SM64ItemData(3626849, progression),
+    "Bowser in the Dark World - Progressive Bowser Arena Bomb": SM64ItemData(3626850, progression),
+    "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": SM64ItemData(3626851, progression),
+    "Bowser in the Sky - Progressive Bowser Arena Bomb": SM64ItemData(3626852, progression),
+}
+
+
+global_mode_coin_object_item_names = (
+    "Single Yellow Coins",
+    "Red Coins",
+    "Single Blue Coins",
+    "Blue Coin Blocks",
+    "Horizontal Coin Lines",
+    "Horizontal Coin Rings",
+    "Coin Arrows",
+    "Vertical Coin Lines",
+    "Vertical Coin Rings",
+    "Breakable Coin Boxes",
+    "Throwable Cork Boxes",
+    "Crazy Boxes",
+    "Wooden Posts",
+    "3-Coin Blocks",
+    "10-Coin Blocks",
+    "Lethal Lava Land - Bowser Puzzle",
+)
+
+
+global_mode_enemy_item_names = (
+    "Bob-ombs",
+    "Boos",
+    "Bullies",
+    "Chuckyas",
+    "Lakitus",
+    "Fire Piranha Plants",
+    "Fly Guys",
+    "Goombas",
+    "Koopa Troopas",
+    "Mr Blizzards",
+    "Mr. Is",
+    "Scuttlebugs",
+    "Snufits",
+    "Spindrifts",
+    "Whomps",
+    "Monty Moles",
+    "Big Bully",
+    "Shifting Sand Land - Eyerok",
+    "Big Boo's Haunt - Flying Bookends",
+    "Snowman's Land - Moneybags",
+    "Whomp's Fortress - Piranha Plants",
+    "Shifting Sand Land - Pokeys",
+    "Wet-Dry World - Skeeters",
+    "Hazy Maze Cave - Swoops",
+    "Big Boo's Haunt - Big Boo",
+    "Thwomp",
+)
 
 item_data_table = {
     **generic_item_data_table,
@@ -459,7 +898,15 @@ item_data_table = {
     **action_item_data_table,
     **per_level_action_item_data_table,
     **cannon_item_data_table,
-    **painting_unlock_item_data_table
+    **painting_unlock_item_data_table,
+    **global_one_up_unlock_item_data_table,
+    **per_level_one_up_unlock_item_data_table,
+    **global_coin_object_item_data_table,
+    **per_level_coin_object_item_data_table,
+    **global_enemy_item_data_table,
+    **per_level_enemy_item_data_table,
+    **bowser_bomb_item_data_table,
+    **trap_item_data_table
 }
 
 item_table = {name: data.code for name, data in item_data_table.items() if data.code is not None}
@@ -474,6 +921,16 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Moves": set(per_level_action_item_data_table),
     "Cannon Unlocks": set(cannon_item_data_table),
     "Painting Unlocks": set(painting_unlock_item_data_table),
+    "Level Unlocks": (
+        set(special_level_unlock_item_names)
+        | set(painting_unlock_item_data_table)
+    ),
+    "1-Up Unlocks": (
+        set(global_one_up_unlock_item_data_table)
+        | set(per_level_one_up_unlock_item_data_table)
+    ),
+    "Global 1-Up Unlocks": set(global_one_up_unlock_item_data_table),
+    "Per-Level 1-Up Unlocks": set(per_level_one_up_unlock_item_data_table),
     "Course Feature Unlocks": set(feature_item_data_table),
     "Castle Unlocks": set(castle_progression_item_data_table),
     "Optional Feature Unlocks": set(arbitrary_item_data_table),
@@ -481,7 +938,23 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Checkerboard Platforms": set(checkerboard_item_data_table),
     "Per-Level Rolling Logs": set(rolling_log_item_data_table),
     "Per-Level Purple Switches": set(purple_switch_item_data_table),
+    "Bob-omb Buddy Unlocks": (
+        set(global_bobomb_buddy_item_names)
+        | set(per_level_bobomb_buddy_item_names)
+    ),
+    "Treasure Chest Unlocks": (
+        set(global_treasure_chest_item_names)
+        | set(per_level_treasure_chest_item_names)
+    ),
     "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
+    "Coin Object Unlocks": set(global_coin_object_item_data_table) | set(per_level_coin_object_item_data_table),
+    "Global Coin Object Unlocks": set(global_coin_object_item_data_table),
+    "Per-Level Coin Object Unlocks": set(per_level_coin_object_item_data_table),
+    "Enemy Unlocks": set(global_enemy_item_data_table) | set(per_level_enemy_item_data_table),
+    "Global Enemy Unlocks": set(global_enemy_item_data_table),
+    "Per-Level Enemy Unlocks": set(per_level_enemy_item_data_table),
+    "Progressive Bowser Arena Bombs": set(bowser_bomb_item_data_table),
     "Optional Items": set(optional_item_data_table),
     "Filler": {"1-Up Mushroom"},
+     "Traps": set(trap_item_data_table),
 }

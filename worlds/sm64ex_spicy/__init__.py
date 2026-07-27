@@ -4,20 +4,28 @@ import json
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
-    global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
+    global_rolling_log_item_names, global_purple_switch_item_names, global_bobomb_buddy_item_names, \
+    global_treasure_chest_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
+    simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
-    item_name_groups
+    item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
+    global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
+    global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
+    global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
+    per_level_one_up_unlock_item_data_table
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
-    move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names
+    move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names, \
+    trap_weight_option_names, trap_item_name_by_option_name
 from .Rules import set_rules
+from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
-from BaseClasses import Item, Tutorial
+from BaseClasses import CollectionState, Item, Region, Tutorial
 from Options import OptionError
-from ..AutoWorld import World, WebWorld
+from ..AutoWorld import WebWorld, World
 
 
 class SM64Web(WebWorld):
@@ -62,10 +70,37 @@ class SM64World(World):
     number_of_stars: int
     move_rando_bitvec: int
     filler_count: int
+
+    @staticmethod
+    def _clear_coin_evaluation_cache(state: CollectionState, player: int) -> None:
+        cache = getattr(state, "sm64_coin_evaluation_cache", None)
+        if cache is None:
+            return
+        for cache_key in tuple(cache):
+            if cache_key[0] == player:
+                del cache[cache_key]
+
+    def collect(self, state: CollectionState, item: Item) -> bool:
+        changed = super().collect(state, item)
+        if changed:
+            self._clear_coin_evaluation_cache(state, self.player)
+        return changed
+
+    def remove(self, state: CollectionState, item: Item) -> bool:
+        changed = super().remove(state, item)
+        if changed:
+            self._clear_coin_evaluation_cache(state, self.player)
+        return changed
+
+    def reached_region(self, state: CollectionState, region: Region) -> None:
+        super().reached_region(state, region)
+        self._clear_coin_evaluation_cache(state, self.player)
+
     star_costs: typing.Dict[str, int]
     coinsanity_location_names: typing.Tuple[str, ...]
     music_slot_data: typing.Dict[str, typing.Any] | None
     using_slot_coinsanity_locations: bool
+    start_inventory_item_ids: set[int]
 
     slot_option_names = (
         "area_rando",
@@ -74,8 +109,10 @@ class SM64World(World):
         "blocksanity",
         "easy_butterflies",
         "no_despawns",
+        "permanent_coin_collection",
         "combined_progressive_keys",
-        "enable_locked_paintings",
+        "level_unlocks",
+        "one_up_mushroom_unlocks",
         "triple_jump",
         "long_jump",
         "backflip",
@@ -86,29 +123,33 @@ class SM64World(World):
         "kick",
         "climb",
         "ledge_grab",
-        "strict_cap_requirements",
         "per_level_cap_items",
-        "hazy_maze_cave_swimming_beast",
-        "rainbow_ride_carpets",
-        "checkerboard_platforms",
-        "tiny_huge_island_warp_pipes",
-        "cool_cool_mountain_baby_penguins",
-        "snowmans_land_penguin",
-        "shifting_sand_land_pyramid_elevator",
-        "rolling_logs",
-        "purple_switches",
+        "level_features",
+        "bobomb_buddies",
+        "bowser_bombs",
+        "bowser_in_the_dark_world_hits",
+        "bowser_in_the_fire_sea_hits",
+        "bowser_in_the_sky_hits",
+        "bowser_in_the_sky_stage_collapse_hits",
         "bowser_stage_1ups",
-        "wet_dry_world_water_level_diamond",
-        "tick_tock_clock_spinners",
-        "strict_cannon_requirements",
-        "strict_move_requirements",
+        "logic_tricks",
+        "universal_tracker_glitched_logic",
         "marios_hat",
-        "mario_colors",
+        "mario_hat_color",
+        "mario_shirt_color",
+        "mario_overalls_color",
+        "mario_gloves_color",
+        "mario_shoes_color",
+        "mario_skin_color",
+        "mario_hair_color",
         "music_shuffle",
+        "skybox_shuffle",
         "coinsanity",
         "secret_stage_coinsanity",
         *secret_stage_coinsanity_max_coin_option_names,
         *coin_star_requirement_option_names,
+        "traps_filler_percentage",
+        *trap_weight_option_names,
         "death_link",
         "completion_type",
     )
@@ -117,6 +158,7 @@ class SM64World(World):
         slot_data = self.get_re_gen_slot_data()
         self.area_connections = {}
         self.music_slot_data = None
+        self.skybox_slot_data = None
         self.using_slot_coinsanity_locations = False
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
@@ -125,6 +167,18 @@ class SM64World(World):
                 for entrance, destination in slot_data.get("AreaRando", {}).items()
             }
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
+            self.skybox_slot_data = self.get_skybox_slot_data_from_slot_data(slot_data)
+            self.start_inventory_item_ids = {
+                int(item_id) for item_id in slot_data.get("StartInventory", {})
+            }
+        else:
+            self.start_inventory_item_ids = set(self.get_start_inventory_slot_data())
+
+        enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
+        tracker_logic_tricks = get_enabled_logic_tricks(self.options.universal_tracker_glitched_logic.value)
+        for trick, data in logic_tricks.items():
+            setattr(self, data["internal_id"], trick in enabled_logic_tricks)
+            setattr(self, f"{data['internal_id']}_ut_glitch", trick in tracker_logic_tricks)
 
         self.move_rando_bitvec = 0
         double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
@@ -135,6 +189,18 @@ class SM64World(World):
 
         self.filler_count = 0
         self.topology_present = self.options.area_rando
+        if (
+                self.options.accessibility == self.options.accessibility.option_full
+                and not self.logic_sl_impossible_coin
+        ):
+            self.options.snowmans_land_coin_star_requirement.value = min(
+                self.options.snowmans_land_coin_star_requirement.value, 126)
+        if (
+                self.options.accessibility == self.options.accessibility.option_full
+                and not self.logic_thi_impossible_coin
+        ):
+            self.options.tiny_huge_island_coin_star_requirement.value = min(
+                self.options.tiny_huge_island_coin_star_requirement.value, 191)
         coin_star_requirements = {
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names
@@ -150,6 +216,12 @@ class SM64World(World):
                     option_name: getattr(self.options, option_name).value
                     for option_name in secret_stage_coinsanity_max_coin_option_names
                 }
+                if (
+                        self.options.accessibility == self.options.accessibility.option_full
+                        and not self.logic_totwc_coin_mastery
+                ):
+                    secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"] = min(
+                        secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"], 31)
                 self.coinsanity_location_names += get_secret_stage_coinsanity_location_names(
                     secret_stage_coin_maxes, self.options.coinsanity.value)
         if "MoveRandoVec" in slot_data:
@@ -203,65 +275,76 @@ class SM64World(World):
             return list(cap_item_data_table)
         return list(global_cap_item_names)
 
-    def get_arbitrary_item_names(self) -> typing.List[str]:
-        item_names = [
-            item_name
-            for item_name, option_name in (
-                ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
-                ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
-                ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
-                ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
-                ("Snowman's Land - Penguin", "snowmans_land_penguin"),
-                ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
-                ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
-                ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
-            )
-            if getattr(self.options, option_name).value
-        ]
+    def get_level_feature_item_names(self) -> typing.List[str]:
+        item_names = []
+        mode = self.options.level_features.value
+        if mode != self.options.level_features.option_not_shuffled:
+            item_names += [
+                name for name in feature_item_data_table
+                if name not in per_level_bobomb_buddy_item_names
+            ]
+        if mode in {
+                self.options.level_features.option_global,
+                self.options.level_features.option_per_level,
+        }:
+            item_names += [
+                name for name in simple_arbitrary_item_data_table
+                if name not in per_level_bobomb_buddy_item_names
+                and name not in per_level_treasure_chest_item_names
+            ]
+            item_names += self.get_unlock_item_names(
+                self.options.level_features, global_checkerboard_item_names, checkerboard_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features, global_rolling_log_item_names, rolling_log_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features, global_purple_switch_item_names, purple_switch_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_treasure_chest_item_names,
+                per_level_treasure_chest_item_names)
 
-        if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_global:
-            item_names += list(global_checkerboard_item_names)
-        elif self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_individual:
-            item_names += list(checkerboard_item_data_table)
-
-        if self.options.rolling_logs.value == self.options.rolling_logs.option_global:
-            item_names += list(global_rolling_log_item_names)
-        elif self.options.rolling_logs.value == self.options.rolling_logs.option_individual:
-            item_names += list(rolling_log_item_data_table)
-
-        if self.options.purple_switches.value == self.options.purple_switches.option_global:
-            item_names += list(global_purple_switch_item_names)
-        elif self.options.purple_switches.value == self.options.purple_switches.option_individual:
-            item_names += list(purple_switch_item_data_table)
-
+        buddy_mode = self.options.bobomb_buddies.value
+        if buddy_mode == self.options.bobomb_buddies.option_per_act_only:
+            item_names += [
+                name for name in feature_item_data_table
+                if name in per_level_bobomb_buddy_item_names
+            ]
+        elif buddy_mode == self.options.bobomb_buddies.option_global:
+            item_names += list(global_bobomb_buddy_item_names)
+        elif buddy_mode == self.options.bobomb_buddies.option_per_level:
+            item_names += list(per_level_bobomb_buddy_item_names)
         return item_names
 
-    def get_unrandomized_arbitrary_item_names(self) -> typing.List[str]:
-        item_names = [
-            item_name
-            for item_name, option_name in (
-                ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
-                ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
-                ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
-                ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
-                ("Snowman's Land - Penguin", "snowmans_land_penguin"),
-                ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
-                ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
-                ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
-            )
-            if not getattr(self.options, option_name).value
-        ]
-
-        if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_not_shuffled:
+    def get_unrandomized_level_feature_item_names(self) -> typing.List[str]:
+        item_names = []
+        mode = self.options.level_features.value
+        if mode == self.options.level_features.option_not_shuffled:
+            item_names += [
+                name for name in feature_item_data_table
+                if name not in per_level_bobomb_buddy_item_names
+            ]
+        if mode in {
+                self.options.level_features.option_not_shuffled,
+                self.options.level_features.option_per_act_only,
+        }:
+            item_names += [
+                name for name in simple_arbitrary_item_data_table
+                if name not in per_level_bobomb_buddy_item_names
+                and name not in per_level_treasure_chest_item_names
+            ]
             item_names += list(global_checkerboard_item_names)
-            item_names += list(checkerboard_item_data_table)
-        if self.options.rolling_logs.value == self.options.rolling_logs.option_not_shuffled:
             item_names += list(global_rolling_log_item_names)
-            item_names += list(rolling_log_item_data_table)
-        if self.options.purple_switches.value == self.options.purple_switches.option_not_shuffled:
             item_names += list(global_purple_switch_item_names)
-            item_names += list(purple_switch_item_data_table)
+            item_names += list(global_treasure_chest_item_names)
 
+        buddy_mode = self.options.bobomb_buddies.value
+        if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
+            item_names += list(global_bobomb_buddy_item_names)
+        elif buddy_mode == self.options.bobomb_buddies.option_per_act_only:
+            item_names += [
+                name for name in per_level_bobomb_buddy_item_names
+                if name not in feature_item_data_table
+            ]
         return item_names
 
     def get_optional_item_names(self) -> typing.List[str]:
@@ -274,10 +357,82 @@ class SM64World(World):
             return []
         return list(optional_item_data_table)
 
+    @staticmethod
+    def get_unlock_item_names(option, global_mode_item_names, per_level_item_data_table) -> typing.List[str]:
+        if option.value == option.option_global:
+            return list(global_mode_item_names)
+        if option.value == option.option_per_level:
+            return list(per_level_item_data_table)
+        return []
+
+    def get_coin_object_unlock_item_names(self) -> typing.List[str]:
+        return self.get_unlock_item_names(
+            self.options.coin_object_unlocks,
+            global_mode_coin_object_item_names,
+            per_level_coin_object_item_data_table)
+
+    def get_enemy_unlock_item_names(self) -> typing.List[str]:
+        return self.get_unlock_item_names(
+            self.options.enemy_unlocks,
+            global_mode_enemy_item_names,
+            per_level_enemy_item_data_table)
+
+    def get_one_up_unlock_item_names(self) -> typing.List[str]:
+        if not self.options.one_up_checks:
+            return []
+        return self.get_unlock_item_names(
+            self.options.one_up_mushroom_unlocks,
+            global_one_up_unlock_item_names,
+            per_level_one_up_unlock_item_data_table)
+
+    def get_level_unlock_item_names(self) -> typing.List[str]:
+        option = self.options.level_unlocks
+        if option.value == option.option_disabled:
+            return []
+
+        item_names = list(special_level_unlock_item_names)
+        if option.value == option.option_full:
+            item_names += list(painting_unlock_item_data_table)
+        return item_names
+
+    def get_bowser_arena_bomb_item_names(self) -> typing.List[str]:
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_global:
+            return ["Progressive Bowser Arena Bomb"] * 5
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_per_level:
+            return (
+                ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
+                + ["Bowser in the Fire Sea - Progressive Bowser Arena Bomb"] * 4
+                + ["Bowser in the Sky - Progressive Bowser Arena Bomb"] * 5
+            )
+        return []
+
+    def get_unrandomized_bowser_arena_bomb_item_names(self) -> typing.List[str]:
+        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_not_shuffled:
+            return ["Progressive Bowser Arena Bomb"] * 5
+        return []
+
+    def get_unrandomized_unlock_item_names(self) -> typing.List[str]:
+        item_names = []
+        if self.options.coin_object_unlocks.value == self.options.coin_object_unlocks.option_not_shuffled:
+            item_names += list(global_coin_object_item_data_table)
+            item_names += list(per_level_coin_object_item_data_table)
+        if self.options.enemy_unlocks.value == self.options.enemy_unlocks.option_not_shuffled:
+            item_names += list(global_enemy_item_data_table)
+            item_names += list(per_level_enemy_item_data_table)
+        if self.options.one_up_mushroom_unlocks.value == \
+                self.options.one_up_mushroom_unlocks.option_not_shuffled:
+            item_names += list(global_one_up_unlock_item_data_table)
+            item_names += list(per_level_one_up_unlock_item_data_table)
+        if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
+            item_names += list(painting_unlock_item_data_table)
+        if self.options.level_unlocks.value == self.options.level_unlocks.option_disabled:
+            item_names += list(special_level_unlock_item_names)
+        return item_names
+
     def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
         if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_global:
             return ["Bowser Stage Extra 1-Ups"]
-        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_individual:
+        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_per_level:
             return [
                 "Bowser in the Dark World - Extra 1-Ups",
                 "Bowser in the Fire Sea - Extra 1-Ups",
@@ -303,23 +458,26 @@ class SM64World(World):
         return item_names
 
     def get_progression_item_names(self) -> typing.List[str]:
-        item_names = list(feature_item_data_table)
-        item_names += self.get_arbitrary_item_names()
+        item_names = self.get_level_feature_item_names()
         item_names += self.get_castle_key_item_names()
         item_names += ["Castle - Progressive MIPS"] * 2
         item_names += [
             item_name for item_name in castle_progression_item_data_table
             if item_name != "Castle - Progressive MIPS"
+            and item_name not in special_level_unlock_item_names
         ]
+        item_names += self.get_level_unlock_item_names()
         item_names += self.get_cap_item_names()
         item_names += self.get_bowser_stage_1up_item_names()
 
         if self.options.buddy_checks:
             item_names += list(cannon_item_data_table)
-        if self.options.enable_locked_paintings:
-            item_names += list(painting_unlock_item_data_table)
 
         item_names += self.get_action_item_names()
+        item_names += self.get_coin_object_unlock_item_names()
+        item_names += self.get_enemy_unlock_item_names()
+        item_names += self.get_one_up_unlock_item_names()
+        item_names += self.get_bowser_arena_bomb_item_names()
 
         return item_names
 
@@ -386,6 +544,25 @@ class SM64World(World):
         if not self.options.buddy_checks:
             locked_count += len(cannon_item_data_table)
         return locked_count
+        
+    def get_filler_replacements(self, filler_count: int) -> typing.List[str]:
+        replacement_names: typing.List[str] = []
+
+        trap_items = []
+        trap_weights = []
+        for option_name in trap_weight_option_names:
+            if (option_name == "uncollect_random_coin_trap_weight"
+                    and not self.options.permanent_coin_collection):
+                continue
+            weight = getattr(self.options, option_name).value
+            if weight > 0:
+                trap_items.append(trap_item_name_by_option_name[option_name])
+                trap_weights.append(weight)
+
+        trap_count = (filler_count * self.options.traps_filler_percentage.value) // 100
+        if trap_items: replacement_names.extend(self.random.choices(trap_items, weights=trap_weights, k=trap_count,))
+        self.random.shuffle(replacement_names)
+        return replacement_names
 
     def create_items(self):
         item_names = self.get_progression_item_names()
@@ -396,8 +573,11 @@ class SM64World(World):
             raise OptionError(f"{self.player_name}'s Spicy Mycena 64 world has {abs(self.filler_count)} more "
                               f"required items than randomized locations.")
 
+        replacement_item_names = self.get_filler_replacements(self.filler_count)
+        plain_filler_count = self.filler_count - len(replacement_item_names)
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
-        self.multiworld.itempool += [self.create_item("1-Up Mushroom") for i in range(0, self.filler_count)]
+        self.multiworld.itempool += [self.create_item(item_name) for item_name in replacement_item_names]
+        self.multiworld.itempool += [self.create_item("1-Up Mushroom") for i in range(plain_filler_count)]
 
     def generate_basic(self):
         if not self.options.buddy_checks:
@@ -422,8 +602,20 @@ class SM64World(World):
     def get_filler_item_name(self) -> str:
         return "1-Up Mushroom"
 
+    @staticmethod
+    def get_rgb_color(value: int) -> typing.List[int]:
+        return [(value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF]
+
     def get_mario_colors_slot_data(self) -> typing.Dict[str, typing.List[int]]:
-        return {color_name: list(channels) for color_name, channels in self.options.mario_colors.value.items()}
+        return {
+            "hat": self.get_rgb_color(self.options.mario_hat_color.value),
+            "shirt": self.get_rgb_color(self.options.mario_shirt_color.value),
+            "overalls": self.get_rgb_color(self.options.mario_overalls_color.value),
+            "gloves": self.get_rgb_color(self.options.mario_gloves_color.value),
+            "shoes": self.get_rgb_color(self.options.mario_shoes_color.value),
+            "skin": self.get_rgb_color(self.options.mario_skin_color.value),
+            "hair": self.get_rgb_color(self.options.mario_hair_color.value),
+        }
 
     def get_coin_star_requirements_slot_data(self) -> typing.List[int]:
         return [
@@ -434,9 +626,11 @@ class SM64World(World):
     def get_start_inventory_slot_data(self) -> typing.Dict[int, int]:
         start_inventory = {}
         for item_name in (
-                self.get_unrandomized_arbitrary_item_names()
+                self.get_unrandomized_level_feature_item_names()
                 + self.get_unrandomized_optional_item_names()
-                + self.get_unrandomized_bowser_stage_1up_item_names()):
+                + self.get_unrandomized_bowser_stage_1up_item_names()
+                + self.get_unrandomized_bowser_arena_bomb_item_names()
+                + self.get_unrandomized_unlock_item_names()):
             item_id = item_table[item_name]
             start_inventory[item_id] = start_inventory.get(item_id, 0) + 1
         return start_inventory
@@ -452,6 +646,8 @@ class SM64World(World):
             getattr(self.options, option_name).value = value
         if "MusicShuffleMode" in slot_data:
             self.options.music_shuffle.value = slot_data["MusicShuffleMode"]
+        if "SkyboxShuffleMode" in slot_data:
+            self.options.skybox_shuffle.value = slot_data["SkyboxShuffleMode"]
 
     def get_music_slot_data_from_slot_data(
             self, slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any] | None:
@@ -468,12 +664,30 @@ class SM64World(World):
                 self.options.music_shuffle.value, self.random)
         return self.music_slot_data.copy()
 
+    def get_skybox_slot_data(self) -> typing.Dict[str, typing.Any]:
+        if self.skybox_slot_data is None:
+            from .Skyboxes import build_skybox_slot_data
+            self.skybox_slot_data = build_skybox_slot_data(
+                self.options.skybox_shuffle.value, self.random)
+        return self.skybox_slot_data.copy()
+
+    @staticmethod
+    def get_skybox_slot_data_from_slot_data(
+            slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any] | None:
+        if "SkyboxShuffleMode" not in slot_data:
+            return None
+        skybox_slot_data = {"SkyboxShuffleMode": slot_data["SkyboxShuffleMode"]}
+        if "SkyboxMap" in slot_data:
+            skybox_slot_data["SkyboxMap"] = slot_data["SkyboxMap"]
+        return skybox_slot_data
+
     def fill_slot_data(self):
         slot_data = {
             "Options": self.options.as_dict(*self.slot_option_names),
             "AreaRando": self.area_connections,
             "MoveRandoVec": self.move_rando_bitvec,
-            "PaintingRando": self.options.enable_locked_paintings.value,
+            "GlobalCapItems": not self.options.per_level_cap_items.value,
+            "OneUpUnlockMode": self.options.one_up_mushroom_unlocks.value,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
@@ -485,8 +699,14 @@ class SM64World(World):
             "BuddyChecks": self.options.buddy_checks.value,
             "EasyButterflies": self.options.easy_butterflies.value,
             "NoDespawn": self.options.no_despawns.value,
+            "PermanentCoinCollection": self.options.permanent_coin_collection.value,
+            "BowserInTheDarkWorldHits": self.options.bowser_in_the_dark_world_hits.value,
+            "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_hits.value,
+            "BowserInTheSkyHits": self.options.bowser_in_the_sky_hits.value,
+            "BowserInTheSkyStageCollapseHits": self.options.bowser_in_the_sky_stage_collapse_hits.value,
         }
         slot_data.update(self.get_music_slot_data())
+        slot_data.update(self.get_skybox_slot_data())
         mario_colors = self.get_mario_colors_slot_data()
         if mario_colors:
             slot_data["MarioColors"] = mario_colors
@@ -498,7 +718,6 @@ class SM64World(World):
 
     def get_apsm64ex_slot_data(self):
         slot_data = self.fill_slot_data()
-        slot_data["StartInventory"] = slot_data["StartInventory"].copy()
         for item in self.multiworld.precollected_items[self.player]:
             if item.code is None:
                 continue
@@ -556,5 +775,7 @@ class SM64World(World):
                     regions += region.subregions
                 for region in regions:
                     for location in region.locations:
+                        if location.address is None:
+                            continue
                         er_hint_data[location.address] = entrance_name
             hint_data[self.player] = er_hint_data

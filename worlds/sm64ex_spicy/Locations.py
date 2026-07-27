@@ -18,7 +18,7 @@ coinsanity_course_data = (
     ("Snowman's Land", 1210, "snowmans_land_coin_star_requirement", 127),
     ("Wet-Dry World", 1337, "wet_dry_world_coin_star_requirement", 152),
     ("Tall, Tall Mountain", 1489, "tall_tall_mountain_coin_star_requirement", 137),
-    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 191),
+    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 192),
     ("Tick Tock Clock", 1817, "tick_tock_clock_coin_star_requirement", 128),
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )
@@ -138,9 +138,9 @@ locCCM_table = {
     "Cool, Cool Mountain - Snowman's Lost His Head": 3626025,
     "Cool, Cool Mountain - Wall Kicks Will Work": 3626026,
     "Cool, Cool Mountain - Bob-omb Buddy": 3626203,
-    "Cool, Cool Mountain - Near Snowman 1-Up": 3626215,
-    "Cool, Cool Mountain - Ice Pillar 1-Up": 3626216,
-    "Cool, Cool Mountain - Secret Slide 1-Up": 3626217
+    "Cool, Cool Mountain - Near Snowman Block 1-Up": 3626215,
+    "Cool, Cool Mountain - Ice Pillar Block 1-Up": 3626216,
+    "Cool, Cool Mountain - Secret Slide Block 1-Up": 3626217
 }
 
 #Big Boo's Haunt
@@ -151,7 +151,7 @@ locBBH_table = {
     "Big Boo's Haunt - Seek the 8 Red Coins": 3626031,
     "Big Boo's Haunt - Big Boo's Balcony": 3626032,
     "Big Boo's Haunt - Eye to Eye in the Secret Room": 3626033,
-    "Big Boo's Haunt - Top of Mansion 1-Up": 3626218
+    "Big Boo's Haunt - Top of Mansion Block 1-Up": 3626218
 }
 
 #Hazy Maze Cave
@@ -162,8 +162,8 @@ locHMC_table = {
     "Hazy Maze Cave - Navigating the Toxic Maze": 3626038,
     "Hazy Maze Cave - A-Maze-Ing Emergency Exit": 3626039,
     "Hazy Maze Cave - Watch for Rolling Rocks": 3626040,
-    "Hazy Maze Cave - Above Pit 1-Up": 3626219,
-    "Hazy Maze Cave - Past Rolling Rocks 1-Up": 3626220,
+    "Hazy Maze Cave - Above Pit Block 1-Up": 3626219,
+    "Hazy Maze Cave - Past Rolling Rocks Block 1-Up": 3626220,
 }
 
 #Lethal Lava Land
@@ -185,9 +185,9 @@ locSSL_table = {
     "Shifting Sand Land - Free Flying for 8 Red Coins": 3626053,
     "Shifting Sand Land - Pyramid Puzzle": 3626054,
     "Shifting Sand Land - Bob-omb Buddy": 3626207,
-    "Shifting Sand Land - Outside Pyramid 1-Up": 3626221,
-    "Shifting Sand Land - Pyramid Left Path 1-Up": 3626222,
-    "Shifting Sand Land - Pyramid Back 1-Up": 3626223
+    "Shifting Sand Land - Outside Pyramid Block 1-Up": 3626221,
+    "Shifting Sand Land - Pyramid Left Path Block 1-Up": 3626222,
+    "Shifting Sand Land - Pyramid Back Block 1-Up": 3626223
 }
 
 #Dire, Dire Docks
@@ -209,8 +209,8 @@ locSL_table = {
     "Snowman's Land - Shell Shreddin' for Red Coins": 3626067,
     "Snowman's Land - Into the Igloo": 3626068,
     "Snowman's Land - Bob-omb Buddy": 3626209,
-    "Snowman's Land - Near Moneybags 1-Up": 3626224,
-    "Snowman's Land - Inside Igloo 1-Up": 3626225
+    "Snowman's Land - Near Moneybags Block 1-Up": 3626224,
+    "Snowman's Land - Inside Igloo Block 1-Up": 3626225
 }
 
 #Wet-Dry World
@@ -222,7 +222,7 @@ locWDW_table = {
     "Wet-Dry World - Go to Town for Red Coins": 3626074,
     "Wet-Dry World - Quick Race Through Downtown!": 3626075,
     "Wet-Dry World - Bob-omb Buddy": 3626210,
-    "Wet-Dry World - Downtown 1-Up": 3626226
+    "Wet-Dry World - Downtown Block 1-Up": 3626226
 }
 
 #Tall, Tall Mountain
@@ -234,7 +234,7 @@ locTTM_table = {
     "Tall, Tall Mountain - Breathtaking View from Bridge": 3626081,
     "Tall, Tall Mountain - Blast to the Lonely Mushroom": 3626082,
     "Tall, Tall Mountain - Bob-omb Buddy": 3626211,
-    "Tall, Tall Mountain - Red Mushroom 1-Up": 3626227
+    "Tall, Tall Mountain - Red Mushroom Block 1-Up": 3626227
 }
 
 #Tiny-Huge Island
@@ -246,9 +246,9 @@ locTHI_table = {
     "Tiny-Huge Island - Wiggler's Red Coins": 3626088,
     "Tiny-Huge Island - Make Wiggler Squirm": 3626089,
     "Tiny-Huge Island - Bob-omb Buddy": 3626212,
-    "Tiny-Huge Island - Tiny Island Near Start 1-Up": 3626228,
-    "Tiny-Huge Island - Huge Island Near Start 1-Up": 3626229,
-    "Tiny-Huge Island - Windy Area 1-Up": 3626230
+    "Tiny-Huge Island - Tiny Island Near Start Block 1-Up": 3626228,
+    "Tiny-Huge Island - Huge Island Near Start Block 1-Up": 3626229,
+    "Tiny-Huge Island - Windy Area Block 1-Up": 3626230
 }
 
 #Tick Tock Clock
@@ -259,8 +259,8 @@ locTTC_table = {
     "Tick Tock Clock - Stomp on the Thwomp": 3626094,
     "Tick Tock Clock - Timed Jumps on Moving Bars": 3626095,
     "Tick Tock Clock - Stop Time for Red Coins": 3626096,
-    "Tick Tock Clock - Midway Up 1-Up": 3626231,
-    "Tick Tock Clock - Top 1-Up": 3626232
+    "Tick Tock Clock - Midway Up Block 1-Up": 3626231,
+    "Tick Tock Clock - Top Block 1-Up": 3626232
 }
 
 #Rainbow Ride
@@ -272,9 +272,9 @@ locRR_table = {
     "Rainbow Ride - Tricky Triangles!": 3626102,
     "Rainbow Ride - Somewhere Over the Rainbow": 3626103,
     "Rainbow Ride - Bob-omb Buddy": 3626214,
-    "Rainbow Ride - Top of Red Coin Maze 1-Up": 3626233,
-    "Rainbow Ride - Under Fly Guy 1-Up": 3626234,
-    "Rainbow Ride - House in the Sky 1-Up": 3626235
+    "Rainbow Ride - Top of Red Coin Maze Block 1-Up": 3626233,
+    "Rainbow Ride - Under Fly Guy Block 1-Up": 3626234,
+    "Rainbow Ride - House in the Sky Block 1-Up": 3626235
 }
 
 loc100Coin_table = {
@@ -307,8 +307,8 @@ locSA_table = {
 locBitDW_table = {
     "Bowser in the Dark World - Red Coins": 3626105,
     "Bowser in the Dark World - Key": 3626178,
-    "Bowser in the Dark World - Tower 1-Up": 3626236,
-    "Bowser in the Dark World - Near Goombas 1-Up": 3626237
+    "Bowser in the Dark World - Tower Block 1-Up": 3626236,
+    "Bowser in the Dark World - Near Goombas Block 1-Up": 3626237
 }
 
 locTotWC_table = {
@@ -319,31 +319,31 @@ locTotWC_table = {
 locCotMC_table = {
     "Cavern of the Metal Cap - Switch": 3626182,
     "Cavern of the Metal Cap - Red Coins": 3626133,
-    "Cavern of the Metal Cap - 1-Up": 3626241
+    "Cavern of the Metal Cap - Block 1-Up": 3626241
 }
 
 locVCutM_table = {
     "Vanish Cap Under the Moat - Switch": 3626183,
     "Vanish Cap Under the Moat - Red Coins": 3626147,
-    "Vanish Cap Under the Moat - 1-Up": 3626242
+    "Vanish Cap Under the Moat - Block 1-Up": 3626242
 }
 
 locBitFS_table = {
     "Bowser in the Fire Sea - Red Coins": 3626112,
     "Bowser in the Fire Sea - Key": 3626179,
-    "Bowser in the Fire Sea - Swaying Stairs 1-Up": 3626238,
+    "Bowser in the Fire Sea - Swaying Stairs Block 1-Up": 3626238,
     "Bowser in the Fire Sea - Near Poles Block 1-Up": 3626239
 }
 
 locWMotR_table = {
     "Wing Mario Over the Rainbow - Red Coins": 3626154,
-    "Wing Mario Over the Rainbow - 1-Up": 3626243,
+    "Wing Mario Over the Rainbow - Block 1-Up": 3626243,
     "Wing Mario Over the Rainbow - Bob-omb Buddy": 3626525
 }
 
 locBitS_table = {
     "Bowser in the Sky - Red Coins": 3626119,
-    "Bowser in the Sky - 1-Up": 3626240
+    "Bowser in the Sky - Block 1-Up": 3626240
 }
 
 #Secret Stars found inside the Castle
@@ -370,7 +370,7 @@ locFreestanding1Up_table = {
 
     "Bowser in the Fire Sea - First Stone Structure 1-Up": 3629105,
     "Bowser in the Fire Sea - Elevator Pole 1-Up": 3629106,
-    "Bowser in the Fire Sea - Moving Platform Trigger 1-Up": 3629107,
+    "Bowser in the Fire Sea - Stretching Platform Trigger 1-Up": 3629107,
     "Bowser in the Fire Sea - Near Poles 1-Up": 3629108,
     "Bowser in the Fire Sea - Second Stone Structure 1-Up": 3629109,
 
@@ -393,7 +393,7 @@ locFreestanding1Up_table = {
     "Castle - Right Butterfly 1-Up": 3629124,
 
     "Castle - Jolly Roger Bay Lobby 1-Up": 3629125,
-    "Castle - Basement Four Corners 1-Up": 3629126,
+    "Castle - Basement Water Tunnel Four Corners 1-Up": 3629126,
 
     "Cool, Cool Mountain - Snowman Tree 1-Up": 3629127,
     "Cool, Cool Mountain - Slide Shortcut First 1-Up": 3629128,
@@ -409,7 +409,7 @@ locFreestanding1Up_table = {
     "Lethal Lava Land - Flamethrower Ring 1-Up": 3629134,
     "Lethal Lava Land - Volcano Flamethrower 1-Up": 3629135,
     "Lethal Lava Land - Northeast Brown Platform 1-Up": 3629136,
-    "Lethal Lava Land - Southern Curve 1-Up": 3629137,
+    "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up": 3629137,
     "Lethal Lava Land - Volcano Curve 1-Up": 3629138,
     "Lethal Lava Land - Volcano Brown Platform 1-Up": 3629139,
     "Lethal Lava Land - Northwest Curve 1-Up": 3629140,
@@ -441,7 +441,7 @@ locFreestanding1Up_table = {
     "Tiny-Huge Island - Beach Coins 1-Up": 3629160,
     "Tiny-Huge Island - Boss Bass 1-Up": 3629161,
     "Tiny-Huge Island - Koopa Area Butterfly 1-Up": 3629162,
-    "Tiny-Huge Island - Cannon Tree Butterfly 1-Up": 3629163,
+    "Tiny-Huge Island - Red Coin Bridge Tree 1-Up": 3629163,
     "Tiny-Huge Island - Start Butterfly 1-Up": 3629164,
     "Tiny-Huge Island - Red Coin Cave 1-Up": 3629165,
 
@@ -622,38 +622,76 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
 loc1UpBlock_table = {
     location_name: location_table[location_name]
     for location_name in (
-        "Cool, Cool Mountain - Near Snowman 1-Up",
-        "Cool, Cool Mountain - Ice Pillar 1-Up",
-        "Cool, Cool Mountain - Secret Slide 1-Up",
-        "Big Boo's Haunt - Top of Mansion 1-Up",
-        "Hazy Maze Cave - Above Pit 1-Up",
-        "Hazy Maze Cave - Past Rolling Rocks 1-Up",
-        "Shifting Sand Land - Outside Pyramid 1-Up",
-        "Shifting Sand Land - Pyramid Left Path 1-Up",
-        "Shifting Sand Land - Pyramid Back 1-Up",
-        "Snowman's Land - Near Moneybags 1-Up",
-        "Snowman's Land - Inside Igloo 1-Up",
-        "Wet-Dry World - Downtown 1-Up",
-        "Tall, Tall Mountain - Red Mushroom 1-Up",
-        "Tiny-Huge Island - Tiny Island Near Start 1-Up",
-        "Tiny-Huge Island - Huge Island Near Start 1-Up",
-        "Tiny-Huge Island - Windy Area 1-Up",
-        "Tick Tock Clock - Midway Up 1-Up",
-        "Tick Tock Clock - Top 1-Up",
-        "Rainbow Ride - Top of Red Coin Maze 1-Up",
-        "Rainbow Ride - Under Fly Guy 1-Up",
-        "Rainbow Ride - House in the Sky 1-Up",
-        "Bowser in the Dark World - Tower 1-Up",
-        "Bowser in the Dark World - Near Goombas 1-Up",
-        "Cavern of the Metal Cap - 1-Up",
-        "Vanish Cap Under the Moat - 1-Up",
-        "Bowser in the Fire Sea - Swaying Stairs 1-Up",
+        "Cool, Cool Mountain - Near Snowman Block 1-Up",
+        "Cool, Cool Mountain - Ice Pillar Block 1-Up",
+        "Cool, Cool Mountain - Secret Slide Block 1-Up",
+        "Big Boo's Haunt - Top of Mansion Block 1-Up",
+        "Hazy Maze Cave - Above Pit Block 1-Up",
+        "Hazy Maze Cave - Past Rolling Rocks Block 1-Up",
+        "Shifting Sand Land - Outside Pyramid Block 1-Up",
+        "Shifting Sand Land - Pyramid Left Path Block 1-Up",
+        "Shifting Sand Land - Pyramid Back Block 1-Up",
+        "Snowman's Land - Near Moneybags Block 1-Up",
+        "Snowman's Land - Inside Igloo Block 1-Up",
+        "Wet-Dry World - Downtown Block 1-Up",
+        "Tall, Tall Mountain - Red Mushroom Block 1-Up",
+        "Tiny-Huge Island - Tiny Island Near Start Block 1-Up",
+        "Tiny-Huge Island - Huge Island Near Start Block 1-Up",
+        "Tiny-Huge Island - Windy Area Block 1-Up",
+        "Tick Tock Clock - Midway Up Block 1-Up",
+        "Tick Tock Clock - Top Block 1-Up",
+        "Rainbow Ride - Top of Red Coin Maze Block 1-Up",
+        "Rainbow Ride - Under Fly Guy Block 1-Up",
+        "Rainbow Ride - House in the Sky Block 1-Up",
+        "Bowser in the Dark World - Tower Block 1-Up",
+        "Bowser in the Dark World - Near Goombas Block 1-Up",
+        "Cavern of the Metal Cap - Block 1-Up",
+        "Vanish Cap Under the Moat - Block 1-Up",
+        "Bowser in the Fire Sea - Swaying Stairs Block 1-Up",
         "Bowser in the Fire Sea - Near Poles Block 1-Up",
-        "Wing Mario Over the Rainbow - 1-Up",
-        "Bowser in the Sky - 1-Up",
+        "Wing Mario Over the Rainbow - Block 1-Up",
+        "Bowser in the Sky - Block 1-Up",
     )
 }
 locOneUp_table = {**loc1UpBlock_table, **locFreestanding1Up_table}
+
+trigger_1up_location_ids = {
+    3629106, 3629107, 3629112, 3629115, 3629117, 3629118,
+    3629122, 3629125, 3629126, 3629127,
+    3629131, 3629132, 3629134, 3629141, 3629142, 3629146,
+    3629149, 3629150, 3629151, 3629153, 3629156, 3629159,
+    3629160, 3629163, 3629166, 3629167,
+    3629172, 3629178, 3629181, 3629182, 3629183,
+    3629185, 3629189, 3629190, 3629191, 3629192,
+}
+
+butterfly_1up_location_ids = {
+    3629123, 3629124, 3629162, 3629164, 3629171, 3629184,
+}
+
+locTrigger1Up_table = {
+    location_name: location_id
+    for location_name, location_id in locFreestanding1Up_table.items()
+    if location_id in trigger_1up_location_ids
+}
+locButterfly1Up_table = {
+    location_name: location_id
+    for location_name, location_id in locFreestanding1Up_table.items()
+    if location_id in butterfly_1up_location_ids
+}
+locStandalone1Up_table = {
+    location_name: location_id
+    for location_name, location_id in locFreestanding1Up_table.items()
+    if location_id not in trigger_1up_location_ids
+    and location_id not in butterfly_1up_location_ids
+}
+
+one_up_unlock_category_by_location = {
+    **{location_name: "Freestanding 1-Ups" for location_name in locStandalone1Up_table},
+    **{location_name: "Trigger 1-Ups" for location_name in locTrigger1Up_table},
+    **{location_name: "Butterflies" for location_name in locButterfly1Up_table},
+    **{location_name: "1-Up Blocks" for location_name in loc1UpBlock_table},
+}
 
 
 def _locations_with_prefix(prefix: str) -> set[str]:

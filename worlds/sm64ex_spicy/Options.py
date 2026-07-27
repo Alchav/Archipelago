@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, OptionError, PerGameCommonOptions, OptionDict, \
-    OptionGroup
+from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup, \
+    OptionSet, ItemsAccessibility
+
+from .LogicTricks import logic_trick_option_keys
 
 
 class CoinStarRequirement(Range):
@@ -11,8 +13,21 @@ class CoinStarRequirement(Range):
 
 class Coinsanity(Range):
     """
-    Adds extra location checks for collecting a percentage of each course's possible coin thresholds below that
-    course's Coin Star requirement.
+    Adds extra location checks for collecting coins.
+
+    The value is a percentage from 0 to 100. For each main course, the game looks at every possible coin count below
+    that course's Coin Star requirement, then creates that percentage of them as checks, rounded up. The checks are
+    spread evenly below the Coin Star requirement and never duplicate the Coin Star check itself.
+
+    Number of checks per main course:
+    ceil((Coin Star Requirement - 1) * Coinsanity / 100)
+
+    Example: if Bob-omb Battlefield requires 50 coins for its Coin Star, there are 49 possible Coinsanity checks
+    from 1 to 49 coins. Coinsanity 2 creates 1 check, at 25 coins. Coinsanity 50 creates 25 checks. Coinsanity 100
+    creates all 49 checks.
+
+    If Secret Stage Coinsanity is enabled, secret stages use the same percentage based on their Coinsanity Max Coins
+    option. At 100, every coin count from 1 through that stage's max is a check.
 
     Some Coinsanity locations may be created regardless of this option if there are too many items in the item pool.
     """
@@ -20,6 +35,10 @@ class Coinsanity(Range):
     range_start = 0
     range_end = 100
     default = 0
+
+
+class SM64Accessibility(ItemsAccessibility):
+    default = ItemsAccessibility.option_full
 
 
 class SecretStageCoinsanity(Toggle):
@@ -203,7 +222,7 @@ class TallTallMountainCoinStarRequirement(CoinStarRequirement):
 class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
     """Coins needed for the Coin Star in Tiny-Huge Island."""
     display_name = "Tiny-Huge Island Coin Star Requirement"
-    range_end = 191
+    range_end = 192
 
 
 class TickTockClockCoinStarRequirement(CoinStarRequirement):
@@ -254,24 +273,27 @@ coin_star_requirement_option_names = (
     "rainbow_ride_coin_star_requirement",
 )
 
-class EnableLockedPaintings(Toggle):
+class LevelUnlocks(Choice):
     """
-    Determine how paintings are treated.
+    Choose which level entrances require unlock items.
 
-    Off - Paintings are not locked, as long as you can access them you can enter them (Vanilla behavior).
+    Disabled - Start with every level entrance unlocked.
 
-    On - Paintings (other than Bob-omb Battlefield) are replaced in the pool with items to allow access to them.
-    Attempting to enter a locked painting will simply kick Mario out.
-    Does not affect secrets and levels that don't have a painting (Big Boo's Haunt, Rainbow Ride).
-    This only affects the ability for Mario to enter a painting, the destination of the painting may change due to
-    Entrance Randomization, if it is enabled.
+    Special Only - Shuffle level unlocks for Tower of the Wing Cap, Big Boo's Haunt, Bowser in the Fire Sea,
+    and Vanish Cap Under the Moat.
+
+    Full - Also shuffle the course painting unlocks, Rainbow Ride, and Wing Mario Over the Rainbow.
+
+    A locked entrance will reject Mario. Entrance Randomization may change the level reached through that entrance.
     """
-    display_name = "Enable Locked Paintings"
-
-
-class StrictCapRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect special caps may have to be acquired without the caps"""
-    display_name = "Strict Cap Requirements"
+    display_name = "Level Unlocks"
+    option_disabled = 0
+    option_special_only = 1
+    option_full = 2
+    alias_default = option_special_only
+    alias_false = option_special_only
+    alias_true = option_full
+    default = 1
 
 
 class PerLevelCapItems(Toggle):
@@ -286,91 +308,145 @@ class MariosHat(Toggle):
     display_name = "Include Mario's Hat"
 
 
-class HazyMazeCaveSwimmingBeast(Toggle):
-    """Shuffle Hazy Maze Cave - Swimming Beast as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
-
-
-class RainbowRideCarpets(Toggle):
-    """Shuffle Rainbow Ride - Carpets as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Rainbow Ride - Carpets"
-
-
-class TinyHugeIslandWarpPipes(Toggle):
-    """Shuffle Tiny-Huge Island - Warp Pipes as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
-
-
-class CoolCoolMountainBabyPenguins(Toggle):
-    """Shuffle Cool, Cool Mountain - Baby Penguins as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
-
-
-class SnowmansLandPenguin(Toggle):
-    """Shuffle Snowman's Land - Penguin as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Snowman's Land - Penguin"
-
-
-class ShiftingSandLandPyramidElevator(Toggle):
-    """Shuffle Shifting Sand Land - Pyramid Elevator as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
-
-
-class WetDryWorldWaterLevelDiamond(Toggle):
-    """Shuffle Wet-Dry World - Water Level Diamond as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Wet-Dry World - Water Level Diamond"
-
-
-class TickTockClockSpinners(Toggle):
-    """Shuffle Tick Tock Clock - Spinners as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Tick Tock Clock - Spinners"
-
-
-
 class LevelFeatureItemMode(Choice):
     option_not_shuffled = 0
     option_global = 1
-    option_individual = 2
+    option_per_level = 2
+    alias_individual = 2
 
 
 
-class CheckerboardPlatforms(LevelFeatureItemMode):
+class LevelFeatures(Choice):
     """
-    Choose how Checkerboard Platform unlocks are handled.
+    Choose how level features are handled.
 
-    Not Shuffled - The game starts with all Checkerboard Platforms unlocked.
+    Not Shuffled - Start with every level feature unlocked.
 
-    Global - Shuffle one Checkerboard Platforms item that unlocks every applicable platform.
+    Per Act Only - Shuffle only features that were tied to specific selected Stars in vanilla Super Mario 64.
 
-    Individual - Shuffle separate level-specific Checkerboard Platforms items.
+    Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, Purple
+    Switches, and Treasure Chests use global items.
+
+    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, =
+    Purple= Switches, and Treasure Chests use separate level-specific items.
     """
-    display_name = "Checkerboard Platform Items"
+    display_name = "Level Features"
+    option_not_shuffled = 0
+    option_per_act_only = 1
+    option_global = 2
+    option_per_level = 3
+    default = 1
 
 
-class RollingLogs(LevelFeatureItemMode):
+class BobombBuddies(Choice):
     """
-    Choose how Rolling Log unlocks are handled.
+    Choose how all Bob-omb Buddy spawns are handled.
 
-    Not Shuffled - The game starts with all Rolling Logs unlocked.
+    Not Shuffled - Start with every Bob-omb Buddy unlocked.
 
-    Global - Shuffle one Rolling Logs item that unlocks every applicable log.
+    Per Act Only - Shuffle the Bob-omb Battlefield, Whomp's Fortress, and Jolly Roger Bay buddies. Start with the
+    remaining buddies unlocked.
 
-    Individual - Shuffle separate level-specific Rolling Log items.
+    Global - Shuffle one Bob-omb Buddies item that unlocks every buddy.
+
+    Per Level - Shuffle a separate item for every level's Bob-omb Buddy.
     """
-    display_name = "Rolling Log Items"
+    display_name = "Bob-omb Buddy Items"
+    option_not_shuffled = 0
+    option_per_act_only = 1
+    option_global = 2
+    option_per_level = 3
+    default = 1
 
 
-class PurpleSwitches(LevelFeatureItemMode):
+class CoinObjectUnlocks(LevelFeatureItemMode):
     """
-    Choose how Purple Switch unlocks are handled.
+    Choose how placed coins, coin formations, and coin-producing object unlocks are handled.
 
-    Not Shuffled - The game starts with all Purple Switches unlocked.
+    Not Shuffled - The game starts with every coin object unlocked.
 
-    Global - Shuffle one Purple Switches item that unlocks every applicable switch.
+    Global - Shuffle one item for each object type. Object types without a global item use their level-specific item.
 
-    Individual - Shuffle separate level-specific Purple Switch items.
+    Per Level - Shuffle separate level-specific items for every applicable coin object type.
     """
-    display_name = "Purple Switch Items"
+    display_name = "Coin Object Unlocks"
+
+
+class EnemyUnlocks(LevelFeatureItemMode):
+    """
+    Choose how enemy unlocks are handled.
+
+    Not Shuffled - The game starts with every affected enemy unlocked.
+
+    Global - Shuffle one item for each enemy type. Enemy types without a global item use their level-specific item.
+
+    Per Level - Shuffle separate level-specific items for every applicable enemy type.
+    """
+    display_name = "Enemy Unlocks"
+
+
+class OneUpMushroomUnlocks(LevelFeatureItemMode):
+    """
+    Choose how 1-Up Mushroom source unlocks are handled.
+
+    Not Shuffled - Start with freestanding, triggered, block-spawned, and butterfly 1-Ups unlocked.
+
+    Global - Shuffle one global item for each of those four 1-Up source types.
+
+    Per Level - Shuffle separate source-type unlock items for each level that contains matching 1-Up checks.
+
+    Butterfly unlocks also control harmless scenery butterflies and the other butterflies in each 1-Up triplet.
+    """
+    display_name = "1-Up Mushroom Unlocks"
+
+
+class BowserBombs(LevelFeatureItemMode):
+    """
+    Choose how Progressive Bowser Arena Bombs are handled.
+
+    Not Shuffled - The game starts with all Bower Arena Bombs available.
+
+    Global - Shuffle five Progressive Bowser Arena Bomb items that each add one bomb to each Bowser Arena.
+    Bowser in the Dark World and Bowser in the Fire Sea cap at four bombs.
+
+    Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
+    Fire Sea, and five for Bowser in the Sky.
+    """
+    display_name = "Progressive Bowser Arena Bomb Items"
+
+
+class BowserInTheDarkWorldHits(Range):
+    """Number of Bowser Bomb hits required to defeat Bowser in the Dark World."""
+    display_name = "Bowser in the Dark World Hits"
+    range_start = 1
+    range_end = 4
+    default = 1
+
+
+class BowserInTheFireSeaHits(Range):
+    """Number of Bowser Bomb hits required to defeat Bowser in the Fire Sea."""
+    display_name = "Bowser in the Fire Sea Hits"
+    range_start = 1
+    range_end = 4
+    default = 1
+
+
+class BowserInTheSkyHits(Range):
+    """Number of Bowser Bomb hits required to defeat Bowser in the Sky."""
+    display_name = "Bowser in the Sky Hits"
+    range_start = 1
+    range_end = 5
+    default = 3
+
+
+class BowserInTheSkyStageCollapseHits(Range):
+    """
+    Number of hits Bowser must take before parts of the Bowser in the Sky arena fall off.
+    """
+    display_name = "Bowser in the Sky Stage Collapse Hits"
+    range_start = 1
+    range_end = 5
+    default = 2
 
 
 class BowserStage1Ups(Choice):
@@ -383,22 +459,17 @@ class BowserStage1Ups(Choice):
     Global - Shuffle one Bowser Stage Extra 1-Ups item that spawns all affected Bowser in the Dark World and Bowser in the
     Fire Sea 1-Ups.
 
-    Individual - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
+    Per Level - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
 
     Always Spawn - All 1-Ups always spawn in the Bowser stages.
     """
     display_name = "Bowser Stage 1-Up Behavior"
     option_vanilla = 0
     option_global = 1
-    option_individual = 2
+    option_per_level = 2
+    alias_individual = 2
     option_always_spawn = 3
     default = 0
-
-
-class StrictCannonRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect cannons may have to be acquired without them.
-    Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled."""
-    display_name = "Strict Cannon Requirements"
 
 
 class AreaRandomizer(Choice):
@@ -439,6 +510,15 @@ class NoDespawns(Toggle):
     display_name = "No Despawns"
 
 
+class PermanentCoinCollection(Toggle):
+    """
+    Coins collected in a course remain collected after leaving it. Re-entering a course restores the collected coin
+    total and prevents collected coin outputs from spawning again. Coin logic may combine coins obtainable across
+    separate visits and mutually exclusive routes.
+    """
+    display_name = "Permanent Coin Collection"
+
+
 class CompletionType(Choice):
     """Set goal for game completion"""
     display_name = "Completion Goal"
@@ -454,16 +534,170 @@ class CombinedProgressiveKeys(DefaultOnToggle):
     """
     display_name = "Combined Progressive Castle Keys"
 
-class StrictMoveRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect certain moves may have to be acquired without them.
-    Only makes a difference for movement abilities that are shuffled."""
-    display_name = "Strict Move Requirements"
+class TrapsFillerPercentage(NamedRange):
+    """
+    Replaces this percentage of filler items with trap items.
+    Trap types are selected according to their configured weights.
+    It is recommended to keep this at a low percentage so the majority of the pool aren't all traps.
+    """
+    default = 0
+    range_start = 0
+    range_end = 100
+    display_name = "Replace Filler With Traps"
+    special_range_names = {
+        "disabled": 0,
+        "light": 10,
+        "normal": 25,
+        "extreme": 50,
+    }
+
+
+class BonkTrapWeight(Range):
+    """
+    Relative weight for Bonk Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Bonk Trap Weight"
+
+
+class FireTrapWeight(Range):
+    """
+    Relative weight for Burn Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Burn Trap Weight"
+
+
+class ElectricTrapWeight(Range):
+    """
+    Relative weight for Shock Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Shock Trap Weight"
+
+
+class ChuckyaTrapWeight(Range):
+    """
+    Relative weight for Chuckya Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Chuckya Trap Weight"
+
+
+class SpinTrapWeight(Range):
+    """
+    Relative weight for Spin Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Spin Trap Weight"
+
+
+class GustTrapWeight(Range):
+    """
+    Relative weight for Gust Traps.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 100
+    display_name = "Gust Trap Weight"
+
+
+class UncollectRandomCoinTrapWeight(Range):
+    """
+    Relative weight for Uncollect Random Coin Traps.
+
+    When Permanent Coin Collection is enabled, this trap randomly selects one previously collected coin and makes it
+    collectible again, and your starting coin total reduced, on a future course visit.
+
+    This weight is ignored when Permanent Coin Collection is disabled.
+
+    Higher values make this trap appear more often.
+    A weight of 0 disables this trap.
+    """
+    range_start = 0
+    range_end = 100
+    default = 0
+    display_name = "Uncollect Random Coin Trap Weight"
+
+
+trap_weight_options = (
+    BonkTrapWeight,
+    FireTrapWeight,
+    ElectricTrapWeight,
+    ChuckyaTrapWeight,
+    SpinTrapWeight,
+    GustTrapWeight,
+    UncollectRandomCoinTrapWeight,
+)
+
+trap_weight_option_names = (
+    "bonk_trap_weight",
+    "fire_trap_weight",
+    "electric_trap_weight",
+    "chuckya_trap_weight",
+    "spin_trap_weight",
+    "gust_trap_weight",
+    "uncollect_random_coin_trap_weight",
+)
+
+trap_item_name_by_option_name = {
+    "bonk_trap_weight": "Bonk Trap",
+    "fire_trap_weight": "Burn Trap",
+    "electric_trap_weight": "Shock Trap",
+    "chuckya_trap_weight": "Chuckya Trap",
+    "spin_trap_weight": "Spin Trap",
+    "gust_trap_weight": "Gust Trap",
+    "uncollect_random_coin_trap_weight": "Uncollect Random Coin Trap",
+}
+class LogicTricks(OptionSet):
+    """Choose specific advanced techniques to include in logic. The All Easy, All Medium, and All Hard entries
+    include every trick at that difficulty and below. Details for each trick are documented in
+    LogicTricks.py."""
+    display_name = "Logic Tricks"
+    valid_keys = logic_trick_option_keys
+
+
+class UniversalTrackerGlitchedLogic(OptionSet):
+    """Choose tricks that the Universal Tracker should show as glitched logic.
+    The All Easy, All Medium, and All Hard entries include every trick at that difficulty and below.
+    """
+    display_name = "Universal Tracker Glitched Logic"
+    valid_keys = logic_trick_option_keys
 
 
 class MoveRandomizerMode(Choice):
     option_not_shuffled = 0
     option_global = 1
     option_per_level = 2
+    alias_individual = 2
 
 
 
@@ -634,39 +868,74 @@ move_randomizer_option_name_by_action = {
 }
 
 
-class MarioColors(OptionDict):
+class MarioColor(NamedRange):
     """
-    Cosmetic Mario palette. Keys may be shirt, overalls, gloves, shoes, skin, or hair, with each value being
-    an RGB array.
+    Cosmetic Mario palette color. Use a named color or a decimal RGB value from 0 through 16777215.
+
+    To use an exact hex color, convert it to decimal first. For example, FF0000 is 16711680.
     """
-    display_name = "Mario Colors"
-    valid_keys = {"shirt", "overalls", "gloves", "shoes", "skin", "hair"}
-    default = {
-        "shirt": [255, 0, 0],
-        "overalls": [0, 0, 255],
-        "gloves": [255, 255, 255],
-        "shoes": [114, 28, 14],
-        "skin": [254, 193, 121],
-        "hair": [115, 6, 0]
+    range_start = 0
+    range_end = 16777215
+    special_range_names = {
+        "black": 0,
+        "white": 16777215,
+        "gray": 8421504,
+        "red": 16711680,
+        "green": 65280,
+        "blue": 255,
+        "yellow": 16776960,
+        "cyan": 65535,
+        "magenta": 16711935,
+        "purple": 16711935,
+        "orange": 16753920,
+        "pink": 16761035,
+        "brown": 10824234,
     }
 
-    def verify(self, world, player_name: str, plando_options) -> None:
-        super().verify(world, player_name, plando_options)
-        errors = []
-        if self.value.keys() != self.valid_keys:
-            errors.append(f"Color keys must be {self.valid_keys}. Keys used: {set(self.value.keys())}")
-        for color_name, channels in self.value.items():
-            if not isinstance(channels, (list, tuple)) or len(channels) != 3:
-                errors.append(f"{color_name} must be an RGB array with exactly three channels.")
-                continue
-            invalid_channels = [
-                channel for channel in channels
-                if isinstance(channel, bool) or not isinstance(channel, int) or channel < 0 or channel > 255
-            ]
-            if invalid_channels:
-                errors.append(f"{color_name} channels must be integers from 0 through 255.")
-        if errors:
-            raise OptionError(f"Player {player_name} has invalid Mario Colors:\n" + "\n".join(errors))
+
+class MarioHatColor(MarioColor):
+    """Mario's hat color."""
+    display_name = "Mario Hat Color"
+    default = 16711680
+
+
+class MarioShirtColor(MarioColor):
+    """Mario's shirt color."""
+    display_name = "Mario Shirt Color"
+    default = 16711680
+
+
+class MarioOverallsColor(MarioColor):
+    """Mario's overalls color."""
+    display_name = "Mario Overalls Color"
+    default = 255
+
+
+class MarioGlovesColor(MarioColor):
+    """Mario's gloves color."""
+    display_name = "Mario Gloves Color"
+    default = 16777215
+
+
+class MarioShoesColor(MarioColor):
+    """Mario's shoes color."""
+    display_name = "Mario Shoes Color"
+    default = 7478286
+    special_range_names = {**MarioColor.special_range_names, "default_brown": 7478286}
+
+
+class MarioSkinColor(MarioColor):
+    """Mario's skin color."""
+    display_name = "Mario Skin Color"
+    default = 16695673
+    special_range_names = {**MarioColor.special_range_names, "default_skin": 16695673}
+
+
+class MarioHairColor(MarioColor):
+    """Mario's hair color."""
+    display_name = "Mario Hair Color"
+    default = 7538176
+    special_range_names = {**MarioColor.special_range_names, "default_brown": 7538176}
 
 
 class MusicShuffle(Choice):
@@ -686,6 +955,23 @@ class MusicShuffle(Choice):
     alias_on = 1
 
 
+class SkyboxShuffle(Choice):
+    """
+    Control the textured skybox used by each outdoor area.
+
+    Off - Use vanilla skyboxes.
+
+    Shuffle - Archipelago sends a deterministic per-area skybox map.
+
+    Random on Load - The game picks a random skybox each time an area loads.
+    """
+    display_name = "Skybox Shuffle"
+    option_off = 0
+    option_shuffle = 1
+    option_random_on_load = 2
+    alias_on = 1
+
+
 sm64_options_groups = [
     OptionGroup("Logic Options", [
         AreaRandomizer,
@@ -695,55 +981,67 @@ sm64_options_groups = [
         EasyButterflies,
         NoDespawns,
         CombinedProgressiveKeys,
-        EnableLockedPaintings,
-        StrictCapRequirements,
+        LevelUnlocks,
         PerLevelCapItems,
-        StrictCannonRequirements,
+        LogicTricks,
+        UniversalTrackerGlitchedLogic,
     ]),
     OptionGroup("Level Feature Unlocks", [
-        HazyMazeCaveSwimmingBeast,
-        RainbowRideCarpets,
-        CheckerboardPlatforms,
-        TinyHugeIslandWarpPipes,
-        CoolCoolMountainBabyPenguins,
-        SnowmansLandPenguin,
-        ShiftingSandLandPyramidElevator,
-        RollingLogs,
-        PurpleSwitches,
+        LevelFeatures,
+        BobombBuddies,
+        CoinObjectUnlocks,
+        EnemyUnlocks,
+        OneUpMushroomUnlocks,
+        BowserBombs,
         BowserStage1Ups,
-        WetDryWorldWaterLevelDiamond,
-        TickTockClockSpinners,
     ]),
     OptionGroup("Coin Options", [
         Coinsanity,
         SecretStageCoinsanity,
+        PermanentCoinCollection,
         *secret_stage_coinsanity_max_coin_options,
         *coin_star_requirement_options,
     ]),
     OptionGroup("Gameplay Options", [
         MariosHat,
+        BowserInTheDarkWorldHits,
+        BowserInTheFireSeaHits,
+        BowserInTheSkyHits,
+        BowserInTheSkyStageCollapseHits,
     ]),
     OptionGroup("Ability Options", [
         *move_randomizer_options,
-        StrictMoveRequirements,
+    ]),
+    OptionGroup("Trap Options", [
+        TrapsFillerPercentage,
+        *trap_weight_options,
     ]),
     OptionGroup("Cosmetic Options", [
-        MarioColors,
+        MarioHatColor,
+        MarioShirtColor,
+        MarioOverallsColor,
+        MarioGlovesColor,
+        MarioShoesColor,
+        MarioSkinColor,
+        MarioHairColor,
         MusicShuffle,
+        SkyboxShuffle,
     ]),
 
 ]
 
 @dataclass
 class SM64Options(PerGameCommonOptions):
+    accessibility: SM64Accessibility
     area_rando: AreaRandomizer
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks
     blocksanity: Blocksanity
     easy_butterflies: EasyButterflies
     no_despawns: NoDespawns
+    permanent_coin_collection: PermanentCoinCollection
     combined_progressive_keys: CombinedProgressiveKeys
-    enable_locked_paintings: EnableLockedPaintings
+    level_unlocks: LevelUnlocks
     triple_jump: TripleJump
     long_jump: LongJump
     backflip: Backflip
@@ -754,25 +1052,30 @@ class SM64Options(PerGameCommonOptions):
     kick: Kick
     climb: Climb
     ledge_grab: LedgeGrab
-    strict_cap_requirements: StrictCapRequirements
     per_level_cap_items: PerLevelCapItems
-    hazy_maze_cave_swimming_beast: HazyMazeCaveSwimmingBeast
-    rainbow_ride_carpets: RainbowRideCarpets
-    checkerboard_platforms: CheckerboardPlatforms
-    tiny_huge_island_warp_pipes: TinyHugeIslandWarpPipes
-    cool_cool_mountain_baby_penguins: CoolCoolMountainBabyPenguins
-    snowmans_land_penguin: SnowmansLandPenguin
-    shifting_sand_land_pyramid_elevator: ShiftingSandLandPyramidElevator
-    rolling_logs: RollingLogs
-    purple_switches: PurpleSwitches
+    level_features: LevelFeatures
+    bobomb_buddies: BobombBuddies
+    coin_object_unlocks: CoinObjectUnlocks
+    enemy_unlocks: EnemyUnlocks
+    one_up_mushroom_unlocks: OneUpMushroomUnlocks
+    bowser_bombs: BowserBombs
+    bowser_in_the_dark_world_hits: BowserInTheDarkWorldHits
+    bowser_in_the_fire_sea_hits: BowserInTheFireSeaHits
+    bowser_in_the_sky_hits: BowserInTheSkyHits
+    bowser_in_the_sky_stage_collapse_hits: BowserInTheSkyStageCollapseHits
     bowser_stage_1ups: BowserStage1Ups
-    wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
-    tick_tock_clock_spinners: TickTockClockSpinners
-    strict_cannon_requirements: StrictCannonRequirements
-    strict_move_requirements: StrictMoveRequirements
+    logic_tricks: LogicTricks
+    universal_tracker_glitched_logic: UniversalTrackerGlitchedLogic
     marios_hat: MariosHat
-    mario_colors: MarioColors
+    mario_hat_color: MarioHatColor
+    mario_shirt_color: MarioShirtColor
+    mario_overalls_color: MarioOverallsColor
+    mario_gloves_color: MarioGlovesColor
+    mario_shoes_color: MarioShoesColor
+    mario_skin_color: MarioSkinColor
+    mario_hair_color: MarioHairColor
     music_shuffle: MusicShuffle
+    skybox_shuffle: SkyboxShuffle
     coinsanity: Coinsanity
     secret_stage_coinsanity: SecretStageCoinsanity
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
@@ -799,5 +1102,13 @@ class SM64Options(PerGameCommonOptions):
     bowser_in_the_dark_world_coinsanity_max_coins: BowserInTheDarkWorldCoinsanityMaxCoins
     bowser_in_the_fire_sea_coinsanity_max_coins: BowserInTheFireSeaCoinsanityMaxCoins
     bowser_in_the_sky_coinsanity_max_coins: BowserInTheSkyCoinsanityMaxCoins
+    traps_filler_percentage: TrapsFillerPercentage
+    bonk_trap_weight: BonkTrapWeight
+    fire_trap_weight: FireTrapWeight
+    electric_trap_weight: ElectricTrapWeight
+    chuckya_trap_weight: ChuckyaTrapWeight
+    spin_trap_weight: SpinTrapWeight
+    gust_trap_weight: GustTrapWeight
+    uncollect_random_coin_trap_weight: UncollectRandomCoinTrapWeight
     death_link: DeathLink
     completion_type: CompletionType

@@ -1,17 +1,24 @@
+import unittest
+
 from .bases import SM64TestBase
 from BaseClasses import ItemClassification
-from Options import OptionError
 from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
-    cannon_item_data_table, painting_unlock_item_data_table, item_name_groups
+    cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
+    global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
+    global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
+    global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
+    global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table, \
+    per_level_bobomb_buddy_item_names
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
+from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
 
@@ -23,6 +30,87 @@ def world_has_reachable_starting_check(test_base: SM64TestBase, allowed_source_e
 
 wdw_variant_ids = {SM64_WDW_LOW, SM64_WDW_MIDDLE, SM64_WDW_HIGH}
 ttc_variant_ids = {SM64_TTC_STOPPED, SM64_TTC_SLOW, SM64_TTC_RANDOM, SM64_TTC_FAST}
+
+
+class LogicTrickOptionTest(unittest.TestCase):
+    def test_presets_are_first_in_option_keys(self):
+        self.assertEqual(logic_trick_option_keys[:3], (
+            "All Easy Tricks",
+            "All Medium Tricks",
+            "All Hard Tricks",
+        ))
+
+    def test_difficulty_presets_include_lower_difficulties(self):
+        for preset, maximum_difficulty in (("All Easy Tricks", "easy"),
+                                           ("All Medium Tricks", "medium"),
+                                           ("All Hard Tricks", "hard")):
+            enabled = get_enabled_logic_tricks({preset})
+            expected = {
+                trick for trick, data in logic_tricks.items()
+                if ("easy", "medium", "hard").index(data["difficulty"])
+                <= ("easy", "medium", "hard").index(maximum_difficulty)
+            }
+            self.assertEqual(enabled, expected)
+
+
+class BowserStageCollapseHitsOptionTest(unittest.TestCase):
+    def test_range(self):
+        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_start, 1)
+        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 5)
+
+
+UNCOLLECT_TRAP_ONLY_OPTIONS = {
+    "traps_filler_percentage": 100,
+    "bonk_trap_weight": 0,
+    "fire_trap_weight": 0,
+    "electric_trap_weight": 0,
+    "chuckya_trap_weight": 0,
+    "spin_trap_weight": 0,
+    "gust_trap_weight": 0,
+    "uncollect_random_coin_trap_weight": 100,
+}
+
+
+class UncollectTrapWithoutPermanentCoinsTestBase(SM64TestBase):
+    options = UNCOLLECT_TRAP_ONLY_OPTIONS
+
+    def test_uncollect_trap_weight_is_ignored(self):
+        self.assertEqual(len(self.get_items_by_name("Uncollect Random Coin Trap")), 0)
+
+
+class UncollectTrapWithPermanentCoinsTestBase(SM64TestBase):
+    options = {
+        **UNCOLLECT_TRAP_ONLY_OPTIONS,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def test_uncollect_trap_weight_is_used(self):
+        self.assertGreater(len(self.get_items_by_name("Uncollect Random Coin Trap")), 0)
+
+
+class PerLevelOptionAliasTest(unittest.TestCase):
+    def test_individual_aliases_per_level(self):
+        option_classes = (
+            Options.CoinObjectUnlocks,
+            Options.EnemyUnlocks,
+            Options.OneUpMushroomUnlocks,
+            Options.BowserBombs,
+            Options.BowserStage1Ups,
+            Options.LevelFeatures,
+            Options.BobombBuddies,
+            Options.TripleJump,
+        )
+        for option_class in option_classes:
+            with self.subTest(option=option_class.__name__):
+                self.assertEqual(option_class.from_text("per_level").value, option_class.option_per_level)
+                self.assertEqual(option_class.from_text("individual").value, option_class.option_per_level)
+
+
+class LevelUnlockOptionTest(unittest.TestCase):
+    def test_legacy_boolean_aliases(self):
+        self.assertEqual(Options.LevelUnlocks.from_any(False).value, Options.LevelUnlocks.option_special_only)
+        self.assertEqual(Options.LevelUnlocks.from_any(True).value, Options.LevelUnlocks.option_full)
+
 
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
     "triple_jump": Options.TripleJump.option_global,
@@ -87,6 +175,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
     def test_wmotr_cannon_unlock_item_id(self):
         self.assertEqual(cannon_item_data_table["Wing Mario Over the Rainbow - Cannon Unlock"].code, 3626525)
 
+    def test_uncollect_random_coin_trap_item_id(self):
+        self.assertEqual(item_table["Uncollect Random Coin Trap"], 3627766)
+
     def test_item_name_groups(self):
         for group_name, group_items in item_name_groups.items():
             with self.subTest(group=group_name):
@@ -109,7 +200,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                       self.world.location_name_groups["Secret Stages"])
         self.assertIn("Wet-Dry World - Downtown 1-Up Block",
                       self.world.location_name_groups["Blocksanity"])
-        self.assertIn("Wet-Dry World - Downtown 1-Up",
+        self.assertIn("Wet-Dry World - Downtown Block 1-Up",
                       self.world.location_name_groups["1-Ups"])
         self.assertIn("Wet-Dry World - Downtown 1-Up Block",
                       self.world.location_name_groups["1-Up Blocks"])
@@ -218,6 +309,18 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Bowser Stage Extra 1-Ups": 3626556,
             "Bowser in the Dark World - Extra 1-Ups": 3626557,
             "Bowser in the Fire Sea - Extra 1-Ups": 3626558,
+            "Cool, Cool Mountain - Bob-omb Buddy": 3626920,
+            "Shifting Sand Land - Bob-omb Buddy": 3626921,
+            "Snowman's Land - Bob-omb Buddy": 3626922,
+            "Wet-Dry World - Bob-omb Buddy": 3626923,
+            "Tall, Tall Mountain - Bob-omb Buddy": 3626924,
+            "Tiny-Huge Island - Bob-omb Buddy": 3626925,
+            "Rainbow Ride - Bob-omb Buddy": 3626926,
+            "Wing Mario Over the Rainbow - Bob-omb Buddy": 3626927,
+            "Bob-omb Buddies": 3626928,
+            "Jolly Roger Bay - Treasure Chests": 3626929,
+            "Dire, Dire Docks - Treasure Chests": 3626930,
+            "Treasure Chests": 3626931,
         }
         item_data = {
             **feature_item_data_table,
@@ -227,7 +330,11 @@ class FeatureItemPoolTestBase(SM64TestBase):
             **arbitrary_item_data_table,
             **optional_item_data_table,
             **bowser_stage_1up_item_data_table,
-            **painting_unlock_item_data_table,
+            **{
+                item_name: item_data
+                for item_name, item_data in painting_unlock_item_data_table.items()
+                if item_data.code < 3626853
+            },
             **{item_name: generic_item_data_table[item_name] for item_name in global_cap_item_names},
         }
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)
@@ -294,11 +401,18 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_feature_items_are_generated(self):
         for item_name in feature_item_data_table:
+            if (
+                    item_name in per_level_bobomb_buddy_item_names
+            ):
+                continue
             with self.subTest("Feature item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
     def test_default_arbitrary_items_are_not_generated(self):
-        for item_name in {**simple_arbitrary_item_data_table, **global_arbitrary_item_data_table}:
+        for item_name in {
+                **simple_arbitrary_item_data_table,
+                **global_arbitrary_item_data_table,
+        }:
             with self.subTest("Default arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
 
@@ -308,13 +422,22 @@ class FeatureItemPoolTestBase(SM64TestBase):
         for item_name in {
                 **simple_arbitrary_item_data_table,
                 **global_arbitrary_item_data_table,
-                **checkerboard_item_data_table,
-                **rolling_log_item_data_table,
-                **purple_switch_item_data_table,
         }:
+            if item_name in {
+                    "Bob-omb Buddies",
+                    "Jolly Roger Bay - Treasure Chests",
+                    "Dire, Dire Docks - Treasure Chests",
+            }:
+                continue
             with self.subTest("Default arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
                 self.assertNotIn(item_name, precollected_names)
+
+        for item_name in per_level_bobomb_buddy_item_names:
+            if item_name in feature_item_data_table:
+                continue
+            with self.subTest("Non-act buddy in StartInventory", item=item_name):
+                self.assertEqual(start_inventory[item_table[item_name]], 1)
 
     def test_precollected_items_are_only_added_to_apsm64ex_start_inventory(self):
         self.multiworld.push_precollected(self.world.create_item("Dark World Key"))
@@ -330,7 +453,6 @@ class FeatureItemPoolTestBase(SM64TestBase):
     def test_unused_individual_arbitrary_items_are_filler(self):
         for item_name in (
                 "Bob-omb Battlefield - Checkerboard Platform",
-                "Tall, Tall Mountain - Rolling Log",
                 "Bob-omb Battlefield - Purple Switch",
         ):
             with self.subTest("Unused individual arbitrary item is filler", item=item_name):
@@ -347,6 +469,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                     self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
     def test_default_global_cap_items_are_generated(self):
+        self.assertTrue(self.world.fill_slot_data()["GlobalCapItems"])
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -417,7 +540,7 @@ class GlobalBowserStage1UpsItemPoolTestBase(SM64TestBase):
 
 class IndividualBowserStage1UpsItemPoolTestBase(SM64TestBase):
     options = {
-        "bowser_stage_1ups": Options.BowserStage1Ups.option_individual,
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_per_level,
     }
 
     def test_individual_bowser_stage_1up_items_are_generated(self):
@@ -450,6 +573,7 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
     def test_global_cap_items_are_not_generated(self):
+        self.assertFalse(self.world.fill_slot_data()["GlobalCapItems"])
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -504,8 +628,86 @@ class OneUpChecksOnTestBase(SM64TestBase):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertEqual(self.world.fill_slot_data()["OneUpChecks"], 1)
         for location_name in locOneUp_table:
+            if location_name == "Cool, Cool Mountain - Slide Shortcut Second 1-Up":
+                continue
             with self.subTest("1-Up location generated", location=location_name):
                 self.assertIn(location_name, active_locations)
+        self.assertNotIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
+
+
+class OneUpChecksNoDespawnsOnTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "no_despawns": Options.NoDespawns.option_true,
+    }
+
+    def test_impossible_one_up_location_is_generated_with_no_despawns(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
+
+
+class GlobalOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+    }
+
+    def test_global_one_up_unlock_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["OneUpUnlockMode"], 1)
+        for item_name in global_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+        for item_name in per_level_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+        self.assertEqual(item_table["Butterflies"], 3626919)
+
+
+class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    }
+
+    def test_per_level_one_up_unlock_items_are_generated(self):
+        self.assertEqual(self.world.fill_slot_data()["OneUpUnlockMode"], 2)
+        for item_name in global_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+        for item_name in per_level_one_up_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+        self.assertEqual(item_table["Castle - Butterflies"], 3626915)
+        self.assertEqual(item_table["Tall, Tall Mountain - Butterflies"], 3626918)
+
+
+class DisabledLevelUnlockItemPoolTestBase(SM64TestBase):
+    options = {"level_unlocks": Options.LevelUnlocks.option_disabled}
+
+    def test_no_level_unlock_items_are_generated(self):
+        slot_data = self.world.fill_slot_data()
+        for item_name in (*special_level_unlock_item_names, *painting_unlock_item_data_table):
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+            self.assertEqual(slot_data["StartInventory"][item_table[item_name]], 1)
+
+
+class DefaultLevelUnlockItemPoolTestBase(SM64TestBase):
+    options = {"level_unlocks": Options.LevelUnlocks.option_special_only}
+
+    def test_only_special_level_unlock_items_are_generated(self):
+        slot_data = self.world.fill_slot_data()
+        for item_name in special_level_unlock_item_names:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            self.assertNotIn(item_table[item_name], slot_data["StartInventory"])
+        for item_name in painting_unlock_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+            self.assertEqual(slot_data["StartInventory"][item_table[item_name]], 1)
+
+
+class FullLevelUnlockItemPoolTestBase(SM64TestBase):
+    options = {"level_unlocks": Options.LevelUnlocks.option_full}
+
+    def test_all_level_unlock_items_are_generated(self):
+        slot_data = self.world.fill_slot_data()
+        for item_name in (*special_level_unlock_item_names, *painting_unlock_item_data_table):
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            self.assertNotIn(item_table[item_name], slot_data["StartInventory"])
 
 
 class BlocksanityOnTestBase(SM64TestBase):
@@ -525,12 +727,14 @@ class GameBehaviorSlotDataTestBase(SM64TestBase):
     options = {
         "easy_butterflies": Options.EasyButterflies.option_true,
         "no_despawns": Options.NoDespawns.option_true,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
     }
 
     def test_game_behavior_slot_data(self):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(slot_data["EasyButterflies"], 1)
         self.assertEqual(slot_data["NoDespawn"], 1)
+        self.assertEqual(slot_data["PermanentCoinCollection"], 1)
 
 
 class GlobalMoveItemPoolTestBase(SM64TestBase):
@@ -578,9 +782,8 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     options = {
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
-        "rolling_logs": Options.RollingLogs.option_individual,
-        "purple_switches": Options.PurpleSwitches.option_individual,
+        "level_features": Options.LevelFeatures.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
     }
 
     def test_individual_arbitrary_items_are_generated(self):
@@ -596,11 +799,7 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
 
 class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
     options = {
-        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_false,
-        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_false,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_not_shuffled,
-        "rolling_logs": Options.RollingLogs.option_not_shuffled,
-        "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+        "level_features": Options.LevelFeatures.option_not_shuffled,
     }
 
     def test_unshuffled_arbitrary_items_are_not_generated(self):
@@ -608,9 +807,9 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Hazy Maze Cave - Swimming Beast",
                 "Tick Tock Clock - Spinners",
                 "Checkerboard Platforms",
-                "Lethal Lava Land - Rolling Log",
+                "Rolling Logs",
                 "Purple Switches",
-                "Bowser in the Sky - Purple Switch",
+                "Treasure Chests",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -622,13 +821,100 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Hazy Maze Cave - Swimming Beast",
                 "Tick Tock Clock - Spinners",
                 "Checkerboard Platforms",
-                "Lethal Lava Land - Rolling Log",
+                "Rolling Logs",
                 "Purple Switches",
-                "Bowser in the Sky - Purple Switch",
+                "Treasure Chests",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
                 self.assertNotIn(item_name, precollected_names)
+
+
+class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    def test_all_unlock_items_are_start_inventory_slot_data_only(self):
+        unlock_items = {
+            **global_coin_object_item_data_table,
+            **per_level_coin_object_item_data_table,
+            **global_enemy_item_data_table,
+            **per_level_enemy_item_data_table,
+        }
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
+
+        self.assertEqual(len(unlock_items), 229)
+        for item_name, item_data in unlock_items.items():
+            with self.subTest(item=item_name):
+                self.assertEqual(start_inventory[item_data.code], 1)
+                self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+                self.assertNotIn(item_name, precollected_names)
+
+
+class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
+        "enemy_unlocks": Options.EnemyUnlocks.option_global,
+    }
+
+    def test_global_mode_unlock_items_are_generated(self):
+        expected_names = set(global_mode_coin_object_item_names) | set(global_mode_enemy_item_names)
+        self.assertEqual(len(expected_names), 42)
+        for item_name in expected_names:
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+                self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
+
+
+class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+    }
+
+    def test_individual_unlock_items_are_generated(self):
+        individual_items = {
+            **per_level_coin_object_item_data_table,
+            **per_level_enemy_item_data_table,
+        }
+        self.assertEqual(len(individual_items), 196)
+        for item_name in individual_items:
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+                self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
+
+
+class UnshuffledBowserArenaBombItemPoolTestBase(SM64TestBase):
+    def test_bowser_arena_bombs_are_start_inventory_slot_data_only(self):
+        start_inventory = self.world.fill_slot_data()["StartInventory"]
+        self.assertEqual(start_inventory[item_table["Progressive Bowser Arena Bomb"]], 5)
+        for item_name in bowser_bomb_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class GlobalBowserArenaBombItemPoolTestBase(SM64TestBase):
+    options = {"bowser_bombs": Options.BowserBombs.option_global}
+
+    def test_global_bowser_arena_bombs_are_generated(self):
+        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 5)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 0)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")), 0)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Fire Sea - Progressive Bowser Arena Bomb")), 0)
+
+
+class IndividualBowserArenaBombItemPoolTestBase(SM64TestBase):
+    options = {"bowser_bombs": Options.BowserBombs.option_per_level}
+
+    def test_individual_bowser_arena_bombs_are_generated(self):
+        expected_counts = {
+            "Bowser in the Dark World - Progressive Bowser Arena Bomb": 4,
+            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": 4,
+            "Bowser in the Sky - Progressive Bowser Arena Bomb": 5,
+        }
+        for item_name, count in expected_counts.items():
+            self.assertEqual(len(self.get_items_by_name(item_name)), count)
+        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 0)
 
 
 class GroupedCastleKeyPoolTestBase(SM64TestBase):
@@ -645,38 +931,46 @@ class GroupedCastleKeyPoolTestBase(SM64TestBase):
 
 class MarioColorsTestBase(SM64TestBase):
     options = {
-        "mario_colors": {
-            "shirt": [1, 2, 3],
-            "hair": [4, 5, 6],
-        }
+        "mario_hat_color": 0x010203,
+        "mario_shirt_color": "green",
+        "mario_overalls_color": "purple",
+        "mario_gloves_color": "black",
+        "mario_shoes_color": "default_brown",
+        "mario_skin_color": "default_skin",
+        "mario_hair_color": "default_brown",
     }
 
     def test_mario_colors_slot_data(self):
         self.assertEqual(self.world.fill_slot_data()["MarioColors"], {
-            "shirt": [1, 2, 3],
-            "hair": [4, 5, 6],
+            "hat": [1, 2, 3],
+            "shirt": [0, 255, 0],
+            "overalls": [255, 0, 255],
+            "gloves": [0, 0, 0],
+            "shoes": [114, 28, 14],
+            "skin": [254, 193, 121],
+            "hair": [115, 6, 0],
         })
 
 
 class MarioColorsValidationTestBase(SM64TestBase):
     auto_construct = False
 
-    def assert_mario_colors_invalid(self, value):
-        option = Options.MarioColors.from_any(value)
-        with self.assertRaises(OptionError):
-            option.verify(None, "Tester", None)
+    def test_named_color_values(self):
+        self.assertEqual(Options.MarioShirtColor.from_any("red").value, 16711680)
+        self.assertEqual(Options.MarioShirtColor.from_any("green").value, 65280)
+        self.assertEqual(Options.MarioShirtColor.from_any("purple").value, 16711935)
 
-    def test_unknown_color_key_is_invalid(self):
-        self.assert_mario_colors_invalid({"unknown": [1, 2, 3]})
+    def test_exact_decimal_color_value(self):
+        self.assertEqual(Options.MarioHatColor.from_any(0x123456).value, 1193046)
 
-    def test_color_channels_must_be_rgb_triplets(self):
-        self.assert_mario_colors_invalid({"shirt": [1, 2]})
+    def test_part_specific_default_color_values(self):
+        self.assertEqual(Options.MarioShoesColor.from_any("default_brown").value, 7478286)
+        self.assertEqual(Options.MarioSkinColor.from_any("default_skin").value, 16695673)
+        self.assertEqual(Options.MarioHairColor.from_any("default_brown").value, 7538176)
 
-    def test_color_channels_must_be_ints(self):
-        self.assert_mario_colors_invalid({"shirt": [True, 2, 3]})
-
-    def test_color_channels_must_be_in_range(self):
-        self.assert_mario_colors_invalid({"shirt": [256, 2, 3]})
+    def test_color_value_must_be_in_rgb_range(self):
+        with self.assertRaises(Exception):
+            Options.MarioHatColor.from_any(16777216)
 
 
 class MusicShuffleOffTestBase(SM64TestBase):
@@ -711,6 +1005,35 @@ class MusicShuffleRandomOnLoadTestBase(SM64TestBase):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(2, slot_data["MusicShuffleMode"])
         self.assertNotIn("MusicMap", slot_data)
+
+
+class SkyboxShuffleOffTestBase(SM64TestBase):
+    options = {"skybox_shuffle": Options.SkyboxShuffle.option_off}
+
+    def test_skybox_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(0, slot_data["SkyboxShuffleMode"])
+        self.assertNotIn("SkyboxMap", slot_data)
+
+
+class SkyboxShuffleShuffleTestBase(SM64TestBase):
+    options = {"skybox_shuffle": Options.SkyboxShuffle.option_shuffle}
+
+    def test_skybox_shuffle_slot_data(self):
+        from ..Skyboxes import SM64_SKYBOX_AREAS, SM64_SKYBOX_IDS
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(1, slot_data["SkyboxShuffleMode"])
+        self.assertEqual({str(area) for area in SM64_SKYBOX_AREAS}, set(slot_data["SkyboxMap"]))
+        self.assertTrue(all(skybox in SM64_SKYBOX_IDS for skybox in slot_data["SkyboxMap"].values()))
+
+
+class SkyboxShuffleRandomOnLoadTestBase(SM64TestBase):
+    options = {"skybox_shuffle": Options.SkyboxShuffle.option_random_on_load}
+
+    def test_skybox_shuffle_slot_data(self):
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(2, slot_data["SkyboxShuffleMode"])
+        self.assertNotIn("SkyboxMap", slot_data)
 
 
 class CoinStarRequirementTestBase(SM64TestBase):
@@ -751,7 +1074,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.SnowmansLandCoinStarRequirement: 127,
             Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
-            Options.TinyHugeIslandCoinStarRequirement: 191,
+            Options.TinyHugeIslandCoinStarRequirement: 192,
             Options.TickTockClockCoinStarRequirement: 128,
             Options.RainbowRideCoinStarRequirement: 146,
         }
@@ -836,11 +1159,11 @@ class CoinsanityLocationTableTestBase(SM64TestBase):
             "Snowman's Land": 127,
             "Wet-Dry World": 152,
             "Tall, Tall Mountain": 137,
-            "Tiny-Huge Island": 191,
+            "Tiny-Huge Island": 192,
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coinsanity_location_table), 2641)
+        self.assertEqual(len(coinsanity_location_table), 2642)
         self.assertEqual(len(secret_stage_coinsanity_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):
@@ -931,26 +1254,61 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
         self.assertEqual(location.parent_region.name, "Wing Mario Over the Rainbow")
 
 
+class TowerOfTheWingCapFullAccessibilityCapTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": Options.SM64Accessibility.option_full,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+    }
+
+    def test_full_accessibility_caps_locations_at_31_without_mastery(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Tower of the Wing Cap - 31 Coins", active_locations)
+        self.assertNotIn("Tower of the Wing Cap - 32 Coins", active_locations)
+
+
+class TowerOfTheWingCapItemsAccessibilityTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": Options.SM64Accessibility.option_items,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+    }
+
+    def test_items_accessibility_keeps_locations_above_31(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Tower of the Wing Cap - 63 Coins", active_locations)
+
+
+class TowerOfTheWingCapMinimalAccessibilityTestBase(TowerOfTheWingCapItemsAccessibilityTestBase):
+    options = {
+        **TowerOfTheWingCapItemsAccessibilityTestBase.options,
+        "accessibility": Options.SM64Accessibility.option_minimal,
+    }
+
+
+class TowerOfTheWingCapMasteryGenerationTestBase(TowerOfTheWingCapItemsAccessibilityTestBase):
+    options = {
+        **TowerOfTheWingCapItemsAccessibilityTestBase.options,
+        "accessibility": Options.SM64Accessibility.option_full,
+        "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
+    }
+
+
 class CoinsanityOverflowGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
         "marios_hat": Options.MariosHat.option_true,
-        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
-        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
-        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
-        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
-        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
-        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
-        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
-        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_individual,
-        "rolling_logs": Options.RollingLogs.option_individual,
-        "purple_switches": Options.PurpleSwitches.option_individual,
+        "level_features": Options.LevelFeatures.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
         "triple_jump": Options.TripleJump.option_per_level,
         "long_jump": Options.LongJump.option_per_level,
         "backflip": Options.Backflip.option_per_level,
@@ -1036,7 +1394,7 @@ class EntranceRandoOffTestBase(SM64TestBase):
 class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
 
@@ -1047,7 +1405,6 @@ class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
 
     def test_princess_slide_source_has_reachable_check(self):
         self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
-
 
 class EntranceRandoCourseTestBase(SM64TestBase):
     options = {
@@ -1073,6 +1430,13 @@ class EntranceRandoCourseTestBase(SM64TestBase):
 
     def test_princess_slide_source_has_reachable_check(self):
         self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+
+    def test_event_locations_are_not_entrance_hinted(self):
+        hint_data = {}
+        self.world.extend_hint_information(hint_data)
+        self.assertIn(self.player, hint_data)
+        self.assertNotIn(None, hint_data[self.player])
+        self.assertIsNone(self.multiworld.get_location("Bob-omb Battlefield - Bob-omb Buddy", self.player).address)
 
 
 class EntranceRandoSeparateTestBase(SM64TestBase):
@@ -1169,7 +1533,7 @@ class CourseEntrancesMoveTestBase(SM64TestBase):
 
 class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_Only
     }
@@ -1204,7 +1568,7 @@ class SeparateEntrancesMoveTestBase(SM64TestBase):
 
 class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
-        "enable_locked_paintings": Options.EnableLockedPaintings.option_true,
+        "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
     }
@@ -1245,7 +1609,4 @@ class NoStrictRequirementsTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
-        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
-        "strict_cannon_requirements": Options.StrictCannonRequirements.option_false,
     }
