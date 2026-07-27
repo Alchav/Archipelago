@@ -54,12 +54,9 @@ class LogicTrickOptionTest(unittest.TestCase):
 
 
 class BowserStageCollapseHitsOptionTest(unittest.TestCase):
-    def test_never_alias(self):
-        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.from_text("never").value, 6)
-
     def test_range(self):
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_start, 1)
-        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 6)
+        self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 5)
 
 
 UNCOLLECT_TRAP_ONLY_OPTIONS = {
@@ -99,10 +96,7 @@ class PerLevelOptionAliasTest(unittest.TestCase):
             Options.OneUpMushroomUnlocks,
             Options.BowserBombs,
             Options.BowserStage1Ups,
-            Options.CheckerboardPlatforms,
-            Options.RollingLogs,
-            Options.PurpleSwitches,
-            Options.TreasureChests,
+            Options.LevelFeatures,
             Options.BobombBuddies,
             Options.TripleJump,
         )
@@ -407,11 +401,18 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_feature_items_are_generated(self):
         for item_name in feature_item_data_table:
+            if (
+                    item_name in per_level_bobomb_buddy_item_names
+            ):
+                continue
             with self.subTest("Feature item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
     def test_default_arbitrary_items_are_not_generated(self):
-        for item_name in {**simple_arbitrary_item_data_table, **global_arbitrary_item_data_table}:
+        for item_name in {
+                **simple_arbitrary_item_data_table,
+                **global_arbitrary_item_data_table,
+        }:
             with self.subTest("Default arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
 
@@ -781,20 +782,8 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     options = {
-        "level_features": Options.LevelFeatures.option_true,
-        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
-        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
-        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
-        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
-        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
-        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
-        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
-        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
-        "rolling_logs": Options.RollingLogs.option_per_level,
-        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
-        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def test_individual_arbitrary_items_are_generated(self):
@@ -810,7 +799,7 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
 
 class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
     options = {
-        "level_features": Options.LevelFeatures.option_false,
+        "level_features": Options.LevelFeatures.option_not_shuffled,
     }
 
     def test_unshuffled_arbitrary_items_are_not_generated(self):
@@ -1318,20 +1307,8 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
         "marios_hat": Options.MariosHat.option_true,
-        "level_features": Options.LevelFeatures.option_true,
-        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
-        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
-        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
-        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
-        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
-        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
-        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
-        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
-        "rolling_logs": Options.RollingLogs.option_per_level,
-        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
-        "treasure_chests": Options.TreasureChests.option_per_level,
         "triple_jump": Options.TripleJump.option_per_level,
         "long_jump": Options.LongJump.option_per_level,
         "backflip": Options.Backflip.option_per_level,

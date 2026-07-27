@@ -44,17 +44,6 @@ simple_level_feature_items = {
     "TTC_SPINNERS": "Tick Tock Clock - Spinners",
 }
 
-simple_level_feature_option_names = {
-    "HMC_SWIMMING_BEAST": "hazy_maze_cave_swimming_beast",
-    "RR_CARPETS": "rainbow_ride_carpets",
-    "THI_WARP_PIPES": "tiny_huge_island_warp_pipes",
-    "CCM_BABY_PENGUINS": "cool_cool_mountain_baby_penguins",
-    "SL_PENGUIN": "snowmans_land_penguin",
-    "SSL_PYRAMID_ELEVATOR": "shifting_sand_land_pyramid_elevator",
-    "WDW_WATER_LEVEL_DIAMOND": "wet_dry_world_water_level_diamond",
-    "TTC_SPINNERS": "tick_tock_clock_spinners",
-}
-
 checkerboard_item_name_by_level = {
     "Bob-omb Battlefield": "Bob-omb Battlefield - Checkerboard Platform",
     "Whomp's Fortress": "Whomp's Fortress - Checkerboard Platform",
@@ -202,12 +191,21 @@ def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
 def has_simple_arbitrary_feature(state: CollectionState, player: int, token: str) -> bool:
     item_name = simple_level_feature_items[token]
     options = state.multiworld.worlds[player].options
-    return not getattr(options, simple_level_feature_option_names[token]) or state.has(item_name, player)
+    return (
+        options.level_features.value in {
+            options.level_features.option_not_shuffled,
+            options.level_features.option_per_act_only,
+        }
+        or state.has(item_name, player)
+    )
 
 
 def get_level_feature_item_name(
         option, global_item_name: str | None, per_level_item_name: str) -> str | bool:
-    if option.value == option.option_not_shuffled:
+    if option.value in {
+            option.option_not_shuffled,
+            getattr(option, "option_per_act_only", -1),
+    }:
         return True
     if option.value == option.option_global and global_item_name:
         return global_item_name
@@ -231,7 +229,7 @@ def has_per_act_feature(
 def has_purple_switches(state: CollectionState, player: int, level_name: str) -> bool:
     item_name = purple_switch_item_name_by_level.get(level_name)
     return item_name is None or has_level_feature(
-        state, player, "purple_switches", "Purple Switches", item_name)
+        state, player, "level_features", "Purple Switches", item_name)
 
 
 def has_tiny_huge_island_top_return_movement(state: CollectionState, player: int) -> bool:
@@ -248,7 +246,7 @@ def has_tiny_huge_island_top_return_movement(state: CollectionState, player: int
 def has_checkerboard_platforms(state: CollectionState, player: int, level_name: str) -> bool:
     item_name = checkerboard_item_name_by_level.get(level_name)
     return item_name is None or has_level_feature(
-        state, player, "checkerboard_platforms", "Checkerboard Platforms", item_name)
+        state, player, "level_features", "Checkerboard Platforms", item_name)
 
 
 def get_unlock_item_name(options, option_name: str, global_item_name: str, per_level_item_name: str) -> HasUnlock:
@@ -1506,7 +1504,14 @@ class RuleFactory:
             "The Secret Aquarium": "Secret Aquarium",
         }.get(level_name, level_name)
         item_names = {
-            token: item_name if getattr(self.options, simple_level_feature_option_names[token]) else True
+            token: (
+                item_name
+                if self.options.level_features.value in {
+                    self.options.level_features.option_global,
+                    self.options.level_features.option_per_level,
+                }
+                else True
+            )
             for token, item_name in simple_level_feature_items.items()
         }
         for token in per_act_feature_tokens:
@@ -1520,23 +1525,27 @@ class RuleFactory:
                 else:
                     item_names[token] = per_level_item_name
             else:
-                item_names[token] = per_level_item_name if self.options.level_features else True
+                item_names[token] = (
+                    True
+                    if self.options.level_features.value == self.options.level_features.option_not_shuffled
+                    else per_level_item_name
+                )
         item_names["CHECKERBOARD_PLATFORMS"] = (
             get_level_feature_item_name(
-                self.options.checkerboard_platforms,
+                self.options.level_features,
                 "Checkerboard Platforms", checkerboard_item_name_by_level[level_name])
             if level_name in checkerboard_item_name_by_level else True
         )
         item_names["LLL_ROLLING_LOG"] = (
             get_level_feature_item_name(
-                self.options.rolling_logs,
+                self.options.level_features,
                 "Rolling Logs", rolling_log_item_name_by_level[level_name])
             if level_name in rolling_log_item_name_by_level else True
         )
         item_names["ROLLING_LOG"] = item_names["LLL_ROLLING_LOG"]
         item_names["PURPLE_SWITCHES"] = (
             get_level_feature_item_name(
-                self.options.purple_switches,
+                self.options.level_features,
                 "Purple Switches", purple_switch_item_name_by_level[level_name])
             if level_name in purple_switch_item_name_by_level else True
         )
@@ -1555,7 +1564,7 @@ class RuleFactory:
         chest_item_name = treasure_chest_item_name_by_level.get(level_name)
         if chest_item_name:
             item_names["TREASURE_CHESTS"] = get_level_feature_item_name(
-                self.options.treasure_chests, "Treasure Chests", chest_item_name)
+                self.options.level_features, "Treasure Chests", chest_item_name)
         item_names["SINGLE_YELLOW_COINS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Single Yellow Coins", f"{unlock_level_name} - Single Yellow Coins")

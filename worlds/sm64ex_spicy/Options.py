@@ -316,68 +316,26 @@ class LevelFeatureItemMode(Choice):
 
 
 
-class HazyMazeCaveSwimmingBeast(Toggle):
-    """Shuffle Hazy Maze Cave - Swimming Beast. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
-
-
-class RainbowRideCarpets(Toggle):
-    """Shuffle Rainbow Ride - Carpets. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Rainbow Ride - Carpets"
-
-
-class TinyHugeIslandWarpPipes(Toggle):
-    """Shuffle Tiny-Huge Island - Warp Pipes. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
-
-
-class CoolCoolMountainBabyPenguins(Toggle):
-    """Shuffle Cool, Cool Mountain - Baby Penguins. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
-
-
-class SnowmansLandPenguin(Toggle):
-    """Shuffle Snowman's Land - Penguin. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Snowman's Land - Penguin"
-
-
-class ShiftingSandLandPyramidElevator(Toggle):
-    """Shuffle Shifting Sand Land - Pyramid Elevator. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
-
-
-class WetDryWorldWaterLevelDiamond(Toggle):
-    """Shuffle Wet-Dry World - Water Level Diamond. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Wet-Dry World - Water Level Diamond"
-
-
-class TickTockClockSpinners(Toggle):
-    """Shuffle Tick Tock Clock - Spinners. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Tick Tock Clock - Spinners"
-
-
-class LevelFeatures(Toggle):
+class LevelFeatures(Choice):
     """
-    Shuffle level-specific features that were tied to the selected Star in vanilla Super Mario 64.
-    If disabled, the game starts with all of these features unlocked.
+    Choose how level features are handled.
+
+    Not Shuffled - Start with every level feature unlocked.
+
+    Per Act Only - Shuffle only features that were tied to specific selected Stars in vanilla Super Mario 64.
+
+    Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, Purple
+    Switches, and Treasure Chests use global items.
+
+    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, =
+    Purple= Switches, and Treasure Chests use separate level-specific items.
     """
     display_name = "Level Features"
+    option_not_shuffled = 0
+    option_per_act_only = 1
+    option_global = 2
+    option_per_level = 3
     default = 1
-
-
-class CheckerboardPlatforms(LevelFeatureItemMode):
-    """Choose whether Checkerboard Platforms start unlocked or use global or per-level unlock items."""
-    display_name = "Checkerboard Platform Items"
-
-
-class RollingLogs(LevelFeatureItemMode):
-    """Choose whether Rolling Logs start unlocked or use global or per-level unlock items."""
-    display_name = "Rolling Log Items"
-
-
-class PurpleSwitches(LevelFeatureItemMode):
-    """Choose whether Purple Switches start unlocked or use global or per-level unlock items."""
-    display_name = "Purple Switch Items"
 
 
 class BobombBuddies(Choice):
@@ -398,13 +356,7 @@ class BobombBuddies(Choice):
     option_per_act_only = 1
     option_global = 2
     option_per_level = 3
-    alias_individual = 3
     default = 1
-
-
-class TreasureChests(LevelFeatureItemMode):
-    """Choose whether Treasure Chests start unlocked or use a global or per-level unlock item."""
-    display_name = "Treasure Chest Items"
 
 
 class CoinObjectUnlocks(LevelFeatureItemMode):
@@ -454,8 +406,8 @@ class BowserBombs(LevelFeatureItemMode):
 
     Not Shuffled - The game starts with all Bower Arena Bombs available.
 
-    Global - Shuffle five Progressive Bowser Arena Bomb items that each add one bomb to every arena. The fifth has no
-    additional effect in the first two arenas.
+    Global - Shuffle five Progressive Bowser Arena Bomb items that each add one bomb to each Bowser Arena.
+    Bowser in the Dark World and Bowser in the Fire Sea cap at four bombs.
 
     Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
     Fire Sea, and five for Bowser in the Sky.
@@ -487,15 +439,14 @@ class BowserInTheSkyHits(Range):
     default = 3
 
 
-class BowserInTheSkyStageCollapseHits(NamedRange):
+class BowserInTheSkyStageCollapseHits(Range):
     """
-    Number of hits Bowser must take before parts of the Bowser in the Sky arena begin falling.
+    Number of hits Bowser must take before parts of the Bowser in the Sky arena fall off.
     """
     display_name = "Bowser in the Sky Stage Collapse Hits"
     range_start = 1
-    range_end = 6
+    range_end = 5
     default = 2
-    special_range_names = {"never": 6}
 
 
 class BowserStage1Ups(Choice):
@@ -1037,19 +988,7 @@ sm64_options_groups = [
     ]),
     OptionGroup("Level Feature Unlocks", [
         LevelFeatures,
-        HazyMazeCaveSwimmingBeast,
-        RainbowRideCarpets,
-        TinyHugeIslandWarpPipes,
-        CoolCoolMountainBabyPenguins,
-        SnowmansLandPenguin,
-        ShiftingSandLandPyramidElevator,
-        WetDryWorldWaterLevelDiamond,
-        TickTockClockSpinners,
-        CheckerboardPlatforms,
-        RollingLogs,
-        PurpleSwitches,
         BobombBuddies,
-        TreasureChests,
         CoinObjectUnlocks,
         EnemyUnlocks,
         OneUpMushroomUnlocks,
@@ -1115,19 +1054,7 @@ class SM64Options(PerGameCommonOptions):
     ledge_grab: LedgeGrab
     per_level_cap_items: PerLevelCapItems
     level_features: LevelFeatures
-    hazy_maze_cave_swimming_beast: HazyMazeCaveSwimmingBeast
-    rainbow_ride_carpets: RainbowRideCarpets
-    tiny_huge_island_warp_pipes: TinyHugeIslandWarpPipes
-    cool_cool_mountain_baby_penguins: CoolCoolMountainBabyPenguins
-    snowmans_land_penguin: SnowmansLandPenguin
-    shifting_sand_land_pyramid_elevator: ShiftingSandLandPyramidElevator
-    wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
-    tick_tock_clock_spinners: TickTockClockSpinners
-    checkerboard_platforms: CheckerboardPlatforms
-    rolling_logs: RollingLogs
-    purple_switches: PurpleSwitches
     bobomb_buddies: BobombBuddies
-    treasure_chests: TreasureChests
     coin_object_unlocks: CoinObjectUnlocks
     enemy_unlocks: EnemyUnlocks
     one_up_mushroom_unlocks: OneUpMushroomUnlocks
