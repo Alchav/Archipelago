@@ -296,12 +296,6 @@ class LevelUnlocks(Choice):
     default = 1
 
 
-class StrictCapRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect special caps may have to be acquired without the caps.
-    Some, but not all, tricks have been migrated to the Logic Tricks setting."""
-    display_name = "Strict Cap Requirements"
-
-
 class PerLevelCapItems(Toggle):
     """
     Generate separate cap items for each level that can require a cap instead of one global item per cap type.
@@ -314,47 +308,6 @@ class MariosHat(Toggle):
     display_name = "Include Mario's Hat"
 
 
-class HazyMazeCaveSwimmingBeast(Toggle):
-    """Shuffle Hazy Maze Cave - Swimming Beast as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
-
-
-class RainbowRideCarpets(Toggle):
-    """Shuffle Rainbow Ride - Carpets as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Rainbow Ride - Carpets"
-
-
-class TinyHugeIslandWarpPipes(Toggle):
-    """Shuffle Tiny-Huge Island - Warp Pipes as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
-
-
-class CoolCoolMountainBabyPenguins(Toggle):
-    """Shuffle Cool, Cool Mountain - Baby Penguins as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
-
-
-class SnowmansLandPenguin(Toggle):
-    """Shuffle Snowman's Land - Penguin as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Snowman's Land - Penguin"
-
-
-class ShiftingSandLandPyramidElevator(Toggle):
-    """Shuffle Shifting Sand Land - Pyramid Elevator as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
-
-
-class WetDryWorldWaterLevelDiamond(Toggle):
-    """Shuffle Wet-Dry World - Water Level Diamond as an item. If disabled, the game starts with it unlocked."""
-    display_name = "Shuffle Wet-Dry World - Water Level Diamond"
-
-
-class TickTockClockSpinners(Toggle):
-    """Shuffle Tick Tock Clock - Spinners as an item. If disabled, the game starts with them unlocked."""
-    display_name = "Shuffle Tick Tock Clock - Spinners"
-
-
-
 class LevelFeatureItemMode(Choice):
     option_not_shuffled = 0
     option_global = 1
@@ -363,43 +316,95 @@ class LevelFeatureItemMode(Choice):
 
 
 
+class HazyMazeCaveSwimmingBeast(Toggle):
+    """Shuffle Hazy Maze Cave - Swimming Beast. If disabled, the game starts with it unlocked."""
+    display_name = "Shuffle Hazy Maze Cave - Swimming Beast"
+
+
+class RainbowRideCarpets(Toggle):
+    """Shuffle Rainbow Ride - Carpets. If disabled, the game starts with them unlocked."""
+    display_name = "Shuffle Rainbow Ride - Carpets"
+
+
+class TinyHugeIslandWarpPipes(Toggle):
+    """Shuffle Tiny-Huge Island - Warp Pipes. If disabled, the game starts with them unlocked."""
+    display_name = "Shuffle Tiny-Huge Island - Warp Pipes"
+
+
+class CoolCoolMountainBabyPenguins(Toggle):
+    """Shuffle Cool, Cool Mountain - Baby Penguins. If disabled, the game starts with them unlocked."""
+    display_name = "Shuffle Cool, Cool Mountain - Baby Penguins"
+
+
+class SnowmansLandPenguin(Toggle):
+    """Shuffle Snowman's Land - Penguin. If disabled, the game starts with it unlocked."""
+    display_name = "Shuffle Snowman's Land - Penguin"
+
+
+class ShiftingSandLandPyramidElevator(Toggle):
+    """Shuffle Shifting Sand Land - Pyramid Elevator. If disabled, the game starts with it unlocked."""
+    display_name = "Shuffle Shifting Sand Land - Pyramid Elevator"
+
+
+class WetDryWorldWaterLevelDiamond(Toggle):
+    """Shuffle Wet-Dry World - Water Level Diamond. If disabled, the game starts with it unlocked."""
+    display_name = "Shuffle Wet-Dry World - Water Level Diamond"
+
+
+class TickTockClockSpinners(Toggle):
+    """Shuffle Tick Tock Clock - Spinners. If disabled, the game starts with them unlocked."""
+    display_name = "Shuffle Tick Tock Clock - Spinners"
+
+
+class LevelFeatures(Toggle):
+    """
+    Shuffle level-specific features that were tied to the selected Star in vanilla Super Mario 64.
+    If disabled, the game starts with all of these features unlocked.
+    """
+    display_name = "Level Features"
+    default = 1
+
+
 class CheckerboardPlatforms(LevelFeatureItemMode):
-    """
-    Choose how Checkerboard Platform unlocks are handled.
-
-    Not Shuffled - The game starts with all Checkerboard Platforms unlocked.
-
-    Global - Shuffle one Checkerboard Platforms item that unlocks every applicable platform.
-
-    Per Level - Shuffle separate level-specific Checkerboard Platforms items.
-    """
+    """Choose whether Checkerboard Platforms start unlocked or use global or per-level unlock items."""
     display_name = "Checkerboard Platform Items"
 
 
 class RollingLogs(LevelFeatureItemMode):
-    """
-    Choose how Rolling Log unlocks are handled.
-
-    Not Shuffled - The game starts with all Rolling Logs unlocked.
-
-    Global - Shuffle one Rolling Logs item that unlocks every applicable log.
-
-    Per Level - Shuffle separate level-specific Rolling Log items.
-    """
+    """Choose whether Rolling Logs start unlocked or use global or per-level unlock items."""
     display_name = "Rolling Log Items"
 
 
 class PurpleSwitches(LevelFeatureItemMode):
-    """
-    Choose how Purple Switch unlocks are handled.
-
-    Not Shuffled - The game starts with all Purple Switches unlocked.
-
-    Global - Shuffle one Purple Switches item that unlocks every applicable switch.
-
-    Per Level - Shuffle separate level-specific Purple Switch items.
-    """
+    """Choose whether Purple Switches start unlocked or use global or per-level unlock items."""
     display_name = "Purple Switch Items"
+
+
+class BobombBuddies(Choice):
+    """
+    Choose how all Bob-omb Buddy spawns are handled.
+
+    Not Shuffled - Start with every Bob-omb Buddy unlocked.
+
+    Per Act Only - Shuffle the Bob-omb Battlefield, Whomp's Fortress, and Jolly Roger Bay buddies. Start with the
+    remaining buddies unlocked.
+
+    Global - Shuffle one Bob-omb Buddies item that unlocks every buddy.
+
+    Per Level - Shuffle a separate item for every level's Bob-omb Buddy.
+    """
+    display_name = "Bob-omb Buddy Items"
+    option_not_shuffled = 0
+    option_per_act_only = 1
+    option_global = 2
+    option_per_level = 3
+    alias_individual = 3
+    default = 1
+
+
+class TreasureChests(LevelFeatureItemMode):
+    """Choose whether Treasure Chests start unlocked or use a global or per-level unlock item."""
+    display_name = "Treasure Chest Items"
 
 
 class CoinObjectUnlocks(LevelFeatureItemMode):
@@ -449,8 +454,8 @@ class BowserBombs(LevelFeatureItemMode):
 
     Not Shuffled - The game starts with all Bower Arena Bombs available.
 
-    Global - Shuffle four Progressive Bowser Arena Bomb items that each add one bomb to every arena, plus one
-    Bowser in the Sky item for its fifth bomb.
+    Global - Shuffle five Progressive Bowser Arena Bomb items that each add one bomb to every arena. The fifth has no
+    additional effect in the first two arenas.
 
     Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
     Fire Sea, and five for Bowser in the Sky.
@@ -514,13 +519,6 @@ class BowserStage1Ups(Choice):
     alias_individual = 2
     option_always_spawn = 3
     default = 0
-
-
-class StrictCannonRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect cannons may have to be acquired without them.
-    Has no effect if Buddy Checks are disabled and all movement abilities are not shuffled.
-    Some, but not all, tricks have been migrated to the Logic Tricks setting."""
-    display_name = "Strict Cannon Requirements"
 
 
 class AreaRandomizer(Choice):
@@ -728,13 +726,6 @@ trap_item_name_by_option_name = {
     "gust_trap_weight": "Gust Trap",
     "uncollect_random_coin_trap_weight": "Uncollect Random Coin Trap",
 }
-class StrictMoveRequirements(DefaultOnToggle):
-    """If disabled, Stars that expect certain moves may have to be acquired without them.
-    Only makes a difference for movement abilities that are shuffled.
-    Some, but not all, tricks have been migrated to the Logic Tricks setting."""
-    display_name = "Strict Move Requirements"
-
-
 class LogicTricks(OptionSet):
     """Choose specific advanced techniques to include in logic. The All Easy, All Medium, and All Hard entries
     include every trick at that difficulty and below. Details for each trick are documented in
@@ -1040,29 +1031,30 @@ sm64_options_groups = [
         NoDespawns,
         CombinedProgressiveKeys,
         LevelUnlocks,
-        StrictCapRequirements,
         PerLevelCapItems,
-        StrictCannonRequirements,
         LogicTricks,
         UniversalTrackerGlitchedLogic,
     ]),
     OptionGroup("Level Feature Unlocks", [
+        LevelFeatures,
         HazyMazeCaveSwimmingBeast,
         RainbowRideCarpets,
-        CheckerboardPlatforms,
         TinyHugeIslandWarpPipes,
         CoolCoolMountainBabyPenguins,
         SnowmansLandPenguin,
         ShiftingSandLandPyramidElevator,
+        WetDryWorldWaterLevelDiamond,
+        TickTockClockSpinners,
+        CheckerboardPlatforms,
         RollingLogs,
         PurpleSwitches,
+        BobombBuddies,
+        TreasureChests,
         CoinObjectUnlocks,
         EnemyUnlocks,
         OneUpMushroomUnlocks,
         BowserBombs,
         BowserStage1Ups,
-        WetDryWorldWaterLevelDiamond,
-        TickTockClockSpinners,
     ]),
     OptionGroup("Coin Options", [
         Coinsanity,
@@ -1080,7 +1072,6 @@ sm64_options_groups = [
     ]),
     OptionGroup("Ability Options", [
         *move_randomizer_options,
-        StrictMoveRequirements,
     ]),
     OptionGroup("Trap Options", [
         TrapsFillerPercentage,
@@ -1122,17 +1113,21 @@ class SM64Options(PerGameCommonOptions):
     kick: Kick
     climb: Climb
     ledge_grab: LedgeGrab
-    strict_cap_requirements: StrictCapRequirements
     per_level_cap_items: PerLevelCapItems
+    level_features: LevelFeatures
     hazy_maze_cave_swimming_beast: HazyMazeCaveSwimmingBeast
     rainbow_ride_carpets: RainbowRideCarpets
-    checkerboard_platforms: CheckerboardPlatforms
     tiny_huge_island_warp_pipes: TinyHugeIslandWarpPipes
     cool_cool_mountain_baby_penguins: CoolCoolMountainBabyPenguins
     snowmans_land_penguin: SnowmansLandPenguin
     shifting_sand_land_pyramid_elevator: ShiftingSandLandPyramidElevator
+    wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
+    tick_tock_clock_spinners: TickTockClockSpinners
+    checkerboard_platforms: CheckerboardPlatforms
     rolling_logs: RollingLogs
     purple_switches: PurpleSwitches
+    bobomb_buddies: BobombBuddies
+    treasure_chests: TreasureChests
     coin_object_unlocks: CoinObjectUnlocks
     enemy_unlocks: EnemyUnlocks
     one_up_mushroom_unlocks: OneUpMushroomUnlocks
@@ -1142,10 +1137,6 @@ class SM64Options(PerGameCommonOptions):
     bowser_in_the_sky_hits: BowserInTheSkyHits
     bowser_in_the_sky_stage_collapse_hits: BowserInTheSkyStageCollapseHits
     bowser_stage_1ups: BowserStage1Ups
-    wet_dry_world_water_level_diamond: WetDryWorldWaterLevelDiamond
-    tick_tock_clock_spinners: TickTockClockSpinners
-    strict_cannon_requirements: StrictCannonRequirements
-    strict_move_requirements: StrictMoveRequirements
     logic_tricks: LogicTricks
     universal_tracker_glitched_logic: UniversalTrackerGlitchedLogic
     marios_hat: MariosHat

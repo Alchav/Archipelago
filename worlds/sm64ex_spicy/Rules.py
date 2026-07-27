@@ -2,7 +2,7 @@ import re
 from typing import Union, Dict, Set
 
 from BaseClasses import CollectionState, DEFAULT_COLLECTION_RULE, Entrance, MultiWorld
-from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Has, HasAll, HasAny, HasFromList, \
+from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Has, HasAll, HasAny, \
     Or, Rule, True_
 from .Locations import locOneUp_table, location_table, one_up_unlock_category_by_location, \
     parse_coinsanity_location_name
@@ -10,7 +10,8 @@ from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
     sm64_ttc_entrances, sm64_wdw_entrances
-from .Items import action_item_data_table, cap_item_data_table, per_level_move_area_names, ut_glitch_item_name
+from .Items import action_item_data_table, cap_item_data_table, feature_item_data_table, \
+    per_level_move_area_names, ut_glitch_item_name
 from .LogicTricks import logic_tricks
 from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoins, HasUnlock, LogicTrick, \
     register_coin_evaluator, register_red_coin_evaluator
@@ -32,15 +33,26 @@ initial_reachable_entrances = (
 )
 minimum_starting_check_count = 2
 
-simple_arbitrary_feature_options = {
-    "HMC_SWIMMING_BEAST": ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
-    "RR_CARPETS": ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
-    "THI_WARP_PIPES": ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
-    "CCM_BABY_PENGUINS": ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
-    "SL_PENGUIN": ("Snowman's Land - Penguin", "snowmans_land_penguin"),
-    "SSL_PYRAMID_ELEVATOR": ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
-    "WDW_WATER_LEVEL_DIAMOND": ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
-    "TTC_SPINNERS": ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
+simple_level_feature_items = {
+    "HMC_SWIMMING_BEAST": "Hazy Maze Cave - Swimming Beast",
+    "RR_CARPETS": "Rainbow Ride - Carpets",
+    "THI_WARP_PIPES": "Tiny-Huge Island - Warp Pipes",
+    "CCM_BABY_PENGUINS": "Cool, Cool Mountain - Baby Penguins",
+    "SL_PENGUIN": "Snowman's Land - Penguin",
+    "SSL_PYRAMID_ELEVATOR": "Shifting Sand Land - Pyramid Elevator",
+    "WDW_WATER_LEVEL_DIAMOND": "Wet-Dry World - Water Level Diamond",
+    "TTC_SPINNERS": "Tick Tock Clock - Spinners",
+}
+
+simple_level_feature_option_names = {
+    "HMC_SWIMMING_BEAST": "hazy_maze_cave_swimming_beast",
+    "RR_CARPETS": "rainbow_ride_carpets",
+    "THI_WARP_PIPES": "tiny_huge_island_warp_pipes",
+    "CCM_BABY_PENGUINS": "cool_cool_mountain_baby_penguins",
+    "SL_PENGUIN": "snowmans_land_penguin",
+    "SSL_PYRAMID_ELEVATOR": "shifting_sand_land_pyramid_elevator",
+    "WDW_WATER_LEVEL_DIAMOND": "wet_dry_world_water_level_diamond",
+    "TTC_SPINNERS": "tick_tock_clock_spinners",
 }
 
 checkerboard_item_name_by_level = {
@@ -67,6 +79,54 @@ purple_switch_item_name_by_level = {
     "Rainbow Ride": "Rainbow Ride - Purple Switch",
     "Bowser in the Dark World": "Bowser in the Dark World - Purple Switch",
     "Bowser in the Sky": "Bowser in the Sky - Purple Switch",
+}
+
+bobomb_buddy_item_name_by_level = {
+    level_name: f"{level_name} - Bob-omb Buddy"
+    for level_name in (
+        "Bob-omb Battlefield",
+        "Whomp's Fortress",
+        "Jolly Roger Bay",
+        "Cool, Cool Mountain",
+        "Shifting Sand Land",
+        "Snowman's Land",
+        "Wet-Dry World",
+        "Tall, Tall Mountain",
+        "Tiny-Huge Island",
+        "Rainbow Ride",
+        "Wing Mario Over the Rainbow",
+    )
+}
+
+treasure_chest_item_name_by_level = {
+    "Jolly Roger Bay": "Jolly Roger Bay - Treasure Chests",
+    "Dire, Dire Docks": "Dire, Dire Docks - Treasure Chests",
+}
+
+per_act_feature_tokens = {
+    "BOB_KING",
+    "BOB_KOOPA",
+    "BOB_BUDDY",
+    "WF_KING",
+    "WF_FORTRESS",
+    "WF_BUDDY",
+    "WF_HOOT",
+    "CCM_SNOWMAN_HEAD",
+    "CCM_BIG_PENGUIN",
+    "JRB_SUNKEN_SHIP",
+    "JRB_RAISED_SHIP",
+    "JRB_BUDDY",
+    "JRB_JET_STREAM",
+    "JRB_UNAGI",
+    "LLL_KOOPA_SHELL",
+    "SSL_KLEPTO",
+    "THI_KOOPA",
+    "TTM_UKIKI",
+    "DDD_MANTA_RAY",
+    "DDD_BOWSER_SUB",
+    "DDD_POLES",
+    "BBH_STAIRCASE",
+    "BBH_MERRY_GO_ROUND",
 }
 
 
@@ -140,19 +200,38 @@ def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
 
 
 def has_simple_arbitrary_feature(state: CollectionState, player: int, token: str) -> bool:
-    item_name, option_name = simple_arbitrary_feature_options[token]
+    item_name = simple_level_feature_items[token]
     options = state.multiworld.worlds[player].options
-    return not getattr(options, option_name).value or state.has(item_name, player)
+    return not getattr(options, simple_level_feature_option_names[token]) or state.has(item_name, player)
+
+
+def get_level_feature_item_name(
+        option, global_item_name: str | None, per_level_item_name: str) -> str | bool:
+    if option.value == option.option_not_shuffled:
+        return True
+    if option.value == option.option_global and global_item_name:
+        return global_item_name
+    return per_level_item_name
+
+
+def has_level_feature(
+        state: CollectionState, player: int, option_name: str,
+        global_item_name: str | None, per_level_item_name: str) -> bool:
+    option = getattr(state.multiworld.worlds[player].options, option_name)
+    item_name = get_level_feature_item_name(option, global_item_name, per_level_item_name)
+    return item_name is True or state.has(item_name, player)
+
+
+def has_per_act_feature(
+        state: CollectionState, player: int, per_level_item_name: str) -> bool:
+    options = state.multiworld.worlds[player].options
+    return not options.level_features or state.has(per_level_item_name, player)
 
 
 def has_purple_switches(state: CollectionState, player: int, level_name: str) -> bool:
-    options = state.multiworld.worlds[player].options
-    if options.purple_switches.value == options.purple_switches.option_not_shuffled:
-        return True
-    if options.purple_switches.value == options.purple_switches.option_global:
-        return state.has("Purple Switches", player)
     item_name = purple_switch_item_name_by_level.get(level_name)
-    return item_name is None or state.has(item_name, player)
+    return item_name is None or has_level_feature(
+        state, player, "purple_switches", "Purple Switches", item_name)
 
 
 def has_tiny_huge_island_top_return_movement(state: CollectionState, player: int) -> bool:
@@ -167,13 +246,9 @@ def has_tiny_huge_island_top_return_movement(state: CollectionState, player: int
 
 
 def has_checkerboard_platforms(state: CollectionState, player: int, level_name: str) -> bool:
-    options = state.multiworld.worlds[player].options
-    if options.checkerboard_platforms.value == options.checkerboard_platforms.option_not_shuffled:
-        return True
-    if options.checkerboard_platforms.value == options.checkerboard_platforms.option_global:
-        return state.has("Checkerboard Platforms", player)
     item_name = checkerboard_item_name_by_level.get(level_name)
-    return item_name is None or state.has(item_name, player)
+    return item_name is None or has_level_feature(
+        state, player, "checkerboard_platforms", "Checkerboard Platforms", item_name)
 
 
 def get_unlock_item_name(options, option_name: str, global_item_name: str, per_level_item_name: str) -> HasUnlock:
@@ -482,11 +557,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         if options.bowser_bombs.value == options.bowser_bombs.option_not_shuffled:
             return True_()
         if options.bowser_bombs.value == options.bowser_bombs.option_global:
-            if stage_name == "Bowser in the Sky":
-                return HasFromList(
-                    "Progressive Bowser Arena Bomb",
-                    "Bowser in the Sky - Progressive Bowser Arena Bomb",
-                    count=required_hits)
             return Has("Progressive Bowser Arena Bomb", required_hits)
         return Has(f"{stage_name} - Progressive Bowser Arena Bomb", required_hits)
 
@@ -627,7 +697,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Whomp's Fortress - Flagpole 1-Up", "CL")
     rf.assign_rule("Whomp's Fortress - Tower Alcove 1-Up", "WF_FORTRESS")
     # Jolly Roger Bay
-    rf.assign_rule("Jolly Roger Bay - Plunder in the Sunken Ship", "JRB_SUNKEN_SHIP")
+    rf.assign_rule("Jolly Roger Bay - Plunder in the Sunken Ship", "JRB_SUNKEN_SHIP & TREASURE_CHESTS")
+    rf.assign_rule("Jolly Roger Bay - Treasure of the Ocean Cave", "TREASURE_CHESTS")
     rf.assign_rule("Jolly Roger Bay - Can the Eel Come Out to Play?", "JRB_UNAGI")
     rf.assign_rule(
         "Jolly Roger Bay - Upper",
@@ -645,6 +716,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Cool, Cool Mountain - Big Penguin Race", "CCM_BIG_PENGUIN")
     rf.assign_rule("Cool, Cool Mountain - Snowman's Lost His Head", "CCM_SNOWMAN_HEAD")
     rf.assign_rule("Cool, Cool Mountain - Li'l Penguin Lost", "CCM_BABY_PENGUINS")
+    rf.assign_rule("Cool, Cool Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
         "Cool, Cool Mountain - Wall Kicks Will Work",
         "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
@@ -726,6 +798,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
     rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "THWOMP")
+    rf.assign_rule("Shifting Sand Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
         "Shifting Sand Land - Pyramid Right Path 1-Up",
         "{Shifting Sand Land - Upper Pyramid} | CL/TJ/SF/BF")
@@ -735,6 +808,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Dire, Dire Docks - Through the Jet Stream", "MC | logic_ddd_jet_stream_capless")
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC")
+    rf.assign_rule("Dire, Dire Docks - Chests in the Current", "TREASURE_CHESTS")
     # Snowman's Land
     rf.world.set_rule(
         multiworld.get_region("Snowman's Land - Whirl from the Freezing Pond", player).entrances[0],
@@ -755,6 +829,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC & TJ/SF/BF/WK/LG")
     rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC & TJ/SF/BF/WK/LG")
+    rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
@@ -792,8 +867,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_wdw_quick_race_triple_jump")
     rf.assign_rule("Wet-Dry World - Downtown Block 1-Up", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
-                   "{Wet-Dry World - High Water} & TJ | {Wet-Dry World - High Water} & SF+LG | "
-                   "{Wet-Dry World - Highest Water} & BF/SF")
+                   "BOBOMB_BUDDY & {Wet-Dry World - High Water} & TJ | "
+                   "BOBOMB_BUDDY & {Wet-Dry World - High Water} & SF+LG | "
+                   "BOBOMB_BUDDY & {Wet-Dry World - Highest Water} & BF/SF")
     # Tall, Tall Mountain
     rf.assign_rule("Tall, Tall Mountain - Upper", "TJ/BF/SF/ROLLING_LOG")
     rf.assign_rule("Tall, Tall Mountain - Top",
@@ -806,6 +882,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_ttm_lonely_mushroom_fly_guy_spin_jump")
     rf.assign_rule("Tall, Tall Mountain - Upper Monty Moles", "MONTY_MOLES")
     rf.assign_rule("Tall, Tall Mountain - Lower Monty Moles", "MONTY_MOLES")
+    rf.assign_rule("Tall, Tall Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Tiny-Huge Island
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
     rf.assign_rule("Tiny-Huge Island - Tiny Main", "PURPLE_SWITCHES")
@@ -828,6 +905,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
+    rf.assign_rule("Tiny-Huge Island - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - First Clock Hand Area",
@@ -854,7 +932,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - Maze", "CL")
     rf.assign_rule("Rainbow Ride - Initial to Maze", "RR_CARPETS")
     rf.assign_rule("Rainbow Ride - Carpets", "RR_CARPETS")
-    rf.assign_rule("Rainbow Ride - Bob-omb Buddy", "WK | logic_rr_buddy_ledge_grab")
+    rf.assign_rule(
+        "Rainbow Ride - Bob-omb Buddy",
+        "BOBOMB_BUDDY & WK | BOBOMB_BUDDY & logic_rr_buddy_ledge_grab")
     rf.assign_rule("Rainbow Ride - Swingin' in the Breeze",
                    "LG/TJ/BF/SF | logic_rr_swingin_no_movement")
     rf.assign_rule("Rainbow Ride - Tricky Triangles!",
@@ -926,6 +1006,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Wing Mario Over the Rainbow - Bob-omb Buddy Platform",
         "WC+TJ | LJ+LG & logic_wmotr_leap_of_faith | "
         "LJ & logic_wmotr_leap_of_faith_without_ledge_grab")
+    rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
@@ -961,7 +1042,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "CANN+CL | logic_jrb_stone_pillar_cannonless | "
                 "logic_jrb_stone_pillar_cannon_no_climb",
             "Jolly Roger Bay - Purple Switch Metal Cap Block": "MC",
-            "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "JRB_SUNKEN_SHIP",
+            "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "JRB_SUNKEN_SHIP & TREASURE_CHESTS",
             "Lethal Lava Land - Wing Cap Block": "WC",
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
@@ -1425,31 +1506,56 @@ class RuleFactory:
             "The Secret Aquarium": "Secret Aquarium",
         }.get(level_name, level_name)
         item_names = {
-            token: True if not getattr(self.options, option_name).value else item_name
-            for token, (item_name, option_name) in simple_arbitrary_feature_options.items()
+            token: item_name if getattr(self.options, simple_level_feature_option_names[token]) else True
+            for token, item_name in simple_level_feature_items.items()
         }
-        item_names["CHECKERBOARD_PLATFORMS"] = self.get_feature_family_item_name(
-            self.options.checkerboard_platforms.value,
-            self.options.checkerboard_platforms.option_not_shuffled,
-            self.options.checkerboard_platforms.option_global,
-            "Checkerboard Platforms",
-            checkerboard_item_name_by_level,
-            level_name)
-        item_names["LLL_ROLLING_LOG"] = self.get_feature_family_item_name(
-            self.options.rolling_logs.value,
-            self.options.rolling_logs.option_not_shuffled,
-            self.options.rolling_logs.option_global,
-            "Rolling Logs",
-            rolling_log_item_name_by_level,
-            level_name)
+        for token in per_act_feature_tokens:
+            per_level_item_name = self.token_table[token]
+            if token in {"BOB_BUDDY", "WF_BUDDY", "JRB_BUDDY"}:
+                buddy_mode = self.options.bobomb_buddies.value
+                if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
+                    item_names[token] = True
+                elif buddy_mode == self.options.bobomb_buddies.option_global:
+                    item_names[token] = "Bob-omb Buddies"
+                else:
+                    item_names[token] = per_level_item_name
+            else:
+                item_names[token] = per_level_item_name if self.options.level_features else True
+        item_names["CHECKERBOARD_PLATFORMS"] = (
+            get_level_feature_item_name(
+                self.options.checkerboard_platforms,
+                "Checkerboard Platforms", checkerboard_item_name_by_level[level_name])
+            if level_name in checkerboard_item_name_by_level else True
+        )
+        item_names["LLL_ROLLING_LOG"] = (
+            get_level_feature_item_name(
+                self.options.rolling_logs,
+                "Rolling Logs", rolling_log_item_name_by_level[level_name])
+            if level_name in rolling_log_item_name_by_level else True
+        )
         item_names["ROLLING_LOG"] = item_names["LLL_ROLLING_LOG"]
-        item_names["PURPLE_SWITCHES"] = self.get_feature_family_item_name(
-            self.options.purple_switches.value,
-            self.options.purple_switches.option_not_shuffled,
-            self.options.purple_switches.option_global,
-            "Purple Switches",
-            purple_switch_item_name_by_level,
-            level_name)
+        item_names["PURPLE_SWITCHES"] = (
+            get_level_feature_item_name(
+                self.options.purple_switches,
+                "Purple Switches", purple_switch_item_name_by_level[level_name])
+            if level_name in purple_switch_item_name_by_level else True
+        )
+        buddy_item_name = bobomb_buddy_item_name_by_level.get(level_name)
+        if buddy_item_name:
+            buddy_mode = self.options.bobomb_buddies.value
+            if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
+                item_names["BOBOMB_BUDDY"] = True
+            elif buddy_mode == self.options.bobomb_buddies.option_per_act_only:
+                item_names["BOBOMB_BUDDY"] = (
+                    buddy_item_name if buddy_item_name in feature_item_data_table else True)
+            elif buddy_mode == self.options.bobomb_buddies.option_global:
+                item_names["BOBOMB_BUDDY"] = "Bob-omb Buddies"
+            else:
+                item_names["BOBOMB_BUDDY"] = buddy_item_name
+        chest_item_name = treasure_chest_item_name_by_level.get(level_name)
+        if chest_item_name:
+            item_names["TREASURE_CHESTS"] = get_level_feature_item_name(
+                self.options.treasure_chests, "Treasure Chests", chest_item_name)
         item_names["SINGLE_YELLOW_COINS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Single Yellow Coins", f"{unlock_level_name} - Single Yellow Coins")

@@ -4,8 +4,10 @@ import json
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
-    global_rolling_log_item_names, global_purple_switch_item_names, checkerboard_item_data_table, \
+    global_rolling_log_item_names, global_purple_switch_item_names, global_bobomb_buddy_item_names, \
+    global_treasure_chest_item_names, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
+    per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
     item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
@@ -121,27 +123,27 @@ class SM64World(World):
         "kick",
         "climb",
         "ledge_grab",
-        "strict_cap_requirements",
         "per_level_cap_items",
+        "level_features",
         "hazy_maze_cave_swimming_beast",
         "rainbow_ride_carpets",
-        "checkerboard_platforms",
         "tiny_huge_island_warp_pipes",
         "cool_cool_mountain_baby_penguins",
         "snowmans_land_penguin",
         "shifting_sand_land_pyramid_elevator",
+        "wet_dry_world_water_level_diamond",
+        "tick_tock_clock_spinners",
+        "checkerboard_platforms",
         "rolling_logs",
         "purple_switches",
+        "bobomb_buddies",
+        "treasure_chests",
         "bowser_bombs",
         "bowser_in_the_dark_world_hits",
         "bowser_in_the_fire_sea_hits",
         "bowser_in_the_sky_hits",
         "bowser_in_the_sky_stage_collapse_hits",
         "bowser_stage_1ups",
-        "wet_dry_world_water_level_diamond",
-        "tick_tock_clock_spinners",
-        "strict_cannon_requirements",
-        "strict_move_requirements",
         "logic_tricks",
         "universal_tracker_glitched_logic",
         "marios_hat",
@@ -285,65 +287,81 @@ class SM64World(World):
             return list(cap_item_data_table)
         return list(global_cap_item_names)
 
-    def get_arbitrary_item_names(self) -> typing.List[str]:
-        item_names = [
-            item_name
-            for item_name, option_name in (
-                ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
-                ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
-                ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
-                ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
-                ("Snowman's Land - Penguin", "snowmans_land_penguin"),
-                ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
-                ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
-                ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
-            )
-            if getattr(self.options, option_name).value
-        ]
+    def get_level_feature_item_names(self) -> typing.List[str]:
+        item_names = []
+        if self.options.level_features:
+            item_names += [
+                name for name in feature_item_data_table
+                if name not in per_level_bobomb_buddy_item_names
+            ]
 
-        if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_global:
-            item_names += list(global_checkerboard_item_names)
-        elif self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_per_level:
-            item_names += list(checkerboard_item_data_table)
+        simple_options = {
+            "Hazy Maze Cave - Swimming Beast": self.options.hazy_maze_cave_swimming_beast,
+            "Rainbow Ride - Carpets": self.options.rainbow_ride_carpets,
+            "Tiny-Huge Island - Warp Pipes": self.options.tiny_huge_island_warp_pipes,
+            "Cool, Cool Mountain - Baby Penguins": self.options.cool_cool_mountain_baby_penguins,
+            "Snowman's Land - Penguin": self.options.snowmans_land_penguin,
+            "Shifting Sand Land - Pyramid Elevator": self.options.shifting_sand_land_pyramid_elevator,
+            "Wet-Dry World - Water Level Diamond": self.options.wet_dry_world_water_level_diamond,
+            "Tick Tock Clock - Spinners": self.options.tick_tock_clock_spinners,
+        }
+        item_names += [name for name, option in simple_options.items() if option]
+        item_names += self.get_unlock_item_names(
+            self.options.checkerboard_platforms, global_checkerboard_item_names, checkerboard_item_data_table)
+        item_names += self.get_unlock_item_names(
+            self.options.rolling_logs, global_rolling_log_item_names, rolling_log_item_data_table)
+        item_names += self.get_unlock_item_names(
+            self.options.purple_switches, global_purple_switch_item_names, purple_switch_item_data_table)
+        item_names += self.get_unlock_item_names(
+            self.options.treasure_chests, global_treasure_chest_item_names, per_level_treasure_chest_item_names)
 
-        if self.options.rolling_logs.value == self.options.rolling_logs.option_global:
-            item_names += list(global_rolling_log_item_names)
-        elif self.options.rolling_logs.value == self.options.rolling_logs.option_per_level:
-            item_names += list(rolling_log_item_data_table)
-
-        if self.options.purple_switches.value == self.options.purple_switches.option_global:
-            item_names += list(global_purple_switch_item_names)
-        elif self.options.purple_switches.value == self.options.purple_switches.option_per_level:
-            item_names += list(purple_switch_item_data_table)
-
+        buddy_mode = self.options.bobomb_buddies.value
+        if buddy_mode == self.options.bobomb_buddies.option_per_act_only:
+            item_names += [
+                name for name in feature_item_data_table
+                if name in per_level_bobomb_buddy_item_names
+            ]
+        elif buddy_mode == self.options.bobomb_buddies.option_global:
+            item_names += list(global_bobomb_buddy_item_names)
+        elif buddy_mode == self.options.bobomb_buddies.option_per_level:
+            item_names += list(per_level_bobomb_buddy_item_names)
         return item_names
 
-    def get_unrandomized_arbitrary_item_names(self) -> typing.List[str]:
-        item_names = [
-            item_name
-            for item_name, option_name in (
-                ("Hazy Maze Cave - Swimming Beast", "hazy_maze_cave_swimming_beast"),
-                ("Rainbow Ride - Carpets", "rainbow_ride_carpets"),
-                ("Tiny-Huge Island - Warp Pipes", "tiny_huge_island_warp_pipes"),
-                ("Cool, Cool Mountain - Baby Penguins", "cool_cool_mountain_baby_penguins"),
-                ("Snowman's Land - Penguin", "snowmans_land_penguin"),
-                ("Shifting Sand Land - Pyramid Elevator", "shifting_sand_land_pyramid_elevator"),
-                ("Wet-Dry World - Water Level Diamond", "wet_dry_world_water_level_diamond"),
-                ("Tick Tock Clock - Spinners", "tick_tock_clock_spinners"),
-            )
-            if not getattr(self.options, option_name).value
-        ]
+    def get_unrandomized_level_feature_item_names(self) -> typing.List[str]:
+        item_names = []
+        if not self.options.level_features:
+            item_names += [
+                name for name in feature_item_data_table
+                if name not in per_level_bobomb_buddy_item_names
+            ]
 
-        if self.options.checkerboard_platforms.value == self.options.checkerboard_platforms.option_not_shuffled:
-            item_names += list(global_checkerboard_item_names)
-            item_names += list(checkerboard_item_data_table)
-        if self.options.rolling_logs.value == self.options.rolling_logs.option_not_shuffled:
-            item_names += list(global_rolling_log_item_names)
-            item_names += list(rolling_log_item_data_table)
-        if self.options.purple_switches.value == self.options.purple_switches.option_not_shuffled:
-            item_names += list(global_purple_switch_item_names)
-            item_names += list(purple_switch_item_data_table)
+        simple_options = {
+            "Hazy Maze Cave - Swimming Beast": self.options.hazy_maze_cave_swimming_beast,
+            "Rainbow Ride - Carpets": self.options.rainbow_ride_carpets,
+            "Tiny-Huge Island - Warp Pipes": self.options.tiny_huge_island_warp_pipes,
+            "Cool, Cool Mountain - Baby Penguins": self.options.cool_cool_mountain_baby_penguins,
+            "Snowman's Land - Penguin": self.options.snowmans_land_penguin,
+            "Shifting Sand Land - Pyramid Elevator": self.options.shifting_sand_land_pyramid_elevator,
+            "Wet-Dry World - Water Level Diamond": self.options.wet_dry_world_water_level_diamond,
+            "Tick Tock Clock - Spinners": self.options.tick_tock_clock_spinners,
+        }
+        item_names += [name for name, option in simple_options.items() if not option]
+        for option, global_names in (
+                (self.options.checkerboard_platforms, global_checkerboard_item_names),
+                (self.options.rolling_logs, global_rolling_log_item_names),
+                (self.options.purple_switches, global_purple_switch_item_names),
+                (self.options.treasure_chests, global_treasure_chest_item_names)):
+            if option.value == option.option_not_shuffled:
+                item_names += list(global_names)
 
+        buddy_mode = self.options.bobomb_buddies.value
+        if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
+            item_names += list(global_bobomb_buddy_item_names)
+        elif buddy_mode == self.options.bobomb_buddies.option_per_act_only:
+            item_names += [
+                name for name in per_level_bobomb_buddy_item_names
+                if name not in feature_item_data_table
+            ]
         return item_names
 
     def get_optional_item_names(self) -> typing.List[str]:
@@ -396,8 +414,7 @@ class SM64World(World):
 
     def get_bowser_arena_bomb_item_names(self) -> typing.List[str]:
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_global:
-            return ["Progressive Bowser Arena Bomb"] * 4 + [
-                "Bowser in the Sky - Progressive Bowser Arena Bomb"]
+            return ["Progressive Bowser Arena Bomb"] * 5
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_per_level:
             return (
                 ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
@@ -408,8 +425,7 @@ class SM64World(World):
 
     def get_unrandomized_bowser_arena_bomb_item_names(self) -> typing.List[str]:
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_not_shuffled:
-            return ["Progressive Bowser Arena Bomb"] * 4 + [
-                "Bowser in the Sky - Progressive Bowser Arena Bomb"]
+            return ["Progressive Bowser Arena Bomb"] * 5
         return []
 
     def get_unrandomized_unlock_item_names(self) -> typing.List[str]:
@@ -459,8 +475,7 @@ class SM64World(World):
         return item_names
 
     def get_progression_item_names(self) -> typing.List[str]:
-        item_names = list(feature_item_data_table)
-        item_names += self.get_arbitrary_item_names()
+        item_names = self.get_level_feature_item_names()
         item_names += self.get_castle_key_item_names()
         item_names += ["Castle - Progressive MIPS"] * 2
         item_names += [
@@ -628,7 +643,7 @@ class SM64World(World):
     def get_start_inventory_slot_data(self) -> typing.Dict[int, int]:
         start_inventory = {}
         for item_name in (
-                self.get_unrandomized_arbitrary_item_names()
+                self.get_unrandomized_level_feature_item_names()
                 + self.get_unrandomized_optional_item_names()
                 + self.get_unrandomized_bowser_stage_1up_item_names()
                 + self.get_unrandomized_bowser_arena_bomb_item_names()

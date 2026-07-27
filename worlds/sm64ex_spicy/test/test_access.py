@@ -43,17 +43,20 @@ bowser_in_the_sky_coins = coin_rule("Bowser in the Sky")
 
 
 SHUFFLED_ARBITRARY_FEATURE_OPTIONS = {
-    "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
-    "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
-    "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
-    "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
-    "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
-    "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
-    "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
-    "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
-    "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
-    "rolling_logs": Options.RollingLogs.option_global,
-    "purple_switches": Options.PurpleSwitches.option_global,
+    "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_global,
+        "purple_switches": Options.PurpleSwitches.option_global,
+        "bobomb_buddies": Options.BobombBuddies.option_global,
+        "treasure_chests": Options.TreasureChests.option_global,
 }
 
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
@@ -1108,7 +1111,20 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
     options = {
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "area_rando": Options.AreaRandomizer.option_Off,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_global,
+        "purple_switches": Options.PurpleSwitches.option_global,
+        "bobomb_buddies": Options.BobombBuddies.option_global,
+        "treasure_chests": Options.TreasureChests.option_global,
         "triple_jump": Options.TripleJump.option_per_level,
         "backflip": Options.Backflip.option_global,
         "side_flip": Options.SideFlip.option_per_level,
@@ -1164,6 +1180,7 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
     def test_wmotR_rule_uses_castle_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 5)
         self.collect(self.world.create_item("Wing Cap"))
+        self.collect(self.world.create_item("Bob-omb Buddies"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
         self.collect(self.world.create_item("Bob-omb Battlefield - Triple Jump"))
@@ -1762,9 +1779,20 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **ArbitraryFeatureAccessTestBase.options,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
         "rolling_logs": Options.RollingLogs.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def collect_basement_access(self):
@@ -1851,10 +1879,20 @@ class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         **ArbitraryFeatureAccessTestBase.options,
+        "level_features": Options.LevelFeatures.option_false,
         "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_false,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_false,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_false,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_false,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_false,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_false,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_false,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_false,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_not_shuffled,
         "rolling_logs": Options.RollingLogs.option_not_shuffled,
         "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+        "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
+        "treasure_chests": Options.TreasureChests.option_not_shuffled,
     }
 
     def collect_basement_access(self):
@@ -1883,7 +1921,20 @@ class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
     }
 
@@ -2009,7 +2060,20 @@ class BowserInTheDarkWorldIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_global,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def test_coin_and_enemy_sources_are_counted_independently(self):
@@ -2068,7 +2132,20 @@ class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "logic_tricks": {"Bowser in the Dark World Triple Jump up the Purple Switch Slope"},
-        "purple_switches": Options.PurpleSwitches.option_global,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def collect_stage_access(self):
@@ -2139,7 +2216,20 @@ class VanishCapUnderTheMoatTrickAccessTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "blocksanity": Options.Blocksanity.option_true,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "logic_tricks": {"Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate"},
@@ -2184,7 +2274,20 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "logic_tricks": {"Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above"},
@@ -2228,7 +2331,20 @@ class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "logic_tricks": {
             "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide"
         },
@@ -2982,7 +3098,20 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -3068,7 +3197,20 @@ class WhompsFortressWhompTricksTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "logic_tricks": {
             "Whomp's Fortress Top Access with Side Flip and Ledge Grab Off of Whomp",
             "Whomp's Fortress Top Access with Triple Jump Off of Whomp",
@@ -3262,7 +3404,20 @@ class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -3415,7 +3570,20 @@ class JollyRogerBayCoinStar55AccessTestBase(JollyRogerBayCoinStarAccessTestBase)
 class JollyRogerBayCoinStar68AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_global,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "logic_tricks": {"Jolly Roger Bay Ship Red Coin With Long Jump"},
         "universal_tracker_glitched_logic": {
             "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick"
@@ -4282,7 +4450,6 @@ class HazyMazeCaveCoinStar81CheckerboardAccessTestBase(HazyMazeCaveCoinStarAcces
 class HazyMazeCaveCoinStar54CaplessAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
         "hazy_maze_cave_coin_star_requirement": 54,
     }
 
@@ -5418,7 +5585,6 @@ class SnowmansLandIglooShellCoinLossTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "no_despawns": Options.NoDespawns.option_true,
-        "strict_cannon_requirements": Options.StrictCannonRequirements.option_true,
     }
 
     def test_shell_transition_loses_spindrift_coins_even_with_no_despawns(self):
@@ -5481,7 +5647,6 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -5843,8 +6008,20 @@ class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
-        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
         "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -6433,6 +6610,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.disable_wdw_entrance("Wet-Dry World Low")
         self.disable_wdw_entrance("Wet-Dry World Middle")
         self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.collect([self.get_item_by_name("Ledge Grab"), self.get_item_by_name("Triple Jump")])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
@@ -6444,6 +6622,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.disable_wdw_entrance("Wet-Dry World Middle")
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.collect([
             self.get_item_by_name("Wet-Dry World - Water Level Diamond"),
             self.get_item_by_name("Purple Switches"),
@@ -6551,7 +6730,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
     }
 
     def test_bob_wing_cap_access(self):
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Bob-omb Buddy"))
+        self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("Bob-omb Battlefield - Wing Cap"))
@@ -6595,6 +6774,7 @@ class GlobalCapAccessTestBase(SM64TestBase):
 
     def test_wmotr_buddy_wing_cap_route_accepts_triple_jump(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
@@ -6658,7 +6838,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
     }
 
     def test_bob_wing_cap_access(self):
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Bob-omb Buddy"))
+        self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("Wing Cap"))
@@ -6684,6 +6864,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
 
     def test_wmotr_bob_omb_buddy_accepts_wing_cap(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
@@ -6989,7 +7170,6 @@ class TTCMovelessWallKickAccessTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "logic_tricks": {"Castle Tick Tock Clock Entrance With Wall Kick"},
     }
@@ -7451,9 +7631,6 @@ class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
         "blocksanity": Options.Blocksanity.option_true,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
-        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
-        "strict_cannon_requirements": Options.StrictCannonRequirements.option_false,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
     }
 
     coin_block_locations_by_item = {
@@ -7597,7 +7774,7 @@ class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Bowser Arena Bomb")] * 4)
         self.assertFalse(self.multiworld.can_beat_game(self.multiworld.state))
 
-        self.collect(self.get_item_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb"))
+        self.collect(self.get_item_by_name("Progressive Bowser Arena Bomb"))
         self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
 
 

@@ -135,7 +135,7 @@ def _can_collect_all_wf_red_coins(state: CollectionState, player: int) -> bool:
         _has_red_coins(state, player, level)
         and state.can_reach(f"{level} - Top", "Region", player)
         and Rules.has_unlock(
-            state, player, "enemy_unlocks", "Thwomps", f"{level} - Thwomp")
+            state, player, "enemy_unlocks", "Thwomp", f"{level} - Thwomp")
     )
 
 
@@ -152,7 +152,7 @@ def _can_collect_all_jrb_red_coins(state: CollectionState, player: int) -> bool:
     return (
         _has_red_coins(state, player, level)
         and state.can_reach(f"{level} - Upper", "Region", player)
-        and state.has(f"{level} - Raised Ship", player)
+        and Rules.has_per_act_feature(state, player, f"{level} - Raised Ship")
         and pillar
     )
 
@@ -213,13 +213,13 @@ def _can_collect_all_ddd_red_coins(state: CollectionState, player: int) -> bool:
 
     level = "Dire, Dire Docks"
     poles = (
-        state.has(f"{level} - Poles", player)
+        Rules.has_per_act_feature(state, player, f"{level} - Poles")
         and Rules.has_action(state, player, "Climb", level)
     )
     first = (
         Rules.has_purple_switches(state, player, level)
         or (
-            state.has(f"{level} - Bowser's Sub", player)
+            Rules.has_per_act_feature(state, player, f"{level} - Bowser's Sub")
             and poles
             and Rules.has_action(state, player, "Triple Jump", level)
         )
@@ -787,7 +787,8 @@ def evaluate_jolly_roger_bay_coins(
     has_pillar_red_coin_cannon = Rules.can_use_logic_trick(
         state, player, "logic_jrb_pillar_red_coin_cannon", target_name)
     has_upper = state.can_reach(f"{level_name} - Upper", "Region", player)
-    has_raised_ship = state.has(f"{level_name} - Raised Ship", player)
+    has_raised_ship = Rules.has_per_act_feature(
+        state, player, f"{level_name} - Raised Ship")
 
     traces = [
         coin_source("start_three_coin_block", "Three-Coin Block near the start", 3,
@@ -1106,7 +1107,8 @@ def evaluate_big_boos_haunt_coins(
         "merry_go_round_boos",
         "Five Merry-Go-Round Boos",
         25,
-        has_boos and state.has(f"{level_name} - Merry-go-round", player),
+        has_boos and Rules.has_per_act_feature(
+            state, player, f"{level_name} - Merry-go-round"),
     ))
     return coin_evaluation(traces, 151)
 
@@ -1315,7 +1317,8 @@ def lethal_lava_land_coins(
         state, player, "enemy_unlocks",
         "Mr. Is", f"{level_name} - Mr. Is")
 
-    has_koopa_shell = state.has(f"{level_name} - Koopa Shell", player)
+    has_koopa_shell = Rules.has_per_act_feature(
+        state, player, f"{level_name} - Koopa Shell")
     has_lava_damage_boosting = Rules.can_use_logic_trick(
         state, player, "logic_lava_damage_boosting", target_name)
     can_reach_red_coins = Rules.can_reach_lethal_lava_land_red_coins(
@@ -1797,10 +1800,12 @@ def dire_dire_docks_coins(
         "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
 
     has_climb = Rules.has_action(state, player, "Climb", level_name)
-    has_poles_item = state.has(f"{level_name} - Poles", player)
+    has_poles_item = Rules.has_per_act_feature(
+        state, player, f"{level_name} - Poles")
     has_poles = has_poles_item and has_climb
     has_purple_switch_route = Rules.has_purple_switches(state, player, level_name)
-    has_sub = state.has(f"{level_name} - Bowser's Sub", player)
+    has_sub = Rules.has_per_act_feature(
+        state, player, f"{level_name} - Bowser's Sub")
     has_triple_jump = Rules.has_action(state, player, "Triple Jump", level_name)
     has_sub_poles_movement_route = has_sub and has_poles and has_triple_jump
 

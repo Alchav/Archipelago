@@ -11,8 +11,20 @@ RR_OPTIONS = {
     "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-    "purple_switches": Options.PurpleSwitches.option_per_level,
-    "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+    "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     "rainbow_ride_coin_star_requirement": 1,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
@@ -67,7 +79,8 @@ class TestRainbowRideLocations(SM64TestBase):
              maze + [RED_COINS, "Wall Kick"]],
 
             ["Rainbow Ride - Bob-omb Buddy", False, carpets],
-            ["Rainbow Ride - Bob-omb Buddy", True, carpets + ["Wall Kick"]],
+            ["Rainbow Ride - Bob-omb Buddy", True,
+             carpets + ["Wall Kick", "Rainbow Ride - Bob-omb Buddy"]],
 
             ["Rainbow Ride - Cruiser Crossing the Rainbow", False, carpets],
             ["Rainbow Ride - Cruiser Crossing the Rainbow", True, cruiser],
@@ -146,7 +159,8 @@ class TestRainbowRideBuddyLedgeGrabAndCarpetsTrick(SM64TestBase):
         self.run_location_tests([
             ["Rainbow Ride - Bob-omb Buddy", False, ["Ledge Grab"]],
             ["Rainbow Ride - Bob-omb Buddy", False, [CARPETS]],
-            ["Rainbow Ride - Bob-omb Buddy", True, [CARPETS, "Ledge Grab"]],
+            ["Rainbow Ride - Bob-omb Buddy", True,
+             [CARPETS, "Ledge Grab", "Rainbow Ride - Bob-omb Buddy"]],
         ], starting_regions=["Rainbow Ride - Carpets"])
 
 
@@ -175,7 +189,20 @@ class TestRainbowRideGlobalUnlockModes(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
         "enemy_unlocks": Options.EnemyUnlocks.option_global,
         "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_global,
         "purple_switches": Options.PurpleSwitches.option_global,
+        "bobomb_buddies": Options.BobombBuddies.option_global,
+        "treasure_chests": Options.TreasureChests.option_global,
     }
 
     def test_global_items_replace_per_level_items(self):
@@ -200,8 +227,10 @@ class TestRainbowRideNotShuffledUnlockModes(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
         "enemy_unlocks": Options.EnemyUnlocks.option_not_shuffled,
         "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
-        "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+        "level_features": Options.LevelFeatures.option_false,
         "rainbow_ride_carpets": Options.RainbowRideCarpets.option_false,
+        "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+        "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
     }
 
     def test_not_shuffled_items_require_no_inventory(self):

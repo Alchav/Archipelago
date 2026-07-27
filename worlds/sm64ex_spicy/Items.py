@@ -138,17 +138,51 @@ simple_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Shifting Sand Land - Pyramid Elevator": SM64ItemData(sm64ex_base_id + 301),
     "Wet-Dry World - Water Level Diamond": SM64ItemData(sm64ex_base_id + 305),
     "Tick Tock Clock - Spinners": SM64ItemData(sm64ex_base_id + 319),
+    "Cool, Cool Mountain - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 920, progression_deprioritized),
+    "Shifting Sand Land - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 921, progression_deprioritized),
+    "Snowman's Land - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 922, progression_deprioritized),
+    "Wet-Dry World - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 923, progression_deprioritized),
+    "Tall, Tall Mountain - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 924, progression_deprioritized),
+    "Tiny-Huge Island - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 925, progression_deprioritized),
+    "Rainbow Ride - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 926, progression_deprioritized),
+    "Wing Mario Over the Rainbow - Bob-omb Buddy": SM64ItemData(
+        sm64ex_base_id + 927, progression_deprioritized),
+    "Jolly Roger Bay - Treasure Chests": SM64ItemData(sm64ex_base_id + 929),
+    "Dire, Dire Docks - Treasure Chests": SM64ItemData(sm64ex_base_id + 930),
 }
 
 global_checkerboard_item_names = ("Checkerboard Platforms",)
 global_rolling_log_item_names = ("Rolling Logs",)
 global_purple_switch_item_names = ("Purple Switches",)
+global_bobomb_buddy_item_names = ("Bob-omb Buddies",)
+global_treasure_chest_item_names = ("Treasure Chests",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
     "Rolling Logs": SM64ItemData(sm64ex_base_id + 302),
     "Purple Switches": SM64ItemData(sm64ex_base_id + 303),
+    "Bob-omb Buddies": SM64ItemData(sm64ex_base_id + 928),
+    "Treasure Chests": SM64ItemData(sm64ex_base_id + 931),
 }
+
+per_level_bobomb_buddy_item_names = (
+    "Bob-omb Battlefield - Bob-omb Buddy",
+    "Whomp's Fortress - Bob-omb Buddy",
+    "Jolly Roger Bay - Bob-omb Buddy",
+    "Cool, Cool Mountain - Bob-omb Buddy",
+    "Shifting Sand Land - Bob-omb Buddy",
+    "Snowman's Land - Bob-omb Buddy",
+    "Wet-Dry World - Bob-omb Buddy",
+    "Tall, Tall Mountain - Bob-omb Buddy",
+    "Tiny-Huge Island - Bob-omb Buddy",
+    "Rainbow Ride - Bob-omb Buddy",
+    "Wing Mario Over the Rainbow - Bob-omb Buddy",
+)
+
+per_level_treasure_chest_item_names = (
+    "Jolly Roger Bay - Treasure Chests",
+    "Dire, Dire Docks - Treasure Chests",
+)
 
 checkerboard_item_data_table: dict[str, SM64ItemData] = {
     "Bob-omb Battlefield - Checkerboard Platform": SM64ItemData(sm64ex_base_id + 306, filler),
@@ -904,6 +938,14 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Checkerboard Platforms": set(checkerboard_item_data_table),
     "Per-Level Rolling Logs": set(rolling_log_item_data_table),
     "Per-Level Purple Switches": set(purple_switch_item_data_table),
+    "Bob-omb Buddy Unlocks": (
+        set(global_bobomb_buddy_item_names)
+        | set(per_level_bobomb_buddy_item_names)
+    ),
+    "Treasure Chest Unlocks": (
+        set(global_treasure_chest_item_names)
+        | set(per_level_treasure_chest_item_names)
+    ),
     "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
     "Coin Object Unlocks": set(global_coin_object_item_data_table) | set(per_level_coin_object_item_data_table),
     "Global Coin Object Unlocks": set(global_coin_object_item_data_table),

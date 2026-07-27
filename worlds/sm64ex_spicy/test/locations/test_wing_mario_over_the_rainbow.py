@@ -48,7 +48,8 @@ class TestWingMarioOverTheRainbowLocations(SM64TestBase):
             ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, flight],
 
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, wing_cap],
-            ["Wing Mario Over the Rainbow - Bob-omb Buddy", True, flight],
+            ["Wing Mario Over the Rainbow - Bob-omb Buddy", True,
+             flight + ["Wing Mario Over the Rainbow - Bob-omb Buddy"]],
             ["Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up", False, flight],
             ["Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up", True,
              flight + ["Wing Mario Over the Rainbow - Trigger 1-Ups"]],
@@ -114,9 +115,10 @@ class TestWingMarioOverTheRainbowLeapOfFaith(SM64TestBase):
 
     def test_leap_of_faith_routes(self):
         leap = ["Long Jump", "Ledge Grab"]
+        buddy_leap = leap + ["Wing Mario Over the Rainbow - Bob-omb Buddy"]
         self.run_location_tests([
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, ["Long Jump"]],
-            ["Wing Mario Over the Rainbow - Bob-omb Buddy", True, leap],
+            ["Wing Mario Over the Rainbow - Bob-omb Buddy", True, buddy_leap],
             ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, ["Long Jump"]],
             ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, leap],
             ["Wing Mario Over the Rainbow - Red Coins", False, [
@@ -143,6 +145,7 @@ class TestWingMarioOverTheRainbowLeapWithoutLedgeGrab(SM64TestBase):
     def test_leap_of_faith_without_ledge_grab_routes(self):
         self.run_location_tests([
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, []],
-            ["Wing Mario Over the Rainbow - Bob-omb Buddy", True, ["Long Jump"]],
+            ["Wing Mario Over the Rainbow - Bob-omb Buddy", True,
+             ["Long Jump", "Wing Mario Over the Rainbow - Bob-omb Buddy"]],
             ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, ["Long Jump"]],
         ], starting_regions=["Wing Mario Over the Rainbow"])

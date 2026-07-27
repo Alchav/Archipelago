@@ -12,7 +12,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
-    global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table
+    global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table, \
+    per_level_bobomb_buddy_item_names
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -93,14 +94,16 @@ class UncollectTrapWithPermanentCoinsTestBase(SM64TestBase):
 class PerLevelOptionAliasTest(unittest.TestCase):
     def test_individual_aliases_per_level(self):
         option_classes = (
-            Options.CheckerboardPlatforms,
-            Options.RollingLogs,
-            Options.PurpleSwitches,
             Options.CoinObjectUnlocks,
             Options.EnemyUnlocks,
             Options.OneUpMushroomUnlocks,
             Options.BowserBombs,
             Options.BowserStage1Ups,
+            Options.CheckerboardPlatforms,
+            Options.RollingLogs,
+            Options.PurpleSwitches,
+            Options.TreasureChests,
+            Options.BobombBuddies,
             Options.TripleJump,
         )
         for option_class in option_classes:
@@ -312,6 +315,18 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Bowser Stage Extra 1-Ups": 3626556,
             "Bowser in the Dark World - Extra 1-Ups": 3626557,
             "Bowser in the Fire Sea - Extra 1-Ups": 3626558,
+            "Cool, Cool Mountain - Bob-omb Buddy": 3626920,
+            "Shifting Sand Land - Bob-omb Buddy": 3626921,
+            "Snowman's Land - Bob-omb Buddy": 3626922,
+            "Wet-Dry World - Bob-omb Buddy": 3626923,
+            "Tall, Tall Mountain - Bob-omb Buddy": 3626924,
+            "Tiny-Huge Island - Bob-omb Buddy": 3626925,
+            "Rainbow Ride - Bob-omb Buddy": 3626926,
+            "Wing Mario Over the Rainbow - Bob-omb Buddy": 3626927,
+            "Bob-omb Buddies": 3626928,
+            "Jolly Roger Bay - Treasure Chests": 3626929,
+            "Dire, Dire Docks - Treasure Chests": 3626930,
+            "Treasure Chests": 3626931,
         }
         item_data = {
             **feature_item_data_table,
@@ -406,13 +421,22 @@ class FeatureItemPoolTestBase(SM64TestBase):
         for item_name in {
                 **simple_arbitrary_item_data_table,
                 **global_arbitrary_item_data_table,
-                **checkerboard_item_data_table,
-                **rolling_log_item_data_table,
-                **purple_switch_item_data_table,
         }:
+            if item_name in {
+                    "Bob-omb Buddies",
+                    "Jolly Roger Bay - Treasure Chests",
+                    "Dire, Dire Docks - Treasure Chests",
+            }:
+                continue
             with self.subTest("Default arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
                 self.assertNotIn(item_name, precollected_names)
+
+        for item_name in per_level_bobomb_buddy_item_names:
+            if item_name in feature_item_data_table:
+                continue
+            with self.subTest("Non-act buddy in StartInventory", item=item_name):
+                self.assertEqual(start_inventory[item_table[item_name]], 1)
 
     def test_precollected_items_are_only_added_to_apsm64ex_start_inventory(self):
         self.multiworld.push_precollected(self.world.create_item("Dark World Key"))
@@ -757,9 +781,20 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     options = {
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
         "rolling_logs": Options.RollingLogs.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     }
 
     def test_individual_arbitrary_items_are_generated(self):
@@ -775,11 +810,7 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
 
 class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
     options = {
-        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_false,
-        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_false,
-        "checkerboard_platforms": Options.CheckerboardPlatforms.option_not_shuffled,
-        "rolling_logs": Options.RollingLogs.option_not_shuffled,
-        "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+        "level_features": Options.LevelFeatures.option_false,
     }
 
     def test_unshuffled_arbitrary_items_are_not_generated(self):
@@ -787,9 +818,9 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Hazy Maze Cave - Swimming Beast",
                 "Tick Tock Clock - Spinners",
                 "Checkerboard Platforms",
-                "Lethal Lava Land - Rolling Log",
+                "Rolling Logs",
                 "Purple Switches",
-                "Bowser in the Sky - Purple Switch",
+                "Treasure Chests",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -801,9 +832,9 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Hazy Maze Cave - Swimming Beast",
                 "Tick Tock Clock - Spinners",
                 "Checkerboard Platforms",
-                "Lethal Lava Land - Rolling Log",
+                "Rolling Logs",
                 "Purple Switches",
-                "Bowser in the Sky - Purple Switch",
+                "Treasure Chests",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
@@ -865,9 +896,7 @@ class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 class UnshuffledBowserArenaBombItemPoolTestBase(SM64TestBase):
     def test_bowser_arena_bombs_are_start_inventory_slot_data_only(self):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
-        self.assertEqual(start_inventory[item_table["Progressive Bowser Arena Bomb"]], 4)
-        self.assertEqual(
-            start_inventory[item_table["Bowser in the Sky - Progressive Bowser Arena Bomb"]], 1)
+        self.assertEqual(start_inventory[item_table["Progressive Bowser Arena Bomb"]], 5)
         for item_name in bowser_bomb_item_data_table:
             self.assertEqual(len(self.get_items_by_name(item_name)), 0)
 
@@ -876,9 +905,9 @@ class GlobalBowserArenaBombItemPoolTestBase(SM64TestBase):
     options = {"bowser_bombs": Options.BowserBombs.option_global}
 
     def test_global_bowser_arena_bombs_are_generated(self):
-        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 4)
+        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 5)
         self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 1)
+            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 0)
         self.assertEqual(
             len(self.get_items_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")), 0)
         self.assertEqual(
@@ -1289,6 +1318,7 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
         "marios_hat": Options.MariosHat.option_true,
+        "level_features": Options.LevelFeatures.option_true,
         "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
         "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
         "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
@@ -1300,6 +1330,8 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
         "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
         "rolling_logs": Options.RollingLogs.option_per_level,
         "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
         "triple_jump": Options.TripleJump.option_per_level,
         "long_jump": Options.LongJump.option_per_level,
         "backflip": Options.Backflip.option_per_level,
@@ -1600,7 +1632,4 @@ class NoStrictRequirementsTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "buddy_checks": Options.BuddyChecks.option_true,
-        "strict_move_requirements": Options.StrictMoveRequirements.option_false,
-        "strict_cap_requirements": Options.StrictCapRequirements.option_false,
-        "strict_cannon_requirements": Options.StrictCannonRequirements.option_false,
     }

@@ -11,8 +11,20 @@ WDW_OPTIONS = {
     "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-    "purple_switches": Options.PurpleSwitches.option_per_level,
-    "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+    "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_per_level,
+        "rolling_logs": Options.RollingLogs.option_per_level,
+        "purple_switches": Options.PurpleSwitches.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "treasure_chests": Options.TreasureChests.option_per_level,
     "per_level_cap_items": Options.PerLevelCapItems.option_true,
     "wet_dry_world_coin_star_requirement": 1,
     "triple_jump": Options.TripleJump.option_global,
@@ -134,8 +146,10 @@ class TestWetDryWorldHighLocations(SM64TestBase):
     def test_highest_water_buddy_route(self):
         self.run_location_tests([
             ["Wet-Dry World - Bob-omb Buddy", False, []],
-            ["Wet-Dry World - Bob-omb Buddy", True, ["Backflip"]],
-            ["Wet-Dry World - Bob-omb Buddy", True, ["Side Flip"]],
+            ["Wet-Dry World - Bob-omb Buddy", True,
+             ["Backflip", "Wet-Dry World - Bob-omb Buddy"]],
+            ["Wet-Dry World - Bob-omb Buddy", True,
+             ["Side Flip", "Wet-Dry World - Bob-omb Buddy"]],
         ], starting_regions=["Wet-Dry World High"])
 
 
@@ -193,7 +207,20 @@ class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
         **WDW_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
         "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "level_features": Options.LevelFeatures.option_true,
+        "hazy_maze_cave_swimming_beast": Options.HazyMazeCaveSwimmingBeast.option_true,
+        "rainbow_ride_carpets": Options.RainbowRideCarpets.option_true,
+        "tiny_huge_island_warp_pipes": Options.TinyHugeIslandWarpPipes.option_true,
+        "cool_cool_mountain_baby_penguins": Options.CoolCoolMountainBabyPenguins.option_true,
+        "snowmans_land_penguin": Options.SnowmansLandPenguin.option_true,
+        "shifting_sand_land_pyramid_elevator": Options.ShiftingSandLandPyramidElevator.option_true,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_true,
+        "tick_tock_clock_spinners": Options.TickTockClockSpinners.option_true,
+        "checkerboard_platforms": Options.CheckerboardPlatforms.option_global,
+        "rolling_logs": Options.RollingLogs.option_global,
         "purple_switches": Options.PurpleSwitches.option_global,
+        "bobomb_buddies": Options.BobombBuddies.option_global,
+        "treasure_chests": Options.TreasureChests.option_global,
     }
 
     def test_global_items_replace_per_level_items(self):
@@ -216,7 +243,10 @@ class TestWetDryWorldNotShuffledUnlockModes(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_disabled,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
         "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "level_features": Options.LevelFeatures.option_false,
+        "wet_dry_world_water_level_diamond": Options.WetDryWorldWaterLevelDiamond.option_false,
         "purple_switches": Options.PurpleSwitches.option_not_shuffled,
+        "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
     }
 
     def test_not_shuffled_items_require_no_inventory(self):

@@ -163,7 +163,11 @@ def evaluate_coins(
     cache = getattr(state, "sm64_coin_evaluation_cache", None)
     if cache is None:
         cache = {}
-        state.sm64_coin_evaluation_cache = cache
+        try:
+            state.sm64_coin_evaluation_cache = cache
+        except AttributeError:
+            # Lightweight evaluator tests may use an immutable stand-in state.
+            pass
 
     cache_key = (player, course_name)
     cached = cache.get(cache_key)
