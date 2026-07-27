@@ -154,6 +154,29 @@ def get_coin_evaluator(course_name: str) -> CoinEvaluatorRegistration:
         raise KeyError(f"No coin evaluator is registered for {course_name}") from error
 
 
+def evaluate_coins(
+        state: CollectionState,
+        player: int,
+        course_name: str,
+        required_coins: int,
+) -> bool | CoinEvaluation:
+    cache = getattr(state, "sm64_coin_evaluation_cache", None)
+    if cache is None:
+        cache = {}
+        state.sm64_coin_evaluation_cache = cache
+
+    cache_key = (player, course_name)
+    cached = cache.get(cache_key)
+    if isinstance(cached, CoinEvaluation):
+        return cached
+
+    result = get_coin_evaluator(course_name).evaluator(
+        state, player, required_coins)
+    if isinstance(result, CoinEvaluation):
+        cache[cache_key] = result
+    return result
+
+
 def register_red_coin_evaluator(course_name: str, evaluator: RedCoinEvaluator) -> None:
     previous = _red_coin_evaluators.get(course_name)
     if previous is not None and previous is not evaluator:
@@ -258,8 +281,8 @@ class CanCollectCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         force_recalculate: ClassVar[bool] = True
 
         def _evaluate_registered(self, state: CollectionState) -> bool | CoinEvaluation:
-            result = get_coin_evaluator(self.course_name).evaluator(
-                state, self.player, self.required_coins)
+            result = evaluate_coins(
+                state, self.player, self.course_name, self.required_coins)
             if not isinstance(result, (bool, CoinEvaluation)):
                 raise TypeError(
                     f"The coin evaluator for {self.course_name} returned "

@@ -21,9 +21,9 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
 from .Rules import set_rules
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
-from BaseClasses import Item, Tutorial
+from BaseClasses import CollectionState, Item, Region, Tutorial
 from Options import OptionError
-from ..AutoWorld import World, WebWorld
+from ..AutoWorld import WebWorld, World
 
 
 class SM64Web(WebWorld):
@@ -68,6 +68,32 @@ class SM64World(World):
     number_of_stars: int
     move_rando_bitvec: int
     filler_count: int
+
+    @staticmethod
+    def _clear_coin_evaluation_cache(state: CollectionState, player: int) -> None:
+        cache = getattr(state, "sm64_coin_evaluation_cache", None)
+        if cache is None:
+            return
+        for cache_key in tuple(cache):
+            if cache_key[0] == player:
+                del cache[cache_key]
+
+    def collect(self, state: CollectionState, item: Item) -> bool:
+        changed = super().collect(state, item)
+        if changed:
+            self._clear_coin_evaluation_cache(state, self.player)
+        return changed
+
+    def remove(self, state: CollectionState, item: Item) -> bool:
+        changed = super().remove(state, item)
+        if changed:
+            self._clear_coin_evaluation_cache(state, self.player)
+        return changed
+
+    def reached_region(self, state: CollectionState, region: Region) -> None:
+        super().reached_region(state, region)
+        self._clear_coin_evaluation_cache(state, self.player)
+
     star_costs: typing.Dict[str, int]
     coinsanity_location_names: typing.Tuple[str, ...]
     music_slot_data: typing.Dict[str, typing.Any] | None
