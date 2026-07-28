@@ -290,7 +290,7 @@ class ArchipeladokuWorld(World):
 
         if self.multiworld.players > 1:
             nothing_count = self.filler_counts.get("Nothing", 0)
-            pre_fill_nothing_count = nothing_count * self.options.pre_fill_nothings_percent // 100
+            pre_fill_nothing_count = 0 # nothing_count * self.options.pre_fill_nothings_percent // 100
 
         for item_name, count in self.filler_counts.items():
             for _ in range(count):

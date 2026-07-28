@@ -151,9 +151,14 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
     while any(reachable_items.values()) and locations:
         if one_item_per_player:
             # grab one item per player
+            items_to_place = []
             while len(items_to_place) < len(reachable_items):
-                items_to_place = [items.pop()
+                new_items = [items.pop()
                                   for items in reachable_items.values() if items]
+                if new_items:
+                    items_to_place += new_items
+                else:
+                    break
             # items_to_place += [items.pop()
             #                   for items in reachable_items.values() if items]
             # items_to_place += [items.pop()
@@ -1119,6 +1124,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # if option == "o":
         #     sphere = [location for location in sphere if location.player in owner_groups[player_to_owner[player]]]
 
+        sphere = [
+            location for location in sphere
+            if location.progress_type != LocationProgressType.EXCLUDED
+        ]
         filler_sphere = sorted([location for location in sphere if location.address and not location.item])
         # filler_sphere = None
         if not filler_sphere:
@@ -2066,14 +2075,13 @@ def compress_owner_spheres(multiworld):
             for owner, i in spheres_per_owner.items():
                 logging.info(f"{owner_names[owner]}: {i}")
             logging.info(f"Max sphere: {max_sphere}")
-        logging.info(f"Highest sphere: {highest_sphere}")
         owners_above_max_sphere = [owner for owner in owner_groups if spheres_per_owner[owner] > max_sphere]
         if highest_sphere <= max_sphere:
             break
 
         # active_games_x = {location.player for location in spheres[max_sphere]}
         i += 1
-        logging.info(f"compress sphere loop {i}. Number of spheres: {len(spheres)}")
+        logging.info(f"compress sphere loop {i}. Highest sphere: {highest_sphere}")
         active_games = []
         for owner in owners_above_max_sphere:
             group = owner_groups[owner]
