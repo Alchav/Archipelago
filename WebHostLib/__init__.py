@@ -13,6 +13,8 @@ from werkzeug.routing import BaseConverter
 from Utils import title_sorted, get_file_safe_name
 from .cli import CLI
 
+CURRENT_ROOM_ALIAS = "172"
+
 UPLOAD_FOLDER = os.path.relpath('uploads')
 LOGS_FOLDER = os.path.relpath('logs')
 os.makedirs(LOGS_FOLDER, exist_ok=True)
@@ -72,13 +74,49 @@ Compress(app)
 CLI(app)
 
 
+def _current_room_ids() -> tuple[uuid.UUID, uuid.UUID | None] | None:
+    """Return the newest room's internal room and tracker IDs.
+
+    The public WebHost is intentionally a single-room service, so its newest
+    room can have a stable, human-friendly URL without reusing database keys.
+    Importing here avoids a models/__init__ import cycle.
+    """
+    from pony.orm import db_session, desc
+    from .models import Room
+
+    with db_session:
+        room = Room.select().order_by(lambda candidate: desc(candidate.creation_time)).first()
+        if room is None:
+            return None
+        return room.id, room.tracker
+
+
 def to_python(value: str) -> uuid.UUID:
+    if value == CURRENT_ROOM_ALIAS:
+        current_room = _current_room_ids()
+        if current_room is None:
+            raise ValueError("No current room")
+
+        room_id, tracker_id = current_room
+        # All tracker, player-tracker, sphere-tracker, and tracker API routes
+        # include "tracker" in their path. Everything else using this alias is
+        # a room route (room page, log, status, or download).
+        from flask import request
+        if "tracker" in request.path:
+            if tracker_id is None:
+                raise ValueError("Current room has no tracker")
+            return tracker_id
+        return room_id
+
     if "=" in value or any(c.isspace() for c in value):
         raise ValueError("Invalid UUID format")
     return uuid.UUID(bytes=base64.urlsafe_b64decode(value + '=' * (-len(value) % 4)))
 
 
 def to_url(value: uuid.UUID) -> str:
+    current_room = _current_room_ids()
+    if current_room is not None and value in current_room:
+        return CURRENT_ROOM_ALIAS
     return base64.urlsafe_b64encode(value.bytes).rstrip(b'=').decode('ascii')
 
 

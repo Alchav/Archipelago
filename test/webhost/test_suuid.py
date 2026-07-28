@@ -74,3 +74,22 @@ class TestSUUID(TestBase):
     def test_filter_bad_type(self) -> None:
         with self.assertRaises(Exception):  # currently the type is not checked directly, so any exception is valid
             self.filter(None)
+
+    def test_current_room_uses_stable_alias(self) -> None:
+        from pony.orm import db_session
+        from WebHostLib.models import Room, Seed
+
+        owner = uuid4()
+        tracker = uuid4()
+        with db_session:
+            seed = Seed(multidata=b"", owner=owner)
+            room = Room(seed=seed, owner=owner, tracker=tracker)
+            room_id = room.id
+
+        self.assertEqual("172", self.converter.to_url(room_id))
+        self.assertEqual("172", self.converter.to_url(tracker))
+
+        with self.app.test_request_context("/room/172"):
+            self.assertEqual(room_id, self.converter.to_python("172"))
+        with self.app.test_request_context("/tracker/172"):
+            self.assertEqual(tracker, self.converter.to_python("172"))
