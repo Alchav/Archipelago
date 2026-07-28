@@ -1,0 +1,177 @@
+from dataclasses import dataclass
+from Options import Choice, NamedRange, PerGameCommonOptions, Range
+
+
+class BlockSize(Choice):
+    """The size of a single block (and the width/height of each board)."""
+    display_name = "Block Size"
+    option_4 = 4
+    option_6 = 6
+    option_8 = 8
+    option_9 = 9
+    option_12 = 12
+    option_16 = 16
+    default = 9
+
+
+class BoardsPerCluster(Choice):
+    """How many boards to put in each cluster of overlapping boards.
+    1 creates individual boards without clusters, 100 puts all boards into a
+    single big cluster.
+    """
+    display_name = "Boards per Cluster"
+    option_1 = 1
+    option_5 = 5
+    option_8 = 8
+    option_13 = 13
+    option_100 = 100
+    default = 5
+
+
+class NumberOfBoards(Range):
+    """How many boards to generate. Maximum depend on block size:
+    - 4-9: 100 boards
+    - 12: 64 boards
+    - 16: 36 boards
+    """
+    display_name = "Number of Boards"
+    range_start = 3
+    range_end = 100
+    default = 5
+
+
+class Difficulty(Choice):
+    """The overall difficulty level. Solving techniques required:
+    - Beginner: Naked/hidden singles.
+    - Easy: Pointing pairs, box line reduction.
+    - Medium: Naked pairs/triples.
+    - Hard: Hidden pairs/triples.
+    """
+    display_name = "Difficulty"
+    option_beginner = 1
+    option_easy = 2
+    option_medium = 3
+    option_hard = 4
+    default = 2
+
+
+class Progression(Choice):
+    """How blocks are unlocked during the game.
+    - Fixed: Blocks are unlocked by progressive block items in a fixed order. Smoother progression.
+    - Shuffled: Blocks are unlocked by specific block items. More chaotic progression.
+    """
+    display_name = "Block Unlocks"
+    option_fixed = "fixed"
+    option_shuffled = "shuffled"
+    default = "shuffled"
+
+
+class DuplicateProgression(Range):
+    """Percent of progression items that should be duplicated.
+    - For Fixed progression higher values may lead to progression being too fast and as such a
+      lower value is recommended.
+    - For Shuffled progression this can safely be set to 100% to make progression a bit faster.
+      The blocks to duplicate are chosen randomly if not 100%, though each block can only be duplicated once.
+    """
+    display_name = "Duplicate Progression Items"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
+class LocationScouting(Choice):
+    """How scouting of locations is handled.
+    - Auto: Locations are scouted automatically when fully revealed.
+    - Manual: Locations can be scouted manually.
+    - Disabled: Locations cannot be scouted.
+    """
+    display_name = "Location Scouting"
+    option_auto = "auto"
+    option_manual = "manual"
+    option_disabled = "disabled"
+    default = "manual"
+
+
+class SolveSelectedCellRatio(Range):
+    """Ratio of Solve Selected Cell filler items to number of boards, in percent."""
+    display_name = "Filler Ratio: Solve Selected Cell"
+    range_start = 0
+    range_end = 5000
+    default = 100
+
+
+class SolveRandomCellRatio(Range):
+    """Ratio of Solve Random Cell filler items to number of boards, in percent."""
+    display_name = "Filler Ratio: Solve Random Cell"
+    range_start = 0
+    range_end = 5000
+    default = 150
+
+
+class RemoveRandomCandidateRatio(Range):
+    """Ratio of Remove Random Candidate filler items to number of boards, in percent."""
+    display_name = "Filler Ratio: Remove Random Candidate"
+    range_start = 0
+    range_end = 5000
+    default = 300
+
+
+class EmojiTrapRatio(Range):
+    """Ratio of Emoji Trap filler items to number of boards, in percent.
+    When received your numbers will be replaced with emojis for a time.
+    """
+    display_name = "Filler Ratio: Emoji Trap"
+    range_start = 0
+    range_end = 5000
+    default = 20
+
+
+class DiscoTrapRatio(Range):
+    """Ratio of Disco Trap filler items to number of boards, in percent.
+    When received all cells will shift colors for a time.
+    """
+    display_name = "Filler Ratio: Disco Trap"
+    range_start = 0
+    range_end = 5000
+    default = 20
+
+
+class TunnelVisionTrapRatio(Range):
+    """Ratio of Tunnel Vision Trap filler items to number of boards, in percent.
+    When received you will only be able to see a small area of the board for a time.
+    """
+    display_name = "Filler Ratio: Tunnel Vision Trap"
+    range_start = 0
+    range_end = 5000
+    default = 20
+
+
+class PreFillNothingsPercent(Range):
+    """Percentage of Nothing items that should be pre-filled, forcing them to be placed in
+    an Archipeladoku game and thus excluding them from other games.
+    Caution: This reduces the number of filler items in the item pool. Having few fillers can lead
+    to increased generation times or even generation failures. As long as you don't remove other
+    filler items this shouldn't be an issue though, even at 100%.
+    """
+    display_name = "Pre-fill Nothings Percentage"
+    range_start = 0
+    range_end = 100
+    default = 50
+
+
+@dataclass
+class ArchipeladokuOptions(PerGameCommonOptions):
+    block_size: BlockSize
+    boards_per_cluster: BoardsPerCluster
+    number_of_boards: NumberOfBoards
+    difficulty: Difficulty
+    progression: Progression
+    duplicate_progression: DuplicateProgression
+    location_scouting: LocationScouting
+    solve_selected_cell_ratio: SolveSelectedCellRatio
+    solve_random_cell_ratio: SolveRandomCellRatio
+    remove_random_candidate_ratio: RemoveRandomCandidateRatio
+    emoji_trap_ratio: EmojiTrapRatio
+    disco_trap_ratio: DiscoTrapRatio
+    tunnel_vision_trap_ratio: TunnelVisionTrapRatio
+    pre_fill_nothings_percent: PreFillNothingsPercent

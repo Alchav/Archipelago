@@ -1,0 +1,447 @@
+from typing import Any
+
+from . import options, utils
+from BaseClasses import CollectionState, Item, ItemClassification, Location, Region, MultiWorld
+from Options import OptionError
+from collections import defaultdict
+from worlds.AutoWorld import World
+from .utils import Cluster
+import Fill
+
+
+class ArchipeladokuWorld(World):
+    game = "Archipeladoku"
+
+    options_dataclass = options.ArchipeladokuOptions
+    options: options.ArchipeladokuOptions
+
+    item_name_to_id = utils.item_name_to_id
+    location_name_to_id = utils.location_name_to_id
+    item_name_groups = utils.item_name_groups
+    location_name_groups = utils.location_name_groups
+
+    block_unlock_order: list[tuple[int, int]]
+    clusters: dict[int, Cluster]
+    filler_counts: dict[str, int]
+    pre_fill_items: list[Item]
+
+
+    def __init__(self, multiworld: MultiWorld, player: int):
+        super().__init__(multiworld, player)
+
+        self.block_unlock_order = []
+        self.clusters = {}
+        self.duplicate_progression_count = 0
+        self.filler_counts = {}
+        self.pre_fill_items = []
+        self.item_name_groups = self.__class__.item_name_groups.copy()
+        self.location_name_groups = self.__class__.location_name_groups.copy()
+
+        # To be filled in generate_early based on options
+        self.item_name_groups["Blocks"] = set()
+        self.location_name_groups["Boards"] = set()
+        self.location_name_groups["Rows"] = set()
+        self.location_name_groups["Columns"] = set()
+        self.location_name_groups["Blocks"] = set()
+
+
+    def generate_early(self):
+
+        board_positions = utils.position_boards(
+            self.options.block_size.value,
+            self.options.boards_per_cluster.value,
+            utils.get_number_of_boards(
+                self.options.block_size.value,
+                self.options.number_of_boards.value,
+            ),
+        )
+
+        grouped_positions = utils.group_positions(
+            self.options.block_size.value,
+            board_positions,
+        )
+
+        for idx, positions in grouped_positions.items():
+            group_blocks = set([block for pos in positions for block in utils.build_blocks(self.options.block_size.value, pos)])
+            cluster = utils.Cluster(
+                id=idx,
+                blocks=group_blocks,
+                positions=set(positions)
+            )
+
+            self.clusters[idx] = cluster
+
+        self.block_unlock_order = utils.build_block_unlock_order(
+            self.options.block_size.value,
+            utils.get_number_of_boards(
+                self.options.block_size.value,
+                self.options.number_of_boards.value,
+            ),
+            self.clusters,
+            self.random
+        )
+
+        initial_unlock_count = self.options.block_size.value
+        progression_items = len(self.block_unlock_order) - initial_unlock_count
+        self.duplicate_progression_count = progression_items * self.options.duplicate_progression.value // 100
+
+        self.filler_counts = utils.get_filler_counts(self.options, self.duplicate_progression_count)
+
+        for ( row, col ) in self.block_unlock_order[initial_unlock_count:]:
+            match self.options.progression:
+                case options.Progression.option_fixed:
+                    self.item_name_groups["Blocks"].add("Progressive Block")
+                    break
+
+                case options.Progression.option_shuffled:
+                    self.item_name_groups["Blocks"].add(utils.block_item_name(row, col))
+
+                case _:
+                    raise ValueError("Invalid progression option")
+
+        for cluster in self.clusters.values():
+            for (row, col) in cluster.blocks:
+                self.location_name_groups["Blocks"].add(utils.block_name(row, col))
+
+            for (row, col) in cluster.positions:
+                self.location_name_groups["Boards"].add(utils.board_name(row, col))
+
+                for offset in range(self.options.block_size.value):
+                    self.location_name_groups["Rows"].add(utils.row_name(row + offset, col))
+                    self.location_name_groups["Columns"].add(utils.col_name(row, col + offset))
+
+        unused_blocks = self.__class__.item_name_groups["Blocks"] - self.item_name_groups["Blocks"]
+        if unused_blocks:
+            self.options.local_items.value -= unused_blocks
+            self.options.non_local_items.value -= unused_blocks
+
+        locations_groups = ["Boards", "Rows", "Columns", "Blocks"]
+        for group in locations_groups:
+            unused = self.__class__.location_name_groups[group] - self.location_name_groups[group]
+            if unused:
+                self.options.priority_locations.value -= unused
+                self.options.exclude_locations.value -= unused
+
+
+    def create_regions(self) -> None:
+
+        menu = Region("Menu", self.player, self.multiworld)
+        self.multiworld.regions.append(menu)
+
+        initial_unlock_count = self.options.block_size.value
+        initial_blocks = set(self.block_unlock_order[:initial_unlock_count])
+        cluster_unlock_requirements = utils.calculate_cluster_unlock_requirements(
+            self.clusters,
+            self.block_unlock_order,
+            initial_unlock_count,
+        )
+
+        block_region_map = {}
+        block_cluster_map = defaultdict(list)
+        for cluster in self.clusters.values():
+            for block in cluster.blocks:
+                for position in cluster.positions:
+                    block_cluster_map[block].append(position)
+
+        for cluster in self.clusters.values():
+            region = Region(f"Board {cluster.id}", self.player, self.multiworld)
+            self.multiworld.regions.append(region)
+            connection = menu.connect(region)
+
+            match self.options.progression:
+                case options.Progression.option_fixed:
+                    connection.access_rule = lambda state, unlock_req=cluster_unlock_requirements[cluster.id]: \
+                        state.has("Progressive Block", self.player, unlock_req) if unlock_req > 0 else True
+
+                case options.Progression.option_shuffled:
+                    cluster_blocks = cluster.blocks.difference(initial_blocks)
+                    block_names = [utils.block_item_name(row, col) for (row, col) in cluster_blocks]
+
+                    connection.access_rule = lambda state, block_names=block_names: \
+                        state.has_all(block_names, self.player)
+
+                case _:
+                    raise ValueError("Invalid progression option")
+
+            # Add board locations
+            for (row, col) in cluster.positions:
+                loc = ArchipeladokuLocation(
+                    self.player,
+                    utils.board_name(row, col),
+                    utils.board_id(row, col),
+                    region,
+                )
+                region.locations.append(loc)
+
+                # Add row and column locations
+                for offset in range(self.options.block_size.value):
+                    loc = ArchipeladokuLocation(
+                        self.player,
+                        utils.row_name(row + offset, col),
+                        utils.row_id(row + offset, col),
+                        region,
+                    )
+                    region.locations.append(loc)
+
+                    loc = ArchipeladokuLocation(
+                        self.player,
+                        utils.col_name(row, col + offset),
+                        utils.col_id(row, col + offset),
+                        region,
+                    )
+                    region.locations.append(loc)
+
+            # Add block locations
+            for (row, col) in cluster.blocks:
+                block_clusters = block_cluster_map[(row, col)]
+                if block_region_map.get((row, col)) is None:
+                    if len(block_clusters) > 1:
+                        block_region = Region(
+                            f"Block {row},{col} Overlap",
+                            self.player,
+                            self.multiworld,
+                        )
+                        self.multiworld.regions.append(block_region)
+                        connection = region.connect(block_region)
+                        block_region_map[(row, col)] = block_region
+
+                    else:
+                        block_region = region
+
+                    loc = ArchipeladokuLocation(
+                        self.player,
+                        utils.block_name(row, col),
+                        utils.block_id(row, col),
+                        block_region,
+                    )
+                    block_region.locations.append(loc)
+
+                elif len(block_clusters) > 1:
+                    block_region = block_region_map[(row, col)]
+                    connection = region.connect(block_region)
+
+        victory_location = ArchipeladokuLocation(
+            self.player,
+            "Solve Everything",
+            None,
+            menu,
+        )
+        victory_item = ArchipeladokuItem(
+            "Victory",
+            ItemClassification.progression,
+            None,
+            self.player,
+        )
+        victory_location.place_locked_item(victory_item)
+
+        menu.locations.append(victory_location)
+
+        match self.options.progression:
+            case options.Progression.option_fixed:
+                last_cluster_requirement = max(cluster_unlock_requirements.values())
+                victory_location.access_rule = lambda state, last_cluster_requirement=last_cluster_requirement: \
+                    state.has("Progressive Block", self.player, last_cluster_requirement)
+
+            case options.Progression.option_shuffled:
+                all_blocks = [
+                    utils.block_item_name(row, col)
+                    for (row, col) in self.block_unlock_order[initial_unlock_count:]
+                    if row > 0
+                ]
+                victory_location.access_rule = lambda state, all_blocks=all_blocks: \
+                    state.has_all(all_blocks, self.player)
+
+            case _:
+                raise ValueError("Invalid progression option")
+
+        self.multiworld.completion_condition[self.player] = lambda state: \
+            state.has(victory_item.name, self.player)
+
+
+    def create_items(self) -> None:
+
+        initial_unlock_count = self.options.block_size.value
+        items = []
+
+        for ( row, col ) in self.block_unlock_order[initial_unlock_count:]:
+            match self.options.progression:
+                case options.Progression.option_fixed:
+                    item = self.create_item("Progressive Block")
+                    items.append(item)
+
+                case options.Progression.option_shuffled:
+                    item = self.create_item(utils.block_item_name(row, col))
+                    items.append(item)
+
+                case _:
+                    raise ValueError("Invalid progression option")
+
+        if self.duplicate_progression_count > 0:
+            items_to_duplicate = self.random.sample(
+                items,
+                self.duplicate_progression_count
+            )
+
+            for original_item in items_to_duplicate:
+                item = self.create_item(original_item.name)
+                items.append(item)
+
+        pre_fill_nothing_count = 0
+
+        if self.multiworld.players > 1:
+            nothing_count = self.filler_counts.get("Nothing", 0)
+            pre_fill_nothing_count = 0 # nothing_count * self.options.pre_fill_nothings_percent // 100
+
+        for item_name, count in self.filler_counts.items():
+            for _ in range(count):
+                item = self.create_item(item_name)
+
+                if item_name == "Nothing" and pre_fill_nothing_count > 0:
+                    self.pre_fill_items.append(item)
+                    pre_fill_nothing_count -= 1
+
+                else:
+                    items.append(item)
+
+        self.multiworld.itempool += items
+
+
+    def get_pre_fill_items(self) -> list["Item"]:
+
+        return self.pre_fill_items
+
+
+    @classmethod
+    def stage_pre_fill(cls, multiworld: MultiWorld) -> None:
+
+        pre_fill_items = []
+        fill_locations = []
+        backup_locations = []
+        empty_state = CollectionState(multiworld)
+
+        for world in multiworld.get_game_worlds("Archipeladoku"):
+            world_items = world.get_pre_fill_items()
+            world_item_count = len(world_items)
+
+            if not world_items:
+                continue
+
+            pre_fill_items.extend(world_items)
+
+            sphere_one_locs = multiworld.get_reachable_locations(empty_state, world.player)
+            world_locations = [
+                loc for loc in multiworld.get_unfilled_locations(world.player)
+                if loc not in sphere_one_locs
+                and loc.name not in world.options.priority_locations.value
+            ]
+            fill_locations.extend(world_locations[:world_item_count])
+            backup_locations.extend(world_locations[world_item_count:])
+
+        if not pre_fill_items:
+            return
+
+        if len(fill_locations) < len(pre_fill_items):
+            needed = len(pre_fill_items)
+            available = len(fill_locations) + len(backup_locations)
+
+            if available < needed:
+                raise OptionError(
+                    f"Archipeladoku: Not enough locations available for pre-fill. Needed {needed},"
+                    f" but only {available} were available. This is likely caused by too many"
+                    f" plando or priority locations."
+                )
+
+            diff = len(pre_fill_items) - len(fill_locations)
+            multiworld.random.shuffle(backup_locations)
+            fill_locations.extend(backup_locations[:diff])
+
+        multiworld.random.shuffle(pre_fill_items)
+        multiworld.random.shuffle(fill_locations)
+
+        for item in pre_fill_items:
+            fill_locations.pop().place_locked_item(item)
+
+
+    def fill_slot_data(self) -> dict[str, Any]:
+
+        return {
+            "blockSize": self.options.block_size.value,
+            "blockUnlockOrder": self.block_unlock_order,
+            "clusters": [cluster.positions for cluster in self.clusters.values()],
+            "difficulty": self.options.difficulty.value,
+            "locationScouting": self.options.location_scouting.value,
+            "progression": self.options.progression.value,
+            "seed": self.random.getrandbits(32),
+        }
+
+
+    def create_item(self, name: str) -> "ArchipeladokuItem":
+
+        id = self.item_name_to_id.get(name)
+
+        if id is None:
+            raise ValueError(f"Invalid item name: {name}")
+
+        if id < 100:
+            classification = ItemClassification.filler
+        elif id >= 100 and id < 200:
+            classification = ItemClassification.progression
+        elif id >= 200 and id < 300:
+            classification = ItemClassification.useful
+        elif id >= 400 and id < 500:
+            classification = ItemClassification.trap
+        elif id >= 1000000:
+            classification = ItemClassification.progression
+        else:
+            raise ValueError(f"Invalid item id: {id}")
+
+        return ArchipeladokuItem(
+            name,
+            classification,
+            id,
+            self.player,
+        )
+
+
+    def get_filler_item_name(self) -> str:
+
+        weights = self.get_filler_weights()
+        filler = self.random.choices(list(weights.keys()), weights=list(weights.values()))[0]
+
+        return filler
+
+
+    def get_filler_weights(self) -> dict[str, int]:
+
+        weights = {
+            "Solve Selected Cell": self.options.solve_selected_cell_ratio.value,
+            "Solve Random Cell": self.options.solve_random_cell_ratio.value,
+            "Remove Random Candidate": self.options.remove_random_candidate_ratio.value,
+            "Emoji Trap": self.options.emoji_trap_ratio.value,
+            "Disco Trap": self.options.disco_trap_ratio.value,
+            "Tunnel Vision Trap": self.options.tunnel_vision_trap_ratio.value,
+            "Nothing": self.get_nothing_weight(),
+        }
+
+        if all(weight == 0 for weight in weights.values()):
+            weights["Nothing"] = 1
+
+        return weights
+
+
+    def get_nothing_weight(self) -> int:
+
+        weight = self.options.block_size.value * 200 + 100 \
+            - self.options.solve_selected_cell_ratio.value \
+            - self.options.solve_random_cell_ratio.value \
+            - self.options.remove_random_candidate_ratio.value \
+
+        return max(0, weight)
+
+
+class ArchipeladokuLocation(Location):
+    game = "Archipeladoku"
+
+
+class ArchipeladokuItem(Item):
+    game = "Archipeladoku"

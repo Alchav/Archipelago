@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from worlds.alttp.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
+from worlds.alttp_beta.EnemyShuffle import RandomizedDungeonEnemyRoom, RandomizedDungeonEnemySprite
 
 from .TestDungeon import TestDungeon
 

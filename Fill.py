@@ -151,14 +151,20 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
     while any(reachable_items.values()) and locations:
         if one_item_per_player:
             # grab one item per player
-            items_to_place = [items.pop()
-                              for items in reachable_items.values() if items]
-            items_to_place += [items.pop()
-                              for items in reachable_items.values() if items]
-            items_to_place += [items.pop()
-                              for items in reachable_items.values() if items and items[0].game in ["Stardew Valley", "Archipeladoku"]]
-            items_to_place += [items.pop()
-                              for items in reachable_items.values() if items and items[0].game in ["Archipeladoku"]]
+            items_to_place = []
+            while len(items_to_place) < len(reachable_items):
+                new_items = [items.pop()
+                                  for items in reachable_items.values() if items]
+                if new_items:
+                    items_to_place += new_items
+                else:
+                    break
+            # items_to_place += [items.pop()
+            #                   for items in reachable_items.values() if items]
+            # items_to_place += [items.pop()
+            #                   for items in reachable_items.values() if items and items[0].game in ["Stardew Valley", "Archipeladoku", "Spicy Mycena 64"]]
+            # items_to_place += [items.pop()
+            #                   for items in reachable_items.values() if items and items[0].game in ["Archipeladoku", "Spicy Mycena 64"]]
         else:
             next_player = multiworld.random.choice([player for player, items in reachable_items.items() if items])
             items_to_place = []
@@ -606,6 +612,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     multiworld.random.shuffle(fill_locations)
     # get items to distribute
     itempool = sorted(multiworld.itempool)
+
+    itempool = [item for item in itempool if item.name not in ("Nothing", "1-Up Mushroom")]
+
     multiworld.random.shuffle(itempool)
 
     for player in multiworld.player_name:
@@ -824,9 +833,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             breakpoint()
     test_beatable()
     # breakpoint()
-    compress_spheres(multiworld, sphere_max)
 
-    # compress_owner_spheres(multiworld)
+    option = "o"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
+
+    if option == "o":
+        compress_owner_spheres(multiworld)
+    else:
+        compress_spheres(multiworld, sphere_max)
+
 
 
     test_beatable()
@@ -890,6 +904,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         if i.classification == ItemClassification.useful and game == "Terraria":
             return multiworld.random.randint(2, 3)
         if i.classification == ItemClassification.trap:
+            if i.name == "Uncollect Random Coin Trap":
+                return 1
             if game == "Super Mario Land 2":
                 return 1
             if game == "Tetris" and i.name == "Increase Speed":
@@ -897,6 +913,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if game == "Jigsaw":
                 return 1
             return 0
+        if i.classification & ItemClassification.progression and game == "Archipeladoku":
+            return multiworld.random.choice([1,2,2,3])
+        if i.classification & ItemClassification.progression and game == "Spicy Mycena 64":
+            return multiworld.random.choice([2,2,3])
         if i.classification & ItemClassification.progression and game == "Stardew Valley":
             if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
                            "Progressive Barn", "Progressive Fishing Rod", "Progressive Pickaxe", "Bridge Repair",
@@ -935,7 +955,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 return 2
             return 1
 
-    option = "r"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
@@ -1105,6 +1124,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         # if option == "o":
         #     sphere = [location for location in sphere if location.player in owner_groups[player_to_owner[player]]]
 
+        sphere = [
+            location for location in sphere
+            if location.progress_type != LocationProgressType.EXCLUDED
+        ]
         filler_sphere = sorted([location for location in sphere if location.address and not location.item])
         # filler_sphere = None
         if not filler_sphere:
@@ -2052,14 +2075,13 @@ def compress_owner_spheres(multiworld):
             for owner, i in spheres_per_owner.items():
                 logging.info(f"{owner_names[owner]}: {i}")
             logging.info(f"Max sphere: {max_sphere}")
-        logging.info(f"Highest sphere: {highest_sphere}")
         owners_above_max_sphere = [owner for owner in owner_groups if spheres_per_owner[owner] > max_sphere]
         if highest_sphere <= max_sphere:
             break
 
         # active_games_x = {location.player for location in spheres[max_sphere]}
         i += 1
-        logging.info(f"compress sphere loop {i}. Number of spheres: {len(spheres)}")
+        logging.info(f"compress sphere loop {i}. Highest sphere: {highest_sphere}")
         active_games = []
         for owner in owners_above_max_sphere:
             group = owner_groups[owner]

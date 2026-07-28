@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "902f840986705336c637e25d6b654315"
+RANDOMIZERBASEHASH: str = "b419a04b7fc6744137a379bccc2e436c"
 ROM_PLAYER_LIMIT: int = 255
 HINT_READ_TABLE_ADDRESS: int = 0x1863B0
 HINT_READ_TABLE_SIZE: int = 0x100
@@ -105,6 +105,7 @@ from .Items import item_table, item_name_groups, progression_items, key_ring_tab
 from .EntranceShuffle import door_addresses
 from .Graphics import patch_boss_prize_crystal_sprite_data
 from .Options import small_key_shuffle
+from .PuzzleShuffle import get_turtle_rock_peg_order_hint
 
 if TYPE_CHECKING:
     from . import ALTTPWorld
@@ -236,11 +237,11 @@ class LttPPatchExtensions(worlds.Files.APPatchExtension):
             if mode in ("good", "random"):
                 mode = "maseya"
 
-            rng = random.Random(patch["seed"])
+            palette_random = random.Random(patch["seed"])
 
             def next_color_generator():
                 while True:
-                    yield ColorF(rng.random(), rng.random(), rng.random())
+                    yield ColorF(palette_random.random(), palette_random.random(), palette_random.random())
 
             data_dir = local_path("data") if is_frozen() else None
             offsets_array = build_offsets({patch["option_name"]: True}, data_dir)
@@ -288,125 +289,6 @@ def _encrypt_range(rom, startaddress: int, length: int, key: bytes, cryptography
         data = bytes(rom.read_byte(startaddress + i + offset) for offset in range(8))
         data = cryptography.encrypt(data, key, padding=False)
         rom.write_bytes(startaddress + i, bytearray(data))
-
-
-class LocalRom:
-
-    def __init__(self, file, patch=True, vanillaRom=None, name=None, hash=None):
-        self.name = name
-        self.hash = hash
-        self.orig_buffer = None
-
-        with open(file, 'rb') as stream:
-            self.buffer = read_snes_rom(stream)
-        if patch:
-            self.patch_base_rom()
-            self.orig_buffer = self.buffer.copy()
-        if vanillaRom:
-            with open(vanillaRom, 'rb') as vanillaStream:
-                self.orig_buffer = read_snes_rom(vanillaStream)
-
-    def read_byte(self, address: int) -> int:
-        return self.buffer[address]
-
-    def write_byte(self, address: int, value: int):
-        self.write_bytes(address, (value,))
-
-    def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
-        values = bytes(values)
-        self.buffer[startaddress:startaddress + len(values)] = values
-
-    def encrypt_range(self, startaddress: int, length: int, key: bytes):
-        _encrypt_range(self, startaddress, length, key, xxtea)
-
-    def encrypt(self, world, player):
-        global xxtea
-        if xxtea is None:
-            # cause crash to provide traceback
-            import xxtea
-
-        local_random = world.worlds[player].random
-        key = bytes(local_random.getrandbits(8 * 16).to_bytes(16, 'big'))
-        self.write_bytes(0x1800B0, bytearray(key))
-        self.write_int16(0x180087, 1)
-
-        itemtable = []
-        locationtable = []
-        itemplayertable = []
-        for i in range(168):
-            itemtable.append(self.read_byte(0xE96E + (i * 3)))
-            itemplayertable.append(self.read_byte(0x186142 + (i * 3)))
-            locationtable.append(self.read_byte(0xe96C + (i * 3)))
-            locationtable.append(self.read_byte(0xe96D + (i * 3)))
-        self.write_bytes(0xE96C, locationtable)
-        self.write_bytes(0xE96C + 0x150, itemtable)
-        self.encrypt_range(0xE96C + 0x150, 168, key)
-        self.write_bytes(0x186140, [0] * 0x150)
-        self.write_bytes(0x186140 + 0x150, itemplayertable)
-        self.encrypt_range(0x186140 + 0x150, 168, key)
-        self.encrypt_range(0x186338, 56, key)
-        self.encrypt_range(0x180000, 32, key)
-        self.encrypt_range(0x180140, 32, key)
-        self.encrypt_range(0xEDA1, 8, key)
-
-    def write_to_file(self, file):
-        with open(file, 'wb') as outfile:
-            outfile.write(self.buffer)
-
-    def read_from_file(self, file):
-        with open(file, 'rb') as stream:
-            self.buffer = bytearray(stream.read())
-
-    @staticmethod
-    def verify(buffer, expected: str = RANDOMIZERBASEHASH) -> bool:
-        buffermd5 = hashlib.md5()
-        buffermd5.update(buffer)
-        return expected == buffermd5.hexdigest()
-
-    def patch_base_rom(self):
-        if os.path.isfile(user_path('basepatch.sfc')):
-            with open(user_path('basepatch.sfc'), 'rb') as stream:
-                buffer = bytearray(stream.read())
-
-            if self.verify(buffer):
-                self.buffer = buffer
-                return
-
-        delta = pkgutil.get_data(__name__, "basepatch.bsdiff4")
-        if delta is None:
-            raise RuntimeError("Could not load ALttP base patch data.")
-
-        buffer = bsdiff4.patch(get_base_rom_bytes(), delta)
-        if self.verify(buffer):
-            self.buffer = bytearray(buffer)
-            with open(user_path('basepatch.sfc'), 'wb') as stream:
-                stream.write(buffer)
-            return
-        raise RuntimeError('Base patch unverified.  Unable to continue.')
-
-    def write_crc(self):
-        crc = (sum(self.buffer[:0x7FDC] + self.buffer[0x7FE0:]) + 0x01FE) & 0xFFFF
-        inv = crc ^ 0xFFFF
-        self.write_bytes(0x7FDC, [inv & 0xFF, (inv >> 8) & 0xFF, crc & 0xFF, (crc >> 8) & 0xFF])
-
-    def get_hash(self) -> str:
-        h = hashlib.md5()
-        h.update(self.buffer)
-        return h.hexdigest()
-
-    def write_int16(self, address: int, value: int):
-        self.write_bytes(address, int16_as_bytes(value))
-
-    def write_int32(self, address: int, value: int):
-        self.write_bytes(address, int32_as_bytes(value))
-
-    def write_int16s(self, startaddress: int, values):
-        for i, value in enumerate(values):
-            self.write_int16(startaddress + (i * 2), value)
-
-    def write_int32s(self, startaddress: int, values):
-        for i, value in enumerate(values):
-            self.write_int32(startaddress + (i * 4), value)
 
 
 class TokenRom:
@@ -480,6 +362,93 @@ class ProcedureRom:
         return bytes(self.buffer)
 
 
+class AdjusterRom:
+    def __init__(self, file: str, vanilla_rom: Optional[str] = None, name=None, hash=None):
+        self.name = name
+        self.hash = hash
+        self.token_patch = self
+        with open(file, "rb") as stream:
+            self.buffer = read_snes_rom(stream)
+        self.orig_buffer = None
+        if vanilla_rom:
+            with open(vanilla_rom, "rb") as vanilla_stream:
+                self.orig_buffer = read_snes_rom(vanilla_stream)
+
+    def read_byte(self, address: int) -> int:
+        return self.buffer[address]
+
+    def write_byte(self, address: int, value: int):
+        self.write_bytes(address, (value,))
+
+    def write_bytes(self, startaddress: int, values: Collection[SupportsIndex]) -> None:
+        values = bytes(values)
+        self.buffer[startaddress:startaddress + len(values)] = values
+
+    def write_int16(self, address: int, value: int):
+        self.write_bytes(address, int16_as_bytes(value))
+
+    def write_int32(self, address: int, value: int):
+        self.write_bytes(address, int32_as_bytes(value))
+
+    def write_int16s(self, startaddress: int, values):
+        for i, value in enumerate(values):
+            self.write_int16(startaddress + (i * 2), value)
+
+    def write_int32s(self, startaddress: int, values):
+        for i, value in enumerate(values):
+            self.write_int32(startaddress + (i * 4), value)
+
+    def copy_bytes(self, destination: int, source: int, length: int) -> None:
+        self.write_bytes(destination, self.buffer[source:source + length])
+
+    def write_to_file(self, file: str):
+        with open(file, "wb") as outfile:
+            outfile.write(self.buffer)
+
+    def add_ap_sprite_patch(self, patch_data: bytes, *, primary: bool, slot: Optional[int]) -> None:
+        base_sprite_data = bytes(
+            self.buffer[0x80000:0x87000]
+            + self.buffer[0xDD308:0xDD380]
+            + self.buffer[0xDEDF5:0xDEDF9]
+        )
+        sprite_data = bsdiff4.patch(base_sprite_data, patch_data)
+        sprite = sprite_data[:Sprite.sprite_size]
+        palette = sprite_data[Sprite.sprite_size:Sprite.sprite_size + Sprite.palette_size]
+        glove_palette = sprite_data[Sprite.sprite_size + Sprite.palette_size:]
+
+        if primary:
+            self.write_bytes(0x80000, sprite)
+            self.write_bytes(0xDD308, palette)
+            self.write_bytes(0xDEDF5, glove_palette)
+
+        if slot is not None:
+            sprite_address = 0x300000 + (slot * 0x8000)
+            palette_address = 0x307000 + (slot * 0x8000)
+            glove_palette_address = 0x307078 + (slot * 0x8000)
+            self.write_bytes(sprite_address, sprite)
+            self.write_bytes(palette_address, palette)
+            self.write_bytes(glove_palette_address, glove_palette)
+
+    def add_z3pr_palette_randomization(self, option_name: str, mode: str, seed: int) -> None:
+        palette_randomizer, build_offsets = _require_z3pr()
+        ColorF = palette_randomizer.ColorF
+        if mode == "default":
+            return
+        if mode in ("good", "random"):
+            mode = "maseya"
+
+        palette_random = random.Random(seed)
+
+        def next_color_generator():
+            while True:
+                yield ColorF(palette_random.random(), palette_random.random(), palette_random.random())
+
+        data_dir = local_path("data") if is_frozen() else None
+        offsets_array = build_offsets({option_name: True}, data_dir)
+        palette_randomizer.randomize(
+            self.buffer, mode, offset_collections=offsets_array, random_colors=next_color_generator())
+
+
 def read_byte_or_default(rom, address: int, default: int) -> int:
     try:
         return rom.read_byte(address)
@@ -487,7 +456,7 @@ def read_byte_or_default(rom, address: int, default: int) -> int:
         return default
 
 
-def apply_random_sprite_on_event(rom: LocalRom, sprite, local_random, allow_random_on_event, sprite_pool):
+def apply_random_sprite_on_event(rom: TokenRom | AdjusterRom, sprite, local_random, allow_random_on_event, sprite_pool):
     userandomsprites = False
     if sprite and not isinstance(sprite, Sprite):
         sprite = sprite.lower()
@@ -539,6 +508,7 @@ def apply_random_sprite_on_event(rom: LocalRom, sprite, local_random, allow_rand
                         logging.info(f"Sprite {spritename} was not found.")
             else:
                 sprites = list(set(_sprite_table.values()))  # convert to list and remove dupes
+                sprites.sort(key=lambda x: x.name)
         else:
             sprites.append(sprite)
         if sprites:
@@ -882,7 +852,7 @@ class Sprite():
     def __hash__(self):
         return hash(self.name)
 
-    def write_to_rom(self, rom: LocalRom):
+    def write_to_rom(self, rom: TokenRom | AdjusterRom):
         if not self.valid:
             logging.warning("Tried writing invalid sprite to rom, skipping.")
             return
@@ -898,7 +868,7 @@ class Sprite():
         rom.write_bytes(0xDEDF5, self.glove_palette)
         self.write_to_sprite_slot(rom, 0)
 
-    def write_to_sprite_slot(self, rom: LocalRom, slot: int) -> None:
+    def write_to_sprite_slot(self, rom: TokenRom | AdjusterRom, slot: int) -> None:
         sprite_address = 0x300000 + (slot * 0x8000)
         palette_address = 0x307000 + (slot * 0x8000)
         glove_palette_address = 0x307078 + (slot * 0x8000)
@@ -933,13 +903,14 @@ def get_nonnative_item_sprite(code: int) -> int:
     # https://discord.com/channels/731205301247803413/827141303330406408/852102450822905886
 
 
-def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
+def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
     local_random = multiworld.worlds[player].random
     local_world = multiworld.worlds[player]
     enemized = bool(local_world.options.boss_shuffle or local_world.options.enemy_shuffle
                     or local_world.options.enemy_health != 'default' or local_world.options.enemy_damage != 'default'
                     or local_world.options.randomize_damage_classes != 'vanilla'
                     or local_world.options.pot_shuffle or local_world.options.bush_shuffle
+                    or local_world.options.randomize_puzzles
                     or local_world.options.killable_thieves)
 
     # patch items
@@ -998,6 +969,8 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
                         itemid = 0x5A
             location_address = old_location_address_to_new_location_address.get(location.address, location.address)
             rom.write_byte(location_address, itemid)
+
+    rom.write_byte(0x18018F, 0x01 if local_world.options.wallmasters_stay_dead else 0x00)
 
     rom.write_byte(0x18018E, 0x01 if local_world.options.boss_prize_shuffle else 0x00)
     if local_world.options.boss_prize_shuffle:
@@ -1247,13 +1220,15 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
 
     difficulty = local_world.difficulty_requirements
 
-    # Set overflow items for progressive equipment
+    # Set overflow items for progressive equipment. The game only has four bottle slots,
+    # even when Easy mode keeps extra bottles in the item pool as overflow pickups.
+    progressive_bottle_limit = min(difficulty.progressive_bottle_limit, 4)
     rom.write_bytes(0x180090,
                     [difficulty.progressive_sword_limit if not local_world.options.swordless else 0,
                      item_table[difficulty.basicsword[-1]].item_code,
                      difficulty.progressive_shield_limit, item_table[difficulty.basicshield[-1]].item_code,
                      difficulty.progressive_armor_limit, item_table[difficulty.basicarmor[-1]].item_code,
-                     difficulty.progressive_bottle_limit, overflow_replacement,
+                     progressive_bottle_limit, overflow_replacement,
                      difficulty.progressive_bow_limit, item_table[difficulty.basicbow[-1]].item_code])
 
     if difficulty.progressive_bow_limit < 2 and (
@@ -1466,7 +1441,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         rom.write_byte(0x180169, 0x02)  # lock aga/ganon tower door with crystals in inverted
     rom.write_byte(0x180171,
                    0x01 if local_world.ganon_at_pyramid else 0x00)  # Enable respawning on pyramid after ganon death
-    rom.write_byte(0x180173, 0x01)  # Bob is enabled
+    rom.write_byte(0x180173, 0x00)  # Bob is disabled
     rom.write_byte(0x180168, 0x08)  # Spike Cave Damage
     rom.write_bytes(0x18016B, [0x04, 0x02, 0x01])  # Set spike cave and MM spike room Cape usage
     rom.write_bytes(0x18016E, [0x04, 0x08, 0x10])  # Set spike cave and MM spike room Cape usage
@@ -1625,7 +1600,7 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
             for address in addresses:
                 equip[address] = min(equip[address] + quantity, 99)
         elif item.name in bottles:
-            if equip[0x34F] < local_world.difficulty_requirements.progressive_bottle_limit:
+            if equip[0x34F] < 4:
                 equip[0x35C + equip[0x34F]] = bottles[item.name]
                 equip[0x34F] += 1
         elif item.name in rupees:
@@ -1937,21 +1912,31 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         from . import EnemizerPatches as enemizer_patches
         from .EnemyShuffle import apply_enemy_shuffle
         from .PotShuffle import apply_pot_shuffle
+        from .PuzzleShuffle import apply_puzzle_shuffle
 
         enemizer_patches.apply_enemizer_base_patch(rom)
         enemy_shuffle_state = getattr(local_world, "enemy_shuffle_state", None)
         combat_model = getattr(local_world, "enemy_combat_model", None)
         combat_model = getattr(enemy_shuffle_state, "combat_model", None) or combat_model
+        existing_combat_model = combat_model
+        base_combat_model = combat_model or enemizer_patches.VANILLA_COMBAT_MODEL
+        if local_world.options.killable_thieves:
+            base_combat_model = enemizer_patches.with_killable_thief_combat_model(base_combat_model)
+            combat_model = base_combat_model
         damage_class_key = enemizer_patches._option_key(local_world.options.randomize_damage_classes)
         enemy_health_key = enemizer_patches._option_key(local_world.options.enemy_health)
-        if combat_model is None and damage_class_key != enemizer_patches.VANILLA_RANDOMIZE_DAMAGE_CLASSES:
+        if existing_combat_model is None and damage_class_key != enemizer_patches.VANILLA_RANDOMIZE_DAMAGE_CLASSES:
             combat_model = enemizer_patches.build_randomized_damage_class_combat_model(
-                enemizer_patches._make_native_enemizer_rng(local_world),
+                local_world.random,
                 damage_class_key,
+                base_combat_model,
                 max_attacks_in_logic=local_world.options.max_attacks_in_logic.value,
                 enemy_health_key=enemy_health_key,
                 item_pool_key=enemizer_patches._option_key(getattr(local_world.options, "item_pool", "normal")),
                 swordless=bool(getattr(local_world.options, "swordless", False)),
+                killable_thieves=bool(local_world.options.killable_thieves),
+                enemy_shuffle=bool(local_world.options.enemy_shuffle),
+                preserve_melee_damage_classes=bool(getattr(local_world.options, "preserve_melee_damage_classes", False)),
             )
         enemizer_patches.apply_enemy_combat_data(rom, combat_model or enemizer_patches.VANILLA_COMBAT_MODEL)
 
@@ -1977,24 +1962,14 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
             rom.write_byte(0x1F2E5, 0xB0)
             rom.write_byte(0x1F2EB, 0xD0)
 
-        if local_world.options.killable_thieves:
-            enemizer_patches._apply_killable_thief(rom)
-
-        if enemy_health_key != "default" or enemy_damage_key != "default":
-            rng = enemizer_patches._make_native_enemizer_rng(local_world)
-        else:
-            rng = None
-
         if enemy_health_key != "default":
-            assert rng is not None
-            enemizer_patches._randomize_enemy_health(rom, rng, enemy_health_key, combat_model)
+            enemizer_patches._randomize_enemy_health(rom, local_world.random, enemy_health_key, combat_model)
 
         if enemy_damage_key != "default":
-            assert rng is not None
-            enemizer_patches._randomize_enemy_damage(rom, rng, allow_zero_damage=True)
+            enemizer_patches._randomize_enemy_damage(rom, local_world.random, allow_zero_damage=True)
             enemizer_patches._shuffle_damage_groups(
                 rom,
-                rng,
+                local_world.random,
                 chaos_mode=enemy_damage_key == "chaos",
                 allow_zero_damage=True,
             )
@@ -2011,6 +1986,10 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
         if local_world.options.pot_shuffle and pot_shuffle_state is not None:
             apply_pot_shuffle(rom, pot_shuffle_state)
 
+        puzzle_shuffle_state = getattr(local_world, "puzzle_shuffle_state", None)
+        if local_world.options.randomize_puzzles and puzzle_shuffle_state is not None:
+            apply_puzzle_shuffle(rom, puzzle_shuffle_state, pot_shuffle_state)
+
     # Write title screen Code
     hashint = int(rom.get_hash(), 16)
     code = [
@@ -2026,11 +2005,6 @@ def patch_rom(multiworld: MultiWorld, rom: LocalRom, player: int):
     return rom
 
 
-def patch_race_rom(rom: LocalRom, multiworld: MultiWorld, player: int):
-    rom.write_bytes(0x180213, [0x01, 0x00])  # Tournament Seed
-    rom.encrypt(multiworld, player)
-
-
 def get_price_data(price: int, price_type: int) -> List[int]:
     if price_type != ShopPriceType.Rupees:
         # Set special price flag 0x8000
@@ -2041,7 +2015,7 @@ def get_price_data(price: int, price_type: int) -> List[int]:
         return int16_as_bytes(price)
 
 
-def write_custom_shops(rom: LocalRom, multiworld: MultiWorld, player: int):
+def write_custom_shops(rom: TokenRom, multiworld: MultiWorld, player: int):
     shops = sorted([shop for shop in multiworld.worlds[player].shops if shop.custom], key=lambda shop: shop.sram_offset)
 
     shop_data = bytearray()
@@ -2115,7 +2089,7 @@ def hud_format_text(text: str):
         output += b'\x7f\x00'
     return output[:32]
 
-def apply_oof_sfx(rom: LocalRom, oof: str):
+def apply_oof_sfx(rom: TokenRom | AdjusterRom, oof: str):
     with open(oof, 'rb') as stream:
         oof_bytes = bytearray(stream.read())
 
@@ -2165,7 +2139,7 @@ def apply_oof_sfx(rom: LocalRom, oof: str):
     rom.write_bytes(0x13000D, [0x00, 0x00, 0x00, 0x08])
 
 
-def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, menuspeed: str, music: bool, sprite: str,
+def apply_rom_settings(rom: TokenRom | AdjusterRom, beep: str, color: str, quickswap: bool, menuspeed: str, music: bool, sprite: str,
                        oof: str, palettes_options: dict[str, str], world: "ALTTPWorld | None" = None, player: int = 1,
                        allow_random_on_event: bool = False, reduceflashing: bool = False, triforcehud: str = None,
                        deathlink: bool = False, allowcollect: bool = False):
@@ -2279,7 +2253,7 @@ def apply_rom_settings(rom: LocalRom, beep: str, color: str, quickswap: bool, me
     if oof is not None:
         apply_oof_sfx(rom, oof)
 
-def set_color(rom: LocalRom, address: int, color: tuple[int, int, int], shade: int):
+def set_color(rom: TokenRom | AdjusterRom, address: int, color: tuple[int, int, int], shade: int):
     r = round(min(color[0], 0xFF) * pow(0.8, shade) * 0x1F / 0xFF)
     g = round(min(color[1], 0xFF) * pow(0.8, shade) * 0x1F / 0xFF)
     b = round(min(color[2], 0xFF) * pow(0.8, shade) * 0x1F / 0xFF)
@@ -2287,7 +2261,7 @@ def set_color(rom: LocalRom, address: int, color: tuple[int, int, int], shade: i
     rom.write_bytes(address, ((b << 10) | (g << 5) | (r << 0)).to_bytes(2, byteorder='little', signed=False))
 
 
-def default_ow_palettes(rom: LocalRom):
+def default_ow_palettes(rom: TokenRom | AdjusterRom):
     if not rom.orig_buffer:
         return
     rom.write_bytes(0xDE604, rom.orig_buffer[0xDE604:0xDEBB4])
@@ -2296,7 +2270,7 @@ def default_ow_palettes(rom: LocalRom):
         rom.write_bytes(address, rom.orig_buffer[address:address + 2])
 
 
-def randomize_ow_palettes(rom: LocalRom, local_random: random.Random):
+def randomize_ow_palettes(rom: TokenRom | AdjusterRom, local_random: random.Random):
     grass, grass2, grass3, dirt, dirt2, water, clouds, dwdirt, \
     dwgrass, dwwater, dwdmdirt, dwdmgrass, dwdmclouds1, dwdmclouds2 = [[local_random.randint(60, 215) for _ in range(3)]
                                                                        for _ in range(14)]
@@ -2372,7 +2346,7 @@ def randomize_ow_palettes(rom: LocalRom, local_random: random.Random):
         set_color(rom, address, color, shade)
 
 
-def blackout_ow_palettes(rom: LocalRom):
+def blackout_ow_palettes(rom: TokenRom | AdjusterRom):
     rom.write_bytes(0xDE604, [0] * 0xC4)
     for i in range(0xDE6C8, 0xDE86C, 70):
         rom.write_bytes(i, [0] * 64)
@@ -2383,13 +2357,13 @@ def blackout_ow_palettes(rom: LocalRom):
         rom.write_bytes(address, [0, 0])
 
 
-def default_uw_palettes(rom: LocalRom):
+def default_uw_palettes(rom: TokenRom | AdjusterRom):
     if not rom.orig_buffer:
         return
     rom.write_bytes(0xDD734, rom.orig_buffer[0xDD734:0xDE544])
 
 
-def randomize_uw_palettes(rom: LocalRom, local_random: random.Random):
+def randomize_uw_palettes(rom: TokenRom | AdjusterRom, local_random: random.Random):
     for dungeon in range(20):
         wall, pot, chest, floor1, floor2, floor3 = [[local_random.randint(60, 240) for _ in range(3)] for _ in range(6)]
 
@@ -2436,7 +2410,7 @@ def randomize_uw_palettes(rom: LocalRom, local_random: random.Random):
         set_color(rom, 0x0DD796 + (0xB4 * dungeon), floor3, 4)
 
 
-def blackout_uw_palettes(rom: LocalRom):
+def blackout_uw_palettes(rom: TokenRom | AdjusterRom):
     for i in range(0xDD734, 0xDE544, 180):
         rom.write_bytes(i, [0] * 38)
         rom.write_bytes(i + 44, [0] * 76)
@@ -2447,7 +2421,7 @@ def get_hash_string(hash):
     return ", ".join([hash_alphabet[code & 0x1F] for code in hash])
 
 
-def write_string_to_rom(rom: LocalRom, target: str, string: str):
+def write_string_to_rom(rom: TokenRom, target: str, string: str):
     address, maxbytes = text_addresses[target]
     rom.write_bytes(address, MultiByteTextMapper.convert(string, maxbytes))
 
@@ -2467,6 +2441,11 @@ def get_hint_text(multiworld: MultiWorld, player: int, dest, ped_hint: bool = Fa
         else:
             hint += f" for {multiworld.player_name[dest.player]}"
     return hint
+
+
+def find_item_hint_location(multiworld: MultiWorld, item_name: str, player: int) -> Optional[Location]:
+    locations = multiworld.find_item_locations(item_name, player)
+    return locations[0] if locations else None
 
 
 def build_hint_read_table(hint_entries) -> bytearray:
@@ -2701,6 +2680,9 @@ def get_in_game_hint_data(multiworld: MultiWorld, player: int):
                 this_hint = location + " contains " + hint_text(hinted_location.item) + "."
                 set_item_hint(text_key, this_hint, [hinted_location])
 
+        if w.options.randomize_puzzles and hint_locations:
+            set_text(hint_locations.pop(0), get_turtle_rock_peg_order_hint(w.puzzle_shuffle_state))
+
         # Lastly we write hints to show where certain interesting items are.
         items_to_hint = RelevantItems.copy()
         if w.options.small_key_shuffle.hints_useful:
@@ -2737,10 +2719,12 @@ def get_in_game_hint_data(multiworld: MultiWorld, player: int):
     track_item_hint("tablet_ether_book", [multiworld.get_location("Ether Tablet", player)])
     track_item_hint("tablet_bombos_book", [multiworld.get_location("Bombos Tablet", player)])
     track_item_hint("bomb_shop", [
-        multiworld.find_item("Crystal (Ice Palace)", player),
-        multiworld.find_item("Crystal (Misery Mire)", player),
+        find_item_hint_location(multiworld, "Crystal (Ice Palace)", player),
+        find_item_hint_location(multiworld, "Crystal (Misery Mire)", player),
     ])
-    track_item_hint("sahasrahla_bring_courage", [multiworld.find_item("Pendant of Courage", player)])
+    track_item_hint("sahasrahla_bring_courage", [
+        find_item_hint_location(multiworld, "Pendant of Courage", player)
+    ])
 
     hint_entries = []
     for flag, (text_key, locations) in enumerate(item_hint_locations_by_text.items()):
@@ -2758,7 +2742,7 @@ def get_in_game_hint_data(multiworld: MultiWorld, player: int):
     return w.in_game_hint_data
 
 
-def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
+def write_strings(rom: TokenRom, multiworld: MultiWorld, player: int):
     from . import ALTTPWorld
     local_random = multiworld.worlds[player].random
     w: ALTTPWorld = multiworld.worlds[player]
@@ -2811,17 +2795,29 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
             silverarrow_hint = (' %s?' % hint_text(bow_loc).replace('Ganon\'s', 'my'))
             tt[target] = 'Did you find the silver arrows%s' % silverarrow_hint
 
-    crystal5 = multiworld.find_item('Crystal (Ice Palace)', player)
-    crystal6 = multiworld.find_item('Crystal (Misery Mire)', player)
-    if multiworld.worlds[player].options.boss_prize_shuffle:
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until the crystals are found %s and %s.' % (
-            hint_text(crystal5), hint_text(crystal6))
-    else:
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
-            clear_hint_text(crystal5), clear_hint_text(crystal6))
+    bomb_shop_crystal_locations = [
+        find_item_hint_location(multiworld, 'Crystal (Ice Palace)', player),
+        find_item_hint_location(multiworld, 'Crystal (Misery Mire)', player),
+    ]
+    bomb_shop_crystal_locations = [location for location in bomb_shop_crystal_locations if location]
+    if len(bomb_shop_crystal_locations) == 2:
+        if multiworld.worlds[player].options.boss_prize_shuffle:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until the crystals are found %s and %s.' % (
+                hint_text(bomb_shop_crystal_locations[0]), hint_text(bomb_shop_crystal_locations[1]))
+        else:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (
+                clear_hint_text(bomb_shop_crystal_locations[0]), clear_hint_text(bomb_shop_crystal_locations[1]))
+    elif bomb_shop_crystal_locations:
+        if multiworld.worlds[player].options.boss_prize_shuffle:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is sealed until a crystal is found %s.' % (
+                hint_text(bomb_shop_crystal_locations[0]))
+        else:
+            tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s.' % (
+                clear_hint_text(bomb_shop_crystal_locations[0]))
 
-    courage_pendant = multiworld.find_item('Pendant of Courage', player)
-    tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % hint_text(courage_pendant)
+    courage_pendant = find_item_hint_location(multiworld, 'Pendant of Courage', player)
+    if courage_pendant:
+        tt['sahasrahla_bring_courage'] = 'I lost my family heirloom %s' % hint_text(courage_pendant)
 
     if multiworld.worlds[player].options.crystals_needed_for_gt == 1:
         tt['sign_ganons_tower'] = 'You need a crystal to enter.'
@@ -2979,7 +2975,7 @@ def write_strings(rom: LocalRom, multiworld: MultiWorld, player: int):
     rom.write_bytes(0x76CC0, [byte for p in pointers for byte in [p & 0xFF, p >> 8 & 0xFF]])
 
 
-def set_inverted_mode(multiworld: MultiWorld, player: int, rom: LocalRom):
+def set_inverted_mode(multiworld: MultiWorld, player: int, rom: TokenRom):
     rom.write_byte(snes_to_pc(0x0283E0), 0xF0)  # residual portals
     rom.write_byte(snes_to_pc(0x02B34D), 0xF0)
     rom.write_byte(snes_to_pc(0x06DB78), 0x8B)

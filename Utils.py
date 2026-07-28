@@ -52,8 +52,9 @@ class Version(typing.NamedTuple):
         return ".".join(str(item) for item in self)
 
 
-__version__ = "0.6.7"
+__version__ = ("0.6.8")
 version_tuple = tuplize_version(__version__)
+version = Version(*version_tuple)
 
 is_linux = sys.platform.startswith("linux")
 is_macos = sys.platform == "darwin"

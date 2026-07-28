@@ -1,5 +1,5 @@
 from .TestDungeon import TestDungeon
-from worlds.alttp.PotShuffle import FilledPot, POT_KEY
+from worlds.alttp_beta.PotShuffle import FilledPot, POT_KEY
 
 
 class TestSwampPalace(TestDungeon):
@@ -124,4 +124,32 @@ class TestSwampPalace(TestDungeon):
         self.run_tests([
             ["Swamp Palace - Waterway Pot Key", False, baseline],
             ["Swamp Palace - Waterway Pot Key", True, baseline + ['Bomb Upgrade (+5)']],
+        ])
+
+    def testSwampPalacePotShuffleTrench2KeyLogic(self):
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state())
+        self.starting_regions = ['Swamp Palace (Center)']
+        self.run_tests([
+            ["Swamp Palace - Trench 2 Pot Key", True, []],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0x35: (FilledPot(20, 8, POT_KEY),),
+        }))
+        self.starting_regions = ['Swamp Palace (Center)']
+        swamp_keys = ['Small Key (Swamp Palace)'] * 6
+        self.run_tests([
+            ["Swamp Palace - Trench 2 Pot Key", False, []],
+            ["Swamp Palace - Trench 2 Pot Key", False, swamp_keys[:5]],
+            ["Swamp Palace - Trench 2 Pot Key", True, swamp_keys],
+        ])
+
+        self.rebuild_with_pot_shuffle(self.get_test_pot_shuffle_state({
+            0x35: (FilledPot(76, 28, POT_KEY),),
+        }))
+        self.starting_regions = ['Swamp Palace (Center)']
+        self.run_tests([
+            ["Swamp Palace - Trench 2 Pot Key", False, []],
+            ["Swamp Palace - Trench 2 Pot Key", False, swamp_keys[:5]],
+            ["Swamp Palace - Trench 2 Pot Key", True, swamp_keys],
         ])

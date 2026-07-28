@@ -41,7 +41,7 @@ class DarkRoomLogic(Choice):
 class Goal(Choice):
     """Ganon: Climb GT, defeat Agahnim 2, and then kill Ganon
     Crystals: Only killing Ganon is required. However, items may still be placed in GT
-    Dungeons: Clear the required number of dungeons, including Agahnim's tower and GT (Aga 2), then kill Ganon
+    Dungeons: Clear the required number of dungeons, including Agahnim's tower and GT, then kill Ganon
     Pedestal: Pull the Triforce from the Master Sword pedestal
     Ganon Pedestal: Pull the Master Sword pedestal, then kill Ganon
     Triforce Hunt: Collect Triforce pieces spread throughout the worlds, then turn them in to Murahadala in front of Hyrule Castle
@@ -329,6 +329,14 @@ class RandomizeDamageClasses(Choice):
     option_nightmare = 5
 
 
+class PreserveMeleeDamageClasses(Toggle):
+    """Keep sword and hammer damage classes out of Randomize Damage Classes.
+    When enabled, damage classes used by melee weapons keep their normal behavior.
+    When disabled, higher level swords may be less capable than lower level swords.
+    Ignored on the Enemy Swap and Nightmare options."""
+    display_name = "Preserve Melee Damage Classes"
+
+
 class MaxAttacksInLogic(Range):
     """Maximum number of attacks required to kill one enemy for that kill method to be considered logical.
     Lower values opt out of tedious high-hit kills, such as very low-damage weapons against high-health enemies."""
@@ -351,6 +359,12 @@ class ShufflePrizes(Choice):
 class BossPrizeShuffle(Toggle):
     """Shuffle dungeon prizes into the regular item pool and allow any item on boss prize locations."""
     display_name = "Boss Prize Shuffle"
+
+
+class RandomizePuzzles(Toggle):
+    """Randomize the conditions that open doors or chests spawn, the locations of pushable blocks, and various other
+    puzzles throughout the game."""
+    display_name = "Randomize Puzzles"
 
 
 class Medallion(Choice):
@@ -648,6 +662,11 @@ class KillableThieves(Toggle):
     display_name = "Killable Thieves"
 
 
+class WallmastersStayDead(Toggle):
+    """After killing a Wallmaster, no more Wallmasters spawn in that room visit."""
+    display_name = "Wallmasters Stay Dead"
+
+
 class BushShuffle(Toggle):
     """Randomize chance that a bush contains an enemy as well as which enemy may spawn."""
     display_name = "Bush Shuffle"
@@ -840,6 +859,7 @@ class ALTTPOptions(PerGameCommonOptions):
     enemy_health: EnemyHealth
     enemy_damage: EnemyDamage
     randomize_damage_classes: RandomizeDamageClasses
+    preserve_melee_damage_classes: PreserveMeleeDamageClasses
     max_attacks_in_logic: MaxAttacksInLogic
     progressive: Progressive
     swordless: Swordless
@@ -852,6 +872,7 @@ class ALTTPOptions(PerGameCommonOptions):
     pot_shuffle: PotShuffle
     enemy_shuffle: EnemyShuffle
     killable_thieves: KillableThieves
+    wallmasters_stay_dead: WallmastersStayDead
     bush_shuffle: BushShuffle
     shop_item_slots: ShopItemSlots
     randomize_shop_inventories: RandomizeShopInventories
@@ -864,6 +885,7 @@ class ALTTPOptions(PerGameCommonOptions):
     bombless_start: BomblessStart
     shuffle_prizes: ShufflePrizes
     boss_prize_shuffle: BossPrizeShuffle
+    randomize_puzzles: RandomizePuzzles
     tile_shuffle: TileShuffle
     misery_mire_medallion: MiseryMireMedallion
     turtle_rock_medallion: TurtleRockMedallion
