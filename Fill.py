@@ -151,14 +151,15 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
     while any(reachable_items.values()) and locations:
         if one_item_per_player:
             # grab one item per player
-            items_to_place = [items.pop()
-                              for items in reachable_items.values() if items]
-            items_to_place += [items.pop()
-                              for items in reachable_items.values() if items]
-            items_to_place += [items.pop()
-                              for items in reachable_items.values() if items and items[0].game in ["Stardew Valley", "Archipeladoku"]]
-            items_to_place += [items.pop()
-                              for items in reachable_items.values() if items and items[0].game in ["Archipeladoku"]]
+            while len(items_to_place) < len(reachable_items):
+                items_to_place = [items.pop()
+                                  for items in reachable_items.values() if items]
+            # items_to_place += [items.pop()
+            #                   for items in reachable_items.values() if items]
+            # items_to_place += [items.pop()
+            #                   for items in reachable_items.values() if items and items[0].game in ["Stardew Valley", "Archipeladoku", "Spicy Mycena 64"]]
+            # items_to_place += [items.pop()
+            #                   for items in reachable_items.values() if items and items[0].game in ["Archipeladoku", "Spicy Mycena 64"]]
         else:
             next_player = multiworld.random.choice([player for player, items in reachable_items.items() if items])
             items_to_place = []
@@ -827,9 +828,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             breakpoint()
     test_beatable()
     # breakpoint()
-    compress_spheres(multiworld, sphere_max)
 
-    # compress_owner_spheres(multiworld)
+    option = "o"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
+
+    if option == "o":
+        compress_owner_spheres(multiworld)
+    else:
+        compress_spheres(multiworld, sphere_max)
+
 
 
     test_beatable()
@@ -902,6 +908,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if game == "Jigsaw":
                 return 1
             return 0
+        if i.classification & ItemClassification.progression and game == "Archipeladoku":
+            return multiworld.random.choice([1,2,2,3])
+        if i.classification & ItemClassification.progression and game == "Spicy Mycena 64":
+            return multiworld.random.choice([2,2,3])
         if i.classification & ItemClassification.progression and game == "Stardew Valley":
             if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
                            "Progressive Barn", "Progressive Fishing Rod", "Progressive Pickaxe", "Bridge Repair",
@@ -940,7 +950,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 return 2
             return 1
 
-    option = "o"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
