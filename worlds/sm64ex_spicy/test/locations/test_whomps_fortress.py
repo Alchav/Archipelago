@@ -90,6 +90,7 @@ class TestWhompsFortressTricks(SM64TestBase):
             "Whomp's Fortress Top Access with Cannon",
             "Whomp's Fortress Top Access with Triple Jump Off of Whomp",
             "Whomp's Fortress Caged Island from the Floating Island with Triple Jump Off of Whomp King",
+            "Whomp's Fortress Caged Island With Cannon",
             "Whomp's Fortress Blast Away the Wall with Ledge Grab",
             "Whomp's Fortress Shoot Into the Wild Blue with Long Jump",
         },
@@ -120,6 +121,13 @@ class TestWhompsFortressTricks(SM64TestBase):
              TOP + ["Whomp's Fortress - Whomp King"]],
             ["Whomp's Fortress - Fall onto the Caged Island", True,
              TOP + ["Triple Jump", "Whomp's Fortress - Whomp King"]],
+        ], starting_regions=["Whomp's Fortress"])
+
+    def test_caged_island_with_cannon(self):
+        self.run_location_tests([
+            ["Whomp's Fortress - Fall onto the Caged Island", False, []],
+            ["Whomp's Fortress - Fall onto the Caged Island", True,
+             ["Whomp's Fortress - Cannon Unlock"]],
         ], starting_regions=["Whomp's Fortress"])
 
     def test_blast_away_wall_with_ledge_grab(self):

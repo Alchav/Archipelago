@@ -95,18 +95,18 @@ class TestBigBoosHauntTricks(SM64TestBase):
         **BBH_OPTIONS,
         "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
         "logic_tricks": {
-            "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick",
+            "Big Boo's Haunt Second Floor with Wall Kick",
             "Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends",
             "Big Boo's Haunt Roof without Long Jump",
         },
     }
 
-    def test_second_floor_with_triple_jump_and_wall_kick(self):
+    def test_second_floor_with_wall_kick(self):
         self.run_location_tests([
             ["Big Boo's Haunt - Secret of the Haunted Books", False,
-             ["Triple Jump", "Kick"]],
+             ["Kick"]],
             ["Big Boo's Haunt - Secret of the Haunted Books", True,
-             ["Triple Jump", "Wall Kick", "Kick"]],
+             ["Wall Kick", "Kick"]],
         ], starting_regions=["Big Boo's Haunt"])
 
     def test_third_floor_with_bookend_bounce(self):

@@ -687,7 +687,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_wf_caged_island_cage_triple_jump | "
                    "logic_wf_caged_island_cage_wk_long_jump | "
                    "logic_wf_caged_island_cage_wk_jump | "
-                   "logic_wf_caged_island_top_fortress_long_jump")
+                   "logic_wf_caged_island_top_fortress_long_jump | "
+                   "logic_wf_caged_island_cannon")
     rf.assign_rule(
         "Whomp's Fortress - Blast Away the Wall",
         "CANN | logic_wf_blast_away_wall_cannonless_backflip | logic_wf_blast_away_wall_cannonless")
@@ -725,8 +726,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "BBH_MERRY_GO_ROUND & BOOS & BIG_BOO")
     rf.assign_rule(
         "Big Boo's Haunt - Second Floor",
-        "BBH_STAIRCASE | logic_bbh_third_floor_triple_jump_wall_kick | "
-        "logic_bbh_third_floor_side_flip_wall_kick")
+        "BBH_STAIRCASE | logic_bbh_second_floor_wall_kick")
     rf.assign_rule(
         "Big Boo's Haunt - Third Floor",
         "WK+LG | logic_bbh_third_floor_wall_kick | logic_bbh_third_floor_side_flip")
@@ -784,7 +784,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
     rf.assign_rule(
         "Shifting Sand Land - Stone Structure",
-        "TJ/SF/BF | logic_ssl_stone_structure_shy_guy_bounce")
+        "TJ/SF/BF | logic_ssl_stone_structure_shy_guy_spin_jump")
     rf.assign_rule(
         "Shifting Sand Land - Upper Pyramid",
         "SSL_PYRAMID_ELEVATOR & TJ+WC+GP | SSL_PYRAMID_ELEVATOR & CANN+WC+GP | "
@@ -1756,7 +1756,7 @@ class RuleFactory:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)
         if not item:
-            raise Exception(f"Invalid token: '{item}'")
+            raise Exception(f"Invalid token: '{token}'")
         if item in action_item_data_table:
             return action_item_names[item]
         elif item in cap_item_data_table:

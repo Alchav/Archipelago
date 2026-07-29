@@ -252,6 +252,13 @@ logic_tricks = {
         # title says Long Jump and Ground Pound. Ground Pound not needed in Spicy Mycena 64
         "video": "https://www.youtube.com/watch?v=DTieM0YZ-DY"
     },
+    "Whomp's Fortress Caged Island With Cannon": {
+        "internal_id": "logic_wf_caged_island_cannon",
+        "rule": "CANN",
+        "difficulty": "medium",
+        "description": "Reaching Fall onto the Caged Island by launching from the cannon.",
+        "video": "https://www.youtube.com/watch?v=tatC8AiuaDc",
+    },
     "Whomp's Fortress Top Access with Cannon": {
         "internal_id": "logic_wf_caged_top_access_with_cannon",
         "rule": "CANN",
@@ -381,19 +388,12 @@ logic_tricks = {
     },
 
     # Big Boo's Haunt
-    "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick": {
-        "internal_id": "logic_bbh_third_floor_triple_jump_wall_kick",
-        "rule": "TJ+WK",
-        "difficulty": "medium",
-        "description": "Reaching the second floor by Triple Jumping and Wall Kicking up to the balcony, without"
-                       "the Staircase.",
-    },
-    "Big Boo's Haunt Second Floor with Side Flip and Wall Kick": {
-        "internal_id": "logic_bbh_third_floor_side_flip_wall_kick",
-        "rule": "SF+WK",
-        "difficulty": "medium",
-        "description": "Reaching the second floor by Side Flipping and Wall Kicking up to the balcony, without"
-                       "the Staircase.",
+    "Big Boo's Haunt Second Floor with Wall Kick": {
+        "internal_id": "logic_bbh_second_floor_wall_kick",
+        "rule": "WK",
+        "difficulty": "easy",
+        "description": "Reaching the second floor by Wall Kicking up to the balcony without the Staircase.",
+        "video": "https://www.youtube.com/watch?v=mUrXEnEBiMA",
     },
     "Big Boo's Haunt Third Floor with Wall Kick Only": {
         "internal_id": "logic_bbh_third_floor_wall_kick",
@@ -468,10 +468,10 @@ logic_tricks = {
                        "leading to Elevator Tour in the Volcano (and three coins).",
     },
     # Shifting Sand Land
-    "Shifting Sand Land Stone Structure with Shy Guy Bounce": {
-        "internal_id": "logic_ssl_stone_structure_shy_guy_bounce",
+    "Shifting Sand Land Stone Structure with Spin Jump": {
+        "internal_id": "logic_ssl_stone_structure_shy_guy_spin_jump",
         "rule": "FLY_GUY",
-        "difficulty": "medium",
+        "difficulty": "easy",
         "description": "Reaching the top of the Stone Structure by bouncing off of a Shy Guy.",
     },
     "Shifting Sand Land Three Red Coins with Tweesters": {
@@ -480,7 +480,7 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Using Tweesters to collect three of the elevated Red Coins.",
     },
-    "Shifting Sand Land One Red Coin with Shy Guy Spin Jump": {
+    "Shifting Sand Land One Red Coin with Spin Jump": {
         "internal_id": "logic_ssl_one_red_coin_with_shy_guy_spin_jump",
         "rule": "FLY_GUY",
         "difficulty": "medium",
@@ -489,7 +489,7 @@ logic_tricks = {
     "Shifting Sand Land Pillars with Koopa Shell": {
         "internal_id": "logic_ssl_pillars_shell",
         "rule": "{Shifting Sand Land - Stone Structure}",
-        "difficulty": "medium",
+        "difficulty": "easy",
         "description": "Reaching the Upper Pyramid entrance using a Koopa Shell to access the quicksand pillar.",
     },
     "Shifting Sand Land Pillars with Side Flip or Kick": {
@@ -499,7 +499,7 @@ logic_tricks = {
         "description": "Reaching the Upper Pyramid entrance using a Side Flip or Kick to access the quicksand pillar."
                        # "It's likely possible with other moves, but I have not been able to do it myself."
     },
-    "Stand Tall on the Four Pyramids Without Pyramid Elevator": {
+    "Shifting Sand Land Stand Tall on the Four Pyramids Without Pyramid Elevator": {
         "internal_id": "logic_ssl_stand_tall_without_pyramid_elevator",
         "rule": "",
         "difficulty": "medium",
@@ -515,7 +515,7 @@ logic_tricks = {
     "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell": {
         "internal_id": "logic_thi_scale_huge_mountain_koopa_shell",
         "rule": "KOOPA_TROOPA",
-        "difficulty": "medium",
+        "difficulty": "easy",
         "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
     },
     "Tiny-Huge Island Impossible Coin": {
@@ -595,8 +595,8 @@ logic_tricks = {
         "internal_id": "logic_wmotr_leap_of_faith_without_ledge_grab",
         "rule": "",
         "difficulty": "hard",
-        "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
-                       "Red Coin. Long Jump can reach the Buddy Platform",
+        "description": "Using Wing Cap and/or Long Jump to leap down. Wing Cap can reach a single Red Coin. Long Jump"
+                       "can reach the Buddy Platform",
         "video": "https://www.youtube.com/watch?v=hAWQ97iT8wY",
     },
     # Tower of the Wing Cap

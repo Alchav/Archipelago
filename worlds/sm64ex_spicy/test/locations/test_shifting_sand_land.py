@@ -133,7 +133,7 @@ class TestShiftingSandLandStoneStructureTrick(SM64TestBase):
     run_default_tests = False
     options = {
         **SSL_OPTIONS,
-        "logic_tricks": {"Shifting Sand Land Stone Structure with Shy Guy Bounce"},
+        "logic_tricks": {"Shifting Sand Land Stone Structure with Spin Jump"},
     }
 
     def test_shy_guy_bounce(self):
@@ -150,7 +150,7 @@ class TestShiftingSandLandRedCoinTricks(SM64TestBase):
         **SSL_OPTIONS,
         "logic_tricks": {
             "Shifting Sand Land Three Red Coins with Tweesters",
-            "Shifting Sand Land One Red Coin with Shy Guy Spin Jump",
+            "Shifting Sand Land One Red Coin with Spin Jump",
         },
     }
 
@@ -204,7 +204,7 @@ class TestShiftingSandLandStandTallTrick(SM64TestBase):
     run_default_tests = False
     options = {
         **SSL_OPTIONS,
-        "logic_tricks": {"Stand Tall on the Four Pyramids Without Pyramid Elevator"},
+        "logic_tricks": {"Shifting Sand Land Stand Tall on the Four Pyramids Without Pyramid Elevator"},
     }
 
     def test_route_without_elevator(self):

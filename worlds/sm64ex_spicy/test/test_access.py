@@ -4777,10 +4777,10 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
         "blocksanity": Options.Blocksanity.option_true,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
-            "Shifting Sand Land Stone Structure with Shy Guy Bounce",
+            "Shifting Sand Land Stone Structure with Spin Jump",
             "Shifting Sand Land Pillars with Koopa Shell",
             "Shifting Sand Land Pillars with Side Flip or Kick",
-            "Stand Tall on the Four Pyramids Without Pyramid Elevator",
+            "Shifting Sand Land Stand Tall on the Four Pyramids Without Pyramid Elevator",
         },
     }
 
@@ -4868,7 +4868,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
             "Shifting Sand Land Three Red Coins with Tweesters",
-            "Shifting Sand Land One Red Coin with Shy Guy Spin Jump",
+            "Shifting Sand Land One Red Coin with Spin Jump",
         },
     }
 
@@ -4902,7 +4902,7 @@ class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
         "no_despawns": Options.NoDespawns.option_true,
         "logic_tricks": {
             "Shifting Sand Land Three Red Coins with Tweesters",
-            "Shifting Sand Land One Red Coin with Shy Guy Spin Jump",
+            "Shifting Sand Land One Red Coin with Spin Jump",
         },
     }
 
@@ -5936,7 +5936,7 @@ class BigBooHauntAccessTestBase(SM64TestBase):
     options = {
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "logic_tricks": {
-            "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick",
+            "Big Boo's Haunt Second Floor with Wall Kick",
             "Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends",
             "Big Boo's Haunt Roof without Long Jump",
         },
@@ -5953,11 +5953,9 @@ class BigBooHauntAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Second Floor"))
 
-    def test_second_floor_access_with_movement(self):
+    def test_second_floor_access_with_wall_kick(self):
         self.collect_bbh_access()
         self.collect(self.get_item_by_name("Wall Kick"))
-        self.assertFalse(self.can_reach_region("Big Boo's Haunt - Second Floor"))
-        self.collect(self.get_item_by_name("Triple Jump"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Second Floor"))
 
     def test_secret_books_requires_second_floor(self):
@@ -5969,9 +5967,9 @@ class BigBooHauntAccessTestBase(SM64TestBase):
 
     def test_third_floor_inherits_second_floor_access(self):
         self.collect_bbh_access()
-        self.collect([self.get_item_by_name("Wall Kick"), self.get_item_by_name("Ledge Grab")])
+        self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertFalse(self.can_reach_region("Big Boo's Haunt - Third Floor"))
-        self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
+        self.collect(self.get_item_by_name("Wall Kick"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Third Floor"))
 
     def test_third_floor_side_flip_trick(self):
