@@ -102,63 +102,6 @@ ALTTP_UT_LOGIC_OPTION_NAMES = (
     "timer",
 )
 
-ALTTP_UT_LOGIC_LOCATION_ITEM_NAMES = (
-    "Ganon",
-    "Murahdahla",
-    "Agahnim 1",
-    "Agahnim 2",
-    "Dark Blacksmith Ruins",
-    "Frog",
-    "Missing Smith",
-    "Floodgate",
-    "Flute Activation Spot",
-    "Capacity Upgrade Shop",
-    "Sewers - Key Rat Key Drop",
-    "Eastern Palace - Big Key Chest",
-    "Tower of Hera - Big Key Chest",
-    "Thieves' Town - Big Chest",
-    "Swamp Palace - Big Chest",
-    "Skull Woods - Spike Corner Key Drop",
-    "Skull Woods - Big Chest",
-    "Ice Palace - Spike Room",
-    "Ice Palace - Hammer Block Key Drop",
-    "Ice Palace - Big Key Chest",
-    "Ice Palace - Map Chest",
-    "Misery Mire - Compass Chest",
-    "Misery Mire - Big Key Chest",
-    "Misery Mire - Conveyor Crystal Key Drop",
-    "Palace of Darkness - Big Key Chest",
-    "Palace of Darkness - Harmless Hellway",
-    "Ganons Tower - Map Chest",
-    "Ganons Tower - Randomizer Room - Top Left",
-    "Ganons Tower - Randomizer Room - Top Right",
-    "Ganons Tower - Randomizer Room - Bottom Left",
-    "Ganons Tower - Randomizer Room - Bottom Right",
-    "Ganons Tower - Firesnake Room",
-    "Ganons Tower - Compass Room - Top Left",
-    "Ganons Tower - Compass Room - Top Right",
-    "Ganons Tower - Compass Room - Bottom Left",
-    "Ganons Tower - Compass Room - Bottom Right",
-    "Ganons Tower - Conveyor Star Pits Pot Key",
-    "Ganons Tower - Bob's Chest",
-    "Ganons Tower - Big Chest",
-    "Ganons Tower - Big Key Room - Left",
-    "Ganons Tower - Big Key Room - Right",
-    "Ganons Tower - Big Key Chest",
-    "Turtle Rock - Big Key Chest",
-    "Turtle Rock - Compass Chest",
-    "Turtle Rock - Chain Chomps",
-    "Turtle Rock - Crystaroller Room",
-    "Turtle Rock - Pokey 1 Key Drop",
-    "Turtle Rock - Pokey 2 Key Drop",
-    "Turtle Rock - Roller Room - Left",
-    "Turtle Rock - Roller Room - Right",
-    "Turtle Rock - Eye Bridge - Top Left",
-    "Turtle Rock - Eye Bridge - Top Right",
-    "Turtle Rock - Eye Bridge - Bottom Left",
-    "Turtle Rock - Eye Bridge - Bottom Right",
-)
-
 complex_entrance_shuffle_modes = {"full", "crossed", "insanity"}
 complex_entrance_fill_priority_items = {
     "Blue Boomerang",
@@ -878,16 +821,6 @@ class ALTTPWorld(World):
             self.puzzle_shuffle_state = generate_puzzle_shuffle(self)
         self.pot_shuffle_state = apply_puzzle_pot_modifications(self.pot_shuffle_state, self.puzzle_shuffle_state)
 
-    def post_fill(self) -> None:
-        location_items = _get_ut_replay_value(self.ut_replay_data, "ut_location_items", "location_items")
-        if location_items is not None:
-            _apply_ut_location_items(self, location_items)
-
-    def generate_basic(self) -> None:
-        location_items = _get_ut_replay_value(self.ut_replay_data, "ut_location_items", "location_items")
-        if location_items is not None:
-            _apply_ut_location_items(self, location_items)
-
     @classmethod
     def stage_pre_fill(cls, world):
         from .Dungeons import fill_dungeons_restrictive
@@ -1313,7 +1246,6 @@ class ALTTPWorld(World):
             ),
             "ut_key_rings": sorted(self.key_rings),
             "ut_key_ring_data": dict(self.key_ring_data),
-            "ut_location_items": _encode_ut_location_items(self),
             "ut_pot_shuffle": _encode_ut_pot_shuffle(self.pot_shuffle_state),
             "ut_puzzle_shuffle": encode_puzzle_shuffle(self.puzzle_shuffle_state),
             "ut_shop_inventories": _encode_ut_shop_inventories(self),
@@ -1337,40 +1269,6 @@ def _get_ut_replay_value(
     if legacy_key and legacy_key in replay_data:
         return replay_data[legacy_key]
     return None
-
-
-def _encode_ut_location_items(world: ALTTPWorld) -> dict[str, dict[str, typing.Any]]:
-    location_items = {}
-    for location_name in ALTTP_UT_LOGIC_LOCATION_ITEM_NAMES:
-        try:
-            location = world.multiworld.get_location(location_name, world.player)
-        except KeyError:
-            continue
-        if location.item is None:
-            continue
-        location_items[location_name] = {
-            "item": location.item.name,
-            "player": location.item.player,
-            "classification": int(location.item.classification),
-        }
-    return location_items
-
-
-def _apply_ut_location_items(world: ALTTPWorld, location_items: dict[str, dict[str, typing.Any]]) -> None:
-    for location_name, item_data in location_items.items():
-        try:
-            location = world.multiworld.get_location(location_name, world.player)
-        except KeyError:
-            continue
-        item_name = str(item_data["item"])
-        item_player = int(item_data["player"])
-        if item_player == world.player and item_name in item_init_table:
-            location.item = world.create_item(item_name)
-        else:
-            location.item = world.create_item("Rupees (20)")
-        if "classification" in item_data:
-            location.item.classification = ItemClassification(int(item_data["classification"]))
-        location.item.location = location
 
 
 def _encode_ut_entrance_connections(world: ALTTPWorld) -> list[list[str]]:
