@@ -417,7 +417,7 @@ class BowserBombs(LevelFeatureItemMode):
 
 class BowserInTheDarkWorldHits(Range):
     """Number of Bowser Bomb hits required to defeat Bowser in the Dark World."""
-    display_name = "Bowser in the Dark World Hits"
+    display_name = "Bowser in the Dark World Health"
     range_start = 1
     range_end = 4
     default = 1
@@ -425,7 +425,7 @@ class BowserInTheDarkWorldHits(Range):
 
 class BowserInTheFireSeaHits(Range):
     """Number of Bowser Bomb hits required to defeat Bowser in the Fire Sea."""
-    display_name = "Bowser in the Fire Sea Hits"
+    display_name = "Bowser in the Fire Sea Health"
     range_start = 1
     range_end = 4
     default = 1
@@ -433,7 +433,7 @@ class BowserInTheFireSeaHits(Range):
 
 class BowserInTheSkyHits(Range):
     """Number of Bowser Bomb hits required to defeat Bowser in the Sky."""
-    display_name = "Bowser in the Sky Hits"
+    display_name = "Bowser in the Sky Health"
     range_start = 1
     range_end = 5
     default = 3
@@ -1059,9 +1059,9 @@ class SM64Options(PerGameCommonOptions):
     enemy_unlocks: EnemyUnlocks
     one_up_mushroom_unlocks: OneUpMushroomUnlocks
     bowser_bombs: BowserBombs
-    bowser_in_the_dark_world_hits: BowserInTheDarkWorldHits
-    bowser_in_the_fire_sea_hits: BowserInTheFireSeaHits
-    bowser_in_the_sky_hits: BowserInTheSkyHits
+    bowser_in_the_dark_world_health: BowserInTheDarkWorldHits
+    bowser_in_the_fire_sea_health: BowserInTheFireSeaHits
+    bowser_in_the_sky_health: BowserInTheSkyHits
     bowser_in_the_sky_stage_collapse_hits: BowserInTheSkyStageCollapseHits
     bowser_stage_1ups: BowserStage1Ups
     logic_tricks: LogicTricks

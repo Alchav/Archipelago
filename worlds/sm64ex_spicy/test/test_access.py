@@ -7582,9 +7582,9 @@ class RedCoinStarUnlockAccessTestBase(SM64TestBase):
 class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
     options = {
         "bowser_bombs": Options.BowserBombs.option_global,
-        "bowser_in_the_dark_world_hits": 4,
-        "bowser_in_the_fire_sea_hits": 4,
-        "bowser_in_the_sky_hits": 5,
+        "bowser_in_the_dark_world_health": 4,
+        "bowser_in_the_fire_sea_health": 4,
+        "bowser_in_the_sky_health": 5,
     }
 
     def test_first_two_keys_require_four_global_bombs(self):

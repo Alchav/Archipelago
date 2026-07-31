@@ -969,7 +969,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Dark World"),
             action_item_names=rf.get_action_item_names("Bowser in the Dark World"))
         & bowser_arena_bomb_rule(
-            "Bowser in the Dark World", options.bowser_in_the_dark_world_hits.value))
+            "Bowser in the Dark World", options.bowser_in_the_dark_world_health.value))
     if options.one_up_checks:
         for location_name in (
                 "Bowser in the Dark World - Center Overhang 1-Up",
@@ -990,7 +990,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule_object(
         "Bowser in the Fire Sea - Key",
         bowser_arena_bomb_rule(
-            "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_hits.value))
+            "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_health.value))
     if options.one_up_checks:
         for location_name in (
                 "Bowser in the Fire Sea - Near Poles 1-Up",
@@ -1265,7 +1265,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     can_defeat_bowser_in_the_sky = (
         CanReachRegion("Bowser in the Sky - Top")
-        & bowser_arena_bomb_rule("Bowser in the Sky", options.bowser_in_the_sky_hits.value)
+        & bowser_arena_bomb_rule("Bowser in the Sky", options.bowser_in_the_sky_health.value)
     )
     rf.world.set_completion_rule(can_defeat_bowser_in_the_sky)
 
