@@ -327,8 +327,8 @@ class LevelFeatures(Choice):
     Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, Purple
     Switches, and Treasure Chests use global items.
 
-    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, =
-    Purple= Switches, and Treasure Chests use separate level-specific items.
+    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs,
+    Purple Switches, and Treasure Chests use separate level-specific items.
     """
     display_name = "Level Features"
     option_not_shuffled = 0
