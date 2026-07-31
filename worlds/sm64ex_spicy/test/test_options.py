@@ -507,7 +507,9 @@ class FeatureItemPoolTestBase(SM64TestBase):
 
     def test_blocksanity_defaults_to_off(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
-        self.assertEqual(self.world.fill_slot_data()["Blocksanity"], 0)
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(slot_data["Options"]["blocksanity"], 0)
+        self.assertNotIn("Blocksanity", slot_data)
         self.assertTrue(set(locBlocksanity_table).isdisjoint(active_locations))
 
     def test_buddy_checks_default_to_events(self):
@@ -717,7 +719,9 @@ class BlocksanityOnTestBase(SM64TestBase):
 
     def test_blocksanity_locations_are_generated(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
-        self.assertEqual(self.world.fill_slot_data()["Blocksanity"], 1)
+        slot_data = self.world.fill_slot_data()
+        self.assertEqual(slot_data["Options"]["blocksanity"], 1)
+        self.assertNotIn("Blocksanity", slot_data)
         for location_name in locBlocksanity_table:
             with self.subTest("Blocksanity location generated", location=location_name):
                 self.assertIn(location_name, active_locations)

@@ -695,7 +695,6 @@ class SM64World(World):
             "StartInventory": self.get_start_inventory_slot_data(),
             "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,
             "OneUpChecks": self.options.one_up_checks.value,
-            "Blocksanity": self.options.blocksanity.value,
             "BuddyChecks": self.options.buddy_checks.value,
             "EasyButterflies": self.options.easy_butterflies.value,
             "NoDespawn": self.options.no_despawns.value,
