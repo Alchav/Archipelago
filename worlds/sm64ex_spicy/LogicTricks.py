@@ -395,6 +395,24 @@ logic_tricks = {
         "description": "Reaching the second floor by Wall Kicking up to the balcony without the Staircase.",
         "video": "https://www.youtube.com/watch?v=mUrXEnEBiMA",
     },
+    "Big Boo's Haunt Secret of the Haunted Books with Wall Kick": {
+        "internal_id": "logic_bbh_haunted_books_wall_kick",
+        "rule": "WK",
+        "difficulty": "medium",
+        "description": "Reaching the Secret of the Haunted Books by Wall Kicking up from the piano room without the Staircase.",
+    },
+    "Big Boo's Haunt Secret of the Haunted Books with Long Jump & Staircase": {
+        "internal_id": "logic_bbh_haunted_books_long_jump",
+        "rule": "LJ+BBH_STAIRCASE",
+        "difficulty": "easy",
+        "description": "Reaching the Secret of the Haunted Books by Long Jumping from the right side, with Staircase unlocked.",
+    },
+    "Big Boo's Haunt Secret of the Haunted Books with Long Jump & Wall Kick": {
+        "internal_id": "logic_bbh_haunted_books_long_jump_wall_kick",
+        "rule": "LJ+WK",
+        "difficulty": "easy",
+        "description": "Reaching the Secret of the Haunted Books by Wall Kicking up from the piano room without the Staircase, and then Long Jumping from the right.",
+    },
     "Big Boo's Haunt Third Floor with Wall Kick Only": {
         "internal_id": "logic_bbh_third_floor_wall_kick",
         "rule": "WK",
