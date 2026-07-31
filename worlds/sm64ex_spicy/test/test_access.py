@@ -4339,6 +4339,23 @@ class HazyMazeCaveCoinStar59SwimmingBeastAccessTestBase(HazyMazeCaveCoinStarAcce
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
+class HazyMazeCaveElevatorClipAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+    options = {
+        **HazyMazeCaveCoinStarAccessTestBase.options,
+        "hazy_maze_cave_coin_star_requirement": 59,
+        "logic_tricks": {"Hazy Maze Cave Elevator Clip"},
+    }
+
+    def test_elevator_clip_reaches_swimming_beast_and_cotmc(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Swimming Beast in the Cavern"))
+        self.assertTrue(self.can_reach_region("Cavern of the Metal Cap"))
+
+    def test_elevator_clip_reaches_swimming_beast_coin_ring(self):
+        self.collect_basement_access()
+        self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+
+
 class HazyMazeCaveCoinStar86AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,

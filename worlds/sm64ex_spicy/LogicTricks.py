@@ -3,7 +3,7 @@ logic_tricks = {
     "Lava Damage Boosting": {
         "internal_id": "logic_lava_damage_boosting",
         "rule": "",
-        "difficulty": "medium",
+        "difficulty": "easy",
         "description": "Jumping into and bouncing off lava to cross gaps or reach nearby platforms."
                        "If you don't have Mario's Hat, you may have to die!",
     },
@@ -638,6 +638,14 @@ logic_tricks = {
         "video": "https://www.youtube.com/watch?v=72TsponCYvg",
     },
     # Hazy Maze Cave
+    "Hazy Maze Cave Elevator Clip": {
+        "internal_id": "logic_hmc_elevator_clip",
+        "rule": "",
+        "difficulty": "hard",
+        "description": "Clipping through the elevator to reach the Swimming Beast cavern and the Cavern of the "
+                       "Metal Cap entrance without the Swimming Beast.",
+        "video": "https://www.youtube.com/watch?v=797eWQVltF0",
+    },
     "Hazy Maze Cave Upper Red Coin Area with Wall Kick Only": {
         "internal_id": "logic_hmc_upper_red_coin_area_wall_kick",
         "rule": "CHECKERBOARD_PLATFORMS & WK",

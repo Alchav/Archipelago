@@ -600,8 +600,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     ddd_entry_rule = rf.build_rule("", painting_lvl_name="Dire, Dire Docks")
     connect_randomized_entrance("Basement", "Dire, Dire Docks",
                                 thirty_star_door_bypass_rule & ddd_entry_rule)
-    connect_randomized_entrance("Hazy Maze Cave", "Cavern of the Metal Cap",
-                                rf.build_rule("HMC_SWIMMING_BEAST"))
+    connect_randomized_entrance(
+        "Hazy Maze Cave", "Cavern of the Metal Cap",
+        rf.build_rule("HMC_SWIMMING_BEAST | logic_hmc_elevator_clip"))
     connect_randomized_entrance("Menu", "Vanish Cap Under the Moat",
                                 level_unlock_rule("Unlock Vanish Cap Under the Moat"))
     connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
@@ -736,7 +737,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
     rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ/SF/WK")
     # Haze Maze Cave
-    rf.assign_rule("Hazy Maze Cave - Swimming Beast in the Cavern", "HMC_SWIMMING_BEAST")
+    rf.assign_rule(
+        "Hazy Maze Cave - Swimming Beast in the Cavern",
+        "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip")
     rf.assign_rule("Hazy Maze Cave - Red Coin Area",
                    "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | "
                    "logic_hmc_upper_red_coin_area_wall_kick")

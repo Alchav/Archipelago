@@ -1228,7 +1228,10 @@ def evaluate_hazy_maze_cave_coins(
         "swimming_beast_coin_ring",
         "Coin ring around Swimming Beast in the Cavern",
         8,
-        Rules.has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST")
+        (
+            Rules.has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST")
+            or Rules.can_use_logic_trick(state, player, "logic_hmc_elevator_clip", level_name)
+        )
         and has_horizontal_coin_rings,
     ))
 
