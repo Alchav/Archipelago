@@ -165,6 +165,19 @@ def _red_coins_and_region(
         and (region is None or state.can_reach(region, "Region", player))
     )
 
+def _can_collect_all_bbh_red_coins(state: CollectionState, player: int) -> bool:
+    from . import Rules
+
+    level = "Big Boo's Haunt"
+    return (
+        _red_coins_and_region(state, player, level, f"{level} - Second Floor")
+        and (
+            Rules.has_action(state, player, "Triple Jump", level)
+            or Rules.has_action(state, player, "Wall Kick", level)
+            or Rules.has_action(state, player, "Backflip", level)
+            or Rules.has_action(state, player, "Side Flip", level)
+        )
+    )
 
 def _can_collect_all_hmc_red_coins(state: CollectionState, player: int) -> bool:
     from . import Rules
@@ -1037,7 +1050,14 @@ def evaluate_big_boos_haunt_coins(
         coin_source("main_mr_is", "Two Mr. Is", 10, has_mr_is),
         coin_source("main_bookend", "Flying Bookend on the first floor", 5,
                 has_flying_bookends),
-        coin_source("first_floor_red_coins", "Four first-floor Red Coins", 8, has_red_coins),
+        coin_source("first_floor_easy_red_coins", "Three easy first-floor Red Coins", 6, has_red_coins),
+        coin_source("first_floor_elevated_red_coin", "Elevated Red Coin on the first floor", 2,
+            has_red_coins and (
+                Rules.has_action(state, player, "Triple Jump", level_name)
+                or Rules.has_action(state, player, "Wall Kick", level_name)
+                or Rules.has_action(state, player, "Backflip", level_name)
+                or Rules.has_action(state, player, "Side Flip", level_name)
+            )),
     ]
 
     has_second_floor = state.can_reach(f"{level_name} - Second Floor", "Region", player)
@@ -4169,8 +4189,7 @@ RED_COIN_EVALUATORS: dict[str, RedCoinEvaluator] = {
     "Jolly Roger Bay": _can_collect_all_jrb_red_coins,
     "Cool, Cool Mountain": lambda state, player: _has_red_coins(
         state, player, "Cool, Cool Mountain"),
-    "Big Boo's Haunt": lambda state, player: _red_coins_and_region(
-        state, player, "Big Boo's Haunt", "Big Boo's Haunt - Second Floor"),
+    "Big Boo's Haunt": _can_collect_all_bbh_red_coins,
     "Hazy Maze Cave": _can_collect_all_hmc_red_coins,
     "Lethal Lava Land": _can_collect_all_lll_red_coins,
     "Shifting Sand Land": _can_collect_all_ssl_red_coins,
