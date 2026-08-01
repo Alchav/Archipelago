@@ -1090,7 +1090,7 @@ class LevelFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Big Penguin Race"))
 
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Snowman's Lost His Head"))
-        self.collect(self.get_item_by_name("Cool, Cool Mountain - Snowman's Head"))
+        self.collect(self.get_item_by_name("Cool, Cool Mountain - Snowman's Body"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Snowman's Lost His Head"))
 
 

@@ -49,7 +49,7 @@ class TestCoolCoolMountainLocations(SM64TestBase):
              ["Cool, Cool Mountain - Red Coins"]],
             ["Cool, Cool Mountain - Snowman's Lost His Head", False, []],
             ["Cool, Cool Mountain - Snowman's Lost His Head", True,
-             ["Cool, Cool Mountain - Snowman's Head"]],
+             ["Cool, Cool Mountain - Snowman's Body"]],
             ["Cool, Cool Mountain - Wall Kicks Will Work", False, []],
             ["Cool, Cool Mountain - Wall Kicks Will Work", True, ["Triple Jump"]],
             ["Cool, Cool Mountain - Bob-omb Buddy", False, []],
@@ -70,9 +70,9 @@ class TestCoolCoolMountainLocations(SM64TestBase):
             ["Cool, Cool Mountain - Secret Slide Block 1-Up", False, []],
             ["Cool, Cool Mountain - Secret Slide Block 1-Up", True, BLOCK_1UPS],
 
-            ["Cool, Cool Mountain - Near Snowman 1-Up Block", True, []],
-            ["Cool, Cool Mountain - Ice Pillar 1-Up Block", True, []],
-            ["Cool, Cool Mountain - Secret Slide 1-Up Block", True, []],
+            ["Cool, Cool Mountain - Near Snowman 1-Up Block", True, BLOCK_1UPS],
+            ["Cool, Cool Mountain - Ice Pillar 1-Up Block", True, BLOCK_1UPS],
+            ["Cool, Cool Mountain - Secret Slide 1-Up Block", True, BLOCK_1UPS],
 
             ["Cool, Cool Mountain - Coins Star", False, []],
             ["Cool, Cool Mountain - Coins Star", True, [], ALL_ITEMS],

@@ -216,7 +216,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Whomp's Fortress - Fortress": 3626249,
             "Whomp's Fortress - Bob-omb Buddy": 3626250,
             "Whomp's Fortress - Hoot": 3626251,
-            "Cool, Cool Mountain - Snowman's Head": 3626252,
+            "Cool, Cool Mountain - Snowman's Body": 3626252,
             "Cool, Cool Mountain - Big Penguin": 3626253,
             "Jolly Roger Bay - Sunken Ship": 3626254,
             "Jolly Roger Bay - Raised Ship": 3626255,

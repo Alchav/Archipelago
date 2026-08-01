@@ -100,7 +100,7 @@ per_act_feature_tokens = {
     "WF_FORTRESS",
     "WF_BUDDY",
     "WF_HOOT",
-    "CCM_SNOWMAN_HEAD",
+    "CCM_SNOWMAN_BODY",
     "CCM_BIG_PENGUIN",
     "JRB_SUNKEN_SHIP",
     "JRB_RAISED_SHIP",
@@ -714,7 +714,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Jolly Roger Bay - Stone Pillar 1-Up", "CANN")
     # Cool, Cool Mountain
     rf.assign_rule("Cool, Cool Mountain - Big Penguin Race", "CCM_BIG_PENGUIN")
-    rf.assign_rule("Cool, Cool Mountain - Snowman's Lost His Head", "CCM_SNOWMAN_HEAD")
+    rf.assign_rule("Cool, Cool Mountain - Snowman's Lost His Head", "CCM_SNOWMAN_BODY")
     rf.assign_rule("Cool, Cool Mountain - Li'l Penguin Lost", "CCM_BABY_PENGUINS")
     rf.assign_rule("Cool, Cool Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
@@ -1317,7 +1317,7 @@ class RuleFactory:
         "WF_FORTRESS": "Whomp's Fortress - Fortress",
         "WF_BUDDY": "Whomp's Fortress - Bob-omb Buddy",
         "WF_HOOT": "Whomp's Fortress - Hoot",
-        "CCM_SNOWMAN_HEAD": "Cool, Cool Mountain - Snowman's Head",
+        "CCM_SNOWMAN_BODY": "Cool, Cool Mountain - Snowman's Body",
         "CCM_BIG_PENGUIN": "Cool, Cool Mountain - Big Penguin",
         "JRB_SUNKEN_SHIP": "Jolly Roger Bay - Sunken Ship",
         "JRB_RAISED_SHIP": "Jolly Roger Bay - Raised Ship",

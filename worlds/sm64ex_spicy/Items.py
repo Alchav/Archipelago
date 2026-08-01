@@ -68,7 +68,7 @@ feature_item_data_table: dict[str, SM64ItemData] = {
     "Whomp's Fortress - Fortress": SM64ItemData(sm64ex_base_id + 249),
     "Whomp's Fortress - Bob-omb Buddy": SM64ItemData(sm64ex_base_id + 250, progression_deprioritized),
     "Whomp's Fortress - Hoot": SM64ItemData(sm64ex_base_id + 251),
-    "Cool, Cool Mountain - Snowman's Head": SM64ItemData(sm64ex_base_id + 252, progression_deprioritized),
+    "Cool, Cool Mountain - Snowman's Body": SM64ItemData(sm64ex_base_id + 252, progression_deprioritized),
     "Cool, Cool Mountain - Big Penguin": SM64ItemData(sm64ex_base_id + 253, progression_deprioritized),
     "Jolly Roger Bay - Sunken Ship": SM64ItemData(sm64ex_base_id + 254, progression_deprioritized),
     "Jolly Roger Bay - Raised Ship": SM64ItemData(sm64ex_base_id + 255, progression_deprioritized),
