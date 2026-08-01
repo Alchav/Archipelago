@@ -6,7 +6,7 @@ BOWSER_STAGE_OPTIONS = {
     "area_rando": Options.AreaRandomizer.option_Off,
     "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "bowser_stage_1ups": Options.BowserStage1Ups.option_per_level,
     "bowser_bombs": Options.BowserBombs.option_per_level,
     "bowser_in_the_dark_world_health": 2,

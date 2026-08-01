@@ -9,7 +9,7 @@ LLL_OPTIONS = {
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "lethal_lava_land_coin_star_requirement": 133,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "per_level_cap_items": Options.PerLevelCapItems.option_true,
     "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,

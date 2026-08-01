@@ -8,7 +8,7 @@ class TestCastleLocations(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Off,
         "blocksanity": Options.Blocksanity.option_true,
         "one_up_checks": Options.OneUpChecks.option_true,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "per_level_cap_items": Options.PerLevelCapItems.option_true,
         "triple_jump": Options.TripleJump.option_global,

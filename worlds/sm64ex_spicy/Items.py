@@ -508,6 +508,7 @@ global_one_up_unlock_item_names = (
     "Trigger 1-Ups",
     "1-Up Blocks",
     "Butterflies",
+    "Monty Moles",
 )
 
 global_one_up_unlock_item_data_table: dict[str, SM64ItemData] = {
@@ -515,9 +516,13 @@ global_one_up_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Trigger 1-Ups": SM64ItemData(sm64ex_base_id + 856),
     "1-Up Blocks": SM64ItemData(sm64ex_base_id + 857),
     "Butterflies": SM64ItemData(sm64ex_base_id + 919),
+    "Monty Moles": SM64ItemData(3626838, progression),
 }
 
 per_level_one_up_unlock_item_data_table: dict[str, SM64ItemData] = {
+    # Monty Mole enemies and their triggered 1-Ups
+    "Hazy Maze Cave - Monty Moles": SM64ItemData(3626840, progression),
+    "Tall, Tall Mountain - Monty Moles": SM64ItemData(3626841, progression),
     # Freestanding 1-Ups
     "Big Boo's Haunt - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 858),
     "Bowser in the Dark World - Freestanding 1-Ups": SM64ItemData(sm64ex_base_id + 859),
@@ -756,7 +761,6 @@ global_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Snufits": SM64ItemData(3626583, progression),
     "Spindrifts": SM64ItemData(3626584, progression),
     "Whomps": SM64ItemData(3626585, progression),
-    "Monty Moles": SM64ItemData(3626838, progression),
     "Big Bully": SM64ItemData(3626839, progression),
     "Thwomp": SM64ItemData(3626845, progression),
 }
@@ -819,8 +823,6 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Hazy Maze Cave - Swoops": SM64ItemData(3626778, progression),
     "Bowser in the Sky - Whomp": SM64ItemData(3626779, progression),
     "Whomp's Fortress - Whomps": SM64ItemData(3626780, progression),
-    "Hazy Maze Cave - Monty Moles": SM64ItemData(3626840, progression),
-    "Tall, Tall Mountain - Monty Moles": SM64ItemData(3626841, progression),
     "Lethal Lava Land - Big Bullies": SM64ItemData(3626842, progression),
     "Snowman's Land - Chill Bully": SM64ItemData(3626843, progression),
     "Big Boo's Haunt - Big Boo": SM64ItemData(3626844, progression),
@@ -873,7 +875,6 @@ global_mode_enemy_item_names = (
     "Snufits",
     "Spindrifts",
     "Whomps",
-    "Monty Moles",
     "Big Bully",
     "Shifting Sand Land - Eyerok",
     "Big Boo's Haunt - Flying Bookends",

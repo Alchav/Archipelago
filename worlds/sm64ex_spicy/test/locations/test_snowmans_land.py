@@ -10,7 +10,7 @@ SL_OPTIONS = {
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "no_despawns": Options.NoDespawns.option_false,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "per_level_cap_items": Options.PerLevelCapItems.option_true,
     "snowmans_land_coin_star_requirement": 126,
     "level_features": Options.LevelFeatures.option_per_level,

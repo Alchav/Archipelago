@@ -93,7 +93,7 @@ class PerLevelOptionAliasTest(unittest.TestCase):
         option_classes = (
             Options.CoinObjectUnlocks,
             Options.EnemyUnlocks,
-            Options.OneUpMushroomUnlocks,
+            Options.OneUpUnlocks,
             Options.BowserBombs,
             Options.BowserStage1Ups,
             Options.LevelFeatures,
@@ -651,7 +651,7 @@ class OneUpChecksNoDespawnsOnTestBase(SM64TestBase):
 class GlobalOneUpUnlockItemPoolTestBase(SM64TestBase):
     options = {
         "one_up_checks": Options.OneUpChecks.option_true,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
     }
 
     def test_global_one_up_unlock_items_are_generated(self):
@@ -666,7 +666,7 @@ class GlobalOneUpUnlockItemPoolTestBase(SM64TestBase):
 class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
     options = {
         "one_up_checks": Options.OneUpChecks.option_true,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+        "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     }
 
     def test_per_level_one_up_unlock_items_are_generated(self):
@@ -861,7 +861,7 @@ class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 
     def test_global_mode_unlock_items_are_generated(self):
         expected_names = set(global_mode_coin_object_item_names) | set(global_mode_enemy_item_names)
-        self.assertEqual(len(expected_names), 42)
+        self.assertEqual(len(expected_names), 41)
         for item_name in expected_names:
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -879,7 +879,7 @@ class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
             **per_level_coin_object_item_data_table,
             **per_level_enemy_item_data_table,
         }
-        self.assertEqual(len(individual_items), 196)
+        self.assertEqual(len(individual_items), 194)
         for item_name in individual_items:
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)

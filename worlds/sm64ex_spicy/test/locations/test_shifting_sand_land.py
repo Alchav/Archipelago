@@ -9,7 +9,7 @@ SSL_OPTIONS = {
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "per_level_cap_items": Options.PerLevelCapItems.option_true,
     "shifting_sand_land_coin_star_requirement": 136,
     "level_features": Options.LevelFeatures.option_per_level,

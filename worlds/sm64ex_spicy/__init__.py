@@ -112,7 +112,7 @@ class SM64World(World):
         "permanent_coin_collection",
         "combined_progressive_keys",
         "level_unlocks",
-        "one_up_mushroom_unlocks",
+        "one_up_unlocks",
         "triple_jump",
         "long_jump",
         "backflip",
@@ -378,12 +378,13 @@ class SM64World(World):
             per_level_enemy_item_data_table)
 
     def get_one_up_unlock_item_names(self) -> typing.List[str]:
-        if not self.options.one_up_checks:
-            return []
-        return self.get_unlock_item_names(
-            self.options.one_up_mushroom_unlocks,
+        item_names = self.get_unlock_item_names(
+            self.options.one_up_unlocks,
             global_one_up_unlock_item_names,
             per_level_one_up_unlock_item_data_table)
+        if self.options.one_up_checks:
+            return item_names
+        return [item_name for item_name in item_names if item_name.endswith("Monty Moles")]
 
     def get_level_unlock_item_names(self) -> typing.List[str]:
         option = self.options.level_unlocks
@@ -419,8 +420,8 @@ class SM64World(World):
         if self.options.enemy_unlocks.value == self.options.enemy_unlocks.option_not_shuffled:
             item_names += list(global_enemy_item_data_table)
             item_names += list(per_level_enemy_item_data_table)
-        if self.options.one_up_mushroom_unlocks.value == \
-                self.options.one_up_mushroom_unlocks.option_not_shuffled:
+        if self.options.one_up_unlocks.value == \
+                self.options.one_up_unlocks.option_not_shuffled:
             item_names += list(global_one_up_unlock_item_data_table)
             item_names += list(per_level_one_up_unlock_item_data_table)
         if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
@@ -687,7 +688,7 @@ class SM64World(World):
             "AreaRando": self.area_connections,
             "MoveRandoVec": self.move_rando_bitvec,
             "GlobalCapItems": not self.options.per_level_cap_items.value,
-            "OneUpUnlockMode": self.options.one_up_mushroom_unlocks.value,
+            "OneUpUnlockMode": self.options.one_up_unlocks.value,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),

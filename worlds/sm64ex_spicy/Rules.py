@@ -1234,13 +1234,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Castle - MIPS 2",
         CanReachRegion("Basement") & Has("Castle - Progressive MIPS", 2))
 
-    one_up_option = options.one_up_mushroom_unlocks
+    one_up_option = options.one_up_unlocks
     if options.one_up_checks and one_up_option.value != one_up_option.option_not_shuffled:
         active_location_names = {
             location.name for location in multiworld.get_locations(player)
         }
         for location_name, category_name in one_up_unlock_category_by_location.items():
             if location_name not in active_location_names:
+                continue
+            if location_name.endswith("Monty Moles"):
                 continue
             item_name = (
                 category_name
@@ -1634,7 +1636,7 @@ class RuleFactory:
             self.options, "enemy_unlocks",
             "Mr. Is", f"{level_name} - Mr. Is")
         item_names["MONTY_MOLES"] = get_unlock_item_name(
-            self.options, "enemy_unlocks",
+            self.options, "one_up_unlocks",
             "Monty Moles", f"{level_name} - Monty Moles")
         item_names["FLYING_BOOKENDS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",

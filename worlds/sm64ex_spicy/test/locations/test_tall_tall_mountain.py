@@ -8,7 +8,7 @@ TTM_OPTIONS = {
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
@@ -56,8 +56,7 @@ class TestTallTallMountainLocations(SM64TestBase):
             ["Tall, Tall Mountain - Red Mushroom 1-Up Block", True, []],
             ["Tall, Tall Mountain - Lower Monty Moles", False, []],
             ["Tall, Tall Mountain - Lower Monty Moles", False, [TRIGGER_1UPS]],
-            ["Tall, Tall Mountain - Lower Monty Moles", True,
-             [TRIGGER_1UPS, MONTY_MOLES]],
+            ["Tall, Tall Mountain - Lower Monty Moles", True, [MONTY_MOLES]],
 
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", False, upper],
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
@@ -70,7 +69,7 @@ class TestTallTallMountainLocations(SM64TestBase):
              upper + [FREESTANDING_1UPS]],
             ["Tall, Tall Mountain - Upper Monty Moles", False, upper],
             ["Tall, Tall Mountain - Upper Monty Moles", True,
-             upper + [TRIGGER_1UPS, MONTY_MOLES]],
+             upper + [MONTY_MOLES]],
 
             ["Tall, Tall Mountain - Scale the Mountain", False, upper],
             ["Tall, Tall Mountain - Scale the Mountain", True, top],
@@ -175,7 +174,7 @@ class TestTallTallMountainGlobalUnlockModes(SM64TestBase):
         **TTM_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
         "enemy_unlocks": Options.EnemyUnlocks.option_global,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
         "level_features": Options.LevelFeatures.option_global,
         "bobomb_buddies": Options.BobombBuddies.option_global,
     }
@@ -186,9 +185,7 @@ class TestTallTallMountainGlobalUnlockModes(SM64TestBase):
              ["Tall, Tall Mountain - Horizontal Coin Rings"]],
             ["Tall, Tall Mountain - Coins Star", True, ["Horizontal Coin Rings"]],
             ["Tall, Tall Mountain - Lower Monty Moles", True,
-             ["Trigger 1-Ups", "Tall, Tall Mountain - Monty Moles"]],
-            ["Tall, Tall Mountain - Lower Monty Moles", True,
-             ["Trigger 1-Ups", "Monty Moles"]],
+             ["Monty Moles"]],
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
              ["Rolling Logs", "Red Coins"]],
         ], starting_regions=["Tall, Tall Mountain"])
@@ -201,7 +198,7 @@ class TestTallTallMountainNotShuffledUnlockModes(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_disabled,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
         "enemy_unlocks": Options.EnemyUnlocks.option_not_shuffled,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
     }
 
     def test_not_shuffled_items_require_no_inventory(self):

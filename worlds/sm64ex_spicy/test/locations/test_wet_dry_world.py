@@ -8,7 +8,7 @@ WDW_OPTIONS = {
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
@@ -194,7 +194,7 @@ class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
     options = {
         **WDW_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
         "level_features": Options.LevelFeatures.option_global,
         "bobomb_buddies": Options.BobombBuddies.option_global,
     }
@@ -218,7 +218,7 @@ class TestWetDryWorldNotShuffledUnlockModes(SM64TestBase):
         **WDW_OPTIONS,
         "level_unlocks": Options.LevelUnlocks.option_disabled,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "level_features": Options.LevelFeatures.option_not_shuffled,
         "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
     }

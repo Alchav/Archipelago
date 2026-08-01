@@ -6,7 +6,7 @@ BBH_OPTIONS = {
     "area_rando": Options.AreaRandomizer.option_Off,
     "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "per_level_cap_items": Options.PerLevelCapItems.option_true,
@@ -93,7 +93,7 @@ class TestBigBoosHauntTricks(SM64TestBase):
     run_default_tests = False
     options = {
         **BBH_OPTIONS,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "logic_tricks": {
             "Big Boo's Haunt Second Floor with Wall Kick",
             "Big Boo's Haunt Third Floor with Side Flip and Bounce Off of Bookends",

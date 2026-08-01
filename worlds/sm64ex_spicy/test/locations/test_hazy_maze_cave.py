@@ -12,7 +12,7 @@ HMC_OPTIONS = {
     "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "per_level_cap_items": Options.PerLevelCapItems.option_true,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
@@ -79,18 +79,12 @@ class TestHazyMazeCaveLocations(SM64TestBase):
 
             ["Hazy Maze Cave - Blue Coin Trail Monty Moles", False,
              ["Hazy Maze Cave - Trigger 1-Ups"]],
-            ["Hazy Maze Cave - Blue Coin Trail Monty Moles", False,
+            ["Hazy Maze Cave - Blue Coin Trail Monty Moles", True,
              ["Hazy Maze Cave - Monty Moles"]],
-            ["Hazy Maze Cave - Blue Coin Trail Monty Moles", True, [
-                "Hazy Maze Cave - Monty Moles",
-                "Hazy Maze Cave - Trigger 1-Ups",
-            ]],
             ["Hazy Maze Cave - Twin Hole Monty Moles", False,
              ["Hazy Maze Cave - Trigger 1-Ups"]],
-            ["Hazy Maze Cave - Twin Hole Monty Moles", True, [
-                "Hazy Maze Cave - Monty Moles",
-                "Hazy Maze Cave - Trigger 1-Ups",
-            ]],
+            ["Hazy Maze Cave - Twin Hole Monty Moles", True,
+             ["Hazy Maze Cave - Monty Moles"]],
 
             ["Hazy Maze Cave - Beginning Metal Cap Block", False, []],
             ["Hazy Maze Cave - Beginning Metal Cap Block", True,

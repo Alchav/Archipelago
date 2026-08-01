@@ -210,7 +210,7 @@ class GlobalOneUpUnlockAccessTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
         "one_up_checks": Options.OneUpChecks.option_true,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
     }
 
     def test_each_global_item_controls_its_one_up_category(self):
@@ -232,7 +232,7 @@ class PerLevelOneUpUnlockAccessTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
         "one_up_checks": Options.OneUpChecks.option_true,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+        "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     }
 
     def test_per_level_item_only_unlocks_matching_level(self):

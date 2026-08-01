@@ -374,7 +374,7 @@ class CoinObjectUnlocks(LevelFeatureItemMode):
 
 class EnemyUnlocks(LevelFeatureItemMode):
     """
-    Choose how enemy unlocks are handled.
+    Choose how coin-yielding enemy unlocks are handled.
 
     Not Shuffled - The game starts with every affected enemy unlocked.
 
@@ -385,19 +385,17 @@ class EnemyUnlocks(LevelFeatureItemMode):
     display_name = "Enemy Unlocks"
 
 
-class OneUpMushroomUnlocks(LevelFeatureItemMode):
+class OneUpUnlocks(LevelFeatureItemMode):
     """
-    Choose how 1-Up Mushroom source unlocks are handled.
+    Choose how 1-Up source unlocks and Monty Moles are handled.
 
-    Not Shuffled - Start with freestanding, triggered, block-spawned, and butterfly 1-Ups unlocked.
+    Not Shuffled - Start with freestanding, triggered, block-spawned, butterfly 1-Ups and Monty Moles unlocked.
 
-    Global - Shuffle one global item for each of those four 1-Up source types.
+    Global - Shuffle one global item for each of those five 1-Up source types.
 
     Per Level - Shuffle separate source-type unlock items for each level that contains matching 1-Up checks.
-
-    Butterfly unlocks also control harmless scenery butterflies and the other butterflies in each 1-Up triplet.
     """
-    display_name = "1-Up Mushroom Unlocks"
+    display_name = "1-Up Unlocks"
 
 
 class BowserBombs(LevelFeatureItemMode):
@@ -991,7 +989,7 @@ sm64_options_groups = [
         BobombBuddies,
         CoinObjectUnlocks,
         EnemyUnlocks,
-        OneUpMushroomUnlocks,
+        OneUpUnlocks,
         BowserBombs,
         BowserStage1Ups,
     ]),
@@ -1057,7 +1055,7 @@ class SM64Options(PerGameCommonOptions):
     bobomb_buddies: BobombBuddies
     coin_object_unlocks: CoinObjectUnlocks
     enemy_unlocks: EnemyUnlocks
-    one_up_mushroom_unlocks: OneUpMushroomUnlocks
+    one_up_unlocks: OneUpUnlocks
     bowser_bombs: BowserBombs
     bowser_in_the_dark_world_health: BowserInTheDarkWorldHits
     bowser_in_the_fire_sea_health: BowserInTheFireSeaHits
