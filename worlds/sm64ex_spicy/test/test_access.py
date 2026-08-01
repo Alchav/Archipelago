@@ -2801,6 +2801,14 @@ class TowerOfTheWingCapCoinMasteryLogicTestBase(SM64TestBase):
             self.multiworld.state, self.player, 63))
 
 
+class TowerOfTheWingCapPermanentCoinsLogicTestBase(TowerOfTheWingCapCoinMasteryLogicTestBase):
+    options = {
+        **TowerOfTheWingCapCoinMasteryLogicTestBase.options,
+        "logic_tricks": set(),
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+
 class CoolCoolMountainCoinStarAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {

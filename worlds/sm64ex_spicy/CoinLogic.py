@@ -3673,6 +3673,10 @@ def tower_of_the_wing_cap_coins(
     level_name = "Tower of the Wing Cap"
     has_coin_mastery = rules.has_logic_trick(
         state, player, "logic_totwc_coin_mastery")
+    uses_mastery_routes = (
+        has_coin_mastery
+        or rules.permanent_coin_collection_enabled(state, player)
+    )
     has_single_yellow_coins = rules.has_unlock(
         state, player, "coin_object_unlocks",
         "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
@@ -3693,16 +3697,16 @@ def tower_of_the_wing_cap_coins(
     trace.add_route(
         "totwc_standard_ring_route",
         "Coin rings without Coin Mastery",
-        not has_coin_mastery,
+        not uses_mastery_routes,
         (coin_source("totwc_standard_ring_coins",
                  "Reachable vertical Coin Ring coins",
                  16, has_vertical_coin_rings),),
-        selected=not has_coin_mastery,
+        selected=not uses_mastery_routes,
     )
     trace.add_route(
         "totwc_mastery_ring_route",
         "Coin Mastery route",
-        has_coin_mastery,
+        uses_mastery_routes,
         (
             coin_source("totwc_mastery_ring_coins",
                     "Coin Ring coins reachable with Coin Mastery",
@@ -3711,12 +3715,12 @@ def tower_of_the_wing_cap_coins(
                     "Additional Coin Ring coins with Wing Cap",
                     12, has_vertical_coin_rings and has_wing_cap_item),
         ),
-        selected=has_coin_mastery,
+        selected=uses_mastery_routes,
     )
 
     uncapped_coins = trace.reachable_coins
     assert uncapped_coins <= 63
-    logic_cap = 63 if has_coin_mastery else 31
+    logic_cap = 63 if uses_mastery_routes else 31
     option_cap = state.multiworld.worlds[
         player].options.tower_of_the_wing_cap_coinsanity_max_coins.value
     reachable_coins = min(uncapped_coins, logic_cap, option_cap)

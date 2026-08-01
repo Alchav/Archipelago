@@ -74,7 +74,8 @@ class TowerOfTheWingCapCoinsanityMaxCoins(Range):
     """
     Maximum coin threshold used for Tower of the Wing Cap Coinsanity.
 
-    Collecting all Tower of the Wing Cap coins is very difficult.
+    Collecting all Tower of the Wing Cap coins is very difficult. With Full Accessibility and Permanent Coins
+    disabled, this is capped at 31 unless the Tower of the Wing Cap Coin Mastery trick is enabled.
     """
     display_name = "Tower of the Wing Cap Coinsanity Max Coins"
     range_start = 0
@@ -202,7 +203,10 @@ class DireDireDocksCoinStarRequirement(CoinStarRequirement):
 
 
 class SnowmansLandCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Snowman's Land."""
+    """
+    Coins needed for the Coin Star in Snowman's Land. With Full Accessibility, this is capped at 126 unless the
+    Snowman's Land Impossible Coin trick is enabled.
+    """
     display_name = "Snowman's Land Coin Star Requirement"
     range_end = 127
 
@@ -220,7 +224,10 @@ class TallTallMountainCoinStarRequirement(CoinStarRequirement):
 
 
 class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
-    """Coins needed for the Coin Star in Tiny-Huge Island."""
+    """
+    Coins needed for the Coin Star in Tiny-Huge Island. With Full Accessibility, this is capped at 191 unless the
+    Tiny-Huge Island Impossible Coin trick is enabled.
+    """
     display_name = "Tiny-Huge Island Coin Star Requirement"
     range_end = 192
 

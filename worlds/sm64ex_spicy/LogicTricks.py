@@ -605,7 +605,7 @@ logic_tricks = {
         "rule": "",
         "difficulty": "hard",
         "description": "Collecting the difficult coin rings in Tower of the Wing Cap. The final rings require"
-                       " restarting flight with the Wing Cap.",
+                       " restarting flight with the Wing Cap. Irrelevant if Permanent Coins is enabled.",
     },
     # Vanish Cap Under the Moat
     "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {

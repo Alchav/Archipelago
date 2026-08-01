@@ -218,6 +218,7 @@ class SM64World(World):
                 }
                 if (
                         self.options.accessibility == self.options.accessibility.option_full
+                        and not self.options.permanent_coin_collection
                         and not self.logic_totwc_coin_mastery
                 ):
                     secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"] = min(

@@ -1273,6 +1273,18 @@ class TowerOfTheWingCapFullAccessibilityCapTestBase(SM64TestBase):
         self.assertNotIn("Tower of the Wing Cap - 32 Coins", active_locations)
 
 
+class TowerOfTheWingCapPermanentCoinsGenerationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TowerOfTheWingCapFullAccessibilityCapTestBase.options,
+        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
+    }
+
+    def test_permanent_coins_bypass_full_accessibility_cap(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertIn("Tower of the Wing Cap - 63 Coins", active_locations)
+
+
 class TowerOfTheWingCapItemsAccessibilityTestBase(SM64TestBase):
     run_default_tests = False
     options = {
