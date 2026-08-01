@@ -655,7 +655,7 @@ class GlobalOneUpUnlockItemPoolTestBase(SM64TestBase):
     }
 
     def test_global_one_up_unlock_items_are_generated(self):
-        self.assertEqual(self.world.fill_slot_data()["OneUpUnlockMode"], 1)
+        self.assertNotIn("OneUpUnlockMode", self.world.fill_slot_data())
         for item_name in global_one_up_unlock_item_data_table:
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
         for item_name in per_level_one_up_unlock_item_data_table:
@@ -670,7 +670,7 @@ class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
     }
 
     def test_per_level_one_up_unlock_items_are_generated(self):
-        self.assertEqual(self.world.fill_slot_data()["OneUpUnlockMode"], 2)
+        self.assertNotIn("OneUpUnlockMode", self.world.fill_slot_data())
         for item_name in global_one_up_unlock_item_data_table:
             self.assertEqual(len(self.get_items_by_name(item_name)), 0)
         for item_name in per_level_one_up_unlock_item_data_table:

@@ -749,8 +749,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_hmc_metal_head_capless_no_movement")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
-    rf.assign_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles", "MONTY_MOLES")
-    rf.assign_rule("Hazy Maze Cave - Twin Hole Monty Moles", "MONTY_MOLES")
+    if options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled:
+        rf.add_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles",
+                    Has("Monty Moles") | Has("Hazy Maze Cave - Monty Moles"))
+        rf.add_rule("Hazy Maze Cave - Twin Hole Monty Moles",
+                    Has("Monty Moles") | Has("Hazy Maze Cave - Monty Moles"))
     # Lethal Lava Land
     rf.assign_rule("Lethal Lava Land - Boil the Big Bully", "BIG_BULLY")
     rf.assign_rule("Lethal Lava Land - Bully the Bullies", "BULLIES & BIG_BULLY")
@@ -881,8 +884,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom",
                    "CANN | logic_ttm_lonely_mushroom_cannonless | "
                    "logic_ttm_lonely_mushroom_fly_guy_spin_jump")
-    rf.assign_rule("Tall, Tall Mountain - Upper Monty Moles", "MONTY_MOLES")
-    rf.assign_rule("Tall, Tall Mountain - Lower Monty Moles", "MONTY_MOLES")
+    if options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled:
+        rf.add_rule("Tall, Tall Mountain - Upper Monty Moles",
+                    Has("Monty Moles") | Has("Tall, Tall Mountain - Monty Moles"))
+        rf.add_rule("Tall, Tall Mountain - Lower Monty Moles",
+                    Has("Monty Moles") | Has("Tall, Tall Mountain - Monty Moles"))
     rf.assign_rule("Tall, Tall Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Tiny-Huge Island
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
@@ -1244,12 +1250,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 continue
             if location_name.endswith("Monty Moles"):
                 continue
-            item_name = (
-                category_name
-                if one_up_option.value == one_up_option.option_global
-                else f"{location_name.split(' - ', 1)[0]} - {category_name}"
-            )
-            rf.add_rule(location_name, Has(item_name))
+            per_level_item_name = f"{location_name.split(' - ', 1)[0]} - {category_name}"
+            rf.add_rule(location_name, Has(category_name) | Has(per_level_item_name))
 
     if options.area_rando > options.area_rando.option_Off and not using_slot_area_connections:
         ensure_reachable_starting_check(

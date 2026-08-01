@@ -688,7 +688,6 @@ class SM64World(World):
             "AreaRando": self.area_connections,
             "MoveRandoVec": self.move_rando_bitvec,
             "GlobalCapItems": not self.options.per_level_cap_items.value,
-            "OneUpUnlockMode": self.options.one_up_unlocks.value,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
