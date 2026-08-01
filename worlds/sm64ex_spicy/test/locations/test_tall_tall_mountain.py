@@ -53,7 +53,7 @@ class TestTallTallMountainLocations(SM64TestBase):
              ["Tall, Tall Mountain - Bob-omb Buddy"]],
             ["Tall, Tall Mountain - Red Mushroom Block 1-Up", False, []],
             ["Tall, Tall Mountain - Red Mushroom Block 1-Up", True, [BLOCK_1UPS]],
-            ["Tall, Tall Mountain - Red Mushroom 1-Up Block", True, []],
+            ["Tall, Tall Mountain - Red Mushroom 1-Up Block", True, [BLOCK_1UPS]],
             ["Tall, Tall Mountain - Lower Monty Moles", False, []],
             ["Tall, Tall Mountain - Lower Monty Moles", False, [TRIGGER_1UPS]],
             ["Tall, Tall Mountain - Lower Monty Moles", True, [MONTY_MOLES]],

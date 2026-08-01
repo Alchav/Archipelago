@@ -4411,6 +4411,7 @@ class HazyMazeCaveIndividualUnlockLogicTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
@@ -4821,7 +4822,7 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
 
     def test_shy_guy_bounce_requires_fly_guy(self):
         self.collect_basement_access()
-        self.assertTrue(self.world.logic_ssl_stone_structure_shy_guy_bounce)
+        self.assertTrue(self.world.logic_ssl_stone_structure_shy_guy_spin_jump)
         self.assertFalse(self.can_reach_region("Shifting Sand Land - Stone Structure"))
 
         self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
@@ -5865,6 +5866,7 @@ class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
         "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
         "area_rando": Options.AreaRandomizer.option_Off,

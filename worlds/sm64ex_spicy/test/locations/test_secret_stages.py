@@ -93,7 +93,8 @@ class TestCavernOfTheMetalCapLocations(SM64TestBase):
              ["Cavern of the Metal Cap - Freestanding 1-Ups"]],
             ["Cavern of the Metal Cap - First Metal Cap Block", False, []],
             ["Cavern of the Metal Cap - First Metal Cap Block", True, metal_cap],
-            ["Cavern of the Metal Cap - 1-Up Block", True, []],
+            ["Cavern of the Metal Cap - 1-Up Block", True,
+             ["Cavern of the Metal Cap - 1-Up Blocks"]],
             ["Cavern of the Metal Cap - Near Switch Metal Cap Block", False, []],
             ["Cavern of the Metal Cap - Near Switch Metal Cap Block", True, metal_cap],
         ], starting_regions=["Cavern of the Metal Cap"])
@@ -154,7 +155,8 @@ class TestVanishCapUnderTheMoatLocations(SM64TestBase):
 
             ["Vanish Cap Under the Moat - Bottom of Slide Vanish Cap Block", False, []],
             ["Vanish Cap Under the Moat - Bottom of Slide Vanish Cap Block", True, vanish_cap],
-            ["Vanish Cap Under the Moat - 1-Up Block", True, []],
+            ["Vanish Cap Under the Moat - 1-Up Block", True,
+             ["Vanish Cap Under the Moat - 1-Up Blocks"]],
             ["Vanish Cap Under the Moat - 3 Coins Block", False, ["Ledge Grab"]],
             ["Vanish Cap Under the Moat - 3 Coins Block", False,
              ["Vanish Cap Under the Moat - 3-Coin Block"]],

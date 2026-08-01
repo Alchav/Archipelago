@@ -70,12 +70,14 @@ class TestHazyMazeCaveLocations(SM64TestBase):
             ["Hazy Maze Cave - Above Pit Block 1-Up", True,
              pit_islands + ["Hazy Maze Cave - 1-Up Blocks"]],
             ["Hazy Maze Cave - Above Pit 1-Up Block", False, ["Triple Jump"]],
-            ["Hazy Maze Cave - Above Pit 1-Up Block", True, pit_islands],
+            ["Hazy Maze Cave - Above Pit 1-Up Block", True,
+             pit_islands + ["Hazy Maze Cave - 1-Up Blocks"]],
 
             ["Hazy Maze Cave - Past Rolling Rocks Block 1-Up", False, []],
             ["Hazy Maze Cave - Past Rolling Rocks Block 1-Up", True,
              ["Hazy Maze Cave - 1-Up Blocks"]],
-            ["Hazy Maze Cave - Past Rolling Rocks 1-Up Block", True, []],
+            ["Hazy Maze Cave - Past Rolling Rocks 1-Up Block", True,
+             ["Hazy Maze Cave - 1-Up Blocks"]],
 
             ["Hazy Maze Cave - Blue Coin Trail Monty Moles", False,
              ["Hazy Maze Cave - Trigger 1-Ups"]],

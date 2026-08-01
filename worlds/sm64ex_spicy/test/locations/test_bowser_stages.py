@@ -76,8 +76,10 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
             ["Bowser in the Dark World - 3 Coins Block", False, []],
             ["Bowser in the Dark World - 3 Coins Block", True,
              ["Bowser in the Dark World - 3-Coin Block"]],
-            ["Bowser in the Dark World - Tower 1-Up Block", True, []],
-            ["Bowser in the Dark World - Near Goombas 1-Up Block", True, []],
+            ["Bowser in the Dark World - Tower 1-Up Block", True,
+             ["Bowser in the Dark World - 1-Up Blocks"]],
+            ["Bowser in the Dark World - Near Goombas 1-Up Block", True,
+             ["Bowser in the Dark World - 1-Up Blocks"]],
         ], starting_regions=["Bowser in the Dark World"])
 
 
@@ -150,11 +152,13 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - Near Poles 1-Up", True,
              near_poles + freestanding + extra],
             ["Bowser in the Fire Sea - Swaying Stairs 1-Up Block", False, []],
-            ["Bowser in the Fire Sea - Swaying Stairs 1-Up Block", True, upper],
+            ["Bowser in the Fire Sea - Swaying Stairs 1-Up Block", True,
+             upper + ["Bowser in the Fire Sea - 1-Up Blocks"]],
             ["Bowser in the Fire Sea - 10 Coins Block", False, upper],
             ["Bowser in the Fire Sea - 10 Coins Block", True,
              upper + ["Bowser in the Fire Sea - 10-Coin Block"]],
-            ["Bowser in the Fire Sea - Near Poles 1-Up Block", True, upper],
+            ["Bowser in the Fire Sea - Near Poles 1-Up Block", True,
+             upper + ["Bowser in the Fire Sea - 1-Up Blocks"]],
         ], starting_regions=["Bowser in the Fire Sea"])
 
 
@@ -173,7 +177,8 @@ class TestBowserInTheSkyLocations(SM64TestBase):
             ["Bowser in the Sky - Block 1-Up", False, []],
             ["Bowser in the Sky - Block 1-Up", True,
              ["Bowser in the Sky - 1-Up Blocks"]],
-            ["Bowser in the Sky - 1-Up Block", True, []],
+            ["Bowser in the Sky - 1-Up Block", True,
+             ["Bowser in the Sky - 1-Up Blocks"]],
             ["Bowser in the Sky - Before Tilting Platform 1-Up", False, []],
             ["Bowser in the Sky - Before Tilting Platform 1-Up", True, freestanding],
             ["Bowser in the Sky - Ferris Wheel 1-Up", False, []],

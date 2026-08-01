@@ -108,7 +108,7 @@ class TestShiftingSandLandLocations(SM64TestBase):
             ["Shifting Sand Land - Outside Pyramid Wing Cap Block", False, []],
             ["Shifting Sand Land - Outside Pyramid Wing Cap Block", True,
              ["Shifting Sand Land - Wing Cap"]],
-            ["Shifting Sand Land - Outside Pyramid 1-Up Block", True, []],
+            ["Shifting Sand Land - Outside Pyramid 1-Up Block", True, block_mushroom],
 
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", False, []],
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", True, ["Triple Jump"]],
@@ -120,8 +120,8 @@ class TestShiftingSandLandLocations(SM64TestBase):
             ["Shifting Sand Land - Cannon Wing Cap Block", False, []],
             ["Shifting Sand Land - Cannon Wing Cap Block", True,
              ["Shifting Sand Land - Wing Cap"]],
-            ["Shifting Sand Land - Pyramid Left Path 1-Up Block", True, []],
-            ["Shifting Sand Land - Pyramid Back 1-Up Block", True, []],
+            ["Shifting Sand Land - Pyramid Left Path 1-Up Block", True, block_mushroom],
+            ["Shifting Sand Land - Pyramid Back 1-Up Block", True, block_mushroom],
 
             ["Shifting Sand Land - Coins Star", False, [],
              ["Shifting Sand Land - Red Coins"]],

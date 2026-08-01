@@ -76,7 +76,8 @@ class TestWingMarioOverTheRainbowLocations(SM64TestBase):
             ["Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block",
              True, cannon_route],
             ["Wing Mario Over the Rainbow - 1-Up Block", False, flight],
-            ["Wing Mario Over the Rainbow - 1-Up Block", True, cannon_route],
+            ["Wing Mario Over the Rainbow - 1-Up Block", True,
+             cannon_route + ["Wing Mario Over the Rainbow - 1-Up Blocks"]],
         ], starting_regions=["Wing Mario Over the Rainbow"])
 
 

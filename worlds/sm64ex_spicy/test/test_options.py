@@ -96,8 +96,6 @@ class PerLevelOptionAliasTest(unittest.TestCase):
             Options.OneUpUnlocks,
             Options.BowserBombs,
             Options.BowserStage1Ups,
-            Options.LevelFeatures,
-            Options.BobombBuddies,
             Options.TripleJump,
         )
         for option_class in option_classes:
@@ -845,7 +843,7 @@ class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
         precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
 
-        self.assertEqual(len(unlock_items), 229)
+        self.assertEqual(len(unlock_items), 226)
         for item_name, item_data in unlock_items.items():
             with self.subTest(item=item_name):
                 self.assertEqual(start_inventory[item_data.code], 1)

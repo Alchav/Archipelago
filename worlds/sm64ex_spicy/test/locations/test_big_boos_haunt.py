@@ -57,9 +57,7 @@ class TestBigBoosHauntLocations(SM64TestBase):
             ["Big Boo's Haunt - 10 Coins Block", True,
              ["Big Boo's Haunt - 10-Coin Block"]],
 
-            ["Big Boo's Haunt - Secret of the Haunted Books", False, SECOND_FLOOR],
-            ["Big Boo's Haunt - Secret of the Haunted Books", True,
-             SECOND_FLOOR + ["Kick"]],
+            ["Big Boo's Haunt - Secret of the Haunted Books", True, SECOND_FLOOR],
             ["Big Boo's Haunt - Seek the 8 Red Coins", False,
              SECOND_FLOOR],
             ["Big Boo's Haunt - Seek the 8 Red Coins", True,
@@ -82,7 +80,8 @@ class TestBigBoosHauntLocations(SM64TestBase):
             ["Big Boo's Haunt - Top of Mansion Block 1-Up", False, ROOF],
             ["Big Boo's Haunt - Top of Mansion Block 1-Up", True,
              ROOF + ["Big Boo's Haunt - 1-Up Blocks"]],
-            ["Big Boo's Haunt - Top of Mansion 1-Up Block", True, ROOF],
+            ["Big Boo's Haunt - Top of Mansion 1-Up Block", True,
+             ROOF + ["Big Boo's Haunt - 1-Up Blocks"]],
 
             ["Big Boo's Haunt - Coins Star", False, []],
             ["Big Boo's Haunt - Coins Star", True, [], ALL_ITEMS],

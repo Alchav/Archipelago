@@ -46,7 +46,7 @@ class TestTinyHugeIslandTinyLocations(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Tiny Island Near Start Block 1-Up", False, []],
             ["Tiny-Huge Island - Tiny Island Near Start Block 1-Up", True, [BLOCK_1UPS]],
-            ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True, []],
+            ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True, [BLOCK_1UPS]],
             ["Tiny-Huge Island - Start Butterfly 1-Up", False, []],
             ["Tiny-Huge Island - Start Butterfly 1-Up", True, [BUTTERFLIES]],
 
@@ -88,7 +88,8 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
             ["Tiny-Huge Island - Windy Area Block 1-Up", False, windswept],
             ["Tiny-Huge Island - Windy Area Block 1-Up", True,
              windswept + [BLOCK_1UPS]],
-            ["Tiny-Huge Island - Windy Area 1-Up Block", True, windswept],
+            ["Tiny-Huge Island - Windy Area 1-Up Block", True,
+             windswept + [BLOCK_1UPS]],
 
             ["Tiny-Huge Island - Rematch with Koopa the Quick", False, koopa_region],
             ["Tiny-Huge Island - Rematch with Koopa the Quick", True,
@@ -98,7 +99,7 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
             ["Tiny-Huge Island - Huge Island Near Start Block 1-Up", True,
              koopa_region + [BLOCK_1UPS]],
             ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", True,
-             koopa_region],
+             koopa_region + [BLOCK_1UPS]],
             ["Tiny-Huge Island - Koopa Area Butterfly 1-Up", False, koopa_region],
             ["Tiny-Huge Island - Koopa Area Butterfly 1-Up", True,
              koopa_region + [BUTTERFLIES]],
@@ -141,7 +142,8 @@ class TestTinyHugeIslandPipeDirections(SM64TestBase):
     def test_tiny_main_pipe_reaches_koopa_region(self):
         self.run_location_tests([
             ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", False, []],
-            ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", True, [PIPES]],
+            ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", True,
+             [PIPES, BLOCK_1UPS]],
         ], starting_regions=["Tiny-Huge Island - Tiny Main"])
 
     def test_terminal_regions_do_not_lead_back_upstream(self):
@@ -194,7 +196,7 @@ class TestTinyHugeIslandFullLevelUnlocks(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", False, upstairs],
             ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True,
-             upstairs + ["Unlock Tiny Island"]],
+             upstairs + ["Unlock Tiny Island", BLOCK_1UPS]],
             ["Tiny-Huge Island - Beach Coins 1-Up", False,
              upstairs + [TRIGGER_1UPS]],
             ["Tiny-Huge Island - Beach Coins 1-Up", True,
@@ -217,7 +219,7 @@ class TestTinyHugeIslandGlobalUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Coins Star", True, ["Tiny-Huge Island - Goombas"]],
             ["Tiny-Huge Island - Coins Star", True, ["Goombas"]],
-            ["Tiny-Huge Island - Start Butterfly 1-Up", False,
+            ["Tiny-Huge Island - Start Butterfly 1-Up", True,
              ["Tiny-Huge Island - Butterflies"]],
             ["Tiny-Huge Island - Start Butterfly 1-Up", True, ["Butterflies"]],
             ["Tiny-Huge Island - Five Itty Bitty Secrets", False, ["Long Jump"]],

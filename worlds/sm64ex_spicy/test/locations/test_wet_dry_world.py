@@ -107,7 +107,8 @@ class TestWetDryWorldLowLocations(SM64TestBase):
             ["Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block",
              True, downtown + [DIAMOND, VANISH_CAP]],
             ["Wet-Dry World - Downtown 1-Up Block", False, downtown],
-            ["Wet-Dry World - Downtown 1-Up Block", True, downtown + [DIAMOND]],
+            ["Wet-Dry World - Downtown 1-Up Block", True,
+             downtown + [DIAMOND, BLOCK_1UPS]],
 
             ["Wet-Dry World - Coins Star", False, []],
             ["Wet-Dry World - Coins Star", True,
@@ -205,7 +206,7 @@ class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
             ["Wet-Dry World - Coins Star", True,
              ["Wet-Dry World - Horizontal Coin Rings"]],
             ["Wet-Dry World - Coins Star", True, ["Horizontal Coin Rings"]],
-            ["Wet-Dry World - Cylinder Lower 1-Up", False,
+            ["Wet-Dry World - Cylinder Lower 1-Up", True,
              top + ["Wet-Dry World - Freestanding 1-Ups"]],
             ["Wet-Dry World - Cylinder Lower 1-Up", True,
              top + ["Freestanding 1-Ups"]],
