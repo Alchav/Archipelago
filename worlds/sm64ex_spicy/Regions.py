@@ -159,13 +159,13 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regWhomp, "Whomp's Fortress - Shoot into the Wild Blue",
                           "Whomp's Fortress - Fall onto the Caged Island", "Whomp's Fortress - Blast Away the Wall",
                           "Whomp's Fortress - Bob-omb Buddy", "Whomp's Fortress - Flower Patch Butterfly 1-Up",
+                          "Whomp's Fortress - Rotating Platform Coins 1-Up",
                           "Whomp's Fortress - Metal Cap Block")
     wf_top = create_subregion(regWhomp, "Whomp's Fortress - Top",
                               "Whomp's Fortress - Chip Off Whomp's Block",
                               "Whomp's Fortress - Red Coins on the Floating Isle",
                               "Whomp's Fortress - To the Top of the Fortress",
                               "Whomp's Fortress - Flagpole 1-Up",
-                              "Whomp's Fortress - Rotating Platform Coins 1-Up",
                               "Whomp's Fortress - Tower Alcove 1-Up")
     regWhomp.subregions = [wf_top]
     create_locs(regWhomp, "Whomp's Fortress - Coins Star")

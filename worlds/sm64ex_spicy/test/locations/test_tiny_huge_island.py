@@ -50,8 +50,10 @@ class TestTinyHugeIslandTinyLocations(SM64TestBase):
             ["Tiny-Huge Island - Start Butterfly 1-Up", False, []],
             ["Tiny-Huge Island - Start Butterfly 1-Up", True, [BUTTERFLIES]],
 
-            ["Tiny-Huge Island - Pluck the Piranha Flower", False, piranha_area],
-            ["Tiny-Huge Island - Pluck the Piranha Flower", True, piranha_area + [PIPES]],
+            ["Tiny-Huge Island - Pluck the Piranha Flower", False,
+             piranha_area + [PIPES]],
+            ["Tiny-Huge Island - Pluck the Piranha Flower", True,
+             piranha_area + [PIPES, "Tiny-Huge Island - Fire Piranha Plants"]],
 
             ["Tiny-Huge Island - Five Itty Bitty Secrets", False, piranha_area],
             ["Tiny-Huge Island - Five Itty Bitty Secrets", True, tiny_main],

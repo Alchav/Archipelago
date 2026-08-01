@@ -912,6 +912,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     rf.assign_rule("Tiny-Huge Island - Bob-omb Buddy", "BOBOMB_BUDDY")
+    rf.assign_rule("Tiny-Huge Island - Pluck the Piranha Flower", "FIRE_PIRANHA_PLANTS")
     rf.assign_rule("Tiny-Huge Island - Red Coin Cave 1-Up", "WK")
     # Tick Tock Clock
     rf.assign_rule("Tick Tock Clock - First Clock Hand Area",
@@ -1621,6 +1622,9 @@ class RuleFactory:
         item_names["FLY_GUY"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Fly Guys", f"{level_name} - Fly Guy")
+        item_names["FIRE_PIRANHA_PLANTS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Fire Piranha Plants", f"{level_name} - Fire Piranha Plants")
         item_names["EYEROK"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Shifting Sand Land - Eyerok", "Shifting Sand Land - Eyerok")
