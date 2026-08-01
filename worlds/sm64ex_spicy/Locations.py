@@ -691,6 +691,8 @@ one_up_unlock_category_by_location = {
     **{location_name: "Trigger 1-Ups" for location_name in locTrigger1Up_table},
     **{location_name: "Butterflies" for location_name in locButterfly1Up_table},
     **{location_name: "1-Up Blocks" for location_name in loc1UpBlock_table},
+    **{location_name: "1-Up Blocks" for location_name in locBlocksanity_table
+       if location_name.endswith("1-Up Block")},
 }
 
 

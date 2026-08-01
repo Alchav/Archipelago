@@ -733,7 +733,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "WK+LG | logic_bbh_third_floor_wall_kick | logic_bbh_third_floor_side_flip")
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
     rf.assign_rule("Big Boo's Haunt - Big Boo's Balcony", "BIG_BOO")
-    rf.assign_rule("Big Boo's Haunt - Secret of the Haunted Books", "KK")
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
     rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ/SF/WK")
     # Haze Maze Cave
