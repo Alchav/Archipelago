@@ -700,6 +700,7 @@ class SM64World(World):
             "EasyButterflies": self.options.easy_butterflies.value,
             "NoDespawn": self.options.no_despawns.value,
             "PermanentCoinCollection": self.options.permanent_coin_collection.value,
+            "MipsSkipEnabled": self.logic_castle_30_star_door_mips_skip,
             "BowserInTheDarkWorldHits": self.options.bowser_in_the_dark_world_health.value,
             "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_health.value,
             "BowserInTheSkyHits": self.options.bowser_in_the_sky_health.value,

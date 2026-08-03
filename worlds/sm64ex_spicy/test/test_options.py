@@ -53,6 +53,21 @@ class LogicTrickOptionTest(unittest.TestCase):
             self.assertEqual(enabled, expected)
 
 
+class MipsSkipSlotDataDisabledTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_mips_skip_slot_data_is_disabled(self):
+        self.assertFalse(self.world.fill_slot_data()["MipsSkipEnabled"])
+
+
+class MipsSkipSlotDataEnabledTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {"logic_tricks": {"Castle MIPS Skip Through the 30 Star Door"}}
+
+    def test_mips_skip_slot_data_is_enabled(self):
+        self.assertTrue(self.world.fill_slot_data()["MipsSkipEnabled"])
+
+
 class BowserStageCollapseHitsOptionTest(unittest.TestCase):
     def test_range(self):
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_start, 1)
