@@ -332,10 +332,10 @@ class LevelFeatures(Choice):
     Per Act Only - Shuffle only features that were tied to specific selected Stars in vanilla Super Mario 64.
 
     Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, Purple
-    Switches, and Treasure Chests use global items.
+    Switches, Treasure Chests, and Warp Pipes use global items.
 
     Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs,
-    Purple Switches, and Treasure Chests use separate level-specific items.
+    Purple Switches, Treasure Chests, and Warp Pipes use separate level-specific items.
     """
     display_name = "Level Features"
     option_not_shuffled = 0
