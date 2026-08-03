@@ -44,6 +44,7 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
         ]
         freestanding = ["Bowser in the Dark World - Freestanding 1-Ups"]
         extra = ["Bowser in the Dark World - Extra 1-Ups"]
+        warp_pipes = ["Bowser in the Dark World - Warp Pipes"]
 
         self.run_location_tests([
             ["Bowser in the Dark World - Red Coins", False, purple_switch],
@@ -51,7 +52,8 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
             ["Bowser in the Dark World - Red Coins", True, purple_switch + red_coins],
             ["Bowser in the Dark World - Key", False, purple_switch],
             ["Bowser in the Dark World - Key", False, purple_switch + bombs[:1]],
-            ["Bowser in the Dark World - Key", True, purple_switch + bombs],
+            ["Bowser in the Dark World - Key", False, purple_switch + bombs],
+            ["Bowser in the Dark World - Key", True, purple_switch + bombs + warp_pipes],
 
             ["Bowser in the Dark World - Tower Block 1-Up", False, []],
             ["Bowser in the Dark World - Tower Block 1-Up", True,
@@ -93,6 +95,7 @@ class TestBowserInTheDarkWorldSlopeTrick(SM64TestBase):
     def test_trick_reaches_bowser_but_not_red_coin_star(self):
         trick_route = [
             "Triple Jump",
+            "Bowser in the Dark World - Warp Pipes",
             "Bowser in the Dark World - Progressive Bowser Arena Bomb",
             "Bowser in the Dark World - Progressive Bowser Arena Bomb",
         ]
@@ -118,6 +121,7 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
         freestanding = ["Bowser in the Fire Sea - Freestanding 1-Ups"]
         triggers = ["Bowser in the Fire Sea - Trigger 1-Ups"]
         extra = ["Bowser in the Fire Sea - Extra 1-Ups"]
+        warp_pipes = ["Bowser in the Fire Sea - Warp Pipes"]
 
         self.run_location_tests([
             ["Bowser in the Fire Sea - First Stone Structure 1-Up", False, []],
@@ -132,7 +136,8 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - Red Coins", True, upper + ["Bowser in the Fire Sea - Red Coins"]],
             ["Bowser in the Fire Sea - Red Coins", False, near_poles],
             ["Bowser in the Fire Sea - Key", False, upper + bombs[:1]],
-            ["Bowser in the Fire Sea - Key", True, upper + bombs],
+            ["Bowser in the Fire Sea - Key", False, upper + bombs],
+            ["Bowser in the Fire Sea - Key", True, upper + bombs + warp_pipes],
 
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", False, upper],
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", True,

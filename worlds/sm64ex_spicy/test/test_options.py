@@ -13,7 +13,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table, \
-    per_level_bobomb_buddy_item_names
+    per_level_bobomb_buddy_item_names, per_level_warp_pipe_item_names
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -334,6 +334,10 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Jolly Roger Bay - Treasure Chests": 3626929,
             "Dire, Dire Docks - Treasure Chests": 3626930,
             "Treasure Chests": 3626931,
+            "Bowser in the Dark World - Warp Pipes": 3626932,
+            "Bowser in the Fire Sea - Warp Pipes": 3626933,
+            "Bowser in the Sky - Warp Pipes": 3626934,
+            "Warp Pipes": 3626935,
         }
         item_data = {
             **feature_item_data_table,
@@ -440,6 +444,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
                     "Bob-omb Buddies",
                     "Jolly Roger Bay - Treasure Chests",
                     "Dire, Dire Docks - Treasure Chests",
+                    *per_level_warp_pipe_item_names,
             }:
                 continue
             with self.subTest("Default arbitrary item in StartInventory only", item=item_name):
@@ -459,7 +464,12 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual(self.world.get_apsm64ex_slot_data()["StartInventory"][item_id], 1)
 
     def test_default_individual_arbitrary_items_are_not_generated(self):
-        for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
+        for item_name in {
+                **checkerboard_item_data_table,
+                **rolling_log_item_data_table,
+                **purple_switch_item_data_table,
+                **{name: None for name in per_level_warp_pipe_item_names},
+        }:
             with self.subTest("Individual arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
 
@@ -827,6 +837,7 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Rolling Logs",
                 "Purple Switches",
                 "Treasure Chests",
+                "Warp Pipes",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -841,6 +852,7 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Rolling Logs",
                 "Purple Switches",
                 "Treasure Chests",
+                "Warp Pipes",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)

@@ -36,12 +36,18 @@ minimum_starting_check_count = 2
 simple_level_feature_items = {
     "HMC_SWIMMING_BEAST": "Hazy Maze Cave - Swimming Beast",
     "RR_CARPETS": "Rainbow Ride - Carpets",
-    "THI_WARP_PIPES": "Tiny-Huge Island - Warp Pipes",
     "CCM_BABY_PENGUINS": "Cool, Cool Mountain - Baby Penguins",
     "SL_PENGUIN": "Snowman's Land - Penguin",
     "SSL_PYRAMID_ELEVATOR": "Shifting Sand Land - Pyramid Elevator",
     "WDW_WATER_LEVEL_DIAMOND": "Wet-Dry World - Water Level Diamond",
     "TTC_SPINNERS": "Tick Tock Clock - Spinners",
+}
+
+warp_pipe_item_name_by_level = {
+    "Tiny-Huge Island": "Tiny-Huge Island - Warp Pipes",
+    "Bowser in the Dark World": "Bowser in the Dark World - Warp Pipes",
+    "Bowser in the Fire Sea": "Bowser in the Fire Sea - Warp Pipes",
+    "Bowser in the Sky": "Bowser in the Sky - Warp Pipes",
 }
 
 checkerboard_item_name_by_level = {
@@ -198,6 +204,11 @@ def has_simple_arbitrary_feature(state: CollectionState, player: int, token: str
         }
         or state.has(item_name, player)
     )
+
+
+def has_warp_pipes(state: CollectionState, player: int, level_name: str) -> bool:
+    return has_level_feature(
+        state, player, "level_features", "Warp Pipes", warp_pipe_item_name_by_level[level_name])
 
 
 def get_level_feature_item_name(
@@ -892,10 +903,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # Tiny-Huge Island
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
     rf.assign_rule("Tiny-Huge Island - Tiny Main", "PURPLE_SWITCHES")
-    rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Tiny Main to Koopa the Quick", "THI_WARP_PIPES")
-    rf.assign_rule("Tiny-Huge Island - Koopa the Quick to Tiny Main", "THI_WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Tiny Main to Koopa the Quick", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Koopa the Quick to Tiny Main", "WARP_PIPES")
     rf.assign_rule(
         "Tiny-Huge Island - Windswept Valley",
         "TJ+DV | LJ | logic_thi_windswept_valley_fly_guy_spin_jump")
@@ -908,7 +919,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coins Area", "CANN")
     rf.assign_rule(
         "Tiny-Huge Island - Wiggler's Cave",
-        "{Tiny-Huge Island - Tiny Main} & GP & THI_WARP_PIPES")
+        "{Tiny-Huge Island - Tiny Main} & GP & WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     rf.assign_rule("Tiny-Huge Island - Bob-omb Buddy", "BOBOMB_BUDDY")
@@ -971,7 +982,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule_object(
         "Bowser in the Dark World - Key",
         rf.build_rule(
-            "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass",
+            "WARP_PIPES & PURPLE_SWITCHES | WARP_PIPES & logic_bitdw_purple_switch_bypass",
             arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Dark World"),
             action_item_names=rf.get_action_item_names("Bowser in the Dark World"))
         & bowser_arena_bomb_rule(
@@ -995,7 +1006,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
     rf.assign_rule_object(
         "Bowser in the Fire Sea - Key",
-        bowser_arena_bomb_rule(
+        rf.build_rule(
+            "WARP_PIPES",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Fire Sea"))
+        & bowser_arena_bomb_rule(
             "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_health.value))
     if options.one_up_checks:
         for location_name in (
@@ -1268,6 +1282,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     can_defeat_bowser_in_the_sky = (
         CanReachRegion("Bowser in the Sky - Top")
+        & rf.build_rule("WARP_PIPES", arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Sky"))
         & bowser_arena_bomb_rule("Bowser in the Sky", options.bowser_in_the_sky_health.value)
     )
     rf.world.set_completion_rule(can_defeat_bowser_in_the_sky)
@@ -1336,7 +1351,6 @@ class RuleFactory:
         "HMC_SWIMMING_BEAST": "Hazy Maze Cave - Swimming Beast",
         "RR_CARPETS": "Rainbow Ride - Carpets",
         "CHECKERBOARD_PLATFORMS": "Checkerboard Platforms",
-        "THI_WARP_PIPES": "Tiny-Huge Island - Warp Pipes",
         "CCM_BABY_PENGUINS": "Cool, Cool Mountain - Baby Penguins",
         "SL_PENGUIN": "Snowman's Land - Penguin",
         "SSL_PYRAMID_ELEVATOR": "Shifting Sand Land - Pyramid Elevator",
@@ -1555,6 +1569,10 @@ class RuleFactory:
                 "Purple Switches", purple_switch_item_name_by_level[level_name])
             if level_name in purple_switch_item_name_by_level else True
         )
+        warp_pipe_item_name = warp_pipe_item_name_by_level.get(level_name)
+        if warp_pipe_item_name:
+            item_names["WARP_PIPES"] = get_level_feature_item_name(
+                self.options.level_features, "Warp Pipes", warp_pipe_item_name)
         buddy_item_name = bobomb_buddy_item_name_by_level.get(level_name)
         if buddy_item_name:
             buddy_mode = self.options.bobomb_buddies.value

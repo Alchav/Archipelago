@@ -2836,7 +2836,7 @@ def tiny_huge_island_coin_evaluation(
     has_koopa_troopa = rules.has_unlock(
         state, player, "enemy_unlocks",
         "Koopa Troopas", f"{level_name} - Koopa Troopa")
-    has_warp_pipes = rules.has_simple_arbitrary_feature(state, player, "THI_WARP_PIPES")
+    has_warp_pipes = rules.has_warp_pipes(state, player, "Tiny-Huge Island")
     has_thi_purple_switches = rules.has_purple_switches(state, player, level_name)
     has_triple_jump = rules.has_action(state, player, "Triple Jump", level_name)
     has_long_jump = rules.has_action(state, player, "Long Jump", level_name)

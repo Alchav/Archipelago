@@ -132,7 +132,6 @@ cap_item_data_table: dict[str, SM64ItemData] = {
 simple_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Hazy Maze Cave - Swimming Beast": SM64ItemData(sm64ex_base_id + 295),
     "Rainbow Ride - Carpets": SM64ItemData(sm64ex_base_id + 296),
-    "Tiny-Huge Island - Warp Pipes": SM64ItemData(sm64ex_base_id + 298),
     "Cool, Cool Mountain - Baby Penguins": SM64ItemData(sm64ex_base_id + 299, progression_deprioritized_skip_balancing),
     "Snowman's Land - Penguin": SM64ItemData(sm64ex_base_id + 300),
     "Shifting Sand Land - Pyramid Elevator": SM64ItemData(sm64ex_base_id + 301),
@@ -151,11 +150,22 @@ simple_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Dire, Dire Docks - Treasure Chests": SM64ItemData(sm64ex_base_id + 930),
 }
 
+warp_pipe_item_data_table: dict[str, SM64ItemData] = {
+    "Tiny-Huge Island - Warp Pipes": SM64ItemData(sm64ex_base_id + 298),
+    "Bowser in the Dark World - Warp Pipes": SM64ItemData(
+        sm64ex_base_id + 932, progression_deprioritized_skip_balancing),
+    "Bowser in the Fire Sea - Warp Pipes": SM64ItemData(
+        sm64ex_base_id + 933, progression_deprioritized_skip_balancing),
+    "Bowser in the Sky - Warp Pipes": SM64ItemData(
+        sm64ex_base_id + 934, progression_deprioritized_skip_balancing),
+}
+
 global_checkerboard_item_names = ("Checkerboard Platforms",)
 global_rolling_log_item_names = ("Rolling Logs",)
 global_purple_switch_item_names = ("Purple Switches",)
 global_bobomb_buddy_item_names = ("Bob-omb Buddies",)
 global_treasure_chest_item_names = ("Treasure Chests",)
+global_warp_pipe_item_names = ("Warp Pipes",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
@@ -163,6 +173,7 @@ global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Purple Switches": SM64ItemData(sm64ex_base_id + 303),
     "Bob-omb Buddies": SM64ItemData(sm64ex_base_id + 928),
     "Treasure Chests": SM64ItemData(sm64ex_base_id + 931),
+    "Warp Pipes": SM64ItemData(sm64ex_base_id + 935),
 }
 
 per_level_bobomb_buddy_item_names = (
@@ -183,6 +194,8 @@ per_level_treasure_chest_item_names = (
     "Jolly Roger Bay - Treasure Chests",
     "Dire, Dire Docks - Treasure Chests",
 )
+
+per_level_warp_pipe_item_names = tuple(warp_pipe_item_data_table)
 
 checkerboard_item_data_table: dict[str, SM64ItemData] = {
     "Bob-omb Battlefield - Checkerboard Platform": SM64ItemData(sm64ex_base_id + 306, filler),
@@ -232,6 +245,7 @@ trap_item_data_table: dict[str, SM64ItemData] = {
 
 arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **simple_arbitrary_item_data_table,
+    **warp_pipe_item_data_table,
     **global_arbitrary_item_data_table,
     **checkerboard_item_data_table,
     **rolling_log_item_data_table,
@@ -947,6 +961,7 @@ item_name_groups: dict[str, set[str]] = {
         set(global_treasure_chest_item_names)
         | set(per_level_treasure_chest_item_names)
     ),
+    "Warp Pipe Unlocks": set(global_warp_pipe_item_names) | set(per_level_warp_pipe_item_names),
     "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
     "Coin Object Unlocks": set(global_coin_object_item_data_table) | set(per_level_coin_object_item_data_table),
     "Global Coin Object Unlocks": set(global_coin_object_item_data_table),
