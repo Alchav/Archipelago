@@ -113,9 +113,8 @@ logic_tricks = {
     "Castle MIPS Skip Through the 30 Star Door": {
         "internal_id": "logic_castle_30_star_door_mips_skip",
         "rule": "MIPS1 & DV | MIPS1 & logic_castle_mips_without_dive",
-        "description": "Bypass the 30 Star Door with MIPS. While this trick is enabled, MIPS remains available after"
-                       " receiving the first Progressive MIPS item and keeps spawning a blue star after completed"
-                       " MIPS checks so he cannot disappear before being used for the skip.",
+        "description": "Bypass the 30 Star Door with MIPS. While this trick is enabled, MIPS becomes permanently"
+                       " available after receiving the first Progressive MIPS item.",
         "difficulty": "hard",
         "video": "https://www.youtube.com/watch?v=ahfVwNCD5bw"
     },

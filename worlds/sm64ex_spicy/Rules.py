@@ -830,8 +830,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
-    rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC & TJ/SF/BF/WK/LG")
-    rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC & TJ/SF/BF/WK/LG")
+    rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC")
+    rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC")
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
@@ -1053,8 +1053,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Lethal Lava Land - Wing Cap Block": "WC",
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
-            "Snowman's Land - Inside Igloo 1-Up Block":
-                "VC & TJ/SF/BF/WK/LG",
+            "Snowman's Land - Inside Igloo 1-Up Block": "VC",
             "Snowman's Land - Vanish Cap Block": "VC",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
             "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
