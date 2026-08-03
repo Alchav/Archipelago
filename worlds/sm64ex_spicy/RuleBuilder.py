@@ -25,6 +25,7 @@ class CoinSourceTrace:
     counted: bool
     available: bool = True
     children: tuple[CoinSourceTrace, ...] = ()
+    red_coin_ids: frozenset[int] = frozenset()
 
     def __post_init__(self) -> None:
         if not self.source_id:
@@ -37,6 +38,19 @@ class CoinSourceTrace:
             raise ValueError("An unavailable coin source cannot be counted")
         if not isinstance(self.children, tuple):
             object.__setattr__(self, "children", tuple(self.children))
+        if not isinstance(self.red_coin_ids, frozenset):
+            object.__setattr__(self, "red_coin_ids", frozenset(self.red_coin_ids))
+        if not self.red_coin_ids.issubset(range(1, 9)):
+            raise ValueError("Red Coin IDs must be between 1 and 8")
+
+    @property
+    def available_red_coin_ids(self) -> frozenset[int]:
+        if not self.available:
+            return frozenset()
+        result = set(self.red_coin_ids)
+        for child in self.children:
+            result.update(child.available_red_coin_ids)
+        return frozenset(result)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -52,9 +66,22 @@ class CoinEvaluation:
         if not isinstance(self.children, tuple):
             object.__setattr__(self, "children", tuple(self.children))
 
+    @property
+    def reachable_red_coin_ids(self) -> frozenset[int]:
+        def collect(source: CoinSourceTrace, parent_counted: bool) -> set[int]:
+            counted = parent_counted and source.counted
+            result = set(source.red_coin_ids) if counted else set()
+            for child in source.children:
+                result.update(collect(child, counted))
+            return result
+
+        result: set[int] = set()
+        for source in self.children:
+            result.update(collect(source, True))
+        return frozenset(result)
+
 
 CoinEvaluator: TypeAlias = Callable[[CollectionState, int, int], bool | CoinEvaluation]
-RedCoinEvaluator: TypeAlias = Callable[[CollectionState, int], bool]
 
 
 @dataclasses.dataclass()
@@ -113,7 +140,6 @@ class CoinEvaluatorRegistration:
 
 
 _coin_evaluators: dict[str, CoinEvaluatorRegistration] = {}
-_red_coin_evaluators: dict[str, RedCoinEvaluator] = {}
 
 
 def register_coin_evaluator(
@@ -179,20 +205,6 @@ def evaluate_coins(
     if isinstance(result, CoinEvaluation):
         cache[cache_key] = result
     return result
-
-
-def register_red_coin_evaluator(course_name: str, evaluator: RedCoinEvaluator) -> None:
-    previous = _red_coin_evaluators.get(course_name)
-    if previous is not None and previous is not evaluator:
-        raise ValueError(f"A Red Coin evaluator is already registered for {course_name}")
-    _red_coin_evaluators[course_name] = evaluator
-
-
-def get_red_coin_evaluator(course_name: str) -> RedCoinEvaluator:
-    try:
-        return _red_coin_evaluators[course_name]
-    except KeyError as error:
-        raise KeyError(f"No Red Coin evaluator is registered for {course_name}") from error
 
 
 def _format_coin_source(source: CoinSourceTrace, depth: int) -> list[JSONMessagePart]:
@@ -368,7 +380,7 @@ class CanCollectAllRedCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
     @override
     def _instantiate(self, world: SM64World) -> Rule.Resolved:
-        get_red_coin_evaluator(self.course_name)
+        get_coin_evaluator(self.course_name)
         return self.Resolved(
             self.course_name,
             player=world.player,
@@ -381,7 +393,11 @@ class CanCollectAllRedCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
         @override
         def _evaluate(self, state: CollectionState) -> bool:
-            return get_red_coin_evaluator(self.course_name)(state, self.player)
+            # Region reachability can change while CollectionState is sweeping.
+            # Red Coin Stars must inspect a fresh trace rather than the coin-rule cache.
+            result = get_coin_evaluator(self.course_name).evaluator(
+                state, self.player, 0)
+            return isinstance(result, CoinEvaluation) and result.reachable_red_coin_ids == frozenset(range(1, 9))
 
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:

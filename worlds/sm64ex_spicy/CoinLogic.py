@@ -11,7 +11,6 @@ from .RuleBuilder import CoinEvaluation, CoinSourceTrace
 
 
 CoinTraceEvaluator = Callable[[CollectionState, int, int], CoinEvaluation]
-RedCoinEvaluator = Callable[[CollectionState, int], bool]
 
 
 class CoinTraceBuilder:
@@ -28,11 +27,12 @@ class CoinTraceBuilder:
             *,
             counted: bool | None = None,
             children: tuple[CoinSourceTrace, ...] = (),
+            red_coin_ids: frozenset[int] = frozenset(),
     ) -> None:
         if counted is None:
             counted = available
         self.children.append(CoinSourceTrace(
-            source_id, label, coins, counted, available, children))
+            source_id, label, coins, counted, available, children, red_coin_ids))
         if counted:
             self.reachable_coins += coins
 
@@ -65,6 +65,7 @@ class CoinTraceBuilder:
                 counted and source.available,
                 available and source.available,
                 source.children,
+                source.red_coin_ids,
             )
             for source in sources
         )
@@ -85,7 +86,8 @@ class CoinTraceBuilder:
             displayed_coins,
             counted,
             available,
-            source_traces,
+        source_traces,
+        frozenset(),
         ))
 
     def evaluation(self, reachable_coins: int | None = None) -> CoinEvaluation:
@@ -102,259 +104,6 @@ def _has_red_coins(state: CollectionState, player: int, level_name: str) -> bool
         "Red Coins", f"{level_name} - Red Coins")
 
 
-def _can_collect_all_bob_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Bob-omb Battlefield"
-    target = f"{level} - Find the 8 Red Coins"
-    return (
-        _has_red_coins(state, player, level)
-        and state.can_reach(f"{level} - Island", "Region", player)
-        and (
-            any(Rules.has_action(state, player, action, level)
-                for action in ("Climb", "Side Flip", "Backflip", "Triple Jump"))
-            or Rules.can_use_logic_trick(
-                state, player, "logic_bob_island_red_coin_with_ground_pound", target)
-            or Rules.can_use_logic_trick(
-                state, player, "logic_bob_island_koopa_shell", target)
-            or Rules.can_use_logic_trick(
-                state, player, "logic_bob_mario_wings_to_the_sky_without_cannon", target)
-            or (
-                state.has(f"{level} - Cannon Unlock", player)
-                and state.can_reach(f"{level} - Mario Wings to the Sky", "Location", player)
-            )
-        )
-    )
-
-
-def _can_collect_all_wf_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Whomp's Fortress"
-    return (
-        _has_red_coins(state, player, level)
-        and state.can_reach(f"{level} - Top", "Region", player)
-        and Rules.has_unlock(
-            state, player, "enemy_unlocks", "Thwomp", f"{level} - Thwomp")
-    )
-
-
-def _can_collect_all_jrb_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Jolly Roger Bay"
-    target = f"{level} - Red Coins on the Ship Afloat"
-    pillar = (
-        Rules.has_action(state, player, "Climb", level)
-        or Rules.can_use_logic_trick(state, player, "logic_jrb_pillar_red_coin_moves", target)
-        or Rules.can_use_logic_trick(state, player, "logic_jrb_pillar_red_coin_cannon", target)
-    )
-    return (
-        _has_red_coins(state, player, level)
-        and state.can_reach(f"{level} - Upper", "Region", player)
-        and Rules.has_per_act_feature(state, player, f"{level} - Raised Ship")
-        and pillar
-    )
-
-
-def _red_coins_and_region(
-        state: CollectionState, player: int, level: str, region: str | None = None,
-) -> bool:
-    return (
-        _has_red_coins(state, player, level)
-        and (region is None or state.can_reach(region, "Region", player))
-    )
-
-
-def _can_collect_all_hmc_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Hazy Maze Cave"
-    return (
-        _red_coins_and_region(state, player, level, f"{level} - Red Coin Area")
-        and Rules.has_checkerboard_platforms(state, player, level)
-    )
-
-
-def _can_collect_all_lll_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    return (
-        _has_red_coins(state, player, "Lethal Lava Land")
-        and Rules.can_collect_all_lethal_lava_land_red_coins(
-            state, player, "Lethal Lava Land - 8-Coin Puzzle with 15 Pieces")
-    )
-
-
-def _can_collect_all_ssl_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Shifting Sand Land"
-    target = f"{level} - Free Flying for 8 Red Coins"
-    normal = (
-        Rules.has_wing_cap(state, player, level)
-        and (
-            Rules.has_action(state, player, "Triple Jump", level)
-            or state.has(f"{level} - Cannon Unlock", player)
-        )
-    )
-    trick = (
-        Rules.can_use_logic_trick(
-            state, player, "logic_ssl_three_red_coins_with_tweesters", target)
-        and Rules.can_use_logic_trick(
-            state, player, "logic_ssl_one_red_coin_with_shy_guy_spin_jump", target)
-        and bool(state.multiworld.worlds[player].options.no_despawns.value)
-    )
-    return _has_red_coins(state, player, level) and (normal or trick)
-
-
-def _can_collect_all_ddd_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Dire, Dire Docks"
-    poles = (
-        Rules.has_per_act_feature(state, player, f"{level} - Poles")
-        and Rules.has_action(state, player, "Climb", level)
-    )
-    first = (
-        Rules.has_purple_switches(state, player, level)
-        or (
-            Rules.has_per_act_feature(state, player, f"{level} - Bowser's Sub")
-            and poles
-            and Rules.has_action(state, player, "Triple Jump", level)
-        )
-    )
-    return _has_red_coins(state, player, level) and first and poles
-
-
-def _can_collect_all_wdw_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Wet-Dry World"
-    return (
-        _red_coins_and_region(state, player, level, f"{level} - Downtown")
-        and Rules.has_simple_arbitrary_feature(
-            state, player, "WDW_WATER_LEVEL_DIAMOND")
-        and (
-            Rules.has_action(state, player, "Wall Kick", level)
-            or Rules.can_use_logic_trick(
-                state, player, "logic_wdw_high_red_coins_triple_jump",
-                f"{level} - Go to Town for Red Coins")
-        )
-    )
-
-
-def _can_collect_all_thi_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Tiny-Huge Island"
-    return (
-        _red_coins_and_region(state, player, level, f"{level} - Red Coins Area")
-        and Rules.has_action(state, player, "Wall Kick", level)
-    )
-
-
-def _can_collect_all_ttc_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    return (
-        _red_coins_and_region(
-            state, player, "Tick Tock Clock",
-            "Tick Tock Clock - First Clock Hand Area")
-        and Rules.has_simple_arbitrary_feature(state, player, "TTC_SPINNERS")
-    )
-
-
-def _can_collect_all_rr_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Rainbow Ride"
-    target = f"{level} - Coins Amassed in a Maze"
-    route = (
-        Rules.has_action(state, player, "Wall Kick", level)
-        or (
-            Rules.has_action(state, player, "Long Jump", level)
-            and any(Rules.has_action(state, player, action, level)
-                    for action in ("Side Flip", "Backflip", "Triple Jump"))
-        )
-        or Rules.can_use_logic_trick(
-            state, player, "logic_rr_maze_coins_ledge_grab_and_carpets", target)
-    )
-    return (
-        _red_coins_and_region(state, player, level, f"{level} - Maze")
-        and route
-    )
-
-
-def _can_collect_all_wmotr_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Wing Mario Over the Rainbow"
-    cannon = state.can_reach(f"{level} - Cannon", "Region", player)
-    flight = (
-        cannon
-        or (
-            Rules.has_wing_cap(state, player, level)
-            and Rules.has_action(state, player, "Triple Jump", level)
-        )
-    )
-    return _has_red_coins(state, player, level) and cannon and flight
-
-
-def _can_collect_all_vcutm_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Vanish Cap Under the Moat"
-    target = f"{level} - Red Coins"
-    combines_routes = (
-        any(Rules.has_action(state, player, action, level)
-            for action in ("Triple Jump", "Ledge Grab", "Side Flip", "Backflip", "Wall Kick"))
-        or Rules.can_use_logic_trick(
-            state, player,
-            "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up", target)
-    )
-    can_cross_grate = (
-        Rules.has_vanish_cap(state, player, level)
-        or Rules.can_use_logic_trick(
-            state, player, "logic_vcutm_wall_kick_over_vanish_cap_grate", target)
-    )
-    return (
-        _has_red_coins(state, player, level)
-        and Rules.has_checkerboard_platforms(state, player, level)
-        and combines_routes
-        and can_cross_grate
-    )
-
-
-def _can_collect_all_cotmc_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Cavern of the Metal Cap"
-    return (
-        _has_red_coins(state, player, level)
-        and (
-            Rules.has_metal_cap(state, player, level)
-            or Rules.can_use_logic_trick(
-                state, player, "logic_cotmc_deep_underwater_coins_without_metal_cap",
-                f"{level} - Red Coins")
-        )
-    )
-
-
-def _can_collect_all_bitdw_red_coins(state: CollectionState, player: int) -> bool:
-    from . import Rules
-
-    level = "Bowser in the Dark World"
-    return (
-        _has_red_coins(state, player, level)
-        and Rules.has_purple_switches(state, player, level)
-    )
-
-
-def _can_collect_all_bitfs_red_coins(state: CollectionState, player: int) -> bool:
-    level = "Bowser in the Fire Sea"
-    return _red_coins_and_region(state, player, level, f"{level} - Upper")
-
 
 def coin_source(
         source_id: str,
@@ -364,10 +113,11 @@ def coin_source(
         *,
         counted: bool | None = None,
         children: tuple[CoinSourceTrace, ...] = (),
+        red_coin_ids: frozenset[int] = frozenset(),
 ) -> CoinSourceTrace:
     if counted is None:
         counted = available
-    return CoinSourceTrace(source_id, label, coins, counted, available, children)
+    return CoinSourceTrace(source_id, label, coins, counted, available, children, red_coin_ids)
 
 
 def coin_route(
@@ -457,7 +207,8 @@ def evaluate_bob_omb_battlefield_coins(
                 has_horizontal_coin_rings),
         coin_source("main_bob_ombs", "Twelve Bob-ombs", 12, has_bob_ombs),
         coin_source("main_goombas", "Eleven Goombas", 11, has_goombas),
-        coin_source("main_red_coins", "Seven Red Coins outside the island", 14, has_red_coins),
+        coin_source("main_red_coins", "Seven Red Coins outside the island", 14, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 8))),
         coin_source("main_koopa_troopa", "Koopa Troopa", 5, has_koopa_troopa),
     ]
 
@@ -503,6 +254,7 @@ def evaluate_bob_omb_battlefield_coins(
             2,
             has_full_trick_route and has_red_coins,
             counted=selected_route == "without_cannon" and has_full_trick_route and has_red_coins,
+            red_coin_ids=frozenset({8}),
         ),
     )
     traces.append(coin_route(
@@ -534,6 +286,7 @@ def evaluate_bob_omb_battlefield_coins(
             2,
             has_cannon_route and has_red_coins,
             counted=selected_route == "cannon" and has_cannon_route and has_red_coins,
+            red_coin_ids=frozenset({8}),
         ),
     )
     traces.append(coin_route(
@@ -583,6 +336,7 @@ def evaluate_bob_omb_battlefield_coins(
                 or has_island_red_coin_ground_pound
                 or has_island_koopa_shell
             ),
+            red_coin_ids=frozenset({8}),
         ),
         coin_source(
             "island_partial_first_ring_three_coins",
@@ -674,9 +428,10 @@ def evaluate_whomps_fortress_coins(
                 has_horizontal_coin_lines),
         coin_source("whomp_jump_coins", "Coins from jumping on two Whomps", 10, has_whomps),
         coin_source("piranha_plant_coins", "Three Piranha Plants", 15, has_piranha_plants),
-        coin_source("initial_red_coins", "Five initially reachable Red Coins", 10, has_red_coins),
+        coin_source("initial_red_coins", "Five initially reachable Red Coins", 10, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 6))),
         coin_source("thwomp_red_coin", "Red Coin on the Thwomp", 2,
-                has_red_coins and has_thwomp),
+                has_red_coins and has_thwomp, red_coin_ids=frozenset({6})),
     ]
 
     has_moveless_wild_blue_route = (
@@ -737,7 +492,7 @@ def evaluate_whomps_fortress_coins(
         coin_source("top_floating_arrow", "Coin arrow above the fortress", 8,
                 has_top and has_coin_arrows),
         coin_source("top_red_coins", "Two Red Coins at the top", 4,
-                has_top and has_red_coins),
+                has_top and has_red_coins, red_coin_ids=frozenset({7, 8})),
     )
     traces.append(coin_route(
         "top_region_sources",
@@ -804,7 +559,8 @@ def evaluate_jolly_roger_bay_coins(
         coin_source("cave_chest_coin_ring", "Coin ring near the cave treasure chests", 8,
                 has_horizontal_coin_rings),
         coin_source("main_goombas", "Three Goombas", 3, has_goombas),
-        coin_source("lower_red_coins", "Four initially reachable Red Coins", 8, has_red_coins),
+        coin_source("lower_red_coins", "Four initially reachable Red Coins", 8, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 5))),
     ]
 
     has_pillar_route = (
@@ -814,7 +570,7 @@ def evaluate_jolly_roger_bay_coins(
     )
     pillar_children = (
         coin_source("pillar_red_coin", "Red Coin on the stone pillar", 2,
-                has_pillar_route and has_red_coins),
+                has_pillar_route and has_red_coins, red_coin_ids=frozenset({5})),
     )
     traces.append(coin_route(
         "pillar_red_coin_route",
@@ -847,6 +603,7 @@ def evaluate_jolly_roger_bay_coins(
             "Three Red Coins on the raised ship",
             6,
             has_upper and has_red_coins and has_raised_ship,
+            red_coin_ids=frozenset({6, 7, 8}),
         ),
         coin_source(
             "ship_alternative_red_coin",
@@ -854,6 +611,7 @@ def evaluate_jolly_roger_bay_coins(
             2,
             has_upper and has_red_coins and not has_raised_ship
             and has_ship_red_coin_alternative,
+            red_coin_ids=frozenset({6}),
         ),
     )
     traces.append(coin_route(
@@ -922,7 +680,8 @@ def evaluate_cool_cool_mountain_coins(
                 has_horizontal_coin_lines),
         coin_source("standard_mr_blizzard", "Defeatable Mr. Blizzard", 3, has_mr_blizzards),
         coin_source("main_spindrifts", "Three Spindrifts on the main route", 9, has_spindrifts),
-        coin_source("red_coins", "Eight Red Coins", 16, has_red_coins),
+        coin_source("red_coins", "Eight Red Coins", 16, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 9))),
         coin_source("slide_blue_coin", "Blue Coin at the start of the slide", 5,
                 has_single_blue_coin),
     ]
@@ -1037,7 +796,8 @@ def evaluate_big_boos_haunt_coins(
         coin_source("main_mr_is", "Two Mr. Is", 10, has_mr_is),
         coin_source("main_bookend", "Flying Bookend on the first floor", 5,
                 has_flying_bookends),
-        coin_source("first_floor_red_coins", "Four first-floor Red Coins", 8, has_red_coins),
+        coin_source("first_floor_red_coins", "Four first-floor Red Coins", 8, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 5))),
     ]
 
     has_second_floor = state.can_reach(f"{level_name} - Second Floor", "Region", player)
@@ -1046,8 +806,18 @@ def evaluate_big_boos_haunt_coins(
                 has_second_floor and has_flying_bookends),
         coin_source("second_floor_mr_i", "Mr. I on the second floor", 5,
                 has_second_floor and has_mr_is),
-        coin_source("second_floor_red_coins", "Four second-floor Red Coins", 8,
-                has_second_floor and has_red_coins),
+        coin_source("second_floor_red_coins", "Three readily reachable second-floor Red Coins", 6,
+                has_second_floor and has_red_coins, red_coin_ids=frozenset({5, 6, 7})),
+        coin_source(
+            "second_floor_movement_red_coin",
+            "Second-floor Red Coin requiring Triple Jump, Wall Kick, Backflip, or Side Flip",
+            2,
+            has_second_floor and has_red_coins and any(
+                Rules.has_action(state, player, action, level_name)
+                for action in ("Triple Jump", "Wall Kick", "Backflip", "Side Flip")
+            ),
+            red_coin_ids=frozenset({8}),
+        ),
     )
     traces.append(coin_route(
         "second_floor_sources",
@@ -1182,7 +952,7 @@ def evaluate_hazy_maze_cave_coins(
 
     basic_movement_children = (
         coin_source("lower_red_coin_room_coins", "Four lower Red Coins in the Red Coin room", 8,
-                has_basic_movement and has_red_coins),
+                has_basic_movement and has_red_coins, red_coin_ids=frozenset(range(1, 5))),
         coin_source("red_coin_room_mr_is", "Two Mr. Is in the Red Coin room", 10,
                 has_basic_movement and has_mr_is),
         coin_source("pit_island_room_swoops", "Two Swoops in the Pit Island elevator room", 2,
@@ -1204,12 +974,14 @@ def evaluate_hazy_maze_cave_coins(
         "First pair of upper Red Coins",
         4,
         first_upper_red_coin_route,
+        red_coin_ids=frozenset({5, 6}),
     ))
     traces.append(coin_source(
         "upper_red_coin_pair_checkerboards",
         "Second pair of upper Red Coins",
         4,
         has_red_coins and has_platform_route and has_checkerboards,
+        red_coin_ids=frozenset({7, 8}),
     ))
     traces.append(coin_source(
         "upper_red_coin_swoops",
@@ -1438,6 +1210,7 @@ def lethal_lava_land_coins(
         10,
         has_red_coins and can_reach_red_coins,
         children=red_coin_route_children,
+        red_coin_ids=frozenset(range(1, 6)),
     )
     all_red_coin_route_children = red_coin_route_children + (
         coin_condition(
@@ -1452,6 +1225,7 @@ def lethal_lava_land_coins(
         6,
         has_red_coins and can_collect_all_red_coins,
         children=all_red_coin_route_children,
+        red_coin_ids=frozenset({6, 7, 8}),
     )
 
     builder.add(
@@ -1658,6 +1432,7 @@ def shifting_sand_land_coins(
         "Four low Red Coins",
         8,
         has_red_coins,
+        red_coin_ids=frozenset(range(1, 5)),
     )
 
     has_climb = Rules.has_action(state, player, "Climb", level_name)
@@ -1691,6 +1466,7 @@ def shifting_sand_land_coins(
             coin_condition("ssl_high_red_coin_triple_jump", "Triple Jump route", has_triple_jump),
             coin_condition("ssl_high_red_coin_cannon", "Cannon route", has_cannon),
         ),
+        red_coin_ids=frozenset({5, 6, 7, 8}),
     )
     tweester_route_available = has_red_coins and has_tweester_trick
     builder.add(
@@ -1706,6 +1482,7 @@ def shifting_sand_land_coins(
                 has_tweester_trick,
             ),
         ),
+        red_coin_ids=frozenset({5, 6, 7}),
     )
     shy_guy_route_available = has_red_coins and has_shy_guy_trick and no_despawns
     builder.add(
@@ -1726,6 +1503,7 @@ def shifting_sand_land_coins(
                 no_despawns,
             ),
         ),
+        red_coin_ids=frozenset({8}),
     )
 
     can_reach_upper_pyramid = state.can_reach(
@@ -1875,6 +1653,7 @@ def dire_dire_docks_coins(
         2,
         has_red_coins and can_reach_first_red_coin,
         children=red_route_children,
+        red_coin_ids=frozenset({1}),
     )
     builder.add(
         "ddd_remaining_red_coins",
@@ -1885,6 +1664,7 @@ def dire_dire_docks_coins(
             coin_condition("ddd_remaining_red_coin_poles", "Poles item", has_poles_item),
             coin_condition("ddd_remaining_red_coin_climb", "Climb", has_climb),
         ),
+        red_coin_ids=frozenset(range(2, 9)),
     )
 
     has_ground_pound = Rules.has_action(state, player, "Ground Pound", level_name)
@@ -1992,6 +1772,7 @@ def snowmans_land_coins(
                 can_reach_whirl,
             ),
         ),
+        red_coin_ids=frozenset({1, 2, 3}),
     )
     has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
     no_despawns = bool(state.multiworld.worlds[player].options.no_despawns.value)
@@ -2055,6 +1836,7 @@ def snowmans_land_coins(
         "Five Red Coins in the Upper area",
         10,
         can_reach_upper and has_red_coins,
+        red_coin_ids=frozenset({4, 5, 6, 7, 8}),
     )
 
     can_reach_snowman_top = state.can_reach(
@@ -2232,6 +2014,7 @@ def tall_tall_mountain_coins(
         "Six Red Coins in the Middle area",
         12,
         can_reach_middle and has_red_coins,
+        red_coin_ids=frozenset(range(1, 7)),
     )
     builder.add(
         "ttm_middle_bob_ombs",
@@ -2264,6 +2047,7 @@ def tall_tall_mountain_coins(
         "Two Red Coins in the Upper area",
         4,
         can_reach_upper and has_red_coins,
+        red_coin_ids=frozenset({7, 8}),
     )
     builder.add(
         "ttm_upper_goombas",
@@ -2398,6 +2182,7 @@ class _route_trace_node_type:
     available: bool
     selected: bool
     children: list[_route_trace_node_type] = dataclasses.field(default_factory=list)
+    red_coin_ids: frozenset[int] = frozenset()
 
 
 @dataclasses.dataclass
@@ -2416,6 +2201,7 @@ def _route_source(
         available: bool,
         *,
         selected: bool | None = None,
+        red_coin_ids: frozenset[int] = frozenset(),
 ) -> _route_trace_node_type:
     return _route_trace_node_type(
         source_id,
@@ -2423,6 +2209,7 @@ def _route_source(
         coins,
         available,
         available if selected is None else selected,
+        red_coin_ids=red_coin_ids,
     )
 
 
@@ -2467,6 +2254,7 @@ def _build_route_trace_node(
         node.coins,
         counted,
         available,
+        red_coin_ids=node.red_coin_ids,
     )
 
 
@@ -2749,20 +2537,22 @@ def wet_dry_world_coin_evaluation(
                 "downtown_initial_red_coin",
                 "First Downtown red coin",
                 2,
-                has_downtown and has_red_coins,
+                has_red_coins,
+                red_coin_ids=frozenset({1}),
             ),
             _route_source(
                 "downtown_diamond_red_coins",
                 "Five Downtown red coins beyond water-level diamonds",
                 10,
-                has_downtown and has_water_level_diamond and has_red_coins,
+                has_water_level_diamond and has_red_coins,
+                red_coin_ids=frozenset({2, 3, 4, 5, 6}),
             ),
             _route_source(
                 "downtown_high_red_coins",
                 "Two high Downtown red coins",
                 4,
-                has_downtown and has_water_level_diamond and has_red_coins
-                and can_reach_high_red_coins,
+                has_water_level_diamond and has_red_coins and can_reach_high_red_coins,
+                red_coin_ids=frozenset({7, 8}),
             ),
         ]
         sources = {
@@ -2784,11 +2574,29 @@ def wet_dry_world_coin_evaluation(
         make_route("Wet-Dry World Middle", "mid", "Middle entrance variant"),
         make_route("Wet-Dry World High", "highest", "High entrance variant"),
     ]
-    return _evaluate_route_set(
+    evaluation = _evaluate_route_set(
         routes,
         permanent=rules.permanent_coin_collection_enabled(state, player),
         maximum=152,
     )
+    if any(
+            frozenset().union(*(
+                child.red_coin_ids for child in route.children if child.available
+            ))
+            == frozenset(range(1, 9))
+            for route in routes
+    ):
+        return CoinEvaluation(
+            evaluation.reachable_coins,
+            evaluation.children + (coin_source(
+                "wdw_all_red_coins_reachable",
+                "All eight Downtown Red Coins are reachable through one entrance variant",
+                0,
+                True,
+                red_coin_ids=frozenset(range(1, 9)),
+            ),),
+        )
+    return evaluation
 
 
 def tiny_huge_island_coin_evaluation(
@@ -2883,8 +2691,10 @@ def tiny_huge_island_coin_evaluation(
                 label: str,
                 value: int,
                 available: bool,
+                red_coin_ids: frozenset[int] = frozenset(),
         ) -> None:
-            children.append(_route_source(source_id, label, value, available))
+            children.append(_route_source(
+                source_id, label, value, available, red_coin_ids=red_coin_ids))
             if available and value:
                 sources[source_id] = value
 
@@ -3093,6 +2903,7 @@ def tiny_huge_island_coin_evaluation(
                 "Seven red coins in the Red Coins Area",
                 14,
                 has_red_coins,
+                red_coin_ids=frozenset(range(1, 8)),
             ),
             _route_source(
                 "red_area_wall_kick_red_coin",
@@ -3100,6 +2911,7 @@ def tiny_huge_island_coin_evaluation(
                 2,
                 has_red_coins and rules.has_action(
                     state, player, "Wall Kick", level_name),
+                red_coin_ids=frozenset({8}),
             ),
             _route_source(
                 "red_area_blue_coins",
@@ -3286,13 +3098,15 @@ def tick_tock_clock_coins(
     trace.add_route("ttc_lower", "Lower region", has_lower, (
         coin_source("ttc_first_hand_block",
                 "3-Coin Block by the first moving hand", 3, has_three_coin_blocks),
-        coin_source("ttc_lower_red_coins", "Five lower Red Coins", 10, has_red_coins),
+        coin_source("ttc_lower_red_coins", "Five lower Red Coins", 10, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 6))),
         coin_source(
             "ttc_spinner_red_coins",
             "Three Red Coins reached with the Spinners",
             6,
             has_red_coins
             and rules.has_simple_arbitrary_feature(state, player, "TTC_SPINNERS"),
+            red_coin_ids=frozenset({6, 7, 8}),
         ),
         coin_source(
             "ttc_first_pole_coin_line",
@@ -3452,16 +3266,24 @@ def rainbow_ride_coins(
                 rules.has_action(state, player, "Long Jump", level_name)
                 or has_wall_kick
                 or has_maze_red_coin_trick),
+            red_coin_ids=frozenset({1}),
+        ),
+        coin_source(
+            "rr_other_red_coins",
+            "Seven remaining Red Coins",
+            14,
+            has_red_coins and (
+                has_wall_kick
+                or (
+                    rules.has_action(state, player, "Long Jump", level_name)
+                    and any(rules.has_action(state, player, action, level_name)
+                            for action in ("Side Flip", "Backflip", "Triple Jump"))
+                )
+                or has_maze_red_coin_trick
+            ),
+            red_coin_ids=frozenset(range(2, 9)),
         ),
     ))
-
-    trace.add_route(
-        "rr_red_coin_star_route",
-        "All Red Coins route",
-        _can_collect_all_rr_red_coins(state, player),
-        (coin_source("rr_other_red_coins", "Seven remaining Red Coins",
-                 14, has_red_coins),),
-    )
     trace.add_route(
         "rr_carpets", "Carpets region",
         state.can_reach("Rainbow Ride - Carpets", "Region", player), (
@@ -3557,6 +3379,7 @@ def secret_aquarium_coins(
             rules.has_unlock(
                 state, player, "coin_object_unlocks",
                 "Red Coins", "Secret Aquarium - Red Coins"),
+            red_coin_ids=frozenset(range(1, 9)),
         ),
         coin_source(
             "sa_horizontal_coin_ring", "Horizontal Coin Ring", 8,
@@ -3611,17 +3434,18 @@ def wing_mario_over_the_rainbow_coins(
 
     trace = CoinTraceBuilder()
     trace.add_route("wmotr_initial", "Starting cloud", True, (
-        coin_source("wmotr_initial_red_coin", "Initial Red Coin", 2, has_red_coins),
+        coin_source("wmotr_initial_red_coin", "Initial Red Coin", 2, has_red_coins,
+                    red_coin_ids=frozenset({1})),
     ))
     trace.add_route("wmotr_cannon_only", "Cannon region", has_cannon_region, (
         coin_source("wmotr_cannon_red_coins",
                 "Four Red Coins requiring the Cannon region",
-                8, has_red_coins),
+                8, has_red_coins, red_coin_ids=frozenset({2, 3, 4, 5})),
     ))
 
     trace.add_route("wmotr_flight_route", "Flight route", has_flight_route, (
         coin_source("wmotr_flight_red_coins", "Three flight-path Red Coins",
-                6, has_red_coins),
+                6, has_red_coins, red_coin_ids=frozenset({6, 7, 8})),
         coin_source("wmotr_rainbow_coin_rings",
                 "Four vertical coin rings around the rainbows",
                 32, has_vertical_coin_rings),
@@ -3652,13 +3476,13 @@ def wing_mario_over_the_rainbow_coins(
         (
             coin_source("wmotr_long_jump_first_red_coin",
                     "First Long Jump Leap of Faith Red Coin",
-                    2, long_jump_first_coin),
+                    2, long_jump_first_coin, red_coin_ids=frozenset({6})),
             coin_source("wmotr_long_jump_second_red_coin",
                     "Second Long Jump Leap of Faith Red Coin",
-                    2, long_jump_second_coin),
+                    2, long_jump_second_coin, red_coin_ids=frozenset({7})),
             coin_source("wmotr_wing_cap_fallback_red_coin",
                     "Wing Cap slow-fall Leap of Faith Red Coin",
-                    2, wing_cap_fallback_coin),
+                    2, wing_cap_fallback_coin, red_coin_ids=frozenset({6})),
         ),
         selected=fallback_selected,
     )
@@ -3692,7 +3516,8 @@ def tower_of_the_wing_cap_coins(
     trace.add_route("totwc_course", "Course coin objects", True, (
         coin_source("totwc_single_yellow_coins",
                 "Single Yellow Coins", 15, has_single_yellow_coins),
-        coin_source("totwc_red_coins", "Eight Red Coins", 16, has_red_coins),
+        coin_source("totwc_red_coins", "Eight Red Coins", 16, has_red_coins,
+                    red_coin_ids=frozenset(range(1, 9))),
     ))
     trace.add_route(
         "totwc_standard_ring_route",
@@ -3771,7 +3596,7 @@ def vanish_cap_under_the_moat_coins(
                 5, has_horizontal_coin_lines),
         coin_source("vcutm_earlier_red_coins",
                 "Four Red Coins before the checkerboards",
-                8, has_red_coins),
+                8, has_red_coins, red_coin_ids=frozenset(range(1, 5))),
     )
     later_route = (
         has_movement or can_drop_to_checkerboards or can_crawl_back_then_drop)
@@ -3781,7 +3606,8 @@ def vanish_cap_under_the_moat_coins(
                 3, has_three_coin_block),
         coin_source("vcutm_checkerboard_red_coins",
                 "Four Red Coins at the checkerboards",
-                8, has_checkerboards and has_red_coins),
+                8, has_checkerboards and has_red_coins,
+                red_coin_ids=frozenset({5, 6, 7, 8})),
         coin_source("vcutm_end_marker_coins",
                 "Coins by the final star marker",
                 3,
@@ -3859,7 +3685,7 @@ def cavern_of_the_metal_cap_coins(
                 5, has_horizontal_coin_lines),
         coin_source("cotmc_snufits", "Four Snufits", 8, has_snufits),
         coin_source("cotmc_initial_red_coins", "Four initial Red Coins",
-                8, has_red_coins),
+                8, has_red_coins, red_coin_ids=frozenset(range(1, 5))),
     ))
     trace.add_route(
         "cotmc_deep_water",
@@ -3874,7 +3700,7 @@ def cavern_of_the_metal_cap_coins(
                     5, has_horizontal_coin_lines),
             coin_source("cotmc_deep_red_coins",
                     "Four deep-water Red Coins",
-                    8, has_red_coins),
+                    8, has_red_coins, red_coin_ids=frozenset({5, 6, 7, 8})),
         ))
     assert trace.reachable_coins <= 47
     return trace.evaluation()
@@ -3923,7 +3749,8 @@ def bowser_in_the_dark_world_coins(
                 3, has_three_coin_block),
         coin_source("bitdw_goombas", "Six Goombas", 6, has_goombas),
         coin_source("bitdw_red_coins_before_slope",
-                "Six Red Coins before the slope", 12, has_red_coins),
+                "Six Red Coins before the slope", 12, has_red_coins,
+                red_coin_ids=frozenset(range(1, 7))),
     ))
     trace.add_route(
         "bitdw_slope",
@@ -3938,7 +3765,8 @@ def bowser_in_the_dark_world_coins(
         "Final slope Red Coins (Purple Switches only)",
         has_purple_switches,
         (coin_source("bitdw_final_red_coins",
-                 "Final two Red Coins", 4, has_red_coins),),
+                 "Final two Red Coins", 4, has_red_coins,
+                 red_coin_ids=frozenset({7, 8})),),
     )
     assert trace.reachable_coins <= 80
     return trace.evaluation()
@@ -3996,7 +3824,7 @@ def bowser_in_the_fire_sea_coins(
         coin_source("bitfs_first_bully", "First Bully", 1, has_bullies),
         coin_source("bitfs_start_goombas", "Three Goombas", 3, has_goombas),
         coin_source("bitfs_start_red_coins", "Two initial Red Coins",
-                4, has_red_coins),
+                4, has_red_coins, red_coin_ids=frozenset({1, 2})),
     ))
     trace.add_route(
         "bitfs_rising_platform_block",
@@ -4028,7 +3856,7 @@ def bowser_in_the_fire_sea_coins(
         coin_source("bitfs_upper_bullies", "Three upper Bullies",
                 3, has_bullies),
         coin_source("bitfs_upper_red_coins", "Six upper Red Coins",
-                12, has_red_coins),
+                12, has_red_coins, red_coin_ids=frozenset(range(3, 9))),
     ))
     assert trace.reachable_coins <= 80
     return trace.evaluation()
@@ -4072,7 +3900,7 @@ def bowser_in_the_sky_coins(
                 3, has_single_yellow_coins),
         coin_source("bits_start_goombas", "Two Goombas", 2, has_goombas),
         coin_source("bits_start_red_coins", "Three initial Red Coins",
-                6, has_red_coins),
+                6, has_red_coins, red_coin_ids=frozenset({1, 2, 3})),
         coin_source("bits_start_fire_piranha",
                 "Initial Fire Piranha Plant",
                 1, has_fire_piranha_plants),
@@ -4108,7 +3936,7 @@ def bowser_in_the_sky_coins(
                     5, has_horizontal_coin_lines),
             coin_source("bits_arrow_ride_red_coins",
                     "Three Arrow Ride Red Coins",
-                    6, has_red_coins),
+                    6, has_red_coins, red_coin_ids=frozenset({4, 5, 6})),
             coin_source("bits_spinning_platform_coins",
                     "Coins on the spinning platform after the fifth Red Coin",
                     3, has_single_yellow_coins),
@@ -4126,7 +3954,7 @@ def bowser_in_the_sky_coins(
             coin_source("bits_top_goombas", "Four top Goombas", 4, has_goombas),
             coin_source("bits_top_bob_ombs", "Two top Bob-ombs", 2, has_bob_ombs),
             coin_source("bits_top_red_coins", "Two top Red Coins",
-                    4, has_red_coins),
+                    4, has_red_coins, red_coin_ids=frozenset({7, 8})),
             coin_source("bits_final_rotating_platform_line",
                     "Coin line before the final rotating platforms",
                     5, has_horizontal_coin_lines),
@@ -4160,38 +3988,4 @@ COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
     "Bowser in the Dark World": bowser_in_the_dark_world_coins,
     "Bowser in the Fire Sea": bowser_in_the_fire_sea_coins,
     "Bowser in the Sky": bowser_in_the_sky_coins,
-}
-
-
-RED_COIN_EVALUATORS: dict[str, RedCoinEvaluator] = {
-    "Bob-omb Battlefield": _can_collect_all_bob_red_coins,
-    "Whomp's Fortress": _can_collect_all_wf_red_coins,
-    "Jolly Roger Bay": _can_collect_all_jrb_red_coins,
-    "Cool, Cool Mountain": lambda state, player: _has_red_coins(
-        state, player, "Cool, Cool Mountain"),
-    "Big Boo's Haunt": lambda state, player: _red_coins_and_region(
-        state, player, "Big Boo's Haunt", "Big Boo's Haunt - Second Floor"),
-    "Hazy Maze Cave": _can_collect_all_hmc_red_coins,
-    "Lethal Lava Land": _can_collect_all_lll_red_coins,
-    "Shifting Sand Land": _can_collect_all_ssl_red_coins,
-    "Dire, Dire Docks": _can_collect_all_ddd_red_coins,
-    "Snowman's Land": lambda state, player: _red_coins_and_region(
-        state, player, "Snowman's Land", "Snowman's Land - Upper"),
-    "Wet-Dry World": _can_collect_all_wdw_red_coins,
-    "Tall, Tall Mountain": lambda state, player: _red_coins_and_region(
-        state, player, "Tall, Tall Mountain", "Tall, Tall Mountain - Upper"),
-    "Tiny-Huge Island": _can_collect_all_thi_red_coins,
-    "Tick Tock Clock": _can_collect_all_ttc_red_coins,
-    "Rainbow Ride": _can_collect_all_rr_red_coins,
-    "The Secret Aquarium": lambda state, player: _has_red_coins(
-        state, player, "Secret Aquarium"),
-    "Wing Mario Over the Rainbow": _can_collect_all_wmotr_red_coins,
-    "Tower of the Wing Cap": lambda state, player: _has_red_coins(
-        state, player, "Tower of the Wing Cap"),
-    "Vanish Cap Under the Moat": _can_collect_all_vcutm_red_coins,
-    "Cavern of the Metal Cap": _can_collect_all_cotmc_red_coins,
-    "Bowser in the Dark World": _can_collect_all_bitdw_red_coins,
-    "Bowser in the Fire Sea": _can_collect_all_bitfs_red_coins,
-    "Bowser in the Sky": lambda state, player: _red_coins_and_region(
-        state, player, "Bowser in the Sky", "Bowser in the Sky - Top"),
 }

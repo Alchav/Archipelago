@@ -59,9 +59,9 @@ class TestBigBoosHauntLocations(SM64TestBase):
 
             ["Big Boo's Haunt - Secret of the Haunted Books", True, SECOND_FLOOR],
             ["Big Boo's Haunt - Seek the 8 Red Coins", False,
-             SECOND_FLOOR],
-            ["Big Boo's Haunt - Seek the 8 Red Coins", True,
              SECOND_FLOOR + ["Big Boo's Haunt - Red Coins"]],
+            ["Big Boo's Haunt - Seek the 8 Red Coins", True,
+             SECOND_FLOOR + ["Big Boo's Haunt - Red Coins", "Triple Jump"]],
             ["Big Boo's Haunt - Second Floor Vanish Cap Block", False, SECOND_FLOOR],
             ["Big Boo's Haunt - Second Floor Vanish Cap Block", True,
              SECOND_FLOOR + VANISH_CAP],

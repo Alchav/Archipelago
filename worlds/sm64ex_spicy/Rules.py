@@ -13,9 +13,8 @@ from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_
 from .Items import action_item_data_table, cap_item_data_table, feature_item_data_table, \
     per_level_move_area_names, ut_glitch_item_name
 from .LogicTricks import logic_tricks
-from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoins, HasUnlock, LogicTrick, \
-    register_coin_evaluator, register_red_coin_evaluator
-from .CoinLogic import COIN_EVALUATORS, RED_COIN_EVALUATORS
+from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoins, HasUnlock, LogicTrick, register_coin_evaluator
+from .CoinLogic import COIN_EVALUATORS
 
 
 logic_tricks_by_internal_id = {
@@ -1169,9 +1168,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 rf.add_rule(location_name, required_item)
     for course_name, evaluator in COIN_EVALUATORS.items():
         register_coin_evaluator(course_name, evaluator)
-    for course_name, evaluator in RED_COIN_EVALUATORS.items():
-        register_red_coin_evaluator(course_name, evaluator)
-
     red_coin_star_by_course = {
         "Bob-omb Battlefield": "Bob-omb Battlefield - Find the 8 Red Coins",
         "Whomp's Fortress": "Whomp's Fortress - Red Coins on the Floating Isle",
@@ -1199,6 +1195,14 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     }
     for course_name, location_name in red_coin_star_by_course.items():
         rf.assign_rule_object(location_name, CanCollectAllRedCoins(course_name))
+    vcutm_red_coin_star = "Vanish Cap Under the Moat - Red Coins"
+    rf.add_rule(vcutm_red_coin_star, rf.build_rule(
+        "VC | logic_vcutm_wall_kick_over_vanish_cap_grate",
+        rf.get_cannon_item_name(vcutm_red_coin_star),
+        rf.get_cap_item_names(vcutm_red_coin_star),
+        rf.get_arbitrary_item_names(vcutm_red_coin_star),
+        rf.get_action_item_names(vcutm_red_coin_star),
+    ))
 
     coin_star_requirements = {
         "Bob-omb Battlefield": options.bob_omb_battlefield_coin_star_requirement.value,
