@@ -631,6 +631,22 @@ class BlocksanityPerLevelCapItemPoolTestBase(SM64TestBase):
                 self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
 
 
+class TowerOfTheWingCapCoinsanityCapItemPoolTestBase(SM64TestBase):
+    options = {
+        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "coinsanity": 100,
+        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
+        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+        "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
+    }
+
+    def test_wing_cap_is_progression_for_high_coin_checks(self):
+        item_name = "Tower of the Wing Cap - Wing Cap"
+        self.assertEqual(
+            self.world.get_item_classification(cap_item_data_table[item_name]),
+            ItemClassification.progression_deprioritized_skip_balancing)
+        self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
+
 class MariosHatItemPoolTestBase(SM64TestBase):
     options = {
         "marios_hat": Options.MariosHat.option_true,

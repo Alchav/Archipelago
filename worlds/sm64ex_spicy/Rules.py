@@ -758,7 +758,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_hmc_metal_head_capless_no_movement")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
-    if options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled:
+    if (options.one_up_checks
+            and options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled):
         rf.add_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles",
                     Has("Monty Moles") | Has("Hazy Maze Cave - Monty Moles"))
         rf.add_rule("Hazy Maze Cave - Twin Hole Monty Moles",
@@ -893,7 +894,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom",
                    "CANN | logic_ttm_lonely_mushroom_cannonless | "
                    "logic_ttm_lonely_mushroom_fly_guy_spin_jump")
-    if options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled:
+    if (options.one_up_checks
+            and options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled):
         rf.add_rule("Tall, Tall Mountain - Upper Monty Moles",
                     Has("Monty Moles") | Has("Tall, Tall Mountain - Monty Moles"))
         rf.add_rule("Tall, Tall Mountain - Lower Monty Moles",

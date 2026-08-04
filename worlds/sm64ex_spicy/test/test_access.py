@@ -3917,6 +3917,60 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
         repeatable_ascent_total = self.maximum_reachable_coins()
         self.assertGreater(repeatable_ascent_total, two_ascent_total)
 
+    def collect_full_two_way_pipe_route(self):
+        self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect_by_name([
+            "Long Jump",
+            "Side Flip",
+            "Wall Kick",
+            "Ground Pound",
+            "Purple Switches",
+            "Warp Pipes",
+            "Tiny-Huge Island - Cannon Unlock",
+            "Tiny-Huge Island - Single Yellow Coins",
+            "Tiny-Huge Island - Red Coins",
+            "Tiny-Huge Island - Blue Coin Block",
+            "Tiny-Huge Island - Horizontal Coin Lines",
+            "Tiny-Huge Island - 3-Coin Block",
+            "Tiny-Huge Island - Wooden Posts",
+            "Tiny-Huge Island - Chuckya",
+            "Tiny-Huge Island - Lakitu",
+            "Tiny-Huge Island - Fire Piranha Plants",
+            "Tiny-Huge Island - Fly Guy",
+            "Tiny-Huge Island - Goombas",
+            "Tiny-Huge Island - Koopa Troopa",
+        ])
+
+    def test_tiny_entrance_route_can_collect_all_non_impossible_coins(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
+        self.collect_full_two_way_pipe_route()
+
+        self.assertEqual(self.maximum_reachable_coins(), 191)
+
+    def test_huge_entrance_route_can_collect_all_non_impossible_coins(self):
+        self.multiworld.get_entrance(
+            "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
+        self.collect_full_two_way_pipe_route()
+
+        self.assertEqual(self.maximum_reachable_coins(), 191)
+        evaluation = COIN_EVALUATORS["Tiny-Huge Island"](
+            self.multiworld.state, self.player, 191)
+        huge_route = next(
+            source for source in evaluation.children
+            if source.source_id == "thi_huge_variant")
+        piranha_route = next(
+            source for source in huge_route.children
+            if source.source_id == "thi_huge_piranha_area")
+        self.assertEqual(
+            {
+                "huge_piranha_area_plants",
+                "tiny_piranha_area_plant",
+                "tiny_start_goomba",
+            },
+            {source.source_id for source in piranha_route.children},
+        )
+
 
 class TinyHugeIslandPermanentCoinCollectionTestBase(SM64TestBase):
     run_default_tests = False

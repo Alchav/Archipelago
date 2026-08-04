@@ -2698,10 +2698,10 @@ def tiny_huge_island_coin_evaluation(
             if available and value:
                 sources[source_id] = value
 
-        has_tiny_piranha = start_tiny and has_tiny_piranha_movement
-        has_tiny_main_from_tiny = has_tiny_piranha and has_thi_purple_switches
-        has_huge_start = not start_tiny
-        has_huge_piranha_from_pipe = has_tiny_piranha and has_warp_pipes
+        has_initial_tiny_piranha = start_tiny and has_tiny_piranha_movement
+        has_tiny_main_from_tiny = has_initial_tiny_piranha and has_thi_purple_switches
+        has_huge_piranha_from_pipe = has_initial_tiny_piranha and has_warp_pipes
+        has_huge_start = not start_tiny or has_huge_piranha_from_pipe
         has_koopa_from_pipe = has_tiny_main_from_tiny and has_warp_pipes
 
         repeatable_windswept = has_huge_start and (
@@ -2717,6 +2717,8 @@ def tiny_huge_island_coin_evaluation(
         )
         has_top_from_mountain = has_koopa_region and has_upper_movement
         has_top = has_top_from_mountain or has_koopa_shell_ascent and has_huge_start
+        has_tiny_piranha = has_initial_tiny_piranha or has_koopa_region and has_warp_pipes
+        has_tiny_start = start_tiny or has_tiny_piranha
         has_tiny_main = has_tiny_main_from_tiny or has_koopa_region and has_warp_pipes
 
         normal_repeatable_top = (
@@ -2737,7 +2739,7 @@ def tiny_huge_island_coin_evaluation(
             "tiny_start_goomba",
             "Small Goomba at Tiny Island start",
             1,
-            start_tiny and has_goombas,
+            start_tiny and has_tiny_start and has_goombas,
         )
         add_source(
             "tiny_piranha_area_plant",
@@ -2749,44 +2751,43 @@ def tiny_huge_island_coin_evaluation(
             "tiny_main_individual_coins",
             "Individual coins in Tiny Main",
             8,
-            start_tiny and has_tiny_main and has_single_yellow_coins,
+            has_tiny_main and has_single_yellow_coins,
         )
         add_source(
             "tiny_main_coin_line",
             "Coin line on the Tiny Main wooden plank",
             5,
-            start_tiny and has_tiny_main and has_horizontal_coin_lines,
+            has_tiny_main and has_horizontal_coin_lines,
         )
         add_source(
             "tiny_main_three_coin_block",
             "3-Coin Block in Tiny Main",
             3,
-            start_tiny and has_tiny_main and has_three_coin_block,
+            has_tiny_main and has_three_coin_block,
         )
         add_source(
             "tiny_main_goombas",
             "Nine Small Goombas in Tiny Main",
             9,
-            start_tiny and has_tiny_main and has_goombas,
+            has_tiny_main and has_goombas,
         )
         add_source(
             "tiny_main_koopa",
             "Small Koopa in Tiny Main",
             5,
-            start_tiny and has_tiny_main and has_koopa_troopa,
+            has_tiny_main and has_koopa_troopa,
         )
         add_source(
             "tiny_impossible_coin",
             "Impossible underground coin on Tiny Island",
             1,
-            start_tiny and has_tiny_main and has_single_yellow_coins and has_impossible_coin,
+            has_tiny_main and has_single_yellow_coins and has_impossible_coin,
         )
         add_source(
             "tiny_purple_switch_coin",
             "Separated Tiny Island coin",
             1,
-            start_tiny
-            and has_tiny_main
+            has_tiny_main
             and has_thi_purple_switches
             and has_single_yellow_coins,
         )
@@ -2934,6 +2935,18 @@ def tiny_huge_island_coin_evaluation(
                 "Fire Piranha Plants in the Huge Piranha Area",
                 10,
                 has_fire_piranha_plants,
+            ),
+            _route_source(
+                "tiny_piranha_area_plant",
+                "Piranha Plant beyond the Warp Pipe in the Tiny Piranha Area",
+                1,
+                not start_tiny and has_warp_pipes and has_fire_piranha_plants,
+            ),
+            _route_source(
+                "tiny_start_goomba",
+                "Small Goomba beyond the Warp Pipe at Tiny Island start",
+                1,
+                not start_tiny and has_warp_pipes and has_goombas,
             ),
         ]
 
