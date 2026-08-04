@@ -1424,6 +1424,8 @@ class RuleFactory:
         self.world.set_rule(target, rule)
 
     def add_rule(self, target_name: str, rule: Rule) -> None:
+        if target_name in locOneUp_table and not self.options.one_up_checks:
+            return
         combined_rule = self.assigned_rules.get(target_name, True_()) & rule
         self.assigned_rules[target_name] = combined_rule
         target = (
