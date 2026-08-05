@@ -4966,7 +4966,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
         self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 83))
         self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 84))
-        self.assertFalse(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+        self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
 
 
 class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
@@ -5012,8 +5012,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_initial_coin_sources_are_counted_independently(self):
         source_coins = {
             "Shifting Sand Land - Single Yellow Coins": 6,
-            "Shifting Sand Land - Horizontal Coin Lines": 5,
-            "Shifting Sand Land - Vertical Coin Lines": 5,
+            "Shifting Sand Land - Horizontal Coin Lines": 10,
             "Shifting Sand Land - Throwable Cork Box": 3,
             "Shifting Sand Land - Crazy Boxes": 10,
             "Shifting Sand Land - Red Coins": 8,
@@ -5043,6 +5042,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         source_coins = {
             "Shifting Sand Land - Single Yellow Coins": 19,
             "Shifting Sand Land - Horizontal Coin Lines": 20,
+            "Shifting Sand Land - Vertical Coin Lines": 5,
             "Shifting Sand Land - Horizontal Coin Rings": 8,
         }
         for item_name, expected_coins in source_coins.items():

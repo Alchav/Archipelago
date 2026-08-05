@@ -26,6 +26,8 @@ class CoinSourceTrace:
     available: bool = True
     children: tuple[CoinSourceTrace, ...] = ()
     red_coin_ids: frozenset[int] = frozenset()
+    max_coins: int | None = None
+    reachable_red_coin_ids_when_uncounted: frozenset[int] = frozenset()
 
     def __post_init__(self) -> None:
         if not self.source_id:
@@ -34,6 +36,8 @@ class CoinSourceTrace:
             raise ValueError("Coin source labels must not be empty")
         if self.coins < 0:
             raise ValueError("Coin source values must not be negative")
+        if self.max_coins is not None and self.max_coins < self.coins:
+            raise ValueError("Maximum coin source value cannot be less than its counted value")
         if self.counted and not self.available:
             raise ValueError("An unavailable coin source cannot be counted")
         if not isinstance(self.children, tuple):
@@ -42,6 +46,12 @@ class CoinSourceTrace:
             object.__setattr__(self, "red_coin_ids", frozenset(self.red_coin_ids))
         if not self.red_coin_ids.issubset(range(1, 9)):
             raise ValueError("Red Coin IDs must be between 1 and 8")
+        if not isinstance(self.reachable_red_coin_ids_when_uncounted, frozenset):
+            object.__setattr__(
+                self, "reachable_red_coin_ids_when_uncounted",
+                frozenset(self.reachable_red_coin_ids_when_uncounted))
+        if not self.reachable_red_coin_ids_when_uncounted.issubset(range(1, 9)):
+            raise ValueError("Reachable uncounted Red Coin IDs must be between 1 and 8")
 
     @property
     def available_red_coin_ids(self) -> frozenset[int]:
@@ -71,6 +81,8 @@ class CoinEvaluation:
         def collect(source: CoinSourceTrace, parent_counted: bool) -> set[int]:
             counted = parent_counted and source.counted
             result = set(source.red_coin_ids) if counted else set()
+            if parent_counted and source.available:
+                result.update(source.reachable_red_coin_ids_when_uncounted)
             for child in source.children:
                 result.update(collect(child, counted))
             return result
@@ -208,17 +220,20 @@ def evaluate_coins(
 
 
 def _format_coin_source(source: CoinSourceTrace, depth: int) -> list[JSONMessagePart]:
+    displayed_max = source.max_coins if source.max_coins is not None else source.coins
     if source.counted:
         color = "green"
         amount = f"+{source.coins}"
+        if source.max_coins is not None and source.coins != source.max_coins:
+            amount += f"/{source.max_coins}"
         suffix = ""
     elif source.available:
         color = "yellow"
-        amount = f"0/{source.coins}"
+        amount = f"0/{displayed_max}"
         suffix = " (not selected)"
     else:
         color = "salmon"
-        amount = f"0/{source.coins}"
+        amount = f"0/{displayed_max}"
         suffix = " (unavailable)"
 
     messages: list[JSONMessagePart] = [

@@ -28,11 +28,12 @@ class CoinTraceBuilder:
             counted: bool | None = None,
             children: tuple[CoinSourceTrace, ...] = (),
             red_coin_ids: frozenset[int] = frozenset(),
+            max_coins: int | None = None,
     ) -> None:
         if counted is None:
             counted = available
         self.children.append(CoinSourceTrace(
-            source_id, label, coins, counted, available, children, red_coin_ids))
+            source_id, label, coins, counted, available, children, red_coin_ids, max_coins))
         if counted:
             self.reachable_coins += coins
 
@@ -1387,15 +1388,15 @@ def shifting_sand_land_coins(
     )
     builder.add(
         "ssl_behind_pyramid_coin_line",
-        "Coin line between the pillars behind the pyramid",
+        "Line of coins between the two pillars behind the pyramid",
         5,
         has_horizontal_coin_lines,
     )
     builder.add(
         "ssl_pyramid_side_coin_line",
-        "Vertical coin line up the side of the pyramid",
+        "Line of coins on the pyramid",
         5,
-        has_vertical_coin_line,
+        has_horizontal_coin_lines,
     )
     builder.add(
         "ssl_fly_guys",
@@ -1456,70 +1457,82 @@ def shifting_sand_land_coins(
         state, player, "logic_ssl_one_red_coin_with_shy_guy_spin_jump", target_name)
     no_despawns = bool(state.multiworld.worlds[player].options.no_despawns.value)
 
-    builder.add(
-        "ssl_normal_high_red_coin_route",
-        "Four high Red Coins via Wing Cap",
-        8,
-        has_red_coins and has_normal_red_coin_route,
-        children=(
-            coin_condition("ssl_high_red_coin_wing_cap", "Wing Cap", has_wing_cap),
-            coin_condition("ssl_high_red_coin_triple_jump", "Triple Jump route", has_triple_jump),
-            coin_condition("ssl_high_red_coin_cannon", "Cannon route", has_cannon),
-        ),
-        red_coin_ids=frozenset({5, 6, 7, 8}),
-    )
     tweester_route_available = has_red_coins and has_tweester_trick
-    builder.add(
-        "ssl_tweester_red_coin_route",
-        "Three high Red Coins with the Tweester trick",
-        6,
-        tweester_route_available,
-        counted=tweester_route_available and not has_normal_red_coin_route,
-        children=(
-            coin_condition(
-                "ssl_tweester_red_coin_trick",
-                "Tweesters to Reach 3 Red Coins trick",
-                has_tweester_trick,
-            ),
-        ),
-        red_coin_ids=frozenset({5, 6, 7}),
+    shy_guy_route_available = has_red_coins and has_shy_guy_trick
+    normal_route_available = has_red_coins and has_normal_red_coin_route
+    use_tweester_route = tweester_route_available and not normal_route_available
+    use_shy_guy_coins = shy_guy_route_available and not normal_route_available and no_despawns
+    reachable_high_red_coin_value = (
+        8 if normal_route_available
+        else (6 if use_tweester_route else 0) + (2 if use_shy_guy_coins else 0)
     )
-    shy_guy_route_available = has_red_coins and has_shy_guy_trick and no_despawns
     builder.add(
-        "ssl_shy_guy_red_coin_route",
-        "One high Red Coin with the Shy Guy spin-jump trick",
-        2,
-        shy_guy_route_available,
-        counted=shy_guy_route_available and not has_normal_red_coin_route,
+        "ssl_high_red_coins",
+        "Four high Red Coins",
+        reachable_high_red_coin_value,
+        normal_route_available or tweester_route_available or shy_guy_route_available,
+        max_coins=8,
         children=(
-            coin_condition(
-                "ssl_shy_guy_red_coin_trick",
-                "Spin Jump Off a Shy Guy to Reach 1 Red Coin trick",
-                has_shy_guy_trick,
+            CoinSourceTrace(
+                "ssl_normal_high_red_coin_route",
+                "Wing Cap with Triple Jump or Cannon",
+                8,
+                normal_route_available,
+                normal_route_available,
+                red_coin_ids=frozenset({5, 6, 7, 8}),
             ),
-            coin_condition(
-                "ssl_shy_guy_red_coin_no_despawns",
-                "No Despawns",
-                no_despawns,
+            CoinSourceTrace(
+                "ssl_tweester_red_coin_route",
+                "Three Red Coins with the Tweester trick",
+                6,
+                use_tweester_route,
+                tweester_route_available,
+                red_coin_ids=frozenset({5, 6, 7}),
+            ),
+            CoinSourceTrace(
+                "ssl_shy_guy_red_coin_route",
+                "One Red Coin with the Shy Guy spin-jump trick",
+                2,
+                use_shy_guy_coins,
+                shy_guy_route_available,
+                children=(coin_condition(
+                    "ssl_shy_guy_red_coin_no_despawns",
+                    "No Despawns preserves this coin value for Coinsanity",
+                    no_despawns,
+                ),),
+                red_coin_ids=frozenset({8}),
+                reachable_red_coin_ids_when_uncounted=frozenset({8}),
             ),
         ),
-        red_coin_ids=frozenset({8}),
     )
 
     can_reach_upper_pyramid = state.can_reach(
         "Shifting Sand Land - Upper Pyramid", "Region", player)
+    upper_pyramid_access = coin_condition(
+        "ssl_upper_pyramid_access_for_lines",
+        "Upper Pyramid is reachable",
+        can_reach_upper_pyramid,
+    )
     builder.add(
-        "ssl_upper_pyramid_coin_lines",
-        "Coin lines under the second wire grid and at the pyramid top",
-        15,
+        "ssl_second_wire_grid_coin_line",
+        "Line of coins under the second wire grid",
+        5,
         can_reach_upper_pyramid and has_horizontal_coin_lines,
-        children=(
-            coin_condition(
-                "ssl_upper_pyramid_access_for_lines",
-                "Upper Pyramid is reachable",
-                can_reach_upper_pyramid,
-            ),
-        ),
+        children=(upper_pyramid_access,),
+    )
+    builder.add(
+        "ssl_pyramid_top_horizontal_coin_line",
+        "Horizontal coin line at the top of the pyramid",
+        5,
+        can_reach_upper_pyramid and has_horizontal_coin_lines,
+        children=(upper_pyramid_access,),
+    )
+    builder.add(
+        "ssl_pyramid_top_vertical_coin_line",
+        "Vertical coin line at the top of the pyramid",
+        5,
+        can_reach_upper_pyramid and has_vertical_coin_line,
+        children=(upper_pyramid_access,),
     )
     builder.add(
         "ssl_upper_pyramid_single_coins",

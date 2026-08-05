@@ -335,7 +335,6 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Dire, Dire Docks - Treasure Chests": 3626930,
             "Treasure Chests": 3626931,
             "Bowser in the Dark World - Warp Pipes": 3626932,
-            "Bowser in the Fire Sea - Warp Pipes": 3626933,
             "Bowser in the Sky - Warp Pipes": 3626934,
             "Warp Pipes": 3626935,
         }

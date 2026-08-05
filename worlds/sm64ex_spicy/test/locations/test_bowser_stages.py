@@ -121,7 +121,6 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
         freestanding = ["Bowser in the Fire Sea - Freestanding 1-Ups"]
         triggers = ["Bowser in the Fire Sea - Trigger 1-Ups"]
         extra = ["Bowser in the Fire Sea - Extra 1-Ups"]
-        warp_pipes = ["Bowser in the Fire Sea - Warp Pipes"]
 
         self.run_location_tests([
             ["Bowser in the Fire Sea - First Stone Structure 1-Up", False, []],
@@ -136,8 +135,7 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - Red Coins", True, upper + ["Bowser in the Fire Sea - Red Coins"]],
             ["Bowser in the Fire Sea - Red Coins", False, near_poles],
             ["Bowser in the Fire Sea - Key", False, upper + bombs[:1]],
-            ["Bowser in the Fire Sea - Key", False, upper + bombs],
-            ["Bowser in the Fire Sea - Key", True, upper + bombs + warp_pipes],
+            ["Bowser in the Fire Sea - Key", True, upper + bombs],
 
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", False, upper],
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", True,

@@ -45,7 +45,6 @@ simple_level_feature_items = {
 warp_pipe_item_name_by_level = {
     "Tiny-Huge Island": "Tiny-Huge Island - Warp Pipes",
     "Bowser in the Dark World": "Bowser in the Dark World - Warp Pipes",
-    "Bowser in the Fire Sea": "Bowser in the Fire Sea - Warp Pipes",
     "Bowser in the Sky": "Bowser in the Sky - Warp Pipes",
 }
 
@@ -1007,10 +1006,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
     rf.assign_rule_object(
         "Bowser in the Fire Sea - Key",
-        rf.build_rule(
-            "WARP_PIPES",
-            arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Fire Sea"))
-        & bowser_arena_bomb_rule(
+        bowser_arena_bomb_rule(
             "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_health.value))
     if options.one_up_checks:
         for location_name in (

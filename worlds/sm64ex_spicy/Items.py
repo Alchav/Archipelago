@@ -165,8 +165,6 @@ warp_pipe_item_data_table: dict[str, SM64ItemData] = {
     "Tiny-Huge Island - Warp Pipes": SM64ItemData(sm64ex_base_id + 298),
     "Bowser in the Dark World - Warp Pipes": SM64ItemData(
         sm64ex_base_id + 932, progression_deprioritized_skip_balancing),
-    "Bowser in the Fire Sea - Warp Pipes": SM64ItemData(
-        sm64ex_base_id + 933, progression_deprioritized_skip_balancing),
     "Bowser in the Sky - Warp Pipes": SM64ItemData(
         sm64ex_base_id + 934, progression_deprioritized_skip_balancing),
 }
