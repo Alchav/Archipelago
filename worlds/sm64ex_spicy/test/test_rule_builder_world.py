@@ -4,7 +4,10 @@ from BaseClasses import CollectionState
 from rule_builder.rules import Rule
 
 from .bases import SM64TestBase
+from .. import Options
 from ..Items import item_table
+from ..CoinLogic import COIN_EVALUATORS, _coin_source_rule_specs
+from ..RuleBuilder import CanCollectCoins, CoinSourceTrace
 from ..Rules import has_unlock
 
 
@@ -46,3 +49,48 @@ class RuleBuilderWorldTestBase(SM64TestBase):
                     json.dumps(rule.explain_json(state))
                     if state is not None:
                         self.assertEqual(rule(state), result_before)
+
+
+class CoinSourceExplanationTest(SM64TestBase):
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "level_unlocks": Options.LevelUnlocks.option_full,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "level_features": Options.LevelFeatures.option_per_level,
+        "tiny_huge_island_coin_star_requirement": 1,
+    }
+
+    def test_tiny_start_goomba_explains_region_and_unlock(self):
+        state = CollectionState(self.multiworld)
+        rule = CanCollectCoins("Tiny-Huge Island", 1).resolve(self.world)
+
+        explanation = "".join(part.get("text", "") for part in rule.explain_json(state))
+
+        self.assertIn("Small Goomba in the starting Tiny region", explanation)
+        self.assertIn(
+            "Small Goomba in the starting Tiny region (unavailable)\n      (",
+            explanation,
+        )
+        self.assertIn("Tiny-Huge Island (Tiny)", explanation)
+        self.assertIn("Tiny-Huge Island - Goombas", explanation)
+
+    def test_every_generated_coin_source_has_a_rule(self):
+        state = self.multiworld.get_all_state(False)
+        specs = _coin_source_rule_specs()
+
+        def source_ids(sources: tuple[CoinSourceTrace, ...]):
+            for source in sources:
+                yield source.source_id
+                yield from source_ids(source.children)
+
+        missing = []
+        for course_name, evaluator in COIN_EVALUATORS.items():
+            evaluation = evaluator(state, self.player, 1)
+            missing.extend(
+                (course_name, source_id)
+                for source_id in source_ids(evaluation.children)
+                if (course_name, source_id) not in specs
+            )
+
+        self.assertEqual(missing, [])

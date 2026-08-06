@@ -1,4 +1,4 @@
-from BaseClasses import CollectionState
+from BaseClasses import CollectionState, ItemClassification
 
 from .bases import SM64TestBase
 from .. import Options
@@ -1403,7 +1403,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
@@ -1423,7 +1423,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Huge)"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
 
     def test_tiny_huge_island_koopa_region_connects_to_tiny_main_with_warp_pipes(self):
@@ -1441,7 +1441,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
 
     def test_tiny_huge_island_rematch_accepts_long_jump_route(self):
@@ -1488,7 +1488,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
 
     def test_purple_switch_gated_locations(self):
@@ -1612,7 +1612,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Tiny-Huge Island (Tiny)"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
@@ -1631,7 +1631,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Top"))
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Make Wiggler Squirm"))
 
     def test_rainbow_ride_tricky_triangles_requires_purple_switches(self):
@@ -1652,7 +1652,10 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
-        self.collect(self.get_item_by_name("Purple Switches"))
+        self.collect([
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Warp Pipes"),
+        ])
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
@@ -1669,7 +1672,10 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
 
-        self.collect(self.get_item_by_name("Purple Switches"))
+        self.collect([
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Warp Pipes"),
+        ])
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Red Coins"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
@@ -1762,26 +1768,20 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
     def collect_basement_access(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
 
-    def test_individual_checkerboard_platforms_ignore_global_item(self):
+    def test_individual_checkerboard_platforms_accept_global_item(self):
         self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
 
         self.collect(self.world.create_item("Checkerboard Platforms"))
-        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
-
-        self.collect(self.get_item_by_name("Whomp's Fortress - Checkerboard Platform"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
-    def test_individual_rolling_logs_ignore_global_item(self):
+    def test_individual_rolling_logs_accept_global_item(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
         self.collect(self.world.create_item("Rolling Logs"))
-        self.assertFalse(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
-
-        self.collect(self.get_item_by_name("Lethal Lava Land - Rolling Log"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
-    def test_individual_purple_switches_ignore_global_item(self):
+    def test_individual_purple_switches_accept_global_item(self):
         self.collect_basement_access()
         self.collect([
             self.get_item_by_name("Long Jump"),
@@ -1790,9 +1790,6 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
 
         self.collect(self.world.create_item("Purple Switches"))
-        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
-
-        self.collect(self.get_item_by_name("Hazy Maze Cave - Purple Switch"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
 
     def test_dire_dire_docks_uses_individual_purple_switch(self):
@@ -1804,9 +1801,6 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
         self.collect(self.world.create_item("Purple Switches"))
-        self.assertFalse(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
-
-        self.collect(self.get_item_by_name("Dire, Dire Docks - Purple Switch"))
         self.assertTrue(self.can_reach_location("Dire, Dire Docks - Board Bowser's Sub"))
 
     def test_tall_tall_mountain_uses_individual_purple_switch(self):
@@ -1819,9 +1813,6 @@ class IndividualArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
 
         self.collect(self.world.create_item("Purple Switches"))
-        self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
-
-        self.collect(self.get_item_by_name("Tall, Tall Mountain - Purple Switch"))
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Breathtaking View from Bridge"))
 
     def test_tiny_huge_island_uses_individual_purple_switch(self):
@@ -2065,7 +2056,10 @@ class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
     }
 
     def collect_stage_access(self):
-        self.collect(self.get_item_by_name("Dark World Key"))
+        self.collect_by_name([
+            "Dark World Key",
+            "Bowser in the Dark World - Warp Pipes",
+        ])
 
     def test_trick_reaches_bowser_but_not_red_coin_star(self):
         self.collect_stage_access()
@@ -3606,7 +3600,7 @@ class TinyHugeIslandCoinStar55FromHugeAccessTestBase(TinyHugeIslandCoinStarAcces
         self.disable_tiny_entry()
         self.collect_second_floor_access()
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Coins Star"))
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Coins Star"))
 
@@ -3701,7 +3695,7 @@ class TinyHugeIslandCoinStar12FromTinyAccessTestBase(TinyHugeIslandCoinStarAcces
         self.collect_second_floor_access()
         self.collect([
             self.get_item_by_name("Long Jump"),
-            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+            self.get_item_by_name("Warp Pipes"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
@@ -3823,7 +3817,7 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
-        self.collect(self.get_item_by_name("Tiny-Huge Island - Warp Pipes"))
+        self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
 
@@ -3852,7 +3846,7 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         self.collect_second_floor_access()
         self.collect([
             self.get_item_by_name("Tiny-Huge Island - Koopa Troopa"),
-            self.get_item_by_name("Tiny-Huge Island - Warp Pipes"),
+            self.get_item_by_name("Warp Pipes"),
             self.get_item_by_name("Purple Switches"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Top"))
@@ -5568,6 +5562,75 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
     def disable_wdw_entrance(self, entrance_name: str):
         self.multiworld.get_entrance(f"Second Floor -> {entrance_name}", self.player).access_rule = \
             lambda state: False
+
+
+class WetDryWorldFirstDowntownRedCoinAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WetDryWorldCoinStarAccessTestBase.options,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "bobomb_buddies": Options.BobombBuddies.option_per_level,
+        "logic_tricks": {"Wet-Dry World Downtown with Triple Jump"},
+    }
+
+    def make_state(self, item_names, starting_region):
+        state = CollectionState(self.multiworld)
+        region = self.multiworld.get_region(starting_region, self.player)
+        state.reachable_regions[self.player].add(region)
+        for entrance in region.exits:
+            if entrance.connected_region is not None:
+                state.blocked_connections[self.player].add(entrance)
+        for item_name in item_names:
+            item = item_name if not isinstance(item_name, str) else self.world.create_item(item_name)
+            item.classification = ItemClassification.progression
+            state.collect(item, prevent_sweep=True)
+        state.sweep_for_advancements()
+        return state
+
+    def first_downtown_red_coin_is_available(self, state):
+        evaluation = COIN_EVALUATORS["Wet-Dry World"](state, self.player, 152)
+        return any(
+            source.available
+            for route in evaluation.children
+            for source in route.children
+            if source.source_id == "downtown_initial_red_coin"
+        )
+
+    def test_expected_access_routes(self):
+        cases = []
+        for red_coins in ("Red Coins", "Wet-Dry World - Red Coins"):
+            cases.append(("Wet-Dry World Low", [
+                red_coins, "Wet-Dry World - Cannon Unlock"]))
+            cases.extend((
+                ("Wet-Dry World High", [red_coins, "Ledge Grab"]),
+                ("Wet-Dry World Low", [red_coins, "Triple Jump"]),
+            ))
+        for starting_region, item_names in cases:
+            with self.subTest(starting_region=starting_region, items=item_names):
+                state = self.make_state(item_names, starting_region)
+                self.assertTrue(self.first_downtown_red_coin_is_available(state))
+
+    def test_all_items_without_red_coin_unlock_do_not_reach_first_red_coin(self):
+        items = [
+            item for item in self.multiworld.get_items()
+            if item.name not in {"Red Coins", "Wet-Dry World - Red Coins"}
+        ]
+        state = self.make_state(items, "Wet-Dry World High")
+        self.assertFalse(self.first_downtown_red_coin_is_available(state))
+
+    def test_all_items_without_downtown_access_do_not_reach_first_red_coin(self):
+        downtown_access_item_names = {
+            "Wet-Dry World - Cannon Unlock",
+            "Ledge Grab",
+            "Triple Jump",
+        }
+        items = [
+            item for item in self.multiworld.get_items()
+            if item.name not in downtown_access_item_names
+        ]
+        items.append(self.world.create_item("Wet-Dry World - Red Coins"))
+        state = self.make_state(items, "Wet-Dry World Low")
+        self.assertFalse(self.first_downtown_red_coin_is_available(state))
 
 
 class WetDryWorldCoinStar49AccessTestBase(WetDryWorldCoinStarAccessTestBase):

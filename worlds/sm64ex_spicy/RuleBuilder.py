@@ -8,7 +8,7 @@ from typing_extensions import override
 
 from BaseClasses import CollectionState
 from NetUtils import JSONMessagePart
-from rule_builder.rules import HasAny, Rule
+from rule_builder.rules import Has, Or, Rule
 from .Items import ut_glitch_item_name
 
 if TYPE_CHECKING:
@@ -28,6 +28,7 @@ class CoinSourceTrace:
     red_coin_ids: frozenset[int] = frozenset()
     max_coins: int | None = None
     reachable_red_coin_ids_when_uncounted: frozenset[int] = frozenset()
+    requirement_rule: Rule.Resolved | None = None
 
     def __post_init__(self) -> None:
         if not self.source_id:
@@ -39,7 +40,7 @@ class CoinSourceTrace:
         if self.max_coins is not None and self.max_coins < self.coins:
             raise ValueError("Maximum coin source value cannot be less than its counted value")
         if self.counted and not self.available:
-            raise ValueError("An unavailable coin source cannot be counted")
+            raise ValueError(f"Unavailable coin source cannot be counted: {self.source_id}")
         if not isinstance(self.children, tuple):
             object.__setattr__(self, "children", tuple(self.children))
         if not isinstance(self.red_coin_ids, frozenset):
@@ -102,6 +103,7 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
     global_item_name: str
     per_level_item_name: str
+    count: int = 1
 
     @override
     def _instantiate(self, world: SM64World) -> Rule.Resolved:
@@ -112,11 +114,17 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         if not item_names:
             raise ValueError(
                 f"Neither unlock item exists: {self.global_item_name}, {self.per_level_item_name}")
+        start_inventory_counts = getattr(world, "start_inventory_item_counts", {})
         start_inventory_ids = getattr(world, "start_inventory_item_ids", set())
-        starts_unlocked = any(world.item_name_to_id[name] in start_inventory_ids for name in item_names)
+        starts_unlocked = any(
+            start_inventory_counts.get(
+                world.item_name_to_id[name], int(world.item_name_to_id[name] in start_inventory_ids)
+            ) >= self.count
+            for name in item_names
+        )
         return self.Resolved(
             item_names,
-            HasAny(*item_names).resolve(world),
+            Or(*(Has(name, self.count) for name in item_names)).resolve(world),
             starts_unlocked,
             player=world.player,
             caching_enabled=getattr(world, "rule_caching_enabled", False),
@@ -219,7 +227,22 @@ def evaluate_coins(
     return result
 
 
-def _format_coin_source(source: CoinSourceTrace, depth: int) -> list[JSONMessagePart]:
+def _coin_source_requirement_explanation(
+        source: CoinSourceTrace,
+        state: CollectionState,
+) -> tuple[JSONMessagePart, ...]:
+    if source.requirement_rule is None:
+        return ()
+    return tuple(source.requirement_rule.explain_json(state))
+
+
+def _format_coin_source(
+        course_name: str,
+        source: CoinSourceTrace,
+        depth: int,
+        state: CollectionState,
+        player: int,
+) -> list[JSONMessagePart]:
     displayed_max = source.max_coins if source.max_coins is not None else source.coins
     if source.counted:
         color = "green"
@@ -244,8 +267,14 @@ def _format_coin_source(source: CoinSourceTrace, depth: int) -> list[JSONMessage
     ]
     if suffix:
         messages.append({"type": "text", "text": suffix})
+    requirement_explanation = _coin_source_requirement_explanation(source, state)
+    if requirement_explanation:
+        messages.append({"type": "text", "text": f"\n{'  ' * (depth + 1)}("})
+        messages.extend(requirement_explanation)
+        messages.append({"type": "text", "text": ")"})
     for child in source.children:
-        messages.extend(_format_coin_source(child, depth + 1))
+        messages.extend(_format_coin_source(
+            course_name, child, depth + 1, state, player))
     return messages
 
 
@@ -253,6 +282,8 @@ def format_coin_evaluation(
         course_name: str,
         required_coins: int,
         evaluation: CoinEvaluation,
+        state: CollectionState,
+        player: int,
 ) -> list[JSONMessagePart]:
     """Format a structured coin evaluation for print_json consumers."""
     accessible = evaluation.reachable_coins >= required_coins
@@ -267,7 +298,8 @@ def format_coin_evaluation(
         },
     ]
     for child in evaluation.children:
-        messages.extend(_format_coin_source(child, 1))
+        messages.extend(_format_coin_source(
+            course_name, child, 1, state, player))
     return messages
 
 
@@ -356,7 +388,8 @@ class CanCollectCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
             result = self._evaluate_registered(state)
             if isinstance(result, CoinEvaluation):
-                return format_coin_evaluation(self.course_name, self.required_coins, result)
+                return format_coin_evaluation(
+                    self.course_name, self.required_coins, result, state, self.player)
 
             return [
                 {"type": "text", "text": "Can collect " if result else "Cannot collect "},

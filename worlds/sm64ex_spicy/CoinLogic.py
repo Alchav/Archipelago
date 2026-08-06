@@ -1,16 +1,53 @@
 from __future__ import annotations
 
 import dataclasses
+from contextvars import ContextVar
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import cache
 from types import ModuleType
+from typing import TYPE_CHECKING, Any
 
 from BaseClasses import CollectionState
+from rule_builder.rules import And, False_, Or, Rule, True_
 
-from .RuleBuilder import CoinEvaluation, CoinSourceTrace
+from .RuleBuilder import CoinEvaluation, CoinSourceTrace, HasUnlock
+
+if TYPE_CHECKING:
+    from . import SM64World
 
 
 CoinTraceEvaluator = Callable[[CollectionState, int, int], CoinEvaluation]
+_coin_rule_context: ContextVar[tuple[CollectionState, int, str] | None] = ContextVar(
+    "sm64_coin_rule_context", default=None)
+
+
+def _coin_trace(
+        source_id: str,
+        label: str,
+        coins: int,
+        available: bool,
+        *,
+        counted: bool | None = None,
+        children: tuple[CoinSourceTrace, ...] = (),
+        red_coin_ids: frozenset[int] = frozenset(),
+        max_coins: int | None = None,
+        reachable_red_coin_ids_when_uncounted: frozenset[int] = frozenset(),
+) -> CoinSourceTrace:
+    requirement_rule = None
+    original_available = available
+    context = _coin_rule_context.get()
+    if context is not None:
+        state, player, course_name = context
+        requirement_rule = get_coin_requirement_rule(course_name, source_id, state, player)
+        if requirement_rule is not None:
+            rule_available = requirement_rule(state)
+            available = rule_available
+    if counted is None:
+        counted = available and original_available
+    return CoinSourceTrace(
+        source_id, label, coins, counted, available, children, red_coin_ids,
+        max_coins, reachable_red_coin_ids_when_uncounted, requirement_rule)
 
 
 class CoinTraceBuilder:
@@ -30,11 +67,11 @@ class CoinTraceBuilder:
             red_coin_ids: frozenset[int] = frozenset(),
             max_coins: int | None = None,
     ) -> None:
-        if counted is None:
-            counted = available
-        self.children.append(CoinSourceTrace(
-            source_id, label, coins, counted, available, children, red_coin_ids, max_coins))
-        if counted:
+        source = _coin_trace(
+            source_id, label, coins, available, counted=counted, children=children,
+            red_coin_ids=red_coin_ids, max_coins=max_coins)
+        self.children.append(source)
+        if source.counted:
             self.reachable_coins += coins
 
     def add_source(
@@ -59,14 +96,14 @@ class CoinTraceBuilder:
     ) -> None:
         counted = available and selected
         source_traces = tuple(
-            CoinSourceTrace(
+            _coin_trace(
                 source.source_id,
                 source.label,
                 source.coins,
-                counted and source.available,
                 available and source.available,
-                source.children,
-                source.red_coin_ids,
+                counted=counted and source.available,
+                children=source.children,
+                red_coin_ids=source.red_coin_ids,
             )
             for source in sources
         )
@@ -81,15 +118,9 @@ class CoinTraceBuilder:
             source.coins for source in sources
             if source.available or not available
         )
-        self.children.append(CoinSourceTrace(
-            route_id,
-            label,
-            displayed_coins,
-            counted,
-            available,
-        source_traces,
-        frozenset(),
-        ))
+        self.children.append(_coin_trace(
+            route_id, label, displayed_coins, available,
+            counted=counted, children=source_traces))
 
     def evaluation(self, reachable_coins: int | None = None) -> CoinEvaluation:
         if reachable_coins is None:
@@ -116,9 +147,9 @@ def coin_source(
         children: tuple[CoinSourceTrace, ...] = (),
         red_coin_ids: frozenset[int] = frozenset(),
 ) -> CoinSourceTrace:
-    if counted is None:
-        counted = available
-    return CoinSourceTrace(source_id, label, coins, counted, available, children, red_coin_ids)
+    return _coin_trace(
+        source_id, label, coins, available, counted=counted,
+        children=children, red_coin_ids=red_coin_ids)
 
 
 def coin_route(
@@ -148,7 +179,8 @@ def coin_evaluation(
         maximum: int,
 ) -> CoinEvaluation:
     reachable_coins = sum(trace.coins for trace in traces if trace.counted)
-    assert reachable_coins <= maximum
+    assert reachable_coins <= maximum, [
+        (trace.source_id, trace.coins) for trace in traces if trace.counted]
     return CoinEvaluation(reachable_coins, tuple(traces))
 
 
@@ -1054,9 +1086,7 @@ def coin_condition(
         *,
         counted: bool | None = None,
 ) -> CoinSourceTrace:
-    if counted is None:
-        counted = available
-    return CoinSourceTrace(source_id, label, 0, counted, available)
+    return _coin_trace(source_id, label, 0, available, counted=counted)
 
 
 def lethal_lava_land_coins(
@@ -1473,28 +1503,28 @@ def shifting_sand_land_coins(
         normal_route_available or tweester_route_available or shy_guy_route_available,
         max_coins=8,
         children=(
-            CoinSourceTrace(
+            _coin_trace(
                 "ssl_normal_high_red_coin_route",
                 "Wing Cap with Triple Jump or Cannon",
                 8,
                 normal_route_available,
-                normal_route_available,
+                counted=normal_route_available,
                 red_coin_ids=frozenset({5, 6, 7, 8}),
             ),
-            CoinSourceTrace(
+            _coin_trace(
                 "ssl_tweester_red_coin_route",
                 "Three Red Coins with the Tweester trick",
                 6,
-                use_tweester_route,
                 tweester_route_available,
+                counted=use_tweester_route,
                 red_coin_ids=frozenset({5, 6, 7}),
             ),
-            CoinSourceTrace(
+            _coin_trace(
                 "ssl_shy_guy_red_coin_route",
                 "One Red Coin with the Shy Guy spin-jump trick",
                 2,
-                use_shy_guy_coins,
                 shy_guy_route_available,
+                counted=use_shy_guy_coins,
                 children=(coin_condition(
                     "ssl_shy_guy_red_coin_no_despawns",
                     "No Despawns preserves this coin value for Coinsanity",
@@ -1891,7 +1921,7 @@ def snowmans_land_coins(
         ),
     )
     igloo_children = [
-        CoinSourceTrace(source_id, label, coins, available, available)
+        _coin_trace(source_id, label, coins, available)
         for source_id, label, coins, available in igloo_source_data
     ]
     igloo_coins = sum(
@@ -1905,7 +1935,7 @@ def snowmans_land_coins(
     )
     transition_loss = min(3, igloo_coins) if loses_spindrift_coins else 0
     if loses_spindrift_coins:
-        igloo_children.append(CoinSourceTrace(
+        igloo_children.append(_coin_trace(
             "sl_igloo_transition_loss",
             (
                 "Spindrift coins lost during the forced Igloo transition"
@@ -1913,16 +1943,16 @@ def snowmans_land_coins(
                 else "Forced Igloo transition has no Igloo coins to deduct"
             ),
             transition_loss,
-            False,
             True,
+            counted=False,
         ))
     else:
-        igloo_children.append(CoinSourceTrace(
+        igloo_children.append(_coin_trace(
             "sl_igloo_transition_loss",
             "No Spindrift coin loss during the Igloo transition",
             3,
             False,
-            False,
+            counted=False,
         ))
     net_igloo_coins = igloo_coins - transition_loss
     builder.add(
@@ -2250,25 +2280,15 @@ def _build_route_trace_node(
         coins = sum(child.coins for child in children if child.counted)
         if not counted:
             coins = sum(child.coins for child in children if child.available)
-        return CoinSourceTrace(
-            node.source_id,
-            node.label,
-            coins,
-            counted,
-            available,
-            children,
-        )
+        return _coin_trace(
+            node.source_id, node.label, coins, available,
+            counted=counted, children=children)
 
     owned = source_owners is None or source_owners.get(node.source_id) == route_id
     counted = route_counted and node.selected and available and owned
-    return CoinSourceTrace(
-        node.source_id,
-        node.label,
-        node.coins,
-        counted,
-        available,
-        red_coin_ids=node.red_coin_ids,
-    )
+    return _coin_trace(
+        node.source_id, node.label, node.coins, available,
+        counted=counted, red_coin_ids=node.red_coin_ids)
 
 
 def _build_route_trace(
@@ -2291,14 +2311,9 @@ def _build_route_trace(
         coins = sum(child.coins for child in children if child.counted)
     else:
         coins = sum(route.sources.values())
-    return CoinSourceTrace(
-        route.source_id,
-        route.label,
-        coins,
-        counted,
-        route.available,
-        children,
-    )
+    return _coin_trace(
+        route.source_id, route.label, coins, route.available,
+        counted=counted, children=children)
 
 
 def _evaluate_route_set(
@@ -2550,21 +2565,21 @@ def wet_dry_world_coin_evaluation(
                 "downtown_initial_red_coin",
                 "First Downtown red coin",
                 2,
-                has_red_coins,
+                has_downtown and has_red_coins,
                 red_coin_ids=frozenset({1}),
             ),
             _route_source(
                 "downtown_diamond_red_coins",
                 "Five Downtown red coins beyond water-level diamonds",
                 10,
-                has_water_level_diamond and has_red_coins,
+                has_downtown and has_water_level_diamond and has_red_coins,
                 red_coin_ids=frozenset({2, 3, 4, 5, 6}),
             ),
             _route_source(
                 "downtown_high_red_coins",
                 "Two high Downtown red coins",
                 4,
-                has_water_level_diamond and has_red_coins and can_reach_high_red_coins,
+                has_downtown and has_water_level_diamond and has_red_coins and can_reach_high_red_coins,
                 red_coin_ids=frozenset({7, 8}),
             ),
         ]
@@ -2593,6 +2608,8 @@ def wet_dry_world_coin_evaluation(
         maximum=152,
     )
     if any(
+            route.available
+            and
             frozenset().union(*(
                 child.red_coin_ids for child in route.children if child.available
             ))
@@ -2691,7 +2708,6 @@ def tiny_huge_island_coin_evaluation(
         f"{level_name} - Coins Star",
     )
     permanent = rules.permanent_coin_collection_enabled(state, player)
-
     def giant_goomba_coins(count: int) -> int:
         return count * (5 if has_ground_pound else 1)
 
@@ -2707,7 +2723,8 @@ def tiny_huge_island_coin_evaluation(
                 red_coin_ids: frozenset[int] = frozenset(),
         ) -> None:
             children.append(_route_source(
-                source_id, label, value, available, red_coin_ids=red_coin_ids))
+                source_id, label, value, available,
+                red_coin_ids=red_coin_ids))
             if available and value:
                 sources[source_id] = value
 
@@ -2750,7 +2767,7 @@ def tiny_huge_island_coin_evaluation(
 
         add_source(
             "tiny_start_goomba",
-            "Small Goomba at Tiny Island start",
+            "Small Goomba in the starting Tiny region",
             1,
             start_tiny and has_tiny_start and has_goombas,
         )
@@ -2957,7 +2974,7 @@ def tiny_huge_island_coin_evaluation(
             ),
             _route_source(
                 "tiny_start_goomba",
-                "Small Goomba beyond the Warp Pipe at Tiny Island start",
+                "Small Goomba in the starting Tiny region",
                 1,
                 not start_tiny and has_warp_pipes and has_goombas,
             ),
@@ -3989,7 +4006,25 @@ def bowser_in_the_sky_coins(
     return trace.evaluation()
 
 
-COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
+def _with_coin_rule_context(
+        course_name: str,
+        evaluator: CoinTraceEvaluator,
+) -> CoinTraceEvaluator:
+    def evaluate(
+            state: CollectionState,
+            player: int,
+            required_coins: int,
+    ) -> CoinEvaluation:
+        token = _coin_rule_context.set((state, player, course_name))
+        try:
+            return evaluator(state, player, required_coins)
+        finally:
+            _coin_rule_context.reset(token)
+
+    return evaluate
+
+
+_RAW_COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
     "Bob-omb Battlefield": evaluate_bob_omb_battlefield_coins,
     "Whomp's Fortress": evaluate_whomps_fortress_coins,
     "Jolly Roger Bay": evaluate_jolly_roger_bay_coins,
@@ -4015,3 +4050,1308 @@ COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
     "Bowser in the Fire Sea": bowser_in_the_fire_sea_coins,
     "Bowser in the Sky": bowser_in_the_sky_coins,
 }
+
+COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
+    course_name: _with_coin_rule_context(course_name, evaluator)
+    for course_name, evaluator in _RAW_COIN_EVALUATORS.items()
+}
+
+
+CoinSourceRuleSpec = dict[str, Any]
+
+
+_TOKEN_ALIASES = {
+    "BOB_OMBS": "BOBOMBS",
+    "THI_PURPLE_SWITCHES": "PURPLE_SWITCHES",
+    "THI_WARP_PIPES": "WARP_PIPES",
+    "TTM_PURPLE_SWITCHES": "PURPLE_SWITCHES",
+    "WDW_PURPLE_SWITCHES": "PURPLE_SWITCHES",
+}
+
+_EXPLANATION_ONLY_UNLOCKS = {
+    "BLUE_COIN_BLOCKS": ("Blue Coin Blocks", "Blue Coin Block"),
+    "BREAKABLE_COIN_BOXES": ("Breakable Coin Boxes", "Breakable Coin Box"),
+    "CHUCKYA": ("Chuckyas", "Chuckya"),
+    "CRAZY_BOXES": ("Crazy Boxes", "Crazy Box"),
+    "GOOMBAS": ("Goombas", "Goombas"),
+    "LAKITU": ("Lakitus", "Lakitu"),
+    "SINGLE_BLUE_COINS": ("Single Blue Coins", "Single Blue Coins"),
+    "SKEETERS": ("Skeeters", "Skeeters"),
+}
+
+
+def _early_requirement_specs():
+    """Rule Builder requirement specifications for the first five course coin evaluators.
+
+    This is intentionally data-only scaffolding.  ``rule`` contains the non-object
+    requirements from CoinLogic, while ``unlocks`` contains the object/enemy unlock
+    families that must be resolved with HasUnlock.
+    """
+
+
+
+    UnlockPair = tuple[str, str]
+    RequirementSpec = dict[str, str | tuple[UnlockPair, ...]]
+
+
+    def _spec(target: str, rule: str = "", *unlocks: UnlockPair) -> RequirementSpec:
+        return {"rule": rule, "target": target, "unlocks": unlocks}
+
+
+    BOB = "Bob-omb Battlefield"
+    BOB_TARGET = f"{BOB} - Coins Star"
+    WF = "Whomp's Fortress"
+    WF_TARGET = f"{WF} - Coins Star"
+    JRB = "Jolly Roger Bay"
+    JRB_TARGET = f"{JRB} - Coins Star"
+    CCM = "Cool, Cool Mountain"
+    CCM_TARGET = f"{CCM} - Coins Star"
+    BBH = "Big Boo's Haunt"
+    BBH_TARGET = f"{BBH} - Coins Star"
+
+
+    COIN_REQUIREMENT_SPECS: dict[tuple[str, str], RequirementSpec] = {
+        # Bob-omb Battlefield
+        (BOB, "start_breakable_coin_box"): _spec(
+            BOB_TARGET, "", ("Breakable Coin Boxes", f"{BOB} - Breakable Coin Box")),
+        (BOB, "start_throwable_cork_boxes"): _spec(
+            BOB_TARGET, "", ("Throwable Cork Boxes", f"{BOB} - Throwable Cork Boxes")),
+        (BOB, "main_horizontal_coin_lines"): _spec(
+            BOB_TARGET, "", ("Horizontal Coin Lines", f"{BOB} - Horizontal Coin Lines")),
+        (BOB, "main_wooden_posts"): _spec(
+            BOB_TARGET, "", ("Wooden Posts", f"{BOB} - Wooden Posts")),
+        (BOB, "flowerbed_coin_ring"): _spec(
+            BOB_TARGET, "", ("Horizontal Coin Rings", f"{BOB} - Horizontal Coin Rings")),
+        (BOB, "main_bob_ombs"): _spec(
+            BOB_TARGET, "", ("Bob-ombs", f"{BOB} - Bob-ombs")),
+        (BOB, "main_goombas"): _spec(BOB_TARGET, "", ("Goombas", f"{BOB} - Goombas")),
+        (BOB, "main_red_coins"): _spec(BOB_TARGET, "", ("Red Coins", f"{BOB} - Red Coins")),
+        (BOB, "main_koopa_troopa"): _spec(
+            BOB_TARGET, "", ("Koopa Troopas", f"{BOB} - Koopa Troopa")),
+        (BOB, "island_first_ring_easy_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}}",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+
+        (BOB, "island_without_cannon_route"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & logic_bob_mario_wings_to_the_sky_without_cannon"),
+        (BOB, "island_full_trick_vertical_ring_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & logic_bob_mario_wings_to_the_sky_without_cannon",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+        (BOB, "island_full_trick_ring_center_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & logic_bob_mario_wings_to_the_sky_without_cannon",
+            ("Single Yellow Coins", f"{BOB} - Single Yellow Coins")),
+        (BOB, "island_full_trick_red_coin"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & logic_bob_mario_wings_to_the_sky_without_cannon",
+            ("Red Coins", f"{BOB} - Red Coins")),
+
+        (BOB, "island_cannon_route"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}"),
+        (BOB, "island_cannon_vertical_ring_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+        (BOB, "island_cannon_ring_center_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
+            ("Single Yellow Coins", f"{BOB} - Single Yellow Coins")),
+        (BOB, "island_cannon_red_coin"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
+            ("Red Coins", f"{BOB} - Red Coins")),
+
+        # The evaluator selects this route only when neither complete route is available.
+        # RuleFactory has no NOT operator, so that route-selection exclusion remains runtime logic.
+        (BOB, "island_partial_route"): _spec(BOB_TARGET, f"{{{BOB} - Island}}"),
+        (BOB, "island_partial_flight_ring_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & WC & TJ",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+        (BOB, "island_partial_flight_center_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & WC & TJ",
+            ("Single Yellow Coins", f"{BOB} - Single Yellow Coins")),
+        (BOB, "island_partial_red_coin"): _spec(
+            BOB_TARGET,
+            f"{{{BOB} - Island}} & CL/SF/BF/TJ | "
+            f"{{{BOB} - Island}} & logic_bob_island_red_coin_with_ground_pound | "
+            f"{{{BOB} - Island}} & logic_bob_island_koopa_shell",
+            ("Red Coins", f"{BOB} - Red Coins")),
+        (BOB, "island_partial_first_ring_three_coins"): _spec(
+            BOB_TARGET,
+            f"{{{BOB} - Island}} & SF/BF/TJ | "
+            f"{{{BOB} - Island}} & logic_bob_island_red_coin_with_ground_pound",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+        (BOB, "island_partial_first_ring_two_coins"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & SF/BF/TJ",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+        (BOB, "island_partial_triple_jump_coin"): _spec(
+            BOB_TARGET, f"{{{BOB} - Island}} & TJ",
+            ("Single Yellow Coins", f"{BOB} - Single Yellow Coins")),
+
+        # Whomp's Fortress
+        (WF, "start_throwable_cork_boxes"): _spec(
+            WF_TARGET, "", ("Throwable Cork Boxes", f"{WF} - Throwable Cork Boxes")),
+        (WF, "start_flower_coin_ring"): _spec(
+            WF_TARGET, "", ("Horizontal Coin Rings", f"{WF} - Horizontal Coin Rings")),
+        (WF, "start_coin_line"): _spec(
+            WF_TARGET, "", ("Horizontal Coin Lines", f"{WF} - Horizontal Coin Lines")),
+        (WF, "falling_bridge_coin_line"): _spec(
+            WF_TARGET, "", ("Horizontal Coin Lines", f"{WF} - Horizontal Coin Lines")),
+        (WF, "rotating_plank_coins"): _spec(
+            WF_TARGET, "", ("Single Yellow Coins", f"{WF} - Single Yellow Coins")),
+        (WF, "water_slope_coin_line"): _spec(
+            WF_TARGET, "", ("Horizontal Coin Lines", f"{WF} - Horizontal Coin Lines")),
+        (WF, "water_coin_ring"): _spec(
+            WF_TARGET, "", ("Horizontal Coin Rings", f"{WF} - Horizontal Coin Rings")),
+        (WF, "buddy_coin_line"): _spec(
+            WF_TARGET, "", ("Horizontal Coin Lines", f"{WF} - Horizontal Coin Lines")),
+        (WF, "whomp_jump_coins"): _spec(WF_TARGET, "", ("Whomps", f"{WF} - Whomps")),
+        (WF, "piranha_plant_coins"): _spec(
+            WF_TARGET, "", (f"{WF} - Piranha Plants", f"{WF} - Piranha Plants")),
+        (WF, "initial_red_coins"): _spec(WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins")),
+        (WF, "thwomp_red_coin"): _spec(
+            WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins"), ("Thwomp", f"{WF} - Thwomp")),
+        (WF, "wild_blue_route"): _spec(
+            WF_TARGET,
+            "CANN | logic_wf_into_the_wild_blue_yonder_wall_kick | "
+            "logic_wf_into_the_wild_blue_yonder_long_jump | "
+            "logic_wf_into_the_wild_blue_yonder_moveless & CL | "
+            "logic_wf_into_the_wild_blue_yonder_moveless & SF | "
+            "logic_wf_into_the_wild_blue_yonder_moveless & TJ+LG"),
+        (WF, "wild_blue_coin_ring"): _spec(
+            WF_TARGET,
+            "CANN | logic_wf_into_the_wild_blue_yonder_wall_kick | "
+            "logic_wf_into_the_wild_blue_yonder_long_jump | "
+            "logic_wf_into_the_wild_blue_yonder_moveless & CL | "
+            "logic_wf_into_the_wild_blue_yonder_moveless & SF | "
+            "logic_wf_into_the_wild_blue_yonder_moveless & TJ+LG",
+            ("Horizontal Coin Rings", f"{WF} - Horizontal Coin Rings")),
+        (WF, "ground_pound_sources"): _spec(WF_TARGET, "GP"),
+        (WF, "whomp_ground_pound_coins"): _spec(
+            WF_TARGET, "GP", ("Whomps", f"{WF} - Whomps")),
+        (WF, "blue_coin_block"): _spec(
+            WF_TARGET, "GP", ("Blue Coin Blocks", f"{WF} - Blue Coin Block")),
+        (WF, "top_region_sources"): _spec(WF_TARGET, f"{{{WF} - Top}}"),
+        (WF, "top_floating_isle_ring"): _spec(
+            WF_TARGET, f"{{{WF} - Top}}", ("Horizontal Coin Rings", f"{WF} - Horizontal Coin Rings")),
+        (WF, "top_floating_arrow"): _spec(
+            WF_TARGET, f"{{{WF} - Top}}", ("Coin Arrows", f"{WF} - Coin Arrows")),
+        (WF, "top_red_coins"): _spec(
+            WF_TARGET, f"{{{WF} - Top}}", ("Red Coins", f"{WF} - Red Coins")),
+
+        # Jolly Roger Bay
+        (JRB, "start_three_coin_block"): _spec(
+            JRB_TARGET, "", ("3-Coin Blocks", f"{JRB} - 3-Coin Block")),
+        (JRB, "clam_vertical_coin_ring"): _spec(
+            JRB_TARGET, "", ("Vertical Coin Rings", f"{JRB} - Vertical Coin Rings")),
+        (JRB, "tall_spike_coin_ring"): _spec(
+            JRB_TARGET, "", ("Horizontal Coin Rings", f"{JRB} - Horizontal Coin Rings")),
+        (JRB, "purple_switch_lower_coin_line"): _spec(
+            JRB_TARGET, "", ("Vertical Coin Lines", f"{JRB} - Vertical Coin Lines")),
+        (JRB, "jet_stream_coin_ring"): _spec(
+            JRB_TARGET, "", ("Horizontal Coin Rings", f"{JRB} - Horizontal Coin Rings")),
+        (JRB, "cave_chest_coin_ring"): _spec(
+            JRB_TARGET, "", ("Horizontal Coin Rings", f"{JRB} - Horizontal Coin Rings")),
+        (JRB, "main_goombas"): _spec(JRB_TARGET, "", ("Goombas", f"{JRB} - Goombas")),
+        (JRB, "lower_red_coins"): _spec(JRB_TARGET, "", ("Red Coins", f"{JRB} - Red Coins")),
+        (JRB, "pillar_red_coin_route"): _spec(
+            JRB_TARGET, "CL | logic_jrb_pillar_red_coin_moves | logic_jrb_pillar_red_coin_cannon"),
+        (JRB, "pillar_red_coin"): _spec(
+            JRB_TARGET, "CL | logic_jrb_pillar_red_coin_moves | logic_jrb_pillar_red_coin_cannon",
+            ("Red Coins", f"{JRB} - Red Coins")),
+        (JRB, "upper_region_sources"): _spec(JRB_TARGET, f"{{{JRB} - Upper}}"),
+        (JRB, "purple_switch_upper_coin_line"): _spec(
+            JRB_TARGET, f"{{{JRB} - Upper}}", ("Vertical Coin Lines", f"{JRB} - Vertical Coin Lines")),
+        (JRB, "raised_ship_approach_coin_lines"): _spec(
+            JRB_TARGET, f"{{{JRB} - Upper}}",
+            ("Horizontal Coin Lines", f"{JRB} - Horizontal Coin Lines")),
+        (JRB, "raised_ship_red_coins"): _spec(
+            JRB_TARGET, f"{{{JRB} - Upper}} & JRB_RAISED_SHIP",
+            ("Red Coins", f"{JRB} - Red Coins")),
+        # This source additionally requires Raised Ship to be absent. RuleFactory cannot express NOT.
+        (JRB, "ship_alternative_red_coin"): _spec(
+            JRB_TARGET,
+            f"{{{JRB} - Upper}} & logic_jrb_ship_red_coin_with_long_jump | "
+            f"{{{JRB} - Upper}} & PURPLE_SWITCHES",
+            ("Red Coins", f"{JRB} - Red Coins")),
+        (JRB, "blue_coin_block"): _spec(
+            JRB_TARGET, "GP", ("Blue Coin Blocks", f"{JRB} - Blue Coin Block")),
+
+        # Cool, Cool Mountain
+        (CCM, "penguin_slide_yellow_coins"): _spec(
+            CCM_TARGET, "", ("Single Yellow Coins", f"{CCM} - Single Yellow Coins")),
+        (CCM, "penguin_slide_coin_lines"): _spec(
+            CCM_TARGET, "", ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
+        (CCM, "chimney_vertical_coin_line"): _spec(
+            CCM_TARGET, "", ("Vertical Coin Lines", f"{CCM} - Vertical Coin Lines")),
+        (CCM, "main_mountain_coin_lines"): _spec(
+            CCM_TARGET, "", ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
+        (CCM, "standard_mr_blizzard"): _spec(
+            CCM_TARGET, "", ("Mr Blizzards", f"{CCM} - Mr Blizzards")),
+        (CCM, "main_spindrifts"): _spec(CCM_TARGET, "", ("Spindrifts", f"{CCM} - Spindrifts")),
+        (CCM, "red_coins"): _spec(CCM_TARGET, "", ("Red Coins", f"{CCM} - Red Coins")),
+        (CCM, "slide_blue_coin"): _spec(
+            CCM_TARGET, "", ("Single Blue Coins", f"{CCM} - Single Blue Coin")),
+        (CCM, "wall_kicks_route"): _spec(
+            CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump"),
+        (CCM, "wall_kicks_coin_arrow"): _spec(
+            CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump",
+            ("Coin Arrows", f"{CCM} - Coin Arrows")),
+        (CCM, "wall_kicks_spindrifts"): _spec(
+            CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump",
+            ("Spindrifts", f"{CCM} - Spindrifts")),
+        # This synthetic loss also requires: no Cannon, no Permanent Coins, and the Spin Jump route.
+        # Those negative/option predicates cannot be represented by a RuleFactory expression.
+        (CCM, "wall_kicks_spindrift_route_loss"): _spec(
+            CCM_TARGET, "logic_ccm_wall_kicks_will_work_spin_jump",
+            ("Spindrifts", f"{CCM} - Spindrifts")),
+        (CCM, "blue_coin_block"): _spec(
+            CCM_TARGET, "GP", ("Blue Coin Blocks", f"{CCM} - Blue Coin Block")),
+
+        # Big Boo's Haunt
+        (BBH, "mansion_ten_coin_block"): _spec(
+            BBH_TARGET, "", ("10-Coin Blocks", f"{BBH} - 10-Coin Block")),
+        (BBH, "shed_breakable_coin_boxes"): _spec(
+            BBH_TARGET, "", ("Breakable Coin Boxes", f"{BBH} - Breakable Coin Boxes")),
+        (BBH, "outside_crazy_box"): _spec(BBH_TARGET, "", ("Crazy Boxes", f"{BBH} - Crazy Box")),
+        (BBH, "outside_scuttlebugs"): _spec(
+            BBH_TARGET, "", ("Scuttlebugs", f"{BBH} - Scuttlebugs")),
+        (BBH, "main_boos"): _spec(BBH_TARGET, "", ("Boos", f"{BBH} - Boos")),
+        (BBH, "main_mr_is"): _spec(BBH_TARGET, "", ("Mr. Is", f"{BBH} - Mr. Is")),
+        (BBH, "main_bookend"): _spec(
+            BBH_TARGET, "", (f"{BBH} - Flying Bookends", f"{BBH} - Flying Bookends")),
+        (BBH, "first_floor_red_coins"): _spec(
+            BBH_TARGET, "", ("Red Coins", f"{BBH} - Red Coins")),
+        (BBH, "second_floor_sources"): _spec(BBH_TARGET, f"{{{BBH} - Second Floor}}"),
+        (BBH, "second_floor_bookends"): _spec(
+            BBH_TARGET, f"{{{BBH} - Second Floor}}",
+            (f"{BBH} - Flying Bookends", f"{BBH} - Flying Bookends")),
+        (BBH, "second_floor_mr_i"): _spec(
+            BBH_TARGET, f"{{{BBH} - Second Floor}}", ("Mr. Is", f"{BBH} - Mr. Is")),
+        (BBH, "second_floor_red_coins"): _spec(
+            BBH_TARGET, f"{{{BBH} - Second Floor}}", ("Red Coins", f"{BBH} - Red Coins")),
+        (BBH, "second_floor_movement_red_coin"): _spec(
+            BBH_TARGET, f"{{{BBH} - Second Floor}} & TJ/WK/BF/SF",
+            ("Red Coins", f"{BBH} - Red Coins")),
+        (BBH, "third_floor_sources"): _spec(BBH_TARGET, f"{{{BBH} - Third Floor}}"),
+        (BBH, "third_floor_boo"): _spec(
+            BBH_TARGET, f"{{{BBH} - Third Floor}}", ("Boos", f"{BBH} - Boos")),
+        (BBH, "attic_blue_coin_block"): _spec(
+            BBH_TARGET, f"{{{BBH} - Third Floor}} & GP",
+            ("Blue Coin Blocks", f"{BBH} - Blue Coin Block")),
+        # This synthetic loss additionally requires no normal/Wall Kick route, No Despawns off,
+        # Permanent Coins off, and the Bookend route. RuleFactory cannot encode those negatives.
+        (BBH, "bookend_third_floor_route_loss"): _spec(
+            BBH_TARGET, f"{{{BBH} - Third Floor}} & logic_bbh_third_floor_side_flip",
+            (f"{BBH} - Flying Bookends", f"{BBH} - Flying Bookends")),
+        (BBH, "merry_go_round_boos"): _spec(
+            BBH_TARGET, "BBH_MERRY_GO_ROUND", ("Boos", f"{BBH} - Boos")),
+    }
+    return COIN_REQUIREMENT_SPECS
+
+
+def _middle_requirement_specs():
+    """RuleBuilder requirements for the middle group of course coin evaluators.
+
+    This module is intentionally data-only.  ``unlocks`` contains global/per-level
+    item-name pairs which are ANDed with ``rule`` by the eventual consumer.
+    """
+
+
+
+    UnlockPair = tuple[str, str]
+    CoinRequirementSpec = dict[str, str | tuple[UnlockPair, ...]]
+
+    COIN_REQUIREMENT_SPECS: dict[tuple[str, str], CoinRequirementSpec] = {}
+
+
+    def _add(
+            course: str,
+            source_ids: str | tuple[str, ...],
+            rule: str = "",
+            unlocks: tuple[UnlockPair, ...] = (),
+    ) -> None:
+        if isinstance(source_ids, str):
+            source_ids = (source_ids,)
+        target = f"{course} - Coins Star"
+        for source_id in source_ids:
+            COIN_REQUIREMENT_SPECS[(course, source_id)] = {
+                "rule": rule,
+                "target": target,
+                "unlocks": unlocks,
+            }
+
+
+    def _unlock(global_name: str, course: str, per_level_name: str | None = None) -> UnlockPair:
+        return global_name, per_level_name or f"{course} - {global_name}"
+
+
+    # Hazy Maze Cave
+    HMC = "Hazy Maze Cave"
+    HMC_BASIC = "WK/LG/BF/SF/TJ"
+    HMC_PLATFORM = (
+        f"{HMC_BASIC} & CL | "
+        "logic_hmc_upper_red_coin_area_wall_kick"
+    )
+    HMC_PLATFORM_CHECKERBOARDS = (
+        f"{HMC_BASIC} & CL & CHECKERBOARD_PLATFORMS | "
+        "logic_hmc_upper_red_coin_area_wall_kick"
+    )
+
+    _add(HMC, ("start_coin_line", "maze_entrance_coin_line"),
+         unlocks=(_unlock("Horizontal Coin Lines", HMC),))
+    _add(HMC, "rolling_rocks_coins", unlocks=(_unlock("Single Yellow Coins", HMC),))
+    _add(HMC, ("lake_approach_coin_ring",),
+         unlocks=(_unlock("Horizontal Coin Rings", HMC),))
+    _add(HMC, ("first_room_scuttlebugs", "pit_room_scuttlebug", "red_coin_room_scuttlebugs"),
+         unlocks=(_unlock("Scuttlebugs", HMC),))
+    _add(HMC, ("pit_room_swoop", "toxic_maze_swoops"),
+         unlocks=(_unlock("Swoops", HMC),))
+    _add(HMC, "toxic_maze_snufits", unlocks=(_unlock("Snufits", HMC),))
+    _add(HMC, "basic_movement_sources", HMC_BASIC)
+    _add(HMC, "lower_red_coin_room_coins", HMC_BASIC,
+         (_unlock("Red Coins", HMC),))
+    _add(HMC, "red_coin_room_mr_is", HMC_BASIC, (_unlock("Mr. Is", HMC),))
+    _add(HMC, "pit_island_room_swoops", HMC_BASIC, (_unlock("Swoops", HMC),))
+    _add(HMC, "upper_red_coin_pair_first",
+         f"{HMC_BASIC} & CL & LJ/CHECKERBOARD_PLATFORMS | "
+         "logic_hmc_upper_red_coin_area_wall_kick",
+         (_unlock("Red Coins", HMC),))
+    _add(HMC, "upper_red_coin_pair_checkerboards",
+         HMC_PLATFORM_CHECKERBOARDS,
+         (_unlock("Red Coins", HMC),))
+    _add(HMC, "upper_red_coin_swoops",
+         HMC_PLATFORM_CHECKERBOARDS,
+         (_unlock("Swoops", HMC),))
+    _add(HMC, "pit_islands_ceiling_coin_line", f"{{{HMC} - Pit Islands}} & CL",
+         (_unlock("Horizontal Coin Lines", HMC),))
+    _add(HMC, "swimming_beast_coin_ring", "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
+         (_unlock("Horizontal Coin Rings", HMC),))
+    _add(HMC, "navigating_toxic_maze_sources", f"{{{{{HMC} - Navigating the Toxic Maze}}}}")
+    _add(HMC, "toxic_maze_star_coin_line", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
+         (_unlock("Horizontal Coin Lines", HMC),))
+    _add(HMC, "toxic_maze_exit_swoops", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
+         (_unlock("Swoops", HMC),))
+    _add(HMC, "metal_head_scuttlebug",
+         "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_coin_route_capless",
+         (_unlock("Scuttlebugs", HMC),))
+    _add(HMC, "toxic_maze_blue_coin_block", "GP",
+         (_unlock("Blue Coin Blocks", HMC, f"{HMC} - Blue Coin Block"),))
+
+
+    # Lethal Lava Land
+    LLL = "Lethal Lava Land"
+    LLL_RED_ROUTE = "BOWSER_PUZZLE | LLL_KOOPA_SHELL | logic_lava_damage_boosting"
+    LLL_HEALING = "SINGLE_YELLOW_COINS/HORIZONTAL_COIN_LINES/HORIZONTAL_COIN_RINGS/BULLIES/MR_IS"
+
+    _add(LLL, (
+        "lll_tilting_platform_coin_line", "lll_first_big_bully_coin_line",
+        "lll_northwest_ramp_coin_line", "lll_north_volcano_coin_line",
+        "lll_volcano_first_ridge_coin_line", "lll_volcano_second_bully_coin_line",
+    ), unlocks=(_unlock("Horizontal Coin Lines", LLL),))
+    _add(LLL, (
+        "lll_grey_ramp_coins", "lll_sinking_platform_coins",
+        "lll_spinning_volcano_platform_coins", "lll_southeast_grey_ramp_coins",
+        "lll_volcano_s_island_coins", "lll_volcano_second_ridge_coins",
+        "lll_volcano_floating_platform_coins", "lll_volcano_post_platform_coin",
+        "lll_volcano_checkerboard_lift_coin",
+    ), unlocks=(_unlock("Single Yellow Coins", LLL),))
+    _add(LLL, "lll_bowser_puzzle_coins",
+         unlocks=((f"{LLL} - Bowser Puzzle", f"{LLL} - Bowser Puzzle"),))
+    _add(LLL, (
+        "lll_second_big_bully_coin_ring", "lll_two_bullies_coin_ring",
+        "lll_second_mr_i_coin_ring",
+    ), unlocks=(_unlock("Horizontal Coin Rings", LLL),))
+    _add(LLL, "lll_crazy_box_coins", unlocks=(_unlock("Crazy Boxes", LLL, f"{LLL} - Crazy Box"),))
+    _add(LLL, "lll_first_five_red_coins", LLL_RED_ROUTE, (_unlock("Red Coins", LLL),))
+    _add(LLL, "lll_remaining_three_red_coins",
+         f"BOWSER_PUZZLE | LLL_KOOPA_SHELL & {LLL_HEALING} | "
+         f"logic_lava_damage_boosting & {LLL_HEALING}",
+         (_unlock("Red Coins", LLL),))
+    _add(LLL, "lll_outside_bullies", unlocks=(_unlock("Bullies", LLL),))
+    _add(LLL, "lll_mr_is", unlocks=(_unlock("Mr. Is", LLL),))
+    _add(LLL, "lll_under_bridge_coin_line", "LLL_KOOPA_SHELL | logic_lava_damage_boosting",
+         (_unlock("Single Yellow Coins", LLL),))
+    _add(LLL, "lll_volcano_bullies", unlocks=(_unlock("Bullies", LLL),))
+    _add(LLL, "lll_elevator_tour_platform_coins",
+         f"{{{{{LLL} - Elevator Tour in the Volcano}}}}",
+         (_unlock("Single Yellow Coins", LLL),))
+
+    # Zero-coin route/group traces used as nested explanation nodes.
+    _add(LLL, "lll_red_coin_unlock", unlocks=(_unlock("Red Coins", LLL),))
+    _add(LLL, "lll_red_coin_bowser_puzzle_route",
+         unlocks=((f"{LLL} - Bowser Puzzle", f"{LLL} - Bowser Puzzle"),))
+    _add(LLL, "lll_red_coin_koopa_shell_route", "LLL_KOOPA_SHELL")
+    _add(LLL, ("lll_red_coin_lava_damage_boosting_route",
+               "lll_under_bridge_lava_damage_boosting_route"), "logic_lava_damage_boosting")
+    _add(LLL, "lll_red_coin_healing_source", LLL_HEALING)
+    _add(LLL, "lll_under_bridge_koopa_shell_route", "LLL_KOOPA_SHELL")
+    _add(LLL, "lll_elevator_tour_location_access",
+         f"{{{{{LLL} - Elevator Tour in the Volcano}}}}")
+
+
+    # Shifting Sand Land
+    SSL = "Shifting Sand Land"
+    _add(SSL, "ssl_throwable_cork_box",
+         unlocks=(_unlock("Throwable Cork Boxes", SSL, f"{SSL} - Throwable Cork Box"),))
+    _add(SSL, "ssl_pillar_and_pyramid_coins", unlocks=(_unlock("Single Yellow Coins", SSL),))
+    _add(SSL, ("ssl_behind_pyramid_coin_line", "ssl_pyramid_side_coin_line"),
+         unlocks=(_unlock("Horizontal Coin Lines", SSL),))
+    _add(SSL, "ssl_fly_guys", unlocks=(_unlock("Fly Guys", SSL, f"{SSL} - Fly Guy"),))
+    _add(SSL, "ssl_crazy_boxes", unlocks=(_unlock("Crazy Boxes", SSL),))
+    _add(SSL, "ssl_bob_ombs", unlocks=(_unlock("Bob-ombs", SSL),))
+    _add(SSL, "ssl_pokeys", unlocks=(_unlock("Pokeys", SSL),))
+    _add(SSL, "ssl_goombas", unlocks=(_unlock("Goombas", SSL),))
+    _add(SSL, "ssl_low_red_coins", unlocks=(_unlock("Red Coins", SSL),))
+    _add(SSL, "ssl_first_wire_grid_coin_ring", "CL",
+         (_unlock("Horizontal Coin Rings", SSL),))
+    _add(SSL, "ssl_first_wire_grid_climb", "CL")
+
+    SSL_NORMAL_HIGH = "WC & TJ/CANN"
+    SSL_TWEESTER = "logic_ssl_three_red_coins_with_tweesters"
+    SSL_SHY_GUY = "logic_ssl_one_red_coin_with_shy_guy_spin_jump"
+    _add(SSL, "ssl_high_red_coins",
+         f"{SSL_NORMAL_HIGH} | {SSL_TWEESTER} | {SSL_SHY_GUY}",
+         (_unlock("Red Coins", SSL),))
+    _add(SSL, "ssl_normal_high_red_coin_route", SSL_NORMAL_HIGH,
+         (_unlock("Red Coins", SSL),))
+    _add(SSL, "ssl_tweester_red_coin_route", SSL_TWEESTER,
+         (_unlock("Red Coins", SSL),))
+    _add(SSL, "ssl_shy_guy_red_coin_route", SSL_SHY_GUY,
+         (_unlock("Red Coins", SSL),))
+    # No Despawns controls whether this reachable Red Coin contributes its two coins;
+    # it is an option predicate and cannot be represented by a RuleFactory expression.
+    _add(SSL, "ssl_shy_guy_red_coin_no_despawns")
+
+    _add(SSL, "ssl_upper_pyramid_access_for_lines", f"{{{SSL} - Upper Pyramid}}")
+    _add(SSL, ("ssl_second_wire_grid_coin_line", "ssl_pyramid_top_horizontal_coin_line"),
+         f"{{{SSL} - Upper Pyramid}}", (_unlock("Horizontal Coin Lines", SSL),))
+    _add(SSL, "ssl_pyramid_top_vertical_coin_line", f"{{{SSL} - Upper Pyramid}}",
+         (_unlock("Vertical Coin Lines", SSL),))
+    _add(SSL, "ssl_upper_pyramid_single_coins", f"{{{SSL} - Upper Pyramid}}",
+         (_unlock("Single Yellow Coins", SSL),))
+    _add(SSL, "ssl_upper_pyramid_access_for_singles", f"{{{SSL} - Upper Pyramid}}")
+    _add(SSL, "ssl_blue_coin_block", "GP",
+         (_unlock("Blue Coin Blocks", SSL, f"{SSL} - Blue Coin Block"),))
+    _add(SSL, "ssl_blue_coin_block_ground_pound", "GP")
+
+
+    # Dire, Dire Docks
+    DDD = "Dire, Dire Docks"
+    _add(DDD, ("ddd_start_wall_coin_line", "ddd_sub_area_dock_coin_line"),
+         unlocks=(_unlock("Horizontal Coin Lines", DDD),))
+    _add(DDD, ("ddd_chest_and_current_coin_lines", "ddd_moat_exit_coin_line"),
+         unlocks=(_unlock("Vertical Coin Lines", DDD),))
+    _add(DDD, "ddd_seafloor_chest_coins", unlocks=(_unlock("Single Yellow Coins", DDD),))
+    _add(DDD, "ddd_sub_area_coin_rings", unlocks=(_unlock("Vertical Coin Rings", DDD),))
+    _add(DDD, "ddd_seafloor_clam_coin_ring", unlocks=(_unlock("Horizontal Coin Rings", DDD),))
+
+    DDD_FIRST_RED_ROUTE = "PURPLE_SWITCHES | DDD_BOWSER_SUB & DDD_POLES & CL & TJ"
+    _add(DDD, "ddd_first_red_coin", DDD_FIRST_RED_ROUTE, (_unlock("Red Coins", DDD),))
+    _add(DDD, "ddd_remaining_red_coins",
+         "PURPLE_SWITCHES & DDD_POLES & CL | DDD_BOWSER_SUB & DDD_POLES & CL & TJ",
+         (_unlock("Red Coins", DDD),))
+    _add(DDD, "ddd_red_coin_purple_switch_route", "PURPLE_SWITCHES")
+    _add(DDD, "ddd_red_coin_sub_poles_movement_route", "DDD_BOWSER_SUB & DDD_POLES & CL & TJ")
+    _add(DDD, "ddd_remaining_red_coin_poles", "DDD_POLES")
+    _add(DDD, "ddd_remaining_red_coin_climb", "CL")
+    _add(DDD, "ddd_blue_coin_block", "PURPLE_SWITCHES & DDD_POLES & CL & GP",
+         (_unlock("Blue Coin Blocks", DDD, f"{DDD} - Blue Coin Block"),))
+    _add(DDD, "ddd_blue_coin_block_purple_switches", "PURPLE_SWITCHES")
+    _add(DDD, "ddd_blue_coin_block_poles", "DDD_POLES")
+    _add(DDD, "ddd_blue_coin_block_climb", "CL")
+    _add(DDD, "ddd_blue_coin_block_ground_pound", "GP")
+
+
+    # Snowman's Land
+    SL = "Snowman's Land"
+    _add(SL, "sl_start_coins", unlocks=(_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_spindrifts", unlocks=(_unlock("Spindrifts", SL),))
+    _add(SL, "sl_start_mr_blizzards", unlocks=(_unlock("Mr Blizzards", SL),))
+    _add(SL, "sl_moneybags",
+         unlocks=((f"{SL} - Moneybags", f"{SL} - Moneybags"),))
+    _add(SL, "sl_fly_guy", unlocks=(_unlock("Fly Guys", SL, f"{SL} - Fly Guy"),))
+    _add(SL, "sl_whirl_red_coins", f"{{{SL} - Whirl from the Freezing Pond}}",
+         (_unlock("Red Coins", SL),))
+    _add(SL, "sl_whirl_region_access_for_red_coins", f"{{{SL} - Whirl from the Freezing Pond}}")
+
+    # Exact evaluator condition is Whirl & Mr. Blizzard & (Cannon | No Despawns).
+    # RuleFactory cannot express the No Despawns option predicate.  Requiring Cannon
+    # here would produce a false missing requirement when No Despawns is the route,
+    # so the shared portion is represented and the option-aware branch is left to
+    # the consumer.
+    _add(SL, "sl_whirl_mr_blizzard",
+         f"{{{SL} - Whirl from the Freezing Pond}}",
+         (_unlock("Mr Blizzards", SL),))
+    _add(SL, "sl_whirl_region_access_for_mr_blizzard", f"{{{SL} - Whirl from the Freezing Pond}}")
+    _add(SL, "sl_whirl_mr_blizzard_cannon_route", "CANN")
+    _add(SL, "sl_whirl_mr_blizzard_no_despawns_route")
+
+    _add(SL, "sl_upper_slope_coin_line", f"{{{SL} - Upper}}",
+         (_unlock("Horizontal Coin Lines", SL),))
+    _add(SL, ("sl_upper_slope_single_coins", "sl_penguin_and_face_coins"),
+         f"{{{SL} - Upper}}", (_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_upper_spindrifts", f"{{{SL} - Upper}}", (_unlock("Spindrifts", SL),))
+    _add(SL, "sl_upper_goombas", f"{{{SL} - Upper}}", (_unlock("Goombas", SL),))
+    _add(SL, "sl_upper_red_coins", f"{{{SL} - Upper}}", (_unlock("Red Coins", SL),))
+    _add(SL, "sl_snowman_head_plank_coins", f"{{{SL} - Top of Snowman's Head}}",
+         (_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_snowman_head_region_access", f"{{{SL} - Top of Snowman's Head}}")
+
+    _add(SL, "sl_igloo_frozen_coin_lines", "VC",
+         (_unlock("Horizontal Coin Lines", SL),))
+    _add(SL, "sl_igloo_single_coins",
+         unlocks=(_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_igloo_three_coin_block",
+         unlocks=(_unlock("3-Coin Blocks", SL, f"{SL} - 3-Coin Block"),))
+    _add(SL, "sl_igloo_route", f"{{{SL} - Igloo}}")
+    # Transition loss additionally depends on !Top, !Cannon, Spindrifts, !Permanent
+    # Coins, and the dynamically available Igloo total. Negation and option checks
+    # are outside RuleFactory's expression grammar.
+    _add(SL, "sl_igloo_transition_loss", f"{{{SL} - Igloo}}",
+         (_unlock("Spindrifts", SL),))
+
+    _add(SL, "sl_impossible_coin", "logic_sl_impossible_coin",
+         (_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_impossible_coin_trick", "logic_sl_impossible_coin")
+
+
+    del HMC, HMC_BASIC, HMC_PLATFORM, HMC_PLATFORM_CHECKERBOARDS
+    del LLL, LLL_RED_ROUTE, LLL_HEALING
+    del SSL, SSL_NORMAL_HIGH, SSL_TWEESTER, SSL_SHY_GUY
+    del DDD, DDD_FIRST_RED_ROUTE, SL
+    return COIN_REQUIREMENT_SPECS
+
+
+def _late_requirement_specs():
+    """Late coin-source requirements for structured CoinLogic explanations.
+
+    This module is intentionally data-only.  Rules are RuleFactory expressions and
+    ``unlocks`` contains the global/per-level item pair represented by each unlock
+    token.  Route-selection remains CoinLogic's responsibility: WDW selects the
+    best reachable entrance variant without Permanent Coins, while THI additionally
+    models one-use mountain ascents and terminal areas.
+    """
+
+
+    from typing import TypedDict
+
+
+    UnlockPair = tuple[str, str]
+
+
+    class CoinRequirementSpec(TypedDict):
+        rule: str
+        target: str
+        unlocks: tuple[UnlockPair, ...]
+
+
+    COIN_REQUIREMENT_SPECS: dict[tuple[str, str], CoinRequirementSpec] = {}
+
+
+    _UNLOCK_RULE_TOKENS = {
+        "Single Yellow Coins": "SINGLE_YELLOW_COINS",
+        "Red Coins": "RED_COINS",
+        "Single Blue Coins": "SINGLE_BLUE_COINS",
+        "Horizontal Coin Lines": "HORIZONTAL_COIN_LINES",
+        "Horizontal Coin Rings": "HORIZONTAL_COIN_RINGS",
+        "Vertical Coin Lines": "VERTICAL_COIN_LINES",
+        "Crazy Boxes": "CRAZY_BOXES",
+        "Breakable Coin Boxes": "BREAKABLE_COIN_BOXES",
+        "3-Coin Blocks": "THREE_COIN_BLOCKS",
+        "10-Coin Blocks": "TEN_COIN_BLOCKS",
+        "Blue Coin Blocks": "BLUE_COIN_BLOCKS",
+        "Wooden Posts": "WOODEN_POSTS",
+        "Bob-ombs": "BOB_OMBS",
+        "Chuckyas": "CHUCKYA",
+        "Fire Piranha Plants": "FIRE_PIRANHA_PLANTS",
+        "Fly Guys": "FLY_GUY",
+        "Goombas": "GOOMBAS",
+        "Koopa Troopas": "KOOPA_TROOPA",
+        "Lakitus": "LAKITU",
+        "Skeeters": "SKEETERS",
+    }
+
+
+    def _remove_unlock_tokens(rule: str, unlocks: tuple[UnlockPair, ...]) -> str:
+        """Keep object/enemy requirements in HasUnlock rather than RuleFactory."""
+        for global_name, _per_level_name in unlocks:
+            token = _UNLOCK_RULE_TOKENS[global_name]
+            if rule == token:
+                rule = ""
+            else:
+                rule = rule.replace(f"{token} & ", "").replace(f" & {token}", "")
+        return rule
+
+
+    def _add(course: str, source_id: str, rule: str, *unlocks: UnlockPair) -> None:
+        COIN_REQUIREMENT_SPECS[course, source_id] = {
+            "rule": _remove_unlock_tokens(rule, unlocks),
+            "target": f"{course} - Coins Star",
+            "unlocks": unlocks,
+        }
+
+
+    def _unlock(global_name: str, course: str, local_name: str | None = None) -> UnlockPair:
+        return global_name, f"{course} - {local_name or global_name}"
+
+
+    # Wet-Dry World
+    WDW = "Wet-Dry World"
+    _add(WDW, "wdw_low_variant", "{Wet-Dry World Low}")
+    _add(WDW, "wdw_mid_variant", "{Wet-Dry World Middle}")
+    _add(WDW, "wdw_highest_variant", "{Wet-Dry World High}")
+    _add(WDW, "main_skeeters", "SKEETERS", _unlock("Skeeters", WDW))
+    _add(WDW, "amp_ring", "HORIZONTAL_COIN_RINGS", _unlock("Horizontal Coin Rings", WDW))
+    _add(WDW, "pillar_ten_coin_block", "TEN_COIN_BLOCKS", _unlock("10-Coin Blocks", WDW))
+    _add(WDW, "push_block_three_coin_block", "THREE_COIN_BLOCKS", _unlock("3-Coin Blocks", WDW))
+    _add(WDW, "low_breakable_boxes", "{Wet-Dry World - Low Water} & BREAKABLE_COIN_BOXES",
+         _unlock("Breakable Coin Boxes", WDW))
+    _add(WDW, "low_ten_coin_block", "{Wet-Dry World - Low Water} & TEN_COIN_BLOCKS",
+         _unlock("10-Coin Blocks", WDW))
+    _add(WDW, "low_blue_coins", "{Wet-Dry World - Low Water} & GP & BLUE_COIN_BLOCKS",
+         _unlock("Blue Coin Blocks", WDW, "Blue Coin Block"))
+    _add(WDW, "wooden_structure_three_coin_block", "{Wet-Dry World - Mid Water} & THREE_COIN_BLOCKS",
+         _unlock("3-Coin Blocks", WDW))
+    _add(WDW, "fourth_diamond_coin_line",
+         "{Wet-Dry World - Mid Water} | {Wet-Dry World - Highest Water} | "
+         "PURPLE_SWITCHES | TJ+DV", _unlock("Horizontal Coin Lines", WDW))
+    _add(WDW, "top_coin_line", "{Wet-Dry World - Top} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", WDW))
+    _add(WDW, "top_chuckya", "{Wet-Dry World - Top} & CHUCKYA", _unlock("Chuckyas", WDW, "Chuckya"))
+    _add(WDW, "express_elevator_ten_coin_block",
+         "{Wet-Dry World - Top of the Express Elevator} & TEN_COIN_BLOCKS",
+         _unlock("10-Coin Blocks", WDW))
+    _add(WDW, "downtown_ring", "{Wet-Dry World - Downtown} & HORIZONTAL_COIN_RINGS",
+         _unlock("Horizontal Coin Rings", WDW))
+    for _source in ("downtown_metal_cap_line", "downtown_first_building_line", "downtown_second_building_line"):
+        _add(WDW, _source, "{Wet-Dry World - Downtown} & HORIZONTAL_COIN_LINES",
+             _unlock("Horizontal Coin Lines", WDW))
+    _add(WDW, "downtown_skeeters", "{Wet-Dry World - Downtown} & SKEETERS", _unlock("Skeeters", WDW))
+    _add(WDW, "downtown_initial_red_coin", "{Wet-Dry World - Downtown} & RED_COINS",
+         _unlock("Red Coins", WDW))
+    _add(WDW, "downtown_diamond_red_coins", "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & RED_COINS",
+         _unlock("Red Coins", WDW))
+    _add(WDW, "downtown_high_red_coins",
+         "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & WK | "
+         "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & logic_wdw_high_red_coins_triple_jump",
+         _unlock("Red Coins", WDW))
+    _add(WDW, "wdw_all_red_coins_reachable",
+         "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & WK | "
+         "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & logic_wdw_high_red_coins_triple_jump",
+         _unlock("Red Coins", WDW))
+
+
+    # Tall, Tall Mountain
+    TTM = "Tall, Tall Mountain"
+    _add(TTM, "ttm_start_coin_ring", "HORIZONTAL_COIN_RINGS", _unlock("Horizontal Coin Rings", TTM))
+    _add(TTM, "ttm_crazy_box", "CRAZY_BOXES", _unlock("Crazy Boxes", TTM, "Crazy Box"))
+    _add(TTM, "ttm_start_goombas", "GOOMBAS", _unlock("Goombas", TTM))
+    _add(TTM, "ttm_middle_goomba", "{Tall, Tall Mountain - Middle} & GOOMBAS", _unlock("Goombas", TTM))
+    _add(TTM, "ttm_middle_red_coins", "{Tall, Tall Mountain - Middle} & RED_COINS", _unlock("Red Coins", TTM))
+    _add(TTM, "ttm_middle_bob_ombs", "{Tall, Tall Mountain - Middle} & BOB_OMBS", _unlock("Bob-ombs", TTM))
+    _add(TTM, "ttm_middle_chuckya", "{Tall, Tall Mountain - Middle} & CHUCKYA", _unlock("Chuckyas", TTM, "Chuckya"))
+    _add(TTM, "ttm_middle_bridge_coin_line", "{Tall, Tall Mountain - Middle} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", TTM))
+    _add(TTM, "ttm_middle_fly_guy", "{Tall, Tall Mountain - Middle} & FLY_GUY", _unlock("Fly Guys", TTM, "Fly Guy"))
+    _add(TTM, "ttm_upper_red_coins", "{Tall, Tall Mountain - Upper} & RED_COINS", _unlock("Red Coins", TTM))
+    _add(TTM, "ttm_upper_goombas", "{Tall, Tall Mountain - Upper} & GOOMBAS", _unlock("Goombas", TTM))
+    _add(TTM, "ttm_upper_bob_ombs", "{Tall, Tall Mountain - Upper} & BOB_OMBS", _unlock("Bob-ombs", TTM))
+    _add(TTM, "ttm_upper_leaf_climb_route", "CL")
+    _add(TTM, "ttm_upper_leaf_moveless_route", "logic_ttm_coins_without_climb")
+    _add(TTM, "ttm_upper_leaf_coin_line",
+         "{Tall, Tall Mountain - Upper} & CL | "
+         "{Tall, Tall Mountain - Upper} & logic_ttm_coins_without_climb",
+         _unlock("Horizontal Coin Lines", TTM))
+    _add(TTM, "ttm_slide_single_coins", "{Tall, Tall Mountain - Top} & SINGLE_YELLOW_COINS",
+         _unlock("Single Yellow Coins", TTM))
+    for _source in ("ttm_slide_coin_lines", "ttm_slide_entrance_coin_line", "ttm_waterfall_bridge_coin_line"):
+        _add(TTM, _source, "{Tall, Tall Mountain - Top} & HORIZONTAL_COIN_LINES",
+             _unlock("Horizontal Coin Lines", TTM))
+    _add(TTM, "ttm_slide_blue_coins", "{Tall, Tall Mountain - Top} & SINGLE_BLUE_COINS",
+         _unlock("Single Blue Coins", TTM))
+    _add(TTM, "ttm_top_switch_base_coins", "{Tall, Tall Mountain - Top} & VERTICAL_COIN_LINES",
+         _unlock("Vertical Coin Lines", TTM))
+    for _source, _rule in (
+            ("ttm_top_switch_middle_purple_switch_route", "PURPLE_SWITCHES"),
+            ("ttm_top_switch_middle_triple_jump_route", "TJ"),
+            ("ttm_top_switch_middle_backflip_route", "BF"),
+            ("ttm_top_switch_middle_side_flip_route", "SF")):
+        _add(TTM, _source, _rule)
+    _add(TTM, "ttm_top_switch_middle_coins",
+         "{Tall, Tall Mountain - Top} & PURPLE_SWITCHES | "
+         "{Tall, Tall Mountain - Top} & TJ/BF/SF",
+         _unlock("Vertical Coin Lines", TTM))
+    _add(TTM, "ttm_top_switch_highest_purple_switch_route", "PURPLE_SWITCHES")
+    _add(TTM, "ttm_top_switch_highest_triple_jump_route", "TJ")
+    _add(TTM, "ttm_top_switch_highest_coin",
+         "{Tall, Tall Mountain - Top} & PURPLE_SWITCHES | {Tall, Tall Mountain - Top} & TJ",
+         _unlock("Vertical Coin Lines", TTM))
+
+
+    # Tiny-Huge Island. Static rules describe physical source access. CoinLogic must
+    # still select terminal groups according to Permanent Coins, repeatable ascents,
+    # and the number/value of one-use Koopa-shell and Fly-Guy ascents.
+    THI = "Tiny-Huge Island"
+    _add(THI, "thi_tiny_variant", "{Tiny-Huge Island (Tiny)}")
+    _add(THI, "thi_huge_variant", "{Tiny-Huge Island (Huge)}")
+    _add(THI, "tiny_start_goomba", "{Tiny-Huge Island (Tiny)} & GOOMBAS", _unlock("Goombas", THI))
+    _add(THI, "tiny_piranha_area_plant", "{Tiny-Huge Island - Tiny Piranha Area} & FIRE_PIRANHA_PLANTS",
+         _unlock("Fire Piranha Plants", THI))
+    _add(THI, "tiny_main_individual_coins", "{Tiny-Huge Island - Tiny Main} & SINGLE_YELLOW_COINS",
+         _unlock("Single Yellow Coins", THI))
+    _add(THI, "tiny_main_coin_line", "{Tiny-Huge Island - Tiny Main} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "tiny_main_three_coin_block", "{Tiny-Huge Island - Tiny Main} & THREE_COIN_BLOCKS",
+         _unlock("3-Coin Blocks", THI, "3-Coin Block"))
+    _add(THI, "tiny_main_goombas", "{Tiny-Huge Island - Tiny Main} & GOOMBAS", _unlock("Goombas", THI))
+    _add(THI, "tiny_main_koopa", "{Tiny-Huge Island - Tiny Main} & KOOPA_TROOPA",
+         _unlock("Koopa Troopas", THI, "Koopa Troopa"))
+    _add(THI, "tiny_impossible_coin",
+         "{Tiny-Huge Island - Tiny Main} & SINGLE_YELLOW_COINS & logic_thi_impossible_coin",
+         _unlock("Single Yellow Coins", THI))
+    _add(THI, "tiny_purple_switch_coin",
+         "{Tiny-Huge Island - Tiny Main} & PURPLE_SWITCHES & SINGLE_YELLOW_COINS",
+         _unlock("Single Yellow Coins", THI))
+
+    _thi_huge_main = "{Tiny-Huge Island (Huge)}"
+    for _source, _token, _global, _local in (
+            ("huge_lower_giant_goombas", "GOOMBAS", "Goombas", None),
+            ("huge_start_post", "WOODEN_POSTS", "Wooden Posts", None),
+            ("huge_beach_coins", "SINGLE_YELLOW_COINS", "Single Yellow Coins", None),
+            ("huge_lower_fly_guys", "FLY_GUY", "Fly Guys", "Fly Guy"),
+            ("huge_lakitu", "LAKITU", "Lakitus", "Lakitu"),
+            ("huge_koopa_troopa", "KOOPA_TROOPA", "Koopa Troopas", "Koopa Troopa")):
+        _add(THI, _source, f"{_thi_huge_main} & {_token}", _unlock(_global, THI, _local))
+    _add(THI, "huge_lakitu_island_post",
+         "{Tiny-Huge Island (Huge)} & CANN | {Tiny-Huge Island - Huge Top} & LJ",
+         _unlock("Wooden Posts", THI))
+    _add(THI, "huge_windswept_line", "{Tiny-Huge Island - Windswept Valley} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "huge_windswept_giant_goombas", "{Tiny-Huge Island - Windswept Valley} & GOOMBAS",
+         _unlock("Goombas", THI))
+    _add(THI, "huge_cannonball_line", "{Tiny-Huge Island - Cannonball} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "huge_cannonball_fly_guy", "{Tiny-Huge Island - Cannonball} & FLY_GUY",
+         _unlock("Fly Guys", THI, "Fly Guy"))
+    _add(THI, "huge_koopa_region_line", "{Tiny-Huge Island - Koopa the Quick} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "huge_koopa_region_giant_goombas", "{Tiny-Huge Island - Koopa the Quick} & GOOMBAS",
+         _unlock("Goombas", THI))
+    for _source in ("huge_top_wooden_plank_line", "huge_top_curved_plank_line"):
+        _add(THI, _source, "{Tiny-Huge Island - Huge Top} & HORIZONTAL_COIN_LINES",
+             _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "huge_top_chuckya", "{Tiny-Huge Island - Huge Top} & CHUCKYA", _unlock("Chuckyas", THI, "Chuckya"))
+
+    _add(THI, "thi_red_coins_area", "{Tiny-Huge Island - Red Coins Area}")
+    _add(THI, "red_area_giant_goombas", "{Tiny-Huge Island - Red Coins Area} & GOOMBAS", _unlock("Goombas", THI))
+    _add(THI, "red_area_red_coins", "{Tiny-Huge Island - Red Coins Area} & RED_COINS", _unlock("Red Coins", THI))
+    _add(THI, "red_area_wall_kick_red_coin", "{Tiny-Huge Island - Red Coins Area} & RED_COINS & WK",
+         _unlock("Red Coins", THI))
+    _add(THI, "red_area_blue_coins", "{Tiny-Huge Island - Red Coins Area} & GP & BLUE_COIN_BLOCKS",
+         _unlock("Blue Coin Blocks", THI, "Blue Coin Block"))
+    _add(THI, "thi_wiggler_cave", "{Tiny-Huge Island - Tiny Main} & WARP_PIPES & GP")
+    _add(THI, "wiggler_cave_coin_lines",
+         "{Tiny-Huge Island - Tiny Main} & WARP_PIPES & GP & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "thi_huge_piranha_area", "{Tiny-Huge Island - Huge Piranha Area}")
+    _add(THI, "huge_piranha_area_plants", "{Tiny-Huge Island - Huge Piranha Area} & FIRE_PIRANHA_PLANTS",
+         _unlock("Fire Piranha Plants", THI))
+
+
+    # Tick Tock Clock
+    TTC = "Tick Tock Clock"
+    _add(TTC, "ttc_start", "")
+    _add(TTC, "ttc_start_ten_coin_block", "TEN_COIN_BLOCKS", _unlock("10-Coin Blocks", TTC))
+    _add(TTC, "ttc_start_bob_ombs", "BOB_OMBS", _unlock("Bob-ombs", TTC))
+    _add(TTC, "ttc_start_cube_coins", "SINGLE_YELLOW_COINS", _unlock("Single Yellow Coins", TTC))
+    _add(TTC, "ttc_second_pendulum_block", "THREE_COIN_BLOCKS", _unlock("3-Coin Blocks", TTC))
+    _add(TTC, "ttc_lower", "{Tick Tock Clock - First Clock Hand Area}")
+    _add(TTC, "ttc_first_hand_block", "{Tick Tock Clock - First Clock Hand Area} & THREE_COIN_BLOCKS",
+         _unlock("3-Coin Blocks", TTC))
+    _add(TTC, "ttc_lower_red_coins", "{Tick Tock Clock - First Clock Hand Area} & RED_COINS", _unlock("Red Coins", TTC))
+    _add(TTC, "ttc_spinner_red_coins", "{Tick Tock Clock - First Clock Hand Area} & RED_COINS & TTC_SPINNERS",
+         _unlock("Red Coins", TTC))
+    _add(TTC, "ttc_first_pole_coin_line",
+         "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Moving} | "
+         "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Stopped} & LG/BF/TJ/WK",
+         _unlock("Horizontal Coin Lines", TTC))
+    _add(TTC, "ttc_upper", "{Tick Tock Clock - Moving Bars Area}")
+    _add(TTC, "ttc_heave_ho_blocks", "{Tick Tock Clock - Moving Bars Area} & THREE_COIN_BLOCKS",
+         _unlock("3-Coin Blocks", TTC))
+    _add(TTC, "ttc_blue_coin_block", "{Tick Tock Clock - Moving Bars Area} & GP & BLUE_COIN_BLOCKS",
+         _unlock("Blue Coin Blocks", TTC, "Blue Coin Block"))
+    _add(TTC, "ttc_top", "{Tick Tock Clock - Top}")
+    _add(TTC, "ttc_timed_jumps_block", "{Tick Tock Clock - Top} & THREE_COIN_BLOCKS",
+         _unlock("3-Coin Blocks", TTC))
+    _add(TTC, "ttc_four_moving_bars_block", "{Tick Tock Clock - Top} & TEN_COIN_BLOCKS",
+         _unlock("10-Coin Blocks", TTC))
+    _add(TTC, "ttc_top_past_spinners", "{Tick Tock Clock - Top Past Spinners}")
+    _add(TTC, "ttc_past_three_spinners_block", "{Tick Tock Clock - Top Past Spinners} & THREE_COIN_BLOCKS",
+         _unlock("3-Coin Blocks", TTC))
+    for _source in ("ttc_beneath_thwomp_block", "ttc_top_clock_hand_block", "ttc_top_central_platform_block"):
+        _add(TTC, _source, "{Tick Tock Clock - Top Past Spinners} & TEN_COIN_BLOCKS",
+             _unlock("10-Coin Blocks", TTC))
+
+
+    # Rainbow Ride
+    RR = "Rainbow Ride"
+    _add(RR, "rr_initial", "")
+    _add(RR, "rr_first_platform_ring",
+         "RR_CARPETS | logic_rr_initial_coins_without_carpets",
+         _unlock("Horizontal Coin Rings", RR))
+    _add(RR, "rr_beneath_pole", "{Rainbow Ride - Beneath the Pole}")
+    for _source in ("rr_fly_guy_line", "rr_second_swing_line", "rr_tricky_triangles_line"):
+        _add(RR, _source, "{Rainbow Ride - Beneath the Pole} & HORIZONTAL_COIN_LINES",
+             _unlock("Horizontal Coin Lines", RR))
+    _add(RR, "rr_fly_guy", "{Rainbow Ride - Beneath the Pole} & FLY_GUY", _unlock("Fly Guys", RR, "Fly Guy"))
+    _add(RR, "rr_first_swing_line", "{Rainbow Ride - Beneath the Pole} & VERTICAL_COIN_LINES",
+         _unlock("Vertical Coin Lines", RR))
+    _add(RR, "rr_first_donut_lift_coins", "{Rainbow Ride - Beneath the Pole} & SINGLE_YELLOW_COINS",
+         _unlock("Single Yellow Coins", RR))
+    _add(RR, "rr_beneath_pole_goomba", "{Rainbow Ride - Beneath the Pole} & GOOMBAS", _unlock("Goombas", RR, "Goomba"))
+    _add(RR, "rr_maze", "{Rainbow Ride - Maze}")
+    _add(RR, "rr_maze_coin_rings", "{Rainbow Ride - Maze} & HORIZONTAL_COIN_RINGS",
+         _unlock("Horizontal Coin Rings", RR))
+    _add(RR, "rr_maze_lakitus", "{Rainbow Ride - Maze} & LAKITU", _unlock("Lakitus", RR))
+    _add(RR, "rr_maze_bob_ombs", "{Rainbow Ride - Maze} & BOB_OMBS", _unlock("Bob-ombs", RR))
+    _add(RR, "rr_maze_blue_coin", "{Rainbow Ride - Maze} & BLUE_COIN_BLOCKS & GP",
+         _unlock("Blue Coin Blocks", RR, "Blue Coin Block"))
+    _add(RR, "rr_maze_wall_kick_blue_coins", "{Rainbow Ride - Maze} & BLUE_COIN_BLOCKS & GP & WK",
+         _unlock("Blue Coin Blocks", RR, "Blue Coin Block"))
+    _add(RR, "rr_maze_movement_red_coin",
+         "{Rainbow Ride - Maze} & LJ/WK | "
+         "{Rainbow Ride - Maze} & logic_rr_maze_coins_ledge_grab_and_carpets",
+         _unlock("Red Coins", RR))
+    _add(RR, "rr_other_red_coins",
+         "{Rainbow Ride - Maze} & WK | {Rainbow Ride - Maze} & LJ & SF/BF/TJ | "
+         "{Rainbow Ride - Maze} & logic_rr_maze_coins_ledge_grab_and_carpets",
+         _unlock("Red Coins", RR))
+    _add(RR, "rr_carpets", "{Rainbow Ride - Carpets}")
+    for _source in ("rr_second_carpet_platform_coin", "rr_second_carpet_air_coin"):
+        _add(RR, _source, "{Rainbow Ride - Carpets} & SINGLE_YELLOW_COINS", _unlock("Single Yellow Coins", RR))
+    _add(RR, "rr_house", "{Rainbow Ride - House}")
+    _add(RR, "rr_house_donut_lift_line", "{Rainbow Ride - House} & VERTICAL_COIN_LINES",
+         _unlock("Vertical Coin Lines", RR))
+    for _source in ("rr_house_floor_line", "rr_house_glass_platform_line", "rr_house_return_line"):
+        _add(RR, _source, "{Rainbow Ride - House} & HORIZONTAL_COIN_LINES",
+             _unlock("Horizontal Coin Lines", RR))
+    _add(RR, "rr_cruiser", "{Rainbow Ride - Cruiser}")
+    _add(RR, "rr_cruiser_bob_ombs", "{Rainbow Ride - Cruiser} & BOB_OMBS", _unlock("Bob-ombs", RR))
+    _add(RR, "rr_ship_pole_ring", "{Rainbow Ride - Cruiser} & HORIZONTAL_COIN_RINGS",
+         _unlock("Horizontal Coin Rings", RR))
+    _add(RR, "rr_somewhere_over_the_rainbow", "{{Rainbow Ride - Somewhere Over the Rainbow}}")
+    _add(RR, "rr_somewhere_chuckya", "{Rainbow Ride - Cruiser} & CHUCKYA",
+         _unlock("Chuckyas", RR, "Chuckya"))
+    return COIN_REQUIREMENT_SPECS
+
+
+def _secrets_requirement_specs():
+    """RuleBuilder requirement specifications for secret-stage coin sources.
+
+    This is intentionally data-only groundwork.  ``rule`` contains the non-unlock
+    portion of a complete source requirement.  ``unlocks`` contains global and
+    per-level item alternatives that should be instantiated as ``HasUnlock`` rules.
+    """
+
+
+
+    def _spec(
+            target: str,
+            rule: str = "",
+            *unlocks: tuple[str, str],
+    ) -> dict[str, str | tuple[tuple[str, str], ...]]:
+        return {"rule": rule, "target": target, "unlocks": unlocks}
+
+
+    PSS = "The Princess's Secret Slide"
+    SA = "The Secret Aquarium"
+    WMOTR = "Wing Mario Over the Rainbow"
+    TOTWC = "Tower of the Wing Cap"
+    VCUTM = "Vanish Cap Under the Moat"
+    COTMC = "Cavern of the Metal Cap"
+    BITDW = "Bowser in the Dark World"
+    BITFS = "Bowser in the Fire Sea"
+    BITS = "Bowser in the Sky"
+
+
+    def _target(course: str) -> str:
+        return f"{course} - Coins Star"
+
+
+    COIN_REQUIREMENT_SPECS: dict[
+        tuple[str, str], dict[str, str | tuple[tuple[str, str], ...]]
+    ] = {
+        # The Princess's Secret Slide
+        (PSS, "pss_course"): _spec(_target(PSS)),
+        (PSS, "pss_single_yellow_coins"): _spec(
+            _target(PSS), "", ("Single Yellow Coins", "Princess's Secret Slide - Single Yellow Coins")),
+        (PSS, "pss_horizontal_coin_lines"): _spec(
+            _target(PSS), "", ("Horizontal Coin Lines", "Princess's Secret Slide - Horizontal Coin Lines")),
+        (PSS, "pss_blue_coin_block"): _spec(
+            _target(PSS), "GP", ("Blue Coin Blocks", "Princess's Secret Slide - Blue Coin Block")),
+
+        # The Secret Aquarium
+        (SA, "sa_course"): _spec(_target(SA)),
+        (SA, "sa_red_coins"): _spec(
+            _target(SA), "", ("Red Coins", "Secret Aquarium - Red Coins")),
+        (SA, "sa_horizontal_coin_ring"): _spec(
+            _target(SA), "", ("Horizontal Coin Rings", "Secret Aquarium - Horizontal Coin Rings")),
+        (SA, "sa_vertical_coin_rings"): _spec(
+            _target(SA), "", ("Vertical Coin Rings", "Secret Aquarium - Vertical Coin Rings")),
+
+        # Wing Mario Over the Rainbow
+        (WMOTR, "wmotr_initial"): _spec(_target(WMOTR)),
+        (WMOTR, "wmotr_initial_red_coin"): _spec(
+            _target(WMOTR), "", ("Red Coins", f"{WMOTR} - Red Coins")),
+        (WMOTR, "wmotr_cannon_only"): _spec(_target(WMOTR), f"{{{WMOTR} - Cannon}}"),
+        (WMOTR, "wmotr_cannon_red_coins"): _spec(
+            _target(WMOTR), f"{{{WMOTR} - Cannon}}", ("Red Coins", f"{WMOTR} - Red Coins")),
+        (WMOTR, "wmotr_flight_route"): _spec(
+            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ"),
+        (WMOTR, "wmotr_flight_red_coins"): _spec(
+            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ", ("Red Coins", f"{WMOTR} - Red Coins")),
+        (WMOTR, "wmotr_rainbow_coin_rings"): _spec(
+            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ",
+            ("Vertical Coin Rings", f"{WMOTR} - Vertical Coin Rings")),
+        (WMOTR, "wmotr_cloud_coin_ring"): _spec(
+            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ",
+            ("Horizontal Coin Rings", f"{WMOTR} - Horizontal Coin Rings")),
+        # This route is selected only while the flight route is unavailable. RuleFactory expressions
+        # cannot represent that non-monotonic selection condition.
+        (WMOTR, "wmotr_leap_fallback"): _spec(_target(WMOTR)),
+        (WMOTR, "wmotr_long_jump_first_red_coin"): _spec(
+            _target(WMOTR),
+            "LJ & logic_wmotr_leap_of_faith | LJ & logic_wmotr_leap_of_faith_without_ledge_grab",
+            ("Red Coins", f"{WMOTR} - Red Coins")),
+        (WMOTR, "wmotr_long_jump_second_red_coin"): _spec(
+            _target(WMOTR),
+            "LJ & logic_wmotr_leap_of_faith_without_ledge_grab | "
+            "LJ+LG & logic_wmotr_leap_of_faith",
+            ("Red Coins", f"{WMOTR} - Red Coins")),
+        # The evaluator additionally suppresses this source when the Long Jump fallback is available.
+        (WMOTR, "wmotr_wing_cap_fallback_red_coin"): _spec(
+            _target(WMOTR),
+            "WC & logic_wmotr_leap_of_faith | WC & logic_wmotr_leap_of_faith_without_ledge_grab",
+            ("Red Coins", f"{WMOTR} - Red Coins")),
+
+        # Tower of the Wing Cap
+        (TOTWC, "totwc_course"): _spec(_target(TOTWC)),
+        (TOTWC, "totwc_single_yellow_coins"): _spec(
+            _target(TOTWC), "", ("Single Yellow Coins", f"{TOTWC} - Single Yellow Coins")),
+        (TOTWC, "totwc_red_coins"): _spec(
+            _target(TOTWC), "", ("Red Coins", f"{TOTWC} - Red Coins")),
+        # Standard and mastery routes are mutually selected by Coin Mastery or Permanent Coins.
+        # The absence of both settings cannot be encoded as a positive RuleFactory expression.
+        (TOTWC, "totwc_standard_ring_route"): _spec(_target(TOTWC)),
+        (TOTWC, "totwc_standard_ring_coins"): _spec(
+            _target(TOTWC), "", ("Vertical Coin Rings", f"{TOTWC} - Vertical Coin Rings")),
+        # Route selection is handled by the evaluator because Permanent Coins is not a RuleFactory token.
+        (TOTWC, "totwc_mastery_ring_route"): _spec(_target(TOTWC)),
+        (TOTWC, "totwc_mastery_ring_coins"): _spec(
+            _target(TOTWC), "",
+            ("Vertical Coin Rings", f"{TOTWC} - Vertical Coin Rings")),
+        (TOTWC, "totwc_mastery_wing_cap_ring_coins"): _spec(
+            _target(TOTWC), "WC",
+            ("Vertical Coin Rings", f"{TOTWC} - Vertical Coin Rings"),
+            ("Wing Cap", f"{TOTWC} - Wing Cap")),
+        # This synthetic trace is present only when the dynamic logic/option cap removes coins.
+        (TOTWC, "totwc_coin_cap"): _spec(_target(TOTWC)),
+
+        # Vanish Cap Under the Moat
+        (VCUTM, "vcutm_earlier_slide_route"): _spec(_target(VCUTM)),
+        (VCUTM, "vcutm_bottom_slide_line"): _spec(
+            _target(VCUTM), "", ("Horizontal Coin Lines", f"{VCUTM} - Horizontal Coin Lines")),
+        (VCUTM, "vcutm_earlier_red_coins"): _spec(
+            _target(VCUTM), "", ("Red Coins", f"{VCUTM} - Red Coins")),
+        (VCUTM, "vcutm_later_checkerboard_route"): _spec(
+            _target(VCUTM),
+            "TJ/LG/SF/BF/WK | logic_vcutm_drop_to_checkerboard_platforms | "
+            "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up"),
+        (VCUTM, "vcutm_turning_lifts_block"): _spec(
+            _target(VCUTM),
+            "TJ/LG/SF/BF/WK | logic_vcutm_drop_to_checkerboard_platforms | "
+            "logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up",
+            ("3-Coin Blocks", f"{VCUTM} - 3-Coin Block")),
+        (VCUTM, "vcutm_checkerboard_red_coins"): _spec(
+            _target(VCUTM),
+            "CHECKERBOARD_PLATFORMS & TJ/LG/SF/BF/WK | "
+            "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms | "
+            "CHECKERBOARD_PLATFORMS & logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up",
+            ("Red Coins", f"{VCUTM} - Red Coins"),
+            ("Checkerboard Platforms", f"{VCUTM} - Checkerboard Platforms")),
+        (VCUTM, "vcutm_end_marker_coins"): _spec(
+            _target(VCUTM),
+            "CHECKERBOARD_PLATFORMS & VC & TJ/LG/SF/BF/WK | "
+            "CHECKERBOARD_PLATFORMS & VC & logic_vcutm_drop_to_checkerboard_platforms | "
+            "CHECKERBOARD_PLATFORMS & VC & logic_vcutm_drop_to_checkerboard_platforms_after_crawling_back_up",
+            ("Single Yellow Coins", f"{VCUTM} - Single Yellow Coins"),
+            ("Checkerboard Platforms", f"{VCUTM} - Checkerboard Platforms"),
+            ("Vanish Cap", f"{VCUTM} - Vanish Cap")),
+        # Route selection also compares the reachable earlier/later totals. The positive access rules
+        # above are exact, but that total-dependent selection is not expressible by RuleFactory.
+
+        # Cavern of the Metal Cap
+        (COTMC, "cotmc_course"): _spec(_target(COTMC)),
+        (COTMC, "cotmc_underwater_slope_line"): _spec(
+            _target(COTMC), "", ("Horizontal Coin Lines", f"{COTMC} - Horizontal Coin Lines")),
+        (COTMC, "cotmc_rock_bridge_line"): _spec(
+            _target(COTMC), "", ("Horizontal Coin Lines", f"{COTMC} - Horizontal Coin Lines")),
+        (COTMC, "cotmc_snufits"): _spec(
+            _target(COTMC), "", ("Snufits", f"{COTMC} - Snufits")),
+        (COTMC, "cotmc_initial_red_coins"): _spec(
+            _target(COTMC), "", ("Red Coins", f"{COTMC} - Red Coins")),
+        (COTMC, "cotmc_deep_water"): _spec(
+            _target(COTMC), "MC | logic_cotmc_deep_underwater_coins_without_metal_cap"),
+        (COTMC, "cotmc_underwater_ring"): _spec(
+            _target(COTMC), "MC | logic_cotmc_deep_underwater_coins_without_metal_cap",
+            ("Horizontal Coin Rings", f"{COTMC} - Horizontal Coin Rings")),
+        (COTMC, "cotmc_stream_bottom_line"): _spec(
+            _target(COTMC), "MC | logic_cotmc_deep_underwater_coins_without_metal_cap",
+            ("Horizontal Coin Lines", f"{COTMC} - Horizontal Coin Lines")),
+        (COTMC, "cotmc_deep_red_coins"): _spec(
+            _target(COTMC), "MC | logic_cotmc_deep_underwater_coins_without_metal_cap",
+            ("Red Coins", f"{COTMC} - Red Coins")),
+
+        # Bowser in the Dark World
+        (BITDW, "bitdw_before_slope"): _spec(_target(BITDW)),
+        (BITDW, "bitdw_coin_rings"): _spec(
+            _target(BITDW), "", ("Horizontal Coin Rings", f"{BITDW} - Horizontal Coin Rings")),
+        (BITDW, "bitdw_coin_lines"): _spec(
+            _target(BITDW), "", ("Horizontal Coin Lines", f"{BITDW} - Horizontal Coin Lines")),
+        (BITDW, "bitdw_single_coins_before_slope"): _spec(
+            _target(BITDW), "", ("Single Yellow Coins", f"{BITDW} - Single Yellow Coins")),
+        (BITDW, "bitdw_three_coin_block"): _spec(
+            _target(BITDW), "", ("3-Coin Blocks", f"{BITDW} - 3-Coin Block")),
+        (BITDW, "bitdw_goombas"): _spec(
+            _target(BITDW), "", ("Goombas", f"{BITDW} - Goombas")),
+        (BITDW, "bitdw_red_coins_before_slope"): _spec(
+            _target(BITDW), "", ("Red Coins", f"{BITDW} - Red Coins")),
+        (BITDW, "bitdw_slope"): _spec(
+            _target(BITDW), "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass"),
+        (BITDW, "bitdw_slope_single_coins"): _spec(
+            _target(BITDW), "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass",
+            ("Single Yellow Coins", f"{BITDW} - Single Yellow Coins")),
+        (BITDW, "bitdw_slope_red_coins"): _spec(_target(BITDW), "PURPLE_SWITCHES"),
+        (BITDW, "bitdw_final_red_coins"): _spec(
+            _target(BITDW), "PURPLE_SWITCHES", ("Red Coins", f"{BITDW} - Red Coins")),
+
+        # Bowser in the Fire Sea
+        (BITFS, "bitfs_start"): _spec(_target(BITFS)),
+        (BITFS, "bitfs_start_single_coins"): _spec(
+            _target(BITFS), "", ("Single Yellow Coins", f"{BITFS} - Single Yellow Coins")),
+        (BITFS, "bitfs_second_sinking_platform_line"): _spec(
+            _target(BITFS), "", ("Horizontal Coin Lines", f"{BITFS} - Horizontal Coin Lines")),
+        (BITFS, "bitfs_first_ring"): _spec(
+            _target(BITFS), "", ("Horizontal Coin Rings", f"{BITFS} - Horizontal Coin Rings")),
+        (BITFS, "bitfs_first_bully"): _spec(
+            _target(BITFS), "", ("Bullies", f"{BITFS} - Bullies")),
+        (BITFS, "bitfs_start_goombas"): _spec(
+            _target(BITFS), "", ("Goombas", f"{BITFS} - Goombas")),
+        (BITFS, "bitfs_start_red_coins"): _spec(
+            _target(BITFS), "", ("Red Coins", f"{BITFS} - Red Coins")),
+        (BITFS, "bitfs_rising_platform_block"): _spec(
+            _target(BITFS), "CL | logic_lava_damage_boosting"),
+        (BITFS, "bitfs_three_coin_block"): _spec(
+            _target(BITFS), "CL | logic_lava_damage_boosting",
+            ("3-Coin Blocks", f"{BITFS} - 3-Coin Block")),
+        (BITFS, "bitfs_climb"): _spec(_target(BITFS), "CL"),
+        (BITFS, "bitfs_elevator_line"): _spec(
+            _target(BITFS), "CL", ("Horizontal Coin Lines", f"{BITFS} - Horizontal Coin Lines")),
+        (BITFS, "bitfs_wire_grid_ring"): _spec(
+            _target(BITFS), "CL", ("Horizontal Coin Rings", f"{BITFS} - Horizontal Coin Rings")),
+        (BITFS, "bitfs_vertical_drop_line"): _spec(
+            _target(BITFS), "CL", ("Vertical Coin Lines", f"{BITFS} - Vertical Coin Lines")),
+        (BITFS, "bitfs_bob_omb_slope_line"): _spec(
+            _target(BITFS), "CL", ("Horizontal Coin Lines", f"{BITFS} - Horizontal Coin Lines")),
+        (BITFS, "bitfs_ten_coin_block"): _spec(
+            _target(BITFS), "CL", ("10-Coin Blocks", f"{BITFS} - 10-Coin Block")),
+        (BITFS, "bitfs_third_sinking_platform_line"): _spec(
+            _target(BITFS), "CL", ("Horizontal Coin Lines", f"{BITFS} - Horizontal Coin Lines")),
+        (BITFS, "bitfs_bob_omb"): _spec(
+            _target(BITFS), "CL", ("Bob-ombs", f"{BITFS} - Bob-omb")),
+        (BITFS, "bitfs_upper_bullies"): _spec(
+            _target(BITFS), "CL", ("Bullies", f"{BITFS} - Bullies")),
+        (BITFS, "bitfs_upper_red_coins"): _spec(
+            _target(BITFS), "CL", ("Red Coins", f"{BITFS} - Red Coins")),
+
+        # Bowser in the Sky
+        (BITS, "bits_start"): _spec(_target(BITS)),
+        (BITS, "bits_tilting_w_coins"): _spec(
+            _target(BITS), "", ("Single Yellow Coins", f"{BITS} - Single Yellow Coins")),
+        (BITS, "bits_start_goombas"): _spec(
+            _target(BITS), "", ("Goombas", f"{BITS} - Goombas")),
+        (BITS, "bits_start_red_coins"): _spec(
+            _target(BITS), "", ("Red Coins", f"{BITS} - Red Coins")),
+        (BITS, "bits_start_fire_piranha"): _spec(
+            _target(BITS), "", ("Fire Piranha Plants", f"{BITS} - Fire Piranha Plants")),
+        (BITS, "bits_whomp_platform_lines"): _spec(
+            _target(BITS), "", ("Horizontal Coin Lines", f"{BITS} - Horizontal Coin Lines")),
+        (BITS, "bits_whomp_jump_coins"): _spec(
+            _target(BITS), "", ("Whomps", f"{BITS} - Whomp")),
+        (BITS, "bits_whomp_ground_pound_coins"): _spec(
+            _target(BITS), "GP", ("Whomps", f"{BITS} - Whomp")),
+        (BITS, "bits_chuckya"): _spec(_target(BITS), f"{{{BITS} - Chuckya}}"),
+        (BITS, "bits_chuckya_enemy"): _spec(
+            _target(BITS), f"{{{BITS} - Chuckya}}", ("Chuckyas", f"{BITS} - Chuckya")),
+        (BITS, "bits_chuckya_goomba"): _spec(
+            _target(BITS), f"{{{BITS} - Chuckya}}", ("Goombas", f"{BITS} - Goombas")),
+        (BITS, "bits_raised_steps_coins"): _spec(
+            _target(BITS), f"{{{BITS} - Chuckya}}",
+            ("Single Yellow Coins", f"{BITS} - Single Yellow Coins")),
+        (BITS, "bits_arrow_ride"): _spec(_target(BITS), f"{{{BITS} - Arrow Ride}}"),
+        (BITS, "bits_suction_platform_line"): _spec(
+            _target(BITS), f"{{{BITS} - Arrow Ride}}",
+            ("Horizontal Coin Lines", f"{BITS} - Horizontal Coin Lines")),
+        (BITS, "bits_arrow_ride_red_coins"): _spec(
+            _target(BITS), f"{{{BITS} - Arrow Ride}}", ("Red Coins", f"{BITS} - Red Coins")),
+        (BITS, "bits_spinning_platform_coins"): _spec(
+            _target(BITS), f"{{{BITS} - Arrow Ride}}",
+            ("Single Yellow Coins", f"{BITS} - Single Yellow Coins")),
+        (BITS, "bits_arrow_ride_bob_ombs"): _spec(
+            _target(BITS), f"{{{BITS} - Arrow Ride}}", ("Bob-ombs", f"{BITS} - Bob-ombs")),
+        (BITS, "bits_arrow_ride_fire_piranha"): _spec(
+            _target(BITS), f"{{{BITS} - Arrow Ride}}",
+            ("Fire Piranha Plants", f"{BITS} - Fire Piranha Plants")),
+        (BITS, "bits_top"): _spec(_target(BITS), f"{{{BITS} - Top}}"),
+        (BITS, "bits_top_goombas"): _spec(
+            _target(BITS), f"{{{BITS} - Top}}", ("Goombas", f"{BITS} - Goombas")),
+        (BITS, "bits_top_bob_ombs"): _spec(
+            _target(BITS), f"{{{BITS} - Top}}", ("Bob-ombs", f"{BITS} - Bob-ombs")),
+        (BITS, "bits_top_red_coins"): _spec(
+            _target(BITS), f"{{{BITS} - Top}}", ("Red Coins", f"{BITS} - Red Coins")),
+        (BITS, "bits_final_rotating_platform_line"): _spec(
+            _target(BITS), f"{{{BITS} - Top}}",
+            ("Horizontal Coin Lines", f"{BITS} - Horizontal Coin Lines")),
+    }
+    return COIN_REQUIREMENT_SPECS
+
+
+@cache
+def _coin_source_rule_specs() -> dict[tuple[str, str], CoinSourceRuleSpec]:
+    combined: dict[tuple[str, str], CoinSourceRuleSpec] = {}
+    for group in (
+            _early_requirement_specs(),
+            _middle_requirement_specs(),
+            _late_requirement_specs(),
+            _secrets_requirement_specs(),
+    ):
+        duplicates = combined.keys() & group.keys()
+        if duplicates:
+            raise ValueError(f"Duplicate coin requirement specs: {sorted(duplicates)}")
+        combined.update(group)
+    return combined
+
+def _split_top_level(expression: str, operators: str) -> list[str]:
+    depth = 0
+    brace_depth = 0
+    pieces: list[str] = []
+    start = 0
+    for index, character in enumerate(expression):
+        if character == "{":
+            brace_depth += 1
+        elif character == "}":
+            brace_depth -= 1
+        elif not brace_depth:
+            if character == "(":
+                depth += 1
+            elif character == ")":
+                depth -= 1
+            elif depth == 0 and character in operators:
+                pieces.append(expression[start:index].strip())
+                start = index + 1
+    if pieces:
+        pieces.append(expression[start:].strip())
+    return pieces
+
+
+def _strip_outer_parentheses(expression: str) -> str:
+    expression = expression.strip()
+    while expression.startswith("(") and expression.endswith(")"):
+        depth = 0
+        encloses_all = True
+        for index, character in enumerate(expression):
+            if character == "(":
+                depth += 1
+            elif character == ")":
+                depth -= 1
+                if depth == 0 and index != len(expression) - 1:
+                    encloses_all = False
+                    break
+        if not encloses_all:
+            break
+        expression = expression[1:-1].strip()
+    return expression
+
+
+def _build_expression_rule(rf, expression: str, target_name: str, arbitrary_item_names) -> Rule:
+    expression = _strip_outer_parentheses(expression)
+    if not expression:
+        return True_()
+
+    alternatives = _split_top_level(expression, "|/")
+    if alternatives:
+        return Or(*(_build_expression_rule(rf, part, target_name, arbitrary_item_names)
+                    for part in alternatives))
+
+    requirements = _split_top_level(expression, "&+")
+    if requirements:
+        return And(*(_build_expression_rule(rf, part, target_name, arbitrary_item_names)
+                     for part in requirements))
+
+    atom = _TOKEN_ALIASES.get(expression, expression)
+    result = rf.make_rule(
+        atom,
+        rf.get_cannon_item_name(target_name),
+        rf.get_cap_item_names(target_name),
+        arbitrary_item_names,
+        rf.get_action_item_names(target_name),
+    )
+    if result is True:
+        return True_()
+    if result is False:
+        return False_()
+    if isinstance(result, Rule):
+        return result
+    from rule_builder.rules import Has
+    return Has(result)
+
+
+def get_coin_requirement_rule(
+        course_name: str,
+        source_id: str,
+        state: CollectionState,
+        player: int,
+) -> Rule.Resolved | None:
+    """Build the Rule Builder rule explaining one structured coin source."""
+    spec = _coin_source_rule_specs().get((course_name, source_id))
+    if spec is None:
+        return None
+
+    world: SM64World = state.multiworld.worlds[player]
+    cache = getattr(world, "coin_requirement_rule_cache", None)
+    if cache is None:
+        cache = {}
+        world.coin_requirement_rule_cache = cache
+    cache_key = (course_name, source_id)
+    if cache_key in cache:
+        return cache[cache_key]
+
+    from .Rules import RuleFactory
+
+    target_name = spec.get("target", course_name)
+    rule_expression = spec.get("rule", "")
+    unlocks = spec.get("unlocks", ())
+    if not rule_expression and not unlocks:
+        cache[cache_key] = None
+        return None
+
+    rf = RuleFactory(world.multiworld, world.options, player, world.move_rando_bitvec)
+    arbitrary_item_names = rf.get_arbitrary_item_names(target_name)
+    level_name = rf.get_level_name_from_target(target_name)
+    for token, (global_name, local_suffix) in _EXPLANATION_ONLY_UNLOCKS.items():
+        arbitrary_item_names[token] = HasUnlock(
+            global_name, f"{level_name} - {local_suffix}")
+    rule = _build_expression_rule(
+        rf, rule_expression, target_name, arbitrary_item_names)
+    for global_item_name, per_level_item_name in unlocks:
+        rule &= HasUnlock(global_item_name, per_level_item_name)
+
+    resolved = rule.resolve(world)
+    cache[cache_key] = resolved
+    return resolved

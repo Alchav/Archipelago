@@ -194,14 +194,7 @@ def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
 
 def has_simple_arbitrary_feature(state: CollectionState, player: int, token: str) -> bool:
     item_name = simple_level_feature_items[token]
-    options = state.multiworld.worlds[player].options
-    return (
-        options.level_features.value in {
-            options.level_features.option_not_shuffled,
-            options.level_features.option_per_act_only,
-        }
-        or state.has(item_name, player)
-    )
+    return has_unlock(state, player, "level_features", item_name, item_name)
 
 
 def has_warp_pipes(state: CollectionState, player: int, level_name: str) -> bool:
@@ -210,29 +203,20 @@ def has_warp_pipes(state: CollectionState, player: int, level_name: str) -> bool
 
 
 def get_level_feature_item_name(
-        option, global_item_name: str | None, per_level_item_name: str) -> str | bool:
-    if option.value in {
-            option.option_not_shuffled,
-            getattr(option, "option_per_act_only", -1),
-    }:
-        return True
-    if option.value == option.option_global and global_item_name:
-        return global_item_name
-    return per_level_item_name
+        option, global_item_name: str | None, per_level_item_name: str) -> HasUnlock:
+    return HasUnlock(global_item_name or per_level_item_name, per_level_item_name)
 
 
 def has_level_feature(
         state: CollectionState, player: int, option_name: str,
         global_item_name: str | None, per_level_item_name: str) -> bool:
-    option = getattr(state.multiworld.worlds[player].options, option_name)
-    item_name = get_level_feature_item_name(option, global_item_name, per_level_item_name)
-    return item_name is True or state.has(item_name, player)
+    return has_unlock(
+        state, player, option_name, global_item_name or per_level_item_name, per_level_item_name)
 
 
 def has_per_act_feature(
         state: CollectionState, player: int, per_level_item_name: str) -> bool:
-    options = state.multiworld.worlds[player].options
-    return not options.level_features or state.has(per_level_item_name, player)
+    return has_unlock(state, player, "level_features", per_level_item_name, per_level_item_name)
 
 
 def has_purple_switches(state: CollectionState, player: int, level_name: str) -> bool:
@@ -552,30 +536,22 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     def bowser_stage_one_up_rule(stage_item_name: str, vanilla_key_rule: Rule) -> Rule:
         option = options.bowser_stage_1ups
-        if option.value == option.option_always_spawn:
-            return True_()
         if option.value == option.option_vanilla:
             return vanilla_key_rule
-        if option.value == option.option_global:
-            return Has("Bowser Stage Extra 1-Ups")
-        return Has(stage_item_name)
+        return HasUnlock("Bowser Stage Extra 1-Ups", stage_item_name)
 
     def bowser_arena_bomb_rule(stage_name: str, required_hits: int) -> Rule:
-        if options.bowser_bombs.value == options.bowser_bombs.option_not_shuffled:
-            return True_()
-        if options.bowser_bombs.value == options.bowser_bombs.option_global:
-            return Has("Progressive Bowser Arena Bomb", required_hits)
-        return Has(f"{stage_name} - Progressive Bowser Arena Bomb", required_hits)
+        return HasUnlock(
+            "Progressive Bowser Arena Bomb",
+            f"{stage_name} - Progressive Bowser Arena Bomb",
+            required_hits,
+        )
 
     def level_unlock_rule(item_name: str) -> Rule:
-        if options.level_unlocks.value == options.level_unlocks.option_disabled:
-            return True_()
-        return Has(item_name)
+        return HasUnlock(item_name, item_name)
 
     def full_level_unlock_rule(item_name: str) -> Rule:
-        if options.level_unlocks.value != options.level_unlocks.option_full:
-            return True_()
-        return Has(item_name)
+        return HasUnlock(item_name, item_name)
 
     connect_randomized_entrance("Menu", "Bob-omb Battlefield")
     connect_randomized_entrance("Menu", "Whomp's Fortress",
@@ -757,12 +733,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_hmc_metal_head_capless_no_movement")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
-    if (options.one_up_checks
-            and options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled):
+    if options.one_up_checks:
         rf.add_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles",
-                    Has("Monty Moles") | Has("Hazy Maze Cave - Monty Moles"))
+                    HasUnlock("Monty Moles", "Hazy Maze Cave - Monty Moles"))
         rf.add_rule("Hazy Maze Cave - Twin Hole Monty Moles",
-                    Has("Monty Moles") | Has("Hazy Maze Cave - Monty Moles"))
+                    HasUnlock("Monty Moles", "Hazy Maze Cave - Monty Moles"))
     # Lethal Lava Land
     rf.assign_rule("Lethal Lava Land - Boil the Big Bully", "BIG_BULLY")
     rf.assign_rule("Lethal Lava Land - Bully the Bullies", "BULLIES & BIG_BULLY")
@@ -893,12 +868,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom",
                    "CANN | logic_ttm_lonely_mushroom_cannonless | "
                    "logic_ttm_lonely_mushroom_fly_guy_spin_jump")
-    if (options.one_up_checks
-            and options.one_up_unlocks.value != options.one_up_unlocks.option_not_shuffled):
+    if options.one_up_checks:
         rf.add_rule("Tall, Tall Mountain - Upper Monty Moles",
-                    Has("Monty Moles") | Has("Tall, Tall Mountain - Monty Moles"))
+                    HasUnlock("Monty Moles", "Tall, Tall Mountain - Monty Moles"))
         rf.add_rule("Tall, Tall Mountain - Lower Monty Moles",
-                    Has("Monty Moles") | Has("Tall, Tall Mountain - Monty Moles"))
+                    HasUnlock("Monty Moles", "Tall, Tall Mountain - Monty Moles"))
     rf.assign_rule("Tall, Tall Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Tiny-Huge Island
     rf.assign_rule("Tiny-Huge Island - Tiny Piranha Area", "TJ/LJ/LG")
@@ -1255,8 +1229,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Castle - MIPS 2",
         CanReachRegion("Basement") & Has("Castle - Progressive MIPS", 2))
 
-    one_up_option = options.one_up_unlocks
-    if options.one_up_checks and one_up_option.value != one_up_option.option_not_shuffled:
+    if options.one_up_checks:
         active_location_names = {
             location.name for location in multiworld.get_locations(player)
         }
@@ -1266,7 +1239,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             if location_name.endswith("Monty Moles"):
                 continue
             per_level_item_name = f"{location_name.split(' - ', 1)[0]} - {category_name}"
-            rf.add_rule(location_name, Has(category_name) | Has(per_level_item_name))
+            rf.add_rule(location_name, HasUnlock(category_name, per_level_item_name))
 
     if options.area_rando > options.area_rando.option_Off and not using_slot_area_connections:
         ensure_reachable_starting_check(
@@ -1401,9 +1374,6 @@ class RuleFactory:
         self.player = player
         self.move_rando_bitvec = move_rando_bitvec
         self.area_randomizer = options.area_rando > 0
-        self.painting_randomizer = (
-            options.level_unlocks.value == options.level_unlocks.option_full)
-        self.per_level_caps = options.per_level_cap_items
         self.assigned_rules: dict[str, Rule] = {}
 
     def assign_rule(self, target_name: str, rule_expr: str):
@@ -1483,9 +1453,9 @@ class RuleFactory:
             self, painting_lvl_name: str = None, star_num_req: int = None) -> Rule:
         star_rule: Rule = True_()
         painting_rule: Rule = True_()
-        if painting_lvl_name is not None and self.painting_randomizer:
+        if painting_lvl_name is not None:
             painting_item_name = f"Unlock {painting_lvl_name}"
-            painting_rule = Has(painting_item_name)
+            painting_rule = HasUnlock(painting_item_name, painting_item_name)
         return star_rule & painting_rule
 
     def get_level_name_from_target(self, target_name: str) -> str:
@@ -1526,32 +1496,15 @@ class RuleFactory:
             "The Secret Aquarium": "Secret Aquarium",
         }.get(level_name, level_name)
         item_names = {
-            token: (
-                item_name
-                if self.options.level_features.value in {
-                    self.options.level_features.option_global,
-                    self.options.level_features.option_per_level,
-                }
-                else True
-            )
+            token: HasUnlock(item_name, item_name)
             for token, item_name in simple_level_feature_items.items()
         }
         for token in per_act_feature_tokens:
             per_level_item_name = self.token_table[token]
             if token in {"BOB_BUDDY", "WF_BUDDY", "JRB_BUDDY"}:
-                buddy_mode = self.options.bobomb_buddies.value
-                if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
-                    item_names[token] = True
-                elif buddy_mode == self.options.bobomb_buddies.option_global:
-                    item_names[token] = "Bob-omb Buddies"
-                else:
-                    item_names[token] = per_level_item_name
+                item_names[token] = HasUnlock("Bob-omb Buddies", per_level_item_name)
             else:
-                item_names[token] = (
-                    True
-                    if self.options.level_features.value == self.options.level_features.option_not_shuffled
-                    else per_level_item_name
-                )
+                item_names[token] = HasUnlock(per_level_item_name, per_level_item_name)
         item_names["CHECKERBOARD_PLATFORMS"] = (
             get_level_feature_item_name(
                 self.options.level_features,
@@ -1577,16 +1530,7 @@ class RuleFactory:
                 self.options.level_features, "Warp Pipes", warp_pipe_item_name)
         buddy_item_name = bobomb_buddy_item_name_by_level.get(level_name)
         if buddy_item_name:
-            buddy_mode = self.options.bobomb_buddies.value
-            if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
-                item_names["BOBOMB_BUDDY"] = True
-            elif buddy_mode == self.options.bobomb_buddies.option_per_act_only:
-                item_names["BOBOMB_BUDDY"] = (
-                    buddy_item_name if buddy_item_name in feature_item_data_table else True)
-            elif buddy_mode == self.options.bobomb_buddies.option_global:
-                item_names["BOBOMB_BUDDY"] = "Bob-omb Buddies"
-            else:
-                item_names["BOBOMB_BUDDY"] = buddy_item_name
+            item_names["BOBOMB_BUDDY"] = HasUnlock("Bob-omb Buddies", buddy_item_name)
         chest_item_name = treasure_chest_item_name_by_level.get(level_name)
         if chest_item_name:
             item_names["TREASURE_CHESTS"] = get_level_feature_item_name(
@@ -1684,16 +1628,6 @@ class RuleFactory:
                 item_names[action] = get_per_level_action_item_name(level_name, action) or True
         return item_names
 
-    @staticmethod
-    def get_feature_family_item_name(
-            option_value: int, not_shuffled_value: int, global_value: int, global_item_name: str,
-            item_name_by_level: dict[str, str], level_name: str) -> str | bool:
-        if option_value == not_shuffled_value:
-            return True
-        if option_value == global_value:
-            return global_item_name
-        return item_name_by_level.get(level_name, True)
-
     def combine_and_clauses(
             self, rule_expr: str, cannon_name: str, cap_item_names: dict[str, str],
             arbitrary_item_names: dict[str, str | bool],
@@ -1775,11 +1709,11 @@ class RuleFactory:
         if token == "CANN":
             return cannon_name
         if token in self.global_cap_item_name_by_token:
-            if not self.per_level_caps:
+            if not self.options.per_level_cap_items:
                 return self.global_cap_item_name_by_token[token]
             item = cap_item_names.get(token)
-            if not item:
-                raise RuleFactory.SM64LogicException(f"No per-level cap item for token '{token}' in this target.")
+            if item is None:
+                raise RuleFactory.SM64LogicException(f"No cap item for token '{token}' in this target.")
             return item
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]

@@ -102,6 +102,7 @@ class SM64World(World):
     music_slot_data: typing.Dict[str, typing.Any] | None
     using_slot_coinsanity_locations: bool
     start_inventory_item_ids: set[int]
+    start_inventory_item_counts: dict[int, int]
 
     slot_option_names = (
         "area_rando",
@@ -169,11 +170,13 @@ class SM64World(World):
             }
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
             self.skybox_slot_data = self.get_skybox_slot_data_from_slot_data(slot_data)
-            self.start_inventory_item_ids = {
-                int(item_id) for item_id in slot_data.get("StartInventory", {})
+            self.start_inventory_item_counts = {
+                int(item_id): int(count)
+                for item_id, count in slot_data.get("StartInventory", {}).items()
             }
         else:
-            self.start_inventory_item_ids = set(self.get_start_inventory_slot_data())
+            self.start_inventory_item_counts = self.get_start_inventory_slot_data()
+        self.start_inventory_item_ids = set(self.start_inventory_item_counts)
 
         enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
         tracker_logic_tricks = get_enabled_logic_tricks(self.options.universal_tracker_glitched_logic.value)

@@ -167,14 +167,14 @@ class TestWetDryWorldHighRedCoinsTripleJumpTrick(SM64TestBase):
     }
 
     def test_red_coin_star_accepts_triple_jump_instead_of_wall_kick(self):
-        requirements = [DIAMOND, RED_COINS]
+        requirements = [CANNON, DIAMOND, RED_COINS]
         self.run_location_tests([
             ["Wet-Dry World - Go to Town for Red Coins", False, requirements],
             ["Wet-Dry World - Go to Town for Red Coins", True,
              requirements + ["Wall Kick"]],
             ["Wet-Dry World - Go to Town for Red Coins", True,
              requirements + ["Triple Jump"]],
-        ], starting_regions=["Wet-Dry World - Downtown"])
+        ], starting_regions=["Wet-Dry World Low"])
 
 
 class TestWetDryWorldFullLevelUnlock(SM64TestBase):
