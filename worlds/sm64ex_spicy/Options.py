@@ -381,7 +381,7 @@ class CoinObjectUnlocks(LevelFeatureItemMode):
 
 class EnemyUnlocks(LevelFeatureItemMode):
     """
-    Choose how coin-yielding enemy unlocks are handled.
+    Choose how unlocks are handled for most enemies.
 
     Not Shuffled - The game starts with every affected enemy unlocked.
 
