@@ -103,6 +103,13 @@ logic_tricks = {
         "difficulty": "medium",
         "video": "https://www.youtube.com/watch?v=NNfJI9hYSqI"
     },
+    "Castle Lobby Backwards Long Jump Through the 8 Star Door": {
+        "internal_id": "logic_castle_lobby_8_star_door_blj",
+        "rule": "LJ+LG",
+        "description": "Bypassing the 8 Star Door using a Lobby Backwards Long Jump.",
+        "difficulty": "hard",
+        "video": "https://www.youtube.com/watch?v=RfyThHpFXoo"
+    },
     "Castle Side Backwards Long Jump Through the 30 Star Door": {
         "internal_id": "logic_castle_30_star_door_sblj",
         "rule": "LJ",

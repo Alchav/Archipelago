@@ -572,7 +572,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                     "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab"))
     connect_randomized_entrance("Menu", "Tower of the Wing Cap",
                                 level_unlock_rule("Unlock Tower of the Wing Cap"))
-    connect_randomized_entrance("Menu", "Bowser in the Dark World", first_floor_key_rule)
+    connect_randomized_entrance(
+        "Menu", "Bowser in the Dark World",
+        first_floor_key_rule | rf.build_rule("logic_castle_lobby_8_star_door_blj"))
 
     connect_regions(multiworld, player, "Menu", "Basement", basement_key_rule)
 

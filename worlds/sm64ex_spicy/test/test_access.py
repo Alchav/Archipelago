@@ -347,10 +347,18 @@ class CastleDoorBLJLogicTricksTestBase(SM64TestBase):
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "area_rando": Options.AreaRandomizer.option_Off,
         "logic_tricks": {
+            "Castle Lobby Backwards Long Jump Through the 8 Star Door",
             "Castle Backwards Long Jump Through the 50 Star Door",
             "Castle Backwards Long Jump Through the 70 Star Door",
         },
     }
+
+    def test_lobby_8_star_door_blj_requires_long_jump_and_ledge_grab(self):
+        self.assertFalse(self.can_reach_region("Bowser in the Dark World"))
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertFalse(self.can_reach_region("Bowser in the Dark World"))
+        self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
 
     def test_fifty_and_seventy_star_door_blj_require_long_jump(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
