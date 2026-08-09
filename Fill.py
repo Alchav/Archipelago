@@ -2044,6 +2044,33 @@ def distribute_planned_blocks(multiworld: MultiWorld, plando_blocks: list[Plando
 
 
 
+def _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index, location, merge_jigsaw=False):
+    """Move one item to the latest usable location in an earlier sphere."""
+    item = location.item
+    for earlier_index in range(sphere_index - 1, -1, -1):
+        for new_location in spheres[earlier_index]:
+            if (merge_jigsaw and new_location.item and item and new_location.player == location.player and
+                    multiworld.game[location.player] == "Jigsaw" and "Puzzle Piece" in item.name and
+                    "Puzzle Piece" in new_location.item.name):
+                new_pieces = int(new_location.item.name.split(" ")[0]) + int(item.name.split(" ")[0])
+                new_location.item = multiworld.worlds[location.player].create_item(f"{new_pieces} Puzzle Pieces")
+                new_location.item.location = new_location
+                location.item = None
+                logging.info(f"Merged puzzle pieces into {new_pieces} piece item in sphere {earlier_index + 1}")
+                return True
+            if (new_location.item is None and new_location.player == location.player and
+                    new_location.item_rule(item) and new_location.progress_type != LocationProgressType.EXCLUDED):
+                new_location.item = item
+                item.location = new_location
+                location.item = None
+                return True
+
+    logging.info(f"Pushing {item} to start inventory for {multiworld.player_name[item.player]}")
+    multiworld.push_precollected(item)
+    location.item = None
+    return True
+
+
 def compress_owner_spheres(multiworld):
     def gen_spheres():
         spheres = []
@@ -2079,67 +2106,23 @@ def compress_owner_spheres(multiworld):
         if highest_sphere <= max_sphere:
             break
 
-        # active_games_x = {location.player for location in spheres[max_sphere]}
         i += 1
         logging.info(f"compress sphere loop {i}. Highest sphere: {highest_sphere}")
-        active_games = []
+        candidate_spheres = []
         for owner in owners_above_max_sphere:
-            group = owner_groups[owner]
-            spheres_per_player = {a: b for a, b in spheres_per_game.items() if a in group}
-            highest_game = max(spheres_per_player, key=spheres_per_player.get)
-            active_games.append(highest_game)
-        for nx, sphere in enumerate(reversed(spheres), start=1):
-            n = len(spheres) - nx
-            if not active_games:
-                break
-            games_to_remove = set()
-            for location in sphere:
-                if not active_games:
-                    break
-                if (swappable(multiworld, location,
-                              within_local=True) and location.item and location.item.advancement and
-                        (location.item.player in active_games)):
-                    # if location.item.player in active_games:
-                    #     active_games.remove(location.item.player)
-                    games_to_remove.add(location.item.player)
-                    if n == 0:
-                        new_sphere = -1
-                    else:
-                        new_sphere = multiworld.random.randint(multiworld.random.randint(0, n - 1), n - 1)
-                    for new_sphere in range(new_sphere, -2, -1):
-                        if new_sphere == -1:
-                            logging.info(
-                                f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")
-                            multiworld.push_precollected(location.item)
-                            location.item = None
-                            break
-                        for new_location in spheres[new_sphere]:
-                            if (new_location.item and location.item and new_location.player == location.player and
-                                    multiworld.game[location.player] == "Jigsaw"
-                                    and "Puzzle Piece" in location.item.name
-                                    and "Puzzle Piece" in new_location.item.name):
-                                new_pieces = int(new_location.item.name.split(" ")[0]) + int(
-                                    location.item.name.split(" ")[0])
-                                new_location.item = multiworld.worlds[location.player].create_item(
-                                    f"{new_pieces} Puzzle Pieces")
-                                new_location.item.location = new_location
-                                location.item = None
-                                logging.info(f"Merged puzzle pieces into {new_pieces} piece item in sphere {new_sphere}")
-                                break
-                            elif new_location.item is None and new_location.player == location.player and new_location.item_rule(
-                                    location.item) and new_location.progress_type != LocationProgressType.EXCLUDED:
-                                new_location.item = location.item
-                                new_location.item.location = new_location
-                                location.item = None
-                                break
-                        else:
-                            continue
-                        break
-            for player in games_to_remove:
-                try:
-                    active_games.remove(player)
-                except Exception as e:
-                    pass
+            owner_players = owner_groups[owner]
+            for sphere_index, sphere in enumerate(spheres):
+                candidates = [location for location in sphere
+                              if swappable(multiworld, location, within_local=True) and location.item and
+                              location.item.advancement and location.item.player in owner_players]
+                if candidates:
+                    candidate_spheres.append((len(candidates), sphere_index, candidates))
+        if not candidate_spheres:
+            break
+        _, sphere_index, candidates = min(candidate_spheres,
+                                          key=lambda candidate: (candidate[0], -candidate[1]))
+        _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index,
+                                         multiworld.random.choice(candidates), merge_jigsaw=True)
 
 def compress_spheres(multiworld, max_sphere):
     def gen_spheres():
@@ -2149,44 +2132,30 @@ def compress_spheres(multiworld, max_sphere):
             multiworld.random.shuffle(sphere)
             spheres.append(sphere)
         return spheres
-    spheres = gen_spheres()
     i = 0
-    while len(spheres) > max_sphere:
-        active_games_x = {location.player for location in spheres[max_sphere]}
+    while True:
+        spheres = gen_spheres()
+        if len(spheres) <= max_sphere:
+            break
         i += 1
         logging.info(f"compress sphere loop {i}. Number of spheres: {len(spheres)}")
-        for n, sphere in enumerate(spheres, start=1):
-            active_games = active_games_x.copy()
-            if n >= max_sphere - 1:
-                sphere = sorted(sphere)
-                for location in sphere:
-                    if not active_games:
-                        break
-                    if (swappable(multiworld, location, within_local=True) and location.item and location.item.advancement and
-                            (location.item.player in active_games or multiworld.random.randint(40, 140) < i)):
-                        if location.item.player in active_games:
-                            active_games.remove(location.item.player)
-                        new_sphere = multiworld.random.randint(multiworld.random.randint(0, n-1), n-1)
-                        for new_sphere in range(new_sphere, -2, -1):
-                            if new_sphere == -1:
-                                logging.info(f"Pushing {location.item} to start inventory for {multiworld.player_name[location.item.player]}")
-                                multiworld.push_precollected(location.item)
-                                location.item = None
-                                break
-                            for new_location in spheres[new_sphere]:
-                                if new_location.item is None and new_location.player == location.player and new_location.item_rule(location.item) and new_location.progress_type != LocationProgressType.EXCLUDED:
-                                    new_location.item = location.item
-                                    new_location.item.location = new_location
-                                    location.item = None
-                                    break
-                            else:
-                                continue
-                            break
-        if i % 3 != 2:
-            spheres = gen_spheres()
+        candidate_spheres = []
+        for sphere_index in range(max_sphere, len(spheres)):
+            candidates_by_game = collections.defaultdict(list)
+            for location in spheres[sphere_index]:
+                if (swappable(multiworld, location, within_local=True) and location.item and
+                        location.item.advancement):
+                    candidates_by_game[location.item.player].append(location)
+            candidate_spheres.extend((len(candidates), sphere_index, candidates)
+                                     for candidates in candidates_by_game.values())
+        if not candidate_spheres:
+            break
+        _, sphere_index, candidates = min(candidate_spheres,
+                                          key=lambda candidate: (candidate[0], -candidate[1]))
+        _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index,
+                                         multiworld.random.choice(candidates))
 
 def check_no_skips(multiworld, starting_spheres):
-    return
     games = {player: 0 for player in multiworld.player_ids}
     for n, sphere in enumerate(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False), start=1):
         sphere_games = {loc.player for loc in sphere}
