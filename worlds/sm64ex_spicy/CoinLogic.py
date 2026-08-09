@@ -3457,14 +3457,11 @@ def wing_mario_over_the_rainbow_coins(
     has_vertical_coin_rings = rules.has_unlock(
         state, player, "coin_object_unlocks",
         "Vertical Coin Rings", f"{level_name} - Vertical Coin Rings")
-    has_leap_of_faith = rules.has_logic_trick(
-        state, player, "logic_wmotr_leap_of_faith")
-    has_leap_without_ledge_grab = rules.has_logic_trick(
-        state, player, "logic_wmotr_leap_of_faith_without_ledge_grab")
-    can_long_jump_leap = (
-        rules.has_action(state, player, "Long Jump", level_name)
-        and (has_leap_of_faith or has_leap_without_ledge_grab)
-    )
+    has_leap_of_faith = rules.can_use_logic_trick(
+        state, player, "logic_wmotr_leap_of_faith", level_name)
+    has_leap_without_ledge_grab = rules.can_use_logic_trick(
+        state, player, "logic_wmotr_leap_of_faith_without_ledge_grab", level_name)
+    can_long_jump_leap = has_leap_of_faith or has_leap_without_ledge_grab
     has_cannon_region = state.can_reach(
         "Wing Mario Over the Rainbow - Cannon", "Region", player)
     has_flight_route = (
@@ -3501,10 +3498,7 @@ def wing_mario_over_the_rainbow_coins(
     long_jump_first_coin = has_red_coins and can_long_jump_leap
     long_jump_second_coin = (
         long_jump_first_coin
-        and (
-            has_leap_without_ledge_grab
-            or rules.has_action(state, player, "Ledge Grab", level_name)
-        )
+        and (has_leap_of_faith or has_leap_without_ledge_grab)
     )
     wing_cap_fallback_coin = (
         not long_jump_first_coin
@@ -5017,12 +5011,11 @@ def _secrets_requirement_specs():
         (WMOTR, "wmotr_leap_fallback"): _spec(_target(WMOTR)),
         (WMOTR, "wmotr_long_jump_first_red_coin"): _spec(
             _target(WMOTR),
-            "LJ & logic_wmotr_leap_of_faith | LJ & logic_wmotr_leap_of_faith_without_ledge_grab",
+            "logic_wmotr_leap_of_faith | logic_wmotr_leap_of_faith_without_ledge_grab",
             ("Red Coins", f"{WMOTR} - Red Coins")),
         (WMOTR, "wmotr_long_jump_second_red_coin"): _spec(
             _target(WMOTR),
-            "LJ & logic_wmotr_leap_of_faith_without_ledge_grab | "
-            "LJ+LG & logic_wmotr_leap_of_faith",
+            "logic_wmotr_leap_of_faith_without_ledge_grab | logic_wmotr_leap_of_faith",
             ("Red Coins", f"{WMOTR} - Red Coins")),
         # The evaluator additionally suppresses this source when the Long Jump fallback is available.
         (WMOTR, "wmotr_wing_cap_fallback_red_coin"): _spec(

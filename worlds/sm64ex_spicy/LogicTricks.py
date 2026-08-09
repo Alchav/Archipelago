@@ -594,14 +594,14 @@ logic_tricks = {
     # Wing Mario Over the Rainbow
     "Wing Mario Over the Rainbow Leap of Faith": {
         "internal_id": "logic_wmotr_leap_of_faith",
-        "rule": "",
+        "rule": "LJ+LG",
         "difficulty": "medium",
         "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
                        "Red Coin. Long Jump and Ledge Grab can reach the Buddy Platform",
     },
     "Wing Mario Over the Rainbow Leap of Faith Without Ledge Grab": {
         "internal_id": "logic_wmotr_leap_of_faith_without_ledge_grab",
-        "rule": "",
+        "rule": "LJ",
         "difficulty": "hard",
         "description": "Using Wing Cap and/or Long Jump to leap down. Wing Cap can reach a single Red Coin. Long Jump"
                        "can reach the Buddy Platform",

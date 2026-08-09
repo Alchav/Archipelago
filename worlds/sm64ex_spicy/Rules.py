@@ -886,8 +886,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule(
         "Tiny-Huge Island - Windswept Valley",
         "TJ+DV | LJ | logic_thi_windswept_valley_fly_guy_spin_jump")
-    rf.assign_rule("Tiny-Huge Island - Cannonball", "LG/SF/BF/TJ")
-    rf.assign_rule("Tiny-Huge Island - Koopa the Quick", "SF/BF/TJ")
+    rf.assign_rule("Tiny-Huge Island - Cannonball", "LG/SF/BF/TJ/WK")
+    rf.assign_rule("Tiny-Huge Island - Koopa the Quick", "SF/BF/TJ/WK")
     rf.assign_rule("Tiny-Huge Island - Huge Top", "SF/BF/TJ")
     rf.assign_rule(
         "Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell",
@@ -998,8 +998,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     wmotr_flight_rule = "WC & TJ | WC & {Wing Mario Over the Rainbow - Bob-omb Buddy Platform} & CANN"
     rf.assign_rule(
         "Wing Mario Over the Rainbow - Bob-omb Buddy Platform",
-        "WC+TJ | LJ+LG & logic_wmotr_leap_of_faith | "
-        "LJ & logic_wmotr_leap_of_faith_without_ledge_grab")
+        "WC+TJ | logic_wmotr_leap_of_faith | logic_wmotr_leap_of_faith_without_ledge_grab")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
@@ -1077,9 +1076,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block":
                 "WC+TJ | WC & logic_wmotr_leap_of_faith | "
-                "WC & logic_wmotr_leap_of_faith_without_ledge_grab | "
-                "LJ+LG & logic_wmotr_leap_of_faith | "
-                "LJ & logic_wmotr_leap_of_faith_without_ledge_grab",
+                "WC & logic_wmotr_leap_of_faith_without_ledge_grab",
             "Wing Mario Over the Rainbow - Bob-omb Buddy Platform Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block": wmotr_flight_rule,
         }

@@ -121,7 +121,9 @@ class TestWingMarioOverTheRainbowLeapOfFaith(SM64TestBase):
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, ["Long Jump"]],
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", True, buddy_leap],
             ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, ["Long Jump"]],
-            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, leap],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, leap],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True,
+             leap + ["Wing Mario Over the Rainbow - Wing Cap"]],
             ["Wing Mario Over the Rainbow - Red Coins", False, [
                 *leap,
                 "Wing Mario Over the Rainbow - Wing Cap",
@@ -148,5 +150,7 @@ class TestWingMarioOverTheRainbowLeapWithoutLedgeGrab(SM64TestBase):
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, []],
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", True,
              ["Long Jump", "Wing Mario Over the Rainbow - Bob-omb Buddy"]],
-            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, ["Long Jump"]],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, ["Long Jump"]],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True,
+             ["Long Jump", "Wing Mario Over the Rainbow - Wing Cap"]],
         ], starting_regions=["Wing Mario Over the Rainbow"])

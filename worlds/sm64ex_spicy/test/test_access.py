@@ -3849,6 +3849,17 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Wiggler's Cave"))
 
+    def test_wall_kick_reaches_cannonball_and_koopa_regions(self):
+        self.disable_tiny_entry()
+        self.collect_second_floor_access()
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Windswept Valley"))
+        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Cannonball"))
+
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Cannonball"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
+
     def test_huge_piranha_area_returns_through_both_pipes(self):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
