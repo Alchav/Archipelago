@@ -899,7 +899,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             return 0
         if (not i.advancement) and "Auto" in multiworld.player_name[i.player]:
             return 0
-        if item.player == 1 and item.name.startswith("Unlock "):
+        if i.player == 1 and i.name.startswith("Unlock "):
             return 0
         if i.classification == ItemClassification.useful and game == "Terraria":
             return multiworld.random.randint(2, 3)
