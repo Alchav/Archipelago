@@ -5877,10 +5877,10 @@ class TallTallMountainCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
 
-class TallTallMountainCoinStar16AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+class TallTallMountainCoinStar17AccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
-        "tall_tall_mountain_coin_star_requirement": 16,
+        "tall_tall_mountain_coin_star_requirement": 17,
     }
 
     def test_coins_above_start_require_middle_region(self):
@@ -5904,10 +5904,10 @@ class TallTallMountainCoinStar43AccessTestBase(TallTallMountainCoinStarAccessTes
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
-class TallTallMountainCoinStar60AccessTestBase(TallTallMountainCoinStarAccessTestBase):
+class TallTallMountainCoinStar57AccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
-        "tall_tall_mountain_coin_star_requirement": 60,
+        "tall_tall_mountain_coin_star_requirement": 57,
     }
 
     def test_climb_coins_reach_coin_star(self):
@@ -5919,11 +5919,11 @@ class TallTallMountainCoinStar60AccessTestBase(TallTallMountainCoinStarAccessTes
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
-class TallTallMountainCoinStar60MovelessAccessTestBase(TallTallMountainCoinStarAccessTestBase):
+class TallTallMountainCoinStar57MovelessAccessTestBase(TallTallMountainCoinStarAccessTestBase):
     options = {
         **TallTallMountainCoinStarAccessTestBase.options,
         "logic_tricks": {"Tall, Tall Mountain Coins without Climb"},
-        "tall_tall_mountain_coin_star_requirement": 60,
+        "tall_tall_mountain_coin_star_requirement": 57,
     }
 
     def test_moveless_coins_reach_coin_star(self):

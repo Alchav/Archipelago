@@ -2041,17 +2041,11 @@ def tall_tall_mountain_coins(
     builder.add(
         "ttm_start_goombas",
         "Three Goombas in the starting area",
-        2,
+        3,
         has_goombas,
     )
 
     can_reach_middle = state.can_reach(f"{level_name} - Middle", "Region", player)
-    builder.add(
-        "ttm_middle_goomba",
-        "Goomba above the starting area",
-        1,
-        can_reach_middle and has_goombas,
-    )
     builder.add(
         "ttm_middle_red_coins",
         "Six Red Coins in the Middle area",
@@ -2094,8 +2088,8 @@ def tall_tall_mountain_coins(
     )
     builder.add(
         "ttm_upper_goombas",
-        "Six Goombas in the Upper area",
-        6,
+        "Three Goombas in the Upper area",
+        3,
         can_reach_upper and has_goombas,
     )
     builder.add(
@@ -2124,9 +2118,21 @@ def tall_tall_mountain_coins(
 
     can_reach_top = state.can_reach(f"{level_name} - Top", "Region", player)
     builder.add(
+        "ttm_top_goombas",
+        "Three Goombas in the Top area",
+        3,
+        can_reach_top and has_goombas,
+    )
+    builder.add(
+        "ttm_hidden_coin_before_slide",
+        "Hidden single yellow coin before the slide",
+        1,
+        can_reach_top and has_single_yellow_coins,
+    )
+    builder.add(
         "ttm_slide_single_coins",
         "Single yellow coins on the slide",
-        27,
+        26,
         can_reach_top and has_single_yellow_coins,
     )
     builder.add(

@@ -14,7 +14,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
-    per_level_one_up_unlock_item_data_table
+    per_level_one_up_unlock_item_data_table, progressive_cap_length_item_names
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
@@ -71,6 +71,7 @@ class SM64World(World):
     number_of_stars: int
     move_rando_bitvec: int
     filler_count: int
+    cap_length_item_counts: dict[str, int]
 
     @staticmethod
     def _clear_coin_evaluation_cache(state: CollectionState, player: int) -> None:
@@ -192,6 +193,9 @@ class SM64World(World):
                 self.move_rando_bitvec |= (1 << (action_item_data_table[action].code - double_jump_bitvec_offset))
 
         self.filler_count = 0
+        self.cap_length_item_counts = {
+            item_name: 0 for item_name in progressive_cap_length_item_names
+        }
         self.topology_present = self.options.area_rando
         if (
                 self.options.accessibility == self.options.accessibility.option_full
@@ -586,9 +590,18 @@ class SM64World(World):
 
         replacement_item_names = self.get_filler_replacements(self.filler_count)
         plain_filler_count = self.filler_count - len(replacement_item_names)
+        cap_length_item_names = [
+            progressive_cap_length_item_names[index % len(progressive_cap_length_item_names)]
+            for index in range(plain_filler_count)
+        ]
+        self.random.shuffle(cap_length_item_names)
+        self.cap_length_item_counts = {
+            item_name: cap_length_item_names.count(item_name)
+            for item_name in progressive_cap_length_item_names
+        }
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
         self.multiworld.itempool += [self.create_item(item_name) for item_name in replacement_item_names]
-        self.multiworld.itempool += [self.create_item("1-Up Mushroom") for i in range(plain_filler_count)]
+        self.multiworld.itempool += [self.create_item(item_name) for item_name in cap_length_item_names]
 
     def generate_basic(self):
         if not self.options.buddy_checks:
@@ -611,7 +624,7 @@ class SM64World(World):
                 location.place_locked_item(self.create_event_item(item_name))
 
     def get_filler_item_name(self) -> str:
-        return "1-Up Mushroom"
+        return self.random.choice(progressive_cap_length_item_names)
 
     @staticmethod
     def get_rgb_color(value: int) -> typing.List[int]:
@@ -709,6 +722,9 @@ class SM64World(World):
             "EasyButterflies": self.options.easy_butterflies.value,
             "NoDespawn": self.options.no_despawns.value,
             "PermanentCoinCollection": self.options.permanent_coin_collection.value,
+            "WingCapLengthItemCount": self.cap_length_item_counts["Progressive Wing Cap Length"],
+            "MetalCapLengthItemCount": self.cap_length_item_counts["Progressive Metal Cap Length"],
+            "VanishCapLengthItemCount": self.cap_length_item_counts["Progressive Vanish Cap Length"],
             "MipsSkipEnabled": self.logic_castle_30_star_door_mips_skip,
             "BowserInTheDarkWorldHits": self.options.bowser_in_the_dark_world_health.value,
             "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_health.value,

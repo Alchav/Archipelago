@@ -1561,7 +1561,24 @@ class NoPowerStarsTestBase(SM64TestBase):
     }
 
     def test_no_power_stars_generated(self):
-        self.assertGreater(len(self.get_items_by_name("1-Up Mushroom")), 0)
+        cap_length_items = sum(
+            len(self.get_items_by_name(item_name))
+            for item_name in (
+                "Progressive Wing Cap Length",
+                "Progressive Metal Cap Length",
+                "Progressive Vanish Cap Length",
+            )
+        )
+        self.assertGreater(cap_length_items, 0)
+        self.assertNotIn("1-Up Mushroom", self.world.item_name_to_id)
+        slot_data = self.world.fill_slot_data()
+        cap_length_counts = [
+            slot_data["WingCapLengthItemCount"],
+            slot_data["MetalCapLengthItemCount"],
+            slot_data["VanishCapLengthItemCount"],
+        ]
+        self.assertEqual(sum(cap_length_counts), cap_length_items)
+        self.assertLessEqual(max(cap_length_counts) - min(cap_length_counts), 1)
         self.assertNotIn("Power Star", {item.name for item in self.multiworld.get_items()})
 
 

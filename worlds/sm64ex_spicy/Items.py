@@ -65,11 +65,18 @@ generic_item_data_table: dict[str, SM64ItemData] = {
     "Wing Cap": SM64ItemData(sm64ex_base_id + 181),
     "Metal Cap": SM64ItemData(sm64ex_base_id + 182),
     "Vanish Cap": SM64ItemData(sm64ex_base_id + 183),
-    "1-Up Mushroom": SM64ItemData(sm64ex_base_id + 184, filler),
+    "Progressive Wing Cap Length": SM64ItemData(sm64ex_base_id + 936, filler),
+    "Progressive Metal Cap Length": SM64ItemData(sm64ex_base_id + 937, filler),
+    "Progressive Vanish Cap Length": SM64ItemData(sm64ex_base_id + 938, filler),
     ut_glitch_item_name: SM64ItemData(),
 }
 
 global_cap_item_names = ("Wing Cap", "Metal Cap", "Vanish Cap")
+progressive_cap_length_item_names = (
+    "Progressive Wing Cap Length",
+    "Progressive Metal Cap Length",
+    "Progressive Vanish Cap Length",
+)
 
 feature_item_data_table: dict[str, SM64ItemData] = {
     "Bob-omb Battlefield - King Bob-omb": SM64ItemData(sm64ex_base_id + 245, progression_deprioritized),
@@ -980,6 +987,6 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Enemy Unlocks": set(per_level_enemy_item_data_table),
     "Progressive Bowser Arena Bombs": set(bowser_bomb_item_data_table),
     "Optional Items": set(optional_item_data_table),
-    "Filler": {"1-Up Mushroom"},
+    "Filler": set(progressive_cap_length_item_names),
      "Traps": set(trap_item_data_table),
 }
