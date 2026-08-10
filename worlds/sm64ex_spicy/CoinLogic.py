@@ -2871,7 +2871,7 @@ def tiny_huge_island_coin_evaluation(
             5,
             has_huge_context
             and has_wooden_posts
-            and (has_cannon and has_huge_start or has_top and has_long_jump),
+            and (has_cannon and has_huge_start or has_koopa_region and has_long_jump),
         )
         add_source(
             "huge_windswept_line",
@@ -4819,7 +4819,7 @@ def _late_requirement_specs():
             ("huge_koopa_troopa", "KOOPA_TROOPA", "Koopa Troopas", "Koopa Troopa")):
         _add(THI, _source, f"{_thi_huge_main} & {_token}", _unlock(_global, THI, _local))
     _add(THI, "huge_lakitu_island_post",
-         "{Tiny-Huge Island (Huge)} & CANN | {Tiny-Huge Island - Huge Top} & LJ",
+         "{Tiny-Huge Island (Huge)} & CANN | {Tiny-Huge Island - Koopa the Quick} & LJ",
          _unlock("Wooden Posts", THI))
     _add(THI, "huge_windswept_line", "{Tiny-Huge Island - Windswept Valley} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", THI))
