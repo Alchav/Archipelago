@@ -318,6 +318,7 @@ joke_hints = (
     "Dang Pencil, I see your point. I guess you write.",
     "Yeah, I speak French. Shut up heck idiot. Pardon my French.",
     "Congratulations. You have successfully found this sign.",
+    "Dating is easy, you just ask them out and they say no.",
 )
 
 
@@ -333,7 +334,6 @@ tip_hints = (
     "Please include your Universal Tracker /explain details with any questions or reports regarding logic.",
     "If your game was generated with a 0.2.X apworld, set the branch to 0.2.0 when you build sm64ex",
     "Water in the moat won't stop you from entering the Vanish Cap Under the Moat entrance if the grate is gone!",
-    ""
 )
 
 
