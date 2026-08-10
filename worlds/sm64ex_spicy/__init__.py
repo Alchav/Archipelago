@@ -629,7 +629,8 @@ class SM64World(World):
             item.advancement for item in self.multiworld.itempool
             if item.player == self.player
         )
-        self.sign_hint_count = min(len(sign_data), advancement_count // 5)
+        entrance_count = len(get_shuffled_entrance_ids(self.options.area_rando.value))
+        self.sign_hint_count = min(len(sign_data), (advancement_count + entrance_count) // 5)
 
     @classmethod
     def stage_pre_output(cls, multiworld):
