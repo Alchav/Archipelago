@@ -320,6 +320,7 @@ tip_hints = (
     "Save files are a thing of the past. It's all on the Archipelago server now!",
     "If you aren't using Universal Tracker, you should cease not using it immediately.",
     "Please include your Universal Tracker /explain details with any questions or reports regarding logic.",
+    "If your game was generated with a 0.2.X apworld, set the branch to 0.2.0 when you build sm64ex"
 )
 
 

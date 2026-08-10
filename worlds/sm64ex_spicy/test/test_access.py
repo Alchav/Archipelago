@@ -7603,6 +7603,22 @@ class RainbowRideIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Rainbow Ride - Red Coins"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Amassed in a Maze"))
 
+    def test_lakitus_are_split_between_maze_and_carpets(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Climb"),
+            self.get_item_by_name("Rainbow Ride - Lakitus"),
+        ])
+
+        self.assertTrue(rainbow_ride_coins(self.multiworld.state, self.player, 5))
+        self.assertFalse(rainbow_ride_coins(self.multiworld.state, self.player, 6))
+
+        self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
+        self.assertTrue(rainbow_ride_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(rainbow_ride_coins(self.multiworld.state, self.player, 11))
+
 
 class BlocksanityCoinBlockUnlockAccessTestBase(SM64TestBase):
     run_default_tests = False

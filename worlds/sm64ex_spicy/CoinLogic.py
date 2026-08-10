@@ -3299,7 +3299,7 @@ def rainbow_ride_coins(
         coin_source("rr_maze_coin_rings",
                 "Two coin rings at the spinning platforms",
                 16, has_horizontal_coin_rings),
-        coin_source("rr_maze_lakitus", "Two Lakitus", 10, has_lakitus),
+        coin_source("rr_maze_lakitu", "Lakitu in the Maze", 5, has_lakitus),
         coin_source("rr_maze_bob_ombs", "Two Bob-ombs", 2, has_bob_ombs),
         coin_source("rr_maze_blue_coin",
                 "First Blue Coin from the Maze block",
@@ -3336,6 +3336,7 @@ def rainbow_ride_coins(
     trace.add_route(
         "rr_carpets", "Carpets region",
         state.can_reach("Rainbow Ride - Carpets", "Region", player), (
+            coin_source("rr_carpets_lakitu", "Lakitu in the Carpets region", 5, has_lakitus),
             coin_source("rr_second_carpet_platform_coin",
                     "Coin on the second carpet's grey platform",
                     1, has_single_yellow_coins),
@@ -4908,7 +4909,8 @@ def _late_requirement_specs():
     _add(RR, "rr_maze", "{Rainbow Ride - Maze}")
     _add(RR, "rr_maze_coin_rings", "{Rainbow Ride - Maze} & HORIZONTAL_COIN_RINGS",
          _unlock("Horizontal Coin Rings", RR))
-    _add(RR, "rr_maze_lakitus", "{Rainbow Ride - Maze} & LAKITU", _unlock("Lakitus", RR))
+    _add(RR, "rr_maze_lakitu", "{Rainbow Ride - Maze} & LAKITU", _unlock("Lakitus", RR))
+    _add(RR, "rr_carpets_lakitu", "{Rainbow Ride - Carpets} & LAKITU", _unlock("Lakitus", RR))
     _add(RR, "rr_maze_bob_ombs", "{Rainbow Ride - Maze} & BOB_OMBS", _unlock("Bob-ombs", RR))
     _add(RR, "rr_maze_blue_coin", "{Rainbow Ride - Maze} & BLUE_COIN_BLOCKS & GP",
          _unlock("Blue Coin Blocks", RR, "Blue Coin Block"))
