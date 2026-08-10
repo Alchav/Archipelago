@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from BaseClasses import CollectionState
 from rule_builder.rules import And, False_, Or, Rule, True_
 
-from .RuleBuilder import CoinEvaluation, CoinSourceTrace, HasUnlock
+from .RuleBuilder import CoinEvaluation, CoinSourceTrace, HasUnlock, LogicTrick
 
 if TYPE_CHECKING:
     from . import SM64World
@@ -3468,6 +3468,10 @@ def wing_mario_over_the_rainbow_coins(
         state, player, "logic_wmotr_leap_of_faith", level_name)
     has_leap_without_ledge_grab = rules.can_use_logic_trick(
         state, player, "logic_wmotr_leap_of_faith_without_ledge_grab", level_name)
+    leap_of_faith_selected = rules.has_logic_trick(
+        state, player, "logic_wmotr_leap_of_faith")
+    leap_without_ledge_grab_selected = rules.has_logic_trick(
+        state, player, "logic_wmotr_leap_of_faith_without_ledge_grab")
     can_long_jump_leap = has_leap_of_faith or has_leap_without_ledge_grab
     has_cannon_region = state.can_reach(
         "Wing Mario Over the Rainbow - Cannon", "Region", player)
@@ -3505,13 +3509,17 @@ def wing_mario_over_the_rainbow_coins(
     long_jump_first_coin = has_red_coins and can_long_jump_leap
     long_jump_second_coin = (
         long_jump_first_coin
-        and (has_leap_of_faith or has_leap_without_ledge_grab)
+        and (
+            has_leap_without_ledge_grab
+            or has_leap_of_faith
+            and rules.has_action(state, player, "Ledge Grab", level_name)
+        )
     )
     wing_cap_fallback_coin = (
         not long_jump_first_coin
         and has_red_coins
         and has_wing_cap_item
-        and (has_leap_of_faith or has_leap_without_ledge_grab)
+        and (leap_of_faith_selected or leap_without_ledge_grab_selected)
     )
     trace.add_route(
         "wmotr_leap_fallback",
@@ -4759,6 +4767,9 @@ def _late_requirement_specs():
          "{Tall, Tall Mountain - Upper} & CL | "
          "{Tall, Tall Mountain - Upper} & logic_ttm_coins_without_climb",
          _unlock("Horizontal Coin Lines", TTM))
+    _add(TTM, "ttm_top_goombas", "{Tall, Tall Mountain - Top} & GOOMBAS", _unlock("Goombas", TTM))
+    _add(TTM, "ttm_hidden_coin_before_slide", "{Tall, Tall Mountain - Top} & SINGLE_YELLOW_COINS",
+         _unlock("Single Yellow Coins", TTM))
     _add(TTM, "ttm_slide_single_coins", "{Tall, Tall Mountain - Top} & SINGLE_YELLOW_COINS",
          _unlock("Single Yellow Coins", TTM))
     for _source in ("ttm_slide_coin_lines", "ttm_slide_entrance_coin_line", "ttm_waterfall_bridge_coin_line"):
@@ -5023,12 +5034,13 @@ def _secrets_requirement_specs():
             ("Red Coins", f"{WMOTR} - Red Coins")),
         (WMOTR, "wmotr_long_jump_second_red_coin"): _spec(
             _target(WMOTR),
-            "logic_wmotr_leap_of_faith_without_ledge_grab | logic_wmotr_leap_of_faith",
+            "logic_wmotr_leap_of_faith_without_ledge_grab | LG & logic_wmotr_leap_of_faith",
             ("Red Coins", f"{WMOTR} - Red Coins")),
         # The evaluator additionally suppresses this source when the Long Jump fallback is available.
         (WMOTR, "wmotr_wing_cap_fallback_red_coin"): _spec(
             _target(WMOTR),
-            "WC & logic_wmotr_leap_of_faith | WC & logic_wmotr_leap_of_faith_without_ledge_grab",
+            "WC & SELECTED_TRICK:logic_wmotr_leap_of_faith | "
+            "WC & SELECTED_TRICK:logic_wmotr_leap_of_faith_without_ledge_grab",
             ("Red Coins", f"{WMOTR} - Red Coins")),
 
         # Tower of the Wing Cap
@@ -5296,6 +5308,21 @@ def _build_expression_rule(rf, expression: str, target_name: str, arbitrary_item
                      for part in requirements))
 
     atom = _TOKEN_ALIASES.get(expression, expression)
+    selected_trick_prefix = "SELECTED_TRICK:"
+    if atom.startswith(selected_trick_prefix):
+        from .LogicTricks import logic_tricks
+
+        internal_id = atom[len(selected_trick_prefix):]
+        option_key = next(
+            key for key, data in logic_tricks.items()
+            if data["internal_id"] == internal_id
+        )
+        world = rf.multiworld.worlds[rf.player]
+        if getattr(world, internal_id, False):
+            return LogicTrick(option_key, True_())
+        if getattr(world, f"{internal_id}_ut_glitch", False):
+            return LogicTrick(option_key, True_(), ut_glitched=True)
+        return False_()
     result = rf.make_rule(
         atom,
         rf.get_cannon_item_name(target_name),

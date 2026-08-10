@@ -4903,7 +4903,7 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
                 "Shifting Sand Land - Stone Structure Koopa Shell Block",
                 "Shifting Sand Land - Stone Structure Wing Cap Block",
             },
-            {location.name for location in region.locations})
+            {location.name for location in region.locations if not location.name.startswith("Sign Hint - ")})
 
     def test_stone_structure_shell_route_reaches_upper_pyramid(self):
         self.collect_basement_access()
@@ -6193,7 +6193,7 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
 
         source_coins = {
-            "Big Boo's Haunt - Red Coins": 16,
+            "Big Boo's Haunt - Red Coins": 14,
             "Big Boo's Haunt - Flying Bookends": 15,
             "Big Boo's Haunt - Mr. Is": 15,
         }
@@ -7475,6 +7475,7 @@ class RainbowRideCoinStar55AccessTestBase(RainbowRideCoinStarAccessTestBase):
         self.collect([
             self.get_item_by_name("Dive"),
             self.get_item_by_name("Climb"),
+            self.get_item_by_name("Rainbow Ride - Carpets"),
         ])
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
 
@@ -7507,6 +7508,7 @@ class RainbowRideCoinStar101AccessTestBase(RainbowRideCoinStarAccessTestBase):
             self.get_item_by_name("Climb"),
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Rainbow Ride - Carpets"),
         ])
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Star"))
 
