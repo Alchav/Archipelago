@@ -4,6 +4,7 @@ from enum import Enum
 from BaseClasses import MultiWorld, Region, Entrance, Location
 from rule_builder.rules import Rule
 from .Options import SM64Options
+from .Signs import create_sign_locations
 from .Locations import SM64Location, location_table, locBoB_table, locWhomp_table, locJRB_table, locCCM_table, \
     locBBH_table, \
     locHMC_table, locLLL_table, locSSL_table, locDDD_table, locSL_table, \
@@ -645,6 +646,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         remove_locs(multiworld, player, set(locOneUp_table))
     if not options.blocksanity:
         remove_locs(multiworld, player, set(locBlocksanity_table))
+
+    create_sign_locations(multiworld, player)
 
 
 def connect_regions(multiworld: MultiWorld, player: int, source: str, target: str, rule=None,

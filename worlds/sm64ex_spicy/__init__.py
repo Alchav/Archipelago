@@ -22,6 +22,7 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
     move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names, \
     trap_weight_option_names, trap_item_name_by_option_name
 from .Rules import set_rules
+from .Signs import fallback_hints, sign_data, sign_data_by_location_name
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
 from BaseClasses import CollectionState, Item, Region, Tutorial
@@ -104,6 +105,9 @@ class SM64World(World):
     using_slot_coinsanity_locations: bool
     start_inventory_item_ids: set[int]
     start_inventory_item_counts: dict[int, int]
+    sign_hint_count: int
+    sign_hints: dict[str, str]
+    sign_hint_locations: dict[str, int]
 
     slot_option_names = (
         "area_rando",
@@ -163,6 +167,9 @@ class SM64World(World):
         self.music_slot_data = None
         self.skybox_slot_data = None
         self.using_slot_coinsanity_locations = False
+        self.sign_hint_count = 0
+        self.sign_hints = dict(slot_data.get("SignHints", {})) if slot_data else {}
+        self.sign_hint_locations = dict(slot_data.get("SignHintLocations", {})) if slot_data else {}
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
             self.area_connections = {
@@ -602,6 +609,76 @@ class SM64World(World):
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
         self.multiworld.itempool += [self.create_item(item_name) for item_name in replacement_item_names]
         self.multiworld.itempool += [self.create_item(item_name) for item_name in cap_length_item_names]
+        advancement_count = sum(
+            item.advancement for item in self.multiworld.itempool
+            if item.player == self.player
+        )
+        self.sign_hint_count = min(len(sign_data), advancement_count // 5)
+
+    @classmethod
+    def stage_post_fill(cls, multiworld):
+        worlds = [world for world in multiworld.worlds.values() if isinstance(world, cls)]
+        if not worlds:
+            return
+
+        spheres = []
+        for sphere in multiworld.get_spheres():
+            if not sphere:
+                break
+            spheres.append(sorted(sphere))
+
+        for world in worlds:
+            if world.sign_hints:
+                continue
+
+            shuffled_fallback_hints = list(fallback_hints)
+            world.random.shuffle(shuffled_fallback_hints)
+            world.sign_hints = {
+                sign.key: shuffled_fallback_hints[index]
+                for index, sign in enumerate(sign_data)
+            }
+            world.sign_hint_locations = {sign.key: 0 for sign in sign_data}
+
+            signs_by_sphere: list[list] = [[] for _sphere in spheres]
+            items_by_sphere: list[list] = [[] for _sphere in spheres]
+            for sphere_index, sphere in enumerate(spheres):
+                for location in sphere:
+                    if location.player == world.player and location.name in sign_data_by_location_name:
+                        signs_by_sphere[sphere_index].append(location)
+                    elif (
+                            location.item is not None
+                            and location.item.player == world.player
+                            and location.item.advancement
+                            and location.item.code is not None
+                            and location.address is not None
+                    ):
+                        items_by_sphere[sphere_index].append(location)
+
+            for locations in signs_by_sphere:
+                world.random.shuffle(locations)
+            for locations in items_by_sphere:
+                world.random.shuffle(locations)
+
+            assigned_hint_count = 0
+            for sign_sphere_index, sign_locations in enumerate(signs_by_sphere):
+                for sign_location in sign_locations:
+                    if assigned_hint_count >= world.sign_hint_count:
+                        break
+                    item_location = None
+                    for item_sphere_index in range(sign_sphere_index, len(items_by_sphere)):
+                        if items_by_sphere[item_sphere_index]:
+                            item_location = items_by_sphere[item_sphere_index].pop()
+                            break
+                    if item_location is None:
+                        continue
+
+                    hint = f"{item_location.item.name} is at {item_location.name}"
+                    if item_location.player != sign_location.player:
+                        hint += f" in {multiworld.player_name[item_location.player]}'s game"
+                    sign = sign_data_by_location_name[sign_location.name]
+                    world.sign_hints[sign.key] = hint
+                    world.sign_hint_locations[sign.key] = item_location.address
+                    assigned_hint_count += 1
 
     def generate_basic(self):
         if not self.options.buddy_checks:
@@ -730,6 +807,15 @@ class SM64World(World):
             "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_health.value,
             "BowserInTheSkyHits": self.options.bowser_in_the_sky_health.value,
             "BowserInTheSkyStageCollapseHits": self.options.bowser_in_the_sky_stage_collapse_hits.value,
+            "SignHints": self.sign_hints,
+            "SignHintLocations": self.sign_hint_locations,
+            "SignHintData": {
+                str(sign.level * 256 + sign.dialog): [
+                    self.sign_hints.get(sign.key, ""),
+                    self.sign_hint_locations.get(sign.key, 0),
+                ]
+                for sign in sign_data
+            },
         }
         slot_data.update(self.get_music_slot_data())
         slot_data.update(self.get_skybox_slot_data())

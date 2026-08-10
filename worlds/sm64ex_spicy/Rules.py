@@ -15,6 +15,7 @@ from .Items import action_item_data_table, cap_item_data_table, feature_item_dat
 from .LogicTricks import logic_tricks
 from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoins, HasUnlock, LogicTrick, register_coin_evaluator
 from .CoinLogic import COIN_EVALUATORS
+from .Signs import sign_data
 
 
 logic_tricks_by_internal_id = {
@@ -735,6 +736,19 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_hmc_metal_head_capless_no_movement")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
+    for sign in sign_data:
+        if not sign.rule:
+            continue
+        target_name = sign.area
+        rule = rf.build_rule(
+            sign.rule,
+            rf.get_cannon_item_name(target_name),
+            rf.get_cap_item_names(target_name),
+            rf.get_arbitrary_item_names(target_name),
+            rf.get_action_item_names(target_name),
+        )
+        rf.world.set_rule(multiworld.get_location(sign.location_name, player), rule)
+
     if options.one_up_checks:
         rf.add_rule("Hazy Maze Cave - Blue Coin Trail Monty Moles",
                     HasUnlock("Monty Moles", "Hazy Maze Cave - Monty Moles"))
