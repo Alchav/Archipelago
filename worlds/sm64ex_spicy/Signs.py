@@ -197,8 +197,6 @@ joke_hints = (
     "Hoot is asleep and unavailable for hint duty.",
     "The sunken ship took this hint down with it.",
     "Unagi ate the part of the sign that mattered.",
-    "The Whomp King flattened the useful sentence.",
-    "King Bob-omb considers this information classified.",
     "Ukiki has the hint. Ukiki also has no intention of returning it.",
     "Klepto stole the answer before the sign loaded.",
     "The Manta Ray left only rings, not directions.",
@@ -212,8 +210,6 @@ joke_hints = (
     "The Chuckya threw the hint into another region.",
     "The Goomba knew one thing and then got stepped on.",
     "The Boo is invisible, much like the useful information here.",
-    "The Big Boo has a big secret and a small attention span.",
-    "The Thwomp refuses to discuss anything until stomped.",
     "The Snufit fired the answer into the void.",
     "The Scuttlebug scuttled off with the important part.",
     "The Mr. I saw everything and explained nothing.",
@@ -285,6 +281,7 @@ joke_hints = (
     "The owl can carry Mario, but not this conversation.",
     "There are two baby penguins. Choose your crimes carefully.",
     "Press A to perform an action associated with the A Button.",
+    "Press left on the D-Pad to do nothing.",
     "Running is faster than standing still.",
     "Jumping allows Mario to temporarily stop touching the ground.",
     "Doors commonly lead to the other side of doors.",
@@ -303,7 +300,24 @@ joke_hints = (
     "The courtyard is outside but still somehow part of the castle.",
     "Up is the preferred direction for reaching higher platforms.",
     "Moving Mario toward the objective may reduce the distance to the objective.",
-    "There are no warp pipes in Bowser in the Fire Sea, despite what some devs might think."
+    "There are no warp pipes in Bowser in the Fire Sea, despite what some devs might think.",
+    "The extraordinarily perspicacious, intellectually indefatigable, and almost preternaturally loquacious professor delivered an interminable interdisciplinary disquisition concerning antidisestablishmentarianism, constitutional jurisprudence, ecclesiastical institutionalization, anthropocentric epistemology, socioeconomic stratification, geopolitical interconnectedness, neuropsychological phenomenology, bureaucratic compartmentalization, counterrevolutionary historiography, incomprehensibility, disproportionateness, pseudointellectualism, electroencephalographically observable abnormalities, and the seemingly irreconcilable philosophical ramifications of hyperindividualistic self-determination, all while demonstrating such spectacularly sesquipedalian circumlocution, syntactical sophistication, terminological extravagance, and unapologetic grandiloquence that even the most erudite, encyclopedically knowledgeable, and linguistically adventurous members of the audience eventually succumbed to bewilderment, discombobulation, and an overwhelming suspicion that the entire presentation could have been communicated with considerably greater comprehensibility, efficiency, and pedagogical effectiveness had the speaker possessed even the slightest inclination toward concision.",
+    "I do not think, therefore I do not am.",
+    "Private sign\n\nDo not read.",
+    "My brothers and sisters always hated me just because I was an only child.",
+    "Mustard isn't even real. A soggy potato chip told me!",
+    "Nearly visible to me at the edge of my periphery.\nWhat do these astral entities want with humankind?\nI can't even tell if they're substantive or intangible.\nAre spacebugs real, or are they just in my mind?",
+    "I defeated the boss and took his loot. No one at the office messed with me after that.",
+    "Apply garlic to a freshly opened cut or burn to immediately intensify the pain.",
+    "They call them the \"Super\" Mario Bros but I've never seen them managing rental properties.",
+    "Cheese graters aren't even actually made out of cheese.",
+    "\"Don't talk to me until I've had my coffee table\"\n-Termite",
+    "We've been trying to reach you about your car's extended warranty.",
+    "You can pick your friends, and you can lead a horse to water, but you can't sneeze without closing your eyes.",
+    "Do you like bad boys? Because I'm bad at everything.",
+    "Dang Pencil, I see your point. I guess you write.",
+    "Yeah, I speak French. Shut up heck idiot. Pardon my French.",
+    "Congratulations. You have successfully found this sign.",
 )
 
 
@@ -320,7 +334,7 @@ tip_hints = (
     "Save files are a thing of the past. It's all on the Archipelago server now!",
     "If you aren't using Universal Tracker, you should cease not using it immediately.",
     "Please include your Universal Tracker /explain details with any questions or reports regarding logic.",
-    "If your game was generated with a 0.2.X apworld, set the branch to 0.2.0 when you build sm64ex"
+    "If your game was generated with a 0.2.X apworld, set the branch to 0.2.0 when you build sm64ex",
 )
 
 
@@ -331,5 +345,6 @@ def create_sign_locations(multiworld: MultiWorld, player: int) -> None:
     for sign in sign_data:
         region = multiworld.get_region(sign.region, player)
         location = SM64Location(player, sign.location_name, None, region)
+        location.show_in_spoiler = False
         location.place_locked_item(SM64Item("Sign Hint Event", ItemClassification.filler, None, player))
         region.locations.append(location)

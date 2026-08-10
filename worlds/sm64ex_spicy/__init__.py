@@ -616,7 +616,7 @@ class SM64World(World):
         self.sign_hint_count = min(len(sign_data), advancement_count // 5)
 
     @classmethod
-    def stage_post_fill(cls, multiworld):
+    def stage_pre_output(cls, multiworld):
         worlds = [world for world in multiworld.worlds.values() if isinstance(world, cls)]
         if not worlds:
             return
