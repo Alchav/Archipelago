@@ -24,8 +24,10 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
 from .Rules import set_rules
 from .Signs import fallback_hints, sign_data, sign_data_by_location_name
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
-from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels
-from BaseClasses import CollectionState, Item, Region, Tutorial
+from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels, \
+    get_shuffled_entrance_ids, sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
+    sm64_entrance_destination_descriptions
+from BaseClasses import CollectionState, Entrance, Item, Region, Tutorial
 from Options import OptionError
 from ..AutoWorld import WebWorld, World
 
@@ -63,6 +65,7 @@ class SM64World(World):
 
     ut_can_gen_without_yaml = True
     glitches_item_name = ut_glitch_item_name
+    found_entrances_datastorage_key = "SM64SpicyFoundEntrances_{player}"
 
     area_connections: typing.Dict[int, int]
 
@@ -108,6 +111,9 @@ class SM64World(World):
     sign_hint_count: int
     sign_hints: dict[str, str]
     sign_hint_locations: dict[str, int]
+    sign_hint_entrances: dict[str, int]
+    randomized_entrance_connections: dict[int, Entrance]
+    deferred_entrance_targets: dict[int, Region]
 
     slot_option_names = (
         "area_rando",
@@ -170,6 +176,11 @@ class SM64World(World):
         self.sign_hint_count = 0
         self.sign_hints = dict(slot_data.get("SignHints", {})) if slot_data else {}
         self.sign_hint_locations = dict(slot_data.get("SignHintLocations", {})) if slot_data else {}
+        self.sign_hint_entrances = {
+            key: int(value) for key, value in slot_data.get("SignHintEntrances", {}).items()
+        } if slot_data else {}
+        self.randomized_entrance_connections = {}
+        self.deferred_entrance_targets = {}
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
             self.area_connections = {
@@ -184,6 +195,11 @@ class SM64World(World):
             }
         else:
             self.start_inventory_item_counts = self.get_start_inventory_slot_data()
+        self.found_entrances_datastorage_key = (
+            "SM64SpicyFoundEntrances_{player}"
+            if self.options.area_rando.value != self.options.area_rando.option_Off
+            else None
+        )
         self.start_inventory_item_ids = set(self.start_inventory_item_counts)
 
         enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
@@ -621,11 +637,33 @@ class SM64World(World):
         if not worlds:
             return
 
+        state = CollectionState(multiworld)
+        remaining_locations = set(multiworld.get_filled_locations())
+        remaining_entrances = {
+            entrance
+            for world in worlds
+            for entrance_id in get_shuffled_entrance_ids(world.options.area_rando.value)
+            if (entrance := world.randomized_entrance_connections.get(entrance_id)) is not None
+        }
         spheres = []
-        for sphere in multiworld.get_spheres():
+        entrance_spheres = []
+        while remaining_locations:
+            sphere = {
+                location for location in remaining_locations
+                if location.can_reach(state)
+            }
             if not sphere:
                 break
+            entrance_sphere = {
+                entrance for entrance in remaining_entrances
+                if entrance.can_reach(state)
+            }
             spheres.append(sorted(sphere))
+            entrance_spheres.append(entrance_sphere)
+            remaining_entrances -= entrance_sphere
+            for location in sphere:
+                state.collect(location.item, True, location)
+            remaining_locations -= sphere
 
         for world in worlds:
             if world.sign_hints:
@@ -638,9 +676,10 @@ class SM64World(World):
                 for index, sign in enumerate(sign_data)
             }
             world.sign_hint_locations = {sign.key: 0 for sign in sign_data}
+            world.sign_hint_entrances = {sign.key: 0 for sign in sign_data}
 
             signs_by_sphere: list[list] = [[] for _sphere in spheres]
-            items_by_sphere: list[list] = [[] for _sphere in spheres]
+            candidates_by_sphere: list[list[tuple[str, object]]] = [[] for _sphere in spheres]
             for sphere_index, sphere in enumerate(spheres):
                 for location in sphere:
                     if location.player == world.player and location.name in sign_data_by_location_name:
@@ -652,32 +691,53 @@ class SM64World(World):
                             and location.item.code is not None
                             and location.address is not None
                     ):
-                        items_by_sphere[sphere_index].append(location)
+                        candidates_by_sphere[sphere_index].append(("item", location))
+
+                for entrance in entrance_spheres[sphere_index]:
+                    if entrance.player != world.player:
+                        continue
+                    source_id = next(
+                        entrance_id for entrance_id, connection
+                        in world.randomized_entrance_connections.items()
+                        if connection is entrance
+                    )
+                    candidates_by_sphere[sphere_index].append(("entrance", source_id))
 
             for locations in signs_by_sphere:
                 world.random.shuffle(locations)
-            for locations in items_by_sphere:
-                world.random.shuffle(locations)
+            for candidates in candidates_by_sphere:
+                world.random.shuffle(candidates)
 
             assigned_hint_count = 0
             for sign_sphere_index, sign_locations in enumerate(signs_by_sphere):
                 for sign_location in sign_locations:
                     if assigned_hint_count >= world.sign_hint_count:
                         break
-                    item_location = None
-                    for item_sphere_index in range(sign_sphere_index, len(items_by_sphere)):
-                        if items_by_sphere[item_sphere_index]:
-                            item_location = items_by_sphere[item_sphere_index].pop()
+                    candidate = None
+                    for candidate_sphere_index in range(sign_sphere_index, len(candidates_by_sphere)):
+                        if candidates_by_sphere[candidate_sphere_index]:
+                            candidate = candidates_by_sphere[candidate_sphere_index].pop()
                             break
-                    if item_location is None:
+                    if candidate is None:
                         continue
 
-                    hint = f"{item_location.item.name} is at {item_location.name}"
-                    if item_location.player != sign_location.player:
-                        hint += f" in {multiworld.player_name[item_location.player]}'s game"
                     sign = sign_data_by_location_name[sign_location.name]
+                    candidate_type, candidate_value = candidate
+                    if candidate_type == "entrance":
+                        source_id = typing.cast(int, candidate_value)
+                        destination_id = world.area_connections[source_id]
+                        hint = (
+                            f"{sm64_entrance_destination_descriptions[destination_id]} is at "
+                            f"{sm64_entrance_source_descriptions[source_id]}"
+                        )
+                        world.sign_hint_entrances[sign.key] = source_id
+                    else:
+                        item_location = typing.cast(typing.Any, candidate_value)
+                        hint = f"{item_location.item.name} is at {item_location.name}"
+                        if item_location.player != sign_location.player:
+                            hint += f" in {multiworld.player_name[item_location.player]}'s game"
+                        world.sign_hint_locations[sign.key] = item_location.address
                     world.sign_hints[sign.key] = hint
-                    world.sign_hint_locations[sign.key] = item_location.address
                     assigned_hint_count += 1
 
     def generate_basic(self):
@@ -809,10 +869,12 @@ class SM64World(World):
             "BowserInTheSkyStageCollapseHits": self.options.bowser_in_the_sky_stage_collapse_hits.value,
             "SignHints": self.sign_hints,
             "SignHintLocations": self.sign_hint_locations,
+            "SignHintEntrances": self.sign_hint_entrances,
             "SignHintData": {
                 str(sign.level * 256 + sign.dialog): [
                     self.sign_hints.get(sign.key, ""),
                     self.sign_hint_locations.get(sign.key, 0),
+                    self.sign_hint_entrances.get(sign.key, 0),
                 ]
                 for sign in sign_data
             },
@@ -827,6 +889,20 @@ class SM64World(World):
     @staticmethod
     def interpret_slot_data(slot_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
         return slot_data
+
+    def reconnect_found_entrances(self, _found_key: str, data_storage_value) -> None:
+        try:
+            discovered = int(data_storage_value or 0)
+        except (TypeError, ValueError):
+            return
+
+        for bit, entrance_id in enumerate(sm64_shuffled_entrance_ids):
+            if not discovered & (1 << bit):
+                continue
+            entrance = self.randomized_entrance_connections.get(entrance_id)
+            target = self.deferred_entrance_targets.get(entrance_id)
+            if entrance is not None and target is not None and entrance.connected_region is None:
+                entrance.connect(target)
 
     def get_apsm64ex_slot_data(self):
         slot_data = self.fill_slot_data()

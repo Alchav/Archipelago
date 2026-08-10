@@ -9,7 +9,7 @@ from .Locations import locOneUp_table, location_table, one_up_unlock_category_by
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
-    sm64_ttc_entrances, sm64_wdw_entrances
+    get_shuffled_entrance_ids, sm64_ttc_entrances, sm64_wdw_entrances
 from .Items import action_item_data_table, cap_item_data_table, feature_item_data_table, \
     per_level_move_area_names, ut_glitch_item_name
 from .LogicTricks import logic_tricks
@@ -504,6 +504,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     randomized_entrances_s = {sm64_level_to_entrances[entrance_lvl]: destination for (entrance_lvl,destination) in randomized_entrances.items()}
     randomized_entrance_connections = {}
+    world = multiworld.worlds[player]
+    defer_randomized_entrances = (
+        bool(getattr(multiworld, "generation_is_fake", False))
+        and getattr(multiworld, "enforce_deferred_connections", "default") != "off"
+        and options.area_rando.value != options.area_rando.option_Off
+    )
 
     rf = RuleFactory(multiworld, options, player, move_rando_bitvec)
 
@@ -515,6 +521,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             name=f"{source} -> {source_entrance}"
         )
         randomized_entrance_connections[source_entrance] = entrance
+        entrance_id = int(sm64_entrances_to_level[source_entrance])
+        world.randomized_entrance_connections[entrance_id] = entrance
         return entrance
 
     first_floor_key_rule = Has("Dark World Key") | Has("Progressive Key")
@@ -1283,6 +1291,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             & CanReachLocation("Bowser in the Fire Sea - Key")
             & can_defeat_bowser_in_the_sky
         )
+
+    if defer_randomized_entrances:
+        for entrance_id in get_shuffled_entrance_ids(options.area_rando.value):
+            entrance = world.randomized_entrance_connections[entrance_id]
+            target = entrance.connected_region
+            if target is None:
+                continue
+            target.entrances.remove(entrance)
+            entrance.connected_region = None
+            world.deferred_entrance_targets[entrance_id] = target
 
 
 class RuleFactory:

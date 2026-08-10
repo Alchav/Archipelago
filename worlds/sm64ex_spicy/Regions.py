@@ -111,6 +111,61 @@ sm64_entrances_to_level["Wet-Dry World"] = SM64_WDW_LOW
 sm64_entrances_to_level["Tick Tock Clock"] = SM64_TTC_STOPPED
 sm64_level_to_entrances = {**sm64_level_to_paintings, **sm64_level_to_secrets }
 
+# Stable ordering shared with sm64ex for the discovered-entrance Data Storage bitset.
+sm64_shuffled_entrance_ids = tuple(sm64_level_to_entrances)
+
+
+def get_shuffled_entrance_ids(area_rando_value: int) -> tuple[int, ...]:
+    if area_rando_value == 0:
+        return ()
+    if area_rando_value == 1:
+        return tuple(sm64_level_to_paintings)
+    return sm64_shuffled_entrance_ids
+
+
+sm64_entrance_source_descriptions = {
+    SM64Levels.BOB_OMB_BATTLEFIELD: "the Bob-omb Battlefield painting",
+    SM64Levels.WHOMPS_FORTRESS: "the Whomp's Fortress painting",
+    SM64Levels.JOLLY_ROGER_BAY: "the Jolly Roger Bay painting",
+    SM64Levels.COOL_COOL_MOUNTAIN: "the Cool, Cool Mountain painting",
+    SM64Levels.BIG_BOOS_HAUNT: "the Big Boo's Haunt entrance",
+    SM64Levels.HAZY_MAZE_CAVE: "the Hazy Maze Cave entrance",
+    SM64Levels.LETHAL_LAVA_LAND: "the Lethal Lava Land painting",
+    SM64Levels.SHIFTING_SAND_LAND: "the Shifting Sand Land painting",
+    SM64Levels.DIRE_DIRE_DOCKS: "the Dire, Dire Docks entrance",
+    SM64Levels.SNOWMANS_LAND: "the Snowman's Land painting",
+    SM64_WDW_LOW: "the bottom of the Wet-Dry World painting",
+    SM64_WDW_MIDDLE: "the middle of the Wet-Dry World painting",
+    SM64_WDW_HIGH: "the top of the Wet-Dry World painting",
+    SM64Levels.TALL_TALL_MOUNTAIN: "the Tall, Tall Mountain painting",
+    SM64Levels.TINY_HUGE_ISLAND_TINY: "the Tiny Island painting",
+    SM64Levels.TINY_HUGE_ISLAND_HUGE: "the Huge Island painting",
+    SM64_TTC_STOPPED: "Tick-Tock Clock, at 12 o'clock",
+    SM64_TTC_SLOW: "Tick-Tock Clock, at 3 o'clock",
+    SM64_TTC_RANDOM: "Tick-Tock Clock, at 6 o'clock",
+    SM64_TTC_FAST: "Tick-Tock Clock, at 9 o'clock",
+    SM64Levels.RAINBOW_RIDE: "the Rainbow Ride entrance",
+    SM64Levels.THE_PRINCESS_SECRET_SLIDE: "the Princess's Secret Slide entrance",
+    SM64Levels.THE_SECRET_AQUARIUM: "the Secret Aquarium entrance",
+    SM64Levels.BOWSER_IN_THE_DARK_WORLD: "Bowser in the Dark World",
+    SM64Levels.TOWER_OF_THE_WING_CAP: "Tower of the Wing Cap",
+    SM64Levels.CAVERN_OF_THE_METAL_CAP: "Cavern of the Metal Cap",
+    SM64Levels.VANISH_CAP_UNDER_THE_MOAT: "Vanish Cap Under the Moat",
+    SM64Levels.BOWSER_IN_THE_FIRE_SEA: "Bowser in the Fire Sea",
+    SM64Levels.WING_MARIO_OVER_THE_RAINBOW: "Wing Mario Over the Rainbow",
+}
+
+sm64_entrance_destination_descriptions = {
+    **sm64_level_to_entrances,
+    SM64_WDW_LOW: "Wet-Dry World with Low Water",
+    SM64_WDW_MIDDLE: "Wet-Dry World with Middle Water",
+    SM64_WDW_HIGH: "Wet-Dry World with High Water",
+    SM64_TTC_STOPPED: "Tick-Tock Clock with Stopped Time",
+    SM64_TTC_SLOW: "Tick-Tock Clock with Slow Time",
+    SM64_TTC_RANDOM: "Tick-Tock Clock with Random Time",
+    SM64_TTC_FAST: "Tick-Tock Clock with Fast Time",
+}
+
 sm64_entrance_to_region = {
     **{entrance: entrance for entrance in sm64_entrances_to_level},
     "Tick Tock Clock Stopped Entrance": "Tick Tock Clock Stopped",
