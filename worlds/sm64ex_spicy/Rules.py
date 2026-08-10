@@ -7,7 +7,7 @@ from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Ha
 from .Locations import locOneUp_table, location_table, one_up_unlock_category_by_location, \
     parse_coinsanity_location_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
-from .Regions import connect_regions, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
+from .Regions import connect_regions, create_region, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
     get_shuffled_entrance_ids, sm64_ttc_entrances, sm64_wdw_entrances
 from .Items import action_item_data_table, cap_item_data_table, feature_item_data_table, \
@@ -513,6 +513,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     rf = RuleFactory(multiworld, options, player, move_rando_bitvec)
 
+    if defer_randomized_entrances:
+        create_region("Bypassing Logic", player, multiworld)
+        connect_regions(
+            multiworld, player, world.origin_region_name, "Bypassing Logic", Has(ut_glitch_item_name))
+
     def connect_randomized_entrance(source: str, source_entrance: str, rule=None):
         destination_entrance = randomized_entrances_s[source_entrance]
         target_region = sm64_entrance_to_region[destination_entrance]
@@ -562,30 +567,29 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     def full_level_unlock_rule(item_name: str) -> Rule:
         return HasUnlock(item_name, item_name)
 
-    connect_randomized_entrance("Menu", "Bob-omb Battlefield")
-    connect_randomized_entrance("Menu", "Whomp's Fortress",
+    connect_regions(multiworld, player, "Castle Grounds", "Castle Lobby")
+    connect_randomized_entrance("Castle Lobby", "Bob-omb Battlefield")
+    connect_randomized_entrance("Castle Lobby", "Whomp's Fortress",
                                 rf.build_rule("", painting_lvl_name="Whomp's Fortress"))
-    # JRB door is separated from JRB itself because the secret aquarium can be accessed without entering the painting
-    connect_regions(multiworld, player, "Menu", "Jolly Roger Bay Door")
-    connect_randomized_entrance("Jolly Roger Bay Door", "Jolly Roger Bay",
+    connect_randomized_entrance("Castle Lobby", "Jolly Roger Bay",
                                 rf.build_rule("", painting_lvl_name="Jolly Roger Bay"))
-    connect_randomized_entrance("Menu", "Cool, Cool Mountain",
+    connect_randomized_entrance("Castle Lobby", "Cool, Cool Mountain",
                                 rf.build_rule("", painting_lvl_name="Cool, Cool Mountain"))
-    connect_randomized_entrance("Menu", "Big Boo's Haunt",
+    connect_randomized_entrance("Castle Lobby", "Big Boo's Haunt",
                                 level_unlock_rule("Unlock Big Boo's Haunt"))
-    connect_randomized_entrance("Menu", "The Princess's Secret Slide")
-    connect_randomized_entrance("Jolly Roger Bay Door", "The Secret Aquarium",
+    connect_randomized_entrance("Castle Lobby", "The Princess's Secret Slide")
+    connect_randomized_entrance("Castle Lobby", "The Secret Aquarium",
                                 rf.build_rule(
                                     "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
                                     "logic_secret_aquarium_wall_kick_and_ledge_grab | "
                                     "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab"))
-    connect_randomized_entrance("Menu", "Tower of the Wing Cap",
+    connect_randomized_entrance("Castle Lobby", "Tower of the Wing Cap",
                                 level_unlock_rule("Unlock Tower of the Wing Cap"))
     connect_randomized_entrance(
-        "Menu", "Bowser in the Dark World",
+        "Castle Lobby", "Bowser in the Dark World",
         first_floor_key_rule | rf.build_rule("logic_castle_lobby_8_star_door_blj"))
 
-    connect_regions(multiworld, player, "Menu", "Basement", basement_key_rule)
+    connect_regions(multiworld, player, "Castle Lobby", "Basement", basement_key_rule)
 
     connect_randomized_entrance("Basement", "Hazy Maze Cave",
                                 rf.build_rule("", painting_lvl_name="Hazy Maze Cave"))
@@ -599,12 +603,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance(
         "Hazy Maze Cave", "Cavern of the Metal Cap",
         rf.build_rule("HMC_SWIMMING_BEAST | logic_hmc_elevator_clip"))
-    connect_randomized_entrance("Menu", "Vanish Cap Under the Moat",
+    connect_randomized_entrance("Castle Grounds", "Vanish Cap Under the Moat",
                                 level_unlock_rule("Unlock Vanish Cap Under the Moat"))
     connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
                                 thirty_star_door_bypass_rule & level_unlock_rule("Unlock Bowser in the Fire Sea"))
 
-    connect_regions(multiworld, player, "Menu", "Second Floor", second_floor_key_rule)
+    connect_regions(multiworld, player, "Castle Lobby", "Second Floor", second_floor_key_rule)
 
     connect_randomized_entrance("Second Floor", "Snowman's Land",
                                 rf.build_rule("", painting_lvl_name="Snowman's Land"))

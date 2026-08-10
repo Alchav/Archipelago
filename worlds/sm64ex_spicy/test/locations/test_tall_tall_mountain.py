@@ -120,7 +120,7 @@ class TestTallTallMountainFullLevelUnlock(SM64TestBase):
             ["Tall, Tall Mountain - Start Edge 1-Up", False, route],
             ["Tall, Tall Mountain - Start Edge 1-Up", True,
              route + ["Unlock Tall, Tall Mountain"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestTallTallMountainTopWithKickTrick(SM64TestBase):
@@ -209,4 +209,4 @@ class TestTallTallMountainNotShuffledUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Tall, Tall Mountain - Start Edge 1-Up", True,
              ["Progressive Upstairs Key"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

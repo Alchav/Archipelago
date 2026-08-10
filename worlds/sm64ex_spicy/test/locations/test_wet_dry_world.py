@@ -187,7 +187,7 @@ class TestWetDryWorldFullLevelUnlock(SM64TestBase):
             ["Wet-Dry World - Shocking Arrow Lifts!", False, upstairs],
             ["Wet-Dry World - Shocking Arrow Lifts!", True,
              upstairs + ["Unlock Wet-Dry World"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
@@ -232,4 +232,4 @@ class TestWetDryWorldNotShuffledUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Wet-Dry World - Shocking Arrow Lifts!", True,
              ["Progressive Upstairs Key"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

@@ -52,6 +52,7 @@ class SM64World(World):
     """
 
     game: str = "SM64: Spicy Mycena 64"
+    origin_region_name = "Castle Grounds"
     topology_present = False
 
     web = SM64Web()
@@ -181,6 +182,7 @@ class SM64World(World):
         } if slot_data else {}
         self.randomized_entrance_connections = {}
         self.deferred_entrance_targets = {}
+        self.bypass_entrance_connections = {}
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
             self.area_connections = {
@@ -709,37 +711,76 @@ class SM64World(World):
             for candidates in candidates_by_sphere:
                 world.random.shuffle(candidates)
 
-            assigned_hint_count = 0
-            for sign_sphere_index, sign_locations in enumerate(signs_by_sphere):
-                for sign_location in sign_locations:
-                    if assigned_hint_count >= world.sign_hint_count:
-                        break
-                    candidate = None
-                    for candidate_sphere_index in range(sign_sphere_index, len(candidates_by_sphere)):
-                        if candidates_by_sphere[candidate_sphere_index]:
-                            candidate = candidates_by_sphere[candidate_sphere_index].pop()
-                            break
-                    if candidate is None:
-                        continue
+            sign_entries = [
+                (sphere_index, sign_location)
+                for sphere_index, sign_locations in enumerate(signs_by_sphere)
+                for sign_location in sign_locations
+            ]
+            target_hint_count = min(world.sign_hint_count, len(sign_entries))
+            sign_buckets = [
+                sign_entries[
+                    bucket_index * len(sign_entries) // target_hint_count:
+                    (bucket_index + 1) * len(sign_entries) // target_hint_count
+                ]
+                for bucket_index in range(target_hint_count)
+            ] if target_hint_count else []
+            for bucket in sign_buckets:
+                world.random.shuffle(bucket)
 
-                    sign = sign_data_by_location_name[sign_location.name]
-                    candidate_type, candidate_value = candidate
-                    if candidate_type == "entrance":
-                        source_id = typing.cast(int, candidate_value)
-                        destination_id = world.area_connections[source_id]
-                        hint = (
-                            f"{sm64_entrance_destination_descriptions[destination_id]} is at "
-                            f"{sm64_entrance_source_descriptions[source_id]}"
-                        )
-                        world.sign_hint_entrances[sign.key] = source_id
-                    else:
-                        item_location = typing.cast(typing.Any, candidate_value)
-                        hint = f"{item_location.item.name} is at {item_location.name}"
-                        if item_location.player != sign_location.player:
-                            hint += f" in {multiworld.player_name[item_location.player]}'s game"
-                        world.sign_hint_locations[sign.key] = item_location.address
-                    world.sign_hints[sign.key] = hint
-                    assigned_hint_count += 1
+            selected_signs = set()
+            assignments = []
+
+            def take_candidate(sign_sphere_index):
+                for candidate_sphere_index in range(sign_sphere_index, len(candidates_by_sphere)):
+                    if candidates_by_sphere[candidate_sphere_index]:
+                        return candidates_by_sphere[candidate_sphere_index].pop()
+                return None
+
+            # Work backward so late signs get first claim on the candidates that can validly hint them.
+            for bucket_index in reversed(range(target_hint_count)):
+                eligible_signs = sign_buckets[bucket_index]
+                if not eligible_signs:
+                    continue
+                assignment = None
+                for sign_sphere_index, sign_location in eligible_signs:
+                    if sign_location in selected_signs:
+                        continue
+                    candidate = take_candidate(sign_sphere_index)
+                    if candidate is not None:
+                        assignment = (sign_location, candidate)
+                        break
+                if assignment is None:
+                    # If this portion of the playthrough has no later candidate, move its hint earlier.
+                    for sign_sphere_index, sign_location in reversed(sign_entries):
+                        if sign_location in selected_signs:
+                            continue
+                        candidate = take_candidate(sign_sphere_index)
+                        if candidate is not None:
+                            assignment = (sign_location, candidate)
+                            break
+                if assignment is not None:
+                    selected_signs.add(assignment[0])
+                    assignments.append(assignment)
+
+            for sign_location, candidate in assignments:
+                sign = sign_data_by_location_name[sign_location.name]
+                candidate_type, candidate_value = candidate
+                if candidate_type == "entrance":
+                    source_id = typing.cast(int, candidate_value)
+                    destination_id = world.area_connections[source_id]
+                    hint = (
+                        f"{sm64_entrance_destination_descriptions[destination_id]} is at "
+                        f"{sm64_entrance_source_descriptions[source_id]}."
+                    )
+                    world.sign_hint_entrances[sign.key] = source_id
+                else:
+                    item_location = typing.cast(typing.Any, candidate_value)
+                    hint = f"{item_location.item.name} is at {item_location.name}"
+                    if item_location.player != sign_location.player:
+                        hint += f" in {multiworld.player_name[item_location.player]}'s game"
+                    hint += "."
+                    world.sign_hint_locations[sign.key] = item_location.address
+                world.sign_hints[sign.key] = hint
 
     def generate_basic(self):
         if not self.options.buddy_checks:
@@ -902,8 +943,16 @@ class SM64World(World):
                 continue
             entrance = self.randomized_entrance_connections.get(entrance_id)
             target = self.deferred_entrance_targets.get(entrance_id)
-            if entrance is not None and target is not None and entrance.connected_region is None:
+            if entrance is None or target is None:
+                continue
+            if entrance.connected_region is None:
                 entrance.connect(target)
+            if entrance_id not in self.bypass_entrance_connections:
+                bypass_region = self.multiworld.get_region("Bypassing Logic", self.player)
+                self.bypass_entrance_connections[entrance_id] = bypass_region.connect(
+                    target,
+                    name=f"Bypassing Logic -> {sm64_level_to_entrances[entrance_id]}",
+                )
 
     def get_apsm64ex_slot_data(self):
         slot_data = self.fill_slot_data()

@@ -36,7 +36,8 @@ class SM64TestBase(WorldTestBase):
                     items = [self.world.create_item(item_name) for item_name in item_names]
 
                 state = CollectionState(self.multiworld)
-                state.reachable_regions[self.player].add(self.multiworld.get_region("Menu", self.player))
+                state.reachable_regions[self.player].add(
+                    self.multiworld.get_region(self.world.origin_region_name, self.player))
                 for region_name in starting_regions:
                     region = self.multiworld.get_region(region_name, self.player)
                     state.reachable_regions[self.player].add(region)

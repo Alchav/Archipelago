@@ -104,7 +104,7 @@ class TestWingMarioOverTheRainbowEntrance(SM64TestBase):
                 "Unlock Wing Mario Over the Rainbow",
                 "Wing Mario Over the Rainbow - Wing Cap",
             ]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestWingMarioOverTheRainbowLeapOfFaith(SM64TestBase):

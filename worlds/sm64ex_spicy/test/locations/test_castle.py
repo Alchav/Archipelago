@@ -68,4 +68,4 @@ class TestCastleLocations(SM64TestBase):
             ["Castle - Jolly Roger Bay Lobby 1-Up", True, ["Side Flip"]],
             ["Castle - Basement Water Tunnel Four Corners 1-Up", False, []],
             ["Castle - Basement Water Tunnel Four Corners 1-Up", True, basement],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

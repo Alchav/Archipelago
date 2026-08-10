@@ -136,7 +136,7 @@ class TestRainbowRideFullLevelUnlock(SM64TestBase):
             ["Rainbow Ride - Coins Star", False, third_floor],
             ["Rainbow Ride - Coins Star", True,
              third_floor + ["Unlock Rainbow Ride"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestRainbowRideBuddyLedgeGrabAndCarpetsTrick(SM64TestBase):
@@ -224,4 +224,4 @@ class TestRainbowRideNotShuffledUnlockModes(SM64TestBase):
         ], starting_regions=["Rainbow Ride"])
         self.run_location_tests([
             ["Rainbow Ride - Coins Star", True, third_floor],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

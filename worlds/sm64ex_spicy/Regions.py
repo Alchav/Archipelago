@@ -175,26 +175,22 @@ sm64_entrance_to_region = {
 }
 
 def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
-    regSS = Region("Menu", player, multiworld, "Castle Area")
-    create_locs(regSS,
-                "Castle - Toad (Basement)",
-                "Castle - Toad (Second Floor)",
-                "Castle - Toad (Third Floor)",
-                "Castle - MIPS 1",
-                "Castle - MIPS 2",
+    castle_grounds = Region("Castle Grounds", player, multiworld, "Castle Area")
+    create_locs(castle_grounds,
                 "Castle - Third Tree From Waterfall 1-Up",
                 "Castle - Bridge Coins 1-Up",
                 "Castle - Left Butterfly 1-Up",
-                "Castle - Right Butterfly 1-Up",
-                "Castle - Jolly Roger Bay Lobby 1-Up")
-    multiworld.regions.append(regSS)
-    castle_roof = create_subregion(regSS, "Castle - Roof",
+                "Castle - Right Butterfly 1-Up")
+    multiworld.regions.append(castle_grounds)
+    castle_lobby = create_region("Castle Lobby", player, multiworld)
+    create_locs(castle_lobby, "Castle - Jolly Roger Bay Lobby 1-Up")
+    castle_roof = create_subregion(castle_grounds, "Castle - Roof",
                                    "Castle - Yoshi",
                                    "Castle - Roof Back 1-Up",
                                    "Castle - Roof Center 1-Up",
                                    "Castle - Roof Front 1-Up",
                                    "Castle - Roof Wing Cap Block")
-    regSS.subregions = [castle_roof]
+    castle_grounds.subregions = [castle_roof]
 
     regBoB = create_region("Bob-omb Battlefield", player, multiworld)
     create_locs(regBoB, "Bob-omb Battlefield - Big Bob-Omb on the Summit", "Bob-omb Battlefield - Footrace with Koopa The Quick",
@@ -226,7 +222,6 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regWhomp.subregions = [wf_top]
     create_locs(regWhomp, "Whomp's Fortress - Coins Star")
 
-    regJRBDoor = create_region("Jolly Roger Bay Door", player, multiworld)
     regJRB = create_region("Jolly Roger Bay", player, multiworld)
     create_locs(regJRB, "Jolly Roger Bay - Plunder in the Sunken Ship", "Jolly Roger Bay - Can the Eel Come Out to Play?", "Jolly Roger Bay - Treasure of the Ocean Cave",
                         "Jolly Roger Bay - Blast to the Stone Pillar", "Jolly Roger Bay - Through the Jet Stream", "Jolly Roger Bay - Bob-omb Buddy",
@@ -302,7 +297,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     regBasement = create_region("Basement", player, multiworld)
     create_default_locs(regBasement, locBasement_table)
-    create_locs(regBasement, "Castle - Basement Water Tunnel Four Corners 1-Up")
+    create_locs(regBasement,
+                "Castle - Toad (Basement)",
+                "Castle - MIPS 1",
+                "Castle - MIPS 2",
+                "Castle - Basement Water Tunnel Four Corners 1-Up")
 
     regHMC = create_region("Hazy Maze Cave", player, multiworld)
     create_locs(regHMC, "Hazy Maze Cave - Swimming Beast in the Cavern", "Hazy Maze Cave - Metal-Head Mario Can Move!",
@@ -415,7 +414,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                    "Bowser in the Fire Sea - Near Poles 1-Up Block")
     regBitFS.subregions = [bitfs_upper]
 
-    create_region("Second Floor", player, multiworld)
+    second_floor = create_region("Second Floor", player, multiworld)
+    create_locs(second_floor, "Castle - Toad (Second Floor)")
 
     regSL = create_region("Snowman's Land", player, multiworld)
     create_locs(regSL,
@@ -594,6 +594,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     tinyTHI.subregions = [thi_coins, thi_tiny_piranha_area, thi_tiny_main]
 
     regFloor3 = create_region("Third Floor", player, multiworld)
+    create_locs(regFloor3, "Castle - Toad (Third Floor)")
 
     regTTC = create_region("Tick Tock Clock", player, multiworld)
     create_locs(regTTC,

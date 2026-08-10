@@ -241,4 +241,4 @@ class TestBowserStageEntrances(SM64TestBase):
                 "Progressive Upstairs Key",
                 "Bowser in the Sky - Freestanding 1-Ups",
             ]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

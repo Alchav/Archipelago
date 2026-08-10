@@ -196,7 +196,7 @@ class TestSecretStageEntrances(SM64TestBase):
                 "Unlock Vanish Cap Under the Moat",
                 "Vanish Cap Under the Moat - Freestanding 1-Ups",
             ]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestVanishCapUnderTheMoatWallKickTrick(SM64TestBase):

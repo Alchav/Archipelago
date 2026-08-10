@@ -201,7 +201,7 @@ class TestTinyHugeIslandFullLevelUnlocks(SM64TestBase):
              upstairs + [TRIGGER_1UPS]],
             ["Tiny-Huge Island - Beach Coins 1-Up", True,
              upstairs + ["Unlock Huge Island", TRIGGER_1UPS]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestTinyHugeIslandGlobalUnlockModes(SM64TestBase):
@@ -249,4 +249,4 @@ class TestTinyHugeIslandNotShuffledUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True,
              ["Progressive Upstairs Key"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
