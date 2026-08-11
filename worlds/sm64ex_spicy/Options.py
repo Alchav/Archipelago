@@ -303,11 +303,23 @@ class LevelUnlocks(Choice):
     default = 1
 
 
-class PerLevelCapItems(Toggle):
+class CapItems(Choice):
     """
-    Generate separate cap items for each level that can require a cap instead of one global item per cap type.
+    Choose how cap items are handled.
+
+    Global - Shuffle one item for each cap type that unlocks that cap everywhere.
+
+    Per Level - Shuffle separate cap items for each level that can require a cap.
+
+    Both - Shuffle both the global cap items and every applicable level-specific cap item.
     """
-    display_name = "Per-Level Cap Items"
+    display_name = "Cap Items"
+    option_global = 0
+    option_per_level = 1
+    alias_individual = 1
+    option_both = 2
+    alias_false = 0
+    alias_true = 1
 
 
 class MariosHat(Toggle):
@@ -320,6 +332,7 @@ class LevelFeatureItemMode(Choice):
     option_global = 1
     option_per_level = 2
     alias_individual = 2
+    option_both = 3
 
 
 
@@ -336,12 +349,15 @@ class LevelFeatures(Choice):
 
     Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs,
     Purple Switches, Treasure Chests, and Warp Pipes use separate level-specific items.
+
+    Both - Shuffle both global and level-specific items for features that support both forms.
     """
     display_name = "Level Features"
     option_not_shuffled = 0
     option_per_act_only = 1
     option_global = 2
     option_per_level = 3
+    option_both = 4
     default = 1
 
 
@@ -357,12 +373,15 @@ class BobombBuddies(Choice):
     Global - Shuffle one Bob-omb Buddies item that unlocks every buddy.
 
     Per Level - Shuffle a separate item for every level's Bob-omb Buddy.
+
+    Both - Shuffle the global Bob-omb Buddies item and every level-specific Bob-omb Buddy item.
     """
     display_name = "Bob-omb Buddy Items"
     option_not_shuffled = 0
     option_per_act_only = 1
     option_global = 2
     option_per_level = 3
+    option_both = 4
     default = 1
 
 
@@ -375,6 +394,8 @@ class CoinObjectUnlocks(LevelFeatureItemMode):
     Global - Shuffle one item for each object type. Object types without a global item use their level-specific item.
 
     Per Level - Shuffle separate level-specific items for every applicable coin object type.
+
+    Both - Shuffle both global and level-specific items for every applicable coin object type.
     """
     display_name = "Coin Object Unlocks"
 
@@ -388,6 +409,8 @@ class EnemyUnlocks(LevelFeatureItemMode):
     Global - Shuffle one item for each enemy type. Enemy types without a global item use their level-specific item.
 
     Per Level - Shuffle separate level-specific items for every applicable enemy type.
+
+    Both - Shuffle both global and level-specific items for every applicable enemy type.
     """
     display_name = "Enemy Unlocks"
 
@@ -401,6 +424,8 @@ class OneUpUnlocks(LevelFeatureItemMode):
     Global - Shuffle one global item for each of those five 1-Up source types.
 
     Per Level - Shuffle separate source-type unlock items for each level that contains matching 1-Up checks.
+
+    Both - Shuffle both global and level-specific items for every applicable 1-Up source type.
     """
     display_name = "1-Up Unlocks"
 
@@ -415,6 +440,8 @@ class SignUnlocks(LevelFeatureItemMode):
 
     Per Level - Shuffle separate Signs items for each area containing signs. Castle - Signs controls all signs in the
     Castle Grounds, castle interior, and courtyard.
+
+    Both - Shuffle the global Signs item and every level-specific Signs item.
     """
     display_name = "Sign Unlocks"
 
@@ -430,6 +457,8 @@ class BowserBombs(LevelFeatureItemMode):
 
     Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
     Fire Sea, and five for Bowser in the Sky.
+
+    Both - Shuffle five global bombs in addition to all thirteen level-specific bombs.
     """
     display_name = "Progressive Bowser Arena Bomb Items"
 
@@ -480,6 +509,8 @@ class BowserStage1Ups(Choice):
 
     Per Level - Shuffle separate Bowser in the Dark World - Extra 1-Ups and Bowser in the Fire Sea - Extra 1-Ups items.
 
+    Both - Shuffle the global Bowser Stage Extra 1-Ups item and both level-specific items.
+
     Always Spawn - All 1-Ups always spawn in the Bowser stages.
     """
     display_name = "Bowser Stage 1-Up Behavior"
@@ -488,6 +519,7 @@ class BowserStage1Ups(Choice):
     option_per_level = 2
     alias_individual = 2
     option_always_spawn = 3
+    option_both = 4
     default = 0
 
 
@@ -717,6 +749,7 @@ class MoveRandomizerMode(Choice):
     option_global = 1
     option_per_level = 2
     alias_individual = 2
+    option_both = 3
 
 
 
@@ -730,6 +763,8 @@ class TripleJump(MoveRandomizerMode):
 
     Per Level - Shuffle separate Triple Jump items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Triple Jump item.
+
+    Both - Shuffle the global Triple Jump item and every applicable level-specific Triple Jump item.
     """
     display_name = "Triple Jump"
 
@@ -744,6 +779,8 @@ class LongJump(MoveRandomizerMode):
 
     Per Level - Shuffle separate Long Jump items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Long Jump item.
+
+    Both - Shuffle the global Long Jump item and every applicable level-specific Long Jump item.
     """
     display_name = "Long Jump"
 
@@ -758,6 +795,8 @@ class Backflip(MoveRandomizerMode):
 
     Per Level - Shuffle separate Backflip items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Backflip item.
+
+    Both - Shuffle the global Backflip item and every applicable level-specific Backflip item.
     """
     display_name = "Backflip"
 
@@ -772,6 +811,8 @@ class SideFlip(MoveRandomizerMode):
 
     Per Level - Shuffle separate Side Flip items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Side Flip item.
+
+    Both - Shuffle the global Side Flip item and every applicable level-specific Side Flip item.
     """
     display_name = "Side Flip"
 
@@ -786,6 +827,8 @@ class WallKick(MoveRandomizerMode):
 
     Per Level - Shuffle separate Wall Kick items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Wall Kick item.
+
+    Both - Shuffle the global Wall Kick item and every applicable level-specific Wall Kick item.
     """
     display_name = "Wall Kick"
 
@@ -800,6 +843,8 @@ class Dive(MoveRandomizerMode):
 
     Per Level - Shuffle separate Dive items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Dive item.
+
+    Both - Shuffle the global Dive item and every applicable level-specific Dive item.
     """
     display_name = "Dive"
 
@@ -814,6 +859,8 @@ class GroundPound(MoveRandomizerMode):
 
     Per Level - Shuffle separate Ground Pound items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Ground Pound item.
+
+    Both - Shuffle the global Ground Pound item and every applicable level-specific Ground Pound item.
     """
     display_name = "Ground Pound"
 
@@ -828,6 +875,8 @@ class Kick(MoveRandomizerMode):
 
     Per Level - Shuffle separate Kick items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Kick item.
+
+    Both - Shuffle the global Kick item and every applicable level-specific Kick item.
     """
     display_name = "Kick"
 
@@ -842,6 +891,8 @@ class Climb(MoveRandomizerMode):
 
     Per Level - Shuffle separate Climb items for each main course (Except Big Boo's Haunt which has no climbable objects).
     Castle, castle grounds, secret courses, cap stages, and Bowser stages use the Castle - Climb item.
+
+    Both - Shuffle the global Climb item and every applicable level-specific Climb item.
     """
     display_name = "Climb"
 
@@ -856,6 +907,8 @@ class LedgeGrab(MoveRandomizerMode):
 
     Per Level - Shuffle separate Ledge Grab items for each main course. Castle, castle grounds, secret courses,
     cap stages, and Bowser stages use the Castle - Ledge Grab item.
+
+    Both - Shuffle the global Ledge Grab item and every applicable level-specific Ledge Grab item.
     """
     display_name = "Ledge Grab"
 
@@ -1001,7 +1054,7 @@ sm64_options_groups = [
         NoDespawns,
         CombinedProgressiveKeys,
         LevelUnlocks,
-        PerLevelCapItems,
+        CapItems,
         LogicTricks,
         UniversalTrackerGlitchedLogic,
     ]),
@@ -1072,7 +1125,7 @@ class SM64Options(PerGameCommonOptions):
     kick: Kick
     climb: Climb
     ledge_grab: LedgeGrab
-    per_level_cap_items: PerLevelCapItems
+    cap_items: CapItems
     level_features: LevelFeatures
     bobomb_buddies: BobombBuddies
     coin_object_unlocks: CoinObjectUnlocks

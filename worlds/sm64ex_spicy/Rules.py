@@ -158,10 +158,10 @@ def has_action(state: CollectionState, player: int, action: str, level_name: str
     option = getattr(options, option_name)
     if option.value == option.option_not_shuffled:
         return True
-    if option.value == option.option_global:
-        return state.has(action, player)
     item_name = get_per_level_action_item_name(level_name, action)
-    return item_name is None or state.has(item_name, player)
+    if item_name is None:
+        return state.has(action, player)
+    return state.has(action, player) or state.has(item_name, player)
 
 
 def has_logic_trick(state: CollectionState, player: int, trick_name: str) -> bool:
@@ -188,9 +188,7 @@ def can_use_logic_trick(
 
 
 def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
-    options = state.multiworld.worlds[player].options
-    item_name = f"{level_name} - Metal Cap" if options.per_level_cap_items else "Metal Cap"
-    return state.has(item_name, player)
+    return state.has("Metal Cap", player) or state.has(f"{level_name} - Metal Cap", player)
 
 
 def has_simple_arbitrary_feature(state: CollectionState, player: int, token: str) -> bool:
@@ -266,15 +264,11 @@ def permanent_coin_collection_enabled(state: CollectionState, player: int) -> bo
 
 
 def has_wing_cap(state: CollectionState, player: int, level_name: str) -> bool:
-    options = state.multiworld.worlds[player].options
-    item_name = f"{level_name} - Wing Cap" if options.per_level_cap_items else "Wing Cap"
-    return state.has(item_name, player)
+    return state.has("Wing Cap", player) or state.has(f"{level_name} - Wing Cap", player)
 
 
 def has_vanish_cap(state: CollectionState, player: int, level_name: str) -> bool:
-    options = state.multiworld.worlds[player].options
-    item_name = f"{level_name} - Vanish Cap" if options.per_level_cap_items else "Vanish Cap"
-    return state.has(item_name, player)
+    return state.has("Vanish Cap", player) or state.has(f"{level_name} - Vanish Cap", player)
 
 
 def has_lethal_lava_land_healing_coins(state: CollectionState, player: int) -> bool:
@@ -555,10 +549,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         return HasUnlock("Bowser Stage Extra 1-Ups", stage_item_name)
 
     def bowser_arena_bomb_rule(stage_name: str, required_hits: int) -> Rule:
-        return HasUnlock(
-            "Progressive Bowser Arena Bomb",
-            f"{stage_name} - Progressive Bowser Arena Bomb",
-            required_hits,
+        global_item_name = "Progressive Bowser Arena Bomb"
+        stage_item_name = f"{stage_name} - Progressive Bowser Arena Bomb"
+        return Or(*(
+            HasUnlock(global_item_name, global_item_name, global_count)
+            & HasUnlock(stage_item_name, stage_item_name, required_hits - global_count)
+            for global_count in range(1, required_hits)
+        ),
+            HasUnlock(global_item_name, global_item_name, required_hits),
+            HasUnlock(stage_item_name, stage_item_name, required_hits),
         )
 
     def level_unlock_rule(item_name: str) -> Rule:
@@ -1457,7 +1456,7 @@ class RuleFactory:
         return region_names
 
     def build_rule(
-            self, rule_expr: str, cannon_name: str = '', cap_item_names: dict[str, str] | None = None,
+            self, rule_expr: str, cannon_name: str = '', cap_item_names: dict[str, str | Rule] | None = None,
             arbitrary_item_names: dict[str, str | bool] | None = None,
             action_item_names: dict[str, str | bool] | None = None,
             painting_lvl_name: str = None, star_num_req: int = None) -> Rule:
@@ -1517,10 +1516,10 @@ class RuleFactory:
         level_name = self.get_level_name_from_target(target_name)
         return self.cannon_item_name_by_level.get(level_name, f"{level_name} - Cannon Unlock")
 
-    def get_cap_item_names(self, target_name: str) -> dict[str, str]:
+    def get_cap_item_names(self, target_name: str) -> dict[str, Rule]:
         level_name = self.get_level_name_from_target(target_name)
         return {
-            token: item_name_by_level[level_name]
+            token: HasUnlock(self.global_cap_item_name_by_token[token], item_name_by_level[level_name])
             for token, item_name_by_level in self.cap_item_name_by_token_and_level.items()
             if level_name in item_name_by_level
         }
@@ -1658,14 +1657,16 @@ class RuleFactory:
             option = getattr(self.options, option_name)
             if option.value == option.option_not_shuffled:
                 item_names[action] = True
-            elif option.value == option.option_global:
-                item_names[action] = action
             else:
-                item_names[action] = get_per_level_action_item_name(level_name, action) or True
+                per_level_item_name = get_per_level_action_item_name(level_name, action)
+                item_names[action] = (
+                    HasUnlock(action, per_level_item_name)
+                    if per_level_item_name is not None else action
+                )
         return item_names
 
     def combine_and_clauses(
-            self, rule_expr: str, cannon_name: str, cap_item_names: dict[str, str],
+            self, rule_expr: str, cannon_name: str, cap_item_names: dict[str, str | Rule],
             arbitrary_item_names: dict[str, str | bool],
             action_item_names: dict[str, str | bool]) -> Union[Rule, bool]:
         expressions = rule_expr.split(" & ")
@@ -1683,7 +1684,7 @@ class RuleFactory:
             return True
 
     def make_rule(
-            self, expression: str, cannon_name: str, cap_item_names: dict[str, str],
+            self, expression: str, cannon_name: str, cap_item_names: dict[str, str | Rule],
             arbitrary_item_names: dict[str, str | bool],
             action_item_names: dict[str, str | bool]) -> Union[Rule, bool]:
         if expression in logic_tricks_by_internal_id:
@@ -1739,18 +1740,14 @@ class RuleFactory:
         return Has(item)
 
     def parse_token(
-            self, token: str, cannon_name: str, cap_item_names: dict[str, str],
+            self, token: str, cannon_name: str, cap_item_names: dict[str, str | Rule],
             arbitrary_item_names: dict[str, str | bool],
             action_item_names: dict[str, str | bool]) -> Union[str, bool, Rule]:
         if token == "CANN":
             return cannon_name
         if token in self.global_cap_item_name_by_token:
-            if not self.options.per_level_cap_items:
-                return self.global_cap_item_name_by_token[token]
             item = cap_item_names.get(token)
-            if item is None:
-                raise RuleFactory.SM64LogicException(f"No cap item for token '{token}' in this target.")
-            return item
+            return item if item is not None else self.global_cap_item_name_by_token[token]
         if token in arbitrary_item_names:
             return arbitrary_item_names[token]
         item = self.token_table.get(token, None)

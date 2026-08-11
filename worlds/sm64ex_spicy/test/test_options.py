@@ -1,7 +1,7 @@
 import unittest
 
 from .bases import SM64TestBase
-from BaseClasses import ItemClassification
+from BaseClasses import CollectionState, ItemClassification
 from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
@@ -14,7 +14,9 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table, \
     global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, \
-    per_level_bobomb_buddy_item_names, per_level_warp_pipe_item_names
+    global_checkerboard_item_names, global_rolling_log_item_names, global_purple_switch_item_names, \
+    global_bobomb_buddy_item_names, global_treasure_chest_item_names, global_warp_pipe_item_names, \
+    per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
     location_name_groups
@@ -110,6 +112,7 @@ class PerLevelOptionAliasTest(unittest.TestCase):
             Options.CoinObjectUnlocks,
             Options.EnemyUnlocks,
             Options.OneUpUnlocks,
+            Options.SignUnlocks,
             Options.BowserBombs,
             Options.BowserStage1Ups,
             Options.TripleJump,
@@ -119,11 +122,40 @@ class PerLevelOptionAliasTest(unittest.TestCase):
                 self.assertEqual(option_class.from_text("per_level").value, option_class.option_per_level)
                 self.assertEqual(option_class.from_text("individual").value, option_class.option_per_level)
 
+    def test_both_is_available(self):
+        option_classes = (
+            Options.LevelFeatures,
+            Options.BobombBuddies,
+            Options.CoinObjectUnlocks,
+            Options.EnemyUnlocks,
+            Options.OneUpUnlocks,
+            Options.SignUnlocks,
+            Options.BowserBombs,
+            Options.BowserStage1Ups,
+            Options.CapItems,
+            *Options.move_randomizer_options,
+        )
+        for option_class in option_classes:
+            with self.subTest(option=option_class.__name__):
+                self.assertEqual(option_class.from_text("both").value, option_class.option_both)
+
 
 class LevelUnlockOptionTest(unittest.TestCase):
     def test_legacy_boolean_aliases(self):
         self.assertEqual(Options.LevelUnlocks.from_any(False).value, Options.LevelUnlocks.option_special_only)
         self.assertEqual(Options.LevelUnlocks.from_any(True).value, Options.LevelUnlocks.option_full)
+
+
+class CapItemOptionTest(unittest.TestCase):
+    def test_legacy_boolean_aliases(self):
+        self.assertEqual(
+            Options.CapItems.from_any(False).value,
+            Options.CapItems.option_global,
+        )
+        self.assertEqual(
+            Options.CapItems.from_any(True).value,
+            Options.CapItems.option_per_level,
+        )
 
 
 SHUFFLED_GLOBAL_MOVE_OPTIONS = {
@@ -517,7 +549,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             with self.subTest("Global cap item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
-    def test_default_per_level_cap_items_are_not_generated(self):
+    def test_default_cap_items_are_not_generated(self):
         for item_name in cap_item_data_table:
             with self.subTest("Per-level cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -595,6 +627,16 @@ class IndividualBowserStage1UpsItemPoolTestBase(SM64TestBase):
         self.assertEqual(len(self.get_items_by_name("Bowser in the Fire Sea - Extra 1-Ups")), 1)
 
 
+class BothBowserStage1UpsItemPoolTestBase(SM64TestBase):
+    options = {
+        "bowser_stage_1ups": Options.BowserStage1Ups.option_both,
+    }
+
+    def test_both_bowser_stage_1up_item_forms_are_generated(self):
+        for item_name in bowser_stage_1up_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+
+
 class AlwaysSpawnBowserStage1UpsItemPoolTestBase(SM64TestBase):
     options = {
         "bowser_stage_1ups": Options.BowserStage1Ups.option_always_spawn,
@@ -609,10 +651,10 @@ class AlwaysSpawnBowserStage1UpsItemPoolTestBase(SM64TestBase):
 
 class PerLevelCapItemPoolTestBase(SM64TestBase):
     options = {
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
-    def test_per_level_cap_items_are_generated(self):
+    def test_cap_items_are_generated(self):
         for item_name in cap_item_data_table:
             with self.subTest("Per-level cap item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -622,6 +664,27 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
         for item_name in global_cap_item_names:
             with self.subTest("Global cap item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class BothCapItemPoolTestBase(SM64TestBase):
+    options = {
+        "cap_items": Options.CapItems.option_both,
+    }
+
+    def test_both_cap_item_forms_are_generated(self):
+        self.assertTrue(self.world.fill_slot_data()["GlobalCapItems"])
+        for item_name in (*global_cap_item_names, *cap_item_data_table):
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+
+    def test_either_cap_item_form_satisfies_logic(self):
+        from ..Rules import has_wing_cap
+
+        for item_name in ("Wing Cap", "Bob-omb Battlefield - Wing Cap"):
+            with self.subTest(item=item_name):
+                state = CollectionState(self.multiworld)
+                state.collect(self.world.create_item(item_name), True)
+                self.assertTrue(has_wing_cap(state, self.player, "Bob-omb Battlefield"))
 
     def test_blocksanity_only_cap_items_remain_filler_without_blocksanity(self):
         for item_name in SINGLE_BLOCKSANITY_CHECK_CAP_ITEMS:
@@ -633,7 +696,7 @@ class PerLevelCapItemPoolTestBase(SM64TestBase):
 
 class BlocksanityPerLevelCapItemPoolTestBase(SM64TestBase):
     options = {
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
         "blocksanity": Options.Blocksanity.option_true,
     }
 
@@ -645,7 +708,7 @@ class BlocksanityPerLevelCapItemPoolTestBase(SM64TestBase):
                     ItemClassification.progression_deprioritized_skip_balancing)
                 self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
 
-    def test_all_per_level_cap_items_are_progression_with_blocksanity(self):
+    def test_all_cap_items_are_progression_with_blocksanity(self):
         for item_name in cap_item_data_table:
             with self.subTest("Per-level cap item is progression", item=item_name):
                 self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
@@ -653,7 +716,7 @@ class BlocksanityPerLevelCapItemPoolTestBase(SM64TestBase):
 
 class TowerOfTheWingCapCoinsanityCapItemPoolTestBase(SM64TestBase):
     options = {
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
         "coinsanity": 100,
         "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
         "tower_of_the_wing_cap_coinsanity_max_coins": 63,
@@ -736,6 +799,17 @@ class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
         self.assertEqual(item_table["Castle - Butterflies"], 3626915)
         self.assertEqual(item_table["Tall, Tall Mountain - Butterflies"], 3626918)
+
+
+class BothOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "one_up_checks": Options.OneUpChecks.option_true,
+        "one_up_unlocks": Options.OneUpUnlocks.option_both,
+    }
+
+    def test_both_one_up_unlock_item_forms_are_generated(self):
+        for item_name in (*global_one_up_unlock_item_data_table, *per_level_one_up_unlock_item_data_table):
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
 
 class DisabledLevelUnlockItemPoolTestBase(SM64TestBase):
@@ -824,6 +898,27 @@ class PerLevelMoveItemPoolTestBase(SM64TestBase):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
 
 
+class BothMoveItemPoolTestBase(SM64TestBase):
+    options = {
+        "triple_jump": Options.TripleJump.option_both,
+    }
+
+    def test_both_move_item_forms_are_generated(self):
+        self.assertEqual(len(self.get_items_by_name("Triple Jump")), 1)
+        for area_name in per_level_move_area_names:
+            with self.subTest(area=area_name):
+                self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
+
+    def test_either_move_item_form_satisfies_logic(self):
+        from ..Rules import has_action
+
+        for item_name in ("Triple Jump", "Bob-omb Battlefield - Triple Jump"):
+            with self.subTest(item=item_name):
+                state = CollectionState(self.multiworld)
+                state.collect(self.world.create_item(item_name), True)
+                self.assertTrue(has_action(state, self.player, "Triple Jump", "Bob-omb Battlefield"))
+
+
 class PerLevelClimbItemPoolTestBase(SM64TestBase):
     options = {
         "climb": Options.Climb.option_per_level,
@@ -858,6 +953,37 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
         for item_name in global_arbitrary_item_data_table:
             with self.subTest("Global arbitrary family item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
+
+
+class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
+    options = {
+        "level_features": Options.LevelFeatures.option_both,
+        "bobomb_buddies": Options.BobombBuddies.option_both,
+    }
+
+    def test_both_level_feature_item_forms_are_generated(self):
+        global_names = (
+            *global_checkerboard_item_names,
+            *global_rolling_log_item_names,
+            *global_purple_switch_item_names,
+            *global_treasure_chest_item_names,
+            *global_warp_pipe_item_names,
+        )
+        per_level_names = (
+            *checkerboard_item_data_table,
+            *rolling_log_item_data_table,
+            *purple_switch_item_data_table,
+            *per_level_treasure_chest_item_names,
+            *per_level_warp_pipe_item_names,
+        )
+        for item_name in (*global_names, *per_level_names):
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+
+    def test_both_bobomb_buddy_item_forms_are_generated(self):
+        for item_name in (*global_bobomb_buddy_item_names, *per_level_bobomb_buddy_item_names):
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
 
 class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
@@ -947,6 +1073,24 @@ class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
                 self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
 
 
+class BothCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_both,
+        "enemy_unlocks": Options.EnemyUnlocks.option_both,
+    }
+
+    def test_both_unlock_item_forms_are_generated(self):
+        expected_names = (
+            set(global_mode_coin_object_item_names)
+            | set(per_level_coin_object_item_data_table)
+            | set(global_mode_enemy_item_names)
+            | set(per_level_enemy_item_data_table)
+        )
+        for item_name in expected_names:
+            with self.subTest(item=item_name):
+                self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+
+
 class UnshuffledBowserArenaBombItemPoolTestBase(SM64TestBase):
     def test_bowser_arena_bombs_are_start_inventory_slot_data_only(self):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
@@ -980,6 +1124,19 @@ class IndividualBowserArenaBombItemPoolTestBase(SM64TestBase):
         for item_name, count in expected_counts.items():
             self.assertEqual(len(self.get_items_by_name(item_name)), count)
         self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 0)
+
+
+class BothBowserArenaBombItemPoolTestBase(SM64TestBase):
+    options = {"bowser_bombs": Options.BowserBombs.option_both}
+
+    def test_both_bowser_arena_bomb_item_forms_are_generated(self):
+        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 5)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")), 4)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Fire Sea - Progressive Bowser Arena Bomb")), 4)
+        self.assertEqual(
+            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 5)
 
 
 class GroupedCastleKeyPoolTestBase(SM64TestBase):
@@ -1380,7 +1537,7 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
         "level_unlocks": Options.LevelUnlocks.option_full,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
         "marios_hat": Options.MariosHat.option_true,

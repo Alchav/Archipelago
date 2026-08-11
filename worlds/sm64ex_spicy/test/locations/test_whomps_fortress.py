@@ -12,7 +12,7 @@ WF_OPTIONS = {
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
-    "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    "cap_items": Options.CapItems.option_per_level,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
     "backflip": Options.Backflip.option_global,

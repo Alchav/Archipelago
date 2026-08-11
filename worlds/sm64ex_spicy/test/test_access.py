@@ -1118,13 +1118,16 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         "climb": Options.Climb.option_per_level,
     }
 
-    def test_course_rule_requires_course_move_item(self):
+    def test_course_rule_accepts_global_move_item(self):
         self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
         self.collect(self.world.create_item("Wall Kick"))
         self.collect(self.world.create_item("Whomp's Fortress - Side Flip"))
-        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
+        self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
+    def test_course_rule_accepts_per_level_move_item(self):
+        self.assertFalse(self.can_reach_region("Whomp's Fortress - Top"))
         self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
+        self.collect(self.world.create_item("Whomp's Fortress - Side Flip"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
     def test_castle_entrance_rule_requires_castle_move_item(self):
@@ -1874,7 +1877,7 @@ class VanishCapUnderTheMoatIndividualUnlockLogicTestBase(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "level_features": Options.LevelFeatures.option_global,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def test_initial_coin_sources_are_counted_independently(self):
@@ -2140,7 +2143,7 @@ class VanishCapUnderTheMoatTrickAccessTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "logic_tricks": {"Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate"},
         "one_up_checks": Options.OneUpChecks.option_true,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def collect_stage_access(self):
@@ -2186,7 +2189,7 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "logic_tricks": {"Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above"},
         "one_up_checks": Options.OneUpChecks.option_true,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def collect_all_coin_sources(self):
@@ -2230,7 +2233,7 @@ class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
         "logic_tricks": {
             "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide"
         },
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def test_crawl_back_then_drop_counts_both_sides(self):
@@ -2481,7 +2484,7 @@ class CavernOfTheMetalCapDeepUnderwaterCoinsTrickTestBase(SM64TestBase):
 class CavernOfTheMetalCapCoinLogicTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def test_deep_underwater_coins_require_metal_cap_without_trick(self):
@@ -2500,7 +2503,7 @@ class CavernOfTheMetalCapIndividualUnlockLogicTestBase(SM64TestBase):
     options = {
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def test_unlocks_without_metal_cap(self):
@@ -2771,7 +2774,7 @@ class TowerOfTheWingCapCoinMasteryLogicTestBase(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "coinsanity": 100,
         "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
-        "per_level_cap_items": Options.PerLevelCapItems.option_false,
+        "cap_items": Options.CapItems.option_global,
         "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
         "tower_of_the_wing_cap_coinsanity_max_coins": 63,
     }
@@ -6739,8 +6742,6 @@ class GlobalCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("Bob-omb Battlefield - Wing Cap"))
-        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
-        self.collect(self.get_item_by_name("Wing Cap"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
     def test_lll_wing_cap_route_requires_triple_jump(self):
@@ -6839,7 +6840,7 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "one_up_checks": Options.OneUpChecks.option_true,
         "area_rando": Options.AreaRandomizer.option_Off,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
     }
 
     def test_bob_wing_cap_access(self):
@@ -6847,8 +6848,6 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
         self.collect(self.world.create_item("Wing Cap"))
-        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Wing Cap"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
     def test_tower_wing_cap_access(self):
@@ -6861,11 +6860,13 @@ class PerLevelCapAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
         self.collect(self.world.create_item("Wing Cap"))
-        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
+
+    def test_wmotr_rejects_another_level_wing_cap(self):
+        self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
+        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.collect(self.get_item_by_name("Castle - Wing Cap"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
-        self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Wing Cap"))
-        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Red Coins"))
 
     def test_wmotr_bob_omb_buddy_accepts_wing_cap(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
@@ -7799,6 +7800,24 @@ class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Progressive Bowser Arena Bomb"))
         self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
+
+
+class BothBowserArenaBombAccessTestBase(SM64TestBase):
+    options = {
+        "bowser_bombs": Options.BowserBombs.option_both,
+        "bowser_in_the_dark_world_health": 4,
+    }
+
+    def test_global_and_per_level_bomb_counts_are_combined(self):
+        self.collect_all_but({
+            "Progressive Bowser Arena Bomb",
+            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+        })
+        self.collect([self.get_item_by_name("Progressive Bowser Arena Bomb")] * 2)
+        self.collect([
+            self.get_item_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")
+        ] * 2)
+        self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
 
 class WetDryWorldPermanentCoinCollectionTestBase(SM64TestBase):

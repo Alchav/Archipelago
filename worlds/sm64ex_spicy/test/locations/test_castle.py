@@ -10,7 +10,7 @@ class TestCastleLocations(SM64TestBase):
         "one_up_checks": Options.OneUpChecks.option_true,
         "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
-        "per_level_cap_items": Options.PerLevelCapItems.option_true,
+        "cap_items": Options.CapItems.option_per_level,
         "triple_jump": Options.TripleJump.option_global,
         "long_jump": Options.LongJump.option_global,
         "backflip": Options.Backflip.option_global,

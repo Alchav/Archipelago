@@ -9,7 +9,7 @@ BBH_OPTIONS = {
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-    "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    "cap_items": Options.CapItems.option_per_level,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
     "backflip": Options.Backflip.option_global,

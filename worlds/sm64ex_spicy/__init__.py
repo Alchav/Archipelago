@@ -139,7 +139,7 @@ class SM64World(World):
         "kick",
         "climb",
         "ledge_grab",
-        "per_level_cap_items",
+        "cap_items",
         "level_features",
         "bobomb_buddies",
         "bowser_bombs",
@@ -307,8 +307,11 @@ class SM64World(World):
         return ["Dark World Key"] + ["Progressive Basement Key"] * 2 + ["Progressive Upstairs Key"] * 3
 
     def get_cap_item_names(self) -> typing.List[str]:
-        if self.options.per_level_cap_items:
+        option = self.options.cap_items
+        if option.value == option.option_per_level:
             return list(cap_item_data_table)
+        if option.value == option.option_both:
+            return list(global_cap_item_names) + list(cap_item_data_table)
         return list(global_cap_item_names)
 
     def get_level_feature_item_names(self) -> typing.List[str]:
@@ -322,6 +325,7 @@ class SM64World(World):
         if mode in {
                 self.options.level_features.option_global,
                 self.options.level_features.option_per_level,
+                self.options.level_features.option_both,
         }:
             item_names += [
                 name for name in simple_arbitrary_item_data_table
@@ -352,6 +356,9 @@ class SM64World(World):
         elif buddy_mode == self.options.bobomb_buddies.option_global:
             item_names += list(global_bobomb_buddy_item_names)
         elif buddy_mode == self.options.bobomb_buddies.option_per_level:
+            item_names += list(per_level_bobomb_buddy_item_names)
+        elif buddy_mode == self.options.bobomb_buddies.option_both:
+            item_names += list(global_bobomb_buddy_item_names)
             item_names += list(per_level_bobomb_buddy_item_names)
         return item_names
 
@@ -404,6 +411,8 @@ class SM64World(World):
             return list(global_mode_item_names)
         if option.value == option.option_per_level:
             return list(per_level_item_data_table)
+        if option.value == option.option_both:
+            return list(dict.fromkeys((*global_mode_item_names, *per_level_item_data_table)))
         return []
 
     def get_coin_object_unlock_item_names(self) -> typing.List[str]:
@@ -444,15 +453,17 @@ class SM64World(World):
         return item_names
 
     def get_bowser_arena_bomb_item_names(self) -> typing.List[str]:
-        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_global:
-            return ["Progressive Bowser Arena Bomb"] * 5
-        if self.options.bowser_bombs.value == self.options.bowser_bombs.option_per_level:
-            return (
+        option = self.options.bowser_bombs
+        item_names = []
+        if option.value in {option.option_global, option.option_both}:
+            item_names += ["Progressive Bowser Arena Bomb"] * 5
+        if option.value in {option.option_per_level, option.option_both}:
+            item_names += (
                 ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
                 + ["Bowser in the Fire Sea - Progressive Bowser Arena Bomb"] * 4
                 + ["Bowser in the Sky - Progressive Bowser Arena Bomb"] * 5
             )
-        return []
+        return item_names
 
     def get_unrandomized_bowser_arena_bomb_item_names(self) -> typing.List[str]:
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_not_shuffled:
@@ -481,14 +492,16 @@ class SM64World(World):
         return item_names
 
     def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
-        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_global:
-            return ["Bowser Stage Extra 1-Ups"]
-        if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_per_level:
-            return [
+        option = self.options.bowser_stage_1ups
+        item_names = []
+        if option.value in {option.option_global, option.option_both}:
+            item_names.append("Bowser Stage Extra 1-Ups")
+        if option.value in {option.option_per_level, option.option_both}:
+            item_names += [
                 "Bowser in the Dark World - Extra 1-Ups",
                 "Bowser in the Fire Sea - Extra 1-Ups",
             ]
-        return []
+        return item_names
 
     def get_unrandomized_bowser_stage_1up_item_names(self) -> typing.List[str]:
         if self.options.bowser_stage_1ups.value == self.options.bowser_stage_1ups.option_always_spawn:
@@ -502,6 +515,12 @@ class SM64World(World):
             if option.value == option.option_global:
                 item_names.append(action)
             elif option.value == option.option_per_level:
+                item_names += [
+                    f"{area_name} - {action}" for area_name in per_level_move_area_names
+                    if not (area_name == "Big Boo's Haunt" and action == "Climb")
+                ]
+            elif option.value == option.option_both:
+                item_names.append(action)
                 item_names += [
                     f"{area_name} - {action}" for area_name in per_level_move_area_names
                     if not (area_name == "Big Boo's Haunt" and action == "Climb")
@@ -902,7 +921,10 @@ class SM64World(World):
             "Options": self.options.as_dict(*self.slot_option_names),
             "AreaRando": self.area_connections,
             "MoveRandoVec": self.move_rando_bitvec,
-            "GlobalCapItems": not self.options.per_level_cap_items.value,
+            "GlobalCapItems": self.options.cap_items.value in {
+                self.options.cap_items.option_global,
+                self.options.cap_items.option_both,
+            },
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
