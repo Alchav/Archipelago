@@ -405,6 +405,20 @@ class OneUpUnlocks(LevelFeatureItemMode):
     display_name = "1-Up Unlocks"
 
 
+class SignUnlocks(LevelFeatureItemMode):
+    """
+    Choose how signposts and wall-mounted signs are unlocked. Signs may contain hints.
+
+    Not Shuffled - Start with every sign unlocked.
+
+    Global - Shuffle one Signs item that unlocks every sign.
+
+    Per Level - Shuffle separate Signs items for each area containing signs. Castle - Signs controls all signs in the
+    Castle Grounds, castle interior, and courtyard.
+    """
+    display_name = "Sign Unlocks"
+
+
 class BowserBombs(LevelFeatureItemMode):
     """
     Choose how Progressive Bowser Arena Bombs are handled.
@@ -997,6 +1011,7 @@ sm64_options_groups = [
         CoinObjectUnlocks,
         EnemyUnlocks,
         OneUpUnlocks,
+        SignUnlocks,
         BowserBombs,
         BowserStage1Ups,
     ]),
@@ -1063,6 +1078,7 @@ class SM64Options(PerGameCommonOptions):
     coin_object_unlocks: CoinObjectUnlocks
     enemy_unlocks: EnemyUnlocks
     one_up_unlocks: OneUpUnlocks
+    sign_unlocks: SignUnlocks
     bowser_bombs: BowserBombs
     bowser_in_the_dark_world_health: BowserInTheDarkWorldHits
     bowser_in_the_fire_sea_health: BowserInTheFireSeaHits

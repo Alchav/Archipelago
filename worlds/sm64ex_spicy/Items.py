@@ -620,6 +620,35 @@ per_level_one_up_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Tall, Tall Mountain - Butterflies": SM64ItemData(sm64ex_base_id + 918),
 }
 
+global_sign_unlock_item_data_table: dict[str, SM64ItemData] = {
+    "Signs": SM64ItemData(3626939, progression_deprioritized_skip_balancing),
+}
+
+per_level_sign_unlock_item_data_table: dict[str, SM64ItemData] = {
+    "Castle - Signs": SM64ItemData(3626940, progression_deprioritized_skip_balancing),
+    "Bob-omb Battlefield - Signs": SM64ItemData(3626941, progression_deprioritized_skip_balancing),
+    "Whomp's Fortress - Signs": SM64ItemData(3626942, progression_deprioritized_skip_balancing),
+    "Jolly Roger Bay - Signs": SM64ItemData(3626943, progression_deprioritized_skip_balancing),
+    "Cool, Cool Mountain - Signs": SM64ItemData(3626944, progression_deprioritized_skip_balancing),
+    "Big Boo's Haunt - Signs": SM64ItemData(3626945, progression_deprioritized_skip_balancing),
+    "Hazy Maze Cave - Signs": SM64ItemData(3626946, progression_deprioritized_skip_balancing),
+    "Lethal Lava Land - Signs": SM64ItemData(3626947, progression_deprioritized_skip_balancing),
+    "Shifting Sand Land - Signs": SM64ItemData(3626948, progression_deprioritized_skip_balancing),
+    "Dire, Dire Docks - Signs": SM64ItemData(3626949, progression_deprioritized_skip_balancing),
+    "Snowman's Land - Signs": SM64ItemData(3626950, progression_deprioritized_skip_balancing),
+    "Wet-Dry World - Signs": SM64ItemData(3626951, progression_deprioritized_skip_balancing),
+    "Tall, Tall Mountain - Signs": SM64ItemData(3626952, progression_deprioritized_skip_balancing),
+    "Tiny-Huge Island - Signs": SM64ItemData(3626953, progression_deprioritized_skip_balancing),
+    "The Princess's Secret Slide - Signs": SM64ItemData(3626954, progression_deprioritized_skip_balancing),
+    "Cavern of the Metal Cap - Signs": SM64ItemData(3626955, progression_deprioritized_skip_balancing),
+    "Bowser in the Dark World - Signs": SM64ItemData(3626956, progression_deprioritized_skip_balancing),
+}
+
+sign_unlock_item_names = (
+    set(global_sign_unlock_item_data_table)
+    | set(per_level_sign_unlock_item_data_table)
+)
+
 global_coin_object_item_data_table: dict[str, SM64ItemData] = {
     "Single Yellow Coins": SM64ItemData(3626560, progression),
     "Red Coins": SM64ItemData(3626561, progression),
@@ -932,6 +961,8 @@ item_data_table = {
     **painting_unlock_item_data_table,
     **global_one_up_unlock_item_data_table,
     **per_level_one_up_unlock_item_data_table,
+    **global_sign_unlock_item_data_table,
+    **per_level_sign_unlock_item_data_table,
     **global_coin_object_item_data_table,
     **per_level_coin_object_item_data_table,
     **global_enemy_item_data_table,
@@ -962,6 +993,9 @@ item_name_groups: dict[str, set[str]] = {
     ),
     "Global 1-Up Unlocks": set(global_one_up_unlock_item_data_table),
     "Per-Level 1-Up Unlocks": set(per_level_one_up_unlock_item_data_table),
+    "Sign Unlocks": sign_unlock_item_names,
+    "Global Sign Unlocks": set(global_sign_unlock_item_data_table),
+    "Per-Level Sign Unlocks": set(per_level_sign_unlock_item_data_table),
     "Course Feature Unlocks": set(feature_item_data_table),
     "Castle Unlocks": set(castle_progression_item_data_table),
     "Optional Feature Unlocks": set(arbitrary_item_data_table),

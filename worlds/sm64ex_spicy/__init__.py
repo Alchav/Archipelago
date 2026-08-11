@@ -14,7 +14,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
-    per_level_one_up_unlock_item_data_table, progressive_cap_length_item_names
+    per_level_one_up_unlock_item_data_table, global_sign_unlock_item_data_table, \
+    per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_cap_length_item_names
 from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
     get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
 from .Music import build_music_slot_data
@@ -127,6 +128,7 @@ class SM64World(World):
         "combined_progressive_keys",
         "level_unlocks",
         "one_up_unlocks",
+        "sign_unlocks",
         "triple_jump",
         "long_jump",
         "backflip",
@@ -425,6 +427,12 @@ class SM64World(World):
             return item_names
         return [item_name for item_name in item_names if item_name.endswith("Monty Moles")]
 
+    def get_sign_unlock_item_names(self) -> typing.List[str]:
+        return self.get_unlock_item_names(
+            self.options.sign_unlocks,
+            global_sign_unlock_item_data_table,
+            per_level_sign_unlock_item_data_table)
+
     def get_level_unlock_item_names(self) -> typing.List[str]:
         option = self.options.level_unlocks
         if option.value == option.option_disabled:
@@ -463,6 +471,9 @@ class SM64World(World):
                 self.options.one_up_unlocks.option_not_shuffled:
             item_names += list(global_one_up_unlock_item_data_table)
             item_names += list(per_level_one_up_unlock_item_data_table)
+        if self.options.sign_unlocks.value == self.options.sign_unlocks.option_not_shuffled:
+            item_names += list(global_sign_unlock_item_data_table)
+            item_names += list(per_level_sign_unlock_item_data_table)
         if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
             item_names += list(painting_unlock_item_data_table)
         if self.options.level_unlocks.value == self.options.level_unlocks.option_disabled:
@@ -517,6 +528,7 @@ class SM64World(World):
         item_names += self.get_coin_object_unlock_item_names()
         item_names += self.get_enemy_unlock_item_names()
         item_names += self.get_one_up_unlock_item_names()
+        item_names += self.get_sign_unlock_item_names()
         item_names += self.get_bowser_arena_bomb_item_names()
 
         return item_names
@@ -629,7 +641,7 @@ class SM64World(World):
         self.multiworld.itempool += [self.create_item(item_name) for item_name in cap_length_item_names]
         advancement_count = sum(
             item.advancement for item in self.multiworld.itempool
-            if item.player == self.player
+            if item.player == self.player and item.name not in sign_unlock_item_names
         )
         entrance_count = len(get_shuffled_entrance_ids(self.options.area_rando.value))
         self.sign_hint_count = min(len(sign_data), (advancement_count + entrance_count) // 5)
@@ -691,6 +703,7 @@ class SM64World(World):
                             location.item is not None
                             and location.item.player == world.player
                             and location.item.advancement
+                            and location.item.name not in sign_unlock_item_names
                             and location.item.code is not None
                             and location.address is not None
                     ):

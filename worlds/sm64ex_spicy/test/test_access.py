@@ -3376,6 +3376,30 @@ class JollyRogerBayLogicTricksTestBase(JollyRogerBayCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Jolly Roger Bay - Through the Jet Stream"))
 
 
+class JollyRogerBayPillarBackflipSignTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "sign_unlocks": Options.SignUnlocks.option_per_level,
+        "logic_tricks": {
+            "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick",
+        },
+    }
+
+    def test_backflip_route_requires_jolly_roger_bay_signs(self):
+        self.collect([
+            self.get_item_by_name("Jolly Roger Bay - Raised Ship"),
+            self.get_item_by_name("Jolly Roger Bay - Red Coins"),
+            self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Backflip"),
+        ])
+        self.assertFalse(self.can_reach_location("Jolly Roger Bay - Red Coins on the Ship Afloat"))
+        self.collect(self.get_item_by_name("Jolly Roger Bay - Signs"))
+        self.assertTrue(self.can_reach_location("Jolly Roger Bay - Red Coins on the Ship Afloat"))
+
+
 class JollyRogerBayCoinStar49AccessTestBase(JollyRogerBayCoinStarAccessTestBase):
     options = {
         **JollyRogerBayCoinStarAccessTestBase.options,

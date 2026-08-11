@@ -158,6 +158,12 @@ sign_data = (
 sign_data_by_location_name = {sign.location_name: sign for sign in sign_data}
 
 
+def sign_item_name_for_area(area: str) -> str:
+    if area.startswith("Castle "):
+        return "Castle - Signs"
+    return f"{area} - Signs"
+
+
 joke_hints = (
     "The real hint was the coins collected along the way.",
     "Thank you Mario! But our hint is in another castle.",

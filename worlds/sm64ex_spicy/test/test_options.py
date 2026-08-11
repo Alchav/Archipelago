@@ -13,6 +13,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table, \
+    global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, \
     per_level_bobomb_buddy_item_names, per_level_warp_pipe_item_names
 from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
@@ -337,6 +338,24 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Bowser in the Dark World - Warp Pipes": 3626932,
             "Bowser in the Sky - Warp Pipes": 3626934,
             "Warp Pipes": 3626935,
+            "Signs": 3626939,
+            "Castle - Signs": 3626940,
+            "Bob-omb Battlefield - Signs": 3626941,
+            "Whomp's Fortress - Signs": 3626942,
+            "Jolly Roger Bay - Signs": 3626943,
+            "Cool, Cool Mountain - Signs": 3626944,
+            "Big Boo's Haunt - Signs": 3626945,
+            "Hazy Maze Cave - Signs": 3626946,
+            "Lethal Lava Land - Signs": 3626947,
+            "Shifting Sand Land - Signs": 3626948,
+            "Dire, Dire Docks - Signs": 3626949,
+            "Snowman's Land - Signs": 3626950,
+            "Wet-Dry World - Signs": 3626951,
+            "Tall, Tall Mountain - Signs": 3626952,
+            "Tiny-Huge Island - Signs": 3626953,
+            "The Princess's Secret Slide - Signs": 3626954,
+            "Cavern of the Metal Cap - Signs": 3626955,
+            "Bowser in the Dark World - Signs": 3626956,
         }
         item_data = {
             **feature_item_data_table,
@@ -346,6 +365,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
             **arbitrary_item_data_table,
             **optional_item_data_table,
             **bowser_stage_1up_item_data_table,
+            **global_sign_unlock_item_data_table,
+            **per_level_sign_unlock_item_data_table,
             **{
                 item_name: item_data
                 for item_name, item_data in painting_unlock_item_data_table.items()

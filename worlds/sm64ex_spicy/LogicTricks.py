@@ -344,7 +344,7 @@ logic_tricks = {
     },
     "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick": {
         "internal_id": "logic_jrb_pillar_red_coin_moves",
-        "rule": "TJ/BF/WK",
+        "rule": "TJ/WK | JRB_SIGNS+BF",
         "difficulty": "medium",
         "description": "Collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
         "video": ("https://www.youtube.com/watch?v=5Xs6S9jAMNk", # Triple Jump
