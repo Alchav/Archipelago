@@ -3912,7 +3912,7 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
 
     def maximum_reachable_coins(self):
         return max(
-            coins for coins in range(193)
+            coins for coins in range(194)
             if tiny_huge_island_coins(self.multiworld.state, self.player, coins))
 
     def test_one_use_ascents_select_the_best_dead_end_routes(self):
@@ -3978,14 +3978,14 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
             "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
         self.collect_full_two_way_pipe_route()
 
-        self.assertEqual(self.maximum_reachable_coins(), 191)
+        self.assertEqual(self.maximum_reachable_coins(), 192)
 
     def test_huge_entrance_route_can_collect_all_non_impossible_coins(self):
         self.multiworld.get_entrance(
             "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
         self.collect_full_two_way_pipe_route()
 
-        self.assertEqual(self.maximum_reachable_coins(), 191)
+        self.assertEqual(self.maximum_reachable_coins(), 192)
         evaluation = COIN_EVALUATORS["Tiny-Huge Island"](
             self.multiworld.state, self.player, 191)
         source_ids = {source.source_id for source in evaluation.children}
@@ -4048,35 +4048,40 @@ class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
         "logic_tricks": {"Tiny-Huge Island Impossible Coin"},
     }
 
+    def maximum_reachable_coins(self):
+        return max(
+            coins for coins in range(194)
+            if tiny_huge_island_coins(self.multiworld.state, self.player, coins))
+
     def test_impossible_coin_requires_every_trick_action(self):
         self.multiworld.get_entrance(
             "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.collect([
             self.get_item_by_name("Tiny-Huge Island - Single Yellow Coins"),
+            self.get_item_by_name("Tiny-Huge Island - Horizontal Coin Lines"),
             self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Warp Pipes"),
             self.get_item_by_name("Triple Jump"),
             self.get_item_by_name("Dive"),
             self.get_item_by_name("Ground Pound"),
         ])
-        self.assertTrue(tiny_huge_island_coins(self.multiworld.state, self.player, 9))
-        self.assertFalse(tiny_huge_island_coins(self.multiworld.state, self.player, 10))
+        before_impossible_coin = self.maximum_reachable_coins()
 
         self.collect(self.get_item_by_name("Kick"))
-        self.assertTrue(tiny_huge_island_coins(self.multiworld.state, self.player, 10))
-        self.assertFalse(tiny_huge_island_coins(self.multiworld.state, self.player, 11))
+        self.assertEqual(self.maximum_reachable_coins(), before_impossible_coin + 1)
 
 
 class TinyHugeIslandImpossibleCoinFullAccessibilityCapTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "accessibility": "full",
-        "tiny_huge_island_coin_star_requirement": 192,
+        "tiny_huge_island_coin_star_requirement": 193,
     }
 
-    def test_full_accessibility_caps_requirement_at_191(self):
-        self.assertEqual(self.world.options.tiny_huge_island_coin_star_requirement.value, 191)
-        self.assertEqual(self.world.get_coin_star_requirements_slot_data()[12], 191)
+    def test_full_accessibility_caps_requirement_at_192(self):
+        self.assertEqual(self.world.options.tiny_huge_island_coin_star_requirement.value, 192)
+        self.assertEqual(self.world.get_coin_star_requirements_slot_data()[12], 192)
 
 
 class DireDireDocksCoinStarAccessTestBase(SM64TestBase):

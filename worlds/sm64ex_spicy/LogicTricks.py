@@ -530,7 +530,7 @@ logic_tricks = {
         "internal_id": "logic_thi_impossible_coin",
         "rule": "GP+TJ+DV+KK",
         "difficulty": "hard",
-        "description": "Collecting the coin embedded underground on Tiny Island using Ground Pound, Triple Jump,"
+        "description": "Collecting the coin embedded underground in Koopa the Quick's area using Ground Pound, Triple Jump,"
                        " Dive, and Kick.",
     },
     # Tick Tock Clock

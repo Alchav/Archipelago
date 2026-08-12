@@ -2635,8 +2635,10 @@ def tiny_huge_island_coin_evaluation(
         "logic_thi_impossible_coin",
         f"{level_name} - Coins Star",
     )
-    def giant_goomba_coins(count: int) -> int:
-        return count * (5 if has_ground_pound else 1)
+    def giant_goomba_coins(count: int, blue_coin_available: bool | None = None) -> int:
+        if blue_coin_available is None:
+            blue_coin_available = has_ground_pound
+        return count * (5 if blue_coin_available else 1)
 
     def make_route(start_tiny: bool, route_available: bool) -> _route_type:
         sources: dict[str, int] = {}
@@ -2648,16 +2650,20 @@ def tiny_huge_island_coin_evaluation(
                 value: int,
                 available: bool,
                 red_coin_ids: frozenset[int] = frozenset(),
+                giant_blue_available: bool | None = None,
         ) -> None:
             source = _route_source(source_id, label, value, available, red_coin_ids=red_coin_ids)
             if source_id in {
-                    "huge_lower_giant_goombas", "huge_windswept_giant_goombas",
+                    "huge_start_giant_goombas", "near_cannon_giant_goomba",
+                    "huge_windswept_giant_goombas",
                     "huge_koopa_region_giant_goombas", "red_area_giant_goombas"}:
+                if giant_blue_available is None:
+                    giant_blue_available = has_ground_pound
                 source.children.extend((
                     _route_source(f"{source_id}_yellow", f"{label} yellow outputs", 0, available),
                     _route_source(
                         f"{source_id}_blue", f"{label} blue outputs",
-                        0, available and has_ground_pound),
+                        0, available and giant_blue_available),
                 ))
             children.append(source)
             if available and value:
@@ -2700,43 +2706,37 @@ def tiny_huge_island_coin_evaluation(
         )
         add_source(
             "tiny_main_individual_coins",
-            "Individual coins in Tiny Main",
-            8,
+            "Tiny Island coins",
+            9,
             has_tiny_main and has_single_yellow_coins,
         )
         add_source(
             "tiny_main_coin_line",
-            "Coin line on the Tiny Main wooden plank",
+            "Coin line on the Tiny Island wooden plank",
             5,
             has_tiny_main and has_horizontal_coin_lines,
         )
         add_source(
             "tiny_main_three_coin_block",
-            "3-Coin Block in Tiny Main",
+            "3-Coin Block on Tiny Island",
             3,
             has_tiny_main and has_three_coin_block,
         )
         add_source(
             "tiny_main_goombas",
-            "Nine Small Goombas in Tiny Main",
+            "Nine Tiny Island Goombas",
             9,
             has_tiny_main and has_goombas,
         )
         add_source(
             "tiny_main_koopa",
-            "Small Koopa in Tiny Main",
+            "Tiny Island Koopa Troopa",
             5,
             has_tiny_main and has_koopa_troopa,
         )
         add_source(
-            "tiny_impossible_coin",
-            "Impossible underground coin on Tiny Island",
-            1,
-            has_tiny_main and has_single_yellow_coins and has_impossible_coin,
-        )
-        add_source(
             "tiny_purple_switch_coin",
-            "Separated Tiny Island coin",
+            "Five Itty Bitty Secrets Island coin",
             1,
             has_tiny_main
             and has_thi_purple_switches
@@ -2745,10 +2745,18 @@ def tiny_huge_island_coin_evaluation(
 
         has_huge_context = has_huge_start or has_koopa_region
         add_source(
-            "huge_lower_giant_goombas",
-            "Four Giant Goombas on lower Huge Island",
-            giant_goomba_coins(4),
+            "huge_start_giant_goombas",
+            "Three Huge Starting Area Goombas",
+            giant_goomba_coins(3),
             has_huge_context and has_goombas,
+        )
+        near_cannon_blue_available = has_ground_pound or has_fly_guy
+        add_source(
+            "near_cannon_giant_goomba",
+            "Near Cannon Goomba",
+            giant_goomba_coins(1, near_cannon_blue_available),
+            has_huge_context and has_goombas,
+            giant_blue_available=near_cannon_blue_available,
         )
         add_source(
             "huge_start_post",
@@ -2758,14 +2766,20 @@ def tiny_huge_island_coin_evaluation(
         )
         add_source(
             "huge_beach_coins",
-            "Two coins above the Huge Island beach",
+            "Huge Island beach coins",
             2,
             has_huge_context and has_single_yellow_coins,
         )
         add_source(
-            "huge_lower_fly_guys",
-            "Two Fly Guys on lower Huge Island",
-            4,
+            "huge_beach_fly_guy",
+            "Beach Fly Guy",
+            2,
+            has_huge_context and has_fly_guy,
+        )
+        add_source(
+            "huge_near_cannon_fly_guy",
+            "Near Cannon Fly Guy",
+            2,
             has_huge_context and has_fly_guy,
         )
         add_source(
@@ -2814,9 +2828,15 @@ def tiny_huge_island_coin_evaluation(
         )
         add_source(
             "huge_koopa_region_line",
-            "Slanted coin line in Koopa the Quick's area",
+            "Coin line in Koopa the Quick's area",
             4,
             has_huge_context and has_koopa_region and has_horizontal_coin_lines,
+        )
+        add_source(
+            "tiny_impossible_coin",
+            "Impossible Coin",
+            1,
+            has_huge_context and has_koopa_region and has_horizontal_coin_lines and has_impossible_coin,
         )
         add_source(
             "huge_koopa_region_giant_goombas",
@@ -2831,14 +2851,8 @@ def tiny_huge_island_coin_evaluation(
             has_huge_context and has_top and has_horizontal_coin_lines,
         )
         add_source(
-            "huge_top_curved_plank_line",
-            "Coin line on the curved Wiggler's Cave plank",
-            5,
-            has_huge_context and has_top and has_horizontal_coin_lines,
-        )
-        add_source(
             "huge_top_chuckya",
-            "Chuckya at the Huge Island top",
+            "Chuckya",
             5,
             has_huge_context and has_top and has_chuckya,
         )
@@ -2870,6 +2884,12 @@ def tiny_huge_island_coin_evaluation(
                 "Blue coins in the Red Coins Area",
                 10,
                 has_ground_pound and has_blue_coin_block,
+            ),
+            _route_source(
+                "red_area_plank_line",
+                "Coin line on the Red Coins Area plank",
+                5,
+                has_horizontal_coin_lines,
             ),
         ]
         red_area_children[0].children.extend((
@@ -4656,18 +4676,20 @@ def _late_requirement_specs():
     _add(THI, "tiny_main_koopa", "{Tiny-Huge Island - Tiny Main} & KOOPA_TROOPA",
          _unlock("Koopa Troopas", THI, "Koopa Troopa"))
     _add(THI, "tiny_impossible_coin",
-         "{Tiny-Huge Island - Tiny Main} & SINGLE_YELLOW_COINS & logic_thi_impossible_coin",
-         _unlock("Single Yellow Coins", THI))
+         "{Tiny-Huge Island - Koopa the Quick} & HORIZONTAL_COIN_LINES & logic_thi_impossible_coin",
+         _unlock("Horizontal Coin Lines", THI))
     _add(THI, "tiny_purple_switch_coin",
          "{Tiny-Huge Island - Tiny Main} & PURPLE_SWITCHES & SINGLE_YELLOW_COINS",
          _unlock("Single Yellow Coins", THI))
 
     _thi_huge_main = "{Tiny-Huge Island (Huge)}"
     for _source, _token, _global, _local in (
-            ("huge_lower_giant_goombas", "GOOMBAS", "Goombas", None),
+            ("huge_start_giant_goombas", "GOOMBAS", "Goombas", None),
+            ("near_cannon_giant_goomba", "GOOMBAS", "Goombas", None),
             ("huge_start_post", "WOODEN_POSTS", "Wooden Posts", None),
             ("huge_beach_coins", "SINGLE_YELLOW_COINS", "Single Yellow Coins", None),
-            ("huge_lower_fly_guys", "FLY_GUY", "Fly Guys", "Fly Guy"),
+            ("huge_beach_fly_guy", "FLY_GUY", "Fly Guys", "Fly Guy"),
+            ("huge_near_cannon_fly_guy", "FLY_GUY", "Fly Guys", "Fly Guy"),
             ("huge_lakitu", "LAKITU", "Lakitus", "Lakitu"),
             ("huge_koopa_troopa", "KOOPA_TROOPA", "Koopa Troopas", "Koopa Troopa")):
         _add(THI, _source, f"{_thi_huge_main} & {_token}", _unlock(_global, THI, _local))
@@ -4686,9 +4708,8 @@ def _late_requirement_specs():
          _unlock("Horizontal Coin Lines", THI))
     _add(THI, "huge_koopa_region_giant_goombas", "{Tiny-Huge Island - Koopa the Quick} & GOOMBAS",
          _unlock("Goombas", THI))
-    for _source in ("huge_top_wooden_plank_line", "huge_top_curved_plank_line"):
-        _add(THI, _source, "{Tiny-Huge Island - Huge Top} & HORIZONTAL_COIN_LINES",
-             _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "huge_top_wooden_plank_line", "{Tiny-Huge Island - Huge Top} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
     _add(THI, "huge_top_chuckya", "{Tiny-Huge Island - Huge Top} & CHUCKYA", _unlock("Chuckyas", THI, "Chuckya"))
 
     _add(THI, "thi_red_coins_area", "{Tiny-Huge Island - Red Coins Area}")
@@ -4698,6 +4719,8 @@ def _late_requirement_specs():
          _unlock("Red Coins", THI))
     _add(THI, "red_area_blue_coins", "{Tiny-Huge Island - Red Coins Area} & GP & BLUE_COIN_BLOCKS",
          _unlock("Blue Coin Blocks", THI, "Blue Coin Block"))
+    _add(THI, "red_area_plank_line", "{Tiny-Huge Island - Red Coins Area} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", THI))
     _add(THI, "thi_wiggler_cave", "{Tiny-Huge Island - Tiny Main} & WARP_PIPES & GP")
     _add(THI, "wiggler_cave_coin_lines",
          "{Tiny-Huge Island - Tiny Main} & WARP_PIPES & GP & HORIZONTAL_COIN_LINES",
@@ -4707,7 +4730,7 @@ def _late_requirement_specs():
          _unlock("Fire Piranha Plants", THI))
 
     for _source in (
-            "huge_lower_giant_goombas", "huge_windswept_giant_goombas",
+            "huge_start_giant_goombas", "near_cannon_giant_goomba", "huge_windswept_giant_goombas",
             "huge_koopa_region_giant_goombas", "red_area_giant_goombas"):
         _base = COIN_REQUIREMENT_SPECS[THI, _source]
         COIN_REQUIREMENT_SPECS[THI, f"{_source}_yellow"] = dict(_base)
@@ -4715,6 +4738,10 @@ def _late_requirement_specs():
             **_base,
             "rule": f"{_base['rule']} & GP",
         }
+    COIN_REQUIREMENT_SPECS[THI, "near_cannon_giant_goomba_blue"] = {
+        **COIN_REQUIREMENT_SPECS[THI, "near_cannon_giant_goomba"],
+        "rule": f"{_thi_huge_main} & GOOMBAS & GP/FLY_GUY",
+    }
 
 
     # Tick Tock Clock

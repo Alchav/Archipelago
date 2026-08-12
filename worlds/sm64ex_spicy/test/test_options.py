@@ -1283,7 +1283,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.SnowmansLandCoinStarRequirement: 127,
             Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
-            Options.TinyHugeIslandCoinStarRequirement: 192,
+            Options.TinyHugeIslandCoinStarRequirement: 193,
             Options.TickTockClockCoinStarRequirement: 128,
             Options.RainbowRideCoinStarRequirement: 146,
         }
@@ -1311,7 +1311,7 @@ class SecretStageCoinCountMaxCoinsOptionTestBase(SM64TestBase):
             Options.PrincessSecretSlideCoinCountMaxCoins: (80, 80),
             Options.SecretAquariumCoinCountMaxCoins: (56, 56),
             Options.WingMarioOverTheRainbowCoinCountMaxCoins: (56, 56),
-            Options.TowerOfTheWingCapCoinCountMaxCoins: (63, 31),
+            Options.TowerOfTheWingCapCoinCountMaxCoins: (63, 63),
             Options.VanishCapUnderTheMoatCoinCountMaxCoins: (27, 27),
             Options.CavernOfTheMetalCapCoinCountMaxCoins: (47, 47),
             Options.BowserInTheDarkWorldCoinCountMaxCoins: (80, 80),
@@ -1335,6 +1335,7 @@ class CoinCountChecksLocationTableTestBase(SM64TestBase):
             "Bob-omb Battlefield - 145 Coins": 3627144,
             "Whomp's Fortress - 1 Coin": 3627146,
             "Jolly Roger Bay - 1 Coin": 3627287,
+            "Tiny-Huge Island - 192 Coins": 3629091,
             "Rainbow Ride - 145 Coins": 3629089,
             "The Princess's Secret Slide - 1 Coin": 3629193,
             "The Princess's Secret Slide - 80 Coins": 3629272,
@@ -1368,11 +1369,11 @@ class CoinCountChecksLocationTableTestBase(SM64TestBase):
             "Snowman's Land": 127,
             "Wet-Dry World": 152,
             "Tall, Tall Mountain": 137,
-            "Tiny-Huge Island": 192,
+            "Tiny-Huge Island": 193,
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coin_count_check_location_table), 2642)
+        self.assertEqual(len(coin_count_check_location_table), 2643)
         self.assertEqual(len(secret_stage_coin_count_check_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):

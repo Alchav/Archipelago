@@ -56,7 +56,7 @@ COURSE_MAXIMUM_COIN_VALUES = {
     "Cool, Cool Mountain": 154, "Big Boo's Haunt": 151, "Hazy Maze Cave": 139,
     "Lethal Lava Land": 133, "Shifting Sand Land": 136, "Dire, Dire Docks": 106,
     "Snowman's Land": 127, "Wet-Dry World": 152, "Tall, Tall Mountain": 137,
-    "Tiny-Huge Island": 192, "Tick Tock Clock": 128, "Rainbow Ride": 146,
+    "Tiny-Huge Island": 193, "Tick Tock Clock": 128, "Rainbow Ride": 146,
     "The Princess's Secret Slide": 80, "The Secret Aquarium": 56,
     "Wing Mario Over the Rainbow": 56, "Tower of the Wing Cap": 63,
     "Vanish Cap Under the Moat": 27, "Cavern of the Metal Cap": 47,
@@ -171,7 +171,7 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
     "Snowman's Land": (*_repeat_names("Whirl from the Freezing Pond Red Coin", 3), *_repeat_names("Upper Area Red Coin", 5)),
     "Wet-Dry World": ("First Downtown Red Coin", *_repeat_names("Downtown Red Coin Beyond the Water Level Diamonds", 5), *_repeat_names("High Downtown Red Coin", 2)),
     "Tall, Tall Mountain": (*_repeat_names("Middle Area Red Coin", 6), *_repeat_names("Upper Area Red Coin", 2)),
-    "Tiny-Huge Island": (*_repeat_names("Red Coins Area Red Coin", 7), "Wall Kick Red Coin"),
+    "Tiny-Huge Island": _repeat_names("Red Coin", 8),
     "Tick Tock Clock": (*_repeat_names("First Clock Hand Area Red Coin", 5), *_repeat_names("Spinner Red Coin", 3)),
     "Rainbow Ride": ("Red Coin Requiring Maze Movement", *_repeat_names("Other Maze Red Coin", 7)),
     "The Secret Aquarium": _repeat_names("Aquarium Red Coin", 8),
@@ -235,6 +235,7 @@ def _title_source_label(label: str) -> str:
     replacements = {
         "Bob-Omb": "Bob-omb", "Bob-Ombs": "Bob-ombs", "Whomp'S": "Whomp's",
         "Bowser'S": "Bowser's", "Wiggler'S": "Wiggler's", "Koopa the Quick'S": "Koopa the Quick's",
+        "Lakitu'S": "Lakitu's",
         "Mr. Is": "Mr. Is", "Mr. I": "Mr. I", "10-Coin": "10-Coin", "3-Coin": "3-Coin",
         "S-Shaped": "S-Shaped", "Red Coin": "Red Coin", "Purple Switch": "Purple Switch",
         "Vanish Cap": "Vanish Cap", "Wall Kicks Will Work": "Wall Kicks Will Work",
@@ -270,7 +271,7 @@ _ENEMY_OUTPUT_GROUP_OVERRIDES = {
     "whomp_ground_pound_coins": (5, 5),
     "bits_whomp_jump_coins": (5,),
     "bits_whomp_ground_pound_coins": (5,),
-    "huge_piranha_area_plants": (3, 3, 1, 1, 1, 1),
+    "huge_piranha_area_plants": (2, 2, 2, 2, 2),
 }
 _ENEMY_DESCRIPTOR_OVERRIDES = {
     "whomp_jump_coins": "Whomp (Jump)",
@@ -279,15 +280,20 @@ _ENEMY_DESCRIPTOR_OVERRIDES = {
     "bits_whomp_ground_pound_coins": "Whomp (Ground Pound)",
     "main_mr_is": "Main Area Mr. I",
     "merry_go_round_boos": "Merry-Go-Round Boo",
-    "tiny_piranha_area_plant": "Tiny Piranha Area Piranha Plant",
-    "huge_lower_fly_guys": "Lower Huge Island Fly Guy",
+    "tiny_piranha_area_plant": "Tiny Island Fire Piranha Plant",
+    "tiny_start_goomba": "Tiny Start Goomba",
+    "huge_beach_fly_guy": "Beach Fly Guy",
+    "huge_near_cannon_fly_guy": "Near Cannon Fly Guy",
     "huge_lakitu": "Huge Island Lakitu",
     "huge_koopa_troopa": "Huge Island Koopa Troopa",
     "huge_cannonball_fly_guy": "Cannonball Area Fly Guy",
-    "huge_piranha_area_plants": "Huge Piranha Area Fire Piranha Plant",
+    "huge_piranha_area_plants": "Huge Island Fire Piranha Plant",
+    "tiny_main_goombas": "Tiny Island Goomba",
+    "huge_top_chuckya": "Chuckya",
 }
 _GIANT_GOOMBA_DESCRIPTORS = {
-    "huge_lower_giant_goombas": "Lower Huge Island Giant Goomba",
+    "huge_start_giant_goombas": "Huge Starting Area Goomba",
+    "near_cannon_giant_goomba": "Near Cannon Goomba",
     "huge_windswept_giant_goombas": "Windswept Valley Giant Goomba",
     "huge_koopa_region_giant_goombas": "Koopa the Quick Area Giant Goomba",
     "red_area_giant_goombas": "Red Coins Area Giant Goomba",
@@ -366,7 +372,7 @@ STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
     "sl_impossible_coin": "Impossible Coin",
     "ttm_hidden_coin_before_slide": "Hidden Coin Before the Slide",
     "tiny_impossible_coin": "Impossible Coin",
-    "tiny_purple_switch_coin": "Separated Coin on Tiny Island",
+    "tiny_purple_switch_coin": "Five Itty Bitty Secrets Island Coin",
     "rr_second_carpet_platform_coin": "Coin on the Second Carpet's Grey Platform",
     "rr_second_carpet_air_coin": "Coin in the Air Along the Second Carpet",
 }
@@ -423,7 +429,7 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
                         ),
                         CoinOutputDefinition(
                             CoinOutputID(course_name, source_id, index * 2), course_base + offset + 1,
-                            f"{course_name} - Blue Coin from {producer_name}", CoinOutputKind.BLUE, 5,
+                            f"{course_name} - {producer_name}, Blue Coin", CoinOutputKind.BLUE, 5,
                             (f"{source_id}_blue",),
                         ),
                     ))

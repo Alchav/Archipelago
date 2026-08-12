@@ -6,6 +6,7 @@ class SM64Location(Location):
     game: str = "SM64: Spicy Mycena 64"
 
 coin_count_check_location_base_id = 3627000
+tiny_huge_island_extra_coin_count_check_location_id = 3629091
 
 coin_count_check_course_data = (
     ("Bob-omb Battlefield", 0, "bob_omb_battlefield_coin_star_requirement", 146),
@@ -20,7 +21,7 @@ coin_count_check_course_data = (
     ("Snowman's Land", 1210, "snowmans_land_coin_star_requirement", 127),
     ("Wet-Dry World", 1337, "wet_dry_world_coin_star_requirement", 152),
     ("Tall, Tall Mountain", 1489, "tall_tall_mountain_coin_star_requirement", 137),
-    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 192),
+    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 193),
     ("Tick Tock Clock", 1817, "tick_tock_clock_coin_star_requirement", 128),
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )
@@ -81,7 +82,11 @@ def parse_coin_count_check_location_name(location_name: str) -> tuple[str, int] 
 
 
 coin_count_check_location_table = {
-    get_coin_count_check_location_name(course_name, coin_count): coin_count_check_location_base_id + course_offset + coin_count - 1
+    get_coin_count_check_location_name(course_name, coin_count): (
+        tiny_huge_island_extra_coin_count_check_location_id
+        if course_name == "Tiny-Huge Island" and coin_count == 192
+        else coin_count_check_location_base_id + course_offset + coin_count - 1
+    )
     for course_name, course_offset, _option_name, max_coin_star_requirement in coin_count_check_course_data
     for coin_count in range(1, max_coin_star_requirement)
 }
