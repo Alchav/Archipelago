@@ -1,11 +1,13 @@
 from BaseClasses import Location
 
+from .CoinChecks import individual_coin_location_table
+
 class SM64Location(Location):
     game: str = "SM64: Spicy Mycena 64"
 
-coinsanity_location_base_id = 3627000
+coin_count_check_location_base_id = 3627000
 
-coinsanity_course_data = (
+coin_count_check_course_data = (
     ("Bob-omb Battlefield", 0, "bob_omb_battlefield_coin_star_requirement", 146),
     ("Whomp's Fortress", 146, "whomps_fortress_coin_star_requirement", 141),
     ("Jolly Roger Bay", 287, "jolly_roger_bay_coin_star_requirement", 104),
@@ -23,26 +25,26 @@ coinsanity_course_data = (
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )
 
-secret_stage_coinsanity_location_base_id = 3629193
+secret_stage_coin_count_check_location_base_id = 3629193
 
-secret_stage_coinsanity_data = (
-    ("The Princess's Secret Slide", 3629193, "princess_secret_slide_coinsanity_max_coins", 80),
-    ("The Secret Aquarium", 3629273, "secret_aquarium_coinsanity_max_coins", 56),
-    ("Wing Mario Over the Rainbow", 3629329, "wing_mario_over_the_rainbow_coinsanity_max_coins", 56),
-    ("Tower of the Wing Cap", 3629385, "tower_of_the_wing_cap_coinsanity_max_coins", 63),
-    ("Vanish Cap Under the Moat", 3629448, "vanish_cap_under_the_moat_coinsanity_max_coins", 27),
-    ("Cavern of the Metal Cap", 3629475, "cavern_of_the_metal_cap_coinsanity_max_coins", 47),
-    ("Bowser in the Dark World", 3629522, "bowser_in_the_dark_world_coinsanity_max_coins", 80),
-    ("Bowser in the Fire Sea", 3629602, "bowser_in_the_fire_sea_coinsanity_max_coins", 80),
-    ("Bowser in the Sky", 3629682, "bowser_in_the_sky_coinsanity_max_coins", 76),
+secret_stage_coin_count_check_data = (
+    ("The Princess's Secret Slide", 3629193, "princess_secret_slide_coin_count_max_coins", 80),
+    ("The Secret Aquarium", 3629273, "secret_aquarium_coin_count_max_coins", 56),
+    ("Wing Mario Over the Rainbow", 3629329, "wing_mario_over_the_rainbow_coin_count_max_coins", 56),
+    ("Tower of the Wing Cap", 3629385, "tower_of_the_wing_cap_coin_count_max_coins", 63),
+    ("Vanish Cap Under the Moat", 3629448, "vanish_cap_under_the_moat_coin_count_max_coins", 27),
+    ("Cavern of the Metal Cap", 3629475, "cavern_of_the_metal_cap_coin_count_max_coins", 47),
+    ("Bowser in the Dark World", 3629522, "bowser_in_the_dark_world_coin_count_max_coins", 80),
+    ("Bowser in the Fire Sea", 3629602, "bowser_in_the_fire_sea_coin_count_max_coins", 80),
+    ("Bowser in the Sky", 3629682, "bowser_in_the_sky_coin_count_max_coins", 76),
 )
 
 
-def get_coinsanity_location_name(course_name: str, coin_count: int) -> str:
+def get_coin_count_check_location_name(course_name: str, coin_count: int) -> str:
     return f"{course_name} - {coin_count} Coin{'s' if coin_count != 1 else ''}"
 
 
-def get_coinsanity_thresholds(coin_star_requirement: int, percentage: int) -> tuple[int, ...]:
+def get_coin_count_check_thresholds(coin_star_requirement: int, percentage: int) -> tuple[int, ...]:
     if coin_star_requirement <= 1 or percentage <= 0:
         return ()
 
@@ -54,45 +56,45 @@ def get_coinsanity_thresholds(coin_star_requirement: int, percentage: int) -> tu
     )
 
 
-def get_coinsanity_location_names(coin_star_requirements: dict[str, int], percentage: int) -> tuple[str, ...]:
+def get_coin_count_check_location_names(coin_star_requirements: dict[str, int], percentage: int) -> tuple[str, ...]:
     return tuple(
-        get_coinsanity_location_name(course_name, coin_count)
-        for course_name, _course_offset, option_name, _max_coins in coinsanity_course_data
-        for coin_count in get_coinsanity_thresholds(coin_star_requirements[option_name], percentage)
+        get_coin_count_check_location_name(course_name, coin_count)
+        for course_name, _course_offset, option_name, _max_coins in coin_count_check_course_data
+        for coin_count in get_coin_count_check_thresholds(coin_star_requirements[option_name], percentage)
     )
 
 
-def get_secret_stage_coinsanity_location_names(
+def get_secret_stage_coin_count_check_location_names(
         secret_stage_coin_maxes: dict[str, int], percentage: int) -> tuple[str, ...]:
     return tuple(
-        get_coinsanity_location_name(course_name, coin_count)
-        for course_name, _base_id, option_name, _max_coins in secret_stage_coinsanity_data
-        for coin_count in get_coinsanity_thresholds(secret_stage_coin_maxes[option_name] + 1, percentage)
+        get_coin_count_check_location_name(course_name, coin_count)
+        for course_name, _base_id, option_name, _max_coins in secret_stage_coin_count_check_data
+        for coin_count in get_coin_count_check_thresholds(secret_stage_coin_maxes[option_name] + 1, percentage)
     )
 
 
-def parse_coinsanity_location_name(location_name: str) -> tuple[str, int] | None:
-    if location_name not in coinsanity_location_table:
+def parse_coin_count_check_location_name(location_name: str) -> tuple[str, int] | None:
+    if location_name not in coin_count_check_location_table:
         return None
     course_name, coin_text = location_name.rsplit(" - ", 1)
     return course_name, int(coin_text.split(" ", 1)[0])
 
 
-coinsanity_location_table = {
-    get_coinsanity_location_name(course_name, coin_count): coinsanity_location_base_id + course_offset + coin_count - 1
-    for course_name, course_offset, _option_name, max_coin_star_requirement in coinsanity_course_data
+coin_count_check_location_table = {
+    get_coin_count_check_location_name(course_name, coin_count): coin_count_check_location_base_id + course_offset + coin_count - 1
+    for course_name, course_offset, _option_name, max_coin_star_requirement in coin_count_check_course_data
     for coin_count in range(1, max_coin_star_requirement)
 }
 
-secret_stage_coinsanity_location_table = {
-    get_coinsanity_location_name(course_name, coin_count): base_id + coin_count - 1
-    for course_name, base_id, _option_name, max_coins in secret_stage_coinsanity_data
+secret_stage_coin_count_check_location_table = {
+    get_coin_count_check_location_name(course_name, coin_count): base_id + coin_count - 1
+    for course_name, base_id, _option_name, max_coins in secret_stage_coin_count_check_data
     for coin_count in range(1, max_coins + 1)
 }
 
-coinsanity_location_table = {
-    **coinsanity_location_table,
-    **secret_stage_coinsanity_location_table,
+coin_count_check_location_table = {
+    **coin_count_check_location_table,
+    **secret_stage_coin_count_check_location_table,
 }
 
 #Bob-omb Battlefield
@@ -617,7 +619,7 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
                   **locSS_table, **locBasement_table, **locFreestanding1Up_table, **locBlocksanity_table, \
-                  **coinsanity_location_table}
+                  **coin_count_check_location_table, **individual_coin_location_table}
 
 loc1UpBlock_table = {
     location_name: location_table[location_name]
@@ -755,9 +757,9 @@ location_name_groups.update({
     "Bowser Stages": set().union(
         *(location_name_groups[group_name] for group_name in bowser_stage_location_group_names)),
     "Coin Stars": set(loc100Coin_table),
-    "Coinsanity": set(coinsanity_location_table),
-    "Main Course Coinsanity": set(coinsanity_location_table) - set(secret_stage_coinsanity_location_table),
-    "Secret Stage Coinsanity": set(secret_stage_coinsanity_location_table),
+    "Coin Count Checks": set(coin_count_check_location_table),
+    "Main Course Coin Count Checks": set(coin_count_check_location_table) - set(secret_stage_coin_count_check_location_table),
+    "Secret Stage Coin Count Checks": set(secret_stage_coin_count_check_location_table),
     "1-Ups": set(locOneUp_table),
     "1-Ups from Blocks": set(loc1UpBlock_table),
     "Freestanding 1-Ups": set(locFreestanding1Up_table),
@@ -771,6 +773,7 @@ location_name_groups.update({
     "Coin Blocks": {
         location_name for location_name in locBlocksanity_table if " Coins Block" in location_name
     },
+    "Individual Coin Checks": set(individual_coin_location_table),
     "Shell Blocks": {
         location_name for location_name in locBlocksanity_table if "Shell Block" in location_name
     },

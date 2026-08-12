@@ -29,10 +29,13 @@ class CoinSourceTrace:
     max_coins: int | None = None
     reachable_red_coin_ids_when_uncounted: frozenset[int] = frozenset()
     requirement_rule: Rule.Resolved | None = None
+    collection_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.source_id:
             raise ValueError("Coin source IDs must not be empty")
+        if self.collection_id == "":
+            raise ValueError("Coin collection IDs must not be empty")
         if not self.label:
             raise ValueError("Coin source labels must not be empty")
         if self.coins < 0:
@@ -267,6 +270,25 @@ def _format_coin_source(
     ]
     if suffix:
         messages.append({"type": "text", "text": suffix})
+    multiworld = getattr(state, "multiworld", None)
+    world = multiworld.worlds[player] if multiworld is not None else None
+    if displayed_max > 0 and world is not None:
+        collection_id = source.collection_id or source.source_id
+        collected = min(
+            displayed_max,
+            world.permanent_coin_source_counts.get(
+                f"{course_name}:{collection_id}",
+                world.permanent_coin_source_counts.get(collection_id, 0),
+            ),
+        )
+        messages.extend([
+            {"type": "text", "text": f"\n{'  ' * (depth + 1)}Collected: "},
+            {
+                "type": "color",
+                "color": "green" if collected >= displayed_max else "yellow",
+                "text": f"{collected}/{displayed_max}",
+            },
+        ])
     requirement_explanation = _coin_source_requirement_explanation(source, state)
     if requirement_explanation:
         messages.append({"type": "text", "text": f"\n{'  ' * (depth + 1)}("})
@@ -418,6 +440,112 @@ class CanCollectCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         @override
         def __str__(self) -> str:
             return f"Collect {self.required_coins} coins in {self.course_name}"
+
+
+@dataclasses.dataclass()
+class CanCollectCoinOutput(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
+    """Require one physical output through any of its CoinLogic source methods."""
+
+    course_name: str
+    source_methods: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if not self.course_name or not self.source_methods:
+            raise ValueError("Coin outputs need a course and at least one source method")
+
+    @override
+    def _instantiate(self, world: SM64World) -> Rule.Resolved:
+        registration = get_coin_evaluator(self.course_name)
+        return self.Resolved(
+            self.course_name,
+            tuple(dict.fromkeys(self.source_methods)),
+            registration.item_dependencies,
+            registration.region_dependencies,
+            registration.location_dependencies,
+            registration.entrance_dependencies,
+            player=world.player,
+            caching_enabled=getattr(world, "rule_caching_enabled", False),
+        )
+
+    class Resolved(Rule.Resolved):
+        course_name: str
+        source_methods: tuple[str, ...]
+        item_dependency_names: tuple[str, ...]
+        region_dependency_names: tuple[str, ...]
+        location_dependency_names: tuple[str, ...]
+        entrance_dependency_names: tuple[str, ...]
+        force_recalculate: ClassVar[bool] = True
+
+        def _sources(self, state: CollectionState) -> dict[str, list[CoinSourceTrace]]:
+            evaluation = evaluate_coins(state, self.player, self.course_name, 0)
+            if isinstance(evaluation, bool):
+                return {}
+            result: dict[str, list[CoinSourceTrace]] = {}
+
+            def visit(source: CoinSourceTrace) -> None:
+                result.setdefault(source.source_id, []).append(source)
+                for child in source.children:
+                    visit(child)
+
+            for source in evaluation.children:
+                visit(source)
+            return result
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            sources = self._sources(state)
+            return any(
+                source.available
+                for method in self.source_methods
+                for source in sources.get(method, ())
+            )
+
+        @override
+        def item_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.item_dependency_names}
+
+        @override
+        def region_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.region_dependency_names}
+
+        @override
+        def location_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.location_dependency_names}
+
+        @override
+        def entrance_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.entrance_dependency_names}
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            if state is None:
+                return [{"type": "text", "text": f"Collect this coin in {self.course_name}"}]
+            sources = self._sources(state)
+            messages: list[JSONMessagePart] = []
+            for method in self.source_methods:
+                for source in sources.get(method, ()):
+                    if messages:
+                        messages.append({"type": "text", "text": " or "})
+                    if source.requirement_rule is not None:
+                        messages.extend(source.requirement_rule.explain_json(state))
+                    else:
+                        messages.append({
+                            "type": "color",
+                            "color": "green" if source.available else "salmon",
+                            "text": source.label,
+                        })
+            if messages:
+                return messages
+            return [{
+                "type": "color",
+                "color": "salmon",
+                "text": f"Missing CoinLogic source: {', '.join(self.source_methods)}",
+            }]
+
+        @override
+        def __str__(self) -> str:
+            return f"Collect coin output in {self.course_name} via {' or '.join(self.source_methods)}"
 
 
 @dataclasses.dataclass()

@@ -16,11 +16,12 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
     per_level_one_up_unlock_item_data_table, global_sign_unlock_item_data_table, \
     per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_cap_length_item_names
-from .Locations import location_table, SM64Location, coinsanity_course_data, get_coinsanity_location_name, \
-    get_coinsanity_location_names, get_secret_stage_coinsanity_location_names, location_name_groups
+from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
+    get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, location_name_groups
+from .CoinChecks import CoinOutputID, coin_output_by_name, select_individual_coin_outputs
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
-    move_randomizer_option_name_by_action, secret_stage_coinsanity_max_coin_option_names, \
+    move_randomizer_option_name_by_action, secret_stage_coin_count_max_coin_option_names, \
     trap_weight_option_names, trap_item_name_by_option_name
 from .Rules import set_rules
 from .Signs import fallback_hints, sign_data, sign_data_by_location_name
@@ -67,7 +68,8 @@ class SM64World(World):
 
     ut_can_gen_without_yaml = True
     glitches_item_name = ut_glitch_item_name
-    found_entrances_datastorage_key = "SM64SpicyFoundEntrances_{player}"
+    found_entrances_datastorage_key = None
+    permanent_coin_sources_datastorage_key = "SM64SpicyPermanentCoinSources_{player}"
 
     area_connections: typing.Dict[int, int]
 
@@ -105,9 +107,10 @@ class SM64World(World):
         self._clear_coin_evaluation_cache(state, self.player)
 
     star_costs: typing.Dict[str, int]
-    coinsanity_location_names: typing.Tuple[str, ...]
+    coin_count_check_location_names: typing.Tuple[str, ...]
+    coin_check_location_names: typing.Tuple[str, ...]
     music_slot_data: typing.Dict[str, typing.Any] | None
-    using_slot_coinsanity_locations: bool
+    using_slot_coin_count_check_locations: bool
     start_inventory_item_ids: set[int]
     start_inventory_item_counts: dict[int, int]
     sign_hint_count: int
@@ -116,6 +119,7 @@ class SM64World(World):
     sign_hint_entrances: dict[str, int]
     randomized_entrance_connections: dict[int, Entrance]
     deferred_entrance_targets: dict[int, Region]
+    permanent_coin_source_counts: dict[str, int]
 
     slot_option_names = (
         "area_rando",
@@ -124,7 +128,6 @@ class SM64World(World):
         "blocksanity",
         "easy_butterflies",
         "no_despawns",
-        "permanent_coin_collection",
         "combined_progressive_keys",
         "level_unlocks",
         "one_up_unlocks",
@@ -160,9 +163,9 @@ class SM64World(World):
         "mario_hair_color",
         "music_shuffle",
         "skybox_shuffle",
-        "coinsanity",
-        "secret_stage_coinsanity",
-        *secret_stage_coinsanity_max_coin_option_names,
+        "coin_checks",
+        "coin_count_checks",
+        *secret_stage_coin_count_max_coin_option_names,
         *coin_star_requirement_option_names,
         "traps_filler_percentage",
         *trap_weight_option_names,
@@ -175,7 +178,7 @@ class SM64World(World):
         self.area_connections = {}
         self.music_slot_data = None
         self.skybox_slot_data = None
-        self.using_slot_coinsanity_locations = False
+        self.using_slot_coin_count_check_locations = False
         self.sign_hint_count = 0
         self.sign_hints = dict(slot_data.get("SignHints", {})) if slot_data else {}
         self.sign_hint_locations = dict(slot_data.get("SignHintLocations", {})) if slot_data else {}
@@ -185,6 +188,7 @@ class SM64World(World):
         self.randomized_entrance_connections = {}
         self.deferred_entrance_targets = {}
         self.bypass_entrance_connections = {}
+        self.permanent_coin_source_counts = {}
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
             self.area_connections = {
@@ -199,18 +203,42 @@ class SM64World(World):
             }
         else:
             self.start_inventory_item_counts = self.get_start_inventory_slot_data()
-        self.found_entrances_datastorage_key = (
-            "SM64SpicyFoundEntrances_{player}"
-            if self.options.area_rando.value != self.options.area_rando.option_Off
-            else None
-        )
-        self.start_inventory_item_ids = set(self.start_inventory_item_counts)
 
         enabled_logic_tricks = get_enabled_logic_tricks(self.options.logic_tricks.value)
         tracker_logic_tricks = get_enabled_logic_tricks(self.options.universal_tracker_glitched_logic.value)
         for trick, data in logic_tricks.items():
             setattr(self, data["internal_id"], trick in enabled_logic_tricks)
             setattr(self, f"{data['internal_id']}_ut_glitch", trick in tracker_logic_tricks)
+
+        if slot_data and "CoinCheckLocations" in slot_data:
+            unknown_coin_checks = set(slot_data["CoinCheckLocations"]) - coin_output_by_name.keys()
+            if unknown_coin_checks:
+                raise OptionError(
+                    f"Unknown individual Coin Check locations in slot data: {sorted(unknown_coin_checks)}")
+            self.coin_check_location_names = tuple(slot_data["CoinCheckLocations"])
+        else:
+            excluded_coin_outputs = set()
+            if self.options.accessibility == self.options.accessibility.option_full:
+                if not self.logic_sl_impossible_coin:
+                    excluded_coin_outputs.add(CoinOutputID(
+                        "Snowman's Land", "sl_impossible_coin", 1))
+                if not self.logic_thi_impossible_coin:
+                    excluded_coin_outputs.add(CoinOutputID(
+                        "Tiny-Huge Island", "tiny_impossible_coin", 1))
+            selected_coin_outputs = select_individual_coin_outputs(
+                self.options.coin_checks.value,
+                self.random,
+                excluded_output_ids=frozenset(excluded_coin_outputs),
+            )
+            self.coin_check_location_names = tuple(
+                output.location_name for output in selected_coin_outputs
+            )
+        tracker_datastorage_keys = []
+        if self.options.area_rando.value != self.options.area_rando.option_Off:
+            tracker_datastorage_keys.append("SM64SpicyFoundEntrances_{player}")
+        tracker_datastorage_keys.append(self.permanent_coin_sources_datastorage_key)
+        self.found_entrances_datastorage_key = tracker_datastorage_keys or None
+        self.start_inventory_item_ids = set(self.start_inventory_item_counts)
 
         self.move_rando_bitvec = 0
         double_jump_bitvec_offset = action_item_data_table['Double Jump'].code
@@ -240,41 +268,42 @@ class SM64World(World):
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names
         }
-        if "CoinsanityLocations" in slot_data:
-            self.coinsanity_location_names = tuple(slot_data["CoinsanityLocations"])
-            self.using_slot_coinsanity_locations = True
+        if "CoinCountCheckLocations" in slot_data:
+            self.coin_count_check_location_names = tuple(slot_data["CoinCountCheckLocations"])
+            self.using_slot_coin_count_check_locations = True
         else:
-            self.coinsanity_location_names = get_coinsanity_location_names(
-                coin_star_requirements, self.options.coinsanity.value)
-            if self.options.secret_stage_coinsanity:
-                secret_stage_coin_maxes = {
-                    option_name: getattr(self.options, option_name).value
-                    for option_name in secret_stage_coinsanity_max_coin_option_names
-                }
-                if (
-                        self.options.accessibility == self.options.accessibility.option_full
-                        and not self.options.permanent_coin_collection
-                        and not self.logic_totwc_coin_mastery
-                ):
-                    secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"] = min(
-                        secret_stage_coin_maxes["tower_of_the_wing_cap_coinsanity_max_coins"], 31)
-                self.coinsanity_location_names += get_secret_stage_coinsanity_location_names(
-                    secret_stage_coin_maxes, self.options.coinsanity.value)
+            self.coin_count_check_location_names = get_coin_count_check_location_names(
+                coin_star_requirements, self.options.coin_count_checks.value)
+            secret_stage_coin_maxes = {
+                option_name: getattr(self.options, option_name).value
+                for option_name in secret_stage_coin_count_max_coin_option_names
+            }
+            self.coin_count_check_location_names += get_secret_stage_coin_count_check_location_names(
+                secret_stage_coin_maxes, self.options.coin_count_checks.value)
         if "MoveRandoVec" in slot_data:
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
-        if not self.using_slot_coinsanity_locations:
-            self.add_overflow_coinsanity_locations()
+        if not self.using_slot_coin_count_check_locations:
+            self.add_overflow_coin_count_check_locations()
         coin_check_region_names = {
             "Tiny-Huge Island": "Tiny-Huge Island - Coins",
         }
-        for location_name in self.coinsanity_location_names:
+        for location_name in self.coin_count_check_location_names:
             region_name = location_name.rsplit(" - ", 1)[0]
             region_name = coin_check_region_names.get(region_name, region_name)
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
+        for location_name in self.coin_check_location_names:
+            output = coin_output_by_name[location_name]
+            region_name = coin_check_region_names.get(
+                output.output_id.course_name,
+                output.output_id.course_name,
+            )
+            region = self.multiworld.get_region(region_name, self.player)
+            region.locations.append(SM64Location(
+                self.player, location_name, output.location_id, region))
 
     def set_rules(self):
         set_rules(self.multiworld, self.options, self.player, self.area_connections, self.move_rando_bitvec)
@@ -561,11 +590,11 @@ class SM64World(World):
             for option_name in coin_star_requirement_option_names
         }
 
-    def add_overflow_coinsanity_locations(self) -> None:
+    def add_overflow_coin_count_check_locations(self) -> None:
         item_count = self.get_item_pool_item_count()
         fillable_location_count = (
             len(self.multiworld.get_unfilled_locations(self.player))
-            + len(self.coinsanity_location_names)
+            + len(self.coin_count_check_location_names)
             - self.get_future_locked_location_count()
         )
         extra_location_count = item_count - fillable_location_count
@@ -573,14 +602,14 @@ class SM64World(World):
             return
 
         coin_star_requirements = self.get_coin_star_requirements_by_option()
-        selected_locations = set(self.coinsanity_location_names)
+        selected_locations = set(self.coin_count_check_location_names)
         extra_locations: list[str] = []
 
         below_threshold_pool = [
-            get_coinsanity_location_name(course_name, coin_count)
-            for course_name, _course_offset, option_name, _max_coins in coinsanity_course_data
+            get_coin_count_check_location_name(course_name, coin_count)
+            for course_name, _course_offset, option_name, _max_coins in coin_count_check_course_data
             for coin_count in range(1, coin_star_requirements[option_name])
-            if get_coinsanity_location_name(course_name, coin_count) not in selected_locations
+            if get_coin_count_check_location_name(course_name, coin_count) not in selected_locations
         ]
         self.random.shuffle(below_threshold_pool)
         for location_name in below_threshold_pool[:extra_location_count]:
@@ -591,11 +620,11 @@ class SM64World(World):
         coin_offset = 0
         while remaining_location_count > 0:
             added_this_round = False
-            for course_name, _course_offset, option_name, max_coin_star_requirement in coinsanity_course_data:
+            for course_name, _course_offset, option_name, max_coin_star_requirement in coin_count_check_course_data:
                 coin_count = coin_star_requirements[option_name] + coin_offset
                 if coin_count >= max_coin_star_requirement:
                     continue
-                location_name = get_coinsanity_location_name(course_name, coin_count)
+                location_name = get_coin_count_check_location_name(course_name, coin_count)
                 if location_name in selected_locations:
                     continue
                 selected_locations.add(location_name)
@@ -608,7 +637,7 @@ class SM64World(World):
                 break
             coin_offset += 1
 
-        self.coinsanity_location_names = (*self.coinsanity_location_names, *extra_locations)
+        self.coin_count_check_location_names = (*self.coin_count_check_location_names, *extra_locations)
 
     def get_future_locked_location_count(self) -> int:
         locked_count = 0
@@ -622,9 +651,6 @@ class SM64World(World):
         trap_items = []
         trap_weights = []
         for option_name in trap_weight_option_names:
-            if (option_name == "uncollect_random_coin_trap_weight"
-                    and not self.options.permanent_coin_collection):
-                continue
             weight = getattr(self.options, option_name).value
             if weight > 0:
                 trap_items.append(trap_item_name_by_option_name[option_name])
@@ -928,14 +954,14 @@ class SM64World(World):
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
-            "CoinsanityLocations": list(self.coinsanity_location_names),
+            "CoinCountCheckLocations": list(self.coin_count_check_location_names),
+            "CoinCheckLocations": list(self.coin_check_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
             "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,
             "OneUpChecks": self.options.one_up_checks.value,
             "BuddyChecks": self.options.buddy_checks.value,
             "EasyButterflies": self.options.easy_butterflies.value,
             "NoDespawn": self.options.no_despawns.value,
-            "PermanentCoinCollection": self.options.permanent_coin_collection.value,
             "WingCapLengthItemCount": self.cap_length_item_counts["Progressive Wing Cap Length"],
             "MetalCapLengthItemCount": self.cap_length_item_counts["Progressive Metal Cap Length"],
             "VanishCapLengthItemCount": self.cap_length_item_counts["Progressive Vanish Cap Length"],
@@ -968,6 +994,16 @@ class SM64World(World):
         return slot_data
 
     def reconnect_found_entrances(self, _found_key: str, data_storage_value) -> None:
+        if _found_key.startswith("SM64SpicyPermanentCoinSources_"):
+            if not isinstance(data_storage_value, dict):
+                return
+            self.permanent_coin_source_counts = {
+                str(source_id): max(0, int(count))
+                for source_id, count in data_storage_value.items()
+                if isinstance(count, (int, float))
+            }
+            return
+
         try:
             discovered = int(data_storage_value or 0)
         except (TypeError, ValueError):

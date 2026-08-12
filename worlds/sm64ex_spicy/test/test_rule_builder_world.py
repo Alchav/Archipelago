@@ -68,12 +68,10 @@ class CoinSourceExplanationTest(SM64TestBase):
         explanation = "".join(part.get("text", "") for part in rule.explain_json(state))
 
         self.assertIn("Small Goomba in the starting Tiny region", explanation)
-        self.assertIn(
-            "Small Goomba in the starting Tiny region (unavailable)\n      (",
-            explanation,
-        )
+        self.assertIn("Small Goomba in the starting Tiny region (unavailable)", explanation)
         self.assertIn("Tiny-Huge Island (Tiny)", explanation)
         self.assertIn("Tiny-Huge Island - Goombas", explanation)
+        self.assertIn("Collected: 0/1", explanation)
 
     def test_every_generated_coin_source_has_a_rule(self):
         state = self.multiworld.get_all_state(False)
@@ -94,3 +92,18 @@ class CoinSourceExplanationTest(SM64TestBase):
             )
 
         self.assertEqual(missing, [])
+
+
+class PermanentCoinSourceExplanationTest(CoinSourceExplanationTest):
+    def test_collected_count_uses_restored_canonical_source(self):
+        self.world.reconnect_found_entrances(
+            "SM64SpicyPermanentCoinSources_1",
+            {"Tiny-Huge Island:tiny_start_goomba": 1},
+        )
+        state = CollectionState(self.multiworld)
+        rule = CanCollectCoins("Tiny-Huge Island", 1).resolve(self.world)
+
+        explanation = "".join(part.get("text", "") for part in rule.explain_json(state))
+
+        self.assertIn("Small Goomba in the starting Tiny region", explanation)
+        self.assertIn("Collected: 1/1", explanation)

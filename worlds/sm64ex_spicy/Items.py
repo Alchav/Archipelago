@@ -36,13 +36,10 @@ def progression_deprioritized_skip_balancing_if_blocksanity(options):
     return ItemClassification.filler
 
 
-def progression_deprioritized_skip_balancing_if_totwc_coinsanity(options):
+def progression_deprioritized_skip_balancing_if_totwc_coin_count_checks(options):
     if (options.blocksanity
-            or options.coinsanity.value > 0
-            and options.secret_stage_coinsanity
-            and options.tower_of_the_wing_cap_coinsanity_max_coins.value > 51
-            and (options.permanent_coin_collection
-                 or "Tower of the Wing Cap Coin Mastery" in options.logic_tricks.value)):
+            or options.coin_count_checks.value > 0
+            and options.tower_of_the_wing_cap_coin_count_max_coins.value > 51):
         return ItemClassification.progression_deprioritized_skip_balancing
     return ItemClassification.filler
     
@@ -128,7 +125,7 @@ cap_item_data_table: dict[str, SM64ItemData] = {
     "Lethal Lava Land - Wing Cap": SM64ItemData(sm64ex_base_id + 279, progression_deprioritized_skip_balancing),
     "Shifting Sand Land - Wing Cap": SM64ItemData(sm64ex_base_id + 280, progression_deprioritized),
     "Tower of the Wing Cap - Wing Cap": SM64ItemData(
-        sm64ex_base_id + 281, progression_deprioritized_skip_balancing_if_totwc_coinsanity),
+        sm64ex_base_id + 281, progression_deprioritized_skip_balancing_if_totwc_coin_count_checks),
     "Wing Mario Over the Rainbow - Wing Cap": SM64ItemData(sm64ex_base_id + 282),
     "Whomp's Fortress - Metal Cap": SM64ItemData(
         sm64ex_base_id + 283, progression_deprioritized_skip_balancing_if_blocksanity),

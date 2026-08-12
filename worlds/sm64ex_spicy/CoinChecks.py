@@ -1,0 +1,525 @@
+from __future__ import annotations
+
+import dataclasses
+import random
+import re
+from collections import defaultdict
+from collections.abc import Iterable, Mapping, Sequence
+from enum import Enum
+
+from .CoinCheckData import SOURCE_LAYOUTS
+
+
+INDIVIDUAL_COIN_LOCATION_BASE_ID = 4_000_000
+INDIVIDUAL_COIN_COURSE_STRIDE = 1_000
+
+
+class CoinOutputKind(Enum):
+    YELLOW = "yellow"
+    RED = "red"
+    BLUE = "blue"
+
+
+@dataclasses.dataclass(frozen=True, order=True)
+class CoinOutputID:
+    course_name: str
+    source_id: str
+    output_index: int
+
+
+@dataclasses.dataclass(frozen=True)
+class CoinOutputDefinition:
+    output_id: CoinOutputID
+    location_id: int
+    location_name: str
+    kind: CoinOutputKind
+    coin_value: int
+    source_methods: tuple[str, ...]
+
+
+@dataclasses.dataclass(frozen=True)
+class CoinSourceDefinition:
+    """One physical producer or formation and its canonical outputs."""
+
+    course_name: str
+    source_id: str
+    label: str
+    outputs: tuple[CoinOutputDefinition, ...]
+    maximum_coin_value: int
+
+
+COURSE_ORDER = tuple(SOURCE_LAYOUTS)
+_COURSE_INDEX = {course_name: index for index, course_name in enumerate(COURSE_ORDER)}
+
+COURSE_MAXIMUM_COIN_VALUES = {
+    "Bob-omb Battlefield": 146, "Whomp's Fortress": 141, "Jolly Roger Bay": 104,
+    "Cool, Cool Mountain": 154, "Big Boo's Haunt": 151, "Hazy Maze Cave": 139,
+    "Lethal Lava Land": 133, "Shifting Sand Land": 136, "Dire, Dire Docks": 106,
+    "Snowman's Land": 127, "Wet-Dry World": 152, "Tall, Tall Mountain": 137,
+    "Tiny-Huge Island": 192, "Tick Tock Clock": 128, "Rainbow Ride": 146,
+    "The Princess's Secret Slide": 80, "The Secret Aquarium": 56,
+    "Wing Mario Over the Rainbow": 56, "Tower of the Wing Cap": 63,
+    "Vanish Cap Under the Moat": 27, "Cavern of the Metal Cap": 47,
+    "Bowser in the Dark World": 80, "Bowser in the Fire Sea": 80, "Bowser in the Sky": 76,
+}
+
+
+# Each tuple identifies alternate CoinLogic methods for the same physical Red Coin.
+RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
+    "Bob-omb Battlefield": {
+        **{i: ("main_red_coins",) for i in range(1, 8)},
+        8: ("island_full_trick_red_coin", "island_cannon_red_coin", "island_partial_red_coin"),
+    },
+    "Whomp's Fortress": {
+        **{i: ("initial_red_coins",) for i in range(1, 6)}, 6: ("thwomp_red_coin",),
+        7: ("top_red_coins",), 8: ("top_red_coins",),
+    },
+    "Jolly Roger Bay": {
+        **{i: ("lower_red_coins",) for i in range(1, 5)}, 5: ("pillar_red_coin",),
+        6: ("raised_ship_red_coins", "ship_alternative_red_coin"),
+        7: ("raised_ship_red_coins",), 8: ("raised_ship_red_coins",),
+    },
+    "Cool, Cool Mountain": {i: ("red_coins",) for i in range(1, 9)},
+    "Big Boo's Haunt": {
+        **{i: ("first_floor_red_coins",) for i in range(1, 5)},
+        **{i: ("second_floor_red_coins",) for i in range(5, 8)},
+        8: ("second_floor_movement_red_coin",),
+    },
+    "Hazy Maze Cave": {
+        **{i: ("lower_red_coin_room_coins",) for i in range(1, 5)},
+        5: ("upper_red_coin_pair_first",), 6: ("upper_red_coin_pair_first",),
+        7: ("upper_red_coin_pair_checkerboards",), 8: ("upper_red_coin_pair_checkerboards",),
+    },
+    "Lethal Lava Land": {
+        **{i: ("lll_first_five_red_coins",) for i in range(1, 6)},
+        **{i: ("lll_remaining_three_red_coins",) for i in range(6, 9)},
+    },
+    "Shifting Sand Land": {
+        **{i: ("ssl_low_red_coins",) for i in range(1, 5)},
+        5: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
+        6: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
+        7: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
+        8: ("ssl_normal_high_red_coin_route", "ssl_shy_guy_red_coin_route"),
+    },
+    "Dire, Dire Docks": {1: ("ddd_first_red_coin",), **{i: ("ddd_remaining_red_coins",) for i in range(2, 9)}},
+    "Snowman's Land": {
+        **{i: ("sl_whirl_red_coins",) for i in range(1, 4)},
+        **{i: ("sl_upper_red_coins",) for i in range(4, 9)},
+    },
+    "Wet-Dry World": {
+        1: ("downtown_initial_red_coin",),
+        **{i: ("downtown_diamond_red_coins",) for i in range(2, 7)},
+        7: ("downtown_high_red_coins",), 8: ("downtown_high_red_coins",),
+    },
+    "Tall, Tall Mountain": {
+        **{i: ("ttm_middle_red_coins",) for i in range(1, 7)},
+        7: ("ttm_upper_red_coins",), 8: ("ttm_upper_red_coins",),
+    },
+    "Tiny-Huge Island": {
+        **{i: ("red_area_red_coins",) for i in range(1, 8)}, 8: ("red_area_wall_kick_red_coin",),
+    },
+    "Tick Tock Clock": {
+        **{i: ("ttc_lower_red_coins",) for i in range(1, 6)},
+        **{i: ("ttc_spinner_red_coins",) for i in range(6, 9)},
+    },
+    "Rainbow Ride": {1: ("rr_maze_movement_red_coin",), **{i: ("rr_other_red_coins",) for i in range(2, 9)}},
+    "The Secret Aquarium": {i: ("sa_red_coins",) for i in range(1, 9)},
+    "Tower of the Wing Cap": {i: ("totwc_red_coins",) for i in range(1, 9)},
+    "Vanish Cap Under the Moat": {
+        **{i: ("vcutm_earlier_red_coins",) for i in range(1, 5)},
+        **{i: ("vcutm_checkerboard_red_coins",) for i in range(5, 9)},
+    },
+    "Cavern of the Metal Cap": {
+        **{i: ("cotmc_initial_red_coins",) for i in range(1, 5)},
+        **{i: ("cotmc_deep_red_coins",) for i in range(5, 9)},
+    },
+    "Wing Mario Over the Rainbow": {
+        1: ("wmotr_initial_red_coin",), **{i: ("wmotr_cannon_red_coins",) for i in range(2, 6)},
+        6: ("wmotr_flight_red_coins", "wmotr_long_jump_first_red_coin", "wmotr_wing_cap_fallback_red_coin"),
+        7: ("wmotr_flight_red_coins", "wmotr_long_jump_second_red_coin"), 8: ("wmotr_flight_red_coins",),
+    },
+    "Bowser in the Dark World": {
+        **{i: ("bitdw_red_coins_before_slope",) for i in range(1, 7)},
+        7: ("bitdw_final_red_coins",), 8: ("bitdw_final_red_coins",),
+    },
+    "Bowser in the Fire Sea": {
+        1: ("bitfs_start_red_coins",), 2: ("bitfs_start_red_coins",),
+        **{i: ("bitfs_upper_red_coins",) for i in range(3, 9)},
+    },
+    "Bowser in the Sky": {
+        **{i: ("bits_start_red_coins",) for i in range(1, 4)},
+        **{i: ("bits_arrow_ride_red_coins",) for i in range(4, 7)},
+        7: ("bits_top_red_coins",), 8: ("bits_top_red_coins",),
+    },
+}
+
+
+def _repeat_names(base: str, count: int) -> tuple[str, ...]:
+    return tuple(base if count == 1 else f"{base} {index}" for index in range(1, count + 1))
+
+
+RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
+    "Bob-omb Battlefield": (*_repeat_names("Red Coin Outside the Island", 7), "Red Coin on the Island"),
+    "Whomp's Fortress": (*_repeat_names("Initially Reachable Red Coin", 5), "Red Coin on the Thwomp", *_repeat_names("Red Coin at the Top", 2)),
+    "Jolly Roger Bay": (*_repeat_names("Initially Reachable Red Coin", 4), "Red Coin on the Stone Pillar", *_repeat_names("Red Coin on the Raised Ship", 3)),
+    "Cool, Cool Mountain": _repeat_names("Mountain Red Coin", 8),
+    "Big Boo's Haunt": (*_repeat_names("First Floor Red Coin", 4), *_repeat_names("Second Floor Red Coin", 4)),
+    "Hazy Maze Cave": (*_repeat_names("Lower Red Coin Room Red Coin", 4), *_repeat_names("Upper Red Coin Room Red Coin", 4)),
+    "Lethal Lava Land": _repeat_names("Bowser Puzzle Red Coin", 8),
+    "Shifting Sand Land": (*_repeat_names("Low Red Coin", 4), *_repeat_names("High Red Coin", 4)),
+    "Dire, Dire Docks": ("First Red Coin", *_repeat_names("Pole Red Coin", 7)),
+    "Snowman's Land": (*_repeat_names("Whirl from the Freezing Pond Red Coin", 3), *_repeat_names("Upper Area Red Coin", 5)),
+    "Wet-Dry World": ("First Downtown Red Coin", *_repeat_names("Downtown Red Coin Beyond the Water Level Diamonds", 5), *_repeat_names("High Downtown Red Coin", 2)),
+    "Tall, Tall Mountain": (*_repeat_names("Middle Area Red Coin", 6), *_repeat_names("Upper Area Red Coin", 2)),
+    "Tiny-Huge Island": (*_repeat_names("Red Coins Area Red Coin", 7), "Wall Kick Red Coin"),
+    "Tick Tock Clock": (*_repeat_names("First Clock Hand Area Red Coin", 5), *_repeat_names("Spinner Red Coin", 3)),
+    "Rainbow Ride": ("Red Coin Requiring Maze Movement", *_repeat_names("Other Maze Red Coin", 7)),
+    "The Secret Aquarium": _repeat_names("Aquarium Red Coin", 8),
+    "Tower of the Wing Cap": _repeat_names("Tower Red Coin", 8),
+    "Vanish Cap Under the Moat": (*_repeat_names("Red Coin Before the Checkerboards", 4), *_repeat_names("Checkerboard Red Coin", 4)),
+    "Cavern of the Metal Cap": (*_repeat_names("Initial Red Coin", 4), *_repeat_names("Deep-Water Red Coin", 4)),
+    "Wing Mario Over the Rainbow": ("Initial Red Coin", *_repeat_names("Cannon Region Red Coin", 4), *_repeat_names("Flight Path Red Coin", 3)),
+    "Bowser in the Dark World": (*_repeat_names("Red Coin Before the Slope", 6), *_repeat_names("Final Red Coin", 2)),
+    "Bowser in the Fire Sea": (*_repeat_names("Initial Red Coin", 2), *_repeat_names("Upper Course Red Coin", 6)),
+    "Bowser in the Sky": (*_repeat_names("Initial Red Coin", 3), *_repeat_names("Arrow Ride Red Coin", 3), *_repeat_names("Top Red Coin", 2)),
+}
+
+
+def _output_names(label: str, kind: CoinOutputKind, count: int) -> tuple[str, ...]:
+    source_name = _title_source_label(label)
+    coin_name = "Blue Coin" if kind is CoinOutputKind.BLUE else "Coin"
+    group_size = _formation_group_size(source_name, count)
+    group_count = count // group_size
+    source_name = _singularize_source_name(source_name, group_count > 1)
+    names = []
+    for group_index in range(1, group_count + 1):
+        source = f"{source_name} {group_index}" if group_count > 1 else source_name
+        for coin_index in range(1, group_size + 1):
+            names.append(f"{source}, {coin_name} {coin_index}" if group_size > 1 else f"{source}, {coin_name}")
+    return tuple(names)
+
+
+def _formation_group_size(source_name: str, count: int) -> int:
+    lower_name = source_name.lower()
+    if "coin ring" in lower_name or "rings of eight coins" in lower_name:
+        return 8 if count % 8 == 0 else count
+    if "coin line" in lower_name or "lines of five coins" in lower_name:
+        return 5 if count % 5 == 0 else count
+    if any(term in lower_name for term in ("breakable coin box", "throwable cork box")):
+        return 3 if count % 3 == 0 else count
+    return count
+
+
+def _singularize_source_name(source_name: str, numbered: bool) -> str:
+    source_name = re.sub(r"^(Two|Three|Four|Five|Nine) ", "", source_name)
+    source_name = re.sub(r"^Rings of Eight Coins$", "Coin Ring", source_name)
+    source_name = re.sub(r"^Lines of Five Coins$", "Coin Line", source_name)
+    if numbered:
+        source_name = re.sub(r"\bCoin Rings\b", "Coin Ring", source_name)
+        source_name = re.sub(r"\bCoin Lines\b", "Coin Line", source_name)
+        source_name = re.sub(r"\bBreakable Coin Boxes\b", "Breakable Coin Box", source_name)
+        source_name = re.sub(r"\bThrowable Cork Boxes\b", "Throwable Cork Box", source_name)
+    return source_name
+
+
+def _title_source_label(label: str) -> str:
+    label = label.replace("second-building", "second building").replace("first-building", "first building") \
+        .replace("metal-cap", "metal cap")
+    titled = label.title()
+    titled = re.sub(
+        r"(?<!^)\b(A|An|And|Or|The|Of|In|On|At|To|From|By|Near|After|Before|Around|Above|Below|"
+        r"Behind|Beside|Under|With|Without|Past|Into|Toward|Through)\b",
+        lambda match: match.group(0).lower(),
+        titled,
+    )
+    replacements = {
+        "Bob-Omb": "Bob-omb", "Bob-Ombs": "Bob-ombs", "Whomp'S": "Whomp's",
+        "Bowser'S": "Bowser's", "Wiggler'S": "Wiggler's", "Koopa the Quick'S": "Koopa the Quick's",
+        "Mr. Is": "Mr. Is", "Mr. I": "Mr. I", "10-Coin": "10-Coin", "3-Coin": "3-Coin",
+        "S-Shaped": "S-Shaped", "Red Coin": "Red Coin", "Purple Switch": "Purple Switch",
+        "Vanish Cap": "Vanish Cap", "Wall Kicks Will Work": "Wall Kicks Will Work",
+        "Tiny Main": "Tiny Main", "Huge Island": "Huge Island", "Tiny Island": "Tiny Island",
+    }
+    for old, new in replacements.items():
+        titled = titled.replace(old, new)
+    return titled
+
+
+_ENEMY_TYPES = (
+    ("fire_piranha", "Fire Piranha Plant", 1), ("piranha", "Piranha Plant", 1),
+    ("mr_blizzard", "Mr. Blizzard", 3), ("scuttlebug", "Scuttlebug", 3),
+    ("spindrift", "Spindrift", 3), ("skeeter", "Skeeter", 3), ("snufit", "Snufit", 2),
+    ("fly_guy", "Fly Guy", 2), ("chuckya", "Chuckya", 5), ("lakitu", "Lakitu", 5),
+    ("moneybag", "Moneybag", 5), ("bookend", "Flying Bookend", 1),
+    ("bob_omb", "Bob-omb", 1), ("goomba", "Goomba", 1), ("koopa", "Koopa Troopa", 1),
+    ("mr_i", "Mr. I", 1), ("swoop", "Swoop", 1), ("bully", "Bully", 1),
+    ("boo", "Boo", 1), ("pokey", "Pokey", 1), ("whomp", "Whomp", 5),
+)
+_LEVEL_SOURCE_PREFIXES = {
+    "lll", "ssl", "sl", "ttm", "ttc", "rr", "cotmc", "bitdw", "bitfs", "bits",
+}
+_QUALIFIER_REPLACEMENTS = {
+    "main": "Main Area", "start": "Starting Area", "standard": "Defeatable",
+    "bob": "", "ombs": "", "enemy": "", "plant": "", "plants": "", "troopa": "", "guys": "",
+    "goombas": "", "boos": "", "bullies": "", "bookends": "", "spindrifts": "",
+    "scuttlebugs": "", "skeeters": "", "snufits": "", "swoops": "", "pokeys": "",
+    "blizzards": "", "moneybags": "", "is": "",
+}
+_ENEMY_OUTPUT_GROUP_OVERRIDES = {
+    "whomp_jump_coins": (5, 5),
+    "whomp_ground_pound_coins": (5, 5),
+    "bits_whomp_jump_coins": (5,),
+    "bits_whomp_ground_pound_coins": (5,),
+    "huge_piranha_area_plants": (3, 3, 1, 1, 1, 1),
+}
+_ENEMY_DESCRIPTOR_OVERRIDES = {
+    "whomp_jump_coins": "Whomp (Jump)",
+    "whomp_ground_pound_coins": "Whomp (Ground Pound)",
+    "bits_whomp_jump_coins": "Whomp (Jump)",
+    "bits_whomp_ground_pound_coins": "Whomp (Ground Pound)",
+    "main_mr_is": "Main Area Mr. I",
+    "merry_go_round_boos": "Merry-Go-Round Boo",
+    "tiny_piranha_area_plant": "Tiny Piranha Area Piranha Plant",
+    "huge_lower_fly_guys": "Lower Huge Island Fly Guy",
+    "huge_lakitu": "Huge Island Lakitu",
+    "huge_koopa_troopa": "Huge Island Koopa Troopa",
+    "huge_cannonball_fly_guy": "Cannonball Area Fly Guy",
+    "huge_piranha_area_plants": "Huge Piranha Area Fire Piranha Plant",
+}
+_GIANT_GOOMBA_DESCRIPTORS = {
+    "huge_lower_giant_goombas": "Lower Huge Island Giant Goomba",
+    "huge_windswept_giant_goombas": "Windswept Valley Giant Goomba",
+    "huge_koopa_region_giant_goombas": "Koopa the Quick Area Giant Goomba",
+    "red_area_giant_goombas": "Red Coins Area Giant Goomba",
+}
+
+
+def _enemy_output_names(
+        source_id: str, kind: CoinOutputKind, count: int,
+) -> tuple[str, ...] | None:
+    if any(marker in source_id for marker in ("_line", "_ring", "_post")) \
+            and source_id not in _ENEMY_OUTPUT_GROUP_OVERRIDES:
+        return None
+    matched = next((entry for entry in _ENEMY_TYPES if entry[0] in source_id), None)
+    if matched is None:
+        return None
+    token, enemy_name, default_outputs = matched
+    qualifier_tokens = source_id.split("_")
+    if qualifier_tokens and qualifier_tokens[0] in _LEVEL_SOURCE_PREFIXES:
+        qualifier_tokens.pop(0)
+    enemy_tokens = set(token.split("_"))
+    qualifier_tokens = [
+        _QUALIFIER_REPLACEMENTS.get(part, part)
+        for part in qualifier_tokens
+        if part not in enemy_tokens
+    ]
+    qualifier = " ".join(part for part in qualifier_tokens if part)
+    descriptor = _ENEMY_DESCRIPTOR_OVERRIDES.get(
+        source_id,
+        f"{_title_source_label(qualifier)} {enemy_name}" if qualifier else enemy_name,
+    )
+
+    group_sizes = _ENEMY_OUTPUT_GROUP_OVERRIDES.get(source_id)
+    if group_sizes is None:
+        if count % default_outputs:
+            return None
+        group_sizes = (default_outputs,) * (count // default_outputs)
+
+    coin_name = "Blue Coin" if kind is CoinOutputKind.BLUE else "Coin"
+    names = []
+    multiple_enemies = len(group_sizes) > 1
+    for enemy_index, output_count in enumerate(group_sizes, 1):
+        enemy = f"{descriptor} {enemy_index}" if multiple_enemies else descriptor
+        for output_index in range(1, output_count + 1):
+            suffix = f"{coin_name} {output_index}" if output_count > 1 else coin_name
+            names.append(f"{enemy}, {suffix}")
+    return tuple(names) if len(names) == count else None
+
+
+STANDALONE_YELLOW_COIN_SOURCE_IDS = frozenset({
+    "rotating_plank_coins", "penguin_slide_yellow_coins", "rolling_rocks_coins",
+    "lll_grey_ramp_coins", "lll_sinking_platform_coins", "lll_spinning_volcano_platform_coins",
+    "lll_southeast_grey_ramp_coins", "lll_volcano_s_island_coins",
+    "lll_volcano_first_ridge_coin_line", "lll_volcano_second_ridge_coins",
+    "lll_volcano_floating_platform_coins", "lll_volcano_post_platform_coin",
+    "lll_volcano_checkerboard_lift_coin", "lll_elevator_tour_platform_coins",
+    "ssl_pillar_and_pyramid_coins", "ssl_upper_pyramid_single_coins", "ddd_seafloor_chest_coins",
+    "sl_start_coins", "sl_upper_slope_single_coins", "sl_penguin_and_face_coins",
+    "sl_snowman_head_plank_coins", "sl_igloo_single_coins", "sl_impossible_coin",
+    "ttm_hidden_coin_before_slide", "ttm_slide_single_coins", "tiny_main_individual_coins",
+    "tiny_impossible_coin", "tiny_purple_switch_coin", "huge_beach_coins", "ttc_start_cube_coins",
+    "rr_first_donut_lift_coins", "rr_second_carpet_platform_coin", "rr_second_carpet_air_coin",
+    "pss_single_yellow_coins", "totwc_single_yellow_coins", "vcutm_end_marker_coins",
+    "bitdw_single_coins_before_slope", "bitdw_slope_single_coins", "bitfs_start_single_coins",
+    "bits_tilting_w_coins", "bits_raised_steps_coins", "bits_spinning_platform_coins",
+})
+
+
+STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
+    "lll_volcano_s_island_coins": "Coin on the Volcano S-Shaped Island",
+    "lll_volcano_first_ridge_coin_line": "Coin on the Volcano First Ridge",
+    "lll_volcano_second_ridge_coins": "Coin on the Volcano Second Ridge",
+    "lll_volcano_floating_platform_coins": "Coin on a Volcano Floating Platform",
+    "lll_volcano_post_platform_coin": "Coin After the Volcano Floating Platforms",
+    "lll_volcano_checkerboard_lift_coin": "Coin by the Volcano Checkerboard Lift",
+    "lll_elevator_tour_platform_coins": "Coin on a Tiny Elevator Tour Platform",
+    "sl_impossible_coin": "Impossible Coin",
+    "ttm_hidden_coin_before_slide": "Hidden Coin Before the Slide",
+    "tiny_impossible_coin": "Impossible Coin",
+    "tiny_purple_switch_coin": "Separated Coin on Tiny Island",
+    "rr_second_carpet_platform_coin": "Coin on the Second Carpet's Grey Platform",
+    "rr_second_carpet_air_coin": "Coin in the Air Along the Second Carpet",
+}
+
+
+def _standalone_yellow_names(source_id: str, label: str, count: int) -> tuple[str, ...]:
+    base = STANDALONE_YELLOW_COIN_NAME_OVERRIDES.get(source_id)
+    if base is None:
+        base = label
+        for prefix in ("Individual coins", "Single yellow coins", "Single Yellow Coins", "Single coins",
+                       "Three coins", "Two coins", "Coins"):
+            if base.startswith(prefix):
+                base = "Coin" + base[len(prefix):]
+                break
+        else:
+            if " coin" in base.lower():
+                start = base.lower().index(" coin") + 1
+                end = start + (5 if base[start:start + 5].lower() == "coins" else 4)
+                base = base[:start] + "Coin" + base[end:]
+            else:
+                base = f"{base} Coin"
+    return _repeat_names(base, count)
+
+
+def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
+    sources: list[CoinSourceDefinition] = []
+    for course_name in COURSE_ORDER:
+        course_base = INDIVIDUAL_COIN_LOCATION_BASE_ID + _COURSE_INDEX[course_name] * INDIVIDUAL_COIN_COURSE_STRIDE
+        offset = 0
+
+        red_methods = RED_COIN_SOURCE_METHODS.get(course_name)
+        if red_methods:
+            outputs = tuple(
+                CoinOutputDefinition(
+                    CoinOutputID(course_name, "red_coin", index), course_base + offset + index - 1,
+                    f"{course_name} - {RED_COIN_NAMES[course_name][index - 1]}", CoinOutputKind.RED, 2,
+                    red_methods[index],
+                )
+                for index in range(1, 9)
+            )
+            sources.append(CoinSourceDefinition(course_name, "red_coin", "Red Coins", outputs, 16))
+            offset += 8
+
+        for source_id, label, kind_name, count in SOURCE_LAYOUTS[course_name]:
+            if kind_name == "giant":
+                names = _repeat_names(_GIANT_GOOMBA_DESCRIPTORS[source_id], count)
+                outputs = []
+                for index, producer_name in enumerate(names, 1):
+                    outputs.extend((
+                        CoinOutputDefinition(
+                            CoinOutputID(course_name, source_id, index * 2 - 1), course_base + offset,
+                            f"{course_name} - {producer_name}, Coin", CoinOutputKind.YELLOW, 1,
+                            (f"{source_id}_yellow",),
+                        ),
+                        CoinOutputDefinition(
+                            CoinOutputID(course_name, source_id, index * 2), course_base + offset + 1,
+                            f"{course_name} - Blue Coin from {producer_name}", CoinOutputKind.BLUE, 5,
+                            (f"{source_id}_blue",),
+                        ),
+                    ))
+                    offset += 2
+                sources.append(CoinSourceDefinition(course_name, source_id, label, tuple(outputs), count * 5))
+                continue
+
+            kind = CoinOutputKind(kind_name)
+            names = _enemy_output_names(source_id, kind, count) or (
+                _standalone_yellow_names(source_id, label, count)
+                if kind is CoinOutputKind.YELLOW and source_id in STANDALONE_YELLOW_COIN_SOURCE_IDS
+                else _output_names(label, kind, count)
+            )
+            value = 5 if kind is CoinOutputKind.BLUE else 1
+            outputs = tuple(
+                CoinOutputDefinition(
+                    CoinOutputID(course_name, source_id, index), course_base + offset + index - 1,
+                    f"{course_name} - {name}", kind, value, (source_id,),
+                )
+                for index, name in enumerate(names, 1)
+            )
+            sources.append(CoinSourceDefinition(course_name, source_id, label, outputs, count * value))
+            offset += count
+
+        if course_name == "Bob-omb Battlefield":
+            custom = (
+                ("island_vertical_ring", "Vertical Ring Coin Above the Island", 40, tuple(
+                    ("island_first_ring_easy_coins",) if i <= 3 else
+                    ("island_partial_first_ring_three_coins", "island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins") if i <= 6 else
+                    ("island_partial_first_ring_two_coins", "island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins") if i <= 8 else
+                    ("island_partial_flight_ring_coins", "island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins")
+                    for i in range(1, 41))),
+                ("island_ring_center", "Yellow Coin in the Center of an Island Ring", 5, tuple(
+                    ("island_partial_flight_center_coins", "island_full_trick_ring_center_coins", "island_cannon_ring_center_coins") if i <= 4 else
+                    ("island_full_trick_ring_center_coins", "island_cannon_ring_center_coins",)
+                    for i in range(1, 6))),
+            )
+            for source_id, label, count, methods in custom:
+                if source_id == "island_vertical_ring":
+                    names = tuple(
+                        f"Island Vertical Coin Ring {((index - 1) // 8) + 1}, Coin {((index - 1) % 8) + 1}"
+                        for index in range(1, count + 1)
+                    )
+                else:
+                    names = tuple(f"Island Coin Ring {index}, Center Coin" for index in range(1, count + 1))
+                outputs = tuple(
+                    CoinOutputDefinition(
+                        CoinOutputID(course_name, source_id, index), course_base + offset + index - 1,
+                        f"{course_name} - {names[index - 1]}", CoinOutputKind.YELLOW, 1, methods[index - 1],
+                    ) for index in range(1, count + 1)
+                )
+                sources.append(CoinSourceDefinition(course_name, source_id, label, outputs, count))
+                offset += count
+
+        if course_name == "Tower of the Wing Cap":
+            outputs = tuple(
+                CoinOutputDefinition(
+                    CoinOutputID(course_name, "coin_ring", index), course_base + offset + index - 1,
+                    f"{course_name} - Coin Ring {((index - 1) // 8) + 1}, Coin {((index - 1) % 8) + 1}",
+                    CoinOutputKind.YELLOW, 1,
+                    ("totwc_mastery_ring_coins",) if index <= 20 else ("totwc_mastery_wing_cap_ring_coins",),
+                ) for index in range(1, 33)
+            )
+            sources.append(CoinSourceDefinition(course_name, "coin_ring", "Coin Ring Coins", outputs, 32))
+
+    return tuple(sources)
+
+
+coin_source_catalog = _build_catalog()
+coin_output_catalog = tuple(output for source in coin_source_catalog for output in source.outputs)
+coin_output_by_name = {output.location_name: output for output in coin_output_catalog}
+coin_output_by_id = {output.output_id: output for output in coin_output_catalog}
+individual_coin_location_table = {output.location_name: output.location_id for output in coin_output_catalog}
+
+if len(coin_output_by_name) != len(coin_output_catalog):
+    raise ValueError("Individual Coin Check names must be unique")
+if len({output.location_id for output in coin_output_catalog}) != len(coin_output_catalog):
+    raise ValueError("Individual Coin Check IDs must be unique")
+
+
+def select_individual_coin_outputs(
+        percentage: int, rng: random.Random,
+        catalog: Iterable[CoinOutputDefinition] = coin_output_catalog,
+        excluded_output_ids: frozenset[CoinOutputID] = frozenset(),
+) -> tuple[CoinOutputDefinition, ...]:
+    """Select the requested percentage independently within each course."""
+    if not 0 <= percentage <= 100:
+        raise ValueError("Coin Checks percentage must be between 0 and 100")
+    by_course: dict[str, list[CoinOutputDefinition]] = defaultdict(list)
+    for output in catalog:
+        if output.output_id in excluded_output_ids:
+            continue
+        by_course[output.output_id.course_name].append(output)
+    selected = []
+    for course_name in COURSE_ORDER:
+        outputs = sorted(by_course[course_name], key=lambda output: output.output_id)
+        count = (len(outputs) * percentage + 99) // 100
+        selected.extend(rng.sample(outputs, count))
+    return tuple(sorted(selected, key=lambda output: output.location_id))

@@ -607,14 +607,6 @@ logic_tricks = {
                        "can reach the Buddy Platform",
         "video": "https://www.youtube.com/watch?v=hAWQ97iT8wY",
     },
-    # Tower of the Wing Cap
-    "Tower of the Wing Cap Coin Mastery": {
-        "internal_id": "logic_totwc_coin_mastery",
-        "rule": "",
-        "difficulty": "hard",
-        "description": "Collecting the difficult coin rings in Tower of the Wing Cap. The final rings require"
-                       " restarting flight with the Wing Cap. Irrelevant if Permanent Coins is enabled.",
-    },
     # Vanish Cap Under the Moat
     "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {
         "internal_id": "logic_vcutm_wall_kick_over_vanish_cap_grate",

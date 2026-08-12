@@ -325,13 +325,14 @@ joke_hints = (
     "Yeah, I speak French. Shut up heck idiot. Pardon my French.",
     "Congratulations. You have successfully found this sign.",
     "Dating is easy, you just ask them out and they say no.",
+    "Zozo? Never heard of it.",
 )
 
 
 tip_hints = (
     "Gray coins heal Mario but do not add another coin.",
     "Secret courses, cap stages, and Bowser stages use Castle movement items.",
-    "Coinsanity places checks at evenly spaced coin totals below the Coins Star requirement.",
+    "CoinCountChecks places checks at evenly spaced coin totals below the Coins Star requirement.",
     "With 1-Up checks disabled, 1-Up Mushrooms heal Mario to full health.",
     "Easy Butterflies makes a butterfly become a 1-Up regardless of Mario's distance.",
     "No Despawns preserves timed coins and 1-Ups and grants ones lost to hazards.",

@@ -17,8 +17,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_checkerboard_item_names, global_rolling_log_item_names, global_purple_switch_item_names, \
     global_bobomb_buddy_item_names, global_treasure_chest_item_names, global_warp_pipe_item_names, \
     per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names
-from ..Locations import coinsanity_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
-    coinsanity_location_table, secret_stage_coinsanity_location_table, get_coinsanity_location_name, \
+from ..Locations import coin_count_check_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
+    coin_count_check_location_table, secret_stage_coin_count_check_location_table, get_coin_count_check_location_name, \
     location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
@@ -89,18 +89,8 @@ UNCOLLECT_TRAP_ONLY_OPTIONS = {
 }
 
 
-class UncollectTrapWithoutPermanentCoinsTestBase(SM64TestBase):
+class UncollectTrapTestBase(SM64TestBase):
     options = UNCOLLECT_TRAP_ONLY_OPTIONS
-
-    def test_uncollect_trap_weight_is_ignored(self):
-        self.assertEqual(len(self.get_items_by_name("Uncollect Random Coin Trap")), 0)
-
-
-class UncollectTrapWithPermanentCoinsTestBase(SM64TestBase):
-    options = {
-        **UNCOLLECT_TRAP_ONLY_OPTIONS,
-        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
-    }
 
     def test_uncollect_trap_weight_is_used(self):
         self.assertGreater(len(self.get_items_by_name("Uncollect Random Coin Trap")), 0)
@@ -251,7 +241,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertIn("Wet-Dry World - Downtown 1-Up Block",
                       self.world.location_name_groups["1-Up Blocks"])
         self.assertIn("The Princess's Secret Slide - 1 Coin",
-                      self.world.location_name_groups["Secret Stage Coinsanity"])
+                      self.world.location_name_groups["Secret Stage Coin Count Checks"])
 
     def test_item_ids_match_client_doc(self):
         expected_ids = {
@@ -714,13 +704,11 @@ class BlocksanityPerLevelCapItemPoolTestBase(SM64TestBase):
                 self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
 
 
-class TowerOfTheWingCapCoinsanityCapItemPoolTestBase(SM64TestBase):
+class TowerOfTheWingCapCoinCountChecksCapItemPoolTestBase(SM64TestBase):
     options = {
         "cap_items": Options.CapItems.option_per_level,
-        "coinsanity": 100,
-        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
-        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
-        "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
+        "coin_count_checks": 100,
+        "tower_of_the_wing_cap_coin_count_max_coins": 63,
     }
 
     def test_wing_cap_is_progression_for_high_coin_checks(self):
@@ -864,14 +852,13 @@ class GameBehaviorSlotDataTestBase(SM64TestBase):
     options = {
         "easy_butterflies": Options.EasyButterflies.option_true,
         "no_despawns": Options.NoDespawns.option_true,
-        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
     }
 
     def test_game_behavior_slot_data(self):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(slot_data["EasyButterflies"], 1)
         self.assertEqual(slot_data["NoDespawn"], 1)
-        self.assertEqual(slot_data["PermanentCoinCollection"], 1)
+        self.assertNotIn("PermanentCoinCollection", slot_data)
 
 
 class GlobalMoveItemPoolTestBase(SM64TestBase):
@@ -1316,22 +1303,22 @@ class CoinStarsTestBase(SM64TestBase):
                 self.assertIn(loc, possible_locations)
 
 
-class SecretStageCoinsanityMaxCoinsOptionTestBase(SM64TestBase):
+class SecretStageCoinCountMaxCoinsOptionTestBase(SM64TestBase):
     run_default_tests = False
 
-    def test_secret_stage_coinsanity_max_coin_ranges_and_defaults(self):
+    def test_secret_stage_coin_count_max_coin_ranges_and_defaults(self):
         expected_options = {
-            Options.PrincessSecretSlideCoinsanityMaxCoins: (80, 80),
-            Options.SecretAquariumCoinsanityMaxCoins: (56, 56),
-            Options.WingMarioOverTheRainbowCoinsanityMaxCoins: (56, 56),
-            Options.TowerOfTheWingCapCoinsanityMaxCoins: (63, 31),
-            Options.VanishCapUnderTheMoatCoinsanityMaxCoins: (27, 27),
-            Options.CavernOfTheMetalCapCoinsanityMaxCoins: (47, 47),
-            Options.BowserInTheDarkWorldCoinsanityMaxCoins: (80, 80),
-            Options.BowserInTheFireSeaCoinsanityMaxCoins: (80, 80),
-            Options.BowserInTheSkyCoinsanityMaxCoins: (76, 76),
+            Options.PrincessSecretSlideCoinCountMaxCoins: (80, 80),
+            Options.SecretAquariumCoinCountMaxCoins: (56, 56),
+            Options.WingMarioOverTheRainbowCoinCountMaxCoins: (56, 56),
+            Options.TowerOfTheWingCapCoinCountMaxCoins: (63, 31),
+            Options.VanishCapUnderTheMoatCoinCountMaxCoins: (27, 27),
+            Options.CavernOfTheMetalCapCoinCountMaxCoins: (47, 47),
+            Options.BowserInTheDarkWorldCoinCountMaxCoins: (80, 80),
+            Options.BowserInTheFireSeaCoinCountMaxCoins: (80, 80),
+            Options.BowserInTheSkyCoinCountMaxCoins: (76, 76),
         }
-        self.assertEqual(set(Options.secret_stage_coinsanity_max_coin_options), set(expected_options))
+        self.assertEqual(set(Options.secret_stage_coin_count_max_coin_options), set(expected_options))
         for option, (range_end, default) in expected_options.items():
             with self.subTest(option=option.__name__):
                 self.assertEqual(option.range_start, 0)
@@ -1339,10 +1326,10 @@ class SecretStageCoinsanityMaxCoinsOptionTestBase(SM64TestBase):
                 self.assertEqual(option.default, default)
 
 
-class CoinsanityLocationTableTestBase(SM64TestBase):
+class CoinCountChecksLocationTableTestBase(SM64TestBase):
     run_default_tests = False
 
-    def test_coinsanity_location_ids_match_client_doc(self):
+    def test_coin_count_check_location_ids_match_client_doc(self):
         expected_ids = {
             "Bob-omb Battlefield - 1 Coin": 3627000,
             "Bob-omb Battlefield - 145 Coins": 3627144,
@@ -1363,11 +1350,11 @@ class CoinsanityLocationTableTestBase(SM64TestBase):
             "Bowser in the Sky - 76 Coins": 3629757,
         }
         for location_name, location_id in expected_ids.items():
-            with self.subTest("Coinsanity location ID", location=location_name):
-                self.assertEqual(coinsanity_location_table[location_name], location_id)
+            with self.subTest("CoinCountChecks location ID", location=location_name):
+                self.assertEqual(coin_count_check_location_table[location_name], location_id)
                 self.assertEqual(location_table[location_name], location_id)
 
-    def test_coinsanity_skips_final_coin_threshold_for_each_course(self):
+    def test_coin_count_checks_skips_final_coin_threshold_for_each_course(self):
         skipped_final_locations = {
             "Bob-omb Battlefield": 146,
             "Whomp's Fortress": 141,
@@ -1385,61 +1372,59 @@ class CoinsanityLocationTableTestBase(SM64TestBase):
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coinsanity_location_table), 2642)
-        self.assertEqual(len(secret_stage_coinsanity_location_table), 565)
+        self.assertEqual(len(coin_count_check_location_table), 2642)
+        self.assertEqual(len(secret_stage_coin_count_check_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):
-                self.assertNotIn(get_coinsanity_location_name(course_name, coin_count), coinsanity_location_table)
+                self.assertNotIn(get_coin_count_check_location_name(course_name, coin_count), coin_count_check_location_table)
 
 
-class CoinsanityDefaultOffTestBase(SM64TestBase):
+class CoinCountChecksDefaultOffTestBase(SM64TestBase):
     run_default_tests = False
 
-    def test_default_no_active_coinsanity_locations(self):
+    def test_default_no_active_coin_count_check_locations(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
-        self.assertFalse(active_locations.intersection(coinsanity_location_table))
+        self.assertFalse(active_locations.intersection(coin_count_check_location_table))
 
 
-class CoinsanityGenerationTestBase(SM64TestBase):
+class CoinCountChecksGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coinsanity": 2,
+        "coin_count_checks": 2,
         "bob_omb_battlefield_coin_star_requirement": 50,
     }
 
-    def test_coinsanity_generates_even_thresholds_below_coin_star(self):
+    def test_coin_count_checks_generates_even_thresholds_below_coin_star(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertIn("Bob-omb Battlefield - 25 Coins", active_locations)
         self.assertNotIn("Bob-omb Battlefield - 1 Coin", active_locations)
         self.assertNotIn("Bob-omb Battlefield - 50 Coins", active_locations)
 
-    def test_thi_coinsanity_locations_use_shared_coins_region(self):
+    def test_thi_coin_count_check_locations_use_shared_coins_region(self):
         location = self.multiworld.get_location("Tiny-Huge Island - 33 Coins", self.player)
         self.assertEqual(location.parent_region.name, "Tiny-Huge Island - Coins")
 
 
-class SecretStageCoinsanityOffTestBase(SM64TestBase):
+class SecretStageCoinCountChecksTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coinsanity": 100,
-        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_false,
+        "coin_count_checks": 100,
     }
 
-    def test_secret_stage_coinsanity_requires_toggle(self):
+    def test_secret_stage_coin_count_checks_use_percentage(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
-        self.assertFalse(active_locations.intersection(secret_stage_coinsanity_location_table))
+        self.assertTrue(active_locations.intersection(secret_stage_coin_count_check_location_table))
 
 
-class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
+class SecretStageCoinCountChecksGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "coinsanity": 50,
-        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
-        "princess_secret_slide_coinsanity_max_coins": 10,
-        "tower_of_the_wing_cap_coinsanity_max_coins": 16,
+        "coin_count_checks": 50,
+        "princess_secret_slide_coin_count_max_coins": 10,
+        "tower_of_the_wing_cap_coin_count_max_coins": 16,
     }
 
-    def test_secret_stage_coinsanity_generates_locations(self):
+    def test_secret_stage_coin_count_checks_generates_locations(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertIn("The Princess's Secret Slide - 1 Coin", active_locations)
         self.assertIn("The Secret Aquarium - 1 Coin", active_locations)
@@ -1449,7 +1434,7 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         active_slide_locations = {
             location_name for location_name in active_locations
-            if location_name in secret_stage_coinsanity_location_table
+            if location_name in secret_stage_coin_count_check_location_table
             and location_name.startswith("The Princess's Secret Slide - ")
         }
         self.assertEqual(len(active_slide_locations), 5)
@@ -1462,7 +1447,7 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         active_totwc_locations = {
             location_name for location_name in active_locations
-            if location_name in secret_stage_coinsanity_location_table
+            if location_name in secret_stage_coin_count_check_location_table
             and location_name.startswith("Tower of the Wing Cap - ")
         }
         self.assertEqual(len(active_totwc_locations), 8)
@@ -1471,7 +1456,7 @@ class SecretStageCoinsanityGenerationTestBase(SM64TestBase):
         self.assertNotIn("Tower of the Wing Cap - 16 Coins", active_locations)
         self.assertNotIn("Tower of the Wing Cap - 63 Coins", active_locations)
 
-    def test_secret_stage_coinsanity_locations_use_stage_regions(self):
+    def test_secret_stage_coin_count_check_locations_use_stage_regions(self):
         location = self.multiworld.get_location("Wing Mario Over the Rainbow - 1 Coin", self.player)
         self.assertEqual(location.parent_region.name, "Wing Mario Over the Rainbow")
 
@@ -1480,26 +1465,13 @@ class TowerOfTheWingCapFullAccessibilityCapTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "accessibility": Options.SM64Accessibility.option_full,
-        "coinsanity": 100,
-        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
-        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+        "coin_count_checks": 100,
+        "tower_of_the_wing_cap_coin_count_max_coins": 63,
     }
 
-    def test_full_accessibility_caps_locations_at_31_without_mastery(self):
+    def test_full_accessibility_keeps_locations_above_31(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertIn("Tower of the Wing Cap - 31 Coins", active_locations)
-        self.assertNotIn("Tower of the Wing Cap - 32 Coins", active_locations)
-
-
-class TowerOfTheWingCapPermanentCoinsGenerationTestBase(SM64TestBase):
-    run_default_tests = False
-    options = {
-        **TowerOfTheWingCapFullAccessibilityCapTestBase.options,
-        "permanent_coin_collection": Options.PermanentCoinCollection.option_true,
-    }
-
-    def test_permanent_coins_bypass_full_accessibility_cap(self):
-        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertIn("Tower of the Wing Cap - 63 Coins", active_locations)
 
 
@@ -1507,9 +1479,8 @@ class TowerOfTheWingCapItemsAccessibilityTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "accessibility": Options.SM64Accessibility.option_items,
-        "coinsanity": 100,
-        "secret_stage_coinsanity": Options.SecretStageCoinsanity.option_true,
-        "tower_of_the_wing_cap_coinsanity_max_coins": 63,
+        "coin_count_checks": 100,
+        "tower_of_the_wing_cap_coin_count_max_coins": 63,
     }
 
     def test_items_accessibility_keeps_locations_above_31(self):
@@ -1528,11 +1499,10 @@ class TowerOfTheWingCapMasteryGenerationTestBase(TowerOfTheWingCapItemsAccessibi
     options = {
         **TowerOfTheWingCapItemsAccessibilityTestBase.options,
         "accessibility": Options.SM64Accessibility.option_full,
-        "logic_tricks": {"Tower of the Wing Cap Coin Mastery"},
     }
 
 
-class CoinsanityOverflowGenerationTestBase(SM64TestBase):
+class CoinCountChecksOverflowGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -1557,17 +1527,17 @@ class CoinsanityOverflowGenerationTestBase(SM64TestBase):
     }
 
     def get_active_coin_counts_by_course(self):
-        active_locations = set(self.world.coinsanity_location_names)
+        active_locations = set(self.world.coin_count_check_location_names)
         return {
             course_name: [
                 coin_count for coin_count in range(1, max_coin_star_requirement)
-                if get_coinsanity_location_name(course_name, coin_count) in active_locations
+                if get_coin_count_check_location_name(course_name, coin_count) in active_locations
             ]
-            for course_name, _course_offset, _option_name, max_coin_star_requirement in coinsanity_course_data
+            for course_name, _course_offset, _option_name, max_coin_star_requirement in coin_count_check_course_data
         }
 
-    def test_overflow_adds_extra_coinsanity_locations_before_item_creation(self):
-        self.assertGreater(len(self.world.coinsanity_location_names), 0)
+    def test_overflow_adds_extra_coin_count_check_locations_before_item_creation(self):
+        self.assertGreater(len(self.world.coin_count_check_location_names), 0)
         self.assertGreaterEqual(self.world.filler_count, 0)
 
     def test_overflow_locations_at_coin_star_thresholds_are_distributed_evenly(self):

@@ -11,7 +11,7 @@ class CoinStarRequirement(Range):
     default = 100
 
 
-class Coinsanity(Range):
+class CoinCountChecks(Range):
     """
     Adds extra location checks for collecting coins.
 
@@ -20,18 +20,29 @@ class Coinsanity(Range):
     spread evenly below the Coin Star requirement and never duplicate the Coin Star check itself.
 
     Number of checks per main course:
-    ceil((Coin Star Requirement - 1) * Coinsanity / 100)
+    ceil((Coin Star Requirement - 1) * Coin Count Checks / 100)
 
-    Example: if Bob-omb Battlefield requires 50 coins for its Coin Star, there are 49 possible Coinsanity checks
-    from 1 to 49 coins. Coinsanity 2 creates 1 check, at 25 coins. Coinsanity 50 creates 25 checks. Coinsanity 100
+    Example: if Bob-omb Battlefield requires 50 coins for its Coin Star, there are 49 possible count checks
+    from 1 to 49 coins. A value of 2 creates 1 check, at 25 coins. A value of 50 creates 25 checks. A value of 100
     creates all 49 checks.
 
-    If Secret Stage Coinsanity is enabled, secret stages use the same percentage based on their Coinsanity Max Coins
-    option. At 100, every coin count from 1 through that stage's max is a check.
+    Secret stages use the same percentage based on their Coin Count Max Coins option. At 100, every coin count
+    from 1 through that stage's maximum is a check.
 
-    Some Coinsanity locations may be created regardless of this option if there are too many items in the item pool.
+    Some Coin Count Check locations may be created regardless of this option if there are too many items in the item
+    pool.
     """
-    display_name = "Coinsanity"
+    display_name = "Coin Count Checks"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
+class CoinChecks(Range):
+    """Adds checks to individual physical coins. The percentage is applied independently to every level's complete
+    set of coin objects and enemy/object coin outputs. Zero disables individual coin checks; 100 makes every coin
+    output a check."""
+    display_name = "Coin Checks"
     range_start = 0
     range_end = 100
     default = 0
@@ -41,110 +52,102 @@ class SM64Accessibility(ItemsAccessibility):
     default = ItemsAccessibility.option_full
 
 
-class SecretStageCoinsanity(Toggle):
-    """Include Coinsanity checks for secret stages and Bowser stages."""
-    display_name = "Secret Stage Coinsanity"
-
-
-class PrincessSecretSlideCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for The Princess's Secret Slide Coinsanity."""
-    display_name = "The Princess's Secret Slide Coinsanity Max Coins"
+class PrincessSecretSlideCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for The Princess's Secret Slide Coin Count Checks."""
+    display_name = "The Princess's Secret Slide Coin Count Max Coins"
     range_start = 0
     range_end = 80
     default = 80
 
 
-class SecretAquariumCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for The Secret Aquarium Coinsanity."""
-    display_name = "The Secret Aquarium Coinsanity Max Coins"
+class SecretAquariumCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for The Secret Aquarium Coin Count Checks."""
+    display_name = "The Secret Aquarium Coin Count Max Coins"
     range_start = 0
     range_end = 56
     default = 56
 
 
-class WingMarioOverTheRainbowCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for Wing Mario Over the Rainbow Coinsanity."""
-    display_name = "Wing Mario Over the Rainbow Coinsanity Max Coins"
+class WingMarioOverTheRainbowCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for Wing Mario Over the Rainbow Coin Count Checks."""
+    display_name = "Wing Mario Over the Rainbow Coin Count Max Coins"
     range_start = 0
     range_end = 56
     default = 56
 
 
-class TowerOfTheWingCapCoinsanityMaxCoins(Range):
+class TowerOfTheWingCapCoinCountMaxCoins(Range):
     """
-    Maximum coin threshold used for Tower of the Wing Cap Coinsanity.
-
-    Collecting all Tower of the Wing Cap coins is very difficult. With Full Accessibility and Permanent Coins
-    disabled, this is capped at 31 unless the Tower of the Wing Cap Coin Mastery trick is enabled.
+    Maximum coin threshold used for Tower of the Wing Cap Coin Count Checks.
     """
-    display_name = "Tower of the Wing Cap Coinsanity Max Coins"
+    display_name = "Tower of the Wing Cap Coin Count Max Coins"
     range_start = 0
     range_end = 63
-    default = 31
+    default = 63
 
 
-class VanishCapUnderTheMoatCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for Vanish Cap Under the Moat Coinsanity."""
-    display_name = "Vanish Cap Under the Moat Coinsanity Max Coins"
+class VanishCapUnderTheMoatCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for Vanish Cap Under the Moat Coin Count Checks."""
+    display_name = "Vanish Cap Under the Moat Coin Count Max Coins"
     range_start = 0
     range_end = 27
     default = 27
 
 
-class CavernOfTheMetalCapCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for Cavern of the Metal Cap Coinsanity."""
-    display_name = "Cavern of the Metal Cap Coinsanity Max Coins"
+class CavernOfTheMetalCapCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for Cavern of the Metal Cap Coin Count Checks."""
+    display_name = "Cavern of the Metal Cap Coin Count Max Coins"
     range_start = 0
     range_end = 47
     default = 47
 
 
-class BowserInTheDarkWorldCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for Bowser in the Dark World Coinsanity."""
-    display_name = "Bowser in the Dark World Coinsanity Max Coins"
+class BowserInTheDarkWorldCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for Bowser in the Dark World Coin Count Checks."""
+    display_name = "Bowser in the Dark World Coin Count Max Coins"
     range_start = 0
     range_end = 80
     default = 80
 
 
-class BowserInTheFireSeaCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for Bowser in the Fire Sea Coinsanity."""
-    display_name = "Bowser in the Fire Sea Coinsanity Max Coins"
+class BowserInTheFireSeaCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for Bowser in the Fire Sea Coin Count Checks."""
+    display_name = "Bowser in the Fire Sea Coin Count Max Coins"
     range_start = 0
     range_end = 80
     default = 80
 
 
-class BowserInTheSkyCoinsanityMaxCoins(Range):
-    """Maximum coin threshold used for Bowser in the Sky Coinsanity."""
-    display_name = "Bowser in the Sky Coinsanity Max Coins"
+class BowserInTheSkyCoinCountMaxCoins(Range):
+    """Maximum coin threshold used for Bowser in the Sky Coin Count Checks."""
+    display_name = "Bowser in the Sky Coin Count Max Coins"
     range_start = 0
     range_end = 76
     default = 76
 
 
-secret_stage_coinsanity_max_coin_options = (
-    PrincessSecretSlideCoinsanityMaxCoins,
-    SecretAquariumCoinsanityMaxCoins,
-    WingMarioOverTheRainbowCoinsanityMaxCoins,
-    TowerOfTheWingCapCoinsanityMaxCoins,
-    VanishCapUnderTheMoatCoinsanityMaxCoins,
-    CavernOfTheMetalCapCoinsanityMaxCoins,
-    BowserInTheDarkWorldCoinsanityMaxCoins,
-    BowserInTheFireSeaCoinsanityMaxCoins,
-    BowserInTheSkyCoinsanityMaxCoins,
+secret_stage_coin_count_max_coin_options = (
+    PrincessSecretSlideCoinCountMaxCoins,
+    SecretAquariumCoinCountMaxCoins,
+    WingMarioOverTheRainbowCoinCountMaxCoins,
+    TowerOfTheWingCapCoinCountMaxCoins,
+    VanishCapUnderTheMoatCoinCountMaxCoins,
+    CavernOfTheMetalCapCoinCountMaxCoins,
+    BowserInTheDarkWorldCoinCountMaxCoins,
+    BowserInTheFireSeaCoinCountMaxCoins,
+    BowserInTheSkyCoinCountMaxCoins,
 )
 
-secret_stage_coinsanity_max_coin_option_names = (
-    "princess_secret_slide_coinsanity_max_coins",
-    "secret_aquarium_coinsanity_max_coins",
-    "wing_mario_over_the_rainbow_coinsanity_max_coins",
-    "tower_of_the_wing_cap_coinsanity_max_coins",
-    "vanish_cap_under_the_moat_coinsanity_max_coins",
-    "cavern_of_the_metal_cap_coinsanity_max_coins",
-    "bowser_in_the_dark_world_coinsanity_max_coins",
-    "bowser_in_the_fire_sea_coinsanity_max_coins",
-    "bowser_in_the_sky_coinsanity_max_coins",
+secret_stage_coin_count_max_coin_option_names = (
+    "princess_secret_slide_coin_count_max_coins",
+    "secret_aquarium_coin_count_max_coins",
+    "wing_mario_over_the_rainbow_coin_count_max_coins",
+    "tower_of_the_wing_cap_coin_count_max_coins",
+    "vanish_cap_under_the_moat_coin_count_max_coins",
+    "cavern_of_the_metal_cap_coin_count_max_coins",
+    "bowser_in_the_dark_world_coin_count_max_coins",
+    "bowser_in_the_fire_sea_coin_count_max_coins",
+    "bowser_in_the_sky_coin_count_max_coins",
 )
 
 
@@ -561,15 +564,6 @@ class NoDespawns(Toggle):
     display_name = "No Despawns"
 
 
-class PermanentCoinCollection(Toggle):
-    """
-    Coins collected in a course remain collected after leaving it. Re-entering a course restores the collected coin
-    total and prevents collected coin outputs from spawning again. Coin logic may combine coins obtainable across
-    separate visits and mutually exclusive routes.
-    """
-    display_name = "Permanent Coin Collection"
-
-
 class CompletionType(Choice):
     """Set goal for game completion"""
     display_name = "Completion Goal"
@@ -685,10 +679,8 @@ class UncollectRandomCoinTrapWeight(Range):
     """
     Relative weight for Uncollect Random Coin Traps.
 
-    When Permanent Coin Collection is enabled, this trap randomly selects one previously collected coin and makes it
-    collectible again, and your starting coin total reduced, on a future course visit.
-
-    This weight is ignored when Permanent Coin Collection is disabled.
+    This trap randomly selects one previously collected coin and makes it collectible again. The reduced course total
+    takes effect the next time the course is entered.
 
     Higher values make this trap appear more often.
     A weight of 0 disables this trap.
@@ -1069,10 +1061,9 @@ sm64_options_groups = [
         BowserStage1Ups,
     ]),
     OptionGroup("Coin Options", [
-        Coinsanity,
-        SecretStageCoinsanity,
-        PermanentCoinCollection,
-        *secret_stage_coinsanity_max_coin_options,
+        CoinChecks,
+        CoinCountChecks,
+        *secret_stage_coin_count_max_coin_options,
         *coin_star_requirement_options,
     ]),
     OptionGroup("Gameplay Options", [
@@ -1112,7 +1103,6 @@ class SM64Options(PerGameCommonOptions):
     blocksanity: Blocksanity
     easy_butterflies: EasyButterflies
     no_despawns: NoDespawns
-    permanent_coin_collection: PermanentCoinCollection
     combined_progressive_keys: CombinedProgressiveKeys
     level_unlocks: LevelUnlocks
     triple_jump: TripleJump
@@ -1150,8 +1140,8 @@ class SM64Options(PerGameCommonOptions):
     mario_hair_color: MarioHairColor
     music_shuffle: MusicShuffle
     skybox_shuffle: SkyboxShuffle
-    coinsanity: Coinsanity
-    secret_stage_coinsanity: SecretStageCoinsanity
+    coin_checks: CoinChecks
+    coin_count_checks: CoinCountChecks
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement
@@ -1167,15 +1157,15 @@ class SM64Options(PerGameCommonOptions):
     tiny_huge_island_coin_star_requirement: TinyHugeIslandCoinStarRequirement
     tick_tock_clock_coin_star_requirement: TickTockClockCoinStarRequirement
     rainbow_ride_coin_star_requirement: RainbowRideCoinStarRequirement
-    princess_secret_slide_coinsanity_max_coins: PrincessSecretSlideCoinsanityMaxCoins
-    secret_aquarium_coinsanity_max_coins: SecretAquariumCoinsanityMaxCoins
-    wing_mario_over_the_rainbow_coinsanity_max_coins: WingMarioOverTheRainbowCoinsanityMaxCoins
-    tower_of_the_wing_cap_coinsanity_max_coins: TowerOfTheWingCapCoinsanityMaxCoins
-    vanish_cap_under_the_moat_coinsanity_max_coins: VanishCapUnderTheMoatCoinsanityMaxCoins
-    cavern_of_the_metal_cap_coinsanity_max_coins: CavernOfTheMetalCapCoinsanityMaxCoins
-    bowser_in_the_dark_world_coinsanity_max_coins: BowserInTheDarkWorldCoinsanityMaxCoins
-    bowser_in_the_fire_sea_coinsanity_max_coins: BowserInTheFireSeaCoinsanityMaxCoins
-    bowser_in_the_sky_coinsanity_max_coins: BowserInTheSkyCoinsanityMaxCoins
+    princess_secret_slide_coin_count_max_coins: PrincessSecretSlideCoinCountMaxCoins
+    secret_aquarium_coin_count_max_coins: SecretAquariumCoinCountMaxCoins
+    wing_mario_over_the_rainbow_coin_count_max_coins: WingMarioOverTheRainbowCoinCountMaxCoins
+    tower_of_the_wing_cap_coin_count_max_coins: TowerOfTheWingCapCoinCountMaxCoins
+    vanish_cap_under_the_moat_coin_count_max_coins: VanishCapUnderTheMoatCoinCountMaxCoins
+    cavern_of_the_metal_cap_coin_count_max_coins: CavernOfTheMetalCapCoinCountMaxCoins
+    bowser_in_the_dark_world_coin_count_max_coins: BowserInTheDarkWorldCoinCountMaxCoins
+    bowser_in_the_fire_sea_coin_count_max_coins: BowserInTheFireSeaCoinCountMaxCoins
+    bowser_in_the_sky_coin_count_max_coins: BowserInTheSkyCoinCountMaxCoins
     traps_filler_percentage: TrapsFillerPercentage
     bonk_trap_weight: BonkTrapWeight
     fire_trap_weight: FireTrapWeight

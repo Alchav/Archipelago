@@ -5,7 +5,8 @@ from BaseClasses import CollectionState, DEFAULT_COLLECTION_RULE, Entrance, Mult
 from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Has, HasAll, HasAny, \
     Or, Rule, True_
 from .Locations import locOneUp_table, location_table, one_up_unlock_category_by_location, \
-    parse_coinsanity_location_name
+    parse_coin_count_check_location_name
+from .CoinChecks import coin_output_by_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, create_region, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
@@ -13,7 +14,8 @@ from .Regions import connect_regions, create_region, SM64Levels, sm64_entrance_t
 from .Items import action_item_data_table, cap_item_data_table, feature_item_data_table, \
     per_level_move_area_names, ut_glitch_item_name
 from .LogicTricks import logic_tricks
-from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoins, HasUnlock, LogicTrick, register_coin_evaluator
+from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoinOutput, CanCollectCoins, HasUnlock, LogicTrick, \
+    register_coin_evaluator
 from .CoinLogic import COIN_EVALUATORS
 from .Signs import sign_data, sign_item_name_for_area
 
@@ -257,10 +259,6 @@ def has_unlock(
         any(state.has(item_name, player) for item_name in item_names)
         or any(world.item_name_to_id[item_name] in world.start_inventory_item_ids for item_name in item_names)
     )
-
-
-def permanent_coin_collection_enabled(state: CollectionState, player: int) -> bool:
-    return bool(state.multiworld.worlds[player].options.permanent_coin_collection.value)
 
 
 def has_wing_cap(state: CollectionState, player: int, level_name: str) -> bool:
@@ -1223,10 +1221,20 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             CanCollectCoins(course_name, required_coins))
 
     for location in multiworld.get_locations(player):
-        coinsanity_location = parse_coinsanity_location_name(location.name)
-        if coinsanity_location is None:
+        coin_output = coin_output_by_name.get(location.name)
+        if coin_output is not None:
+            rf.assign_rule_object(
+                location.name,
+                CanCollectCoinOutput(
+                    coin_output.output_id.course_name,
+                    coin_output.source_methods,
+                ),
+            )
             continue
-        course_name, coin_count = coinsanity_location
+        coin_count_check_location = parse_coin_count_check_location_name(location.name)
+        if coin_count_check_location is None:
+            continue
+        course_name, coin_count = coin_count_check_location
         rf.assign_rule_object(location.name, CanCollectCoins(course_name, coin_count))
 
     # Castle Stars

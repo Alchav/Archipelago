@@ -738,25 +738,9 @@ def evaluate_cool_cool_mountain_coins(
         ),
     ]
     route_total = sum(child.coins for child in route_children if child.counted)
-    loses_spindrift_coins = (
-        has_wall_kicks_route
-        and has_spindrifts
-        and not has_cannon
-        and not Rules.permanent_coin_collection_enabled(state, player)
-    )
-    if loses_spindrift_coins:
-        route_total -= 3
-        route_children.append(coin_source(
-            "wall_kicks_spindrift_route_loss",
-            "Three Spindrift coins left behind when using the Spin Jump route",
-            3,
-            False,
-            counted=False,
-        ))
     traces.append(coin_source(
         "wall_kicks_route",
-        "Wall Kicks Will Work coin route"
-        + (" after its three-coin route loss" if loses_spindrift_coins else ""),
+        "Wall Kicks Will Work coin sources",
         route_total,
         has_wall_kicks_route,
         counted=has_wall_kicks_route,
@@ -877,29 +861,9 @@ def evaluate_big_boos_haunt_coins(
         ),
     ]
     third_floor_total = sum(child.coins for child in third_floor_children if child.counted)
-    loses_bookend_coins = (
-        has_third_floor
-        and has_flying_bookends
-        and has_bookend_third_floor_trick
-        and not has_normal_third_floor_route
-        and not has_wall_kick_third_floor_trick
-        and not state.multiworld.worlds[player].options.no_despawns.value
-        and not Rules.permanent_coin_collection_enabled(state, player)
-    )
-    if loses_bookend_coins:
-        lost_coins = min(10, third_floor_total)
-        third_floor_total -= lost_coins
-        third_floor_children.append(coin_source(
-            "bookend_third_floor_route_loss",
-            "Third-floor coins offset by Bookend coins left behind below",
-            lost_coins,
-            False,
-            counted=False,
-        ))
     traces.append(coin_source(
         "third_floor_sources",
-        "Big Boo's Haunt Third Floor sources"
-        + (" after the Bookend route loss" if loses_bookend_coins else ""),
+        "Big Boo's Haunt Third Floor sources",
         third_floor_total,
         has_third_floor,
         counted=has_third_floor,
@@ -1485,13 +1449,11 @@ def shifting_sand_land_coins(
         state, player, "logic_ssl_three_red_coins_with_tweesters", target_name)
     has_shy_guy_trick = Rules.can_use_logic_trick(
         state, player, "logic_ssl_one_red_coin_with_shy_guy_spin_jump", target_name)
-    no_despawns = bool(state.multiworld.worlds[player].options.no_despawns.value)
-
     tweester_route_available = has_red_coins and has_tweester_trick
     shy_guy_route_available = has_red_coins and has_shy_guy_trick
     normal_route_available = has_red_coins and has_normal_red_coin_route
     use_tweester_route = tweester_route_available and not normal_route_available
-    use_shy_guy_coins = shy_guy_route_available and not normal_route_available and no_despawns
+    use_shy_guy_coins = shy_guy_route_available and not normal_route_available
     reachable_high_red_coin_value = (
         8 if normal_route_available
         else (6 if use_tweester_route else 0) + (2 if use_shy_guy_coins else 0)
@@ -1525,11 +1487,6 @@ def shifting_sand_land_coins(
                 2,
                 shy_guy_route_available,
                 counted=use_shy_guy_coins,
-                children=(coin_condition(
-                    "ssl_shy_guy_red_coin_no_despawns",
-                    "No Despawns preserves this coin value for Coinsanity",
-                    no_despawns,
-                ),),
                 red_coin_ids=frozenset({8}),
                 reachable_red_coin_ids_when_uncounted=frozenset({8}),
             ),
@@ -1926,39 +1883,10 @@ def snowmans_land_coins(
     ]
     igloo_coins = sum(
         coins for _source_id, _label, coins, available in igloo_source_data if available)
-    loses_spindrift_coins = (
-        can_reach_igloo
-        and has_spindrifts
-        and not can_reach_snowman_top
-        and not has_cannon
-        and not Rules.permanent_coin_collection_enabled(state, player)
-    )
-    transition_loss = min(3, igloo_coins) if loses_spindrift_coins else 0
-    if loses_spindrift_coins:
-        igloo_children.append(_coin_trace(
-            "sl_igloo_transition_loss",
-            (
-                "Spindrift coins lost during the forced Igloo transition"
-                if transition_loss
-                else "Forced Igloo transition has no Igloo coins to deduct"
-            ),
-            transition_loss,
-            True,
-            counted=False,
-        ))
-    else:
-        igloo_children.append(_coin_trace(
-            "sl_igloo_transition_loss",
-            "No Spindrift coin loss during the Igloo transition",
-            3,
-            False,
-            counted=False,
-        ))
-    net_igloo_coins = igloo_coins - transition_loss
     builder.add(
         "sl_igloo_route",
-        "Igloo coin route after transition losses",
-        net_igloo_coins,
+        "Igloo coin sources",
+        igloo_coins,
         can_reach_igloo,
         children=tuple(igloo_children),
     )
@@ -2325,42 +2253,45 @@ def _build_route_trace(
 def _evaluate_route_set(
         routes: list[_route_type],
         *,
-        permanent: bool,
         maximum: int | None = None,
 ) -> CoinEvaluation:
-    if permanent:
-        source_owners: dict[str, str] = {}
-        reachable_sources: dict[str, int] = {}
-        for route in routes:
-            if not route.available:
-                continue
-            for source_id, value in route.sources.items():
-                source_owners.setdefault(source_id, route.source_id)
-                reachable_sources[source_id] = value
-        reachable_coins = sum(reachable_sources.values())
-        traces = tuple(
-            _build_route_trace(
-                route,
-                counted=route.available,
-                source_owners=source_owners,
-            )
-            for route in routes
+    merged: dict[str, CoinSourceTrace] = {}
+
+    def merge_node(node: _route_trace_node_type, parent_available: bool) -> None:
+        available = parent_available and node.available
+        if node.children:
+            # Some producers, notably Giant Goombas, keep their coin value on
+            # the parent while zero-value children explain alternate physical
+            # outcomes. Preserve that value instead of treating the producer
+            # as a route-only container.
+            if node.coins and not any(child.coins for child in node.children):
+                previous = merged.get(node.source_id)
+                merged[node.source_id] = _coin_trace(
+                    node.source_id,
+                    node.label,
+                    node.coins,
+                    available or bool(previous and previous.available),
+                    red_coin_ids=node.red_coin_ids | (previous.red_coin_ids if previous else frozenset()),
+                )
+            for child in node.children:
+                merge_node(child, available)
+            return
+
+        previous = merged.get(node.source_id)
+        merged[node.source_id] = _coin_trace(
+            node.source_id,
+            node.label,
+            node.coins,
+            available or bool(previous and previous.available),
+            red_coin_ids=node.red_coin_ids | (previous.red_coin_ids if previous else frozenset()),
         )
-    else:
-        selected_index = max(
-            (index for index, route in enumerate(routes) if route.available),
-            key=lambda index: sum(routes[index].sources.values()),
-            default=None,
-        )
-        reachable_coins = (
-            sum(routes[selected_index].sources.values())
-            if selected_index is not None
-            else 0
-        )
-        traces = tuple(
-            _build_route_trace(route, counted=index == selected_index)
-            for index, route in enumerate(routes)
-        )
+
+    for route in routes:
+        for child in route.children:
+            merge_node(child, route.available)
+
+    traces = tuple(merged.values())
+    reachable_coins = sum(trace.coins for trace in traces if trace.counted)
 
     if maximum is not None:
         reachable_coins = min(reachable_coins, maximum)
@@ -2610,23 +2541,14 @@ def wet_dry_world_coin_evaluation(
     ]
     evaluation = _evaluate_route_set(
         routes,
-        permanent=rules.permanent_coin_collection_enabled(state, player),
         maximum=152,
     )
-    if any(
-            route.available
-            and
-            frozenset().union(*(
-                child.red_coin_ids for child in route.children if child.available
-            ))
-            == frozenset(range(1, 9))
-            for route in routes
-    ):
+    if evaluation.reachable_red_coin_ids == frozenset(range(1, 9)):
         return CoinEvaluation(
             evaluation.reachable_coins,
             evaluation.children + (coin_source(
                 "wdw_all_red_coins_reachable",
-                "All eight Downtown Red Coins are reachable through one entrance variant",
+                "All eight Downtown Red Coins are reachable",
                 0,
                 True,
                 red_coin_ids=frozenset(range(1, 9)),
@@ -2713,7 +2635,6 @@ def tiny_huge_island_coin_evaluation(
         "logic_thi_impossible_coin",
         f"{level_name} - Coins Star",
     )
-    permanent = rules.permanent_coin_collection_enabled(state, player)
     def giant_goomba_coins(count: int) -> int:
         return count * (5 if has_ground_pound else 1)
 
@@ -2728,9 +2649,17 @@ def tiny_huge_island_coin_evaluation(
                 available: bool,
                 red_coin_ids: frozenset[int] = frozenset(),
         ) -> None:
-            children.append(_route_source(
-                source_id, label, value, available,
-                red_coin_ids=red_coin_ids))
+            source = _route_source(source_id, label, value, available, red_coin_ids=red_coin_ids)
+            if source_id in {
+                    "huge_lower_giant_goombas", "huge_windswept_giant_goombas",
+                    "huge_koopa_region_giant_goombas", "red_area_giant_goombas"}:
+                source.children.extend((
+                    _route_source(f"{source_id}_yellow", f"{label} yellow outputs", 0, available),
+                    _route_source(
+                        f"{source_id}_blue", f"{label} blue outputs",
+                        0, available and has_ground_pound),
+                ))
+            children.append(source)
             if available and value:
                 sources[source_id] = value
 
@@ -2756,20 +2685,6 @@ def tiny_huge_island_coin_evaluation(
         has_tiny_piranha = has_initial_tiny_piranha or has_koopa_region and has_warp_pipes
         has_tiny_start = start_tiny or has_tiny_piranha
         has_tiny_main = has_tiny_main_from_tiny or has_koopa_region and has_warp_pipes
-
-        normal_repeatable_top = (
-            repeatable_windswept and has_cannonball_movement and has_upper_movement)
-        pipe_repeatable_top = has_koopa_from_pipe and has_upper_movement
-        repeatable_top = normal_repeatable_top or pipe_repeatable_top
-        if has_top and has_warp_pipes and has_upper_movement:
-            repeatable_top = True
-
-        one_use_ascents = 0
-        if not repeatable_top:
-            if has_koopa_shell_ascent and has_huge_start:
-                one_use_ascents += 1
-            if fly_windswept and has_cannonball_movement and has_upper_movement:
-                one_use_ascents += 1
 
         add_source(
             "tiny_start_goomba",
@@ -2957,6 +2872,14 @@ def tiny_huge_island_coin_evaluation(
                 has_ground_pound and has_blue_coin_block,
             ),
         ]
+        red_area_children[0].children.extend((
+            _route_source(
+                "red_area_giant_goombas_yellow", "Two Giant Goombas yellow outputs",
+                0, has_goombas),
+            _route_source(
+                "red_area_giant_goombas_blue", "Two Giant Goombas blue outputs",
+                0, has_goombas and has_ground_pound),
+        ))
         wiggler_children = [
             _route_source(
                 "wiggler_cave_coin_lines",
@@ -2994,54 +2917,10 @@ def tiny_huge_island_coin_evaluation(
             has_koopa_region and has_warp_pipes and has_thi_purple_switches)
         piranha_terminal = not has_huge_piranha_from_pipe and has_koopa_region and not piranha_direct
 
-        terminal_groups: list[_route_trace_node_type] = []
-        if red_area_terminal:
-            terminal_groups.append(_route_trace_node_type(
-                "thi_red_coins_area",
-                "Red Coins Area dead end",
-                sum(child.coins for child in red_area_children if child.available),
-                True,
-                False,
-                red_area_children,
-            ))
-        if has_huge_context:
-            terminal_groups.append(_route_trace_node_type(
-                "thi_wiggler_cave",
-                "Wiggler's Cave dead end",
-                sum(child.coins for child in wiggler_children if child.available)
-                if wiggler_available
-                else 0,
-                wiggler_available,
-                False,
-                wiggler_children,
-            ))
-        if piranha_terminal:
-            terminal_groups.append(_route_trace_node_type(
-                "thi_huge_piranha_area",
-                "Huge Piranha Area dead end",
-                sum(child.coins for child in piranha_children if child.available),
-                True,
-                False,
-                piranha_children,
-            ))
-
-        if permanent or repeatable_top:
-            selected_terminal_groups = terminal_groups
-        elif has_top:
-            selected_terminal_groups = sorted(
-                terminal_groups,
-                key=lambda group: group.coins,
-                reverse=True,
-            )[:one_use_ascents]
-        else:
-            selected_terminal_groups = []
-        selected_terminal_ids = {group.source_id for group in selected_terminal_groups}
-
         def append_group(
                 source_id: str,
                 label: str,
                 available: bool,
-                selected: bool,
                 group_children: list[_route_trace_node_type],
         ) -> None:
             group = _route_trace_node_type(
@@ -3049,11 +2928,11 @@ def tiny_huge_island_coin_evaluation(
                 label,
                 sum(child.coins for child in group_children if child.available),
                 available,
-                selected,
+                available,
                 group_children,
             )
             children.append(group)
-            if selected and available:
+            if available:
                 for child in group_children:
                     if child.available and child.coins:
                         sources[child.source_id] = child.coins
@@ -3062,21 +2941,18 @@ def tiny_huge_island_coin_evaluation(
             "thi_red_coins_area",
             "Red Coins Area",
             red_area_direct or red_area_terminal,
-            red_area_direct or "thi_red_coins_area" in selected_terminal_ids,
             red_area_children,
         )
         append_group(
             "thi_wiggler_cave",
-            "Wiggler's Cave dead end",
+            "Wiggler's Cave",
             wiggler_available,
-            "thi_wiggler_cave" in selected_terminal_ids,
             wiggler_children,
         )
         append_group(
             "thi_huge_piranha_area",
             "Huge Piranha Area",
-            has_huge_piranha_from_pipe or has_koopa_region,
-            piranha_direct or "thi_huge_piranha_area" in selected_terminal_ids,
+            piranha_direct or piranha_terminal,
             piranha_children,
         )
 
@@ -3088,7 +2964,7 @@ def tiny_huge_island_coin_evaluation(
         make_route(True, can_enter_tiny),
         make_route(False, can_enter_huge),
     ]
-    return _evaluate_route_set(routes, permanent=permanent)
+    return _evaluate_route_set(routes)
 
 
 def _rules() -> ModuleType:
@@ -3547,12 +3423,8 @@ def tower_of_the_wing_cap_coins(
         state: CollectionState, player: int, coins: int) -> CoinEvaluation:
     rules = _rules()
     level_name = "Tower of the Wing Cap"
-    has_coin_mastery = rules.has_logic_trick(
-        state, player, "logic_totwc_coin_mastery")
-    uses_mastery_routes = (
-        has_coin_mastery
-        or rules.permanent_coin_collection_enabled(state, player)
-    )
+    # Permanent collection allows the ring coins to be accumulated over
+    # repeated attempts, so the former single-visit mastery cap does not apply.
     has_single_yellow_coins = rules.has_unlock(
         state, player, "coin_object_unlocks",
         "Single Yellow Coins", f"{level_name} - Single Yellow Coins")
@@ -3572,39 +3444,29 @@ def tower_of_the_wing_cap_coins(
                     red_coin_ids=frozenset(range(1, 9))),
     ))
     trace.add_route(
-        "totwc_standard_ring_route",
-        "Coin rings without Coin Mastery",
-        not uses_mastery_routes,
-        (coin_source("totwc_standard_ring_coins",
-                 "Reachable vertical Coin Ring coins",
-                 16, has_vertical_coin_rings),),
-        selected=not uses_mastery_routes,
-    )
-    trace.add_route(
         "totwc_mastery_ring_route",
-        "Coin Mastery route",
-        uses_mastery_routes,
+        "Coin ring sources across repeated attempts",
+        True,
         (
             coin_source("totwc_mastery_ring_coins",
-                    "Coin Ring coins reachable with Coin Mastery",
+                    "Coin Ring coins reachable across repeated attempts",
                     20, has_vertical_coin_rings),
             coin_source("totwc_mastery_wing_cap_ring_coins",
                     "Additional Coin Ring coins with Wing Cap",
                     12, has_vertical_coin_rings and has_wing_cap_item),
         ),
-        selected=uses_mastery_routes,
+        selected=True,
     )
 
     uncapped_coins = trace.reachable_coins
     assert uncapped_coins <= 63
-    logic_cap = 63 if uses_mastery_routes else 31
     option_cap = state.multiworld.worlds[
-        player].options.tower_of_the_wing_cap_coinsanity_max_coins.value
-    reachable_coins = min(uncapped_coins, logic_cap, option_cap)
+        player].options.tower_of_the_wing_cap_coin_count_max_coins.value
+    reachable_coins = min(uncapped_coins, option_cap)
     if reachable_coins < uncapped_coins:
         trace.add_source(
             "totwc_coin_cap",
-            f"Coins excluded by the {min(logic_cap, option_cap)}-coin logic/option cap",
+            f"Coins excluded by the {option_cap}-coin option cap",
             uncapped_coins - reachable_coins,
             True,
             counted=False,
@@ -4165,8 +4027,7 @@ def _early_requirement_specs():
             BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
             ("Red Coins", f"{BOB} - Red Coins")),
 
-        # The evaluator selects this route only when neither complete route is available.
-        # RuleFactory has no NOT operator, so that route-selection exclusion remains runtime logic.
+        # Partial methods expose only the outputs that their individual rules reach.
         (BOB, "island_partial_route"): _spec(BOB_TARGET, f"{{{BOB} - Island}}"),
         (BOB, "island_partial_flight_ring_coins"): _spec(
             BOB_TARGET, f"{{{BOB} - Island}} & WC & TJ",
@@ -4304,11 +4165,6 @@ def _early_requirement_specs():
         (CCM, "wall_kicks_spindrifts"): _spec(
             CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump",
             ("Spindrifts", f"{CCM} - Spindrifts")),
-        # This synthetic loss also requires: no Cannon, no Permanent Coins, and the Spin Jump route.
-        # Those negative/option predicates cannot be represented by a RuleFactory expression.
-        (CCM, "wall_kicks_spindrift_route_loss"): _spec(
-            CCM_TARGET, "logic_ccm_wall_kicks_will_work_spin_jump",
-            ("Spindrifts", f"{CCM} - Spindrifts")),
         (CCM, "blue_coin_block"): _spec(
             CCM_TARGET, "GP", ("Blue Coin Blocks", f"{CCM} - Blue Coin Block")),
 
@@ -4343,11 +4199,6 @@ def _early_requirement_specs():
         (BBH, "attic_blue_coin_block"): _spec(
             BBH_TARGET, f"{{{BBH} - Third Floor}} & GP",
             ("Blue Coin Blocks", f"{BBH} - Blue Coin Block")),
-        # This synthetic loss additionally requires no normal/Wall Kick route, No Despawns off,
-        # Permanent Coins off, and the Bookend route. RuleFactory cannot encode those negatives.
-        (BBH, "bookend_third_floor_route_loss"): _spec(
-            BBH_TARGET, f"{{{BBH} - Third Floor}} & logic_bbh_third_floor_side_flip",
-            (f"{BBH} - Flying Bookends", f"{BBH} - Flying Bookends")),
         (BBH, "merry_go_round_boos"): _spec(
             BBH_TARGET, "BBH_MERRY_GO_ROUND", ("Boos", f"{BBH} - Boos")),
     }
@@ -4609,12 +4460,6 @@ def _middle_requirement_specs():
     _add(SL, "sl_igloo_three_coin_block",
          unlocks=(_unlock("3-Coin Blocks", SL, f"{SL} - 3-Coin Block"),))
     _add(SL, "sl_igloo_route", f"{{{SL} - Igloo}}")
-    # Transition loss additionally depends on !Top, !Cannon, Spindrifts, !Permanent
-    # Coins, and the dynamically available Igloo total. Negation and option checks
-    # are outside RuleFactory's expression grammar.
-    _add(SL, "sl_igloo_transition_loss", f"{{{SL} - Igloo}}",
-         (_unlock("Spindrifts", SL),))
-
     _add(SL, "sl_impossible_coin", "logic_sl_impossible_coin",
          (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_impossible_coin_trick", "logic_sl_impossible_coin")
@@ -4632,9 +4477,7 @@ def _late_requirement_specs():
 
     This module is intentionally data-only.  Rules are RuleFactory expressions and
     ``unlocks`` contains the global/per-level item pair represented by each unlock
-    token.  Route-selection remains CoinLogic's responsibility: WDW selects the
-    best reachable entrance variant without Permanent Coins, while THI additionally
-    models one-use mountain ascents and terminal areas.
+    token.
     """
 
 
@@ -4796,9 +4639,7 @@ def _late_requirement_specs():
          _unlock("Vertical Coin Lines", TTM))
 
 
-    # Tiny-Huge Island. Static rules describe physical source access. CoinLogic must
-    # still select terminal groups according to Permanent Coins, repeatable ascents,
-    # and the number/value of one-use Koopa-shell and Fly-Guy ascents.
+    # Tiny-Huge Island physical source access.
     THI = "Tiny-Huge Island"
     _add(THI, "thi_tiny_variant", "{Tiny-Huge Island (Tiny)}")
     _add(THI, "thi_huge_variant", "{Tiny-Huge Island (Huge)}")
@@ -4864,6 +4705,16 @@ def _late_requirement_specs():
     _add(THI, "thi_huge_piranha_area", "{Tiny-Huge Island - Huge Piranha Area}")
     _add(THI, "huge_piranha_area_plants", "{Tiny-Huge Island - Huge Piranha Area} & FIRE_PIRANHA_PLANTS",
          _unlock("Fire Piranha Plants", THI))
+
+    for _source in (
+            "huge_lower_giant_goombas", "huge_windswept_giant_goombas",
+            "huge_koopa_region_giant_goombas", "red_area_giant_goombas"):
+        _base = COIN_REQUIREMENT_SPECS[THI, _source]
+        COIN_REQUIREMENT_SPECS[THI, f"{_source}_yellow"] = dict(_base)
+        COIN_REQUIREMENT_SPECS[THI, f"{_source}_blue"] = {
+            **_base,
+            "rule": f"{_base['rule']} & GP",
+        }
 
 
     # Tick Tock Clock
@@ -5049,12 +4900,6 @@ def _secrets_requirement_specs():
             _target(TOTWC), "", ("Single Yellow Coins", f"{TOTWC} - Single Yellow Coins")),
         (TOTWC, "totwc_red_coins"): _spec(
             _target(TOTWC), "", ("Red Coins", f"{TOTWC} - Red Coins")),
-        # Standard and mastery routes are mutually selected by Coin Mastery or Permanent Coins.
-        # The absence of both settings cannot be encoded as a positive RuleFactory expression.
-        (TOTWC, "totwc_standard_ring_route"): _spec(_target(TOTWC)),
-        (TOTWC, "totwc_standard_ring_coins"): _spec(
-            _target(TOTWC), "", ("Vertical Coin Rings", f"{TOTWC} - Vertical Coin Rings")),
-        # Route selection is handled by the evaluator because Permanent Coins is not a RuleFactory token.
         (TOTWC, "totwc_mastery_ring_route"): _spec(_target(TOTWC)),
         (TOTWC, "totwc_mastery_ring_coins"): _spec(
             _target(TOTWC), "",
