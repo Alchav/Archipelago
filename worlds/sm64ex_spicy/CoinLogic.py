@@ -1735,8 +1735,8 @@ def snowmans_land_coins(
     )
     builder.add(
         "sl_spindrifts",
-        "Eleven Spindrifts",
-        33,
+        "Eight Spindrifts outside the Upper area",
+        24,
         has_spindrifts,
     )
     builder.add(
@@ -1826,12 +1826,6 @@ def snowmans_land_coins(
         can_reach_upper and has_spindrifts,
     )
     builder.add(
-        "sl_upper_goombas",
-        "Three Goombas in the Upper area",
-        3,
-        can_reach_upper and has_goombas,
-    )
-    builder.add(
         "sl_upper_red_coins",
         "Five Red Coins in the Upper area",
         10,
@@ -1875,6 +1869,18 @@ def snowmans_land_coins(
             "3-Coin Block inside the Igloo",
             3,
             has_three_coin_block,
+        ),
+        (
+            "sl_igloo_goombas",
+            "Three Goombas inside the Igloo",
+            3,
+            has_goombas,
+        ),
+        (
+            "sl_igloo_spindrifts",
+            "Three Spindrifts inside the Igloo",
+            9,
+            has_spindrifts,
         ),
     )
     igloo_children = [
@@ -4467,18 +4473,19 @@ def _middle_requirement_specs():
     _add(SL, ("sl_upper_slope_single_coins", "sl_penguin_and_face_coins"),
          f"{{{SL} - Upper}}", (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_upper_spindrifts", f"{{{SL} - Upper}}", (_unlock("Spindrifts", SL),))
-    _add(SL, "sl_upper_goombas", f"{{{SL} - Upper}}", (_unlock("Goombas", SL),))
     _add(SL, "sl_upper_red_coins", f"{{{SL} - Upper}}", (_unlock("Red Coins", SL),))
     _add(SL, "sl_snowman_head_plank_coins", f"{{{SL} - Top of Snowman's Head}}",
          (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_snowman_head_region_access", f"{{{SL} - Top of Snowman's Head}}")
 
-    _add(SL, "sl_igloo_frozen_coin_lines", "VC",
+    _add(SL, "sl_igloo_frozen_coin_lines", f"{{{SL} - Igloo}} & VC",
          (_unlock("Horizontal Coin Lines", SL),))
-    _add(SL, "sl_igloo_single_coins",
+    _add(SL, "sl_igloo_single_coins", f"{{{SL} - Igloo}}",
          unlocks=(_unlock("Single Yellow Coins", SL),))
-    _add(SL, "sl_igloo_three_coin_block",
+    _add(SL, "sl_igloo_three_coin_block", f"{{{SL} - Igloo}}",
          unlocks=(_unlock("3-Coin Blocks", SL, f"{SL} - 3-Coin Block"),))
+    _add(SL, "sl_igloo_goombas", f"{{{SL} - Igloo}}", (_unlock("Goombas", SL),))
+    _add(SL, "sl_igloo_spindrifts", f"{{{SL} - Igloo}}", (_unlock("Spindrifts", SL),))
     _add(SL, "sl_igloo_route", f"{{{SL} - Igloo}}")
     _add(SL, "sl_impossible_coin", "logic_sl_impossible_coin",
          (_unlock("Single Yellow Coins", SL),))

@@ -142,7 +142,7 @@ SOURCE_LAYOUTS = {
     ),
     "Snowman's Land": (
         ('sl_start_coins', 'Coins to the left of the start', 'yellow', 2),
-        ('sl_spindrifts', 'Eleven Spindrifts', 'yellow', 33),
+        ('sl_spindrifts', 'Eight Spindrifts outside the Upper area', 'yellow', 24),
         ('sl_start_mr_blizzards', 'Three Mr. Blizzards', 'yellow', 9),
         ('sl_moneybags', 'Two Moneybags', 'yellow', 10),
         ('sl_fly_guy', 'Fly Guy', 'yellow', 2),
@@ -151,11 +151,12 @@ SOURCE_LAYOUTS = {
         ('sl_upper_slope_single_coins', 'Single coins on the slope toward the Igloo', 'yellow', 3),
         ('sl_penguin_and_face_coins', "Coins by the penguin and snowman's face", 'yellow', 3),
         ('sl_upper_spindrifts', 'Three Spindrifts in the Upper area', 'yellow', 9),
-        ('sl_upper_goombas', 'Three Goombas in the Upper area', 'yellow', 3),
+        ('sl_igloo_goombas', 'Three Goombas inside the Igloo', 'yellow', 3),
         ('sl_snowman_head_plank_coins', 'Coins on the wooden plank near the top of the snowman', 'yellow', 2),
         ('sl_igloo_frozen_coin_lines', 'Frozen coin lines inside the Igloo', 'yellow', 20),
         ('sl_igloo_single_coins', 'Single coins inside the Igloo', 'yellow', 3),
         ('sl_igloo_three_coin_block', '3-Coin Block inside the Igloo', 'yellow', 3),
+        ('sl_igloo_spindrifts', 'Three Spindrifts inside the Igloo', 'yellow', 9),
         ('sl_impossible_coin', 'Impossible Coin trick', 'yellow', 1),
     ),
     'Wet-Dry World': (
