@@ -3921,6 +3921,40 @@ def _with_coin_rule_context(
     return evaluate
 
 
+def castle_coins(
+        state: CollectionState,
+        player: int,
+        _required_coins: int,
+) -> CoinEvaluation:
+    from . import Rules
+
+    level_name = "Castle"
+    has_single_yellow_coins = Rules.has_unlock(
+        state, player, "coin_object_unlocks",
+        "Single Yellow Coins", "Castle - Single Yellow Coins")
+    can_reach_bridge_coins = (
+        state.can_reach("Castle - Drain the Moat", "Location", player)
+        and Rules.has_action(state, player, "Wall Kick", level_name)
+        and any(Rules.has_action(state, player, action, level_name)
+                for action in ("Triple Jump", "Side Flip"))
+    )
+    has_castle_boos = Rules.has_unlock(
+        state, player, "enemy_unlocks", "Boos", "Castle - Boos")
+
+    trace = CoinTraceBuilder()
+    trace.add_source(
+        "castle_grounds_bridge_coins", "Two coins under the Castle Grounds bridge", 2,
+        has_single_yellow_coins and can_reach_bridge_coins)
+    trace.add_source(
+        "castle_lobby_coins", "Four coins in the Castle Lobby", 4,
+        has_single_yellow_coins)
+    trace.add_source(
+        "castle_courtyard_boos", "Nine Boos in the Castle Courtyard", 45,
+        has_castle_boos)
+    assert trace.reachable_coins <= 51
+    return trace.evaluation()
+
+
 _RAW_COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
     "Bob-omb Battlefield": evaluate_bob_omb_battlefield_coins,
     "Whomp's Fortress": evaluate_whomps_fortress_coins,
@@ -3946,6 +3980,7 @@ _RAW_COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
     "Bowser in the Dark World": bowser_in_the_dark_world_coins,
     "Bowser in the Fire Sea": bowser_in_the_fire_sea_coins,
     "Bowser in the Sky": bowser_in_the_sky_coins,
+    "Castle": castle_coins,
 }
 
 COIN_EVALUATORS: dict[str, CoinTraceEvaluator] = {
@@ -4866,6 +4901,7 @@ def _secrets_requirement_specs():
     BITDW = "Bowser in the Dark World"
     BITFS = "Bowser in the Fire Sea"
     BITS = "Bowser in the Sky"
+    CASTLE = "Castle"
 
 
     def _target(course: str) -> str:
@@ -5110,6 +5146,15 @@ def _secrets_requirement_specs():
         (BITS, "bits_final_rotating_platform_line"): _spec(
             _target(BITS), f"{{{BITS} - Top}}",
             ("Horizontal Coin Lines", f"{BITS} - Horizontal Coin Lines")),
+
+        # Castle Grounds, interior, and courtyard. These have no Coin Count Checks.
+        (CASTLE, "castle_grounds_bridge_coins"): _spec(
+            "Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF",
+            ("Single Yellow Coins", "Castle - Single Yellow Coins")),
+        (CASTLE, "castle_lobby_coins"): _spec(
+            "Castle", "", ("Single Yellow Coins", "Castle - Single Yellow Coins")),
+        (CASTLE, "castle_courtyard_boos"): _spec(
+            "Castle", "", ("Boos", "Castle - Boos")),
     }
     return COIN_REQUIREMENT_SPECS
 

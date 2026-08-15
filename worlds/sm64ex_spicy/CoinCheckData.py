@@ -344,4 +344,9 @@ SOURCE_LAYOUTS = {
         ('bits_top_bob_ombs', 'Two top Bob-ombs', 'yellow', 2),
         ('bits_final_rotating_platform_line', 'Coin line before the final rotating platforms', 'yellow', 5),
     ),
+    'Castle': (
+        ('castle_grounds_bridge_coins', 'Coins under the bridge', 'yellow', 2),
+        ('castle_lobby_coins', 'Coins in the lobby', 'yellow', 4),
+        ('castle_courtyard_boos', 'Boos in the courtyard', 'blue', 9),
+    ),
 }

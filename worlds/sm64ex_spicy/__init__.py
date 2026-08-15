@@ -290,6 +290,11 @@ class SM64World(World):
         coin_check_region_names = {
             "Tiny-Huge Island": "Tiny-Huge Island - Coins",
         }
+        coin_check_source_region_names = {
+            ("Castle", "castle_grounds_bridge_coins"): "Castle Grounds",
+            ("Castle", "castle_lobby_coins"): "Castle Lobby",
+            ("Castle", "castle_courtyard_boos"): "Castle Lobby",
+        }
         for location_name in self.coin_count_check_location_names:
             region_name = location_name.rsplit(" - ", 1)[0]
             region_name = coin_check_region_names.get(region_name, region_name)
@@ -297,9 +302,10 @@ class SM64World(World):
             region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
         for location_name in self.coin_check_location_names:
             output = coin_output_by_name[location_name]
-            region_name = coin_check_region_names.get(
-                output.output_id.course_name,
-                output.output_id.course_name,
+            output_id = output.output_id
+            region_name = coin_check_source_region_names.get(
+                (output_id.course_name, output_id.source_id),
+                coin_check_region_names.get(output_id.course_name, output_id.course_name),
             )
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(

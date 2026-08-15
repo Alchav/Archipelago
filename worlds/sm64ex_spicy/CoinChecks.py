@@ -61,6 +61,7 @@ COURSE_MAXIMUM_COIN_VALUES = {
     "Wing Mario Over the Rainbow": 56, "Tower of the Wing Cap": 63,
     "Vanish Cap Under the Moat": 27, "Cavern of the Metal Cap": 47,
     "Bowser in the Dark World": 80, "Bowser in the Fire Sea": 80, "Bowser in the Sky": 76,
+    "Castle": 51,
 }
 
 
@@ -290,6 +291,7 @@ _ENEMY_DESCRIPTOR_OVERRIDES = {
     "huge_piranha_area_plants": "Huge Island Fire Piranha Plant",
     "tiny_main_goombas": "Tiny Island Goomba",
     "huge_top_chuckya": "Chuckya",
+    "castle_courtyard_boos": "Courtyard Boo",
 }
 _GIANT_GOOMBA_DESCRIPTORS = {
     "huge_start_giant_goombas": "Huge Starting Area Goomba",
@@ -358,6 +360,7 @@ STANDALONE_YELLOW_COIN_SOURCE_IDS = frozenset({
     "pss_single_yellow_coins", "totwc_single_yellow_coins", "vcutm_end_marker_coins",
     "bitdw_single_coins_before_slope", "bitdw_slope_single_coins", "bitfs_start_single_coins",
     "bits_tilting_w_coins", "bits_raised_steps_coins", "bits_spinning_platform_coins",
+    "castle_grounds_bridge_coins", "castle_lobby_coins",
 })
 
 
@@ -375,6 +378,8 @@ STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
     "tiny_purple_switch_coin": "Five Itty Bitty Secrets Island Coin",
     "rr_second_carpet_platform_coin": "Coin on the Second Carpet's Grey Platform",
     "rr_second_carpet_air_coin": "Coin in the Air Along the Second Carpet",
+    "castle_grounds_bridge_coins": "Coin Under the Bridge",
+    "castle_lobby_coins": "Lobby Coin",
 }
 
 
