@@ -717,6 +717,12 @@ logic_tricks = {
                        "without movement items.",
         "video": "https://www.youtube.com/watch?v=5P7OWuw9ZZM",
     },
+    "Ground Pound Underwater Shocking Arrow Lifts Box": {
+        "internal_id": "logic_wdw_shocking_arrow_lifts_underwater_ground_pound",
+        "rule": "GP",
+        "difficulty": "easy",
+        "description": "Ground Pounds the Shocking Arrow Lifts box while it is underwater at the highest water level.",
+    },
     "Wet-Dry World Downtown with Triple Jump": {
         "internal_id": "logic_wdw_downtown_triple_jump",
         "rule": "TJ",

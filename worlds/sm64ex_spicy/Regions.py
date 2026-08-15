@@ -168,6 +168,9 @@ sm64_entrance_destination_descriptions = {
 
 sm64_entrance_to_region = {
     **{entrance: entrance for entrance in sm64_entrances_to_level},
+    "Wet-Dry World Low": "Wet-Dry World - Low Water",
+    "Wet-Dry World Middle": "Wet-Dry World - Mid Water",
+    "Wet-Dry World High": "Wet-Dry World - Highest Water",
     "Tick Tock Clock Stopped Entrance": "Tick Tock Clock Stopped",
     "Tick Tock Clock Slow": "Tick Tock Clock Moving",
     "Tick Tock Clock Random": "Tick Tock Clock Moving",
@@ -446,15 +449,9 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regSL.subregions = [sl_whirl, sl_upper, sl_top_of_snowmans_head, sl_igloo]
     create_locs(regSL, "Snowman's Land - Coins Star")
 
-    regWDWLow = create_region("Wet-Dry World Low", player, multiworld)
-    regWDWMiddle = create_region("Wet-Dry World Middle", player, multiworld)
-    regWDWHigh = create_region("Wet-Dry World High", player, multiworld)
-
     regWDW = create_region("Wet-Dry World", player, multiworld)
     create_locs(regWDW, "Wet-Dry World - Shocking Arrow Lifts!", "Wet-Dry World - Bob-omb Buddy",
                 "Wet-Dry World - Shocking Arrow Lifts Star Block",
-                "Wet-Dry World - Pedestal 10 Coins Block",
-                "Wet-Dry World - Push Block 3 Coins Block",
                 "Wet-Dry World - Wooden Structure 3 Coins Block")
     wdw_low_water = create_region("Wet-Dry World - Low Water", player, multiworld)
     create_locs(wdw_low_water, "Wet-Dry World - Secrets in the Shallows & Sky",
@@ -464,10 +461,13 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     wdw_high_water = create_region("Wet-Dry World - High Water", player, multiworld)
     wdw_highest_water = create_region("Wet-Dry World - Highest Water", player, multiworld)
     wdw_cannon = create_region("Wet-Dry World - Cannon", player, multiworld)
-    wdw_top_of_express_elevator = create_subregion(regWDW, "Wet-Dry World - Top of the Express Elevator",
+    wdw_near_top = create_subregion(regWDW, "Wet-Dry World - Near the Top",
+                                    "Wet-Dry World - Pedestal 10 Coins Block",
+                                    "Wet-Dry World - Push Block 3 Coins Block")
+    wdw_top_of_express_elevator = create_subregion(wdw_near_top, "Wet-Dry World - Top of the Express Elevator",
                                                    "Wet-Dry World - Express Elevator--Hurry Up!",
                                                    "Wet-Dry World - Top of Express Elevator 10 Coins Block")
-    wdw_top = create_subregion(regWDW, "Wet-Dry World - Top",
+    wdw_top = create_subregion(wdw_near_top, "Wet-Dry World - Top",
                                "Wet-Dry World - Top o' the Town",
                                "Wet-Dry World - Cylinder Lower 1-Up",
                                "Wet-Dry World - Cylinder Upper 1-Up",
@@ -483,14 +483,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                     "Wet-Dry World - Downtown 1-Up Block")
     regWDW.subregions = [
         wdw_low_water, wdw_mid_water, wdw_mid_high_water, wdw_high_water, wdw_highest_water, wdw_cannon,
-        wdw_top_of_express_elevator, wdw_top, wdw_downtown
+        wdw_near_top, wdw_top_of_express_elevator, wdw_top, wdw_downtown
     ]
-    regWDWLow.connect(regWDW)
-    regWDWLow.connect(wdw_low_water)
-    regWDWMiddle.connect(regWDW)
-    regWDWMiddle.connect(wdw_mid_water)
-    regWDWHigh.connect(regWDW)
-    regWDWHigh.connect(wdw_highest_water)
+    for wdw_water_region in (
+            wdw_low_water, wdw_mid_water, wdw_mid_high_water, wdw_high_water, wdw_highest_water):
+        wdw_water_region.connect(regWDW)
     wdw_low_water.connect(wdw_mid_water, name="Wet-Dry World - Low Water to Mid Water")
     wdw_mid_water.connect(wdw_low_water, name="Wet-Dry World - Mid Water to Low Water")
     wdw_mid_water.connect(wdw_mid_high_water, name="Wet-Dry World - Mid Water to Mid-High Water")
@@ -500,8 +497,12 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     wdw_highest_water.connect(wdw_high_water, name="Wet-Dry World - Highest Water to High Water")
     wdw_low_water.connect(wdw_cannon)
     wdw_high_water.connect(wdw_cannon)
-    for wdw_entrance_region in (regWDWLow, regWDWMiddle, regWDWHigh):
-        wdw_entrance_region.subregions = [regWDW, *regWDW.subregions]
+    wdw_highest_water.connect(wdw_cannon)
+    wdw_top_of_express_elevator.connect(
+        wdw_top, name="Wet-Dry World - Top of the Express Elevator to Top")
+    wdw_top.connect(
+        wdw_top_of_express_elevator, name="Wet-Dry World - Top to Top of the Express Elevator")
+    wdw_cannon.connect(wdw_downtown, name="Wet-Dry World - Cannon to Downtown")
     create_locs(regWDW, "Wet-Dry World - Coins Star")
 
     regTTM = create_region("Tall, Tall Mountain", player, multiworld)

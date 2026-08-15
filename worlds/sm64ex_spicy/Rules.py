@@ -844,6 +844,30 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC")
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
+    wdw_near_top_block_route = (
+        "{Wet-Dry World - Low Water} | "
+        "{Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
+        "{Wet-Dry World - High Water} & LG | "
+        "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}"
+    )
+    wdw_shocking_arrow_lifts_rule = (
+        "{Wet-Dry World - Cannon} & {Wet-Dry World - Low Water} | "
+        "{Wet-Dry World - Cannon} & {Wet-Dry World - High Water} | "
+        "{Wet-Dry World - Cannon} & {Wet-Dry World - Highest Water} & "
+        "logic_wdw_shocking_arrow_lifts_underwater_ground_pound | "
+        "{Wet-Dry World - Top} | "
+        "{Wet-Dry World - Mid-High Water} & LG/SF/TJ/BF"
+    )
+    wdw_secrets_route = (
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} | "
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
+        "{Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
+        "{Wet-Dry World - High Water} & LG | "
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
+        "{Wet-Dry World - Highest Water} | "
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Top}"
+    )
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Mid-High Water",
@@ -853,27 +877,23 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Mid-High Water to High Water", "{Wet-Dry World - Top}")
     rf.assign_rule("Wet-Dry World - High Water to Mid-High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Highest Water to High Water", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Top of the Express Elevator",
-                   "PURPLE_SWITCHES | WK/TJ/SF/BF & LJ/TJ/LG | "
+    rf.assign_rule("Wet-Dry World - Near the Top",
+                   "{Wet-Dry World - Highest Water} | {Wet-Dry World - Mid Water} | HEAVE_HOS")
+    rf.assign_rule("Wet-Dry World - Top of the Express Elevator", "PURPLE_SWITCHES")
+    rf.assign_rule("Wet-Dry World - Top", "WK/TJ/SF/BF")
+    rf.assign_rule("Wet-Dry World - Top of the Express Elevator to Top",
+                   "LJ | logic_wdw_express_elevator_to_top_no_movement")
+    rf.assign_rule("Wet-Dry World - Top to Top of the Express Elevator",
                    "logic_wdw_top_platforms_to_express_elevator_no_movement")
-    rf.assign_rule("Wet-Dry World - Top",
-                   "WK/TJ/SF/BF | {Wet-Dry World - Top of the Express Elevator} & LJ | "
-                   "{Wet-Dry World - Top of the Express Elevator} & "
-                   "logic_wdw_express_elevator_to_top_no_movement | "
-                   "{Wet-Dry World - Highest Water}")
     rf.assign_rule("Wet-Dry World - Downtown",
-                   "{Wet-Dry World - Highest Water} & LG | CANN | "
+                   "{Wet-Dry World - Highest Water} & LG | "
                    "{Wet-Dry World - Top} & logic_wdw_downtown_triple_jump")
-    rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!",
-                   "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
-                   "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ")
+    rf.assign_rule("Wet-Dry World - Cannon to Downtown", "CANN")
+    rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!", wdw_shocking_arrow_lifts_rule)
     rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!",
                    "{Wet-Dry World - Low Water} & BF/SF/WK | "
                    "{Wet-Dry World - Low Water} & WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky",
-                   "{Wet-Dry World - Top of the Express Elevator} & LJ | "
-                   "{Wet-Dry World - Top of the Express Elevator} & {Wet-Dry World - Top} | "
-                   "{Wet-Dry World - Top of the Express Elevator} & WDW_WATER_LEVEL_DIAMOND")
+    rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky", wdw_secrets_route)
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
@@ -1084,10 +1104,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Vanish Cap Under the Moat - Near Switch Vanish Cap Block":
                 "VC & CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | "
                 "VC & logic_vcutm_switch_no_movement",
-            "Wet-Dry World - Shocking Arrow Lifts Star Block":
-                "{Wet-Dry World - Low Water} | {Wet-Dry World - Mid-High Water} | "
-                "{Wet-Dry World - High Water} | {Wet-Dry World - Top} & TJ/LG/LJ",
-            "Wet-Dry World - Wooden Structure 3 Coins Block": "{Wet-Dry World - Mid Water}",
+            "Wet-Dry World - Shocking Arrow Lifts Star Block": wdw_shocking_arrow_lifts_rule,
+            "Wet-Dry World - Pedestal 10 Coins Block": wdw_near_top_block_route,
+            "Wet-Dry World - Wooden Structure 3 Coins Block":
+                "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | "
+                "{Wet-Dry World - Top of the Express Elevator} & LJ",
             "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Metal Cap Block": "MC",
             "Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
@@ -1639,6 +1660,10 @@ class RuleFactory:
         item_names["THWOMP"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Thwomp", f"{level_name} - Thwomp")
+        item_names["HEAVE_HOS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks",
+            "Heave-Hos",
+            f"{level_name} - {'Heave-Ho' if level_name == 'Tick Tock Clock' else 'Heave-Hos'}")
         item_names["BOOS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Boos", f"{level_name} - Boos")

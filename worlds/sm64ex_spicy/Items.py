@@ -818,6 +818,7 @@ global_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Whomps": SM64ItemData(3626585, progression),
     "Big Bully": SM64ItemData(3626839, progression),
     "Thwomp": SM64ItemData(3626845, progression),
+    "Heave-Hos": SM64ItemData(3626586, progression),
 }
 
 
@@ -885,6 +886,8 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Whomp's Fortress - Thwomp": SM64ItemData(3626846, progression),
     "Shifting Sand Land - Thwomp": SM64ItemData(3626847, progression),
     "Tick Tock Clock - Thwomp": SM64ItemData(3626848, progression),
+    "Wet-Dry World - Heave-Hos": SM64ItemData(3626781, progression),
+    "Tick Tock Clock - Heave-Ho": SM64ItemData(3626786, trap),
 }
 
 bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
@@ -941,6 +944,7 @@ global_mode_enemy_item_names = (
     "Hazy Maze Cave - Swoops",
     "Big Boo's Haunt - Big Boo",
     "Thwomp",
+    "Heave-Hos",
 )
 
 item_data_table = {

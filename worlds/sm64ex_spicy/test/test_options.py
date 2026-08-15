@@ -1019,12 +1019,22 @@ class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
         precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
 
-        self.assertEqual(len(unlock_items), 226)
+        self.assertEqual(len(unlock_items), 229)
         for item_name, item_data in unlock_items.items():
             with self.subTest(item=item_name):
                 self.assertEqual(start_inventory[item_data.code], 1)
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
                 self.assertNotIn(item_name, precollected_names)
+
+    def test_heave_ho_item_classifications(self):
+        self.assertEqual(
+            self.world.get_item_classification(
+                per_level_enemy_item_data_table["Wet-Dry World - Heave-Hos"]),
+            ItemClassification.progression)
+        self.assertEqual(
+            self.world.get_item_classification(
+                per_level_enemy_item_data_table["Tick Tock Clock - Heave-Ho"]),
+            ItemClassification.trap)
 
 
 class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
@@ -1035,7 +1045,7 @@ class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 
     def test_global_mode_unlock_items_are_generated(self):
         expected_names = set(global_mode_coin_object_item_names) | set(global_mode_enemy_item_names)
-        self.assertEqual(len(expected_names), 41)
+        self.assertEqual(len(expected_names), 42)
         for item_name in expected_names:
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -1053,7 +1063,7 @@ class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
             **per_level_coin_object_item_data_table,
             **per_level_enemy_item_data_table,
         }
-        self.assertEqual(len(individual_items), 194)
+        self.assertEqual(len(individual_items), 196)
         for item_name in individual_items:
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)

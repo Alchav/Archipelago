@@ -2309,7 +2309,6 @@ def wet_dry_world_coin_evaluation(
         player: int,
         required_coins: int,
 ) -> CoinEvaluation:
-    # Import lazily so Rules can register these evaluators without an import cycle.
     from . import Rules as rules
 
     level_name = "Wet-Dry World"
@@ -2340,227 +2339,90 @@ def wet_dry_world_coin_evaluation(
     has_skeeters = rules.has_unlock(
         state, player, "enemy_unlocks",
         f"{level_name} - Skeeters", f"{level_name} - Skeeters")
+    has_heave_hos = rules.has_unlock(
+        state, player, "enemy_unlocks",
+        "Heave-Hos", f"{level_name} - Heave-Hos")
     has_ground_pound = rules.has_action(state, player, "Ground Pound", level_name)
-    has_wdw_purple_switches = rules.has_purple_switches(state, player, level_name)
     has_water_level_diamond = rules.has_simple_arbitrary_feature(
         state, player, "WDW_WATER_LEVEL_DIAMOND")
     has_long_jump = rules.has_action(state, player, "Long Jump", level_name)
     has_triple_jump = rules.has_action(state, player, "Triple Jump", level_name)
-    has_dive = rules.has_action(state, player, "Dive", level_name)
+    has_backflip = rules.has_action(state, player, "Backflip", level_name)
+    has_side_flip = rules.has_action(state, player, "Side Flip", level_name)
     has_wall_kick = rules.has_action(state, player, "Wall Kick", level_name)
+    has_ledge_grab = rules.has_action(state, player, "Ledge Grab", level_name)
     can_reach_high_red_coins = has_wall_kick or rules.can_use_logic_trick(
         state, player, "logic_wdw_high_red_coins_triple_jump", level_name)
-    can_reach_top_of_express_elevator = state.can_reach(
-        "Wet-Dry World - Top of the Express Elevator", "Region", player)
-    has_movement_top_route = (
-        any(
-            rules.has_action(state, player, action, level_name)
-            for action in ("Wall Kick", "Triple Jump", "Side Flip", "Backflip")
-        )
+    can_reach_main = state.can_reach(level_name, "Region", player)
+    can_reach_low = state.can_reach(f"{level_name} - Low Water", "Region", player)
+    can_reach_mid = state.can_reach(f"{level_name} - Mid Water", "Region", player)
+    can_reach_high = state.can_reach(f"{level_name} - High Water", "Region", player)
+    can_reach_highest = state.can_reach(f"{level_name} - Highest Water", "Region", player)
+    can_reach_near_top = state.can_reach(f"{level_name} - Near the Top", "Region", player)
+    can_reach_top = state.can_reach(f"{level_name} - Top", "Region", player)
+    can_reach_top_of_express = state.can_reach(
+        f"{level_name} - Top of the Express Elevator", "Region", player)
+    can_reach_downtown = state.can_reach(f"{level_name} - Downtown", "Region", player)
+    near_top_block_route = (
+        can_reach_low
+        or can_reach_mid and (has_heave_hos or has_side_flip or has_backflip or has_triple_jump)
+        or can_reach_high and has_ledge_grab
+        or can_reach_highest
+        or can_reach_top
     )
-    can_reach_top_from_express_elevator = can_reach_top_of_express_elevator and (
-        has_long_jump or rules.can_use_logic_trick(
-            state, player, "logic_wdw_express_elevator_to_top_no_movement", level_name))
-    can_reach_mid_high_from_mid = has_water_level_diamond and (
-        can_reach_top_of_express_elevator or has_triple_jump and has_dive)
+    wooden_structure_route = (
+        can_reach_mid or can_reach_top or can_reach_top_of_express and has_long_jump)
+    fourth_diamond_route = (
+        can_reach_mid or can_reach_highest or can_reach_top
+        or can_reach_top_of_express and has_long_jump)
 
-    def route_has_top(water_levels: set[str]) -> bool:
-        return (
-            has_movement_top_route
-            or can_reach_top_from_express_elevator
-            or "highest" in water_levels
-        )
-
-    def route_water_levels(start_water_level: str) -> set[str]:
-        water_levels = {start_water_level}
-        while True:
-            previous_count = len(water_levels)
-            if has_water_level_diamond:
-                if "low" in water_levels:
-                    water_levels.add("mid")
-                if "mid" in water_levels:
-                    water_levels.add("low")
-                    if can_reach_mid_high_from_mid:
-                        water_levels.add("mid-high")
-                if "mid-high" in water_levels:
-                    water_levels.add("mid")
-                if "high" in water_levels:
-                    water_levels.add("mid-high")
-                if "highest" in water_levels:
-                    water_levels.add("high")
-            if "mid-high" in water_levels and route_has_top(water_levels):
-                water_levels.add("high")
-            if len(water_levels) == previous_count:
-                return water_levels
-
-    def route_has_downtown(water_levels: set[str]) -> bool:
-        return (
-            "highest" in water_levels
-            and rules.has_action(state, player, "Ledge Grab", level_name)
-            or state.has("Wet-Dry World - Cannon Unlock", player)
-            or route_has_top(water_levels)
-            and rules.can_use_logic_trick(
-                state, player, "logic_wdw_downtown_triple_jump", level_name)
-        )
-
-    def make_route(
-            variant_region: str,
-            start_water_level: str,
-            label: str,
-    ) -> _route_type:
-        route_available = state.can_reach(variant_region, "Region", player)
-        water_levels = route_water_levels(start_water_level)
-        has_top = route_has_top(water_levels)
-        has_downtown = route_has_downtown(water_levels)
-        children = [
-            _route_source("main_skeeters", "Two Skeeters in the main area", 6, has_skeeters),
-            _route_source("amp_ring", "Coin ring around the Amp pillar", 8, has_horizontal_coin_rings),
-            _route_source(
-                "pillar_ten_coin_block",
-                "10-Coin Block on the pillar",
-                10,
-                has_ten_coin_blocks,
-            ),
-            _route_source(
-                "push_block_three_coin_block",
-                "3-Coin Block below the Chuckya platform",
-                3,
-                has_three_coin_blocks,
-            ),
-            _route_source(
-                "low_breakable_boxes",
-                "Breakable coin boxes at low water",
-                12,
-                "low" in water_levels and has_breakable_coin_boxes,
-            ),
-            _route_source(
-                "low_ten_coin_block",
-                "10-Coin Block below the cannon",
-                10,
-                "low" in water_levels and has_ten_coin_blocks,
-            ),
-            _route_source(
-                "low_blue_coins",
-                "Blue coins at low water",
-                30,
-                "low" in water_levels and has_ground_pound and has_blue_coin_block,
-            ),
-            _route_source(
-                "wooden_structure_three_coin_block",
-                "3-Coin Block on the wooden structure",
-                3,
-                "mid" in water_levels and has_three_coin_blocks,
-            ),
-            _route_source(
-                "fourth_diamond_coin_line",
-                "Coin line by the fourth water-level diamond",
-                5,
-                has_horizontal_coin_lines and bool(
-                    water_levels.intersection({"mid", "highest"})
-                    or has_wdw_purple_switches
-                    or has_triple_jump and has_dive
-                ),
-            ),
-            _route_source(
-                "top_coin_line",
-                "Coin line at the highest water-level diamond",
-                5,
-                has_top and has_horizontal_coin_lines,
-            ),
-            _route_source("top_chuckya", "Chuckya at the top", 5, has_top and has_chuckya),
-            _route_source(
-                "express_elevator_ten_coin_block",
-                "10-Coin Block above the Express Elevator",
-                10,
-                can_reach_top_of_express_elevator and has_ten_coin_blocks,
-            ),
-            _route_source(
-                "downtown_ring",
-                "Downtown statue coin ring",
-                8,
-                has_downtown and has_horizontal_coin_rings,
-            ),
-            _route_source(
-                "downtown_metal_cap_line",
-                "Downtown metal-cap coin line",
-                5,
-                has_downtown and has_horizontal_coin_lines,
-            ),
-            _route_source(
-                "downtown_first_building_line",
-                "Downtown first-building coin line",
-                5,
-                has_downtown and has_horizontal_coin_lines,
-            ),
-            _route_source(
-                "downtown_second_building_line",
-                "Downtown second-building coin line",
-                5,
-                has_downtown and has_horizontal_coin_lines,
-            ),
-            _route_source(
-                "downtown_skeeters",
-                "Two Skeeters Downtown",
-                6,
-                has_downtown and has_skeeters,
-            ),
-            _route_source(
-                "downtown_initial_red_coin",
-                "First Downtown red coin",
-                2,
-                has_downtown and has_red_coins,
-                red_coin_ids=frozenset({1}),
-            ),
-            _route_source(
-                "downtown_diamond_red_coins",
-                "Five Downtown red coins beyond water-level diamonds",
-                10,
-                has_downtown and has_water_level_diamond and has_red_coins,
-                red_coin_ids=frozenset({2, 3, 4, 5, 6}),
-            ),
-            _route_source(
-                "downtown_high_red_coins",
-                "Two high Downtown red coins",
-                4,
-                has_downtown and has_water_level_diamond and has_red_coins and can_reach_high_red_coins,
-                red_coin_ids=frozenset({7, 8}),
-            ),
-        ]
-        sources = {
-            child.source_id: child.coins
-            for child in children
-            if child.available
-        }
-        water_label = ", ".join(sorted(water_levels))
-        return _route_type(
-            f"wdw_{start_water_level}_variant",
-            f"{label} ({water_label} water reachable)",
-            route_available,
-            sources,
-            children,
-        )
-
-    routes = [
-        make_route("Wet-Dry World Low", "low", "Low entrance variant"),
-        make_route("Wet-Dry World Middle", "mid", "Middle entrance variant"),
-        make_route("Wet-Dry World High", "highest", "High entrance variant"),
+    traces = [
+        coin_source("main_skeeters", "Two Skeeters in the main area", 6,
+                    can_reach_main and has_skeeters),
+        coin_source("amp_ring", "Coin ring around the Amp pillar", 8,
+                    can_reach_near_top and has_horizontal_coin_rings),
+        coin_source("pillar_ten_coin_block", "10-Coin Block on the pillar", 10,
+                    can_reach_near_top and near_top_block_route and has_ten_coin_blocks),
+        coin_source("push_block_three_coin_block", "3-Coin Block below the Chuckya platform", 3,
+                    can_reach_near_top and has_three_coin_blocks),
+        coin_source("low_breakable_boxes", "Breakable coin boxes at low water", 12,
+                    can_reach_low and has_breakable_coin_boxes),
+        coin_source("low_ten_coin_block", "10-Coin Block below the cannon", 10,
+                    can_reach_low and has_ten_coin_blocks),
+        coin_source("low_blue_coins", "Blue coins at low water", 30,
+                    can_reach_low and has_ground_pound and has_blue_coin_block),
+        coin_source("wooden_structure_three_coin_block", "3-Coin Block on the wooden structure", 3,
+                    wooden_structure_route and has_three_coin_blocks),
+        coin_source("fourth_diamond_coin_line", "Coin line by the fourth water-level diamond", 5,
+                    fourth_diamond_route and has_horizontal_coin_lines),
+        coin_source("top_coin_line", "Coin line at the highest water-level diamond", 5,
+                    can_reach_top and has_horizontal_coin_lines),
+        coin_source("top_chuckya", "Chuckya at the top", 5,
+                    can_reach_top and has_chuckya),
+        coin_source("express_elevator_ten_coin_block", "10-Coin Block above the Express Elevator", 10,
+                    can_reach_top_of_express and has_ten_coin_blocks),
+        coin_source("downtown_ring", "Downtown statue coin ring", 8,
+                    can_reach_downtown and has_horizontal_coin_rings),
+        coin_source("downtown_metal_cap_line", "Downtown metal-cap coin line", 5,
+                    can_reach_downtown and has_horizontal_coin_lines),
+        coin_source("downtown_first_building_line", "Downtown first-building coin line", 5,
+                    can_reach_downtown and has_horizontal_coin_lines),
+        coin_source("downtown_second_building_line", "Downtown second-building coin line", 5,
+                    can_reach_downtown and has_horizontal_coin_lines),
+        coin_source("downtown_skeeters", "Two Skeeters Downtown", 6,
+                    can_reach_downtown and has_skeeters),
+        coin_source("downtown_initial_red_coin", "First Downtown red coin", 2,
+                    can_reach_downtown and has_red_coins,
+                    red_coin_ids=frozenset({1})),
+        coin_source("downtown_diamond_red_coins", "Five Downtown red coins beyond water-level diamonds", 10,
+                    can_reach_downtown and has_water_level_diamond and has_red_coins,
+                    red_coin_ids=frozenset({2, 3, 4, 5, 6})),
+        coin_source("downtown_high_red_coins", "Two high Downtown red coins", 4,
+                    can_reach_downtown and has_water_level_diamond
+                    and has_red_coins and can_reach_high_red_coins,
+                    red_coin_ids=frozenset({7, 8})),
     ]
-    evaluation = _evaluate_route_set(
-        routes,
-        maximum=152,
-    )
-    if evaluation.reachable_red_coin_ids == frozenset(range(1, 9)):
-        return CoinEvaluation(
-            evaluation.reachable_coins,
-            evaluation.children + (coin_source(
-                "wdw_all_red_coins_reachable",
-                "All eight Downtown Red Coins are reachable",
-                0,
-                True,
-                red_coin_ids=frozenset(range(1, 9)),
-            ),),
-        )
-    return evaluation
+    return coin_evaluation(traces, 152)
 
 
 def tiny_huge_island_coin_evaluation(
@@ -4607,24 +4469,32 @@ def _late_requirement_specs():
 
     # Wet-Dry World
     WDW = "Wet-Dry World"
-    _add(WDW, "wdw_low_variant", "{Wet-Dry World Low}")
-    _add(WDW, "wdw_mid_variant", "{Wet-Dry World Middle}")
-    _add(WDW, "wdw_highest_variant", "{Wet-Dry World High}")
-    _add(WDW, "main_skeeters", "SKEETERS", _unlock("Skeeters", WDW))
-    _add(WDW, "amp_ring", "HORIZONTAL_COIN_RINGS", _unlock("Horizontal Coin Rings", WDW))
-    _add(WDW, "pillar_ten_coin_block", "TEN_COIN_BLOCKS", _unlock("10-Coin Blocks", WDW))
-    _add(WDW, "push_block_three_coin_block", "THREE_COIN_BLOCKS", _unlock("3-Coin Blocks", WDW))
+    _add(WDW, "main_skeeters", "{Wet-Dry World} & SKEETERS", _unlock("Skeeters", WDW))
+    _add(WDW, "amp_ring", "{Wet-Dry World - Near the Top} & HORIZONTAL_COIN_RINGS",
+         _unlock("Horizontal Coin Rings", WDW))
+    _add(WDW, "pillar_ten_coin_block",
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - High Water} & LG | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Highest Water} | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Top}",
+         _unlock("10-Coin Blocks", WDW))
+    _add(WDW, "push_block_three_coin_block",
+         "{Wet-Dry World - Near the Top} & THREE_COIN_BLOCKS", _unlock("3-Coin Blocks", WDW))
     _add(WDW, "low_breakable_boxes", "{Wet-Dry World - Low Water} & BREAKABLE_COIN_BOXES",
          _unlock("Breakable Coin Boxes", WDW))
     _add(WDW, "low_ten_coin_block", "{Wet-Dry World - Low Water} & TEN_COIN_BLOCKS",
          _unlock("10-Coin Blocks", WDW))
     _add(WDW, "low_blue_coins", "{Wet-Dry World - Low Water} & GP & BLUE_COIN_BLOCKS",
          _unlock("Blue Coin Blocks", WDW, "Blue Coin Block"))
-    _add(WDW, "wooden_structure_three_coin_block", "{Wet-Dry World - Mid Water} & THREE_COIN_BLOCKS",
+    _add(WDW, "wooden_structure_three_coin_block",
+         "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | "
+         "{Wet-Dry World - Top of the Express Elevator} & LJ",
          _unlock("3-Coin Blocks", WDW))
     _add(WDW, "fourth_diamond_coin_line",
          "{Wet-Dry World - Mid Water} | {Wet-Dry World - Highest Water} | "
-         "PURPLE_SWITCHES | TJ+DV", _unlock("Horizontal Coin Lines", WDW))
+         "{Wet-Dry World - Top} | {Wet-Dry World - Top of the Express Elevator} & LJ",
+         _unlock("Horizontal Coin Lines", WDW))
     _add(WDW, "top_coin_line", "{Wet-Dry World - Top} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", WDW))
     _add(WDW, "top_chuckya", "{Wet-Dry World - Top} & CHUCKYA", _unlock("Chuckyas", WDW, "Chuckya"))
