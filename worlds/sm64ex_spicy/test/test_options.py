@@ -1019,7 +1019,7 @@ class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
         precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
 
-        self.assertEqual(len(unlock_items), 282)
+        self.assertEqual(len(unlock_items), 268)
         for item_name, item_data in unlock_items.items():
             with self.subTest(item=item_name):
                 self.assertEqual(start_inventory[item_data.code], 1)
@@ -1038,7 +1038,6 @@ class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 
     def test_tweesters_are_traps_without_their_logic_trick(self):
         for item_name, item_data in (
-                ("Tweesters", global_enemy_item_data_table["Tweesters"]),
                 ("Shifting Sand Land - Tweesters",
                  per_level_enemy_item_data_table["Shifting Sand Land - Tweesters"]),
         ):
@@ -1061,6 +1060,50 @@ class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
                 self.assertNotIn(item_table[item_name], self.world.fill_slot_data()["StartInventory"])
+
+    def test_single_level_enemy_types_reuse_their_level_item(self):
+        expected_level_items = {
+            "Bob-omb Battlefield - Chain Chomp",
+            "Tiny-Huge Island - Wiggler",
+            "Shifting Sand Land - Tweesters",
+            "Shifting Sand Land - Klepto",
+            "Big Boo's Haunt - Mad Piano",
+            "Big Boo's Haunt - Haunted Chairs",
+            "Dire, Dire Docks - Sushi Sharks",
+            "Tiny-Huge Island - Bubbas",
+            "Shifting Sand Land - Tox Boxes",
+            "Bob-omb Battlefield - Water Bombs",
+            "Hazy Maze Cave - Boulders",
+            "Lethal Lava Land - Bouncing Fireballs",
+            "Shifting Sand Land - Spindel",
+            "Jolly Roger Bay - Falling Pillars",
+        }
+        self.assertLessEqual(expected_level_items, set(global_mode_enemy_item_names))
+        self.assertTrue(expected_level_items.isdisjoint(global_enemy_item_data_table))
+
+    def test_new_cross_level_enemy_items_are_the_only_new_global_items(self):
+        new_global_items = {
+            name for name, data in global_enemy_item_data_table.items()
+            if data.code >= 3626957
+        }
+        self.assertEqual(new_global_items, {
+            "Bowsers",
+            "Amps",
+            "Bowling Balls",
+            "Flamethrowers and Fire Bars",
+        })
+
+    def test_enemy_item_names_match_physical_counts(self):
+        expected_names = {
+            "Shifting Sand Land - Fly Guys",
+            "Tiny-Huge Island - Fly Guys",
+            "Tiny-Huge Island - Koopa Troopas",
+            "Big Boo's Haunt - Big Boos",
+            "Whomp's Fortress - Thwomps",
+            "Snowman's Land - Amp",
+            "Vanish Cap Under the Moat - Amp",
+        }
+        self.assertLessEqual(expected_names, set(per_level_enemy_item_data_table))
 
 
 class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):

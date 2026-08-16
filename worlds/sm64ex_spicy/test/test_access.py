@@ -215,7 +215,7 @@ class GlobalOneUpUnlockAccessTestBase(SM64TestBase):
 
     def test_each_global_item_controls_its_one_up_category(self):
         checks = (
-            ("Bob-omb Battlefield - Switch Platform 1-Up", "Freestanding 1-Ups"),
+            ("Bob-omb Battlefield - Switch Tunnel 1-Up", "Freestanding 1-Ups"),
             ("Bob-omb Battlefield - Flower Ring 1-Up", "Trigger 1-Ups"),
             ("Cool, Cool Mountain - Near Snowman Block 1-Up", "1-Up Blocks"),
             ("Castle - Left Butterfly 1-Up", "Butterflies"),
@@ -236,7 +236,7 @@ class PerLevelOneUpUnlockAccessTestBase(SM64TestBase):
     }
 
     def test_per_level_item_only_unlocks_matching_level(self):
-        location_name = "Bob-omb Battlefield - Switch Platform 1-Up"
+        location_name = "Bob-omb Battlefield - Switch Tunnel 1-Up"
         self.assertFalse(self.can_reach_location(location_name))
         self.collect(self.get_item_by_name("Big Boo's Haunt - Freestanding 1-Ups"))
         self.assertFalse(self.can_reach_location(location_name))
@@ -3020,7 +3020,7 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 10))
         self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 11))
 
-        self.collect(self.get_item_by_name("Whomp's Fortress - Thwomp"))
+        self.collect(self.get_item_by_name("Whomp's Fortress - Thwomps"))
         self.assertTrue(whomps_fortress_coins(self.multiworld.state, self.player, 12))
         self.assertFalse(whomps_fortress_coins(self.multiworld.state, self.player, 13))
 
@@ -3065,7 +3065,7 @@ class WhompsFortressIndividualUnlockLogicTestBase(SM64TestBase):
     def test_red_coin_star_requires_red_coins(self):
         self.collect_by_name([
             "Whomp's Fortress - Checkerboard Platform",
-            "Whomp's Fortress - Thwomp",
+            "Whomp's Fortress - Thwomps",
         ])
         self.assertFalse(self.can_reach_location("Whomp's Fortress - Red Coins on the Floating Isle"))
         self.collect(self.get_item_by_name("Whomp's Fortress - Red Coins"))
@@ -3890,7 +3890,7 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
         self.collect([
-            self.get_item_by_name("Tiny-Huge Island - Koopa Troopa"),
+            self.get_item_by_name("Tiny-Huge Island - Koopa Troopas"),
             self.get_item_by_name("Warp Pipes"),
             self.get_item_by_name("Purple Switches"),
         ])
@@ -3938,9 +3938,9 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
                 "Tiny-Huge Island - Chuckya",
                 "Tiny-Huge Island - Lakitu",
                 "Tiny-Huge Island - Fire Piranha Plants",
-                "Tiny-Huge Island - Fly Guy",
+                "Tiny-Huge Island - Fly Guys",
                 "Tiny-Huge Island - Goombas",
-                "Tiny-Huge Island - Koopa Troopa",
+                "Tiny-Huge Island - Koopa Troopas",
             )
         ])
 
@@ -3975,9 +3975,9 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
             "Tiny-Huge Island - Chuckya",
             "Tiny-Huge Island - Lakitu",
             "Tiny-Huge Island - Fire Piranha Plants",
-            "Tiny-Huge Island - Fly Guy",
+            "Tiny-Huge Island - Fly Guys",
             "Tiny-Huge Island - Goombas",
-            "Tiny-Huge Island - Koopa Troopa",
+            "Tiny-Huge Island - Koopa Troopas",
         ])
 
     def test_tiny_entrance_route_can_collect_all_non_impossible_coins(self):
@@ -4031,9 +4031,9 @@ class TinyHugeIslandPermanentCoinCollectionTestBase(SM64TestBase):
             "Tiny-Huge Island - Chuckya",
             "Tiny-Huge Island - Lakitu",
             "Tiny-Huge Island - Fire Piranha Plants",
-            "Tiny-Huge Island - Fly Guy",
+            "Tiny-Huge Island - Fly Guys",
             "Tiny-Huge Island - Goombas",
-            "Tiny-Huge Island - Koopa Troopa",
+            "Tiny-Huge Island - Koopa Troopas",
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Tiny)"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
@@ -4907,8 +4907,8 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
         self.assertTrue(self.world.logic_ssl_stone_structure_shy_guy_spin_jump)
         self.assertFalse(self.can_reach_region("Shifting Sand Land - Stone Structure"))
 
-        self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
-        self.assertTrue(self.multiworld.state.has("Shifting Sand Land - Fly Guy", self.player))
+        self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guys"))
+        self.assertTrue(self.multiworld.state.has("Shifting Sand Land - Fly Guys", self.player))
         self.assertTrue(self.can_reach_region("Shifting Sand Land - Stone Structure"))
 
     def test_stone_structure_contains_both_blocks(self):
@@ -4992,7 +4992,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
         self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 78))
         self.assertFalse(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
 
-        self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guy"))
+        self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guys"))
         self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 83))
         self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 84))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
@@ -5019,7 +5019,7 @@ class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
         self.collect_by_name([
             "Progressive Basement Key",
             "Shifting Sand Land - Bob-ombs",
-            "Shifting Sand Land - Fly Guy",
+            "Shifting Sand Land - Fly Guys",
             "Shifting Sand Land - Goombas",
             "Shifting Sand Land - Pokeys",
             "Shifting Sand Land - Tweesters",
@@ -5047,7 +5047,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
             "Shifting Sand Land - Crazy Boxes": 10,
             "Shifting Sand Land - Red Coins": 8,
             "Shifting Sand Land - Bob-ombs": 2,
-            "Shifting Sand Land - Fly Guy": 6,
+            "Shifting Sand Land - Fly Guys": 6,
             "Shifting Sand Land - Goombas": 12,
             "Shifting Sand Land - Pokeys": 20,
         }
@@ -5124,7 +5124,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
             "Shifting Sand Land - Throwable Cork Box",
             "Shifting Sand Land - Crazy Boxes",
             "Shifting Sand Land - Bob-ombs",
-            "Shifting Sand Land - Fly Guy",
+            "Shifting Sand Land - Fly Guys",
             "Shifting Sand Land - Goombas",
             "Shifting Sand Land - Pokeys",
         ])
@@ -6301,7 +6301,7 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Big Boo's Haunt - Boos"))
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
-        self.collect(self.get_item_by_name("Big Boo's Haunt - Big Boo"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Big Boos"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Go on a Ghost Hunt"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Ride Big Boo's Merry-Go-Round"))
 
@@ -6324,7 +6324,7 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Big Boo's Haunt - Roof"))
         self.assertFalse(self.can_reach_location("Big Boo's Haunt - Big Boo's Balcony"))
 
-        self.collect(self.get_item_by_name("Big Boo's Haunt - Big Boo"))
+        self.collect(self.get_item_by_name("Big Boo's Haunt - Big Boos"))
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Big Boo's Balcony"))
 
 

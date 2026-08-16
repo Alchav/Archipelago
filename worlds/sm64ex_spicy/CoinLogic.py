@@ -441,7 +441,7 @@ def evaluate_whomps_fortress_coins(
         "Whomps", f"{level_name} - Whomps")
     has_thwomp = Rules.has_unlock(
         state, player, "enemy_unlocks",
-        "Thwomps and Grindels", f"{level_name} - Thwomp")
+        "Thwomps and Grindels", f"{level_name} - Thwomps")
 
     traces = [
         coin_source("start_throwable_cork_boxes", "Two throwable cork boxes", 6,
@@ -1359,7 +1359,7 @@ def shifting_sand_land_coins(
         "Bob-ombs", f"{level_name} - Bob-ombs")
     has_fly_guys = Rules.has_unlock(
         state, player, "enemy_unlocks",
-        "Fly Guys", f"{level_name} - Fly Guy")
+        "Fly Guys", f"{level_name} - Fly Guys")
     has_goombas = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Goombas", f"{level_name} - Goombas")
@@ -2463,13 +2463,13 @@ def tiny_huge_island_coin_evaluation(
         "Fire Piranha Plants", f"{level_name} - Fire Piranha Plants")
     has_fly_guy = rules.has_unlock(
         state, player, "enemy_unlocks",
-        "Fly Guys", f"{level_name} - Fly Guy")
+        "Fly Guys", f"{level_name} - Fly Guys")
     has_goombas = rules.has_unlock(
         state, player, "enemy_unlocks",
         "Goombas", f"{level_name} - Goombas")
     has_koopa_troopa = rules.has_unlock(
         state, player, "enemy_unlocks",
-        "Koopa Troopas", f"{level_name} - Koopa Troopa")
+        "Koopa Troopas", f"{level_name} - Koopa Troopas")
     has_warp_pipes = rules.has_warp_pipes(state, player, "Tiny-Huge Island")
     has_thi_purple_switches = rules.has_purple_switches(state, player, level_name)
     has_triple_jump = rules.has_action(state, player, "Triple Jump", level_name)
@@ -3999,7 +3999,7 @@ def _early_requirement_specs():
         (WF, "initial_red_coins"): _spec(WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins")),
         (WF, "thwomp_red_coin"): _spec(
             WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins"),
-            ("Thwomps and Grindels", f"{WF} - Thwomp")),
+            ("Thwomps and Grindels", f"{WF} - Thwomps")),
         (WF, "wild_blue_route"): _spec(
             WF_TARGET,
             "CANN | logic_wf_into_the_wild_blue_yonder_wall_kick | "
@@ -4276,7 +4276,7 @@ def _middle_requirement_specs():
     _add(SSL, "ssl_pillar_and_pyramid_coins", unlocks=(_unlock("Single Yellow Coins", SSL),))
     _add(SSL, ("ssl_behind_pyramid_coin_line", "ssl_pyramid_side_coin_line"),
          unlocks=(_unlock("Horizontal Coin Lines", SSL),))
-    _add(SSL, "ssl_fly_guys", unlocks=(_unlock("Fly Guys", SSL, f"{SSL} - Fly Guy"),))
+    _add(SSL, "ssl_fly_guys", unlocks=(_unlock("Fly Guys", SSL, f"{SSL} - Fly Guys"),))
     _add(SSL, "ssl_crazy_boxes", unlocks=(_unlock("Crazy Boxes", SSL),))
     _add(SSL, "ssl_bob_ombs", unlocks=(_unlock("Bob-ombs", SSL),))
     _add(SSL, "ssl_pokeys", unlocks=(_unlock("Pokeys", SSL),))
@@ -4587,7 +4587,7 @@ def _late_requirement_specs():
          _unlock("3-Coin Blocks", THI, "3-Coin Block"))
     _add(THI, "tiny_main_goombas", "{Tiny-Huge Island - Tiny Main} & GOOMBAS", _unlock("Goombas", THI))
     _add(THI, "tiny_main_koopa", "{Tiny-Huge Island - Tiny Main} & KOOPA_TROOPA",
-         _unlock("Koopa Troopas", THI, "Koopa Troopa"))
+         _unlock("Koopa Troopas", THI, "Koopa Troopas"))
     _add(THI, "tiny_impossible_coin",
          "{Tiny-Huge Island - Koopa the Quick} & HORIZONTAL_COIN_LINES & logic_thi_impossible_coin",
          _unlock("Horizontal Coin Lines", THI))
@@ -4601,10 +4601,10 @@ def _late_requirement_specs():
             ("near_cannon_giant_goomba", "GOOMBAS", "Goombas", None),
             ("huge_start_post", "WOODEN_POSTS", "Wooden Posts", None),
             ("huge_beach_coins", "SINGLE_YELLOW_COINS", "Single Yellow Coins", None),
-            ("huge_beach_fly_guy", "FLY_GUY", "Fly Guys", "Fly Guy"),
-            ("huge_near_cannon_fly_guy", "FLY_GUY", "Fly Guys", "Fly Guy"),
+            ("huge_beach_fly_guy", "FLY_GUY", "Fly Guys", "Fly Guys"),
+            ("huge_near_cannon_fly_guy", "FLY_GUY", "Fly Guys", "Fly Guys"),
             ("huge_lakitu", "LAKITU", "Lakitus", "Lakitu"),
-            ("huge_koopa_troopa", "KOOPA_TROOPA", "Koopa Troopas", "Koopa Troopa")):
+            ("huge_koopa_troopa", "KOOPA_TROOPA", "Koopa Troopas", "Koopa Troopas")):
         _add(THI, _source, f"{_thi_huge_main} & {_token}", _unlock(_global, THI, _local))
     _add(THI, "huge_lakitu_island_post",
          "{Tiny-Huge Island (Huge)} & CANN | {Tiny-Huge Island - Koopa the Quick} & LJ",
@@ -4616,7 +4616,7 @@ def _late_requirement_specs():
     _add(THI, "huge_cannonball_line", "{Tiny-Huge Island - Cannonball} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", THI))
     _add(THI, "huge_cannonball_fly_guy", "{Tiny-Huge Island - Cannonball} & FLY_GUY",
-         _unlock("Fly Guys", THI, "Fly Guy"))
+         _unlock("Fly Guys", THI, "Fly Guys"))
     _add(THI, "huge_koopa_region_line", "{Tiny-Huge Island - Koopa the Quick} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", THI))
     _add(THI, "huge_koopa_region_giant_goombas", "{Tiny-Huge Island - Koopa the Quick} & GOOMBAS",

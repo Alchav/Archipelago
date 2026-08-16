@@ -170,7 +170,7 @@ class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, upper_movement],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", True,
-             upper_movement + ["Tiny-Huge Island - Fly Guy"]],
+             upper_movement + ["Tiny-Huge Island - Fly Guys"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 
@@ -185,7 +185,7 @@ class TestTinyHugeIslandKoopaShellTrick(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", True,
-             ["Tiny-Huge Island - Koopa Troopa"]],
+             ["Tiny-Huge Island - Koopa Troopas"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 

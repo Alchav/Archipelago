@@ -95,16 +95,12 @@ class TestSnowmansLandLocations(SM64TestBase):
             ["Snowman's Land - Near Moneybags 1-Up Block", True,
              ["Snowman's Land - 1-Up Blocks"]],
 
-            ["Snowman's Land - Inside Igloo Block 1-Up", False,
-             igloo + ["Snowman's Land - Vanish Cap"]],
+            ["Snowman's Land - Inside Igloo Block 1-Up", False, igloo],
             ["Snowman's Land - Inside Igloo Block 1-Up", True, igloo + [
-                "Snowman's Land - Vanish Cap",
                 "Snowman's Land - 1-Up Blocks",
             ]],
-            ["Snowman's Land - Inside Igloo 1-Up Block", False,
-             igloo + ["Snowman's Land - Vanish Cap"]],
+            ["Snowman's Land - Inside Igloo 1-Up Block", False, igloo],
             ["Snowman's Land - Inside Igloo 1-Up Block", True, igloo + [
-                "Snowman's Land - Vanish Cap",
                 "Snowman's Land - 1-Up Blocks",
             ]],
 

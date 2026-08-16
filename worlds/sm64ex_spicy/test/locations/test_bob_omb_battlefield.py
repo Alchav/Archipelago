@@ -63,8 +63,8 @@ class TestBobOmbBattlefieldLocations(SM64TestBase):
 
             ["Bob-omb Battlefield - Flower Ring 1-Up", False, []],
             ["Bob-omb Battlefield - Flower Ring 1-Up", True, TRIGGER_1UPS],
-            ["Bob-omb Battlefield - Switch Platform 1-Up", False, []],
-            ["Bob-omb Battlefield - Switch Platform 1-Up", True, FREESTANDING_1UPS],
+            ["Bob-omb Battlefield - Switch Tunnel 1-Up", False, []],
+            ["Bob-omb Battlefield - Switch Tunnel 1-Up", True, FREESTANDING_1UPS],
             ["Bob-omb Battlefield - Cannon Tree 1-Up", False, ISLAND + TRIGGER_1UPS],
             ["Bob-omb Battlefield - Cannon Tree 1-Up", True,
              ISLAND + TRIGGER_1UPS + ["Climb"]],

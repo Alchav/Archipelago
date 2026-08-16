@@ -143,7 +143,7 @@ class TestShiftingSandLandStoneStructureTrick(SM64TestBase):
         self.run_location_tests([
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", False, []],
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", True,
-             ["Shifting Sand Land - Fly Guy"]],
+             ["Shifting Sand Land - Fly Guys"]],
         ], starting_regions=["Shifting Sand Land"])
 
 
@@ -163,14 +163,13 @@ class TestShiftingSandLandRedCoinTricks(SM64TestBase):
              ["Shifting Sand Land - Red Coins"]],
             ["Shifting Sand Land - Free Flying for 8 Red Coins", True, [
                 "Shifting Sand Land - Red Coins",
-                "Shifting Sand Land - Fly Guy",
+                "Shifting Sand Land - Fly Guys",
                 "Shifting Sand Land - Tweesters",
             ]],
         ], starting_regions=["Shifting Sand Land"])
 
     def test_tweesters_are_progression_when_the_trick_is_enabled(self):
         for item_name, item_data in (
-                ("Tweesters", global_enemy_item_data_table["Tweesters"]),
                 ("Shifting Sand Land - Tweesters",
                  per_level_enemy_item_data_table["Shifting Sand Land - Tweesters"]),
         ):

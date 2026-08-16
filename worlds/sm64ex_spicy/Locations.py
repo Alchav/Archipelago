@@ -388,7 +388,7 @@ locFreestanding1Up_table = {
     "Bowser in the Sky - Ferris Wheel 1-Up": 3629114,
 
     "Bob-omb Battlefield - Flower Ring 1-Up": 3629115,
-    "Bob-omb Battlefield - Switch Platform 1-Up": 3629116,
+    "Bob-omb Battlefield - Switch Tunnel 1-Up": 3629116,
     "Bob-omb Battlefield - Cannon Tree 1-Up": 3629117,
 
     "Castle - Third Tree From Waterfall 1-Up": 3629118,

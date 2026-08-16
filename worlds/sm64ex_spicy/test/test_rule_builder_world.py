@@ -17,12 +17,12 @@ class RuleBuilderWorldTestBase(SM64TestBase):
         self.world.start_inventory_item_ids = set()
         self.assertFalse(has_unlock(
             state, self.player, "enemy_unlocks",
-            "Thwomps and Grindels", "Whomp's Fortress - Thwomp"))
+            "Thwomps and Grindels", "Whomp's Fortress - Thwomps"))
 
-        self.world.start_inventory_item_ids.add(item_table["Whomp's Fortress - Thwomp"])
+        self.world.start_inventory_item_ids.add(item_table["Whomp's Fortress - Thwomps"])
         self.assertTrue(has_unlock(
             state, self.player, "enemy_unlocks",
-            "Thwomps and Grindels", "Whomp's Fortress - Thwomp"))
+            "Thwomps and Grindels", "Whomp's Fortress - Thwomps"))
 
     def test_all_access_rules_are_resolved_rule_builder_rules(self):
         for spot in (*self.multiworld.get_entrances(self.player), *self.multiworld.get_locations(self.player)):

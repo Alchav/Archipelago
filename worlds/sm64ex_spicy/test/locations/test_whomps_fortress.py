@@ -64,7 +64,7 @@ class TestWhompsFortressLocations(SM64TestBase):
              TOP + ["Whomp's Fortress - Fortress"]],
             ["Whomp's Fortress - Red Coins on the Floating Isle", False, TOP],
             ["Whomp's Fortress - Red Coins on the Floating Isle", True,
-             TOP + ["Whomp's Fortress - Red Coins", "Whomp's Fortress - Thwomp"]],
+             TOP + ["Whomp's Fortress - Red Coins", "Whomp's Fortress - Thwomps"]],
 
             ["Whomp's Fortress - Flagpole 1-Up", False, TOP + TRIGGER_1UPS],
             ["Whomp's Fortress - Flagpole 1-Up", True,
@@ -102,7 +102,7 @@ class TestWhompsFortressTricks(SM64TestBase):
              ["Whomp's Fortress - Red Coins"]],
             ["Whomp's Fortress - Red Coins on the Floating Isle", True,
              ["Whomp's Fortress - Cannon Unlock", "Whomp's Fortress - Red Coins",
-              "Whomp's Fortress - Thwomp"]],
+              "Whomp's Fortress - Thwomps"]],
         ], starting_regions=["Whomp's Fortress"])
 
     def test_top_with_whomp_and_triple_jump(self):

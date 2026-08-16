@@ -842,7 +842,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC")
-    rf.assign_rule("Snowman's Land - Inside Igloo Block 1-Up", "VC")
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
     wdw_near_top_block_route = (
@@ -1086,7 +1085,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Lethal Lava Land - Wing Cap Block": "WC",
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
-            "Snowman's Land - Inside Igloo 1-Up Block": "VC",
             "Snowman's Land - Vanish Cap Block": "VC",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
             "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
@@ -1635,7 +1633,8 @@ class RuleFactory:
             "Bob-ombs", f"{level_name} - Bob-ombs")
         item_names["KOOPA_TROOPA"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
-            "Koopa Troopas", f"{level_name} - Koopa Troopa")
+            "Koopa Troopas",
+            f"{level_name} - {'Koopa Troopas' if level_name == 'Tiny-Huge Island' else 'Koopa Troopa'}")
         item_names["WHOMPS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Whomps", f"{level_name} - Whomps")
@@ -1644,7 +1643,7 @@ class RuleFactory:
             "Spindrifts", f"{level_name} - Spindrifts")
         item_names["BIG_BULLY"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
-            "Big Bully",
+            "Big Bullies",
             "Lethal Lava Land - Big Bullies" if level_name == "Lethal Lava Land"
             else f"{level_name} - Chill Bully")
         item_names["BULLIES"] = get_unlock_item_name(
@@ -1652,7 +1651,8 @@ class RuleFactory:
             "Bullies", f"{level_name} - Bullies")
         item_names["FLY_GUY"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
-            "Fly Guys", f"{level_name} - Fly Guy")
+            "Fly Guys",
+            f"{level_name} - {'Fly Guys' if level_name in {'Shifting Sand Land', 'Tiny-Huge Island'} else 'Fly Guy'}")
         item_names["FIRE_PIRANHA_PLANTS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Fire Piranha Plants", f"{level_name} - Fire Piranha Plants")
@@ -1661,22 +1661,26 @@ class RuleFactory:
             "Shifting Sand Land - Eyerok", "Shifting Sand Land - Eyerok")
         item_names["BIG_BOO"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
-            "Big Boo's Haunt - Big Boo", "Big Boo's Haunt - Big Boo")
-        thwomp_item_name = (
-            "Shifting Sand Land - Grindel"
-            if level_name == "Shifting Sand Land"
-            else f"{level_name} - Thwomp"
-        )
+            "Big Boo's Haunt - Big Boos", "Big Boo's Haunt - Big Boos")
+        if level_name == "Shifting Sand Land":
+            thwomp_item_name = "Shifting Sand Land - Grindel"
+        elif level_name == "Whomp's Fortress":
+            thwomp_item_name = "Whomp's Fortress - Thwomps"
+        else:
+            thwomp_item_name = f"{level_name} - Thwomp"
         item_names["THWOMP"] = get_unlock_item_name(
             self.options, "enemy_unlocks", "Thwomps and Grindels", thwomp_item_name)
         item_names["BOWSER"] = get_unlock_item_name(
-            self.options, "enemy_unlocks", "Bowser", f"{level_name} - Bowser")
+            self.options, "enemy_unlocks", "Bowsers", f"{level_name} - Bowser")
         item_names["CHAIN_CHOMP"] = get_unlock_item_name(
-            self.options, "enemy_unlocks", "Chain Chomp", f"{level_name} - Chain Chomp")
+            self.options, "enemy_unlocks",
+            "Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Chain Chomp")
         item_names["WIGGLER"] = get_unlock_item_name(
-            self.options, "enemy_unlocks", "Wiggler", f"{level_name} - Wiggler")
+            self.options, "enemy_unlocks",
+            "Tiny-Huge Island - Wiggler", "Tiny-Huge Island - Wiggler")
         item_names["TWEESTERS"] = get_unlock_item_name(
-            self.options, "enemy_unlocks", "Tweesters", f"{level_name} - Tweesters")
+            self.options, "enemy_unlocks",
+            "Shifting Sand Land - Tweesters", "Shifting Sand Land - Tweesters")
         item_names["HEAVE_HOS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Heave-Hos",

@@ -38,14 +38,14 @@ class TestBigBoosHauntLocations(SM64TestBase):
             ["Big Boo's Haunt - Go on a Ghost Hunt", False,
              ["Big Boo's Haunt - Boos"]],
             ["Big Boo's Haunt - Go on a Ghost Hunt", True,
-             ["Big Boo's Haunt - Boos", "Big Boo's Haunt - Big Boo"]],
+             ["Big Boo's Haunt - Boos", "Big Boo's Haunt - Big Boos"]],
             ["Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", False,
              ["Big Boo's Haunt - Merry-go-round", "Big Boo's Haunt - Boos"]],
             ["Big Boo's Haunt - Ride Big Boo's Merry-Go-Round", True,
              [
                  "Big Boo's Haunt - Merry-go-round",
                  "Big Boo's Haunt - Boos",
-                 "Big Boo's Haunt - Big Boo",
+                 "Big Boo's Haunt - Big Boos",
              ]],
             ["Big Boo's Haunt - Shed Roof 1-Up", False,
              ["Big Boo's Haunt - Freestanding 1-Ups"]],
@@ -76,7 +76,7 @@ class TestBigBoosHauntLocations(SM64TestBase):
 
             ["Big Boo's Haunt - Big Boo's Balcony", False, ROOF],
             ["Big Boo's Haunt - Big Boo's Balcony", True,
-             ROOF + ["Big Boo's Haunt - Big Boo"]],
+             ROOF + ["Big Boo's Haunt - Big Boos"]],
             ["Big Boo's Haunt - Top of Mansion Block 1-Up", False, ROOF],
             ["Big Boo's Haunt - Top of Mansion Block 1-Up", True,
              ROOF + ["Big Boo's Haunt - 1-Up Blocks"]],
@@ -124,5 +124,5 @@ class TestBigBoosHauntTricks(SM64TestBase):
     def test_roof_without_long_jump(self):
         self.run_location_tests([
             ["Big Boo's Haunt - Big Boo's Balcony", True,
-             THIRD_FLOOR + ["Big Boo's Haunt - Big Boo"]],
+             THIRD_FLOOR + ["Big Boo's Haunt - Big Boos"]],
         ], starting_regions=["Big Boo's Haunt"])

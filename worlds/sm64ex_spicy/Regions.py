@@ -198,7 +198,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     regBoB = create_region("Bob-omb Battlefield", player, multiworld)
     create_locs(regBoB, "Bob-omb Battlefield - Big Bob-Omb on the Summit", "Bob-omb Battlefield - Footrace with Koopa The Quick",
                         "Bob-omb Battlefield - Mario Wings to the Sky", "Bob-omb Battlefield - Behind Chain Chomp's Gate", "Bob-omb Battlefield - Bob-omb Buddy",
-                        "Bob-omb Battlefield - Flower Ring 1-Up", "Bob-omb Battlefield - Switch Platform 1-Up",
+                        "Bob-omb Battlefield - Flower Ring 1-Up", "Bob-omb Battlefield - Switch Tunnel 1-Up",
                         "Bob-omb Battlefield - Near Flower Patches Wing Cap Block",
                         "Bob-omb Battlefield - Wooden Ramp Wing Cap Block")
     bob_island = create_subregion(regBoB, "Bob-omb Battlefield - Island",
