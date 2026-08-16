@@ -625,7 +625,10 @@ class BobOmbBattlefieldIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(bob_omb_battlefield_coins(self.multiworld.state, self.player, 41))
 
     def test_chain_chomp_normal_route_requires_wooden_posts(self):
-        self.collect(self.get_item_by_name("Ground Pound"))
+        self.collect_by_name([
+            "Ground Pound",
+            "Bob-omb Battlefield - Chain Chomp",
+        ])
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Wooden Posts"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
@@ -660,7 +663,10 @@ class BobOmbBattlefieldUnlockTricksTestBase(SM64TestBase):
 
     def test_chain_chomp_clip_requires_bob_ombs(self):
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Bob-ombs"))
+        self.collect_by_name([
+            "Bob-omb Battlefield - Chain Chomp",
+            "Bob-omb Battlefield - Bob-ombs",
+        ])
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
 
 
@@ -2076,6 +2082,7 @@ class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
         self.collect_stage_access()
         self.collect_by_name([
             "Triple Jump",
+            "Bowser in the Dark World - Bowser",
             "Bowser in the Dark World - Red Coins",
         ])
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
@@ -4979,6 +4986,7 @@ class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
             "Shifting Sand Land - Bob-ombs",
             "Shifting Sand Land - Goombas",
             "Shifting Sand Land - Pokeys",
+            "Shifting Sand Land - Tweesters",
         ])
         self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 77))
         self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 78))
@@ -5014,6 +5022,7 @@ class ShiftingSandLandShyGuyRedCoinNoDespawnsTestBase(SM64TestBase):
             "Shifting Sand Land - Fly Guy",
             "Shifting Sand Land - Goombas",
             "Shifting Sand Land - Pokeys",
+            "Shifting Sand Land - Tweesters",
         ])
         self.assertTrue(shifting_sand_land_coins(self.multiworld.state, self.player, 85))
         self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 86))
@@ -7046,7 +7055,7 @@ class ThwompUnlockAccessTestBase(SM64TestBase):
         self.assertFalse(
             self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
 
-        self.collect(self.get_item_by_name("Shifting Sand Land - Thwomp"))
+        self.collect(self.get_item_by_name("Shifting Sand Land - Grindel"))
         self.assertTrue(
             self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
 

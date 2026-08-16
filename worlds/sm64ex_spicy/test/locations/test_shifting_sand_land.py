@@ -1,5 +1,8 @@
+from BaseClasses import ItemClassification
+
 from ..bases import SM64TestBase
 from ... import Options
+from ...Items import global_enemy_item_data_table, per_level_enemy_item_data_table
 
 
 SSL_OPTIONS = {
@@ -41,7 +44,7 @@ class TestShiftingSandLandLocations(SM64TestBase):
         self.run_location_tests([
             ["Shifting Sand Land - In the Talons of the Big Bird", False, []],
             ["Shifting Sand Land - In the Talons of the Big Bird", True,
-             ["Shifting Sand Land - Klepto Star"]],
+             ["Shifting Sand Land - Klepto with Star"]],
             ["Shifting Sand Land - Shining Atop the Pyramid", True, []],
 
             ["Shifting Sand Land - Inside the Ancient Pyramid", False, []],
@@ -98,7 +101,7 @@ class TestShiftingSandLandLocations(SM64TestBase):
              upper + ["Shifting Sand Land - Trigger 1-Ups"]],
             ["Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", False, freestanding],
             ["Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", True, [
-                "Shifting Sand Land - Thwomp",
+                "Shifting Sand Land - Grindel",
                 "Shifting Sand Land - Freestanding 1-Ups",
             ]],
             ["Shifting Sand Land - Pyramid Right Path 1-Up", False, freestanding],
@@ -161,8 +164,20 @@ class TestShiftingSandLandRedCoinTricks(SM64TestBase):
             ["Shifting Sand Land - Free Flying for 8 Red Coins", True, [
                 "Shifting Sand Land - Red Coins",
                 "Shifting Sand Land - Fly Guy",
+                "Shifting Sand Land - Tweesters",
             ]],
         ], starting_regions=["Shifting Sand Land"])
+
+    def test_tweesters_are_progression_when_the_trick_is_enabled(self):
+        for item_name, item_data in (
+                ("Tweesters", global_enemy_item_data_table["Tweesters"]),
+                ("Shifting Sand Land - Tweesters",
+                 per_level_enemy_item_data_table["Shifting Sand Land - Tweesters"]),
+        ):
+            with self.subTest(item=item_name):
+                self.assertEqual(
+                    self.world.get_item_classification(item_data),
+                    ItemClassification.progression_deprioritized_skip_balancing)
 
 
 class TestShiftingSandLandPillarShellTrick(SM64TestBase):

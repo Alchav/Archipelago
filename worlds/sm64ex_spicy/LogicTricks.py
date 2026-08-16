@@ -484,7 +484,7 @@ logic_tricks = {
     },
     "Shifting Sand Land Three Red Coins with Tweesters": {
         "internal_id": "logic_ssl_three_red_coins_with_tweesters",
-        "rule": "",
+        "rule": "TWEESTERS",
         "difficulty": "medium",
         "description": "Using Tweesters to collect three of the elevated Red Coins.",
     },

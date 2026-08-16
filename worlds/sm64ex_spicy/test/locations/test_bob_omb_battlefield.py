@@ -52,9 +52,11 @@ class TestBobOmbBattlefieldLocations(SM64TestBase):
              CANNON + WING_CAP + ["Bob-omb Battlefield - Vertical Coin Rings"]],
 
             ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False,
-             ["Bob-omb Battlefield - Wooden Posts"]],
-            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
+             ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Wooden Posts"]],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False,
              ["Bob-omb Battlefield - Wooden Posts", "Ground Pound"]],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
+             ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Wooden Posts", "Ground Pound"]],
             ["Bob-omb Battlefield - Bob-omb Buddy", False, []],
             ["Bob-omb Battlefield - Bob-omb Buddy", True,
              ["Bob-omb Battlefield - Bob-omb Buddy"]],
@@ -182,6 +184,8 @@ class TestBobOmbBattlefieldChainChompTrick(SM64TestBase):
     def test_chain_chomp_gate_with_bob_omb(self):
         self.run_location_tests([
             ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False, []],
-            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False,
              ["Bob-omb Battlefield - Bob-ombs"]],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
+             ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Bob-ombs"]],
         ], starting_regions=["Bob-omb Battlefield"])

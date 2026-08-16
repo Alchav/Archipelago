@@ -665,7 +665,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             arbitrary_item_names=rf.get_arbitrary_item_names("Bob-omb Battlefield"),
             action_item_names=rf.get_action_item_names("Bob-omb Battlefield")))
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
-                   "WOODEN_POSTS & GP | logic_bob_chain_chomp_gate_without_ground_pound")
+                   "CHAIN_CHOMP & WOODEN_POSTS & GP | "
+                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_without_ground_pound")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
     rf.assign_rule("Bob-omb Battlefield - Cannon Tree 1-Up", "CL/TJ/BF/SF")
     # Whomp's Fortress
@@ -938,7 +939,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coins Area", "CANN")
     rf.assign_rule(
         "Tiny-Huge Island - Wiggler's Cave",
-        "{Tiny-Huge Island - Tiny Main} & GP & WARP_PIPES")
+        "{Tiny-Huge Island - Tiny Main} & GP & WARP_PIPES & WIGGLER")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
     rf.assign_rule("Tiny-Huge Island - Bob-omb Buddy", "BOBOMB_BUDDY")
@@ -1001,7 +1002,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule_object(
         "Bowser in the Dark World - Key",
         rf.build_rule(
-            "WARP_PIPES & PURPLE_SWITCHES | WARP_PIPES & logic_bitdw_purple_switch_bypass",
+            "BOWSER & WARP_PIPES & PURPLE_SWITCHES | "
+            "BOWSER & WARP_PIPES & logic_bitdw_purple_switch_bypass",
             arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Dark World"),
             action_item_names=rf.get_action_item_names("Bowser in the Dark World"))
         & bowser_arena_bomb_rule(
@@ -1025,7 +1027,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
     rf.assign_rule_object(
         "Bowser in the Fire Sea - Key",
-        bowser_arena_bomb_rule(
+        rf.build_rule(
+            "BOWSER", arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Fire Sea"))
+        & bowser_arena_bomb_rule(
             "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_health.value))
     if options.one_up_checks:
         for location_name in (
@@ -1310,6 +1314,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     can_defeat_bowser_in_the_sky = (
         CanReachRegion("Bowser in the Sky - Top")
+        & rf.build_rule("BOWSER", arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Sky"))
         & rf.build_rule("WARP_PIPES", arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Sky"))
         & bowser_arena_bomb_rule("Bowser in the Sky", options.bowser_in_the_sky_health.value)
     )
@@ -1378,7 +1383,7 @@ class RuleFactory:
         "JRB_JET_STREAM": "Jolly Roger Bay - Jet Stream",
         "JRB_UNAGI": "Jolly Roger Bay - Unagi",
         "LLL_KOOPA_SHELL": "Lethal Lava Land - Koopa Shell",
-        "SSL_KLEPTO": "Shifting Sand Land - Klepto Star",
+        "SSL_KLEPTO": "Shifting Sand Land - Klepto with Star",
         "THI_KOOPA": "Tiny-Huge Island - Koopa the Quick",
         "TTM_UKIKI": "Tall, Tall Mountain - Ukiki",
         "DDD_MANTA_RAY": "Dire, Dire Docks - Manta Ray",
@@ -1657,9 +1662,21 @@ class RuleFactory:
         item_names["BIG_BOO"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Big Boo's Haunt - Big Boo", "Big Boo's Haunt - Big Boo")
+        thwomp_item_name = (
+            "Shifting Sand Land - Grindel"
+            if level_name == "Shifting Sand Land"
+            else f"{level_name} - Thwomp"
+        )
         item_names["THWOMP"] = get_unlock_item_name(
-            self.options, "enemy_unlocks",
-            "Thwomp", f"{level_name} - Thwomp")
+            self.options, "enemy_unlocks", "Thwomps and Grindels", thwomp_item_name)
+        item_names["BOWSER"] = get_unlock_item_name(
+            self.options, "enemy_unlocks", "Bowser", f"{level_name} - Bowser")
+        item_names["CHAIN_CHOMP"] = get_unlock_item_name(
+            self.options, "enemy_unlocks", "Chain Chomp", f"{level_name} - Chain Chomp")
+        item_names["WIGGLER"] = get_unlock_item_name(
+            self.options, "enemy_unlocks", "Wiggler", f"{level_name} - Wiggler")
+        item_names["TWEESTERS"] = get_unlock_item_name(
+            self.options, "enemy_unlocks", "Tweesters", f"{level_name} - Tweesters")
         item_names["HEAVE_HOS"] = get_unlock_item_name(
             self.options, "enemy_unlocks",
             "Heave-Hos",

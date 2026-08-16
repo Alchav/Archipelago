@@ -45,6 +45,7 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
         freestanding = ["Bowser in the Dark World - Freestanding 1-Ups"]
         extra = ["Bowser in the Dark World - Extra 1-Ups"]
         warp_pipes = ["Bowser in the Dark World - Warp Pipes"]
+        bowser = ["Bowser in the Dark World - Bowser"]
 
         self.run_location_tests([
             ["Bowser in the Dark World - Red Coins", False, purple_switch],
@@ -53,7 +54,8 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
             ["Bowser in the Dark World - Key", False, purple_switch],
             ["Bowser in the Dark World - Key", False, purple_switch + bombs[:1]],
             ["Bowser in the Dark World - Key", False, purple_switch + bombs],
-            ["Bowser in the Dark World - Key", True, purple_switch + bombs + warp_pipes],
+            ["Bowser in the Dark World - Key", False, purple_switch + bombs + warp_pipes],
+            ["Bowser in the Dark World - Key", True, purple_switch + bombs + warp_pipes + bowser],
 
             ["Bowser in the Dark World - Tower Block 1-Up", False, []],
             ["Bowser in the Dark World - Tower Block 1-Up", True,
@@ -98,6 +100,7 @@ class TestBowserInTheDarkWorldSlopeTrick(SM64TestBase):
             "Bowser in the Dark World - Warp Pipes",
             "Bowser in the Dark World - Progressive Bowser Arena Bomb",
             "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+            "Bowser in the Dark World - Bowser",
         ]
         self.run_location_tests([
             ["Bowser in the Dark World - Key", False, trick_route[:-1]],
@@ -118,6 +121,7 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             "Bowser in the Fire Sea - Progressive Bowser Arena Bomb",
             "Bowser in the Fire Sea - Progressive Bowser Arena Bomb",
         ]
+        bowser = ["Bowser in the Fire Sea - Bowser"]
         freestanding = ["Bowser in the Fire Sea - Freestanding 1-Ups"]
         triggers = ["Bowser in the Fire Sea - Trigger 1-Ups"]
         extra = ["Bowser in the Fire Sea - Extra 1-Ups"]
@@ -135,7 +139,8 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - Red Coins", True, upper + ["Bowser in the Fire Sea - Red Coins"]],
             ["Bowser in the Fire Sea - Red Coins", False, near_poles],
             ["Bowser in the Fire Sea - Key", False, upper + bombs[:1]],
-            ["Bowser in the Fire Sea - Key", True, upper + bombs],
+            ["Bowser in the Fire Sea - Key", False, upper + bombs],
+            ["Bowser in the Fire Sea - Key", True, upper + bombs + bowser],
 
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", False, upper],
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", True,
@@ -200,6 +205,12 @@ class TestBowserInTheSkyLocations(SM64TestBase):
             ["Bowser in the Sky - Final Platform 1-Up", False, arrow_ride + freestanding],
             ["Bowser in the Sky - Final Platform 1-Up", True, top + freestanding],
         ], starting_regions=["Bowser in the Sky"])
+
+    def test_completion_requires_bowser(self):
+        self.collect_all_but({"Bowser in the Sky - Bowser"})
+        self.assertFalse(self.multiworld.can_beat_game(self.multiworld.state))
+        self.collect(self.get_item_by_name("Bowser in the Sky - Bowser"))
+        self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
 
 
 class TestBowserStageEntrances(SM64TestBase):

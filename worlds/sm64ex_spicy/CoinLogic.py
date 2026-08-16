@@ -441,7 +441,7 @@ def evaluate_whomps_fortress_coins(
         "Whomps", f"{level_name} - Whomps")
     has_thwomp = Rules.has_unlock(
         state, player, "enemy_unlocks",
-        "Thwomp", f"{level_name} - Thwomp")
+        "Thwomps and Grindels", f"{level_name} - Thwomp")
 
     traces = [
         coin_source("start_throwable_cork_boxes", "Two throwable cork boxes", 6,
@@ -3998,7 +3998,8 @@ def _early_requirement_specs():
             WF_TARGET, "", (f"{WF} - Piranha Plants", f"{WF} - Piranha Plants")),
         (WF, "initial_red_coins"): _spec(WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins")),
         (WF, "thwomp_red_coin"): _spec(
-            WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins"), ("Thwomp", f"{WF} - Thwomp")),
+            WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins"),
+            ("Thwomps and Grindels", f"{WF} - Thwomp")),
         (WF, "wild_blue_route"): _spec(
             WF_TARGET,
             "CANN | logic_wf_into_the_wild_blue_yonder_wall_kick | "

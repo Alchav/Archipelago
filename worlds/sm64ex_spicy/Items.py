@@ -47,6 +47,15 @@ def trap(options):
     return ItemClassification.trap
 
 
+def tweesters_classification(options):
+    from .LogicTricks import get_enabled_logic_tricks
+
+    enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
+    if "Shifting Sand Land Three Red Coins with Tweesters" in enabled_tricks:
+        return ItemClassification.progression_deprioritized_skip_balancing
+    return ItemClassification.trap
+
+
 class SM64Item(Item):
     game: str = "SM64: Spicy Mycena 64"
 
@@ -91,7 +100,7 @@ feature_item_data_table: dict[str, SM64ItemData] = {
     "Jolly Roger Bay - Jet Stream": SM64ItemData(sm64ex_base_id + 257, progression_deprioritized),
     "Jolly Roger Bay - Unagi": SM64ItemData(sm64ex_base_id + 258, progression_deprioritized),
     "Lethal Lava Land - Koopa Shell": SM64ItemData(sm64ex_base_id + 259, progression_deprioritized_skip_balancing),
-    "Shifting Sand Land - Klepto Star": SM64ItemData(sm64ex_base_id + 260, progression_deprioritized),
+    "Shifting Sand Land - Klepto with Star": SM64ItemData(sm64ex_base_id + 260, progression_deprioritized),
     "Tiny-Huge Island - Koopa the Quick": SM64ItemData(sm64ex_base_id + 261, progression_deprioritized),
     "Tall, Tall Mountain - Ukiki": SM64ItemData(sm64ex_base_id + 262, progression_deprioritized),
     "Dire, Dire Docks - Manta Ray": SM64ItemData(sm64ex_base_id + 263, progression_deprioritized),
@@ -817,8 +826,26 @@ global_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Spindrifts": SM64ItemData(3626584, progression),
     "Whomps": SM64ItemData(3626585, progression),
     "Big Bully": SM64ItemData(3626839, progression),
-    "Thwomp": SM64ItemData(3626845, progression),
+    "Thwomps and Grindels": SM64ItemData(3626845, progression),
     "Heave-Hos": SM64ItemData(3626586, progression),
+    "Bowser": SM64ItemData(3626957, progression),
+    "Chain Chomp": SM64ItemData(3626958, progression),
+    "Wiggler": SM64ItemData(3626959, progression),
+    "Tweesters": SM64ItemData(3626960, tweesters_classification),
+    "Klepto": SM64ItemData(3626961, trap),
+    "Amps": SM64ItemData(3626962, trap),
+    "Mad Piano": SM64ItemData(3626963, trap),
+    "Haunted Chairs": SM64ItemData(3626964, trap),
+    "Sushi Sharks": SM64ItemData(3626965, trap),
+    "Bubbas": SM64ItemData(3626966, trap),
+    "Tox Boxes": SM64ItemData(3626967, trap),
+    "Bowling Balls": SM64ItemData(3626968, trap),
+    "Water Bombs": SM64ItemData(3626969, trap),
+    "Boulders": SM64ItemData(3626970, trap),
+    "Flamethrowers and Fire Bars": SM64ItemData(3626971, trap),
+    "Bouncing Fireballs": SM64ItemData(3626972, trap),
+    "Spindel": SM64ItemData(3626973, trap),
+    "Falling Pillars": SM64ItemData(3626974, trap),
 }
 
 
@@ -884,10 +911,45 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Snowman's Land - Chill Bully": SM64ItemData(3626843, progression),
     "Big Boo's Haunt - Big Boo": SM64ItemData(3626844, progression),
     "Whomp's Fortress - Thwomp": SM64ItemData(3626846, progression),
-    "Shifting Sand Land - Thwomp": SM64ItemData(3626847, progression),
+    "Shifting Sand Land - Grindel": SM64ItemData(3626847, progression),
     "Tick Tock Clock - Thwomp": SM64ItemData(3626848, progression),
     "Wet-Dry World - Heave-Hos": SM64ItemData(3626781, progression),
     "Tick Tock Clock - Heave-Ho": SM64ItemData(3626786, trap),
+    "Bowser in the Dark World - Bowser": SM64ItemData(3626975, progression),
+    "Bowser in the Fire Sea - Bowser": SM64ItemData(3626976, progression),
+    "Bowser in the Sky - Bowser": SM64ItemData(3626977, progression),
+    "Bob-omb Battlefield - Chain Chomp": SM64ItemData(3626978, progression),
+    "Tiny-Huge Island - Wiggler": SM64ItemData(3626979, progression),
+    "Shifting Sand Land - Tweesters": SM64ItemData(3626980, tweesters_classification),
+    "Shifting Sand Land - Klepto": SM64ItemData(3626981, trap),
+    "Bowser in the Dark World - Amps": SM64ItemData(3626982, trap),
+    "Bowser in the Fire Sea - Amps": SM64ItemData(3626983, trap),
+    "Bowser in the Sky - Amps": SM64ItemData(3626984, trap),
+    "Shifting Sand Land - Amps": SM64ItemData(3626985, trap),
+    "Snowman's Land - Amps": SM64ItemData(3626986, trap),
+    "Wet-Dry World - Amps": SM64ItemData(3626987, trap),
+    "Tick Tock Clock - Amps": SM64ItemData(3626988, trap),
+    "Rainbow Ride - Amps": SM64ItemData(3626989, trap),
+    "Vanish Cap Under the Moat - Amps": SM64ItemData(3626990, trap),
+    "Big Boo's Haunt - Mad Piano": SM64ItemData(3626991, trap),
+    "Big Boo's Haunt - Haunted Chairs": SM64ItemData(3626992, trap),
+    "Dire, Dire Docks - Sushi Sharks": SM64ItemData(3626993, trap),
+    "Tiny-Huge Island - Bubbas": SM64ItemData(3626994, trap),
+    "Shifting Sand Land - Tox Boxes": SM64ItemData(3626995, trap),
+    "Bob-omb Battlefield - Bowling Balls": SM64ItemData(3626996, trap),
+    "Tall, Tall Mountain - Bowling Balls": SM64ItemData(3626997, trap),
+    "Tiny-Huge Island - Bowling Balls": SM64ItemData(3626998, trap),
+    "Bob-omb Battlefield - Water Bombs": SM64ItemData(3626999, trap),
+    "Hazy Maze Cave - Boulders": SM64ItemData(3627000, trap),
+    "Bowser in the Dark World - Flamethrowers and Fire Bars": SM64ItemData(3627001, trap),
+    "Bowser in the Fire Sea - Flamethrowers and Fire Bars": SM64ItemData(3627002, trap),
+    "Bowser in the Sky - Flamethrowers and Fire Bars": SM64ItemData(3627003, trap),
+    "Hazy Maze Cave - Flamethrowers and Fire Bars": SM64ItemData(3627004, trap),
+    "Lethal Lava Land - Flamethrowers and Fire Bars": SM64ItemData(3627005, trap),
+    "Rainbow Ride - Flamethrowers and Fire Bars": SM64ItemData(3627006, trap),
+    "Lethal Lava Land - Bouncing Fireballs": SM64ItemData(3627007, trap),
+    "Shifting Sand Land - Spindel": SM64ItemData(3627008, trap),
+    "Jolly Roger Bay - Falling Pillars": SM64ItemData(3627009, trap),
 }
 
 bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
@@ -943,8 +1005,26 @@ global_mode_enemy_item_names = (
     "Wet-Dry World - Skeeters",
     "Hazy Maze Cave - Swoops",
     "Big Boo's Haunt - Big Boo",
-    "Thwomp",
+    "Thwomps and Grindels",
     "Heave-Hos",
+    "Bowser",
+    "Chain Chomp",
+    "Wiggler",
+    "Tweesters",
+    "Klepto",
+    "Amps",
+    "Mad Piano",
+    "Haunted Chairs",
+    "Sushi Sharks",
+    "Bubbas",
+    "Tox Boxes",
+    "Bowling Balls",
+    "Water Bombs",
+    "Boulders",
+    "Flamethrowers and Fire Bars",
+    "Bouncing Fireballs",
+    "Spindel",
+    "Falling Pillars",
 )
 
 item_data_table = {

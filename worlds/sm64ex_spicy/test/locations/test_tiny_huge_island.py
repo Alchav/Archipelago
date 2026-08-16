@@ -123,8 +123,10 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
 
             ["Tiny-Huge Island - Make Wiggler Squirm", False, top + [PIPES]],
             ["Tiny-Huge Island - Make Wiggler Squirm", False, top + ["Ground Pound"]],
-            ["Tiny-Huge Island - Make Wiggler Squirm", True,
+            ["Tiny-Huge Island - Make Wiggler Squirm", False,
              top + [PIPES, "Ground Pound"]],
+            ["Tiny-Huge Island - Make Wiggler Squirm", True,
+             top + [PIPES, "Ground Pound", "Tiny-Huge Island - Wiggler"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 

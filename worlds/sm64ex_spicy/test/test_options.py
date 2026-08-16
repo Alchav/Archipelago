@@ -260,7 +260,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Jolly Roger Bay - Jet Stream": 3626257,
             "Jolly Roger Bay - Unagi": 3626258,
             "Lethal Lava Land - Koopa Shell": 3626259,
-            "Shifting Sand Land - Klepto Star": 3626260,
+            "Shifting Sand Land - Klepto with Star": 3626260,
             "Tiny-Huge Island - Koopa the Quick": 3626261,
             "Tall, Tall Mountain - Ukiki": 3626262,
             "Dire, Dire Docks - Manta Ray": 3626263,
@@ -1019,7 +1019,7 @@ class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
         precollected_names = {item.name for item in self.multiworld.precollected_items[self.player]}
 
-        self.assertEqual(len(unlock_items), 229)
+        self.assertEqual(len(unlock_items), 282)
         for item_name, item_data in unlock_items.items():
             with self.subTest(item=item_name):
                 self.assertEqual(start_inventory[item_data.code], 1)
@@ -1036,6 +1036,17 @@ class UnshuffledCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
                 per_level_enemy_item_data_table["Tick Tock Clock - Heave-Ho"]),
             ItemClassification.trap)
 
+    def test_tweesters_are_traps_without_their_logic_trick(self):
+        for item_name, item_data in (
+                ("Tweesters", global_enemy_item_data_table["Tweesters"]),
+                ("Shifting Sand Land - Tweesters",
+                 per_level_enemy_item_data_table["Shifting Sand Land - Tweesters"]),
+        ):
+            with self.subTest(item=item_name):
+                self.assertEqual(
+                    self.world.get_item_classification(item_data),
+                    ItemClassification.trap)
+
 
 class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
     options = {
@@ -1045,7 +1056,7 @@ class GlobalCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 
     def test_global_mode_unlock_items_are_generated(self):
         expected_names = set(global_mode_coin_object_item_names) | set(global_mode_enemy_item_names)
-        self.assertEqual(len(expected_names), 42)
+        self.assertEqual(len(expected_names), 60)
         for item_name in expected_names:
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -1063,7 +1074,7 @@ class IndividualCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
             **per_level_coin_object_item_data_table,
             **per_level_enemy_item_data_table,
         }
-        self.assertEqual(len(individual_items), 196)
+        self.assertEqual(len(individual_items), 231)
         for item_name in individual_items:
             with self.subTest(item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
