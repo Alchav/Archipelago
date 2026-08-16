@@ -116,6 +116,7 @@ class SM64World(World):
     sign_hint_count: int
     sign_hints: dict[str, str]
     sign_hint_locations: dict[str, int]
+    sign_hint_location_players: dict[str, int]
     sign_hint_entrances: dict[str, int]
     randomized_entrance_connections: dict[int, Entrance]
     deferred_entrance_targets: dict[int, Region]
@@ -182,6 +183,9 @@ class SM64World(World):
         self.sign_hint_count = 0
         self.sign_hints = dict(slot_data.get("SignHints", {})) if slot_data else {}
         self.sign_hint_locations = dict(slot_data.get("SignHintLocations", {})) if slot_data else {}
+        self.sign_hint_location_players = {
+            key: int(value) for key, value in slot_data.get("SignHintLocationPlayers", {}).items()
+        } if slot_data else {}
         self.sign_hint_entrances = {
             key: int(value) for key, value in slot_data.get("SignHintEntrances", {}).items()
         } if slot_data else {}
@@ -742,6 +746,7 @@ class SM64World(World):
                 for index, sign in enumerate(sign_data)
             }
             world.sign_hint_locations = {sign.key: 0 for sign in sign_data}
+            world.sign_hint_location_players = {sign.key: 0 for sign in sign_data}
             world.sign_hint_entrances = {sign.key: 0 for sign in sign_data}
 
             signs_by_sphere: list[list] = [[] for _sphere in spheres]
@@ -844,6 +849,7 @@ class SM64World(World):
                         hint += f" in {multiworld.player_name[item_location.player]}'s game"
                     hint += "."
                     world.sign_hint_locations[sign.key] = item_location.address
+                    world.sign_hint_location_players[sign.key] = item_location.player
                 world.sign_hints[sign.key] = hint
 
     def generate_basic(self):
@@ -978,12 +984,14 @@ class SM64World(World):
             "BowserInTheSkyStageCollapseHits": self.options.bowser_in_the_sky_stage_collapse_hits.value,
             "SignHints": self.sign_hints,
             "SignHintLocations": self.sign_hint_locations,
+            "SignHintLocationPlayers": self.sign_hint_location_players,
             "SignHintEntrances": self.sign_hint_entrances,
             "SignHintData": {
                 str(sign.level * 256 + sign.dialog): [
                     self.sign_hints.get(sign.key, ""),
                     self.sign_hint_locations.get(sign.key, 0),
                     self.sign_hint_entrances.get(sign.key, 0),
+                    self.sign_hint_location_players.get(sign.key, 0),
                 ]
                 for sign in sign_data
             },
