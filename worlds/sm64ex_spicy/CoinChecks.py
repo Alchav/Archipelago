@@ -20,11 +20,6 @@ class CoinOutputKind(Enum):
     BLUE = "blue"
 
 
-# Display names used by the Coin Check Types option, in menu order. The color entries (Yellow/Red/Blue
-# Coins) gate non-enemy outputs on CoinOutputDefinition.kind. "Enemy Coins" is a separate bucket: it gates
-# outputs whose is_enemy_source is True (coins that come from defeating or interacting with an enemy)
-# entirely on its own - color does not apply to enemy-sourced coins, so deselecting a color entry never
-# excludes an enemy coin of that color, and deselecting Enemy Coins never excludes a non-enemy coin.
 ENEMY_COIN_CHECK_TYPE_NAME = "Enemy Coins"
 COIN_CHECK_TYPE_NAMES: Mapping[CoinOutputKind, str] = {
     CoinOutputKind.YELLOW: "Yellow Coins",
