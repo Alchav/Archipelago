@@ -7,7 +7,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
-    bowser_stage_1up_item_data_table, per_level_action_item_data_table, per_level_move_area_names, \
+    bowser_stage_1up_item_data_table, per_level_action_item_data_table, main_course_move_area_names, \
+    separate_misc_move_area_names, collapsed_misc_move_area_names, \
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
     global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
@@ -399,20 +400,16 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual({name: data.code for name, data in item_data.items()}, expected_ids)
 
     def test_per_level_move_item_ids_match_client_table(self):
-        self.assertEqual(len(per_level_action_item_data_table), 160)
+        self.assertEqual(len(per_level_action_item_data_table), 240)
         self.assertEqual(item_table["Bob-omb Battlefield - Triple Jump"], 3626325)
         self.assertEqual(item_table["Bob-omb Battlefield - Ledge Grab"], 3626334)
         self.assertEqual(item_table["Whomp's Fortress - Triple Jump"], 3626335)
         self.assertEqual(item_table["Castle - Triple Jump"], 3626475)
         self.assertEqual(item_table["Castle - Ledge Grab"], 3626484)
-        self.assertNotIn("Wing Mario Over the Rainbow - Triple Jump", item_table)
-        self.assertNotIn("Vanish Cap Under the Moat - Triple Jump", item_table)
-        self.assertNotIn("Cavern of the Metal Cap - Triple Jump", item_table)
-        self.assertNotIn("Tower of the Wing Cap - Triple Jump", item_table)
-        self.assertNotIn("Bowser in the Dark World - Triple Jump", item_table)
-        self.assertNotIn("Bowser in the Fire Sea - Triple Jump", item_table)
-        self.assertNotIn("Bowser in the Sky - Triple Jump", item_table)
-        self.assertNotIn("Cap Switch Stages - Triple Jump", item_table)
+        self.assertEqual(item_table["Bowser in the Dark World - Triple Jump"], 3627022)
+        self.assertEqual(item_table["Wing Mario Over the Rainbow - Ledge Grab"], 3627091)
+        self.assertEqual(item_table["Misc - Triple Jump"], 3627092)
+        self.assertEqual(item_table["Misc - Ledge Grab"], 3627101)
 
     def test_current_per_level_move_item_classifications(self):
         expected_classifications = {
@@ -880,7 +877,7 @@ class PerLevelMoveItemPoolTestBase(SM64TestBase):
     def test_per_level_move_items_are_generated(self):
         self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 2)
         self.assertEqual(len(self.get_items_by_name("Triple Jump")), 0)
-        for area_name in per_level_move_area_names:
+        for area_name in main_course_move_area_names + collapsed_misc_move_area_names:
             with self.subTest("Per-level move item generated", area=area_name):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
 
@@ -892,7 +889,7 @@ class BothMoveItemPoolTestBase(SM64TestBase):
 
     def test_both_move_item_forms_are_generated(self):
         self.assertEqual(len(self.get_items_by_name("Triple Jump")), 1)
-        for area_name in per_level_move_area_names:
+        for area_name in main_course_move_area_names + collapsed_misc_move_area_names:
             with self.subTest(area=area_name):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
 
@@ -918,11 +915,27 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
     def test_other_per_level_climb_items_are_generated(self):
         self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 512)
         self.assertEqual(len(self.get_items_by_name("Climb")), 0)
-        for area_name in per_level_move_area_names:
+        for area_name in main_course_move_area_names + collapsed_misc_move_area_names:
             if area_name == "Big Boo's Haunt":
                 continue
             with self.subTest("Per-level Climb item generated", area=area_name):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Climb")), 1)
+
+
+class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
+    options = {
+        "triple_jump": Options.TripleJump.option_per_level,
+        "collapse_misc_moves": Options.CollapseMiscMoves.option_false,
+    }
+
+    def test_separate_castle_and_secret_stage_moves_are_generated(self):
+        for area_name in main_course_move_area_names + separate_misc_move_area_names:
+            with self.subTest(area=area_name):
+                self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
+        self.assertEqual(len(self.get_items_by_name("Misc - Triple Jump")), 0)
+
+    def test_collapse_option_is_in_slot_data(self):
+        self.assertEqual(self.world.fill_slot_data()["Options"]["collapse_misc_moves"], 0)
 
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):

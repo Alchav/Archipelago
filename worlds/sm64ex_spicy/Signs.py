@@ -331,7 +331,7 @@ joke_hints = (
 
 tip_hints = (
     "Gray coins heal Mario but do not add another coin.",
-    "Secret courses, cap stages, and Bowser stages use Castle movement items.",
+    "Castle and secret stages use Misc movement items unless separate moves are enabled.",
     "CoinCountChecks places checks at evenly spaced coin totals below the Coins Star requirement.",
     "With 1-Up checks disabled, 1-Up Mushrooms heal Mario to full health.",
     "Easy Butterflies makes a butterfly become a 1-Up regardless of Mario's distance.",

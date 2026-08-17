@@ -301,7 +301,7 @@ randomized_action_item_names = (
     "Ledge Grab",
 )
 
-per_level_move_area_names = (
+main_course_move_area_names = (
     "Bob-omb Battlefield",
     "Whomp's Fortress",
     "Jolly Roger Bay",
@@ -317,7 +317,25 @@ per_level_move_area_names = (
     "Tiny-Huge Island",
     "Tick Tock Clock",
     "Rainbow Ride",
+)
+
+separate_misc_move_area_names = (
     "Castle",
+    "Bowser in the Dark World",
+    "Bowser in the Fire Sea",
+    "Bowser in the Sky",
+    "Vanish Cap Under the Moat",
+    "Cavern of the Metal Cap",
+    "Tower of the Wing Cap",
+    "Wing Mario Over the Rainbow",
+)
+
+collapsed_misc_move_area_names = ("Misc",)
+
+per_level_move_area_names = (
+    *main_course_move_area_names,
+    *separate_misc_move_area_names,
+    *collapsed_misc_move_area_names,
 )
 
 per_level_action_item_data_table: dict[str, SM64ItemData] = {
@@ -497,6 +515,95 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Castle - Kick": SM64ItemData(sm64ex_base_id + 482, filler),
     "Castle - Climb": SM64ItemData(sm64ex_base_id + 483),
     "Castle - Ledge Grab": SM64ItemData(sm64ex_base_id + 484),
+    # Restored secret-stage moves. These use a new range because the original range now contains other items.
+    # Bowser in the Dark World
+    "Bowser in the Dark World - Triple Jump": SM64ItemData(sm64ex_base_id + 1022),
+    "Bowser in the Dark World - Long Jump": SM64ItemData(sm64ex_base_id + 1023, filler),
+    "Bowser in the Dark World - Backflip": SM64ItemData(sm64ex_base_id + 1024, filler),
+    "Bowser in the Dark World - Side Flip": SM64ItemData(sm64ex_base_id + 1025, filler),
+    "Bowser in the Dark World - Wall Kick": SM64ItemData(sm64ex_base_id + 1026, filler),
+    "Bowser in the Dark World - Dive": SM64ItemData(sm64ex_base_id + 1027, filler),
+    "Bowser in the Dark World - Ground Pound": SM64ItemData(sm64ex_base_id + 1028, filler),
+    "Bowser in the Dark World - Kick": SM64ItemData(sm64ex_base_id + 1029, filler),
+    "Bowser in the Dark World - Climb": SM64ItemData(sm64ex_base_id + 1030, filler),
+    "Bowser in the Dark World - Ledge Grab": SM64ItemData(sm64ex_base_id + 1031, filler),
+    # Bowser in the Fire Sea
+    "Bowser in the Fire Sea - Triple Jump": SM64ItemData(sm64ex_base_id + 1032, filler),
+    "Bowser in the Fire Sea - Long Jump": SM64ItemData(sm64ex_base_id + 1033, filler),
+    "Bowser in the Fire Sea - Backflip": SM64ItemData(sm64ex_base_id + 1034, filler),
+    "Bowser in the Fire Sea - Side Flip": SM64ItemData(sm64ex_base_id + 1035, filler),
+    "Bowser in the Fire Sea - Wall Kick": SM64ItemData(sm64ex_base_id + 1036),
+    "Bowser in the Fire Sea - Dive": SM64ItemData(sm64ex_base_id + 1037, filler),
+    "Bowser in the Fire Sea - Ground Pound": SM64ItemData(sm64ex_base_id + 1038, filler),
+    "Bowser in the Fire Sea - Kick": SM64ItemData(sm64ex_base_id + 1039, filler),
+    "Bowser in the Fire Sea - Climb": SM64ItemData(sm64ex_base_id + 1040),
+    "Bowser in the Fire Sea - Ledge Grab": SM64ItemData(sm64ex_base_id + 1041),
+    # Bowser in the Sky
+    "Bowser in the Sky - Triple Jump": SM64ItemData(sm64ex_base_id + 1042),
+    "Bowser in the Sky - Long Jump": SM64ItemData(sm64ex_base_id + 1043, filler),
+    "Bowser in the Sky - Backflip": SM64ItemData(sm64ex_base_id + 1044),
+    "Bowser in the Sky - Side Flip": SM64ItemData(sm64ex_base_id + 1045),
+    "Bowser in the Sky - Wall Kick": SM64ItemData(sm64ex_base_id + 1046),
+    "Bowser in the Sky - Dive": SM64ItemData(sm64ex_base_id + 1047, filler),
+    "Bowser in the Sky - Ground Pound": SM64ItemData(sm64ex_base_id + 1048),
+    "Bowser in the Sky - Kick": SM64ItemData(sm64ex_base_id + 1049, filler),
+    "Bowser in the Sky - Climb": SM64ItemData(sm64ex_base_id + 1050),
+    "Bowser in the Sky - Ledge Grab": SM64ItemData(sm64ex_base_id + 1051),
+    # Vanish Cap Under the Moat
+    "Vanish Cap Under the Moat - Triple Jump": SM64ItemData(sm64ex_base_id + 1052),
+    "Vanish Cap Under the Moat - Long Jump": SM64ItemData(sm64ex_base_id + 1053, filler),
+    "Vanish Cap Under the Moat - Backflip": SM64ItemData(sm64ex_base_id + 1054),
+    "Vanish Cap Under the Moat - Side Flip": SM64ItemData(sm64ex_base_id + 1055),
+    "Vanish Cap Under the Moat - Wall Kick": SM64ItemData(sm64ex_base_id + 1056),
+    "Vanish Cap Under the Moat - Dive": SM64ItemData(sm64ex_base_id + 1057, filler),
+    "Vanish Cap Under the Moat - Ground Pound": SM64ItemData(sm64ex_base_id + 1058, filler),
+    "Vanish Cap Under the Moat - Kick": SM64ItemData(sm64ex_base_id + 1059, filler),
+    "Vanish Cap Under the Moat - Climb": SM64ItemData(sm64ex_base_id + 1060, filler),
+    "Vanish Cap Under the Moat - Ledge Grab": SM64ItemData(sm64ex_base_id + 1061),
+    # Cavern of the Metal Cap
+    "Cavern of the Metal Cap - Triple Jump": SM64ItemData(sm64ex_base_id + 1062, filler),
+    "Cavern of the Metal Cap - Long Jump": SM64ItemData(sm64ex_base_id + 1063, filler),
+    "Cavern of the Metal Cap - Backflip": SM64ItemData(sm64ex_base_id + 1064, filler),
+    "Cavern of the Metal Cap - Side Flip": SM64ItemData(sm64ex_base_id + 1065, filler),
+    "Cavern of the Metal Cap - Wall Kick": SM64ItemData(sm64ex_base_id + 1066, filler),
+    "Cavern of the Metal Cap - Dive": SM64ItemData(sm64ex_base_id + 1067, filler),
+    "Cavern of the Metal Cap - Ground Pound": SM64ItemData(sm64ex_base_id + 1068, filler),
+    "Cavern of the Metal Cap - Kick": SM64ItemData(sm64ex_base_id + 1069, filler),
+    "Cavern of the Metal Cap - Climb": SM64ItemData(sm64ex_base_id + 1070, filler),
+    "Cavern of the Metal Cap - Ledge Grab": SM64ItemData(sm64ex_base_id + 1071, filler),
+    # Tower of the Wing Cap
+    "Tower of the Wing Cap - Triple Jump": SM64ItemData(sm64ex_base_id + 1072, filler),
+    "Tower of the Wing Cap - Long Jump": SM64ItemData(sm64ex_base_id + 1073, filler),
+    "Tower of the Wing Cap - Backflip": SM64ItemData(sm64ex_base_id + 1074, filler),
+    "Tower of the Wing Cap - Side Flip": SM64ItemData(sm64ex_base_id + 1075, filler),
+    "Tower of the Wing Cap - Wall Kick": SM64ItemData(sm64ex_base_id + 1076, filler),
+    "Tower of the Wing Cap - Dive": SM64ItemData(sm64ex_base_id + 1077, filler),
+    "Tower of the Wing Cap - Ground Pound": SM64ItemData(sm64ex_base_id + 1078, filler),
+    "Tower of the Wing Cap - Kick": SM64ItemData(sm64ex_base_id + 1079, filler),
+    "Tower of the Wing Cap - Climb": SM64ItemData(sm64ex_base_id + 1080, filler),
+    "Tower of the Wing Cap - Ledge Grab": SM64ItemData(sm64ex_base_id + 1081, filler),
+    # Wing Mario Over the Rainbow
+    "Wing Mario Over the Rainbow - Triple Jump": SM64ItemData(sm64ex_base_id + 1082),
+    "Wing Mario Over the Rainbow - Long Jump": SM64ItemData(sm64ex_base_id + 1083),
+    "Wing Mario Over the Rainbow - Backflip": SM64ItemData(sm64ex_base_id + 1084, filler),
+    "Wing Mario Over the Rainbow - Side Flip": SM64ItemData(sm64ex_base_id + 1085, filler),
+    "Wing Mario Over the Rainbow - Wall Kick": SM64ItemData(sm64ex_base_id + 1086, filler),
+    "Wing Mario Over the Rainbow - Dive": SM64ItemData(sm64ex_base_id + 1087, filler),
+    "Wing Mario Over the Rainbow - Ground Pound": SM64ItemData(sm64ex_base_id + 1088, filler),
+    "Wing Mario Over the Rainbow - Kick": SM64ItemData(sm64ex_base_id + 1089, filler),
+    "Wing Mario Over the Rainbow - Climb": SM64ItemData(sm64ex_base_id + 1090, filler),
+    "Wing Mario Over the Rainbow - Ledge Grab": SM64ItemData(sm64ex_base_id + 1091),
+    # Collapsed Castle and secret-stage moves
+    "Misc - Triple Jump": SM64ItemData(sm64ex_base_id + 1092),
+    "Misc - Long Jump": SM64ItemData(sm64ex_base_id + 1093),
+    "Misc - Backflip": SM64ItemData(sm64ex_base_id + 1094),
+    "Misc - Side Flip": SM64ItemData(sm64ex_base_id + 1095),
+    "Misc - Wall Kick": SM64ItemData(sm64ex_base_id + 1096),
+    "Misc - Dive": SM64ItemData(sm64ex_base_id + 1097),
+    "Misc - Ground Pound": SM64ItemData(sm64ex_base_id + 1098),
+    "Misc - Kick": SM64ItemData(sm64ex_base_id + 1099, filler),
+    "Misc - Climb": SM64ItemData(sm64ex_base_id + 1100),
+    "Misc - Ledge Grab": SM64ItemData(sm64ex_base_id + 1101),
 }
 
 cannon_item_data_table: dict[str, SM64ItemData] = {

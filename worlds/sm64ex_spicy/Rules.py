@@ -134,25 +134,43 @@ move_area_name_aliases = {
     "Castle Courtyard": "Castle",
     "The Princess's Secret Slide": "Castle",
     "The Secret Aquarium": "Castle",
-    "Wing Mario Over the Rainbow": "Castle",
-    "Tower of the Wing Cap": "Castle",
-    "Cavern of the Metal Cap": "Castle",
-    "Vanish Cap Under the Moat": "Castle",
-    "Bowser in the Dark World": "Castle",
-    "Bowser in the Fire Sea": "Castle",
-    "Bowser in the Sky": "Castle",
 }
 
 
-def get_move_area_name(level_name: str) -> str:
-    return move_area_name_aliases.get(level_name, level_name)
+misc_move_area_names = {
+    "Castle",
+    "Bowser in the Dark World",
+    "Bowser in the Fire Sea",
+    "Bowser in the Sky",
+    "Vanish Cap Under the Moat",
+    "Cavern of the Metal Cap",
+    "Tower of the Wing Cap",
+    "Wing Mario Over the Rainbow",
+}
 
 
-def get_per_level_action_item_name(level_name: str, action: str) -> str | None:
-    move_area_name = get_move_area_name(level_name)
+def get_move_area_name(level_name: str, collapse_misc_moves: bool = True) -> str:
+    move_area_name = move_area_name_aliases.get(level_name, level_name)
+    if collapse_misc_moves and move_area_name in misc_move_area_names:
+        return "Misc"
+    return move_area_name
+
+
+def get_per_level_action_item_name(
+        level_name: str, action: str, collapse_misc_moves: bool = True) -> str | None:
+    move_area_name = get_move_area_name(level_name, collapse_misc_moves)
     if move_area_name not in per_level_move_area_names:
         return None
     return f"{move_area_name} - {action}"
+
+
+def get_compatible_per_level_action_item_names(level_name: str, action: str) -> tuple[str, ...]:
+    exact_item_name = get_per_level_action_item_name(level_name, action, False)
+    if exact_item_name is None:
+        return ()
+    if get_move_area_name(level_name, False) in misc_move_area_names:
+        return exact_item_name, f"Misc - {action}"
+    return (exact_item_name,)
 
 
 def has_action(state: CollectionState, player: int, action: str, level_name: str = "Castle") -> bool:
@@ -163,10 +181,10 @@ def has_action(state: CollectionState, player: int, action: str, level_name: str
     option = getattr(options, option_name)
     if option.value == option.option_not_shuffled:
         return True
-    item_name = get_per_level_action_item_name(level_name, action)
-    if item_name is None:
+    per_level_item_names = get_compatible_per_level_action_item_names(level_name, action)
+    if not per_level_item_names:
         return state.has(action, player)
-    return state.has(action, player) or state.has(item_name, player)
+    return state.has(action, player) or any(state.has(item_name, player) for item_name in per_level_item_names)
 
 
 def has_logic_trick(state: CollectionState, player: int, trick_name: str) -> bool:
@@ -1889,10 +1907,15 @@ class RuleFactory:
             if option.value == option.option_not_shuffled:
                 item_names[action] = True
             else:
-                per_level_item_name = get_per_level_action_item_name(level_name, action)
-                item_names[action] = (
-                    HasUnlock(action, per_level_item_name)
-                    if per_level_item_name is not None else action
+                per_level_item_name = get_per_level_action_item_name(
+                    level_name, action, bool(self.options.collapse_misc_moves))
+                if per_level_item_name is None:
+                    item_names[action] = action
+                    continue
+                compatible_item_names = get_compatible_per_level_action_item_names(level_name, action)
+                item_names[action] = Or(
+                    HasUnlock(action, per_level_item_name),
+                    *(Has(name) for name in compatible_item_names if name != per_level_item_name),
                 )
         return item_names
 

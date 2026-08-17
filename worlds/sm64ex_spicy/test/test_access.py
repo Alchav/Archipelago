@@ -1134,15 +1134,15 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Whomp's Fortress - Side Flip"))
         self.assertTrue(self.can_reach_region("Whomp's Fortress - Top"))
 
-    def test_castle_entrance_rule_requires_castle_move_item(self):
+    def test_castle_entrance_rule_requires_misc_move_item(self):
         self.assertFalse(self.can_reach_region("The Secret Aquarium"))
         self.collect(self.world.create_item("Jolly Roger Bay - Side Flip"))
         self.assertFalse(self.can_reach_region("The Secret Aquarium"))
 
-        self.collect(self.world.create_item("Castle - Side Flip"))
+        self.collect(self.world.create_item("Misc - Side Flip"))
         self.assertTrue(self.can_reach_region("The Secret Aquarium"))
 
-    def test_cap_switch_stage_rule_uses_castle_move_item(self):
+    def test_cap_switch_stage_rule_uses_misc_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 2)
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.collect(self.get_item_by_name("Unlock Vanish Cap Under the Moat"))
@@ -1151,10 +1151,10 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Whomp's Fortress - Wall Kick"))
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
 
-        self.collect(self.world.create_item("Castle - Wall Kick"))
+        self.collect(self.world.create_item("Misc - Wall Kick"))
         self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Switch"))
 
-    def test_secret_stage_names_use_castle_move_items(self):
+    def test_secret_stage_names_use_misc_move_items(self):
         for level_name in (
                 "Tower of the Wing Cap",
                 "Cavern of the Metal Cap",
@@ -1166,9 +1166,9 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
             with self.subTest("Secret stage move alias", level=level_name):
                 self.assertEqual(
                     get_per_level_action_item_name(level_name, "Triple Jump"),
-                    "Castle - Triple Jump")
+                    "Misc - Triple Jump")
 
-    def test_wmotR_rule_uses_castle_move_item(self):
+    def test_wmotR_rule_uses_misc_move_item(self):
         self.collect([self.get_item_by_name("Progressive Key")] * 5)
         self.collect(self.world.create_item("Wing Cap"))
         self.collect(self.world.create_item("Bob-omb Buddies"))
@@ -1177,7 +1177,48 @@ class PerLevelMoveAccessTestBase(SM64TestBase):
         self.collect(self.world.create_item("Bob-omb Battlefield - Triple Jump"))
         self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
+        self.collect(self.world.create_item("Misc - Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+    def test_collapsed_rule_accepts_exact_secret_stage_item(self):
+        self.collect([self.get_item_by_name("Progressive Key")] * 5)
+        self.collect(self.world.create_item("Wing Cap"))
+        self.collect(self.world.create_item("Bob-omb Buddies"))
         self.collect(self.world.create_item("Castle - Triple Jump"))
+        self.collect(self.world.create_item("Wing Mario Over the Rainbow - Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+
+class SeparateSecretStageMoveAccessTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "triple_jump": Options.TripleJump.option_per_level,
+        "collapse_misc_moves": Options.CollapseMiscMoves.option_false,
+    }
+
+    def test_secret_stage_names_use_separate_move_items(self):
+        self.assertEqual(
+            get_per_level_action_item_name("Bowser in the Sky", "Triple Jump", False),
+            "Bowser in the Sky - Triple Jump")
+        self.assertEqual(
+            get_per_level_action_item_name("The Secret Aquarium", "Triple Jump", False),
+            "Castle - Triple Jump")
+
+    def test_wmotr_rule_uses_wmotr_move_item(self):
+        self.collect([self.get_item_by_name("Progressive Key")] * 5)
+        self.collect(self.world.create_item("Wing Cap"))
+        self.collect(self.world.create_item("Bob-omb Buddies"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+        self.collect(self.world.create_item("Castle - Triple Jump"))
+        self.assertFalse(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+        self.collect(self.world.create_item("Wing Mario Over the Rainbow - Triple Jump"))
+        self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
+
+    def test_separate_rule_accepts_misc_move_item(self):
+        self.collect([self.get_item_by_name("Progressive Key")] * 5)
+        self.collect(self.world.create_item("Wing Cap"))
+        self.collect(self.world.create_item("Bob-omb Buddies"))
+        self.collect(self.world.create_item("Misc - Triple Jump"))
         self.assertTrue(self.can_reach_location("Wing Mario Over the Rainbow - Bob-omb Buddy"))
 
 

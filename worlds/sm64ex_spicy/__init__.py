@@ -9,7 +9,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
-    bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_move_area_names, ut_glitch_item_name, \
+    bowser_stage_1up_item_data_table, randomized_action_item_names, main_course_move_area_names, \
+    separate_misc_move_area_names, collapsed_misc_move_area_names, ut_glitch_item_name, \
     item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
@@ -149,6 +150,7 @@ class SM64World(World):
         "kick",
         "climb",
         "ledge_grab",
+        "collapse_misc_moves",
         "cap_items",
         "level_features",
         "bobomb_buddies",
@@ -652,19 +654,23 @@ class SM64World(World):
 
     def get_action_item_names(self) -> typing.List[str]:
         item_names = []
+        per_level_area_names = (
+            main_course_move_area_names
+            + (collapsed_misc_move_area_names if self.options.collapse_misc_moves else separate_misc_move_area_names)
+        )
         for action in randomized_action_item_names:
             option = getattr(self.options, move_randomizer_option_name_by_action[action])
             if option.value == option.option_global:
                 item_names.append(action)
             elif option.value == option.option_per_level:
                 item_names += [
-                    f"{area_name} - {action}" for area_name in per_level_move_area_names
+                    f"{area_name} - {action}" for area_name in per_level_area_names
                     if not (area_name == "Big Boo's Haunt" and action == "Climb")
                 ]
             elif option.value == option.option_both:
                 item_names.append(action)
                 item_names += [
-                    f"{area_name} - {action}" for area_name in per_level_move_area_names
+                    f"{area_name} - {action}" for area_name in per_level_area_names
                     if not (area_name == "Big Boo's Haunt" and action == "Climb")
                 ]
         return item_names
