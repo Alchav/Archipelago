@@ -3,6 +3,7 @@ from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCo
     OptionSet, ItemsAccessibility
 
 from .LogicTricks import logic_trick_option_keys
+from .CoinChecks import coin_check_type_option_keys
 
 
 class CoinStarRequirement(Range):
@@ -46,6 +47,14 @@ class CoinChecks(Range):
     range_start = 0
     range_end = 100
     default = 0
+
+
+class CoinCheckTypes(OptionSet):
+    """Choose which coin types are allowed to become Coin Checks locations.
+    Options are Yellow Coins, Red Coins and Blue Coins."""
+    display_name = "Coin Check Types"
+    valid_keys = coin_check_type_option_keys
+    default = frozenset(coin_check_type_option_keys)
 
 
 class SM64Accessibility(ItemsAccessibility):
@@ -1103,6 +1112,7 @@ sm64_options_groups = [
         BowserStage1Ups,
     ]),
     OptionGroup("Coin Options", [
+        CoinCheckTypes,
         CoinChecks,
         CoinCountChecks,
         *secret_stage_coin_count_max_coin_options,
@@ -1186,6 +1196,7 @@ class SM64Options(PerGameCommonOptions):
     music_shuffle: MusicShuffle
     skybox_shuffle: SkyboxShuffle
     coin_checks: CoinChecks
+    coin_check_types: CoinCheckTypes
     coin_count_checks: CoinCountChecks
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement

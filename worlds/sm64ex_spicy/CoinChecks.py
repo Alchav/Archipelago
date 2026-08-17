@@ -20,6 +20,27 @@ class CoinOutputKind(Enum):
     BLUE = "blue"
 
 
+# Display names used by the Coin Check Types option, in menu order.
+COIN_CHECK_TYPE_NAMES: Mapping[CoinOutputKind, str] = {
+    CoinOutputKind.YELLOW: "Yellow Coins",
+    CoinOutputKind.RED: "Red Coins",
+    CoinOutputKind.BLUE: "Blue Coins",
+}
+COIN_CHECK_TYPE_KIND_BY_NAME: Mapping[str, CoinOutputKind] = {
+    name: kind for kind, name in COIN_CHECK_TYPE_NAMES.items()
+}
+coin_check_type_option_keys = tuple(COIN_CHECK_TYPE_NAMES.values())
+
+
+def get_enabled_coin_check_kinds(selected_types: Iterable[str]) -> frozenset[CoinOutputKind]:
+    """Map the Coin Check Types option value to the CoinOutputKinds it allows as locations."""
+    return frozenset(
+        COIN_CHECK_TYPE_KIND_BY_NAME[selected_type]
+        for selected_type in selected_types
+        if selected_type in COIN_CHECK_TYPE_KIND_BY_NAME
+    )
+
+
 @dataclasses.dataclass(frozen=True, order=True)
 class CoinOutputID:
     course_name: str
@@ -530,13 +551,20 @@ def select_individual_coin_outputs(
         percentage: int, rng: random.Random,
         catalog: Iterable[CoinOutputDefinition] = coin_output_catalog,
         excluded_output_ids: frozenset[CoinOutputID] = frozenset(),
+        allowed_kinds: frozenset[CoinOutputKind] | None = None,
 ) -> tuple[CoinOutputDefinition, ...]:
-    """Select the requested percentage independently within each course."""
+    """Select the requested percentage independently within each course.
+
+    allowed_kinds restricts which CoinOutputKinds (yellow, red, blue) are eligible to become
+    locations. None (the default) allows every kind, matching prior behavior.
+    """
     if not 0 <= percentage <= 100:
         raise ValueError("Coin Checks percentage must be between 0 and 100")
     by_course: dict[str, list[CoinOutputDefinition]] = defaultdict(list)
     for output in catalog:
         if output.output_id in excluded_output_ids:
+            continue
+        if allowed_kinds is not None and output.kind not in allowed_kinds:
             continue
         by_course[output.output_id.course_name].append(output)
     selected = []
