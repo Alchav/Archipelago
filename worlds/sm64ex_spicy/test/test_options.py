@@ -8,7 +8,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, main_course_move_area_names, \
-    separate_misc_move_area_names, collapsed_misc_move_area_names, \
+    separate_misc_move_area_names, collapsed_misc_move_area_names, non_climb_move_area_names, \
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
     global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
@@ -916,7 +916,7 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
         self.assertEqual(self.world.fill_slot_data()["MoveRandoVec"], 512)
         self.assertEqual(len(self.get_items_by_name("Climb")), 0)
         for area_name in main_course_move_area_names + collapsed_misc_move_area_names:
-            if area_name == "Big Boo's Haunt":
+            if area_name in non_climb_move_area_names:
                 continue
             with self.subTest("Per-level Climb item generated", area=area_name):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Climb")), 1)
@@ -925,6 +925,7 @@ class PerLevelClimbItemPoolTestBase(SM64TestBase):
 class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
     options = {
         "triple_jump": Options.TripleJump.option_per_level,
+        "climb": Options.Climb.option_per_level,
         "collapse_misc_moves": Options.CollapseMiscMoves.option_false,
     }
 
@@ -933,6 +934,12 @@ class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
             with self.subTest(area=area_name):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Triple Jump")), 1)
         self.assertEqual(len(self.get_items_by_name("Misc - Triple Jump")), 0)
+
+    def test_climb_is_not_generated_for_stages_without_climbable_objects(self):
+        for area_name in main_course_move_area_names + separate_misc_move_area_names:
+            expected_count = 0 if area_name in non_climb_move_area_names else 1
+            with self.subTest(area=area_name):
+                self.assertEqual(len(self.get_items_by_name(f"{area_name} - Climb")), expected_count)
 
     def test_collapse_option_is_in_slot_data(self):
         self.assertEqual(self.world.fill_slot_data()["Options"]["collapse_misc_moves"], 0)

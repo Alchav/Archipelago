@@ -920,9 +920,10 @@ class Climb(MoveRandomizerMode):
 
     Global - Shuffle one Climb item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Climb items for each applicable area (except Big Boo's Haunt, which has no
-    climbable objects). The Collapse Castle and Secret Stage Moves option determines whether Castle and secret stages
-    share a Misc item or use separate items.
+    Per Level - Shuffle separate Climb items for each applicable area. Big Boo's Haunt, Bowser in the Dark World,
+    Vanish Cap Under the Moat, Cavern of the Metal Cap, and Tower of the Wing Cap have no climbable objects and do not
+    add Climb items. The Collapse Castle and Secret Stage Moves option determines whether the remaining Castle and
+    secret-stage areas share a Misc item or use separate items.
 
     Both - Shuffle the global Climb item and every applicable level-specific Climb item.
     """

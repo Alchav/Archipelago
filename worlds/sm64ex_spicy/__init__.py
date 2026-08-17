@@ -10,7 +10,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
     bowser_stage_1up_item_data_table, randomized_action_item_names, main_course_move_area_names, \
-    separate_misc_move_area_names, collapsed_misc_move_area_names, ut_glitch_item_name, \
+    separate_misc_move_area_names, collapsed_misc_move_area_names, non_climb_move_area_names, ut_glitch_item_name, \
     item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
@@ -665,13 +665,13 @@ class SM64World(World):
             elif option.value == option.option_per_level:
                 item_names += [
                     f"{area_name} - {action}" for area_name in per_level_area_names
-                    if not (area_name == "Big Boo's Haunt" and action == "Climb")
+                    if not (area_name in non_climb_move_area_names and action == "Climb")
                 ]
             elif option.value == option.option_both:
                 item_names.append(action)
                 item_names += [
                     f"{area_name} - {action}" for area_name in per_level_area_names
-                    if not (area_name == "Big Boo's Haunt" and action == "Climb")
+                    if not (area_name in non_climb_move_area_names and action == "Climb")
                 ]
         return item_names
 

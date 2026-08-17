@@ -332,6 +332,14 @@ separate_misc_move_area_names = (
 
 collapsed_misc_move_area_names = ("Misc",)
 
+non_climb_move_area_names = (
+    "Big Boo's Haunt",
+    "Bowser in the Dark World",
+    "Vanish Cap Under the Moat",
+    "Cavern of the Metal Cap",
+    "Tower of the Wing Cap",
+)
+
 per_level_move_area_names = (
     *main_course_move_area_names,
     *separate_misc_move_area_names,
