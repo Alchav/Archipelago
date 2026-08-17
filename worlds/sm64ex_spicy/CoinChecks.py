@@ -65,6 +65,15 @@ COURSE_MAXIMUM_COIN_VALUES = {
 }
 
 
+COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ...]] = {
+    (
+        "Shifting Sand Land",
+        "ssl_pyramid_top_vertical_coin_line",
+        5,
+    ): ("ssl_pyramid_top_vertical_coin_line_top_coin",),
+}
+
+
 # Each tuple identifies alternate CoinLogic methods for the same physical Red Coin.
 RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
     "Bob-omb Battlefield": {
@@ -452,7 +461,9 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             outputs = tuple(
                 CoinOutputDefinition(
                     CoinOutputID(course_name, source_id, index), course_base + offset + index - 1,
-                    f"{course_name} - {name}", kind, value, (source_id,),
+                    f"{course_name} - {name}", kind, value,
+                    COIN_OUTPUT_SOURCE_METHOD_OVERRIDES.get(
+                        (course_name, source_id, index), (source_id,)),
                 )
                 for index, name in enumerate(names, 1)
             )

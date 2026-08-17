@@ -48,7 +48,8 @@ class TestShiftingSandLandLocations(SM64TestBase):
             ["Shifting Sand Land - Shining Atop the Pyramid", True, []],
 
             ["Shifting Sand Land - Inside the Ancient Pyramid", False, []],
-            ["Shifting Sand Land - Inside the Ancient Pyramid", True, upper],
+            ["Shifting Sand Land - Inside the Ancient Pyramid", False, upper],
+            ["Shifting Sand Land - Inside the Ancient Pyramid", True, upper + ["Side Flip"]],
             ["Shifting Sand Land - Pyramid Puzzle", False, []],
             ["Shifting Sand Land - Pyramid Puzzle", True, upper],
 
@@ -212,6 +213,26 @@ class TestShiftingSandLandPillarSideFlipOrKickTrick(SM64TestBase):
                     "Shifting Sand Land - Pyramid Elevator",
                 ]],
             ], starting_regions=["Shifting Sand Land"])
+
+
+class TestShiftingSandLandInteriorRoutes(SM64TestBase):
+    run_default_tests = False
+    options = SSL_OPTIONS
+
+    def test_lower_pyramid_to_upper_pyramid_routes(self):
+        for item_name in ("Climb", "Shifting Sand Land - Pyramid Elevator"):
+            self.run_location_tests([
+                ["Shifting Sand Land - Pyramid Puzzle", True, [item_name]],
+                ["Shifting Sand Land - Inside the Ancient Pyramid", False, [item_name]],
+                ["Shifting Sand Land - Inside the Ancient Pyramid", True, [item_name, "Side Flip"]],
+            ], starting_regions=["Shifting Sand Land - Pyramid"])
+
+    def test_top_entry_elevator_route(self):
+        self.run_location_tests([
+            ["Shifting Sand Land - Pyramid Puzzle", False, []],
+            ["Shifting Sand Land - Inside the Ancient Pyramid", True,
+             ["Shifting Sand Land - Pyramid Elevator"]],
+        ], starting_regions=["Shifting Sand Land - Pyramid Top Entry"])
 
 
 class TestShiftingSandLandStandTallTrick(SM64TestBase):

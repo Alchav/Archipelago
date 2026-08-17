@@ -148,14 +148,41 @@ class TestTinyHugeIslandPipeDirections(SM64TestBase):
              [PIPES, BLOCK_1UPS]],
         ], starting_regions=["Tiny-Huge Island - Tiny Main"])
 
-    def test_terminal_regions_do_not_lead_back_upstream(self):
+    def test_red_coin_cave_exits_to_huge_island_but_wiggler_cave_is_terminal(self):
         self.run_location_tests([
-            ["Tiny-Huge Island - Beach Coins 1-Up", False, [TRIGGER_1UPS]],
+            ["Tiny-Huge Island - Beach Coins 1-Up", True, [TRIGGER_1UPS]],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
         ], starting_regions=["Tiny-Huge Island - Red Coins Area"])
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
         ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
+
+    def test_wiggler_star_does_not_require_warp_pipes_once_inside_the_cave(self):
+        self.run_location_tests([
+            ["Tiny-Huge Island - Make Wiggler Squirm", True, ["Tiny-Huge Island - Wiggler"]],
+        ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
+
+
+class TestTinyHugeIslandShuffledSubAreaCoins(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **THI_OPTIONS,
+        "tiny_huge_island_coin_star_requirement": 10,
+    }
+
+    def test_wiggler_cave_coins_use_destination_region_access(self):
+        self.run_location_tests([
+            ["Tiny-Huge Island - Coins Star", False, []],
+            ["Tiny-Huge Island - Coins Star", True,
+             ["Tiny-Huge Island - Horizontal Coin Lines"]],
+        ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
+
+    def test_red_coin_cave_coins_use_destination_region_access(self):
+        self.run_location_tests([
+            ["Tiny-Huge Island - Coins Star", False, []],
+            ["Tiny-Huge Island - Coins Star", True,
+             ["Tiny-Huge Island - Red Coins"]],
+        ], starting_regions=["Tiny-Huge Island - Red Coins Area"])
 
 
 class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):

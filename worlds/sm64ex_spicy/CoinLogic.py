@@ -701,12 +701,14 @@ def evaluate_cool_cool_mountain_coins(
     has_spindrifts = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Spindrifts", f"{level_name} - Spindrifts")
+    can_reach_slide = state.can_reach(
+        "Cool, Cool Mountain - Secret Slide", "Region", player)
 
     traces = [
         coin_source("penguin_slide_yellow_coins", "Individual coins on the Penguin Slide", 27,
-                has_single_yellow_coins),
+                can_reach_slide and has_single_yellow_coins),
         coin_source("penguin_slide_coin_lines", "Nine coin lines on the Penguin Slide", 45,
-                has_horizontal_coin_lines),
+                can_reach_slide and has_horizontal_coin_lines),
         coin_source("chimney_vertical_coin_line", "Vertical coin line into the chimney", 5,
                 has_vertical_coin_lines),
         coin_source("main_mountain_coin_lines", "Four coin lines on the main mountain route", 20,
@@ -716,7 +718,7 @@ def evaluate_cool_cool_mountain_coins(
         coin_source("red_coins", "Eight Red Coins", 16, has_red_coins,
                     red_coin_ids=frozenset(range(1, 9))),
         coin_source("slide_blue_coin", "Blue Coin at the start of the slide", 5,
-                has_single_blue_coin),
+                can_reach_slide and has_single_blue_coin),
     ]
 
     has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
@@ -1086,6 +1088,8 @@ def lethal_lava_land_coins(
     has_mr_is = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Mr. Is", f"{level_name} - Mr. Is")
+    can_reach_volcano = state.can_reach(
+        "Lethal Lava Land - Volcano", "Region", player)
 
     has_koopa_shell = Rules.has_per_act_feature(
         state, player, f"{level_name} - Koopa Shell")
@@ -1257,49 +1261,49 @@ def lethal_lava_land_coins(
         "lll_volcano_s_island_coins",
         "Volcano S-shaped island coins",
         3,
-        has_single_yellow_coins,
+        can_reach_volcano and has_single_yellow_coins,
     )
     builder.add(
         "lll_volcano_first_ridge_coin_line",
         "Volcano first ridge coin line",
         5,
-        has_horizontal_coin_lines,
+        can_reach_volcano and has_horizontal_coin_lines,
     )
     builder.add(
         "lll_volcano_second_ridge_coins",
         "Volcano second ridge coins",
         2,
-        has_single_yellow_coins,
+        can_reach_volcano and has_single_yellow_coins,
     )
     builder.add(
         "lll_volcano_floating_platform_coins",
         "Volcano floating platform coins",
         4,
-        has_single_yellow_coins,
+        can_reach_volcano and has_single_yellow_coins,
     )
     builder.add(
         "lll_volcano_post_platform_coin",
         "Volcano coin after the floating platforms",
         1,
-        has_single_yellow_coins,
+        can_reach_volcano and has_single_yellow_coins,
     )
     builder.add(
         "lll_volcano_second_bully_coin_line",
         "Volcano second Bully coin line",
         5,
-        has_horizontal_coin_lines,
+        can_reach_volcano and has_horizontal_coin_lines,
     )
     builder.add(
         "lll_volcano_checkerboard_lift_coin",
         "Volcano coin by the checkerboard lift",
         1,
-        has_single_yellow_coins,
+        can_reach_volcano and has_single_yellow_coins,
     )
     builder.add(
         "lll_volcano_bullies",
         "Bullies inside the volcano",
         2,
-        has_bullies,
+        can_reach_volcano and has_bullies,
     )
     can_reach_elevator_tour = state.can_reach(
         "Lethal Lava Land - Elevator Tour in the Volcano", "Location", player)
@@ -1366,6 +1370,8 @@ def shifting_sand_land_coins(
     has_pokeys = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Pokeys", f"{level_name} - Pokeys")
+    can_reach_pyramid = state.can_reach(
+        "Shifting Sand Land - Pyramid", "Region", player)
 
     builder = CoinTraceBuilder()
     builder.add(
@@ -1435,7 +1441,7 @@ def shifting_sand_land_coins(
         "ssl_first_wire_grid_coin_ring",
         "Coin ring under the first pyramid wire grid",
         8,
-        has_horizontal_coin_ring and has_climb,
+        can_reach_pyramid and has_horizontal_coin_ring and has_climb,
         children=(
             coin_condition("ssl_first_wire_grid_climb", "Climb", has_climb),
         ),
@@ -1495,6 +1501,18 @@ def shifting_sand_land_coins(
 
     can_reach_upper_pyramid = state.can_reach(
         "Shifting Sand Land - Upper Pyramid", "Region", player)
+    can_use_upper_pyramid_movement = any(
+        Rules.has_action(state, player, action, level_name)
+        for action in ("Side Flip", "Backflip", "Triple Jump", "Ledge Grab")
+    )
+    entered_pyramid_from_top = state.can_reach(
+        "Shifting Sand Land - Pyramid Top Entry", "Region", player)
+    has_pyramid_elevator = Rules.has_per_act_feature(
+        state, player, f"{level_name} - Pyramid Elevator")
+    can_reach_top_vertical_coin = (
+        can_use_upper_pyramid_movement
+        or (entered_pyramid_from_top and has_pyramid_elevator)
+    )
     upper_pyramid_access = coin_condition(
         "ssl_upper_pyramid_access_for_lines",
         "Upper Pyramid is reachable",
@@ -1516,9 +1534,16 @@ def shifting_sand_land_coins(
     )
     builder.add(
         "ssl_pyramid_top_vertical_coin_line",
-        "Vertical coin line at the top of the pyramid",
-        5,
+        "Lower four coins in the vertical line at the top of the pyramid",
+        4,
         can_reach_upper_pyramid and has_vertical_coin_line,
+        children=(upper_pyramid_access,),
+    )
+    builder.add(
+        "ssl_pyramid_top_vertical_coin_line_top_coin",
+        "Top coin in the vertical line at the top of the pyramid",
+        1,
+        can_reach_upper_pyramid and has_vertical_coin_line and can_reach_top_vertical_coin,
         children=(upper_pyramid_access,),
     )
     builder.add(
@@ -1540,7 +1565,7 @@ def shifting_sand_land_coins(
         "ssl_blue_coin_block",
         "Blue Coin Block",
         15,
-        has_blue_coin_block and has_ground_pound,
+        can_reach_pyramid and has_blue_coin_block and has_ground_pound,
         children=(
             coin_condition("ssl_blue_coin_block_ground_pound", "Ground Pound", has_ground_pound),
         ),
@@ -1958,6 +1983,8 @@ def tall_tall_mountain_coins(
     has_goombas = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Goombas", f"{level_name} - Goombas")
+    can_reach_slide = state.can_reach(
+        "Tall, Tall Mountain - Secret Slide", "Region", player)
 
     builder = CoinTraceBuilder()
     builder.add(
@@ -2061,25 +2088,25 @@ def tall_tall_mountain_coins(
         "ttm_hidden_coin_before_slide",
         "Hidden single yellow coin before the slide",
         1,
-        can_reach_top and has_single_yellow_coins,
+        can_reach_slide and has_single_yellow_coins,
     )
     builder.add(
         "ttm_slide_single_coins",
         "Single yellow coins on the slide",
         26,
-        can_reach_top and has_single_yellow_coins,
+        can_reach_slide and has_single_yellow_coins,
     )
     builder.add(
         "ttm_slide_coin_lines",
         "Four coin lines on the slide",
         20,
-        can_reach_top and has_horizontal_coin_lines,
+        can_reach_slide and has_horizontal_coin_lines,
     )
     builder.add(
         "ttm_slide_blue_coins",
         "Single blue coins on the slide",
         15,
-        can_reach_top and has_single_blue_coins,
+        can_reach_slide and has_single_blue_coins,
     )
     builder.add(
         "ttm_slide_entrance_coin_line",
@@ -2482,6 +2509,10 @@ def tiny_huge_island_coin_evaluation(
     has_cannon = state.has("Tiny-Huge Island - Cannon Unlock", player)
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
+    can_reach_red_coin_cave = state.can_reach(
+        "Tiny-Huge Island - Red Coins Area", "Region", player)
+    can_reach_wiggler_cave = state.can_reach(
+        "Tiny-Huge Island - Wiggler's Cave", "Region", player)
     has_tiny_piranha_movement = has_triple_jump or has_long_jump or has_ledge_grab
     has_cannonball_movement = has_ledge_grab or has_side_flip or has_backflip or has_triple_jump
     has_upper_movement = has_side_flip or has_backflip or has_triple_jump
@@ -2797,10 +2828,6 @@ def tiny_huge_island_coin_evaluation(
             ),
         ]
 
-        red_area_direct = has_huge_context and has_cannon and has_huge_start
-        red_area_terminal = has_huge_context and not red_area_direct and has_top
-        wiggler_available = (
-            has_huge_context and has_tiny_main and has_warp_pipes and has_ground_pound)
         piranha_direct = has_huge_piranha_from_pipe or (
             has_koopa_region and has_warp_pipes and has_thi_purple_switches)
         piranha_terminal = not has_huge_piranha_from_pipe and has_koopa_region and not piranha_direct
@@ -2828,13 +2855,13 @@ def tiny_huge_island_coin_evaluation(
         append_group(
             "thi_red_coins_area",
             "Red Coins Area",
-            red_area_direct or red_area_terminal,
+            can_reach_red_coin_cave,
             red_area_children,
         )
         append_group(
             "thi_wiggler_cave",
             "Wiggler's Cave",
-            wiggler_available,
+            can_reach_wiggler_cave,
             wiggler_children,
         )
         append_group(
@@ -2852,6 +2879,20 @@ def tiny_huge_island_coin_evaluation(
         make_route(True, can_enter_tiny),
         make_route(False, can_enter_huge),
     ]
+    if not can_enter_tiny and not can_enter_huge and (
+            can_reach_red_coin_cave or can_reach_wiggler_cave):
+        direct_sub_area_template = make_route(True, True)
+        direct_sub_area_children = [
+            child for child in direct_sub_area_template.children
+            if child.source_id in {"thi_red_coins_area", "thi_wiggler_cave"}
+        ]
+        routes.append(_route_type(
+            "thi_direct_sub_areas",
+            "Direct shuffled sub-area access",
+            True,
+            {},
+            direct_sub_area_children,
+        ))
     return _evaluate_route_set(routes)
 
 
@@ -4068,9 +4109,11 @@ def _early_requirement_specs():
 
         # Cool, Cool Mountain
         (CCM, "penguin_slide_yellow_coins"): _spec(
-            CCM_TARGET, "", ("Single Yellow Coins", f"{CCM} - Single Yellow Coins")),
+            CCM_TARGET, f"{{{CCM} - Secret Slide}}",
+            ("Single Yellow Coins", f"{CCM} - Single Yellow Coins")),
         (CCM, "penguin_slide_coin_lines"): _spec(
-            CCM_TARGET, "", ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
+            CCM_TARGET, f"{{{CCM} - Secret Slide}}",
+            ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
         (CCM, "chimney_vertical_coin_line"): _spec(
             CCM_TARGET, "", ("Vertical Coin Lines", f"{CCM} - Vertical Coin Lines")),
         (CCM, "main_mountain_coin_lines"): _spec(
@@ -4080,7 +4123,8 @@ def _early_requirement_specs():
         (CCM, "main_spindrifts"): _spec(CCM_TARGET, "", ("Spindrifts", f"{CCM} - Spindrifts")),
         (CCM, "red_coins"): _spec(CCM_TARGET, "", ("Red Coins", f"{CCM} - Red Coins")),
         (CCM, "slide_blue_coin"): _spec(
-            CCM_TARGET, "", ("Single Blue Coins", f"{CCM} - Single Blue Coin")),
+            CCM_TARGET, f"{{{CCM} - Secret Slide}}",
+            ("Single Blue Coins", f"{CCM} - Single Blue Coin")),
         (CCM, "wall_kicks_route"): _spec(
             CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump"),
         (CCM, "wall_kicks_coin_arrow"): _spec(
@@ -4226,15 +4270,18 @@ def _middle_requirement_specs():
     _add(LLL, (
         "lll_tilting_platform_coin_line", "lll_first_big_bully_coin_line",
         "lll_northwest_ramp_coin_line", "lll_north_volcano_coin_line",
-        "lll_volcano_first_ridge_coin_line", "lll_volcano_second_bully_coin_line",
     ), unlocks=(_unlock("Horizontal Coin Lines", LLL),))
+    _add(LLL, ("lll_volcano_first_ridge_coin_line", "lll_volcano_second_bully_coin_line"),
+         f"{{{LLL} - Volcano}}", (_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, (
         "lll_grey_ramp_coins", "lll_sinking_platform_coins",
         "lll_spinning_volcano_platform_coins", "lll_southeast_grey_ramp_coins",
+    ), unlocks=(_unlock("Single Yellow Coins", LLL),))
+    _add(LLL, (
         "lll_volcano_s_island_coins", "lll_volcano_second_ridge_coins",
         "lll_volcano_floating_platform_coins", "lll_volcano_post_platform_coin",
         "lll_volcano_checkerboard_lift_coin",
-    ), unlocks=(_unlock("Single Yellow Coins", LLL),))
+    ), f"{{{LLL} - Volcano}}", (_unlock("Single Yellow Coins", LLL),))
     _add(LLL, "lll_bowser_puzzle_coins",
          unlocks=((f"{LLL} - Bowser Puzzle", f"{LLL} - Bowser Puzzle"),))
     _add(LLL, (
@@ -4251,7 +4298,8 @@ def _middle_requirement_specs():
     _add(LLL, "lll_mr_is", unlocks=(_unlock("Mr. Is", LLL),))
     _add(LLL, "lll_under_bridge_coin_line", "LLL_KOOPA_SHELL | logic_lava_damage_boosting",
          (_unlock("Single Yellow Coins", LLL),))
-    _add(LLL, "lll_volcano_bullies", unlocks=(_unlock("Bullies", LLL),))
+    _add(LLL, "lll_volcano_bullies", f"{{{LLL} - Volcano}}",
+         (_unlock("Bullies", LLL),))
     _add(LLL, "lll_elevator_tour_platform_coins",
          f"{{{{{LLL} - Elevator Tour in the Volcano}}}}",
          (_unlock("Single Yellow Coins", LLL),))
@@ -4282,7 +4330,7 @@ def _middle_requirement_specs():
     _add(SSL, "ssl_pokeys", unlocks=(_unlock("Pokeys", SSL),))
     _add(SSL, "ssl_goombas", unlocks=(_unlock("Goombas", SSL),))
     _add(SSL, "ssl_low_red_coins", unlocks=(_unlock("Red Coins", SSL),))
-    _add(SSL, "ssl_first_wire_grid_coin_ring", "CL",
+    _add(SSL, "ssl_first_wire_grid_coin_ring", f"{{{SSL} - Pyramid}} & CL",
          (_unlock("Horizontal Coin Rings", SSL),))
     _add(SSL, "ssl_first_wire_grid_climb", "CL")
 
@@ -4307,10 +4355,17 @@ def _middle_requirement_specs():
          f"{{{SSL} - Upper Pyramid}}", (_unlock("Horizontal Coin Lines", SSL),))
     _add(SSL, "ssl_pyramid_top_vertical_coin_line", f"{{{SSL} - Upper Pyramid}}",
          (_unlock("Vertical Coin Lines", SSL),))
+    _add(
+        SSL,
+        "ssl_pyramid_top_vertical_coin_line_top_coin",
+        f"{{{SSL} - Upper Pyramid}} & (SF/BF/TJ/LG | "
+        f"{{{SSL} - Pyramid Top Entry}} & SSL_PYRAMID_ELEVATOR)",
+        (_unlock("Vertical Coin Lines", SSL),),
+    )
     _add(SSL, "ssl_upper_pyramid_single_coins", f"{{{SSL} - Upper Pyramid}}",
          (_unlock("Single Yellow Coins", SSL),))
     _add(SSL, "ssl_upper_pyramid_access_for_singles", f"{{{SSL} - Upper Pyramid}}")
-    _add(SSL, "ssl_blue_coin_block", "GP",
+    _add(SSL, "ssl_blue_coin_block", f"{{{SSL} - Pyramid}} & GP",
          (_unlock("Blue Coin Blocks", SSL, f"{SSL} - Blue Coin Block"),))
     _add(SSL, "ssl_blue_coin_block_ground_pound", "GP")
 
@@ -4544,14 +4599,20 @@ def _late_requirement_specs():
          "{Tall, Tall Mountain - Upper} & logic_ttm_coins_without_climb",
          _unlock("Horizontal Coin Lines", TTM))
     _add(TTM, "ttm_top_goombas", "{Tall, Tall Mountain - Top} & GOOMBAS", _unlock("Goombas", TTM))
-    _add(TTM, "ttm_hidden_coin_before_slide", "{Tall, Tall Mountain - Top} & SINGLE_YELLOW_COINS",
+    _add(TTM, "ttm_hidden_coin_before_slide",
+         "{Tall, Tall Mountain - Secret Slide} & SINGLE_YELLOW_COINS",
          _unlock("Single Yellow Coins", TTM))
-    _add(TTM, "ttm_slide_single_coins", "{Tall, Tall Mountain - Top} & SINGLE_YELLOW_COINS",
+    _add(TTM, "ttm_slide_single_coins",
+         "{Tall, Tall Mountain - Secret Slide} & SINGLE_YELLOW_COINS",
          _unlock("Single Yellow Coins", TTM))
-    for _source in ("ttm_slide_coin_lines", "ttm_slide_entrance_coin_line", "ttm_waterfall_bridge_coin_line"):
+    _add(TTM, "ttm_slide_coin_lines",
+         "{Tall, Tall Mountain - Secret Slide} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", TTM))
+    for _source in ("ttm_slide_entrance_coin_line", "ttm_waterfall_bridge_coin_line"):
         _add(TTM, _source, "{Tall, Tall Mountain - Top} & HORIZONTAL_COIN_LINES",
              _unlock("Horizontal Coin Lines", TTM))
-    _add(TTM, "ttm_slide_blue_coins", "{Tall, Tall Mountain - Top} & SINGLE_BLUE_COINS",
+    _add(TTM, "ttm_slide_blue_coins",
+         "{Tall, Tall Mountain - Secret Slide} & SINGLE_BLUE_COINS",
          _unlock("Single Blue Coins", TTM))
     _add(TTM, "ttm_top_switch_base_coins", "{Tall, Tall Mountain - Top} & VERTICAL_COIN_LINES",
          _unlock("Vertical Coin Lines", TTM))
@@ -4634,9 +4695,9 @@ def _late_requirement_specs():
          _unlock("Blue Coin Blocks", THI, "Blue Coin Block"))
     _add(THI, "red_area_plank_line", "{Tiny-Huge Island - Red Coins Area} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", THI))
-    _add(THI, "thi_wiggler_cave", "{Tiny-Huge Island - Tiny Main} & WARP_PIPES & GP")
+    _add(THI, "thi_wiggler_cave", "{Tiny-Huge Island - Wiggler's Cave}")
     _add(THI, "wiggler_cave_coin_lines",
-         "{Tiny-Huge Island - Tiny Main} & WARP_PIPES & GP & HORIZONTAL_COIN_LINES",
+         "{Tiny-Huge Island - Wiggler's Cave} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", THI))
     _add(THI, "thi_huge_piranha_area", "{Tiny-Huge Island - Huge Piranha Area}")
     _add(THI, "huge_piranha_area_plants", "{Tiny-Huge Island - Huge Piranha Area} & FIRE_PIRANHA_PLANTS",
@@ -5176,5 +5237,10 @@ def get_coin_requirement_rule(
         rule &= HasUnlock(global_item_name, per_level_item_name)
 
     resolved = rule.resolve(world)
+    # These rules are evaluated dynamically from inside coin evaluators rather
+    # than as children of the enclosing force-recalculated coin rule. Keeping
+    # their independent cache would preserve the first result across later
+    # inventory and region changes.
+    object.__setattr__(resolved, "caching_enabled", False)
     cache[cache_key] = resolved
     return resolved

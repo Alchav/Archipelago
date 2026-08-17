@@ -39,6 +39,7 @@ class SM64Levels(int, Enum):
     VANISH_CAP_UNDER_THE_MOAT = 181
     BOWSER_IN_THE_FIRE_SEA = 191
     WING_MARIO_OVER_THE_RAINBOW = 311
+    BOWSER_IN_THE_SKY = 211
 
 
 class SM64Region(Region):
@@ -111,8 +112,15 @@ sm64_entrances_to_level["Wet-Dry World"] = SM64_WDW_LOW
 sm64_entrances_to_level["Tick Tock Clock"] = SM64_TTC_STOPPED
 sm64_level_to_entrances = {**sm64_level_to_paintings, **sm64_level_to_secrets }
 
-# Stable ordering shared with sm64ex for the discovered-entrance Data Storage bitset.
-sm64_shuffled_entrance_ids = tuple(sm64_level_to_entrances)
+# Stable ordering shared with sm64ex for the discovered-entrance Data Storage
+# bitset. Bowser in the Sky is only shuffled by mixed sub-area shuffle, but its
+# bit remains reserved between courses and the other secret stages.
+sm64_area_rando_entrance_ids = tuple(sm64_level_to_entrances)
+sm64_shuffled_entrance_ids = (
+    *sm64_level_to_paintings,
+    SM64Levels.BOWSER_IN_THE_SKY,
+    *sm64_level_to_secrets,
+)
 
 
 def get_shuffled_entrance_ids(area_rando_value: int) -> tuple[int, ...]:
@@ -120,7 +128,7 @@ def get_shuffled_entrance_ids(area_rando_value: int) -> tuple[int, ...]:
         return ()
     if area_rando_value == 1:
         return tuple(sm64_level_to_paintings)
-    return sm64_shuffled_entrance_ids
+    return sm64_area_rando_entrance_ids
 
 
 sm64_entrance_source_descriptions = {
@@ -145,6 +153,7 @@ sm64_entrance_source_descriptions = {
     SM64_TTC_RANDOM: "Tick-Tock Clock, at 6 o'clock",
     SM64_TTC_FAST: "Tick-Tock Clock, at 9 o'clock",
     SM64Levels.RAINBOW_RIDE: "the Rainbow Ride entrance",
+    SM64Levels.BOWSER_IN_THE_SKY: "Bowser in the Sky",
     SM64Levels.THE_PRINCESS_SECRET_SLIDE: "the Princess's Secret Slide entrance",
     SM64Levels.THE_SECRET_AQUARIUM: "the Secret Aquarium entrance",
     SM64Levels.BOWSER_IN_THE_DARK_WORLD: "Bowser in the Dark World",
@@ -157,6 +166,7 @@ sm64_entrance_source_descriptions = {
 
 sm64_entrance_destination_descriptions = {
     **sm64_level_to_entrances,
+    SM64Levels.BOWSER_IN_THE_SKY: "Bowser in the Sky",
     SM64_WDW_LOW: "Wet-Dry World with Low Water",
     SM64_WDW_MIDDLE: "Wet-Dry World with Middle Water",
     SM64_WDW_HIGH: "Wet-Dry World with High Water",
@@ -226,30 +236,47 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regWhomp, "Whomp's Fortress - Coins Star")
 
     regJRB = create_region("Jolly Roger Bay", player, multiworld)
-    create_locs(regJRB, "Jolly Roger Bay - Plunder in the Sunken Ship", "Jolly Roger Bay - Can the Eel Come Out to Play?", "Jolly Roger Bay - Treasure of the Ocean Cave",
+    create_locs(regJRB, "Jolly Roger Bay - Can the Eel Come Out to Play?", "Jolly Roger Bay - Treasure of the Ocean Cave",
                         "Jolly Roger Bay - Blast to the Stone Pillar", "Jolly Roger Bay - Through the Jet Stream", "Jolly Roger Bay - Bob-omb Buddy",
                         "Jolly Roger Bay - Underwater Coin Ring 1-Up", "Jolly Roger Bay - Stone Pillar 1-Up",
                         "Jolly Roger Bay - Beginning Metal Cap Block",
                         "Jolly Roger Bay - 3 Coins Block",
                         "Jolly Roger Bay - Ocean Cave Metal Cap Block",
-                        "Jolly Roger Bay - Blast to the Stone Pillar Star Block",
-                        "Jolly Roger Bay - Plunder in the Sunken Ship Star Block")
+                        "Jolly Roger Bay - Blast to the Stone Pillar Star Block")
+    jrb_ship = create_region("Jolly Roger Bay - Sunken Ship", player, multiworld)
+    create_locs(jrb_ship,
+                "Jolly Roger Bay - Plunder in the Sunken Ship",
+                "Jolly Roger Bay - Plunder in the Sunken Ship Star Block")
     jrb_upper = create_subregion(regJRB, 'Jolly Roger Bay - Upper',
                                  "Jolly Roger Bay - Red Coins on the Ship Afloat",
                                  "Jolly Roger Bay - Purple Switch Metal Cap Block")
-    regJRB.subregions = [jrb_upper]
+    regJRB.subregions = [jrb_upper, jrb_ship]
     create_locs(regJRB, "Jolly Roger Bay - Coins Star")
 
     regCCM = create_region("Cool, Cool Mountain", player, multiworld)
-    create_default_locs(regCCM, locCCM_table)
+    create_locs(regCCM,
+                "Cool, Cool Mountain - Li'l Penguin Lost",
+                "Cool, Cool Mountain - Frosty Slide for 8 Red Coins",
+                "Cool, Cool Mountain - Snowman's Lost His Head",
+                "Cool, Cool Mountain - Wall Kicks Will Work",
+                "Cool, Cool Mountain - Bob-omb Buddy",
+                "Cool, Cool Mountain - Near Snowman Block 1-Up",
+                "Cool, Cool Mountain - Ice Pillar Block 1-Up")
     create_locs(regCCM,
                 "Cool, Cool Mountain - Snowman Tree 1-Up",
                 "Cool, Cool Mountain - Slide Shortcut First 1-Up",
                 "Cool, Cool Mountain - Near Snowman 1-Up Block",
-                "Cool, Cool Mountain - Ice Pillar 1-Up Block",
+                "Cool, Cool Mountain - Ice Pillar 1-Up Block")
+    ccm_slide = create_region("Cool, Cool Mountain - Secret Slide", player, multiworld)
+    create_locs(ccm_slide,
+                "Cool, Cool Mountain - Big Penguin Race",
+                "Cool, Cool Mountain - Secret Slide Block 1-Up",
                 "Cool, Cool Mountain - Secret Slide 1-Up Block")
     if options.no_despawns:
-        create_locs(regCCM, "Cool, Cool Mountain - Slide Shortcut Second 1-Up")
+        create_locs(ccm_slide, "Cool, Cool Mountain - Slide Shortcut Second 1-Up")
+    ccm_slide_exit = create_region("Cool, Cool Mountain - Slide Exit", player, multiworld)
+    create_locs(ccm_slide_exit, "Cool, Cool Mountain - Slip Slidin' Away")
+    regCCM.subregions = [ccm_slide]
     create_locs(regCCM, "Cool, Cool Mountain - Coins Star")
 
     regBBH = create_region("Big Boo's Haunt", player, multiworld)
@@ -287,7 +314,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regTotWC, "Tower of the Wing Cap - Wing Cap Block")
 
     regBitDW = create_region("Bowser in the Dark World", player, multiworld)
-    create_default_locs(regBitDW, locBitDW_table)
+    create_locs(regBitDW, *(location for location in locBitDW_table
+                            if location != "Bowser in the Dark World - Key"))
     create_locs(regBitDW,
                 "Bowser in the Dark World - Center Overhang 1-Up",
                 "Bowser in the Dark World - Right Tilting Platform Base 1-Up",
@@ -328,23 +356,27 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(regLLL, "Lethal Lava Land - Boil the Big Bully", "Lethal Lava Land - Bully the Bullies",
                         "Lethal Lava Land - 8-Coin Puzzle with 15 Pieces", "Lethal Lava Land - Red-Hot Log Rolling",
                         "Lethal Lava Land - Flamethrower Ring 1-Up",
-                        "Lethal Lava Land - Volcano Flamethrower 1-Up",
                         "Lethal Lava Land - Northeast Brown Platform 1-Up",
                         "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up",
-                        "Lethal Lava Land - Volcano Curve 1-Up",
-                        "Lethal Lava Land - Volcano Brown Platform 1-Up",
                         "Lethal Lava Land - Northwest Curve 1-Up",
                         "Lethal Lava Land - Wing Cap Block",
                         "Lethal Lava Land - Koopa Shell Block")
+    lll_volcano_entrance = create_region("Lethal Lava Land - Volcano Entrance", player, multiworld)
+    lll_volcano = create_region("Lethal Lava Land - Volcano", player, multiworld)
+    create_locs(lll_volcano,
+                "Lethal Lava Land - Volcano Flamethrower 1-Up",
+                "Lethal Lava Land - Volcano Curve 1-Up",
+                "Lethal Lava Land - Volcano Brown Platform 1-Up")
     lll_hot_foot_ledge = create_subregion(
-        regLLL, "Lethal Lava Land - Hot-Foot-It Ledge",
+        lll_volcano, "Lethal Lava Land - Hot-Foot-It Ledge",
         "Lethal Lava Land - Hot-Foot-It into the Volcano")
     lll_upper_volcano = create_subregion(
-        regLLL, "Lethal Lava Land - Upper Volcano",
+        lll_volcano, "Lethal Lava Land - Upper Volcano",
         "Lethal Lava Land - Volcano Pole 1-Up")
     lll_elevator_tour = create_region("Lethal Lava Land - Elevator Tour", player, multiworld)
     create_locs(lll_elevator_tour, "Lethal Lava Land - Elevator Tour in the Volcano")
-    regLLL.subregions = [lll_hot_foot_ledge, lll_upper_volcano, lll_elevator_tour]
+    regLLL.subregions = [lll_volcano_entrance, lll_volcano, lll_hot_foot_ledge,
+                         lll_upper_volcano, lll_elevator_tour]
     create_locs(regLLL, "Lethal Lava Land - Coins Star")
 
     regSSL = create_region("Shifting Sand Land", player, multiworld)
@@ -352,25 +384,40 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                         "Shifting Sand Land - Free Flying for 8 Red Coins",
                         "Shifting Sand Land - Stand Tall on the Four Pillars",
                         "Shifting Sand Land - Bob-omb Buddy",
-                        "Shifting Sand Land - Outside Pyramid Block 1-Up", "Shifting Sand Land - Pyramid Left Path Block 1-Up", "Shifting Sand Land - Pyramid Back Block 1-Up",
+                        "Shifting Sand Land - Outside Pyramid Block 1-Up",
                         "Shifting Sand Land - Oasis Tree 1-Up",
                         "Shifting Sand Land - Near Quicksand Pits 1-Up",
                         "Shifting Sand Land - Above Quicksand Pit 1-Up",
-                        "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
-                        "Shifting Sand Land - Pyramid Right Path 1-Up",
                         "Shifting Sand Land - Outside Pyramid Wing Cap Block",
                         "Shifting Sand Land - Outside Pyramid 1-Up Block",
-                        "Shifting Sand Land - Cannon Wing Cap Block",
-                        "Shifting Sand Land - Pyramid Left Path 1-Up Block",
-                        "Shifting Sand Land - Pyramid Back 1-Up Block")
+                        "Shifting Sand Land - Cannon Wing Cap Block")
     ssl_stone_structure = create_subregion(
         regSSL, "Shifting Sand Land - Stone Structure",
         "Shifting Sand Land - Stone Structure Koopa Shell Block",
         "Shifting Sand Land - Stone Structure Wing Cap Block")
-    ssl_upper_pyramid = create_subregion(regSSL, "Shifting Sand Land - Upper Pyramid", "Shifting Sand Land - Inside the Ancient Pyramid",
+    ssl_pyramid = create_region("Shifting Sand Land - Pyramid", player, multiworld)
+    create_locs(ssl_pyramid,
+                "Shifting Sand Land - Pyramid Left Path Block 1-Up",
+                "Shifting Sand Land - Pyramid Back Block 1-Up",
+                "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up",
+                "Shifting Sand Land - Pyramid Right Path 1-Up",
+                "Shifting Sand Land - Pyramid Left Path 1-Up Block",
+                "Shifting Sand Land - Pyramid Back 1-Up Block")
+    ssl_upper_pyramid_entrance = create_region(
+        "Shifting Sand Land - Upper Pyramid Entrance", player, multiworld)
+    ssl_pyramid_top_entry = create_region(
+        "Shifting Sand Land - Pyramid Top Entry", player, multiworld)
+    ssl_upper_pyramid = create_subregion(ssl_pyramid, "Shifting Sand Land - Upper Pyramid", "Shifting Sand Land - Inside the Ancient Pyramid",
                                          "Shifting Sand Land - Pyramid Puzzle",
                                          "Shifting Sand Land - Pyramid Platform Triggers 1-Up")
-    regSSL.subregions = [ssl_stone_structure, ssl_upper_pyramid]
+    ssl_pyramid_top_entry.connect(
+        ssl_pyramid, name="Shifting Sand Land - Pyramid Top Entry to Lower Pyramid")
+    ssl_pyramid_top_entry.connect(
+        ssl_upper_pyramid, name="Shifting Sand Land - Pyramid Top Entry Elevator Route")
+    regSSL.subregions = [
+        ssl_stone_structure, ssl_pyramid, ssl_upper_pyramid_entrance,
+        ssl_pyramid_top_entry, ssl_upper_pyramid,
+    ]
     create_locs(regSSL, "Shifting Sand Land - Coins Star")
 
     regDDD = create_region("Dire, Dire Docks", player, multiworld)
@@ -406,7 +453,6 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Bowser in the Fire Sea - 3 Coins Block")
     bitfs_upper = create_subregion(regBitFS, "Bowser in the Fire Sea - Upper",
                                    "Bowser in the Fire Sea - Red Coins",
-                                   "Bowser in the Fire Sea - Key",
                                    "Bowser in the Fire Sea - Swaying Stairs Block 1-Up",
                                    "Bowser in the Fire Sea - Near Poles Block 1-Up",
                                    "Bowser in the Fire Sea - Elevator Pole 1-Up",
@@ -437,7 +483,9 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         sl_upper, "Snowman's Land - Top of Snowman's Head",
         "Snowman's Land - Snowman's Big Head",
         "Snowman's Land - Snowman Tree 1-Up")
-    sl_igloo = create_subregion(regSL, "Snowman's Land - Igloo",
+    sl_igloo_entrance = create_region("Snowman's Land - Igloo Entrance", player, multiworld)
+    sl_igloo = create_region("Snowman's Land - Igloo", player, multiworld)
+    create_locs(sl_igloo,
                                 "Snowman's Land - Into the Igloo",
                                 "Snowman's Land - Inside Igloo Block 1-Up",
                                 "Snowman's Land - Igloo Ice Block 1-Up",
@@ -445,8 +493,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                 "Snowman's Land - Vanish Cap Block",
                                 "Snowman's Land - 3 Coins Block")
     sl_top_of_snowmans_head.connect(
-        sl_igloo, name="Snowman's Land - Top of Snowman's Head to Igloo")
-    regSL.subregions = [sl_whirl, sl_upper, sl_top_of_snowmans_head, sl_igloo]
+        sl_igloo_entrance, name="Snowman's Land - Top of Snowman's Head to Igloo Entrance")
+    regSL.subregions = [sl_whirl, sl_upper, sl_top_of_snowmans_head, sl_igloo_entrance, sl_igloo]
     create_locs(regSL, "Snowman's Land - Coins Star")
 
     regWDW = create_region("Wet-Dry World", player, multiworld)
@@ -518,12 +566,14 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                  "Tall, Tall Mountain - Upper Monty Moles")
     ttm_top = create_subregion(ttm_upper, "Tall, Tall Mountain - Top", "Tall, Tall Mountain - Scale the Mountain", "Tall, Tall Mountain - Mystery of the Monkey Cage",
                                                        "Tall, Tall Mountain - Mysterious Mountainside", "Tall, Tall Mountain - Breathtaking View from Bridge",
-                                                       "Tall, Tall Mountain - Vine Platform Butterfly 1-Up",
+                                                       "Tall, Tall Mountain - Vine Platform Butterfly 1-Up")
+    ttm_slide = create_region("Tall, Tall Mountain - Secret Slide", player, multiworld)
+    create_locs(ttm_slide,
                                                        "Tall, Tall Mountain - Slide Start Room Corners 1-Up",
                                                        "Tall, Tall Mountain - Slide Entry Ledge 1-Up",
                                                        "Tall, Tall Mountain - Slide First 1-Up",
                                                        "Tall, Tall Mountain - Slide Second 1-Up")
-    regTTM.subregions = [ttm_middle, ttm_upper, ttm_top]
+    regTTM.subregions = [ttm_middle, ttm_upper, ttm_top, ttm_slide]
     create_locs(regTTM, "Tall, Tall Mountain - Coins Star")
 
     hugeTHI = create_region("Tiny-Huge Island (Huge)", player, multiworld)
@@ -549,8 +599,9 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         thi_koopa_the_quick, "Tiny-Huge Island - Huge Top",
         "Tiny-Huge Island - The Tip Top of the Huge Island",
         "Tiny-Huge Island - The Tip Top of the Huge Island Star Block")
-    thi_wiggler_cave = create_subregion(
-        thi_huge_top, "Tiny-Huge Island - Wiggler's Cave",
+    thi_wiggler_cave = create_region(
+        "Tiny-Huge Island - Wiggler's Cave", player, multiworld)
+    create_locs(thi_wiggler_cave,
         "Tiny-Huge Island - Make Wiggler Squirm")
     thi_red_coins = create_region("Tiny-Huge Island - Red Coins Area", player, multiworld)
     create_locs(thi_red_coins,
@@ -562,6 +613,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     create_locs(thi_coins, "Tiny-Huge Island - Coins Star")
     hugeTHI.connect(thi_coins)
     tinyTHI.connect(thi_coins)
+    thi_red_coins.connect(thi_coins, name="Tiny-Huge Island - Red Coins Area to Coins")
+    thi_wiggler_cave.connect(thi_coins, name="Tiny-Huge Island - Wiggler's Cave to Coins")
     thi_huge_piranha_area = create_region("Tiny-Huge Island - Huge Piranha Area", player, multiworld)
     create_locs(thi_huge_piranha_area, "Tiny-Huge Island - Pluck the Piranha Flower")
     thi_tiny_piranha_area = create_subregion(tinyTHI, "Tiny-Huge Island - Tiny Piranha Area")
@@ -579,8 +632,12 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     thi_huge_piranha_area.connect(hugeTHI,
                                   name="Tiny-Huge Island - Huge Piranha Area to Huge Island")
     hugeTHI.connect(thi_huge_top, name="Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell")
-    hugeTHI.connect(thi_red_coins, name="Tiny-Huge Island - Huge Island to Red Coins Area")
-    thi_huge_top.connect(thi_red_coins, name="Tiny-Huge Island - Huge Top to Red Coins Area")
+    thi_red_coin_cave_entrance = create_region(
+        "Tiny-Huge Island - Red Coin Cave Entrance", player, multiworld)
+    hugeTHI.connect(thi_red_coin_cave_entrance,
+                    name="Tiny-Huge Island - Huge Island to Red Coin Cave Entrance")
+    thi_huge_top.connect(thi_red_coin_cave_entrance,
+                         name="Tiny-Huge Island - Huge Top to Red Coin Cave Entrance")
     thi_tiny_piranha_area.connect(tinyTHI, name="Tiny-Huge Island - Tiny Piranha Area to Tiny Island")
     thi_tiny_piranha_area.connect(thi_huge_piranha_area,
                                   name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
@@ -698,6 +755,13 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     bits_top = create_subregion(bits_arrow_ride, "Bowser in the Sky - Top", "Bowser in the Sky - Red Coins",
                                 "Bowser in the Sky - Final Platform 1-Up")
     regBitS.subregions = [bits_chuckya, bits_arrow_ride, bits_top]
+
+    create_region("Bowser in the Dark World - Bowser Pipe", player, multiworld)
+    bitdw_arena = create_region("Bowser in the Dark World - Bowser Arena", player, multiworld)
+    create_locs(bitdw_arena, "Bowser in the Dark World - Key")
+    bitfs_arena = create_region("Bowser in the Fire Sea - Bowser Arena", player, multiworld)
+    create_locs(bitfs_arena, "Bowser in the Fire Sea - Key")
+    create_region("Bowser in the Sky - Bowser Arena", player, multiworld)
 
     if not options.one_up_checks:
         remove_locs(multiworld, player, set(locOneUp_table))

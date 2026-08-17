@@ -929,10 +929,8 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         self.collect_basement_access()
         self.assertTrue(
             self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
-        self.assertFalse(
-            self.can_reach_location("Shifting Sand Land - Pyramid Right Path 1-Up"))
-
-        self.collect(self.get_item_by_name("Side Flip"))
+        # The unshuffled Pyramid Elevator reaches the upper interior, from which Mario can
+        # drop to the Right Path 1-Up.
         self.assertTrue(
             self.can_reach_location("Shifting Sand Land - Pyramid Right Path 1-Up"))
 
@@ -4583,6 +4581,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
 
     def test_initial_coin_sources_are_counted_independently(self):
+        self.collect_basement_access()
         source_coins = {
             "Lethal Lava Land - Single Yellow Coins": 25,
             "Lethal Lava Land - Horizontal Coin Lines": 30,
@@ -4612,6 +4611,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 11))
 
     def test_single_yellow_coin_routes(self):
+        self.collect_basement_access()
         self.collect(self.get_item_by_name("Lethal Lava Land - Single Yellow Coins"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
@@ -5072,7 +5072,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         source_coins = {
             "Shifting Sand Land - Single Yellow Coins": 19,
             "Shifting Sand Land - Horizontal Coin Lines": 20,
-            "Shifting Sand Land - Vertical Coin Lines": 5,
+            "Shifting Sand Land - Vertical Coin Lines": 4,
             "Shifting Sand Land - Horizontal Coin Rings": 8,
         }
         for item_name, expected_coins in source_coins.items():
@@ -5086,6 +5086,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
                 self.remove(item)
 
     def test_blue_coin_block_requires_ground_pound(self):
+        self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.collect(self.get_item_by_name("Shifting Sand Land - Blue Coin Block"))
         self.assertFalse(shifting_sand_land_coins(self.multiworld.state, self.player, 1))
 

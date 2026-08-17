@@ -535,6 +535,31 @@ class AreaRandomizer(Choice):
     option_Courses_and_Secrets = 3
 
 
+class SubAreaShuffle(Choice):
+    """
+    Shuffle entrances inside courses, such as the Cool, Cool Mountain chimney,
+    Shifting Sand Land pyramid entrances, and Bowser-stage arena entrances.
+
+    Separate keeps sub-areas separate from Castle course entrances. Sub-areas
+    with a usable exit are paired so leaving returns through the corresponding
+    exit in the source course.
+
+    Mixed combines every Castle course entrance with sub-area entrances. Paths
+    are constrained to at most one intermediate area before a dead end. The
+    Bowser in the Sky entrance always leads through one intermediate area to the
+    Bowser in the Sky arena.
+
+    Mixed Plus Castle Returns also shuffles falls and exits that return to the
+    Castle Lobby or Castle Grounds.
+    """
+    display_name = "Sub-Area Shuffle"
+    option_off = 0
+    option_separate = 1
+    option_mixed = 2
+    option_mixed_plus_castle_returns = 3
+    default = 0
+
+
 class BuddyChecks(Toggle):
     """Bob-omb Buddies are checks, cannon unlocks are items"""
     display_name = "Bob-omb Buddy Checks"
@@ -1039,6 +1064,7 @@ class SkyboxShuffle(Choice):
 sm64_options_groups = [
     OptionGroup("Logic Options", [
         AreaRandomizer,
+        SubAreaShuffle,
         BuddyChecks,
         OneUpChecks,
         Blocksanity,
@@ -1098,6 +1124,7 @@ sm64_options_groups = [
 class SM64Options(PerGameCommonOptions):
     accessibility: SM64Accessibility
     area_rando: AreaRandomizer
+    sub_area_shuffle: SubAreaShuffle
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks
     blocksanity: Blocksanity

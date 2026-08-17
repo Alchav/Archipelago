@@ -93,6 +93,16 @@ class TestJollyRogerBayLocations(SM64TestBase):
             ["Jolly Roger Bay - Coins Star", True, [], ALL_ITEMS],
         ], starting_regions=["Jolly Roger Bay"])
 
+    def test_sunken_ship_checks_do_not_repeat_the_physical_entrance_rule(self):
+        self.run_location_tests([
+            ["Jolly Roger Bay - Plunder in the Sunken Ship", False, []],
+            ["Jolly Roger Bay - Plunder in the Sunken Ship", True,
+             ["Jolly Roger Bay - Treasure Chests"]],
+            ["Jolly Roger Bay - Plunder in the Sunken Ship Star Block", False, []],
+            ["Jolly Roger Bay - Plunder in the Sunken Ship Star Block", True,
+             ["Jolly Roger Bay - Treasure Chests"]],
+        ], starting_regions=["Jolly Roger Bay - Sunken Ship"])
+
 
 class TestJollyRogerBayTricks(SM64TestBase):
     run_default_tests = False

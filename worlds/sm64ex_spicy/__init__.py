@@ -29,6 +29,9 @@ from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels, \
     get_shuffled_entrance_ids, sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
     sm64_entrance_destination_descriptions
+from .SubAreas import CASTLE_RETURN_SOURCES, RETURN_SOURCES, SUB_AREA_SOURCES, \
+    SUB_AREA_DESTINATION_DESCRIPTIONS, SUB_AREA_SOURCE_DESCRIPTIONS, SUB_AREA_SOURCE_NAMES, \
+    sub_area_destination_name, sub_area_source_by_id
 from BaseClasses import CollectionState, Entrance, Item, Region, Tutorial
 from Options import OptionError
 from ..AutoWorld import WebWorld, World
@@ -71,7 +74,8 @@ class SM64World(World):
     found_entrances_datastorage_key = None
     permanent_coin_sources_datastorage_key = "SM64SpicyPermanentCoinSources_{player}"
 
-    area_connections: typing.Dict[int, int]
+    area_connections: dict[int | str, int | str]
+    sub_area_slot_data: dict[int, int]
 
     options_dataclass = SM64Options
     options: SM64Options
@@ -120,10 +124,12 @@ class SM64World(World):
     sign_hint_entrances: dict[str, int]
     randomized_entrance_connections: dict[int, Entrance]
     deferred_entrance_targets: dict[int, Region]
+    shuffled_entrance_source_ids: set[int]
     permanent_coin_source_counts: dict[str, int]
 
     slot_option_names = (
         "area_rando",
+        "sub_area_shuffle",
         "buddy_checks",
         "one_up_checks",
         "blocksanity",
@@ -177,6 +183,7 @@ class SM64World(World):
     def generate_early(self):
         slot_data = self.get_re_gen_slot_data()
         self.area_connections = {}
+        self.sub_area_slot_data = {}
         self.music_slot_data = None
         self.skybox_slot_data = None
         self.using_slot_coin_count_check_locations = False
@@ -192,12 +199,17 @@ class SM64World(World):
         self.randomized_entrance_connections = {}
         self.deferred_entrance_targets = {}
         self.bypass_entrance_connections = {}
+        self.shuffled_entrance_source_ids = set()
         self.permanent_coin_source_counts = {}
         if slot_data:
             self.restore_options_from_slot_data(slot_data)
             self.area_connections = {
-                int(entrance): int(destination)
-                for entrance, destination in slot_data.get("AreaRando", {}).items()
+                int(source) if str(source).isdigit() else str(source): destination
+                for source, destination in slot_data.get("AreaConnections", {}).items()
+            }
+            self.sub_area_slot_data = {
+                int(source): int(destination)
+                for source, destination in slot_data.get("SubAreaRando", {}).items()
             }
             self.music_slot_data = self.get_music_slot_data_from_slot_data(slot_data)
             self.skybox_slot_data = self.get_skybox_slot_data_from_slot_data(slot_data)
@@ -238,8 +250,13 @@ class SM64World(World):
                 output.location_name for output in selected_coin_outputs
             )
         tracker_datastorage_keys = []
-        if self.options.area_rando.value != self.options.area_rando.option_Off:
+        if self.get_shuffled_normal_entrance_ids():
             tracker_datastorage_keys.append("SM64SpicyFoundEntrances_{player}")
+        if self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_off:
+            tracker_datastorage_keys.extend((
+                "SM64SpicyFoundSubAreaEntrancesLow_{player}",
+                "SM64SpicyFoundSubAreaEntrancesHigh_{player}",
+            ))
         tracker_datastorage_keys.append(self.permanent_coin_sources_datastorage_key)
         self.found_entrances_datastorage_key = tracker_datastorage_keys or None
         self.start_inventory_item_ids = set(self.start_inventory_item_counts)
@@ -255,13 +272,14 @@ class SM64World(World):
         self.cap_length_item_counts = {
             item_name: 0 for item_name in progressive_cap_length_item_names
         }
-        self.topology_present = self.options.area_rando
+        self.topology_present = bool(self.options.area_rando or self.options.sub_area_shuffle)
         if (
                 self.options.accessibility == self.options.accessibility.option_full
                 and not self.logic_sl_impossible_coin
         ):
             self.options.snowmans_land_coin_star_requirement.value = min(
                 self.options.snowmans_land_coin_star_requirement.value, 126)
+
         if (
                 self.options.accessibility == self.options.accessibility.option_full
                 and not self.logic_thi_impossible_coin
@@ -286,6 +304,87 @@ class SM64World(World):
                 secret_stage_coin_maxes, self.options.coin_count_checks.value)
         if "MoveRandoVec" in slot_data:
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
+
+    def get_shuffled_normal_entrance_ids(self) -> set[int]:
+        sub_area_mode = self.options.sub_area_shuffle.value
+        if sub_area_mode in {
+                self.options.sub_area_shuffle.option_mixed,
+                self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
+        }:
+            entrance_ids = {int(entrance_id) for entrance_id in sm64_shuffled_entrance_ids}
+            entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
+            return entrance_ids
+
+        entrance_ids = {
+            int(entrance_id)
+            for entrance_id in get_shuffled_entrance_ids(self.options.area_rando.value)
+        }
+        if sub_area_mode:
+            entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
+        return entrance_ids
+
+    def get_shuffled_entrance_source_ids(self) -> set[int]:
+        source_ids = self.get_shuffled_normal_entrance_ids()
+        sub_area_mode = self.options.sub_area_shuffle.value
+        if not sub_area_mode:
+            return source_ids
+
+        source_ids.update(
+            source.source_id for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()))
+        if sub_area_mode == self.options.sub_area_shuffle.option_mixed_plus_castle_returns:
+            source_ids.update(source.source_id for source in CASTLE_RETURN_SOURCES.values())
+        return source_ids
+
+    def get_entrance_hint_text(self, source_id: int) -> str:
+        physical_source = sub_area_source_by_id(source_id)
+        if physical_source is not None:
+            destination_key = self.area_connections[physical_source.key]
+            return (
+                f"{self.get_entrance_destination_description(destination_key)} is at "
+                f"{SUB_AREA_SOURCE_DESCRIPTIONS[physical_source.key]}."
+            )
+
+        source_name = sm64_level_to_entrances.get(source_id)
+        if source_id == int(SM64Levels.BOWSER_IN_THE_SKY):
+            source_name = "Bowser in the Sky"
+        if source_name is None:
+            raise KeyError(source_id)
+
+        if self.options.sub_area_shuffle.value in {
+                self.options.sub_area_shuffle.option_mixed,
+                self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
+        }:
+            destination_key = self.area_connections[source_id]
+        else:
+            destination_key = self.area_connections[source_id]
+        return (
+            f"{self.get_entrance_destination_description(destination_key)} is at "
+            f"{sm64_entrance_source_descriptions[source_id]}."
+        )
+
+    @staticmethod
+    def get_entrance_destination_description(destination: int | str) -> str:
+        if isinstance(destination, int):
+            return sm64_entrance_destination_descriptions[destination]
+        return SUB_AREA_DESTINATION_DESCRIPTIONS[destination]
+
+    @staticmethod
+    def get_entrance_destination_name(destination: int | str) -> str:
+        if isinstance(destination, int):
+            return sm64_entrance_destination_descriptions[destination]
+        return sub_area_destination_name(destination)
+
+    @staticmethod
+    def get_normal_entrance_name(entrance_id: int) -> str:
+        if entrance_id == int(SM64Levels.BOWSER_IN_THE_SKY):
+            return "Bowser in the Sky"
+        return sm64_level_to_entrances[entrance_id]
+
+    @classmethod
+    def get_connection_source_name(cls, source: int | str) -> str:
+        if isinstance(source, int):
+            return cls.get_normal_entrance_name(source)
+        return SUB_AREA_SOURCE_NAMES[source]
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
@@ -318,11 +417,15 @@ class SM64World(World):
     def set_rules(self):
         set_rules(self.multiworld, self.options, self.player, self.area_connections, self.move_rando_bitvec)
         if self.topology_present:
-            # Write area_connections to spoiler log
-            for entrance, destination in self.area_connections.items():
+            for source_id in self.shuffled_entrance_source_ids:
+                physical_source = sub_area_source_by_id(source_id)
+                source = physical_source.key if physical_source else source_id
+                destination = self.area_connections[source]
                 self.multiworld.spoiler.set_entrance(
-                    sm64_level_to_entrances[entrance] + " Entrance",
-                    sm64_level_to_entrances[destination],
+                    SUB_AREA_SOURCE_NAMES[source] if physical_source else
+                    ("Bowser in the Sky" if source_id == int(SM64Levels.BOWSER_IN_THE_SKY)
+                     else sm64_level_to_entrances[source_id]) + " Entrance",
+                    self.get_entrance_destination_name(destination),
                     'entrance', self.player)
 
     def create_item(self, name: str) -> Item:
@@ -698,7 +801,7 @@ class SM64World(World):
             item.advancement for item in self.multiworld.itempool
             if item.player == self.player and item.name not in sign_unlock_item_names
         )
-        entrance_count = len(get_shuffled_entrance_ids(self.options.area_rando.value))
+        entrance_count = len(self.get_shuffled_entrance_source_ids())
         self.sign_hint_count = min(len(sign_data), (advancement_count + entrance_count) // 5)
 
     @classmethod
@@ -712,7 +815,7 @@ class SM64World(World):
         remaining_entrances = {
             entrance
             for world in worlds
-            for entrance_id in get_shuffled_entrance_ids(world.options.area_rando.value)
+            for entrance_id in world.get_shuffled_entrance_source_ids()
             if (entrance := world.randomized_entrance_connections.get(entrance_id)) is not None
         }
         spheres = []
@@ -836,11 +939,7 @@ class SM64World(World):
                 candidate_type, candidate_value = candidate
                 if candidate_type == "entrance":
                     source_id = typing.cast(int, candidate_value)
-                    destination_id = world.area_connections[source_id]
-                    hint = (
-                        f"{sm64_entrance_destination_descriptions[destination_id]} is at "
-                        f"{sm64_entrance_source_descriptions[source_id]}."
-                    )
+                    hint = world.get_entrance_hint_text(source_id)
                     world.sign_hint_entrances[sign.key] = source_id
                 else:
                     item_location = typing.cast(typing.Any, candidate_value)
@@ -955,9 +1054,15 @@ class SM64World(World):
         return skybox_slot_data
 
     def fill_slot_data(self):
+        course_map = {
+            source: destination for source, destination in self.area_connections.items()
+            if isinstance(source, int) and isinstance(destination, int)
+        }
         slot_data = {
             "Options": self.options.as_dict(*self.slot_option_names),
-            "AreaRando": self.area_connections,
+            "AreaRando": course_map,
+            "AreaConnections": self.area_connections,
+            "SubAreaRando": self.sub_area_slot_data,
             "MoveRandoVec": self.move_rando_bitvec,
             "GlobalCapItems": self.options.cap_items.value in {
                 self.options.cap_items.option_global,
@@ -1023,20 +1128,40 @@ class SM64World(World):
         except (TypeError, ValueError):
             return
 
-        for bit, entrance_id in enumerate(sm64_shuffled_entrance_ids):
-            if not discovered & (1 << bit):
-                continue
-            entrance = self.randomized_entrance_connections.get(entrance_id)
-            target = self.deferred_entrance_targets.get(entrance_id)
+        if _found_key.startswith("SM64SpicyFoundSubAreaEntrancesLow_"):
+            discovered_source_ids = (
+                source_id for source_id in range(1, 32)
+                if discovered & (1 << (source_id - 1))
+            )
+        elif _found_key.startswith("SM64SpicyFoundSubAreaEntrancesHigh_"):
+            discovered_source_ids = (
+                source_id for source_id in range(32, 64)
+                if discovered & (1 << (source_id - 32))
+            )
+        else:
+            discovered_source_ids = (
+                int(entrance_id) for bit, entrance_id in enumerate(sm64_shuffled_entrance_ids)
+                if discovered & (1 << bit)
+            )
+
+        for source_id in discovered_source_ids:
+            entrance = self.randomized_entrance_connections.get(source_id)
+            target = self.deferred_entrance_targets.get(source_id)
             if entrance is None or target is None:
                 continue
             if entrance.connected_region is None:
                 entrance.connect(target)
-            if entrance_id not in self.bypass_entrance_connections:
+            if source_id not in self.bypass_entrance_connections:
                 bypass_region = self.multiworld.get_region("Bypassing Logic", self.player)
-                self.bypass_entrance_connections[entrance_id] = bypass_region.connect(
+                physical_source = sub_area_source_by_id(source_id)
+                source_name = (
+                    SUB_AREA_SOURCE_DESCRIPTIONS[physical_source.key]
+                    if physical_source is not None
+                    else sm64_entrance_source_descriptions[source_id]
+                )
+                self.bypass_entrance_connections[source_id] = bypass_region.connect(
                     target,
-                    name=f"Bypassing Logic -> {sm64_level_to_entrances[entrance_id]}",
+                    name=f"Bypassing Logic -> {source_name}",
                 )
 
     def get_apsm64ex_slot_data(self):
@@ -1076,23 +1201,35 @@ class SM64World(World):
         if self.topology_present:
             er_hint_data = {}
             for entrance, destination in self.area_connections.items():
-                destination_name = sm64_level_to_entrances[destination]
-                region_name = sm64_entrance_to_region[destination_name]
+                if not isinstance(entrance, int) or not isinstance(destination, int):
+                    continue
+                destination_name = self.get_normal_entrance_name(destination)
+                region_name = (
+                    "Bowser in the Sky" if destination == int(SM64Levels.BOWSER_IN_THE_SKY)
+                    else sm64_entrance_to_region[destination_name]
+                )
                 if destination_name == "Tiny-Huge Island (Tiny)":
                     continue
                 if region_name == "Tick Tock Clock Moving":
                     region_name = "Tick Tock Clock"
                 if destination_name == "Tiny-Huge Island (Huge)":
                     # Special rules for Tiny-Huge Island's dual entrances
-                    reverse_area_connections = {destination: entrance for entrance, destination in self.area_connections.items()}
-                    entrance_name = sm64_level_to_entrances[reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_HUGE]] \
-                                    + ' or ' + sm64_level_to_entrances[reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_TINY]]
+                    reverse_area_connections = {
+                        mapped_destination: mapped_entrance
+                        for mapped_entrance, mapped_destination in self.area_connections.items()
+                    }
+                    entrance_name = (
+                        self.get_connection_source_name(
+                            reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_HUGE])
+                        + ' or ' + self.get_connection_source_name(
+                            reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_TINY])
+                    )
                     regions = [
                         self.multiworld.get_region("Tiny-Huge Island (Huge)", self.player),
                         self.multiworld.get_region("Tiny-Huge Island (Tiny)", self.player),
                     ]
                 else:
-                    entrance_name = sm64_level_to_entrances[entrance]
+                    entrance_name = self.get_normal_entrance_name(entrance)
                     regions = [self.multiworld.get_region(region_name, self.player)]
                 for region in regions[:]:
                     regions += region.subregions
