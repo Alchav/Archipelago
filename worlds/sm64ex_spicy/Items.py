@@ -832,6 +832,7 @@ global_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Amps": SM64ItemData(3626962, trap),
     "Bowling Balls": SM64ItemData(3626968, trap),
     "Flamethrowers and Fire Bars": SM64ItemData(3626971, trap),
+    "Fire Spitters": SM64ItemData(3627010, trap),
 }
 
 
@@ -936,6 +937,17 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
     "Lethal Lava Land - Bouncing Fireballs": SM64ItemData(3627007, trap),
     "Shifting Sand Land - Spindel": SM64ItemData(3627008, trap),
     "Jolly Roger Bay - Falling Pillars": SM64ItemData(3627009, trap),
+    "Bowser in the Fire Sea - Fire Spitter": SM64ItemData(3627011, trap),
+    "Bowser in the Sky - Fire Spitters": SM64ItemData(3627012, trap),
+    "Dire, Dire Docks - Fire Spitter": SM64ItemData(3627013, trap),
+    "Hazy Maze Cave - Fire Spitters": SM64ItemData(3627014, trap),
+    "Rainbow Ride - Fire Spitters": SM64ItemData(3627015, trap),
+    "Shifting Sand Land - Fire Spitters": SM64ItemData(3627016, trap),
+    "Tiny-Huge Island - Fire Spitters": SM64ItemData(3627017, trap),
+    "Tick Tock Clock - Fire Spitters": SM64ItemData(3627018, trap),
+    "Vanish Cap Under the Moat - Fire Spitters": SM64ItemData(3627019, trap),
+    "Wet-Dry World - Fire Spitters": SM64ItemData(3627020, trap),
+    "Dire, Dire Docks - Bubs": SM64ItemData(3627021, trap),
 }
 
 bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
@@ -1008,9 +1020,11 @@ global_mode_enemy_item_names = (
     "Bob-omb Battlefield - Water Bombs",
     "Hazy Maze Cave - Boulders",
     "Flamethrowers and Fire Bars",
+    "Fire Spitters",
     "Lethal Lava Land - Bouncing Fireballs",
     "Shifting Sand Land - Spindel",
     "Jolly Roger Bay - Falling Pillars",
+    "Dire, Dire Docks - Bubs",
 )
 
 item_data_table = {
