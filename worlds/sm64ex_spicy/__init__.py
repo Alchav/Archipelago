@@ -20,7 +20,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
 from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
     get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, location_name_groups
 from .CoinChecks import CoinOutputID, coin_output_by_name, select_individual_coin_outputs, \
-    get_enabled_coin_check_kinds
+    get_enabled_coin_check_kinds, get_enemy_coin_checks_enabled
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
     move_randomizer_option_name_by_action, secret_stage_coin_count_max_coin_option_names, \
@@ -250,6 +250,7 @@ class SM64World(World):
                 self.random,
                 excluded_output_ids=frozenset(excluded_coin_outputs),
                 allowed_kinds=get_enabled_coin_check_kinds(self.options.coin_check_types.value),
+                allow_enemy_sources=get_enemy_coin_checks_enabled(self.options.coin_check_types.value),
             )
             self.coin_check_location_names = tuple(
                 output.location_name for output in selected_coin_outputs

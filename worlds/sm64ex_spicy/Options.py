@@ -51,7 +51,10 @@ class CoinChecks(Range):
 
 class CoinCheckTypes(OptionSet):
     """Choose which coin types are allowed to become Coin Checks locations.
-    Options are Yellow Coins, Red Coins and Blue Coins."""
+    Yellow Coins: Every yellow coin in a stage can be a location
+    Red Coins: Every red coin in a stage can be a location
+    Blue Coins: Every blue coin in a stage can be a location
+    Enemy Coins: Every coin from an enemy can be a location"""
     display_name = "Coin Check Types"
     valid_keys = coin_check_type_option_keys
     default = frozenset(coin_check_type_option_keys)
