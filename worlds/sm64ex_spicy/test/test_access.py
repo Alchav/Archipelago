@@ -5076,6 +5076,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "coin_checks": 100,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "area_rando": Options.AreaRandomizer.option_Off,
@@ -5083,7 +5084,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
 
     def test_initial_coin_sources_are_counted_independently(self):
         source_coins = {
-            "Shifting Sand Land - Single Yellow Coins": 6,
+            "Shifting Sand Land - Single Yellow Coins": 0,
             "Shifting Sand Land - Horizontal Coin Lines": 10,
             "Shifting Sand Land - Throwable Cork Box": 3,
             "Shifting Sand Land - Crazy Boxes": 10,
@@ -5112,7 +5113,7 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
 
         source_coins = {
-            "Shifting Sand Land - Single Yellow Coins": 19,
+            "Shifting Sand Land - Single Yellow Coins": 15,
             "Shifting Sand Land - Horizontal Coin Lines": 20,
             "Shifting Sand Land - Vertical Coin Lines": 4,
             "Shifting Sand Land - Horizontal Coin Rings": 8,
@@ -5126,6 +5127,27 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
                 self.assertFalse(shifting_sand_land_coins(
                     self.multiworld.state, self.player, expected_coins + 1))
                 self.remove(item)
+
+    def test_pyramid_and_pillar_coin_checks_use_their_physical_regions(self):
+        self.collect_by_name([
+            "Progressive Basement Key",
+            "Shifting Sand Land - Single Yellow Coins",
+        ])
+        for index in range(1, 3):
+            self.assertTrue(self.can_reach_location(
+                f"Shifting Sand Land - Inside Pyramid Coin {index}"))
+        for index in range(1, 4):
+            self.assertFalse(self.can_reach_location(
+                f"Shifting Sand Land - Pillar Coin {index}"))
+        self.assertFalse(self.can_reach_location(
+            "Shifting Sand Land - Quicksand Pillar Coin"))
+
+        self.collect_by_name(["Triple Jump", "Wing Cap", "Ground Pound"])
+        for index in range(1, 4):
+            self.assertTrue(self.can_reach_location(
+                f"Shifting Sand Land - Pillar Coin {index}"))
+        self.assertTrue(self.can_reach_location(
+            "Shifting Sand Land - Quicksand Pillar Coin"))
 
     def test_blue_coin_block_requires_ground_pound(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
@@ -5196,8 +5218,11 @@ class ShiftingSandLandCoinStar77AccessTestBase(ShiftingSandLandCoinStarAccessTes
         "shifting_sand_land_coin_star_requirement": 77,
     }
 
-    def test_start_coins_reach_coin_star(self):
+    def test_pillar_route_reaches_coin_star(self):
         self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect_by_name(["Triple Jump", "Wing Cap", "Ground Pound"])
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
@@ -5216,6 +5241,9 @@ class ShiftingSandLandCoinStar85AccessTestBase(ShiftingSandLandCoinStarAccessTes
             self.get_item_by_name("Wing Cap"),
         ])
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Free Flying for 8 Red Coins"))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
@@ -5230,6 +5258,9 @@ class ShiftingSandLandCoinStar92AccessTestBase(ShiftingSandLandCoinStarAccessTes
         self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
         self.collect(self.get_item_by_name("Ground Pound"))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect_by_name(["Triple Jump", "Wing Cap"])
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
@@ -5250,6 +5281,9 @@ class ShiftingSandLandCoinStar121AccessTestBase(ShiftingSandLandCoinStarAccessTe
             self.get_item_by_name("Wing Cap"),
         ])
         self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
+        self.assertFalse(self.can_reach_location("Shifting Sand Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Ground Pound"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Coins Star"))
 
 
@@ -5822,6 +5856,67 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
         ]:
             state.collect(self.world.create_item(item_name))
         return state
+
+    def make_wdw_route_state(self, starting_region, item_names):
+        state = CollectionState(self.multiworld)
+        region = self.multiworld.get_region(starting_region, self.player)
+        state.reachable_regions[self.player].add(region)
+        for entrance in region.exits:
+            if entrance.connected_region is not None:
+                state.blocked_connections[self.player].add(entrance)
+        for item_name in item_names:
+            state.collect(self.world.create_item(item_name), prevent_sweep=True)
+        state.sweep_for_advancements()
+        return state
+
+    def fourth_diamond_coin_line_is_available(self, state):
+        evaluation = COIN_EVALUATORS["Wet-Dry World"](
+            state, self.player, 152)
+        return next(
+            source.available
+            for source in evaluation.children
+            if source.source_id == "fourth_diamond_coin_line"
+        )
+
+    def test_fourth_diamond_coin_line_requires_highest_or_mid_high_route(self):
+        self.multiworld.get_entrance(
+            "Wet-Dry World - Top", self.player).access_rule = lambda state: False
+        state = self.make_wdw_route_state(
+            "Wet-Dry World - Mid Water",
+            ["Wet-Dry World - Horizontal Coin Lines"],
+        )
+        self.assertFalse(self.fourth_diamond_coin_line_is_available(state))
+
+        state.collect(self.world.create_item("Triple Jump"), prevent_sweep=True)
+        state.sweep_for_advancements()
+        self.assertFalse(self.fourth_diamond_coin_line_is_available(state))
+
+        state.collect(self.world.create_item("Dive"), prevent_sweep=True)
+        state.sweep_for_advancements()
+        self.assertTrue(self.fourth_diamond_coin_line_is_available(state))
+
+    def test_fourth_diamond_coin_line_accepts_purple_switch_route(self):
+        state = self.make_wdw_route_state(
+            "Wet-Dry World - Mid Water",
+            ["Wet-Dry World - Horizontal Coin Lines", "Purple Switches"],
+        )
+        self.assertTrue(state.can_reach(
+            "Wet-Dry World - Top of the Express Elevator", "Region", self.player))
+        self.assertTrue(self.fourth_diamond_coin_line_is_available(state))
+
+    def test_fourth_diamond_coin_line_accepts_highest_water(self):
+        state = self.make_wdw_route_state(
+            "Wet-Dry World - Highest Water",
+            ["Wet-Dry World - Horizontal Coin Lines"],
+        )
+        self.assertTrue(self.fourth_diamond_coin_line_is_available(state))
+
+    def test_fourth_diamond_coin_line_accepts_top(self):
+        state = self.make_wdw_route_state(
+            "Wet-Dry World - Top",
+            ["Wet-Dry World - Horizontal Coin Lines"],
+        )
+        self.assertTrue(self.fourth_diamond_coin_line_is_available(state))
 
     def test_each_unlock_matches_documented_total(self):
         source_coins = {

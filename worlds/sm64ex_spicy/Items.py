@@ -523,7 +523,6 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Castle - Kick": SM64ItemData(sm64ex_base_id + 482, filler),
     "Castle - Climb": SM64ItemData(sm64ex_base_id + 483),
     "Castle - Ledge Grab": SM64ItemData(sm64ex_base_id + 484),
-    # Restored secret-stage moves. These use a new range because the original range now contains other items.
     # Bowser in the Dark World
     "Bowser in the Dark World - Triple Jump": SM64ItemData(sm64ex_base_id + 1022),
     "Bowser in the Dark World - Long Jump": SM64ItemData(sm64ex_base_id + 1023, filler),

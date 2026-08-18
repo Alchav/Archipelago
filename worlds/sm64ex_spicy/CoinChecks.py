@@ -66,11 +66,56 @@ COURSE_MAXIMUM_COIN_VALUES = {
 
 
 COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ...]] = {
+    **{
+        ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", index):
+            (("ssl_inside_pyramid_coins",) if index <= 2 else ("ssl_pillar_coins",))
+        for index in range(1, 7)
+    },
     (
         "Shifting Sand Land",
         "ssl_pyramid_top_vertical_coin_line",
         5,
     ): ("ssl_pyramid_top_vertical_coin_line_top_coin",),
+}
+
+
+COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
+    **{
+        ("Whomp's Fortress", "whomp_jump_coins", index):
+            f"Whomp {((index - 1) // 5) + 1}, Coin {((index - 1) % 5) + 1}"
+        for index in range(1, 11)
+    },
+    **{
+        ("Whomp's Fortress", "whomp_ground_pound_coins", index):
+            f"Whomp {((index - 1) // 5) + 1}, Coin {((index - 1) % 5) + 6}"
+        for index in range(1, 11)
+    },
+    ("Lethal Lava Land", "lll_outside_bullies", 1): "Bully the Bullies Bully 1 Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 2): "Bully the Bullies Bully 3 Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 3): "Bully the Bullies Bully 2 Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 4): "After Bowser Puzzle Bully 2 Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 5): "First Bully Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 6): "Beige Platform Bully 2 Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 7): "Beige Platform Bully 1 Coin",
+    ("Lethal Lava Land", "lll_outside_bullies", 8): "After Bowser Puzzle Bully 1 Coin",
+    ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", 1): "Inside Pyramid Coin 1",
+    ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", 2): "Inside Pyramid Coin 2",
+    **{
+        ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", index): f"Pillar Coin {index - 2}"
+        for index in range(3, 7)
+    },
+    ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", 6): "Quicksand Pillar Coin",
+    **{
+        ("Wet-Dry World", source_id, index): f"{block_name} Coin {index}"
+        for source_id, block_name, count in (
+            ("pillar_ten_coin_block", "Pedestal 10-Coin Block", 10),
+            ("push_block_three_coin_block", "Push Block 3-Coin Block", 3),
+            ("low_ten_coin_block", "Push Block 10-Coin Block", 10),
+            ("wooden_structure_three_coin_block", "Wooden Structure 3-Coin Block", 3),
+            ("express_elevator_ten_coin_block", "Top of Express Elevator 10-Coin Block", 10),
+        )
+        for index in range(1, count + 1)
+    },
 }
 
 
@@ -149,8 +194,10 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
         7: ("wmotr_flight_red_coins", "wmotr_long_jump_second_red_coin"), 8: ("wmotr_flight_red_coins",),
     },
     "Bowser in the Dark World": {
-        **{i: ("bitdw_red_coins_before_slope",) for i in range(1, 7)},
-        7: ("bitdw_final_red_coins",), 8: ("bitdw_final_red_coins",),
+        1: ("bitdw_purple_switch_red_coins",),
+        **{i: ("bitdw_other_red_coins",) for i in range(2, 7)},
+        7: ("bitdw_purple_switch_red_coins",),
+        8: ("bitdw_other_red_coins",),
     },
     "Bowser in the Fire Sea": {
         1: ("bitfs_start_red_coins",), 2: ("bitfs_start_red_coins",),
@@ -172,7 +219,16 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
     "Bob-omb Battlefield": (*_repeat_names("Red Coin Outside the Island", 7), "Red Coin on the Island"),
     "Whomp's Fortress": (*_repeat_names("Initially Reachable Red Coin", 5), "Red Coin on the Thwomp", *_repeat_names("Red Coin at the Top", 2)),
     "Jolly Roger Bay": (*_repeat_names("Initially Reachable Red Coin", 4), "Red Coin on the Stone Pillar", *_repeat_names("Red Coin on the Raised Ship", 3)),
-    "Cool, Cool Mountain": _repeat_names("Mountain Red Coin", 8),
+    "Cool, Cool Mountain": (
+        "First Tree Red Coin",
+        "Bottom of Snowman Slide Red Coin",
+        "Bridge Out Red Coin",
+        "Ice Pillar Red Coin",
+        "Top of Buddy Lift Red Coin",
+        "Bridge Island Red Coin",
+        "Bottom Tree Red Coin",
+        "Bottom Corner Red Coin",
+    ),
     "Big Boo's Haunt": (*_repeat_names("First Floor Red Coin", 4), *_repeat_names("Second Floor Red Coin", 4)),
     "Hazy Maze Cave": (*_repeat_names("Lower Red Coin Room Red Coin", 4), *_repeat_names("Upper Red Coin Room Red Coin", 4)),
     "Lethal Lava Land": _repeat_names("Bowser Puzzle Red Coin", 8),
@@ -189,7 +245,16 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
     "Vanish Cap Under the Moat": (*_repeat_names("Red Coin Before the Checkerboards", 4), *_repeat_names("Checkerboard Red Coin", 4)),
     "Cavern of the Metal Cap": (*_repeat_names("Initial Red Coin", 4), *_repeat_names("Deep-Water Red Coin", 4)),
     "Wing Mario Over the Rainbow": ("Initial Red Coin", *_repeat_names("Cannon Region Red Coin", 4), *_repeat_names("Flight Path Red Coin", 3)),
-    "Bowser in the Dark World": (*_repeat_names("Red Coin Before the Slope", 6), *_repeat_names("Final Red Coin", 2)),
+    "Bowser in the Dark World": (
+        "Purple Switch Red Coin 2",
+        "Moving Yellow Bar Red Coin",
+        "Moving Platforms Red Coin",
+        "Spike Platform Red Coin",
+        "Above Tilting Platforms Red Coin",
+        "Crystal Path Red Coin",
+        "Purple Switch Red Coin 1",
+        "Near Tilting Platforms Red Coin",
+    ),
     "Bowser in the Fire Sea": (*_repeat_names("Initial Red Coin", 2), *_repeat_names("Upper Course Red Coin", 6)),
     "Bowser in the Sky": (*_repeat_names("Initial Red Coin", 3), *_repeat_names("Arrow Ride Red Coin", 3), *_repeat_names("Top Red Coin", 2)),
 }
@@ -374,6 +439,7 @@ STANDALONE_YELLOW_COIN_SOURCE_IDS = frozenset({
 
 
 STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
+    "rotating_plank_coins": "Rotating Plank Coin",
     "lll_volcano_s_island_coins": "Coin on the Volcano S-Shaped Island",
     "lll_volcano_first_ridge_coin_line": "Coin on the Volcano First Ridge",
     "lll_volcano_second_ridge_coins": "Coin on the Volcano Second Ridge",
@@ -461,7 +527,8 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             outputs = tuple(
                 CoinOutputDefinition(
                     CoinOutputID(course_name, source_id, index), course_base + offset + index - 1,
-                    f"{course_name} - {name}", kind, value,
+                    f"{course_name} - {COIN_OUTPUT_NAME_OVERRIDES.get((course_name, source_id, index), name)}",
+                    kind, value,
                     COIN_OUTPUT_SOURCE_METHOD_OVERRIDES.get(
                         (course_name, source_id, index), (source_id,)),
                 )

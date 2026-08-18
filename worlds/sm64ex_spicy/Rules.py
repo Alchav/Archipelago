@@ -489,11 +489,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     }
     using_slot_area_connections = bool(area_connections)
     if using_slot_area_connections:
-        randomized_entrances = {
-            int(entrance_lvl): sm64_level_to_entrances[int(destination_lvl)]
-            for entrance_lvl, destination_lvl in area_connections.items()
-            if isinstance(entrance_lvl, int) and isinstance(destination_lvl, int)
-        }
+        if mixed_sub_areas:
+            # The authoritative mixed map can route normal entrances to sub-areas and includes
+            # Bowser in the Sky, which is not part of the normal painting destination table.
+            randomized_entrances = {}
+        else:
+            randomized_entrances = {
+                int(entrance_lvl): sm64_level_to_entrances[int(destination_lvl)]
+                for entrance_lvl, destination_lvl in area_connections.items()
+                if isinstance(entrance_lvl, int) and isinstance(destination_lvl, int)
+            }
     else:
         randomized_level_to_paintings = sm64_level_to_paintings.copy()
         randomized_level_to_secrets = sm64_level_to_secrets.copy()

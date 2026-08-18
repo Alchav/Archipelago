@@ -446,7 +446,7 @@ def evaluate_whomps_fortress_coins(
     traces = [
         coin_source("start_throwable_cork_boxes", "Two throwable cork boxes", 6,
                 has_throwable_cork_boxes),
-        coin_source("start_flower_coin_ring", "Coin ring around the starting flower", 8,
+        coin_source("start_flower_coin_ring", "Flower Patch Coin Ring", 8,
                 has_horizontal_coin_rings),
         coin_source("start_coin_line", "Coin line near the beginning", 5,
                 has_horizontal_coin_lines),
@@ -456,7 +456,7 @@ def evaluate_whomps_fortress_coins(
                 has_single_yellow_coins),
         coin_source("water_slope_coin_line", "Coin line on the slope from the water", 5,
                 has_horizontal_coin_lines),
-        coin_source("water_coin_ring", "Coin ring in the water", 8, has_horizontal_coin_rings),
+        coin_source("water_coin_ring", "Water Coin Ring", 8, has_horizontal_coin_rings),
         coin_source("buddy_coin_line", "Coin line near the Bob-omb Buddy", 5,
                 has_horizontal_coin_lines),
         coin_source("whomp_jump_coins", "Coins from jumping on two Whomps", 10, has_whomps),
@@ -490,7 +490,7 @@ def evaluate_whomps_fortress_coins(
     wild_blue_children = (
         coin_source(
             "wild_blue_coin_ring",
-            "Coin ring above Shoot into the Wild Blue",
+            "Shoot into the Wild Blue Coin Ring",
             8,
             can_reach_wild_blue_coins and has_horizontal_coin_rings,
         ),
@@ -1381,10 +1381,17 @@ def shifting_sand_land_coins(
         has_throwable_cork_box,
     )
     builder.add(
-        "ssl_pillar_and_pyramid_coins",
-        "Coins on the pillars and inside the pyramid",
-        6,
-        has_single_yellow_coins,
+        "ssl_inside_pyramid_coins",
+        "Two coins inside the pyramid",
+        2,
+        has_single_yellow_coins and can_reach_pyramid,
+    )
+    builder.add(
+        "ssl_pillar_coins",
+        "Four coins on the pillars",
+        4,
+        has_single_yellow_coins and state.can_reach(
+            "Shifting Sand Land - Upper Pyramid Entrance", "Region", player),
     )
     builder.add(
         "ssl_behind_pyramid_coin_line",
@@ -2374,6 +2381,7 @@ def wet_dry_world_coin_evaluation(
         state, player, "WDW_WATER_LEVEL_DIAMOND")
     has_long_jump = rules.has_action(state, player, "Long Jump", level_name)
     has_triple_jump = rules.has_action(state, player, "Triple Jump", level_name)
+    has_dive = rules.has_action(state, player, "Dive", level_name)
     has_backflip = rules.has_action(state, player, "Backflip", level_name)
     has_side_flip = rules.has_action(state, player, "Side Flip", level_name)
     has_wall_kick = rules.has_action(state, player, "Wall Kick", level_name)
@@ -2400,25 +2408,25 @@ def wet_dry_world_coin_evaluation(
     wooden_structure_route = (
         can_reach_mid or can_reach_top or can_reach_top_of_express and has_long_jump)
     fourth_diamond_route = (
-        can_reach_mid or can_reach_highest or can_reach_top
-        or can_reach_top_of_express and has_long_jump)
+        can_reach_highest or can_reach_top_of_express
+        or has_triple_jump and has_dive or can_reach_top)
 
     traces = [
         coin_source("main_skeeters", "Two Skeeters in the main area", 6,
                     can_reach_main and has_skeeters),
         coin_source("amp_ring", "Coin ring around the Amp pillar", 8,
                     can_reach_near_top and has_horizontal_coin_rings),
-        coin_source("pillar_ten_coin_block", "10-Coin Block on the pillar", 10,
+        coin_source("pillar_ten_coin_block", "Pedestal 10-Coin Block", 10,
                     can_reach_near_top and near_top_block_route and has_ten_coin_blocks),
-        coin_source("push_block_three_coin_block", "3-Coin Block below the Chuckya platform", 3,
+        coin_source("push_block_three_coin_block", "Push Block 3-Coin Block", 3,
                     can_reach_near_top and has_three_coin_blocks),
         coin_source("low_breakable_boxes", "Breakable coin boxes at low water", 12,
                     can_reach_low and has_breakable_coin_boxes),
-        coin_source("low_ten_coin_block", "10-Coin Block below the cannon", 10,
+        coin_source("low_ten_coin_block", "Push Block 10-Coin Block", 10,
                     can_reach_low and has_ten_coin_blocks),
         coin_source("low_blue_coins", "Blue coins at low water", 30,
                     can_reach_low and has_ground_pound and has_blue_coin_block),
-        coin_source("wooden_structure_three_coin_block", "3-Coin Block on the wooden structure", 3,
+        coin_source("wooden_structure_three_coin_block", "Wooden Structure 3-Coin Block", 3,
                     wooden_structure_route and has_three_coin_blocks),
         coin_source("fourth_diamond_coin_line", "Coin line by the fourth water-level diamond", 5,
                     fourth_diamond_route and has_horizontal_coin_lines),
@@ -2426,7 +2434,7 @@ def wet_dry_world_coin_evaluation(
                     can_reach_top and has_horizontal_coin_lines),
         coin_source("top_chuckya", "Chuckya at the top", 5,
                     can_reach_top and has_chuckya),
-        coin_source("express_elevator_ten_coin_block", "10-Coin Block above the Express Elevator", 10,
+        coin_source("express_elevator_ten_coin_block", "Top of Express Elevator 10-Coin Block", 10,
                     can_reach_top_of_express and has_ten_coin_blocks),
         coin_source("downtown_ring", "Downtown statue coin ring", 8,
                     can_reach_downtown and has_horizontal_coin_rings),
@@ -3591,9 +3599,9 @@ def bowser_in_the_dark_world_coins(
         coin_source("bitdw_three_coin_block", "3-Coin Block",
                 3, has_three_coin_block),
         coin_source("bitdw_goombas", "Six Goombas", 6, has_goombas),
-        coin_source("bitdw_red_coins_before_slope",
-                "Six Red Coins before the slope", 12, has_red_coins,
-                red_coin_ids=frozenset(range(1, 7))),
+        coin_source("bitdw_other_red_coins",
+                "Six Red Coins not requiring Purple Switches", 12, has_red_coins,
+                red_coin_ids=frozenset({2, 3, 4, 5, 6, 8})),
     ))
     trace.add_route(
         "bitdw_slope",
@@ -3604,12 +3612,12 @@ def bowser_in_the_dark_world_coins(
                  3, has_single_yellow_coins),),
     )
     trace.add_route(
-        "bitdw_slope_red_coins",
-        "Final slope Red Coins (Purple Switches only)",
+        "bitdw_purple_switch_red_coins",
+        "Two opening Red Coins requiring Purple Switches",
         has_purple_switches,
-        (coin_source("bitdw_final_red_coins",
-                 "Final two Red Coins", 4, has_red_coins,
-                 red_coin_ids=frozenset({7, 8})),),
+        (coin_source("bitdw_purple_switch_red_coins",
+                 "Purple Switch Red Coins", 4, has_red_coins,
+                 red_coin_ids=frozenset({1, 7})),),
     )
     assert trace.reachable_coins <= 80
     return trace.evaluation()
@@ -4321,7 +4329,10 @@ def _middle_requirement_specs():
     SSL = "Shifting Sand Land"
     _add(SSL, "ssl_throwable_cork_box",
          unlocks=(_unlock("Throwable Cork Boxes", SSL, f"{SSL} - Throwable Cork Box"),))
-    _add(SSL, "ssl_pillar_and_pyramid_coins", unlocks=(_unlock("Single Yellow Coins", SSL),))
+    _add(SSL, "ssl_inside_pyramid_coins", f"{{{SSL} - Pyramid}}",
+         (_unlock("Single Yellow Coins", SSL),))
+    _add(SSL, "ssl_pillar_coins", f"{{{SSL} - Upper Pyramid Entrance}}",
+         (_unlock("Single Yellow Coins", SSL),))
     _add(SSL, ("ssl_behind_pyramid_coin_line", "ssl_pyramid_side_coin_line"),
          unlocks=(_unlock("Horizontal Coin Lines", SSL),))
     _add(SSL, "ssl_fly_guys", unlocks=(_unlock("Fly Guys", SSL, f"{SSL} - Fly Guys"),))
@@ -4548,8 +4559,8 @@ def _late_requirement_specs():
          "{Wet-Dry World - Top of the Express Elevator} & LJ",
          _unlock("3-Coin Blocks", WDW))
     _add(WDW, "fourth_diamond_coin_line",
-         "{Wet-Dry World - Mid Water} | {Wet-Dry World - Highest Water} | "
-         "{Wet-Dry World - Top} | {Wet-Dry World - Top of the Express Elevator} & LJ",
+         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top of the Express Elevator} | "
+         "TJ+DV | {Wet-Dry World - Top}",
          _unlock("Horizontal Coin Lines", WDW))
     _add(WDW, "top_coin_line", "{Wet-Dry World - Top} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", WDW))
@@ -4980,15 +4991,14 @@ def _secrets_requirement_specs():
             _target(BITDW), "", ("3-Coin Blocks", f"{BITDW} - 3-Coin Block")),
         (BITDW, "bitdw_goombas"): _spec(
             _target(BITDW), "", ("Goombas", f"{BITDW} - Goombas")),
-        (BITDW, "bitdw_red_coins_before_slope"): _spec(
+        (BITDW, "bitdw_other_red_coins"): _spec(
             _target(BITDW), "", ("Red Coins", f"{BITDW} - Red Coins")),
         (BITDW, "bitdw_slope"): _spec(
             _target(BITDW), "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass"),
         (BITDW, "bitdw_slope_single_coins"): _spec(
             _target(BITDW), "PURPLE_SWITCHES | logic_bitdw_purple_switch_bypass",
             ("Single Yellow Coins", f"{BITDW} - Single Yellow Coins")),
-        (BITDW, "bitdw_slope_red_coins"): _spec(_target(BITDW), "PURPLE_SWITCHES"),
-        (BITDW, "bitdw_final_red_coins"): _spec(
+        (BITDW, "bitdw_purple_switch_red_coins"): _spec(
             _target(BITDW), "PURPLE_SWITCHES", ("Red Coins", f"{BITDW} - Red Coins")),
 
         # Bowser in the Fire Sea

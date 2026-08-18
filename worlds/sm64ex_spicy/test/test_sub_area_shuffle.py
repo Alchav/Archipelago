@@ -127,6 +127,23 @@ class MixedSubAreaShuffleTest(SM64TestBase):
         self.assertEqual(self.world.area_connections, expected_connections)
         self.assertEqual(self.world.sub_area_slot_data, expected_warps)
 
+    def test_ut_regeneration_can_set_rules_from_mixed_map(self):
+        slot_data = self.world.fill_slot_data()
+        tracker_multiworld = setup_solo_multiworld(SM64World, steps=(), seed=7)
+        tracker_multiworld.re_gen_passthrough = {self.world.game: slot_data}
+        tracker_multiworld.generation_is_fake = True
+        tracker_multiworld.enforce_deferred_connections = "on"
+
+        for step in ("generate_early", "create_regions", "create_items", "set_rules"):
+            call_all(tracker_multiworld, step)
+
+        tracker_world = tracker_multiworld.worlds[1]
+        self.assertEqual(tracker_world.area_connections, self.world.area_connections)
+        self.assertIn(
+            int(SM64Levels.BOWSER_IN_THE_SKY),
+            tracker_world.randomized_entrance_connections,
+        )
+
     def test_bowser_in_the_sky_uses_its_castle_source_and_level_ids(self):
         source_id = int(SM64Levels.BOWSER_IN_THE_SKY)
         self.assertEqual(source_id, 211)
