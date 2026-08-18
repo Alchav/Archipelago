@@ -61,7 +61,7 @@ COURSE_MAXIMUM_COIN_VALUES = {
     "Wing Mario Over the Rainbow": 56, "Tower of the Wing Cap": 63,
     "Vanish Cap Under the Moat": 27, "Cavern of the Metal Cap": 47,
     "Bowser in the Dark World": 80, "Bowser in the Fire Sea": 80, "Bowser in the Sky": 76,
-    "Castle": 51,
+    "Castle": 15,
 }
 
 
@@ -80,6 +80,10 @@ COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ..
 
 
 COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
+    **{
+        ("Castle", "castle_courtyard_boos", index): f"Courtyard Boo {index} Coin"
+        for index in range(1, 10)
+    },
     **{
         ("Whomp's Fortress", "whomp_jump_coins", index):
             f"Whomp {((index - 1) // 5) + 1}, Coin {((index - 1) % 5) + 1}"

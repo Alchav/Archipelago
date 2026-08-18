@@ -3860,9 +3860,9 @@ def castle_coins(
         "castle_lobby_coins", "Four coins in the Castle Lobby", 4,
         has_single_yellow_coins)
     trace.add_source(
-        "castle_courtyard_boos", "Nine Boos in the Castle Courtyard", 45,
+        "castle_courtyard_boos", "Nine Boos in the Castle Courtyard", 9,
         has_castle_boos)
-    assert trace.reachable_coins <= 51
+    assert trace.reachable_coins <= 15
     return trace.evaluation()
 
 

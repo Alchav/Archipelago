@@ -347,6 +347,6 @@ SOURCE_LAYOUTS = {
     'Castle': (
         ('castle_grounds_bridge_coins', 'Coins under the bridge', 'yellow', 2),
         ('castle_lobby_coins', 'Coins in the lobby', 'yellow', 4),
-        ('castle_courtyard_boos', 'Boos in the courtyard', 'blue', 9),
+        ('castle_courtyard_boos', 'Boos in the courtyard', 'yellow', 9),
     ),
 }
