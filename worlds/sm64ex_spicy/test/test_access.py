@@ -1193,7 +1193,8 @@ class SeparateSecretStageMoveAccessTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "triple_jump": Options.TripleJump.option_per_level,
-        "collapse_misc_moves": Options.CollapseMiscMoves.option_false,
+        "combined_castle_and_secret_stage_move_items":
+            Options.CombinedCastleAndSecretStageMoveItems.option_false,
     }
 
     def test_secret_stage_names_use_separate_move_items(self):

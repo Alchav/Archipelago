@@ -149,16 +149,16 @@ misc_move_area_names = {
 }
 
 
-def get_move_area_name(level_name: str, collapse_misc_moves: bool = True) -> str:
+def get_move_area_name(level_name: str, combined_castle_and_secret_stage_move_items: bool = True) -> str:
     move_area_name = move_area_name_aliases.get(level_name, level_name)
-    if collapse_misc_moves and move_area_name in misc_move_area_names:
+    if combined_castle_and_secret_stage_move_items and move_area_name in misc_move_area_names:
         return "Misc"
     return move_area_name
 
 
 def get_per_level_action_item_name(
-        level_name: str, action: str, collapse_misc_moves: bool = True) -> str | None:
-    move_area_name = get_move_area_name(level_name, collapse_misc_moves)
+        level_name: str, action: str, combined_castle_and_secret_stage_move_items: bool = True) -> str | None:
+    move_area_name = get_move_area_name(level_name, combined_castle_and_secret_stage_move_items)
     if move_area_name not in per_level_move_area_names:
         return None
     return f"{move_area_name} - {action}"
@@ -1908,7 +1908,7 @@ class RuleFactory:
                 item_names[action] = True
             else:
                 per_level_item_name = get_per_level_action_item_name(
-                    level_name, action, bool(self.options.collapse_misc_moves))
+                    level_name, action, bool(self.options.combined_castle_and_secret_stage_move_items))
                 if per_level_item_name is None:
                     item_names[action] = action
                     continue

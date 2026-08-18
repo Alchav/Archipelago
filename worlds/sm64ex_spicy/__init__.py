@@ -150,7 +150,7 @@ class SM64World(World):
         "kick",
         "climb",
         "ledge_grab",
-        "collapse_misc_moves",
+        "combined_castle_and_secret_stage_move_items",
         "cap_items",
         "level_features",
         "bobomb_buddies",
@@ -656,7 +656,8 @@ class SM64World(World):
         item_names = []
         per_level_area_names = (
             main_course_move_area_names
-            + (collapsed_misc_move_area_names if self.options.collapse_misc_moves else separate_misc_move_area_names)
+            + (collapsed_misc_move_area_names
+               if self.options.combined_castle_and_secret_stage_move_items else separate_misc_move_area_names)
         )
         for action in randomized_action_item_names:
             option = getattr(self.options, move_randomizer_option_name_by_action[action])

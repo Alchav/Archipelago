@@ -769,7 +769,7 @@ class MoveRandomizerMode(Choice):
     option_both = 3
 
 
-class CollapseMiscMoves(DefaultOnToggle):
+class CombinedCastleAndSecretStageMoveItems(DefaultOnToggle):
     """
     Controls per-level move items for the castle and secret stages.
 
@@ -781,7 +781,7 @@ class CollapseMiscMoves(DefaultOnToggle):
 
     This option only affects moves set to Per Level or Both.
     """
-    display_name = "Collapse Castle and Secret Stage Moves"
+    display_name = "Combined Castle and Secret Stage Move Items"
 
 
 class TripleJump(MoveRandomizerMode):
@@ -792,8 +792,8 @@ class TripleJump(MoveRandomizerMode):
 
     Global - Shuffle one Triple Jump item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Triple Jump items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Triple Jump items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Triple Jump item and every applicable level-specific Triple Jump item.
     """
@@ -808,8 +808,8 @@ class LongJump(MoveRandomizerMode):
 
     Global - Shuffle one Long Jump item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Long Jump items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Long Jump items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Long Jump item and every applicable level-specific Long Jump item.
     """
@@ -824,8 +824,8 @@ class Backflip(MoveRandomizerMode):
 
     Global - Shuffle one Backflip item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Backflip items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Backflip items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Backflip item and every applicable level-specific Backflip item.
     """
@@ -840,8 +840,8 @@ class SideFlip(MoveRandomizerMode):
 
     Global - Shuffle one Side Flip item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Side Flip items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Side Flip items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Side Flip item and every applicable level-specific Side Flip item.
     """
@@ -856,8 +856,8 @@ class WallKick(MoveRandomizerMode):
 
     Global - Shuffle one Wall Kick item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Wall Kick items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Wall Kick items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Wall Kick item and every applicable level-specific Wall Kick item.
     """
@@ -872,8 +872,8 @@ class Dive(MoveRandomizerMode):
 
     Global - Shuffle one Dive item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Dive items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Dive items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Dive item and every applicable level-specific Dive item.
     """
@@ -888,8 +888,8 @@ class GroundPound(MoveRandomizerMode):
 
     Global - Shuffle one Ground Pound item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Ground Pound items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Ground Pound items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Ground Pound item and every applicable level-specific Ground Pound item.
     """
@@ -904,8 +904,8 @@ class Kick(MoveRandomizerMode):
 
     Global - Shuffle one Kick item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Kick items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Kick items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Kick item and every applicable level-specific Kick item.
     """
@@ -922,8 +922,8 @@ class Climb(MoveRandomizerMode):
 
     Per Level - Shuffle separate Climb items for each applicable area. Big Boo's Haunt, Bowser in the Dark World,
     Vanish Cap Under the Moat, Cavern of the Metal Cap, and Tower of the Wing Cap have no climbable objects and do not
-    add Climb items. The Collapse Castle and Secret Stage Moves option determines whether the remaining Castle and
-    secret-stage areas share a Misc item or use separate items.
+    add Climb items. The Combined Castle and Secret Stage Move Items option determines whether the remaining Castle
+    and secret-stage areas share a Misc item or use separate items.
 
     Both - Shuffle the global Climb item and every applicable level-specific Climb item.
     """
@@ -938,8 +938,8 @@ class LedgeGrab(MoveRandomizerMode):
 
     Global - Shuffle one Ledge Grab item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Ledge Grab items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Ledge Grab items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Ledge Grab item and every applicable level-specific Ledge Grab item.
     """
@@ -1116,7 +1116,7 @@ sm64_options_groups = [
         BowserInTheSkyStageCollapseHits,
     ]),
     OptionGroup("Ability Options", [
-        CollapseMiscMoves,
+        CombinedCastleAndSecretStageMoveItems,
         *move_randomizer_options,
     ]),
     OptionGroup("Trap Options", [
@@ -1159,7 +1159,7 @@ class SM64Options(PerGameCommonOptions):
     kick: Kick
     climb: Climb
     ledge_grab: LedgeGrab
-    collapse_misc_moves: CollapseMiscMoves
+    combined_castle_and_secret_stage_move_items: CombinedCastleAndSecretStageMoveItems
     cap_items: CapItems
     level_features: LevelFeatures
     bobomb_buddies: BobombBuddies

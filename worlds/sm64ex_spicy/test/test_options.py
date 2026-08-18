@@ -926,7 +926,8 @@ class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
     options = {
         "triple_jump": Options.TripleJump.option_per_level,
         "climb": Options.Climb.option_per_level,
-        "collapse_misc_moves": Options.CollapseMiscMoves.option_false,
+        "combined_castle_and_secret_stage_move_items":
+            Options.CombinedCastleAndSecretStageMoveItems.option_false,
     }
 
     def test_separate_castle_and_secret_stage_moves_are_generated(self):
@@ -942,7 +943,8 @@ class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Climb")), expected_count)
 
     def test_collapse_option_is_in_slot_data(self):
-        self.assertEqual(self.world.fill_slot_data()["Options"]["collapse_misc_moves"], 0)
+        self.assertEqual(
+            self.world.fill_slot_data()["Options"]["combined_castle_and_secret_stage_move_items"], 0)
 
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
