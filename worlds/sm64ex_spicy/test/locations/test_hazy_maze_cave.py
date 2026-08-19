@@ -93,7 +93,7 @@ class TestHazyMazeCaveLocations(SM64TestBase):
              ["Hazy Maze Cave - Metal Cap"]],
             ["Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block", False, []],
             ["Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block", True,
-             ["Hazy Maze Cave - Metal Cap"]],
+             ["Hazy Maze Cave - Metal Cap", "Hazy Maze Cave - Purple Switch"]],
             ["Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block", False, []],
             ["Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block", True,
              ["Hazy Maze Cave - Metal Cap"]],

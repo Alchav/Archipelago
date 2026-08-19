@@ -236,11 +236,11 @@ def evaluate_bob_omb_battlefield_coins(
         coin_source("main_horizontal_coin_lines", "Three horizontal coin lines", 15,
                 has_horizontal_coin_lines),
         coin_source("main_wooden_posts", "Five wooden posts", 25, has_wooden_posts),
-        coin_source("flowerbed_coin_ring", "Coin ring around the flowerbed", 8,
+        coin_source("flowerbed_coin_ring", "Flowerbed Coin Ring", 8,
                 has_horizontal_coin_rings),
         coin_source("main_bob_ombs", "Twelve Bob-ombs", 12, has_bob_ombs),
         coin_source("main_goombas", "Eleven Goombas", 11, has_goombas),
-        coin_source("main_red_coins", "Seven Red Coins outside the island", 14, has_red_coins,
+        coin_source("main_red_coins", "Seven Red Coins in the main area", 14, has_red_coins,
                     red_coin_ids=frozenset(range(1, 8))),
         coin_source("main_koopa_troopa", "Koopa Troopa", 5, has_koopa_troopa),
     ]
@@ -448,23 +448,25 @@ def evaluate_whomps_fortress_coins(
                 has_throwable_cork_boxes),
         coin_source("start_flower_coin_ring", "Flower Patch Coin Ring", 8,
                 has_horizontal_coin_rings),
-        coin_source("start_coin_line", "Coin line near the beginning", 5,
+        coin_source("start_coin_line", "Dirt Ramp Coin Line", 5,
                 has_horizontal_coin_lines),
-        coin_source("falling_bridge_coin_line", "Coin line past the falling bridge", 5,
+        coin_source("falling_bridge_coin_line", "Cannon Coin Line", 5,
                 has_horizontal_coin_lines),
         coin_source("rotating_plank_coins", "Coins around the rotating plank", 4,
                 has_single_yellow_coins),
-        coin_source("water_slope_coin_line", "Coin line on the slope from the water", 5,
+        coin_source("water_slope_coin_line", "Narrow Plank Coin Line", 5,
                 has_horizontal_coin_lines),
         coin_source("water_coin_ring", "Water Coin Ring", 8, has_horizontal_coin_rings),
-        coin_source("buddy_coin_line", "Coin line near the Bob-omb Buddy", 5,
+        coin_source("buddy_coin_line", "Stone Ramp Coin Line", 5,
                 has_horizontal_coin_lines),
         coin_source("whomp_jump_coins", "Coins from jumping on two Whomps", 10, has_whomps),
-        coin_source("piranha_plant_coins", "Three Piranha Plants", 15, has_piranha_plants),
+        coin_source("piranha_plant_coins", "Three named Piranha Plants", 15, has_piranha_plants),
         coin_source("initial_red_coins", "Five initially reachable Red Coins", 10, has_red_coins,
                     red_coin_ids=frozenset(range(1, 6))),
-        coin_source("thwomp_red_coin", "Red Coin on the Thwomp", 2,
-                has_red_coins and has_thwomp, red_coin_ids=frozenset({6})),
+        coin_source("thwomp_red_coin", "Thwomp Red Coin", 2,
+                has_red_coins and (
+                    has_thwomp or Rules.has_action(state, player, "Triple Jump", level_name)
+                ), red_coin_ids=frozenset({6})),
     ]
 
     has_moveless_wild_blue_route = (
@@ -520,9 +522,9 @@ def evaluate_whomps_fortress_coins(
 
     has_top = state.can_reach(f"{level_name} - Top", "Region", player)
     top_children = (
-        coin_source("top_floating_isle_ring", "Coin ring on the floating isle", 8,
+        coin_source("top_floating_isle_ring", "Floating Isle Coin Ring", 8,
                 has_top and has_horizontal_coin_rings),
-        coin_source("top_floating_arrow", "Coin arrow above the fortress", 8,
+        coin_source("top_floating_arrow", "Coin Arrow", 8,
                 has_top and has_coin_arrows),
         coin_source("top_red_coins", "Two Red Coins at the top", 4,
                 has_top and has_red_coins, red_coin_ids=frozenset({7, 8})),
@@ -767,7 +769,6 @@ def evaluate_big_boos_haunt_coins(
     from . import Rules
 
     level_name = "Big Boo's Haunt"
-    target_name = f"{level_name} - Coins Star"
     has_red_coins = Rules.has_unlock(
         state, player, "coin_object_unlocks",
         "Red Coins", f"{level_name} - Red Coins")
@@ -795,17 +796,9 @@ def evaluate_big_boos_haunt_coins(
     has_scuttlebugs = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Scuttlebugs", f"{level_name} - Scuttlebugs")
-    has_normal_third_floor_route = (
-        Rules.has_action(state, player, "Wall Kick", level_name)
-        and Rules.has_action(state, player, "Ledge Grab", level_name)
-    )
-    has_wall_kick_third_floor_trick = Rules.can_use_logic_trick(
-        state, player, "logic_bbh_third_floor_wall_kick", target_name)
-    has_bookend_third_floor_trick = Rules.can_use_logic_trick(
-        state, player, "logic_bbh_third_floor_side_flip", target_name)
 
     traces = [
-        coin_source("mansion_ten_coin_block", "Ten-Coin Block behind the mansion", 10,
+        coin_source("mansion_ten_coin_block", "10-Coin Block behind the mansion", 10,
                 has_ten_coin_block),
         coin_source("shed_breakable_coin_boxes", "Two breakable coin boxes near the shed", 6,
                 has_breakable_coin_boxes),
@@ -815,8 +808,18 @@ def evaluate_big_boos_haunt_coins(
         coin_source("main_mr_is", "Two Mr. Is", 10, has_mr_is),
         coin_source("main_bookend", "Flying Bookend on the first floor", 5,
                 has_flying_bookends),
-        coin_source("first_floor_red_coins", "Four first-floor Red Coins", 8, has_red_coins,
-                    red_coin_ids=frozenset(range(1, 5))),
+        coin_source("first_floor_red_coins", "Three readily reachable first-floor Red Coins", 6,
+                    has_red_coins, red_coin_ids=frozenset({1, 2, 4})),
+        coin_source(
+            "first_floor_movement_red_coin",
+            "Bookshelf Red Coin requiring Side Flip, Backflip, Triple Jump, or Wall Kick",
+            2,
+            has_red_coins and any(
+                Rules.has_action(state, player, action, level_name)
+                for action in ("Side Flip", "Backflip", "Triple Jump", "Wall Kick")
+            ),
+            red_coin_ids=frozenset({3}),
+        ),
     ]
 
     has_second_floor = state.can_reach(f"{level_name} - Second Floor", "Region", player)
@@ -931,14 +934,21 @@ def evaluate_hazy_maze_cave_coins(
     )
 
     traces = [
-        coin_source("start_coin_line", "Coin line right of the start", 5,
+        coin_source("start_coin_line", "Rolling Rocks Coin Line", 5,
                 has_horizontal_coin_lines),
         coin_source("maze_entrance_coin_line", "Coin line before the maze", 5,
                 has_horizontal_coin_lines),
-        coin_source("rolling_rocks_coins", "Coins beside the rolling rocks", 5,
+        coin_source("rolling_rocks_coins", "First Room Coins", 5,
                 has_single_yellow_coins),
-        coin_source("lake_approach_coin_ring", "Coin ring before the underground lake", 8,
-                has_horizontal_coin_rings),
+        coin_source(
+            "lake_approach_coin_ring",
+            "Swimming Beast in the Cavern Star Coin Ring",
+            8,
+            (
+                Rules.has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST")
+                or Rules.can_use_logic_trick(state, player, "logic_hmc_elevator_clip", level_name)
+            ) and has_horizontal_coin_rings,
+        ),
         coin_source("first_room_scuttlebugs", "Two Scuttlebugs in the first room", 6,
                 has_scuttlebugs),
         coin_source("pit_room_scuttlebug", "Scuttlebug in the pit room", 3, has_scuttlebugs),
@@ -997,13 +1007,9 @@ def evaluate_hazy_maze_cave_coins(
     ))
     traces.append(coin_source(
         "swimming_beast_coin_ring",
-        "Coin ring around Swimming Beast in the Cavern",
+        "Past Rolling Rocks 1-Up Block Coin Ring",
         8,
-        (
-            Rules.has_simple_arbitrary_feature(state, player, "HMC_SWIMMING_BEAST")
-            or Rules.can_use_logic_trick(state, player, "logic_hmc_elevator_clip", level_name)
-        )
-        and has_horizontal_coin_rings,
+        has_horizontal_coin_rings,
     ))
 
     has_toxic_maze_location = state.can_reach(
@@ -1022,14 +1028,8 @@ def evaluate_hazy_maze_cave_coins(
         toxic_maze_children,
     ))
 
-    has_metal_head_route = (
-        Rules.has_purple_switches(state, player, level_name)
-        and (
-            Rules.has_metal_cap(state, player, level_name)
-            or Rules.can_use_logic_trick(
-                state, player, "logic_hmc_metal_head_coin_route_capless", level_name)
-        )
-    )
+    has_metal_head_route = state.can_reach(
+        f"{level_name} - Metal-Head Mario Can Move Room", "Region", player)
     traces.append(coin_source(
         "metal_head_scuttlebug",
         "Scuttlebug on the Metal-Head Mario Can Move route",
@@ -1104,13 +1104,25 @@ def lethal_lava_land_coins(
     builder = CoinTraceBuilder()
     builder.add(
         "lll_tilting_platform_coin_line",
-        "Coin line on the tilting platform past the first Mr. I",
+        "Coin Line under the Bridge",
         5,
-        has_horizontal_coin_lines,
+        has_horizontal_coin_lines and (has_koopa_shell or has_lava_damage_boosting),
+        children=(
+            coin_condition(
+                "lll_under_bridge_koopa_shell_route",
+                "Koopa Shell route",
+                has_koopa_shell,
+            ),
+            coin_condition(
+                "lll_under_bridge_lava_damage_boosting_route",
+                "Lava Damage Boosting trick route",
+                has_lava_damage_boosting,
+            ),
+        ),
     )
     builder.add(
         "lll_grey_ramp_coins",
-        "Coins on the grey ramp near the tilting platform",
+        "First Grey Crescent Coins",
         3,
         has_single_yellow_coins,
     )
@@ -1128,13 +1140,13 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_second_big_bully_coin_ring",
-        "Coin ring on the second Big Bully platform",
+        "Beige Platform Coin Ring",
         8,
         has_horizontal_coin_rings,
     )
     builder.add(
         "lll_northwest_ramp_coin_line",
-        "Coin line on the northwest brown ramp",
+        "Coin Line on the Sinking Platform near the Big Bully",
         5,
         has_horizontal_coin_lines,
     )
@@ -1146,13 +1158,13 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_north_volcano_coin_line",
-        "Coin line north of the volcano",
+        "Near Volcano Coin Line",
         5,
         has_horizontal_coin_lines,
     )
     builder.add(
         "lll_two_bullies_coin_ring",
-        "Coin ring on the platform with two Bullies",
+        "Bully the Bullies Coin Ring",
         8,
         has_horizontal_coin_rings,
     )
@@ -1164,13 +1176,13 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_southeast_grey_ramp_coins",
-        "Coins on the southeast grey ramp",
+        "Central Gray Crescent Coins",
         4,
         has_single_yellow_coins,
     )
     builder.add(
         "lll_second_mr_i_coin_ring",
-        "Coin ring by the second Mr. I",
+        "Mr. I Island Coin Ring",
         8,
         has_horizontal_coin_rings,
     )
@@ -1241,21 +1253,9 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_under_bridge_coin_line",
-        "Coin line under the bridge",
+        "Northeast Brown Platform Coin Line",
         5,
-        has_single_yellow_coins and (has_koopa_shell or has_lava_damage_boosting),
-        children=(
-            coin_condition(
-                "lll_under_bridge_koopa_shell_route",
-                "Koopa Shell route",
-                has_koopa_shell,
-            ),
-            coin_condition(
-                "lll_under_bridge_lava_damage_boosting_route",
-                "Lava Damage Boosting trick route",
-                has_lava_damage_boosting,
-            ),
-        ),
+        has_horizontal_coin_lines,
     )
     builder.add(
         "lll_volcano_s_island_coins",
@@ -3611,13 +3611,12 @@ def bowser_in_the_dark_world_coins(
                  "Three coins on the slope",
                  3, has_single_yellow_coins),),
     )
-    trace.add_route(
+    trace.add(
         "bitdw_purple_switch_red_coins",
         "Two opening Red Coins requiring Purple Switches",
-        has_purple_switches,
-        (coin_source("bitdw_purple_switch_red_coins",
-                 "Purple Switch Red Coins", 4, has_red_coins,
-                 red_coin_ids=frozenset({1, 7})),),
+        4,
+        has_purple_switches and has_red_coins,
+        red_coin_ids=frozenset({1, 7}),
     )
     assert trace.reachable_coins <= 80
     return trace.evaluation()
@@ -4047,8 +4046,7 @@ def _early_requirement_specs():
             WF_TARGET, "", (f"{WF} - Piranha Plants", f"{WF} - Piranha Plants")),
         (WF, "initial_red_coins"): _spec(WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins")),
         (WF, "thwomp_red_coin"): _spec(
-            WF_TARGET, "", ("Red Coins", f"{WF} - Red Coins"),
-            ("Thwomps and Grindels", f"{WF} - Thwomps")),
+            WF_TARGET, "THWOMP/TJ", ("Red Coins", f"{WF} - Red Coins")),
         (WF, "wild_blue_route"): _spec(
             WF_TARGET,
             "CANN | logic_wf_into_the_wild_blue_yonder_wall_kick | "
@@ -4158,6 +4156,8 @@ def _early_requirement_specs():
             BBH_TARGET, "", (f"{BBH} - Flying Bookends", f"{BBH} - Flying Bookends")),
         (BBH, "first_floor_red_coins"): _spec(
             BBH_TARGET, "", ("Red Coins", f"{BBH} - Red Coins")),
+        (BBH, "first_floor_movement_red_coin"): _spec(
+            BBH_TARGET, "SF/BF/TJ/WK", ("Red Coins", f"{BBH} - Red Coins")),
         (BBH, "second_floor_sources"): _spec(BBH_TARGET, f"{{{BBH} - Second Floor}}"),
         (BBH, "second_floor_bookends"): _spec(
             BBH_TARGET, f"{{{BBH} - Second Floor}}",
@@ -4232,8 +4232,8 @@ def _middle_requirement_specs():
     _add(HMC, ("start_coin_line", "maze_entrance_coin_line"),
          unlocks=(_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "rolling_rocks_coins", unlocks=(_unlock("Single Yellow Coins", HMC),))
-    _add(HMC, ("lake_approach_coin_ring",),
-         unlocks=(_unlock("Horizontal Coin Rings", HMC),))
+    _add(HMC, "lake_approach_coin_ring", "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
+         (_unlock("Horizontal Coin Rings", HMC),))
     _add(HMC, ("first_room_scuttlebugs", "pit_room_scuttlebug", "red_coin_room_scuttlebugs"),
          unlocks=(_unlock("Scuttlebugs", HMC),))
     _add(HMC, ("pit_room_swoop", "toxic_maze_swoops"),
@@ -4256,15 +4256,14 @@ def _middle_requirement_specs():
          (_unlock("Swoops", HMC),))
     _add(HMC, "pit_islands_ceiling_coin_line", f"{{{HMC} - Pit Islands}} & CL",
          (_unlock("Horizontal Coin Lines", HMC),))
-    _add(HMC, "swimming_beast_coin_ring", "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
-         (_unlock("Horizontal Coin Rings", HMC),))
+    _add(HMC, "swimming_beast_coin_ring",
+         unlocks=(_unlock("Horizontal Coin Rings", HMC),))
     _add(HMC, "navigating_toxic_maze_sources", f"{{{{{HMC} - Navigating the Toxic Maze}}}}")
     _add(HMC, "toxic_maze_star_coin_line", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
          (_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "toxic_maze_exit_swoops", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
          (_unlock("Swoops", HMC),))
-    _add(HMC, "metal_head_scuttlebug",
-         "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_coin_route_capless",
+    _add(HMC, "metal_head_scuttlebug", f"{{{HMC} - Metal-Head Mario Can Move Room}}",
          (_unlock("Scuttlebugs", HMC),))
     _add(HMC, "toxic_maze_blue_coin_block", "GP",
          (_unlock("Blue Coin Blocks", HMC, f"{HMC} - Blue Coin Block"),))
@@ -4276,9 +4275,12 @@ def _middle_requirement_specs():
     LLL_HEALING = "SINGLE_YELLOW_COINS/HORIZONTAL_COIN_LINES/HORIZONTAL_COIN_RINGS/BULLIES/MR_IS"
 
     _add(LLL, (
-        "lll_tilting_platform_coin_line", "lll_first_big_bully_coin_line",
+        "lll_first_big_bully_coin_line",
         "lll_northwest_ramp_coin_line", "lll_north_volcano_coin_line",
     ), unlocks=(_unlock("Horizontal Coin Lines", LLL),))
+    _add(LLL, "lll_tilting_platform_coin_line",
+         "LLL_KOOPA_SHELL | logic_lava_damage_boosting",
+         (_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, ("lll_volcano_first_ridge_coin_line", "lll_volcano_second_bully_coin_line"),
          f"{{{LLL} - Volcano}}", (_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, (
@@ -4304,8 +4306,7 @@ def _middle_requirement_specs():
          (_unlock("Red Coins", LLL),))
     _add(LLL, "lll_outside_bullies", unlocks=(_unlock("Bullies", LLL),))
     _add(LLL, "lll_mr_is", unlocks=(_unlock("Mr. Is", LLL),))
-    _add(LLL, "lll_under_bridge_coin_line", "LLL_KOOPA_SHELL | logic_lava_damage_boosting",
-         (_unlock("Single Yellow Coins", LLL),))
+    _add(LLL, "lll_under_bridge_coin_line", unlocks=(_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, "lll_volcano_bullies", f"{{{LLL} - Volcano}}",
          (_unlock("Bullies", LLL),))
     _add(LLL, "lll_elevator_tour_platform_coins",

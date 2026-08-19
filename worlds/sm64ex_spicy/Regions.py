@@ -335,11 +335,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Castle - Basement Water Tunnel Four Corners 1-Up")
 
     regHMC = create_region("Hazy Maze Cave", player, multiworld)
-    create_locs(regHMC, "Hazy Maze Cave - Swimming Beast in the Cavern", "Hazy Maze Cave - Metal-Head Mario Can Move!",
+    create_locs(regHMC, "Hazy Maze Cave - Swimming Beast in the Cavern",
                         "Hazy Maze Cave - Watch for Rolling Rocks", "Hazy Maze Cave - Navigating the Toxic Maze","Hazy Maze Cave - Past Rolling Rocks Block 1-Up",
                         "Hazy Maze Cave - Blue Coin Trail Monty Moles", "Hazy Maze Cave - Twin Hole Monty Moles",
                         "Hazy Maze Cave - Beginning Metal Cap Block",
-                        "Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block",
                         "Hazy Maze Cave - Past Rolling Rocks 1-Up Block",
                         "Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block",
                         "Hazy Maze Cave - Toxic Maze Near Bats Metal Cap Block",
@@ -349,7 +348,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                        "Hazy Maze Cave - A-Maze-Ing Emergency Exit",
                                        "Hazy Maze Cave - Above Pit Block 1-Up",
                                        "Hazy Maze Cave - Above Pit 1-Up Block")
-    regHMC.subregions = [hmc_red_coin_area, hmc_pit_islands]
+    hmc_metal_head_room = create_subregion(
+        regHMC, "Hazy Maze Cave - Metal-Head Mario Can Move Room",
+        "Hazy Maze Cave - Metal-Head Mario Can Move!",
+        "Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block")
+    regHMC.subregions = [hmc_red_coin_area, hmc_pit_islands, hmc_metal_head_room]
     create_locs(regHMC, "Hazy Maze Cave - Coins Star")
 
     regLLL = create_region("Lethal Lava Land", player, multiworld)
@@ -365,7 +368,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     lll_volcano = create_region("Lethal Lava Land - Volcano", player, multiworld)
     create_locs(lll_volcano,
                 "Lethal Lava Land - Volcano Flamethrower 1-Up",
-                "Lethal Lava Land - Volcano Curve 1-Up",
+                "Lethal Lava Land - Central Gray Crescent 1-Up",
                 "Lethal Lava Land - Volcano Brown Platform 1-Up")
     lll_hot_foot_ledge = create_subregion(
         lll_volcano, "Lethal Lava Land - Hot-Foot-It Ledge",

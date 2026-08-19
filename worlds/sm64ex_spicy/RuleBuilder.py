@@ -149,7 +149,7 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
             if self.starts_unlocked:
-                return [{"type": "text", "text": "Unlocked in StartInventory"}]
+                return []
             return self.item_rule.explain_json(state)
 
 

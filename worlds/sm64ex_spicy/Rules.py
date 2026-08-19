@@ -938,9 +938,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | "
                    "logic_hmc_upper_red_coin_area_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | logic_hmc_pit_islands_wall_kick")
+    rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move Room",
+                   "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_capless")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
-                   "PURPLE_SWITCHES & LJ+MC | logic_hmc_metal_head_capless | "
-                   "logic_hmc_metal_head_capless_no_movement")
+                   "LJ | logic_hmc_metal_head_coin_route_capless")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     for sign in sign_data:

@@ -7,7 +7,7 @@ from .bases import SM64TestBase
 from .. import Options
 from ..Items import item_table
 from ..CoinLogic import COIN_EVALUATORS, _coin_source_rule_specs
-from ..RuleBuilder import CanCollectCoins, CoinSourceTrace
+from ..RuleBuilder import CanCollectCoins, CoinSourceTrace, HasUnlock
 from ..Rules import has_unlock
 
 
@@ -23,6 +23,14 @@ class RuleBuilderWorldTestBase(SM64TestBase):
         self.assertTrue(has_unlock(
             state, self.player, "enemy_unlocks",
             "Thwomps and Grindels", "Whomp's Fortress - Thwomps"))
+
+    def test_start_inventory_unlock_has_no_internal_explanation_text(self):
+        item_name = "Whomp's Fortress - Thwomps"
+        self.world.start_inventory_item_ids.add(item_table[item_name])
+        rule = HasUnlock("Thwomps and Grindels", item_name).resolve(self.world)
+
+        self.assertTrue(rule(CollectionState(self.multiworld)))
+        self.assertEqual(rule.explain_json(CollectionState(self.multiworld)), [])
 
     def test_all_access_rules_are_resolved_rule_builder_rules(self):
         for spot in (*self.multiworld.get_entrances(self.player), *self.multiworld.get_locations(self.player)):

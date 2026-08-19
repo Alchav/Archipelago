@@ -1158,7 +1158,14 @@ class SM64World(World):
                 continue
             if entrance.connected_region is None:
                 entrance.connect(target)
-            if source_id not in self.bypass_entrance_connections:
+            state = self.multiworld.state
+            previous_allow_partial_entrances = state.allow_partial_entrances
+            state.allow_partial_entrances = True
+            try:
+                source_was_in_logic = entrance.can_reach(state)
+            finally:
+                state.allow_partial_entrances = previous_allow_partial_entrances
+            if source_id not in self.bypass_entrance_connections and not source_was_in_logic:
                 bypass_region = self.multiworld.get_region("Bypassing Logic", self.player)
                 physical_source = sub_area_source_by_id(source_id)
                 source_name = (

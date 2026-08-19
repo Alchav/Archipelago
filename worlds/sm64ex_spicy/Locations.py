@@ -417,7 +417,7 @@ locFreestanding1Up_table = {
     "Lethal Lava Land - Volcano Flamethrower 1-Up": 3629135,
     "Lethal Lava Land - Northeast Brown Platform 1-Up": 3629136,
     "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up": 3629137,
-    "Lethal Lava Land - Volcano Curve 1-Up": 3629138,
+    "Lethal Lava Land - Central Gray Crescent 1-Up": 3629138,
     "Lethal Lava Land - Volcano Brown Platform 1-Up": 3629139,
     "Lethal Lava Land - Northwest Curve 1-Up": 3629140,
     "Lethal Lava Land - Volcano Pole 1-Up": 3629141,

@@ -662,20 +662,19 @@ logic_tricks = {
                        "Wall Kick, Side Flip, and Ledge Grab.",
         "video": "https://www.youtube.com/watch?v=kPSHKBJxZdY",
     },
-    "Hazy Maze Cave Metal-Head Mario without Metal Cap": {
+    "Hazy Maze Cave Metal-Head Mario Room without Metal Cap": {
         "internal_id": "logic_hmc_metal_head_capless",
-        "rule": "PURPLE_SWITCHES & LJ+TJ",
-        "difficulty": "medium",
-        "description": "Completes Metal-Head Mario Can Move and reaches its related coins without Metal Cap, using "
-                       "Purple Switches, Long Jump, and Triple Jump.",
-        "video": "https://www.youtube.com/watch?v=uBXWrnHZbpQ",
-    },
-    "Hazy Maze Cave Metal-Head Route Coins without Metal Cap": {
-        "internal_id": "logic_hmc_metal_head_coin_route_capless",
         "rule": "PURPLE_SWITCHES & TJ",
         "difficulty": "medium",
-        "description": "Collects the three coins on the Metal-Head Mario route without Metal Cap using Purple "
-                       "Switches and Triple Jump.",
+        "description": "Reaches the Metal-Head Mario Can Move room without Metal Cap by using Purple Switches and "
+                       "Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=uBXWrnHZbpQ",
+    },
+    "Hazy Maze Cave Metal-Head Mario Gap with Triple Jump": {
+        "internal_id": "logic_hmc_metal_head_coin_route_capless",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Crosses the gap to the Metal-Head Mario Can Move star with Triple Jump instead of Long Jump.",
         "video": "https://www.youtube.com/watch?v=ObSmoQ-Xyxo",
     },
     "Hazy Maze Cave Metal-Head Mario without Metal Cap or Full Movement": {

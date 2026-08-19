@@ -1235,7 +1235,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Off,
         "universal_tracker_glitched_logic": {
             "Dire, Dire Docks Board Bowser's Sub with Triple Jump",
-            "Hazy Maze Cave Metal-Head Mario without Metal Cap",
+            "Hazy Maze Cave Metal-Head Mario Room without Metal Cap",
             "Whomp's Fortress Caged Island from the Floating Island with Triple Jump Off of Whomp King",
         },
     }
@@ -4659,8 +4659,18 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
 
         self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+
+    def test_under_bridge_coin_line_requires_a_lava_route(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Lethal Lava Land - Horizontal Coin Lines"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 30))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 31))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 35))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 36))
 
     def test_red_coin_star_requires_red_coins_and_bowser_puzzle(self):
         self.collect_basement_access()
@@ -6324,7 +6334,7 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
 
     def test_initial_coin_sources_are_counted_independently(self):
         source_coins = {
-            "Big Boo's Haunt - Red Coins": 8,
+            "Big Boo's Haunt - Red Coins": 6,
             "Big Boo's Haunt - Breakable Coin Boxes": 6,
             "Big Boo's Haunt - Crazy Box": 5,
             "Big Boo's Haunt - 10-Coin Block": 10,
@@ -6349,7 +6359,7 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Big Boo's Haunt - Staircase"))
 
         source_coins = {
-            "Big Boo's Haunt - Red Coins": 14,
+            "Big Boo's Haunt - Red Coins": 12,
             "Big Boo's Haunt - Flying Bookends": 15,
             "Big Boo's Haunt - Mr. Is": 15,
         }
@@ -6361,6 +6371,20 @@ class BigBooHauntIndividualUnlockLogicTestBase(SM64TestBase):
                     self.multiworld.state, self.player, expected_coins))
                 self.assertFalse(big_boos_haunt_coins(
                     self.multiworld.state, self.player, expected_coins + 1))
+                self.remove(item)
+
+    def test_bookshelf_red_coin_requires_a_movement_ability(self):
+        red_coins = self.get_item_by_name("Big Boo's Haunt - Red Coins")
+        self.collect(red_coins)
+        self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 6))
+        self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 7))
+
+        for action in ("Side Flip", "Backflip", "Triple Jump", "Wall Kick"):
+            with self.subTest(action=action):
+                item = self.get_item_by_name(action)
+                self.collect(item)
+                self.assertTrue(big_boos_haunt_coins(self.multiworld.state, self.player, 8))
+                self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 9))
                 self.remove(item)
 
     def test_side_flip_third_floor_trick_requires_flying_bookends(self):
@@ -6526,10 +6550,10 @@ class BigBooHauntBookendTrickPermanentCoinTestBase(SM64TestBase):
         self.assertFalse(big_boos_haunt_coins(self.multiworld.state, self.player, 36))
 
 
-class BigBooHauntCoinStar78AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+class BigBooHauntCoinStar76AccessTestBase(BigBooHauntCoinStarAccessTestBase):
     options = {
         **BigBooHauntCoinStarAccessTestBase.options,
-        "big_boos_haunt_coin_star_requirement": 78,
+        "big_boos_haunt_coin_star_requirement": 76,
     }
 
     def test_start_coins_reach_coin_star(self):
@@ -6569,10 +6593,10 @@ class BigBooHauntCoinStar102AccessTestBase(BigBooHauntCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Big Boo's Haunt - Coins Star"))
 
 
-class BigBooHauntCoinStar103AccessTestBase(BigBooHauntCoinStarAccessTestBase):
+class BigBooHauntCoinStar101AccessTestBase(BigBooHauntCoinStarAccessTestBase):
     options = {
         **BigBooHauntCoinStarAccessTestBase.options,
-        "big_boos_haunt_coin_star_requirement": 103,
+        "big_boos_haunt_coin_star_requirement": 101,
     }
 
     def test_merry_go_round_coins_reach_coin_star(self):

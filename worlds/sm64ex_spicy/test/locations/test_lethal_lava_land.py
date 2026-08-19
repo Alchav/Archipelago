@@ -72,8 +72,8 @@ class TestLethalLavaLandLocations(SM64TestBase):
              ["Lethal Lava Land - Trigger 1-Ups"]],
             ["Lethal Lava Land - Volcano Flamethrower 1-Up", False, []],
             ["Lethal Lava Land - Volcano Flamethrower 1-Up", True, freestanding],
-            ["Lethal Lava Land - Volcano Curve 1-Up", False, []],
-            ["Lethal Lava Land - Volcano Curve 1-Up", True, freestanding],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", False, []],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", True, freestanding],
             ["Lethal Lava Land - Volcano Brown Platform 1-Up", False, []],
             ["Lethal Lava Land - Volcano Brown Platform 1-Up", True, freestanding],
 
