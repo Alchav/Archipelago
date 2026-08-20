@@ -328,7 +328,7 @@ logic_tricks = {
         "rule": "",
         "difficulty": "hard",
         "description": "Reaching Shoot Into the Wild Blue with a jump.",
-        "video": "https://www.youtube.com/watch?v=E7qv8EsIr5E"
+        "video": "https://www.youtube.com/watch?v=d3i77JAY6ms"
     },
     # Jolly Roger Bay
     "Jolly Roger Bay Upper Platform with Ledge Grab": {
