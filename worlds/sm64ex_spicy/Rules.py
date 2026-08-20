@@ -863,7 +863,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             action_item_names=rf.get_action_item_names("Bob-omb Battlefield")))
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
                    "CHAIN_CHOMP & WOODEN_POSTS & GP | "
-                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_without_ground_pound")
+                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_without_ground_pound | "
+                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_with_cork_box")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
     rf.assign_rule("Bob-omb Battlefield - Cannon Tree 1-Up", "CL/TJ/BF/SF")
     # Whomp's Fortress
@@ -1899,6 +1900,7 @@ class RuleFactory:
             self.options, "enemy_unlocks",
             f"{level_name} - Flying Bookends", f"{level_name} - Flying Bookends")
         item_names["JRB_SIGNS"] = HasUnlock("Signs", "Jolly Roger Bay - Signs")
+        item_names["BOB_CORKBOXES"] = HasUnlock("Throwable Cork Boxes", "Bob-omb Battlefield - Throwable Cork Boxes")
         return item_names
 
     def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:
