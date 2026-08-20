@@ -238,6 +238,14 @@ logic_tricks = {
                        "the gate.",
         "video": "https://www.youtube.com/watch?v=-dZKkhB30LY"
     },
+    "Bob-omb Battlefield Chain Chomp Gate with Throwable Cork Box Clip": {
+        "internal_id": "logic_bob_chain_chomp_gate_with_cork_box",
+        "rule": "BOB_CORKBOXES",
+        "difficulty": "hard",
+        "description": "Collecting Behind Chain Chomp's Gate without Ground Pound, using a Throwable Cork Box"
+                       "to clip through the gate.",
+        "video": "https://www.youtube.com/watch?v=Ta6Hj2F2slo"
+    },
     # Whomp's Fortress
     "Whomp's Fortress Caged Island from the Floating Island with Triple Jump Off of Whomp King": {
         "internal_id": "logic_wf_caged_island_cage_triple_jump",

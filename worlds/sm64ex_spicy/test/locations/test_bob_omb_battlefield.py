@@ -192,7 +192,10 @@ class TestBobOmbBattlefieldChainChompTrick(SM64TestBase):
     run_default_tests = False
     options = {
         **BOB_OPTIONS,
-        "logic_tricks": {"Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip"},
+        "logic_tricks": {
+            "Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip",
+            "Bob-omb Battlefield Chain Chomp Gate with Throwable Cork Box Clip"
+        },
     }
 
     def test_chain_chomp_gate_with_bob_omb(self):
@@ -202,4 +205,13 @@ class TestBobOmbBattlefieldChainChompTrick(SM64TestBase):
              ["Bob-omb Battlefield - Bob-ombs"]],
             ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
              ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Bob-ombs"]],
+        ], starting_regions=["Bob-omb Battlefield"])
+
+    def test_chain_chomp_gate_with_cork_box(self):
+        self.run_location_tests([
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False, []],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False,
+             ["Bob-omb Battlefield - Throwable Cork Boxes"]],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
+             ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Throwable Cork Boxes"]],
         ], starting_regions=["Bob-omb Battlefield"])

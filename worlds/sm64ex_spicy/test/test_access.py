@@ -523,6 +523,10 @@ class BobOmbBattlefieldMediumLogicTricksTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
+    def test_chain_chomp_with_cork_box(self):
+        self.collect(self.get_item_by_name("Bob-omb Battlefield - Throwable Cork Boxes"))
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+
 
 class BobOmbBattlefieldHardLogicTricksTestBase(SM64TestBase):
     run_default_tests = False
