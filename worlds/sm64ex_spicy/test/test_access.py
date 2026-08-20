@@ -523,11 +523,6 @@ class BobOmbBattlefieldMediumLogicTricksTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Mario Wings to the Sky"))
 
-    def test_chain_chomp_with_cork_box(self):
-        self.collect(self.get_item_by_name("Bob-omb Battlefield - Throwable Cork Boxes"))
-        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
-
-
 class BobOmbBattlefieldHardLogicTricksTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -649,6 +644,7 @@ class BobOmbBattlefieldUnlockTricksTestBase(SM64TestBase):
             "Bob-omb Battlefield Mario Wings to the Sky without Coin Markers",
             "Bob-omb Battlefield Island with Koopa Shell",
             "Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip",
+            "Bob-omb Battlefield Chain Chomp Gate with Throwable Cork Box Clip",
         },
     }
 
@@ -670,6 +666,14 @@ class BobOmbBattlefieldUnlockTricksTestBase(SM64TestBase):
         self.collect_by_name([
             "Bob-omb Battlefield - Chain Chomp",
             "Bob-omb Battlefield - Bob-ombs",
+        ])
+        self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+
+    def test_chain_chomp_clip_requires_throwable_cork_boxes(self):
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
+        self.collect_by_name([
+            "Bob-omb Battlefield - Chain Chomp",
+            "Bob-omb Battlefield - Throwable Cork Boxes",
         ])
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
 

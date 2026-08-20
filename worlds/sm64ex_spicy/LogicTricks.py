@@ -242,7 +242,7 @@ logic_tricks = {
         "internal_id": "logic_bob_chain_chomp_gate_with_cork_box",
         "rule": "BOB_CORKBOXES",
         "difficulty": "hard",
-        "description": "Collecting Behind Chain Chomp's Gate without Ground Pound, using a Throwable Cork Box"
+        "description": "Collecting Behind Chain Chomp's Gate without Ground Pound, using a Throwable Cork Box "
                        "to clip through the gate.",
         "video": "https://www.youtube.com/watch?v=Ta6Hj2F2slo"
     },
