@@ -152,7 +152,7 @@ class TestTinyHugeIslandPipeDirections(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Beach Coins 1-Up", True, [TRIGGER_1UPS]],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
-        ], starting_regions=["Tiny-Huge Island - Red Coins Area"])
+        ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
         ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
@@ -182,7 +182,7 @@ class TestTinyHugeIslandShuffledSubAreaCoins(SM64TestBase):
             ["Tiny-Huge Island - Coins Star", False, []],
             ["Tiny-Huge Island - Coins Star", True,
              ["Tiny-Huge Island - Red Coins"]],
-        ], starting_regions=["Tiny-Huge Island - Red Coins Area"])
+        ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
 
 
 class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):

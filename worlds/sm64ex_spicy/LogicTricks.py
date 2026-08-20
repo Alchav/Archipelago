@@ -160,6 +160,14 @@ logic_tricks = {
         "difficulty": "medium",
         "video": "https://www.youtube.com/watch?v=cb-7NZoNaBg"
     },
+    # The Princess's Secret Slide
+    "The Princess's Secret Slide Coin Triggers 1-Up without Coin Markers": {
+        "internal_id": "logic_pss_coin_triggers_1up_without_coin_markers",
+        "rule": "",
+        "difficulty": "easy",
+        "description": "Finding the Coin Triggers 1-Up trigger locations without the Horizontal Coin Lines that "
+                       "mark them. Irrelevant when Trigger Sparkles is enabled.",
+    },
     # Bob-omb Battlefield
     "Bob-omb Battlefield Cannon Tree 1-Up With No Movement": {
         "internal_id": "logic_bob_cannon_tree_1up_with_no_movement",
@@ -204,7 +212,8 @@ logic_tricks = {
         "rule": "",
         "difficulty": "hard",
         "description": "Collecting Mario Wings to the Sky without the Single Yellow Coins or Vertical Coin Rings "
-                       "that indicate the five invisible trigger positions.",
+                       "that indicate the five invisible trigger positions. Irrelevant when Trigger Sparkles is "
+                       "enabled.",
     },
     "Bob-omb Battlefield Island with Long Jump": {
         "internal_id": "logic_bob_island_long_jump",

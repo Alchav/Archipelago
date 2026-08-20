@@ -21,6 +21,11 @@ CoinTraceEvaluator = Callable[[CollectionState, int, int], CoinEvaluation]
 _coin_rule_context: ContextVar[tuple[CollectionState, int, str] | None] = ContextVar(
     "sm64_coin_rule_context", default=None)
 
+SSL_UPPER_PYRAMID_ENTRANCE_RULE = (
+    "TJ+WC+GP | CANN+WC+GP | "
+    "logic_ssl_pillars_shell | logic_ssl_pillars_side_flip_or_kick"
+)
+
 
 def _coin_trace(
         source_id: str,
@@ -1372,6 +1377,16 @@ def shifting_sand_land_coins(
         "Pokeys", f"{level_name} - Pokeys")
     can_reach_pyramid = state.can_reach(
         "Shifting Sand Land - Pyramid", "Region", player)
+    has_ground_pound = Rules.has_action(state, player, "Ground Pound", level_name)
+    has_wing_cap = Rules.has_wing_cap(state, player, level_name)
+    has_triple_jump = Rules.has_action(state, player, "Triple Jump", level_name)
+    has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
+    can_reach_quicksand_pillar = (
+        has_ground_pound and has_wing_cap and (has_triple_jump or has_cannon)
+        or Rules.can_use_logic_trick(state, player, "logic_ssl_pillars_shell", target_name)
+        or Rules.can_use_logic_trick(
+            state, player, "logic_ssl_pillars_side_flip_or_kick", target_name)
+    )
 
     builder = CoinTraceBuilder()
     builder.add(
@@ -1388,10 +1403,15 @@ def shifting_sand_land_coins(
     )
     builder.add(
         "ssl_pillar_coins",
-        "Four coins on the pillars",
-        4,
-        has_single_yellow_coins and state.can_reach(
-            "Shifting Sand Land - Upper Pyramid Entrance", "Region", player),
+        "Three normally reachable coins on the pillars",
+        3,
+        has_single_yellow_coins,
+    )
+    builder.add(
+        "ssl_quicksand_pillar_coin",
+        "Quicksand Pillar Coin",
+        1,
+        has_single_yellow_coins and can_reach_quicksand_pillar,
     )
     builder.add(
         "ssl_behind_pyramid_coin_line",
@@ -1430,10 +1450,16 @@ def shifting_sand_land_coins(
         has_pokeys,
     )
     builder.add(
-        "ssl_goombas",
-        "Goombas inside and outside the pyramid",
-        12,
+        "ssl_outside_goombas",
+        "Three Goombas outside the pyramid",
+        3,
         has_goombas,
+    )
+    builder.add(
+        "ssl_pyramid_goombas",
+        "Nine Goombas inside the pyramid",
+        9,
+        has_goombas and can_reach_pyramid,
     )
     builder.add(
         "ssl_low_red_coins",
@@ -1454,9 +1480,6 @@ def shifting_sand_land_coins(
         ),
     )
 
-    has_wing_cap = Rules.has_wing_cap(state, player, level_name)
-    has_triple_jump = Rules.has_action(state, player, "Triple Jump", level_name)
-    has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
     has_normal_red_coin_route = has_wing_cap and (has_triple_jump or has_cannon)
     has_tweester_trick = Rules.can_use_logic_trick(
         state, player, "logic_ssl_three_red_coins_with_tweesters", target_name)
@@ -1567,7 +1590,6 @@ def shifting_sand_land_coins(
         ),
     )
 
-    has_ground_pound = Rules.has_action(state, player, "Ground Pound", level_name)
     builder.add(
         "ssl_blue_coin_block",
         "Blue Coin Block",
@@ -1631,7 +1653,7 @@ def dire_dire_docks_coins(
     )
     builder.add(
         "ddd_chest_and_current_coin_lines",
-        "Vertical coin lines by the chests and first current",
+        "Vertical Coin Lines by the Whirlpool and Chest",
         10,
         has_vertical_coin_lines,
     )
@@ -1643,7 +1665,7 @@ def dire_dire_docks_coins(
     )
     builder.add(
         "ddd_sub_area_coin_rings",
-        "Coin rings leading to the Bowser's Sub area",
+        "Coin Rings Leading to and Inside the Tunnel",
         24,
         has_vertical_coin_rings,
     )
@@ -2388,6 +2410,7 @@ def wet_dry_world_coin_evaluation(
     has_ledge_grab = rules.has_action(state, player, "Ledge Grab", level_name)
     can_reach_high_red_coins = has_wall_kick or rules.can_use_logic_trick(
         state, player, "logic_wdw_high_red_coins_triple_jump", level_name)
+    can_reach_brown_brick_red_coin = has_long_jump or has_dive or can_reach_high_red_coins
     can_reach_main = state.can_reach(level_name, "Region", player)
     can_reach_low = state.can_reach(f"{level_name} - Low Water", "Region", player)
     can_reach_mid = state.can_reach(f"{level_name} - Mid Water", "Region", player)
@@ -2440,22 +2463,26 @@ def wet_dry_world_coin_evaluation(
                     can_reach_downtown and has_horizontal_coin_rings),
         coin_source("downtown_metal_cap_line", "Downtown metal-cap coin line", 5,
                     can_reach_downtown and has_horizontal_coin_lines),
-        coin_source("downtown_first_building_line", "Downtown first-building coin line", 5,
+        coin_source("downtown_first_building_line", "Beige Building Coin Line", 5,
                     can_reach_downtown and has_horizontal_coin_lines),
-        coin_source("downtown_second_building_line", "Downtown second-building coin line", 5,
+        coin_source("downtown_second_building_line", "Gray Building Coin Line", 5,
                     can_reach_downtown and has_horizontal_coin_lines),
         coin_source("downtown_skeeters", "Two Skeeters Downtown", 6,
                     can_reach_downtown and has_skeeters),
-        coin_source("downtown_initial_red_coin", "First Downtown red coin", 2,
-                    can_reach_downtown and has_red_coins,
-                    red_coin_ids=frozenset({1})),
-        coin_source("downtown_diamond_red_coins", "Five Downtown red coins beyond water-level diamonds", 10,
+        coin_source("downtown_diamond_red_coins", "Five Downtown Red Coins requiring Water Level Diamonds", 10,
                     can_reach_downtown and has_water_level_diamond and has_red_coins,
-                    red_coin_ids=frozenset({2, 3, 4, 5, 6})),
-        coin_source("downtown_high_red_coins", "Two high Downtown red coins", 4,
+                    red_coin_ids=frozenset({1, 3, 5, 6, 7})),
+        coin_source("downtown_brown_brick_red_coin", "Brown Brick Building Red Coin", 2,
+                    can_reach_downtown and has_water_level_diamond
+                    and has_red_coins and can_reach_brown_brick_red_coin,
+                    red_coin_ids=frozenset({2})),
+        coin_source("downtown_beige_building_red_coin", "Beige Building Red Coin", 2,
                     can_reach_downtown and has_water_level_diamond
                     and has_red_coins and can_reach_high_red_coins,
-                    red_coin_ids=frozenset({7, 8})),
+                    red_coin_ids=frozenset({4})),
+        coin_source("downtown_chapel_roof_red_coin", "Chapel Roof Red Coin", 2,
+                    can_reach_downtown and has_red_coins and can_reach_high_red_coins,
+                    red_coin_ids=frozenset({8})),
     ]
     return coin_evaluation(traces, 152)
 
@@ -2517,8 +2544,10 @@ def tiny_huge_island_coin_evaluation(
     has_cannon = state.has("Tiny-Huge Island - Cannon Unlock", player)
     can_enter_tiny = state.can_reach("Tiny-Huge Island (Tiny)", "Region", player)
     can_enter_huge = state.can_reach("Tiny-Huge Island (Huge)", "Region", player)
-    can_reach_red_coin_cave = state.can_reach(
+    can_reach_red_coins_area = state.can_reach(
         "Tiny-Huge Island - Red Coins Area", "Region", player)
+    can_reach_red_coin_cave = state.can_reach(
+        "Tiny-Huge Island - Red Coin Cave", "Region", player)
     can_reach_wiggler_cave = state.can_reach(
         "Tiny-Huge Island - Wiggler's Cave", "Region", player)
     has_tiny_piranha_movement = has_triple_jump or has_long_jump or has_ledge_grab
@@ -2764,33 +2793,12 @@ def tiny_huge_island_coin_evaluation(
             has_huge_context and has_top and has_chuckya,
         )
 
-        red_area_children = [
+        red_coins_area_children = [
             _route_source(
                 "red_area_giant_goombas",
                 "Two Giant Goombas in the Red Coins Area",
                 giant_goomba_coins(2),
                 has_goombas,
-            ),
-            _route_source(
-                "red_area_red_coins",
-                "Seven red coins in the Red Coins Area",
-                14,
-                has_red_coins,
-                red_coin_ids=frozenset(range(1, 8)),
-            ),
-            _route_source(
-                "red_area_wall_kick_red_coin",
-                "Wall-kick red coin in the Red Coins Area",
-                2,
-                has_red_coins and rules.has_action(
-                    state, player, "Wall Kick", level_name),
-                red_coin_ids=frozenset({8}),
-            ),
-            _route_source(
-                "red_area_blue_coins",
-                "Blue coins in the Red Coins Area",
-                10,
-                has_ground_pound and has_blue_coin_block,
             ),
             _route_source(
                 "red_area_plank_line",
@@ -2799,7 +2807,30 @@ def tiny_huge_island_coin_evaluation(
                 has_horizontal_coin_lines,
             ),
         ]
-        red_area_children[0].children.extend((
+        red_coin_cave_children = [
+            _route_source(
+                "red_area_red_coins",
+                "Seven red coins in the Red Coin Cave",
+                14,
+                has_red_coins,
+                red_coin_ids=frozenset(range(1, 8)),
+            ),
+            _route_source(
+                "red_area_wall_kick_red_coin",
+                "Wall-kick red coin in the Red Coin Cave",
+                2,
+                has_red_coins and rules.has_action(
+                    state, player, "Wall Kick", level_name),
+                red_coin_ids=frozenset({8}),
+            ),
+            _route_source(
+                "red_area_blue_coins",
+                "Blue coins in the Red Coin Cave",
+                10,
+                has_ground_pound and has_blue_coin_block,
+            ),
+        ]
+        red_coins_area_children[0].children.extend((
             _route_source(
                 "red_area_giant_goombas_yellow", "Two Giant Goombas yellow outputs",
                 0, has_goombas),
@@ -2863,8 +2894,14 @@ def tiny_huge_island_coin_evaluation(
         append_group(
             "thi_red_coins_area",
             "Red Coins Area",
+            can_reach_red_coins_area,
+            red_coins_area_children,
+        )
+        append_group(
+            "thi_red_coin_cave",
+            "Red Coin Cave",
             can_reach_red_coin_cave,
-            red_area_children,
+            red_coin_cave_children,
         )
         append_group(
             "thi_wiggler_cave",
@@ -2892,7 +2929,7 @@ def tiny_huge_island_coin_evaluation(
         direct_sub_area_template = make_route(True, True)
         direct_sub_area_children = [
             child for child in direct_sub_area_template.children
-            if child.source_id in {"thi_red_coins_area", "thi_wiggler_cave"}
+            if child.source_id in {"thi_red_coin_cave", "thi_wiggler_cave"}
         ]
         routes.append(_route_type(
             "thi_direct_sub_areas",
@@ -4332,7 +4369,8 @@ def _middle_requirement_specs():
          unlocks=(_unlock("Throwable Cork Boxes", SSL, f"{SSL} - Throwable Cork Box"),))
     _add(SSL, "ssl_inside_pyramid_coins", f"{{{SSL} - Pyramid}}",
          (_unlock("Single Yellow Coins", SSL),))
-    _add(SSL, "ssl_pillar_coins", f"{{{SSL} - Upper Pyramid Entrance}}",
+    _add(SSL, "ssl_pillar_coins", unlocks=(_unlock("Single Yellow Coins", SSL),))
+    _add(SSL, "ssl_quicksand_pillar_coin", SSL_UPPER_PYRAMID_ENTRANCE_RULE,
          (_unlock("Single Yellow Coins", SSL),))
     _add(SSL, ("ssl_behind_pyramid_coin_line", "ssl_pyramid_side_coin_line"),
          unlocks=(_unlock("Horizontal Coin Lines", SSL),))
@@ -4340,7 +4378,9 @@ def _middle_requirement_specs():
     _add(SSL, "ssl_crazy_boxes", unlocks=(_unlock("Crazy Boxes", SSL),))
     _add(SSL, "ssl_bob_ombs", unlocks=(_unlock("Bob-ombs", SSL),))
     _add(SSL, "ssl_pokeys", unlocks=(_unlock("Pokeys", SSL),))
-    _add(SSL, "ssl_goombas", unlocks=(_unlock("Goombas", SSL),))
+    _add(SSL, "ssl_outside_goombas", unlocks=(_unlock("Goombas", SSL),))
+    _add(SSL, "ssl_pyramid_goombas", f"{{{SSL} - Pyramid}}",
+         (_unlock("Goombas", SSL),))
     _add(SSL, "ssl_low_red_coins", unlocks=(_unlock("Red Coins", SSL),))
     _add(SSL, "ssl_first_wire_grid_coin_ring", f"{{{SSL} - Pyramid}} & CL",
          (_unlock("Horizontal Coin Rings", SSL),))
@@ -4575,13 +4615,18 @@ def _late_requirement_specs():
         _add(WDW, _source, "{Wet-Dry World - Downtown} & HORIZONTAL_COIN_LINES",
              _unlock("Horizontal Coin Lines", WDW))
     _add(WDW, "downtown_skeeters", "{Wet-Dry World - Downtown} & SKEETERS", _unlock("Skeeters", WDW))
-    _add(WDW, "downtown_initial_red_coin", "{Wet-Dry World - Downtown} & RED_COINS",
-         _unlock("Red Coins", WDW))
     _add(WDW, "downtown_diamond_red_coins", "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & RED_COINS",
          _unlock("Red Coins", WDW))
-    _add(WDW, "downtown_high_red_coins",
+    _add(WDW, "downtown_brown_brick_red_coin",
+         "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & (LJ/DV/WK/logic_wdw_high_red_coins_triple_jump)",
+         _unlock("Red Coins", WDW))
+    _add(WDW, "downtown_beige_building_red_coin",
          "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & WK | "
          "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & logic_wdw_high_red_coins_triple_jump",
+         _unlock("Red Coins", WDW))
+    _add(WDW, "downtown_chapel_roof_red_coin",
+         "{Wet-Dry World - Downtown} & WK | "
+         "{Wet-Dry World - Downtown} & logic_wdw_high_red_coins_triple_jump",
          _unlock("Red Coins", WDW))
     _add(WDW, "wdw_all_red_coins_reachable",
          "{Wet-Dry World - Downtown} & WDW_WATER_LEVEL_DIAMOND & WK | "
@@ -4700,13 +4745,14 @@ def _late_requirement_specs():
 
     _add(THI, "thi_red_coins_area", "{Tiny-Huge Island - Red Coins Area}")
     _add(THI, "red_area_giant_goombas", "{Tiny-Huge Island - Red Coins Area} & GOOMBAS", _unlock("Goombas", THI))
-    _add(THI, "red_area_red_coins", "{Tiny-Huge Island - Red Coins Area} & RED_COINS", _unlock("Red Coins", THI))
-    _add(THI, "red_area_wall_kick_red_coin", "{Tiny-Huge Island - Red Coins Area} & RED_COINS & WK",
-         _unlock("Red Coins", THI))
-    _add(THI, "red_area_blue_coins", "{Tiny-Huge Island - Red Coins Area} & GP & BLUE_COIN_BLOCKS",
-         _unlock("Blue Coin Blocks", THI, "Blue Coin Block"))
     _add(THI, "red_area_plank_line", "{Tiny-Huge Island - Red Coins Area} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", THI))
+    _add(THI, "thi_red_coin_cave", "{Tiny-Huge Island - Red Coin Cave}")
+    _add(THI, "red_area_red_coins", "{Tiny-Huge Island - Red Coin Cave} & RED_COINS", _unlock("Red Coins", THI))
+    _add(THI, "red_area_wall_kick_red_coin", "{Tiny-Huge Island - Red Coin Cave} & RED_COINS & WK",
+         _unlock("Red Coins", THI))
+    _add(THI, "red_area_blue_coins", "{Tiny-Huge Island - Red Coin Cave} & GP & BLUE_COIN_BLOCKS",
+         _unlock("Blue Coin Blocks", THI, "Blue Coin Block"))
     _add(THI, "thi_wiggler_cave", "{Tiny-Huge Island - Wiggler's Cave}")
     _add(THI, "wiggler_cave_coin_lines",
          "{Tiny-Huge Island - Wiggler's Cave} & HORIZONTAL_COIN_LINES",

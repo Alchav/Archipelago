@@ -16,7 +16,7 @@ from .Items import action_item_data_table, cap_item_data_table, feature_item_dat
 from .LogicTricks import logic_tricks
 from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoinOutput, CanCollectCoins, HasUnlock, LogicTrick, \
     register_coin_evaluator
-from .CoinLogic import COIN_EVALUATORS
+from .CoinLogic import COIN_EVALUATORS, SSL_UPPER_PYRAMID_ENTRANCE_RULE
 from .Signs import sign_data, sign_item_name_for_area
 from .SubAreas import CASTLE_RETURN_DESTINATIONS, CASTLE_RETURN_SOURCES, RETURN_DESTINATIONS, RETURN_SOURCES, \
     SUB_AREA_DESTINATIONS, SUB_AREA_SOURCES, build_mixed_connections, build_separate_connections, \
@@ -778,9 +778,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         multiworld, player, "Cool, Cool Mountain - Slide Exit", "Cool, Cool Mountain",
         name="Cool, Cool Mountain - Slide Exit to Main Area")
     connect_regions(multiworld, player, "Lethal Lava Land", "Lethal Lava Land - Volcano Entrance")
-    ssl_upper_pyramid_entrance_rule = rf.build_rule(
-        "TJ+WC+GP | CANN+WC+GP | "
-        "logic_ssl_pillars_shell | logic_ssl_pillars_side_flip_or_kick")
+    ssl_upper_pyramid_entrance_rule = rf.build_rule(SSL_UPPER_PYRAMID_ENTRANCE_RULE)
     connect_regions(
         multiworld, player, "Shifting Sand Land",
         "Shifting Sand Land - Upper Pyramid Entrance", ssl_upper_pyramid_entrance_rule)
@@ -855,12 +853,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             cap_item_names=rf.get_cap_item_names("Bob-omb Battlefield"),
             arbitrary_item_names=rf.get_arbitrary_item_names("Bob-omb Battlefield"),
             action_item_names=rf.get_action_item_names("Bob-omb Battlefield"))
-        & rf.build_rule(
+        & (True_() if options.trigger_sparkles else rf.build_rule(
             "SINGLE_YELLOW_COINS | VERTICAL_COIN_RINGS | logic_bob_mario_wings_without_coin_markers",
             cannon_name=rf.get_cannon_item_name("Bob-omb Battlefield"),
             cap_item_names=rf.get_cap_item_names("Bob-omb Battlefield"),
             arbitrary_item_names=rf.get_arbitrary_item_names("Bob-omb Battlefield"),
-            action_item_names=rf.get_action_item_names("Bob-omb Battlefield")))
+            action_item_names=rf.get_action_item_names("Bob-omb Battlefield"))))
+    rf.assign_rule(
+        "The Princess's Secret Slide - Coin Triggers 1-Up",
+        "" if options.trigger_sparkles else
+        "HORIZONTAL_COIN_LINES | logic_pss_coin_triggers_1up_without_coin_markers")
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
                    "CHAIN_CHOMP & WOODEN_POSTS & GP | "
                    "CHAIN_CHOMP & logic_bob_chain_chomp_gate_without_ground_pound")
@@ -1138,7 +1140,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule(
         "Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell",
         "logic_thi_scale_huge_mountain_koopa_shell")
-    rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coin Cave Entrance", "CANN")
+    rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coins Area", "CANN")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "WIGGLER")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
@@ -1761,6 +1763,7 @@ class RuleFactory:
         level_name = self.get_level_name_from_target(target_name)
         unlock_level_name = {
             "The Secret Aquarium": "Secret Aquarium",
+            "The Princess's Secret Slide": "Princess's Secret Slide",
         }.get(level_name, level_name)
         item_names = {
             token: HasUnlock(item_name, item_name)

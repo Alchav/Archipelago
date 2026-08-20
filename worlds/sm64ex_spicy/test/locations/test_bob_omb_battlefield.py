@@ -174,6 +174,20 @@ class TestBobOmbBattlefieldMarioWingsWithoutCoinMarkers(SM64TestBase):
         ], starting_regions=["Bob-omb Battlefield"])
 
 
+class TestBobOmbBattlefieldMarioWingsWithTriggerSparkles(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BOB_OPTIONS,
+        "trigger_sparkles": True,
+    }
+
+    def test_location(self):
+        self.run_location_tests([
+            ["Bob-omb Battlefield - Mario Wings to the Sky", True,
+             CANNON + WING_CAP],
+        ], starting_regions=["Bob-omb Battlefield"])
+
+
 class TestBobOmbBattlefieldChainChompTrick(SM64TestBase):
     run_default_tests = False
     options = {

@@ -35,12 +35,44 @@ class TestPrincessSecretSlideLocations(SM64TestBase):
             ["The Princess's Secret Slide - Block Star", True, []],
             ["The Princess's Secret Slide - Fast", True, []],
             ["The Princess's Secret Slide - Coin Triggers 1-Up", False, []],
-            ["The Princess's Secret Slide - Coin Triggers 1-Up", True,
+            ["The Princess's Secret Slide - Coin Triggers 1-Up", False,
              ["The Princess's Secret Slide - Trigger 1-Ups"]],
+            ["The Princess's Secret Slide - Coin Triggers 1-Up", True,
+             ["The Princess's Secret Slide - Trigger 1-Ups",
+              "Princess's Secret Slide - Horizontal Coin Lines"]],
             ["The Princess's Secret Slide - Slide 1-Up", False, []],
             ["The Princess's Secret Slide - Slide 1-Up", True,
              ["The Princess's Secret Slide - Freestanding 1-Ups"]],
             ["The Princess's Secret Slide - Star Block", True, []],
+        ], starting_regions=["The Princess's Secret Slide"])
+
+
+class TestPrincessSecretSlideCoinTriggerTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SECRET_STAGE_OPTIONS,
+        "logic_tricks": {"The Princess's Secret Slide Coin Triggers 1-Up without Coin Markers"},
+    }
+
+    def test_coin_triggers_without_coin_markers(self):
+        self.run_location_tests([
+            ["The Princess's Secret Slide - Coin Triggers 1-Up", True,
+             ["The Princess's Secret Slide - Trigger 1-Ups"]],
+        ], starting_regions=["The Princess's Secret Slide"])
+
+
+class TestPrincessSecretSlideTriggerSparkles(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SECRET_STAGE_OPTIONS,
+        "trigger_sparkles": True,
+    }
+
+    def test_coin_triggers_with_trigger_sparkles(self):
+        self.run_location_tests([
+            ["The Princess's Secret Slide - Coin Triggers 1-Up", False, []],
+            ["The Princess's Secret Slide - Coin Triggers 1-Up", True,
+             ["The Princess's Secret Slide - Trigger 1-Ups"]],
         ], starting_regions=["The Princess's Secret Slide"])
 
 

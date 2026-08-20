@@ -581,6 +581,12 @@ class EasyButterflies(Toggle):
     display_name = "Easy Butterflies"
 
 
+class TriggerSparkles(Toggle):
+    """Display sparkles at available invisible trigger locations, including Trigger 1-Ups, 1-Up butterflies, hidden
+    warps, and trigger-based stars such as Mario Wings to the Sky."""
+    display_name = "Trigger Sparkles"
+
+
 class NoDespawns(Toggle):
     """
     Prevent coins and 1-Ups from despawning over time. Coins and 1-Ups that fall into a void, quicksand, or lava are
@@ -1085,6 +1091,7 @@ sm64_options_groups = [
         OneUpChecks,
         Blocksanity,
         EasyButterflies,
+        TriggerSparkles,
         NoDespawns,
         CombinedProgressiveKeys,
         LevelUnlocks,
@@ -1146,6 +1153,7 @@ class SM64Options(PerGameCommonOptions):
     one_up_checks: OneUpChecks
     blocksanity: Blocksanity
     easy_butterflies: EasyButterflies
+    trigger_sparkles: TriggerSparkles
     no_despawns: NoDespawns
     combined_progressive_keys: CombinedProgressiveKeys
     level_unlocks: LevelUnlocks

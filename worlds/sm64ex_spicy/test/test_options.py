@@ -848,12 +848,14 @@ class BlocksanityOnTestBase(SM64TestBase):
 class GameBehaviorSlotDataTestBase(SM64TestBase):
     options = {
         "easy_butterflies": Options.EasyButterflies.option_true,
+        "trigger_sparkles": Options.TriggerSparkles.option_true,
         "no_despawns": Options.NoDespawns.option_true,
     }
 
     def test_game_behavior_slot_data(self):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(slot_data["EasyButterflies"], 1)
+        self.assertEqual(slot_data["TriggerSparkles"], 1)
         self.assertEqual(slot_data["NoDespawn"], 1)
         self.assertNotIn("PermanentCoinCollection", slot_data)
 

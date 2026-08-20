@@ -65,10 +65,77 @@ COURSE_MAXIMUM_COIN_VALUES = {
 }
 
 
+# Coin outputs in independently shuffled sub-areas belong to the physical
+# region containing their source. Course-wide count checks remain course-wide
+# because permanent coin totals span every area in a course.
+COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
+    "penguin_slide_yellow_coins": "Cool, Cool Mountain - Secret Slide",
+    "penguin_slide_coin_lines": "Cool, Cool Mountain - Secret Slide",
+    "slide_blue_coin": "Cool, Cool Mountain - Secret Slide",
+
+    "lll_volcano_s_island_coins": "Lethal Lava Land - Volcano",
+    "lll_volcano_first_ridge_coin_line": "Lethal Lava Land - Volcano",
+    "lll_volcano_second_ridge_coins": "Lethal Lava Land - Volcano",
+    "lll_volcano_floating_platform_coins": "Lethal Lava Land - Volcano",
+    "lll_volcano_post_platform_coin": "Lethal Lava Land - Volcano",
+    "lll_volcano_second_bully_coin_line": "Lethal Lava Land - Volcano",
+    "lll_volcano_checkerboard_lift_coin": "Lethal Lava Land - Volcano",
+    "lll_volcano_bullies": "Lethal Lava Land - Volcano",
+    "lll_elevator_tour_platform_coins": "Lethal Lava Land - Elevator Tour",
+
+    "ssl_inside_pyramid_coins": "Shifting Sand Land - Pyramid",
+    "ssl_pyramid_goombas": "Shifting Sand Land - Pyramid",
+    "ssl_first_wire_grid_coin_ring": "Shifting Sand Land - Pyramid",
+    "ssl_blue_coin_block": "Shifting Sand Land - Pyramid",
+    "ssl_second_wire_grid_coin_line": "Shifting Sand Land - Upper Pyramid",
+    "ssl_pyramid_top_horizontal_coin_line": "Shifting Sand Land - Upper Pyramid",
+    "ssl_pyramid_top_vertical_coin_line": "Shifting Sand Land - Upper Pyramid",
+    "ssl_pyramid_top_vertical_coin_line_top_coin": "Shifting Sand Land - Upper Pyramid",
+    "ssl_upper_pyramid_single_coins": "Shifting Sand Land - Upper Pyramid",
+
+    "sl_igloo_frozen_coin_lines": "Snowman's Land - Igloo",
+    "sl_igloo_single_coins": "Snowman's Land - Igloo",
+    "sl_igloo_three_coin_block": "Snowman's Land - Igloo",
+    "sl_igloo_goombas": "Snowman's Land - Igloo",
+    "sl_igloo_spindrifts": "Snowman's Land - Igloo",
+
+    "ttm_hidden_coin_before_slide": "Tall, Tall Mountain - Secret Slide",
+    "ttm_slide_single_coins": "Tall, Tall Mountain - Secret Slide",
+    "ttm_slide_coin_lines": "Tall, Tall Mountain - Secret Slide",
+    "ttm_slide_blue_coins": "Tall, Tall Mountain - Secret Slide",
+
+    "red_area_red_coins": "Tiny-Huge Island - Red Coin Cave",
+    "red_area_wall_kick_red_coin": "Tiny-Huge Island - Red Coin Cave",
+    "red_area_blue_coins": "Tiny-Huge Island - Red Coin Cave",
+    "red_area_giant_goombas_yellow": "Tiny-Huge Island - Red Coins Area",
+    "red_area_giant_goombas_blue": "Tiny-Huge Island - Red Coins Area",
+    "red_area_plank_line": "Tiny-Huge Island - Red Coins Area",
+    "wiggler_cave_coin_lines": "Tiny-Huge Island - Wiggler's Cave",
+}
+
+
+def coin_output_region_name(output: CoinOutputDefinition) -> str | None:
+    """Return the physical region for an output in an independently shuffled sub-area."""
+    regions = {
+        COIN_SOURCE_METHOD_REGION_NAMES[method]
+        for method in output.source_methods
+        if method in COIN_SOURCE_METHOD_REGION_NAMES
+    }
+    if len(regions) > 1:
+        raise ValueError(f"Coin output {output.output_id} maps to multiple physical regions: {regions}")
+    return next(iter(regions), None)
+
+
 COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ...]] = {
     **{
+        ("Shifting Sand Land", "ssl_goombas", index):
+            (("ssl_pyramid_goombas",) if index <= 9 else ("ssl_outside_goombas",))
+        for index in range(1, 13)
+    },
+    **{
         ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", index):
-            (("ssl_inside_pyramid_coins",) if index <= 2 else ("ssl_pillar_coins",))
+            (("ssl_inside_pyramid_coins",) if index <= 2 else
+             ("ssl_quicksand_pillar_coin",) if index == 6 else ("ssl_pillar_coins",))
         for index in range(1, 7)
     },
     (
@@ -94,6 +161,31 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
     **{
         ("Castle", "castle_courtyard_boos", index): f"Courtyard Boo {index} Coin"
         for index in range(1, 10)
+    },
+    **{
+        ("Dire, Dire Docks", "ddd_sub_area_coin_rings", index):
+            f"Coin Ring Leading to the Tunnel 2 Coin {index}"
+        for index in range(1, 9)
+    },
+    **{
+        ("Dire, Dire Docks", "ddd_sub_area_coin_rings", index):
+            f"Tunnel Coin Ring Coin {index - 8}"
+        for index in range(9, 17)
+    },
+    **{
+        ("Dire, Dire Docks", "ddd_sub_area_coin_rings", index):
+            f"Coin Ring Leading to the Tunnel 1 Coin {index - 16}"
+        for index in range(17, 25)
+    },
+    **{
+        ("Dire, Dire Docks", "ddd_chest_and_current_coin_lines", index):
+            f"Vertical Coin Line by the Whirlpool Coin {index}"
+        for index in range(1, 6)
+    },
+    **{
+        ("Dire, Dire Docks", "ddd_chest_and_current_coin_lines", index):
+            f"Vertical Coin Line by the Chest Coin {index - 5}"
+        for index in range(6, 11)
     },
     **{
         ("Whomp's Fortress", "whomp_jump_coins", index):
@@ -241,9 +333,14 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
         **{i: ("sl_upper_red_coins",) for i in range(4, 9)},
     },
     "Wet-Dry World": {
-        1: ("downtown_initial_red_coin",),
-        **{i: ("downtown_diamond_red_coins",) for i in range(2, 7)},
-        7: ("downtown_high_red_coins",), 8: ("downtown_high_red_coins",),
+        1: ("downtown_diamond_red_coins",),
+        2: ("downtown_brown_brick_red_coin",),
+        3: ("downtown_diamond_red_coins",),
+        4: ("downtown_beige_building_red_coin",),
+        5: ("downtown_diamond_red_coins",),
+        6: ("downtown_diamond_red_coins",),
+        7: ("downtown_diamond_red_coins",),
+        8: ("downtown_chapel_roof_red_coin",),
     },
     "Tall, Tall Mountain": {
         **{i: ("ttm_middle_red_coins",) for i in range(1, 7)},
@@ -338,7 +435,16 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
     "Shifting Sand Land": (*_repeat_names("Low Red Coin", 4), *_repeat_names("High Red Coin", 4)),
     "Dire, Dire Docks": ("First Red Coin", *_repeat_names("Pole Red Coin", 7)),
     "Snowman's Land": (*_repeat_names("Whirl from the Freezing Pond Red Coin", 3), *_repeat_names("Upper Area Red Coin", 5)),
-    "Wet-Dry World": ("First Downtown Red Coin", *_repeat_names("Downtown Red Coin Beyond the Water Level Diamonds", 5), *_repeat_names("High Downtown Red Coin", 2)),
+    "Wet-Dry World": (
+        "Gray Building with Orange Roof Red Coin",
+        "Brown Brick Building Red Coin",
+        "Gray Building Red Coin",
+        "Beige Building Red Coin",
+        "Statue Wall Red Coin 2",
+        "Statue Wall Red Coin 1",
+        "Chapel Alcove Red Coin",
+        "Chapel Roof Red Coin",
+    ),
     "Tall, Tall Mountain": (*_repeat_names("Middle Area Red Coin", 6), *_repeat_names("Upper Area Red Coin", 2)),
     "Tiny-Huge Island": _repeat_names("Red Coin", 8),
     "Tick Tock Clock": (*_repeat_names("First Clock Hand Area Red Coin", 5), *_repeat_names("Spinner Red Coin", 3)),

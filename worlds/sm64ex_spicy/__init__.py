@@ -19,7 +19,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_cap_length_item_names
 from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
     get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, location_name_groups
-from .CoinChecks import CoinOutputID, coin_output_by_name, select_individual_coin_outputs
+from .CoinChecks import CoinOutputID, coin_output_by_name, coin_output_region_name, select_individual_coin_outputs
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
     move_randomizer_option_name_by_action, secret_stage_coin_count_max_coin_option_names, \
@@ -135,6 +135,7 @@ class SM64World(World):
         "one_up_checks",
         "blocksanity",
         "easy_butterflies",
+        "trigger_sparkles",
         "no_despawns",
         "combined_progressive_keys",
         "level_unlocks",
@@ -408,7 +409,7 @@ class SM64World(World):
         for location_name in self.coin_check_location_names:
             output = coin_output_by_name[location_name]
             output_id = output.output_id
-            region_name = coin_check_source_region_names.get(
+            region_name = coin_output_region_name(output) or coin_check_source_region_names.get(
                 (output_id.course_name, output_id.source_id),
                 coin_check_region_names.get(output_id.course_name, output_id.course_name),
             )
@@ -1085,6 +1086,7 @@ class SM64World(World):
             "OneUpChecks": self.options.one_up_checks.value,
             "BuddyChecks": self.options.buddy_checks.value,
             "EasyButterflies": self.options.easy_butterflies.value,
+            "TriggerSparkles": self.options.trigger_sparkles.value,
             "NoDespawn": self.options.no_despawns.value,
             "WingCapLengthItemCount": self.cap_length_item_counts["Progressive Wing Cap Length"],
             "MetalCapLengthItemCount": self.cap_length_item_counts["Progressive Metal Cap Length"],

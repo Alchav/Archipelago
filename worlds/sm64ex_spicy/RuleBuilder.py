@@ -101,6 +101,31 @@ CoinEvaluator: TypeAlias = Callable[[CollectionState, int, int], bool | CoinEval
 
 
 @dataclasses.dataclass()
+class SilentTrue(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
+    """A true rule omitted from explanations when an unlock starts available."""
+
+    @override
+    def _instantiate(self, world: SM64World) -> Rule.Resolved:
+        return self.Resolved(player=world.player)
+
+    class Resolved(Rule.Resolved):
+        always_true: ClassVar[bool] = True
+        skip_cache: ClassVar[bool] = True
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            return True
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            return []
+
+        @override
+        def __str__(self) -> str:
+            return "True"
+
+
+@dataclasses.dataclass()
 class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
     """Accept a global or per-level unlock, including game-only StartInventory."""
 
@@ -125,10 +150,12 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
             ) >= self.count
             for name in item_names
         )
+        if starts_unlocked:
+            return SilentTrue().resolve(world)
         return self.Resolved(
             item_names,
             Or(*(Has(name, self.count) for name in item_names)).resolve(world),
-            starts_unlocked,
+            False,
             player=world.player,
             caching_enabled=getattr(world, "rule_caching_enabled", False),
         )
@@ -523,19 +550,29 @@ class CanCollectCoinOutput(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
                 return [{"type": "text", "text": f"Collect this coin in {self.course_name}"}]
             sources = self._sources(state)
             messages: list[JSONMessagePart] = []
+            found_source = False
             for method in self.source_methods:
                 for source in sources.get(method, ()):
+                    found_source = True
                     if messages:
                         messages.append({"type": "text", "text": " or "})
                     if source.requirement_rule is not None:
-                        messages.extend(source.requirement_rule.explain_json(state))
+                        explanation = source.requirement_rule.explain_json(state)
+                        if explanation:
+                            messages.extend(explanation)
+                        else:
+                            messages.append({
+                                "type": "color",
+                                "color": "green" if source.available else "salmon",
+                                "text": source.label,
+                            })
                     else:
                         messages.append({
                             "type": "color",
                             "color": "green" if source.available else "salmon",
                             "text": source.label,
                         })
-            if messages:
+            if found_source:
                 return messages
             return [{
                 "type": "color",

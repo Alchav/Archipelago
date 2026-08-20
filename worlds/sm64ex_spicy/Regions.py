@@ -606,17 +606,20 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         "Tiny-Huge Island - Wiggler's Cave", player, multiworld)
     create_locs(thi_wiggler_cave,
         "Tiny-Huge Island - Make Wiggler Squirm")
-    thi_red_coins = create_region("Tiny-Huge Island - Red Coins Area", player, multiworld)
-    create_locs(thi_red_coins,
-                "Tiny-Huge Island - Wiggler's Red Coins",
+    thi_red_coins_area = create_region("Tiny-Huge Island - Red Coins Area", player, multiworld)
+    create_locs(thi_red_coins_area,
                 "Tiny-Huge Island - Cannon Tree 1-Up",
-                "Tiny-Huge Island - Red Coin Bridge Tree 1-Up",
+                "Tiny-Huge Island - Red Coin Bridge Tree 1-Up")
+    thi_red_coin_cave = create_region("Tiny-Huge Island - Red Coin Cave", player, multiworld)
+    create_locs(thi_red_coin_cave,
+                "Tiny-Huge Island - Wiggler's Red Coins",
                 "Tiny-Huge Island - Red Coin Cave 1-Up")
     thi_coins = create_region("Tiny-Huge Island - Coins", player, multiworld)
     create_locs(thi_coins, "Tiny-Huge Island - Coins Star")
     hugeTHI.connect(thi_coins)
     tinyTHI.connect(thi_coins)
-    thi_red_coins.connect(thi_coins, name="Tiny-Huge Island - Red Coins Area to Coins")
+    thi_red_coins_area.connect(thi_coins, name="Tiny-Huge Island - Red Coins Area to Coins")
+    thi_red_coin_cave.connect(thi_coins, name="Tiny-Huge Island - Red Coin Cave to Coins")
     thi_wiggler_cave.connect(thi_coins, name="Tiny-Huge Island - Wiggler's Cave to Coins")
     thi_huge_piranha_area = create_region("Tiny-Huge Island - Huge Piranha Area", player, multiworld)
     create_locs(thi_huge_piranha_area, "Tiny-Huge Island - Pluck the Piranha Flower")
@@ -635,12 +638,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     thi_huge_piranha_area.connect(hugeTHI,
                                   name="Tiny-Huge Island - Huge Piranha Area to Huge Island")
     hugeTHI.connect(thi_huge_top, name="Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell")
-    thi_red_coin_cave_entrance = create_region(
-        "Tiny-Huge Island - Red Coin Cave Entrance", player, multiworld)
-    hugeTHI.connect(thi_red_coin_cave_entrance,
-                    name="Tiny-Huge Island - Huge Island to Red Coin Cave Entrance")
-    thi_huge_top.connect(thi_red_coin_cave_entrance,
-                         name="Tiny-Huge Island - Huge Top to Red Coin Cave Entrance")
+    hugeTHI.connect(thi_red_coins_area,
+                    name="Tiny-Huge Island - Huge Island to Red Coins Area")
+    thi_huge_top.connect(thi_red_coins_area,
+                         name="Tiny-Huge Island - Huge Top to Red Coins Area")
     thi_tiny_piranha_area.connect(tinyTHI, name="Tiny-Huge Island - Tiny Piranha Area to Tiny Island")
     thi_tiny_piranha_area.connect(thi_huge_piranha_area,
                                   name="Tiny-Huge Island - Tiny Piranha Area to Huge Piranha Area")
@@ -651,7 +652,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
 
     hugeTHI.subregions = [
         thi_coins, thi_windswept_valley, thi_cannonball, thi_koopa_the_quick,
-        thi_huge_top, thi_wiggler_cave, thi_red_coins, thi_huge_piranha_area]
+        thi_huge_top, thi_wiggler_cave, thi_red_coins_area, thi_red_coin_cave,
+        thi_huge_piranha_area]
     tinyTHI.subregions = [thi_coins, thi_tiny_piranha_area, thi_tiny_main]
 
     regFloor3 = create_region("Third Floor", player, multiworld)

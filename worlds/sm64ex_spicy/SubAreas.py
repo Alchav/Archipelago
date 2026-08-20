@@ -50,7 +50,7 @@ SUB_AREA_SOURCES: dict[str, SubAreaSource] = {
     "sl_igloo": SubAreaSource("sl_igloo", 2, "Snowman's Land - Igloo Entrance", "sl_igloo", "sl_main"),
     "ttm_slide": SubAreaSource("ttm_slide", 3, "Tall, Tall Mountain - Top", "ttm_slide", "ttm_main"),
     "thi_red_cave": SubAreaSource(
-        "thi_red_cave", 4, "Tiny-Huge Island - Red Coin Cave Entrance", "thi_red_cave", "thi_huge"),
+        "thi_red_cave", 4, "Tiny-Huge Island - Red Coins Area", "thi_red_cave", "thi_huge"),
     "hmc_cotmc": SubAreaSource("hmc_cotmc", 5, "Hazy Maze Cave", "cotmc"),
     "jrb_ship": SubAreaSource("jrb_ship", 6, "Jolly Roger Bay", "jrb_ship"),
     "lll_volcano": SubAreaSource(
@@ -77,7 +77,7 @@ RETURN_SOURCES: dict[str, SubAreaSource] = {
     "sl_igloo_exit": SubAreaSource("sl_igloo_exit", 22, "Snowman's Land - Igloo", "sl_main"),
     "ttm_slide_exit": SubAreaSource("ttm_slide_exit", 23, "Tall, Tall Mountain - Secret Slide", "ttm_main"),
     "thi_red_cave_exit": SubAreaSource(
-        "thi_red_cave_exit", 24, "Tiny-Huge Island - Red Coins Area", "thi_huge"),
+        "thi_red_cave_exit", 24, "Tiny-Huge Island - Red Coin Cave", "thi_huge"),
 }
 
 
@@ -95,7 +95,7 @@ SUB_AREA_DESTINATIONS: dict[str, SubAreaDestination] = {
     "ccm_slide": SubAreaDestination("ccm_slide", "Cool, Cool Mountain - Secret Slide", 5, 2, 0x0A),
     "sl_igloo": SubAreaDestination("sl_igloo", "Snowman's Land - Igloo", 10, 2, 0x0A),
     "ttm_slide": SubAreaDestination("ttm_slide", "Tall, Tall Mountain - Secret Slide", 36, 2, 0x0A),
-    "thi_red_cave": SubAreaDestination("thi_red_cave", "Tiny-Huge Island - Red Coins Area", 13, 3, 0x0A),
+    "thi_red_cave": SubAreaDestination("thi_red_cave", "Tiny-Huge Island - Red Coin Cave", 13, 3, 0x0A),
     "cotmc": SubAreaDestination("cotmc", "Cavern of the Metal Cap", 28, 1, 0x0A),
     "jrb_ship": SubAreaDestination("jrb_ship", "Jolly Roger Bay - Sunken Ship", 12, 2, 0x0A),
     "lll_volcano": SubAreaDestination("lll_volcano", "Lethal Lava Land - Volcano", 22, 2, 0x0A),

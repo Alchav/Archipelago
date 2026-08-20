@@ -132,9 +132,9 @@ SOURCE_LAYOUTS = {
     ),
     'Dire, Dire Docks': (
         ('ddd_start_wall_coin_line', 'Sloped underwater coin line near the start', 'yellow', 5),
-        ('ddd_chest_and_current_coin_lines', 'Vertical coin lines by the chests and first current', 'yellow', 10),
+        ('ddd_chest_and_current_coin_lines', 'Vertical Coin Lines by the Whirlpool and Chest', 'yellow', 10),
         ('ddd_seafloor_chest_coins', 'Coins surrounding the sea-floor chest', 'yellow', 3),
-        ('ddd_sub_area_coin_rings', "Coin rings leading to the Bowser's Sub area", 'yellow', 24),
+        ('ddd_sub_area_coin_rings', 'Coin Rings Leading to and Inside the Tunnel', 'yellow', 24),
         ('ddd_seafloor_clam_coin_ring', 'Sea-floor coin ring by the Koopa Shell clam', 'yellow', 8),
         ('ddd_moat_exit_coin_line', 'Vertical coin line by the moat exit', 'yellow', 5),
         ('ddd_sub_area_dock_coin_line', "Coin line on the Bowser's Sub area dock", 'yellow', 5),
@@ -174,8 +174,8 @@ SOURCE_LAYOUTS = {
         ('express_elevator_ten_coin_block', 'Top of Express Elevator 10-Coin Block', 'yellow', 10),
         ('downtown_ring', 'Downtown statue coin ring', 'yellow', 8),
         ('downtown_metal_cap_line', 'Downtown metal-cap coin line', 'yellow', 5),
-        ('downtown_first_building_line', 'Downtown first-building coin line', 'yellow', 5),
-        ('downtown_second_building_line', 'Downtown second-building coin line', 'yellow', 5),
+        ('downtown_first_building_line', 'Beige Building Coin Line', 'yellow', 5),
+        ('downtown_second_building_line', 'Gray Building Coin Line', 'yellow', 5),
         ('downtown_skeeters', 'Two Skeeters Downtown', 'yellow', 6),
     ),
     'Tall, Tall Mountain': (
