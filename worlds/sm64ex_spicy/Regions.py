@@ -649,6 +649,10 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                   name="Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area")
     thi_tiny_main.connect(thi_koopa_the_quick, name="Tiny-Huge Island - Tiny Main to Koopa the Quick")
     thi_koopa_the_quick.connect(thi_tiny_main, name="Tiny-Huge Island - Koopa the Quick to Tiny Main")
+    thi_windswept_valley.connect(thi_tiny_main,
+                                 name="Tiny-Huge Island - Windswept Valley to Tiny Main")
+    thi_tiny_main.connect(thi_windswept_valley,
+                          name="Tiny-Huge Island - Tiny Main to Windswept Valley")
 
     hugeTHI.subregions = [
         thi_coins, thi_windswept_valley, thi_cannonball, thi_koopa_the_quick,

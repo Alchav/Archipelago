@@ -3901,7 +3901,10 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Warp Pipes"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
-        self.assertFalse(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
+        self.assertTrue(self.can_reach_entrance("Tiny-Huge Island - Windswept Valley to Tiny Main"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
+        self.assertTrue(self.can_reach_entrance("Tiny-Huge Island - Tiny Main to Windswept Valley"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
@@ -3914,6 +3917,11 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Windswept Valley"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Cannonball"))
+        self.assertFalse(self.can_reach_entrance("Tiny-Huge Island - Windswept Valley to Tiny Main"))
+
+        self.collect(self.get_item_by_name("Warp Pipes"))
+        self.assertTrue(self.can_reach_entrance("Tiny-Huge Island - Windswept Valley to Tiny Main"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
 
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Cannonball"))

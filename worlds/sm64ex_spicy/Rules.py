@@ -1132,6 +1132,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area", "WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Tiny Main to Koopa the Quick", "WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Koopa the Quick to Tiny Main", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Windswept Valley to Tiny Main", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Tiny Main to Windswept Valley", "WARP_PIPES")
     rf.assign_rule(
         "Tiny-Huge Island - Windswept Valley",
         "TJ+DV | LJ | logic_thi_windswept_valley_fly_guy_spin_jump")
