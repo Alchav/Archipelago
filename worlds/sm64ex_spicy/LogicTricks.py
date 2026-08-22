@@ -535,7 +535,8 @@ logic_tricks = {
         "internal_id": "logic_thi_windswept_valley_fly_guy_spin_jump",
         "rule": "FLY_GUY",
         "difficulty": "medium",
-        "description": "Reaching Windswept Valley by spin-jumping from a Fly Guy. The Fly Guy can only be used once.",
+        "description": "Crossing the first gap toward Windswept Valley by spin-jumping from a Fly Guy. The Fly Guy "
+                       "can only be used once. Vertical Wind or Triple Jump is still needed for the second gap.",
     },
     "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell": {
         "internal_id": "logic_thi_scale_huge_mountain_koopa_shell",

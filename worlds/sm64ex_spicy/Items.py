@@ -188,6 +188,8 @@ global_purple_switch_item_names = ("Purple Switches",)
 global_bobomb_buddy_item_names = ("Bob-omb Buddies",)
 global_treasure_chest_item_names = ("Treasure Chests",)
 global_warp_pipe_item_names = ("Warp Pipes",)
+global_vertical_wind_item_names = ("Vertical Wind",)
+global_horizontal_wind_item_names = ("Horizontal Wind",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
@@ -196,6 +198,21 @@ global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Bob-omb Buddies": SM64ItemData(sm64ex_base_id + 928),
     "Treasure Chests": SM64ItemData(sm64ex_base_id + 931),
     "Warp Pipes": SM64ItemData(sm64ex_base_id + 935),
+    "Vertical Wind": SM64ItemData(sm64ex_base_id + 1102),
+    "Horizontal Wind": SM64ItemData(sm64ex_base_id + 1106, trap),
+}
+
+vertical_wind_item_data_table: dict[str, SM64ItemData] = {
+    "Cool, Cool Mountain - Vertical Wind": SM64ItemData(sm64ex_base_id + 1103, useful),
+    "Tall, Tall Mountain - Vertical Wind": SM64ItemData(sm64ex_base_id + 1104),
+    "Tiny-Huge Island - Vertical Wind": SM64ItemData(sm64ex_base_id + 1105),
+}
+
+horizontal_wind_item_data_table: dict[str, SM64ItemData] = {
+    "Bowser in the Sky - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1107, trap),
+    "Rainbow Ride - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1108, trap),
+    "Snowman's Land - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1109, trap),
+    "Tiny-Huge Island - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1110, trap),
 }
 
 per_level_bobomb_buddy_item_names = (
@@ -272,6 +289,8 @@ arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **checkerboard_item_data_table,
     **rolling_log_item_data_table,
     **purple_switch_item_data_table,
+    **vertical_wind_item_data_table,
+    **horizontal_wind_item_data_table,
 }
 
 action_item_data_table: dict[str, SM64ItemData] = {
@@ -1207,6 +1226,14 @@ item_name_groups: dict[str, set[str]] = {
         | set(per_level_treasure_chest_item_names)
     ),
     "Warp Pipe Unlocks": set(global_warp_pipe_item_names) | set(per_level_warp_pipe_item_names),
+    "Wind Unlocks": (
+        set(global_vertical_wind_item_names)
+        | set(vertical_wind_item_data_table)
+        | set(global_horizontal_wind_item_names)
+        | set(horizontal_wind_item_data_table)
+    ),
+    "Vertical Wind Unlocks": set(global_vertical_wind_item_names) | set(vertical_wind_item_data_table),
+    "Horizontal Wind Unlocks": set(global_horizontal_wind_item_names) | set(horizontal_wind_item_data_table),
     "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
     "Coin Object Unlocks": set(global_coin_object_item_data_table) | set(per_level_coin_object_item_data_table),
     "Global Coin Object Unlocks": set(global_coin_object_item_data_table),

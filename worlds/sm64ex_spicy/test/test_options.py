@@ -6,7 +6,7 @@ from .. import Options
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
-    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
+    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, item_data_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, main_course_move_area_names, \
     separate_misc_move_area_names, collapsed_misc_move_area_names, non_climb_move_area_names, \
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
@@ -17,7 +17,9 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, \
     global_checkerboard_item_names, global_rolling_log_item_names, global_purple_switch_item_names, \
     global_bobomb_buddy_item_names, global_treasure_chest_item_names, global_warp_pipe_item_names, \
-    per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names
+    per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names, \
+    global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
+    horizontal_wind_item_data_table
 from ..Locations import coin_count_check_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coin_count_check_location_table, secret_stage_coin_count_check_location_table, get_coin_count_check_location_name, \
     location_name_groups
@@ -379,6 +381,15 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "The Princess's Secret Slide - Signs": 3626954,
             "Cavern of the Metal Cap - Signs": 3626955,
             "Bowser in the Dark World - Signs": 3626956,
+            "Vertical Wind": 3627102,
+            "Cool, Cool Mountain - Vertical Wind": 3627103,
+            "Tall, Tall Mountain - Vertical Wind": 3627104,
+            "Tiny-Huge Island - Vertical Wind": 3627105,
+            "Horizontal Wind": 3627106,
+            "Bowser in the Sky - Horizontal Wind": 3627107,
+            "Rainbow Ride - Horizontal Wind": 3627108,
+            "Snowman's Land - Horizontal Wind": 3627109,
+            "Tiny-Huge Island - Horizontal Wind": 3627110,
         }
         item_data = {
             **feature_item_data_table,
@@ -410,6 +421,24 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual(item_table["Wing Mario Over the Rainbow - Ledge Grab"], 3627091)
         self.assertEqual(item_table["Misc - Triple Jump"], 3627092)
         self.assertEqual(item_table["Misc - Ledge Grab"], 3627101)
+
+    def test_wind_item_classifications(self):
+        expected = {
+            "Vertical Wind": ItemClassification.progression,
+            "Cool, Cool Mountain - Vertical Wind": ItemClassification.useful,
+            "Tall, Tall Mountain - Vertical Wind": ItemClassification.progression,
+            "Tiny-Huge Island - Vertical Wind": ItemClassification.progression,
+            "Horizontal Wind": ItemClassification.trap,
+            "Bowser in the Sky - Horizontal Wind": ItemClassification.trap,
+            "Rainbow Ride - Horizontal Wind": ItemClassification.trap,
+            "Snowman's Land - Horizontal Wind": ItemClassification.trap,
+            "Tiny-Huge Island - Horizontal Wind": ItemClassification.trap,
+        }
+        for item_name, classification in expected.items():
+            with self.subTest(item=item_name):
+                self.assertEqual(
+                    self.get_item_data_classification(item_data_table[item_name]),
+                    classification)
 
     def test_current_per_level_move_item_classifications(self):
         expected_classifications = {
@@ -956,7 +985,13 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     }
 
     def test_individual_arbitrary_items_are_generated(self):
-        for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
+        for item_name in {
+                **checkerboard_item_data_table,
+                **rolling_log_item_data_table,
+                **purple_switch_item_data_table,
+                **vertical_wind_item_data_table,
+                **horizontal_wind_item_data_table,
+        }:
             with self.subTest("Individual arbitrary item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
@@ -979,6 +1014,8 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *global_purple_switch_item_names,
             *global_treasure_chest_item_names,
             *global_warp_pipe_item_names,
+            *global_vertical_wind_item_names,
+            *global_horizontal_wind_item_names,
         )
         per_level_names = (
             *checkerboard_item_data_table,
@@ -986,6 +1023,8 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *purple_switch_item_data_table,
             *per_level_treasure_chest_item_names,
             *per_level_warp_pipe_item_names,
+            *vertical_wind_item_data_table,
+            *horizontal_wind_item_data_table,
         )
         for item_name in (*global_names, *per_level_names):
             with self.subTest(item=item_name):
@@ -1011,6 +1050,8 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Purple Switches",
                 "Treasure Chests",
                 "Warp Pipes",
+                "Vertical Wind",
+                "Horizontal Wind",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -1026,6 +1067,8 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Purple Switches",
                 "Treasure Chests",
                 "Warp Pipes",
+                "Vertical Wind",
+                "Horizontal Wind",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)

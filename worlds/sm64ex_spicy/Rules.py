@@ -1116,6 +1116,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_ttm_top_wall_kick | logic_ttm_top_kick | logic_ttm_top_dive")
     rf.assign_rule("Tall, Tall Mountain - Mystery of the Monkey Cage", "TTM_UKIKI")
     rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "PURPLE_SWITCHES")
+    rf.assign_rule("Tall, Tall Mountain - Middle", "VERTICAL_WIND/TJ/LJ")
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom",
                    "CANN | logic_ttm_lonely_mushroom_cannonless | "
                    "logic_ttm_lonely_mushroom_fly_guy_spin_jump")
@@ -1136,7 +1137,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Tiny Main to Windswept Valley", "WARP_PIPES")
     rf.assign_rule(
         "Tiny-Huge Island - Windswept Valley",
-        "TJ+DV | LJ | logic_thi_windswept_valley_fly_guy_spin_jump")
+        "TJ+DV | LJ+VERTICAL_WIND | LJ+TJ | "
+        "logic_thi_windswept_valley_fly_guy_spin_jump")
     rf.assign_rule("Tiny-Huge Island - Cannonball", "LG/SF/BF/TJ/WK")
     rf.assign_rule("Tiny-Huge Island - Koopa the Quick", "SF/BF/TJ/WK")
     rf.assign_rule("Tiny-Huge Island - Huge Top", "SF/BF/TJ")
@@ -1605,6 +1607,7 @@ class RuleFactory:
         "PURPLE_SWITCHES": "Purple Switches",
         "WDW_WATER_LEVEL_DIAMOND": "Wet-Dry World - Water Level Diamond",
         "TTC_SPINNERS": "Tick Tock Clock - Spinners",
+        "VERTICAL_WIND": "Vertical Wind",
     }
     cap_item_name_by_token_and_level = {
         "WC": {
@@ -1796,6 +1799,15 @@ class RuleFactory:
                 self.options.level_features,
                 "Purple Switches", purple_switch_item_name_by_level[level_name])
             if level_name in purple_switch_item_name_by_level else True
+        )
+        vertical_wind_item_name_by_level = {
+            "Cool, Cool Mountain": "Cool, Cool Mountain - Vertical Wind",
+            "Tall, Tall Mountain": "Tall, Tall Mountain - Vertical Wind",
+            "Tiny-Huge Island": "Tiny-Huge Island - Vertical Wind",
+        }
+        item_names["VERTICAL_WIND"] = (
+            HasUnlock("Vertical Wind", vertical_wind_item_name_by_level[level_name])
+            if level_name in vertical_wind_item_name_by_level else True
         )
         warp_pipe_item_name = warp_pipe_item_name_by_level.get(level_name)
         if warp_pipe_item_name:

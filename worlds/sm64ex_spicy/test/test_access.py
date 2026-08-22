@@ -3895,7 +3895,10 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
     def test_tiny_pipes_reach_each_matching_huge_region(self):
         self.disable_huge_entry()
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Long Jump"))
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Vertical Wind"),
+        ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
 
@@ -3914,7 +3917,10 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
     def test_repeatable_movement_reaches_the_huge_mountain_regions(self):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Long Jump"))
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Vertical Wind"),
+        ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Windswept Valley"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Cannonball"))
         self.assertFalse(self.can_reach_entrance("Tiny-Huge Island - Windswept Valley to Tiny Main"))
@@ -3934,7 +3940,10 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
     def test_wall_kick_reaches_cannonball_and_koopa_regions(self):
         self.disable_tiny_entry()
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Long Jump"))
+        self.collect([
+            self.get_item_by_name("Long Jump"),
+            self.get_item_by_name("Vertical Wind"),
+        ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Windswept Valley"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Cannonball"))
 
@@ -6172,6 +6181,8 @@ class TallTallMountainCoinStar43AccessTestBase(TallTallMountainCoinStarAccessTes
 
     def test_start_coins_reach_coin_star(self):
         self.collect_second_floor_access()
+        self.assertFalse(self.can_reach_region("Tall, Tall Mountain - Middle"))
+        self.collect(self.get_item_by_name("Vertical Wind"))
         self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Middle"))
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
@@ -6184,7 +6195,10 @@ class TallTallMountainCoinStar57AccessTestBase(TallTallMountainCoinStarAccessTes
 
     def test_climb_coins_reach_coin_star(self):
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Backflip"))
+        self.collect([
+            self.get_item_by_name("Backflip"),
+            self.get_item_by_name("Vertical Wind"),
+        ])
         self.assertFalse(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
         self.collect(self.get_item_by_name("Climb"))
@@ -6200,7 +6214,10 @@ class TallTallMountainCoinStar57MovelessAccessTestBase(TallTallMountainCoinStarA
 
     def test_moveless_coins_reach_coin_star(self):
         self.collect_second_floor_access()
-        self.collect(self.get_item_by_name("Backflip"))
+        self.collect([
+            self.get_item_by_name("Backflip"),
+            self.get_item_by_name("Vertical Wind"),
+        ])
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Coins Star"))
 
 
@@ -6337,6 +6354,7 @@ class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
 
     def test_upper_region_and_monty_mole_checks(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
+        self.collect(self.get_item_by_name("Long Jump"))
         self.assertTrue(self.can_reach_region("Tall, Tall Mountain - Middle"))
         self.assertFalse(self.can_reach_region("Tall, Tall Mountain - Upper"))
         self.assertEqual(

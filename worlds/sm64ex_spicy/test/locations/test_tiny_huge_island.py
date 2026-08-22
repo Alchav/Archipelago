@@ -74,7 +74,7 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
     options = THI_OPTIONS
 
     def test_locations(self):
-        windswept = ["Long Jump"]
+        windswept = ["Long Jump", "Tiny-Huge Island - Vertical Wind"]
         koopa_region = windswept + ["Triple Jump"]
         top = koopa_region
         red_area = [CANNON]
@@ -197,7 +197,7 @@ class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, upper_movement],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", True,
-             upper_movement + ["Tiny-Huge Island - Fly Guys"]],
+             upper_movement + ["Tiny-Huge Island - Fly Guys", "Tiny-Huge Island - Vertical Wind"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 

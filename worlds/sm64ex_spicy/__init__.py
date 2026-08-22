@@ -6,6 +6,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, global_bobomb_buddy_item_names, \
     global_treasure_chest_item_names, global_warp_pipe_item_names, checkerboard_item_data_table, \
+    global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
+    horizontal_wind_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
@@ -491,6 +493,14 @@ class SM64World(World):
                 self.options.level_features,
                 global_warp_pipe_item_names,
                 per_level_warp_pipe_item_names)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_vertical_wind_item_names,
+                vertical_wind_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_horizontal_wind_item_names,
+                horizontal_wind_item_data_table)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_per_act_only:
@@ -529,6 +539,8 @@ class SM64World(World):
             item_names += list(global_purple_switch_item_names)
             item_names += list(global_treasure_chest_item_names)
             item_names += list(global_warp_pipe_item_names)
+            item_names += list(global_vertical_wind_item_names)
+            item_names += list(global_horizontal_wind_item_names)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
