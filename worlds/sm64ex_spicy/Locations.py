@@ -444,11 +444,11 @@ locFreestanding1Up_table = {
     "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up": 3629157,
     "Shifting Sand Land - Pyramid Right Path 1-Up": 3629158,
 
-    "Tiny-Huge Island - Cannon Tree 1-Up": 3629159,
+    "Tiny-Huge Island - Huge Island Tree 1-Up": 3629159,
     "Tiny-Huge Island - Beach Coins 1-Up": 3629160,
     "Tiny-Huge Island - Boss Bass 1-Up": 3629161,
     "Tiny-Huge Island - Koopa Area Butterfly 1-Up": 3629162,
-    "Tiny-Huge Island - Red Coin Bridge Tree 1-Up": 3629163,
+    "Tiny-Huge Island - Huge Island Tree Butterfly 1-Up": 3629163,
     "Tiny-Huge Island - Start Butterfly 1-Up": 3629164,
     "Tiny-Huge Island - Red Coin Cave 1-Up": 3629165,
 
@@ -667,13 +667,13 @@ trigger_1up_location_ids = {
     3629122, 3629125, 3629126, 3629127,
     3629131, 3629132, 3629134, 3629141, 3629142, 3629146,
     3629149, 3629150, 3629151, 3629153, 3629156, 3629159,
-    3629160, 3629163, 3629166, 3629167,
+    3629160, 3629166, 3629167,
     3629172, 3629178, 3629181, 3629182, 3629183,
     3629185, 3629189, 3629190, 3629191, 3629192,
 }
 
 butterfly_1up_location_ids = {
-    3629123, 3629124, 3629162, 3629164, 3629171, 3629184,
+    3629123, 3629124, 3629162, 3629163, 3629164, 3629171, 3629184,
 }
 
 locTrigger1Up_table = {

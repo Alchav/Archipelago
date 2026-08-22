@@ -608,8 +608,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         "Tiny-Huge Island - Make Wiggler Squirm")
     thi_red_coins_area = create_region("Tiny-Huge Island - Red Coins Area", player, multiworld)
     create_locs(thi_red_coins_area,
-                "Tiny-Huge Island - Cannon Tree 1-Up",
-                "Tiny-Huge Island - Red Coin Bridge Tree 1-Up")
+                "Tiny-Huge Island - Huge Island Tree 1-Up",
+                "Tiny-Huge Island - Huge Island Tree Butterfly 1-Up")
     thi_red_coin_cave = create_region("Tiny-Huge Island - Red Coin Cave", player, multiworld)
     create_locs(thi_red_coin_cave,
                 "Tiny-Huge Island - Wiggler's Red Coins",
