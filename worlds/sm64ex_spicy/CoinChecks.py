@@ -98,6 +98,7 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "sl_igloo_three_coin_block": "Snowman's Land - Igloo",
     "sl_igloo_goombas": "Snowman's Land - Igloo",
     "sl_igloo_spindrifts": "Snowman's Land - Igloo",
+    "sl_upper_slope_coin_line": "Snowman's Land - Igloo Entrance",
 
     "ttm_hidden_coin_before_slide": "Tall, Tall Mountain - Secret Slide",
     "ttm_slide_single_coins": "Tall, Tall Mountain - Secret Slide",
@@ -143,6 +144,11 @@ COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ..
         "ssl_pyramid_top_vertical_coin_line",
         5,
     ): ("ssl_pyramid_top_vertical_coin_line_top_coin",),
+    (
+        "Snowman's Land",
+        "sl_upper_slope_single_coins",
+        3,
+    ): ("sl_highest_slope_single_coin",),
 }
 
 

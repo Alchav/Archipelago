@@ -773,6 +773,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # destination assigned to the physical warp.
     connect_regions(
         multiworld, player, "Snowman's Land", "Snowman's Land - Igloo Entrance",
+        rf.build_rule("{Snowman's Land - Whirl from the Freezing Pond}"),
         name="Snowman's Land - Igloo Approach")
     connect_regions(
         multiworld, player, "Cool, Cool Mountain - Slide Exit", "Cool, Cool Mountain",
@@ -1042,7 +1043,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Snowman's Land - Upper",
         "{Snowman's Land - Whirl from the Freezing Pond} | TJ/SF/BF | CANN")
     rf.assign_rule("Snowman's Land - Top of Snowman's Head", "SL_PENGUIN & BF/SF/TJ | CANN")
-    rf.assign_rule("Snowman's Land - Igloo Entrance", "{Snowman's Land - Whirl from the Freezing Pond}")
     rf.assign_rule("Snowman's Land - Chill with the Bully", "BIG_BULLY")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG")

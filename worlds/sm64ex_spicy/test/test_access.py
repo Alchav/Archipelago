@@ -5501,6 +5501,18 @@ class SnowmansLandRegionAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Triple Jump"))
         self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
         self.assertTrue(self.can_reach_region("Snowman's Land - Upper"))
+        self.assertFalse(self.can_reach_entrance("Snowman's Land - Igloo Approach"))
+
+    def test_top_of_snowmans_head_reaches_igloo_without_whirl(self):
+        self.collect_second_floor_access()
+        self.collect_by_name([
+            "Snowman's Land - Penguin",
+            "Backflip",
+        ])
+        self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Igloo Entrance"))
+        self.assertTrue(self.can_reach_region("Snowman's Land - Igloo"))
 
     def test_cannon_reaches_upper_top_and_igloo(self):
         self.collect_second_floor_access()
@@ -5630,6 +5642,24 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Snowman's Land - Chill with the Bully"))
         self.collect(self.get_item_by_name("Snowman's Land - Chill Bully"))
         self.assertTrue(self.can_reach_location("Snowman's Land - Chill with the Bully"))
+
+    def test_slope_single_coins_split_between_main_and_highest_coin_routes(self):
+        self.collect_by_name([
+            "Progressive Upstairs Key",
+            "Snowman's Land - Single Yellow Coins",
+        ])
+        self.assertEqual(
+            COIN_EVALUATORS["Snowman's Land"](
+                self.multiworld.state, self.player, 0).reachable_coins,
+            4,
+        )
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertEqual(
+            COIN_EVALUATORS["Snowman's Land"](
+                self.multiworld.state, self.player, 0).reachable_coins,
+            5,
+        )
 
 
 class SnowmansLandIglooShellCoinLossTestBase(SM64TestBase):

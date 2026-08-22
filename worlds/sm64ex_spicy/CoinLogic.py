@@ -1855,17 +1855,19 @@ def snowmans_land_coins(
     )
 
     can_reach_upper = state.can_reach(f"{level_name} - Upper", "Region", player)
+    can_reach_igloo_entrance = state.can_reach(
+        f"{level_name} - Igloo Entrance", "Region", player)
     builder.add(
         "sl_upper_slope_coin_line",
         "Coin line on the slope toward the Igloo",
         5,
-        can_reach_upper and has_horizontal_coin_lines,
+        can_reach_igloo_entrance and has_horizontal_coin_lines,
     )
     builder.add(
         "sl_upper_slope_single_coins",
-        "Single coins on the slope toward the Igloo",
-        3,
-        can_reach_upper and has_single_yellow_coins,
+        "Two lower single coins on the slope toward the Igloo",
+        2,
+        has_single_yellow_coins,
     )
     builder.add(
         "sl_penguin_and_face_coins",
@@ -1904,6 +1906,13 @@ def snowmans_land_coins(
     )
 
     can_reach_igloo = state.can_reach(f"{level_name} - Igloo", "Region", player)
+    builder.add(
+        "sl_highest_slope_single_coin",
+        "Highest single coin on the slope toward the Igloo",
+        1,
+        has_single_yellow_coins
+        and (Rules.has_action(state, player, "Long Jump", level_name) or can_reach_igloo),
+    )
     has_vanish_cap = Rules.has_vanish_cap(state, player, level_name)
     igloo_source_data = (
         (
@@ -4473,10 +4482,13 @@ def _middle_requirement_specs():
     _add(SL, "sl_whirl_mr_blizzard_cannon_route", "CANN")
     _add(SL, "sl_whirl_mr_blizzard_no_despawns_route")
 
-    _add(SL, "sl_upper_slope_coin_line", f"{{{SL} - Upper}}",
+    _add(SL, "sl_upper_slope_coin_line", f"{{{SL} - Igloo Entrance}}",
          (_unlock("Horizontal Coin Lines", SL),))
-    _add(SL, ("sl_upper_slope_single_coins", "sl_penguin_and_face_coins"),
-         f"{{{SL} - Upper}}", (_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_upper_slope_single_coins", "", (_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_highest_slope_single_coin", f"LJ | {{{SL} - Igloo}}",
+         (_unlock("Single Yellow Coins", SL),))
+    _add(SL, "sl_penguin_and_face_coins", f"{{{SL} - Upper}}",
+         (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_upper_spindrifts", f"{{{SL} - Upper}}", (_unlock("Spindrifts", SL),))
     _add(SL, "sl_upper_red_coins", f"{{{SL} - Upper}}", (_unlock("Red Coins", SL),))
     _add(SL, "sl_snowman_head_plank_coins", f"{{{SL} - Top of Snowman's Head}}",
