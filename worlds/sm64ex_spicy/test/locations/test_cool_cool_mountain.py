@@ -51,18 +51,16 @@ class TestCoolCoolMountainLocations(SM64TestBase):
             ["Cool, Cool Mountain - Snowman's Lost His Head", True,
              ["Cool, Cool Mountain - Snowman's Body"]],
             ["Cool, Cool Mountain - Wall Kicks Will Work", False, []],
-            ["Cool, Cool Mountain - Wall Kicks Will Work", True, ["Triple Jump"]],
+            ["Cool, Cool Mountain - Wall Kicks Will Work", False, ["Triple Jump"]],
+            ["Cool, Cool Mountain - Wall Kicks Will Work", False, ["Wall Kick"]],
+            ["Cool, Cool Mountain - Wall Kicks Will Work", True,
+             ["Triple Jump", "Wall Kick"]],
             ["Cool, Cool Mountain - Bob-omb Buddy", False, []],
             ["Cool, Cool Mountain - Bob-omb Buddy", True,
              ["Cool, Cool Mountain - Bob-omb Buddy"]],
 
             ["Cool, Cool Mountain - Snowman Tree 1-Up", False, []],
             ["Cool, Cool Mountain - Snowman Tree 1-Up", True, TRIGGER_1UPS],
-            ["Cool, Cool Mountain - Slide Shortcut First 1-Up", False, []],
-            ["Cool, Cool Mountain - Slide Shortcut First 1-Up", True, FREESTANDING_1UPS],
-            ["Cool, Cool Mountain - Slide Shortcut Second 1-Up", False, []],
-            ["Cool, Cool Mountain - Slide Shortcut Second 1-Up", True, FREESTANDING_1UPS],
-
             ["Cool, Cool Mountain - Near Snowman Block 1-Up", False, []],
             ["Cool, Cool Mountain - Near Snowman Block 1-Up", True, BLOCK_1UPS],
             ["Cool, Cool Mountain - Ice Pillar Block 1-Up", False, []],
@@ -77,6 +75,20 @@ class TestCoolCoolMountainLocations(SM64TestBase):
             ["Cool, Cool Mountain - Coins Star", False, []],
             ["Cool, Cool Mountain - Coins Star", True, [], ALL_ITEMS],
         ], starting_regions=["Cool, Cool Mountain"])
+
+    def test_slide_shortcut_one_ups_are_in_the_slide(self):
+        self.assertEqual(
+            self.multiworld.get_location(
+                "Cool, Cool Mountain - Slide Shortcut First 1-Up", self.player
+            ).parent_region.name,
+            "Cool, Cool Mountain - Secret Slide",
+        )
+        self.run_location_tests([
+            ["Cool, Cool Mountain - Slide Shortcut First 1-Up", False, []],
+            ["Cool, Cool Mountain - Slide Shortcut First 1-Up", True, FREESTANDING_1UPS],
+            ["Cool, Cool Mountain - Slide Shortcut Second 1-Up", False, []],
+            ["Cool, Cool Mountain - Slide Shortcut Second 1-Up", True, FREESTANDING_1UPS],
+        ], starting_regions=["Cool, Cool Mountain - Secret Slide"])
 
 
 class TestCoolCoolMountainSpinJumpTrick(SM64TestBase):

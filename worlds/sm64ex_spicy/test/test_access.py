@@ -936,11 +936,11 @@ class CourseOneUpAccessTestBase(SM64TestBase):
     def test_ssl_pyramid_1up_access(self):
         self.collect_basement_access()
         self.assertTrue(
-            self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
+            self.can_reach_location("Shifting Sand Land - Pyramid Grindel 1-Up"))
         # The unshuffled Pyramid Elevator reaches the upper interior, from which Mario can
         # drop to the Right Path 1-Up.
         self.assertTrue(
-            self.can_reach_location("Shifting Sand Land - Pyramid Right Path 1-Up"))
+            self.can_reach_location("Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up"))
 
 
 class NoDespawnCourseOneUpAccessTestBase(CourseOneUpAccessTestBase):
@@ -1266,13 +1266,14 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Swimming Beast in the Cavern"))
         self.assertTrue(self.can_reach_region("Cavern of the Metal Cap"))
 
-    def test_checkerboard_platforms_gate_hmc_red_coin_area(self):
+    def test_hmc_red_coin_room_regions(self):
         self.collect_basement_access()
-        self.collect([self.get_item_by_name("Climb"), self.get_item_by_name("Wall Kick")])
-        self.assertFalse(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
+        self.collect(self.get_item_by_name("Wall Kick"))
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Mid Red Coin Room"))
+        self.assertFalse(self.can_reach_region("Hazy Maze Cave - Upper Red Coin Room"))
 
-        self.collect(self.world.create_item("Checkerboard Platforms"))
-        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
+        self.collect(self.get_item_by_name("Climb"))
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Upper Red Coin Room"))
 
     def test_rainbow_ride_beneath_pole_to_maze_route(self):
         self.collect_third_floor_access()
@@ -1502,6 +1503,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Vertical Wind"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Tiny Main"))
@@ -1514,6 +1516,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([
             self.get_item_by_name("Tiny-Huge Island - Koopa the Quick"),
             self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Vertical Wind"),
         ])
         self.assertFalse(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
 
@@ -1671,6 +1674,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect([
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Side Flip"),
+            self.get_item_by_name("Vertical Wind"),
         ])
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
@@ -1919,7 +1923,8 @@ class UnshuffledArbitraryFeatureAccessTestBase(SM64TestBase):
             self.get_item_by_name("Long Jump"),
             self.get_item_by_name("Metal Cap"),
         ])
-        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Red Coin Area"))
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Mid Red Coin Room"))
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Upper Red Coin Room"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Metal-Head Mario Can Move!"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Red-Hot Log Rolling"))
 
@@ -2430,8 +2435,8 @@ class BowserInTheFireSeaCoinCountChecksAccessTestBase(SM64TestBase):
 
     def test_bowser_in_the_fire_sea_coin_sources(self):
         self.collect_bowser_in_the_fire_sea_access()
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 23 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - 24 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 21 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - 22 Coins"))
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - 80 Coins"))
@@ -4650,8 +4655,8 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_initial_coin_sources_are_counted_independently(self):
         self.collect_basement_access()
         source_coins = {
-            "Lethal Lava Land - Single Yellow Coins": 25,
-            "Lethal Lava Land - Horizontal Coin Lines": 30,
+            "Lethal Lava Land - Single Yellow Coins": 21,
+            "Lethal Lava Land - Horizontal Coin Lines": 25,
             "Lethal Lava Land - Horizontal Coin Rings": 24,
             "Lethal Lava Land - Crazy Box": 5,
             "Lethal Lava Land - Bowser Puzzle": 5,
@@ -4680,8 +4685,8 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_single_yellow_coin_routes(self):
         self.collect_basement_access()
         self.collect(self.get_item_by_name("Lethal Lava Land - Single Yellow Coins"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 21))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 22))
 
         self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
@@ -4690,8 +4695,8 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_under_bridge_coin_line_requires_a_lava_route(self):
         self.collect_basement_access()
         self.collect(self.get_item_by_name("Lethal Lava Land - Horizontal Coin Lines"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 30))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 31))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
 
         self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 35))
@@ -4897,8 +4902,11 @@ class LethalLavaLandCoinStar125AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         "lethal_lava_land_coin_star_requirement": 125,
     }
 
-    def test_start_coins_reach_coin_star(self):
+    def test_start_coins_need_a_lava_crossing_to_reach_coin_star(self):
         self.collect_basement_access()
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
@@ -4915,6 +4923,9 @@ class LethalLavaLandCoinStar128AccessTestBase(LethalLavaLandCoinStarAccessTestBa
 
         self.collect(self.get_item_by_name("Checkerboard Platforms"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
+        self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
+
+        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
@@ -5035,10 +5046,14 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
         self.assertTrue(self.can_reach_location("Shifting Sand Land - Stand Tall on the Four Pillars"))
 
-    def test_stand_tall_is_in_main_region(self):
+    def test_stand_tall_is_in_eyerok_arena_inside_the_pyramid(self):
         location = self.multiworld.get_location(
             "Shifting Sand Land - Stand Tall on the Four Pillars", self.player)
-        self.assertEqual("Shifting Sand Land", location.parent_region.name)
+        self.assertEqual("Shifting Sand Land - Eyerok Arena", location.parent_region.name)
+        self.assertEqual(
+            "Shifting Sand Land - Pyramid",
+            location.parent_region.entrances[0].parent_region.name,
+        )
 
 
 class ShiftingSandLandRedCoinTricksTestBase(SM64TestBase):
@@ -5118,12 +5133,31 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
-    def get_isolated_coin_total(self, item_names: list[str]) -> int:
+    def get_isolated_coin_total(
+            self,
+            item_names: list[str],
+            reachable_regions: set[str] | None = None,
+    ) -> int:
         state = CollectionState(self.multiworld)
         for item_name in item_names:
             state.collect(self.world.create_item(item_name), prevent_sweep=True)
+
+        if reachable_regions is not None:
+            class RegionRestrictedState:
+                def can_reach(self, spot, *args, **kwargs):
+                    return getattr(spot, "name", spot) in reachable_regions
+
+                def can_reach_region(self, region, *args, **kwargs):
+                    return getattr(region, "name", region) in reachable_regions
+
+                def __getattr__(self, name):
+                    return getattr(state, name)
+
+            evaluation_state = RegionRestrictedState()
+        else:
+            evaluation_state = state
         return COIN_EVALUATORS["Shifting Sand Land"](
-            state, self.player, 136).reachable_coins
+            evaluation_state, self.player, 136).reachable_coins
 
     def test_initial_coin_sources_are_counted_independently(self):
         source_coins = {
@@ -5140,7 +5174,10 @@ class ShiftingSandLandIndividualUnlockLogicTestBase(SM64TestBase):
         for item_name, expected_coins in source_coins.items():
             with self.subTest(item=item_name):
                 self.assertEqual(
-                    expected_coins, self.get_isolated_coin_total([item_name]))
+                    expected_coins,
+                    self.get_isolated_coin_total(
+                        [item_name], {"Shifting Sand Land"}),
+                )
 
     def test_pyramid_goombas_require_access_to_the_pyramid(self):
         self.collect_by_name([
@@ -5550,6 +5587,7 @@ class SnowmansLandRegionAccessTestBase(SM64TestBase):
         )
         igloo_locations = (
             "Snowman's Land - Into the Igloo",
+            "Snowman's Land - Bob-omb Buddy",
             "Snowman's Land - Inside Igloo Block 1-Up",
             "Snowman's Land - Igloo Ice Block 1-Up",
             "Snowman's Land - Inside Igloo 1-Up Block",
@@ -5819,8 +5857,9 @@ class WetDryWorldFirstDowntownRedCoinAccessTestBase(SM64TestBase):
     def test_all_items_without_downtown_access_do_not_reach_first_red_coin(self):
         downtown_access_item_names = {
             "Wet-Dry World - Cannon Unlock",
-            "Ledge Grab",
             "Triple Jump",
+            "Side Flip",
+            "Backflip",
         }
         items = [
             item for item in self.multiworld.get_items()
@@ -6367,8 +6406,9 @@ class TallTallMountainIndividualUnlockLogicTestBase(SM64TestBase):
             "Tall, Tall Mountain - Upper")
         for location_name in (
                 "Tall, Tall Mountain - Scary 'Shrooms, Red Coins",
-                "Tall, Tall Mountain - Monty Mole Platform 1-Up",
+                "Tall, Tall Mountain - Upper Vine Wall 1-Up",
                 "Tall, Tall Mountain - Waterfall Gap 1-Up",
+                "Tall, Tall Mountain - Breathtaking View from Bridge",
         ):
             self.assertEqual(
                 self.multiworld.get_location(location_name, self.player).parent_region.name,
@@ -6786,16 +6826,21 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.multiworld.get_entrance(f"Second Floor -> {entrance_name}", self.player).access_rule = \
             lambda state: False
 
-    def test_high_entrance_requires_ledge_grab_and_jump(self):
+    def test_high_entrance_requires_jump(self):
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Wet-Dry World"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Highest Water"))
 
         self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Highest Water"))
+        self.remove(self.get_item_by_name("Ledge Grab"))
 
-        self.collect(self.get_item_by_name("Side Flip"))
-        self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
+        for movement in ("Triple Jump", "Side Flip", "Backflip"):
+            with self.subTest(movement=movement):
+                item = self.get_item_by_name(movement)
+                self.collect(item)
+                self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
+                self.remove(item)
 
     def test_downtown_requires_high_entrance_without_cannon(self):
         self.collect_second_floor_access()
@@ -7339,11 +7384,11 @@ class ThwompUnlockAccessTestBase(SM64TestBase):
     def test_ssl_thwomp_1up_requires_thwomp(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.assertFalse(
-            self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
+            self.can_reach_location("Shifting Sand Land - Pyramid Grindel 1-Up"))
 
         self.collect(self.get_item_by_name("Shifting Sand Land - Grindel"))
         self.assertTrue(
-            self.can_reach_location("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up"))
+            self.can_reach_location("Shifting Sand Land - Pyramid Grindel 1-Up"))
 
     def test_ttc_star_requires_thwomp(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
@@ -7556,10 +7601,10 @@ class TickTockClockCoinStar41StoppedSpinnersWallKickAccessTestBase(TickTockClock
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar35MovingAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar25MovingAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
-        "tick_tock_clock_coin_star_requirement": 35,
+        "tick_tock_clock_coin_star_requirement": 25,
     }
 
     def test_coin_star_access(self):
@@ -7568,10 +7613,10 @@ class TickTockClockCoinStar35MovingAccessTestBase(TickTockClockCoinStarAccessTes
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar36MovingAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar26MovingAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
-        "tick_tock_clock_coin_star_requirement": 36,
+        "tick_tock_clock_coin_star_requirement": 26,
     }
 
     def test_coin_star_access(self):
@@ -7580,10 +7625,10 @@ class TickTockClockCoinStar36MovingAccessTestBase(TickTockClockCoinStarAccessTes
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar122SideFlipGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar112SideFlipGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
-        "tick_tock_clock_coin_star_requirement": 122,
+        "tick_tock_clock_coin_star_requirement": 112,
     }
 
     def test_coin_star_access(self):
@@ -7596,10 +7641,10 @@ class TickTockClockCoinStar122SideFlipGroundPoundAccessTestBase(TickTockClockCoi
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar123SideFlipGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar113SideFlipGroundPoundAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
-        "tick_tock_clock_coin_star_requirement": 123,
+        "tick_tock_clock_coin_star_requirement": 113,
     }
 
     def test_coin_star_access(self):

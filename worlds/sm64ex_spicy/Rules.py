@@ -718,7 +718,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_randomized_entrance("Second Floor", "Snowman's Land",
                                 rf.build_rule("", painting_lvl_name="Snowman's Land"))
     for wdw_entrance in sm64_wdw_entrances:
-        wdw_entrance_rule = "LG & TJ/SF/BF" if wdw_entrance == "Wet-Dry World High" else ""
+        wdw_entrance_rule = "TJ/SF/BF" if wdw_entrance == "Wet-Dry World High" else ""
         connect_randomized_entrance("Second Floor", wdw_entrance,
                                     rf.build_rule(wdw_entrance_rule, painting_lvl_name="Wet-Dry World"))
     connect_randomized_entrance("Second Floor", "Tall, Tall Mountain",
@@ -918,7 +918,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Cool, Cool Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
         "Cool, Cool Mountain - Wall Kicks Will Work",
-        "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
+        "TJ+WK | logic_ccm_wall_kicks_will_work_spin_jump")
     # Big Boo's Haunt
     rf.assign_rule("Big Boo's Haunt - Go on a Ghost Hunt", "BOOS & BIG_BOO")
     rf.assign_rule(
@@ -938,9 +938,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule(
         "Hazy Maze Cave - Swimming Beast in the Cavern",
         "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip")
-    rf.assign_rule("Hazy Maze Cave - Red Coin Area",
-                   "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | "
-                   "logic_hmc_upper_red_coin_area_wall_kick")
+    rf.assign_rule("Hazy Maze Cave - Mid Red Coin Room", "WK/LG/BF/SF/TJ")
+    rf.assign_rule(
+        "Hazy Maze Cave - Upper Red Coin Room",
+        "{Hazy Maze Cave - Mid Red Coin Room} & CL | logic_hmc_upper_red_coin_area_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | logic_hmc_pit_islands_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move Room",
                    "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_capless")
@@ -1013,15 +1014,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Shifting Sand Land - Inside the Ancient Pyramid",
         "SF/BF/TJ/LG | "
         "{Shifting Sand Land - Pyramid Top Entry} & SSL_PYRAMID_ELEVATOR")
-    rf.assign_rule("Shifting Sand Land - Stand Tall on the Four Pillars",
+    rf.assign_rule("Shifting Sand Land - Eyerok Arena",
                    "{Shifting Sand Land - Upper Pyramid} & SSL_PYRAMID_ELEVATOR & EYEROK | "
                    "logic_ssl_stand_tall_without_pyramid_elevator & EYEROK & LG/KK")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
-    rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "THWOMP")
+    rf.assign_rule("Shifting Sand Land - Pyramid Grindel 1-Up", "THWOMP")
     rf.assign_rule("Shifting Sand Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
-        "Shifting Sand Land - Pyramid Right Path 1-Up",
+        "Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up",
         "{Shifting Sand Land - Upper Pyramid} | CL/TJ/SF/BF")
     # Dire, Dire Docks
     rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub",
@@ -1056,13 +1057,29 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "{Wet-Dry World - High Water} & LG | "
         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}"
     )
+    wdw_non_highest_near_top_routes = (
+        "{Wet-Dry World - Mid Water}",
+        "{Wet-Dry World - Low Water} & HEAVE_HOS",
+        "{Wet-Dry World - Mid-High Water} & HEAVE_HOS",
+        "{Wet-Dry World - High Water} & HEAVE_HOS",
+    )
+    wdw_top_without_highest_water = " | ".join(
+        [f"{route} & WK/TJ/SF/BF" for route in wdw_non_highest_near_top_routes]
+        + [f"{route} & PURPLE_SWITCHES & LJ" for route in wdw_non_highest_near_top_routes]
+        + [f"{route} & PURPLE_SWITCHES & logic_wdw_express_elevator_to_top_no_movement"
+           for route in wdw_non_highest_near_top_routes]
+    )
     wdw_shocking_arrow_lifts_rule = (
         "{Wet-Dry World - Cannon} & {Wet-Dry World - Low Water} | "
         "{Wet-Dry World - Cannon} & {Wet-Dry World - High Water} | "
         "{Wet-Dry World - Cannon} & {Wet-Dry World - Highest Water} & "
         "logic_wdw_shocking_arrow_lifts_underwater_ground_pound | "
-        "{Wet-Dry World - Top} | "
+        f"{wdw_top_without_highest_water} | "
         "{Wet-Dry World - Mid-High Water} & LG/SF/TJ/BF"
+    )
+    wdw_wooden_structure_block_rule = (
+        "{Wet-Dry World - Mid Water} | "
+        f"{wdw_top_without_highest_water}"
     )
     wdw_secrets_route = (
         "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} | "
@@ -1080,7 +1097,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Top of the Express Elevator} | "
                    "WDW_WATER_LEVEL_DIAMOND & TJ+DV")
     rf.assign_rule("Wet-Dry World - Mid-High Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Mid-High Water to High Water", "{Wet-Dry World - Top}")
+    rf.assign_rule(
+        "Wet-Dry World - Mid-High Water to High Water",
+        "HEAVE_HOS & WK/TJ/SF/BF | "
+        "HEAVE_HOS & PURPLE_SWITCHES & LJ | "
+        "HEAVE_HOS & PURPLE_SWITCHES & logic_wdw_express_elevator_to_top_no_movement")
     rf.assign_rule("Wet-Dry World - High Water to Mid-High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Highest Water to High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Near the Top",
@@ -1108,14 +1129,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
                    "BOBOMB_BUDDY & {Wet-Dry World - High Water} & TJ | "
                    "BOBOMB_BUDDY & {Wet-Dry World - High Water} & SF+LG | "
-                   "BOBOMB_BUDDY & {Wet-Dry World - Highest Water} & BF/SF")
+                   "BOBOMB_BUDDY & {Wet-Dry World - Highest Water} & TJ/BF/SF")
     # Tall, Tall Mountain
-    rf.assign_rule("Tall, Tall Mountain - Upper", "TJ/BF/SF/ROLLING_LOG")
+    rf.assign_rule("Tall, Tall Mountain - Upper",
+                   "TJ+LG | BF/SF/ROLLING_LOG | logic_ttm_upper_fly_guy_spin_jump")
     rf.assign_rule("Tall, Tall Mountain - Top",
-                   "LJ/DV & LG/KK | logic_ttm_top_triple_jump | "
+                   "LJ | logic_ttm_top_triple_jump | "
                    "logic_ttm_top_wall_kick | logic_ttm_top_kick | logic_ttm_top_dive")
     rf.assign_rule("Tall, Tall Mountain - Mystery of the Monkey Cage", "TTM_UKIKI")
-    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "PURPLE_SWITCHES")
+    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge",
+                   "{Tall, Tall Mountain - Top} & PURPLE_SWITCHES | "
+                   "logic_ttm_breathtaking_view_triple_jump_from_below")
     rf.assign_rule("Tall, Tall Mountain - Middle", "VERTICAL_WIND/TJ/LJ")
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom",
                    "CANN | logic_ttm_lonely_mushroom_cannonless | "
@@ -1291,6 +1315,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "TREASURE_CHESTS",
             "Lethal Lava Land - Wing Cap Block": "WC",
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
+            "Bowser in the Fire Sea - 3 Coins Block": "CL | logic_lava_damage_boosting",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
             "Snowman's Land - Vanish Cap Block": "VC",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
@@ -1315,9 +1340,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "VC & logic_vcutm_switch_no_movement",
             "Wet-Dry World - Shocking Arrow Lifts Star Block": wdw_shocking_arrow_lifts_rule,
             "Wet-Dry World - Pedestal 10 Coins Block": wdw_near_top_block_route,
-            "Wet-Dry World - Wooden Structure 3 Coins Block":
-                "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | "
-                "{Wet-Dry World - Top of the Express Elevator} & LJ",
+            "Wet-Dry World - Wooden Structure 3 Coins Block": wdw_wooden_structure_block_rule,
             "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Metal Cap Block": "MC",
             "Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",

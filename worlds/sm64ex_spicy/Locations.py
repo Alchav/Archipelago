@@ -441,8 +441,8 @@ locFreestanding1Up_table = {
     "Shifting Sand Land - Near Quicksand Pits 1-Up": 3629154,
     "Shifting Sand Land - Above Quicksand Pit 1-Up": 3629155,
     "Shifting Sand Land - Pyramid Platform Triggers 1-Up": 3629156,
-    "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up": 3629157,
-    "Shifting Sand Land - Pyramid Right Path 1-Up": 3629158,
+    "Shifting Sand Land - Pyramid Grindel 1-Up": 3629157,
+    "Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up": 3629158,
 
     "Tiny-Huge Island - Huge Island Tree 1-Up": 3629159,
     "Tiny-Huge Island - Beach Coins 1-Up": 3629160,
@@ -456,7 +456,7 @@ locFreestanding1Up_table = {
     "Tick Tock Clock - Moving Bars Platform 1-Up": 3629167,
 
     "Tall, Tall Mountain - Start Edge 1-Up": 3629168,
-    "Tall, Tall Mountain - Monty Mole Platform 1-Up": 3629169,
+    "Tall, Tall Mountain - Upper Vine Wall 1-Up": 3629169,
     "Tall, Tall Mountain - Waterfall Gap 1-Up": 3629170,
     "Tall, Tall Mountain - Vine Platform Butterfly 1-Up": 3629171,
     "Tall, Tall Mountain - Slide Start Room Corners 1-Up": 3629172,

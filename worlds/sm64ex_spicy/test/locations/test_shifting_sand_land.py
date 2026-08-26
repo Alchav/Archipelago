@@ -100,13 +100,13 @@ class TestShiftingSandLandLocations(SM64TestBase):
              ["Shifting Sand Land - Trigger 1-Ups"]],
             ["Shifting Sand Land - Pyramid Platform Triggers 1-Up", True,
              upper + ["Shifting Sand Land - Trigger 1-Ups"]],
-            ["Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", False, freestanding],
-            ["Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", True, [
+            ["Shifting Sand Land - Pyramid Grindel 1-Up", False, freestanding],
+            ["Shifting Sand Land - Pyramid Grindel 1-Up", True, [
                 "Shifting Sand Land - Grindel",
                 "Shifting Sand Land - Freestanding 1-Ups",
             ]],
-            ["Shifting Sand Land - Pyramid Right Path 1-Up", False, freestanding],
-            ["Shifting Sand Land - Pyramid Right Path 1-Up", True,
+            ["Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up", False, freestanding],
+            ["Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up", True,
              freestanding + ["Climb"]],
 
             ["Shifting Sand Land - Outside Pyramid Wing Cap Block", False, []],
@@ -232,6 +232,12 @@ class TestShiftingSandLandInteriorRoutes(SM64TestBase):
             ["Shifting Sand Land - Pyramid Puzzle", False, []],
             ["Shifting Sand Land - Inside the Ancient Pyramid", True,
              ["Shifting Sand Land - Pyramid Elevator"]],
+            ["Shifting Sand Land - Stand Tall on the Four Pillars", False,
+             ["Shifting Sand Land - Pyramid Elevator"]],
+            ["Shifting Sand Land - Stand Tall on the Four Pillars", True, [
+                "Shifting Sand Land - Pyramid Elevator",
+                "Shifting Sand Land - Eyerok",
+            ]],
         ], starting_regions=["Shifting Sand Land - Pyramid Top Entry"])
 
 

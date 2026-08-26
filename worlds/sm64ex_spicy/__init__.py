@@ -396,6 +396,12 @@ class SM64World(World):
         if not self.using_slot_coin_count_check_locations:
             self.add_overflow_coin_count_check_locations()
         coin_check_region_names = {
+            "Jolly Roger Bay": "Jolly Roger Bay - Coins",
+            "Cool, Cool Mountain": "Cool, Cool Mountain - Coins",
+            "Lethal Lava Land": "Lethal Lava Land - Coins",
+            "Shifting Sand Land": "Shifting Sand Land - Coins",
+            "Snowman's Land": "Snowman's Land - Coins",
+            "Tall, Tall Mountain": "Tall, Tall Mountain - Coins",
             "Tiny-Huge Island": "Tiny-Huge Island - Coins",
         }
         coin_check_source_region_names = {

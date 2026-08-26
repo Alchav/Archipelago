@@ -48,7 +48,7 @@ class TestTickTockClockMovingLocations(SM64TestBase):
             ["Tick Tock Clock - Above Red Coin Spinners 3 Coins Block", True,
              LOWER + ["Tick Tock Clock - 3-Coin Blocks"]],
             ["Tick Tock Clock - Stop Time for Red Coins", False, PAST_SPINNERS],
-            ["Tick Tock Clock - Stop Time for Red Coins", True,
+            ["Tick Tock Clock - Stop Time for Red Coins", False,
              PAST_SPINNERS + ["Tick Tock Clock - Spinners", "Tick Tock Clock - Red Coins"]],
 
             ["Tick Tock Clock - The Pit and the Pendulums", False, LOWER],
@@ -131,6 +131,16 @@ class TestTickTockClockStoppedLocations(SM64TestBase):
                  "Ledge Grab",
                  "Tick Tock Clock - Thwomp",
              ]],
+        ], starting_regions=["Tick Tock Clock Stopped"])
+
+    def test_red_coin_star_requires_spinners_and_red_coins(self):
+        self.run_location_tests([
+            ["Tick Tock Clock - Stop Time for Red Coins", False,
+             ["Tick Tock Clock - Red Coins"]],
+            ["Tick Tock Clock - Stop Time for Red Coins", False,
+             ["Tick Tock Clock - Spinners"]],
+            ["Tick Tock Clock - Stop Time for Red Coins", True,
+             ["Tick Tock Clock - Red Coins", "Tick Tock Clock - Spinners"]],
         ], starting_regions=["Tick Tock Clock Stopped"])
 
 

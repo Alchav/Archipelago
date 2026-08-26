@@ -718,9 +718,9 @@ def evaluate_cool_cool_mountain_coins(
                 can_reach_slide and has_horizontal_coin_lines),
         coin_source("chimney_vertical_coin_line", "Vertical coin line into the chimney", 5,
                 has_vertical_coin_lines),
-        coin_source("main_mountain_coin_lines", "Four coin lines on the main mountain route", 20,
+        coin_source("main_mountain_coin_lines", "Four Snowman Slide coin lines", 20,
                 has_horizontal_coin_lines),
-        coin_source("standard_mr_blizzard", "Defeatable Mr. Blizzard", 3, has_mr_blizzards),
+        coin_source("standard_mr_blizzard", "Mr. Blizzard", 3, has_mr_blizzards),
         coin_source("main_spindrifts", "Three Spindrifts on the main route", 9, has_spindrifts),
         coin_source("red_coins", "Eight Red Coins", 16, has_red_coins,
                     red_coin_ids=frozenset(range(1, 9))),
@@ -932,11 +932,10 @@ def evaluate_hazy_maze_cave_coins(
     has_long_jump = Rules.has_action(state, player, "Long Jump", level_name)
     has_climb = Rules.has_action(state, player, "Climb", level_name)
     has_checkerboards = Rules.has_checkerboard_platforms(state, player, level_name)
-    has_platform_route = has_basic_movement and (
-        has_basic_movement and has_climb
-        or Rules.can_use_logic_trick(
-            state, player, "logic_hmc_upper_red_coin_area_wall_kick", level_name)
-    )
+    has_mid_red_coin_room = state.can_reach(
+        f"{level_name} - Mid Red Coin Room", "Region", player)
+    has_upper_red_coin_room = state.can_reach(
+        f"{level_name} - Upper Red Coin Room", "Region", player)
 
     traces = [
         coin_source("start_coin_line", "Rolling Rocks Coin Line", 5,
@@ -957,7 +956,7 @@ def evaluate_hazy_maze_cave_coins(
         coin_source("first_room_scuttlebugs", "Two Scuttlebugs in the first room", 6,
                 has_scuttlebugs),
         coin_source("pit_room_scuttlebug", "Scuttlebug in the pit room", 3, has_scuttlebugs),
-        coin_source("pit_room_swoop", "Swoop in the pit room", 1, has_swoops),
+        coin_source("pit_island_room_swoop", "Pit Island Room Swoop", 1, has_swoops),
         coin_source("red_coin_room_scuttlebugs", "Two Scuttlebugs in the Red Coin room", 6,
                 has_scuttlebugs),
         coin_source("toxic_maze_snufits", "Four Snufits in the toxic maze", 8, has_snufits),
@@ -965,11 +964,9 @@ def evaluate_hazy_maze_cave_coins(
     ]
 
     basic_movement_children = (
-        coin_source("lower_red_coin_room_coins", "Four lower Red Coins in the Red Coin room", 8,
-                has_basic_movement and has_red_coins, red_coin_ids=frozenset(range(1, 5))),
-        coin_source("red_coin_room_mr_is", "Two Mr. Is in the Red Coin room", 10,
-                has_basic_movement and has_mr_is),
-        coin_source("pit_island_room_swoops", "Two Swoops in the Pit Island elevator room", 2,
+        coin_source("amazing_emergency_exit_swoop_1", "A-Maze-Ing Emergency Exit Swoop 1", 1,
+                has_basic_movement and has_swoops),
+        coin_source("amazing_emergency_exit_swoop_2", "A-Maze-Ing Emergency Exit Swoop 2", 1,
                 has_basic_movement and has_swoops),
     )
     traces.append(coin_route(
@@ -979,32 +976,45 @@ def evaluate_hazy_maze_cave_coins(
         has_basic_movement,
         basic_movement_children,
     ))
+    traces.append(coin_source(
+        "lower_red_coin_room_coins",
+        "Four lower Red Coins in the Mid Red Coin Room",
+        8,
+        has_mid_red_coin_room and has_red_coins,
+        red_coin_ids=frozenset(range(1, 5)),
+    ))
+    traces.append(coin_source(
+        "red_coin_room_mr_is",
+        "Two Mr. Is in the Mid Red Coin Room",
+        10,
+        has_mid_red_coin_room and has_mr_is,
+    ))
 
     first_upper_red_coin_route = (
-        has_red_coins and has_platform_route and (has_long_jump or has_checkerboards)
+        has_red_coins and has_upper_red_coin_room and (has_long_jump or has_checkerboards)
     )
     traces.append(coin_source(
         "upper_red_coin_pair_first",
-        "First pair of upper Red Coins",
+        "Checkerboard Platform Arrival Platform Red Coins",
         4,
         first_upper_red_coin_route,
         red_coin_ids=frozenset({5, 6}),
     ))
     traces.append(coin_source(
         "upper_red_coin_pair_checkerboards",
-        "Second pair of upper Red Coins",
+        "Checkerboard Platform Ride Red Coins",
         4,
-        has_red_coins and has_platform_route and has_checkerboards,
+        has_red_coins and has_upper_red_coin_room and has_checkerboards,
         red_coin_ids=frozenset({7, 8}),
     ))
     traces.append(coin_source(
         "upper_red_coin_swoops",
-        "Two Swoops in the upper Red Coin area",
+        "Two Checkerboard Platform Ride Swoops",
         2,
-        has_swoops and has_platform_route and has_checkerboards,
+        has_swoops and has_upper_red_coin_room and has_checkerboards,
     ))
     traces.append(coin_source(
-        "pit_islands_ceiling_coin_line",
+        "toxic_maze_star_coin_line",
         "Coin line on the hangable ceiling above Pit Islands",
         5,
         state.can_reach(f"{level_name} - Pit Islands", "Region", player)
@@ -1020,7 +1030,7 @@ def evaluate_hazy_maze_cave_coins(
     has_toxic_maze_location = state.can_reach(
         f"{level_name} - Navigating the Toxic Maze", "Location", player)
     toxic_maze_children = (
-        coin_source("toxic_maze_star_coin_line", "Coin line leading to the toxic maze star", 5,
+        coin_source("pit_islands_ceiling_coin_line", "Coin line leading to the toxic maze star", 5,
                 has_toxic_maze_location and has_horizontal_coin_lines),
         coin_source("toxic_maze_exit_swoops", "Two additional Swoops on the toxic maze route", 2,
                 has_toxic_maze_location and has_swoops),
@@ -1100,6 +1110,14 @@ def lethal_lava_land_coins(
         state, player, f"{level_name} - Koopa Shell")
     has_lava_damage_boosting = Rules.can_use_logic_trick(
         state, player, "logic_lava_damage_boosting", target_name)
+    can_cross_lava = (
+        has_koopa_shell
+        or has_lava_damage_boosting
+        or (
+            Rules.has_wing_cap(state, player, level_name)
+            and Rules.has_action(state, player, "Triple Jump", level_name)
+        )
+    )
     can_reach_red_coins = Rules.can_reach_lethal_lava_land_red_coins(
         state, player, target_name)
     has_healing_coins = Rules.has_lethal_lava_land_healing_coins(state, player)
@@ -1139,7 +1157,7 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_first_big_bully_coin_line",
-        "Coin line before the first Big Bully",
+        "First Sinking Platform Coin Line",
         5,
         has_horizontal_coin_lines,
     )
@@ -1163,7 +1181,7 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_north_volcano_coin_line",
-        "Near Volcano Coin Line",
+        "Sinking Platform near the Volcano Coin Line",
         5,
         has_horizontal_coin_lines,
     )
@@ -1183,7 +1201,7 @@ def lethal_lava_land_coins(
         "lll_southeast_grey_ramp_coins",
         "Central Gray Crescent Coins",
         4,
-        has_single_yellow_coins,
+        has_single_yellow_coins and can_cross_lava,
     )
     builder.add(
         "lll_second_mr_i_coin_ring",
@@ -1260,7 +1278,7 @@ def lethal_lava_land_coins(
         "lll_under_bridge_coin_line",
         "Northeast Brown Platform Coin Line",
         5,
-        has_horizontal_coin_lines,
+        has_horizontal_coin_lines and can_cross_lava,
     )
     builder.add(
         "lll_volcano_s_island_coins",
@@ -1377,6 +1395,7 @@ def shifting_sand_land_coins(
         "Pokeys", f"{level_name} - Pokeys")
     can_reach_pyramid = state.can_reach(
         "Shifting Sand Land - Pyramid", "Region", player)
+    can_reach_main = state.can_reach(level_name, "Region", player)
     has_ground_pound = Rules.has_action(state, player, "Ground Pound", level_name)
     has_wing_cap = Rules.has_wing_cap(state, player, level_name)
     has_triple_jump = Rules.has_action(state, player, "Triple Jump", level_name)
@@ -1393,7 +1412,7 @@ def shifting_sand_land_coins(
         "ssl_throwable_cork_box",
         "Throwable cork box under the stone structure",
         3,
-        has_throwable_cork_box,
+        can_reach_main and has_throwable_cork_box,
     )
     builder.add(
         "ssl_inside_pyramid_coins",
@@ -1405,55 +1424,55 @@ def shifting_sand_land_coins(
         "ssl_pillar_coins",
         "Three normally reachable coins on the pillars",
         3,
-        has_single_yellow_coins,
+        can_reach_main and has_single_yellow_coins,
     )
     builder.add(
         "ssl_quicksand_pillar_coin",
         "Quicksand Pillar Coin",
         1,
-        has_single_yellow_coins and can_reach_quicksand_pillar,
+        can_reach_main and has_single_yellow_coins and can_reach_quicksand_pillar,
     )
     builder.add(
         "ssl_behind_pyramid_coin_line",
         "Line of coins between the two pillars behind the pyramid",
         5,
-        has_horizontal_coin_lines,
+        can_reach_main and has_horizontal_coin_lines,
     )
     builder.add(
         "ssl_pyramid_side_coin_line",
         "Line of coins on the pyramid",
         5,
-        has_horizontal_coin_lines,
+        can_reach_main and has_horizontal_coin_lines,
     )
     builder.add(
         "ssl_fly_guys",
         "Fly Guys",
         6,
-        has_fly_guys,
+        can_reach_main and has_fly_guys,
     )
     builder.add(
         "ssl_crazy_boxes",
         "Crazy Boxes",
         10,
-        has_crazy_boxes,
+        can_reach_main and has_crazy_boxes,
     )
     builder.add(
         "ssl_bob_ombs",
         "Bob-ombs",
         2,
-        has_bob_ombs,
+        can_reach_main and has_bob_ombs,
     )
     builder.add(
         "ssl_pokeys",
         "Pokeys",
         20,
-        has_pokeys,
+        can_reach_main and has_pokeys,
     )
     builder.add(
         "ssl_outside_goombas",
         "Three Goombas outside the pyramid",
         3,
-        has_goombas,
+        can_reach_main and has_goombas,
     )
     builder.add(
         "ssl_pyramid_goombas",
@@ -1465,14 +1484,14 @@ def shifting_sand_land_coins(
         "ssl_low_red_coins",
         "Four low Red Coins",
         8,
-        has_red_coins,
+        can_reach_main and has_red_coins,
         red_coin_ids=frozenset(range(1, 5)),
     )
 
     has_climb = Rules.has_action(state, player, "Climb", level_name)
     builder.add(
         "ssl_first_wire_grid_coin_ring",
-        "Coin ring under the first pyramid wire grid",
+        "Pyramid Coin Ring under the First Wire Grid",
         8,
         can_reach_pyramid and has_horizontal_coin_ring and has_climb,
         children=(
@@ -1485,9 +1504,9 @@ def shifting_sand_land_coins(
         state, player, "logic_ssl_three_red_coins_with_tweesters", target_name)
     has_shy_guy_trick = Rules.can_use_logic_trick(
         state, player, "logic_ssl_one_red_coin_with_shy_guy_spin_jump", target_name)
-    tweester_route_available = has_red_coins and has_tweester_trick
-    shy_guy_route_available = has_red_coins and has_shy_guy_trick
-    normal_route_available = has_red_coins and has_normal_red_coin_route
+    tweester_route_available = can_reach_main and has_red_coins and has_tweester_trick
+    shy_guy_route_available = can_reach_main and has_red_coins and has_shy_guy_trick
+    normal_route_available = can_reach_main and has_red_coins and has_normal_red_coin_route
     use_tweester_route = tweester_route_available and not normal_route_available
     use_shy_guy_coins = shy_guy_route_available and not normal_route_available
     reachable_high_red_coin_value = (
@@ -1550,7 +1569,7 @@ def shifting_sand_land_coins(
     )
     builder.add(
         "ssl_second_wire_grid_coin_line",
-        "Line of coins under the second wire grid",
+        "Pyramid Coin Line under the Second Wire Grid",
         5,
         can_reach_upper_pyramid and has_horizontal_coin_lines,
         children=(upper_pyramid_access,),
@@ -1789,7 +1808,7 @@ def snowmans_land_coins(
     )
     builder.add(
         "sl_spindrifts",
-        "Eight Spindrifts outside the Upper area",
+        "Eight outdoor Spindrifts",
         24,
         has_spindrifts,
     )
@@ -1815,9 +1834,16 @@ def snowmans_land_coins(
     can_reach_whirl = state.can_reach(
         "Snowman's Land - Whirl from the Freezing Pond", "Region", player)
     builder.add(
+        "sl_start_red_coins",
+        "Two Red Coins in the starting area",
+        4,
+        has_red_coins,
+        red_coin_ids=frozenset({1, 6}),
+    )
+    builder.add(
         "sl_whirl_red_coins",
-        "Three Red Coins in the Whirl from the Freezing Pond area",
-        6,
+        "Six Red Coins in the Whirl from the Freezing Pond area",
+        12,
         can_reach_whirl and has_red_coins,
         children=(
             coin_condition(
@@ -1826,7 +1852,7 @@ def snowmans_land_coins(
                 can_reach_whirl,
             ),
         ),
-        red_coin_ids=frozenset({1, 2, 3}),
+        red_coin_ids=frozenset({2, 3, 4, 5, 7, 8}),
     )
     has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
     no_despawns = bool(state.multiworld.worlds[player].options.no_despawns.value)
@@ -1871,22 +1897,15 @@ def snowmans_land_coins(
     )
     builder.add(
         "sl_penguin_and_face_coins",
-        "Coins by the penguin and snowman's face",
+        "Coins leading to Snowman's Big Head",
         3,
         can_reach_upper and has_single_yellow_coins,
     )
     builder.add(
         "sl_upper_spindrifts",
-        "Three Spindrifts in the Upper area",
+        "Three additional outdoor Spindrifts",
         9,
-        can_reach_upper and has_spindrifts,
-    )
-    builder.add(
-        "sl_upper_red_coins",
-        "Five Red Coins in the Upper area",
-        10,
-        can_reach_upper and has_red_coins,
-        red_coin_ids=frozenset({4, 5, 6, 7, 8}),
+        has_spindrifts,
     )
 
     can_reach_snowman_top = state.can_reach(
@@ -1905,14 +1924,14 @@ def snowmans_land_coins(
         ),
     )
 
-    can_reach_igloo = state.can_reach(f"{level_name} - Igloo", "Region", player)
     builder.add(
         "sl_highest_slope_single_coin",
         "Highest single coin on the slope toward the Igloo",
         1,
         has_single_yellow_coins
-        and (Rules.has_action(state, player, "Long Jump", level_name) or can_reach_igloo),
+        and (Rules.has_action(state, player, "Long Jump", level_name) or can_reach_igloo_entrance),
     )
+    can_reach_igloo = state.can_reach(f"{level_name} - Igloo", "Region", player)
     has_vanish_cap = Rules.has_vanish_cap(state, player, level_name)
     igloo_source_data = (
         (
@@ -2101,9 +2120,15 @@ def tall_tall_mountain_coins(
     has_moveless = Rules.can_use_logic_trick(
         state, player, "logic_ttm_coins_without_climb", level_name)
     builder.add(
+        "ttm_upper_leaf_first_coin",
+        "First coin in the Upper Vine Wall Hangable Ceiling Coin Line",
+        1,
+        can_reach_upper and has_horizontal_coin_lines,
+    )
+    builder.add(
         "ttm_upper_leaf_coin_line",
-        "Coin line by the Upper Monty Moles",
-        5,
+        "Remaining Upper Vine Wall Hangable Ceiling Coin Line coins",
+        4,
         can_reach_upper and has_horizontal_coin_lines and (has_climb or has_moveless),
         children=(
             coin_condition("ttm_upper_leaf_climb_route", "Climb route", has_climb),
@@ -2417,12 +2442,16 @@ def wet_dry_world_coin_evaluation(
     has_side_flip = rules.has_action(state, player, "Side Flip", level_name)
     has_wall_kick = rules.has_action(state, player, "Wall Kick", level_name)
     has_ledge_grab = rules.has_action(state, player, "Ledge Grab", level_name)
+    has_purple_switches = rules.has_purple_switches(state, player, level_name)
+    can_reach_top_from_express_without_movement = rules.can_use_logic_trick(
+        state, player, "logic_wdw_express_elevator_to_top_no_movement", level_name)
     can_reach_high_red_coins = has_wall_kick or rules.can_use_logic_trick(
         state, player, "logic_wdw_high_red_coins_triple_jump", level_name)
     can_reach_brown_brick_red_coin = has_long_jump or has_dive or can_reach_high_red_coins
     can_reach_main = state.can_reach(level_name, "Region", player)
     can_reach_low = state.can_reach(f"{level_name} - Low Water", "Region", player)
     can_reach_mid = state.can_reach(f"{level_name} - Mid Water", "Region", player)
+    can_reach_mid_high = state.can_reach(f"{level_name} - Mid-High Water", "Region", player)
     can_reach_high = state.can_reach(f"{level_name} - High Water", "Region", player)
     can_reach_highest = state.can_reach(f"{level_name} - Highest Water", "Region", player)
     can_reach_near_top = state.can_reach(f"{level_name} - Near the Top", "Region", player)
@@ -2437,8 +2466,20 @@ def wet_dry_world_coin_evaluation(
         or can_reach_highest
         or can_reach_top
     )
+    can_reach_near_top_without_highest_water = (
+        can_reach_mid
+        or has_heave_hos and (can_reach_low or can_reach_mid_high or can_reach_high))
+    can_reach_top_without_highest_water = (
+        can_reach_near_top_without_highest_water
+        and (
+            has_wall_kick or has_triple_jump or has_side_flip or has_backflip
+            or has_purple_switches
+            and (has_long_jump or can_reach_top_from_express_without_movement)
+        )
+    )
     wooden_structure_route = (
-        can_reach_mid or can_reach_top or can_reach_top_of_express and has_long_jump)
+        can_reach_mid
+        or can_reach_top_without_highest_water)
     fourth_diamond_route = (
         can_reach_highest or can_reach_top_of_express
         or has_triple_jump and has_dive or can_reach_top)
@@ -2446,7 +2487,7 @@ def wet_dry_world_coin_evaluation(
     traces = [
         coin_source("main_skeeters", "Two Skeeters in the main area", 6,
                     can_reach_main and has_skeeters),
-        coin_source("amp_ring", "Coin ring around the Amp pillar", 8,
+        coin_source("amp_ring", "Pedestal Coin Ring", 8,
                     can_reach_near_top and has_horizontal_coin_rings),
         coin_source("pillar_ten_coin_block", "Pedestal 10-Coin Block", 10,
                     can_reach_near_top and near_top_block_route and has_ten_coin_blocks),
@@ -2460,7 +2501,7 @@ def wet_dry_world_coin_evaluation(
                     can_reach_low and has_ground_pound and has_blue_coin_block),
         coin_source("wooden_structure_three_coin_block", "Wooden Structure 3-Coin Block", 3,
                     wooden_structure_route and has_three_coin_blocks),
-        coin_source("fourth_diamond_coin_line", "Coin line by the fourth water-level diamond", 5,
+        coin_source("fourth_diamond_coin_line", "Second Highest Water Level Diamond Coin Line", 5,
                     fourth_diamond_route and has_horizontal_coin_lines),
         coin_source("top_coin_line", "Coin line at the highest water-level diamond", 5,
                     can_reach_top and has_horizontal_coin_lines),
@@ -2470,7 +2511,7 @@ def wet_dry_world_coin_evaluation(
                     can_reach_top_of_express and has_ten_coin_blocks),
         coin_source("downtown_ring", "Downtown statue coin ring", 8,
                     can_reach_downtown and has_horizontal_coin_rings),
-        coin_source("downtown_metal_cap_line", "Downtown metal-cap coin line", 5,
+        coin_source("downtown_metal_cap_line", "Downtown Narrow Plank Coin Line", 5,
                     can_reach_downtown and has_horizontal_coin_lines),
         coin_source("downtown_first_building_line", "Beige Building Coin Line", 5,
                     can_reach_downtown and has_horizontal_coin_lines),
@@ -2995,6 +3036,10 @@ def tick_tock_clock_coins(
 
     has_lower = state.can_reach(
         "Tick Tock Clock - First Clock Hand Area", "Region", player)
+    has_stopped_red_coin_route = (
+        state.can_reach("Tick Tock Clock Stopped", "Region", player)
+        and rules.has_simple_arbitrary_feature(state, player, "TTC_SPINNERS")
+    )
     moving_line_route = (
         state.can_reach("Tick Tock Clock Moving", "Region", player)
         or (
@@ -3006,14 +3051,14 @@ def tick_tock_clock_coins(
     trace.add_route("ttc_lower", "Lower region", has_lower, (
         coin_source("ttc_first_hand_block",
                 "3-Coin Block by the first moving hand", 3, has_three_coin_blocks),
-        coin_source("ttc_lower_red_coins", "Five lower Red Coins", 10, has_red_coins,
+        coin_source("ttc_lower_red_coins", "Five lower Red Coins", 10,
+                    has_red_coins and has_stopped_red_coin_route,
                     red_coin_ids=frozenset(range(1, 6))),
         coin_source(
             "ttc_spinner_red_coins",
             "Three Red Coins reached with the Spinners",
             6,
-            has_red_coins
-            and rules.has_simple_arbitrary_feature(state, player, "TTC_SPINNERS"),
+            has_red_coins and has_stopped_red_coin_route,
             red_coin_ids=frozenset({6, 7, 8}),
         ),
         coin_source(
@@ -3036,15 +3081,11 @@ def tick_tock_clock_coins(
             has_blue_coin_block
             and rules.has_action(state, player, "Ground Pound", level_name),
         ),
-    ))
-
-    has_top = state.can_reach("Tick Tock Clock - Top", "Region", player)
-    trace.add_route("ttc_top", "Top region", has_top, (
         coin_source("ttc_timed_jumps_block",
-                "3-Coin Block above Timed Jumps on Moving Bars",
+                "Above Timed Jumps on Moving Bars 3-Coin Block",
                 3, has_three_coin_blocks),
         coin_source("ttc_four_moving_bars_block",
-                "10-Coin Block above Four Moving Bars",
+                "Above Four Moving Bars 10-Coin Block",
                 10, has_ten_coin_blocks),
     ))
 
@@ -3054,16 +3095,16 @@ def tick_tock_clock_coins(
         "ttc_top_past_spinners", "Top Past Spinners region",
         has_top_past_spinners, (
             coin_source("ttc_past_three_spinners_block",
-                    "3-Coin Block past the three spinners",
+                    "Past Three Spinners 3-Coin Block",
                     3, has_three_coin_blocks),
             coin_source("ttc_beneath_thwomp_block",
                     "10-Coin Block beneath the Thwomp",
                     10, has_ten_coin_blocks),
             coin_source("ttc_top_clock_hand_block",
-                    "10-Coin Block at the top clock hand",
+                    "Top Clock Hand 10-Coin Block",
                     10, has_ten_coin_blocks),
             coin_source("ttc_top_central_platform_block",
-                    "10-Coin Block on the top central platform",
+                    "Top Central Platform 10-Coin Block",
                     10, has_ten_coin_blocks),
         ))
 
@@ -3133,16 +3174,16 @@ def rainbow_ride_coins(
                 5, has_horizontal_coin_lines),
         coin_source("rr_fly_guy", "Fly Guy", 2, has_fly_guy),
         coin_source("rr_first_swing_line",
-                "Vertical coin line by the first swing",
+                "First Swing Vertical Coin Line",
                 5, has_vertical_coin_lines),
         coin_source("rr_first_donut_lift_coins",
                 "Coins on the first Donut Lifts",
                 4, has_single_yellow_coins),
         coin_source("rr_second_swing_line",
-                "Coin line before the second swing",
+                "Swingin' in the Breeze Coin Line",
                 5, has_horizontal_coin_lines),
         coin_source("rr_tricky_triangles_line",
-                "Slanted coin line before Tricky Triangles",
+                "Tricky Triangles Coin Line",
                 5, has_horizontal_coin_lines),
         coin_source("rr_beneath_pole_goomba", "Goomba", 1, has_goomba),
     ))
@@ -3345,17 +3386,17 @@ def wing_mario_over_the_rainbow_coins(
     trace = CoinTraceBuilder()
     trace.add_route("wmotr_initial", "Starting cloud", True, (
         coin_source("wmotr_initial_red_coin", "Initial Red Coin", 2, has_red_coins,
-                    red_coin_ids=frozenset({1})),
+                    red_coin_ids=frozenset({7})),
     ))
     trace.add_route("wmotr_cannon_only", "Cannon region", has_cannon_region, (
         coin_source("wmotr_cannon_red_coins",
                 "Four Red Coins requiring the Cannon region",
-                8, has_red_coins, red_coin_ids=frozenset({2, 3, 4, 5})),
+                8, has_red_coins, red_coin_ids=frozenset({1, 2, 3, 8})),
     ))
 
     trace.add_route("wmotr_flight_route", "Flight route", has_flight_route, (
         coin_source("wmotr_flight_red_coins", "Three flight-path Red Coins",
-                6, has_red_coins, red_coin_ids=frozenset({6, 7, 8})),
+                6, has_red_coins, red_coin_ids=frozenset({4, 5, 6})),
         coin_source("wmotr_rainbow_coin_rings",
                 "Four vertical coin rings around the rainbows",
                 32, has_vertical_coin_rings),
@@ -3390,7 +3431,7 @@ def wing_mario_over_the_rainbow_coins(
                     2, long_jump_first_coin, red_coin_ids=frozenset({6})),
             coin_source("wmotr_long_jump_second_red_coin",
                     "Second Long Jump Leap of Faith Red Coin",
-                    2, long_jump_second_coin, red_coin_ids=frozenset({7})),
+                    2, long_jump_second_coin, red_coin_ids=frozenset({5})),
             coin_source("wmotr_wing_cap_fallback_red_coin",
                     "Wing Cap slow-fall Leap of Faith Red Coin",
                     2, wing_cap_fallback_coin, red_coin_ids=frozenset({6})),
@@ -3710,31 +3751,35 @@ def bowser_in_the_fire_sea_coins(
     trace = CoinTraceBuilder()
     trace.add_route("bitfs_start", "Starting section", True, (
         coin_source("bitfs_start_single_coins",
-                "Coins on the first lava platforms",
+                "First Lava Platforms Coins",
                 2, has_single_yellow_coins),
         coin_source("bitfs_second_sinking_platform_line",
-                "Coin line on the second sinking platform",
+                "Sinking Platform Coins",
                 5, has_horizontal_coin_lines),
-        coin_source("bitfs_first_ring", "Coin ring by the first Bully",
+        coin_source("bitfs_wire_grid_ring", "Wire Platform Coin Ring",
                 8, has_horizontal_coin_rings),
         coin_source("bitfs_first_bully", "First Bully", 1, has_bullies),
         coin_source("bitfs_start_goombas", "Three Goombas", 3, has_goombas),
-        coin_source("bitfs_start_red_coins", "Two initial Red Coins",
-                4, has_red_coins, red_coin_ids=frozenset({1, 2})),
+        coin_source("bitfs_start_red_coins", "Wire Platform Red Coin",
+                2, has_red_coins, red_coin_ids=frozenset({2})),
     ))
     trace.add_route(
         "bitfs_rising_platform_block",
         "3-Coin Block after the rising pole platform (Climb or Lava Damage Boosting)",
         has_climb or has_lava_damage_boosting,
-        (coin_source("bitfs_three_coin_block",
-                 "3-Coin Block", 3, has_three_coin_block),),
+        (
+            coin_source("bitfs_three_coin_block",
+                    "3-Coin Block", 3, has_three_coin_block),
+            coin_source("bitfs_second_red_coin",
+                    "Seesaw Platform Red Coin", 2, has_red_coins, red_coin_ids=frozenset({3})),
+        ),
     )
     trace.add_route("bitfs_climb", "Upper course reached with Climb", has_climb, (
         coin_source("bitfs_elevator_line",
                 "Coin line after the elevator",
                 5, has_horizontal_coin_lines),
-        coin_source("bitfs_wire_grid_ring",
-                "Coin ring beneath the wire grid",
+        coin_source("bitfs_first_ring",
+                "Coin ring by the first Bully",
                 8, has_horizontal_coin_rings),
         coin_source("bitfs_vertical_drop_line",
                 "Vertical coin line after the second block",
@@ -3752,7 +3797,7 @@ def bowser_in_the_fire_sea_coins(
         coin_source("bitfs_upper_bullies", "Three upper Bullies",
                 3, has_bullies),
         coin_source("bitfs_upper_red_coins", "Six upper Red Coins",
-                12, has_red_coins, red_coin_ids=frozenset(range(3, 9))),
+                12, has_red_coins, red_coin_ids=frozenset({1, 4, 5, 6, 7, 8})),
     ))
     assert trace.reachable_coins <= 80
     return trace.evaluation()
@@ -4266,15 +4311,6 @@ def _middle_requirement_specs():
     # Hazy Maze Cave
     HMC = "Hazy Maze Cave"
     HMC_BASIC = "WK/LG/BF/SF/TJ"
-    HMC_PLATFORM = (
-        f"{HMC_BASIC} & CL | "
-        "logic_hmc_upper_red_coin_area_wall_kick"
-    )
-    HMC_PLATFORM_CHECKERBOARDS = (
-        f"{HMC_BASIC} & CL & CHECKERBOARD_PLATFORMS | "
-        "logic_hmc_upper_red_coin_area_wall_kick"
-    )
-
     _add(HMC, ("start_coin_line", "maze_entrance_coin_line"),
          unlocks=(_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "rolling_rocks_coins", unlocks=(_unlock("Single Yellow Coins", HMC),))
@@ -4282,30 +4318,31 @@ def _middle_requirement_specs():
          (_unlock("Horizontal Coin Rings", HMC),))
     _add(HMC, ("first_room_scuttlebugs", "pit_room_scuttlebug", "red_coin_room_scuttlebugs"),
          unlocks=(_unlock("Scuttlebugs", HMC),))
-    _add(HMC, ("pit_room_swoop", "toxic_maze_swoops"),
+    _add(HMC, ("pit_island_room_swoop", "toxic_maze_swoops"),
          unlocks=(_unlock("Swoops", HMC),))
     _add(HMC, "toxic_maze_snufits", unlocks=(_unlock("Snufits", HMC),))
     _add(HMC, "basic_movement_sources", HMC_BASIC)
-    _add(HMC, "lower_red_coin_room_coins", HMC_BASIC,
+    _add(HMC, "lower_red_coin_room_coins", f"{{{HMC} - Mid Red Coin Room}}",
          (_unlock("Red Coins", HMC),))
-    _add(HMC, "red_coin_room_mr_is", HMC_BASIC, (_unlock("Mr. Is", HMC),))
-    _add(HMC, "pit_island_room_swoops", HMC_BASIC, (_unlock("Swoops", HMC),))
+    _add(HMC, "red_coin_room_mr_is", f"{{{HMC} - Mid Red Coin Room}}",
+         (_unlock("Mr. Is", HMC),))
+    _add(HMC, ("amazing_emergency_exit_swoop_1", "amazing_emergency_exit_swoop_2"),
+         HMC_BASIC, (_unlock("Swoops", HMC),))
     _add(HMC, "upper_red_coin_pair_first",
-         f"{HMC_BASIC} & CL & LJ/CHECKERBOARD_PLATFORMS | "
-         "logic_hmc_upper_red_coin_area_wall_kick",
+         f"{{{HMC} - Upper Red Coin Room}} & LJ/CHECKERBOARD_PLATFORMS",
          (_unlock("Red Coins", HMC),))
     _add(HMC, "upper_red_coin_pair_checkerboards",
-         HMC_PLATFORM_CHECKERBOARDS,
+         f"{{{HMC} - Upper Red Coin Room}} & CHECKERBOARD_PLATFORMS",
          (_unlock("Red Coins", HMC),))
     _add(HMC, "upper_red_coin_swoops",
-         HMC_PLATFORM_CHECKERBOARDS,
+         f"{{{HMC} - Upper Red Coin Room}} & CHECKERBOARD_PLATFORMS",
          (_unlock("Swoops", HMC),))
-    _add(HMC, "pit_islands_ceiling_coin_line", f"{{{HMC} - Pit Islands}} & CL",
+    _add(HMC, "toxic_maze_star_coin_line", f"{{{HMC} - Pit Islands}} & CL",
          (_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "swimming_beast_coin_ring",
          unlocks=(_unlock("Horizontal Coin Rings", HMC),))
     _add(HMC, "navigating_toxic_maze_sources", f"{{{{{HMC} - Navigating the Toxic Maze}}}}")
-    _add(HMC, "toxic_maze_star_coin_line", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
+    _add(HMC, "pit_islands_ceiling_coin_line", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
          (_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "toxic_maze_exit_swoops", f"{{{{{HMC} - Navigating the Toxic Maze}}}}",
          (_unlock("Swoops", HMC),))
@@ -4331,8 +4368,11 @@ def _middle_requirement_specs():
          f"{{{LLL} - Volcano}}", (_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, (
         "lll_grey_ramp_coins", "lll_sinking_platform_coins",
-        "lll_spinning_volcano_platform_coins", "lll_southeast_grey_ramp_coins",
+        "lll_spinning_volcano_platform_coins",
     ), unlocks=(_unlock("Single Yellow Coins", LLL),))
+    _add(LLL, "lll_southeast_grey_ramp_coins",
+         "LLL_KOOPA_SHELL | WC+TJ | logic_lava_damage_boosting",
+         (_unlock("Single Yellow Coins", LLL),))
     _add(LLL, (
         "lll_volcano_s_island_coins", "lll_volcano_second_ridge_coins",
         "lll_volcano_floating_platform_coins", "lll_volcano_post_platform_coin",
@@ -4352,7 +4392,9 @@ def _middle_requirement_specs():
          (_unlock("Red Coins", LLL),))
     _add(LLL, "lll_outside_bullies", unlocks=(_unlock("Bullies", LLL),))
     _add(LLL, "lll_mr_is", unlocks=(_unlock("Mr. Is", LLL),))
-    _add(LLL, "lll_under_bridge_coin_line", unlocks=(_unlock("Horizontal Coin Lines", LLL),))
+    _add(LLL, "lll_under_bridge_coin_line",
+         "LLL_KOOPA_SHELL | WC+TJ | logic_lava_damage_boosting",
+         (_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, "lll_volcano_bullies", f"{{{LLL} - Volcano}}",
          (_unlock("Bullies", LLL),))
     _add(LLL, "lll_elevator_tour_platform_coins",
@@ -4374,23 +4416,26 @@ def _middle_requirement_specs():
 
     # Shifting Sand Land
     SSL = "Shifting Sand Land"
-    _add(SSL, "ssl_throwable_cork_box",
+    SSL_MAIN = f"{{{SSL}}}"
+    _add(SSL, "ssl_throwable_cork_box", SSL_MAIN,
          unlocks=(_unlock("Throwable Cork Boxes", SSL, f"{SSL} - Throwable Cork Box"),))
     _add(SSL, "ssl_inside_pyramid_coins", f"{{{SSL} - Pyramid}}",
          (_unlock("Single Yellow Coins", SSL),))
-    _add(SSL, "ssl_pillar_coins", unlocks=(_unlock("Single Yellow Coins", SSL),))
-    _add(SSL, "ssl_quicksand_pillar_coin", SSL_UPPER_PYRAMID_ENTRANCE_RULE,
+    _add(SSL, "ssl_pillar_coins", SSL_MAIN, (_unlock("Single Yellow Coins", SSL),))
+    _add(SSL, "ssl_quicksand_pillar_coin",
+         f"{SSL_MAIN} & ({SSL_UPPER_PYRAMID_ENTRANCE_RULE})",
          (_unlock("Single Yellow Coins", SSL),))
     _add(SSL, ("ssl_behind_pyramid_coin_line", "ssl_pyramid_side_coin_line"),
-         unlocks=(_unlock("Horizontal Coin Lines", SSL),))
-    _add(SSL, "ssl_fly_guys", unlocks=(_unlock("Fly Guys", SSL, f"{SSL} - Fly Guys"),))
-    _add(SSL, "ssl_crazy_boxes", unlocks=(_unlock("Crazy Boxes", SSL),))
-    _add(SSL, "ssl_bob_ombs", unlocks=(_unlock("Bob-ombs", SSL),))
-    _add(SSL, "ssl_pokeys", unlocks=(_unlock("Pokeys", SSL),))
-    _add(SSL, "ssl_outside_goombas", unlocks=(_unlock("Goombas", SSL),))
+         SSL_MAIN, (_unlock("Horizontal Coin Lines", SSL),))
+    _add(SSL, "ssl_fly_guys", SSL_MAIN,
+         (_unlock("Fly Guys", SSL, f"{SSL} - Fly Guys"),))
+    _add(SSL, "ssl_crazy_boxes", SSL_MAIN, (_unlock("Crazy Boxes", SSL),))
+    _add(SSL, "ssl_bob_ombs", SSL_MAIN, (_unlock("Bob-ombs", SSL),))
+    _add(SSL, "ssl_pokeys", SSL_MAIN, (_unlock("Pokeys", SSL),))
+    _add(SSL, "ssl_outside_goombas", SSL_MAIN, (_unlock("Goombas", SSL),))
     _add(SSL, "ssl_pyramid_goombas", f"{{{SSL} - Pyramid}}",
          (_unlock("Goombas", SSL),))
-    _add(SSL, "ssl_low_red_coins", unlocks=(_unlock("Red Coins", SSL),))
+    _add(SSL, "ssl_low_red_coins", SSL_MAIN, (_unlock("Red Coins", SSL),))
     _add(SSL, "ssl_first_wire_grid_coin_ring", f"{{{SSL} - Pyramid}} & CL",
          (_unlock("Horizontal Coin Rings", SSL),))
     _add(SSL, "ssl_first_wire_grid_climb", "CL")
@@ -4399,7 +4444,7 @@ def _middle_requirement_specs():
     SSL_TWEESTER = "logic_ssl_three_red_coins_with_tweesters"
     SSL_SHY_GUY = "logic_ssl_one_red_coin_with_shy_guy_spin_jump"
     _add(SSL, "ssl_high_red_coins",
-         f"{SSL_NORMAL_HIGH} | {SSL_TWEESTER} | {SSL_SHY_GUY}",
+         f"{SSL_MAIN} & ({SSL_NORMAL_HIGH} | {SSL_TWEESTER} | {SSL_SHY_GUY})",
          (_unlock("Red Coins", SSL),))
     _add(SSL, "ssl_normal_high_red_coin_route", SSL_NORMAL_HIGH,
          (_unlock("Red Coins", SSL),))
@@ -4466,6 +4511,7 @@ def _middle_requirement_specs():
     _add(SL, "sl_moneybags",
          unlocks=((f"{SL} - Moneybags", f"{SL} - Moneybags"),))
     _add(SL, "sl_fly_guy", unlocks=(_unlock("Fly Guys", SL, f"{SL} - Fly Guy"),))
+    _add(SL, "sl_start_red_coins", unlocks=(_unlock("Red Coins", SL),))
     _add(SL, "sl_whirl_red_coins", f"{{{SL} - Whirl from the Freezing Pond}}",
          (_unlock("Red Coins", SL),))
     _add(SL, "sl_whirl_region_access_for_red_coins", f"{{{SL} - Whirl from the Freezing Pond}}")
@@ -4485,12 +4531,11 @@ def _middle_requirement_specs():
     _add(SL, "sl_upper_slope_coin_line", f"{{{SL} - Igloo Entrance}}",
          (_unlock("Horizontal Coin Lines", SL),))
     _add(SL, "sl_upper_slope_single_coins", "", (_unlock("Single Yellow Coins", SL),))
-    _add(SL, "sl_highest_slope_single_coin", f"LJ | {{{SL} - Igloo}}",
+    _add(SL, "sl_highest_slope_single_coin", f"LJ | {{{SL} - Igloo Entrance}}",
          (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_penguin_and_face_coins", f"{{{SL} - Upper}}",
          (_unlock("Single Yellow Coins", SL),))
-    _add(SL, "sl_upper_spindrifts", f"{{{SL} - Upper}}", (_unlock("Spindrifts", SL),))
-    _add(SL, "sl_upper_red_coins", f"{{{SL} - Upper}}", (_unlock("Red Coins", SL),))
+    _add(SL, "sl_upper_spindrifts", unlocks=(_unlock("Spindrifts", SL),))
     _add(SL, "sl_snowman_head_plank_coins", f"{{{SL} - Top of Snowman's Head}}",
          (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_snowman_head_region_access", f"{{{SL} - Top of Snowman's Head}}")
@@ -4509,9 +4554,9 @@ def _middle_requirement_specs():
     _add(SL, "sl_impossible_coin_trick", "logic_sl_impossible_coin")
 
 
-    del HMC, HMC_BASIC, HMC_PLATFORM, HMC_PLATFORM_CHECKERBOARDS
+    del HMC, HMC_BASIC
     del LLL, LLL_RED_ROUTE, LLL_HEALING
-    del SSL, SSL_NORMAL_HIGH, SSL_TWEESTER, SSL_SHY_GUY
+    del SSL, SSL_MAIN, SSL_NORMAL_HIGH, SSL_TWEESTER, SSL_SHY_GUY
     del DDD, DDD_FIRST_RED_ROUTE, SL
     return COIN_REQUIREMENT_SPECS
 
@@ -4608,8 +4653,23 @@ def _late_requirement_specs():
     _add(WDW, "low_blue_coins", "{Wet-Dry World - Low Water} & GP & BLUE_COIN_BLOCKS",
          _unlock("Blue Coin Blocks", WDW, "Blue Coin Block"))
     _add(WDW, "wooden_structure_three_coin_block",
-         "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | "
-         "{Wet-Dry World - Top of the Express Elevator} & LJ",
+         "{Wet-Dry World - Mid Water} | "
+         "{Wet-Dry World - Mid Water} & WK/TJ/SF/BF | "
+         "{Wet-Dry World - Low Water} & HEAVE_HOS & WK/TJ/SF/BF | "
+         "{Wet-Dry World - Mid-High Water} & HEAVE_HOS & WK/TJ/SF/BF | "
+         "{Wet-Dry World - High Water} & HEAVE_HOS & WK/TJ/SF/BF | "
+         "{Wet-Dry World - Mid Water} & PURPLE_SWITCHES & LJ | "
+         "{Wet-Dry World - Low Water} & HEAVE_HOS & PURPLE_SWITCHES & LJ | "
+         "{Wet-Dry World - Mid-High Water} & HEAVE_HOS & PURPLE_SWITCHES & LJ | "
+         "{Wet-Dry World - High Water} & HEAVE_HOS & PURPLE_SWITCHES & LJ | "
+         "{Wet-Dry World - Mid Water} & PURPLE_SWITCHES & "
+         "logic_wdw_express_elevator_to_top_no_movement | "
+         "{Wet-Dry World - Low Water} & HEAVE_HOS & PURPLE_SWITCHES & "
+         "logic_wdw_express_elevator_to_top_no_movement | "
+         "{Wet-Dry World - Mid-High Water} & HEAVE_HOS & PURPLE_SWITCHES & "
+         "logic_wdw_express_elevator_to_top_no_movement | "
+         "{Wet-Dry World - High Water} & HEAVE_HOS & PURPLE_SWITCHES & "
+         "logic_wdw_express_elevator_to_top_no_movement",
          _unlock("3-Coin Blocks", WDW))
     _add(WDW, "fourth_diamond_coin_line",
          "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top of the Express Elevator} | "
@@ -4663,6 +4723,9 @@ def _late_requirement_specs():
     _add(TTM, "ttm_upper_bob_ombs", "{Tall, Tall Mountain - Upper} & BOB_OMBS", _unlock("Bob-ombs", TTM))
     _add(TTM, "ttm_upper_leaf_climb_route", "CL")
     _add(TTM, "ttm_upper_leaf_moveless_route", "logic_ttm_coins_without_climb")
+    _add(TTM, "ttm_upper_leaf_first_coin",
+         "{Tall, Tall Mountain - Upper} & HORIZONTAL_COIN_LINES",
+         _unlock("Horizontal Coin Lines", TTM))
     _add(TTM, "ttm_upper_leaf_coin_line",
          "{Tall, Tall Mountain - Upper} & CL | "
          "{Tall, Tall Mountain - Upper} & logic_ttm_coins_without_climb",
@@ -4798,8 +4861,11 @@ def _late_requirement_specs():
     _add(TTC, "ttc_lower", "{Tick Tock Clock - First Clock Hand Area}")
     _add(TTC, "ttc_first_hand_block", "{Tick Tock Clock - First Clock Hand Area} & THREE_COIN_BLOCKS",
          _unlock("3-Coin Blocks", TTC))
-    _add(TTC, "ttc_lower_red_coins", "{Tick Tock Clock - First Clock Hand Area} & RED_COINS", _unlock("Red Coins", TTC))
-    _add(TTC, "ttc_spinner_red_coins", "{Tick Tock Clock - First Clock Hand Area} & RED_COINS & TTC_SPINNERS",
+    _add(TTC, "ttc_lower_red_coins",
+         "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Stopped} & RED_COINS & TTC_SPINNERS",
+         _unlock("Red Coins", TTC))
+    _add(TTC, "ttc_spinner_red_coins",
+         "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Stopped} & RED_COINS & TTC_SPINNERS",
          _unlock("Red Coins", TTC))
     _add(TTC, "ttc_first_pole_coin_line",
          "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Moving} | "
@@ -4810,10 +4876,9 @@ def _late_requirement_specs():
          _unlock("3-Coin Blocks", TTC))
     _add(TTC, "ttc_blue_coin_block", "{Tick Tock Clock - Moving Bars Area} & GP & BLUE_COIN_BLOCKS",
          _unlock("Blue Coin Blocks", TTC, "Blue Coin Block"))
-    _add(TTC, "ttc_top", "{Tick Tock Clock - Top}")
-    _add(TTC, "ttc_timed_jumps_block", "{Tick Tock Clock - Top} & THREE_COIN_BLOCKS",
+    _add(TTC, "ttc_timed_jumps_block", "{Tick Tock Clock - Moving Bars Area} & THREE_COIN_BLOCKS",
          _unlock("3-Coin Blocks", TTC))
-    _add(TTC, "ttc_four_moving_bars_block", "{Tick Tock Clock - Top} & TEN_COIN_BLOCKS",
+    _add(TTC, "ttc_four_moving_bars_block", "{Tick Tock Clock - Moving Bars Area} & TEN_COIN_BLOCKS",
          _unlock("10-Coin Blocks", TTC))
     _add(TTC, "ttc_top_past_spinners", "{Tick Tock Clock - Top Past Spinners}")
     _add(TTC, "ttc_past_three_spinners_block", "{Tick Tock Clock - Top Past Spinners} & THREE_COIN_BLOCKS",
@@ -4850,12 +4915,11 @@ def _late_requirement_specs():
     _add(RR, "rr_maze_wall_kick_blue_coins", "{Rainbow Ride - Maze} & BLUE_COIN_BLOCKS & GP & WK",
          _unlock("Blue Coin Blocks", RR, "Blue Coin Block"))
     _add(RR, "rr_maze_movement_red_coin",
-         "{Rainbow Ride - Maze} & LJ/WK | "
-         "{Rainbow Ride - Maze} & logic_rr_maze_coins_ledge_grab_and_carpets",
+         "{Rainbow Ride - Maze} & (LJ/WK/logic_rr_maze_coins_ledge_grab_and_carpets)",
          _unlock("Red Coins", RR))
     _add(RR, "rr_other_red_coins",
-         "{Rainbow Ride - Maze} & WK | {Rainbow Ride - Maze} & LJ & SF/BF/TJ | "
-         "{Rainbow Ride - Maze} & logic_rr_maze_coins_ledge_grab_and_carpets",
+         "{Rainbow Ride - Maze} & "
+         "(WK | LJ & (SF/BF/TJ) | logic_rr_maze_coins_ledge_grab_and_carpets)",
          _unlock("Red Coins", RR))
     _add(RR, "rr_carpets", "{Rainbow Ride - Carpets}")
     for _source in ("rr_second_carpet_platform_coin", "rr_second_carpet_air_coin"):
@@ -5067,7 +5131,7 @@ def _secrets_requirement_specs():
         (BITFS, "bitfs_second_sinking_platform_line"): _spec(
             _target(BITFS), "", ("Horizontal Coin Lines", f"{BITFS} - Horizontal Coin Lines")),
         (BITFS, "bitfs_first_ring"): _spec(
-            _target(BITFS), "", ("Horizontal Coin Rings", f"{BITFS} - Horizontal Coin Rings")),
+            _target(BITFS), "CL", ("Horizontal Coin Rings", f"{BITFS} - Horizontal Coin Rings")),
         (BITFS, "bitfs_first_bully"): _spec(
             _target(BITFS), "", ("Bullies", f"{BITFS} - Bullies")),
         (BITFS, "bitfs_start_goombas"): _spec(
@@ -5079,11 +5143,14 @@ def _secrets_requirement_specs():
         (BITFS, "bitfs_three_coin_block"): _spec(
             _target(BITFS), "CL | logic_lava_damage_boosting",
             ("3-Coin Blocks", f"{BITFS} - 3-Coin Block")),
+        (BITFS, "bitfs_second_red_coin"): _spec(
+            _target(BITFS), "CL | logic_lava_damage_boosting",
+            ("Red Coins", f"{BITFS} - Red Coins")),
         (BITFS, "bitfs_climb"): _spec(_target(BITFS), "CL"),
         (BITFS, "bitfs_elevator_line"): _spec(
             _target(BITFS), "CL", ("Horizontal Coin Lines", f"{BITFS} - Horizontal Coin Lines")),
         (BITFS, "bitfs_wire_grid_ring"): _spec(
-            _target(BITFS), "CL", ("Horizontal Coin Rings", f"{BITFS} - Horizontal Coin Rings")),
+            _target(BITFS), "", ("Horizontal Coin Rings", f"{BITFS} - Horizontal Coin Rings")),
         (BITFS, "bitfs_vertical_drop_line"): _spec(
             _target(BITFS), "CL", ("Vertical Coin Lines", f"{BITFS} - Vertical Coin Lines")),
         (BITFS, "bitfs_bob_omb_slope_line"): _spec(
@@ -5222,7 +5289,7 @@ def _build_expression_rule(rf, expression: str, target_name: str, arbitrary_item
     if not expression:
         return True_()
 
-    alternatives = _split_top_level(expression, "|/")
+    alternatives = _split_top_level(expression, "|")
     if alternatives:
         return Or(*(_build_expression_rule(rf, part, target_name, arbitrary_item_names)
                     for part in alternatives))
@@ -5231,6 +5298,11 @@ def _build_expression_rule(rf, expression: str, target_name: str, arbitrary_item
     if requirements:
         return And(*(_build_expression_rule(rf, part, target_name, arbitrary_item_names)
                      for part in requirements))
+
+    choices = _split_top_level(expression, "/")
+    if choices:
+        return Or(*(_build_expression_rule(rf, part, target_name, arbitrary_item_names)
+                    for part in choices))
 
     atom = _TOKEN_ALIASES.get(expression, expression)
     selected_trick_prefix = "SELECTED_TRICK:"

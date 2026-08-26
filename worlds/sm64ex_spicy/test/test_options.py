@@ -1538,6 +1538,30 @@ class CoinCountChecksGenerationTestBase(SM64TestBase):
         location = self.multiworld.get_location("Tiny-Huge Island - 33 Coins", self.player)
         self.assertEqual(location.parent_region.name, "Tiny-Huge Island - Coins")
 
+    def test_courses_with_shufflable_subareas_use_shared_coins_regions(self):
+        for course_name in (
+                "Jolly Roger Bay",
+                "Cool, Cool Mountain",
+                "Lethal Lava Land",
+                "Shifting Sand Land",
+                "Snowman's Land",
+                "Tall, Tall Mountain",
+        ):
+            with self.subTest(course=course_name):
+                location_name = next(
+                    name for name in self.world.coin_count_check_location_names
+                    if name.startswith(f"{course_name} - ")
+                )
+                location = self.multiworld.get_location(location_name, self.player)
+                self.assertEqual(location.parent_region.name, f"{course_name} - Coins")
+
+    def test_ttm_coins_region_accepts_main_area_or_secret_slide_access(self):
+        coin_region = self.multiworld.get_region("Tall, Tall Mountain - Coins", self.player)
+        self.assertEqual(
+            {entrance.parent_region.name for entrance in coin_region.entrances},
+            {"Tall, Tall Mountain", "Tall, Tall Mountain - Secret Slide"},
+        )
+
 
 class SecretStageCoinCountChecksTestBase(SM64TestBase):
     run_default_tests = False

@@ -39,8 +39,8 @@ class TestTallTallMountainLocations(SM64TestBase):
     options = TTM_OPTIONS
 
     def test_locations(self):
-        upper = MIDDLE + ["Triple Jump"]
-        top = upper + ["Long Jump", "Ledge Grab"]
+        upper = MIDDLE + ["Triple Jump", "Ledge Grab"]
+        top = upper + ["Long Jump"]
 
         self.run_location_tests([
             ["Tall, Tall Mountain - Start Edge 1-Up", False, []],
@@ -62,8 +62,8 @@ class TestTallTallMountainLocations(SM64TestBase):
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", False, upper],
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
              upper + ["Tall, Tall Mountain - Red Coins"]],
-            ["Tall, Tall Mountain - Monty Mole Platform 1-Up", False, upper],
-            ["Tall, Tall Mountain - Monty Mole Platform 1-Up", True,
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", False, upper],
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", True,
              upper + [FREESTANDING_1UPS]],
             ["Tall, Tall Mountain - Waterfall Gap 1-Up", False, upper],
             ["Tall, Tall Mountain - Waterfall Gap 1-Up", True,
@@ -110,6 +110,14 @@ class TestTallTallMountainLocations(SM64TestBase):
              MIDDLE + ["Tall, Tall Mountain - Rolling Log", "Tall, Tall Mountain - Red Coins"]],
         ], starting_regions=["Tall, Tall Mountain"])
 
+    def test_triple_jump_requires_ledge_grab_to_reach_upper(self):
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", False,
+             ["Triple Jump", "Tall, Tall Mountain - Red Coins"]],
+            ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
+             ["Triple Jump", "Ledge Grab", "Tall, Tall Mountain - Red Coins"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
 
 class TestTallTallMountainFullLevelUnlock(SM64TestBase):
     run_default_tests = False
@@ -136,6 +144,40 @@ class TestTallTallMountainTopWithKickTrick(SM64TestBase):
         self.run_location_tests([
             ["Tall, Tall Mountain - Scale the Mountain", False, upper],
             ["Tall, Tall Mountain - Scale the Mountain", True, upper + ["Kick"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
+class TestTallTallMountainUpperFlyGuySpinJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {"Tall, Tall Mountain Upper Region with Spin Jump Off of Fly Guy"},
+    }
+
+    def test_spin_jump_reaches_upper_and_requires_fly_guy(self):
+        route = MIDDLE + [FREESTANDING_1UPS]
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", False, route],
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", True,
+             route + ["Tall, Tall Mountain - Fly Guy"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
+class TestTallTallMountainBreathtakingViewTripleJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {
+            "Tall, Tall Mountain Breathtaking View from Bridge with Triple Jump from Below"
+        },
+    }
+
+    def test_triple_jump_from_upper_reaches_star(self):
+        upper = MIDDLE + ["Tall, Tall Mountain - Rolling Log"]
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Breathtaking View from Bridge", False, upper],
+            ["Tall, Tall Mountain - Breathtaking View from Bridge", True,
+             upper + ["Triple Jump"]],
         ], starting_regions=["Tall, Tall Mountain"])
 
 

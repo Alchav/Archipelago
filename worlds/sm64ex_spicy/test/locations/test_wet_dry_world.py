@@ -151,27 +151,53 @@ class TestWetDryWorldHighLocations(SM64TestBase):
     run_default_tests = False
     options = WDW_OPTIONS
 
+    def test_highest_water_reaches_top_freely(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Top o' the Town", True, []],
+        ], starting_regions=["Wet-Dry World - Highest Water"])
+
     def test_highest_water_buddy_route(self):
         self.run_location_tests([
             ["Wet-Dry World - Bob-omb Buddy", False, []],
+            ["Wet-Dry World - Bob-omb Buddy", True,
+             ["Triple Jump", "Wet-Dry World - Bob-omb Buddy"]],
             ["Wet-Dry World - Bob-omb Buddy", True,
              ["Backflip", "Wet-Dry World - Bob-omb Buddy"]],
             ["Wet-Dry World - Bob-omb Buddy", True,
              ["Side Flip", "Wet-Dry World - Bob-omb Buddy"]],
         ], starting_regions=["Wet-Dry World - Highest Water"])
 
-    def test_shocking_arrow_lifts_does_not_accept_ground_pound_without_trick(self):
+    def test_highest_water_does_not_reach_shocking_arrow_lifts_via_top(self):
         self.run_location_tests([
             ["Wet-Dry World - Shocking Arrow Lifts!", False, []],
-            ["Wet-Dry World - Shocking Arrow Lifts!", False, ["Ground Pound"]],
+            ["Wet-Dry World - Shocking Arrow Lifts!", False,
+             ["Ground Pound", "Triple Jump", "Ledge Grab"]],
+            ["Wet-Dry World - Shocking Arrow Lifts Star Block", False, []],
+            ["Wet-Dry World - Wooden Structure 3 Coins Block", False,
+             ["Wet-Dry World - 3-Coin Blocks", "Long Jump", "Purple Switches"]],
         ], starting_regions=["Wet-Dry World - Highest Water"])
+
+    def test_separately_reached_water_and_top_states_do_not_combine(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Shocking Arrow Lifts!", False, []],
+        ], starting_regions=[
+            "Wet-Dry World - Highest Water",
+            "Wet-Dry World - Mid-High Water",
+        ])
+        self.run_location_tests([
+            ["Wet-Dry World - Wooden Structure 3 Coins Block", False,
+             [THREE_COIN_BLOCKS]],
+        ], starting_regions=[
+            "Wet-Dry World - Highest Water",
+            "Wet-Dry World - Low Water",
+        ])
 
 
 class TestWetDryWorldShockingArrowLiftsGroundPoundTrick(SM64TestBase):
     run_default_tests = False
     options = {
         **WDW_OPTIONS,
-        "logic_tricks": {"Ground Pound Underwater Shocking Arrow Lifts Box"},
+        "logic_tricks": {"Wet-Dry World Ground Pound Underwater Shocking Arrow Lifts Box"},
     }
 
     def test_highest_water_cannon_route_accepts_ground_pound_trick(self):

@@ -666,10 +666,10 @@ logic_tricks = {
     },
     "Hazy Maze Cave Upper Red Coin Area with Wall Kick Only": {
         "internal_id": "logic_hmc_upper_red_coin_area_wall_kick",
-        "rule": "CHECKERBOARD_PLATFORMS & WK",
+        "rule": "WK",
         "difficulty": "medium",
-        "description": "Reaches the upper red coin area and its platform coins using the Checkerboard Platform "
-                       "and Wall Kick.",
+        "description": "Reaches the Upper Red Coin Room from below using only Wall Kick. The Checkerboard "
+                       "Platform is still required for checks located along its ride.",
         "video": "https://www.youtube.com/watch?v=EHx58IaW2uU",
     },
     "Hazy Maze Cave Pit Islands with Wall Kick": {
@@ -734,7 +734,7 @@ logic_tricks = {
                        "without movement items.",
         "video": "https://www.youtube.com/watch?v=5P7OWuw9ZZM",
     },
-    "Ground Pound Underwater Shocking Arrow Lifts Box": {
+    "Wet-Dry World Ground Pound Underwater Shocking Arrow Lifts Box": {
         "internal_id": "logic_wdw_shocking_arrow_lifts_underwater_ground_pound",
         "rule": "GP",
         "difficulty": "easy",
@@ -787,6 +787,18 @@ logic_tricks = {
         "rule": "DV",
         "difficulty": "hard",
         "description": "Reaches the top of Tall, Tall Mountain using Dive.",
+    },
+    "Tall, Tall Mountain Upper Region with Spin Jump Off of Fly Guy": {
+        "internal_id": "logic_ttm_upper_fly_guy_spin_jump",
+        "rule": "FLY_GUY",
+        "difficulty": "easy",
+        "description": "Reaches the Upper region by spin-jumping off of a Fly Guy, bypassing the Rolling Log.",
+    },
+    "Tall, Tall Mountain Breathtaking View from Bridge with Triple Jump from Below": {
+        "internal_id": "logic_ttm_breathtaking_view_triple_jump_from_below",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Collects Breathtaking View from Bridge from the Upper region using Triple Jump.",
     },
     "Tall, Tall Mountain Lonely Mushroom without Cannon": {
         "internal_id": "logic_ttm_lonely_mushroom_cannonless",

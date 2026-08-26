@@ -46,7 +46,7 @@ class TestSnowmansLandLocations(SM64TestBase):
             ["Snowman's Land - In the Deep Freeze", True, ["Wall Kick"]],
             ["Snowman's Land - Bob-omb Buddy", False, []],
             ["Snowman's Land - Bob-omb Buddy", True,
-             ["Snowman's Land - Bob-omb Buddy"]],
+             cannon + ["Snowman's Land - Bob-omb Buddy"]],
 
             ["Snowman's Land - Whirl from the Freezing Pond", False, []],
             ["Snowman's Land - Whirl from the Freezing Pond", True,
