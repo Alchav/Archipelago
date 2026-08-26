@@ -1011,6 +1011,18 @@ class FullCataloguedCoinChecksTest(SM64TestBase):
                 location = self.multiworld.get_location(output.location_name, self.player)
                 self.assertEqual(location.parent_region.name, expected_region)
 
+    def test_individual_coin_checks_are_never_in_aggregate_coin_regions(self):
+        for location_name in self.world.coin_check_location_names:
+            with self.subTest(location=location_name):
+                location = self.multiworld.get_location(location_name, self.player)
+                self.assertFalse(location.parent_region.name.endswith(" - Coins"))
+
+    def test_ccm_mr_blizzard_coins_are_in_the_main_region(self):
+        for index in range(1, 4):
+            location = self.multiworld.get_location(
+                f"Cool, Cool Mountain - Mr. Blizzard Coin {index}", self.player)
+            self.assertEqual(location.parent_region.name, "Cool, Cool Mountain")
+
     def test_slot_data_contains_authoritative_selection(self):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(set(slot_data["CoinCheckLocations"]), set(coin_output_by_name))

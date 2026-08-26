@@ -710,6 +710,7 @@ def evaluate_cool_cool_mountain_coins(
         "Spindrifts", f"{level_name} - Spindrifts")
     can_reach_slide = state.can_reach(
         "Cool, Cool Mountain - Secret Slide", "Region", player)
+    can_reach_main = state.can_reach(level_name, "Region", player)
 
     traces = [
         coin_source("penguin_slide_yellow_coins", "Individual coins on the Penguin Slide", 27,
@@ -717,12 +718,14 @@ def evaluate_cool_cool_mountain_coins(
         coin_source("penguin_slide_coin_lines", "Nine coin lines on the Penguin Slide", 45,
                 can_reach_slide and has_horizontal_coin_lines),
         coin_source("chimney_vertical_coin_line", "Vertical coin line into the chimney", 5,
-                has_vertical_coin_lines),
+                can_reach_main and has_vertical_coin_lines),
         coin_source("main_mountain_coin_lines", "Four Snowman Slide coin lines", 20,
-                has_horizontal_coin_lines),
-        coin_source("standard_mr_blizzard", "Mr. Blizzard", 3, has_mr_blizzards),
-        coin_source("main_spindrifts", "Three Spindrifts on the main route", 9, has_spindrifts),
-        coin_source("red_coins", "Eight Red Coins", 16, has_red_coins,
+                can_reach_main and has_horizontal_coin_lines),
+        coin_source("standard_mr_blizzard", "Mr. Blizzard", 3,
+                can_reach_main and has_mr_blizzards),
+        coin_source("main_spindrifts", "Three Spindrifts on the main route", 9,
+                can_reach_main and has_spindrifts),
+        coin_source("red_coins", "Eight Red Coins", 16, can_reach_main and has_red_coins,
                     red_coin_ids=frozenset(range(1, 9))),
         coin_source("slide_blue_coin", "Blue Coin at the start of the slide", 5,
                 can_reach_slide and has_single_blue_coin),
@@ -731,7 +734,7 @@ def evaluate_cool_cool_mountain_coins(
     has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
     has_spin_jump_route = Rules.can_use_logic_trick(
         state, player, "logic_ccm_wall_kicks_will_work_spin_jump", target_name)
-    has_wall_kicks_route = has_cannon or has_spin_jump_route
+    has_wall_kicks_route = can_reach_main and (has_cannon or has_spin_jump_route)
     route_children: list[CoinSourceTrace] = [
         coin_source(
             "wall_kicks_coin_arrow",
@@ -761,7 +764,7 @@ def evaluate_cool_cool_mountain_coins(
         "blue_coin_block",
         "Blue Coin Block",
         10,
-        has_blue_coin_block and has_ground_pound,
+        can_reach_main and has_blue_coin_block and has_ground_pound,
     ))
     return coin_evaluation(traces, 154)
 
@@ -4236,26 +4239,28 @@ def _early_requirement_specs():
             CCM_TARGET, f"{{{CCM} - Secret Slide}}",
             ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
         (CCM, "chimney_vertical_coin_line"): _spec(
-            CCM_TARGET, "", ("Vertical Coin Lines", f"{CCM} - Vertical Coin Lines")),
+            CCM_TARGET, f"{{{CCM}}}", ("Vertical Coin Lines", f"{CCM} - Vertical Coin Lines")),
         (CCM, "main_mountain_coin_lines"): _spec(
-            CCM_TARGET, "", ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
+            CCM_TARGET, f"{{{CCM}}}", ("Horizontal Coin Lines", f"{CCM} - Horizontal Coin Lines")),
         (CCM, "standard_mr_blizzard"): _spec(
-            CCM_TARGET, "", ("Mr Blizzards", f"{CCM} - Mr Blizzards")),
-        (CCM, "main_spindrifts"): _spec(CCM_TARGET, "", ("Spindrifts", f"{CCM} - Spindrifts")),
-        (CCM, "red_coins"): _spec(CCM_TARGET, "", ("Red Coins", f"{CCM} - Red Coins")),
+            CCM_TARGET, f"{{{CCM}}}", ("Mr Blizzards", f"{CCM} - Mr Blizzards")),
+        (CCM, "main_spindrifts"): _spec(
+            CCM_TARGET, f"{{{CCM}}}", ("Spindrifts", f"{CCM} - Spindrifts")),
+        (CCM, "red_coins"): _spec(
+            CCM_TARGET, f"{{{CCM}}}", ("Red Coins", f"{CCM} - Red Coins")),
         (CCM, "slide_blue_coin"): _spec(
             CCM_TARGET, f"{{{CCM} - Secret Slide}}",
             ("Single Blue Coins", f"{CCM} - Single Blue Coin")),
         (CCM, "wall_kicks_route"): _spec(
-            CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump"),
+            CCM_TARGET, f"{{{CCM}}} & (CANN | logic_ccm_wall_kicks_will_work_spin_jump)"),
         (CCM, "wall_kicks_coin_arrow"): _spec(
-            CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump",
+            CCM_TARGET, f"{{{CCM}}} & (CANN | logic_ccm_wall_kicks_will_work_spin_jump)",
             ("Coin Arrows", f"{CCM} - Coin Arrows")),
         (CCM, "wall_kicks_spindrifts"): _spec(
-            CCM_TARGET, "CANN | logic_ccm_wall_kicks_will_work_spin_jump",
+            CCM_TARGET, f"{{{CCM}}} & (CANN | logic_ccm_wall_kicks_will_work_spin_jump)",
             ("Spindrifts", f"{CCM} - Spindrifts")),
         (CCM, "blue_coin_block"): _spec(
-            CCM_TARGET, "GP", ("Blue Coin Blocks", f"{CCM} - Blue Coin Block")),
+            CCM_TARGET, f"{{{CCM}}} & GP", ("Blue Coin Blocks", f"{CCM} - Blue Coin Block")),
 
         # Big Boo's Haunt
         (BBH, "mansion_ten_coin_block"): _spec(

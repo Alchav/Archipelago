@@ -500,7 +500,7 @@ class SM64World(World):
             output_id = output.output_id
             region_name = coin_output_region_name(output) or coin_check_source_region_names.get(
                 (output_id.course_name, output_id.source_id),
-                coin_check_region_names.get(output_id.course_name, output_id.course_name),
+                output_id.course_name,
             )
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(
