@@ -734,6 +734,7 @@ class SM64World(World):
         fillable_location_count = (
             len(self.multiworld.get_unfilled_locations(self.player))
             + len(self.coin_count_check_location_names)
+            + len(self.coin_check_location_names)
             - self.get_future_locked_location_count()
         )
         extra_location_count = item_count - fillable_location_count

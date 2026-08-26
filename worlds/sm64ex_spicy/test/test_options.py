@@ -1708,6 +1708,18 @@ class CoinCountChecksOverflowGenerationTestBase(SM64TestBase):
                 self.assertEqual(coin_counts, list(range(1, len(coin_counts) + 1)))
 
 
+class CoinCountChecksNoOverflowWithIndividualCoinChecksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **CoinCountChecksOverflowGenerationTestBase.options,
+        "coin_checks": 100,
+    }
+
+    def test_individual_coin_locations_prevent_false_overflow(self):
+        self.assertEqual(self.world.coin_count_check_location_names, ())
+        self.assertGreater(self.world.filler_count, 0)
+
+
 # 1-Up Checks
 class OneUpChecksOffTestBase(SM64TestBase):
     options = {
