@@ -22,6 +22,25 @@ from ..RuleBuilder import CanCollectCoinOutput
 
 
 class CoinCheckCatalogTest(unittest.TestCase):
+    def test_bob_wooden_post_names_distinguish_chain_chomp_post(self):
+        course_name = "Bob-omb Battlefield"
+        expected_names = tuple(
+            f"{course_name} - Chain Chomp's Wooden Post Coin {index}"
+            for index in range(1, 6)
+        ) + tuple(
+            f"{course_name} - Wooden Post {post_index} Coin {coin_index}"
+            for post_index in range(1, 5)
+            for coin_index in range(1, 6)
+        )
+
+        self.assertEqual(
+            tuple(
+                coin_output_by_id[CoinOutputID(course_name, "main_wooden_posts", index)].location_name
+                for index in range(1, 26)
+            ),
+            expected_names,
+        )
+
     def test_wmotr_red_coins_match_physical_elevation_and_routes(self):
         course_name = "Wing Mario Over the Rainbow"
         expected = (

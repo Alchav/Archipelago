@@ -186,6 +186,16 @@ COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ..
 
 COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
     **{
+        ("Bob-omb Battlefield", "main_wooden_posts", index):
+            f"Chain Chomp's Wooden Post Coin {index}"
+        for index in range(1, 6)
+    },
+    **{
+        ("Bob-omb Battlefield", "main_wooden_posts", index):
+            f"Wooden Post {(index - 6) // 5 + 1} Coin {(index - 6) % 5 + 1}"
+        for index in range(6, 26)
+    },
+    **{
         ("Cool, Cool Mountain", "main_spindrifts", index):
             f"Snowman Head Spindrift Coin {index}"
         for index in range(1, 4)
