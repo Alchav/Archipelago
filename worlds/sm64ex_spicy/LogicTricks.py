@@ -2,10 +2,10 @@ logic_tricks = {
     # Non-level-specific tricks
     "Lava Damage Boosting": {
         "internal_id": "logic_lava_damage_boosting",
-        "rule": "",
+        "rule": "MARIOS_HAT",
         "difficulty": "easy",
-        "description": "Jumping into and bouncing off lava to cross gaps or reach nearby platforms."
-                       "If you don't have Mario's Hat, you may have to die!",
+        "description": "Using Mario's Hat while jumping into and bouncing off lava to cross gaps or reach nearby "
+                       "platforms.",
     },
     # Castle
     "Castle Third Tree From Waterfall 1-Up With No Movement": {

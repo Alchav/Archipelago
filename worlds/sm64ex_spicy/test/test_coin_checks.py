@@ -1252,13 +1252,14 @@ class BowserInTheFireSeaLavaDamageBoostingCoinChecksAccessTest(SM64TestBase):
     }
 
     def test_trick_reaches_seesaw_red_coin_and_three_coin_block(self):
+        hat = ["Mario's Hat"]
         self.run_location_tests([
             ["Bowser in the Fire Sea - Seesaw Platform Red Coin", True,
-             ["Bowser in the Fire Sea - Red Coins"]],
+             ["Bowser in the Fire Sea - Red Coins", *hat]],
             ["Bowser in the Fire Sea - 3-Coin Block Coin 1", True,
-             ["Bowser in the Fire Sea - 3-Coin Block"]],
+             ["Bowser in the Fire Sea - 3-Coin Block", *hat]],
             ["Bowser in the Fire Sea - 3 Coins Block", True,
-             ["Bowser in the Fire Sea - 3-Coin Block"]],
+             ["Bowser in the Fire Sea - 3-Coin Block", *hat]],
         ], starting_regions=["Bowser in the Fire Sea"])
 
 
@@ -1415,6 +1416,7 @@ class LethalLavaLandCrossLavaCoinChecksAccessTest(SM64TestBase):
         "coin_checks": 100,
         "coin_object_unlocks": "per_level",
         "level_unlocks": "disabled",
+        "long_jump": "global",
         "triple_jump": "global",
         "cap_items": "per_level",
     }
@@ -1445,6 +1447,42 @@ class LethalLavaLandCrossLavaCoinChecksAccessTest(SM64TestBase):
                 ],
                 starting_regions=("Lethal Lava Land",),
             )
+
+    def test_mr_i_island_coin_ring_routes(self):
+        location_name = "Lethal Lava Land - Mr. I Island Coin Ring Coin 1"
+        rings = ["Lethal Lava Land - Horizontal Coin Rings"]
+        self.run_location_tests(
+            [
+                [location_name, False, rings],
+                [location_name, True, rings + ["Long Jump"]],
+                [location_name, True, rings + ["Lethal Lava Land - Koopa Shell"]],
+                [location_name, True, rings + ["Lethal Lava Land - Wing Cap", "Triple Jump"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
+        )
+
+
+class LethalLavaLandLavaDamageBoostingHatCoinChecksAccessTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_checks": 100,
+        "coin_object_unlocks": "per_level",
+        "level_unlocks": "disabled",
+        "logic_tricks": {"Lava Damage Boosting"},
+        "long_jump": "global",
+        "marios_hat": True,
+    }
+
+    def test_mr_i_island_lava_damage_boosting_requires_hat(self):
+        location_name = "Lethal Lava Land - Mr. I Island Coin Ring Coin 1"
+        rings = ["Lethal Lava Land - Horizontal Coin Rings"]
+        self.run_location_tests(
+            [
+                [location_name, False, rings],
+                [location_name, True, rings + ["Mario's Hat"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
+        )
 
 
 class CastleCoinChecksAccessTest(SM64TestBase):

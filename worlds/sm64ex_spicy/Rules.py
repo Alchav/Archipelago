@@ -1596,6 +1596,7 @@ class RuleFactory:
         "KK": "Kick",
         "CL": "Climb",
         "LG": "Ledge Grab",
+        "MARIOS_HAT": "Mario's Hat",
         "MIPS1": "Castle - Progressive MIPS",
         "BOB_KING": "Bob-omb Battlefield - King Bob-omb",
         "BOB_KOOPA": "Bob-omb Battlefield - Koopa the Quick",

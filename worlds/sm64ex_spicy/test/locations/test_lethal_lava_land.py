@@ -115,9 +115,10 @@ class TestLethalLavaLandLavaDamageBoosting(SM64TestBase):
     }
 
     def test_lava_damage_boosting_routes(self):
-        freestanding = ["Lethal Lava Land - Freestanding 1-Ups"]
+        hat = ["Mario's Hat"]
+        freestanding = ["Lethal Lava Land - Freestanding 1-Ups", *hat]
         self.run_location_tests([
-            ["Lethal Lava Land - Red-Hot Log Rolling", True, []],
+            ["Lethal Lava Land - Red-Hot Log Rolling", True, hat],
             ["Lethal Lava Land - Northeast Brown Platform 1-Up", True, freestanding],
             ["Lethal Lava Land - Boil the Big Bully Star Lava 1-Up", True, freestanding],
             ["Lethal Lava Land - Northwest Curve 1-Up", True, freestanding],
@@ -126,6 +127,7 @@ class TestLethalLavaLandLavaDamageBoosting(SM64TestBase):
             ["Lethal Lava Land - 8-Coin Puzzle with 15 Pieces", True, [
                 "Lethal Lava Land - Red Coins",
                 "Lethal Lava Land - Horizontal Coin Lines",
+                "Mario's Hat",
             ]],
         ], starting_regions=["Lethal Lava Land"])
 

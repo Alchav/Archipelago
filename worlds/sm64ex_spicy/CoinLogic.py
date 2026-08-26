@@ -1110,6 +1110,7 @@ def lethal_lava_land_coins(
         state, player, f"{level_name} - Koopa Shell")
     has_lava_damage_boosting = Rules.can_use_logic_trick(
         state, player, "logic_lava_damage_boosting", target_name)
+    has_long_jump = Rules.has_action(state, player, "Long Jump", level_name)
     can_cross_lava = (
         has_koopa_shell
         or has_lava_damage_boosting
@@ -1207,7 +1208,30 @@ def lethal_lava_land_coins(
         "lll_second_mr_i_coin_ring",
         "Mr. I Island Coin Ring",
         8,
-        has_horizontal_coin_rings,
+        has_horizontal_coin_rings and (can_cross_lava or has_long_jump),
+        children=(
+            coin_condition(
+                "lll_second_mr_i_long_jump_route",
+                "Long Jump route",
+                has_long_jump,
+            ),
+            coin_condition(
+                "lll_second_mr_i_koopa_shell_route",
+                "Koopa Shell route",
+                has_koopa_shell,
+            ),
+            coin_condition(
+                "lll_second_mr_i_wing_cap_triple_jump_route",
+                "Wing Cap and Triple Jump route",
+                Rules.has_wing_cap(state, player, level_name)
+                and Rules.has_action(state, player, "Triple Jump", level_name),
+            ),
+            coin_condition(
+                "lll_second_mr_i_lava_damage_boosting_route",
+                "Lava Damage Boosting trick route",
+                has_lava_damage_boosting,
+            ),
+        ),
     )
     builder.add(
         "lll_crazy_box_coins",
@@ -4382,8 +4406,14 @@ def _middle_requirement_specs():
          unlocks=((f"{LLL} - Bowser Puzzle", f"{LLL} - Bowser Puzzle"),))
     _add(LLL, (
         "lll_second_big_bully_coin_ring", "lll_two_bullies_coin_ring",
-        "lll_second_mr_i_coin_ring",
     ), unlocks=(_unlock("Horizontal Coin Rings", LLL),))
+    _add(LLL, "lll_second_mr_i_coin_ring",
+         "LJ | LLL_KOOPA_SHELL | WC+TJ | logic_lava_damage_boosting",
+         (_unlock("Horizontal Coin Rings", LLL),))
+    _add(LLL, "lll_second_mr_i_long_jump_route", "LJ")
+    _add(LLL, "lll_second_mr_i_koopa_shell_route", "LLL_KOOPA_SHELL")
+    _add(LLL, "lll_second_mr_i_wing_cap_triple_jump_route", "WC+TJ")
+    _add(LLL, "lll_second_mr_i_lava_damage_boosting_route", "logic_lava_damage_boosting")
     _add(LLL, "lll_crazy_box_coins", unlocks=(_unlock("Crazy Boxes", LLL, f"{LLL} - Crazy Box"),))
     _add(LLL, "lll_first_five_red_coins", LLL_RED_ROUTE, (_unlock("Red Coins", LLL),))
     _add(LLL, "lll_remaining_three_red_coins",

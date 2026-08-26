@@ -2447,9 +2447,11 @@ class BowserInTheFireSeaLavaDamageBoostingTrickTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "logic_tricks": {"Lava Damage Boosting"},
+        "marios_hat": True,
     }
 
     def test_lava_damage_boosting_reaches_only_marked_three_coins(self):
+        self.collect(self.get_item_by_name("Mario's Hat"))
         self.assertTrue(bowser_in_the_fire_sea_coins(
             self.multiworld.state, self.player, 26))
         self.assertFalse(bowser_in_the_fire_sea_coins(
@@ -4657,7 +4659,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         source_coins = {
             "Lethal Lava Land - Single Yellow Coins": 21,
             "Lethal Lava Land - Horizontal Coin Lines": 25,
-            "Lethal Lava Land - Horizontal Coin Rings": 24,
+            "Lethal Lava Land - Horizontal Coin Rings": 16,
             "Lethal Lava Land - Crazy Box": 5,
             "Lethal Lava Land - Bowser Puzzle": 5,
             "Lethal Lava Land - Bullies": 10,
@@ -4781,6 +4783,7 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
         "logic_tricks": {"Lava Damage Boosting"},
+        "marios_hat": True,
     }
 
     def collect_basement_access(self):
@@ -4788,6 +4791,7 @@ class LethalLavaLandLogicTricksTestBase(SM64TestBase):
 
     def test_bouncing_off_lava_reaches_log_star_and_one_ups(self):
         self.collect_basement_access()
+        self.collect(self.get_item_by_name("Mario's Hat"))
         for location_name in (
                 "Lethal Lava Land - Red-Hot Log Rolling",
                 "Lethal Lava Land - Northeast Brown Platform 1-Up",
@@ -4889,10 +4893,12 @@ class LethalLavaLandCoinStar130BouncingOffLavaAccessTestBase(LethalLavaLandCoinS
         **LethalLavaLandCoinStarAccessTestBase.options,
         "logic_tricks": {"Lava Damage Boosting"},
         "lethal_lava_land_coin_star_requirement": 130,
+        "marios_hat": True,
     }
 
     def test_bouncing_off_lava_reaches_bridge_coins(self):
         self.collect_basement_access()
+        self.collect(self.get_item_by_name("Mario's Hat"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 

@@ -757,6 +757,20 @@ class MariosHatItemPoolTestBase(SM64TestBase):
         self.assertNotIn(item_table["Mario's Hat"], start_inventory)
 
 
+class MariosHatLavaDamageBoostingItemPoolTestBase(SM64TestBase):
+    options = {
+        "logic_tricks": {"Lava Damage Boosting"},
+        "marios_hat": Options.MariosHat.option_true,
+    }
+
+    def test_marios_hat_is_progression_for_lava_damage_boosting(self):
+        self.assertEqual(
+            self.world.get_item_classification(optional_item_data_table["Mario's Hat"]),
+            ItemClassification.progression,
+        )
+        self.assertTrue(self.get_items_by_name("Mario's Hat")[0].advancement)
+
+
 class OneUpChecksOnTestBase(SM64TestBase):
     options = {
         "one_up_checks": Options.OneUpChecks.option_true,

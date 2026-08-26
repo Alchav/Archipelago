@@ -56,6 +56,15 @@ def tweesters_classification(options):
     return ItemClassification.trap
 
 
+def marios_hat_classification(options):
+    from .LogicTricks import get_enabled_logic_tricks
+
+    enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
+    if "Lava Damage Boosting" in enabled_tricks:
+        return ItemClassification.progression
+    return ItemClassification.useful
+
+
 class SM64Item(Item):
     game: str = "SM64: Spicy Mycena 64"
 
@@ -263,7 +272,7 @@ purple_switch_item_data_table: dict[str, SM64ItemData] = {
 }
 
 optional_item_data_table: dict[str, SM64ItemData] = {
-    "Mario's Hat": SM64ItemData(sm64ex_base_id + 320, useful),
+    "Mario's Hat": SM64ItemData(sm64ex_base_id + 320, marios_hat_classification),
 }
 
 bowser_stage_1up_item_data_table: dict[str, SM64ItemData] = {
