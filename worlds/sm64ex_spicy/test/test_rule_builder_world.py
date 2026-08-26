@@ -8,6 +8,7 @@ from .. import Options
 from ..Items import item_table
 from ..CoinLogic import COIN_EVALUATORS, _coin_source_rule_specs
 from ..RuleBuilder import CanCollectCoins, CoinSourceTrace, HasUnlock
+from ..Regions import SM64_WDW_LOW
 from ..Rules import has_unlock
 
 
@@ -57,6 +58,77 @@ class RuleBuilderWorldTestBase(SM64TestBase):
                     json.dumps(rule.explain_json(state))
                     if state is not None:
                         self.assertEqual(rule(state), result_before)
+
+
+class VariantEntranceExplanationTest(SM64TestBase):
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+    }
+
+    @staticmethod
+    def explanation_text(messages) -> str:
+        return "".join(part.get("text", "") for part in messages)
+
+    def test_wet_dry_world_explains_all_painting_heights(self):
+        explanation = self.explanation_text(
+            self.world.explain_rule("Wet-Dry World", CollectionState(self.multiworld)))
+
+        self.assertIn("Wet-Dry World entrances:", explanation)
+        self.assertIn("Wet-Dry World with Low Water is at the bottom of the Wet-Dry World painting", explanation)
+        self.assertIn("Wet-Dry World with Middle Water is at the middle of the Wet-Dry World painting", explanation)
+        self.assertIn("Wet-Dry World with High Water is at the top of the Wet-Dry World painting", explanation)
+
+    def test_tick_tock_clock_explains_all_clock_times(self):
+        explanation = self.explanation_text(
+            self.world.explain_rule("Tick Tock Clock", CollectionState(self.multiworld)))
+
+        self.assertIn("Tick Tock Clock entrances:", explanation)
+        self.assertIn("Tick-Tock Clock with Stopped Time is at Tick-Tock Clock, at 12 o'clock", explanation)
+        self.assertIn("Tick-Tock Clock with Slow Time is at Tick-Tock Clock, at 3 o'clock", explanation)
+        self.assertIn("Tick-Tock Clock with Random Time is at Tick-Tock Clock, at 6 o'clock", explanation)
+        self.assertIn("Tick-Tock Clock with Fast Time is at Tick-Tock Clock, at 9 o'clock", explanation)
+
+    def test_shifting_sand_land_explains_main_and_pyramid_entrances(self):
+        explanation = self.explanation_text(
+            self.world.explain_rule("Shifting Sand Land", CollectionState(self.multiworld)))
+
+        self.assertIn("Shifting Sand Land entrances:", explanation)
+        self.assertIn("Shifting Sand Land is at the Shifting Sand Land painting", explanation)
+        self.assertIn(
+            "the lower Shifting Sand Land pyramid is at the side entrance of the Shifting Sand Land pyramid",
+            explanation,
+        )
+        self.assertIn(
+            "the upper Shifting Sand Land pyramid is at the top entrance of the Shifting Sand Land pyramid",
+            explanation,
+        )
+
+    def test_undiscovered_entrance_does_not_reveal_its_source(self):
+        source_id = next(
+            source for source, destination in self.world.area_connections.items()
+            if destination == SM64_WDW_LOW
+        )
+        entrance = self.world.randomized_entrance_connections[source_id]
+        target = entrance.connected_region
+        target.entrances.remove(entrance)
+        entrance.connected_region = None
+        self.world.deferred_entrance_targets[source_id] = target
+
+        explanation = self.explanation_text(
+            self.world.explain_rule("Wet-Dry World", CollectionState(self.multiworld)))
+
+        self.assertIn("Wet-Dry World with Low Water: entrance not discovered.", explanation)
+        self.assertNotIn("Low Water is at the bottom of the Wet-Dry World painting", explanation)
+
+    def test_regular_course_explains_its_main_entrance(self):
+        explanation = self.explanation_text(
+            self.world.explain_rule("Whomp's Fortress", CollectionState(self.multiworld)))
+
+        self.assertIn("Whomp's Fortress entrances:", explanation)
+        self.assertIn("Whomp's Fortress is at the Whomp's Fortress painting", explanation)
+
+    def test_non_course_names_use_universal_trackers_normal_explanation(self):
+        self.assertIsNone(self.world.explain_rule("Castle Lobby", CollectionState(self.multiworld)))
 
 
 class CoinSourceExplanationTest(SM64TestBase):

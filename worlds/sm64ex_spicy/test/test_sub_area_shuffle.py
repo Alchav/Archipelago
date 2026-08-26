@@ -1,3 +1,4 @@
+from BaseClasses import CollectionState
 from test.general import setup_solo_multiworld
 from worlds.AutoWorld import call_all
 
@@ -93,6 +94,16 @@ class MixedSubAreaShuffleTest(SM64TestBase):
         self.assertEqual(slot_data["AreaConnections"], self.world.area_connections)
         self.assertNotIn("SubAreaConnections", slot_data)
         self.assertEqual(slot_data["SubAreaRando"], self.world.sub_area_slot_data)
+
+    def test_course_entrance_explanation_handles_mixed_sources(self):
+        messages = self.world.explain_rule(
+            "Shifting Sand Land", CollectionState(self.multiworld))
+        explanation = "".join(part.get("text", "") for part in messages)
+
+        self.assertIn("Shifting Sand Land entrances:", explanation)
+        self.assertIn("Shifting Sand Land", explanation)
+        self.assertIn("the lower Shifting Sand Land pyramid", explanation)
+        self.assertIn("the upper Shifting Sand Land pyramid", explanation)
 
     def test_spoiler_uses_the_authoritative_map_and_friendly_names(self):
         self.assertEqual(

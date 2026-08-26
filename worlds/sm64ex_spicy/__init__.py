@@ -391,6 +391,87 @@ class SM64World(World):
             return cls.get_normal_entrance_name(source)
         return SUB_AREA_SOURCE_NAMES[source]
 
+    def explain_rule(self, name: str, state: CollectionState):
+        def destination_region_name(destination: int | str) -> str:
+            if isinstance(destination, int):
+                entrance_name = self.get_normal_entrance_name(destination)
+                return sm64_entrance_to_region.get(entrance_name, entrance_name)
+            return sub_area_destination_name(destination)
+
+        def destination_course_name(destination: int | str) -> str:
+            region_name = destination_region_name(destination)
+            for course_name in ("Wet-Dry World", "Tick Tock Clock", "Tiny-Huge Island"):
+                if region_name.startswith(course_name):
+                    return course_name
+            return region_name.split(" - ", 1)[0]
+
+        connections = list(self.area_connections.items())
+        configured_sources = {source for source, _destination in connections}
+        for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()):
+            if source.key not in configured_sources:
+                connections.append((source.key, source.vanilla_destination))
+        if self.options.sub_area_shuffle.value == self.options.sub_area_shuffle.option_mixed_plus_castle_returns:
+            for source in CASTLE_RETURN_SOURCES.values():
+                if source.key not in configured_sources:
+                    connections.append((source.key, source.vanilla_destination))
+
+        course_connections = [
+            (source, destination) for source, destination in connections
+            if destination_course_name(destination) == name
+        ]
+        if not course_connections:
+            return None
+
+        messages = [{"type": "text", "text": f"{name} entrances:"}]
+        course_connections.sort(key=lambda connection: (
+            not isinstance(connection[1], int),
+            self.get_entrance_destination_description(connection[1]),
+        ))
+        for source_id, destination_id in course_connections:
+            destination_name = self.get_entrance_destination_description(destination_id)
+            if isinstance(source_id, str):
+                physical_source = next(
+                    table[source_id] for table in (SUB_AREA_SOURCES, RETURN_SOURCES, CASTLE_RETURN_SOURCES)
+                    if source_id in table
+                )
+                connection_id = physical_source.source_id
+            else:
+                physical_source = sub_area_source_by_id(source_id)
+                connection_id = source_id
+
+            entrance = self.randomized_entrance_connections.get(connection_id)
+            if entrance is None and physical_source is not None:
+                entrance = self.multiworld.get_entrance(SUB_AREA_SOURCE_NAMES[physical_source.key], self.player)
+            if entrance is None or entrance.connected_region is None:
+                messages.append({
+                    "type": "text",
+                    "text": f"\n{destination_name}: entrance not discovered.",
+                })
+                continue
+
+            if physical_source is not None:
+                source_name = SUB_AREA_SOURCE_DESCRIPTIONS[physical_source.key]
+            else:
+                source_name = sm64_entrance_source_descriptions[source_id]
+
+            reachable = entrance.can_reach(state)
+            messages.extend(({
+                "type": "text",
+                "text": f"\n{destination_name} is at {source_name}: ",
+            }, {
+                "type": "color",
+                "color": "green" if reachable else "salmon",
+                "text": "reachable" if reachable else "not reachable",
+            }))
+            if hasattr(entrance.access_rule, "explain_json"):
+                explanation = entrance.access_rule.explain_json(state)
+                plain_text = "".join(part.get("text", "") for part in explanation).strip()
+                if plain_text not in {"", "True", "False"}:
+                    messages.append({"type": "text", "text": "\n  Requirements: "})
+                    messages.extend(explanation)
+
+        return messages
+
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
         if not self.using_slot_coin_count_check_locations:
