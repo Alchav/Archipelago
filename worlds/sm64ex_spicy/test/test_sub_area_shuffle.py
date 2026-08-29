@@ -3,7 +3,8 @@ from test.general import setup_solo_multiworld
 from worlds.AutoWorld import call_all
 
 from .. import Options, SM64World
-from ..Regions import SM64Levels, sm64_level_to_entrances
+from ..Regions import SM64Levels, SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, \
+    sm64_level_to_entrances
 from ..SubAreas import CASTLE_RETURN_SOURCES, OUTGOING_SOURCES_BY_DESTINATION, RETURN_DESTINATIONS, \
     RETURN_SOURCES, SUB_AREA_SOURCES, SUB_AREA_SOURCE_NAMES, normal_source_id, sub_area_source_by_id
 from .bases import SM64TestBase
@@ -29,6 +30,11 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
         self.assertEqual(destination.region, "Cool, Cool Mountain - Slide Exit")
         self.assertEqual(destination.warp_arg, 6)
         self.assertEqual((destination.packed >> 28) & 0x0F, 6)
+
+    def test_sl_igloo_exit_reaches_the_igloo_entrance_region(self):
+        destination = RETURN_DESTINATIONS["sl_main"]
+        self.assertEqual(destination.region, "Snowman's Land - Igloo Entrance")
+        self.assertEqual(destination.node, 0x0B)
 
     def test_slip_slidin_away_is_at_the_slide_exit(self):
         location = self.multiworld.get_location(
@@ -115,8 +121,7 @@ class MixedSubAreaShuffleTest(SM64TestBase):
             source_key = physical_source.key if physical_source else source_id
             source_name = (
                 SUB_AREA_SOURCE_NAMES[source_key] if physical_source else
-                ("Bowser in the Sky" if source_id == int(SM64Levels.BOWSER_IN_THE_SKY)
-                 else sm64_level_to_entrances[source_id]) + " Entrance"
+                self.world.get_normal_entrance_source_name(source_id)
             )
             spoiler_entry = self.multiworld.spoiler.entrances[(source_name, "entrance", 1)]
             self.assertEqual(
@@ -126,6 +131,29 @@ class MixedSubAreaShuffleTest(SM64TestBase):
             )
             self.assertNotIn("thi_red_cave_exit", spoiler_entry["entrance"])
             self.assertNotIn("thi_red_cave_exit", spoiler_entry["exit"])
+
+    def test_user_facing_entrance_names(self):
+        expected_normal_names = {
+            int(SM64Levels.TINY_HUGE_ISLAND_TINY): "Tiny Island Entrance",
+            int(SM64Levels.TINY_HUGE_ISLAND_HUGE): "Huge Island Entrance",
+            SM64_TTC_STOPPED: "Tick Tock Clock 12 O'Clock Entrance",
+            SM64_TTC_SLOW: "Tick Tock Clock 3 O'Clock Entrance",
+            SM64_TTC_RANDOM: "Tick Tock Clock 6 O'Clock Entrance",
+            SM64_TTC_FAST: "Tick Tock Clock 9 O'Clock Entrance",
+        }
+        for source_id, expected_name in expected_normal_names.items():
+            with self.subTest(source_id=source_id):
+                self.assertEqual(
+                    self.world.get_normal_entrance_source_name(source_id), expected_name)
+
+        self.assertEqual(
+            SUB_AREA_SOURCE_NAMES["jrb_ship"],
+            "Jolly Roger Bay - Sunken Ship Entrance",
+        )
+        self.assertEqual(
+            SUB_AREA_SOURCE_NAMES["hmc_cotmc"],
+            "Hazy Maze Cave - Cavern of the Metal Cap Entrance",
+        )
 
     def test_ut_regeneration_restores_sub_area_map(self):
         slot_data = self.world.fill_slot_data()

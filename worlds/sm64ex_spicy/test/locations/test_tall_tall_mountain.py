@@ -38,6 +38,22 @@ class TestTallTallMountainLocations(SM64TestBase):
     run_default_tests = False
     options = TTM_OPTIONS
 
+    def test_mysterious_mountainside_is_at_the_slide_exit(self):
+        location = self.multiworld.get_location(
+            "Tall, Tall Mountain - Mysterious Mountainside", self.player)
+        self.assertEqual(
+            location.parent_region.name,
+            "Tall, Tall Mountain - Slide Exit Alcove",
+        )
+        self.assertTrue(any(
+            entrance.connected_region.name == "Tall, Tall Mountain"
+            for entrance in location.parent_region.exits
+        ))
+
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Mysterious Mountainside", True, []],
+        ], starting_regions=["Tall, Tall Mountain - Slide Exit Alcove"])
+
     def test_locations(self):
         upper = MIDDLE + ["Triple Jump", "Ledge Grab"]
         top = upper + ["Long Jump"]

@@ -112,6 +112,15 @@ sm64_entrances_to_level["Wet-Dry World"] = SM64_WDW_LOW
 sm64_entrances_to_level["Tick Tock Clock"] = SM64_TTC_STOPPED
 sm64_level_to_entrances = {**sm64_level_to_paintings, **sm64_level_to_secrets }
 
+sm64_entrance_source_names = {
+    SM64Levels.TINY_HUGE_ISLAND_TINY: "Tiny Island Entrance",
+    SM64Levels.TINY_HUGE_ISLAND_HUGE: "Huge Island Entrance",
+    SM64_TTC_STOPPED: "Tick Tock Clock 12 O'Clock Entrance",
+    SM64_TTC_SLOW: "Tick Tock Clock 3 O'Clock Entrance",
+    SM64_TTC_RANDOM: "Tick Tock Clock 6 O'Clock Entrance",
+    SM64_TTC_FAST: "Tick Tock Clock 9 O'Clock Entrance",
+}
+
 # Stable ordering shared with sm64ex for the discovered-entrance Data Storage
 # bitset. Bowser in the Sky is only shuffled by mixed sub-area shuffle, but its
 # bit remains reserved between courses and the other secret stages.
@@ -197,6 +206,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     multiworld.regions.append(castle_grounds)
     castle_lobby = create_region("Castle Lobby", player, multiworld)
     create_locs(castle_lobby, "Castle - Jolly Roger Bay Lobby 1-Up")
+    create_region("Castle Courtyard", player, multiworld)
     castle_roof = create_subregion(castle_grounds, "Castle - Roof",
                                    "Castle - Yoshi",
                                    "Castle - Roof Back 1-Up",
@@ -371,14 +381,14 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                         "Lethal Lava Land - Northeast Brown Platform 1-Up",
                         "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up",
                         "Lethal Lava Land - Northwest Curve 1-Up",
+                        "Lethal Lava Land - Central Gray Crescent 1-Up",
+                        "Lethal Lava Land - Volcano Brown Platform 1-Up",
                         "Lethal Lava Land - Wing Cap Block",
                         "Lethal Lava Land - Koopa Shell Block")
     lll_volcano_entrance = create_region("Lethal Lava Land - Volcano Entrance", player, multiworld)
     lll_volcano = create_region("Lethal Lava Land - Volcano", player, multiworld)
     create_locs(lll_volcano,
-                "Lethal Lava Land - Volcano Flamethrower 1-Up",
-                "Lethal Lava Land - Central Gray Crescent 1-Up",
-                "Lethal Lava Land - Volcano Brown Platform 1-Up")
+                "Lethal Lava Land - Volcano Flamethrower 1-Up")
     lll_hot_foot_ledge = create_subregion(
         lll_volcano, "Lethal Lava Land - Hot-Foot-It Ledge",
         "Lethal Lava Land - Hot-Foot-It into the Volcano")
@@ -594,15 +604,20 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                  "Tall, Tall Mountain - Breathtaking View from Bridge",
                                  "Tall, Tall Mountain - Upper Monty Moles")
     ttm_top = create_subregion(ttm_upper, "Tall, Tall Mountain - Top", "Tall, Tall Mountain - Scale the Mountain", "Tall, Tall Mountain - Mystery of the Monkey Cage",
-                                                       "Tall, Tall Mountain - Mysterious Mountainside",
                                                        "Tall, Tall Mountain - Vine Platform Butterfly 1-Up")
+    ttm_mysterious_mountainside = create_region(
+        "Tall, Tall Mountain - Slide Exit Alcove", player, multiworld)
+    create_locs(ttm_mysterious_mountainside, "Tall, Tall Mountain - Mysterious Mountainside")
+    ttm_mysterious_mountainside.connect(
+        regTTM, name="Tall, Tall Mountain - Slide Exit Alcove to Start")
     ttm_slide = create_region("Tall, Tall Mountain - Secret Slide", player, multiworld)
     create_locs(ttm_slide,
                                                        "Tall, Tall Mountain - Slide Start Room Corners 1-Up",
                                                        "Tall, Tall Mountain - Slide Entry Ledge 1-Up",
                                                        "Tall, Tall Mountain - Slide First 1-Up",
                                                        "Tall, Tall Mountain - Slide Second 1-Up")
-    regTTM.subregions = [ttm_middle, ttm_upper, ttm_top, ttm_slide]
+    regTTM.subregions = [
+        ttm_middle, ttm_upper, ttm_top, ttm_slide, ttm_mysterious_mountainside]
     ttm_coins = create_region("Tall, Tall Mountain - Coins", player, multiworld)
     create_locs(ttm_coins, "Tall, Tall Mountain - Coins Star")
     regTTM.connect(ttm_coins, name="Tall, Tall Mountain - Main Area to Coins")

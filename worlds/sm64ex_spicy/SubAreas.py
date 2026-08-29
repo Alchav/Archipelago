@@ -113,8 +113,10 @@ SUB_AREA_DESTINATIONS: dict[str, SubAreaDestination] = {
 RETURN_DESTINATIONS: dict[str, SubAreaDestination] = {
     "ccm_cabin": SubAreaDestination(
         "ccm_cabin", "Cool, Cool Mountain - Slide Exit", 5, 1, 0x14, warp_arg=6),
-    "sl_main": SubAreaDestination("sl_main", "Snowman's Land", 10, 1, 0x0B),
-    "ttm_main": SubAreaDestination("ttm_main", "Tall, Tall Mountain", 36, 1, 0x14),
+    "sl_main": SubAreaDestination(
+        "sl_main", "Snowman's Land - Igloo Entrance", 10, 1, 0x0B),
+    "ttm_main": SubAreaDestination(
+        "ttm_main", "Tall, Tall Mountain - Slide Exit Alcove", 36, 1, 0x14),
     "thi_huge": SubAreaDestination("thi_huge", "Tiny-Huge Island (Huge)", 13, 1, 0x0B),
 }
 
@@ -138,8 +140,8 @@ SUB_AREA_SOURCE_DESCRIPTIONS = {
     "sl_igloo": "the Snowman's Land igloo entrance",
     "ttm_slide": "the Tall, Tall Mountain slide entrance",
     "thi_red_cave": "the Tiny-Huge Island Red Coin Cave entrance",
-    "hmc_cotmc": "the underground-lake waterfall in Hazy Maze Cave",
-    "jrb_ship": "the opening in the Jolly Roger Bay sunken ship",
+    "hmc_cotmc": "the Cavern of the Metal Cap entrance in Hazy Maze Cave",
+    "jrb_ship": "the entrance to the Jolly Roger Bay sunken ship",
     "lll_volcano": "the Lethal Lava Land volcano entrance",
     "ssl_pyramid_side": "the side entrance of the Shifting Sand Land pyramid",
     "ssl_pyramid_top": "the top entrance of the Shifting Sand Land pyramid",
@@ -164,8 +166,8 @@ SUB_AREA_SOURCE_NAMES = {
     "sl_igloo": "Snowman's Land - Igloo Entrance",
     "ttm_slide": "Tall, Tall Mountain - Secret Slide Entrance",
     "thi_red_cave": "Tiny-Huge Island - Red Coin Cave Entrance",
-    "hmc_cotmc": "Hazy Maze Cave - Cavern of the Metal Cap Waterfall",
-    "jrb_ship": "Jolly Roger Bay - Sunken Ship Opening",
+    "hmc_cotmc": "Hazy Maze Cave - Cavern of the Metal Cap Entrance",
+    "jrb_ship": "Jolly Roger Bay - Sunken Ship Entrance",
     "lll_volcano": "Lethal Lava Land - Volcano Entrance",
     "ssl_pyramid_side": "Shifting Sand Land - Pyramid Side Entrance",
     "ssl_pyramid_top": "Shifting Sand Land - Pyramid Top Entrance",
@@ -200,8 +202,8 @@ SUB_AREA_DESTINATION_DESCRIPTIONS = {
     "bowser_2": "the Bowser in the Fire Sea arena",
     "bowser_3": "the Bowser in the Sky arena",
     "ccm_cabin": "Cool, Cool Mountain outside the slide exit",
-    "sl_main": "the main Snowman's Land area",
-    "ttm_main": "the main Tall, Tall Mountain area",
+    "sl_main": "the Snowman's Land igloo entrance",
+    "ttm_main": "the Mysterious Mountainside area in Tall, Tall Mountain",
     "thi_huge": "the main Huge Island area",
     "castle_lobby_pss": "the Castle Lobby",
     "castle_lobby_totwc": "the Castle Lobby",

@@ -22,6 +22,16 @@ from ..RuleBuilder import CanCollectCoinOutput
 
 
 class CoinCheckCatalogTest(unittest.TestCase):
+    def test_bob_bob_omb_coin_names_are_uniform(self):
+        course_name = "Bob-omb Battlefield"
+        self.assertEqual(
+            tuple(
+                coin_output_by_id[CoinOutputID(course_name, "main_bob_ombs", index)].location_name
+                for index in range(1, 13)
+            ),
+            tuple(f"{course_name} - Bob-omb {index} Coin" for index in range(1, 13)),
+        )
+
     def test_bob_wooden_post_names_distinguish_chain_chomp_post(self):
         course_name = "Bob-omb Battlefield"
         expected_names = tuple(
@@ -772,7 +782,7 @@ class CoinCheckCatalogTest(unittest.TestCase):
         self.assertEqual(
             tuple(output.location_name.removeprefix(prefix)
                   for output in sources["bitdw_goombas"].outputs),
-            tuple(f"Goomba {index} Coin" for index in (5, 4, 3, 1, 2, 6)),
+            tuple(f"Goomba {index} Coin" for index in (5, 6, 3, 1, 2, 4)),
         )
         self.assertEqual(
             tuple(output.location_name.removeprefix(prefix)
@@ -839,6 +849,11 @@ class CoinCheckCatalogTest(unittest.TestCase):
         self.assertEqual(
             tuple(output.location_name.removeprefix(prefix)
                   for output in sources["bitfs_wire_grid_ring"].outputs),
+            tuple(f"Coin Ring by the First Bully Coin {index}" for index in range(1, 9)),
+        )
+        self.assertEqual(
+            tuple(output.location_name.removeprefix(prefix)
+                  for output in sources["bitfs_first_ring"].outputs),
             tuple(f"Wire Platform Coin Ring Coin {index}" for index in range(1, 9)),
         )
         self.assertEqual(
@@ -1257,9 +1272,9 @@ class BowserInTheFireSeaCoinChecksAccessTest(SM64TestBase):
         three_coin_block = ["Bowser in the Fire Sea - 3-Coin Block"]
         climb = ["Climb"]
         self.run_location_tests([
-            ["Bowser in the Fire Sea - Wire Platform Coin Ring Coin 1", True, rings],
-            ["Bowser in the Fire Sea - Coin Ring by the First Bully Coin 1", False, rings],
-            ["Bowser in the Fire Sea - Coin Ring by the First Bully Coin 1", True, rings + climb],
+            ["Bowser in the Fire Sea - Coin Ring by the First Bully Coin 1", True, rings],
+            ["Bowser in the Fire Sea - Wire Platform Coin Ring Coin 1", False, rings],
+            ["Bowser in the Fire Sea - Wire Platform Coin Ring Coin 1", True, rings + climb],
             ["Bowser in the Fire Sea - Wire Platform Red Coin", True, red_coins],
             ["Bowser in the Fire Sea - Below the Lift Red Coin", False, red_coins],
             ["Bowser in the Fire Sea - Below the Lift Red Coin", True, red_coins + climb],
@@ -1452,32 +1467,33 @@ class LethalLavaLandCrossLavaCoinChecksAccessTest(SM64TestBase):
         "cap_items": "per_level",
     }
 
-    def test_central_crescent_and_northeast_platform_require_lava_crossing(self):
-        locations = (
-            "Lethal Lava Land - Central Gray Crescent Coin 1",
-            "Lethal Lava Land - Northeast Brown Platform Coin Line Coin 1",
+    def test_central_crescent_routes(self):
+        location_name = "Lethal Lava Land - Central Gray Crescent Coin 1"
+        coins = ["Lethal Lava Land - Single Yellow Coins"]
+        self.run_location_tests(
+            [
+                [location_name, False, coins],
+                [location_name, True, coins + ["Lethal Lava Land - Koopa Shell"]],
+                [location_name, True,
+                 coins + ["Lethal Lava Land - Wing Cap", "Triple Jump"]],
+                [location_name, True, coins + ["Long Jump"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
         )
-        for location_name in locations:
-            self.run_location_tests(
-                [
-                    [location_name, False, [
-                        "Lethal Lava Land - Single Yellow Coins",
-                        "Lethal Lava Land - Horizontal Coin Lines",
-                    ]],
-                    [location_name, True, [
-                        "Lethal Lava Land - Single Yellow Coins",
-                        "Lethal Lava Land - Horizontal Coin Lines",
-                        "Lethal Lava Land - Koopa Shell",
-                    ]],
-                    [location_name, True, [
-                        "Lethal Lava Land - Single Yellow Coins",
-                        "Lethal Lava Land - Horizontal Coin Lines",
-                        "Lethal Lava Land - Wing Cap",
-                        "Triple Jump",
-                    ]],
-                ],
-                starting_regions=("Lethal Lava Land",),
-            )
+
+    def test_northeast_platform_routes(self):
+        location_name = "Lethal Lava Land - Northeast Brown Platform Coin Line Coin 1"
+        coin_line = ["Lethal Lava Land - Horizontal Coin Lines"]
+        self.run_location_tests(
+            [
+                [location_name, False, coin_line],
+                [location_name, True, coin_line + ["Lethal Lava Land - Koopa Shell"]],
+                [location_name, True,
+                 coin_line + ["Lethal Lava Land - Wing Cap", "Triple Jump"]],
+                [location_name, False, coin_line + ["Long Jump"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
+        )
 
     def test_mr_i_island_coin_ring_routes(self):
         location_name = "Lethal Lava Land - Mr. I Island Coin Ring Coin 1"
@@ -1514,6 +1530,57 @@ class LethalLavaLandLavaDamageBoostingHatCoinChecksAccessTest(SM64TestBase):
             ],
             starting_regions=("Lethal Lava Land",),
         )
+
+    def test_central_crescent_lava_damage_boosting_requires_hat(self):
+        location_name = "Lethal Lava Land - Central Gray Crescent Coin 1"
+        coins = ["Lethal Lava Land - Single Yellow Coins"]
+        self.run_location_tests(
+            [
+                [location_name, False, coins],
+                [location_name, True, coins + ["Mario's Hat"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
+        )
+
+
+class TinyHugeIslandRedCoinCaveMovementCoinChecksAccessTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_checks": 100,
+        "coin_object_unlocks": "per_level",
+        "level_unlocks": "disabled",
+        "triple_jump": "global",
+        "side_flip": "global",
+        "wall_kick": "global",
+    }
+
+    def test_red_coin_7_requires_movement(self):
+        location_name = "Tiny-Huge Island - Red Coin 7"
+        red_coins = ["Tiny-Huge Island - Red Coins"]
+        self.run_location_tests(
+            [
+                [location_name, False, red_coins],
+                [location_name, True, red_coins + ["Triple Jump"]],
+                [location_name, True, red_coins + ["Wall Kick"]],
+                [location_name, True, red_coins + ["Side Flip"]],
+            ],
+            starting_regions=("Tiny-Huge Island - Red Coin Cave",),
+        )
+
+    def test_blue_coin_block_coins_require_movement(self):
+        blue_coins = ["Tiny-Huge Island - Blue Coin Block", "Ground Pound"]
+        for index in range(1, 3):
+            location_name = (
+                f"Tiny-Huge Island - Blue Coins in the Red Coins Area Blue Coin {index}")
+            self.run_location_tests(
+                [
+                    [location_name, False, blue_coins],
+                    [location_name, True, blue_coins + ["Triple Jump"]],
+                    [location_name, True, blue_coins + ["Wall Kick"]],
+                    [location_name, True, blue_coins + ["Side Flip"]],
+                ],
+                starting_regions=("Tiny-Huge Island - Red Coin Cave",),
+            )
 
 
 class CastleCoinChecksAccessTest(SM64TestBase):
@@ -1557,6 +1624,10 @@ class CastleCoinChecksAccessTest(SM64TestBase):
 
     def test_castle_boos_require_castle_or_global_boo_item(self):
         courtyard_boo = "Castle - Courtyard Boo 1 Coin"
+        self.assertEqual(
+            self.multiworld.get_location(courtyard_boo, self.player).parent_region.name,
+            "Castle Courtyard",
+        )
         self.assertFalse(self.can_reach_location(courtyard_boo))
         self.collect_by_name(["Castle - Boos"])
         self.assertTrue(self.can_reach_location(courtyard_boo))

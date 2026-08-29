@@ -31,7 +31,7 @@ from .Signs import fallback_hints, sign_data, sign_data_by_location_name
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels, \
     get_shuffled_entrance_ids, sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
-    sm64_entrance_destination_descriptions
+    sm64_entrance_destination_descriptions, sm64_entrance_source_names
 from .SubAreas import CASTLE_RETURN_SOURCES, RETURN_SOURCES, SUB_AREA_SOURCES, \
     SUB_AREA_DESTINATION_DESCRIPTIONS, SUB_AREA_SOURCE_DESCRIPTIONS, SUB_AREA_SOURCE_NAMES, \
     sub_area_destination_name, sub_area_source_by_id
@@ -386,9 +386,18 @@ class SM64World(World):
         return sm64_level_to_entrances[entrance_id]
 
     @classmethod
+    def get_normal_entrance_source_name(cls, entrance_id: int) -> str:
+        if entrance_id == int(SM64Levels.BOWSER_IN_THE_SKY):
+            return "Bowser in the Sky"
+        source_name = sm64_entrance_source_names.get(entrance_id)
+        if source_name is not None:
+            return source_name
+        return f"{cls.get_normal_entrance_name(entrance_id)} Entrance"
+
+    @classmethod
     def get_connection_source_name(cls, source: int | str) -> str:
         if isinstance(source, int):
-            return cls.get_normal_entrance_name(source)
+            return cls.get_normal_entrance_source_name(source)
         return SUB_AREA_SOURCE_NAMES[source]
 
     def explain_rule(self, name: str, state: CollectionState):
@@ -488,7 +497,7 @@ class SM64World(World):
         coin_check_source_region_names = {
             ("Castle", "castle_grounds_bridge_coins"): "Castle Grounds",
             ("Castle", "castle_lobby_coins"): "Castle Lobby",
-            ("Castle", "castle_courtyard_boos"): "Castle Lobby",
+            ("Castle", "castle_courtyard_boos"): "Castle Courtyard",
         }
         for location_name in self.coin_count_check_location_names:
             region_name = location_name.rsplit(" - ", 1)[0]
@@ -515,8 +524,7 @@ class SM64World(World):
                 destination = self.area_connections[source]
                 self.multiworld.spoiler.set_entrance(
                     SUB_AREA_SOURCE_NAMES[source] if physical_source else
-                    ("Bowser in the Sky" if source_id == int(SM64Levels.BOWSER_IN_THE_SKY)
-                     else sm64_level_to_entrances[source_id]) + " Entrance",
+                    self.get_normal_entrance_source_name(source_id),
                     self.get_entrance_destination_name(destination),
                     'entrance', self.player)
 
@@ -1345,7 +1353,7 @@ class SM64World(World):
                         self.multiworld.get_region("Tiny-Huge Island (Tiny)", self.player),
                     ]
                 else:
-                    entrance_name = self.get_normal_entrance_name(entrance)
+                    entrance_name = self.get_normal_entrance_source_name(entrance)
                     regions = [self.multiworld.get_region(region_name, self.player)]
                 for region in regions[:]:
                     regions += region.subregions

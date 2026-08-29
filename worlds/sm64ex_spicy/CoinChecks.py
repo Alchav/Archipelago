@@ -156,6 +156,7 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "huge_top_wooden_plank_line": "Tiny-Huge Island - Huge Top",
     "huge_top_chuckya": "Tiny-Huge Island - Huge Top",
     "red_area_red_coins": "Tiny-Huge Island - Red Coin Cave",
+    "red_area_movement_red_coin": "Tiny-Huge Island - Red Coin Cave",
     "red_area_wall_kick_red_coin": "Tiny-Huge Island - Red Coin Cave",
     "red_area_blue_coins": "Tiny-Huge Island - Red Coin Cave",
     "red_area_giant_goombas_yellow": "Tiny-Huge Island - Red Coins Area",
@@ -336,6 +337,11 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
     },
     **{
         ("Bowser in the Fire Sea", "bitfs_wire_grid_ring", index):
+            f"Coin Ring by the First Bully Coin {index}"
+        for index in range(1, 9)
+    },
+    **{
+        ("Bowser in the Fire Sea", "bitfs_first_ring", index):
             f"Wire Platform Coin Ring Coin {index}"
         for index in range(1, 9)
     },
@@ -361,7 +367,7 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
     },
     **{
         ("Bowser in the Dark World", "bitdw_goombas", index): f"Goomba {display_index} Coin"
-        for index, display_index in enumerate((5, 4, 3, 1, 2, 6), 1)
+        for index, display_index in enumerate((5, 6, 3, 1, 2, 4), 1)
     },
     **{
         ("Bowser in the Dark World", "bitdw_single_coins_before_slope", index): name
@@ -400,8 +406,27 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
             f"Bubble Cannon Coin Line Coin {index - 5}"
         for index in range(6, 11)
     },
-    ("Bob-omb Battlefield", "main_bob_ombs", 1): "Switch Tunnel Bob-omb Coin",
-    ("Bob-omb Battlefield", "main_bob_ombs", 12): "Bubble Cannon Bob-omb Coin",
+    **{
+        ("Bob-omb Battlefield", "main_bob_ombs", index): f"Bob-omb {index} Coin"
+        for index in range(1, 13)
+    },
+    **{
+        ("Shifting Sand Land", "ssl_goombas", index): name
+        for index, name in {
+            1: "Pyramid Pole Goomba 2 Coin",
+            2: "Pyramid Right Side Goomba 4 Coin",
+            3: "Pyramid Left Side Goomba 1 Coin",
+            4: "Pyramid Pole Goomba 1 Coin",
+            5: "Pyramid Wire Grid Goomba Coin",
+            6: "Pyramid Left Side Goomba 2 Coin",
+            7: "Pyramid Right Side Goomba 3 Coin",
+            8: "Pyramid Right Side Goomba 1 Coin",
+            9: "Pyramid Right Side Goomba 2 Coin",
+            10: "Stone Structure Goomba 3 Coin",
+            11: "Stone Structure Goomba 2 Coin",
+            12: "Stone Structure Goomba 1 Coin",
+        }.items()
+    },
     **{
         ("Castle", "castle_courtyard_boos", index): f"Courtyard Boo {index} Coin"
         for index in range(1, 10)
@@ -612,7 +637,9 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
         7: ("ttm_upper_red_coins",), 8: ("ttm_upper_red_coins",),
     },
     "Tiny-Huge Island": {
-        **{i: ("red_area_red_coins",) for i in range(1, 8)}, 8: ("red_area_wall_kick_red_coin",),
+        **{i: ("red_area_red_coins",) for i in range(1, 7)},
+        7: ("red_area_movement_red_coin",),
+        8: ("red_area_wall_kick_red_coin",),
     },
     "Tick Tock Clock": {
         **{i: ("ttc_lower_red_coins",) for i in range(1, 6)},
@@ -709,7 +736,13 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
         *_repeat_names("Checkerboard Platform Ride Red Coin", 2),
     ),
     "Lethal Lava Land": _repeat_names("Bowser Puzzle Red Coin", 8),
-    "Shifting Sand Land": (*_repeat_names("Low Red Coin", 4), *_repeat_names("High Red Coin", 4)),
+    "Shifting Sand Land": (
+        "Tox Box Maze Red Coin",
+        "Oasis Red Coin",
+        "Behind Start Red Coin",
+        "Stone Structure Box Red Coin",
+        *_repeat_names("High Red Coin", 4),
+    ),
     "Dire, Dire Docks": ("First Red Coin", *_repeat_names("Pole Red Coin", 7)),
     "Snowman's Land": (
         "Starting Area Red Coin 2",

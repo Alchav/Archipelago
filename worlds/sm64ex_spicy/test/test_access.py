@@ -757,6 +757,13 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Castle - Toad (Third Floor)"))
 
     def test_castle_feature_regions(self):
+        self.assertTrue(self.can_reach_region("Castle Courtyard"))
+        self.assertEqual(
+            self.multiworld.get_entrance(
+                "Castle Courtyard -> Big Boo's Haunt", self.player
+            ).parent_region.name,
+            "Castle Courtyard",
+        )
         self.assertFalse(self.can_reach_region("Big Boo's Haunt"))
         self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
         self.assertTrue(self.can_reach_region("Big Boo's Haunt"))
@@ -4690,6 +4697,11 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 21))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 22))
 
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+        self.remove(self.get_item_by_name("Long Jump"))
+
         self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
@@ -6948,9 +6960,6 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Bob-omb Buddies"))
         self.collect([self.get_item_by_name("Ledge Grab"), self.get_item_by_name("Triple Jump")])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Highest Water"))
-        self.assertFalse(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
-
-        self.collect(self.get_item_by_name("Backflip"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Bob-omb Buddy"))
 
     def test_bob_omb_buddy_high_water_requires_jump_route(self):

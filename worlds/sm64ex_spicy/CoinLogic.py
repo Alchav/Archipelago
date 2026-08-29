@@ -1122,6 +1122,7 @@ def lethal_lava_land_coins(
             and Rules.has_action(state, player, "Triple Jump", level_name)
         )
     )
+    can_reach_central_gray_crescent = can_cross_lava or has_long_jump
     can_reach_red_coins = Rules.can_reach_lethal_lava_land_red_coins(
         state, player, target_name)
     has_healing_coins = Rules.has_lethal_lava_land_healing_coins(state, player)
@@ -1205,7 +1206,7 @@ def lethal_lava_land_coins(
         "lll_southeast_grey_ramp_coins",
         "Central Gray Crescent Coins",
         4,
-        has_single_yellow_coins and can_cross_lava,
+        has_single_yellow_coins and can_reach_central_gray_crescent,
     )
     builder.add(
         "lll_second_mr_i_coin_ring",
@@ -2615,6 +2616,7 @@ def tiny_huge_island_coin_evaluation(
     has_long_jump = rules.has_action(state, player, "Long Jump", level_name)
     has_backflip = rules.has_action(state, player, "Backflip", level_name)
     has_side_flip = rules.has_action(state, player, "Side Flip", level_name)
+    has_wall_kick = rules.has_action(state, player, "Wall Kick", level_name)
     has_ledge_grab = rules.has_action(state, player, "Ledge Grab", level_name)
     has_dive = rules.has_action(state, player, "Dive", level_name)
     has_ground_pound = rules.has_action(state, player, "Ground Pound", level_name)
@@ -2887,24 +2889,31 @@ def tiny_huge_island_coin_evaluation(
         red_coin_cave_children = [
             _route_source(
                 "red_area_red_coins",
-                "Seven red coins in the Red Coin Cave",
-                14,
+                "Six initially reachable red coins in the Red Coin Cave",
+                12,
                 has_red_coins,
-                red_coin_ids=frozenset(range(1, 8)),
+                red_coin_ids=frozenset(range(1, 7)),
+            ),
+            _route_source(
+                "red_area_movement_red_coin",
+                "Red Coin 7 in the Red Coin Cave",
+                2,
+                has_red_coins and (has_triple_jump or has_wall_kick or has_side_flip),
+                red_coin_ids=frozenset({7}),
             ),
             _route_source(
                 "red_area_wall_kick_red_coin",
                 "Wall-kick red coin in the Red Coin Cave",
                 2,
-                has_red_coins and rules.has_action(
-                    state, player, "Wall Kick", level_name),
+                has_red_coins and has_wall_kick,
                 red_coin_ids=frozenset({8}),
             ),
             _route_source(
                 "red_area_blue_coins",
                 "Blue coins in the Red Coin Cave",
                 10,
-                has_ground_pound and has_blue_coin_block,
+                has_ground_pound and has_blue_coin_block
+                and (has_triple_jump or has_wall_kick or has_side_flip),
             ),
         ]
         red_coins_area_children[0].children.extend((
@@ -3783,7 +3792,7 @@ def bowser_in_the_fire_sea_coins(
         coin_source("bitfs_second_sinking_platform_line",
                 "Sinking Platform Coins",
                 5, has_horizontal_coin_lines),
-        coin_source("bitfs_wire_grid_ring", "Wire Platform Coin Ring",
+        coin_source("bitfs_wire_grid_ring", "Coin Ring by the First Bully",
                 8, has_horizontal_coin_rings),
         coin_source("bitfs_first_bully", "First Bully", 1, has_bullies),
         coin_source("bitfs_start_goombas", "Three Goombas", 3, has_goombas),
@@ -3806,7 +3815,7 @@ def bowser_in_the_fire_sea_coins(
                 "Coin line after the elevator",
                 5, has_horizontal_coin_lines),
         coin_source("bitfs_first_ring",
-                "Coin ring by the first Bully",
+                "Wire Platform Coin Ring",
                 8, has_horizontal_coin_rings),
         coin_source("bitfs_vertical_drop_line",
                 "Vertical coin line after the second block",
@@ -4400,7 +4409,7 @@ def _middle_requirement_specs():
         "lll_spinning_volcano_platform_coins",
     ), unlocks=(_unlock("Single Yellow Coins", LLL),))
     _add(LLL, "lll_southeast_grey_ramp_coins",
-         "LLL_KOOPA_SHELL | WC+TJ | logic_lava_damage_boosting",
+         "LLL_KOOPA_SHELL | WC+TJ | LJ | logic_lava_damage_boosting",
          (_unlock("Single Yellow Coins", LLL),))
     _add(LLL, (
         "lll_volcano_s_island_coins", "lll_volcano_second_ridge_coins",
@@ -4859,9 +4868,12 @@ def _late_requirement_specs():
          _unlock("Horizontal Coin Lines", THI))
     _add(THI, "thi_red_coin_cave", "{Tiny-Huge Island - Red Coin Cave}")
     _add(THI, "red_area_red_coins", "{Tiny-Huge Island - Red Coin Cave} & RED_COINS", _unlock("Red Coins", THI))
+    _add(THI, "red_area_movement_red_coin",
+         "{Tiny-Huge Island - Red Coin Cave} & RED_COINS & TJ/WK/SF", _unlock("Red Coins", THI))
     _add(THI, "red_area_wall_kick_red_coin", "{Tiny-Huge Island - Red Coin Cave} & RED_COINS & WK",
          _unlock("Red Coins", THI))
-    _add(THI, "red_area_blue_coins", "{Tiny-Huge Island - Red Coin Cave} & GP & BLUE_COIN_BLOCKS",
+    _add(THI, "red_area_blue_coins",
+         "{Tiny-Huge Island - Red Coin Cave} & GP & BLUE_COIN_BLOCKS & TJ/WK/SF",
          _unlock("Blue Coin Blocks", THI, "Blue Coin Block"))
     _add(THI, "thi_wiggler_cave", "{Tiny-Huge Island - Wiggler's Cave}")
     _add(THI, "wiggler_cave_coin_lines",
@@ -5257,7 +5269,7 @@ def _secrets_requirement_specs():
         (CASTLE, "castle_lobby_coins"): _spec(
             "Castle", "", ("Single Yellow Coins", "Castle - Single Yellow Coins")),
         (CASTLE, "castle_courtyard_boos"): _spec(
-            "Castle", "", ("Boos", "Castle - Boos")),
+            "Castle Courtyard", "", ("Boos", "Castle - Boos")),
     }
     return COIN_REQUIREMENT_SPECS
 

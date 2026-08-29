@@ -672,6 +672,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         return HasUnlock(item_name, item_name)
 
     connect_regions(multiworld, player, "Castle Grounds", "Castle Lobby")
+    connect_regions(multiworld, player, "Castle Lobby", "Castle Courtyard")
     connect_randomized_entrance("Castle Lobby", "Bob-omb Battlefield")
     connect_randomized_entrance("Castle Lobby", "Whomp's Fortress",
                                 rf.build_rule("", painting_lvl_name="Whomp's Fortress"))
@@ -679,7 +680,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                                 rf.build_rule("", painting_lvl_name="Jolly Roger Bay"))
     connect_randomized_entrance("Castle Lobby", "Cool, Cool Mountain",
                                 rf.build_rule("", painting_lvl_name="Cool, Cool Mountain"))
-    connect_randomized_entrance("Castle Lobby", "Big Boo's Haunt",
+    connect_randomized_entrance("Castle Courtyard", "Big Boo's Haunt",
                                 level_unlock_rule("Unlock Big Boo's Haunt"))
     connect_randomized_entrance("Castle Lobby", "The Princess's Secret Slide")
     connect_randomized_entrance("Castle Lobby", "The Secret Aquarium",
@@ -979,6 +980,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Lethal Lava Land - Northwest Curve 1-Up",
     ):
         rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_lava_damage_boosting")
+    rf.assign_rule(
+        "Lethal Lava Land - Central Gray Crescent 1-Up",
+        "LLL_KOOPA_SHELL | WC+TJ | LJ | logic_lava_damage_boosting")
+    rf.assign_rule(
+        "Lethal Lava Land - Volcano Brown Platform 1-Up",
+        "LLL_KOOPA_SHELL | TJ | LJ | logic_lava_damage_boosting")
     rf.assign_rule(
         "Lethal Lava Land - Hot-Foot-It Ledge",
         "CL | logic_lll_hot_foot_it_with_wall_kick | logic_lll_hot_foot_it_with_triple_jump | "

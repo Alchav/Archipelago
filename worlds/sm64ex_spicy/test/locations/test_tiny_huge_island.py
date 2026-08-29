@@ -185,6 +185,21 @@ class TestTinyHugeIslandShuffledSubAreaCoins(SM64TestBase):
         ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
 
 
+class TestTinyHugeIslandRedCoinCaveMovementCoinCount(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **THI_OPTIONS,
+        "tiny_huge_island_coin_star_requirement": 13,
+    }
+
+    def test_red_coin_7_requires_movement_for_coin_count(self):
+        red_coins = ["Tiny-Huge Island - Red Coins"]
+        self.run_location_tests([
+            ["Tiny-Huge Island - Coins Star", False, red_coins],
+            ["Tiny-Huge Island - Coins Star", True, red_coins + ["Side Flip"]],
+        ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
+
+
 class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):
     run_default_tests = False
     options = {
