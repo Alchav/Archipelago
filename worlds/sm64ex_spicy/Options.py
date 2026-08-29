@@ -292,7 +292,8 @@ class LevelUnlocks(Choice):
     Special Only - Shuffle level unlocks for Tower of the Wing Cap, Big Boo's Haunt, Bowser in the Fire Sea,
     and Vanish Cap Under the Moat.
 
-    Full - Also shuffle the course painting unlocks, Rainbow Ride, and Wing Mario Over the Rainbow.
+    Full - Also shuffle every course entrance, Rainbow Ride, Wing Mario Over the Rainbow, The Princess's Secret Slide,
+    The Secret Aquarium, and Cavern of the Metal Cap.
 
     A locked entrance will reject Mario. Entrance Randomization may change the level reached through that entrance.
     """
@@ -347,11 +348,11 @@ class LevelFeatures(Choice):
 
     Per Act Only - Shuffle only features that were tied to specific selected Stars in vanilla Super Mario 64.
 
-    Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, Purple
-    Switches, Treasure Chests, Warp Pipes, and horizontal and vertical wind use global items.
+    Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Features with global forms, including
+    platforms, switches, treasure chests, warp pipes, wind, freestanding Stars, Star Blocks, Koopa Shell Blocks,
+    Star Secrets, and Jet Streams, use global items.
 
-    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs,
-    Purple Switches, Treasure Chests, Warp Pipes, and horizontal and vertical wind use separate level-specific items.
+    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items using separate level-specific items.
 
     Both - Shuffle both global and level-specific items for features that support both forms.
     """
@@ -582,8 +583,8 @@ class EasyButterflies(Toggle):
 
 
 class TriggerSparkles(Toggle):
-    """Display sparkles at available invisible trigger locations, including Trigger 1-Ups, 1-Up butterflies, hidden
-    warps, and trigger-based stars such as Mario Wings to the Sky."""
+    """Display sparkles at available invisible trigger locations. Green marks Trigger 1-Ups, purple marks 1-Up
+    butterflies, blue marks warps, and yellow marks Star Secrets and the Shifting Sand Land pyramid triggers."""
     display_name = "Trigger Sparkles"
 
 

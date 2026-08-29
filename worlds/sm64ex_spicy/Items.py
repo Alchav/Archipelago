@@ -56,6 +56,12 @@ def tweesters_classification(options):
     return ItemClassification.trap
 
 
+def ddd_moat_exit_classification(options):
+    if options.sub_area_shuffle.value == options.sub_area_shuffle.option_mixed_plus_castle_returns:
+        return ItemClassification.progression
+    return ItemClassification.trap
+
+
 def marios_hat_classification(options):
     from .LogicTricks import get_enabled_logic_tricks
 
@@ -199,6 +205,11 @@ global_treasure_chest_item_names = ("Treasure Chests",)
 global_warp_pipe_item_names = ("Warp Pipes",)
 global_vertical_wind_item_names = ("Vertical Wind",)
 global_horizontal_wind_item_names = ("Horizontal Wind",)
+global_freestanding_star_item_names = ("Freestanding Stars",)
+global_star_block_item_names = ("Star Blocks",)
+global_koopa_shell_block_item_names = ("Koopa Shell Blocks",)
+global_star_secret_item_names = ("Star Secrets",)
+global_jet_stream_item_names = ("Jet Streams",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
@@ -209,6 +220,61 @@ global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Warp Pipes": SM64ItemData(sm64ex_base_id + 935),
     "Vertical Wind": SM64ItemData(sm64ex_base_id + 1102),
     "Horizontal Wind": SM64ItemData(sm64ex_base_id + 1106, trap),
+    "Freestanding Stars": SM64ItemData(sm64ex_base_id + 1115, progression_deprioritized),
+    "Star Blocks": SM64ItemData(sm64ex_base_id + 1116, progression_deprioritized),
+    "Koopa Shell Blocks": SM64ItemData(sm64ex_base_id + 1117),
+    "Star Secrets": SM64ItemData(sm64ex_base_id + 1118, progression_deprioritized),
+    "Jet Streams": SM64ItemData(sm64ex_base_id + 1147, progression_deprioritized),
+}
+
+freestanding_star_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-omb Battlefield - Freestanding Star": SM64ItemData(sm64ex_base_id + 1119, progression_deprioritized),
+    "Whomp's Fortress - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1120, progression_deprioritized),
+    "Jolly Roger Bay - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1121, progression_deprioritized),
+    "Cool, Cool Mountain - Freestanding Star": SM64ItemData(sm64ex_base_id + 1122, progression_deprioritized),
+    "Big Boo's Haunt - Freestanding Star": SM64ItemData(sm64ex_base_id + 1123, progression_deprioritized),
+    "Hazy Maze Cave - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1124, progression_deprioritized),
+    "Lethal Lava Land - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1125, progression_deprioritized),
+    "Shifting Sand Land - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1126, progression_deprioritized),
+    "Dire, Dire Docks - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1127, progression_deprioritized),
+    "Snowman's Land - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1128, progression_deprioritized),
+    "Wet-Dry World - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1129, progression_deprioritized),
+    "Tall, Tall Mountain - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1130, progression_deprioritized),
+    "Tick Tock Clock - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1131, progression_deprioritized),
+    "Rainbow Ride - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1132, progression_deprioritized),
+}
+
+star_block_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-omb Battlefield - Star Block": SM64ItemData(sm64ex_base_id + 1133, progression_deprioritized),
+    "Jolly Roger Bay - Star Blocks": SM64ItemData(sm64ex_base_id + 1134, progression_deprioritized),
+    "The Princess's Secret Slide - Star Block": SM64ItemData(sm64ex_base_id + 1135, progression_deprioritized),
+    "Rainbow Ride - Star Block": SM64ItemData(sm64ex_base_id + 1136, progression_deprioritized),
+    "Snowman's Land - Star Block": SM64ItemData(sm64ex_base_id + 1137, progression_deprioritized),
+    "Tiny-Huge Island - Star Block": SM64ItemData(sm64ex_base_id + 1138, progression_deprioritized),
+    "Wet-Dry World - Star Blocks": SM64ItemData(sm64ex_base_id + 1139, progression_deprioritized),
+}
+
+koopa_shell_block_item_data_table: dict[str, SM64ItemData] = {
+    # LLL retains its original per-act feature item and ID.
+    "Lethal Lava Land - Koopa Shell": feature_item_data_table["Lethal Lava Land - Koopa Shell"],
+    "Shifting Sand Land - Koopa Shell Block": SM64ItemData(sm64ex_base_id + 1140),
+    "Snowman's Land - Koopa Shell Block": SM64ItemData(sm64ex_base_id + 1141),
+}
+
+star_secret_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-omb Battlefield - Star Secrets": SM64ItemData(sm64ex_base_id + 1142, progression_deprioritized),
+    "Shifting Sand Land - Star Secrets": SM64ItemData(sm64ex_base_id + 1143, progression_deprioritized),
+    "Wet-Dry World - Star Secrets": SM64ItemData(sm64ex_base_id + 1144, progression_deprioritized),
+    "Tiny-Huge Island - Star Secrets": SM64ItemData(sm64ex_base_id + 1145, progression_deprioritized),
+}
+
+jet_stream_item_data_table: dict[str, SM64ItemData] = {
+    "Jolly Roger Bay - Jet Stream": feature_item_data_table["Jolly Roger Bay - Jet Stream"],
+    "Dire, Dire Docks - Jet Stream": SM64ItemData(sm64ex_base_id + 1146, progression_deprioritized),
+}
+
+moat_exit_item_data_table: dict[str, SM64ItemData] = {
+    "Dire, Dire Docks - Moat Exit": SM64ItemData(sm64ex_base_id + 1114, ddd_moat_exit_classification),
 }
 
 vertical_wind_item_data_table: dict[str, SM64ItemData] = {
@@ -300,6 +366,12 @@ arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **purple_switch_item_data_table,
     **vertical_wind_item_data_table,
     **horizontal_wind_item_data_table,
+    **freestanding_star_item_data_table,
+    **star_block_item_data_table,
+    **koopa_shell_block_item_data_table,
+    **star_secret_item_data_table,
+    **jet_stream_item_data_table,
+    **moat_exit_item_data_table,
 }
 
 action_item_data_table: dict[str, SM64ItemData] = {
@@ -657,6 +729,7 @@ cannon_item_data_table: dict[str, SM64ItemData] = {
 }
 
 painting_unlock_item_data_table: dict[str, SM64ItemData] = {
+    "Unlock Bob-omb Battlefield": SM64ItemData(sm64ex_base_id + 230),
     "Unlock Whomp's Fortress": SM64ItemData(sm64ex_base_id + 231),
     "Unlock Jolly Roger Bay": SM64ItemData(sm64ex_base_id + 232),
     "Unlock Cool, Cool Mountain": SM64ItemData(sm64ex_base_id + 233),
@@ -672,6 +745,9 @@ painting_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Unlock Huge Island": SM64ItemData(sm64ex_base_id + 559),
     "Unlock Rainbow Ride": SM64ItemData(sm64ex_base_id + 853),
     "Unlock Wing Mario Over the Rainbow": SM64ItemData(sm64ex_base_id + 854),
+    "Unlock The Princess's Secret Slide": SM64ItemData(sm64ex_base_id + 1111),
+    "Unlock The Secret Aquarium": SM64ItemData(sm64ex_base_id + 1112),
+    "Unlock Cavern of the Metal Cap": SM64ItemData(sm64ex_base_id + 1113),
 }
 
 special_level_unlock_item_names = (

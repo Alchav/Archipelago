@@ -3,8 +3,7 @@ from test.general import setup_solo_multiworld
 from worlds.AutoWorld import call_all
 
 from .. import Options, SM64World
-from ..Regions import SM64Levels, SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, \
-    sm64_level_to_entrances
+from ..Regions import SM64Levels, SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED
 from ..SubAreas import CASTLE_RETURN_SOURCES, OUTGOING_SOURCES_BY_DESTINATION, RETURN_DESTINATIONS, \
     RETURN_SOURCES, SUB_AREA_SOURCES, SUB_AREA_SOURCE_NAMES, normal_source_id, sub_area_source_by_id
 from .bases import SM64TestBase
@@ -88,7 +87,11 @@ class MixedSubAreaShuffleTest(SM64TestBase):
     def test_mixed_map_is_complete_and_forces_bowser_three_after_a_branch(self):
         self.assertEqual(len(self.world.area_connections), 46)
         bits_destination = self.world.area_connections[int(SM64Levels.BOWSER_IN_THE_SKY)]
-        destination_name = sm64_level_to_entrances.get(bits_destination, bits_destination)
+        destination_name = (
+            self.world.get_normal_entrance_name(bits_destination)
+            if isinstance(bits_destination, int)
+            else bits_destination
+        )
         self.assertIn(destination_name, OUTGOING_SOURCES_BY_DESTINATION)
         self.assertTrue(any(
             self.world.area_connections[source] == "bowser_3"

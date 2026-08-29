@@ -115,7 +115,10 @@ class TestShiftingSandLandLocations(SM64TestBase):
             ["Shifting Sand Land - Outside Pyramid 1-Up Block", True, block_mushroom],
 
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", False, []],
-            ["Shifting Sand Land - Stone Structure Koopa Shell Block", True, ["Triple Jump"]],
+            ["Shifting Sand Land - Stone Structure Koopa Shell Block", True, [
+                "Triple Jump",
+                "Shifting Sand Land - Koopa Shell Block",
+            ]],
             ["Shifting Sand Land - Stone Structure Wing Cap Block", False, ["Triple Jump"]],
             ["Shifting Sand Land - Stone Structure Wing Cap Block", True, [
                 "Triple Jump",
@@ -144,7 +147,7 @@ class TestShiftingSandLandStoneStructureTrick(SM64TestBase):
         self.run_location_tests([
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", False, []],
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", True,
-             ["Shifting Sand Land - Fly Guys"]],
+             ["Shifting Sand Land - Fly Guys", "Shifting Sand Land - Koopa Shell Block"]],
         ], starting_regions=["Shifting Sand Land"])
 
 

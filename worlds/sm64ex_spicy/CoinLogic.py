@@ -1109,8 +1109,8 @@ def lethal_lava_land_coins(
     can_reach_volcano = state.can_reach(
         "Lethal Lava Land - Volcano", "Region", player)
 
-    has_koopa_shell = Rules.has_per_act_feature(
-        state, player, f"{level_name} - Koopa Shell")
+    has_koopa_shell = Rules.has_level_feature(
+        state, player, "level_features", "Koopa Shell Blocks", f"{level_name} - Koopa Shell")
     has_lava_damage_boosting = Rules.can_use_logic_trick(
         state, player, "logic_lava_damage_boosting", target_name)
     has_long_jump = Rules.has_action(state, player, "Long Jump", level_name)
@@ -1861,6 +1861,8 @@ def snowmans_land_coins(
 
     can_reach_whirl = state.can_reach(
         "Snowman's Land - Whirl from the Freezing Pond", "Region", player)
+    has_koopa_shell = Rules.has_level_feature(
+        state, player, "level_features", "Koopa Shell Blocks", "Snowman's Land - Koopa Shell Block")
     builder.add(
         "sl_start_red_coins",
         "Two Red Coins in the starting area",
@@ -1872,7 +1874,7 @@ def snowmans_land_coins(
         "sl_whirl_red_coins",
         "Six Red Coins in the Whirl from the Freezing Pond area",
         12,
-        can_reach_whirl and has_red_coins,
+        can_reach_whirl and has_koopa_shell and has_red_coins,
         children=(
             coin_condition(
                 "sl_whirl_region_access_for_red_coins",

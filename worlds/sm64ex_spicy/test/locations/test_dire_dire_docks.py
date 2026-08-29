@@ -58,7 +58,7 @@ class TestDireDireDocksLocations(SM64TestBase):
 
             ["Dire, Dire Docks - Through the Jet Stream", False, []],
             ["Dire, Dire Docks - Through the Jet Stream", True,
-             ["Dire, Dire Docks - Metal Cap"]],
+             ["Dire, Dire Docks - Metal Cap", "Dire, Dire Docks - Jet Stream"]],
             ["Dire, Dire Docks - The Manta Ray's Reward", False, []],
             ["Dire, Dire Docks - The Manta Ray's Reward", True,
              ["Dire, Dire Docks - Manta Ray"]],

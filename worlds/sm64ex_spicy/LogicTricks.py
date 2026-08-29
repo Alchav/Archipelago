@@ -513,7 +513,7 @@ logic_tricks = {
     },
     "Shifting Sand Land Pillars with Koopa Shell": {
         "internal_id": "logic_ssl_pillars_shell",
-        "rule": "{Shifting Sand Land - Stone Structure}",
+        "rule": "{Shifting Sand Land - Stone Structure} & SSL_KOOPA_SHELL",
         "difficulty": "easy",
         "description": "Reaching the Upper Pyramid entrance using a Koopa Shell to access the quicksand pillar.",
     },

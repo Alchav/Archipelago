@@ -7,7 +7,10 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_rolling_log_item_names, global_purple_switch_item_names, global_bobomb_buddy_item_names, \
     global_treasure_chest_item_names, global_warp_pipe_item_names, checkerboard_item_data_table, \
     global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
-    horizontal_wind_item_data_table, \
+    horizontal_wind_item_data_table, global_freestanding_star_item_names, freestanding_star_item_data_table, \
+    global_star_block_item_names, star_block_item_data_table, global_koopa_shell_block_item_names, \
+    koopa_shell_block_item_data_table, global_star_secret_item_names, star_secret_item_data_table, \
+    global_jet_stream_item_names, jet_stream_item_data_table, moat_exit_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
@@ -563,6 +566,8 @@ class SM64World(World):
             item_names += [
                 name for name in feature_item_data_table
                 if name not in per_level_bobomb_buddy_item_names
+                and not (mode != self.options.level_features.option_per_act_only and name in {
+                    "Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"})
             ]
         if mode in {
                 self.options.level_features.option_global,
@@ -596,6 +601,26 @@ class SM64World(World):
                 self.options.level_features,
                 global_horizontal_wind_item_names,
                 horizontal_wind_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_freestanding_star_item_names,
+                freestanding_star_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_star_block_item_names,
+                star_block_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_koopa_shell_block_item_names,
+                koopa_shell_block_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_star_secret_item_names,
+                star_secret_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_jet_stream_item_names,
+                jet_stream_item_data_table)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_per_act_only:
@@ -636,6 +661,18 @@ class SM64World(World):
             item_names += list(global_warp_pipe_item_names)
             item_names += list(global_vertical_wind_item_names)
             item_names += list(global_horizontal_wind_item_names)
+            item_names += list(global_freestanding_star_item_names)
+            item_names += list(global_star_block_item_names)
+            if mode == self.options.level_features.option_not_shuffled:
+                item_names += list(global_koopa_shell_block_item_names)
+            item_names += list(global_star_secret_item_names)
+            if mode == self.options.level_features.option_not_shuffled:
+                item_names += list(global_jet_stream_item_names)
+            else:
+                item_names += [
+                    name for name in (*koopa_shell_block_item_data_table, *jet_stream_item_data_table)
+                    if name not in {"Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"}
+                ]
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
@@ -674,16 +711,24 @@ class SM64World(World):
             per_level_coin_object_item_data_table)
 
     def get_enemy_unlock_item_names(self) -> typing.List[str]:
-        return self.get_unlock_item_names(
+        item_names = self.get_unlock_item_names(
             self.options.enemy_unlocks,
             global_mode_enemy_item_names,
             per_level_enemy_item_data_table)
+        if self.options.one_up_unlocks.value == self.options.one_up_unlocks.option_not_shuffled:
+            item_names += self.get_unlock_item_names(
+                self.options.enemy_unlocks,
+                ("Monty Moles",),
+                ("Hazy Maze Cave - Monty Moles", "Tall, Tall Mountain - Monty Moles"))
+        return item_names
 
     def get_one_up_unlock_item_names(self) -> typing.List[str]:
         item_names = self.get_unlock_item_names(
             self.options.one_up_unlocks,
             global_one_up_unlock_item_names,
             per_level_one_up_unlock_item_data_table)
+        if self.options.one_up_unlocks.value == self.options.one_up_unlocks.option_not_shuffled:
+            return []
         if self.options.one_up_checks:
             return item_names
         return [item_name for item_name in item_names if item_name.endswith("Monty Moles")]
@@ -734,6 +779,9 @@ class SM64World(World):
                 self.options.one_up_unlocks.option_not_shuffled:
             item_names += list(global_one_up_unlock_item_data_table)
             item_names += list(per_level_one_up_unlock_item_data_table)
+        if (self.options.enemy_unlocks.value != self.options.enemy_unlocks.option_not_shuffled
+                or self.options.one_up_unlocks.value != self.options.one_up_unlocks.option_not_shuffled):
+            item_names = [name for name in item_names if not name.endswith("Monty Moles")]
         if self.options.sign_unlocks.value == self.options.sign_unlocks.option_not_shuffled:
             item_names += list(global_sign_unlock_item_data_table)
             item_names += list(per_level_sign_unlock_item_data_table)
@@ -741,7 +789,7 @@ class SM64World(World):
             item_names += list(painting_unlock_item_data_table)
         if self.options.level_unlocks.value == self.options.level_unlocks.option_disabled:
             item_names += list(special_level_unlock_item_names)
-        return item_names
+        return list(dict.fromkeys(item_names))
 
     def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
         option = self.options.bowser_stage_1ups
@@ -806,6 +854,7 @@ class SM64World(World):
         item_names += self.get_one_up_unlock_item_names()
         item_names += self.get_sign_unlock_item_names()
         item_names += self.get_bowser_arena_bomb_item_names()
+        item_names += list(moat_exit_item_data_table)
 
         return item_names
 
@@ -1184,6 +1233,7 @@ class SM64World(World):
                 self.options.cap_items.option_global,
                 self.options.cap_items.option_both,
             },
+            "FullLevelUnlocks": self.options.level_unlocks.value == self.options.level_unlocks.option_full,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),

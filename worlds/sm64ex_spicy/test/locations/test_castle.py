@@ -69,3 +69,15 @@ class TestCastleLocations(SM64TestBase):
             ["Castle - Basement Water Tunnel Four Corners 1-Up", False, []],
             ["Castle - Basement Water Tunnel Four Corners 1-Up", True, basement],
         ], starting_regions=["Castle Grounds"])
+
+    def test_dynamic_starting_checks_are_in_the_lobby(self):
+        active_locations = {
+            location.name: location
+            for location in self.multiworld.get_locations(self.player)
+        }
+        for location_name in (
+                "Castle Lobby - Free Item",
+                "Castle Lobby - Another Free Item",
+        ):
+            if location_name in active_locations:
+                self.assertEqual(active_locations[location_name].parent_region.name, "Castle Lobby")

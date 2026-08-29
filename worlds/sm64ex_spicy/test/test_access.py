@@ -1,10 +1,21 @@
 from BaseClasses import CollectionState, ItemClassification
 
-from .bases import SM64TestBase
+from .bases import SM64TestBase as _SM64TestBase
 from .. import Options
 from ..CoinLogic import COIN_EVALUATORS
 from ..Regions import sm64_ttc_entrances
 from ..Rules import can_use_logic_trick, get_per_level_action_item_name
+
+
+class SM64TestBase(_SM64TestBase):
+    """Legacy access tests assume star-producing objects themselves are present."""
+
+    def world_setup(self, seed=None) -> None:
+        super().world_setup(seed)
+        if not hasattr(self, "world"):
+            return
+        for item_name in ("Freestanding Stars", "Star Blocks", "Star Secrets"):
+            self.multiworld.state.collect(self.world.create_item(item_name))
 
 
 def coin_rule(course_name):
@@ -1119,6 +1130,68 @@ class LevelFeatureAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Cool, Cool Mountain - Snowman's Lost His Head"))
         self.collect(self.get_item_by_name("Cool, Cool Mountain - Snowman's Body"))
         self.assertTrue(self.can_reach_location("Cool, Cool Mountain - Snowman's Lost His Head"))
+
+
+class NewLevelFeatureUnlockAccessTestBase(_SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "level_features": Options.LevelFeatures.option_global,
+        "level_unlocks": Options.LevelUnlocks.option_disabled,
+        "blocksanity": Options.Blocksanity.option_true,
+    }
+
+    def assert_global_feature_gate(self, item_name, location_name):
+        self.collect_all_but({item_name})
+        self.assertFalse(self.can_reach_location(location_name))
+        self.collect(self.world.create_item(item_name))
+        self.assertTrue(self.can_reach_location(location_name))
+
+    def test_freestanding_star_gate(self):
+        self.assert_global_feature_gate(
+            "Freestanding Stars", "Cool, Cool Mountain - Wall Kicks Will Work")
+
+    def test_star_block_gate(self):
+        self.assert_global_feature_gate(
+            "Star Blocks", "Jolly Roger Bay - Blast to the Stone Pillar")
+
+    def test_koopa_shell_block_gate(self):
+        self.assert_global_feature_gate(
+            "Koopa Shell Blocks", "Snowman's Land - Koopa Shell Block")
+
+    def test_star_secret_gate(self):
+        self.assert_global_feature_gate(
+            "Star Secrets", "Bob-omb Battlefield - Mario Wings to the Sky")
+
+    def test_jet_stream_gate(self):
+        self.assert_global_feature_gate(
+            "Jet Streams", "Dire, Dire Docks - Through the Jet Stream")
+
+
+class FullLevelEntranceUnlockAccessTestBase(_SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "level_unlocks": Options.LevelUnlocks.option_full,
+    }
+
+    def assert_level_unlock_gate(self, item_name, region_name):
+        self.collect_all_but({item_name})
+        self.assertFalse(self.can_reach_region(region_name))
+        self.collect(self.world.create_item(item_name))
+        self.assertTrue(self.can_reach_region(region_name))
+
+    def test_bob_omb_battlefield_unlock(self):
+        self.assert_level_unlock_gate("Unlock Bob-omb Battlefield", "Bob-omb Battlefield")
+
+    def test_princess_secret_slide_unlock(self):
+        self.assert_level_unlock_gate("Unlock The Princess's Secret Slide", "The Princess's Secret Slide")
+
+    def test_secret_aquarium_unlock(self):
+        self.assert_level_unlock_gate("Unlock The Secret Aquarium", "The Secret Aquarium")
+
+    def test_cavern_of_the_metal_cap_unlock(self):
+        self.assert_level_unlock_gate("Unlock Cavern of the Metal Cap", "Cavern of the Metal Cap")
 
 
 class PerLevelMoveAccessTestBase(SM64TestBase):
@@ -4687,7 +4760,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Lethal Lava Land - Red Coins"))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 1))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 10))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 11))
 
@@ -4702,7 +4775,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
         self.remove(self.get_item_by_name("Long Jump"))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
 
@@ -4712,7 +4785,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 35))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 36))
 
@@ -4731,7 +4804,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_last_three_red_coins_need_a_route_and_healing_coins(self):
         self.collect([
             self.get_item_by_name("Lethal Lava Land - Red Coins"),
-            self.get_item_by_name("Lethal Lava Land - Koopa Shell"),
+            self.world.create_item("Koopa Shell Blocks"),
         ])
         self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 10))
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 11))
@@ -4748,7 +4821,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect_basement_access()
         self.collect([
             self.get_item_by_name("Lethal Lava Land - Red Coins"),
-            self.get_item_by_name("Lethal Lava Land - Koopa Shell"),
+            self.world.create_item("Koopa Shell Blocks"),
         ])
         self.assertFalse(self.can_reach_location("Lethal Lava Land - 8-Coin Puzzle with 15 Pieces"))
 
@@ -4896,7 +4969,7 @@ class LethalLavaLandKoopaShellAccessTestBase(SM64TestBase):
     def test_koopa_shell_reaches_lava_crossing_one_ups_without_trick(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Northeast Brown Platform 1-Up"))
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Northeast Brown Platform 1-Up"))
 
 
@@ -4924,7 +4997,7 @@ class LethalLavaLandCoinStar125AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
@@ -4943,7 +5016,7 @@ class LethalLavaLandCoinStar128AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Elevator Tour in the Volcano"))
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
@@ -4957,7 +5030,7 @@ class LethalLavaLandCoinStar130AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
-        self.collect(self.get_item_by_name("Lethal Lava Land - Koopa Shell"))
+        self.collect(self.world.create_item("Koopa Shell Blocks"))
         self.assertTrue(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
 
@@ -4971,7 +5044,7 @@ class LethalLavaLandCoinStar133AccessTestBase(LethalLavaLandCoinStarAccessTestBa
         self.collect_basement_access()
         self.collect([
             self.get_item_by_name("Climb"),
-            self.get_item_by_name("Lethal Lava Land - Koopa Shell"),
+            self.world.create_item("Koopa Shell Blocks"),
         ])
         self.assertFalse(self.can_reach_location("Lethal Lava Land - Coins Star"))
 
@@ -5420,6 +5493,7 @@ class SnowmansLandCoinStarAccessTestBase(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
         "area_rando": Options.AreaRandomizer.option_Off,
+        "start_inventory": {"Koopa Shell Blocks": 1},
     }
 
     def collect_second_floor_access(self):
@@ -5649,6 +5723,8 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
             "Wall Kick",
             "Vanish Cap",
             "Snowman's Land - Cannon Unlock",
+            "Freestanding Stars",
+            "Koopa Shell Blocks",
         ]:
             state.collect(self.world.create_item(item_name))
         self.assertTrue(self.world.logic_sl_impossible_coin)

@@ -367,6 +367,11 @@ locBasement_table = {
     "Castle - Drain the Moat": 3626245
 }
 
+locFreeItem_table = {
+    "Castle Lobby - Free Item": 4025000,
+    "Castle Lobby - Another Free Item": 4025001,
+}
+
 locFreestanding1Up_table = {
     "Big Boo's Haunt - Shed Roof 1-Up": 3629100,
 
@@ -623,7 +628,7 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
-                  **locSS_table, **locBasement_table, **locFreestanding1Up_table, **locBlocksanity_table, \
+                  **locSS_table, **locBasement_table, **locFreeItem_table, **locFreestanding1Up_table, **locBlocksanity_table, \
                   **coin_count_check_location_table, **individual_coin_location_table}
 
 loc1UpBlock_table = {

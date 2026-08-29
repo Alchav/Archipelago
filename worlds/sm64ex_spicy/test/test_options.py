@@ -19,7 +19,10 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_bobomb_buddy_item_names, global_treasure_chest_item_names, global_warp_pipe_item_names, \
     per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names, \
     global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
-    horizontal_wind_item_data_table
+    horizontal_wind_item_data_table, global_freestanding_star_item_names, global_star_block_item_names, \
+    global_koopa_shell_block_item_names, global_star_secret_item_names, global_jet_stream_item_names, \
+    freestanding_star_item_data_table, star_block_item_data_table, koopa_shell_block_item_data_table, \
+    star_secret_item_data_table, jet_stream_item_data_table
 from ..Locations import coin_count_check_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coin_count_check_location_table, secret_stage_coin_count_check_location_table, get_coin_count_check_location_name, \
     location_name_groups
@@ -29,10 +32,12 @@ from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_ST
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
 
 
-def world_has_reachable_starting_check(test_base: SM64TestBase, allowed_source_entrances=None) -> bool:
-    from ..Rules import has_reachable_starting_check
-    return has_reachable_starting_check(
-        test_base.multiworld, test_base.world.options, test_base.player, allowed_source_entrances)
+def world_has_two_reachable_starting_checks(test_base: SM64TestBase) -> bool:
+    state = CollectionState(test_base.multiworld)
+    return sum(
+        location.address is not None and location.can_reach(state)
+        for location in test_base.multiworld.get_locations(test_base.player)
+    ) >= 2
 
 wdw_variant_ids = {SM64_WDW_LOW, SM64_WDW_MIDDLE, SM64_WDW_HIGH}
 ttc_variant_ids = {SM64_TTC_STOPPED, SM64_TTC_SLOW, SM64_TTC_RANDOM, SM64_TTC_FAST}
@@ -282,6 +287,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Castle - Yoshi": 3626276,
             "Unlock Bowser in the Fire Sea": 3626304,
             "Unlock Vanish Cap Under the Moat": 3626555,
+            "Unlock Bob-omb Battlefield": 3626230,
             "Unlock Whomp's Fortress": 3626231,
             "Unlock Jolly Roger Bay": 3626232,
             "Unlock Cool, Cool Mountain": 3626233,
@@ -390,6 +396,40 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Rainbow Ride - Horizontal Wind": 3627108,
             "Snowman's Land - Horizontal Wind": 3627109,
             "Tiny-Huge Island - Horizontal Wind": 3627110,
+            "Dire, Dire Docks - Moat Exit": 3627114,
+            "Freestanding Stars": 3627115,
+            "Star Blocks": 3627116,
+            "Koopa Shell Blocks": 3627117,
+            "Star Secrets": 3627118,
+            "Bob-omb Battlefield - Freestanding Star": 3627119,
+            "Whomp's Fortress - Freestanding Stars": 3627120,
+            "Jolly Roger Bay - Freestanding Stars": 3627121,
+            "Cool, Cool Mountain - Freestanding Star": 3627122,
+            "Big Boo's Haunt - Freestanding Star": 3627123,
+            "Hazy Maze Cave - Freestanding Stars": 3627124,
+            "Lethal Lava Land - Freestanding Stars": 3627125,
+            "Shifting Sand Land - Freestanding Stars": 3627126,
+            "Dire, Dire Docks - Freestanding Stars": 3627127,
+            "Snowman's Land - Freestanding Stars": 3627128,
+            "Wet-Dry World - Freestanding Stars": 3627129,
+            "Tall, Tall Mountain - Freestanding Stars": 3627130,
+            "Tick Tock Clock - Freestanding Stars": 3627131,
+            "Rainbow Ride - Freestanding Stars": 3627132,
+            "Bob-omb Battlefield - Star Block": 3627133,
+            "Jolly Roger Bay - Star Blocks": 3627134,
+            "The Princess's Secret Slide - Star Block": 3627135,
+            "Rainbow Ride - Star Block": 3627136,
+            "Snowman's Land - Star Block": 3627137,
+            "Tiny-Huge Island - Star Block": 3627138,
+            "Wet-Dry World - Star Blocks": 3627139,
+            "Shifting Sand Land - Koopa Shell Block": 3627140,
+            "Snowman's Land - Koopa Shell Block": 3627141,
+            "Bob-omb Battlefield - Star Secrets": 3627142,
+            "Shifting Sand Land - Star Secrets": 3627143,
+            "Wet-Dry World - Star Secrets": 3627144,
+            "Tiny-Huge Island - Star Secrets": 3627145,
+            "Dire, Dire Docks - Jet Stream": 3627146,
+            "Jet Streams": 3627147,
         }
         item_data = {
             **feature_item_data_table,
@@ -512,6 +552,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
                     "Bob-omb Buddies",
                     "Jolly Roger Bay - Treasure Chests",
                     "Dire, Dire Docks - Treasure Chests",
+                    *global_koopa_shell_block_item_names,
+                    *global_jet_stream_item_names,
                     *per_level_warp_pipe_item_names,
             }:
                 continue
@@ -523,6 +565,12 @@ class FeatureItemPoolTestBase(SM64TestBase):
             if item_name in feature_item_data_table:
                 continue
             with self.subTest("Non-act buddy in StartInventory", item=item_name):
+                self.assertEqual(start_inventory[item_table[item_name]], 1)
+
+        for item_name in (*koopa_shell_block_item_data_table, *jet_stream_item_data_table):
+            if item_name in {"Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"}:
+                continue
+            with self.subTest("Non-act level feature in StartInventory", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
 
     def test_precollected_items_are_only_added_to_apsm64ex_start_inventory(self):
@@ -840,6 +888,48 @@ class BothOneUpUnlockItemPoolTestBase(SM64TestBase):
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
 
+class MontyMoleEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
+    }
+
+    def test_enemy_unlocks_generate_monty_moles_when_one_ups_are_not_shuffled(self):
+        self.assertEqual(len(self.get_items_by_name("Hazy Maze Cave - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Tall, Tall Mountain - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Monty Moles")), 0)
+
+
+class MontyMoleOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
+    }
+
+    def test_one_up_unlocks_own_monty_moles_without_duplicates(self):
+        self.assertEqual(len(self.get_items_by_name("Hazy Maze Cave - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Tall, Tall Mountain - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Monty Moles")), 0)
+
+
+class DddMoatExitClassificationTestBase(SM64TestBase):
+    options = {"sub_area_shuffle": Options.SubAreaShuffle.option_separate}
+
+    def test_moat_exit_is_a_trap_without_castle_returns(self):
+        items = self.get_items_by_name("Dire, Dire Docks - Moat Exit")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].classification, ItemClassification.trap)
+
+
+class DddMoatExitCastleReturnsClassificationTestBase(SM64TestBase):
+    options = {"sub_area_shuffle": Options.SubAreaShuffle.option_mixed_plus_castle_returns}
+
+    def test_moat_exit_is_progression_with_castle_returns(self):
+        items = self.get_items_by_name("Dire, Dire Docks - Moat Exit")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].classification, ItemClassification.progression)
+
+
 class DisabledLevelUnlockItemPoolTestBase(SM64TestBase):
     options = {"level_unlocks": Options.LevelUnlocks.option_disabled}
 
@@ -1005,6 +1095,11 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
                 **purple_switch_item_data_table,
                 **vertical_wind_item_data_table,
                 **horizontal_wind_item_data_table,
+                **freestanding_star_item_data_table,
+                **star_block_item_data_table,
+                **koopa_shell_block_item_data_table,
+                **star_secret_item_data_table,
+                **jet_stream_item_data_table,
         }:
             with self.subTest("Individual arbitrary item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -1030,6 +1125,11 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *global_warp_pipe_item_names,
             *global_vertical_wind_item_names,
             *global_horizontal_wind_item_names,
+            *global_freestanding_star_item_names,
+            *global_star_block_item_names,
+            *global_koopa_shell_block_item_names,
+            *global_star_secret_item_names,
+            *global_jet_stream_item_names,
         )
         per_level_names = (
             *checkerboard_item_data_table,
@@ -1039,6 +1139,11 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *per_level_warp_pipe_item_names,
             *vertical_wind_item_data_table,
             *horizontal_wind_item_data_table,
+            *freestanding_star_item_data_table,
+            *star_block_item_data_table,
+            *koopa_shell_block_item_data_table,
+            *star_secret_item_data_table,
+            *jet_stream_item_data_table,
         )
         for item_name in (*global_names, *per_level_names):
             with self.subTest(item=item_name):
@@ -1066,6 +1171,11 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Warp Pipes",
                 "Vertical Wind",
                 "Horizontal Wind",
+                "Freestanding Stars",
+                "Star Blocks",
+                "Koopa Shell Blocks",
+                "Star Secrets",
+                "Jet Streams",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -1083,6 +1193,11 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Warp Pipes",
                 "Vertical Wind",
                 "Horizontal Wind",
+                "Freestanding Stars",
+                "Star Blocks",
+                "Koopa Shell Blocks",
+                "Star Secrets",
+                "Jet Streams",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
@@ -1775,8 +1890,8 @@ class EntranceRandoOffTestBase(SM64TestBase):
             with self.subTest("TTC variant maps to itself", variant=variant_id):
                 self.assertEqual(self.world.area_connections[variant_id], variant_id)
 
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+    def test_starting_state_has_two_reachable_checks(self):
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
@@ -1791,8 +1906,8 @@ class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
             with self.subTest("Entrance maps to itself", entrance=entrance_level_id):
                 self.assertEqual(self.world.area_connections[entrance_level_id], entrance_level_id)
 
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+    def test_starting_state_has_two_reachable_checks(self):
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 class EntranceRandoCourseTestBase(SM64TestBase):
     options = {
@@ -1816,8 +1931,8 @@ class EntranceRandoCourseTestBase(SM64TestBase):
                 self.assertIn(variant_id, self.world.area_connections)
                 self.assertIn(self.world.area_connections[variant_id], sm64_level_to_paintings.keys())
 
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+    def test_starting_state_has_two_reachable_checks(self):
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
     def test_event_locations_are_not_entrance_hinted(self):
         hint_data = {}
@@ -1933,7 +2048,7 @@ class CourseEntrancesMoveTestBase(SM64TestBase):
         self.assertEqual(self.world.area_connections[bitfs_level_id], bitfs_level_id)
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
@@ -1944,10 +2059,7 @@ class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
     }
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
-
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class SeparateEntrancesMoveTestBase(SM64TestBase):
@@ -1968,7 +2080,7 @@ class SeparateEntrancesMoveTestBase(SM64TestBase):
         self.assertIsNot(self.world.area_connections[bitfs_level_id], sm64_entrances_to_level["Dire, Dire Docks"])
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
@@ -1979,7 +2091,7 @@ class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
     }
 
     def test_starting_sources_have_reachable_checks(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class AllEntrancesMoveTestBase(SM64TestBase):
@@ -1997,7 +2109,7 @@ class AllEntrancesMoveTestBase(SM64TestBase):
         self.assertIsNot(self.world.area_connections[bitfs_level_id], sm64_entrances_to_level["Dire, Dire Docks"])
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
     def test_CotMC_entrance(self):
         cotmc_level_id = sm64_entrances_to_level["Cavern of the Metal Cap"]
