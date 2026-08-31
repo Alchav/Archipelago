@@ -228,11 +228,11 @@ class TallTallMountainCoinStarRequirement(CoinStarRequirement):
 
 class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
     """
-    Coins needed for the Coin Star in Tiny-Huge Island. With Full Accessibility, this is capped at 192 unless the
-    Tiny-Huge Island Impossible Coin trick is enabled.
+    Coins needed for the Coin Star in Tiny-Huge Island. With Full Accessibility, this is capped at 191 unless the
+    Tiny Island Impossible Coin trick is enabled.
     """
     display_name = "Tiny-Huge Island Coin Star Requirement"
-    range_end = 193
+    range_end = 192
 
 
 class TickTockClockCoinStarRequirement(CoinStarRequirement):

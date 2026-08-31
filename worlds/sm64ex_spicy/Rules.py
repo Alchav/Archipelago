@@ -827,7 +827,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Cool, Cool Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
         "Cool, Cool Mountain - Wall Kicks Will Work",
-        "TJ+WK | logic_ccm_wall_kicks_will_work_spin_jump")
+        "CANN+TJ+WK | logic_ccm_wall_kicks_will_work_spin_jump")
     # Big Boo's Haunt
     rf.assign_rule("Big Boo's Haunt - Go on a Ghost Hunt", "BOOS & BIG_BOO")
     rf.assign_rule(
@@ -918,16 +918,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
     rf.assign_rule(
         "Shifting Sand Land - Stone Structure",
-        "TJ/SF/BF | logic_ssl_stone_structure_shy_guy_spin_jump")
+        "TJ/SF/BF | logic_ssl_top_of_stone_structure_spin_jump_or_tweesters")
     rf.assign_rule(
         "Shifting Sand Land - Upper Pyramid",
-        "SSL_PYRAMID_ELEVATOR | CL")
+        "CL")
     rf.assign_rule(
         "Shifting Sand Land - Pyramid Top Entry Elevator Route",
         "SSL_PYRAMID_ELEVATOR")
     rf.assign_rule(
         "Shifting Sand Land - Inside the Ancient Pyramid",
-        "SF/BF/TJ/LG | "
+        "SF/BF/TJ/WK/LG | "
         "{Shifting Sand Land - Pyramid Top Entry} & SSL_PYRAMID_ELEVATOR")
     rf.assign_rule("Shifting Sand Land - Eyerok Arena",
                    "{Shifting Sand Land - Upper Pyramid} & SSL_PYRAMID_ELEVATOR & EYEROK | "
@@ -1086,7 +1086,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule(
         "Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell",
         "logic_thi_scale_huge_mountain_koopa_shell")
-    rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coins Area", "CANN")
+    rf.assign_rule("Tiny-Huge Island - Huge Island to Huge Tree Area", "CANN")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "WIGGLER")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
@@ -1102,11 +1102,21 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "CL | logic_ttc_pit_and_pendulums_area_wall_kick")
     rf.assign_rule("Tick Tock Clock - Moving Bars Area", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule(
-        "Tick Tock Clock - Top",
-        "TJ+LG | {Tick Tock Clock Moving} & SF | logic_ttc_top_past_spinners_wall_kick")
+        "Tick Tock Clock - Upper Moving Bars Area",
+        "TJ+LG | {Tick Tock Clock Moving} & SF")
+    rf.assign_rule(
+        "Tick Tock Clock - More Moving Bars Area", "WK/TJ/LG/SF")
+    rf.assign_rule(
+        "Tick Tock Clock - Top", "TJ/LG/BF/SF")
     rf.assign_rule(
         "Tick Tock Clock - Top Past Spinners",
-        "TTC_SPINNERS | SF | TJ | logic_ttc_top_past_spinners_wall_kick")
+        "TTC_SPINNERS | SF | TJ")
+    rf.assign_rule(
+        "Tick Tock Clock - Moving Bars Area to Top with Wall Kick",
+        "logic_ttc_top_past_spinners_wall_kick")
+    rf.assign_rule(
+        "Tick Tock Clock - Moving Bars Area to Top Past Spinners with Wall Kick",
+        "logic_ttc_top_past_spinners_wall_kick")
     rf.assign_rule(
         "Tick Tock Clock - Stomp on the Thwomp",
         "{Tick Tock Clock Moving} & THWOMP | "
@@ -1124,11 +1134,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - Swingin' in the Breeze",
                    "LG/TJ/BF/SF | logic_rr_swingin_no_movement")
     rf.assign_rule("Rainbow Ride - Tricky Triangles!",
-                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement")
+                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement | "
+                   "logic_rr_fall_to_tricky_triangles_from_somewhere_over_the_rainbow")
     rf.assign_rule("Rainbow Ride - Tricky Triangles 1-Up",
-                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement")
+                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement | "
+                   "logic_rr_fall_to_tricky_triangles_one_up_from_somewhere_over_the_rainbow")
+    rf.assign_rule(
+        "Rainbow Ride - Cruiser to Tricky Triangles",
+        "logic_rr_fall_to_tricky_triangles_from_somewhere_over_the_rainbow | "
+        "logic_rr_fall_to_tricky_triangles_one_up_from_somewhere_over_the_rainbow")
     rf.assign_rule("Rainbow Ride - Cruiser", "RR_CARPETS & WK/SF/BF/LG/TJ")
-    rf.assign_rule("Rainbow Ride - Ship Pole 1-Up", "CL")
+    rf.assign_rule("Rainbow Ride - Cruiser Pole 1-Up", "CL")
     rf.assign_rule("Rainbow Ride - House", "RR_CARPETS & TJ/SF/BF/LG")
     rf.assign_rule("Rainbow Ride - Somewhere Over the Rainbow", "CANN")
     # Vanish Cap Under the Moat
@@ -1170,8 +1186,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "Bowser in the Dark World - Extra 1-Ups", second_floor_key_rule))
     # Bowser in the Fire Sea
     rf.assign_rule("Bowser in the Fire Sea - Upper", "CL")
-    rf.assign_rule("Bowser in the Fire Sea - Near Poles Block 1-Up", "LG/WK")
-    rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
+    rf.assign_rule("Bowser in the Fire Sea - Near Final Poles Block 1-Up", "WK/TJ")
+    rf.assign_rule("Bowser in the Fire Sea - Near Final Poles 1-Up", "TJ/WK")
     rf.assign_rule_object(
         "Bowser in the Fire Sea - Key",
         rf.build_rule(
@@ -1180,10 +1196,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_health.value))
     if options.one_up_checks:
         for location_name in (
-                "Bowser in the Fire Sea - Near Poles 1-Up",
+                "Bowser in the Fire Sea - Near Final Poles 1-Up",
                 "Bowser in the Fire Sea - Second Stone Structure 1-Up",
         ):
-            existing_rule = rf.build_rule("LG/WK") if location_name.endswith("Near Poles 1-Up") else True_()
+            existing_rule = rf.build_rule("TJ/WK") if location_name.endswith("Near Final Poles 1-Up") else True_()
             rf.assign_rule_object(
                 location_name,
                 existing_rule & bowser_stage_one_up_rule(
@@ -1232,7 +1248,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "TREASURE_CHESTS",
             "Lethal Lava Land - Wing Cap Block": "WC",
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
-            "Bowser in the Fire Sea - 3 Coins Block": "CL | logic_lava_damage_boosting",
+            "Bowser in the Fire Sea - 3 Coins Block": "CL | WK | logic_lava_damage_boosting",
+            "Bowser in the Fire Sea - Near Final Poles 1-Up Block": "WK/TJ",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
             "Snowman's Land - Vanish Cap Block": "VC",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
@@ -1264,7 +1281,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Wet-Dry World - Downtown 1-Up Block": "WDW_WATER_LEVEL_DIAMOND",
             "Whomp's Fortress - Metal Cap Block": "MC",
             "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block": "WC",
-            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block":
+            "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block":
                 wmotr_flight_rule,
             "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block":
@@ -1359,6 +1376,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     }
     for course_name, location_name in red_coin_star_by_course.items():
         rf.assign_rule_object(location_name, CanCollectAllRedCoins(course_name))
+    rf.add_rule("Bowser in the Fire Sea - Red Coins", rf.build_rule("WK/TJ"))
     vcutm_red_coin_star = "Vanish Cap Under the Moat - Red Coins"
     rf.add_rule(vcutm_red_coin_star, rf.build_rule(
         "VC | logic_vcutm_wall_kick_over_vanish_cap_grate",
@@ -1510,6 +1528,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     for location_name, per_level_name in {
         "Bob-omb Battlefield - Shoot to the Island in the Sky": "Bob-omb Battlefield - Star Block",
         "Jolly Roger Bay - Blast to the Stone Pillar": "Jolly Roger Bay - Star Blocks",
+        "Jolly Roger Bay - Plunder in the Sunken Ship": "Jolly Roger Bay - Star Blocks",
+        "The Princess's Secret Slide - Block Star": "The Princess's Secret Slide - Star Block",
         "Rainbow Ride - Somewhere Over the Rainbow": "Rainbow Ride - Star Block",
         "Snowman's Land - Whirl from the Freezing Pond": "Snowman's Land - Star Block",
         "Tiny-Huge Island - The Tip Top of the Huge Island": "Tiny-Huge Island - Star Block",
@@ -1573,16 +1593,16 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         & rf.build_rule("BOWSER", arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Sky"))
         & bowser_arena_bomb_rule("Bowser in the Sky", options.bowser_in_the_sky_health.value)
     )
-    rf.world.set_completion_rule(can_defeat_bowser_in_the_sky)
-
     if options.completion_type == options.completion_type.option_Last_Bowser_Stage:
         rf.world.set_completion_rule(can_defeat_bowser_in_the_sky)
     elif options.completion_type == options.completion_type.option_All_Bowser_Stages:
-        rf.world.set_completion_rule(
+        all_bowser_stages = (
             CanReachLocation("Bowser in the Dark World - Key")
             & CanReachLocation("Bowser in the Fire Sea - Key")
             & can_defeat_bowser_in_the_sky
         )
+        rf.assign_rule_object("Bowser in the Sky - Grand Star", all_bowser_stages)
+        rf.world.set_completion_rule(CanReachLocation("Bowser in the Sky - Grand Star"))
 
     if defer_randomized_entrances:
         for entrance_id in world.shuffled_entrance_source_ids:

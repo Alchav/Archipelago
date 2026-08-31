@@ -1002,11 +1002,11 @@ class VanillaBowserStageOneUpAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
         self.assertTrue(self.can_reach_region("Bowser in the Fire Sea"))
         self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Final Poles 1-Up"))
 
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Final Poles 1-Up"))
 
 
 class GlobalBowserStageOneUpAccessTestBase(SM64TestBase):
@@ -1033,7 +1033,7 @@ class GlobalBowserStageOneUpAccessTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
         self.collect(self.get_item_by_name("Bowser Stage Extra 1-Ups"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Final Poles 1-Up"))
 
 
 class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
@@ -1047,19 +1047,17 @@ class ShuffledMoveBowserInTheFireSeaOneUpAccessTestBase(SM64TestBase):
         "area_rando": Options.AreaRandomizer.option_Off,
     }
 
-    def test_near_poles_1up_accepts_ledge_grab_like_near_poles_block(self):
+    def test_near_final_poles_freestanding_1up_accepts_triple_jump(self):
         self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
         self.collect([
             self.get_item_by_name("Unlock Bowser in the Fire Sea"),
             self.get_item_by_name("Bowser Stage Extra 1-Ups"),
             self.get_item_by_name("Climb"),
         ])
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles Block 1-Up"))
-        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Near Final Poles 1-Up"))
 
-        self.collect(self.get_item_by_name("Ledge Grab"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles Block 1-Up"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Final Poles 1-Up"))
 
 
 class IndividualBowserStageOneUpAccessTestBase(SM64TestBase):
@@ -1103,7 +1101,7 @@ class AlwaysSpawnBowserStageOneUpAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Basement Key")] * 2)
         self.collect(self.get_item_by_name("Unlock Bowser in the Fire Sea"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Second Stone Structure 1-Up"))
-        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Poles 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Near Final Poles 1-Up"))
 
 
 class LevelFeatureAccessTestBase(SM64TestBase):
@@ -1166,6 +1164,58 @@ class NewLevelFeatureUnlockAccessTestBase(_SM64TestBase):
     def test_jet_stream_gate(self):
         self.assert_global_feature_gate(
             "Jet Streams", "Dire, Dire Docks - Through the Jet Stream")
+
+
+class StarBlockChecksAndStarsAccessTest(SM64TestBase):
+    run_default_tests = False
+    include_baseline_level_feature_unlocks = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "level_features": Options.LevelFeatures.option_global,
+        "level_unlocks": Options.LevelUnlocks.option_disabled,
+        "blocksanity": Options.Blocksanity.option_true,
+    }
+
+    def test_every_star_block_and_its_star_require_star_blocks(self):
+        pairs = (
+            ("Bob-omb Battlefield - Shoot to the Island in the Sky Star Block",
+             "Bob-omb Battlefield - Shoot to the Island in the Sky"),
+            ("Jolly Roger Bay - Blast to the Stone Pillar Star Block",
+             "Jolly Roger Bay - Blast to the Stone Pillar"),
+            ("Jolly Roger Bay - Plunder in the Sunken Ship Star Block",
+             "Jolly Roger Bay - Plunder in the Sunken Ship"),
+            ("The Princess's Secret Slide - Star Block",
+             "The Princess's Secret Slide - Block Star"),
+            ("Rainbow Ride - Somewhere Over the Rainbow Star Block",
+             "Rainbow Ride - Somewhere Over the Rainbow"),
+            ("Snowman's Land - Whirl from the Freezing Pond Star Block",
+             "Snowman's Land - Whirl from the Freezing Pond"),
+            ("Tiny-Huge Island - The Tip Top of the Huge Island Star Block",
+             "Tiny-Huge Island - The Tip Top of the Huge Island"),
+            ("Wet-Dry World - Shocking Arrow Lifts Star Block",
+             "Wet-Dry World - Shocking Arrow Lifts!"),
+            ("Wet-Dry World - Top o' the Town Star Block",
+             "Wet-Dry World - Top o' the Town"),
+        )
+        cases = []
+        for block, star in pairs:
+            cases.extend((
+                [block, False, [], ["Star Blocks"]],
+                [block, True, ["Star Blocks"], ["Star Blocks"]],
+                [star, False, [], ["Star Blocks"]],
+                [star, True, ["Star Blocks"], ["Star Blocks"]],
+            ))
+        self.run_location_tests(cases, starting_regions=(
+            "Bob-omb Battlefield",
+            "Jolly Roger Bay",
+            "The Princess's Secret Slide",
+            "Rainbow Ride",
+            "Snowman's Land",
+            "Tiny-Huge Island (Huge)",
+            "Wet-Dry World",
+            "Wet-Dry World - Low Water",
+            "Wet-Dry World - Cannon",
+        ))
 
 
 class FullLevelEntranceUnlockAccessTestBase(_SM64TestBase):
@@ -1407,15 +1457,15 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
             self.get_item_by_name("Long Jump"),
         ])
         self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze Block 1-Up"))
-        self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze Donut 1-Up"))
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze Block 1-Up"))
-        self.assertFalse(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze Donut 1-Up"))
 
         self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze Block 1-Up"))
-        self.assertTrue(self.can_reach_location("Rainbow Ride - Donut Top of Red Coin Maze 1-Up"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Top of Red Coin Maze Donut 1-Up"))
 
     def test_rainbow_ride_cruiser_still_requires_carpets(self):
         self.collect_third_floor_access()
@@ -1432,16 +1482,16 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_region("Rainbow Ride - Cruiser"))
 
-    def test_rainbow_ride_ship_pole_requires_cruiser_and_climb(self):
+    def test_rainbow_ride_cruiser_pole_requires_cruiser_and_climb(self):
         self.collect_third_floor_access()
         self.collect(self.get_item_by_name("Side Flip"))
         self.collect(self.get_item_by_name("Rainbow Ride - Carpets"))
         self.assertTrue(self.can_reach_region("Rainbow Ride - Cruiser"))
-        self.assertTrue(self.can_reach_location("Rainbow Ride - Ship Tip 1-Up"))
-        self.assertFalse(self.can_reach_location("Rainbow Ride - Ship Pole 1-Up"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Cruiser Tip 1-Up"))
+        self.assertFalse(self.can_reach_location("Rainbow Ride - Cruiser Pole 1-Up"))
 
         self.collect(self.get_item_by_name("Climb"))
-        self.assertTrue(self.can_reach_location("Rainbow Ride - Ship Pole 1-Up"))
+        self.assertTrue(self.can_reach_location("Rainbow Ride - Cruiser Pole 1-Up"))
 
     def test_rainbow_ride_house_path_donut_uses_house_logic(self):
         self.collect_third_floor_access()
@@ -2414,13 +2464,13 @@ class BowserInTheSkyCoinCountChecksAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Chuckya"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - 44 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - 45 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 43 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 44 Coins"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - 61 Coins"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - 62 Coins"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - 60 Coins"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - 61 Coins"))
 
         self.collect(self.get_item_by_name("Climb"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Top"))
@@ -3415,7 +3465,7 @@ class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
         source_coins = {
             "Jolly Roger Bay - Red Coins": 8,
             "Jolly Roger Bay - Horizontal Coin Rings": 24,
-            "Jolly Roger Bay - Vertical Coin Lines": 3,
+            "Jolly Roger Bay - Vertical Coin Lines": 5,
             "Jolly Roger Bay - Vertical Coin Rings": 8,
             "Jolly Roger Bay - 3-Coin Block": 3,
             "Jolly Roger Bay - Goombas": 3,
@@ -3436,7 +3486,6 @@ class JollyRogerBayIndividualUnlockLogicTestBase(SM64TestBase):
 
         source_coins = {
             "Jolly Roger Bay - Horizontal Coin Lines": 15,
-            "Jolly Roger Bay - Vertical Coin Lines": 5,
         }
         for item_name, expected_coins in source_coins.items():
             with self.subTest(item=item_name):
@@ -4020,7 +4069,7 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Cannonball"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Koopa the Quick"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Top"))
-        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Red Coins Area"))
+        self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Tree Area"))
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Huge Piranha Area"))
         self.assertFalse(self.can_reach_region("Tiny-Huge Island - Wiggler's Cave"))
 
@@ -4137,14 +4186,14 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
             "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
         self.collect_full_two_way_pipe_route()
 
-        self.assertEqual(self.maximum_reachable_coins(), 192)
+        self.assertEqual(self.maximum_reachable_coins(), 191)
 
     def test_huge_entrance_route_can_collect_all_non_impossible_coins(self):
         self.multiworld.get_entrance(
             "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
         self.collect_full_two_way_pipe_route()
 
-        self.assertEqual(self.maximum_reachable_coins(), 192)
+        self.assertEqual(self.maximum_reachable_coins(), 191)
         evaluation = COIN_EVALUATORS["Tiny-Huge Island"](
             self.multiworld.state, self.player, 191)
         source_ids = {source.source_id for source in evaluation.children}
@@ -4204,7 +4253,7 @@ class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "accessibility": "minimal",
-        "logic_tricks": {"Tiny-Huge Island Impossible Coin"},
+        "logic_tricks": {"Tiny Island Impossible Coin"},
     }
 
     def maximum_reachable_coins(self):
@@ -4218,7 +4267,6 @@ class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.collect([
             self.get_item_by_name("Tiny-Huge Island - Single Yellow Coins"),
-            self.get_item_by_name("Tiny-Huge Island - Horizontal Coin Lines"),
             self.get_item_by_name("Purple Switches"),
             self.get_item_by_name("Warp Pipes"),
             self.get_item_by_name("Triple Jump"),
@@ -4235,12 +4283,12 @@ class TinyHugeIslandImpossibleCoinFullAccessibilityCapTestBase(SM64TestBase):
     run_default_tests = False
     options = {
         "accessibility": "full",
-        "tiny_huge_island_coin_star_requirement": 193,
+        "tiny_huge_island_coin_star_requirement": 192,
     }
 
-    def test_full_accessibility_caps_requirement_at_192(self):
-        self.assertEqual(self.world.options.tiny_huge_island_coin_star_requirement.value, 192)
-        self.assertEqual(self.world.get_coin_star_requirements_slot_data()[12], 192)
+    def test_full_accessibility_caps_requirement_at_191(self):
+        self.assertEqual(self.world.options.tiny_huge_island_coin_star_requirement.value, 191)
+        self.assertEqual(self.world.get_coin_star_requirements_slot_data()[12], 191)
 
 
 class DireDireDocksCoinStarAccessTestBase(SM64TestBase):
@@ -4743,7 +4791,7 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
             "Lethal Lava Land - Crazy Box": 5,
             "Lethal Lava Land - Bowser Puzzle": 5,
             "Lethal Lava Land - Bullies": 10,
-            "Lethal Lava Land - Mr. Is": 10,
+            "Lethal Lava Land - Mr. Is": 5,
         }
         self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 1))
         for item_name, expected_coins in source_coins.items():
@@ -4755,6 +4803,16 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
                 self.assertFalse(lethal_lava_land_coins(
                     self.multiworld.state, self.player, expected_coins + 1))
                 self.remove(item)
+
+    def test_island_mr_i_requires_a_lava_route(self):
+        self.collect_basement_access()
+        self.collect(self.get_item_by_name("Lethal Lava Land - Mr. Is"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 5))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 6))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 10))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 11))
 
     def test_red_coins_require_a_lava_route(self):
         self.collect(self.get_item_by_name("Lethal Lava Land - Red Coins"))
@@ -5064,7 +5122,7 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
         "blocksanity": Options.Blocksanity.option_true,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "logic_tricks": {
-            "Shifting Sand Land Stone Structure with Spin Jump",
+            "Shifting Sand Land Top of Stone Structure with Spin Jump or Tweesters",
             "Shifting Sand Land Pillars with Koopa Shell",
             "Shifting Sand Land Pillars with Side Flip or Kick",
             "Shifting Sand Land Stand Tall on the Four Pyramids Without Pyramid Elevator",
@@ -5083,7 +5141,7 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
 
     def test_shy_guy_bounce_requires_fly_guy(self):
         self.collect_basement_access()
-        self.assertTrue(self.world.logic_ssl_stone_structure_shy_guy_spin_jump)
+        self.assertTrue(self.world.logic_ssl_top_of_stone_structure_spin_jump_or_tweesters)
         self.assertFalse(self.can_reach_region("Shifting Sand Land - Stone Structure"))
 
         self.collect(self.get_item_by_name("Shifting Sand Land - Fly Guys"))
@@ -5105,7 +5163,10 @@ class ShiftingSandLandStoneStructureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Shifting Sand Land - Stone Structure"))
         self.assertFalse(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
 
-        self.collect(self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"))
+        self.collect([
+            self.get_item_by_name("Koopa Shell Blocks"),
+            self.get_item_by_name("Shifting Sand Land - Pyramid Elevator"),
+        ])
         self.assertTrue(self.can_reach_region("Shifting Sand Land - Upper Pyramid"))
 
     def test_side_flip_trick_reaches_upper_pyramid(self):
@@ -7373,13 +7434,13 @@ class WingMarioOverTheRainbowBlocksanityAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 3)
         self.collect(self.get_item_by_name("Wing Cap"))
         self.assertFalse(self.can_reach_location(
-            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+            "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block"))
         self.assertFalse(self.can_reach_location(
             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block"))
 
         self.collect(self.get_item_by_name("Triple Jump"))
         self.assertTrue(self.can_reach_location(
-            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+            "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block"))
         self.assertTrue(self.can_reach_location(
             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block"))
 
@@ -7392,11 +7453,11 @@ class WingMarioOverTheRainbowBlocksanityAccessTestBase(SM64TestBase):
             self.world.create_item("Glitched Logic"),
         ])
         self.assertFalse(self.can_reach_location(
-            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+            "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block"))
 
         self.collect(self.get_item_by_name("Wing Mario Over the Rainbow - Cannon Unlock"))
         self.assertTrue(self.can_reach_location(
-            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block"))
+            "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block"))
         self.assertTrue(self.can_reach_location(
             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block"))
 

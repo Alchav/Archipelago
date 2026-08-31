@@ -28,11 +28,14 @@ SECRET_STAGE_OPTIONS = {
 
 class TestPrincessSecretSlideLocations(SM64TestBase):
     run_default_tests = False
+    include_baseline_level_feature_unlocks = False
     options = SECRET_STAGE_OPTIONS
 
     def test_locations(self):
+        star_block = ["The Princess's Secret Slide - Star Block"]
         self.run_location_tests([
-            ["The Princess's Secret Slide - Block Star", True, []],
+            ["The Princess's Secret Slide - Block Star", False, []],
+            ["The Princess's Secret Slide - Block Star", True, star_block],
             ["The Princess's Secret Slide - Fast", True, []],
             ["The Princess's Secret Slide - Coin Triggers 1-Up", False, []],
             ["The Princess's Secret Slide - Coin Triggers 1-Up", False,
@@ -43,7 +46,8 @@ class TestPrincessSecretSlideLocations(SM64TestBase):
             ["The Princess's Secret Slide - Slide 1-Up", False, []],
             ["The Princess's Secret Slide - Slide 1-Up", True,
              ["The Princess's Secret Slide - Freestanding 1-Ups"]],
-            ["The Princess's Secret Slide - Star Block", True, []],
+            ["The Princess's Secret Slide - Star Block", False, []],
+            ["The Princess's Secret Slide - Star Block", True, star_block],
         ], starting_regions=["The Princess's Secret Slide"])
 
 

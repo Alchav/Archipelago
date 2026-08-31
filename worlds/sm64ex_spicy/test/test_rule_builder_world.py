@@ -127,6 +127,17 @@ class VariantEntranceExplanationTest(SM64TestBase):
         self.assertIn("Whomp's Fortress entrances:", explanation)
         self.assertIn("Whomp's Fortress is at the Whomp's Fortress painting", explanation)
 
+    def test_lowercase_course_name_explains_main_and_sub_area_entrances(self):
+        explanation = self.explanation_text(
+            self.world.explain_rule("cool, cool mountain", CollectionState(self.multiworld)))
+
+        self.assertIn("Cool, Cool Mountain entrances:", explanation)
+        self.assertIn("Cool, Cool Mountain is at the Cool, Cool Mountain painting", explanation)
+        self.assertIn(
+            "the Cool, Cool Mountain Secret Slide is at the Cool, Cool Mountain chimney",
+            explanation,
+        )
+
     def test_non_course_names_use_universal_trackers_normal_explanation(self):
         self.assertIsNone(self.world.explain_rule("Castle Lobby", CollectionState(self.multiworld)))
 

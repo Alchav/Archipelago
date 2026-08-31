@@ -293,7 +293,7 @@ class SM64World(World):
                 and not self.logic_thi_impossible_coin
         ):
             self.options.tiny_huge_island_coin_star_requirement.value = min(
-                self.options.tiny_huge_island_coin_star_requirement.value, 192)
+                self.options.tiny_huge_island_coin_star_requirement.value, 191)
         coin_star_requirements = {
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names
@@ -427,14 +427,16 @@ class SM64World(World):
                 if source.key not in configured_sources:
                     connections.append((source.key, source.vanilla_destination))
 
+        requested_name = name.casefold()
         course_connections = [
             (source, destination) for source, destination in connections
-            if destination_course_name(destination) == name
+            if destination_course_name(destination).casefold() == requested_name
         ]
         if not course_connections:
             return None
 
-        messages = [{"type": "text", "text": f"{name} entrances:"}]
+        course_name = destination_course_name(course_connections[0][1])
+        messages = [{"type": "text", "text": f"{course_name} entrances:"}]
         course_connections.sort(key=lambda connection: (
             not isinstance(connection[1], int),
             self.get_entrance_destination_description(connection[1]),

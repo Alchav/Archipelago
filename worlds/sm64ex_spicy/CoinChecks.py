@@ -56,7 +56,7 @@ COURSE_MAXIMUM_COIN_VALUES = {
     "Cool, Cool Mountain": 154, "Big Boo's Haunt": 151, "Hazy Maze Cave": 139,
     "Lethal Lava Land": 133, "Shifting Sand Land": 136, "Dire, Dire Docks": 106,
     "Snowman's Land": 127, "Wet-Dry World": 152, "Tall, Tall Mountain": 137,
-    "Tiny-Huge Island": 193, "Tick Tock Clock": 128, "Rainbow Ride": 146,
+    "Tiny-Huge Island": 192, "Tick Tock Clock": 128, "Rainbow Ride": 146,
     "The Princess's Secret Slide": 80, "The Secret Aquarium": 56,
     "Wing Mario Over the Rainbow": 56, "Tower of the Wing Cap": 63,
     "Vanish Cap Under the Moat": 27, "Cavern of the Metal Cap": 47,
@@ -125,6 +125,13 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "ttm_slide_coin_lines": "Tall, Tall Mountain - Secret Slide",
     "ttm_slide_blue_coins": "Tall, Tall Mountain - Secret Slide",
 
+    "ttc_timed_jumps_block": "Tick Tock Clock - Upper Moving Bars Area",
+    "ttc_four_moving_bars_block": "Tick Tock Clock - More Moving Bars Area",
+    "ttc_past_three_spinners_block": "Tick Tock Clock - Top Past Spinners",
+    "ttc_top_clock_hand_block": "Tick Tock Clock - Top Past Spinners",
+    "ttc_top_central_platform_block": "Tick Tock Clock - Top Past Spinners",
+    "ttc_beneath_thwomp_block": "Tick Tock Clock - Top Past Spinners",
+
     "tiny_start_goomba": "Tiny-Huge Island (Tiny)",
     "tiny_piranha_area_plant": "Tiny-Huge Island - Tiny Piranha Area",
     "tiny_main_individual_coins": "Tiny-Huge Island - Tiny Main",
@@ -143,14 +150,14 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "huge_near_cannon_fly_guy": "Tiny-Huge Island (Huge)",
     "huge_lakitu": "Tiny-Huge Island (Huge)",
     "huge_koopa_troopa": "Tiny-Huge Island (Huge)",
-    "huge_lakitu_island_post": "Tiny-Huge Island - Red Coins Area",
+    "huge_lakitu_island_post": "Tiny-Huge Island - Huge Tree Area",
     "huge_windswept_line": "Tiny-Huge Island - Windswept Valley",
     "huge_windswept_giant_goombas_yellow": "Tiny-Huge Island - Windswept Valley",
     "huge_windswept_giant_goombas_blue": "Tiny-Huge Island - Windswept Valley",
     "huge_cannonball_line": "Tiny-Huge Island - Cannonball",
     "huge_cannonball_fly_guy": "Tiny-Huge Island - Cannonball",
     "huge_koopa_region_line": "Tiny-Huge Island - Koopa the Quick",
-    "tiny_impossible_coin": "Tiny-Huge Island - Koopa the Quick",
+    "tiny_impossible_coin": "Tiny-Huge Island - Tiny Main",
     "huge_koopa_region_giant_goombas_yellow": "Tiny-Huge Island - Koopa the Quick",
     "huge_koopa_region_giant_goombas_blue": "Tiny-Huge Island - Koopa the Quick",
     "huge_top_wooden_plank_line": "Tiny-Huge Island - Huge Top",
@@ -159,9 +166,9 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "red_area_movement_red_coin": "Tiny-Huge Island - Red Coin Cave",
     "red_area_wall_kick_red_coin": "Tiny-Huge Island - Red Coin Cave",
     "red_area_blue_coins": "Tiny-Huge Island - Red Coin Cave",
-    "red_area_giant_goombas_yellow": "Tiny-Huge Island - Red Coins Area",
-    "red_area_giant_goombas_blue": "Tiny-Huge Island - Red Coins Area",
-    "red_area_plank_line": "Tiny-Huge Island - Red Coins Area",
+    "red_area_giant_goombas_yellow": "Tiny-Huge Island - Huge Tree Area",
+    "red_area_giant_goombas_blue": "Tiny-Huge Island - Huge Tree Area",
+    "red_area_plank_line": "Tiny-Huge Island - Huge Tree Area",
     "wiggler_cave_coin_lines": "Tiny-Huge Island - Wiggler's Cave",
     "huge_piranha_area_plants": "Tiny-Huge Island - Huge Piranha Area",
 }
@@ -180,6 +187,17 @@ def coin_output_region_name(output: CoinOutputDefinition) -> str | None:
 
 
 COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ...]] = {
+    ("Lethal Lava Land", "lll_mr_is", 2): ("lll_island_mr_i",),
+    ("Big Boo's Haunt", "third_floor_boo", 1): ("merry_go_round_boos",),
+    ("Big Boo's Haunt", "merry_go_round_boos", 5): ("third_floor_boo",),
+    **{
+        ("Jolly Roger Bay", "purple_switch_lower_coin_line", index): ("vertical_coin_line",)
+        for index in range(1, 4)
+    },
+    **{
+        ("Jolly Roger Bay", "purple_switch_upper_coin_line", index): ("vertical_coin_line",)
+        for index in range(1, 3)
+    },
     ("Tall, Tall Mountain", "ttm_upper_leaf_coin_line", 1):
         ("ttm_upper_leaf_first_coin",),
     **{
@@ -213,10 +231,99 @@ COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ..
             ("bitdw_single_coins_before_slope",)
         for index in range(1, 4)
     },
+    **{
+        ("Tick Tock Clock", "ttc_past_three_spinners_block", index):
+            ("ttc_timed_jumps_block",)
+        for index in range(1, 4)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_timed_jumps_block", index):
+            ("ttc_past_three_spinners_block",)
+        for index in range(1, 4)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_top_clock_hand_block", index):
+            ("ttc_four_moving_bars_block",)
+        for index in range(1, 11)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_top_central_platform_block", index):
+            ("ttc_top_clock_hand_block",)
+        for index in range(1, 11)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_four_moving_bars_block", index):
+            ("ttc_top_central_platform_block",)
+        for index in range(1, 11)
+    },
 }
 
 
 COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
+    ("Big Boo's Haunt", "third_floor_boo", 1): "Merry-Go-Round Boo 4 Blue Coin",
+    ("Big Boo's Haunt", "merry_go_round_boos", 4): "Merry-Go-Round Boo 5 Blue Coin",
+    ("Big Boo's Haunt", "merry_go_round_boos", 5): "Secret Room Boo Blue Coin",
+    ("Rainbow Ride", "rr_maze_blue_coin", 1): "Blue Coin Block First Coin",
+    **{
+        ("Rainbow Ride", "rr_maze_wall_kick_blue_coins", index):
+            f"Blue Coin Block Upper Coin {index}"
+        for index in range(1, 6)
+    },
+    **{
+        ("Bowser in the Sky", "bits_top_goombas", index):
+            f"Top Goomba {index + 1} Coin"
+        for index in range(1, 5)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_past_three_spinners_block", index):
+            f"Above Timed Jumps on Moving Bars 3 Coins Block Coin {index}"
+        for index in range(1, 4)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_timed_jumps_block", index):
+            f"Past Three Spinners 3-Coin Block Coin {index}"
+        for index in range(1, 4)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_top_clock_hand_block", index):
+            f"Above Four Moving Bars 10-Coin Block Coin {index}"
+        for index in range(1, 11)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_top_central_platform_block", index):
+            f"Top Clock Hand 10-Coin Block Coin {index}"
+        for index in range(1, 11)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_four_moving_bars_block", index):
+            f"Top Central Platform 10-Coin Block Coin {index}"
+        for index in range(1, 11)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_heave_ho_blocks", index):
+            f"Heave-ho Second 3 Coins Block Coin {index}"
+        for index in range(1, 4)
+    },
+    **{
+        ("Tick Tock Clock", "ttc_heave_ho_blocks", index):
+            f"Heave-ho First 3 Coins Block Coin {index - 3}"
+        for index in range(4, 7)
+    },
+    **{
+        ("Tiny-Huge Island", "red_area_blue_coins", index):
+            f"Red Coin Cave Blue Coin {index}"
+        for index in range(1, 3)
+    },
+    **{
+        ("Jolly Roger Bay", "purple_switch_lower_coin_line", index):
+            f"Vertical Coin Line Coin {index}"
+        for index in range(1, 4)
+    },
+    **{
+        ("Jolly Roger Bay", "purple_switch_upper_coin_line", index):
+            f"Vertical Coin Line Coin {index + 3}"
+        for index in range(1, 3)
+    },
     **{
         ("Bob-omb Battlefield", "main_wooden_posts", index):
             f"Chain Chomp's Wooden Post Coin {index}"
@@ -458,13 +565,21 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
     },
     **{
         ("Whomp's Fortress", "whomp_jump_coins", index):
-            f"Whomp {((index - 1) // 5) + 1}, Coin {((index - 1) % 5) + 1}"
+            f"Whomp {((index - 1) // 5) + 1} Coin {((index - 1) % 5) + 1}"
         for index in range(1, 11)
     },
     **{
         ("Whomp's Fortress", "whomp_ground_pound_coins", index):
-            f"Whomp {((index - 1) // 5) + 1}, Coin {((index - 1) % 5) + 6}"
+            f"Whomp {((index - 1) // 5) + 1} Coin {((index - 1) % 5) + 6}"
         for index in range(1, 11)
+    },
+    **{
+        ("Bowser in the Sky", "bits_whomp_jump_coins", index): f"Whomp Coin {index}"
+        for index in range(1, 6)
+    },
+    **{
+        ("Bowser in the Sky", "bits_whomp_ground_pound_coins", index): f"Whomp Coin {index + 5}"
+        for index in range(1, 6)
     },
     **{
         ("Whomp's Fortress", "start_throwable_cork_boxes", index): f"Grass Cork Box Coin {index}"
@@ -535,6 +650,26 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
     ("Lethal Lava Land", "lll_outside_bullies", 8): "After Bowser Puzzle Bully 1 Coin",
     ("Lethal Lava Land", "lll_mr_is", 1): "Grate Platform Mr. I Blue Coin",
     ("Lethal Lava Land", "lll_mr_is", 2): "Island Mr. I Blue Coin",
+    **{
+        ("Jolly Roger Bay", "clam_vertical_coin_ring", index):
+            f"Jet Stream Vertical Coin Ring Coin {index}"
+        for index in range(1, 9)
+    },
+    **{
+        ("Jolly Roger Bay", "jet_stream_coin_ring", index):
+            f"Treasure Cave Coin Ring Coin {index}"
+        for index in range(1, 9)
+    },
+    **{
+        ("Jolly Roger Bay", "cave_chest_coin_ring", index):
+            f"Clam Coin Ring Coin {index}"
+        for index in range(1, 9)
+    },
+    **{
+        ("Jolly Roger Bay", "main_goombas", index):
+            f"Treasure Cave Goomba {index} Coin"
+        for index in range(1, 4)
+    },
     ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", 1): "Inside Pyramid Coin 1",
     ("Shifting Sand Land", "ssl_pillar_and_pyramid_coins", 2): "Inside Pyramid Coin 2",
     **{
@@ -611,7 +746,12 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
         7: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
         8: ("ssl_normal_high_red_coin_route", "ssl_shy_guy_red_coin_route"),
     },
-    "Dire, Dire Docks": {1: ("ddd_first_red_coin",), **{i: ("ddd_remaining_red_coins",) for i in range(2, 9)}},
+    "Dire, Dire Docks": {
+        1: ("ddd_remaining_red_coins",),
+        **{i: ("ddd_remaining_red_coins",) for i in range(2, 6)},
+        6: ("ddd_first_red_coin",),
+        **{i: ("ddd_remaining_red_coins",) for i in range(7, 9)},
+    },
     "Snowman's Land": {
         1: ("sl_start_red_coins",),
         2: ("sl_whirl_red_coins",),
@@ -681,8 +821,8 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
     },
     "Bowser in the Sky": {
         **{i: ("bits_start_red_coins",) for i in range(1, 4)},
-        **{i: ("bits_arrow_ride_red_coins",) for i in range(4, 7)},
-        7: ("bits_top_red_coins",), 8: ("bits_top_red_coins",),
+        **{i: ("bits_arrow_ride_red_coins",) for i in (4, 5, 7)},
+        6: ("bits_top_red_coins",), 8: ("bits_top_red_coins",),
     },
 }
 
@@ -712,7 +852,11 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
         "Floating Isle Red Coin 1",
         "Floating Isle Red Coin 2",
     ),
-    "Jolly Roger Bay": (*_repeat_names("Initially Reachable Red Coin", 4), "Red Coin on the Stone Pillar", *_repeat_names("Red Coin on the Raised Ship", 3)),
+    "Jolly Roger Bay": (
+        *_repeat_names("Clam Shell Red Coin", 4),
+        "Red Coin on the Stone Pillar",
+        *_repeat_names("Red Coin on the Raised Ship", 3),
+    ),
     "Cool, Cool Mountain": (
         "First Tree Red Coin",
         "Bottom of Snowman Slide Red Coin",
@@ -743,7 +887,13 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
         "Stone Structure Box Red Coin",
         *_repeat_names("High Red Coin", 4),
     ),
-    "Dire, Dire Docks": ("First Red Coin", *_repeat_names("Pole Red Coin", 7)),
+    "Dire, Dire Docks": (
+        "Pole Red Coin 5",
+        *_repeat_names("Pole Red Coin", 4),
+        "First Red Coin",
+        "Pole Red Coin 6",
+        "Pole Red Coin 7",
+    ),
     "Snowman's Land": (
         "Starting Area Red Coin 2",
         "Under the Bully Red Coin 2",
@@ -775,7 +925,7 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
     ),
     "Tiny-Huge Island": _repeat_names("Red Coin", 8),
     "Tick Tock Clock": _repeat_names("Red Coin", 8),
-    "Rainbow Ride": ("Red Coin Requiring Maze Movement", *_repeat_names("Other Maze Red Coin", 7)),
+    "Rainbow Ride": ("Maze Lone Ledge Red Coin", *_repeat_names("Maze Red Coin", 7)),
     "The Secret Aquarium": _repeat_names("Aquarium Red Coin", 8),
     "Tower of the Wing Cap": _repeat_names("Tower Red Coin", 8),
     "Vanish Cap Under the Moat": (
@@ -786,14 +936,14 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
     ),
     "Cavern of the Metal Cap": (*_repeat_names("Initial Red Coin", 4), *_repeat_names("Deep-Water Red Coin", 4)),
     "Wing Mario Over the Rainbow": (
-        "Cannon Region Red Coin 1",
-        "Cannon Region Red Coin 2",
-        "Cannon Region Red Coin 3",
-        "Flight Path Red Coin 1",
-        "Flight Path Red Coin 2",
-        "Flight Path Red Coin 3",
-        "Initial Red Coin",
-        "Cannon Region Red Coin 4",
+        "Hanging Poles Red Coin",
+        "Transparent Cloud Red Coin",
+        "Pole Cloud Red Coin 1",
+        "Overlooking Bob-omb Buddy Cloud Red Coin",
+        "Bob-omb Buddy Platform Red Coin",
+        "Lowest Cloud Red Coin",
+        "Starting Cloud Red Coin",
+        "Pole Cloud Red Coin 2",
     ),
     "Bowser in the Dark World": (
         "Purple Switch Red Coin 2",
@@ -809,18 +959,21 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
         "Below the Lift Red Coin",
         "Wire Platform Red Coin",
         "Seesaw Platform Red Coin",
-        "Upper Course Red Coin 2",
-        "Upper Course Red Coin 3",
-        "Upper Course Red Coin 4",
-        "Upper Course Red Coin 5",
+        "Above Wire Platform Red Coin",
+        "Swaying Stairs Red Coin",
+        "Sinking Platforms Red Coin",
+        "Final Pole Red Coin",
         "Lift Cage Corner Red Coin",
     ),
     "Bowser in the Sky": (
         "Piranha Plant Red Coin",
         "Push Block Red Coin",
         "Beneath the Tilting Platform Hidden Red Coin",
-        *_repeat_names("Arrow Ride Red Coin", 3),
-        *_repeat_names("Top Red Coin", 2),
+        "Arrow Ride Red Coin 1",
+        "Arrow Ride Red Coin 2",
+        "Top Red Coin 1",
+        "Arrow Ride Red Coin 3",
+        "Top Red Coin 2",
     ),
 }
 
@@ -930,6 +1083,7 @@ _ENEMY_OUTPUT_GROUP_OVERRIDES = {
     "huge_piranha_area_plants": (2, 2, 2, 2, 2),
 }
 _ENEMY_DESCRIPTOR_OVERRIDES = {
+    "main_goombas": "Goomba",
     "whomp_jump_coins": "Whomp (Jump)",
     "whomp_ground_pound_coins": "Whomp (Ground Pound)",
     "bits_whomp_jump_coins": "Whomp (Jump)",
@@ -952,13 +1106,14 @@ _ENEMY_DESCRIPTOR_OVERRIDES = {
     "amazing_emergency_exit_swoop_1": "A-Maze-Ing Emergency Exit Swoop 1",
     "amazing_emergency_exit_swoop_2": "A-Maze-Ing Emergency Exit Swoop 2",
     "upper_red_coin_swoops": "Checkerboard Platform Ride Swoop",
+    "bits_chuckya_goomba": "Top Goomba 1",
 }
 _GIANT_GOOMBA_DESCRIPTORS = {
     "huge_start_giant_goombas": "Huge Starting Area Goomba",
     "near_cannon_giant_goomba": "Near Cannon Goomba",
     "huge_windswept_giant_goombas": "Windswept Valley Giant Goomba",
     "huge_koopa_region_giant_goombas": "Koopa the Quick Area Giant Goomba",
-    "red_area_giant_goombas": "Red Coins Area Giant Goomba",
+    "red_area_giant_goombas": "Huge Tree Area Giant Goomba",
 }
 
 
@@ -1036,7 +1191,7 @@ STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
     "sl_impossible_coin": "Impossible Coin",
     "sl_penguin_and_face_coins": "Coin Leading to Snowman's Big Head",
     "ttm_hidden_coin_before_slide": "Hidden Coin Before the Slide",
-    "tiny_impossible_coin": "Impossible Coin",
+    "tiny_impossible_coin": "Tiny Island Impossible Coin",
     "tiny_purple_switch_coin": "Five Itty Bitty Secrets Island Coin",
     "vcutm_end_marker_coins": "Star Cage Coin",
     "rr_second_carpet_platform_coin": "Coin on the Second Carpet's Grey Platform",
@@ -1133,6 +1288,11 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             sources.append(CoinSourceDefinition(course_name, source_id, label, outputs, count * value))
             offset += count
 
+            # Coin 9 used to duplicate the separately tracked impossible coin.
+            # Keep its retired ID vacant so existing THI location IDs remain stable.
+            if course_name == "Tiny-Huge Island" and source_id == "tiny_main_individual_coins":
+                offset += 1
+
         if course_name == "Bob-omb Battlefield":
             # The physical object order runs furthest-to-nearest in places. Keep the stable output IDs,
             # but display and logically treat the rings from closest to the island to furthest.
@@ -1156,13 +1316,13 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             for source_id, label, count, methods in custom:
                 if source_id == "island_vertical_ring":
                     names = tuple(
-                        f"Island Vertical Coin Ring {ring_display_order[((index - 1) // 8) + 1]} "
+                        f"Mario Wings to the Sky Vertical Coin Ring {ring_display_order[((index - 1) // 8) + 1]} "
                         f"Coin {((index - 1) % 8) + 1}"
                         for index in range(1, count + 1)
                     )
                 else:
                     names = tuple(
-                        f"Island Coin Ring {ring_display_order[index]} Center Coin"
+                        f"Mario Wings to the Sky Coin Ring {ring_display_order[index]} Center Coin"
                         for index in range(1, count + 1)
                     )
                 outputs = tuple(

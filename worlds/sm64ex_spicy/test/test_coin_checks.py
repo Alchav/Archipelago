@@ -51,21 +51,22 @@ class CoinCheckCatalogTest(unittest.TestCase):
             expected_names,
         )
 
-    def test_wmotr_red_coins_match_physical_elevation_and_routes(self):
+    def test_wmotr_red_coins_match_physical_landmarks_and_routes(self):
         course_name = "Wing Mario Over the Rainbow"
         expected = (
-            ("Cannon Region Red Coin 1", ("wmotr_cannon_red_coins",)),
-            ("Cannon Region Red Coin 2", ("wmotr_cannon_red_coins",)),
-            ("Cannon Region Red Coin 3", ("wmotr_cannon_red_coins",)),
-            ("Flight Path Red Coin 1", ("wmotr_flight_red_coins",)),
-            ("Flight Path Red Coin 2", ("wmotr_flight_red_coins", "wmotr_long_jump_second_red_coin")),
-            ("Flight Path Red Coin 3", (
+            ("Hanging Poles Red Coin", ("wmotr_cannon_red_coins",)),
+            ("Transparent Cloud Red Coin", ("wmotr_cannon_red_coins",)),
+            ("Pole Cloud Red Coin 1", ("wmotr_cannon_red_coins",)),
+            ("Overlooking Bob-omb Buddy Cloud Red Coin", ("wmotr_flight_red_coins",)),
+            ("Bob-omb Buddy Platform Red Coin", (
+                "wmotr_flight_red_coins", "wmotr_long_jump_second_red_coin")),
+            ("Lowest Cloud Red Coin", (
                 "wmotr_flight_red_coins",
                 "wmotr_long_jump_first_red_coin",
                 "wmotr_wing_cap_fallback_red_coin",
             )),
-            ("Initial Red Coin", ("wmotr_initial_red_coin",)),
-            ("Cannon Region Red Coin 4", ("wmotr_cannon_red_coins",)),
+            ("Starting Cloud Red Coin", ("wmotr_initial_red_coin",)),
+            ("Pole Cloud Red Coin 2", ("wmotr_cannon_red_coins",)),
         )
         for output_index, (expected_name, expected_methods) in enumerate(expected, 1):
             with self.subTest(output_index=output_index):
@@ -168,26 +169,33 @@ class CoinCheckCatalogTest(unittest.TestCase):
     def test_ttc_block_coin_sources_match_their_physical_blocks(self):
         expected_first_outputs = {
             "ttc_past_three_spinners_block": (
-                4_013_046, "Tick Tock Clock - Past Three Spinners 3-Coin Block Coin 1"),
+                4_013_046, "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block Coin 1",
+                "ttc_timed_jumps_block", "Tick Tock Clock - Upper Moving Bars Area"),
             "ttc_top_central_platform_block": (
-                4_013_049, "Tick Tock Clock - Top Central Platform 10-Coin Block Coin 1"),
+                4_013_049, "Tick Tock Clock - Top Clock Hand 10-Coin Block Coin 1",
+                "ttc_top_clock_hand_block", "Tick Tock Clock - Top Past Spinners"),
             "ttc_timed_jumps_block": (
-                4_013_059, "Tick Tock Clock - Above Timed Jumps on Moving Bars 3-Coin Block Coin 1"),
+                4_013_059, "Tick Tock Clock - Past Three Spinners 3-Coin Block Coin 1",
+                "ttc_past_three_spinners_block", "Tick Tock Clock - Top Past Spinners"),
             "ttc_four_moving_bars_block": (
-                4_013_072, "Tick Tock Clock - Above Four Moving Bars 10-Coin Block Coin 1"),
+                4_013_072, "Tick Tock Clock - Top Central Platform 10-Coin Block Coin 1",
+                "ttc_top_central_platform_block", "Tick Tock Clock - Top Past Spinners"),
             "ttc_top_clock_hand_block": (
-                4_013_082, "Tick Tock Clock - Top Clock Hand 10-Coin Block Coin 1"),
+                4_013_082, "Tick Tock Clock - Above Four Moving Bars 10-Coin Block Coin 1",
+                "ttc_four_moving_bars_block", "Tick Tock Clock - More Moving Bars Area"),
         }
         sources = {
             source.source_id: source
             for source in coin_source_catalog
             if source.course_name == "Tick Tock Clock"
         }
-        for source_id, (location_id, location_name) in expected_first_outputs.items():
+        for source_id, (location_id, location_name, source_method, region_name) in expected_first_outputs.items():
             with self.subTest(source_id=source_id):
                 first_output = sources[source_id].outputs[0]
                 self.assertEqual(first_output.location_id, location_id)
                 self.assertEqual(first_output.location_name, location_name)
+                self.assertEqual(first_output.source_methods, (source_method,))
+                self.assertEqual(coin_output_region_name(first_output), region_name)
 
     def test_atomic_output_denominations(self):
         self.assertEqual(
@@ -202,7 +210,7 @@ class CoinCheckCatalogTest(unittest.TestCase):
         self.assertEqual(totals, COURSE_MAXIMUM_COIN_VALUES)
 
     def test_names_and_ids_are_unique_and_stable(self):
-        self.assertEqual(len(coin_output_catalog), 2080)
+        self.assertEqual(len(coin_output_catalog), 2079)
         self.assertEqual(len(coin_output_by_name), len(coin_output_catalog))
         self.assertEqual(
             len({output.location_id for output in coin_output_catalog}),
@@ -212,7 +220,39 @@ class CoinCheckCatalogTest(unittest.TestCase):
             coin_output_by_name["Jolly Roger Bay - Red Coin on the Raised Ship 1"].location_id,
             4_002_005,
         )
-        self.assertIn("Tiny-Huge Island - Impossible Coin", coin_output_by_name)
+        self.assertEqual(
+            tuple(
+                output.location_name.removeprefix("Jolly Roger Bay - ")
+                for output in coin_output_catalog
+                if output.output_id.course_name == "Jolly Roger Bay"
+                and output.output_id.source_id == "red_coin"
+            )[:4],
+            tuple(f"Clam Shell Red Coin {index}" for index in range(1, 5)),
+        )
+        jrb_sources = {
+            source.source_id: source
+            for source in coin_source_catalog
+            if source.course_name == "Jolly Roger Bay"
+        }
+        for source_id, label in (
+            ("clam_vertical_coin_ring", "Jet Stream Vertical Coin Ring"),
+            ("jet_stream_coin_ring", "Treasure Cave Coin Ring"),
+            ("cave_chest_coin_ring", "Clam Coin Ring"),
+        ):
+            with self.subTest(source_id=source_id):
+                self.assertEqual(
+                    tuple(output.location_name for output in jrb_sources[source_id].outputs),
+                    tuple(
+                        f"Jolly Roger Bay - {label} Coin {index}"
+                        for index in range(1, 9)
+                    ),
+                )
+        self.assertEqual(
+            tuple(output.location_name for output in jrb_sources["main_goombas"].outputs),
+            tuple(f"Jolly Roger Bay - Treasure Cave Goomba {index} Coin"
+                  for index in range(1, 4)),
+        )
+        self.assertIn("Tiny-Huge Island - Tiny Island Impossible Coin", coin_output_by_name)
         self.assertIn(
             "Wet-Dry World - Downtown Skeeter 1 Coin 1",
             coin_output_by_name,
@@ -385,7 +425,7 @@ class CoinCheckCatalogTest(unittest.TestCase):
             output for output in coin_output_catalog
             if output.output_id.course_name == "Bob-omb Battlefield"
             and output.output_id.source_id == "island_vertical_ring"
-            and "Island Vertical Coin Ring 1 " in output.location_name
+            and "Mario Wings to the Sky Vertical Coin Ring 1 " in output.location_name
         )
         self.assertEqual(tuple(output.output_id.output_index for output in closest_ring), tuple(range(25, 33)))
         self.assertEqual(closest_ring[0].source_methods, ("island_first_ring_easy_coins",))
@@ -473,6 +513,35 @@ class CoinCheckCatalogTest(unittest.TestCase):
                 output.location_name.removeprefix("Bowser in the Sky - ")
                 for output in coin_output_catalog
                 if output.output_id.course_name == "Bowser in the Sky"
+                and output.output_id.source_id == "red_coin"
+            )[3:],
+            (
+                "Arrow Ride Red Coin 1",
+                "Arrow Ride Red Coin 2",
+                "Top Red Coin 1",
+                "Arrow Ride Red Coin 3",
+                "Top Red Coin 2",
+            ),
+        )
+        self.assertEqual(
+            tuple(
+                output.location_name.removeprefix("Bowser in the Sky - ")
+                for output in coin_output_catalog
+                if output.output_id.course_name == "Bowser in the Sky"
+                and output.output_id.source_id in {"bits_chuckya_goomba", "bits_top_goombas"}
+            ),
+            tuple(f"Top Goomba {index} Coin" for index in range(1, 6)),
+        )
+        self.assertIn("Rainbow Ride - Blue Coin Block First Coin", coin_output_by_name)
+        self.assertTrue(all(
+            f"Rainbow Ride - Blue Coin Block Upper Coin {index}" in coin_output_by_name
+            for index in range(1, 6)
+        ))
+        self.assertEqual(
+            tuple(
+                output.location_name.removeprefix("Bowser in the Sky - ")
+                for output in coin_output_catalog
+                if output.output_id.course_name == "Bowser in the Sky"
                 and output.output_id.source_id == "bits_whomp_platform_lines"
             ),
             (
@@ -534,7 +603,8 @@ class CoinCheckCatalogTest(unittest.TestCase):
             for source in coin_source_catalog
             if source.course_name == "Tiny-Huge Island"
         }
-        self.assertEqual(sum(source.maximum_coin_value for source in sources.values()), 193)
+        self.assertEqual(sum(source.maximum_coin_value for source in sources.values()), 192)
+        self.assertEqual(len(sources["tiny_main_individual_coins"].outputs), 8)
         self.assertEqual(len(sources["tiny_main_three_coin_block"].outputs), 3)
         self.assertEqual(len(sources["huge_windswept_line"].outputs), 5)
         self.assertEqual(len(sources["huge_koopa_region_line"].outputs), 4)
@@ -558,6 +628,23 @@ class CoinCheckCatalogTest(unittest.TestCase):
                 ("ssl_pyramid_top_vertical_coin_line",),
                 ("ssl_pyramid_top_vertical_coin_line",),
                 ("ssl_pyramid_top_vertical_coin_line_top_coin",),
+            ),
+        )
+
+    def test_ttc_heave_ho_block_coin_names_match_their_physical_blocks(self):
+        source = next(
+            source for source in coin_source_catalog
+            if source.course_name == "Tick Tock Clock"
+            and source.source_id == "ttc_heave_ho_blocks"
+        )
+        self.assertEqual(
+            tuple(output.location_name for output in source.outputs),
+            tuple(
+                f"Tick Tock Clock - Heave-ho Second 3 Coins Block Coin {index}"
+                for index in range(1, 4)
+            ) + tuple(
+                f"Tick Tock Clock - Heave-ho First 3 Coins Block Coin {index}"
+                for index in range(1, 4)
             ),
         )
 
@@ -716,7 +803,7 @@ class CoinCheckCatalogTest(unittest.TestCase):
             ("Shifting Sand Land", "ssl_goombas", 10): "Shifting Sand Land",
             ("Tiny-Huge Island", "red_coin", 1): "Tiny-Huge Island - Red Coin Cave",
             ("Tiny-Huge Island", "red_area_giant_goombas", 1):
-                "Tiny-Huge Island - Red Coins Area",
+                "Tiny-Huge Island - Huge Tree Area",
             ("Tiny-Huge Island", "wiggler_cave_coin_lines", 1):
                 "Tiny-Huge Island - Wiggler's Cave",
         }
@@ -724,6 +811,21 @@ class CoinCheckCatalogTest(unittest.TestCase):
             with self.subTest(output_key=output_key):
                 output = coin_output_by_id[CoinOutputID(*output_key)]
                 self.assertEqual(coin_output_region_name(output), expected_region)
+
+    def test_thi_removed_duplicate_coin_keeps_later_location_ids_stable(self):
+        self.assertNotIn(4_012_018, {output.location_id for output in coin_output_catalog})
+        self.assertEqual(
+            coin_output_by_id[CoinOutputID(
+                "Tiny-Huge Island", "tiny_impossible_coin", 1
+            )].location_id,
+            4_012_088,
+        )
+        self.assertEqual(
+            coin_output_by_id[CoinOutputID(
+                "Tiny-Huge Island", "red_area_giant_goombas", 4
+            )].location_id,
+            4_012_108,
+        )
 
     def test_bitdw_red_coin_names_and_purple_switch_rules_match_physical_coins(self):
         source = next(
@@ -863,10 +965,10 @@ class CoinCheckCatalogTest(unittest.TestCase):
                 "Below the Lift Red Coin",
                 "Wire Platform Red Coin",
                 "Seesaw Platform Red Coin",
-                "Upper Course Red Coin 2",
-                "Upper Course Red Coin 3",
-                "Upper Course Red Coin 4",
-                "Upper Course Red Coin 5",
+                "Above Wire Platform Red Coin",
+                "Swaying Stairs Red Coin",
+                "Sinking Platforms Red Coin",
+                "Final Pole Red Coin",
                 "Lift Cage Corner Red Coin",
             ),
         )
@@ -948,6 +1050,22 @@ class CoinCheckCatalogTest(unittest.TestCase):
             ),
         )
 
+    def test_bbh_boo_names_and_rules_match_physical_boos(self):
+        course_name = "Big Boo's Haunt"
+        expected = {
+            ("third_floor_boo", 1):
+                ("Merry-Go-Round Boo 4 Blue Coin", ("merry_go_round_boos",)),
+            ("merry_go_round_boos", 4):
+                ("Merry-Go-Round Boo 5 Blue Coin", ("merry_go_round_boos",)),
+            ("merry_go_round_boos", 5):
+                ("Secret Room Boo Blue Coin", ("third_floor_boo",)),
+        }
+        for (source_id, output_index), (name, methods) in expected.items():
+            with self.subTest(source_id=source_id, output_index=output_index):
+                output = coin_output_by_id[CoinOutputID(course_name, source_id, output_index)]
+                self.assertEqual(output.location_name, f"{course_name} - {name}")
+                self.assertEqual(output.source_methods, methods)
+
 
 class DisabledCoinChecksTest(SM64TestBase):
     run_default_tests = False
@@ -1008,8 +1126,8 @@ class FullCataloguedCoinChecksTest(SM64TestBase):
         state.collect(self.world.create_item("Red Coins"), prevent_sweep=True)
         state.collect(self.world.create_item("Wall Kick"), prevent_sweep=True)
         for location_name in (
-                "Rainbow Ride - Red Coin Requiring Maze Movement",
-                "Rainbow Ride - Other Maze Red Coin 1"):
+                "Rainbow Ride - Maze Lone Ledge Red Coin",
+                "Rainbow Ride - Maze Red Coin 1"):
             with self.subTest(location=location_name):
                 location = self.multiworld.get_location(location_name, self.player)
                 self.assertFalse(location.access_rule(state))
@@ -1126,12 +1244,12 @@ class WingMarioOverTheRainbowRedCoinChecksAccessTest(SM64TestBase):
         flight = red_coins + ["Wing Mario Over the Rainbow - Wing Cap", "Triple Jump"]
         cannon_flight = flight + ["Wing Mario Over the Rainbow - Cannon Unlock"]
         self.run_location_tests([
-            ["Wing Mario Over the Rainbow - Initial Red Coin", True, red_coins],
-            ["Wing Mario Over the Rainbow - Flight Path Red Coin 1", False, red_coins],
-            ["Wing Mario Over the Rainbow - Flight Path Red Coin 1", True, flight],
-            ["Wing Mario Over the Rainbow - Cannon Region Red Coin 1", False, flight],
-            ["Wing Mario Over the Rainbow - Cannon Region Red Coin 1", True, cannon_flight],
-            ["Wing Mario Over the Rainbow - Cannon Region Red Coin 4", True, cannon_flight],
+            ["Wing Mario Over the Rainbow - Starting Cloud Red Coin", True, red_coins],
+            ["Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Red Coin", False, red_coins],
+            ["Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Red Coin", True, flight],
+            ["Wing Mario Over the Rainbow - Hanging Poles Red Coin", False, flight],
+            ["Wing Mario Over the Rainbow - Hanging Poles Red Coin", True, cannon_flight],
+            ["Wing Mario Over the Rainbow - Pole Cloud Red Coin 2", True, cannon_flight],
         ], starting_regions=["Wing Mario Over the Rainbow"])
 
 
@@ -1172,6 +1290,37 @@ class ShiftingSandLandSubAreaCoinChecksAccessTest(SM64TestBase):
             PyramidOnlyState(), self.player, 1)
         self.assertEqual(evaluation.reachable_coins, 0)
         del evaluation, item, state
+
+
+class ShiftingSandLandUpperPyramidCoinChecksAccessTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "coin_checks": 100,
+        "coin_object_unlocks": "per_level",
+        "backflip": "global",
+        "climb": "global",
+        "ledge_grab": "global",
+        "side_flip": "global",
+        "triple_jump": "global",
+        "wall_kick": "global",
+    }
+
+    def test_second_wire_grid_line_requires_climb(self):
+        line_item = ["Shifting Sand Land - Horizontal Coin Lines"]
+        self.run_location_tests([
+            ["Shifting Sand Land - Pyramid Coin Line under the Second Wire Grid Coin 1",
+             False, line_item],
+            ["Shifting Sand Land - Pyramid Coin Line under the Second Wire Grid Coin 1",
+             True, line_item + ["Climb"]],
+        ], starting_regions=["Shifting Sand Land - Upper Pyramid"])
+
+    def test_highest_vertical_line_coin_accepts_wall_kick(self):
+        self.run_location_tests([
+            ["Shifting Sand Land - Vertical Coin Line at the Top of the Pyramid Coin 5",
+             False, ["Shifting Sand Land - Vertical Coin Lines"]],
+            ["Shifting Sand Land - Vertical Coin Line at the Top of the Pyramid Coin 5",
+             True, ["Shifting Sand Land - Vertical Coin Lines", "Wall Kick"]],
+        ], starting_regions=["Shifting Sand Land - Upper Pyramid"])
 
 
 class TallTallMountainUpperCoinLineChecksAccessTest(SM64TestBase):
@@ -1262,6 +1411,7 @@ class BowserInTheFireSeaCoinChecksAccessTest(SM64TestBase):
     options = {
         "blocksanity": True,
         "climb": "global",
+        "wall_kick": "global",
         "coin_checks": 100,
         "coin_object_unlocks": "per_level",
     }
@@ -1280,10 +1430,13 @@ class BowserInTheFireSeaCoinChecksAccessTest(SM64TestBase):
             ["Bowser in the Fire Sea - Below the Lift Red Coin", True, red_coins + climb],
             ["Bowser in the Fire Sea - Seesaw Platform Red Coin", False, red_coins],
             ["Bowser in the Fire Sea - Seesaw Platform Red Coin", True, red_coins + climb],
+            ["Bowser in the Fire Sea - Seesaw Platform Red Coin", True, red_coins + ["Wall Kick"]],
             ["Bowser in the Fire Sea - 3-Coin Block Coin 1", False, three_coin_block],
             ["Bowser in the Fire Sea - 3-Coin Block Coin 1", True, three_coin_block + climb],
+            ["Bowser in the Fire Sea - 3-Coin Block Coin 1", True, three_coin_block + ["Wall Kick"]],
             ["Bowser in the Fire Sea - 3 Coins Block", False, three_coin_block],
             ["Bowser in the Fire Sea - 3 Coins Block", True, three_coin_block + climb],
+            ["Bowser in the Fire Sea - 3 Coins Block", True, three_coin_block + ["Wall Kick"]],
         ], starting_regions=["Bowser in the Fire Sea"])
 
 
@@ -1508,6 +1661,20 @@ class LethalLavaLandCrossLavaCoinChecksAccessTest(SM64TestBase):
             starting_regions=("Lethal Lava Land",),
         )
 
+    def test_island_mr_i_routes(self):
+        location_name = "Lethal Lava Land - Island Mr. I Blue Coin"
+        mr_i = ["Lethal Lava Land - Mr. Is"]
+        self.run_location_tests(
+            [
+                [location_name, False, mr_i],
+                [location_name, True, mr_i + ["Long Jump"]],
+                [location_name, True, mr_i + ["Lethal Lava Land - Koopa Shell"]],
+                [location_name, True,
+                 mr_i + ["Lethal Lava Land - Wing Cap", "Triple Jump"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
+        )
+
 
 class LethalLavaLandLavaDamageBoostingHatCoinChecksAccessTest(SM64TestBase):
     run_default_tests = False
@@ -1527,6 +1694,17 @@ class LethalLavaLandLavaDamageBoostingHatCoinChecksAccessTest(SM64TestBase):
             [
                 [location_name, False, rings],
                 [location_name, True, rings + ["Mario's Hat"]],
+            ],
+            starting_regions=("Lethal Lava Land",),
+        )
+
+    def test_island_mr_i_lava_damage_boosting_requires_hat(self):
+        location_name = "Lethal Lava Land - Island Mr. I Blue Coin"
+        mr_i = ["Lethal Lava Land - Mr. Is"]
+        self.run_location_tests(
+            [
+                [location_name, False, mr_i],
+                [location_name, True, mr_i + ["Mario's Hat"]],
             ],
             starting_regions=("Lethal Lava Land",),
         )
@@ -1570,8 +1748,7 @@ class TinyHugeIslandRedCoinCaveMovementCoinChecksAccessTest(SM64TestBase):
     def test_blue_coin_block_coins_require_movement(self):
         blue_coins = ["Tiny-Huge Island - Blue Coin Block", "Ground Pound"]
         for index in range(1, 3):
-            location_name = (
-                f"Tiny-Huge Island - Blue Coins in the Red Coins Area Blue Coin {index}")
+            location_name = f"Tiny-Huge Island - Red Coin Cave Blue Coin {index}"
             self.run_location_tests(
                 [
                     [location_name, False, blue_coins],
@@ -1649,7 +1826,7 @@ class FullAccessibilityImpossibleCoinChecksTest(SM64TestBase):
 
     def test_impossible_coins_are_not_created_without_their_tricks(self):
         self.assertNotIn("Snowman's Land - Impossible Coin", self.world.coin_check_location_names)
-        self.assertNotIn("Tiny-Huge Island - Impossible Coin", self.world.coin_check_location_names)
+        self.assertNotIn("Tiny-Huge Island - Tiny Island Impossible Coin", self.world.coin_check_location_names)
 
 
 class FullAccessibilityEnabledImpossibleCoinChecksTest(SM64TestBase):
@@ -1659,10 +1836,10 @@ class FullAccessibilityEnabledImpossibleCoinChecksTest(SM64TestBase):
         "accessibility": "full",
         "logic_tricks": {
             "Snowman's Land Impossible Coin",
-            "Tiny-Huge Island Impossible Coin",
+            "Tiny Island Impossible Coin",
         },
     }
 
     def test_impossible_coins_are_created_with_their_tricks(self):
         self.assertIn("Snowman's Land - Impossible Coin", self.world.coin_check_location_names)
-        self.assertIn("Tiny-Huge Island - Impossible Coin", self.world.coin_check_location_names)
+        self.assertIn("Tiny-Huge Island - Tiny Island Impossible Coin", self.world.coin_check_location_names)

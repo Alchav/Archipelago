@@ -51,7 +51,10 @@ def tweesters_classification(options):
     from .LogicTricks import get_enabled_logic_tricks
 
     enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
-    if "Shifting Sand Land Three Red Coins with Tweesters" in enabled_tricks:
+    if ({
+        "Shifting Sand Land Three Red Coins with Tweesters",
+        "Shifting Sand Land Top of Stone Structure with Spin Jump or Tweesters",
+    } & enabled_tricks):
         return ItemClassification.progression_deprioritized_skip_balancing
     return ItemClassification.trap
 

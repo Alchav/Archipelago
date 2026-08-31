@@ -6,7 +6,6 @@ class SM64Location(Location):
     game: str = "SM64: Spicy Mycena 64"
 
 coin_count_check_location_base_id = 3627000
-tiny_huge_island_extra_coin_count_check_location_id = 3629091
 
 coin_count_check_course_data = (
     ("Bob-omb Battlefield", 0, "bob_omb_battlefield_coin_star_requirement", 146),
@@ -21,7 +20,7 @@ coin_count_check_course_data = (
     ("Snowman's Land", 1210, "snowmans_land_coin_star_requirement", 127),
     ("Wet-Dry World", 1337, "wet_dry_world_coin_star_requirement", 152),
     ("Tall, Tall Mountain", 1489, "tall_tall_mountain_coin_star_requirement", 137),
-    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 193),
+    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 192),
     ("Tick Tock Clock", 1817, "tick_tock_clock_coin_star_requirement", 128),
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )
@@ -82,11 +81,8 @@ def parse_coin_count_check_location_name(location_name: str) -> tuple[str, int] 
 
 
 coin_count_check_location_table = {
-    get_coin_count_check_location_name(course_name, coin_count): (
-        tiny_huge_island_extra_coin_count_check_location_id
-        if course_name == "Tiny-Huge Island" and coin_count == 192
-        else coin_count_check_location_base_id + course_offset + coin_count - 1
-    )
+    get_coin_count_check_location_name(course_name, coin_count):
+        coin_count_check_location_base_id + course_offset + coin_count - 1
     for course_name, course_offset, _option_name, max_coin_star_requirement in coin_count_check_course_data
     for coin_count in range(1, max_coin_star_requirement)
 }
@@ -281,7 +277,7 @@ locRR_table = {
     "Rainbow Ride - Bob-omb Buddy": 3626214,
     "Rainbow Ride - Top of Red Coin Maze Block 1-Up": 3626233,
     "Rainbow Ride - Under Fly Guy Block 1-Up": 3626234,
-    "Rainbow Ride - House in the Sky Block 1-Up": 3626235
+    "Rainbow Ride - The Big House in the Sky Block 1-Up": 3626235
 }
 
 loc100Coin_table = {
@@ -339,7 +335,7 @@ locBitFS_table = {
     "Bowser in the Fire Sea - Red Coins": 3626112,
     "Bowser in the Fire Sea - Key": 3626179,
     "Bowser in the Fire Sea - Swaying Stairs Block 1-Up": 3626238,
-    "Bowser in the Fire Sea - Near Poles Block 1-Up": 3626239
+    "Bowser in the Fire Sea - Near Final Poles Block 1-Up": 3626239
 }
 
 locWMotR_table = {
@@ -350,7 +346,8 @@ locWMotR_table = {
 
 locBitS_table = {
     "Bowser in the Sky - Red Coins": 3626119,
-    "Bowser in the Sky - Block 1-Up": 3626240
+    "Bowser in the Sky - Block 1-Up": 3626240,
+    "Bowser in the Sky - Grand Star": 3629861,
 }
 
 #Secret Stars found inside the Castle
@@ -381,9 +378,9 @@ locFreestanding1Up_table = {
     "Bowser in the Dark World - Far Overhang 1-Up": 3629104,
 
     "Bowser in the Fire Sea - First Stone Structure 1-Up": 3629105,
-    "Bowser in the Fire Sea - Elevator Pole 1-Up": 3629106,
-    "Bowser in the Fire Sea - Stretching Platform Trigger 1-Up": 3629107,
-    "Bowser in the Fire Sea - Near Poles 1-Up": 3629108,
+    "Bowser in the Fire Sea - Lift Cage Pole 1-Up": 3629106,
+    "Bowser in the Fire Sea - Swaying Stairs Trigger 1-Up": 3629107,
+    "Bowser in the Fire Sea - Near Final Poles 1-Up": 3629108,
     "Bowser in the Fire Sea - Second Stone Structure 1-Up": 3629109,
 
     "Bowser in the Sky - Before Tilting Platform 1-Up": 3629110,
@@ -432,10 +429,10 @@ locFreestanding1Up_table = {
 
     "Rainbow Ride - Tricky Triangles 1-Up": 3629144,
     "Rainbow Ride - Rotating Bridge Platform 1-Up": 3629145,
-    "Rainbow Ride - Ship Pole 1-Up": 3629146,
-    "Rainbow Ride - Ship Tip 1-Up": 3629147,
+    "Rainbow Ride - Cruiser Pole 1-Up": 3629146,
+    "Rainbow Ride - Cruiser Tip 1-Up": 3629147,
     "Rainbow Ride - House Path Donut Lifts 1-Up": 3629148,
-    "Rainbow Ride - Donut Top of Red Coin Maze 1-Up": 3629149,
+    "Rainbow Ride - Top of Red Coin Maze Donut 1-Up": 3629149,
 
     "The Secret Aquarium - Center Coin Ring 1-Up": 3629150,
 
@@ -507,7 +504,7 @@ locBlocksanity_table = {
 
     "Bowser in the Fire Sea - Swaying Stairs 1-Up Block": 3629767,
     "Bowser in the Fire Sea - 10 Coins Block": 3629768,
-    "Bowser in the Fire Sea - Near Poles 1-Up Block": 3629769,
+    "Bowser in the Fire Sea - Near Final Poles 1-Up Block": 3629769,
     "Bowser in the Fire Sea - 3 Coins Block": 3629770,
 
     "Bowser in the Sky - 1-Up Block": 3629771,
@@ -552,7 +549,7 @@ locBlocksanity_table = {
 
     "Rainbow Ride - Top of Red Coin Maze 1-Up Block": 3629801,
     "Rainbow Ride - Under Fly Guy 1-Up Block": 3629802,
-    "Rainbow Ride - House in the Sky 1-Up Block": 3629803,
+    "Rainbow Ride - The Big House in the Sky 1-Up Block": 3629803,
     "Rainbow Ride - Somewhere Over the Rainbow Star Block": 3629804,
 
     "Snowman's Land - Koopa Shell Block": 3629805,
@@ -614,7 +611,7 @@ locBlocksanity_table = {
     "Whomp's Fortress - Metal Cap Block": 3629853,
 
     "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block": 3629854,
-    "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block": 3629855,
+    "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block": 3629855,
     "Wing Mario Over the Rainbow - 1-Up Block": 3629856,
     "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": 3629857,
     "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block": 3629858,
@@ -654,13 +651,13 @@ loc1UpBlock_table = {
         "Tick Tock Clock - Top Block 1-Up",
         "Rainbow Ride - Top of Red Coin Maze Block 1-Up",
         "Rainbow Ride - Under Fly Guy Block 1-Up",
-        "Rainbow Ride - House in the Sky Block 1-Up",
+        "Rainbow Ride - The Big House in the Sky Block 1-Up",
         "Bowser in the Dark World - Tower Block 1-Up",
         "Bowser in the Dark World - Near Goombas Block 1-Up",
         "Cavern of the Metal Cap - Block 1-Up",
         "Vanish Cap Under the Moat - Block 1-Up",
         "Bowser in the Fire Sea - Swaying Stairs Block 1-Up",
-        "Bowser in the Fire Sea - Near Poles Block 1-Up",
+        "Bowser in the Fire Sea - Near Final Poles Block 1-Up",
         "Wing Mario Over the Rainbow - Block 1-Up",
         "Bowser in the Sky - Block 1-Up",
     )

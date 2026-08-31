@@ -493,11 +493,11 @@ logic_tricks = {
                        "leading to Elevator Tour in the Volcano (and three coins).",
     },
     # Shifting Sand Land
-    "Shifting Sand Land Stone Structure with Spin Jump": {
-        "internal_id": "logic_ssl_stone_structure_shy_guy_spin_jump",
-        "rule": "FLY_GUY",
+    "Shifting Sand Land Top of Stone Structure with Spin Jump or Tweesters": {
+        "internal_id": "logic_ssl_top_of_stone_structure_spin_jump_or_tweesters",
+        "rule": "FLY_GUY/TWEESTERS",
         "difficulty": "easy",
-        "description": "Reaching the top of the Stone Structure by bouncing off of a Shy Guy.",
+        "description": "Reaching the top of the Stone Structure by spin-jumping off of a Fly Guy or using a Tweester.",
     },
     "Shifting Sand Land Three Red Coins with Tweesters": {
         "internal_id": "logic_ssl_three_red_coins_with_tweesters",
@@ -544,12 +544,11 @@ logic_tricks = {
         "difficulty": "easy",
         "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
     },
-    "Tiny-Huge Island Impossible Coin": {
+    "Tiny Island Impossible Coin": {
         "internal_id": "logic_thi_impossible_coin",
         "rule": "GP+TJ+DV+KK",
         "difficulty": "hard",
-        "description": "Collecting the coin embedded underground in Koopa the Quick's area using Ground Pound, Triple Jump,"
-                       " Dive, and Kick.",
+        "description": "Collecting the underground coin on Tiny Island using Ground Pound, Triple Jump, Dive, and Kick.",
     },
     # Tick Tock Clock
     "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp without Thwomp": {
@@ -575,7 +574,7 @@ logic_tricks = {
     "Tick Tock Clock Top Past Spinners with Wall Kick": {
         "internal_id": "logic_ttc_top_past_spinners_wall_kick",
         "rule": "WK",
-        "difficulty": "medium",
+        "difficulty": "hard",
         "description": "Reaches both the Top and Top Past Spinners areas from the Moving Bars Area using Wall Kick.",
         "video": "https://www.youtube.com/watch?v=63eenKoAxEo",
     },
@@ -847,6 +846,19 @@ logic_tricks = {
         "difficulty": "easy",
         "description": "Completes Tricky Triangles and reaches its 1-Up using Purple Switches without movement items.",
         "video": "https://www.youtube.com/watch?v=tJxuv2YGmaU",
+    },
+    "Rainbow Ride Fall to Tricky Triangles from Somewhere Over the Rainbow": {
+        "internal_id": "logic_rr_fall_to_tricky_triangles_from_somewhere_over_the_rainbow",
+        "rule": "{Rainbow Ride - Cruiser} & CANN",
+        "difficulty": "easy",
+        "description": "Reaches Tricky Triangles without Purple Switches by falling from Somewhere Over the Rainbow.",
+    },
+    "Rainbow Ride Fall to Tricky Triangles 1-Up from Somewhere Over the Rainbow": {
+        "internal_id": "logic_rr_fall_to_tricky_triangles_one_up_from_somewhere_over_the_rainbow",
+        "rule": "{Rainbow Ride - Cruiser} & CANN",
+        "difficulty": "medium",
+        "description": "Reaches the Tricky Triangles 1-Up without Purple Switches by falling from Somewhere Over the "
+                       "Rainbow.",
     },
     "Rainbow Ride Initial Coins without Carpets": {
         "internal_id": "logic_rr_initial_coins_without_carpets",

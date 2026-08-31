@@ -50,6 +50,7 @@ class TestShiftingSandLandLocations(SM64TestBase):
             ["Shifting Sand Land - Inside the Ancient Pyramid", False, []],
             ["Shifting Sand Land - Inside the Ancient Pyramid", False, upper],
             ["Shifting Sand Land - Inside the Ancient Pyramid", True, upper + ["Side Flip"]],
+            ["Shifting Sand Land - Inside the Ancient Pyramid", True, upper + ["Wall Kick"]],
             ["Shifting Sand Land - Pyramid Puzzle", False, []],
             ["Shifting Sand Land - Pyramid Puzzle", True, upper],
 
@@ -140,7 +141,7 @@ class TestShiftingSandLandStoneStructureTrick(SM64TestBase):
     run_default_tests = False
     options = {
         **SSL_OPTIONS,
-        "logic_tricks": {"Shifting Sand Land Stone Structure with Spin Jump"},
+        "logic_tricks": {"Shifting Sand Land Top of Stone Structure with Spin Jump or Tweesters"},
     }
 
     def test_shy_guy_bounce(self):
@@ -149,6 +150,23 @@ class TestShiftingSandLandStoneStructureTrick(SM64TestBase):
             ["Shifting Sand Land - Stone Structure Koopa Shell Block", True,
              ["Shifting Sand Land - Fly Guys", "Shifting Sand Land - Koopa Shell Block"]],
         ], starting_regions=["Shifting Sand Land"])
+
+    def test_tweester_route(self):
+        self.run_location_tests([
+            ["Shifting Sand Land - Stone Structure Koopa Shell Block", False,
+             ["Shifting Sand Land - Koopa Shell Block"]],
+            ["Shifting Sand Land - Stone Structure Koopa Shell Block", True, [
+                "Shifting Sand Land - Tweesters",
+                "Shifting Sand Land - Koopa Shell Block",
+            ]],
+        ], starting_regions=["Shifting Sand Land"])
+
+    def test_tweesters_are_progression_when_trick_is_enabled(self):
+        self.assertEqual(
+            self.world.get_item_classification(
+                per_level_enemy_item_data_table["Shifting Sand Land - Tweesters"]),
+            ItemClassification.progression_deprioritized_skip_balancing,
+        )
 
 
 class TestShiftingSandLandRedCoinTricks(SM64TestBase):
@@ -195,6 +213,7 @@ class TestShiftingSandLandPillarShellTrick(SM64TestBase):
             ["Shifting Sand Land - Inside the Ancient Pyramid", False, ["Triple Jump"]],
             ["Shifting Sand Land - Inside the Ancient Pyramid", True, [
                 "Triple Jump",
+                "Shifting Sand Land - Koopa Shell Block",
                 "Shifting Sand Land - Pyramid Elevator",
             ]],
         ], starting_regions=["Shifting Sand Land"])
@@ -223,12 +242,13 @@ class TestShiftingSandLandInteriorRoutes(SM64TestBase):
     options = SSL_OPTIONS
 
     def test_lower_pyramid_to_upper_pyramid_routes(self):
-        for item_name in ("Climb", "Shifting Sand Land - Pyramid Elevator"):
-            self.run_location_tests([
-                ["Shifting Sand Land - Pyramid Puzzle", True, [item_name]],
-                ["Shifting Sand Land - Inside the Ancient Pyramid", False, [item_name]],
-                ["Shifting Sand Land - Inside the Ancient Pyramid", True, [item_name, "Side Flip"]],
-            ], starting_regions=["Shifting Sand Land - Pyramid"])
+        self.run_location_tests([
+            ["Shifting Sand Land - Pyramid Puzzle", False,
+             ["Shifting Sand Land - Pyramid Elevator"]],
+            ["Shifting Sand Land - Pyramid Puzzle", True, ["Climb"]],
+            ["Shifting Sand Land - Inside the Ancient Pyramid", False, ["Climb"]],
+            ["Shifting Sand Land - Inside the Ancient Pyramid", True, ["Climb", "Side Flip"]],
+        ], starting_regions=["Shifting Sand Land - Pyramid"])
 
     def test_top_entry_elevator_route(self):
         self.run_location_tests([

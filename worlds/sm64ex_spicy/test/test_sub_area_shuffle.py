@@ -35,6 +35,14 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
         self.assertEqual(destination.region, "Snowman's Land - Igloo Entrance")
         self.assertEqual(destination.node, 0x0B)
 
+        igloo_entrance = self.multiworld.get_region(
+            "Snowman's Land - Igloo Entrance", self.player)
+        self.assertTrue(
+            {"Snowman's Land", "Snowman's Land - Upper"}.issubset(
+                {entrance.connected_region.name for entrance in igloo_entrance.exits}
+            )
+        )
+
     def test_slip_slidin_away_is_at_the_slide_exit(self):
         location = self.multiworld.get_location(
             "Cool, Cool Mountain - Slip Slidin' Away", self.player)

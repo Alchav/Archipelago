@@ -50,7 +50,7 @@ SUB_AREA_SOURCES: dict[str, SubAreaSource] = {
     "sl_igloo": SubAreaSource("sl_igloo", 2, "Snowman's Land - Igloo Entrance", "sl_igloo", "sl_main"),
     "ttm_slide": SubAreaSource("ttm_slide", 3, "Tall, Tall Mountain - Top", "ttm_slide", "ttm_main"),
     "thi_red_cave": SubAreaSource(
-        "thi_red_cave", 4, "Tiny-Huge Island - Red Coins Area", "thi_red_cave", "thi_huge"),
+        "thi_red_cave", 4, "Tiny-Huge Island - Huge Tree Area", "thi_red_cave", "thi_huge"),
     "hmc_cotmc": SubAreaSource("hmc_cotmc", 5, "Hazy Maze Cave", "cotmc"),
     "jrb_ship": SubAreaSource("jrb_ship", 6, "Jolly Roger Bay", "jrb_ship"),
     "lll_volcano": SubAreaSource(

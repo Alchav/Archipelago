@@ -1545,7 +1545,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.SnowmansLandCoinStarRequirement: 127,
             Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
-            Options.TinyHugeIslandCoinStarRequirement: 193,
+            Options.TinyHugeIslandCoinStarRequirement: 192,
             Options.TickTockClockCoinStarRequirement: 128,
             Options.RainbowRideCoinStarRequirement: 146,
         }
@@ -1597,7 +1597,6 @@ class CoinCountChecksLocationTableTestBase(SM64TestBase):
             "Bob-omb Battlefield - 145 Coins": 3627144,
             "Whomp's Fortress - 1 Coin": 3627146,
             "Jolly Roger Bay - 1 Coin": 3627287,
-            "Tiny-Huge Island - 192 Coins": 3629091,
             "Rainbow Ride - 145 Coins": 3629089,
             "The Princess's Secret Slide - 1 Coin": 3629193,
             "The Princess's Secret Slide - 80 Coins": 3629272,
@@ -1631,11 +1630,11 @@ class CoinCountChecksLocationTableTestBase(SM64TestBase):
             "Snowman's Land": 127,
             "Wet-Dry World": 152,
             "Tall, Tall Mountain": 137,
-            "Tiny-Huge Island": 193,
+            "Tiny-Huge Island": 192,
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coin_count_check_location_table), 2643)
+        self.assertEqual(len(coin_count_check_location_table), 2642)
         self.assertEqual(len(secret_stage_coin_count_check_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):
@@ -1990,11 +1989,41 @@ class CompletionLastBowserTestBase(SM64TestBase):
         "completion_type": Options.CompletionType.option_Last_Bowser_Stage
     }
 
+    def test_grand_star_check_is_not_created(self):
+        self.assertNotIn(
+            "Bowser in the Sky - Grand Star",
+            {location.name for location in self.multiworld.get_locations(self.player)},
+        )
+
 
 class CompletionAllBowserTestBase(SM64TestBase):
     options = {
         "completion_type": Options.CompletionType.option_All_Bowser_Stages
     }
+
+    def test_grand_star_check_is_created(self):
+        location = self.multiworld.get_location("Bowser in the Sky - Grand Star", self.player)
+        self.assertEqual(location.parent_region.name, "Bowser in the Sky - Bowser Arena")
+
+    def test_grand_star_check_requires_all_bowser_stages(self):
+        state = self.multiworld.get_all_state(False)
+        location = self.multiworld.get_location("Bowser in the Sky - Grand Star", self.player)
+        self.assertTrue(location.can_reach(state))
+
+        for required_location_name in (
+            "Bowser in the Dark World - Key",
+            "Bowser in the Fire Sea - Key",
+        ):
+            required_location = self.multiworld.get_location(required_location_name, self.player)
+            original_rule = required_location.access_rule
+            try:
+                required_location.access_rule = lambda _: False
+                self.assertFalse(
+                    location.can_reach(self.multiworld.get_all_state(False)),
+                    required_location_name,
+                )
+            finally:
+                required_location.access_rule = original_rule
 
 
 # Option Combos
