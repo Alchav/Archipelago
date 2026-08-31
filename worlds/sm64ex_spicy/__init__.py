@@ -21,7 +21,7 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
     per_level_one_up_unlock_item_data_table, global_sign_unlock_item_data_table, \
-    per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_cap_length_item_names
+    per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_filler_item_names
 from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
     get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, location_name_groups
 from .CoinChecks import CoinOutputID, coin_output_by_name, coin_output_region_name, select_individual_coin_outputs
@@ -89,7 +89,6 @@ class SM64World(World):
     number_of_stars: int
     move_rando_bitvec: int
     filler_count: int
-    cap_length_item_counts: dict[str, int]
 
     @staticmethod
     def _clear_coin_evaluation_cache(state: CollectionState, player: int) -> None:
@@ -277,9 +276,6 @@ class SM64World(World):
                 self.move_rando_bitvec |= (1 << (action_item_data_table[action].code - double_jump_bitvec_offset))
 
         self.filler_count = 0
-        self.cap_length_item_counts = {
-            item_name: 0 for item_name in progressive_cap_length_item_names
-        }
         self.topology_present = bool(self.options.area_rando or self.options.sub_area_shuffle)
         if (
                 self.options.accessibility == self.options.accessibility.option_full
@@ -952,18 +948,14 @@ class SM64World(World):
 
         replacement_item_names = self.get_filler_replacements(self.filler_count)
         plain_filler_count = self.filler_count - len(replacement_item_names)
-        cap_length_item_names = [
-            progressive_cap_length_item_names[index % len(progressive_cap_length_item_names)]
+        filler_item_names = [
+            progressive_filler_item_names[index % len(progressive_filler_item_names)]
             for index in range(plain_filler_count)
         ]
-        self.random.shuffle(cap_length_item_names)
-        self.cap_length_item_counts = {
-            item_name: cap_length_item_names.count(item_name)
-            for item_name in progressive_cap_length_item_names
-        }
+        self.random.shuffle(filler_item_names)
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
         self.multiworld.itempool += [self.create_item(item_name) for item_name in replacement_item_names]
-        self.multiworld.itempool += [self.create_item(item_name) for item_name in cap_length_item_names]
+        self.multiworld.itempool += [self.create_item(item_name) for item_name in filler_item_names]
         advancement_count = sum(
             item.advancement for item in self.multiworld.itempool
             if item.player == self.player and item.name not in sign_unlock_item_names
@@ -1139,7 +1131,7 @@ class SM64World(World):
                 location.place_locked_item(self.create_event_item(item_name))
 
     def get_filler_item_name(self) -> str:
-        return self.random.choice(progressive_cap_length_item_names)
+        return self.random.choice(progressive_filler_item_names)
 
     @staticmethod
     def get_rgb_color(value: int) -> typing.List[int]:
@@ -1248,9 +1240,6 @@ class SM64World(World):
             "EasyButterflies": self.options.easy_butterflies.value,
             "TriggerSparkles": self.options.trigger_sparkles.value,
             "NoDespawn": self.options.no_despawns.value,
-            "WingCapLengthItemCount": self.cap_length_item_counts["Progressive Wing Cap Length"],
-            "MetalCapLengthItemCount": self.cap_length_item_counts["Progressive Metal Cap Length"],
-            "VanishCapLengthItemCount": self.cap_length_item_counts["Progressive Vanish Cap Length"],
             "MipsSkipEnabled": self.logic_castle_30_star_door_mips_skip,
             "BowserInTheDarkWorldHits": self.options.bowser_in_the_dark_world_health.value,
             "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_health.value,

@@ -2037,24 +2037,29 @@ class NoPowerStarsTestBase(SM64TestBase):
     }
 
     def test_no_power_stars_generated(self):
-        cap_length_items = sum(
+        progressive_filler_items = sum(
             len(self.get_items_by_name(item_name))
             for item_name in (
-                "Progressive Wing Cap Length",
-                "Progressive Metal Cap Length",
-                "Progressive Vanish Cap Length",
+                "Progressive Cap Length",
+                "Progressive Underwater Breath",
+                "Progressive Damage Dodge",
             )
         )
-        self.assertGreater(cap_length_items, 0)
+        self.assertGreater(progressive_filler_items, 0)
         self.assertNotIn("1-Up Mushroom", self.world.item_name_to_id)
         slot_data = self.world.fill_slot_data()
-        cap_length_counts = [
-            slot_data["WingCapLengthItemCount"],
-            slot_data["MetalCapLengthItemCount"],
-            slot_data["VanishCapLengthItemCount"],
+        self.assertNotIn("WingCapLengthItemCount", slot_data)
+        self.assertNotIn("MetalCapLengthItemCount", slot_data)
+        self.assertNotIn("VanishCapLengthItemCount", slot_data)
+        filler_counts = [
+            len(self.get_items_by_name(item_name))
+            for item_name in (
+                "Progressive Cap Length",
+                "Progressive Underwater Breath",
+                "Progressive Damage Dodge",
+            )
         ]
-        self.assertEqual(sum(cap_length_counts), cap_length_items)
-        self.assertLessEqual(max(cap_length_counts) - min(cap_length_counts), 1)
+        self.assertLessEqual(max(filler_counts) - min(filler_counts), 1)
         self.assertNotIn("Power Star", {item.name for item in self.multiworld.get_items()})
 
 
