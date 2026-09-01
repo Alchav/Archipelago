@@ -518,6 +518,7 @@ class SM64World(World):
 
     def set_rules(self):
         set_rules(self.multiworld, self.options, self.player, self.area_connections, self.move_rando_bitvec)
+        self.configure_full_level_unlock_early_items()
         if self.topology_present:
             for source_id in self.shuffled_entrance_source_ids:
                 physical_source = sub_area_source_by_id(source_id)
@@ -528,6 +529,43 @@ class SM64World(World):
                     self.get_normal_entrance_source_name(source_id),
                     self.get_entrance_destination_name(destination),
                     'entrance', self.player)
+
+    def configure_full_level_unlock_early_items(self) -> None:
+        if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
+            return
+
+        unlock_name_by_entrance_name = {
+            "Wet-Dry World Low": "Unlock Wet-Dry World",
+            "Wet-Dry World Middle": "Unlock Wet-Dry World",
+            "Wet-Dry World High": "Unlock Wet-Dry World",
+            "Tick Tock Clock Stopped Entrance": "Unlock Tick Tock Clock",
+            "Tick Tock Clock Slow": "Unlock Tick Tock Clock",
+            "Tick Tock Clock Random": "Unlock Tick Tock Clock",
+            "Tick Tock Clock Fast": "Unlock Tick Tock Clock",
+            "Tiny-Huge Island (Tiny)": "Unlock Tiny Island",
+            "Tiny-Huge Island (Huge)": "Unlock Huge Island",
+        }
+        available_unlocks = set(self.get_level_unlock_item_names())
+        state = CollectionState(self.multiworld)
+        state.reachable_regions[self.player].add(
+            self.multiworld.get_region(self.origin_region_name, self.player))
+
+        candidates = []
+        for entrance_id, entrance in self.randomized_entrance_connections.items():
+            entrance_name = sm64_level_to_entrances.get(entrance_id)
+            if entrance_name is None or not entrance.parent_region.can_reach(state):
+                continue
+            item_name = unlock_name_by_entrance_name.get(entrance_name, f"Unlock {entrance_name}")
+            if item_name in available_unlocks:
+                candidates.append(item_name)
+
+        candidates = list(dict.fromkeys(candidates))
+        if not candidates:
+            raise OptionError("Full Level Unlocks has no sphere-one entrance unlock candidates.")
+        self.random.shuffle(candidates)
+        self.multiworld.local_early_items[self.player][candidates[0]] = 1
+        if self.multiworld.players > 1 and len(candidates) > 1:
+            self.multiworld.early_items[self.player][candidates[1]] = 1
 
     def create_item(self, name: str) -> Item:
         data = item_data_table[name]

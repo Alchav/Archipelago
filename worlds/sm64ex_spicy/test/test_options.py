@@ -962,6 +962,11 @@ class FullLevelUnlockItemPoolTestBase(SM64TestBase):
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
             self.assertNotIn(item_table[item_name], slot_data["StartInventory"])
 
+    def test_sphere_one_level_unlock_is_local_early(self):
+        early_items = self.multiworld.local_early_items[self.player]
+        self.assertEqual(sum(early_items.values()), 1)
+        self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
+
 
 class BlocksanityOnTestBase(SM64TestBase):
     options = {
@@ -1683,12 +1688,28 @@ class CoinCountChecksGenerationTestBase(SM64TestBase):
                 location = self.multiworld.get_location(location_name, self.player)
                 self.assertEqual(location.parent_region.name, f"{course_name} - Coins")
 
-    def test_ttm_coins_region_accepts_main_area_or_secret_slide_access(self):
-        coin_region = self.multiworld.get_region("Tall, Tall Mountain - Coins", self.player)
-        self.assertEqual(
-            {entrance.parent_region.name for entrance in coin_region.entrances},
-            {"Tall, Tall Mountain", "Tall, Tall Mountain - Secret Slide"},
-        )
+    def test_coin_star_regions_accept_only_coin_bearing_physical_areas(self):
+        expected_parents = {
+            "Jolly Roger Bay": {"Jolly Roger Bay"},
+            "Cool, Cool Mountain": {"Cool, Cool Mountain", "Cool, Cool Mountain - Secret Slide"},
+            "Lethal Lava Land": {"Lethal Lava Land", "Lethal Lava Land - Volcano"},
+            "Shifting Sand Land": {
+                "Shifting Sand Land", "Shifting Sand Land - Pyramid",
+                "Shifting Sand Land - Pyramid Top Entry",
+            },
+            "Snowman's Land": {"Snowman's Land", "Snowman's Land - Igloo"},
+            "Tall, Tall Mountain": {"Tall, Tall Mountain", "Tall, Tall Mountain - Secret Slide"},
+            "Tiny-Huge Island": {
+                "Tiny-Huge Island (Tiny)", "Tiny-Huge Island (Huge)",
+                "Tiny-Huge Island - Huge Tree Area", "Tiny-Huge Island - Red Coin Cave",
+                "Tiny-Huge Island - Wiggler's Cave",
+            },
+        }
+        for course_name, parents in expected_parents.items():
+            with self.subTest(course=course_name):
+                coin_region = self.multiworld.get_region(f"{course_name} - Coins", self.player)
+                self.assertEqual(
+                    {entrance.parent_region.name for entrance in coin_region.entrances}, parents)
 
 
 class SecretStageCoinCountChecksTestBase(SM64TestBase):

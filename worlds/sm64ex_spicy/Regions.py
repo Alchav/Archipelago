@@ -264,7 +264,6 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     jrb_coins = create_region("Jolly Roger Bay - Coins", player, multiworld)
     create_locs(jrb_coins, "Jolly Roger Bay - Coins Star")
     regJRB.connect(jrb_coins, name="Jolly Roger Bay - Main Area to Coins")
-    jrb_ship.connect(jrb_coins, name="Jolly Roger Bay - Sunken Ship to Coins")
 
     regCCM = create_region("Cool, Cool Mountain", player, multiworld)
     create_locs(regCCM,

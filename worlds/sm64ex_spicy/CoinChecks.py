@@ -173,6 +173,19 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "huge_piranha_area_plants": "Tiny-Huge Island - Huge Piranha Area",
 }
 
+# Courses with independently shuffled sub-areas need an explicit main-area
+# owner for sources that are not listed above.  Aggregate count checks may be
+# reachable from a sub-area, but only sources in physically reachable regions
+# may contribute to their totals.
+COIN_SOURCE_DEFAULT_REGION_NAMES: Mapping[str, str] = {
+    "Jolly Roger Bay": "Jolly Roger Bay",
+    "Cool, Cool Mountain": "Cool, Cool Mountain",
+    "Lethal Lava Land": "Lethal Lava Land",
+    "Shifting Sand Land": "Shifting Sand Land",
+    "Snowman's Land": "Snowman's Land",
+    "Tall, Tall Mountain": "Tall, Tall Mountain",
+}
+
 
 def coin_output_region_name(output: CoinOutputDefinition) -> str | None:
     """Return the physical region for an output in an independently shuffled sub-area."""

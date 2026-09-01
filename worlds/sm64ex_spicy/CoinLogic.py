@@ -44,10 +44,23 @@ def _coin_trace(
     context = _coin_rule_context.get()
     if context is not None:
         state, player, course_name = context
+        # Count sources only when their physical region is reachable.  The
+        # aggregate coin-count region can be entered from several sub-areas,
+        # but that must never expose coins in a different area of the course.
+        from .CoinChecks import COIN_SOURCE_DEFAULT_REGION_NAMES, COIN_SOURCE_METHOD_REGION_NAMES
+
+        source_region = COIN_SOURCE_METHOD_REGION_NAMES.get(
+            source_id, COIN_SOURCE_DEFAULT_REGION_NAMES.get(course_name))
+        physical_region_available = (
+            source_region is None
+            or state.can_reach(source_region, "Region", player)
+        )
+        original_available = original_available and physical_region_available
+        available = available and physical_region_available
         requirement_rule = get_coin_requirement_rule(course_name, source_id, state, player)
         if requirement_rule is not None:
             rule_available = requirement_rule(state)
-            available = rule_available
+            available = rule_available and physical_region_available
     if counted is None:
         counted = available and original_available
     return CoinSourceTrace(
