@@ -968,9 +968,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC")
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
-    wdw_near_top_block_route = (
-        "{Wet-Dry World - Low Water} | "
-        "{Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
+    wdw_pedestal_block_route = (
+        "{Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+        "{Wet-Dry World - Low Water} & SF/BF/TJ | "
+        "{Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+        "{Wet-Dry World - Mid Water} & SF/BF/TJ | "
         "{Wet-Dry World - High Water} & LG | "
         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}"
     )
@@ -998,21 +1000,68 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "{Wet-Dry World - Mid Water} | "
         f"{wdw_top_without_highest_water}"
     )
-    wdw_secrets_route = (
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
-        "{Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
-        "{Wet-Dry World - High Water} & LG | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
-        "{Wet-Dry World - Highest Water} | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Top}"
+    wdw_secrets_target = "Wet-Dry World - Secrets in the Shallows & Sky"
+    wdw_secrets_cannon = rf.get_cannon_item_name(wdw_secrets_target)
+    wdw_secrets_cap_items = rf.get_cap_item_names(wdw_secrets_target)
+    wdw_secrets_arbitrary_items = rf.get_arbitrary_item_names(wdw_secrets_target)
+    wdw_secrets_action_items = rf.get_action_item_names(wdw_secrets_target)
+
+    def build_wdw_secrets_rule(rule_expr: str) -> Rule:
+        return rf.build_rule(
+            rule_expr, wdw_secrets_cannon, wdw_secrets_cap_items,
+            wdw_secrets_arbitrary_items, wdw_secrets_action_items)
+
+    wdw_secrets_route = And(
+        build_wdw_secrets_rule("CANN/HEAVE_HOS"),
+        Or(
+            build_wdw_secrets_rule("PURPLE_SWITCHES"),
+            And(
+                build_wdw_secrets_rule("logic_wdw_top_platforms_to_express_elevator_no_movement"),
+                build_wdw_secrets_rule("CANN/SF/BF/WK/TJ"),
+            ),
+        ),
+        Or(
+            build_wdw_secrets_rule("logic_wdw_pedestal_heave_ho"),
+            build_wdw_secrets_rule("CANN/SF/BF/WK/TJ"),
+        ),
+        build_wdw_secrets_rule("SF/BF/WK/TJ/LJ/CANN/WDW_WATER_LEVEL_DIAMOND"),
+    )
+    wdw_express_elevator_target = "Wet-Dry World - Express Elevator--Hurry Up!"
+    wdw_express_elevator_cannon = rf.get_cannon_item_name(wdw_express_elevator_target)
+    wdw_express_elevator_cap_items = rf.get_cap_item_names(wdw_express_elevator_target)
+    wdw_express_elevator_arbitrary_items = rf.get_arbitrary_item_names(wdw_express_elevator_target)
+    wdw_express_elevator_action_items = rf.get_action_item_names(wdw_express_elevator_target)
+
+    def build_wdw_express_elevator_rule(rule_expr: str) -> Rule:
+        return rf.build_rule(
+            rule_expr, wdw_express_elevator_cannon, wdw_express_elevator_cap_items,
+            wdw_express_elevator_arbitrary_items, wdw_express_elevator_action_items)
+
+    wdw_express_elevator_route = And(
+        build_wdw_express_elevator_rule("CANN/HEAVE_HOS"),
+        Or(
+            build_wdw_express_elevator_rule("PURPLE_SWITCHES"),
+            And(
+                build_wdw_express_elevator_rule("logic_wdw_top_platforms_to_express_elevator_no_movement"),
+                build_wdw_express_elevator_rule("CANN/SF/BF/WK/TJ"),
+            ),
+        ),
+        build_wdw_express_elevator_rule("SF/BF/WK/WDW_WATER_LEVEL_DIAMOND"),
     )
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Mid Water to Mid-High Water",
-                   "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Top of the Express Elevator} | "
-                   "WDW_WATER_LEVEL_DIAMOND & TJ+DV")
+    wdw_water_level_diamond_route = (
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Top} | "
+        "WDW_WATER_LEVEL_DIAMOND & TJ+DV | "
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Cannon} & LJ | "
+        "WDW_WATER_LEVEL_DIAMOND & PURPLE_SWITCHES"
+    )
+    rf.assign_rule(
+        "Wet-Dry World - Low Water to Mid-High Water",
+        "WDW_WATER_LEVEL_DIAMOND & LJ")
+    rf.assign_rule(
+        "Wet-Dry World - Mid Water to Mid-High Water",
+        wdw_water_level_diamond_route)
     rf.assign_rule("Wet-Dry World - Mid-High Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule(
         "Wet-Dry World - Mid-High Water to High Water",
@@ -1029,15 +1078,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "LJ | logic_wdw_express_elevator_to_top_no_movement")
     rf.assign_rule("Wet-Dry World - Top to Top of the Express Elevator",
                    "logic_wdw_top_platforms_to_express_elevator_no_movement")
+    rf.assign_rule("Wet-Dry World - Cannon to Near the Top", "CANN")
+    rf.assign_rule("Wet-Dry World - Cannon to Top", "CANN")
     rf.assign_rule("Wet-Dry World - Downtown",
                    "{Wet-Dry World - Highest Water} & LG | "
                    "{Wet-Dry World - Top} & logic_wdw_downtown_triple_jump")
     rf.assign_rule("Wet-Dry World - Cannon to Downtown", "CANN")
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!", wdw_shocking_arrow_lifts_rule)
-    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!",
-                   "{Wet-Dry World - Low Water} & BF/SF/WK | "
-                   "{Wet-Dry World - Low Water} & WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky", wdw_secrets_route)
+    rf.assign_rule_object("Wet-Dry World - Express Elevator--Hurry Up!", wdw_express_elevator_route)
+    rf.assign_rule_object("Wet-Dry World - Secrets in the Shallows & Sky", wdw_secrets_route)
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
@@ -1273,7 +1322,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "VC & CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | "
                 "VC & logic_vcutm_switch_no_movement",
             "Wet-Dry World - Shocking Arrow Lifts Star Block": wdw_shocking_arrow_lifts_rule,
-            "Wet-Dry World - Pedestal 10 Coins Block": wdw_near_top_block_route,
+            "Wet-Dry World - Pedestal 10 Coins Block": wdw_pedestal_block_route,
             "Wet-Dry World - Wooden Structure 3 Coins Block": wdw_wooden_structure_block_rule,
             "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Metal Cap Block": "MC",

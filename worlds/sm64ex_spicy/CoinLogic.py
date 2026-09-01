@@ -2511,6 +2511,8 @@ def wet_dry_world_coin_evaluation(
     has_wall_kick = rules.has_action(state, player, "Wall Kick", level_name)
     has_ledge_grab = rules.has_action(state, player, "Ledge Grab", level_name)
     has_purple_switches = rules.has_purple_switches(state, player, level_name)
+    can_use_pedestal_heave_ho = rules.can_use_logic_trick(
+        state, player, "logic_wdw_pedestal_heave_ho", level_name)
     can_reach_top_from_express_without_movement = rules.can_use_logic_trick(
         state, player, "logic_wdw_express_elevator_to_top_no_movement", level_name)
     can_reach_high_red_coins = has_wall_kick or rules.can_use_logic_trick(
@@ -2524,12 +2526,16 @@ def wet_dry_world_coin_evaluation(
     can_reach_highest = state.can_reach(f"{level_name} - Highest Water", "Region", player)
     can_reach_near_top = state.can_reach(f"{level_name} - Near the Top", "Region", player)
     can_reach_top = state.can_reach(f"{level_name} - Top", "Region", player)
+    can_reach_cannon = state.can_reach(f"{level_name} - Cannon", "Region", player)
     can_reach_top_of_express = state.can_reach(
         f"{level_name} - Top of the Express Elevator", "Region", player)
     can_reach_downtown = state.can_reach(f"{level_name} - Downtown", "Region", player)
-    near_top_block_route = (
-        can_reach_low
-        or can_reach_mid and (has_heave_hos or has_side_flip or has_backflip or has_triple_jump)
+    pedestal_block_route = (
+        (can_reach_low or can_reach_mid)
+        and (
+            has_heave_hos and can_use_pedestal_heave_ho
+            or has_side_flip or has_backflip or has_triple_jump
+        )
         or can_reach_high and has_ledge_grab
         or can_reach_highest
         or can_reach_top
@@ -2549,8 +2555,11 @@ def wet_dry_world_coin_evaluation(
         can_reach_mid
         or can_reach_top_without_highest_water)
     fourth_diamond_route = (
-        can_reach_highest or can_reach_top_of_express
-        or has_triple_jump and has_dive or can_reach_top)
+        can_reach_top
+        or has_triple_jump and has_dive
+        or can_reach_cannon and has_long_jump
+        or has_purple_switches
+    )
 
     traces = [
         coin_source("main_skeeters", "Two Skeeters in the main area", 6,
@@ -2558,7 +2567,7 @@ def wet_dry_world_coin_evaluation(
         coin_source("amp_ring", "Pedestal Coin Ring", 8,
                     can_reach_near_top and has_horizontal_coin_rings),
         coin_source("pillar_ten_coin_block", "Pedestal 10-Coin Block", 10,
-                    can_reach_near_top and near_top_block_route and has_ten_coin_blocks),
+                    pedestal_block_route and has_ten_coin_blocks),
         coin_source("push_block_three_coin_block", "Push Block 3-Coin Block", 3,
                     can_reach_near_top and has_three_coin_blocks),
         coin_source("low_breakable_boxes", "Breakable coin boxes at low water", 12,
@@ -4737,11 +4746,12 @@ def _late_requirement_specs():
     _add(WDW, "amp_ring", "{Wet-Dry World - Near the Top} & HORIZONTAL_COIN_RINGS",
          _unlock("Horizontal Coin Rings", WDW))
     _add(WDW, "pillar_ten_coin_block",
-         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} | "
-         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
-         "{Wet-Dry World - Near the Top} & {Wet-Dry World - High Water} & LG | "
-         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Highest Water} | "
-         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Top}",
+         "{Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+         "{Wet-Dry World - Low Water} & SF/BF/TJ | "
+         "{Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+         "{Wet-Dry World - Mid Water} & SF/BF/TJ | "
+         "{Wet-Dry World - High Water} & LG | "
+         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}",
          _unlock("10-Coin Blocks", WDW))
     _add(WDW, "push_block_three_coin_block",
          "{Wet-Dry World - Near the Top} & THREE_COIN_BLOCKS", _unlock("3-Coin Blocks", WDW))
@@ -4771,8 +4781,8 @@ def _late_requirement_specs():
          "logic_wdw_express_elevator_to_top_no_movement",
          _unlock("3-Coin Blocks", WDW))
     _add(WDW, "fourth_diamond_coin_line",
-         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top of the Express Elevator} | "
-         "TJ+DV | {Wet-Dry World - Top}",
+         "{Wet-Dry World - Top} | TJ+DV | "
+         "{Wet-Dry World - Cannon} & LJ | PURPLE_SWITCHES",
          _unlock("Horizontal Coin Lines", WDW))
     _add(WDW, "top_coin_line", "{Wet-Dry World - Top} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", WDW))

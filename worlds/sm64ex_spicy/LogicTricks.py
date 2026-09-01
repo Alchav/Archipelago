@@ -739,6 +739,12 @@ logic_tricks = {
         "difficulty": "easy",
         "description": "Ground Pounds the Shocking Arrow Lifts box while it is underwater at the highest water level.",
     },
+    "Wet-Dry World Pedestal with Heave-ho": {
+        "internal_id": "logic_wdw_pedestal_heave_ho",
+        "rule": "HEAVE_HOS",
+        "difficulty": "easy",
+        "description": "Uses a Heave-ho to reach the Pedestal with the 10-Coin Block.",
+    },
     "Wet-Dry World Downtown with Triple Jump": {
         "internal_id": "logic_wdw_downtown_triple_jump",
         "rule": "TJ",

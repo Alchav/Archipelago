@@ -1735,7 +1735,10 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Backflip"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
-        self.collect(self.get_item_by_name("Purple Switches"))
+        self.collect([
+            self.get_item_by_name("Purple Switches"),
+            self.get_item_by_name("Wet-Dry World - Cannon Unlock"),
+        ])
         self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
     def test_wet_dry_world_quick_race_tj_lg_route_requires_purple_switches(self):
@@ -6074,6 +6077,9 @@ class WetDryWorldCoinStar49AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Wet-Dry World - Low Water"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+        self.collect_by_name(["Wet-Dry World - Cannon Unlock", "Purple Switches"])
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
 
 
@@ -6104,6 +6110,9 @@ class WetDryWorldCoinStar30AccessTestBase(WetDryWorldCoinStarAccessTestBase):
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid Water"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Coins Star"))
+
+        self.collect_by_name(["Wet-Dry World - Cannon Unlock", "Purple Switches"])
         self.assertTrue(self.can_reach_location("Wet-Dry World - Coins Star"))
 
 
@@ -7039,14 +7048,14 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid Water"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Mid-High Water"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Top"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
         self.collect([
             self.get_item_by_name("Long Jump"),
@@ -7055,6 +7064,12 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - High Water"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Highest Water"))
+
+        self.collect([
+            self.get_item_by_name("Wet-Dry World - Cannon Unlock"),
+            self.get_item_by_name("Backflip"),
+        ])
+        self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
     def test_middle_water_to_mid_high_accepts_triple_jump_and_dive(self):
         self.disable_wdw_entrance("Wet-Dry World Low")
@@ -7067,7 +7082,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.collect([self.get_item_by_name("Triple Jump"), self.get_item_by_name("Dive")])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
 
-    def test_middle_water_to_mid_high_accepts_top_of_express_elevator(self):
+    def test_middle_water_to_mid_high_accepts_purple_switch(self):
         self.disable_wdw_entrance("Wet-Dry World Low")
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
@@ -7077,6 +7092,34 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         ])
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+    def test_low_water_to_mid_high_requires_water_level_diamond_and_long_jump(self):
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Low Water"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+        self.collect(self.get_item_by_name("Long Jump"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Mid-High Water"))
+
+    def test_cannon_unlock_reaches_near_top_and_top(self):
+        self.disable_wdw_entrance("Wet-Dry World Middle")
+        self.disable_wdw_entrance("Wet-Dry World High")
+        self.collect_second_floor_access()
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Cannon"))
+        self.assertFalse(self.can_reach_entrance("Wet-Dry World - Cannon to Near the Top"))
+        self.assertFalse(self.can_reach_entrance("Wet-Dry World - Cannon to Top"))
+        self.assertFalse(self.can_reach_region("Wet-Dry World - Top"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Cannon Unlock"))
+        self.assertTrue(self.can_reach_entrance("Wet-Dry World - Cannon to Near the Top"))
+        self.assertTrue(self.can_reach_entrance("Wet-Dry World - Cannon to Top"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Near the Top"))
+        self.assertTrue(self.can_reach_region("Wet-Dry World - Top"))
 
     def test_highest_water_lowers_with_diamond(self):
         self.disable_wdw_entrance("Wet-Dry World Low")
@@ -7139,7 +7182,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Ledge Grab"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
 
-    def test_express_elevator_top_route_needs_elevator_access_method(self):
+    def test_express_elevator_requires_cannon_or_heave_ho(self):
         self.disable_wdw_entrance("Wet-Dry World Middle")
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
@@ -7149,10 +7192,13 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
-        self.collect(self.get_item_by_name("Backflip"))
+        self.collect([
+            self.get_item_by_name("Wet-Dry World - Cannon Unlock"),
+            self.get_item_by_name("Backflip"),
+        ])
         self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
 
-    def test_secrets_requires_water_level_diamond(self):
+    def test_secrets_requires_its_low_water_route(self):
         self.disable_wdw_entrance("Wet-Dry World Middle")
         self.disable_wdw_entrance("Wet-Dry World High")
         self.collect_second_floor_access()
@@ -7160,11 +7206,14 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Wet-Dry World - Water Level Diamond"))
         self.assertFalse(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
         self.assertFalse(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
-        self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Wet-Dry World - Top of the Express Elevator"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Express Elevator--Hurry Up!"))
+        self.assertFalse(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
+
+        self.collect(self.get_item_by_name("Wet-Dry World - Cannon Unlock"))
         self.assertTrue(self.can_reach_location("Wet-Dry World - Secrets in the Shallows & Sky"))
 
     def test_secrets_do_not_accept_top_route_without_water_level_diamond(self):

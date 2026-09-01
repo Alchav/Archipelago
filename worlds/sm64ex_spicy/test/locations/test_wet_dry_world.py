@@ -58,8 +58,10 @@ class TestWetDryWorldLowLocations(SM64TestBase):
             ["Wet-Dry World - Shocking Arrow Lifts Star Block", True, []],
 
             ["Wet-Dry World - Pedestal 10 Coins Block", False, []],
-            ["Wet-Dry World - Pedestal 10 Coins Block", True,
+            ["Wet-Dry World - Pedestal 10 Coins Block", False,
              near_top + [TEN_COIN_BLOCKS]],
+            ["Wet-Dry World - Pedestal 10 Coins Block", True,
+             near_top + ["Side Flip", TEN_COIN_BLOCKS]],
             ["Wet-Dry World - Push Block 3 Coins Block", False, []],
             ["Wet-Dry World - Push Block 3 Coins Block", True,
              near_top + [THREE_COIN_BLOCKS]],
@@ -70,15 +72,16 @@ class TestWetDryWorldLowLocations(SM64TestBase):
              top_of_elevator_without_diamond],
             ["Wet-Dry World - Express Elevator--Hurry Up!", True,
              top_of_elevator_without_diamond + ["Backflip"]],
-            ["Wet-Dry World - Express Elevator--Hurry Up!", True,
-             top_of_elevator],
+            ["Wet-Dry World - Express Elevator--Hurry Up!", True, [CANNON, PURPLE_SWITCH, DIAMOND]],
             ["Wet-Dry World - Top of Express Elevator 10 Coins Block", False,
              top_of_elevator],
             ["Wet-Dry World - Top of Express Elevator 10 Coins Block", True,
              top_of_elevator + [TEN_COIN_BLOCKS]],
             ["Wet-Dry World - Secrets in the Shallows & Sky", False,
              []],
-            ["Wet-Dry World - Secrets in the Shallows & Sky", True, [DIAMOND]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", False, [CANNON]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", True,
+             [CANNON, PURPLE_SWITCH]],
 
             ["Wet-Dry World - Top o' the Town", False, top_of_elevator],
             ["Wet-Dry World - Top o' the Town", True, top],
@@ -145,6 +148,47 @@ class TestWetDryWorldMiddleLocations(SM64TestBase):
             ["Wet-Dry World - Pedestal 10 Coins Block", True,
              ["Side Flip", TEN_COIN_BLOCKS]],
         ], starting_regions=["Wet-Dry World - Mid Water"])
+
+
+class TestWetDryWorldPedestalHeaveHoTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {"Wet-Dry World Pedestal with Heave-ho"},
+    }
+
+    def test_pedestal_heave_ho_requires_trick(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Pedestal 10 Coins Block", True, [HEAVE_HOS, TEN_COIN_BLOCKS]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
+
+
+class TestWetDryWorldSecretsRoutes(SM64TestBase):
+    run_default_tests = False
+    options = WDW_OPTIONS
+
+    def test_cannon_and_purple_switch_route(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Secrets in the Shallows & Sky", False, [CANNON]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", True, [CANNON, PURPLE_SWITCH]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
+
+
+class TestWetDryWorldSecretsTrickRoutes(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {
+            "Wet-Dry World Pedestal with Heave-ho",
+            "Wet-Dry World Top Platforms to Express Elevator without Movement Items",
+        },
+    }
+
+    def test_heave_ho_and_top_platforms_trick_route(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Secrets in the Shallows & Sky", False, [HEAVE_HOS]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", True, [HEAVE_HOS, "Side Flip"]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
 
 
 class TestWetDryWorldHighLocations(SM64TestBase):
