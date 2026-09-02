@@ -23,7 +23,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     per_level_one_up_unlock_item_data_table, global_sign_unlock_item_data_table, \
     per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_filler_item_names
 from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
-    get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, location_name_groups
+    get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, \
+    get_global_coin_count_check_location_names, get_global_coin_count_caps, location_name_groups
 from .CoinChecks import CoinOutputID, coin_output_by_name, coin_output_region_name, select_individual_coin_outputs
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
@@ -117,6 +118,7 @@ class SM64World(World):
 
     star_costs: typing.Dict[str, int]
     coin_count_check_location_names: typing.Tuple[str, ...]
+    global_coin_count_check_location_names: typing.Tuple[str, ...]
     coin_check_location_names: typing.Tuple[str, ...]
     music_slot_data: typing.Dict[str, typing.Any] | None
     using_slot_coin_count_check_locations: bool
@@ -179,6 +181,8 @@ class SM64World(World):
         "skybox_shuffle",
         "coin_checks",
         "coin_count_checks",
+        "global_coin_count_checks",
+        "counts_coins_beyond_coin_stars",
         *secret_stage_coin_count_max_coin_option_names,
         *coin_star_requirement_option_names,
         "traps_filler_percentage",
@@ -306,15 +310,25 @@ class SM64World(World):
             }
             self.coin_count_check_location_names += get_secret_stage_coin_count_check_location_names(
                 secret_stage_coin_maxes, self.options.coin_count_checks.value)
+        if "GlobalCoinCountCheckLocations" in slot_data:
+            self.global_coin_count_check_location_names = tuple(slot_data["GlobalCoinCountCheckLocations"])
+        else:
+            self.global_coin_count_check_location_names = get_global_coin_count_check_location_names(
+                sum(self.get_global_coin_count_caps()),
+                self.options.global_coin_count_checks.value,
+            )
         if "MoveRandoVec" in slot_data:
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
 
     def get_shuffled_normal_entrance_ids(self) -> set[int]:
         sub_area_mode = self.options.sub_area_shuffle.value
-        if sub_area_mode in {
-                self.options.sub_area_shuffle.option_mixed,
-                self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
-        }:
+        if (
+                self.options.area_rando.value != self.options.area_rando.option_Off
+                and sub_area_mode in {
+                    self.options.sub_area_shuffle.option_mixed,
+                    self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
+                }
+        ):
             entrance_ids = {int(entrance_id) for entrance_id in sm64_shuffled_entrance_ids}
             entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
             return entrance_ids
@@ -354,13 +368,7 @@ class SM64World(World):
         if source_name is None:
             raise KeyError(source_id)
 
-        if self.options.sub_area_shuffle.value in {
-                self.options.sub_area_shuffle.option_mixed,
-                self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
-        }:
-            destination_key = self.area_connections[source_id]
-        else:
-            destination_key = self.area_connections[source_id]
+        destination_key = self.area_connections[source_id]
         return (
             f"{self.get_entrance_destination_description(destination_key)} is at "
             f"{sm64_entrance_source_descriptions[source_id]}."
@@ -505,6 +513,10 @@ class SM64World(World):
             region_name = coin_check_region_names.get(region_name, region_name)
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
+        global_coin_count_region = self.multiworld.get_region(self.origin_region_name, self.player)
+        for location_name in self.global_coin_count_check_location_names:
+            global_coin_count_region.locations.append(SM64Location(
+                self.player, location_name, location_table[location_name], global_coin_count_region))
         for location_name in self.coin_check_location_names:
             output = coin_output_by_name[location_name]
             output_id = output.output_id
@@ -903,11 +915,29 @@ class SM64World(World):
             for option_name in coin_star_requirement_option_names
         }
 
+    def get_global_coin_count_caps(self) -> tuple[int, ...]:
+        reachable_coin_maxima = {}
+        if self.options.accessibility == self.options.accessibility.option_full:
+            if not self.logic_sl_impossible_coin:
+                reachable_coin_maxima["Snowman's Land"] = 126
+            if not self.logic_thi_impossible_coin:
+                reachable_coin_maxima["Tiny-Huge Island"] = 191
+        return get_global_coin_count_caps(
+            self.get_coin_star_requirements_by_option(),
+            {
+                option_name: getattr(self.options, option_name).value
+                for option_name in secret_stage_coin_count_max_coin_option_names
+            },
+            bool(self.options.counts_coins_beyond_coin_stars),
+            reachable_coin_maxima,
+        )
+
     def add_overflow_coin_count_check_locations(self) -> None:
         item_count = self.get_item_pool_item_count()
         fillable_location_count = (
             len(self.multiworld.get_unfilled_locations(self.player))
             + len(self.coin_count_check_location_names)
+            + len(self.global_coin_count_check_location_names)
             + len(self.coin_check_location_names)
             - self.get_future_locked_location_count()
         )
@@ -1270,6 +1300,9 @@ class SM64World(World):
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
             "CoinCountCheckLocations": list(self.coin_count_check_location_names),
+            "GlobalCoinCountCheckLocations": list(self.global_coin_count_check_location_names),
+            "GlobalCoinCountChecksEnabled": self.options.global_coin_count_checks.value > 0,
+            "GlobalCoinCountCaps": list(self.get_global_coin_count_caps()),
             "CoinCheckLocations": list(self.coin_check_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
             "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,

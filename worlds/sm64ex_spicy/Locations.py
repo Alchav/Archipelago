@@ -27,6 +27,8 @@ coin_count_check_course_data = (
 
 secret_stage_coin_count_check_location_base_id = 3629193
 
+global_coin_count_check_location_base_id = 4_100_000
+
 secret_stage_coin_count_check_data = (
     ("The Princess's Secret Slide", 3629193, "princess_secret_slide_coin_count_max_coins", 80),
     ("The Secret Aquarium", 3629273, "secret_aquarium_coin_count_max_coins", 56),
@@ -38,6 +40,33 @@ secret_stage_coin_count_check_data = (
     ("Bowser in the Fire Sea", 3629602, "bowser_in_the_fire_sea_coin_count_max_coins", 80),
     ("Bowser in the Sky", 3629682, "bowser_in_the_sky_coin_count_max_coins", 76),
 )
+
+global_coin_count_course_data = (
+    *coin_count_check_course_data,
+    *secret_stage_coin_count_check_data,
+)
+
+
+def get_global_coin_count_caps(
+        coin_star_requirements: dict[str, int],
+        secret_stage_coin_maxes: dict[str, int],
+        count_beyond_coin_stars: bool,
+        reachable_coin_maxima: dict[str, int] | None = None,
+) -> tuple[int, ...]:
+    if count_beyond_coin_stars:
+        return tuple(
+            min(
+                maximum,
+                (reachable_coin_maxima or {}).get(course_name, maximum),
+            )
+            for course_name, _offset, _option_name, maximum in global_coin_count_course_data
+        )
+    return tuple(
+        coin_star_requirements[option_name]
+        if option_name in coin_star_requirements
+        else secret_stage_coin_maxes[option_name]
+        for _course_name, _offset, option_name, _maximum in global_coin_count_course_data
+    )
 
 
 def get_coin_count_check_location_name(course_name: str, coin_count: int) -> str:
@@ -73,6 +102,28 @@ def get_secret_stage_coin_count_check_location_names(
     )
 
 
+def get_global_coin_count_check_location_name(coin_count: int) -> str:
+    return f"{coin_count} Coin{'s' if coin_count != 1 else ''}"
+
+
+def get_global_coin_count_check_thresholds(maximum_coins: int, percentage: int) -> tuple[int, ...]:
+    if maximum_coins <= 0 or percentage <= 0:
+        return ()
+
+    check_count = min((maximum_coins * percentage + 99) // 100, maximum_coins)
+    return tuple(
+        (maximum_coins * check_index + check_count - 1) // check_count
+        for check_index in range(1, check_count + 1)
+    )
+
+
+def get_global_coin_count_check_location_names(maximum_coins: int, percentage: int) -> tuple[str, ...]:
+    return tuple(
+        get_global_coin_count_check_location_name(coin_count)
+        for coin_count in get_global_coin_count_check_thresholds(maximum_coins, percentage)
+    )
+
+
 def parse_coin_count_check_location_name(location_name: str) -> tuple[str, int] | None:
     if location_name not in coin_count_check_location_table:
         return None
@@ -93,10 +144,24 @@ secret_stage_coin_count_check_location_table = {
     for coin_count in range(1, max_coins + 1)
 }
 
+global_coin_count_check_maximum = sum(course_data[3] for course_data in global_coin_count_course_data)
+
+global_coin_count_check_location_table = {
+    get_global_coin_count_check_location_name(coin_count):
+        global_coin_count_check_location_base_id + coin_count - 1
+    for coin_count in range(1, global_coin_count_check_maximum + 1)
+}
+
 coin_count_check_location_table = {
     **coin_count_check_location_table,
     **secret_stage_coin_count_check_location_table,
 }
+
+
+def parse_global_coin_count_check_location_name(location_name: str) -> int | None:
+    if location_name not in global_coin_count_check_location_table:
+        return None
+    return int(location_name.split(" ", 1)[0])
 
 #Bob-omb Battlefield
 locBoB_table = {
@@ -626,7 +691,8 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
                   **locSS_table, **locBasement_table, **locFreeItem_table, **locFreestanding1Up_table, **locBlocksanity_table, \
-                  **coin_count_check_location_table, **individual_coin_location_table}
+                  **coin_count_check_location_table, **global_coin_count_check_location_table,
+                  **individual_coin_location_table}
 
 loc1UpBlock_table = {
     location_name: location_table[location_name]
@@ -767,6 +833,7 @@ location_name_groups.update({
     "Coin Count Checks": set(coin_count_check_location_table),
     "Main Course Coin Count Checks": set(coin_count_check_location_table) - set(secret_stage_coin_count_check_location_table),
     "Secret Stage Coin Count Checks": set(secret_stage_coin_count_check_location_table),
+    "Global Coin Count Checks": set(global_coin_count_check_location_table),
     "1-Ups": set(locOneUp_table),
     "1-Ups from Blocks": set(loc1UpBlock_table),
     "Freestanding 1-Ups": set(locFreestanding1Up_table),

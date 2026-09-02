@@ -229,6 +229,18 @@ class TestBowserInTheSkyLocations(SM64TestBase):
         self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
 
 
+class TestBowserInTheSkyGrandStar(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BOWSER_STAGE_OPTIONS,
+        "completion_type": Options.CompletionType.option_All_Bowser_Stages,
+    }
+
+    def test_grand_star_is_in_the_bowser_arena(self):
+        location = self.multiworld.get_location("Bowser in the Sky - Grand Star", self.player)
+        self.assertEqual(location.parent_region.name, "Bowser in the Sky - Bowser Arena")
+
+
 class TestBowserStageEntrances(SM64TestBase):
     run_default_tests = False
     options = BOWSER_STAGE_OPTIONS

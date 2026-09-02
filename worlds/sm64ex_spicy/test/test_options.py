@@ -23,9 +23,10 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_koopa_shell_block_item_names, global_star_secret_item_names, global_jet_stream_item_names, \
     freestanding_star_item_data_table, star_block_item_data_table, koopa_shell_block_item_data_table, \
     star_secret_item_data_table, jet_stream_item_data_table
-from ..Locations import coin_count_check_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
+from ..Locations import coin_count_check_course_data, secret_stage_coin_count_check_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coin_count_check_location_table, secret_stage_coin_count_check_location_table, get_coin_count_check_location_name, \
-    location_name_groups
+    get_global_coin_count_caps, get_global_coin_count_check_location_name, \
+    global_coin_count_check_location_table, global_coin_count_check_maximum, location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -1591,6 +1592,7 @@ class SecretStageCoinCountMaxCoinsOptionTestBase(SM64TestBase):
                 self.assertEqual(option.range_start, 0)
                 self.assertEqual(option.range_end, range_end)
                 self.assertEqual(option.default, default)
+                self.assertEqual(option.visibility, Options.Visibility.none)
 
 
 class CoinCountChecksLocationTableTestBase(SM64TestBase):
@@ -1652,6 +1654,95 @@ class CoinCountChecksDefaultOffTestBase(SM64TestBase):
     def test_default_no_active_coin_count_check_locations(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertFalse(active_locations.intersection(coin_count_check_location_table))
+
+
+class GlobalCoinCountChecksDefaultOffTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_default_no_active_global_coin_count_check_locations(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertFalse(active_locations.intersection(global_coin_count_check_location_table))
+
+
+class GlobalCoinCountChecksGenerationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "global_coin_count_checks": 1,
+    }
+
+    def test_global_coin_count_checks_use_the_total_of_the_configured_course_caps(self):
+        caps = self.world.get_global_coin_count_caps()
+        maximum = sum(caps)
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertEqual(len(self.world.global_coin_count_check_location_names), (maximum + 99) // 100)
+        self.assertEqual(self.world.global_coin_count_check_location_names[-1],
+                         get_global_coin_count_check_location_name(maximum))
+        self.assertIn(get_global_coin_count_check_location_name(maximum), active_locations)
+
+    def test_global_coin_count_locations_are_in_the_origin_region(self):
+        location_name = self.world.global_coin_count_check_location_names[0]
+        location = self.multiworld.get_location(location_name, self.player)
+        self.assertEqual(location.parent_region.name, self.world.origin_region_name)
+
+    def test_global_coin_count_rules_evaluate_unreachable_courses_without_counting_them(self):
+        location_name = self.world.global_coin_count_check_location_names[0]
+        location = self.multiworld.get_location(location_name, self.player)
+        self.assertIsInstance(location.can_reach(CollectionState(self.multiworld)), bool)
+
+
+class GlobalCoinCountCapsTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_coin_stars_and_secret_stage_maxes_cap_global_counts_by_default(self):
+        coin_star_requirements = {
+            option_name: maximum
+            for _course_name, _offset, option_name, maximum in coin_count_check_course_data
+        }
+        secret_stage_coin_maxes = {
+            option_name: maximum
+            for _course_name, _base_id, option_name, maximum in secret_stage_coin_count_check_data
+        }
+        coin_star_requirements["bob_omb_battlefield_coin_star_requirement"] = 100
+        secret_stage_coin_maxes["princess_secret_slide_coin_count_max_coins"] = 10
+        capped = get_global_coin_count_caps(
+            coin_star_requirements,
+            secret_stage_coin_maxes,
+            False,
+        )
+        all_coins = get_global_coin_count_caps(
+            coin_star_requirements,
+            secret_stage_coin_maxes,
+            True,
+            {"Snowman's Land": 126, "Tiny-Huge Island": 191},
+        )
+        self.assertEqual(capped[0], 100)
+        self.assertEqual(capped[len(coin_count_check_course_data)], 10)
+        self.assertEqual(all_coins[0], 146)
+        self.assertEqual(all_coins[len(coin_count_check_course_data)], 80)
+        self.assertEqual(all_coins[9], 126)
+        self.assertEqual(all_coins[12], 191)
+        self.assertEqual(sum(all_coins), global_coin_count_check_maximum - 2)
+
+
+class GlobalCoinCountChecksFullAccessibilityTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "global_coin_count_checks": 100,
+        "counts_coins_beyond_coin_stars": 1,
+        "accessibility": Options.SM64Accessibility.option_full,
+    }
+
+    def test_impossible_coins_do_not_create_unreachable_final_global_checks(self):
+        maximum = global_coin_count_check_maximum - 2
+        self.assertEqual(sum(self.world.get_global_coin_count_caps()), maximum)
+        self.assertIn(
+            get_global_coin_count_check_location_name(maximum),
+            self.world.global_coin_count_check_location_names,
+        )
+        self.assertNotIn(
+            get_global_coin_count_check_location_name(maximum + 1),
+            self.world.global_coin_count_check_location_names,
+        )
 
 
 class CoinCountChecksGenerationTestBase(SM64TestBase):

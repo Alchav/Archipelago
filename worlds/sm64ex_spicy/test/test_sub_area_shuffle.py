@@ -88,7 +88,7 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
 class MixedSubAreaShuffleTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
+        "area_rando": Options.AreaRandomizer.option_Courses_Only,
         "sub_area_shuffle": Options.SubAreaShuffle.option_mixed,
     }
 
@@ -229,6 +229,7 @@ class MixedSubAreaShuffleTest(SM64TestBase):
             seed=7,
         )
         world = multiworld.worlds[1]
+        world.options.area_rando.value = Options.AreaRandomizer.option_Courses_Only
         world.options.sub_area_shuffle.value = sub_area_mode
         multiworld.generation_is_fake = True
         multiworld.enforce_deferred_connections = "on"
@@ -239,7 +240,7 @@ class MixedSubAreaShuffleTest(SM64TestBase):
 class MixedCastleReturnSubAreaShuffleTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
+        "area_rando": Options.AreaRandomizer.option_Courses_Only,
         "sub_area_shuffle": Options.SubAreaShuffle.option_mixed_plus_castle_returns,
     }
 
@@ -262,3 +263,31 @@ class MixedCastleReturnSubAreaShuffleTest(SM64TestBase):
             for other_id, entrance in world.randomized_entrance_connections.items()
             if other_id != source_id
         ))
+
+
+class MixedSubAreaShuffleWithoutEntranceRandomizerTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "area_rando": Options.AreaRandomizer.option_Off,
+        "sub_area_shuffle": Options.SubAreaShuffle.option_mixed_plus_castle_returns,
+    }
+
+    def test_mixed_mode_without_entrance_randomizer_uses_separate_sub_areas(self):
+        expected_ids = {
+            source.source_id
+            for source in (
+                *SUB_AREA_SOURCES.values(),
+                *RETURN_SOURCES.values(),
+                *CASTLE_RETURN_SOURCES.values(),
+            )
+        }
+        self.assertEqual(set(self.world.sub_area_slot_data), expected_ids)
+        self.assertTrue(all(
+            source == destination
+            for source, destination in self.world.area_connections.items()
+            if isinstance(source, int)
+        ))
+
+        bob_entrance = self.multiworld.get_entrance(
+            "Castle Lobby -> Bob-omb Battlefield", self.player)
+        self.assertEqual(bob_entrance.connected_region.name, "Bob-omb Battlefield")

@@ -63,6 +63,11 @@ def _coin_trace(
             available = rule_available and physical_region_available
     if counted is None:
         counted = available and original_available
+    else:
+        # Route selection happens before the shared physical-region and
+        # declarative-rule context is applied. A selected route cannot remain
+        # counted after either later constraint makes it unavailable.
+        counted = counted and available and original_available
     return CoinSourceTrace(
         source_id, label, coins, counted, available, children, red_coin_ids,
         max_coins, reachable_red_coin_ids_when_uncounted, requirement_rule)

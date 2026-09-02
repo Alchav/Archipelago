@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup, \
-    OptionSet, ItemsAccessibility
+    OptionSet, ItemsAccessibility, Visibility
 
 from .LogicTricks import logic_trick_option_keys
 
@@ -48,6 +48,30 @@ class CoinChecks(Range):
     default = 0
 
 
+class GlobalCoinCountChecks(Range):
+    """Adds checks for cumulative permanent coins across all coin-bearing areas.
+
+    The percentage selects evenly distributed thresholds from one through the
+    configured global maximum. The global total includes the current course's
+    live coin counter and stored permanent coins from every other course.
+    """
+    display_name = "Global Coin Count Checks"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
+class CountsCoinsBeyondCoinStars(Toggle):
+    """Counts every collected coin toward Global Coin Count Checks.
+
+    When disabled, each main course contributes at most its Coin Star
+    Requirement and each secret stage contributes at most its hidden Coin Count
+    Max Coins setting.
+    """
+    display_name = "Counts Coins Beyond Coin Stars"
+    default = 0
+
+
 class SM64Accessibility(ItemsAccessibility):
     default = ItemsAccessibility.option_full
 
@@ -58,6 +82,7 @@ class PrincessSecretSlideCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 80
     default = 80
+    visibility = Visibility.none
 
 
 class SecretAquariumCoinCountMaxCoins(Range):
@@ -66,6 +91,7 @@ class SecretAquariumCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 56
     default = 56
+    visibility = Visibility.none
 
 
 class WingMarioOverTheRainbowCoinCountMaxCoins(Range):
@@ -74,6 +100,7 @@ class WingMarioOverTheRainbowCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 56
     default = 56
+    visibility = Visibility.none
 
 
 class TowerOfTheWingCapCoinCountMaxCoins(Range):
@@ -84,6 +111,7 @@ class TowerOfTheWingCapCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 63
     default = 63
+    visibility = Visibility.none
 
 
 class VanishCapUnderTheMoatCoinCountMaxCoins(Range):
@@ -92,6 +120,7 @@ class VanishCapUnderTheMoatCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 27
     default = 27
+    visibility = Visibility.none
 
 
 class CavernOfTheMetalCapCoinCountMaxCoins(Range):
@@ -100,6 +129,7 @@ class CavernOfTheMetalCapCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 47
     default = 47
+    visibility = Visibility.none
 
 
 class BowserInTheDarkWorldCoinCountMaxCoins(Range):
@@ -108,6 +138,7 @@ class BowserInTheDarkWorldCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 80
     default = 80
+    visibility = Visibility.none
 
 
 class BowserInTheFireSeaCoinCountMaxCoins(Range):
@@ -116,6 +147,7 @@ class BowserInTheFireSeaCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 80
     default = 80
+    visibility = Visibility.none
 
 
 class BowserInTheSkyCoinCountMaxCoins(Range):
@@ -124,6 +156,7 @@ class BowserInTheSkyCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 76
     default = 76
+    visibility = Visibility.none
 
 
 secret_stage_coin_count_max_coin_options = (
@@ -1113,7 +1146,8 @@ sm64_options_groups = [
     OptionGroup("Coin Options", [
         CoinChecks,
         CoinCountChecks,
-        *secret_stage_coin_count_max_coin_options,
+        GlobalCoinCountChecks,
+        CountsCoinsBeyondCoinStars,
         *coin_star_requirement_options,
     ]),
     OptionGroup("Gameplay Options", [
@@ -1196,6 +1230,8 @@ class SM64Options(PerGameCommonOptions):
     skybox_shuffle: SkyboxShuffle
     coin_checks: CoinChecks
     coin_count_checks: CoinCountChecks
+    global_coin_count_checks: GlobalCoinCountChecks
+    counts_coins_beyond_coin_stars: CountsCoinsBeyondCoinStars
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement

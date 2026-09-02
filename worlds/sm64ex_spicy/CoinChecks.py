@@ -173,17 +173,15 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "huge_piranha_area_plants": "Tiny-Huge Island - Huge Piranha Area",
 }
 
-# Courses with independently shuffled sub-areas need an explicit main-area
-# owner for sources that are not listed above.  Aggregate count checks may be
-# reachable from a sub-area, but only sources in physically reachable regions
-# may contribute to their totals.
+# Every source without a more specific physical-region mapping belongs to its
+# course's main region. Aggregate count checks may be reachable from a
+# sub-area, but only sources in physically reachable regions may contribute to
+# their totals. Tiny-Huge Island has no shared main region; its sources are all
+# mapped explicitly above.
 COIN_SOURCE_DEFAULT_REGION_NAMES: Mapping[str, str] = {
-    "Jolly Roger Bay": "Jolly Roger Bay",
-    "Cool, Cool Mountain": "Cool, Cool Mountain",
-    "Lethal Lava Land": "Lethal Lava Land",
-    "Shifting Sand Land": "Shifting Sand Land",
-    "Snowman's Land": "Snowman's Land",
-    "Tall, Tall Mountain": "Tall, Tall Mountain",
+    course_name: course_name
+    for course_name in COURSE_MAXIMUM_COIN_VALUES
+    if course_name not in {"Tiny-Huge Island", "Castle"}
 }
 
 

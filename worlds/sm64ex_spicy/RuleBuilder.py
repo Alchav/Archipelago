@@ -470,6 +470,137 @@ class CanCollectCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
 
 @dataclasses.dataclass()
+class CanCollectGlobalCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
+    """Require a capped sum of reachable coins across every coin-bearing course."""
+
+    course_caps: tuple[tuple[str, int], ...]
+    required_coins: int
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.required_coins < 0:
+            raise ValueError("Required coin counts must not be negative")
+        if not self.course_caps or any(not name or cap < 0 for name, cap in self.course_caps):
+            raise ValueError("Global coin checks need non-negative caps for every course")
+
+    @override
+    def _instantiate(self, world: SM64World) -> Rule.Resolved:
+        registrations = tuple(get_coin_evaluator(course_name) for course_name, _cap in self.course_caps)
+        return self.Resolved(
+            self.course_caps,
+            self.required_coins,
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.item_dependencies
+            )),
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.region_dependencies
+            )),
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.location_dependencies
+            )),
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.entrance_dependencies
+            )),
+            player=world.player,
+            caching_enabled=getattr(world, "rule_caching_enabled", False),
+        )
+
+    class Resolved(Rule.Resolved):
+        course_caps: tuple[tuple[str, int], ...]
+        required_coins: int
+        item_dependency_names: tuple[str, ...]
+        region_dependency_names: tuple[str, ...]
+        location_dependency_names: tuple[str, ...]
+        entrance_dependency_names: tuple[str, ...]
+
+        force_recalculate: ClassVar[bool] = True
+
+        def _evaluate_courses(self, state: CollectionState) -> tuple[int, tuple[tuple[str, int, int], ...]]:
+            course_totals: list[tuple[str, int, int]] = []
+            total = 0
+            for course_name, cap in self.course_caps:
+                result = evaluate_coins(state, self.player, course_name, cap)
+                reachable = result.reachable_coins if isinstance(result, CoinEvaluation) else (cap if result else 0)
+                reachable = min(reachable, cap)
+                total += reachable
+                course_totals.append((course_name, reachable, cap))
+            return total, tuple(course_totals)
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            total, _course_totals = self._evaluate_courses(state)
+            return total >= self.required_coins
+
+        @override
+        def item_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.item_dependency_names}
+
+        @override
+        def region_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.region_dependency_names}
+
+        @override
+        def location_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.location_dependency_names}
+
+        @override
+        def entrance_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.entrance_dependency_names}
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            if state is None:
+                return [
+                    {"type": "text", "text": "Collect "},
+                    {"type": "color", "color": "cyan", "text": str(self.required_coins)},
+                    {"type": "text", "text": " global coins"},
+                ]
+
+            total, course_totals = self._evaluate_courses(state)
+            maximum = sum(cap for _course_name, _reachable, cap in course_totals)
+            messages: list[JSONMessagePart] = [
+                {"type": "text", "text": "Reachable global coins: "},
+                {
+                    "type": "color",
+                    "color": "green" if total >= self.required_coins else "salmon",
+                    "text": f"{total}/{maximum}",
+                },
+                {"type": "text", "text": f" (requires {self.required_coins})"},
+            ]
+            for course_name, reachable, cap in course_totals:
+                messages.extend((
+                    {"type": "text", "text": "\n  "},
+                    {
+                        "type": "color",
+                        "color": "green" if reachable >= cap else "salmon",
+                        "text": f"{reachable}/{cap}",
+                    },
+                    {"type": "text", "text": f" {course_name}"},
+                ))
+            return messages
+
+        @override
+        def explain_str(self, state: CollectionState | None = None) -> str:
+            if state is None:
+                return str(self)
+            total, course_totals = self._evaluate_courses(state)
+            maximum = sum(cap for _course_name, _reachable, cap in course_totals)
+            return f"Reachable global coins: {total}/{maximum} (requires {self.required_coins})"
+
+        @override
+        def __str__(self) -> str:
+            return f"Collect {self.required_coins} global coins"
+
+
+@dataclasses.dataclass()
 class CanCollectCoinOutput(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
     """Require one physical output through any of its CoinLogic source methods."""
 

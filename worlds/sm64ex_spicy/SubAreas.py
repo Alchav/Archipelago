@@ -270,7 +270,8 @@ CASTLE_RETURN_OUTGOING_BY_DESTINATION = {
 }
 
 
-def build_separate_connections(random: Random) -> dict[str, str]:
+def build_separate_connections(
+        random: Random, include_castle_returns: bool = False) -> dict[str, str]:
     connections: dict[str, str] = {}
 
     reusable_destinations = list(REUSABLE_ENTRY_KEYS)
@@ -286,6 +287,12 @@ def build_separate_connections(random: Random) -> dict[str, str]:
     dead_destination_keys = [key for key in SUB_AREA_DESTINATIONS if key not in REUSABLE_ENTRY_KEYS]
     random.shuffle(dead_destination_keys)
     connections.update(zip(dead_source_keys, dead_destination_keys))
+
+    if include_castle_returns:
+        castle_return_destinations = list(CASTLE_RETURN_DESTINATIONS)
+        random.shuffle(castle_return_destinations)
+        connections.update(zip(CASTLE_RETURN_SOURCES, castle_return_destinations))
+
     return connections
 
 

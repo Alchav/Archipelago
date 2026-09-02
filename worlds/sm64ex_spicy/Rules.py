@@ -5,7 +5,7 @@ from BaseClasses import CollectionState, DEFAULT_COLLECTION_RULE, Entrance, Mult
 from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Has, HasAll, HasAny, \
     Or, Rule, True_
 from .Locations import SM64Location, locOneUp_table, location_table, one_up_unlock_category_by_location, \
-    parse_coin_count_check_location_name
+    parse_coin_count_check_location_name, parse_global_coin_count_check_location_name, global_coin_count_course_data
 from .CoinChecks import coin_output_by_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, create_region, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
@@ -15,7 +15,7 @@ from .Items import action_item_data_table, cap_item_data_table, feature_item_dat
     per_level_move_area_names, ut_glitch_item_name, freestanding_star_item_data_table, \
     star_block_item_data_table, koopa_shell_block_item_data_table, star_secret_item_data_table
 from .LogicTricks import logic_tricks
-from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoinOutput, CanCollectCoins, HasUnlock, LogicTrick, \
+from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoinOutput, CanCollectCoins, CanCollectGlobalCoins, HasUnlock, LogicTrick, \
     register_coin_evaluator
 from .CoinLogic import COIN_EVALUATORS, SSL_UPPER_PYRAMID_ENTRANCE_RULE
 from .Signs import sign_data, sign_item_name_for_area
@@ -365,10 +365,13 @@ def is_starting_check_location(location_name: str, options: SM64Options) -> bool
 def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_connections: dict, move_rando_bitvec: int):
     world = multiworld.worlds[player]
     sub_area_mode = options.sub_area_shuffle.value
-    mixed_sub_areas = sub_area_mode in {
-        options.sub_area_shuffle.option_mixed,
-        options.sub_area_shuffle.option_mixed_plus_castle_returns,
-    }
+    mixed_sub_areas = (
+        options.area_rando.value != options.area_rando.option_Off
+        and sub_area_mode in {
+            options.sub_area_shuffle.option_mixed,
+            options.sub_area_shuffle.option_mixed_plus_castle_returns,
+        }
+    )
     using_slot_area_connections = bool(area_connections)
     if using_slot_area_connections:
         if mixed_sub_areas:
@@ -442,8 +445,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     has_physical_warp_connections = any(isinstance(source, str) for source in area_connections)
     if sub_area_mode and not has_physical_warp_connections:
-        if sub_area_mode == options.sub_area_shuffle.option_separate:
-            area_connections.update(build_separate_connections(world.random))
+        if (sub_area_mode == options.sub_area_shuffle.option_separate
+                or options.area_rando.value == options.area_rando.option_Off):
+            area_connections.update(build_separate_connections(
+                world.random,
+                sub_area_mode == options.sub_area_shuffle.option_mixed_plus_castle_returns,
+            ))
         else:
             mixed_connections = build_mixed_connections(
                 world.random,
@@ -1469,10 +1476,18 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             )
             continue
         coin_count_check_location = parse_coin_count_check_location_name(location.name)
-        if coin_count_check_location is None:
+        if coin_count_check_location is not None:
+            course_name, coin_count = coin_count_check_location
+            rf.assign_rule_object(location.name, CanCollectCoins(course_name, coin_count))
             continue
-        course_name, coin_count = coin_count_check_location
-        rf.assign_rule_object(location.name, CanCollectCoins(course_name, coin_count))
+        global_coin_count = parse_global_coin_count_check_location_name(location.name)
+        if global_coin_count is not None:
+            course_caps = tuple(
+                (course_name, cap)
+                for (course_name, _offset, _option_name, _maximum), cap
+                in zip(global_coin_count_course_data, world.get_global_coin_count_caps())
+            )
+            rf.assign_rule_object(location.name, CanCollectGlobalCoins(course_caps, global_coin_count))
 
     # Castle Stars
     rf.assign_rule("Castle - Roof", "CANN")
