@@ -485,19 +485,19 @@ class SignUnlocks(LevelFeatureItemMode):
 
 class BowserBombs(LevelFeatureItemMode):
     """
-    Choose how Progressive Bowser Arena Bombs are handled.
+    Choose how Bowser Arena Bombs are handled.
 
-    Not Shuffled - The game starts with all Bower Arena Bombs available.
+    Not Shuffled - The game starts with all Bowser Arena Bombs available.
 
-    Global - Shuffle five Progressive Bowser Arena Bomb items that each add one bomb to each Bowser Arena.
-    Bowser in the Dark World and Bowser in the Fire Sea cap at four bombs.
+    Global - Shuffle Bowser Arena Bombs 1 through 4, which unlock the matching bomb in every arena, and Bowser in the
+    Sky - Bowser Arena Bomb 5.
 
-    Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
-    Fire Sea, and five for Bowser in the Sky.
+    Per Level - Shuffle separately named bombs for each arena: four each for Bowser in the Dark World and Bowser in
+    the Fire Sea, and five for Bowser in the Sky.
 
-    Both - Shuffle five global bombs in addition to all thirteen level-specific bombs.
+    Both - Shuffle global bombs 1 through 4 in addition to all level-specific bombs. Bowser in the Sky Bomb 5 is shared.
     """
-    display_name = "Progressive Bowser Arena Bomb Items"
+    display_name = "Bowser Arena Bomb Items"
 
 
 class BowserInTheDarkWorldHits(Range):

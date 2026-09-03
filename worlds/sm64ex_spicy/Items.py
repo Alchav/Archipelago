@@ -1172,10 +1172,23 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
 }
 
 bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
-    "Progressive Bowser Arena Bomb": SM64ItemData(3626849, progression),
-    "Bowser in the Dark World - Progressive Bowser Arena Bomb": SM64ItemData(3626850, progression),
-    "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": SM64ItemData(3626851, progression),
-    "Bowser in the Sky - Progressive Bowser Arena Bomb": SM64ItemData(3626852, progression),
+    "Bowser Arena Bomb 1": SM64ItemData(3627150, progression),
+    "Bowser Arena Bomb 2": SM64ItemData(3627151, progression),
+    "Bowser Arena Bomb 3": SM64ItemData(3627152, progression),
+    "Bowser Arena Bomb 4": SM64ItemData(3627153, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 1": SM64ItemData(3627154, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 2": SM64ItemData(3627155, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 3": SM64ItemData(3627156, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 4": SM64ItemData(3627157, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 1": SM64ItemData(3627158, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 2": SM64ItemData(3627159, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 3": SM64ItemData(3627160, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 4": SM64ItemData(3627161, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 1": SM64ItemData(3627162, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 2": SM64ItemData(3627163, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 3": SM64ItemData(3627164, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 4": SM64ItemData(3627165, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 5": SM64ItemData(3627166, progression),
 }
 
 
@@ -1329,7 +1342,26 @@ item_name_groups: dict[str, set[str]] = {
     "Enemy Unlocks": set(global_enemy_item_data_table) | set(per_level_enemy_item_data_table),
     "Global Enemy Unlocks": set(global_enemy_item_data_table),
     "Per-Level Enemy Unlocks": set(per_level_enemy_item_data_table),
-    "Progressive Bowser Arena Bombs": set(bowser_bomb_item_data_table),
+    "Bowser Arena Bombs": set(bowser_bomb_item_data_table),
+    "Global Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        "Bowser in the Sky - Bowser Arena Bomb 5",
+    },
+    "Per-Level Bowser Arena Bombs": {
+        item_name for item_name in bowser_bomb_item_data_table if item_name.startswith("Bowser in the")
+    },
+    "Bowser in the Dark World - Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        *(f"Bowser in the Dark World - Bowser Arena Bomb {index}" for index in range(1, 5)),
+    },
+    "Bowser in the Fire Sea - Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        *(f"Bowser in the Fire Sea - Bowser Arena Bomb {index}" for index in range(1, 5)),
+    },
+    "Bowser in the Sky - Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        *(f"Bowser in the Sky - Bowser Arena Bomb {index}" for index in range(1, 6)),
+    },
     "Optional Items": set(optional_item_data_table),
     "Filler": set(progressive_filler_item_names),
      "Traps": set(trap_item_data_table),

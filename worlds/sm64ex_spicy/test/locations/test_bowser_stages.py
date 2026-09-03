@@ -39,8 +39,8 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
         purple_switch = ["Bowser in the Dark World - Purple Switch"]
         red_coins = ["Bowser in the Dark World - Red Coins"]
         bombs = [
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+            "Bowser in the Dark World - Bowser Arena Bomb 1",
+            "Bowser in the Dark World - Bowser Arena Bomb 2",
         ]
         freestanding = ["Bowser in the Dark World - Freestanding 1-Ups"]
         extra = ["Bowser in the Dark World - Extra 1-Ups"]
@@ -98,8 +98,8 @@ class TestBowserInTheDarkWorldSlopeTrick(SM64TestBase):
         trick_route = [
             "Triple Jump",
             "Bowser in the Dark World - Warp Pipes",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+            "Bowser in the Dark World - Bowser Arena Bomb 1",
+            "Bowser in the Dark World - Bowser Arena Bomb 2",
             "Bowser in the Dark World - Bowser",
         ]
         self.run_location_tests([
@@ -119,8 +119,8 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
         near_final_poles_freestanding = upper + ["Triple Jump"]
         near_final_poles = upper + ["Wall Kick"]
         bombs = [
-            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb",
-            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb",
+            "Bowser in the Fire Sea - Bowser Arena Bomb 1",
+            "Bowser in the Fire Sea - Bowser Arena Bomb 2",
         ]
         bowser = ["Bowser in the Fire Sea - Bowser"]
         freestanding = ["Bowser in the Fire Sea - Freestanding 1-Ups"]

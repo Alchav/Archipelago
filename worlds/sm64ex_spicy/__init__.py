@@ -801,18 +801,30 @@ class SM64World(World):
         option = self.options.bowser_bombs
         item_names = []
         if option.value in {option.option_global, option.option_both}:
-            item_names += ["Progressive Bowser Arena Bomb"] * 5
+            item_names += [
+                "Bowser Arena Bomb 1",
+                "Bowser Arena Bomb 2",
+                "Bowser Arena Bomb 3",
+                "Bowser Arena Bomb 4",
+                "Bowser in the Sky - Bowser Arena Bomb 5",
+            ]
         if option.value in {option.option_per_level, option.option_both}:
             item_names += (
-                ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
-                + ["Bowser in the Fire Sea - Progressive Bowser Arena Bomb"] * 4
-                + ["Bowser in the Sky - Progressive Bowser Arena Bomb"] * 5
+                [f"Bowser in the Dark World - Bowser Arena Bomb {index}" for index in range(1, 5)]
+                + [f"Bowser in the Fire Sea - Bowser Arena Bomb {index}" for index in range(1, 5)]
+                + [f"Bowser in the Sky - Bowser Arena Bomb {index}" for index in range(1, 6)]
             )
-        return item_names
+        return list(dict.fromkeys(item_names))
 
     def get_unrandomized_bowser_arena_bomb_item_names(self) -> typing.List[str]:
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_not_shuffled:
-            return ["Progressive Bowser Arena Bomb"] * 5
+            return [
+                "Bowser Arena Bomb 1",
+                "Bowser Arena Bomb 2",
+                "Bowser Arena Bomb 3",
+                "Bowser Arena Bomb 4",
+                "Bowser in the Sky - Bowser Arena Bomb 5",
+            ]
         return []
 
     def get_unrandomized_unlock_item_names(self) -> typing.List[str]:

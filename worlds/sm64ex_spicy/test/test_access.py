@@ -8290,27 +8290,32 @@ class GlobalBowserArenaBombAccessTestBase(SM64TestBase):
 
     def test_first_two_keys_require_four_global_bombs(self):
         self.collect_all_but({
-            "Progressive Bowser Arena Bomb",
-            "Bowser in the Sky - Progressive Bowser Arena Bomb",
+            "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+            "Bowser in the Sky - Bowser Arena Bomb 5",
         })
-        global_bomb = self.get_item_by_name("Progressive Bowser Arena Bomb")
-        self.collect([global_bomb] * 3)
+        self.collect([
+            self.get_item_by_name("Bowser Arena Bomb 1"),
+            self.get_item_by_name("Bowser Arena Bomb 2"),
+            self.get_item_by_name("Bowser Arena Bomb 3"),
+        ])
         self.assertFalse(self.can_reach_location("Bowser in the Dark World - Key"))
         self.assertFalse(self.can_reach_location("Bowser in the Fire Sea - Key"))
 
-        self.collect(global_bomb)
+        self.collect(self.get_item_by_name("Bowser Arena Bomb 4"))
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
         self.assertTrue(self.can_reach_location("Bowser in the Fire Sea - Key"))
 
     def test_bowser_in_the_sky_uses_its_fifth_bomb(self):
         self.collect_all_but({
-            "Progressive Bowser Arena Bomb",
-            "Bowser in the Sky - Progressive Bowser Arena Bomb",
+            "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+            "Bowser in the Sky - Bowser Arena Bomb 5",
         })
-        self.collect([self.get_item_by_name("Progressive Bowser Arena Bomb")] * 4)
+        self.collect([
+            self.get_item_by_name(f"Bowser Arena Bomb {bomb}") for bomb in range(1, 5)
+        ])
         self.assertFalse(self.multiworld.can_beat_game(self.multiworld.state))
 
-        self.collect(self.get_item_by_name("Progressive Bowser Arena Bomb"))
+        self.collect(self.get_item_by_name("Bowser in the Sky - Bowser Arena Bomb 5"))
         self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
 
 
@@ -8320,15 +8325,22 @@ class BothBowserArenaBombAccessTestBase(SM64TestBase):
         "bowser_in_the_dark_world_health": 4,
     }
 
-    def test_global_and_per_level_bomb_counts_are_combined(self):
+    def test_global_and_per_level_bombs_are_combined(self):
         self.collect_all_but({
-            "Progressive Bowser Arena Bomb",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+            "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+            "Bowser in the Dark World - Bowser Arena Bomb 1",
+            "Bowser in the Dark World - Bowser Arena Bomb 2",
+            "Bowser in the Dark World - Bowser Arena Bomb 3",
+            "Bowser in the Dark World - Bowser Arena Bomb 4",
         })
-        self.collect([self.get_item_by_name("Progressive Bowser Arena Bomb")] * 2)
         self.collect([
-            self.get_item_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")
-        ] * 2)
+            self.get_item_by_name("Bowser Arena Bomb 1"),
+            self.get_item_by_name("Bowser Arena Bomb 2"),
+        ])
+        self.collect([
+            self.get_item_by_name("Bowser in the Dark World - Bowser Arena Bomb 3"),
+            self.get_item_by_name("Bowser in the Dark World - Bowser Arena Bomb 4"),
+        ])
         self.assertTrue(self.can_reach_location("Bowser in the Dark World - Key"))
 
 

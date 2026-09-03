@@ -543,16 +543,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         return HasUnlock("Bowser Stage Extra 1-Ups", stage_item_name)
 
     def bowser_arena_bomb_rule(stage_name: str, required_hits: int) -> Rule:
-        global_item_name = "Progressive Bowser Arena Bomb"
-        stage_item_name = f"{stage_name} - Progressive Bowser Arena Bomb"
-        return Or(*(
-            HasUnlock(global_item_name, global_item_name, global_count)
-            & HasUnlock(stage_item_name, stage_item_name, required_hits - global_count)
-            for global_count in range(1, required_hits)
-        ),
-            HasUnlock(global_item_name, global_item_name, required_hits),
-            HasUnlock(stage_item_name, stage_item_name, required_hits),
-        )
+        required_bombs = []
+        for bomb in range(1, required_hits + 1):
+            stage_item_name = f"{stage_name} - Bowser Arena Bomb {bomb}"
+            if bomb == 5:
+                required_bombs.append(HasUnlock(stage_item_name, stage_item_name))
+            else:
+                global_item_name = f"Bowser Arena Bomb {bomb}"
+                required_bombs.append(
+                    HasUnlock(global_item_name, global_item_name)
+                    | HasUnlock(stage_item_name, stage_item_name))
+        return And(*required_bombs)
 
     def level_unlock_rule(item_name: str) -> Rule:
         return HasUnlock(item_name, item_name)
