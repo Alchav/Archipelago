@@ -561,6 +561,7 @@ class SM64World(World):
         state = CollectionState(self.multiworld)
         state.reachable_regions[self.player].add(
             self.multiworld.get_region(self.origin_region_name, self.player))
+        state.update_reachable_regions(self.player)
 
         candidates = []
         for entrance_id, entrance in self.randomized_entrance_connections.items():
