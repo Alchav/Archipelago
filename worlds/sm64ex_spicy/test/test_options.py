@@ -2150,7 +2150,7 @@ class NoPowerStarsTestBase(SM64TestBase):
             len(self.get_items_by_name(item_name))
             for item_name in (
                 "Progressive Cap Length",
-                "Progressive Underwater Breath",
+                "Progressive Breath",
                 "Progressive Damage Dodge",
             )
         )
@@ -2164,7 +2164,7 @@ class NoPowerStarsTestBase(SM64TestBase):
             len(self.get_items_by_name(item_name))
             for item_name in (
                 "Progressive Cap Length",
-                "Progressive Underwater Breath",
+                "Progressive Breath",
                 "Progressive Damage Dodge",
             )
         ]

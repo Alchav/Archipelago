@@ -90,7 +90,7 @@ generic_item_data_table: dict[str, SM64ItemData] = {
     "Metal Cap": SM64ItemData(sm64ex_base_id + 182),
     "Vanish Cap": SM64ItemData(sm64ex_base_id + 183),
     "Progressive Cap Length": SM64ItemData(sm64ex_base_id + 936, filler),
-    "Progressive Underwater Breath": SM64ItemData(sm64ex_base_id + 937, filler),
+    "Progressive Breath": SM64ItemData(sm64ex_base_id + 937, filler),
     "Progressive Damage Dodge": SM64ItemData(sm64ex_base_id + 938, filler),
     ut_glitch_item_name: SM64ItemData(),
 }
@@ -98,7 +98,7 @@ generic_item_data_table: dict[str, SM64ItemData] = {
 global_cap_item_names = ("Wing Cap", "Metal Cap", "Vanish Cap")
 progressive_filler_item_names = (
     "Progressive Cap Length",
-    "Progressive Underwater Breath",
+    "Progressive Breath",
     "Progressive Damage Dodge",
 )
 
