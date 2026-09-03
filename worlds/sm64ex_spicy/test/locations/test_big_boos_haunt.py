@@ -50,7 +50,11 @@ class TestBigBoosHauntLocations(SM64TestBase):
             ["Big Boo's Haunt - Shed Roof 1-Up", False,
              ["Big Boo's Haunt - Freestanding 1-Ups"]],
             ["Big Boo's Haunt - Shed Roof 1-Up", True,
-             ["Big Boo's Haunt - Freestanding 1-Ups", "Triple Jump"]],
+             [
+                 "Big Boo's Haunt - Freestanding 1-Ups",
+                 "Triple Jump",
+                 "Big Boo's Haunt - Breakable Coin Boxes",
+             ]],
             ["Big Boo's Haunt - Back Entrance Vanish Cap Block", False, []],
             ["Big Boo's Haunt - Back Entrance Vanish Cap Block", True, VANISH_CAP],
             ["Big Boo's Haunt - 10 Coins Block", False, []],

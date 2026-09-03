@@ -525,7 +525,8 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
         for index in range(6, 11)
     },
     **{
-        ("Bob-omb Battlefield", "main_bob_ombs", index): f"Bob-omb {index} Coin"
+        ("Bob-omb Battlefield", "main_bob_ombs", index):
+            f"Bob-omb {12 - index if index <= 11 else index} Coin"
         for index in range(1, 13)
     },
     **{
@@ -1095,6 +1096,7 @@ _ENEMY_OUTPUT_GROUP_OVERRIDES = {
 }
 _ENEMY_DESCRIPTOR_OVERRIDES = {
     "main_goombas": "Goomba",
+    "main_koopa_troopa": "Koopa",
     "whomp_jump_coins": "Whomp (Jump)",
     "whomp_ground_pound_coins": "Whomp (Ground Pound)",
     "bits_whomp_jump_coins": "Whomp (Jump)",

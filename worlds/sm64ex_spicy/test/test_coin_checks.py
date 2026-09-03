@@ -29,7 +29,10 @@ class CoinCheckCatalogTest(unittest.TestCase):
                 coin_output_by_id[CoinOutputID(course_name, "main_bob_ombs", index)].location_name
                 for index in range(1, 13)
             ),
-            tuple(f"{course_name} - Bob-omb {index} Coin" for index in range(1, 13)),
+            tuple(
+                f"{course_name} - Bob-omb {12 - index if index <= 11 else index} Coin"
+                for index in range(1, 13)
+            ),
         )
 
     def test_bob_wooden_post_names_distinguish_chain_chomp_post(self):

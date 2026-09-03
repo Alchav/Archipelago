@@ -849,7 +849,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
     rf.assign_rule("Big Boo's Haunt - Big Boo's Balcony", "BIG_BOO")
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
-    rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ/SF/WK")
+    rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ & BREAKABLE_COIN_BOXES")
     # Haze Maze Cave
     rf.assign_rule(
         "Hazy Maze Cave - Swimming Beast in the Cavern",
@@ -937,7 +937,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "SF/BF/TJ/WK/LG | "
         "{Shifting Sand Land - Pyramid Top Entry} & SSL_PYRAMID_ELEVATOR")
     rf.assign_rule("Shifting Sand Land - Eyerok Arena",
-                   "{Shifting Sand Land - Upper Pyramid} & SSL_PYRAMID_ELEVATOR & EYEROK | "
+                   "{Shifting Sand Land - Pyramid Top Entry} & SSL_PYRAMID_ELEVATOR & EYEROK | "
                    "logic_ssl_stand_tall_without_pyramid_elevator & EYEROK & LG/KK")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
@@ -1994,6 +1994,9 @@ class RuleFactory:
         item_names["TEN_COIN_BLOCKS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "10-Coin Blocks", f"{level_name} - 10-Coin Blocks")
+        item_names["BREAKABLE_COIN_BOXES"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Breakable Coin Boxes", f"{level_name} - Breakable Coin Boxes")
         item_names["WOODEN_POSTS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Wooden Posts", f"{level_name} - Wooden Posts")

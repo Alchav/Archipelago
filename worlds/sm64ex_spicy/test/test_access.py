@@ -908,18 +908,6 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertNotIn("Cool, Cool Mountain - Slide Shortcut Second 1-Up", active_locations)
 
-    def test_bbh_shed_roof_1up_accepts_side_flip(self):
-        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
-        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
-        self.collect(self.get_item_by_name("Side Flip"))
-        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
-
-    def test_bbh_shed_roof_1up_accepts_wall_kick(self):
-        self.collect(self.get_item_by_name("Unlock Big Boo's Haunt"))
-        self.assertFalse(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
-        self.collect(self.get_item_by_name("Wall Kick"))
-        self.assertTrue(self.can_reach_location("Big Boo's Haunt - Shed Roof 1-Up"))
-
     def test_ssl_oasis_tree_1up_accepts_side_flip(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Shifting Sand Land - Oasis Tree 1-Up"))
@@ -955,9 +943,8 @@ class CourseOneUpAccessTestBase(SM64TestBase):
         self.collect_basement_access()
         self.assertTrue(
             self.can_reach_location("Shifting Sand Land - Pyramid Grindel 1-Up"))
-        # The unshuffled Pyramid Elevator reaches the upper interior, from which Mario can
-        # drop to the Right Path 1-Up.
-        self.assertTrue(
+        # The elevator cannot carry a normal lower-pyramid entry to the upper interior.
+        self.assertFalse(
             self.can_reach_location("Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up"))
 
 

@@ -58,7 +58,7 @@ class TestShiftingSandLandLocations(SM64TestBase):
                 "Climb",
                 "Shifting Sand Land - Pyramid Elevator",
             ]],
-            ["Shifting Sand Land - Stand Tall on the Four Pillars", True, [
+            ["Shifting Sand Land - Stand Tall on the Four Pillars", False, [
                 "Climb",
                 "Shifting Sand Land - Pyramid Elevator",
                 "Shifting Sand Land - Eyerok",

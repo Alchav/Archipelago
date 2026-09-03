@@ -4625,7 +4625,8 @@ def _middle_requirement_specs():
          unlocks=((f"{SL} - Moneybags", f"{SL} - Moneybags"),))
     _add(SL, "sl_fly_guy", unlocks=(_unlock("Fly Guys", SL, f"{SL} - Fly Guy"),))
     _add(SL, "sl_start_red_coins", unlocks=(_unlock("Red Coins", SL),))
-    _add(SL, "sl_whirl_red_coins", f"{{{SL} - Whirl from the Freezing Pond}}",
+    _add(SL, "sl_whirl_red_coins",
+         f"{{{SL} - Whirl from the Freezing Pond}} & SL_KOOPA_SHELL",
          (_unlock("Red Coins", SL),))
     _add(SL, "sl_whirl_region_access_for_red_coins", f"{{{SL} - Whirl from the Freezing Pond}}")
 
