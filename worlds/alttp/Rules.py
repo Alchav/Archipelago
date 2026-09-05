@@ -1339,11 +1339,6 @@ def global_rules(multiworld: MultiWorld, player: int):
         if world.puzzle_shuffle_state is not None
         else TAG_NE_MOVE_BLOCK_TO_OPEN
     )
-    gt_block_puzzle_push_block_target = (
-        world.puzzle_shuffle_state.gt_block_puzzle_push_block_target
-        if world.puzzle_shuffle_state is not None
-        else None
-    )
     gt_tile_torch_puzzle_tag = (
         world.puzzle_shuffle_state.gt_tile_torch_puzzle_tag
         if world.puzzle_shuffle_state is not None
@@ -1387,10 +1382,7 @@ def global_rules(multiworld: MultiWorld, player: int):
         return True
 
     def can_solve_gt_hookshot_room_puzzle(state: CollectionState) -> bool:
-        if gt_block_puzzle_push_block_target is None:
-            if not state.has('Hammer', player):
-                return False
-        elif not state.has('Pegasus Boots', player):
+        if not state.has('Hammer', player):
             return False
         if gt_block_puzzle_tag == TAG_NE_KILL_ENEMY_TO_OPEN:
             return can_clear_enemy_region(state, player, GANONS_TOWER_BLOCK_PUZZLE_NORTHEAST)
