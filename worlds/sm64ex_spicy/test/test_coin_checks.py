@@ -519,11 +519,11 @@ class CoinCheckCatalogTest(unittest.TestCase):
                 and output.output_id.source_id == "red_coin"
             )[3:],
             (
-                "Arrow Ride Red Coin 1",
-                "Arrow Ride Red Coin 2",
-                "Top Red Coin 1",
-                "Arrow Ride Red Coin 3",
-                "Top Red Coin 2",
+                "Suction Cup Platform Red Coin",
+                "Arrow Ride Red Coin",
+                "Top Pole Red Coin",
+                "Spinning Platform Red Coin",
+                "Under Final Steps Red Coin",
             ),
         )
         self.assertEqual(

@@ -1864,7 +1864,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bowser in the Sky - Ferris Wheel 1-Up"))
         self.assertFalse(self.can_reach_region("Bowser in the Sky - Chuckya"))
         self.assertFalse(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
-        self.assertFalse(self.can_reach_location("Bowser in the Sky - Spark Pole Coins 1-Up"))
+        self.assertFalse(self.can_reach_location("Bowser in the Sky - Spinning Platform Coins 1-Up"))
 
         self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Chuckya"))
@@ -1872,7 +1872,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
 
         self.collect(self.get_item_by_name("Purple Switches"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky - Arrow Ride"))
-        self.assertTrue(self.can_reach_location("Bowser in the Sky - Spark Pole Coins 1-Up"))
+        self.assertTrue(self.can_reach_location("Bowser in the Sky - Spinning Platform Coins 1-Up"))
         self.assertTrue(self.can_reach_location("Bowser in the Sky - Arrow Ride 1-Up"))
         self.assertFalse(self.can_reach_region("Bowser in the Sky - Top"))
         self.assertFalse(self.can_reach_location("Bowser in the Sky - Final Platform 1-Up"))
@@ -2866,7 +2866,7 @@ class WingMarioOverTheRainbowIndividualUnlockLogicTestBase(SM64TestBase):
             "Wing Cap",
             "Wing Mario Over the Rainbow - Cannon Unlock",
         ])
-        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow - Cannon"))
+        self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow - Upper"))
 
     def test_each_coin_object_unlock_matches_documented_total(self):
         self.collect_full_wmotr_route()

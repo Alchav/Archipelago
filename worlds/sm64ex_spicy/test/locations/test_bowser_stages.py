@@ -207,8 +207,8 @@ class TestBowserInTheSkyLocations(SM64TestBase):
             ["Bowser in the Sky - Ferris Wheel 1-Up", False, []],
             ["Bowser in the Sky - Ferris Wheel 1-Up", True, freestanding],
 
-            ["Bowser in the Sky - Spark Pole Coins 1-Up", False, arrow_ride],
-            ["Bowser in the Sky - Spark Pole Coins 1-Up", True, arrow_ride + trigger],
+            ["Bowser in the Sky - Spinning Platform Coins 1-Up", False, arrow_ride],
+            ["Bowser in the Sky - Spinning Platform Coins 1-Up", True, arrow_ride + trigger],
             ["Bowser in the Sky - Arrow Ride 1-Up", False, chuckya + freestanding],
             ["Bowser in the Sky - Arrow Ride 1-Up", False,
              ["Bowser in the Sky - Purple Switch", *freestanding]],

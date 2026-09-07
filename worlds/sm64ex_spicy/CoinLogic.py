@@ -3486,7 +3486,7 @@ def wing_mario_over_the_rainbow_coins(
         state, player, "logic_wmotr_leap_of_faith_without_ledge_grab")
     can_long_jump_leap = has_leap_of_faith or has_leap_without_ledge_grab
     has_cannon_region = state.can_reach(
-        "Wing Mario Over the Rainbow - Cannon", "Region", player)
+        "Wing Mario Over the Rainbow - Upper", "Region", player)
     has_flight_route = (
         has_cannon_region
         or (
@@ -3500,9 +3500,9 @@ def wing_mario_over_the_rainbow_coins(
         coin_source("wmotr_initial_red_coin", "Initial Red Coin", 2, has_red_coins,
                     red_coin_ids=frozenset({7})),
     ))
-    trace.add_route("wmotr_cannon_only", "Cannon region", has_cannon_region, (
+    trace.add_route("wmotr_cannon_only", "Upper", has_cannon_region, (
         coin_source("wmotr_cannon_red_coins",
-                "Four Red Coins requiring the Cannon region",
+                "Four Red Coins in Upper",
                 8, has_red_coins, red_coin_ids=frozenset({1, 2, 3, 8})),
     ))
 
@@ -5138,18 +5138,18 @@ def _secrets_requirement_specs():
         (WMOTR, "wmotr_initial"): _spec(_target(WMOTR)),
         (WMOTR, "wmotr_initial_red_coin"): _spec(
             _target(WMOTR), "", ("Red Coins", f"{WMOTR} - Red Coins")),
-        (WMOTR, "wmotr_cannon_only"): _spec(_target(WMOTR), f"{{{WMOTR} - Cannon}}"),
+        (WMOTR, "wmotr_cannon_only"): _spec(_target(WMOTR), f"{{{WMOTR} - Upper}}"),
         (WMOTR, "wmotr_cannon_red_coins"): _spec(
-            _target(WMOTR), f"{{{WMOTR} - Cannon}}", ("Red Coins", f"{WMOTR} - Red Coins")),
+            _target(WMOTR), f"{{{WMOTR} - Upper}}", ("Red Coins", f"{WMOTR} - Red Coins")),
         (WMOTR, "wmotr_flight_route"): _spec(
-            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ"),
+            _target(WMOTR), f"{{{WMOTR} - Upper}} | WC+TJ"),
         (WMOTR, "wmotr_flight_red_coins"): _spec(
-            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ", ("Red Coins", f"{WMOTR} - Red Coins")),
+            _target(WMOTR), f"{{{WMOTR} - Upper}} | WC+TJ", ("Red Coins", f"{WMOTR} - Red Coins")),
         (WMOTR, "wmotr_rainbow_coin_rings"): _spec(
-            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ",
+            _target(WMOTR), f"{{{WMOTR} - Upper}} | WC+TJ",
             ("Vertical Coin Rings", f"{WMOTR} - Vertical Coin Rings")),
         (WMOTR, "wmotr_cloud_coin_ring"): _spec(
-            _target(WMOTR), f"{{{WMOTR} - Cannon}} | WC+TJ",
+            _target(WMOTR), f"{{{WMOTR} - Upper}} | WC+TJ",
             ("Horizontal Coin Rings", f"{WMOTR} - Horizontal Coin Rings")),
         # This route is selected only while the flight route is unavailable. RuleFactory expressions
         # cannot represent that non-monotonic selection condition.

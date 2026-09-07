@@ -1001,11 +1001,11 @@ RED_COIN_NAMES: Mapping[str, tuple[str, ...]] = {
         "Piranha Plant Red Coin",
         "Push Block Red Coin",
         "Beneath the Tilting Platform Hidden Red Coin",
-        "Arrow Ride Red Coin 1",
-        "Arrow Ride Red Coin 2",
-        "Top Red Coin 1",
-        "Arrow Ride Red Coin 3",
-        "Top Red Coin 2",
+        "Suction Cup Platform Red Coin",
+        "Arrow Ride Red Coin",
+        "Top Pole Red Coin",
+        "Spinning Platform Red Coin",
+        "Under Final Steps Red Coin",
     ),
 }
 
@@ -1220,6 +1220,7 @@ STANDALONE_YELLOW_COIN_SOURCE_IDS = frozenset({
 
 
 STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
+    "bits_spinning_platform_coins": "Spinning Platform Coin",
     "rotating_plank_coins": "Rotating Plank Coin",
     "lll_volcano_s_island_coins": "Coin on the Volcano S-Shaped Island",
     "lll_volcano_first_ridge_coin_line": "Coin on the Volcano First Ridge",

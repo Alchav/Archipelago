@@ -1293,7 +1293,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Wing Mario Over the Rainbow - Bob-omb Buddy Platform",
         "WC+TJ | LG & logic_wmotr_leap_of_faith | logic_wmotr_leap_of_faith_without_ledge_grab")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "BOBOMB_BUDDY")
-    rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Upper", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", wmotr_flight_rule)

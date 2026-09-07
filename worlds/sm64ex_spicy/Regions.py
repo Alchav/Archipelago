@@ -801,7 +801,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                             "Wing Mario Over the Rainbow - Bob-omb Buddy Platform 1-Up",
                                             "Wing Mario Over the Rainbow - Bob-omb Buddy Platform Wing Cap Block",
                                             "Wing Mario Over the Rainbow - Overlooking Bob-omb Buddy Cloud Wing Cap Block")
-    wmotr_cannon = create_subregion(wmotr_buddy_platform, "Wing Mario Over the Rainbow - Cannon",
+    wmotr_cannon = create_subregion(wmotr_buddy_platform, "Wing Mario Over the Rainbow - Upper",
                                     "Wing Mario Over the Rainbow - Red Coins",
                                     "Wing Mario Over the Rainbow - Block 1-Up",
                                     "Wing Mario Over the Rainbow - Hanging Pole 1-Up",
@@ -816,7 +816,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Bowser in the Sky - Ferris Wheel 1-Up")
     bits_chuckya = create_subregion(regBitS, "Bowser in the Sky - Chuckya")
     bits_arrow_ride = create_subregion(bits_chuckya, "Bowser in the Sky - Arrow Ride",
-                                       "Bowser in the Sky - Spark Pole Coins 1-Up",
+                                       "Bowser in the Sky - Spinning Platform Coins 1-Up",
                                        "Bowser in the Sky - Arrow Ride 1-Up")
     bits_top = create_subregion(bits_arrow_ride, "Bowser in the Sky - Top", "Bowser in the Sky - Red Coins",
                                 "Bowser in the Sky - Final Platform 1-Up")

@@ -496,7 +496,7 @@ locFreestanding1Up_table = {
 
     "Bowser in the Sky - Before Tilting Platform 1-Up": 3629110,
     "Bowser in the Sky - Arrow Ride 1-Up": 3629111,
-    "Bowser in the Sky - Spark Pole Coins 1-Up": 3629112,
+    "Bowser in the Sky - Spinning Platform Coins 1-Up": 3629112,
     "Bowser in the Sky - Final Platform 1-Up": 3629113,
     "Bowser in the Sky - Ferris Wheel 1-Up": 3629114,
 
