@@ -625,6 +625,11 @@ class Blocksanity(Toggle):
     display_name = "Blocksanity"
 
 
+class VisitChecks(Toggle):
+    """Include a location check for entering each distinct game zone."""
+    display_name = "Visit Checks"
+
+
 class EasyButterflies(Toggle):
     """Butterflies turn into 1-Up mushrooms regardless of Mario's distance from the butterfly, and one of the three
     always has a 1-Up."""
@@ -1142,6 +1147,7 @@ sm64_options_groups = [
         BuddyChecks,
         OneUpChecks,
         Blocksanity,
+        VisitChecks,
         EasyButterflies,
         TriggerSparkles,
         NoDespawns,
@@ -1207,6 +1213,7 @@ class SM64Options(PerGameCommonOptions):
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks
     blocksanity: Blocksanity
+    visit_checks: VisitChecks
     easy_butterflies: EasyButterflies
     trigger_sparkles: TriggerSparkles
     no_despawns: NoDespawns

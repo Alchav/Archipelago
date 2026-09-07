@@ -185,10 +185,10 @@ class FeatureItemPoolTestBase(SM64TestBase):
         return self.world.get_item_classification(item_data)
 
     def test_yoshi_location_id(self):
-        self.assertEqual(location_table["Castle - Yoshi"], 3626244)
+        self.assertEqual(location_table["Castle Grounds - Yoshi"], 3626244)
 
     def test_drain_the_moat_location_id(self):
-        self.assertEqual(location_table["Castle - Drain the Moat"], 3626245)
+        self.assertEqual(location_table["Castle Basement - Drain the Moat"], 3626245)
 
     def test_wmotr_bob_omb_buddy_location_id(self):
         self.assertEqual(location_table["Wing Mario Over the Rainbow - Bob-omb Buddy"], 3626525)

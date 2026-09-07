@@ -130,7 +130,11 @@ per_act_feature_tokens = {
 
 move_area_name_aliases = {
     "Castle Grounds": "Castle",
+    "Castle First Floor": "Castle",
     "Castle Courtyard": "Castle",
+    "Castle Basement": "Castle",
+    "Castle Second Floor": "Castle",
+    "Castle Third Floor": "Castle",
     "The Princess's Secret Slide": "Castle",
     "The Secret Aquarium": "Castle",
 }
@@ -576,42 +580,42 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     def full_level_unlock_rule(item_name: str) -> Rule:
         return HasUnlock(item_name, item_name)
 
-    connect_regions(multiworld, player, "Castle Grounds", "Castle Lobby")
-    connect_regions(multiworld, player, "Castle Lobby", "Castle Courtyard")
+    connect_regions(multiworld, player, "Castle Grounds", "Castle First Floor")
+    connect_regions(multiworld, player, "Castle First Floor", "Castle Courtyard")
     connect_randomized_entrance(
-        "Castle Lobby", "Bob-omb Battlefield", level_unlock_rule("Unlock Bob-omb Battlefield"))
-    connect_randomized_entrance("Castle Lobby", "Whomp's Fortress",
+        "Castle First Floor", "Bob-omb Battlefield", level_unlock_rule("Unlock Bob-omb Battlefield"))
+    connect_randomized_entrance("Castle First Floor", "Whomp's Fortress",
                                 rf.build_rule("", painting_lvl_name="Whomp's Fortress"))
-    connect_randomized_entrance("Castle Lobby", "Jolly Roger Bay",
+    connect_randomized_entrance("Castle First Floor", "Jolly Roger Bay",
                                 rf.build_rule("", painting_lvl_name="Jolly Roger Bay"))
-    connect_randomized_entrance("Castle Lobby", "Cool, Cool Mountain",
+    connect_randomized_entrance("Castle First Floor", "Cool, Cool Mountain",
                                 rf.build_rule("", painting_lvl_name="Cool, Cool Mountain"))
     connect_randomized_entrance("Castle Courtyard", "Big Boo's Haunt",
                                 level_unlock_rule("Unlock Big Boo's Haunt"))
     connect_randomized_entrance(
-        "Castle Lobby", "The Princess's Secret Slide",
+        "Castle First Floor", "The Princess's Secret Slide",
         level_unlock_rule("Unlock The Princess's Secret Slide"))
-    connect_randomized_entrance("Castle Lobby", "The Secret Aquarium",
+    connect_randomized_entrance("Castle First Floor", "The Secret Aquarium",
                                 level_unlock_rule("Unlock The Secret Aquarium") & rf.build_rule(
                                     "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
                                     "logic_secret_aquarium_wall_kick_and_ledge_grab | "
                                     "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab"))
-    connect_randomized_entrance("Castle Lobby", "Tower of the Wing Cap",
+    connect_randomized_entrance("Castle First Floor", "Tower of the Wing Cap",
                                 level_unlock_rule("Unlock Tower of the Wing Cap"))
     connect_randomized_entrance(
-        "Castle Lobby", "Bowser in the Dark World",
+        "Castle First Floor", "Bowser in the Dark World",
         first_floor_key_rule | rf.build_rule("logic_castle_lobby_8_star_door_blj"))
 
-    connect_regions(multiworld, player, "Castle Lobby", "Basement", basement_key_rule)
+    connect_regions(multiworld, player, "Castle First Floor", "Castle Basement", basement_key_rule)
 
-    connect_randomized_entrance("Basement", "Hazy Maze Cave",
+    connect_randomized_entrance("Castle Basement", "Hazy Maze Cave",
                                 rf.build_rule("", painting_lvl_name="Hazy Maze Cave"))
-    connect_randomized_entrance("Basement", "Lethal Lava Land",
+    connect_randomized_entrance("Castle Basement", "Lethal Lava Land",
                                 rf.build_rule("", painting_lvl_name="Lethal Lava Land"))
-    connect_randomized_entrance("Basement", "Shifting Sand Land",
+    connect_randomized_entrance("Castle Basement", "Shifting Sand Land",
                                 rf.build_rule("", painting_lvl_name="Shifting Sand Land"))
     ddd_entry_rule = rf.build_rule("", painting_lvl_name="Dire, Dire Docks")
-    connect_randomized_entrance("Basement", "Dire, Dire Docks",
+    connect_randomized_entrance("Castle Basement", "Dire, Dire Docks",
                                 thirty_star_door_bypass_rule & ddd_entry_rule)
     if not sub_area_mode:
         connect_randomized_entrance(
@@ -623,41 +627,41 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 action_item_names=rf.get_action_item_names("Hazy Maze Cave")))
     connect_randomized_entrance("Castle Grounds", "Vanish Cap Under the Moat",
                                 level_unlock_rule("Unlock Vanish Cap Under the Moat"))
-    connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
+    connect_randomized_entrance("Castle Basement", "Bowser in the Fire Sea",
                                 thirty_star_door_bypass_rule & level_unlock_rule("Unlock Bowser in the Fire Sea"))
 
-    connect_regions(multiworld, player, "Castle Lobby", "Second Floor", second_floor_key_rule)
+    connect_regions(multiworld, player, "Castle First Floor", "Castle Second Floor", second_floor_key_rule)
 
-    connect_randomized_entrance("Second Floor", "Snowman's Land",
+    connect_randomized_entrance("Castle Second Floor", "Snowman's Land",
                                 rf.build_rule("", painting_lvl_name="Snowman's Land"))
     for wdw_entrance in sm64_wdw_entrances:
         wdw_entrance_rule = "TJ/SF/BF" if wdw_entrance == "Wet-Dry World High" else ""
-        connect_randomized_entrance("Second Floor", wdw_entrance,
+        connect_randomized_entrance("Castle Second Floor", wdw_entrance,
                                     rf.build_rule(wdw_entrance_rule, painting_lvl_name="Wet-Dry World"))
-    connect_randomized_entrance("Second Floor", "Tall, Tall Mountain",
+    connect_randomized_entrance("Castle Second Floor", "Tall, Tall Mountain",
                                 rf.build_rule("", painting_lvl_name="Tall, Tall Mountain"))
-    connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Tiny)",
+    connect_randomized_entrance("Castle Second Floor", "Tiny-Huge Island (Tiny)",
                                 rf.build_rule("", painting_lvl_name="Tiny Island"))
-    connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Huge)",
+    connect_randomized_entrance("Castle Second Floor", "Tiny-Huge Island (Huge)",
                                 rf.build_rule("", painting_lvl_name="Huge Island"))
 
-    connect_regions(multiworld, player, "Second Floor", "Third Floor", fifty_star_door_bypass_rule)
+    connect_regions(multiworld, player, "Castle Second Floor", "Castle Third Floor", fifty_star_door_bypass_rule)
 
     ttc_entrance_rule = rf.build_rule(
         "LG/TJ/SF/BF | logic_castle_ttc_with_wall_kick | "
         "logic_castle_ttc_with_long_jump_and_kick | logic_castle_ttc_with_dive_and_kick",
         painting_lvl_name="Tick Tock Clock")
     for ttc_entrance in sm64_ttc_entrances:
-        connect_randomized_entrance("Third Floor", ttc_entrance, ttc_entrance_rule)
+        connect_randomized_entrance("Castle Third Floor", ttc_entrance, ttc_entrance_rule)
     third_floor_alcove_rule = rf.build_rule(
         "TJ/SF/BF | logic_castle_3f_alcoves_with_wall_kick | "
         "logic_castle_3f_alcoves_with_dive_and_kick | "
         "logic_castle_3f_alcoves_with_dive_and_ledge_grab | "
         "logic_castle_3f_alcoves_with_long_jump_and_ledge_grab")
     connect_randomized_entrance(
-        "Third Floor", "Rainbow Ride",
+        "Castle Third Floor", "Rainbow Ride",
         third_floor_alcove_rule & full_level_unlock_rule("Unlock Rainbow Ride"))
-    connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
+    connect_randomized_entrance("Castle Third Floor", "Wing Mario Over the Rainbow",
                                 third_floor_alcove_rule
                                 & full_level_unlock_rule("Unlock Wing Mario Over the Rainbow"))
     if int(SM64Levels.BOWSER_IN_THE_SKY) in area_connections:
@@ -668,15 +672,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         bits_target_region = None
     if bits_target_region is not None:
         bits_entrance = connect_regions(
-            multiworld, player, "Third Floor",
+            multiworld, player, "Castle Third Floor",
             bits_target_region,
             seventy_star_door_bypass_rule,
-            name="Third Floor -> Bowser in the Sky",
+            name="Castle Third Floor -> Bowser in the Sky",
         )
         world.randomized_entrance_connections[int(SM64Levels.BOWSER_IN_THE_SKY)] = bits_entrance
     else:
         connect_regions(
-            multiworld, player, "Third Floor", "Bowser in the Sky", seventy_star_door_bypass_rule)
+            multiworld, player, "Castle Third Floor", "Bowser in the Sky", seventy_star_door_bypass_rule)
 
     def connect_sub_area_source(source_key: str, rule: Rule | None = None) -> None:
         source = SUB_AREA_SOURCES[source_key]
@@ -1308,7 +1312,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Bob-omb Battlefield - Near Flower Patches Wing Cap Block": "WC",
             "Bob-omb Battlefield - Wooden Ramp Wing Cap Block": "WC",
             "Bob-omb Battlefield - Island Wing Cap Block": "WC",
-            "Castle - Roof Wing Cap Block": "WC",
+            "Castle Grounds - Roof Wing Cap Block": "WC",
             "Cavern of the Metal Cap - First Metal Cap Block": "MC",
             "Cavern of the Metal Cap - Near Switch Metal Cap Block": "MC",
             "Dire, Dire Docks - Metal Cap Block": "MC",
@@ -1513,28 +1517,28 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             rf.assign_rule_object(location.name, CanCollectGlobalCoins(course_caps, global_coin_count))
 
     # Castle Stars
-    rf.assign_rule("Castle - Roof", "CANN")
-    rf.add_rule("Castle - Toad (Basement)", CanReachRegion("Basement") & Has("Castle - Toads"))
-    rf.add_rule("Castle - Toad (Second Floor)", CanReachRegion("Second Floor") & Has("Castle - Toads"))
-    rf.add_rule("Castle - Toad (Third Floor)", CanReachRegion("Third Floor") & Has("Castle - Toads"))
-    rf.add_rule("Castle - Yoshi", Has("Castle - Yoshi"))
+    rf.assign_rule("Castle Grounds - Roof", "CANN")
+    rf.add_rule("Castle Basement - Toad", CanReachRegion("Castle Basement") & Has("Castle - Toads"))
+    rf.add_rule("Castle Second Floor - Toad", CanReachRegion("Castle Second Floor") & Has("Castle - Toads"))
+    rf.add_rule("Castle Third Floor - Toad", CanReachRegion("Castle Third Floor") & Has("Castle - Toads"))
+    rf.add_rule("Castle Grounds - Yoshi", Has("Castle - Yoshi"))
 
-    rf.assign_rule("Castle - Third Tree From Waterfall 1-Up",
+    rf.assign_rule("Castle Grounds - Third Tree From Waterfall 1-Up",
                    "CL/TJ/BF/SF | logic_castle_waterfall_tree_1up_with_no_movement")
-    rf.assign_rule("Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF")
-    rf.assign_rule("Castle - Jolly Roger Bay Lobby 1-Up",
+    rf.assign_rule("Castle Grounds - Bridge Coins 1-Up", "{{Castle Basement - Drain the Moat}} & WK & TJ/SF")
+    rf.assign_rule("Castle First Floor - Jolly Roger Bay Room 1-Up",
                    "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
                    "logic_secret_aquarium_wall_kick_and_ledge_grab | "
                    "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab")
-    rf.assign_rule("Castle - Drain the Moat", "GP")
-    rf.assign_rule("Castle - MIPS 1", "DV | logic_castle_mips_without_dive")
-    rf.assign_rule("Castle - MIPS 2", "DV | logic_castle_mips_without_dive")
+    rf.assign_rule("Castle Basement - Drain the Moat", "GP")
+    rf.assign_rule("Castle Basement - MIPS 1", "DV | logic_castle_mips_without_dive")
+    rf.assign_rule("Castle Basement - MIPS 2", "DV | logic_castle_mips_without_dive")
     rf.add_rule(
-        "Castle - MIPS 1",
-        CanReachRegion("Basement") & Has("Castle - Progressive MIPS"))
+        "Castle Basement - MIPS 1",
+        CanReachRegion("Castle Basement") & Has("Castle - Progressive MIPS"))
     rf.add_rule(
-        "Castle - MIPS 2",
-        CanReachRegion("Basement") & Has("Castle - Progressive MIPS", 2))
+        "Castle Basement - MIPS 2",
+        CanReachRegion("Castle Basement") & Has("Castle - Progressive MIPS", 2))
 
     active_location_names = {location.name for location in multiworld.get_locations(player)}
     freestanding_star_locations = {
@@ -1654,7 +1658,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 continue
             if location_name.endswith("Monty Moles"):
                 continue
-            per_level_item_name = f"{location_name.split(' - ', 1)[0]} - {category_name}"
+            level_name = rf.get_level_name_from_target(location_name)
+            per_level_item_name = f"{level_name} - {category_name}"
             rf.add_rule(location_name, HasUnlock(category_name, per_level_item_name))
 
     starting_state = CollectionState(multiworld)
@@ -1665,8 +1670,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         for location in multiworld.get_locations(player)
     )
     if reachable_starting_checks < 2:
-        castle_lobby = multiworld.get_region("Castle Lobby", player)
-        fallback_names = ("Castle Lobby - Free Item", "Castle Lobby - Another Free Item")
+        castle_lobby = multiworld.get_region("Castle First Floor", player)
+        fallback_names = ("Castle First Floor - Free Item", "Castle First Floor - Another Free Item")
         for location_name in fallback_names[:2 - reachable_starting_checks]:
             castle_lobby.locations.append(
                 SM64Location(player, location_name, location_table[location_name], castle_lobby))
@@ -1899,7 +1904,12 @@ class RuleFactory:
 
     def get_level_name_from_target(self, target_name: str) -> str:
         if " - " in target_name:
-            return target_name.split(" - ", 1)[0]
+            level_name = target_name.split(" - ", 1)[0]
+            if level_name in {
+                    "Castle Grounds", "Castle First Floor", "Castle Courtyard",
+                    "Castle Basement", "Castle Second Floor", "Castle Third Floor"}:
+                return "Castle"
+            return level_name
         if target_name in per_level_move_area_names:
             return target_name
         for level_name in (

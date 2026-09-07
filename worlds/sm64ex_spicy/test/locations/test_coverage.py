@@ -6,6 +6,7 @@ from ...Locations import (
     coin_count_check_location_table,
     global_coin_count_check_location_table,
     individual_coin_location_table,
+    locVisit_table,
     location_table,
 )
 
@@ -16,6 +17,7 @@ class TestDeclarativeLocationCoverage(unittest.TestCase):
             coin_count_check_location_table,
             global_coin_count_check_location_table,
             individual_coin_location_table,
+            locVisit_table,
         )
         tested_locations: set[str] = set()
         test_directory = Path(__file__).parent

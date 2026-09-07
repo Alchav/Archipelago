@@ -138,7 +138,7 @@ class VariantEntranceExplanationTest(SM64TestBase):
         )
 
     def test_non_course_names_use_universal_trackers_normal_explanation(self):
-        self.assertIsNone(self.world.explain_rule("Castle Lobby", CollectionState(self.multiworld)))
+        self.assertIsNone(self.world.explain_rule("Castle First Floor", CollectionState(self.multiworld)))
 
 
 class CoinSourceExplanationTest(SM64TestBase):

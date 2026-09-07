@@ -121,8 +121,8 @@ RETURN_DESTINATIONS: dict[str, SubAreaDestination] = {
 
 
 CASTLE_RETURN_DESTINATIONS: dict[str, SubAreaDestination] = {
-    "castle_lobby_pss": SubAreaDestination("castle_lobby_pss", "Castle Lobby", 6, 1, 0x20),
-    "castle_lobby_totwc": SubAreaDestination("castle_lobby_totwc", "Castle Lobby", 6, 1, 0x20),
+    "castle_lobby_pss": SubAreaDestination("castle_lobby_pss", "Castle First Floor", 6, 1, 0x20),
+    "castle_lobby_totwc": SubAreaDestination("castle_lobby_totwc", "Castle First Floor", 6, 1, 0x20),
     "castle_grounds_vcutm": SubAreaDestination(
         "castle_grounds_vcutm", "Castle Grounds", 16, 1, 0x07),
     "castle_grounds_cotmc": SubAreaDestination(

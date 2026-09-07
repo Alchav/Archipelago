@@ -4047,7 +4047,7 @@ def castle_coins(
         state, player, "coin_object_unlocks",
         "Single Yellow Coins", "Castle - Single Yellow Coins")
     can_reach_bridge_coins = (
-        state.can_reach("Castle - Drain the Moat", "Location", player)
+        state.can_reach("Castle Basement - Drain the Moat", "Location", player)
         and Rules.has_action(state, player, "Wall Kick", level_name)
         and any(Rules.has_action(state, player, action, level_name)
                 for action in ("Triple Jump", "Side Flip"))
@@ -5356,7 +5356,7 @@ def _secrets_requirement_specs():
 
         # Castle Grounds, interior, and courtyard. These have no Coin Count Checks.
         (CASTLE, "castle_grounds_bridge_coins"): _spec(
-            "Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF",
+            "Castle Grounds - Bridge Coins 1-Up", "{{Castle Basement - Drain the Moat}} & WK & TJ/SF",
             ("Single Yellow Coins", "Castle - Single Yellow Coins")),
         (CASTLE, "castle_lobby_coins"): _spec(
             "Castle", "", ("Single Yellow Coins", "Castle - Single Yellow Coins")),

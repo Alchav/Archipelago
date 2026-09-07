@@ -393,5 +393,5 @@ class MixedSubAreaShuffleWithoutEntranceRandomizerTest(SM64TestBase):
         ))
 
         bob_entrance = self.multiworld.get_entrance(
-            "Castle Lobby -> Bob-omb Battlefield", self.player)
+            "Castle First Floor -> Bob-omb Battlefield", self.player)
         self.assertEqual(bob_entrance.connected_region.name, "Bob-omb Battlefield")

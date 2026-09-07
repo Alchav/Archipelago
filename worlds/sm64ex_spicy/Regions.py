@@ -11,7 +11,7 @@ from .Locations import SM64Location, location_table, locBoB_table, locWhomp_tabl
     locWDW_table, locTTM_table, locTHI_table, locTTC_table, locRR_table, \
     locPSS_table, locSA_table, locBitDW_table, locTotWC_table, locCotMC_table, \
     locVCutM_table, locBitFS_table, locWMotR_table, locBitS_table, locSS_table, locBasement_table, \
-    locOneUp_table, locBlocksanity_table
+    locOneUp_table, locBlocksanity_table, locVisit_table
 
 
 class SM64Levels(int, Enum):
@@ -188,20 +188,20 @@ sm64_entrance_to_region = {
 def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     castle_grounds = Region("Castle Grounds", player, multiworld, "Castle Area")
     create_locs(castle_grounds,
-                "Castle - Third Tree From Waterfall 1-Up",
-                "Castle - Bridge Coins 1-Up",
-                "Castle - Left Butterfly 1-Up",
-                "Castle - Right Butterfly 1-Up")
+                "Castle Grounds - Third Tree From Waterfall 1-Up",
+                "Castle Grounds - Bridge Coins 1-Up",
+                "Castle Grounds - Left Butterfly 1-Up",
+                "Castle Grounds - Right Butterfly 1-Up")
     multiworld.regions.append(castle_grounds)
-    castle_lobby = create_region("Castle Lobby", player, multiworld)
-    create_locs(castle_lobby, "Castle - Jolly Roger Bay Lobby 1-Up")
+    castle_lobby = create_region("Castle First Floor", player, multiworld)
+    create_locs(castle_lobby, "Castle First Floor - Jolly Roger Bay Room 1-Up")
     create_region("Castle Courtyard", player, multiworld)
-    castle_roof = create_subregion(castle_grounds, "Castle - Roof",
-                                   "Castle - Yoshi",
-                                   "Castle - Roof Back 1-Up",
-                                   "Castle - Roof Center 1-Up",
-                                   "Castle - Roof Front 1-Up",
-                                   "Castle - Roof Wing Cap Block")
+    castle_roof = create_subregion(castle_grounds, "Castle Grounds - Roof",
+                                   "Castle Grounds - Yoshi",
+                                   "Castle Grounds - Roof Back 1-Up",
+                                   "Castle Grounds - Roof Center 1-Up",
+                                   "Castle Grounds - Roof Front 1-Up",
+                                   "Castle Grounds - Roof Wing Cap Block")
     castle_grounds.subregions = [castle_roof]
 
     regBoB = create_region("Bob-omb Battlefield", player, multiworld)
@@ -330,13 +330,13 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Bowser in the Dark World - Tower 1-Up Block",
                 "Bowser in the Dark World - Near Goombas 1-Up Block")
 
-    regBasement = create_region("Basement", player, multiworld)
+    regBasement = create_region("Castle Basement", player, multiworld)
     create_default_locs(regBasement, locBasement_table)
     create_locs(regBasement,
-                "Castle - Toad (Basement)",
-                "Castle - MIPS 1",
-                "Castle - MIPS 2",
-                "Castle - Basement Water Tunnel Four Corners 1-Up")
+                "Castle Basement - Toad",
+                "Castle Basement - MIPS 1",
+                "Castle Basement - MIPS 2",
+                "Castle Basement - Water Tunnel Four Corners 1-Up")
 
     regHMC = create_region("Hazy Maze Cave", player, multiworld)
     create_locs(regHMC, "Hazy Maze Cave - Swimming Beast in the Cavern",
@@ -485,8 +485,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                                    "Bowser in the Fire Sea - Near Final Poles 1-Up Block")
     regBitFS.subregions = [bitfs_upper]
 
-    second_floor = create_region("Second Floor", player, multiworld)
-    create_locs(second_floor, "Castle - Toad (Second Floor)")
+    second_floor = create_region("Castle Second Floor", player, multiworld)
+    create_locs(second_floor, "Castle Second Floor - Toad")
 
     regSL = create_region("Snowman's Land", player, multiworld)
     create_locs(regSL,
@@ -701,8 +701,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         thi_huge_piranha_area]
     tinyTHI.subregions = [thi_coins, thi_tiny_piranha_area, thi_tiny_main]
 
-    regFloor3 = create_region("Third Floor", player, multiworld)
-    create_locs(regFloor3, "Castle - Toad (Third Floor)")
+    regFloor3 = create_region("Castle Third Floor", player, multiworld)
+    create_locs(regFloor3, "Castle Third Floor - Toad")
 
     regTTC = create_region("Tick Tock Clock", player, multiworld)
     create_locs(regTTC,
@@ -835,6 +835,56 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         remove_locs(multiworld, player, set(locOneUp_table))
     if not options.blocksanity:
         remove_locs(multiworld, player, set(locBlocksanity_table))
+
+    if options.visit_checks:
+        thi_cave_visit = create_region("Tiny-Huge Island - Cave Visit", player, multiworld)
+        thi_red_coin_cave.connect(thi_cave_visit, name="Tiny-Huge Island - Red Coin Cave to Cave Visit")
+        thi_wiggler_cave.connect(thi_cave_visit, name="Tiny-Huge Island - Wiggler's Cave to Cave Visit")
+        visit_regions = {
+            "Castle Grounds - Visited": castle_grounds,
+            "Castle First Floor - Visited": castle_lobby,
+            "Castle Courtyard - Visited": multiworld.get_region("Castle Courtyard", player),
+            "Castle Basement - Visited": regBasement,
+            "Castle Second Floor - Visited": second_floor,
+            "Bob-omb Battlefield - Visited": regBoB,
+            "Whomp's Fortress - Visited": regWhomp,
+            "Jolly Roger Bay - Visited": regJRB,
+            "Jolly Roger Bay - Sunken Ship Visited": jrb_ship,
+            "Cool, Cool Mountain - Visited": regCCM,
+            "Cool, Cool Mountain - Secret Slide Visited": ccm_slide,
+            "Big Boo's Haunt - Visited": regBBH,
+            "Hazy Maze Cave - Visited": regHMC,
+            "Lethal Lava Land - Visited": regLLL,
+            "Lethal Lava Land - Volcano Visited": lll_volcano,
+            "Shifting Sand Land - Visited": regSSL,
+            "Shifting Sand Land - Pyramid Visited": ssl_pyramid,
+            "Dire, Dire Docks - Visited": regDDD,
+            "Snowman's Land - Visited": regSL,
+            "Snowman's Land - Igloo Visited": sl_igloo,
+            "Wet-Dry World - Visited": regWDW,
+            "Tall, Tall Mountain - Visited": regTTM,
+            "Tall, Tall Mountain - Secret Slide Visited": ttm_slide,
+            "Tiny-Huge Island - Huge Island Visited": hugeTHI,
+            "Tiny-Huge Island - Tiny Island Visited": tinyTHI,
+            "Tiny-Huge Island - Cave Visited": thi_cave_visit,
+            "Tick Tock Clock - Visited": regTTC,
+            "Rainbow Ride - Visited": regRR,
+            "The Princess's Secret Slide - Visited": regPSS,
+            "The Secret Aquarium - Visited": regSA,
+            "Tower of the Wing Cap - Visited": regTotWC,
+            "Vanish Cap Under the Moat - Visited": regVCutM,
+            "Cavern of the Metal Cap - Visited": regCotMC,
+            "Bowser in the Dark World - Visited": regBitDW,
+            "Bowser in the Dark World - Bowser Arena Visited": bitdw_arena,
+            "Bowser in the Fire Sea - Visited": regBitFS,
+            "Bowser in the Fire Sea - Bowser Arena Visited": bitfs_arena,
+            "Wing Mario Over the Rainbow - Visited": regWMotR,
+            "Bowser in the Sky - Visited": regBitS,
+            "Bowser in the Sky - Bowser Arena Visited": bits_arena,
+        }
+        for location_name, region in visit_regions.items():
+            region.locations.append(SM64Location(
+                player, location_name, locVisit_table[location_name], region))
 
     create_sign_locations(multiworld, player)
 

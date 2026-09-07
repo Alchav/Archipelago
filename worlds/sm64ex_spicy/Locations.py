@@ -417,21 +417,67 @@ locBitS_table = {
 
 #Secret Stars found inside the Castle
 locSS_table = {
-    "Castle - Toad (Basement)": 3626168,
-    "Castle - Toad (Second Floor)": 3626169,
-    "Castle - Toad (Third Floor)": 3626170,
-    "Castle - MIPS 1": 3626171,
-    "Castle - MIPS 2": 3626172,
-    "Castle - Yoshi": 3626244
+    "Castle Basement - Toad": 3626168,
+    "Castle Second Floor - Toad": 3626169,
+    "Castle Third Floor - Toad": 3626170,
+    "Castle Basement - MIPS 1": 3626171,
+    "Castle Basement - MIPS 2": 3626172,
+    "Castle Grounds - Yoshi": 3626244
 }
 
 locBasement_table = {
-    "Castle - Drain the Moat": 3626245
+    "Castle Basement - Drain the Moat": 3626245
 }
 
 locFreeItem_table = {
-    "Castle Lobby - Free Item": 4025000,
-    "Castle Lobby - Another Free Item": 4025001,
+    "Castle First Floor - Free Item": 4025000,
+    "Castle First Floor - Another Free Item": 4025001,
+}
+
+locVisit_table = {
+    name: 4026000 + index
+    for index, name in enumerate((
+        "Castle Grounds - Visited",
+        "Castle First Floor - Visited",
+        "Castle Courtyard - Visited",
+        "Castle Basement - Visited",
+        "Castle Second Floor - Visited",
+        "Bob-omb Battlefield - Visited",
+        "Whomp's Fortress - Visited",
+        "Jolly Roger Bay - Visited",
+        "Jolly Roger Bay - Sunken Ship Visited",
+        "Cool, Cool Mountain - Visited",
+        "Cool, Cool Mountain - Secret Slide Visited",
+        "Big Boo's Haunt - Visited",
+        "Hazy Maze Cave - Visited",
+        "Lethal Lava Land - Visited",
+        "Lethal Lava Land - Volcano Visited",
+        "Shifting Sand Land - Visited",
+        "Shifting Sand Land - Pyramid Visited",
+        "Dire, Dire Docks - Visited",
+        "Snowman's Land - Visited",
+        "Snowman's Land - Igloo Visited",
+        "Wet-Dry World - Visited",
+        "Tall, Tall Mountain - Visited",
+        "Tall, Tall Mountain - Secret Slide Visited",
+        "Tiny-Huge Island - Huge Island Visited",
+        "Tiny-Huge Island - Tiny Island Visited",
+        "Tiny-Huge Island - Cave Visited",
+        "Tick Tock Clock - Visited",
+        "Rainbow Ride - Visited",
+        "The Princess's Secret Slide - Visited",
+        "The Secret Aquarium - Visited",
+        "Tower of the Wing Cap - Visited",
+        "Vanish Cap Under the Moat - Visited",
+        "Cavern of the Metal Cap - Visited",
+        "Bowser in the Dark World - Visited",
+        "Bowser in the Dark World - Bowser Arena Visited",
+        "Bowser in the Fire Sea - Visited",
+        "Bowser in the Fire Sea - Bowser Arena Visited",
+        "Wing Mario Over the Rainbow - Visited",
+        "Bowser in the Sky - Visited",
+        "Bowser in the Sky - Bowser Arena Visited",
+    ))
 }
 
 locFreestanding1Up_table = {
@@ -458,16 +504,16 @@ locFreestanding1Up_table = {
     "Bob-omb Battlefield - Switch Tunnel 1-Up": 3629116,
     "Bob-omb Battlefield - Cannon Tree 1-Up": 3629117,
 
-    "Castle - Third Tree From Waterfall 1-Up": 3629118,
-    "Castle - Roof Back 1-Up": 3629119,
-    "Castle - Roof Center 1-Up": 3629120,
-    "Castle - Roof Front 1-Up": 3629121,
-    "Castle - Bridge Coins 1-Up": 3629122,
-    "Castle - Left Butterfly 1-Up": 3629123,
-    "Castle - Right Butterfly 1-Up": 3629124,
+    "Castle Grounds - Third Tree From Waterfall 1-Up": 3629118,
+    "Castle Grounds - Roof Back 1-Up": 3629119,
+    "Castle Grounds - Roof Center 1-Up": 3629120,
+    "Castle Grounds - Roof Front 1-Up": 3629121,
+    "Castle Grounds - Bridge Coins 1-Up": 3629122,
+    "Castle Grounds - Left Butterfly 1-Up": 3629123,
+    "Castle Grounds - Right Butterfly 1-Up": 3629124,
 
-    "Castle - Jolly Roger Bay Lobby 1-Up": 3629125,
-    "Castle - Basement Water Tunnel Four Corners 1-Up": 3629126,
+    "Castle First Floor - Jolly Roger Bay Room 1-Up": 3629125,
+    "Castle Basement - Water Tunnel Four Corners 1-Up": 3629126,
 
     "Cool, Cool Mountain - Snowman Tree 1-Up": 3629127,
     "Cool, Cool Mountain - Slide Shortcut First 1-Up": 3629128,
@@ -579,7 +625,7 @@ locBlocksanity_table = {
     "Bob-omb Battlefield - Island Wing Cap Block": 3629774,
     "Bob-omb Battlefield - Shoot to the Island in the Sky Star Block": 3629775,
 
-    "Castle - Roof Wing Cap Block": 3629776,
+    "Castle Grounds - Roof Wing Cap Block": 3629776,
 
     "Cool, Cool Mountain - Near Snowman 1-Up Block": 3629777,
     "Cool, Cool Mountain - Ice Pillar 1-Up Block": 3629778,
@@ -690,7 +736,7 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
-                  **locSS_table, **locBasement_table, **locFreeItem_table, **locFreestanding1Up_table, **locBlocksanity_table, \
+                  **locSS_table, **locBasement_table, **locFreeItem_table, **locVisit_table, **locFreestanding1Up_table, **locBlocksanity_table, \
                   **coin_count_check_location_table, **global_coin_count_check_location_table,
                   **individual_coin_location_table}
 

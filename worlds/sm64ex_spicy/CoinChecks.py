@@ -566,7 +566,7 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
         }.items()
     },
     **{
-        ("Castle", "castle_courtyard_boos", index): f"Courtyard Boo {index} Coin"
+        ("Castle", "castle_courtyard_boos", index): f"Boo {index} Coin"
         for index in range(1, 10)
     },
     **{
@@ -1232,7 +1232,7 @@ STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
     "rr_second_carpet_platform_coin": "Coin on the Second Carpet's Grey Platform",
     "rr_second_carpet_air_coin": "Coin in the Air Along the Second Carpet",
     "castle_grounds_bridge_coins": "Coin Under the Bridge",
-    "castle_lobby_coins": "Lobby Coin",
+    "castle_lobby_coins": "Coin",
 }
 
 
@@ -1260,6 +1260,13 @@ def _without_coin_separator(name: str) -> str:
     """Keep producer and formation coin names readable without comma-separated suffixes."""
     return name.replace(", Blue Coin", " Blue Coin").replace(", Coin", " Coin") \
         .replace(", Center Coin", " Center Coin")
+
+
+CASTLE_COIN_REGION_NAMES = {
+    "castle_grounds_bridge_coins": "Castle Grounds",
+    "castle_lobby_coins": "Castle First Floor",
+    "castle_courtyard_boos": "Castle Courtyard",
+}
 
 
 def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
@@ -1312,7 +1319,7 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             outputs = tuple(
                 CoinOutputDefinition(
                     CoinOutputID(course_name, source_id, index), course_base + offset + index - 1,
-                    f"{course_name} - {_without_coin_separator(COIN_OUTPUT_NAME_OVERRIDES.get(
+                    f"{CASTLE_COIN_REGION_NAMES.get(source_id, course_name)} - {_without_coin_separator(COIN_OUTPUT_NAME_OVERRIDES.get(
                         (course_name, source_id, index), name))}",
                     kind, value,
                     COIN_OUTPUT_SOURCE_METHOD_OVERRIDES.get(

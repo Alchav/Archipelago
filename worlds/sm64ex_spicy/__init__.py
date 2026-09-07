@@ -502,7 +502,7 @@ class SM64World(World):
         }
         coin_check_source_region_names = {
             ("Castle", "castle_grounds_bridge_coins"): "Castle Grounds",
-            ("Castle", "castle_lobby_coins"): "Castle Lobby",
+            ("Castle", "castle_lobby_coins"): "Castle First Floor",
             ("Castle", "castle_courtyard_boos"): "Castle Courtyard",
         }
         for location_name in self.coin_count_check_location_names:

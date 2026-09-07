@@ -103,9 +103,9 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
 
     def test_basement_access(self):
-        self.assertFalse(self.can_reach_region("Basement"))
+        self.assertFalse(self.can_reach_region("Castle Basement"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertTrue(self.can_reach_region("Basement"))
+        self.assertTrue(self.can_reach_region("Castle Basement"))
 
     def test_DDD_entrance_access(self):
         self.assertFalse(self.can_reach_region("Dire, Dire Docks"))
@@ -120,14 +120,14 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Bowser in the Fire Sea"))
 
     def test_second_floor_access(self):
-        self.assertFalse(self.can_reach_region("Second Floor"))
+        self.assertFalse(self.can_reach_region("Castle Second Floor"))
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.assertTrue(self.can_reach_region("Second Floor"))
+        self.assertTrue(self.can_reach_region("Castle Second Floor"))
 
     def test_third_floor_access(self):
-        self.assertFalse(self.can_reach_region("Third Floor"))
+        self.assertFalse(self.can_reach_region("Castle Third Floor"))
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
-        self.assertTrue(self.can_reach_region("Third Floor"))
+        self.assertTrue(self.can_reach_region("Castle Third Floor"))
 
     def test_BitS_entrance_access(self):
         self.assertFalse(self.can_reach_region("Bowser in the Sky"))
@@ -135,13 +135,13 @@ class GroupedCastleKeyAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Bowser in the Sky"))
 
     def test_legacy_key_compatibility(self):
-        self.assertFalse(self.can_reach_region("Basement"))
+        self.assertFalse(self.can_reach_region("Castle Basement"))
         self.collect(self.world.create_item("Basement Key"))
-        self.assertTrue(self.can_reach_region("Basement"))
+        self.assertTrue(self.can_reach_region("Castle Basement"))
 
-        self.assertFalse(self.can_reach_region("Second Floor"))
+        self.assertFalse(self.can_reach_region("Castle Second Floor"))
         self.collect(self.world.create_item("Second Floor Key"))
-        self.assertTrue(self.can_reach_region("Second Floor"))
+        self.assertTrue(self.can_reach_region("Castle Second Floor"))
 
 
 class CastleAquariumLogicTricksTestBase(SM64TestBase):
@@ -156,7 +156,7 @@ class CastleAquariumLogicTricksTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_region("The Secret Aquarium"))
         self.collect(self.get_item_by_name("Triple Jump"))
         self.assertTrue(self.can_reach_region("The Secret Aquarium"))
-        self.assertTrue(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
+        self.assertTrue(self.can_reach_location("Castle First Floor - Jolly Roger Bay Room 1-Up"))
 
 
 class CastleWaterfallTreeLogicTrickTestBase(SM64TestBase):
@@ -168,7 +168,7 @@ class CastleWaterfallTreeLogicTrickTestBase(SM64TestBase):
     }
 
     def test_no_movement_trick_reaches_tree_one_up(self):
-        self.assertTrue(self.can_reach_location("Castle - Third Tree From Waterfall 1-Up"))
+        self.assertTrue(self.can_reach_location("Castle Grounds - Third Tree From Waterfall 1-Up"))
 
 
 class CastleTTCLogicTricksTestBase(SM64TestBase):
@@ -235,7 +235,7 @@ class GlobalOneUpUnlockAccessTestBase(SM64TestBase):
             ("Bob-omb Battlefield - Switch Tunnel 1-Up", "Freestanding 1-Ups"),
             ("Bob-omb Battlefield - Flower Ring 1-Up", "Trigger 1-Ups"),
             ("Cool, Cool Mountain - Near Snowman Block 1-Up", "1-Up Blocks"),
-            ("Castle - Left Butterfly 1-Up", "Butterflies"),
+            ("Castle Grounds - Left Butterfly 1-Up", "Butterflies"),
         )
         for location_name, item_name in checks:
             with self.subTest(location=location_name):
@@ -260,7 +260,7 @@ class PerLevelOneUpUnlockAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location(location_name))
 
     def test_per_level_butterfly_item_only_unlocks_matching_level(self):
-        castle_location = "Castle - Left Butterfly 1-Up"
+        castle_location = "Castle Grounds - Left Butterfly 1-Up"
         self.assertFalse(self.can_reach_location(castle_location))
         self.collect(self.get_item_by_name("Whomp's Fortress - Butterflies"))
         self.assertFalse(self.can_reach_location(castle_location))
@@ -295,9 +295,9 @@ class CastleThirtyStarDoorSBLJLogicTricksTestBase(SM64TestBase):
 
     def test_sblj_requires_only_long_jump(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertFalse(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
         self.collect(self.get_item_by_name("Long Jump"))
-        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertTrue(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
 
 
 class CastleThirtyStarDoorDoubleJumpLogicTricksTestBase(SM64TestBase):
@@ -311,9 +311,9 @@ class CastleThirtyStarDoorDoubleJumpLogicTricksTestBase(SM64TestBase):
     def test_double_jump_setup_uses_triple_jump_item(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.collect(self.get_item_by_name("Ledge Grab"))
-        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertFalse(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
         self.collect(self.get_item_by_name("Triple Jump"))
-        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertTrue(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
 
 
 class CastleMIPSSkipLogicTricksTestBase(SM64TestBase):
@@ -327,9 +327,9 @@ class CastleMIPSSkipLogicTricksTestBase(SM64TestBase):
     def test_mips_skip_requires_one_mips_and_dive(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
         self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
-        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertFalse(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
         self.collect(self.get_item_by_name("Dive"))
-        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertTrue(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
 
 
 class CastleMIPSSkipWithoutDiveLogicTricksTestBase(SM64TestBase):
@@ -345,10 +345,10 @@ class CastleMIPSSkipWithoutDiveLogicTricksTestBase(SM64TestBase):
 
     def test_mips_without_dive_trick_removes_dive_requirement(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertFalse(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
+        self.assertFalse(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
         self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
-        self.assertTrue(self.can_reach_entrance("Basement -> Dire, Dire Docks"))
-        self.assertTrue(self.can_reach_location("Castle - MIPS 1"))
+        self.assertTrue(self.can_reach_entrance("Castle Basement -> Dire, Dire Docks"))
+        self.assertTrue(self.can_reach_location("Castle Basement - MIPS 1"))
 
 
 class CastleDoorBLJLogicTricksTestBase(SM64TestBase):
@@ -372,9 +372,9 @@ class CastleDoorBLJLogicTricksTestBase(SM64TestBase):
 
     def test_fifty_and_seventy_star_door_blj_require_long_jump(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.assertFalse(self.can_reach_region("Third Floor"))
+        self.assertFalse(self.can_reach_region("Castle Third Floor"))
         self.collect(self.get_item_by_name("Long Jump"))
-        self.assertTrue(self.can_reach_region("Third Floor"))
+        self.assertTrue(self.can_reach_region("Castle Third Floor"))
         self.assertTrue(self.can_reach_region("Bowser in the Sky"))
 
 
@@ -393,21 +393,21 @@ class SingleProgressiveKeyAccessTestBase(SM64TestBase):
         self.collect_progressive_keys(1)
         self.assertTrue(self.can_reach_region("Bowser in the Dark World"))
 
-        self.assertFalse(self.can_reach_region("Basement"))
+        self.assertFalse(self.can_reach_region("Castle Basement"))
         self.collect_progressive_keys(1)
-        self.assertTrue(self.can_reach_region("Basement"))
+        self.assertTrue(self.can_reach_region("Castle Basement"))
 
         self.assertFalse(self.can_reach_region("Dire, Dire Docks"))
         self.collect_progressive_keys(1)
         self.assertTrue(self.can_reach_region("Dire, Dire Docks"))
 
-        self.assertFalse(self.can_reach_region("Second Floor"))
+        self.assertFalse(self.can_reach_region("Castle Second Floor"))
         self.collect_progressive_keys(1)
-        self.assertTrue(self.can_reach_region("Second Floor"))
+        self.assertTrue(self.can_reach_region("Castle Second Floor"))
 
-        self.assertFalse(self.can_reach_region("Third Floor"))
+        self.assertFalse(self.can_reach_region("Castle Third Floor"))
         self.collect_progressive_keys(1)
-        self.assertTrue(self.can_reach_region("Third Floor"))
+        self.assertTrue(self.can_reach_region("Castle Third Floor"))
 
         self.assertFalse(self.can_reach_region("Bowser in the Sky"))
         self.collect_progressive_keys(1)
@@ -429,22 +429,22 @@ class LockedPaintingAccessTestBase(SM64TestBase):
 
     def test_hazy_maze_cave_requires_unlock(self):
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertFalse(self.can_reach_entrance("Basement -> Hazy Maze Cave"))
+        self.assertFalse(self.can_reach_entrance("Castle Basement -> Hazy Maze Cave"))
 
         self.collect(self.get_item_by_name("Unlock Hazy Maze Cave"))
-        self.assertTrue(self.can_reach_entrance("Basement -> Hazy Maze Cave"))
+        self.assertTrue(self.can_reach_entrance("Castle Basement -> Hazy Maze Cave"))
 
     def test_tiny_island_requires_tiny_unlock(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.collect(self.get_item_by_name("Unlock Huge Island"))
-        self.assertFalse(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Tiny)"))
-        self.assertTrue(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Huge)"))
+        self.assertFalse(self.can_reach_entrance("Castle Second Floor -> Tiny-Huge Island (Tiny)"))
+        self.assertTrue(self.can_reach_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)"))
 
     def test_huge_island_requires_huge_unlock(self):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.collect(self.get_item_by_name("Unlock Tiny Island"))
-        self.assertTrue(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Tiny)"))
-        self.assertFalse(self.can_reach_entrance("Second Floor -> Tiny-Huge Island (Huge)"))
+        self.assertTrue(self.can_reach_entrance("Castle Second Floor -> Tiny-Huge Island (Tiny)"))
+        self.assertFalse(self.can_reach_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)"))
 
 
 class UTGlitchLogicTestBase(SM64TestBase):
@@ -742,28 +742,28 @@ class CastleFeatureAccessTestBase(SM64TestBase):
             }
 
     def test_mips_access(self):
-        self.assertFalse(self.can_reach_location("Castle - MIPS 1"))
+        self.assertFalse(self.can_reach_location("Castle Basement - MIPS 1"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertFalse(self.can_reach_location("Castle - MIPS 1"))
+        self.assertFalse(self.can_reach_location("Castle Basement - MIPS 1"))
         self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
-        self.assertTrue(self.can_reach_location("Castle - MIPS 1"))
-        self.assertFalse(self.can_reach_location("Castle - MIPS 2"))
+        self.assertTrue(self.can_reach_location("Castle Basement - MIPS 1"))
+        self.assertFalse(self.can_reach_location("Castle Basement - MIPS 2"))
         self.collect(self.get_item_by_name("Castle - Progressive MIPS"))
-        self.assertTrue(self.can_reach_location("Castle - MIPS 2"))
+        self.assertTrue(self.can_reach_location("Castle Basement - MIPS 2"))
 
     def test_castle_toad_access(self):
-        self.assertFalse(self.can_reach_location("Castle - Toad (Basement)"))
+        self.assertFalse(self.can_reach_location("Castle Basement - Toad"))
         self.collect(self.get_item_by_name("Castle - Toads"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertTrue(self.can_reach_location("Castle - Toad (Basement)"))
+        self.assertTrue(self.can_reach_location("Castle Basement - Toad"))
 
-        self.assertFalse(self.can_reach_location("Castle - Toad (Second Floor)"))
+        self.assertFalse(self.can_reach_location("Castle Second Floor - Toad"))
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.assertTrue(self.can_reach_location("Castle - Toad (Second Floor)"))
+        self.assertTrue(self.can_reach_location("Castle Second Floor - Toad"))
 
-        self.assertFalse(self.can_reach_location("Castle - Toad (Third Floor)"))
+        self.assertFalse(self.can_reach_location("Castle Third Floor - Toad"))
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
-        self.assertTrue(self.can_reach_location("Castle - Toad (Third Floor)"))
+        self.assertTrue(self.can_reach_location("Castle Third Floor - Toad"))
 
     def test_castle_feature_regions(self):
         self.assertTrue(self.can_reach_region("Castle Courtyard"))
@@ -788,9 +788,9 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Wing Mario Over the Rainbow"))
 
     def test_drain_the_moat_access_uses_old_vcutm_entrance_logic(self):
-        self.assertFalse(self.can_reach_location("Castle - Drain the Moat"))
+        self.assertFalse(self.can_reach_location("Castle Basement - Drain the Moat"))
         self.collect(self.get_item_by_name("Progressive Basement Key"))
-        self.assertTrue(self.can_reach_location("Castle - Drain the Moat"))
+        self.assertTrue(self.can_reach_location("Castle Basement - Drain the Moat"))
 
     def test_vcutm_entrance_not_unlocked_by_old_basement_route(self):
         self.assertFalse(self.can_reach_region("Vanish Cap Under the Moat"))
@@ -803,31 +803,31 @@ class CastleFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Vanish Cap Under the Moat"))
 
     def test_yoshi_access(self):
-        self.assertFalse(self.can_reach_location("Castle - Yoshi"))
+        self.assertFalse(self.can_reach_location("Castle Grounds - Yoshi"))
         self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
-        self.assertFalse(self.can_reach_location("Castle - Yoshi"))
+        self.assertFalse(self.can_reach_location("Castle Grounds - Yoshi"))
         self.collect(self.get_item_by_name("Castle - Yoshi"))
-        self.assertTrue(self.can_reach_location("Castle - Yoshi"))
+        self.assertTrue(self.can_reach_location("Castle Grounds - Yoshi"))
 
     def test_yoshi_access_requires_castle_cannon(self):
         self.collect(self.get_item_by_name("Castle - Yoshi"))
-        self.assertFalse(self.can_reach_location("Castle - Yoshi"))
+        self.assertFalse(self.can_reach_location("Castle Grounds - Yoshi"))
         self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
-        self.assertTrue(self.can_reach_location("Castle - Yoshi"))
+        self.assertTrue(self.can_reach_location("Castle Grounds - Yoshi"))
 
     def test_castle_roof_1ups_require_castle_cannon_region(self):
         for location_name in (
-                "Castle - Roof Back 1-Up",
-                "Castle - Roof Center 1-Up",
-                "Castle - Roof Front 1-Up",
+                "Castle Grounds - Roof Back 1-Up",
+                "Castle Grounds - Roof Center 1-Up",
+                "Castle Grounds - Roof Front 1-Up",
         ):
             with self.subTest(location=location_name):
                 self.assertFalse(self.can_reach_location(location_name))
         self.collect(self.get_item_by_name("Castle - Cannon Unlock"))
         for location_name in (
-                "Castle - Roof Back 1-Up",
-                "Castle - Roof Center 1-Up",
-                "Castle - Roof Front 1-Up",
+                "Castle Grounds - Roof Back 1-Up",
+                "Castle Grounds - Roof Center 1-Up",
+                "Castle Grounds - Roof Front 1-Up",
         ):
             with self.subTest(location=location_name):
                 self.assertTrue(self.can_reach_location(location_name))
@@ -843,9 +843,9 @@ class CastleOneUpAccessTestBase(SM64TestBase):
     }
 
     def test_castle_tree_1up_accepts_side_flip(self):
-        self.assertFalse(self.can_reach_location("Castle - Third Tree From Waterfall 1-Up"))
+        self.assertFalse(self.can_reach_location("Castle Grounds - Third Tree From Waterfall 1-Up"))
         self.collect(self.get_item_by_name("Side Flip"))
-        self.assertTrue(self.can_reach_location("Castle - Third Tree From Waterfall 1-Up"))
+        self.assertTrue(self.can_reach_location("Castle Grounds - Third Tree From Waterfall 1-Up"))
 
     def test_castle_bridge_coins_1up_requires_moat_drained_route_and_movement(self):
         self.collect([
@@ -853,15 +853,15 @@ class CastleOneUpAccessTestBase(SM64TestBase):
             self.get_item_by_name("Ground Pound"),
             self.get_item_by_name("Wall Kick"),
         ])
-        self.assertTrue(self.can_reach_location("Castle - Drain the Moat"))
-        self.assertFalse(self.can_reach_location("Castle - Bridge Coins 1-Up"))
+        self.assertTrue(self.can_reach_location("Castle Basement - Drain the Moat"))
+        self.assertFalse(self.can_reach_location("Castle Grounds - Bridge Coins 1-Up"))
         self.collect(self.get_item_by_name("Side Flip"))
-        self.assertTrue(self.can_reach_location("Castle - Bridge Coins 1-Up"))
+        self.assertTrue(self.can_reach_location("Castle Grounds - Bridge Coins 1-Up"))
 
     def test_castle_jolly_roger_bay_lobby_1up_uses_secret_aquarium_logic(self):
-        self.assertFalse(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
+        self.assertFalse(self.can_reach_location("Castle First Floor - Jolly Roger Bay Room 1-Up"))
         self.collect(self.get_item_by_name("Side Flip"))
-        self.assertTrue(self.can_reach_location("Castle - Jolly Roger Bay Lobby 1-Up"))
+        self.assertTrue(self.can_reach_location("Castle First Floor - Jolly Roger Bay Room 1-Up"))
 
 
 class CourseOneUpAccessTestBase(SM64TestBase):
@@ -1565,7 +1565,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island - Tiny Piranha Area"))
 
     def test_tiny_huge_island_warp_from_tiny_requires_piranha_area_and_warp_pipes(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
@@ -1582,7 +1582,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
 
     def test_tiny_huge_island_main_regions_connect_with_warp_pipes(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
@@ -1597,7 +1597,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_region("Tiny-Huge Island (Huge)"))
 
     def test_tiny_huge_island_koopa_region_connects_to_tiny_main_with_warp_pipes(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
@@ -1648,7 +1648,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Rematch with Koopa the Quick"))
 
     def test_tiny_huge_island_rematch_warp_pipe_route_does_not_require_moveless(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
@@ -1759,7 +1759,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Tall, Tall Mountain - Vine Platform Butterfly 1-Up"))
 
     def test_tiny_huge_island_five_secrets_from_tiny_requires_purple_switches(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
@@ -1774,7 +1774,7 @@ class ArbitraryFeatureAccessTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Tiny-Huge Island - Five Itty Bitty Secrets"))
 
     def test_tiny_huge_island_five_secrets_from_huge_requires_warp_pipes(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
             lambda state: False
 
         self.collect_second_floor_access()
@@ -3709,11 +3709,11 @@ class TinyHugeIslandCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
     def disable_huge_entry(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = \
             lambda state: False
 
     def disable_tiny_entry(self):
-        self.multiworld.get_entrance("Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = \
             lambda state: False
 
 
@@ -3996,11 +3996,11 @@ class TinyHugeIslandRegionRewriteTestBase(SM64TestBase):
 
     def disable_huge_entry(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
 
     def disable_tiny_entry(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
 
     def test_tiny_pipes_reach_each_matching_huge_region(self):
         self.disable_huge_entry()
@@ -4098,7 +4098,7 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
 
     def test_one_use_ascents_select_the_best_dead_end_routes(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.collect([
             self.get_item_by_name(name)
@@ -4156,14 +4156,14 @@ class TinyHugeIslandOneUseAscentCoinTestBase(SM64TestBase):
 
     def test_tiny_entrance_route_can_collect_all_non_impossible_coins(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
         self.collect_full_two_way_pipe_route()
 
         self.assertEqual(self.maximum_reachable_coins(), 191)
 
     def test_huge_entrance_route_can_collect_all_non_impossible_coins(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Tiny-Huge Island (Tiny)", self.player).access_rule = lambda state: False
         self.collect_full_two_way_pipe_route()
 
         self.assertEqual(self.maximum_reachable_coins(), 191)
@@ -4235,7 +4235,7 @@ class TinyHugeIslandImpossibleCoinTrickTestBase(SM64TestBase):
 
     def test_impossible_coin_requires_every_trick_action(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Tiny-Huge Island (Huge)", self.player).access_rule = lambda state: False
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         self.collect([
             self.get_item_by_name("Tiny-Huge Island - Single Yellow Coins"),
@@ -5896,7 +5896,7 @@ class WetDryWorldCoinStarAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
     def disable_wdw_entrance(self, entrance_name: str):
-        self.multiworld.get_entrance(f"Second Floor -> {entrance_name}", self.player).access_rule = \
+        self.multiworld.get_entrance(f"Castle Second Floor -> {entrance_name}", self.player).access_rule = \
             lambda state: False
 
 
@@ -6235,9 +6235,9 @@ class WetDryWorldIndividualUnlockLogicTestBase(SM64TestBase):
 
     def test_coin_blocks_require_their_unlock(self):
         self.multiworld.get_entrance(
-            "Second Floor -> Wet-Dry World Middle", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Wet-Dry World Middle", self.player).access_rule = lambda state: False
         self.multiworld.get_entrance(
-            "Second Floor -> Wet-Dry World High", self.player).access_rule = lambda state: False
+            "Castle Second Floor -> Wet-Dry World High", self.player).access_rule = lambda state: False
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
         three_coin_blocks = (
             "Wet-Dry World - Push Block 3 Coins Block",
@@ -6929,7 +6929,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Progressive Upstairs Key"))
 
     def disable_wdw_entrance(self, entrance_name: str):
-        self.multiworld.get_entrance(f"Second Floor -> {entrance_name}", self.player).access_rule = \
+        self.multiworld.get_entrance(f"Castle Second Floor -> {entrance_name}", self.player).access_rule = \
             lambda state: False
 
     def test_high_entrance_requires_jump(self):
@@ -6950,7 +6950,7 @@ class WetDryWorldVariantAccessTestBase(SM64TestBase):
 
     def test_downtown_requires_high_entrance_without_cannon(self):
         self.collect_second_floor_access()
-        self.multiworld.get_entrance("Second Floor -> Wet-Dry World High", self.player).access_rule = \
+        self.multiworld.get_entrance("Castle Second Floor -> Wet-Dry World High", self.player).access_rule = \
             lambda state: True
         self.assertFalse(self.can_reach_region("Wet-Dry World - Downtown"))
 
@@ -7479,7 +7479,7 @@ class TTCVariantAccessTestBase(SM64TestBase):
 
     def test_stomp_on_the_thwomp_unreachable_from_stopped_ttc(self):
         for ttc_entrance in sm64_ttc_entrances[1:]:
-            self.multiworld.get_entrance(f"Third Floor -> {ttc_entrance}", self.player).access_rule = \
+            self.multiworld.get_entrance(f"Castle Third Floor -> {ttc_entrance}", self.player).access_rule = \
                 lambda state: False
 
         self.collect_third_floor_access()
@@ -7496,7 +7496,7 @@ class TTCVariantAccessTestBase(SM64TestBase):
 
     def test_stop_time_red_coins_unreachable_from_moving_ttc_without_lower_access(self):
         stopped_entrance = sm64_ttc_entrances[0]
-        self.multiworld.get_entrance(f"Third Floor -> {stopped_entrance}", self.player).access_rule = \
+        self.multiworld.get_entrance(f"Castle Third Floor -> {stopped_entrance}", self.player).access_rule = \
             lambda state: False
         self.multiworld.get_entrance("Tick Tock Clock - First Clock Hand Area", self.player).access_rule = \
             lambda state: False
@@ -7550,10 +7550,10 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
 
     def use_stopped_ttc_without_entry_move(self):
         for ttc_entrance in sm64_ttc_entrances[1:]:
-            self.multiworld.get_entrance(f"Third Floor -> {ttc_entrance}", self.player).access_rule = \
+            self.multiworld.get_entrance(f"Castle Third Floor -> {ttc_entrance}", self.player).access_rule = \
                 lambda state: False
         stopped_entrance = sm64_ttc_entrances[0]
-        self.multiworld.get_entrance(f"Third Floor -> {stopped_entrance}", self.player).access_rule = \
+        self.multiworld.get_entrance(f"Castle Third Floor -> {stopped_entrance}", self.player).access_rule = \
             lambda state: True
 
     def test_spinners_reach_lower_from_stopped_ttc_without_entry_move(self):
@@ -7661,10 +7661,10 @@ class TickTockClockCoinStarAccessTestBase(SM64TestBase):
 
     def use_stopped_ttc_without_entry_move(self):
         for ttc_entrance in sm64_ttc_entrances[1:]:
-            self.multiworld.get_entrance(f"Third Floor -> {ttc_entrance}", self.player).access_rule = \
+            self.multiworld.get_entrance(f"Castle Third Floor -> {ttc_entrance}", self.player).access_rule = \
                 lambda state: False
         stopped_entrance = sm64_ttc_entrances[0]
-        self.multiworld.get_entrance(f"Third Floor -> {stopped_entrance}", self.player).access_rule = \
+        self.multiworld.get_entrance(f"Castle Third Floor -> {stopped_entrance}", self.player).access_rule = \
             lambda state: True
 
 
@@ -7887,7 +7887,7 @@ class TickTockClockStompThwompTrickTestBase(SM64TestBase):
     def test_trick_does_not_work_in_stopped_ttc(self):
         for ttc_entrance in sm64_ttc_entrances[1:]:
             self.multiworld.get_entrance(
-                f"Third Floor -> {ttc_entrance}", self.player).access_rule = lambda state: False
+                f"Castle Third Floor -> {ttc_entrance}", self.player).access_rule = lambda state: False
         self.collect_third_floor_access()
         self.collect([
             self.get_item_by_name("Triple Jump"),

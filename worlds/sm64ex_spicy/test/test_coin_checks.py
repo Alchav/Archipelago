@@ -269,9 +269,9 @@ class CoinCheckCatalogTest(unittest.TestCase):
             coin_output_by_name,
         )
         self.assertIn("The Secret Aquarium - Vertical Coin Ring 1 Coin 3", coin_output_by_name)
-        self.assertIn("Castle - Coin Under the Bridge 1", coin_output_by_name)
-        self.assertIn("Castle - Lobby Coin 4", coin_output_by_name)
-        self.assertIn("Castle - Courtyard Boo 9 Coin", coin_output_by_name)
+        self.assertIn("Castle Grounds - Coin Under the Bridge 1", coin_output_by_name)
+        self.assertIn("Castle First Floor - Coin 4", coin_output_by_name)
+        self.assertIn("Castle Courtyard - Boo 9 Coin", coin_output_by_name)
         self.assertIn("Rainbow Ride - First Swing Vertical Coin Line Coin 4", coin_output_by_name)
         self.assertIn("Rainbow Ride - Swingin' in the Breeze Coin Line Coin 5", coin_output_by_name)
         self.assertIn("Rainbow Ride - Tricky Triangles Coin Line Coin 1", coin_output_by_name)
@@ -1782,7 +1782,7 @@ class CastleCoinChecksAccessTest(SM64TestBase):
                              for name in self.world.coin_count_check_location_names))
 
     def test_bridge_coins_use_bridge_route_and_castle_yellow_coins(self):
-        coin_name = "Castle - Coin Under the Bridge 1"
+        coin_name = "Castle Grounds - Coin Under the Bridge 1"
         self.assertFalse(self.can_reach_location(coin_name))
         self.collect_by_name([
             "Castle - Single Yellow Coins",
@@ -1792,16 +1792,16 @@ class CastleCoinChecksAccessTest(SM64TestBase):
             "Side Flip",
         ])
         self.assertTrue(self.can_reach_location(coin_name))
-        self.assertFalse(self.can_reach_location("Castle - Bridge Coins 1-Up"))
+        self.assertFalse(self.can_reach_location("Castle Grounds - Bridge Coins 1-Up"))
 
     def test_lobby_coins_require_castle_yellow_coins(self):
-        coin_name = "Castle - Lobby Coin 1"
+        coin_name = "Castle First Floor - Coin 1"
         self.assertFalse(self.can_reach_location(coin_name))
         self.collect_by_name(["Castle - Single Yellow Coins"])
         self.assertTrue(self.can_reach_location(coin_name))
 
     def test_castle_boos_require_castle_or_global_boo_item(self):
-        courtyard_boo = "Castle - Courtyard Boo 1 Coin"
+        courtyard_boo = "Castle Courtyard - Boo 1 Coin"
         self.assertEqual(
             self.multiworld.get_location(courtyard_boo, self.player).parent_region.name,
             "Castle Courtyard",
@@ -1811,12 +1811,12 @@ class CastleCoinChecksAccessTest(SM64TestBase):
         self.assertTrue(self.can_reach_location(courtyard_boo))
 
     def test_global_boos_also_unlock_castle_courtyard_boos(self):
-        courtyard_boo = "Castle - Courtyard Boo 1 Coin"
+        courtyard_boo = "Castle Courtyard - Boo 1 Coin"
         self.collect(self.world.create_item("Boos"))
         self.assertTrue(self.can_reach_location(courtyard_boo))
 
     def test_big_boos_haunt_unlock_does_not_unlock_coin_boos(self):
-        courtyard_boo = "Castle - Courtyard Boo 1 Coin"
+        courtyard_boo = "Castle Courtyard - Boo 1 Coin"
         self.collect_by_name(["Unlock Big Boo's Haunt"])
         self.assertFalse(self.can_reach_location(courtyard_boo))
 
