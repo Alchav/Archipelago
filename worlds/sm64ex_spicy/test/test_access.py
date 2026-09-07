@@ -2238,7 +2238,7 @@ class BowserInTheDarkWorldSlopeTrickTestBase(SM64TestBase):
     def collect_stage_access(self):
         self.collect_by_name([
             "Dark World Key",
-            "Bowser in the Dark World - Warp Pipes",
+            "Bowser in the Dark World - Warp Pipe",
         ])
 
     def test_trick_reaches_bowser_but_not_red_coin_star(self):

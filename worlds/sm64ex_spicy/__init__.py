@@ -528,7 +528,6 @@ class SM64World(World):
 
     def set_rules(self):
         set_rules(self.multiworld, self.options, self.player, self.area_connections, self.move_rando_bitvec)
-        self.configure_full_level_unlock_early_items()
         if self.topology_present:
             for source_id in self.shuffled_entrance_source_ids:
                 physical_source = sub_area_source_by_id(source_id)
@@ -539,6 +538,12 @@ class SM64World(World):
                     self.get_normal_entrance_source_name(source_id),
                     self.get_entrance_destination_name(destination),
                     'entrance', self.player)
+
+    @classmethod
+    def stage_set_rules(cls, multiworld) -> None:
+        for world in multiworld.worlds.values():
+            if isinstance(world, cls):
+                world.configure_full_level_unlock_early_items()
 
     def configure_full_level_unlock_early_items(self) -> None:
         if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
@@ -575,7 +580,12 @@ class SM64World(World):
             raise OptionError("Full Level Unlocks has no sphere-one entrance unlock candidates.")
         self.random.shuffle(candidates)
         self.multiworld.local_early_items[self.player][candidates[0]] = 1
-        if self.multiworld.players > 1 and len(candidates) > 1:
+        sphere_one_state = CollectionState(self.multiworld)
+        sphere_one_location_count = sum(
+            location.address is not None and location.can_reach(sphere_one_state)
+            for location in self.multiworld.get_locations()
+        )
+        if sphere_one_location_count > 2 and len(candidates) > 1:
             self.multiworld.early_items[self.player][candidates[1]] = 1
 
     def create_item(self, name: str) -> Item:
@@ -1045,7 +1055,7 @@ class SM64World(World):
             if item.player == self.player and item.name not in sign_unlock_item_names
         )
         entrance_count = len(self.get_shuffled_entrance_source_ids())
-        self.sign_hint_count = min(len(sign_data), (advancement_count + entrance_count) // 5)
+        self.sign_hint_count = min(len(sign_data) - 1, (advancement_count + entrance_count) // 5)
 
     @classmethod
     def stage_pre_output(cls, multiworld):
@@ -1131,7 +1141,7 @@ class SM64World(World):
                 for sphere_index, sign_locations in enumerate(signs_by_sphere)
                 for sign_location in sign_locations
             ]
-            target_hint_count = min(world.sign_hint_count, len(sign_entries))
+            target_hint_count = min(world.sign_hint_count, len(sign_entries), len(sign_data) - 1)
             sign_buckets = [
                 sign_entries[
                     bucket_index * len(sign_entries) // target_hint_count:

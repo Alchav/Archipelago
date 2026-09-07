@@ -49,8 +49,8 @@ simple_level_feature_items = {
 
 warp_pipe_item_name_by_level = {
     "Tiny-Huge Island": "Tiny-Huge Island - Warp Pipes",
-    "Bowser in the Dark World": "Bowser in the Dark World - Warp Pipes",
-    "Bowser in the Sky": "Bowser in the Sky - Warp Pipes",
+    "Bowser in the Dark World": "Bowser in the Dark World - Warp Pipe",
+    "Bowser in the Sky": "Bowser in the Sky - Warp Pipe",
 }
 
 checkerboard_item_name_by_level = {

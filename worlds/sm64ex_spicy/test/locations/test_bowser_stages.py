@@ -43,7 +43,7 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
         ]
         freestanding = ["Bowser in the Dark World - Freestanding 1-Ups"]
         extra = ["Bowser in the Dark World - Extra 1-Ups"]
-        warp_pipes = ["Bowser in the Dark World - Warp Pipes"]
+        warp_pipes = ["Bowser in the Dark World - Warp Pipe"]
         bowser = ["Bowser in the Dark World - Bowser"]
 
         self.run_location_tests([
@@ -96,7 +96,7 @@ class TestBowserInTheDarkWorldSlopeTrick(SM64TestBase):
     def test_trick_reaches_bowser_but_not_red_coin_star(self):
         trick_route = [
             "Triple Jump",
-            "Bowser in the Dark World - Warp Pipes",
+            "Bowser in the Dark World - Warp Pipe",
             "Bowser in the Dark World - Bowser Arena Bomb 1",
             "Bowser in the Dark World - Bowser Arena Bomb 2",
             "Bowser in the Dark World - Bowser",

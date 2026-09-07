@@ -368,8 +368,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Jolly Roger Bay - Treasure Chests": 3626929,
             "Dire, Dire Docks - Treasure Chests": 3626930,
             "Treasure Chests": 3626931,
-            "Bowser in the Dark World - Warp Pipes": 3626932,
-            "Bowser in the Sky - Warp Pipes": 3626934,
+            "Bowser in the Dark World - Warp Pipe": 3626932,
+            "Bowser in the Sky - Warp Pipe": 3626934,
             "Warp Pipes": 3626935,
             "Signs": 3626939,
             "Castle - Signs": 3626940,
@@ -972,6 +972,32 @@ class FullLevelUnlockItemPoolTestBase(SM64TestBase):
         early_items = self.multiworld.local_early_items[self.player]
         self.assertEqual(sum(early_items.values()), 1)
         self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
+
+    def test_second_level_unlock_uses_global_sphere_one_location_count(self):
+        state = CollectionState(self.multiworld)
+        sphere_one_location_count = sum(
+            location.address is not None and location.can_reach(state)
+            for location in self.multiworld.get_locations()
+        )
+        early_items = self.multiworld.early_items[self.player]
+        self.assertEqual(sum(early_items.values()), sphere_one_location_count > 2)
+        self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
+
+
+class FullLevelUnlockWithVisitChecksTestBase(FullLevelUnlockItemPoolTestBase):
+    options = {
+        "level_unlocks": Options.LevelUnlocks.option_full,
+        "visit_checks": Options.VisitChecks.option_true,
+    }
+
+    def test_single_player_world_has_second_early_unlock(self):
+        state = CollectionState(self.multiworld)
+        sphere_one_location_count = sum(
+            location.address is not None and location.can_reach(state)
+            for location in self.multiworld.get_locations()
+        )
+        self.assertGreater(sphere_one_location_count, 2)
+        self.assertEqual(sum(self.multiworld.early_items[self.player].values()), 1)
 
 
 class BlocksanityOnTestBase(SM64TestBase):

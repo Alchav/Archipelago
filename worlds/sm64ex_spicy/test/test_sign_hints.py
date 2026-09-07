@@ -43,7 +43,7 @@ class SignHintTest(unittest.TestCase):
 
         advancement_count = sum(item.advancement for item in multiworld.itempool if item.player == 1)
         entrance_count = len(world.get_shuffled_entrance_source_ids())
-        self.assertEqual(world.sign_hint_count, min(91, (advancement_count + entrance_count) // 5))
+        self.assertEqual(world.sign_hint_count, min(90, (advancement_count + entrance_count) // 5))
 
     def test_castle_courtyard_signs_are_in_the_courtyard_region(self):
         multiworld = setup_solo_multiworld(
@@ -131,7 +131,7 @@ class SignHintTest(unittest.TestCase):
         entrance_count = len(world.get_shuffled_entrance_source_ids())
 
         self.assertGreater(entrance_count, 0)
-        self.assertEqual(world.sign_hint_count, min(91, (advancement_count + entrance_count) // 5))
+        self.assertEqual(world.sign_hint_count, min(90, (advancement_count + entrance_count) // 5))
 
     def test_real_hints_use_same_or_later_sphere_items_without_reuse(self):
         multiworld = setup_solo_multiworld(SM64World, seed=2)
@@ -195,6 +195,7 @@ class SignHintTest(unittest.TestCase):
             self.assertEqual(world.sign_hint_location_players[sign_key], 0)
 
         self.assertEqual(set(world.sign_hints), {sign.key for sign in sign_data})
+        self.assertTrue(any(hint in fallback_hints for hint in world.sign_hints.values()))
         self.assertFalse(any(world.sign_hint_entrances.values()))
         slot_data = world.fill_slot_data()["SignHintData"]
         self.assertEqual(len(slot_data), 91)
