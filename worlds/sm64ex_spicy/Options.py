@@ -1138,25 +1138,11 @@ class SkyboxShuffle(Choice):
 
 
 sm64_options_groups = [
-    OptionGroup("Logic Options", [
-        MainCourseShuffle,
-        SecretCourseShuffle,
-        SubAreaShuffle,
-        CastleReturnShuffle,
-        BuddyChecks,
-        OneUpChecks,
-        Blocksanity,
-        VisitChecks,
-        EasyButterflies,
-        TriggerSparkles,
-        NoDespawns,
+    OptionGroup("Item Pool Options", [
         CombinedProgressiveKeys,
         LevelUnlocks,
         CapItems,
-        LogicTricks,
-        UniversalTrackerGlitchedLogic,
-    ]),
-    OptionGroup("Level Feature Unlocks", [
+        MariosHat,
         LevelFeatures,
         BobombBuddies,
         CoinObjectUnlocks,
@@ -1165,24 +1151,40 @@ sm64_options_groups = [
         SignUnlocks,
         BowserBombs,
         BowserStage1Ups,
+        CombinedCastleAndSecretStageMoveItems,
+        *move_randomizer_options,
     ]),
-    OptionGroup("Coin Options", [
+    OptionGroup("Location Pool Options", [
+        BuddyChecks,
+        OneUpChecks,
+        Blocksanity,
+        VisitChecks,
         CoinChecks,
         CoinCountChecks,
         GlobalCoinCountChecks,
         CountsCoinsBeyondCoinStars,
         *coin_star_requirement_options,
     ]),
-    OptionGroup("Gameplay Options", [
-        MariosHat,
+    OptionGroup("Entrance Shuffle Options", [
+        MainCourseShuffle,
+        SecretCourseShuffle,
+        SubAreaShuffle,
+        CastleReturnShuffle,
+    ]),
+    OptionGroup("Quality of Life Options", [
+        EasyButterflies,
+        TriggerSparkles,
+        NoDespawns,
+    ]),
+    OptionGroup("Logic Options", [
+        LogicTricks,
+        UniversalTrackerGlitchedLogic,
+    ]),
+    OptionGroup("Bowser Battle Options", [
         BowserInTheDarkWorldHits,
         BowserInTheFireSeaHits,
         BowserInTheSkyHits,
         BowserInTheSkyStageCollapseHits,
-    ]),
-    OptionGroup("Ability Options", [
-        CombinedCastleAndSecretStageMoveItems,
-        *move_randomizer_options,
     ]),
     OptionGroup("Trap Options", [
         TrapsFillerPercentage,
