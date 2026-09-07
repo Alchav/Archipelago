@@ -7,8 +7,9 @@ from worlds.AutoWorld import call_all
 from .. import Options, SM64World
 from ..Regions import SM64Levels, SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, \
     sm64_level_to_paintings, sm64_level_to_secrets
-from ..SubAreas import BITS_BRANCH_DESTINATIONS, CASTLE_RETURN_SOURCES, OUTGOING_SOURCES_BY_DESTINATION, \
-    RETURN_DESTINATIONS, RETURN_SOURCES, SUB_AREA_SOURCES, SUB_AREA_SOURCE_NAMES, build_mixed_connections, \
+from ..SubAreas import BITS_BRANCH_DESTINATIONS, CASTLE_RETURN_OUTGOING_BY_DESTINATION, CASTLE_RETURN_SOURCES, \
+    OUTGOING_SOURCES_BY_DESTINATION, RETURN_DESTINATIONS, RETURN_SOURCES, SUB_AREA_SOURCES, \
+    SUB_AREA_SOURCE_NAMES, REUSABLE_ENTRY_KEYS, build_mixed_connections, \
     normal_source_id, sub_area_source_by_id
 from .bases import SM64TestBase
 
@@ -165,6 +166,48 @@ class MixedSubAreaShuffleTest(SM64TestBase):
                         for source in OUTGOING_SOURCES_BY_DESTINATION[bits_destination]
                     ))
 
+    def test_reusable_sub_areas_keep_their_level_returns(self):
+        outgoing = {
+            **OUTGOING_SOURCES_BY_DESTINATION,
+            **CASTLE_RETURN_OUTGOING_BY_DESTINATION,
+        }
+        for source in REUSABLE_ENTRY_KEYS:
+            destination = self.world.area_connections[source]
+            if destination not in outgoing:
+                continue
+            self.assertTrue(any(
+                self.world.area_connections[exit_source]
+                == SUB_AREA_SOURCES[source].return_destination
+                for exit_source in outgoing[destination]
+            ))
+
+    def test_bits_can_use_castle_return_level_when_all_categories_are_mixed(self):
+        normal_destinations = (
+            "Bob-omb Battlefield",
+            "Bowser in the Sky",
+            "Wing Mario Over the Rainbow",
+        )
+        normal_sources = {
+            f"normal:{destination}": index
+            for index, destination in enumerate(normal_destinations)
+        }
+        found_castle_return_branch = False
+        for seed in range(200):
+            connections = build_mixed_connections(
+                Random(seed), normal_sources, normal_destinations,
+                include_castle_returns=True, include_sub_areas=True,
+                allow_castle_return_bits_branch=True,
+            )
+            bits_destination = connections["normal:Bowser in the Sky"]
+            if bits_destination in CASTLE_RETURN_OUTGOING_BY_DESTINATION:
+                found_castle_return_branch = True
+                self.assertTrue(any(
+                    connections[source] == "bowser_3"
+                    for source in CASTLE_RETURN_OUTGOING_BY_DESTINATION[bits_destination]
+                ))
+        self.assertTrue(found_castle_return_branch)
+
+
     def test_mixed_map_is_authoritative_in_slot_data(self):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(slot_data["AreaConnections"], self.world.area_connections)
@@ -296,6 +339,23 @@ class MixedSubAreaShuffleTest(SM64TestBase):
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")
         return world
+
+
+class MixedDecoupledSubAreaShuffleTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed,
+        "sub_area_shuffle": Options.SubAreaShuffle.option_mixed_decoupled,
+    }
+
+    def test_mixed_decoupled_keeps_the_old_complete_pool(self):
+        self.assertEqual(len(self.world.area_connections), 46)
+        self.assertEqual(
+            set(self.world.sub_area_slot_data),
+            {source.source_id for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values())}
+            | {normal_source_id(source) for source in self.world.get_shuffled_normal_entrance_ids()},
+        )
 
 
 class MixedCastleReturnSubAreaShuffleTest(SM64TestBase):

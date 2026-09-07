@@ -416,7 +416,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 if entrance_id != int(SM64Levels.CAVERN_OF_THE_METAL_CAP)
             ]
 
-        include_mixed_sub_areas = sub_area_mode == options.sub_area_shuffle.option_mixed
+        include_mixed_sub_areas = sub_area_mode in {
+            options.sub_area_shuffle.option_mixed,
+            options.sub_area_shuffle.option_mixed_decoupled,
+        }
         include_mixed_castle_returns = (
             castle_return_mode == options.castle_return_shuffle.option_mixed)
         if mixed_normal_ids or include_mixed_sub_areas or include_mixed_castle_returns:
@@ -432,6 +435,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 tuple(mixed_names),
                 include_mixed_castle_returns,
                 include_mixed_sub_areas,
+                decoupled=sub_area_mode == options.sub_area_shuffle.option_mixed_decoupled,
+                allow_castle_return_bits_branch=(
+                    options.main_course_shuffle.value == options.main_course_shuffle.option_mixed
+                    and sub_area_mode == options.sub_area_shuffle.option_mixed
+                    and include_mixed_castle_returns
+                ),
             )
             area_connections.update({
                 mixed_names[source.removeprefix("normal:")]

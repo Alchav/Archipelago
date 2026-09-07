@@ -315,6 +315,8 @@ def build_mixed_connections(
         normal_destinations: tuple[str, ...],
         include_castle_returns: bool,
         include_sub_areas: bool = True,
+        decoupled: bool = False,
+        allow_castle_return_bits_branch: bool = False,
 ) -> dict[str, str]:
     """Build a two-deep directed entrance graph.
 
@@ -340,6 +342,11 @@ def build_mixed_connections(
 
     if len(sources) != len(destinations):
         raise ValueError(f"Sub-area source/destination mismatch: {len(sources)} != {len(destinations)}")
+
+    if not decoupled and include_sub_areas:
+        return _build_coupled_mixed_connections(
+            random, sources, destinations, normal_sources, outgoing,
+            allow_castle_return_bits_branch)
 
     branch_destinations = [destination for destination in destinations if destination in outgoing]
     root_sources = list(normal_sources)
@@ -386,6 +393,83 @@ def build_mixed_connections(
     # consumed by the reserved branch exit. Everything left is terminal.
     if any(destination in outgoing for destination in remaining_destinations):
         raise ValueError("Mixed sub-area shuffle left a branch destination outside the root layer")
+    random.shuffle(remaining_sources)
+    random.shuffle(remaining_destinations)
+    connections.update(zip(remaining_sources, remaining_destinations))
+    return connections
+
+
+def _build_coupled_mixed_connections(
+        random: Random,
+        sources: list[str],
+        destinations: list[str],
+        normal_sources: dict[str, int],
+        outgoing: dict[str, tuple[str, ...]],
+        allow_castle_return_bits_branch: bool,
+) -> dict[str, str]:
+    """Shuffle mixed entrances while preserving reusable level returns."""
+    branch_destinations = [destination for destination in destinations if destination in outgoing]
+    bits_source = "normal:Bowser in the Sky"
+    connections: dict[str, str] = {}
+
+    source_homes = {
+        source: source.removeprefix("normal:")
+        for source in normal_sources
+    }
+    source_homes.update({
+        key: SUB_AREA_SOURCES[key].return_destination
+        for key in REUSABLE_ENTRY_KEYS if key in sources
+    })
+    available_sources = set(sources)
+    available_destinations = set(destinations)
+
+    if bits_source in sources and "bowser_3" in destinations:
+        bits_candidates = set(BITS_BRANCH_DESTINATIONS)
+        if allow_castle_return_bits_branch:
+            bits_candidates.update(CASTLE_RETURN_OUTGOING_BY_DESTINATION)
+        available = [
+            destination for destination in branch_destinations
+            if destination in bits_candidates and outgoing[destination]
+        ]
+        if available:
+            destination = random.choice(available)
+            connections[bits_source] = destination
+            exit_source = random.choice(list(outgoing[destination]))
+            connections[exit_source] = "bowser_3"
+            available_sources.difference_update((bits_source, exit_source))
+            available_destinations.difference_update((destination, "bowser_3"))
+            branch_destinations.remove(destination)
+
+    random.shuffle(branch_destinations)
+    for destination in tuple(branch_destinations):
+        if destination not in available_destinations:
+            continue
+        candidates = [
+            source for source, home in source_homes.items()
+            if source in available_sources
+            and source not in outgoing[destination]
+            and home in available_destinations
+            and home != destination
+        ]
+        exit_sources = [source for source in outgoing[destination] if source in available_sources]
+        if not candidates or not exit_sources:
+            continue
+        source = random.choice(candidates)
+        exit_source = random.choice(exit_sources)
+        home = source_homes[source]
+        connections[source] = destination
+        connections[exit_source] = home
+        available_sources.difference_update((source, exit_source))
+        available_destinations.difference_update((destination, home))
+
+    remaining_sources = [source for source in sources if source in available_sources]
+    remaining_destinations = [
+        destination for destination in destinations if destination in available_destinations
+    ]
+    if len(remaining_sources) != len(remaining_destinations):
+        raise ValueError(
+            f"Coupled mixed source/destination mismatch: "
+            f"{len(remaining_sources)} != {len(remaining_destinations)}")
     random.shuffle(remaining_sources)
     random.shuffle(remaining_destinations)
     connections.update(zip(remaining_sources, remaining_destinations))

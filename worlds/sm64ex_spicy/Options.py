@@ -586,12 +586,17 @@ class SubAreaShuffle(Choice):
     with a usable exit are paired so leaving returns through the corresponding
     exit in the source course.
 
-    Mixed joins the same pool as every other entrance category set to Mixed.
+    Mixed joins the same pool as every other entrance category set to Mixed,
+    while keeping sub-areas with exits coupled to the return point belonging
+    to the entrance that led into them.
+
+    Mixed Decoupled joins that pool without preserving those return pairs.
     """
     display_name = "Sub-Area Shuffle"
     option_vanilla = 0
     option_separate = 1
     option_mixed = 2
+    option_mixed_decoupled = 3
     default = 0
 
 
