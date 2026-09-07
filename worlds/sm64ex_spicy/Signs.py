@@ -332,14 +332,12 @@ joke_hints = (
 tip_hints = (
     "Gray coins heal Mario but do not add another coin.",
     "Castle and secret stages use Misc movement items unless separate moves are enabled.",
-    "CoinCountChecks places checks at evenly spaced coin totals below the Coins Star requirement.",
-    "With 1-Up checks disabled, 1-Up Mushrooms heal Mario to full health.",
-    "Easy Butterflies makes a butterfly become a 1-Up regardless of Mario's distance.",
+    "Coin Count Checks places checks at evenly spaced coin totals below the Coins Star requirement.",
     "No Despawns preserves timed coins and 1-Ups and grants ones lost to hazards.",
     "Save files are a thing of the past. It's all on the Archipelago server now!",
-    "If you aren't using Universal Tracker, you should cease not using it immediately.",
+    "If you aren't using Universal Tracker, you should.",
     "Please include your Universal Tracker /explain details with any questions or reports regarding logic.",
-    "If your game was generated with a 0.2.X apworld, set the branch to 0.2.0 when you build sm64ex",
+    "If your game was generated with a 0.2.X apworld, set the branch to 0.2.0 when you build sm64ex.",
     "Water in the moat won't stop you from entering the Vanish Cap Under the Moat entrance if the grate is gone!",
 )
 
