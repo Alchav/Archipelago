@@ -117,6 +117,7 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "sl_igloo_three_coin_block": "Snowman's Land - Igloo",
     "sl_igloo_goombas": "Snowman's Land - Igloo",
     "sl_igloo_spindrifts": "Snowman's Land - Igloo",
+    "sl_igloo_route": "Snowman's Land - Igloo",
     "sl_upper_slope_coin_line": "Snowman's Land - Igloo Entrance",
 
     "amp_ring": "Wet-Dry World - Near the Top",
@@ -1136,7 +1137,7 @@ _ENEMY_DESCRIPTOR_OVERRIDES = {
     "tiny_main_goombas": "Tiny Island Goomba",
     "huge_top_chuckya": "Chuckya",
     "castle_courtyard_boos": "Courtyard Boo",
-    "sl_upper_spindrifts": "Additional Outdoor Spindrift",
+    "sl_upper_spindrifts": "Spindrift",
     "standard_mr_blizzard": "Mr. Blizzard",
     "amazing_emergency_exit_swoop_1": "A-Maze-Ing Emergency Exit Swoop 1",
     "amazing_emergency_exit_swoop_2": "A-Maze-Ing Emergency Exit Swoop 2",
@@ -1149,6 +1150,9 @@ _GIANT_GOOMBA_DESCRIPTORS = {
     "huge_windswept_giant_goombas": "Windswept Valley Giant Goomba",
     "huge_koopa_region_giant_goombas": "Koopa the Quick Area Giant Goomba",
     "red_area_giant_goombas": "Huge Tree Area Giant Goomba",
+}
+_ENEMY_INDEX_OFFSETS = {
+    "sl_upper_spindrifts": 8,
 }
 
 
@@ -1186,7 +1190,8 @@ def _enemy_output_names(
     coin_name = "Blue Coin" if kind is CoinOutputKind.BLUE else "Coin"
     names = []
     multiple_enemies = len(group_sizes) > 1
-    for enemy_index, output_count in enumerate(group_sizes, 1):
+    first_enemy_index = _ENEMY_INDEX_OFFSETS.get(source_id, 0) + 1
+    for enemy_index, output_count in enumerate(group_sizes, first_enemy_index):
         enemy = f"{descriptor} {enemy_index}" if multiple_enemies else descriptor
         for output_index in range(1, output_count + 1):
             suffix = f"{coin_name} {output_index}" if output_count > 1 else coin_name

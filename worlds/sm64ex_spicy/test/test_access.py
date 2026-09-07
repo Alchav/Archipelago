@@ -1,8 +1,11 @@
+from unittest.mock import patch
+
 from BaseClasses import CollectionState, ItemClassification
 
 from .bases import SM64TestBase as _SM64TestBase
 from .. import Options
 from ..CoinLogic import COIN_EVALUATORS
+from ..RuleBuilder import evaluate_coins
 from ..Regions import sm64_ttc_entrances
 from ..Rules import can_use_logic_trick, get_per_level_action_item_name
 
@@ -5881,6 +5884,26 @@ class SnowmansLandIglooPermanentCoinCollectionTestBase(SM64TestBase):
             if snowmans_land_coins(self.multiworld.state, self.player, coin_count)
         )
         self.assertEqual(coins_after_igloo_block, coins_before_igloo_block + 3)
+
+    def test_igloo_only_access_counts_single_coins(self):
+        state = CollectionState(self.multiworld)
+        igloo = self.multiworld.get_region("Snowman's Land - Igloo", self.player)
+        state.reachable_regions[self.player].add(igloo)
+        state.blocked_connections[self.player].update(
+            entrance for entrance in igloo.exits if entrance.connected_region is not None)
+        state.collect(
+            self.world.create_item("Snowman's Land - Single Yellow Coins"),
+            prevent_sweep=True,
+        )
+
+        with patch.object(
+                state,
+                "can_reach",
+                side_effect=lambda name, resolution_hint=None, player=None:
+                name == "Snowman's Land - Igloo",
+        ):
+            evaluation = evaluate_coins(state, self.player, "Snowman's Land", 3)
+        self.assertEqual(evaluation.reachable_coins, 3)
 
 
 class WetDryWorldCoinStarAccessTestBase(SM64TestBase):

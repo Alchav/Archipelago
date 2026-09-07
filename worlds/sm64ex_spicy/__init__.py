@@ -144,6 +144,7 @@ class SM64World(World):
         "buddy_checks",
         "one_up_checks",
         "blocksanity",
+        "visit_checks",
         "easy_butterflies",
         "trigger_sparkles",
         "no_despawns",
