@@ -65,8 +65,7 @@ class CountsCoinsBeyondCoinStars(Toggle):
     """Counts every collected coin toward Global Coin Count Checks.
 
     When disabled, each main course contributes at most its Coin Star
-    Requirement and each secret stage contributes at most its hidden Coin Count
-    Max Coins setting.
+    Requirement.
     """
     display_name = "Counts Coins Beyond Coin Stars"
     default = 0
@@ -692,7 +691,7 @@ class BonkTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Bonk Trap Weight"
 
 
@@ -705,7 +704,7 @@ class FireTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Burn Trap Weight"
 
 
@@ -718,7 +717,7 @@ class ElectricTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Shock Trap Weight"
 
 
@@ -731,7 +730,7 @@ class ChuckyaTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Chuckya Trap Weight"
 
 
@@ -744,7 +743,7 @@ class SpinTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Spin Trap Weight"
 
 
@@ -757,7 +756,7 @@ class GustTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Gust Trap Weight"
 
 
