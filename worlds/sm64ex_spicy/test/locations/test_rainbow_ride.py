@@ -3,8 +3,7 @@ from ... import Options
 
 
 RR_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "level_unlocks": Options.LevelUnlocks.option_full,
+        "level_unlocks": Options.LevelUnlocks.option_full,
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,

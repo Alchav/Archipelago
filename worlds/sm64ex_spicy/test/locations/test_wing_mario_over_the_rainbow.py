@@ -3,8 +3,7 @@ from ... import Options
 
 
 WMOTR_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,

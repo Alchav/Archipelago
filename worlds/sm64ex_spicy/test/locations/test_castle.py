@@ -5,8 +5,7 @@ from ... import Options
 class TestCastleLocations(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "blocksanity": Options.Blocksanity.option_true,
+                "blocksanity": Options.Blocksanity.option_true,
         "one_up_checks": Options.OneUpChecks.option_true,
         "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,

@@ -62,8 +62,7 @@ class RuleBuilderWorldTestBase(SM64TestBase):
 
 class VariantEntranceExplanationTest(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-    }
+            }
 
     @staticmethod
     def explanation_text(messages) -> str:
@@ -144,8 +143,7 @@ class VariantEntranceExplanationTest(SM64TestBase):
 
 class CoinSourceExplanationTest(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "level_unlocks": Options.LevelUnlocks.option_full,
+                "level_unlocks": Options.LevelUnlocks.option_full,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
         "level_features": Options.LevelFeatures.option_per_level,

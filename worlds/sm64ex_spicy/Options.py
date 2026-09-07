@@ -560,13 +560,22 @@ class BowserStage1Ups(Choice):
     default = 0
 
 
-class AreaRandomizer(Choice):
-    """Randomize Entrances"""
-    display_name = "Entrance Randomizer"
-    option_Off = 0
-    option_Courses_Only = 1
-    option_Courses_and_Secrets_Separate = 2
-    option_Courses_and_Secrets = 3
+class CourseShuffle(Choice):
+    """Choose whether this entrance category remains vanilla, shuffles by itself, or joins every mixed category."""
+    option_vanilla = 0
+    option_separate = 1
+    option_mixed = 2
+    default = 0
+
+
+class MainCourseShuffle(CourseShuffle):
+    """Shuffle the fifteen main-course entrances and their water/time/size variants."""
+    display_name = "Main Course Shuffle"
+
+
+class SecretCourseShuffle(CourseShuffle):
+    """Shuffle Castle entrances to secret courses and Bowser stages."""
+    display_name = "Secret Course Shuffle"
 
 
 class SubAreaShuffle(Choice):
@@ -578,19 +587,26 @@ class SubAreaShuffle(Choice):
     with a usable exit are paired so leaving returns through the corresponding
     exit in the source course.
 
-    Mixed combines every Castle course entrance with sub-area entrances. Paths
-    are constrained to at most one intermediate area before a dead end. The
-    Bowser in the Sky entrance always leads through one intermediate area to the
-    Bowser in the Sky arena.
-
-    Mixed Plus Castle Returns also shuffles falls and exits that return to the
-    Castle Lobby or Castle Grounds.
+    Mixed joins the same pool as every other entrance category set to Mixed.
     """
     display_name = "Sub-Area Shuffle"
-    option_off = 0
+    option_vanilla = 0
     option_separate = 1
     option_mixed = 2
-    option_mixed_plus_castle_returns = 3
+    default = 0
+
+
+class CastleReturnShuffle(Choice):
+    """
+    Controls course exits that normally return to the Castle Lobby or Castle Grounds.
+
+    Vanilla leaves them unchanged. Mixed joins them with every entrance category set to Mixed.
+    Death makes them return through the entrance used to reach the current course as a death.
+    """
+    display_name = "Castle Return Shuffle"
+    option_vanilla = 0
+    option_mixed = 1
+    option_death = 2
     default = 0
 
 
@@ -1119,8 +1135,10 @@ class SkyboxShuffle(Choice):
 
 sm64_options_groups = [
     OptionGroup("Logic Options", [
-        AreaRandomizer,
+        MainCourseShuffle,
+        SecretCourseShuffle,
         SubAreaShuffle,
+        CastleReturnShuffle,
         BuddyChecks,
         OneUpChecks,
         Blocksanity,
@@ -1182,8 +1200,10 @@ sm64_options_groups = [
 @dataclass
 class SM64Options(PerGameCommonOptions):
     accessibility: SM64Accessibility
-    area_rando: AreaRandomizer
+    main_course_shuffle: MainCourseShuffle
+    secret_course_shuffle: SecretCourseShuffle
     sub_area_shuffle: SubAreaShuffle
+    castle_return_shuffle: CastleReturnShuffle
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks
     blocksanity: Blocksanity

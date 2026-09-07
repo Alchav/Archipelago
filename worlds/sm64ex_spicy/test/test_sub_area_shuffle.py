@@ -1,19 +1,22 @@
+from random import Random
+
 from BaseClasses import CollectionState
 from test.general import setup_solo_multiworld
 from worlds.AutoWorld import call_all
 
 from .. import Options, SM64World
-from ..Regions import SM64Levels, SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED
-from ..SubAreas import CASTLE_RETURN_SOURCES, OUTGOING_SOURCES_BY_DESTINATION, RETURN_DESTINATIONS, \
-    RETURN_SOURCES, SUB_AREA_SOURCES, SUB_AREA_SOURCE_NAMES, normal_source_id, sub_area_source_by_id
+from ..Regions import SM64Levels, SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, \
+    sm64_level_to_paintings, sm64_level_to_secrets
+from ..SubAreas import BITS_BRANCH_DESTINATIONS, CASTLE_RETURN_SOURCES, OUTGOING_SOURCES_BY_DESTINATION, \
+    RETURN_DESTINATIONS, RETURN_SOURCES, SUB_AREA_SOURCES, SUB_AREA_SOURCE_NAMES, build_mixed_connections, \
+    normal_source_id, sub_area_source_by_id
 from .bases import SM64TestBase
 
 
 class SeparateSubAreaShuffleTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "sub_area_shuffle": Options.SubAreaShuffle.option_separate,
+                "sub_area_shuffle": Options.SubAreaShuffle.option_separate,
     }
 
     def test_separate_map_contains_only_physical_sub_area_sources(self):
@@ -88,7 +91,8 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
 class MixedSubAreaShuffleTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_Only,
+        "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed,
         "sub_area_shuffle": Options.SubAreaShuffle.option_mixed,
     }
 
@@ -100,11 +104,66 @@ class MixedSubAreaShuffleTest(SM64TestBase):
             if isinstance(bits_destination, int)
             else bits_destination
         )
-        self.assertIn(destination_name, OUTGOING_SOURCES_BY_DESTINATION)
+        self.assertIn(destination_name, BITS_BRANCH_DESTINATIONS)
         self.assertTrue(any(
             self.world.area_connections[source] == "bowser_3"
             for source in OUTGOING_SOURCES_BY_DESTINATION[destination_name]
         ))
+
+    def test_bowser_three_branch_has_no_alternate_level_entrance(self):
+        bits_destination = self.world.area_connections[int(SM64Levels.BOWSER_IN_THE_SKY)]
+        destination_name = (
+            self.world.get_normal_entrance_name(bits_destination)
+            if isinstance(bits_destination, int)
+            else bits_destination
+        )
+
+        self.assertNotIn(destination_name, {
+            "Cool, Cool Mountain",
+            "Snowman's Land",
+            "Tall, Tall Mountain",
+            "Tiny-Huge Island (Huge)",
+        })
+        self.assertEqual(
+            1,
+            sum(destination == "bowser_3" for destination in self.world.area_connections.values()),
+        )
+
+    def test_bowser_three_uses_a_single_entry_level_across_shuffle_seeds(self):
+        all_normal_destinations = {
+            **sm64_level_to_paintings,
+            **sm64_level_to_secrets,
+        }
+        all_normal_destinations.pop(SM64Levels.CAVERN_OF_THE_METAL_CAP)
+        secret_destinations = dict(sm64_level_to_secrets)
+        secret_destinations.pop(SM64Levels.CAVERN_OF_THE_METAL_CAP)
+
+        for configuration, normal_destinations in (
+                ("all", all_normal_destinations),
+                ("secret-only fallback", secret_destinations)):
+            normal_sources = {
+                f"normal:{destination}": int(source)
+                for source, destination in normal_destinations.items()
+            }
+            for seed in range(100):
+                with self.subTest(configuration=configuration, seed=seed):
+                    connections = build_mixed_connections(
+                        Random(seed),
+                        normal_sources,
+                        tuple(normal_destinations.values()),
+                        include_castle_returns=True,
+                        include_sub_areas=True,
+                    )
+                    bits_destination = connections["normal:Bowser in the Sky"]
+                    self.assertIn(bits_destination, BITS_BRANCH_DESTINATIONS)
+                    self.assertEqual(
+                        1,
+                        sum(destination == "bowser_3" for destination in connections.values()),
+                    )
+                    self.assertTrue(any(
+                        connections[source] == "bowser_3"
+                        for source in OUTGOING_SOURCES_BY_DESTINATION[bits_destination]
+                    ))
 
     def test_mixed_map_is_authoritative_in_slot_data(self):
         slot_data = self.world.fill_slot_data()
@@ -222,15 +281,17 @@ class MixedSubAreaShuffleTest(SM64TestBase):
         ))
 
     @staticmethod
-    def _create_fake_tracker_world(sub_area_mode):
+    def _create_fake_tracker_world(sub_area_mode, castle_return_mode=Options.CastleReturnShuffle.option_vanilla):
         multiworld = setup_solo_multiworld(
             SM64World,
             steps=("generate_early", "create_regions", "create_items"),
             seed=7,
         )
         world = multiworld.worlds[1]
-        world.options.area_rando.value = Options.AreaRandomizer.option_Courses_Only
+        world.options.main_course_shuffle.value = Options.MainCourseShuffle.option_mixed
+        world.options.secret_course_shuffle.value = Options.SecretCourseShuffle.option_mixed
         world.options.sub_area_shuffle.value = sub_area_mode
+        world.options.castle_return_shuffle.value = castle_return_mode
         multiworld.generation_is_fake = True
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")
@@ -240,8 +301,10 @@ class MixedSubAreaShuffleTest(SM64TestBase):
 class MixedCastleReturnSubAreaShuffleTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_Only,
-        "sub_area_shuffle": Options.SubAreaShuffle.option_mixed_plus_castle_returns,
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla,
+        "sub_area_shuffle": Options.SubAreaShuffle.option_mixed,
+        "castle_return_shuffle": Options.CastleReturnShuffle.option_mixed,
     }
 
     def test_castle_return_sources_are_included(self):
@@ -251,7 +314,7 @@ class MixedCastleReturnSubAreaShuffleTest(SM64TestBase):
 
     def test_ut_reconnects_a_high_physical_source_bit(self):
         world = MixedSubAreaShuffleTest._create_fake_tracker_world(
-            Options.SubAreaShuffle.option_mixed_plus_castle_returns)
+            Options.SubAreaShuffle.option_mixed, Options.CastleReturnShuffle.option_mixed)
         source_id = CASTLE_RETURN_SOURCES["vcutm_fall"].source_id
         self.assertIsNone(world.randomized_entrance_connections[source_id].connected_region)
 
@@ -265,11 +328,53 @@ class MixedCastleReturnSubAreaShuffleTest(SM64TestBase):
         ))
 
 
+class MixedCastleReturnOnlyTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "castle_return_shuffle": Options.CastleReturnShuffle.option_mixed,
+    }
+
+    def test_castle_returns_shuffle_without_sub_areas(self):
+        self.assertEqual(
+            set(self.world.sub_area_slot_data),
+            {source.source_id for source in CASTLE_RETURN_SOURCES.values()},
+        )
+        for source in CASTLE_RETURN_SOURCES.values():
+            self.assertIn(source.source_id, self.world.randomized_entrance_connections)
+
+    def test_normal_and_sub_area_entrances_stay_vanilla(self):
+        self.assertTrue(all(
+            source == destination
+            for source, destination in self.world.area_connections.items()
+            if isinstance(source, int)
+        ))
+        self.assertFalse(any(source in self.world.area_connections for source in SUB_AREA_SOURCES))
+
+
+class DeathCastleReturnTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "castle_return_shuffle": Options.CastleReturnShuffle.option_death,
+    }
+
+    def test_death_mode_is_sent_without_randomizing_castle_returns(self):
+        slot_data = self.world.fill_slot_data()
+
+        self.assertEqual(slot_data["CastleReturnShuffleMode"], 2)
+        self.assertFalse(any(
+            source.key in self.world.area_connections
+            for source in CASTLE_RETURN_SOURCES.values()
+        ))
+        self.assertFalse(any(
+            source.source_id in self.world.sub_area_slot_data
+            for source in CASTLE_RETURN_SOURCES.values()
+        ))
+
+
 class MixedSubAreaShuffleWithoutEntranceRandomizerTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "sub_area_shuffle": Options.SubAreaShuffle.option_mixed_plus_castle_returns,
+                "sub_area_shuffle": Options.SubAreaShuffle.option_mixed,
     }
 
     def test_mixed_mode_without_entrance_randomizer_uses_separate_sub_areas(self):
@@ -278,7 +383,6 @@ class MixedSubAreaShuffleWithoutEntranceRandomizerTest(SM64TestBase):
             for source in (
                 *SUB_AREA_SOURCES.values(),
                 *RETURN_SOURCES.values(),
-                *CASTLE_RETURN_SOURCES.values(),
             )
         }
         self.assertEqual(set(self.world.sub_area_slot_data), expected_ids)

@@ -8,7 +8,7 @@ from worlds.AutoWorld import call_all
 from .. import SM64World
 from ..Items import global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, sign_unlock_item_names
 from ..Options import SignUnlocks
-from ..Regions import get_shuffled_entrance_ids, sm64_entrance_destination_descriptions, \
+from ..Regions import sm64_entrance_destination_descriptions, \
     sm64_entrance_source_descriptions, sm64_shuffled_entrance_ids
 from ..Signs import fallback_hints, joke_hints, sign_data, tip_hints
 
@@ -42,7 +42,7 @@ class SignHintTest(unittest.TestCase):
                             for location in sign_locations))
 
         advancement_count = sum(item.advancement for item in multiworld.itempool if item.player == 1)
-        entrance_count = len(get_shuffled_entrance_ids(world.options.area_rando.value))
+        entrance_count = len(world.get_shuffled_entrance_source_ids())
         self.assertEqual(world.sign_hint_count, min(91, (advancement_count + entrance_count) // 5))
 
     def test_castle_courtyard_signs_are_in_the_courtyard_region(self):
@@ -124,11 +124,11 @@ class SignHintTest(unittest.TestCase):
             SM64World,
             steps=("generate_early", "create_regions", "create_items"),
             seed=1,
-            options={"area_rando": 3},
+            options={"main_course_shuffle": 2, "secret_course_shuffle": 2},
         )
         world = multiworld.worlds[1]
         advancement_count = sum(item.advancement for item in multiworld.itempool if item.player == 1)
-        entrance_count = len(get_shuffled_entrance_ids(world.options.area_rando.value))
+        entrance_count = len(world.get_shuffled_entrance_source_ids())
 
         self.assertGreater(entrance_count, 0)
         self.assertEqual(world.sign_hint_count, min(91, (advancement_count + entrance_count) // 5))
@@ -236,7 +236,8 @@ class SignHintTest(unittest.TestCase):
             steps=("generate_early", "create_regions", "create_items"),
             seed=3,
         )
-        multiworld.worlds[1].options.area_rando.value = 3
+        multiworld.worlds[1].options.main_course_shuffle.value = 2
+        multiworld.worlds[1].options.secret_course_shuffle.value = 2
         multiworld.generation_is_fake = True
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")
@@ -260,7 +261,8 @@ class SignHintTest(unittest.TestCase):
             steps=("generate_early", "create_regions", "create_items"),
             seed=5,
         )
-        multiworld.worlds[1].options.area_rando.value = 3
+        multiworld.worlds[1].options.main_course_shuffle.value = 2
+        multiworld.worlds[1].options.secret_course_shuffle.value = 2
         multiworld.generation_is_fake = True
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")
@@ -284,7 +286,8 @@ class SignHintTest(unittest.TestCase):
             steps=("generate_early", "create_regions", "create_items"),
             seed=6,
         )
-        multiworld.worlds[1].options.area_rando.value = 3
+        multiworld.worlds[1].options.main_course_shuffle.value = 2
+        multiworld.worlds[1].options.secret_course_shuffle.value = 2
         multiworld.generation_is_fake = True
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")
@@ -305,7 +308,7 @@ class SignHintTest(unittest.TestCase):
             steps=("generate_early", "create_regions", "create_items"),
             seed=4,
         )
-        multiworld.worlds[1].options.area_rando.value = 1
+        multiworld.worlds[1].options.main_course_shuffle.value = 1
         multiworld.generation_is_fake = True
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")

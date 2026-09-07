@@ -3,8 +3,7 @@ from ... import Options
 
 
 SECRET_STAGE_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
@@ -100,7 +99,8 @@ class TestTowerOfTheWingCapLocations(SM64TestBase):
 
     def test_locations(self):
         self.run_location_tests([
-            ["Tower of the Wing Cap - Switch", True, []],
+            ["Tower of the Wing Cap - Switch", False, []],
+            ["Tower of the Wing Cap - Switch", True, ["Tower of the Wing Cap - Cap Switch"]],
             ["Tower of the Wing Cap - Red Coins", False, []],
             ["Tower of the Wing Cap - Red Coins", True, ["Tower of the Wing Cap - Red Coins"]],
             ["Tower of the Wing Cap - Wing Cap Block", False, []],
@@ -115,7 +115,8 @@ class TestCavernOfTheMetalCapLocations(SM64TestBase):
     def test_locations(self):
         metal_cap = ["Cavern of the Metal Cap - Metal Cap"]
         self.run_location_tests([
-            ["Cavern of the Metal Cap - Switch", True, []],
+            ["Cavern of the Metal Cap - Switch", False, []],
+            ["Cavern of the Metal Cap - Switch", True, ["Cavern of the Metal Cap - Cap Switch"]],
             ["Cavern of the Metal Cap - Red Coins", False,
              ["Cavern of the Metal Cap - Red Coins"]],
             ["Cavern of the Metal Cap - Red Coins", False, metal_cap],
@@ -162,9 +163,10 @@ class TestVanishCapUnderTheMoatLocations(SM64TestBase):
         red_coins = ["Vanish Cap Under the Moat - Red Coins"]
 
         self.run_location_tests([
-            ["Vanish Cap Under the Moat - Switch", False, checkerboards],
-            ["Vanish Cap Under the Moat - Switch", False, movement],
-            ["Vanish Cap Under the Moat - Switch", True, checkerboards + movement],
+            ["Vanish Cap Under the Moat - Switch", False,
+             checkerboards + movement],
+            ["Vanish Cap Under the Moat - Switch", True,
+             checkerboards + movement + ["Vanish Cap Under the Moat - Cap Switch"]],
 
             ["Vanish Cap Under the Moat - Red Coins", False,
              checkerboards + movement + vanish_cap],
@@ -220,11 +222,15 @@ class TestSecretStageEntrances(SM64TestBase):
             ["The Secret Aquarium - Red Coins", True,
              ["Side Flip", "Secret Aquarium - Red Coins"]],
             ["Tower of the Wing Cap - Switch", False, []],
-            ["Tower of the Wing Cap - Switch", True, ["Unlock Tower of the Wing Cap"]],
+            ["Tower of the Wing Cap - Switch", True, [
+                "Unlock Tower of the Wing Cap",
+                "Tower of the Wing Cap - Cap Switch",
+            ]],
             ["Cavern of the Metal Cap - Switch", False, ["Progressive Basement Key"]],
             ["Cavern of the Metal Cap - Switch", True, [
                 "Progressive Basement Key",
                 "Hazy Maze Cave - Swimming Beast",
+                "Cavern of the Metal Cap - Cap Switch",
             ]],
             ["Vanish Cap Under the Moat - Upper Platform 1-Up", False,
              ["Vanish Cap Under the Moat - Freestanding 1-Ups"]],

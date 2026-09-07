@@ -70,8 +70,7 @@ SUB_AREA_SOURCES: dict[str, SubAreaSource] = {
 }
 
 
-# Reusable exits from shuffled sub-areas. Castle returns are activated only by
-# mixed_plus_castle_returns.
+# Reusable exits from shuffled sub-areas.
 RETURN_SOURCES: dict[str, SubAreaSource] = {
     "ccm_slide_exit": SubAreaSource("ccm_slide_exit", 21, "Cool, Cool Mountain - Secret Slide", "ccm_cabin"),
     "sl_igloo_exit": SubAreaSource("sl_igloo_exit", 22, "Snowman's Land - Igloo", "sl_main"),
@@ -260,6 +259,20 @@ OUTGOING_SOURCES_BY_DESTINATION: dict[str, tuple[str, ...]] = {
 }
 
 
+# Bowser in the Sky must remain the only way into its arena. These are the
+# level destinations with an internal sub-area entrance and no second
+# destination that enters the same level from elsewhere in the shuffled graph.
+BITS_BRANCH_DESTINATIONS = frozenset({
+    "Hazy Maze Cave",
+    "Jolly Roger Bay",
+    "Lethal Lava Land",
+    "Shifting Sand Land",
+    "Bowser in the Dark World",
+    "Bowser in the Fire Sea",
+    "Bowser in the Sky",
+})
+
+
 CASTLE_RETURN_OUTGOING_BY_DESTINATION = {
     "The Princess's Secret Slide": ("pss_fall",),
     "Tower of the Wing Cap": ("totwc_fall",),
@@ -301,6 +314,7 @@ def build_mixed_connections(
         normal_sources: dict[str, int],
         normal_destinations: tuple[str, ...],
         include_castle_returns: bool,
+        include_sub_areas: bool = True,
 ) -> dict[str, str]:
     """Build a two-deep directed entrance graph.
 
@@ -308,9 +322,16 @@ def build_mixed_connections(
     Castle entrance. All remaining outgoing sources then receive terminal
     destinations, so no shuffled path can exceed root -> branch -> terminal.
     """
-    sources = list(normal_sources) + list(SUB_AREA_SOURCES) + list(RETURN_SOURCES)
-    destinations = list(normal_destinations) + list(SUB_AREA_DESTINATIONS) + list(RETURN_DESTINATIONS)
-    outgoing = dict(OUTGOING_SOURCES_BY_DESTINATION)
+    sources = list(normal_sources)
+    destinations = list(normal_destinations)
+    outgoing = {}
+
+    if include_sub_areas:
+        sources.extend(SUB_AREA_SOURCES)
+        sources.extend(RETURN_SOURCES)
+        destinations.extend(SUB_AREA_DESTINATIONS)
+        destinations.extend(RETURN_DESTINATIONS)
+        outgoing.update(OUTGOING_SOURCES_BY_DESTINATION)
 
     if include_castle_returns:
         sources.extend(CASTLE_RETURN_SOURCES)
@@ -322,23 +343,37 @@ def build_mixed_connections(
 
     branch_destinations = [destination for destination in destinations if destination in outgoing]
     root_sources = list(normal_sources)
-    if len(branch_destinations) > len(root_sources):
-        raise ValueError("Not enough Castle entrances for all non-terminal sub-area destinations")
-
     bits_source = "normal:Bowser in the Sky"
-    if bits_source not in root_sources:
-        raise ValueError("Mixed sub-area shuffle requires the Bowser in the Sky root entrance")
-
     connections: dict[str, str] = {}
-    available_branches = [destination for destination in branch_destinations if outgoing[destination]]
-    bits_branch = random.choice(available_branches)
-    connections[bits_source] = bits_branch
+    remaining_roots = list(root_sources)
+    remaining_branches = list(branch_destinations)
+    if bits_source in root_sources and "bowser_3" in destinations:
+        available_branches = [
+            destination for destination in branch_destinations
+            if destination in BITS_BRANCH_DESTINATIONS and outgoing[destination]
+        ]
+        if available_branches:
+            bits_branch = random.choice(available_branches)
+            connections[bits_source] = bits_branch
+            branch_exit = random.choice(list(outgoing[bits_branch]))
+            connections[branch_exit] = "bowser_3"
+            remaining_roots.remove(bits_source)
+            remaining_branches.remove(bits_branch)
 
-    branch_exit = random.choice(list(outgoing[bits_branch]))
-    connections[branch_exit] = "bowser_3"
+    if len(remaining_branches) > len(remaining_roots):
+        # There are not enough mixed Castle entrances to anchor every physical
+        # area. Preserve the reserved BITS route, then directly permute the
+        # remaining sources and destinations.
+        remaining_sources = [source for source in sources if source not in connections]
+        remaining_destinations = [
+            destination for destination in destinations
+            if destination not in connections.values()
+        ]
+        random.shuffle(remaining_sources)
+        random.shuffle(remaining_destinations)
+        connections.update(zip(remaining_sources, remaining_destinations))
+        return connections
 
-    remaining_roots = [source for source in root_sources if source != bits_source]
-    remaining_branches = [destination for destination in branch_destinations if destination != bits_branch]
     random.shuffle(remaining_roots)
     random.shuffle(remaining_branches)
     for source, destination in zip(remaining_roots, remaining_branches):

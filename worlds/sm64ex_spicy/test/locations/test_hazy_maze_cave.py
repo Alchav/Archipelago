@@ -3,8 +3,7 @@ from ... import Options
 
 
 HMC_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,

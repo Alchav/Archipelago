@@ -10,7 +10,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     horizontal_wind_item_data_table, global_freestanding_star_item_names, freestanding_star_item_data_table, \
     global_star_block_item_names, star_block_item_data_table, global_koopa_shell_block_item_names, \
     koopa_shell_block_item_data_table, global_star_secret_item_names, star_secret_item_data_table, \
-    global_jet_stream_item_names, jet_stream_item_data_table, moat_exit_item_data_table, \
+    global_jet_stream_item_names, jet_stream_item_data_table, global_cap_switch_item_names, \
+    cap_switch_item_data_table, moat_exit_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
@@ -33,8 +34,9 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
 from .Rules import set_rules
 from .Signs import fallback_hints, sign_data, sign_data_by_location_name
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
-from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels, \
-    get_shuffled_entrance_ids, sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
+from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, \
+    sm64_level_to_paintings, sm64_level_to_secrets, SM64Levels, \
+    sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
     sm64_entrance_destination_descriptions, sm64_entrance_source_names
 from .SubAreas import CASTLE_RETURN_SOURCES, RETURN_SOURCES, SUB_AREA_SOURCES, \
     SUB_AREA_DESTINATION_DESCRIPTIONS, SUB_AREA_SOURCE_DESCRIPTIONS, SUB_AREA_SOURCE_NAMES, \
@@ -135,8 +137,10 @@ class SM64World(World):
     permanent_coin_source_counts: dict[str, int]
 
     slot_option_names = (
-        "area_rando",
+        "main_course_shuffle",
+        "secret_course_shuffle",
         "sub_area_shuffle",
+        "castle_return_shuffle",
         "buddy_checks",
         "one_up_checks",
         "blocksanity",
@@ -263,7 +267,11 @@ class SM64World(World):
         tracker_datastorage_keys = []
         if self.get_shuffled_normal_entrance_ids():
             tracker_datastorage_keys.append("SM64SpicyFoundEntrances_{player}")
-        if self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_off:
+        if (
+                self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_vanilla
+                or self.options.castle_return_shuffle.value
+                == self.options.castle_return_shuffle.option_mixed
+        ):
             tracker_datastorage_keys.extend((
                 "SM64SpicyFoundSubAreaEntrancesLow_{player}",
                 "SM64SpicyFoundSubAreaEntrancesHigh_{player}",
@@ -280,7 +288,9 @@ class SM64World(World):
                 self.move_rando_bitvec |= (1 << (action_item_data_table[action].code - double_jump_bitvec_offset))
 
         self.filler_count = 0
-        self.topology_present = bool(self.options.area_rando or self.options.sub_area_shuffle)
+        self.topology_present = bool(
+            self.options.main_course_shuffle or self.options.secret_course_shuffle
+            or self.options.sub_area_shuffle or self.options.castle_return_shuffle)
         if (
                 self.options.accessibility == self.options.accessibility.option_full
                 and not self.logic_sl_impossible_coin
@@ -321,35 +331,22 @@ class SM64World(World):
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
 
     def get_shuffled_normal_entrance_ids(self) -> set[int]:
-        sub_area_mode = self.options.sub_area_shuffle.value
-        if (
-                self.options.area_rando.value != self.options.area_rando.option_Off
-                and sub_area_mode in {
-                    self.options.sub_area_shuffle.option_mixed,
-                    self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
-                }
-        ):
-            entrance_ids = {int(entrance_id) for entrance_id in sm64_shuffled_entrance_ids}
-            entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
-            return entrance_ids
-
-        entrance_ids = {
-            int(entrance_id)
-            for entrance_id in get_shuffled_entrance_ids(self.options.area_rando.value)
-        }
-        if sub_area_mode:
+        entrance_ids = set()
+        if self.options.main_course_shuffle.value != self.options.main_course_shuffle.option_vanilla:
+            entrance_ids.update(int(entrance_id) for entrance_id in sm64_level_to_paintings)
+        if self.options.secret_course_shuffle.value != self.options.secret_course_shuffle.option_vanilla:
+            entrance_ids.update(int(entrance_id) for entrance_id in sm64_level_to_secrets)
+        if self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_vanilla:
             entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
         return entrance_ids
 
     def get_shuffled_entrance_source_ids(self) -> set[int]:
         source_ids = self.get_shuffled_normal_entrance_ids()
         sub_area_mode = self.options.sub_area_shuffle.value
-        if not sub_area_mode:
-            return source_ids
-
-        source_ids.update(
-            source.source_id for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()))
-        if sub_area_mode == self.options.sub_area_shuffle.option_mixed_plus_castle_returns:
+        if sub_area_mode != self.options.sub_area_shuffle.option_vanilla:
+            source_ids.update(
+                source.source_id for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()))
+        if self.options.castle_return_shuffle.value == self.options.castle_return_shuffle.option_mixed:
             source_ids.update(source.source_id for source in CASTLE_RETURN_SOURCES.values())
         return source_ids
 
@@ -426,7 +423,7 @@ class SM64World(World):
         for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()):
             if source.key not in configured_sources:
                 connections.append((source.key, source.vanilla_destination))
-        if self.options.sub_area_shuffle.value == self.options.sub_area_shuffle.option_mixed_plus_castle_returns:
+        if self.options.castle_return_shuffle.value == self.options.castle_return_shuffle.option_mixed:
             for source in CASTLE_RETURN_SOURCES.values():
                 if source.key not in configured_sources:
                     connections.append((source.key, source.vanilla_destination))
@@ -670,6 +667,10 @@ class SM64World(World):
                 self.options.level_features,
                 global_jet_stream_item_names,
                 jet_stream_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_cap_switch_item_names,
+                cap_switch_item_data_table)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_per_act_only:
@@ -722,6 +723,7 @@ class SM64World(World):
                     name for name in (*koopa_shell_block_item_data_table, *jet_stream_item_data_table)
                     if name not in {"Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"}
                 ]
+            item_names += list(global_cap_switch_item_names)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
@@ -1303,6 +1305,8 @@ class SM64World(World):
             "AreaRando": course_map,
             "AreaConnections": self.area_connections,
             "SubAreaRando": self.sub_area_slot_data,
+            "SubAreaShuffleMode": self.options.sub_area_shuffle.value,
+            "CastleReturnShuffleMode": self.options.castle_return_shuffle.value,
             "MoveRandoVec": self.move_rando_bitvec,
             "GlobalCapItems": self.options.cap_items.value in {
                 self.options.cap_items.option_global,

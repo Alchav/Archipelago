@@ -3,8 +3,7 @@ from ... import Options
 
 
 LLL_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "lethal_lava_land_coin_star_requirement": 133,

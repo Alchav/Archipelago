@@ -21,6 +21,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
     horizontal_wind_item_data_table, global_freestanding_star_item_names, global_star_block_item_names, \
     global_koopa_shell_block_item_names, global_star_secret_item_names, global_jet_stream_item_names, \
+    global_cap_switch_item_names, cap_switch_item_data_table, \
     freestanding_star_item_data_table, star_block_item_data_table, koopa_shell_block_item_data_table, \
     star_secret_item_data_table, jet_stream_item_data_table
 from ..Locations import coin_count_check_course_data, secret_stage_coin_count_check_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
@@ -431,6 +432,10 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Tiny-Huge Island - Star Secrets": 3627145,
             "Dire, Dire Docks - Jet Stream": 3627146,
             "Jet Streams": 3627147,
+            "Cap Switches": 3627167,
+            "Tower of the Wing Cap - Cap Switch": 3627168,
+            "Cavern of the Metal Cap - Cap Switch": 3627169,
+            "Vanish Cap Under the Moat - Cap Switch": 3627170,
         }
         item_data = {
             **feature_item_data_table,
@@ -923,7 +928,7 @@ class DddMoatExitClassificationTestBase(SM64TestBase):
 
 
 class DddMoatExitCastleReturnsClassificationTestBase(SM64TestBase):
-    options = {"sub_area_shuffle": Options.SubAreaShuffle.option_mixed_plus_castle_returns}
+    options = {"castle_return_shuffle": Options.CastleReturnShuffle.option_mixed}
 
     def test_moat_exit_is_progression_with_castle_returns(self):
         items = self.get_items_by_name("Dire, Dire Docks - Moat Exit")
@@ -1106,6 +1111,7 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
                 **koopa_shell_block_item_data_table,
                 **star_secret_item_data_table,
                 **jet_stream_item_data_table,
+                **cap_switch_item_data_table,
         }:
             with self.subTest("Individual arbitrary item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
@@ -1136,6 +1142,7 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *global_koopa_shell_block_item_names,
             *global_star_secret_item_names,
             *global_jet_stream_item_names,
+            *global_cap_switch_item_names,
         )
         per_level_names = (
             *checkerboard_item_data_table,
@@ -1150,6 +1157,7 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *koopa_shell_block_item_data_table,
             *star_secret_item_data_table,
             *jet_stream_item_data_table,
+            *cap_switch_item_data_table,
         )
         for item_name in (*global_names, *per_level_names):
             with self.subTest(item=item_name):
@@ -1182,6 +1190,7 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Koopa Shell Blocks",
                 "Star Secrets",
                 "Jet Streams",
+                "Cap Switches",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -1204,6 +1213,7 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Koopa Shell Blocks",
                 "Star Secrets",
                 "Jet Streams",
+                "Cap Switches",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
@@ -1900,8 +1910,7 @@ class TowerOfTheWingCapMasteryGenerationTestBase(TowerOfTheWingCapItemsAccessibi
 class CoinCountChecksOverflowGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "level_unlocks": Options.LevelUnlocks.option_full,
+                "level_unlocks": Options.LevelUnlocks.option_full,
         "cap_items": Options.CapItems.option_per_level,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
@@ -1970,9 +1979,7 @@ class OneUpChecksOffTestBase(SM64TestBase):
 
 # Entrance Randomizer
 class EntranceRandoOffTestBase(SM64TestBase):
-    options = {
-        "area_rando": Options.AreaRandomizer.option_Off
-    }
+    options = {}
 
     # Ensure entrance rando disabled
     def test_all_entrances_are_vanilla(self):
@@ -2004,8 +2011,7 @@ class EntranceRandoOffTestBase(SM64TestBase):
 
 class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "level_unlocks": Options.LevelUnlocks.option_full,
+                "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
 
@@ -2019,7 +2025,8 @@ class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
 
 class EntranceRandoCourseTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_Only
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla
     }
 
     def test_BoB_entrance(self):
@@ -2052,7 +2059,8 @@ class EntranceRandoCourseTestBase(SM64TestBase):
 
 class EntranceRandoSeparateTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate
     }
 
     def test_BoB_entrance(self):
@@ -2078,7 +2086,8 @@ class EntranceRandoSeparateTestBase(SM64TestBase):
 
 class EntranceRandoAllTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets
+        "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed
     }
 
     def test_BitFS_entrance(self):
@@ -2176,7 +2185,8 @@ class NoPowerStarsTestBase(SM64TestBase):
 class CourseEntrancesMoveTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_Only
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla
     }
 
     def test_BoB_entrance(self):
@@ -2198,7 +2208,8 @@ class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
     options = {
         "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_Only
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla
     }
 
     def test_starting_state_has_reachable_check(self):
@@ -2208,7 +2219,8 @@ class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
 class SeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate
     }
 
     def test_BoB_entrance(self):
@@ -2230,7 +2242,8 @@ class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
         "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate
     }
 
     def test_starting_sources_have_reachable_checks(self):
@@ -2240,7 +2253,8 @@ class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
 class AllEntrancesMoveTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets
+        "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed
     }
 
     def test_BoB_entrance(self):

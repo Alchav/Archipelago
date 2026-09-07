@@ -3,8 +3,7 @@ from ... import Options
 
 
 SHUFFLED_TTC_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,

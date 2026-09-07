@@ -60,7 +60,7 @@ def tweesters_classification(options):
 
 
 def ddd_moat_exit_classification(options):
-    if options.sub_area_shuffle.value == options.sub_area_shuffle.option_mixed_plus_castle_returns:
+    if options.castle_return_shuffle.value == options.castle_return_shuffle.option_mixed:
         return ItemClassification.progression
     return ItemClassification.trap
 
@@ -213,6 +213,7 @@ global_star_block_item_names = ("Star Blocks",)
 global_koopa_shell_block_item_names = ("Koopa Shell Blocks",)
 global_star_secret_item_names = ("Star Secrets",)
 global_jet_stream_item_names = ("Jet Streams",)
+global_cap_switch_item_names = ("Cap Switches",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
@@ -228,6 +229,7 @@ global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Koopa Shell Blocks": SM64ItemData(sm64ex_base_id + 1117),
     "Star Secrets": SM64ItemData(sm64ex_base_id + 1118, progression_deprioritized),
     "Jet Streams": SM64ItemData(sm64ex_base_id + 1147, progression_deprioritized),
+    "Cap Switches": SM64ItemData(sm64ex_base_id + 1167),
 }
 
 freestanding_star_item_data_table: dict[str, SM64ItemData] = {
@@ -274,6 +276,12 @@ star_secret_item_data_table: dict[str, SM64ItemData] = {
 jet_stream_item_data_table: dict[str, SM64ItemData] = {
     "Jolly Roger Bay - Jet Stream": feature_item_data_table["Jolly Roger Bay - Jet Stream"],
     "Dire, Dire Docks - Jet Stream": SM64ItemData(sm64ex_base_id + 1146, progression_deprioritized),
+}
+
+cap_switch_item_data_table: dict[str, SM64ItemData] = {
+    "Tower of the Wing Cap - Cap Switch": SM64ItemData(sm64ex_base_id + 1168),
+    "Cavern of the Metal Cap - Cap Switch": SM64ItemData(sm64ex_base_id + 1169),
+    "Vanish Cap Under the Moat - Cap Switch": SM64ItemData(sm64ex_base_id + 1170),
 }
 
 moat_exit_item_data_table: dict[str, SM64ItemData] = {
@@ -373,6 +381,7 @@ arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **star_block_item_data_table,
     **koopa_shell_block_item_data_table,
     **star_secret_item_data_table,
+    **cap_switch_item_data_table,
     **jet_stream_item_data_table,
     **moat_exit_item_data_table,
 }
@@ -1318,6 +1327,9 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Checkerboard Platforms": set(checkerboard_item_data_table),
     "Per-Level Rolling Logs": set(rolling_log_item_data_table),
     "Per-Level Purple Switches": set(purple_switch_item_data_table),
+    "Cap Switch Unlocks": set(global_cap_switch_item_names) | set(cap_switch_item_data_table),
+    "Global Cap Switch Unlocks": set(global_cap_switch_item_names),
+    "Per-Level Cap Switch Unlocks": set(cap_switch_item_data_table),
     "Bob-omb Buddy Unlocks": (
         set(global_bobomb_buddy_item_names)
         | set(per_level_bobomb_buddy_item_names)

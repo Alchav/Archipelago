@@ -278,10 +278,22 @@ def evaluate_bob_omb_battlefield_coins(
 
     has_full_trick_route = has_island and Rules.can_use_logic_trick(
         state, player, "logic_bob_mario_wings_to_the_sky_without_cannon", target_name)
+    has_visible_markers = (
+        bool(state.multiworld.worlds[player].options.trigger_sparkles.value)
+        or has_single_yellow_coins
+        or has_vertical_coin_rings
+        or Rules.can_use_logic_trick(
+            state, player, "logic_bob_mario_wings_without_coin_markers", target_name)
+    )
     has_cannon_route = (
         has_island
         and has_cannon
-        and state.can_reach(f"{level_name} - Mario Wings to the Sky", "Location", player)
+        and has_visible_markers
+        and (
+            Rules.has_wing_cap(state, player, level_name)
+            or Rules.can_use_logic_trick(
+                state, player, "logic_bob_mario_wings_capless", target_name)
+        )
     )
     selected_route = (
         "without_cannon" if has_full_trick_route
@@ -4179,15 +4191,15 @@ def _early_requirement_specs():
             ("Red Coins", f"{BOB} - Red Coins")),
 
         (BOB, "island_cannon_route"): _spec(
-            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}"),
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & (WC | logic_bob_mario_wings_capless)"),
         (BOB, "island_cannon_vertical_ring_coins"): _spec(
-            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & (WC | logic_bob_mario_wings_capless)",
             ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
         (BOB, "island_cannon_ring_center_coins"): _spec(
-            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & (WC | logic_bob_mario_wings_capless)",
             ("Single Yellow Coins", f"{BOB} - Single Yellow Coins")),
         (BOB, "island_cannon_red_coin"): _spec(
-            BOB_TARGET, f"{{{BOB} - Island}} & CANN & {{{{{BOB} - Mario Wings to the Sky}}}}",
+            BOB_TARGET, f"{{{BOB} - Island}} & CANN & (WC | logic_bob_mario_wings_capless)",
             ("Red Coins", f"{BOB} - Red Coins")),
 
         # Partial methods expose only the outputs that their individual rules reach.

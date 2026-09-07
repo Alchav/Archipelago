@@ -96,6 +96,7 @@ sm64_paintings_to_level = {painting: level for (level, painting) in sm64_level_t
 
 # sm64secrets is a dict of secret areas, same format as sm64paintings
 sm64_level_to_secrets: typing.Dict[SM64Levels, str] = {
+    SM64Levels.BOWSER_IN_THE_SKY: "Bowser in the Sky",
     SM64Levels.THE_PRINCESS_SECRET_SLIDE: "The Princess's Secret Slide",
     SM64Levels.THE_SECRET_AQUARIUM: "The Secret Aquarium",
     SM64Levels.BOWSER_IN_THE_DARK_WORLD: "Bowser in the Dark World",
@@ -124,22 +125,10 @@ sm64_entrance_source_names = {
 # Stable ordering shared with sm64ex for the discovered-entrance Data Storage
 # bitset. Bowser in the Sky is only shuffled by mixed sub-area shuffle, but its
 # bit remains reserved between courses and the other secret stages.
-sm64_area_rando_entrance_ids = tuple(sm64_level_to_entrances)
 sm64_shuffled_entrance_ids = (
     *sm64_level_to_paintings,
-    SM64Levels.BOWSER_IN_THE_SKY,
     *sm64_level_to_secrets,
 )
-
-
-def get_shuffled_entrance_ids(area_rando_value: int) -> tuple[int, ...]:
-    if area_rando_value == 0:
-        return ()
-    if area_rando_value == 1:
-        return tuple(sm64_level_to_paintings)
-    return sm64_area_rando_entrance_ids
-
-
 sm64_entrance_source_descriptions = {
     SM64Levels.BOB_OMB_BATTLEFIELD: "the Bob-omb Battlefield painting",
     SM64Levels.WHOMPS_FORTRESS: "the Whomp's Fortress painting",
@@ -592,6 +581,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         wdw_top, name="Wet-Dry World - Top of the Express Elevator to Top")
     wdw_top.connect(
         wdw_top_of_express_elevator, name="Wet-Dry World - Top to Top of the Express Elevator")
+    wdw_top.connect(
+        wdw_near_top, name="Wet-Dry World - Top to Near the Top")
     wdw_cannon.connect(wdw_near_top, name="Wet-Dry World - Cannon to Near the Top")
     wdw_cannon.connect(wdw_top, name="Wet-Dry World - Cannon to Top")
     wdw_cannon.connect(wdw_downtown, name="Wet-Dry World - Cannon to Downtown")

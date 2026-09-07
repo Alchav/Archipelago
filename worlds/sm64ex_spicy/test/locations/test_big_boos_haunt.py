@@ -3,8 +3,7 @@ from ... import Options
 
 
 BBH_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,

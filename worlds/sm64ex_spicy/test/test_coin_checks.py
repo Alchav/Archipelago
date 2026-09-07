@@ -796,8 +796,7 @@ class CoinCheckCatalogTest(unittest.TestCase):
             ("Snowman's Land", "sl_igloo_goombas", 1): "Snowman's Land - Igloo",
             ("Snowman's Land", "sl_upper_slope_coin_line", 1):
                 "Snowman's Land - Igloo Entrance",
-            ("Snowman's Land", "sl_upper_slope_single_coins", 3):
-                "Snowman's Land - Igloo Entrance",
+            ("Snowman's Land", "sl_upper_slope_single_coins", 3): None,
             ("Tall, Tall Mountain", "ttm_slide_coin_lines", 1):
                 "Tall, Tall Mountain - Secret Slide",
             ("Lethal Lava Land", "lll_volcano_s_island_coins", 1):
@@ -1183,8 +1182,7 @@ class FullCataloguedCoinChecksTest(SM64TestBase):
 class WetDryWorldWoodenStructureCoinChecksAccessTest(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": "off",
-        "level_unlocks": "full",
+                "level_unlocks": "full",
         "level_features": "per_level",
         "coin_checks": 100,
         "coin_object_unlocks": "per_level",
