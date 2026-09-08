@@ -795,7 +795,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bob-omb Battlefield - Footrace with Koopa The Quick", "BOB_KOOPA")
     rf.assign_rule("Bob-omb Battlefield - Island",
                    "CANN | logic_bob_island_without_cannon | logic_bob_island_long_jump | "
-                   "logic_bob_island_koopa_shell | "
+                   "logic_bob_island_koopa_shell | logic_bob_island_koopa_shell_wing_cap | "
                    "logic_bob_mario_wings_to_the_sky_without_cannon")
     rf.assign_rule_object(
         "Bob-omb Battlefield - Mario Wings to the Sky",

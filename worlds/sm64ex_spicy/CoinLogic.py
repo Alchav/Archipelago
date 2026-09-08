@@ -373,6 +373,8 @@ def evaluate_bob_omb_battlefield_coins(
         state, player, "logic_bob_island_red_coin_with_ground_pound", target_name)
     has_island_koopa_shell = Rules.can_use_logic_trick(
         state, player, "logic_bob_island_koopa_shell", target_name)
+    has_island_koopa_shell_wing_cap = Rules.can_use_logic_trick(
+        state, player, "logic_bob_island_koopa_shell_wing_cap", target_name)
     has_first_ring_jump = any(
         Rules.has_action(state, player, action, level_name)
         for action in ("Side Flip", "Backflip", "Triple Jump")
@@ -403,6 +405,7 @@ def evaluate_bob_omb_battlefield_coins(
                 has_island_red_coin_movement
                 or has_island_red_coin_ground_pound
                 or has_island_koopa_shell
+                or has_island_koopa_shell_wing_cap
             ),
             red_coin_ids=frozenset({8}),
         ),
@@ -4214,7 +4217,8 @@ def _early_requirement_specs():
             BOB_TARGET,
             f"{{{BOB} - Island}} & CL/SF/BF/TJ | "
             f"{{{BOB} - Island}} & logic_bob_island_red_coin_with_ground_pound | "
-            f"{{{BOB} - Island}} & logic_bob_island_koopa_shell",
+            f"{{{BOB} - Island}} & logic_bob_island_koopa_shell | "
+            f"{{{BOB} - Island}} & logic_bob_island_koopa_shell_wing_cap",
             ("Red Coins", f"{BOB} - Red Coins")),
         (BOB, "island_partial_first_ring_three_coins"): _spec(
             BOB_TARGET,

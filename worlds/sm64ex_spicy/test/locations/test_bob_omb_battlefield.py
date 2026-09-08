@@ -138,6 +138,23 @@ class TestBobOmbBattlefieldMarioWingsWithoutWingCap(SM64TestBase):
         ], starting_regions=["Bob-omb Battlefield"])
 
 
+class TestBobOmbBattlefieldKoopaShellAndWingCapIslandTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BOB_OPTIONS,
+        "logic_tricks": {"Bob-omb Battlefield Island with Koopa Shell and Wing Cap"},
+    }
+
+    def test_route_requires_koopa_troopa_and_wing_cap(self):
+        self.run_location_tests([
+            ["Bob-omb Battlefield - Shoot to the Island in the Sky", False,
+             ["Bob-omb Battlefield - Koopa Troopa"]],
+            ["Bob-omb Battlefield - Shoot to the Island in the Sky", False, WING_CAP],
+            ["Bob-omb Battlefield - Shoot to the Island in the Sky", True,
+             ["Bob-omb Battlefield - Koopa Troopa"] + WING_CAP],
+        ], starting_regions=["Bob-omb Battlefield"])
+
+
 class TestBobOmbBattlefieldMarioWingsWithoutCannon(SM64TestBase):
     run_default_tests = False
     options = {

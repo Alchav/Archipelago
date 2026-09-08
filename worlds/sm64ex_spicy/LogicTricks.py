@@ -182,6 +182,14 @@ logic_tricks = {
         "difficulty": "easy",
         "description": "Reaching the floating island without the cannon by using Wing Cap and Triple Jump.",
     },
+    "Bob-omb Battlefield Island with Koopa Shell and Wing Cap": {
+        "internal_id": "logic_bob_island_koopa_shell_wing_cap",
+        "rule": "KOOPA_TROOPA+WC",
+        "difficulty": "easy",
+        "description": "Reaching the floating island (and collecting the red coin on it) without the cannon using "
+                       "the Koopa Shell and Wing Cap.",
+        "video": "https://www.youtube.com/watch?v=9CWEFBZAHmk",
+    },
     "Bob-omb Battlefield Island Red Coin With Ground Pound": {
         "internal_id": "logic_bob_island_red_coin_with_ground_pound",
         "rule": "GP",
