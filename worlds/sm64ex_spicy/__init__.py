@@ -1,6 +1,7 @@
 import typing
 import os
 import json
+import pkgutil
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
@@ -44,6 +45,23 @@ from .SubAreas import CASTLE_RETURN_SOURCES, RETURN_SOURCES, SUB_AREA_SOURCES, \
 from BaseClasses import CollectionState, Entrance, Item, Region, Tutorial
 from Options import OptionError
 from ..AutoWorld import WebWorld, World
+
+
+def _read_world_version() -> tuple[int, int, int]:
+    manifest_data = pkgutil.get_data(__package__, "archipelago.json")
+    if manifest_data is None:
+        raise RuntimeError("Could not load the Spicy Mycena archipelago.json manifest")
+    version_text = json.loads(manifest_data.decode("utf-8"))["world_version"]
+    try:
+        version = tuple(int(part) for part in version_text.split("."))
+    except (AttributeError, ValueError) as error:
+        raise RuntimeError(f"Invalid Spicy Mycena world_version: {version_text!r}") from error
+    if len(version) != 3 or any(part < 0 for part in version):
+        raise RuntimeError(f"Invalid Spicy Mycena world_version: {version_text!r}")
+    return typing.cast(tuple[int, int, int], version)
+
+
+SPICY_MYCENA_VERSION = _read_world_version()
 
 
 class SM64Web(WebWorld):
@@ -1310,6 +1328,7 @@ class SM64World(World):
             if isinstance(source, int) and isinstance(destination, int)
         }
         slot_data = {
+            "SpicyMycenaVersion": SPICY_MYCENA_VERSION,
             "Options": self.options.as_dict(*self.slot_option_names),
             "AreaRando": course_map,
             "AreaConnections": self.area_connections,

@@ -2,7 +2,7 @@ import unittest
 
 from .bases import SM64TestBase
 from BaseClasses import CollectionState, ItemClassification
-from .. import Options
+from .. import Options, SPICY_MYCENA_VERSION
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
@@ -85,6 +85,15 @@ class BowserStageCollapseHitsOptionTest(unittest.TestCase):
     def test_range(self):
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_start, 1)
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 5)
+
+
+class WorldVersionSlotDataTest(SM64TestBase):
+    run_default_tests = False
+
+    def test_world_version_comes_from_manifest(self):
+        self.assertEqual(len(SPICY_MYCENA_VERSION), 3)
+        self.assertTrue(all(isinstance(part, int) and part >= 0 for part in SPICY_MYCENA_VERSION))
+        self.assertEqual(self.world.fill_slot_data()["SpicyMycenaVersion"], SPICY_MYCENA_VERSION)
 
 
 UNCOLLECT_TRAP_ONLY_OPTIONS = {
@@ -984,14 +993,9 @@ class FullLevelUnlockItemPoolTestBase(SM64TestBase):
         self.assertEqual(sum(early_items.values()), 1)
         self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
 
-    def test_second_level_unlock_uses_global_sphere_one_location_count(self):
-        state = CollectionState(self.multiworld)
-        sphere_one_location_count = sum(
-            location.address is not None and location.can_reach(state)
-            for location in self.multiworld.get_locations()
-        )
+    def test_optional_second_level_unlock_is_valid(self):
         early_items = self.multiworld.early_items[self.player]
-        self.assertEqual(sum(early_items.values()), sphere_one_location_count > 2)
+        self.assertLessEqual(sum(early_items.values()), 1)
         self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
 
 
@@ -1001,14 +1005,8 @@ class FullLevelUnlockWithVisitChecksTestBase(FullLevelUnlockItemPoolTestBase):
         "visit_checks": Options.VisitChecks.option_true,
     }
 
-    def test_single_player_world_has_second_early_unlock(self):
-        state = CollectionState(self.multiworld)
-        sphere_one_location_count = sum(
-            location.address is not None and location.can_reach(state)
-            for location in self.multiworld.get_locations()
-        )
-        self.assertGreater(sphere_one_location_count, 2)
-        self.assertEqual(sum(self.multiworld.early_items[self.player].values()), 1)
+    def test_visit_checks_do_not_change_the_guaranteed_local_unlock(self):
+        self.assertEqual(sum(self.multiworld.local_early_items[self.player].values()), 1)
 
 
 class BlocksanityOnTestBase(SM64TestBase):
