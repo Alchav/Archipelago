@@ -27,6 +27,7 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
         }
         self.assertEqual(source_ids, expected_ids)
         self.assertFalse(any(source_id >= 1000 for source_id in source_ids))
+        self.assertNotIn(5, source_ids)
 
     def test_ccm_slide_exit_uses_the_exterior_side_of_the_door(self):
         destination = RETURN_DESTINATIONS["ccm_cabin"]
@@ -135,9 +136,7 @@ class MixedSubAreaShuffleTest(SM64TestBase):
             **sm64_level_to_paintings,
             **sm64_level_to_secrets,
         }
-        all_normal_destinations.pop(SM64Levels.CAVERN_OF_THE_METAL_CAP)
         secret_destinations = dict(sm64_level_to_secrets)
-        secret_destinations.pop(SM64Levels.CAVERN_OF_THE_METAL_CAP)
 
         for configuration, normal_destinations in (
                 ("all", all_normal_destinations),
@@ -263,11 +262,6 @@ class MixedSubAreaShuffleTest(SM64TestBase):
             SUB_AREA_SOURCE_NAMES["jrb_ship"],
             "Jolly Roger Bay - Sunken Ship Entrance",
         )
-        self.assertEqual(
-            SUB_AREA_SOURCE_NAMES["hmc_cotmc"],
-            "Hazy Maze Cave - Cavern of the Metal Cap Entrance",
-        )
-
     def test_ut_regeneration_restores_sub_area_map(self):
         slot_data = self.world.fill_slot_data()
         expected_connections = self.world.area_connections.copy()
@@ -278,7 +272,6 @@ class MixedSubAreaShuffleTest(SM64TestBase):
 
         self.assertEqual(self.world.area_connections, expected_connections)
         self.assertEqual(self.world.sub_area_slot_data, expected_warps)
-
     def test_ut_regeneration_can_set_rules_from_mixed_map(self):
         slot_data = self.world.fill_slot_data()
         tracker_multiworld = setup_solo_multiworld(SM64World, steps=(), seed=7)
@@ -339,6 +332,22 @@ class MixedSubAreaShuffleTest(SM64TestBase):
         multiworld.enforce_deferred_connections = "on"
         call_all(multiworld, "set_rules")
         return world
+
+
+class MixedSecretCoursesAndCastleReturnsTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed,
+        "sub_area_shuffle": Options.SubAreaShuffle.option_vanilla,
+        "castle_return_shuffle": Options.CastleReturnShuffle.option_mixed,
+    }
+
+    def test_cotmc_uses_its_normal_secret_course_source(self):
+        self.assertIn(
+            normal_source_id(int(SM64Levels.CAVERN_OF_THE_METAL_CAP)),
+            self.world.sub_area_slot_data,
+        )
+        self.assertNotIn(5, self.world.sub_area_slot_data)
 
 
 class MixedDecoupledSubAreaShuffleTest(SM64TestBase):

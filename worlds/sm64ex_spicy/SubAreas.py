@@ -51,7 +51,6 @@ SUB_AREA_SOURCES: dict[str, SubAreaSource] = {
     "ttm_slide": SubAreaSource("ttm_slide", 3, "Tall, Tall Mountain - Top", "ttm_slide", "ttm_main"),
     "thi_red_cave": SubAreaSource(
         "thi_red_cave", 4, "Tiny-Huge Island - Huge Tree Area", "thi_red_cave", "thi_huge"),
-    "hmc_cotmc": SubAreaSource("hmc_cotmc", 5, "Hazy Maze Cave", "cotmc"),
     "jrb_ship": SubAreaSource("jrb_ship", 6, "Jolly Roger Bay", "jrb_ship"),
     "lll_volcano": SubAreaSource(
         "lll_volcano", 7, "Lethal Lava Land - Volcano Entrance", "lll_volcano"),
@@ -95,7 +94,6 @@ SUB_AREA_DESTINATIONS: dict[str, SubAreaDestination] = {
     "sl_igloo": SubAreaDestination("sl_igloo", "Snowman's Land - Igloo", 10, 2, 0x0A),
     "ttm_slide": SubAreaDestination("ttm_slide", "Tall, Tall Mountain - Secret Slide", 36, 2, 0x0A),
     "thi_red_cave": SubAreaDestination("thi_red_cave", "Tiny-Huge Island - Red Coin Cave", 13, 3, 0x0A),
-    "cotmc": SubAreaDestination("cotmc", "Cavern of the Metal Cap", 28, 1, 0x0A),
     "jrb_ship": SubAreaDestination("jrb_ship", "Jolly Roger Bay - Sunken Ship", 12, 2, 0x0A),
     "lll_volcano": SubAreaDestination("lll_volcano", "Lethal Lava Land - Volcano", 22, 2, 0x0A),
     "ssl_pyramid_lower": SubAreaDestination(
@@ -139,7 +137,6 @@ SUB_AREA_SOURCE_DESCRIPTIONS = {
     "sl_igloo": "the Snowman's Land igloo entrance",
     "ttm_slide": "the Tall, Tall Mountain slide entrance",
     "thi_red_cave": "the Tiny-Huge Island Red Coin Cave entrance",
-    "hmc_cotmc": "the Cavern of the Metal Cap entrance in Hazy Maze Cave",
     "jrb_ship": "the entrance to the Jolly Roger Bay sunken ship",
     "lll_volcano": "the Lethal Lava Land volcano entrance",
     "ssl_pyramid_side": "the side entrance of the Shifting Sand Land pyramid",
@@ -165,7 +162,6 @@ SUB_AREA_SOURCE_NAMES = {
     "sl_igloo": "Snowman's Land - Igloo Entrance",
     "ttm_slide": "Tall, Tall Mountain - Secret Slide Entrance",
     "thi_red_cave": "Tiny-Huge Island - Red Coin Cave Entrance",
-    "hmc_cotmc": "Hazy Maze Cave - Cavern of the Metal Cap Entrance",
     "jrb_ship": "Jolly Roger Bay - Sunken Ship Entrance",
     "lll_volcano": "Lethal Lava Land - Volcano Entrance",
     "ssl_pyramid_side": "Shifting Sand Land - Pyramid Side Entrance",
@@ -191,7 +187,6 @@ SUB_AREA_DESTINATION_DESCRIPTIONS = {
     "sl_igloo": "the Snowman's Land igloo",
     "ttm_slide": "the Tall, Tall Mountain Secret Slide",
     "thi_red_cave": "the Tiny-Huge Island Red Coin Cave",
-    "cotmc": "Cavern of the Metal Cap",
     "jrb_ship": "the inside of the Jolly Roger Bay sunken ship",
     "lll_volcano": "the inside of the Lethal Lava Land volcano",
     "ssl_pyramid_lower": "the lower Shifting Sand Land pyramid",
@@ -245,7 +240,6 @@ OUTGOING_SOURCES_BY_DESTINATION: dict[str, tuple[str, ...]] = {
     "Snowman's Land": ("sl_igloo",),
     "Tall, Tall Mountain": ("ttm_slide",),
     "Tiny-Huge Island (Huge)": ("thi_red_cave", "thi_wiggler"),
-    "Hazy Maze Cave": ("hmc_cotmc",),
     "Jolly Roger Bay": ("jrb_ship",),
     "Lethal Lava Land": ("lll_volcano",),
     "Shifting Sand Land": ("ssl_pyramid_side", "ssl_pyramid_top"),
@@ -263,7 +257,6 @@ OUTGOING_SOURCES_BY_DESTINATION: dict[str, tuple[str, ...]] = {
 # level destinations with an internal sub-area entrance and no second
 # destination that enters the same level from elsewhere in the shuffled graph.
 BITS_BRANCH_DESTINATIONS = frozenset({
-    "Hazy Maze Cave",
     "Jolly Roger Bay",
     "Lethal Lava Land",
     "Shifting Sand Land",
@@ -277,7 +270,7 @@ CASTLE_RETURN_OUTGOING_BY_DESTINATION = {
     "The Princess's Secret Slide": ("pss_fall",),
     "Tower of the Wing Cap": ("totwc_fall",),
     "Vanish Cap Under the Moat": ("vcutm_fall",),
-    "cotmc": ("cotmc_fall",),
+    "Cavern of the Metal Cap": ("cotmc_fall",),
     "Dire, Dire Docks": ("ddd_fall",),
     "Wing Mario Over the Rainbow": ("wmotr_fall",),
 }

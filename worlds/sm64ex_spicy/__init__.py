@@ -337,8 +337,6 @@ class SM64World(World):
             entrance_ids.update(int(entrance_id) for entrance_id in sm64_level_to_paintings)
         if self.options.secret_course_shuffle.value != self.options.secret_course_shuffle.option_vanilla:
             entrance_ids.update(int(entrance_id) for entrance_id in sm64_level_to_secrets)
-        if self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_vanilla:
-            entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
         return entrance_ids
 
     def get_shuffled_entrance_source_ids(self) -> set[int]:

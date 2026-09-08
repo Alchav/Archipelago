@@ -825,6 +825,17 @@ class MariosHatLavaDamageBoostingItemPoolTestBase(SM64TestBase):
         self.assertTrue(self.get_items_by_name("Mario's Hat")[0].advancement)
 
 
+class TinyHugeIslandImpossibleCoinKickClassificationTestBase(SM64TestBase):
+    options = {
+        "kick": Options.Kick.option_per_level,
+        "logic_tricks": {"Tiny Island Impossible Coin"},
+    }
+
+    def test_tiny_huge_island_kick_is_progression(self):
+        item = self.get_items_by_name("Tiny-Huge Island - Kick")[0]
+        self.assertEqual(item.classification, ItemClassification.progression)
+
+
 class OneUpChecksOnTestBase(SM64TestBase):
     options = {
         "one_up_checks": Options.OneUpChecks.option_true,

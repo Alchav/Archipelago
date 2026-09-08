@@ -369,9 +369,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         randomized_level_to_paintings = sm64_level_to_paintings.copy()
         randomized_level_to_secrets = sm64_level_to_secrets.copy()
 
-        if sub_area_mode != options.sub_area_shuffle.option_vanilla:
-            randomized_level_to_secrets.pop(SM64Levels.CAVERN_OF_THE_METAL_CAP)
-
         if options.main_course_shuffle.value == options.main_course_shuffle.option_separate:
             randomized_level_to_paintings = shuffle_dict_keys(multiworld, sm64_level_to_paintings)
         if options.secret_course_shuffle.value == options.secret_course_shuffle.option_separate:
@@ -383,7 +380,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     normal_destination_ids = {
         name: int(entrance_id)
         for entrance_id, name in sm64_level_to_entrances.items()
-        if entrance_id != SM64Levels.CAVERN_OF_THE_METAL_CAP
     }
     normal_destination_ids["Bowser in the Sky"] = int(SM64Levels.BOWSER_IN_THE_SKY)
     normal_source_ids = {
@@ -410,12 +406,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             mixed_normal_ids.extend(int(entrance_id) for entrance_id in sm64_level_to_paintings)
         if options.secret_course_shuffle.value == options.secret_course_shuffle.option_mixed:
             mixed_normal_ids.extend(int(entrance_id) for entrance_id in sm64_level_to_secrets)
-        if sub_area_mode != options.sub_area_shuffle.option_vanilla:
-            mixed_normal_ids = [
-                entrance_id for entrance_id in mixed_normal_ids
-                if entrance_id != int(SM64Levels.CAVERN_OF_THE_METAL_CAP)
-            ]
-
         include_mixed_sub_areas = sub_area_mode in {
             options.sub_area_shuffle.option_mixed,
             options.sub_area_shuffle.option_mixed_decoupled,
@@ -626,14 +616,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     ddd_entry_rule = rf.build_rule("", painting_lvl_name="Dire, Dire Docks")
     connect_randomized_entrance("Castle Basement", "Dire, Dire Docks",
                                 thirty_star_door_bypass_rule & ddd_entry_rule)
-    if not sub_area_mode:
-        connect_randomized_entrance(
-            "Hazy Maze Cave", "Cavern of the Metal Cap",
-            level_unlock_rule("Unlock Cavern of the Metal Cap")
-            & rf.build_rule(
-                "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
-                arbitrary_item_names=rf.get_arbitrary_item_names("Hazy Maze Cave"),
-                action_item_names=rf.get_action_item_names("Hazy Maze Cave")))
+    connect_randomized_entrance(
+        "Hazy Maze Cave", "Cavern of the Metal Cap",
+        level_unlock_rule("Unlock Cavern of the Metal Cap")
+        & rf.build_rule(
+            "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Hazy Maze Cave"),
+            action_item_names=rf.get_action_item_names("Hazy Maze Cave")))
     connect_randomized_entrance("Castle Grounds", "Vanish Cap Under the Moat",
                                 level_unlock_rule("Unlock Vanish Cap Under the Moat"))
     connect_randomized_entrance("Castle Basement", "Bowser in the Fire Sea",
@@ -730,13 +719,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_sub_area_source("sl_igloo")
     connect_sub_area_source("ttm_slide")
     connect_sub_area_source("thi_red_cave")
-    if sub_area_mode:
-        connect_sub_area_source(
-            "hmc_cotmc", level_unlock_rule("Unlock Cavern of the Metal Cap")
-            & rf.build_rule(
-                "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
-                arbitrary_item_names=rf.get_arbitrary_item_names("Hazy Maze Cave"),
-                action_item_names=rf.get_action_item_names("Hazy Maze Cave")))
     connect_sub_area_source(
         "jrb_ship",
         rf.build_rule(

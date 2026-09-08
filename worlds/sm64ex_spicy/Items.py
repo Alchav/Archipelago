@@ -74,6 +74,15 @@ def marios_hat_classification(options):
     return ItemClassification.useful
 
 
+def tiny_huge_island_kick_classification(options):
+    from .LogicTricks import get_enabled_logic_tricks
+
+    enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
+    if "Tiny Island Impossible Coin" in enabled_tricks:
+        return ItemClassification.progression
+    return ItemClassification.filler
+
+
 class SM64Item(Item):
     game: str = "SM64: Spicy Mycena 64"
 
@@ -599,7 +608,8 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Tiny-Huge Island - Wall Kick": SM64ItemData(sm64ex_base_id + 449),
     "Tiny-Huge Island - Dive": SM64ItemData(sm64ex_base_id + 450),
     "Tiny-Huge Island - Ground Pound": SM64ItemData(sm64ex_base_id + 451),
-    "Tiny-Huge Island - Kick": SM64ItemData(sm64ex_base_id + 452, filler),
+    "Tiny-Huge Island - Kick": SM64ItemData(
+        sm64ex_base_id + 452, tiny_huge_island_kick_classification),
     "Tiny-Huge Island - Climb": SM64ItemData(sm64ex_base_id + 453, useful),
     "Tiny-Huge Island - Ledge Grab": SM64ItemData(sm64ex_base_id + 454),
     # Tick Tock Clock
