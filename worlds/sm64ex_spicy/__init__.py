@@ -1,11 +1,18 @@
 import typing
 import os
 import json
+import pkgutil
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
     global_rolling_log_item_names, global_purple_switch_item_names, global_bobomb_buddy_item_names, \
     global_treasure_chest_item_names, global_warp_pipe_item_names, checkerboard_item_data_table, \
+    global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
+    horizontal_wind_item_data_table, global_freestanding_star_item_names, freestanding_star_item_data_table, \
+    global_star_block_item_names, star_block_item_data_table, global_koopa_shell_block_item_names, \
+    koopa_shell_block_item_data_table, global_star_secret_item_names, star_secret_item_data_table, \
+    global_jet_stream_item_names, jet_stream_item_data_table, global_cap_switch_item_names, \
+    cap_switch_item_data_table, moat_exit_item_data_table, \
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
@@ -16,10 +23,11 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_names, global_one_up_unlock_item_data_table, \
     per_level_one_up_unlock_item_data_table, global_sign_unlock_item_data_table, \
-    per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_cap_length_item_names
+    per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_filler_item_names
 from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
-    get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, location_name_groups
-from .CoinChecks import CoinOutputID, coin_output_by_name, select_individual_coin_outputs, \
+    get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, \
+    get_global_coin_count_check_location_names, get_global_coin_count_caps, location_name_groups
+from .CoinChecks import CoinOutputID, coin_output_by_name, coin_output_region_name, select_individual_coin_outputs, \
     get_enabled_coin_check_kinds, get_enemy_coin_checks_enabled
 from .Music import build_music_slot_data
 from .Options import sm64_options_groups, SM64Options, coin_star_requirement_option_names, \
@@ -28,15 +36,33 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
 from .Rules import set_rules
 from .Signs import fallback_hints, sign_data, sign_data_by_location_name
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
-from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, SM64Levels, \
-    get_shuffled_entrance_ids, sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
-    sm64_entrance_destination_descriptions
+from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, \
+    sm64_level_to_paintings, sm64_level_to_secrets, SM64Levels, \
+    sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
+    sm64_entrance_destination_descriptions, sm64_entrance_source_names
 from .SubAreas import CASTLE_RETURN_SOURCES, RETURN_SOURCES, SUB_AREA_SOURCES, \
     SUB_AREA_DESTINATION_DESCRIPTIONS, SUB_AREA_SOURCE_DESCRIPTIONS, SUB_AREA_SOURCE_NAMES, \
     sub_area_destination_name, sub_area_source_by_id
 from BaseClasses import CollectionState, Entrance, Item, Region, Tutorial
 from Options import OptionError
 from ..AutoWorld import WebWorld, World
+
+
+def _read_world_version() -> tuple[int, int, int]:
+    manifest_data = pkgutil.get_data(__package__, "archipelago.json")
+    if manifest_data is None:
+        raise RuntimeError("Could not load the Spicy Mycena archipelago.json manifest")
+    version_text = json.loads(manifest_data.decode("utf-8"))["world_version"]
+    try:
+        version = tuple(int(part) for part in version_text.split("."))
+    except (AttributeError, ValueError) as error:
+        raise RuntimeError(f"Invalid Spicy Mycena world_version: {version_text!r}") from error
+    if len(version) != 3 or any(part < 0 for part in version):
+        raise RuntimeError(f"Invalid Spicy Mycena world_version: {version_text!r}")
+    return typing.cast(tuple[int, int, int], version)
+
+
+SPICY_MYCENA_VERSION = _read_world_version()
 
 
 class SM64Web(WebWorld):
@@ -85,7 +111,6 @@ class SM64World(World):
     number_of_stars: int
     move_rando_bitvec: int
     filler_count: int
-    cap_length_item_counts: dict[str, int]
 
     @staticmethod
     def _clear_coin_evaluation_cache(state: CollectionState, player: int) -> None:
@@ -114,6 +139,7 @@ class SM64World(World):
 
     star_costs: typing.Dict[str, int]
     coin_count_check_location_names: typing.Tuple[str, ...]
+    global_coin_count_check_location_names: typing.Tuple[str, ...]
     coin_check_location_names: typing.Tuple[str, ...]
     music_slot_data: typing.Dict[str, typing.Any] | None
     using_slot_coin_count_check_locations: bool
@@ -130,12 +156,16 @@ class SM64World(World):
     permanent_coin_source_counts: dict[str, int]
 
     slot_option_names = (
-        "area_rando",
+        "main_course_shuffle",
+        "secret_course_shuffle",
         "sub_area_shuffle",
+        "castle_return_shuffle",
         "buddy_checks",
         "one_up_checks",
         "blocksanity",
+        "visit_checks",
         "easy_butterflies",
+        "trigger_sparkles",
         "no_despawns",
         "combined_progressive_keys",
         "level_unlocks",
@@ -151,7 +181,7 @@ class SM64World(World):
         "kick",
         "climb",
         "ledge_grab",
-        "collapse_misc_moves",
+        "combined_castle_and_secret_stage_move_items",
         "cap_items",
         "level_features",
         "bobomb_buddies",
@@ -176,6 +206,8 @@ class SM64World(World):
         "coin_checks",
         "coin_check_types",
         "coin_count_checks",
+        "global_coin_count_checks",
+        "counts_coins_beyond_coin_stars",
         *secret_stage_coin_count_max_coin_option_names,
         *coin_star_requirement_option_names,
         "traps_filler_percentage",
@@ -258,7 +290,11 @@ class SM64World(World):
         tracker_datastorage_keys = []
         if self.get_shuffled_normal_entrance_ids():
             tracker_datastorage_keys.append("SM64SpicyFoundEntrances_{player}")
-        if self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_off:
+        if (
+                self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_vanilla
+                or self.options.castle_return_shuffle.value
+                == self.options.castle_return_shuffle.option_mixed
+        ):
             tracker_datastorage_keys.extend((
                 "SM64SpicyFoundSubAreaEntrancesLow_{player}",
                 "SM64SpicyFoundSubAreaEntrancesHigh_{player}",
@@ -275,10 +311,9 @@ class SM64World(World):
                 self.move_rando_bitvec |= (1 << (action_item_data_table[action].code - double_jump_bitvec_offset))
 
         self.filler_count = 0
-        self.cap_length_item_counts = {
-            item_name: 0 for item_name in progressive_cap_length_item_names
-        }
-        self.topology_present = bool(self.options.area_rando or self.options.sub_area_shuffle)
+        self.topology_present = bool(
+            self.options.main_course_shuffle or self.options.secret_course_shuffle
+            or self.options.sub_area_shuffle or self.options.castle_return_shuffle)
         if (
                 self.options.accessibility == self.options.accessibility.option_full
                 and not self.logic_sl_impossible_coin
@@ -291,7 +326,7 @@ class SM64World(World):
                 and not self.logic_thi_impossible_coin
         ):
             self.options.tiny_huge_island_coin_star_requirement.value = min(
-                self.options.tiny_huge_island_coin_star_requirement.value, 192)
+                self.options.tiny_huge_island_coin_star_requirement.value, 191)
         coin_star_requirements = {
             option_name: getattr(self.options, option_name).value
             for option_name in coin_star_requirement_option_names
@@ -308,36 +343,31 @@ class SM64World(World):
             }
             self.coin_count_check_location_names += get_secret_stage_coin_count_check_location_names(
                 secret_stage_coin_maxes, self.options.coin_count_checks.value)
+        if "GlobalCoinCountCheckLocations" in slot_data:
+            self.global_coin_count_check_location_names = tuple(slot_data["GlobalCoinCountCheckLocations"])
+        else:
+            self.global_coin_count_check_location_names = get_global_coin_count_check_location_names(
+                sum(self.get_global_coin_count_caps()),
+                self.options.global_coin_count_checks.value,
+            )
         if "MoveRandoVec" in slot_data:
             self.move_rando_bitvec = slot_data["MoveRandoVec"]
 
     def get_shuffled_normal_entrance_ids(self) -> set[int]:
-        sub_area_mode = self.options.sub_area_shuffle.value
-        if sub_area_mode in {
-                self.options.sub_area_shuffle.option_mixed,
-                self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
-        }:
-            entrance_ids = {int(entrance_id) for entrance_id in sm64_shuffled_entrance_ids}
-            entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
-            return entrance_ids
-
-        entrance_ids = {
-            int(entrance_id)
-            for entrance_id in get_shuffled_entrance_ids(self.options.area_rando.value)
-        }
-        if sub_area_mode:
-            entrance_ids.discard(int(SM64Levels.CAVERN_OF_THE_METAL_CAP))
+        entrance_ids = set()
+        if self.options.main_course_shuffle.value != self.options.main_course_shuffle.option_vanilla:
+            entrance_ids.update(int(entrance_id) for entrance_id in sm64_level_to_paintings)
+        if self.options.secret_course_shuffle.value != self.options.secret_course_shuffle.option_vanilla:
+            entrance_ids.update(int(entrance_id) for entrance_id in sm64_level_to_secrets)
         return entrance_ids
 
     def get_shuffled_entrance_source_ids(self) -> set[int]:
         source_ids = self.get_shuffled_normal_entrance_ids()
         sub_area_mode = self.options.sub_area_shuffle.value
-        if not sub_area_mode:
-            return source_ids
-
-        source_ids.update(
-            source.source_id for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()))
-        if sub_area_mode == self.options.sub_area_shuffle.option_mixed_plus_castle_returns:
+        if sub_area_mode != self.options.sub_area_shuffle.option_vanilla:
+            source_ids.update(
+                source.source_id for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()))
+        if self.options.castle_return_shuffle.value == self.options.castle_return_shuffle.option_mixed:
             source_ids.update(source.source_id for source in CASTLE_RETURN_SOURCES.values())
         return source_ids
 
@@ -356,13 +386,7 @@ class SM64World(World):
         if source_name is None:
             raise KeyError(source_id)
 
-        if self.options.sub_area_shuffle.value in {
-                self.options.sub_area_shuffle.option_mixed,
-                self.options.sub_area_shuffle.option_mixed_plus_castle_returns,
-        }:
-            destination_key = self.area_connections[source_id]
-        else:
-            destination_key = self.area_connections[source_id]
+        destination_key = self.area_connections[source_id]
         return (
             f"{self.get_entrance_destination_description(destination_key)} is at "
             f"{sm64_entrance_source_descriptions[source_id]}."
@@ -387,34 +411,136 @@ class SM64World(World):
         return sm64_level_to_entrances[entrance_id]
 
     @classmethod
+    def get_normal_entrance_source_name(cls, entrance_id: int) -> str:
+        if entrance_id == int(SM64Levels.BOWSER_IN_THE_SKY):
+            return "Bowser in the Sky"
+        source_name = sm64_entrance_source_names.get(entrance_id)
+        if source_name is not None:
+            return source_name
+        return f"{cls.get_normal_entrance_name(entrance_id)} Entrance"
+
+    @classmethod
     def get_connection_source_name(cls, source: int | str) -> str:
         if isinstance(source, int):
-            return cls.get_normal_entrance_name(source)
+            return cls.get_normal_entrance_source_name(source)
         return SUB_AREA_SOURCE_NAMES[source]
+
+    def explain_rule(self, name: str, state: CollectionState):
+        def destination_region_name(destination: int | str) -> str:
+            if isinstance(destination, int):
+                entrance_name = self.get_normal_entrance_name(destination)
+                return sm64_entrance_to_region.get(entrance_name, entrance_name)
+            return sub_area_destination_name(destination)
+
+        def destination_course_name(destination: int | str) -> str:
+            region_name = destination_region_name(destination)
+            for course_name in ("Wet-Dry World", "Tick Tock Clock", "Tiny-Huge Island"):
+                if region_name.startswith(course_name):
+                    return course_name
+            return region_name.split(" - ", 1)[0]
+
+        connections = list(self.area_connections.items())
+        configured_sources = {source for source, _destination in connections}
+        for source in (*SUB_AREA_SOURCES.values(), *RETURN_SOURCES.values()):
+            if source.key not in configured_sources:
+                connections.append((source.key, source.vanilla_destination))
+        if self.options.castle_return_shuffle.value == self.options.castle_return_shuffle.option_mixed:
+            for source in CASTLE_RETURN_SOURCES.values():
+                if source.key not in configured_sources:
+                    connections.append((source.key, source.vanilla_destination))
+
+        requested_name = name.casefold()
+        course_connections = [
+            (source, destination) for source, destination in connections
+            if destination_course_name(destination).casefold() == requested_name
+        ]
+        if not course_connections:
+            return None
+
+        course_name = destination_course_name(course_connections[0][1])
+        messages = [{"type": "text", "text": f"{course_name} entrances:"}]
+        course_connections.sort(key=lambda connection: (
+            not isinstance(connection[1], int),
+            self.get_entrance_destination_description(connection[1]),
+        ))
+        for source_id, destination_id in course_connections:
+            destination_name = self.get_entrance_destination_description(destination_id)
+            if isinstance(source_id, str):
+                physical_source = next(
+                    table[source_id] for table in (SUB_AREA_SOURCES, RETURN_SOURCES, CASTLE_RETURN_SOURCES)
+                    if source_id in table
+                )
+                connection_id = physical_source.source_id
+            else:
+                physical_source = sub_area_source_by_id(source_id)
+                connection_id = source_id
+
+            entrance = self.randomized_entrance_connections.get(connection_id)
+            if entrance is None and physical_source is not None:
+                entrance = self.multiworld.get_entrance(SUB_AREA_SOURCE_NAMES[physical_source.key], self.player)
+            if entrance is None or entrance.connected_region is None:
+                messages.append({
+                    "type": "text",
+                    "text": f"\n{destination_name}: entrance not discovered.",
+                })
+                continue
+
+            if physical_source is not None:
+                source_name = SUB_AREA_SOURCE_DESCRIPTIONS[physical_source.key]
+            else:
+                source_name = sm64_entrance_source_descriptions[source_id]
+
+            reachable = entrance.can_reach(state)
+            messages.extend(({
+                "type": "text",
+                "text": f"\n{destination_name} is at {source_name}: ",
+            }, {
+                "type": "color",
+                "color": "green" if reachable else "salmon",
+                "text": "reachable" if reachable else "not reachable",
+            }))
+            if hasattr(entrance.access_rule, "explain_json"):
+                explanation = entrance.access_rule.explain_json(state)
+                plain_text = "".join(part.get("text", "") for part in explanation).strip()
+                if plain_text not in {"", "True", "False"}:
+                    messages.append({"type": "text", "text": "\n  Requirements: "})
+                    messages.extend(explanation)
+
+        return messages
 
     def create_regions(self):
         create_regions(self.multiworld, self.options, self.player)
         if not self.using_slot_coin_count_check_locations:
             self.add_overflow_coin_count_check_locations()
         coin_check_region_names = {
+            "Jolly Roger Bay": "Jolly Roger Bay - Coins",
+            "Cool, Cool Mountain": "Cool, Cool Mountain - Coins",
+            "Lethal Lava Land": "Lethal Lava Land - Coins",
+            "Shifting Sand Land": "Shifting Sand Land - Coins",
+            "Snowman's Land": "Snowman's Land - Coins",
+            "Tall, Tall Mountain": "Tall, Tall Mountain - Coins",
             "Tiny-Huge Island": "Tiny-Huge Island - Coins",
         }
         coin_check_source_region_names = {
             ("Castle", "castle_grounds_bridge_coins"): "Castle Grounds",
-            ("Castle", "castle_lobby_coins"): "Castle Lobby",
-            ("Castle", "castle_courtyard_boos"): "Castle Lobby",
+            ("Castle", "castle_lobby_coins"): "Castle First Floor",
+            ("Castle", "castle_courtyard_boos"): "Castle Courtyard",
         }
         for location_name in self.coin_count_check_location_names:
             region_name = location_name.rsplit(" - ", 1)[0]
             region_name = coin_check_region_names.get(region_name, region_name)
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(self.player, location_name, location_table[location_name], region))
+        global_coin_count_region = self.multiworld.get_region(self.origin_region_name, self.player)
+        for location_name in self.global_coin_count_check_location_names:
+            global_coin_count_region.locations.append(SM64Location(
+                self.player, location_name, location_table[location_name], global_coin_count_region))
         for location_name in self.coin_check_location_names:
             output = coin_output_by_name[location_name]
             output_id = output.output_id
-            region_name = coin_check_source_region_names.get(
+            region_name = coin_output_region_name(output) or coin_check_source_region_names.get(
                 (output_id.course_name, output_id.source_id),
-                coin_check_region_names.get(output_id.course_name, output_id.course_name),
+                output_id.course_name,
             )
             region = self.multiworld.get_region(region_name, self.player)
             region.locations.append(SM64Location(
@@ -429,10 +555,58 @@ class SM64World(World):
                 destination = self.area_connections[source]
                 self.multiworld.spoiler.set_entrance(
                     SUB_AREA_SOURCE_NAMES[source] if physical_source else
-                    ("Bowser in the Sky" if source_id == int(SM64Levels.BOWSER_IN_THE_SKY)
-                     else sm64_level_to_entrances[source_id]) + " Entrance",
+                    self.get_normal_entrance_source_name(source_id),
                     self.get_entrance_destination_name(destination),
                     'entrance', self.player)
+
+    @classmethod
+    def stage_set_rules(cls, multiworld) -> None:
+        for world in multiworld.worlds.values():
+            if isinstance(world, cls):
+                world.configure_full_level_unlock_early_items()
+
+    def configure_full_level_unlock_early_items(self) -> None:
+        if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
+            return
+
+        unlock_name_by_entrance_name = {
+            "Wet-Dry World Low": "Unlock Wet-Dry World",
+            "Wet-Dry World Middle": "Unlock Wet-Dry World",
+            "Wet-Dry World High": "Unlock Wet-Dry World",
+            "Tick Tock Clock Stopped Entrance": "Unlock Tick Tock Clock",
+            "Tick Tock Clock Slow": "Unlock Tick Tock Clock",
+            "Tick Tock Clock Random": "Unlock Tick Tock Clock",
+            "Tick Tock Clock Fast": "Unlock Tick Tock Clock",
+            "Tiny-Huge Island (Tiny)": "Unlock Tiny Island",
+            "Tiny-Huge Island (Huge)": "Unlock Huge Island",
+        }
+        available_unlocks = set(self.get_level_unlock_item_names())
+        state = CollectionState(self.multiworld)
+        state.reachable_regions[self.player].add(
+            self.multiworld.get_region(self.origin_region_name, self.player))
+        state.update_reachable_regions(self.player)
+
+        candidates = []
+        for entrance_id, entrance in self.randomized_entrance_connections.items():
+            entrance_name = sm64_level_to_entrances.get(entrance_id)
+            if entrance_name is None or not entrance.parent_region.can_reach(state):
+                continue
+            item_name = unlock_name_by_entrance_name.get(entrance_name, f"Unlock {entrance_name}")
+            if item_name in available_unlocks:
+                candidates.append(item_name)
+
+        candidates = list(dict.fromkeys(candidates))
+        if not candidates:
+            raise OptionError("Full Level Unlocks has no sphere-one entrance unlock candidates.")
+        self.random.shuffle(candidates)
+        self.multiworld.local_early_items[self.player][candidates[0]] = 1
+        sphere_one_state = CollectionState(self.multiworld)
+        sphere_one_location_count = sum(
+            location.address is not None and location.can_reach(sphere_one_state)
+            for location in self.multiworld.get_locations()
+        )
+        if sphere_one_location_count > 2 and len(candidates) > 1:
+            self.multiworld.early_items[self.player][candidates[1]] = 1
 
     def create_item(self, name: str) -> Item:
         data = item_data_table[name]
@@ -469,6 +643,8 @@ class SM64World(World):
             item_names += [
                 name for name in feature_item_data_table
                 if name not in per_level_bobomb_buddy_item_names
+                and not (mode != self.options.level_features.option_per_act_only and name in {
+                    "Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"})
             ]
         if mode in {
                 self.options.level_features.option_global,
@@ -494,6 +670,38 @@ class SM64World(World):
                 self.options.level_features,
                 global_warp_pipe_item_names,
                 per_level_warp_pipe_item_names)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_vertical_wind_item_names,
+                vertical_wind_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_horizontal_wind_item_names,
+                horizontal_wind_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_freestanding_star_item_names,
+                freestanding_star_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_star_block_item_names,
+                star_block_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_koopa_shell_block_item_names,
+                koopa_shell_block_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_star_secret_item_names,
+                star_secret_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_jet_stream_item_names,
+                jet_stream_item_data_table)
+            item_names += self.get_unlock_item_names(
+                self.options.level_features,
+                global_cap_switch_item_names,
+                cap_switch_item_data_table)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_per_act_only:
@@ -532,6 +740,21 @@ class SM64World(World):
             item_names += list(global_purple_switch_item_names)
             item_names += list(global_treasure_chest_item_names)
             item_names += list(global_warp_pipe_item_names)
+            item_names += list(global_vertical_wind_item_names)
+            item_names += list(global_horizontal_wind_item_names)
+            item_names += list(global_freestanding_star_item_names)
+            item_names += list(global_star_block_item_names)
+            if mode == self.options.level_features.option_not_shuffled:
+                item_names += list(global_koopa_shell_block_item_names)
+            item_names += list(global_star_secret_item_names)
+            if mode == self.options.level_features.option_not_shuffled:
+                item_names += list(global_jet_stream_item_names)
+            else:
+                item_names += [
+                    name for name in (*koopa_shell_block_item_data_table, *jet_stream_item_data_table)
+                    if name not in {"Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"}
+                ]
+            item_names += list(global_cap_switch_item_names)
 
         buddy_mode = self.options.bobomb_buddies.value
         if buddy_mode == self.options.bobomb_buddies.option_not_shuffled:
@@ -570,16 +793,24 @@ class SM64World(World):
             per_level_coin_object_item_data_table)
 
     def get_enemy_unlock_item_names(self) -> typing.List[str]:
-        return self.get_unlock_item_names(
+        item_names = self.get_unlock_item_names(
             self.options.enemy_unlocks,
             global_mode_enemy_item_names,
             per_level_enemy_item_data_table)
+        if self.options.one_up_unlocks.value == self.options.one_up_unlocks.option_not_shuffled:
+            item_names += self.get_unlock_item_names(
+                self.options.enemy_unlocks,
+                ("Monty Moles",),
+                ("Hazy Maze Cave - Monty Moles", "Tall, Tall Mountain - Monty Moles"))
+        return item_names
 
     def get_one_up_unlock_item_names(self) -> typing.List[str]:
         item_names = self.get_unlock_item_names(
             self.options.one_up_unlocks,
             global_one_up_unlock_item_names,
             per_level_one_up_unlock_item_data_table)
+        if self.options.one_up_unlocks.value == self.options.one_up_unlocks.option_not_shuffled:
+            return []
         if self.options.one_up_checks:
             return item_names
         return [item_name for item_name in item_names if item_name.endswith("Monty Moles")]
@@ -604,18 +835,30 @@ class SM64World(World):
         option = self.options.bowser_bombs
         item_names = []
         if option.value in {option.option_global, option.option_both}:
-            item_names += ["Progressive Bowser Arena Bomb"] * 5
+            item_names += [
+                "Bowser Arena Bomb 1",
+                "Bowser Arena Bomb 2",
+                "Bowser Arena Bomb 3",
+                "Bowser Arena Bomb 4",
+                "Bowser in the Sky - Bowser Arena Bomb 5",
+            ]
         if option.value in {option.option_per_level, option.option_both}:
             item_names += (
-                ["Bowser in the Dark World - Progressive Bowser Arena Bomb"] * 4
-                + ["Bowser in the Fire Sea - Progressive Bowser Arena Bomb"] * 4
-                + ["Bowser in the Sky - Progressive Bowser Arena Bomb"] * 5
+                [f"Bowser in the Dark World - Bowser Arena Bomb {index}" for index in range(1, 5)]
+                + [f"Bowser in the Fire Sea - Bowser Arena Bomb {index}" for index in range(1, 5)]
+                + [f"Bowser in the Sky - Bowser Arena Bomb {index}" for index in range(1, 6)]
             )
-        return item_names
+        return list(dict.fromkeys(item_names))
 
     def get_unrandomized_bowser_arena_bomb_item_names(self) -> typing.List[str]:
         if self.options.bowser_bombs.value == self.options.bowser_bombs.option_not_shuffled:
-            return ["Progressive Bowser Arena Bomb"] * 5
+            return [
+                "Bowser Arena Bomb 1",
+                "Bowser Arena Bomb 2",
+                "Bowser Arena Bomb 3",
+                "Bowser Arena Bomb 4",
+                "Bowser in the Sky - Bowser Arena Bomb 5",
+            ]
         return []
 
     def get_unrandomized_unlock_item_names(self) -> typing.List[str]:
@@ -630,6 +873,9 @@ class SM64World(World):
                 self.options.one_up_unlocks.option_not_shuffled:
             item_names += list(global_one_up_unlock_item_data_table)
             item_names += list(per_level_one_up_unlock_item_data_table)
+        if (self.options.enemy_unlocks.value != self.options.enemy_unlocks.option_not_shuffled
+                or self.options.one_up_unlocks.value != self.options.one_up_unlocks.option_not_shuffled):
+            item_names = [name for name in item_names if not name.endswith("Monty Moles")]
         if self.options.sign_unlocks.value == self.options.sign_unlocks.option_not_shuffled:
             item_names += list(global_sign_unlock_item_data_table)
             item_names += list(per_level_sign_unlock_item_data_table)
@@ -637,7 +883,7 @@ class SM64World(World):
             item_names += list(painting_unlock_item_data_table)
         if self.options.level_unlocks.value == self.options.level_unlocks.option_disabled:
             item_names += list(special_level_unlock_item_names)
-        return item_names
+        return list(dict.fromkeys(item_names))
 
     def get_bowser_stage_1up_item_names(self) -> typing.List[str]:
         option = self.options.bowser_stage_1ups
@@ -660,7 +906,8 @@ class SM64World(World):
         item_names = []
         per_level_area_names = (
             main_course_move_area_names
-            + (collapsed_misc_move_area_names if self.options.collapse_misc_moves else separate_misc_move_area_names)
+            + (collapsed_misc_move_area_names
+               if self.options.combined_castle_and_secret_stage_move_items else separate_misc_move_area_names)
         )
         for action in randomized_action_item_names:
             option = getattr(self.options, move_randomizer_option_name_by_action[action])
@@ -701,6 +948,7 @@ class SM64World(World):
         item_names += self.get_one_up_unlock_item_names()
         item_names += self.get_sign_unlock_item_names()
         item_names += self.get_bowser_arena_bomb_item_names()
+        item_names += list(moat_exit_item_data_table)
 
         return item_names
 
@@ -713,11 +961,30 @@ class SM64World(World):
             for option_name in coin_star_requirement_option_names
         }
 
+    def get_global_coin_count_caps(self) -> tuple[int, ...]:
+        reachable_coin_maxima = {}
+        if self.options.accessibility == self.options.accessibility.option_full:
+            if not self.logic_sl_impossible_coin:
+                reachable_coin_maxima["Snowman's Land"] = 126
+            if not self.logic_thi_impossible_coin:
+                reachable_coin_maxima["Tiny-Huge Island"] = 191
+        return get_global_coin_count_caps(
+            self.get_coin_star_requirements_by_option(),
+            {
+                option_name: getattr(self.options, option_name).value
+                for option_name in secret_stage_coin_count_max_coin_option_names
+            },
+            bool(self.options.counts_coins_beyond_coin_stars),
+            reachable_coin_maxima,
+        )
+
     def add_overflow_coin_count_check_locations(self) -> None:
         item_count = self.get_item_pool_item_count()
         fillable_location_count = (
             len(self.multiworld.get_unfilled_locations(self.player))
             + len(self.coin_count_check_location_names)
+            + len(self.global_coin_count_check_location_names)
+            + len(self.coin_check_location_names)
             - self.get_future_locked_location_count()
         )
         extra_location_count = item_count - fillable_location_count
@@ -795,24 +1062,20 @@ class SM64World(World):
 
         replacement_item_names = self.get_filler_replacements(self.filler_count)
         plain_filler_count = self.filler_count - len(replacement_item_names)
-        cap_length_item_names = [
-            progressive_cap_length_item_names[index % len(progressive_cap_length_item_names)]
+        filler_item_names = [
+            progressive_filler_item_names[index % len(progressive_filler_item_names)]
             for index in range(plain_filler_count)
         ]
-        self.random.shuffle(cap_length_item_names)
-        self.cap_length_item_counts = {
-            item_name: cap_length_item_names.count(item_name)
-            for item_name in progressive_cap_length_item_names
-        }
+        self.random.shuffle(filler_item_names)
         self.multiworld.itempool += [self.create_item(item_name) for item_name in item_names]
         self.multiworld.itempool += [self.create_item(item_name) for item_name in replacement_item_names]
-        self.multiworld.itempool += [self.create_item(item_name) for item_name in cap_length_item_names]
+        self.multiworld.itempool += [self.create_item(item_name) for item_name in filler_item_names]
         advancement_count = sum(
             item.advancement for item in self.multiworld.itempool
             if item.player == self.player and item.name not in sign_unlock_item_names
         )
         entrance_count = len(self.get_shuffled_entrance_source_ids())
-        self.sign_hint_count = min(len(sign_data), (advancement_count + entrance_count) // 5)
+        self.sign_hint_count = min(len(sign_data) - 1, (advancement_count + entrance_count) // 5)
 
     @classmethod
     def stage_pre_output(cls, multiworld):
@@ -898,7 +1161,7 @@ class SM64World(World):
                 for sphere_index, sign_locations in enumerate(signs_by_sphere)
                 for sign_location in sign_locations
             ]
-            target_hint_count = min(world.sign_hint_count, len(sign_entries))
+            target_hint_count = min(world.sign_hint_count, len(sign_entries), len(sign_data) - 1)
             sign_buckets = [
                 sign_entries[
                     bucket_index * len(sign_entries) // target_hint_count:
@@ -982,7 +1245,7 @@ class SM64World(World):
                 location.place_locked_item(self.create_event_item(item_name))
 
     def get_filler_item_name(self) -> str:
-        return self.random.choice(progressive_cap_length_item_names)
+        return self.random.choice(progressive_filler_item_names)
 
     @staticmethod
     def get_rgb_color(value: int) -> typing.List[int]:
@@ -1069,29 +1332,34 @@ class SM64World(World):
             if isinstance(source, int) and isinstance(destination, int)
         }
         slot_data = {
+            "SpicyMycenaVersion": SPICY_MYCENA_VERSION,
             "Options": self.options.as_dict(*self.slot_option_names),
             "AreaRando": course_map,
             "AreaConnections": self.area_connections,
             "SubAreaRando": self.sub_area_slot_data,
+            "SubAreaShuffleMode": self.options.sub_area_shuffle.value,
+            "CastleReturnShuffleMode": self.options.castle_return_shuffle.value,
             "MoveRandoVec": self.move_rando_bitvec,
             "GlobalCapItems": self.options.cap_items.value in {
                 self.options.cap_items.option_global,
                 self.options.cap_items.option_both,
             },
+            "FullLevelUnlocks": self.options.level_unlocks.value == self.options.level_unlocks.option_full,
             "DeathLink": self.options.death_link.value,
             "CompletionType": self.options.completion_type.value,
             "CoinStarRequirements": self.get_coin_star_requirements_slot_data(),
             "CoinCountCheckLocations": list(self.coin_count_check_location_names),
+            "GlobalCoinCountCheckLocations": list(self.global_coin_count_check_location_names),
+            "GlobalCoinCountChecksEnabled": self.options.global_coin_count_checks.value > 0,
+            "GlobalCoinCountCaps": list(self.get_global_coin_count_caps()),
             "CoinCheckLocations": list(self.coin_check_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
             "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,
             "OneUpChecks": self.options.one_up_checks.value,
             "BuddyChecks": self.options.buddy_checks.value,
             "EasyButterflies": self.options.easy_butterflies.value,
+            "TriggerSparkles": self.options.trigger_sparkles.value,
             "NoDespawn": self.options.no_despawns.value,
-            "WingCapLengthItemCount": self.cap_length_item_counts["Progressive Wing Cap Length"],
-            "MetalCapLengthItemCount": self.cap_length_item_counts["Progressive Metal Cap Length"],
-            "VanishCapLengthItemCount": self.cap_length_item_counts["Progressive Vanish Cap Length"],
             "MipsSkipEnabled": self.logic_castle_30_star_door_mips_skip,
             "BowserInTheDarkWorldHits": self.options.bowser_in_the_dark_world_health.value,
             "BowserInTheFireSeaHits": self.options.bowser_in_the_fire_sea_health.value,
@@ -1161,7 +1429,14 @@ class SM64World(World):
                 continue
             if entrance.connected_region is None:
                 entrance.connect(target)
-            if source_id not in self.bypass_entrance_connections:
+            state = self.multiworld.state
+            previous_allow_partial_entrances = state.allow_partial_entrances
+            state.allow_partial_entrances = True
+            try:
+                source_was_in_logic = entrance.can_reach(state)
+            finally:
+                state.allow_partial_entrances = previous_allow_partial_entrances
+            if source_id not in self.bypass_entrance_connections and not source_was_in_logic:
                 bypass_region = self.multiworld.get_region("Bypassing Logic", self.player)
                 physical_source = sub_area_source_by_id(source_id)
                 source_name = (
@@ -1239,7 +1514,7 @@ class SM64World(World):
                         self.multiworld.get_region("Tiny-Huge Island (Tiny)", self.player),
                     ]
                 else:
-                    entrance_name = self.get_normal_entrance_name(entrance)
+                    entrance_name = self.get_normal_entrance_source_name(entrance)
                     regions = [self.multiworld.get_region(region_name, self.player)]
                 for region in regions[:]:
                     regions += region.subregions

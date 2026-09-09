@@ -2,13 +2,23 @@ import ast
 import unittest
 from pathlib import Path
 
-from ...Locations import coin_count_check_location_table, individual_coin_location_table, location_table
+from ...Locations import (
+    coin_count_check_location_table,
+    global_coin_count_check_location_table,
+    individual_coin_location_table,
+    locVisit_table,
+    location_table,
+)
 
 
 class TestDeclarativeLocationCoverage(unittest.TestCase):
     def test_every_non_coin_count_check_location_has_a_declarative_test(self):
         expected_locations = set(location_table).difference(
-            coin_count_check_location_table, individual_coin_location_table)
+            coin_count_check_location_table,
+            global_coin_count_check_location_table,
+            individual_coin_location_table,
+            locVisit_table,
+        )
         tested_locations: set[str] = set()
         test_directory = Path(__file__).parent
 

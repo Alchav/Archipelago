@@ -3,8 +3,7 @@ from ... import Options
 
 
 WMOTR_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
@@ -38,9 +37,9 @@ class TestWingMarioOverTheRainbowLocations(SM64TestBase):
             ["Wing Mario Over the Rainbow - Cloud 1-Up", False, flight],
             ["Wing Mario Over the Rainbow - Cloud 1-Up", True,
              flight + ["Wing Mario Over the Rainbow - Freestanding 1-Ups"]],
-            ["Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block",
+            ["Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block",
              False, wing_cap],
-            ["Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block",
+            ["Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block",
              True, flight],
             ["Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block", False, []],
             ["Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block", True, wing_cap],

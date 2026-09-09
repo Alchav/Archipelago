@@ -3,8 +3,7 @@ from ... import Options
 
 
 TTM_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "level_unlocks": Options.LevelUnlocks.option_full,
+        "level_unlocks": Options.LevelUnlocks.option_full,
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
@@ -31,15 +30,32 @@ TRIGGER_1UPS = "Tall, Tall Mountain - Trigger 1-Ups"
 BLOCK_1UPS = "Tall, Tall Mountain - 1-Up Blocks"
 BUTTERFLIES = "Tall, Tall Mountain - Butterflies"
 MONTY_MOLES = "Tall, Tall Mountain - Monty Moles"
+MIDDLE = ["Tall, Tall Mountain - Vertical Wind"]
 
 
 class TestTallTallMountainLocations(SM64TestBase):
     run_default_tests = False
     options = TTM_OPTIONS
 
+    def test_mysterious_mountainside_is_at_the_slide_exit(self):
+        location = self.multiworld.get_location(
+            "Tall, Tall Mountain - Mysterious Mountainside", self.player)
+        self.assertEqual(
+            location.parent_region.name,
+            "Tall, Tall Mountain - Slide Exit Alcove",
+        )
+        self.assertTrue(any(
+            entrance.connected_region.name == "Tall, Tall Mountain"
+            for entrance in location.parent_region.exits
+        ))
+
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Mysterious Mountainside", True, []],
+        ], starting_regions=["Tall, Tall Mountain - Slide Exit Alcove"])
+
     def test_locations(self):
-        upper = ["Triple Jump"]
-        top = upper + ["Long Jump", "Ledge Grab"]
+        upper = MIDDLE + ["Triple Jump", "Ledge Grab"]
+        top = upper + ["Long Jump"]
 
         self.run_location_tests([
             ["Tall, Tall Mountain - Start Edge 1-Up", False, []],
@@ -47,22 +63,22 @@ class TestTallTallMountainLocations(SM64TestBase):
 
             ["Tall, Tall Mountain - Blast to the Lonely Mushroom", False, []],
             ["Tall, Tall Mountain - Blast to the Lonely Mushroom", True,
-             ["Tall, Tall Mountain - Cannon Unlock"]],
+             MIDDLE + ["Tall, Tall Mountain - Cannon Unlock"]],
             ["Tall, Tall Mountain - Bob-omb Buddy", False, []],
             ["Tall, Tall Mountain - Bob-omb Buddy", True,
-             ["Tall, Tall Mountain - Bob-omb Buddy"]],
+             MIDDLE + ["Tall, Tall Mountain - Bob-omb Buddy"]],
             ["Tall, Tall Mountain - Red Mushroom Block 1-Up", False, []],
-            ["Tall, Tall Mountain - Red Mushroom Block 1-Up", True, [BLOCK_1UPS]],
-            ["Tall, Tall Mountain - Red Mushroom 1-Up Block", True, [BLOCK_1UPS]],
+            ["Tall, Tall Mountain - Red Mushroom Block 1-Up", True, MIDDLE + [BLOCK_1UPS]],
+            ["Tall, Tall Mountain - Red Mushroom 1-Up Block", True, MIDDLE + [BLOCK_1UPS]],
             ["Tall, Tall Mountain - Lower Monty Moles", False, []],
             ["Tall, Tall Mountain - Lower Monty Moles", False, [TRIGGER_1UPS]],
-            ["Tall, Tall Mountain - Lower Monty Moles", True, [MONTY_MOLES]],
+            ["Tall, Tall Mountain - Lower Monty Moles", True, MIDDLE + [MONTY_MOLES]],
 
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", False, upper],
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
              upper + ["Tall, Tall Mountain - Red Coins"]],
-            ["Tall, Tall Mountain - Monty Mole Platform 1-Up", False, upper],
-            ["Tall, Tall Mountain - Monty Mole Platform 1-Up", True,
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", False, upper],
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", True,
              upper + [FREESTANDING_1UPS]],
             ["Tall, Tall Mountain - Waterfall Gap 1-Up", False, upper],
             ["Tall, Tall Mountain - Waterfall Gap 1-Up", True,
@@ -106,7 +122,15 @@ class TestTallTallMountainLocations(SM64TestBase):
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", False,
              ["Tall, Tall Mountain - Red Coins"]],
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
-             ["Tall, Tall Mountain - Rolling Log", "Tall, Tall Mountain - Red Coins"]],
+             MIDDLE + ["Tall, Tall Mountain - Rolling Log", "Tall, Tall Mountain - Red Coins"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+    def test_triple_jump_requires_ledge_grab_to_reach_upper(self):
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", False,
+             ["Triple Jump", "Tall, Tall Mountain - Red Coins"]],
+            ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
+             ["Triple Jump", "Ledge Grab", "Tall, Tall Mountain - Red Coins"]],
         ], starting_regions=["Tall, Tall Mountain"])
 
 
@@ -131,10 +155,44 @@ class TestTallTallMountainTopWithKickTrick(SM64TestBase):
     }
 
     def test_kick_reaches_top(self):
-        upper = ["Tall, Tall Mountain - Rolling Log"]
+        upper = MIDDLE + ["Tall, Tall Mountain - Rolling Log"]
         self.run_location_tests([
             ["Tall, Tall Mountain - Scale the Mountain", False, upper],
             ["Tall, Tall Mountain - Scale the Mountain", True, upper + ["Kick"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
+class TestTallTallMountainUpperFlyGuySpinJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {"Tall, Tall Mountain Upper Region with Spin Jump Off of Fly Guy"},
+    }
+
+    def test_spin_jump_reaches_upper_and_requires_fly_guy(self):
+        route = MIDDLE + [FREESTANDING_1UPS]
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", False, route],
+            ["Tall, Tall Mountain - Upper Vine Wall 1-Up", True,
+             route + ["Tall, Tall Mountain - Fly Guy"]],
+        ], starting_regions=["Tall, Tall Mountain"])
+
+
+class TestTallTallMountainBreathtakingViewTripleJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **TTM_OPTIONS,
+        "logic_tricks": {
+            "Tall, Tall Mountain Breathtaking View from Bridge with Triple Jump from Below"
+        },
+    }
+
+    def test_triple_jump_from_upper_reaches_star(self):
+        upper = MIDDLE + ["Tall, Tall Mountain - Rolling Log"]
+        self.run_location_tests([
+            ["Tall, Tall Mountain - Breathtaking View from Bridge", False, upper],
+            ["Tall, Tall Mountain - Breathtaking View from Bridge", True,
+             upper + ["Triple Jump"]],
         ], starting_regions=["Tall, Tall Mountain"])
 
 
@@ -146,7 +204,7 @@ class TestTallTallMountainTopWithDiveTrick(SM64TestBase):
     }
 
     def test_dive_reaches_top(self):
-        upper = ["Tall, Tall Mountain - Rolling Log"]
+        upper = MIDDLE + ["Tall, Tall Mountain - Rolling Log"]
         self.run_location_tests([
             ["Tall, Tall Mountain - Scale the Mountain", False, upper],
             ["Tall, Tall Mountain - Scale the Mountain", True, upper + ["Dive"]],
@@ -164,7 +222,7 @@ class TestTallTallMountainLonelyMushroomFlyGuyTrick(SM64TestBase):
         self.run_location_tests([
             ["Tall, Tall Mountain - Blast to the Lonely Mushroom", False, []],
             ["Tall, Tall Mountain - Blast to the Lonely Mushroom", True,
-             ["Tall, Tall Mountain - Fly Guy"]],
+             MIDDLE + ["Tall, Tall Mountain - Fly Guy"]],
         ], starting_regions=["Tall, Tall Mountain"])
 
 
@@ -185,9 +243,9 @@ class TestTallTallMountainGlobalUnlockModes(SM64TestBase):
              ["Tall, Tall Mountain - Horizontal Coin Rings"]],
             ["Tall, Tall Mountain - Coins Star", True, ["Horizontal Coin Rings"]],
             ["Tall, Tall Mountain - Lower Monty Moles", True,
-             ["Monty Moles"]],
+             ["Vertical Wind", "Monty Moles"]],
             ["Tall, Tall Mountain - Scary 'Shrooms, Red Coins", True,
-             ["Rolling Logs", "Red Coins"]],
+             ["Vertical Wind", "Rolling Logs", "Red Coins"]],
         ], starting_regions=["Tall, Tall Mountain"])
 
 
@@ -199,6 +257,7 @@ class TestTallTallMountainNotShuffledUnlockModes(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
         "enemy_unlocks": Options.EnemyUnlocks.option_not_shuffled,
         "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
+        "level_features": Options.LevelFeatures.option_not_shuffled,
     }
 
     def test_not_shuffled_items_require_no_inventory(self):

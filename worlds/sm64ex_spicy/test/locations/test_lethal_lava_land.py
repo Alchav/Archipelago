@@ -3,8 +3,7 @@ from ... import Options
 
 
 LLL_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "lethal_lava_land_coin_star_requirement": 133,
@@ -72,10 +71,20 @@ class TestLethalLavaLandLocations(SM64TestBase):
              ["Lethal Lava Land - Trigger 1-Ups"]],
             ["Lethal Lava Land - Volcano Flamethrower 1-Up", False, []],
             ["Lethal Lava Land - Volcano Flamethrower 1-Up", True, freestanding],
-            ["Lethal Lava Land - Volcano Curve 1-Up", False, []],
-            ["Lethal Lava Land - Volcano Curve 1-Up", True, freestanding],
-            ["Lethal Lava Land - Volcano Brown Platform 1-Up", False, []],
-            ["Lethal Lava Land - Volcano Brown Platform 1-Up", True, freestanding],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", False, freestanding],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", True,
+             freestanding + ["Long Jump"]],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", True,
+             freestanding + ["Lethal Lava Land - Wing Cap", "Triple Jump"]],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", True,
+             freestanding + ["Lethal Lava Land - Koopa Shell"]],
+            ["Lethal Lava Land - Volcano Brown Platform 1-Up", False, freestanding],
+            ["Lethal Lava Land - Volcano Brown Platform 1-Up", True,
+             freestanding + ["Long Jump"]],
+            ["Lethal Lava Land - Volcano Brown Platform 1-Up", True,
+             freestanding + ["Triple Jump"]],
+            ["Lethal Lava Land - Volcano Brown Platform 1-Up", True,
+             freestanding + ["Lethal Lava Land - Koopa Shell"]],
 
             ["Lethal Lava Land - Northeast Brown Platform 1-Up", False, freestanding],
             ["Lethal Lava Land - Northeast Brown Platform 1-Up", True,
@@ -115,17 +124,21 @@ class TestLethalLavaLandLavaDamageBoosting(SM64TestBase):
     }
 
     def test_lava_damage_boosting_routes(self):
-        freestanding = ["Lethal Lava Land - Freestanding 1-Ups"]
+        hat = ["Mario's Hat"]
+        freestanding = ["Lethal Lava Land - Freestanding 1-Ups", *hat]
         self.run_location_tests([
-            ["Lethal Lava Land - Red-Hot Log Rolling", True, []],
+            ["Lethal Lava Land - Red-Hot Log Rolling", True, hat],
             ["Lethal Lava Land - Northeast Brown Platform 1-Up", True, freestanding],
             ["Lethal Lava Land - Boil the Big Bully Star Lava 1-Up", True, freestanding],
             ["Lethal Lava Land - Northwest Curve 1-Up", True, freestanding],
+            ["Lethal Lava Land - Central Gray Crescent 1-Up", True, freestanding],
+            ["Lethal Lava Land - Volcano Brown Platform 1-Up", True, freestanding],
             ["Lethal Lava Land - 8-Coin Puzzle with 15 Pieces", False,
              ["Lethal Lava Land - Red Coins"]],
             ["Lethal Lava Land - 8-Coin Puzzle with 15 Pieces", True, [
                 "Lethal Lava Land - Red Coins",
                 "Lethal Lava Land - Horizontal Coin Lines",
+                "Mario's Hat",
             ]],
         ], starting_regions=["Lethal Lava Land"])
 

@@ -51,9 +51,36 @@ def tweesters_classification(options):
     from .LogicTricks import get_enabled_logic_tricks
 
     enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
-    if "Shifting Sand Land Three Red Coins with Tweesters" in enabled_tricks:
+    if ({
+        "Shifting Sand Land Three Red Coins with Tweesters",
+        "Shifting Sand Land Top of Stone Structure with Spin Jump or Tweesters",
+    } & enabled_tricks):
         return ItemClassification.progression_deprioritized_skip_balancing
     return ItemClassification.trap
+
+
+def ddd_moat_exit_classification(options):
+    if options.castle_return_shuffle.value == options.castle_return_shuffle.option_mixed:
+        return ItemClassification.progression
+    return ItemClassification.trap
+
+
+def marios_hat_classification(options):
+    from .LogicTricks import get_enabled_logic_tricks
+
+    enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
+    if "Lava Damage Boosting" in enabled_tricks:
+        return ItemClassification.progression
+    return ItemClassification.useful
+
+
+def tiny_huge_island_kick_classification(options):
+    from .LogicTricks import get_enabled_logic_tricks
+
+    enabled_tricks = get_enabled_logic_tricks(set(options.logic_tricks.value))
+    if "Tiny Island Impossible Coin" in enabled_tricks:
+        return ItemClassification.progression
+    return ItemClassification.filler
 
 
 class SM64Item(Item):
@@ -71,17 +98,17 @@ generic_item_data_table: dict[str, SM64ItemData] = {
     "Wing Cap": SM64ItemData(sm64ex_base_id + 181),
     "Metal Cap": SM64ItemData(sm64ex_base_id + 182),
     "Vanish Cap": SM64ItemData(sm64ex_base_id + 183),
-    "Progressive Wing Cap Length": SM64ItemData(sm64ex_base_id + 936, filler),
-    "Progressive Metal Cap Length": SM64ItemData(sm64ex_base_id + 937, filler),
-    "Progressive Vanish Cap Length": SM64ItemData(sm64ex_base_id + 938, filler),
+    "Progressive Cap Length": SM64ItemData(sm64ex_base_id + 936, filler),
+    "Progressive Breath": SM64ItemData(sm64ex_base_id + 937, filler),
+    "Progressive Damage Dodge": SM64ItemData(sm64ex_base_id + 938, filler),
     ut_glitch_item_name: SM64ItemData(),
 }
 
 global_cap_item_names = ("Wing Cap", "Metal Cap", "Vanish Cap")
-progressive_cap_length_item_names = (
-    "Progressive Wing Cap Length",
-    "Progressive Metal Cap Length",
-    "Progressive Vanish Cap Length",
+progressive_filler_item_names = (
+    "Progressive Cap Length",
+    "Progressive Breath",
+    "Progressive Damage Dodge",
 )
 
 feature_item_data_table: dict[str, SM64ItemData] = {
@@ -176,9 +203,9 @@ simple_arbitrary_item_data_table: dict[str, SM64ItemData] = {
 
 warp_pipe_item_data_table: dict[str, SM64ItemData] = {
     "Tiny-Huge Island - Warp Pipes": SM64ItemData(sm64ex_base_id + 298),
-    "Bowser in the Dark World - Warp Pipes": SM64ItemData(
+    "Bowser in the Dark World - Warp Pipe": SM64ItemData(
         sm64ex_base_id + 932, progression_deprioritized_skip_balancing),
-    "Bowser in the Sky - Warp Pipes": SM64ItemData(
+    "Bowser in the Sky - Warp Pipe": SM64ItemData(
         sm64ex_base_id + 934, progression_deprioritized_skip_balancing),
 }
 
@@ -188,6 +215,14 @@ global_purple_switch_item_names = ("Purple Switches",)
 global_bobomb_buddy_item_names = ("Bob-omb Buddies",)
 global_treasure_chest_item_names = ("Treasure Chests",)
 global_warp_pipe_item_names = ("Warp Pipes",)
+global_vertical_wind_item_names = ("Vertical Wind",)
+global_horizontal_wind_item_names = ("Horizontal Wind",)
+global_freestanding_star_item_names = ("Freestanding Stars",)
+global_star_block_item_names = ("Star Blocks",)
+global_koopa_shell_block_item_names = ("Koopa Shell Blocks",)
+global_star_secret_item_names = ("Star Secrets",)
+global_jet_stream_item_names = ("Jet Streams",)
+global_cap_switch_item_names = ("Cap Switches",)
 
 global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Checkerboard Platforms": SM64ItemData(sm64ex_base_id + 297),
@@ -196,6 +231,83 @@ global_arbitrary_item_data_table: dict[str, SM64ItemData] = {
     "Bob-omb Buddies": SM64ItemData(sm64ex_base_id + 928),
     "Treasure Chests": SM64ItemData(sm64ex_base_id + 931),
     "Warp Pipes": SM64ItemData(sm64ex_base_id + 935),
+    "Vertical Wind": SM64ItemData(sm64ex_base_id + 1102),
+    "Horizontal Wind": SM64ItemData(sm64ex_base_id + 1106, trap),
+    "Freestanding Stars": SM64ItemData(sm64ex_base_id + 1115, progression_deprioritized),
+    "Star Blocks": SM64ItemData(sm64ex_base_id + 1116, progression_deprioritized),
+    "Koopa Shell Blocks": SM64ItemData(sm64ex_base_id + 1117),
+    "Star Secrets": SM64ItemData(sm64ex_base_id + 1118, progression_deprioritized),
+    "Jet Streams": SM64ItemData(sm64ex_base_id + 1147, progression_deprioritized),
+    "Cap Switches": SM64ItemData(sm64ex_base_id + 1167),
+}
+
+freestanding_star_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-omb Battlefield - Freestanding Star": SM64ItemData(sm64ex_base_id + 1119, progression_deprioritized),
+    "Whomp's Fortress - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1120, progression_deprioritized),
+    "Jolly Roger Bay - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1121, progression_deprioritized),
+    "Cool, Cool Mountain - Freestanding Star": SM64ItemData(sm64ex_base_id + 1122, progression_deprioritized),
+    "Big Boo's Haunt - Freestanding Star": SM64ItemData(sm64ex_base_id + 1123, progression_deprioritized),
+    "Hazy Maze Cave - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1124, progression_deprioritized),
+    "Lethal Lava Land - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1125, progression_deprioritized),
+    "Shifting Sand Land - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1126, progression_deprioritized),
+    "Dire, Dire Docks - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1127, progression_deprioritized),
+    "Snowman's Land - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1128, progression_deprioritized),
+    "Wet-Dry World - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1129, progression_deprioritized),
+    "Tall, Tall Mountain - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1130, progression_deprioritized),
+    "Tick Tock Clock - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1131, progression_deprioritized),
+    "Rainbow Ride - Freestanding Stars": SM64ItemData(sm64ex_base_id + 1132, progression_deprioritized),
+}
+
+star_block_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-omb Battlefield - Star Block": SM64ItemData(sm64ex_base_id + 1133, progression_deprioritized),
+    "Jolly Roger Bay - Star Blocks": SM64ItemData(sm64ex_base_id + 1134, progression_deprioritized),
+    "The Princess's Secret Slide - Star Block": SM64ItemData(sm64ex_base_id + 1135, progression_deprioritized),
+    "Rainbow Ride - Star Block": SM64ItemData(sm64ex_base_id + 1136, progression_deprioritized),
+    "Snowman's Land - Star Block": SM64ItemData(sm64ex_base_id + 1137, progression_deprioritized),
+    "Tiny-Huge Island - Star Block": SM64ItemData(sm64ex_base_id + 1138, progression_deprioritized),
+    "Wet-Dry World - Star Blocks": SM64ItemData(sm64ex_base_id + 1139, progression_deprioritized),
+}
+
+koopa_shell_block_item_data_table: dict[str, SM64ItemData] = {
+    # LLL retains its original per-act feature item and ID.
+    "Lethal Lava Land - Koopa Shell": feature_item_data_table["Lethal Lava Land - Koopa Shell"],
+    "Shifting Sand Land - Koopa Shell Block": SM64ItemData(sm64ex_base_id + 1140),
+    "Snowman's Land - Koopa Shell Block": SM64ItemData(sm64ex_base_id + 1141),
+}
+
+star_secret_item_data_table: dict[str, SM64ItemData] = {
+    "Bob-omb Battlefield - Star Secrets": SM64ItemData(sm64ex_base_id + 1142, progression_deprioritized),
+    "Shifting Sand Land - Star Secrets": SM64ItemData(sm64ex_base_id + 1143, progression_deprioritized),
+    "Wet-Dry World - Star Secrets": SM64ItemData(sm64ex_base_id + 1144, progression_deprioritized),
+    "Tiny-Huge Island - Star Secrets": SM64ItemData(sm64ex_base_id + 1145, progression_deprioritized),
+}
+
+jet_stream_item_data_table: dict[str, SM64ItemData] = {
+    "Jolly Roger Bay - Jet Stream": feature_item_data_table["Jolly Roger Bay - Jet Stream"],
+    "Dire, Dire Docks - Jet Stream": SM64ItemData(sm64ex_base_id + 1146, progression_deprioritized),
+}
+
+cap_switch_item_data_table: dict[str, SM64ItemData] = {
+    "Tower of the Wing Cap - Cap Switch": SM64ItemData(sm64ex_base_id + 1168),
+    "Cavern of the Metal Cap - Cap Switch": SM64ItemData(sm64ex_base_id + 1169),
+    "Vanish Cap Under the Moat - Cap Switch": SM64ItemData(sm64ex_base_id + 1170),
+}
+
+moat_exit_item_data_table: dict[str, SM64ItemData] = {
+    "Dire, Dire Docks - Moat Exit": SM64ItemData(sm64ex_base_id + 1114, ddd_moat_exit_classification),
+}
+
+vertical_wind_item_data_table: dict[str, SM64ItemData] = {
+    "Cool, Cool Mountain - Vertical Wind": SM64ItemData(sm64ex_base_id + 1103, useful),
+    "Tall, Tall Mountain - Vertical Wind": SM64ItemData(sm64ex_base_id + 1104),
+    "Tiny-Huge Island - Vertical Wind": SM64ItemData(sm64ex_base_id + 1105),
+}
+
+horizontal_wind_item_data_table: dict[str, SM64ItemData] = {
+    "Bowser in the Sky - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1107, trap),
+    "Rainbow Ride - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1108, trap),
+    "Snowman's Land - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1109, trap),
+    "Tiny-Huge Island - Horizontal Wind": SM64ItemData(sm64ex_base_id + 1110, trap),
 }
 
 per_level_bobomb_buddy_item_names = (
@@ -246,7 +358,7 @@ purple_switch_item_data_table: dict[str, SM64ItemData] = {
 }
 
 optional_item_data_table: dict[str, SM64ItemData] = {
-    "Mario's Hat": SM64ItemData(sm64ex_base_id + 320, useful),
+    "Mario's Hat": SM64ItemData(sm64ex_base_id + 320, marios_hat_classification),
 }
 
 bowser_stage_1up_item_data_table: dict[str, SM64ItemData] = {
@@ -272,6 +384,15 @@ arbitrary_item_data_table: dict[str, SM64ItemData] = {
     **checkerboard_item_data_table,
     **rolling_log_item_data_table,
     **purple_switch_item_data_table,
+    **vertical_wind_item_data_table,
+    **horizontal_wind_item_data_table,
+    **freestanding_star_item_data_table,
+    **star_block_item_data_table,
+    **koopa_shell_block_item_data_table,
+    **star_secret_item_data_table,
+    **cap_switch_item_data_table,
+    **jet_stream_item_data_table,
+    **moat_exit_item_data_table,
 }
 
 action_item_data_table: dict[str, SM64ItemData] = {
@@ -487,7 +608,8 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Tiny-Huge Island - Wall Kick": SM64ItemData(sm64ex_base_id + 449),
     "Tiny-Huge Island - Dive": SM64ItemData(sm64ex_base_id + 450),
     "Tiny-Huge Island - Ground Pound": SM64ItemData(sm64ex_base_id + 451),
-    "Tiny-Huge Island - Kick": SM64ItemData(sm64ex_base_id + 452, filler),
+    "Tiny-Huge Island - Kick": SM64ItemData(
+        sm64ex_base_id + 452, tiny_huge_island_kick_classification),
     "Tiny-Huge Island - Climb": SM64ItemData(sm64ex_base_id + 453, useful),
     "Tiny-Huge Island - Ledge Grab": SM64ItemData(sm64ex_base_id + 454),
     # Tick Tock Clock
@@ -523,7 +645,6 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Castle - Kick": SM64ItemData(sm64ex_base_id + 482, filler),
     "Castle - Climb": SM64ItemData(sm64ex_base_id + 483),
     "Castle - Ledge Grab": SM64ItemData(sm64ex_base_id + 484),
-    # Restored secret-stage moves. These use a new range because the original range now contains other items.
     # Bowser in the Dark World
     "Bowser in the Dark World - Triple Jump": SM64ItemData(sm64ex_base_id + 1022),
     "Bowser in the Dark World - Long Jump": SM64ItemData(sm64ex_base_id + 1023, filler),
@@ -630,6 +751,7 @@ cannon_item_data_table: dict[str, SM64ItemData] = {
 }
 
 painting_unlock_item_data_table: dict[str, SM64ItemData] = {
+    "Unlock Bob-omb Battlefield": SM64ItemData(sm64ex_base_id + 230),
     "Unlock Whomp's Fortress": SM64ItemData(sm64ex_base_id + 231),
     "Unlock Jolly Roger Bay": SM64ItemData(sm64ex_base_id + 232),
     "Unlock Cool, Cool Mountain": SM64ItemData(sm64ex_base_id + 233),
@@ -645,6 +767,9 @@ painting_unlock_item_data_table: dict[str, SM64ItemData] = {
     "Unlock Huge Island": SM64ItemData(sm64ex_base_id + 559),
     "Unlock Rainbow Ride": SM64ItemData(sm64ex_base_id + 853),
     "Unlock Wing Mario Over the Rainbow": SM64ItemData(sm64ex_base_id + 854),
+    "Unlock The Princess's Secret Slide": SM64ItemData(sm64ex_base_id + 1111),
+    "Unlock The Secret Aquarium": SM64ItemData(sm64ex_base_id + 1112),
+    "Unlock Cavern of the Metal Cap": SM64ItemData(sm64ex_base_id + 1113),
 }
 
 special_level_unlock_item_names = (
@@ -1066,10 +1191,23 @@ per_level_enemy_item_data_table: dict[str, SM64ItemData] = {
 }
 
 bowser_bomb_item_data_table: dict[str, SM64ItemData] = {
-    "Progressive Bowser Arena Bomb": SM64ItemData(3626849, progression),
-    "Bowser in the Dark World - Progressive Bowser Arena Bomb": SM64ItemData(3626850, progression),
-    "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": SM64ItemData(3626851, progression),
-    "Bowser in the Sky - Progressive Bowser Arena Bomb": SM64ItemData(3626852, progression),
+    "Bowser Arena Bomb 1": SM64ItemData(3627150, progression),
+    "Bowser Arena Bomb 2": SM64ItemData(3627151, progression),
+    "Bowser Arena Bomb 3": SM64ItemData(3627152, progression),
+    "Bowser Arena Bomb 4": SM64ItemData(3627153, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 1": SM64ItemData(3627154, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 2": SM64ItemData(3627155, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 3": SM64ItemData(3627156, progression),
+    "Bowser in the Dark World - Bowser Arena Bomb 4": SM64ItemData(3627157, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 1": SM64ItemData(3627158, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 2": SM64ItemData(3627159, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 3": SM64ItemData(3627160, progression),
+    "Bowser in the Fire Sea - Bowser Arena Bomb 4": SM64ItemData(3627161, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 1": SM64ItemData(3627162, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 2": SM64ItemData(3627163, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 3": SM64ItemData(3627164, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 4": SM64ItemData(3627165, progression),
+    "Bowser in the Sky - Bowser Arena Bomb 5": SM64ItemData(3627166, progression),
 }
 
 
@@ -1199,6 +1337,9 @@ item_name_groups: dict[str, set[str]] = {
     "Per-Level Checkerboard Platforms": set(checkerboard_item_data_table),
     "Per-Level Rolling Logs": set(rolling_log_item_data_table),
     "Per-Level Purple Switches": set(purple_switch_item_data_table),
+    "Cap Switch Unlocks": set(global_cap_switch_item_names) | set(cap_switch_item_data_table),
+    "Global Cap Switch Unlocks": set(global_cap_switch_item_names),
+    "Per-Level Cap Switch Unlocks": set(cap_switch_item_data_table),
     "Bob-omb Buddy Unlocks": (
         set(global_bobomb_buddy_item_names)
         | set(per_level_bobomb_buddy_item_names)
@@ -1208,6 +1349,14 @@ item_name_groups: dict[str, set[str]] = {
         | set(per_level_treasure_chest_item_names)
     ),
     "Warp Pipe Unlocks": set(global_warp_pipe_item_names) | set(per_level_warp_pipe_item_names),
+    "Wind Unlocks": (
+        set(global_vertical_wind_item_names)
+        | set(vertical_wind_item_data_table)
+        | set(global_horizontal_wind_item_names)
+        | set(horizontal_wind_item_data_table)
+    ),
+    "Vertical Wind Unlocks": set(global_vertical_wind_item_names) | set(vertical_wind_item_data_table),
+    "Horizontal Wind Unlocks": set(global_horizontal_wind_item_names) | set(horizontal_wind_item_data_table),
     "Bowser Stage Extra 1-Up Unlocks": set(bowser_stage_1up_item_data_table),
     "Coin Object Unlocks": set(global_coin_object_item_data_table) | set(per_level_coin_object_item_data_table),
     "Global Coin Object Unlocks": set(global_coin_object_item_data_table),
@@ -1215,8 +1364,27 @@ item_name_groups: dict[str, set[str]] = {
     "Enemy Unlocks": set(global_enemy_item_data_table) | set(per_level_enemy_item_data_table),
     "Global Enemy Unlocks": set(global_enemy_item_data_table),
     "Per-Level Enemy Unlocks": set(per_level_enemy_item_data_table),
-    "Progressive Bowser Arena Bombs": set(bowser_bomb_item_data_table),
+    "Bowser Arena Bombs": set(bowser_bomb_item_data_table),
+    "Global Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        "Bowser in the Sky - Bowser Arena Bomb 5",
+    },
+    "Per-Level Bowser Arena Bombs": {
+        item_name for item_name in bowser_bomb_item_data_table if item_name.startswith("Bowser in the")
+    },
+    "Bowser in the Dark World - Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        *(f"Bowser in the Dark World - Bowser Arena Bomb {index}" for index in range(1, 5)),
+    },
+    "Bowser in the Fire Sea - Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        *(f"Bowser in the Fire Sea - Bowser Arena Bomb {index}" for index in range(1, 5)),
+    },
+    "Bowser in the Sky - Bowser Arena Bombs": {
+        "Bowser Arena Bomb 1", "Bowser Arena Bomb 2", "Bowser Arena Bomb 3", "Bowser Arena Bomb 4",
+        *(f"Bowser in the Sky - Bowser Arena Bomb {index}" for index in range(1, 6)),
+    },
     "Optional Items": set(optional_item_data_table),
-    "Filler": set(progressive_cap_length_item_names),
+    "Filler": set(progressive_filler_item_names),
      "Traps": set(trap_item_data_table),
 }

@@ -50,8 +50,7 @@ SUB_AREA_SOURCES: dict[str, SubAreaSource] = {
     "sl_igloo": SubAreaSource("sl_igloo", 2, "Snowman's Land - Igloo Entrance", "sl_igloo", "sl_main"),
     "ttm_slide": SubAreaSource("ttm_slide", 3, "Tall, Tall Mountain - Top", "ttm_slide", "ttm_main"),
     "thi_red_cave": SubAreaSource(
-        "thi_red_cave", 4, "Tiny-Huge Island - Red Coin Cave Entrance", "thi_red_cave", "thi_huge"),
-    "hmc_cotmc": SubAreaSource("hmc_cotmc", 5, "Hazy Maze Cave", "cotmc"),
+        "thi_red_cave", 4, "Tiny-Huge Island - Huge Tree Area", "thi_red_cave", "thi_huge"),
     "jrb_ship": SubAreaSource("jrb_ship", 6, "Jolly Roger Bay", "jrb_ship"),
     "lll_volcano": SubAreaSource(
         "lll_volcano", 7, "Lethal Lava Land - Volcano Entrance", "lll_volcano"),
@@ -70,14 +69,13 @@ SUB_AREA_SOURCES: dict[str, SubAreaSource] = {
 }
 
 
-# Reusable exits from shuffled sub-areas. Castle returns are activated only by
-# mixed_plus_castle_returns.
+# Reusable exits from shuffled sub-areas.
 RETURN_SOURCES: dict[str, SubAreaSource] = {
     "ccm_slide_exit": SubAreaSource("ccm_slide_exit", 21, "Cool, Cool Mountain - Secret Slide", "ccm_cabin"),
     "sl_igloo_exit": SubAreaSource("sl_igloo_exit", 22, "Snowman's Land - Igloo", "sl_main"),
     "ttm_slide_exit": SubAreaSource("ttm_slide_exit", 23, "Tall, Tall Mountain - Secret Slide", "ttm_main"),
     "thi_red_cave_exit": SubAreaSource(
-        "thi_red_cave_exit", 24, "Tiny-Huge Island - Red Coins Area", "thi_huge"),
+        "thi_red_cave_exit", 24, "Tiny-Huge Island - Red Coin Cave", "thi_huge"),
 }
 
 
@@ -95,8 +93,7 @@ SUB_AREA_DESTINATIONS: dict[str, SubAreaDestination] = {
     "ccm_slide": SubAreaDestination("ccm_slide", "Cool, Cool Mountain - Secret Slide", 5, 2, 0x0A),
     "sl_igloo": SubAreaDestination("sl_igloo", "Snowman's Land - Igloo", 10, 2, 0x0A),
     "ttm_slide": SubAreaDestination("ttm_slide", "Tall, Tall Mountain - Secret Slide", 36, 2, 0x0A),
-    "thi_red_cave": SubAreaDestination("thi_red_cave", "Tiny-Huge Island - Red Coins Area", 13, 3, 0x0A),
-    "cotmc": SubAreaDestination("cotmc", "Cavern of the Metal Cap", 28, 1, 0x0A),
+    "thi_red_cave": SubAreaDestination("thi_red_cave", "Tiny-Huge Island - Red Coin Cave", 13, 3, 0x0A),
     "jrb_ship": SubAreaDestination("jrb_ship", "Jolly Roger Bay - Sunken Ship", 12, 2, 0x0A),
     "lll_volcano": SubAreaDestination("lll_volcano", "Lethal Lava Land - Volcano", 22, 2, 0x0A),
     "ssl_pyramid_lower": SubAreaDestination(
@@ -113,15 +110,17 @@ SUB_AREA_DESTINATIONS: dict[str, SubAreaDestination] = {
 RETURN_DESTINATIONS: dict[str, SubAreaDestination] = {
     "ccm_cabin": SubAreaDestination(
         "ccm_cabin", "Cool, Cool Mountain - Slide Exit", 5, 1, 0x14, warp_arg=6),
-    "sl_main": SubAreaDestination("sl_main", "Snowman's Land", 10, 1, 0x0B),
-    "ttm_main": SubAreaDestination("ttm_main", "Tall, Tall Mountain", 36, 1, 0x14),
+    "sl_main": SubAreaDestination(
+        "sl_main", "Snowman's Land - Igloo Entrance", 10, 1, 0x0B),
+    "ttm_main": SubAreaDestination(
+        "ttm_main", "Tall, Tall Mountain - Slide Exit Alcove", 36, 1, 0x14),
     "thi_huge": SubAreaDestination("thi_huge", "Tiny-Huge Island (Huge)", 13, 1, 0x0B),
 }
 
 
 CASTLE_RETURN_DESTINATIONS: dict[str, SubAreaDestination] = {
-    "castle_lobby_pss": SubAreaDestination("castle_lobby_pss", "Castle Lobby", 6, 1, 0x20),
-    "castle_lobby_totwc": SubAreaDestination("castle_lobby_totwc", "Castle Lobby", 6, 1, 0x20),
+    "castle_lobby_pss": SubAreaDestination("castle_lobby_pss", "Castle First Floor", 6, 1, 0x20),
+    "castle_lobby_totwc": SubAreaDestination("castle_lobby_totwc", "Castle First Floor", 6, 1, 0x20),
     "castle_grounds_vcutm": SubAreaDestination(
         "castle_grounds_vcutm", "Castle Grounds", 16, 1, 0x07),
     "castle_grounds_cotmc": SubAreaDestination(
@@ -138,8 +137,7 @@ SUB_AREA_SOURCE_DESCRIPTIONS = {
     "sl_igloo": "the Snowman's Land igloo entrance",
     "ttm_slide": "the Tall, Tall Mountain slide entrance",
     "thi_red_cave": "the Tiny-Huge Island Red Coin Cave entrance",
-    "hmc_cotmc": "the underground-lake waterfall in Hazy Maze Cave",
-    "jrb_ship": "the opening in the Jolly Roger Bay sunken ship",
+    "jrb_ship": "the entrance to the Jolly Roger Bay sunken ship",
     "lll_volcano": "the Lethal Lava Land volcano entrance",
     "ssl_pyramid_side": "the side entrance of the Shifting Sand Land pyramid",
     "ssl_pyramid_top": "the top entrance of the Shifting Sand Land pyramid",
@@ -164,8 +162,7 @@ SUB_AREA_SOURCE_NAMES = {
     "sl_igloo": "Snowman's Land - Igloo Entrance",
     "ttm_slide": "Tall, Tall Mountain - Secret Slide Entrance",
     "thi_red_cave": "Tiny-Huge Island - Red Coin Cave Entrance",
-    "hmc_cotmc": "Hazy Maze Cave - Cavern of the Metal Cap Waterfall",
-    "jrb_ship": "Jolly Roger Bay - Sunken Ship Opening",
+    "jrb_ship": "Jolly Roger Bay - Sunken Ship Entrance",
     "lll_volcano": "Lethal Lava Land - Volcano Entrance",
     "ssl_pyramid_side": "Shifting Sand Land - Pyramid Side Entrance",
     "ssl_pyramid_top": "Shifting Sand Land - Pyramid Top Entrance",
@@ -190,7 +187,6 @@ SUB_AREA_DESTINATION_DESCRIPTIONS = {
     "sl_igloo": "the Snowman's Land igloo",
     "ttm_slide": "the Tall, Tall Mountain Secret Slide",
     "thi_red_cave": "the Tiny-Huge Island Red Coin Cave",
-    "cotmc": "Cavern of the Metal Cap",
     "jrb_ship": "the inside of the Jolly Roger Bay sunken ship",
     "lll_volcano": "the inside of the Lethal Lava Land volcano",
     "ssl_pyramid_lower": "the lower Shifting Sand Land pyramid",
@@ -200,8 +196,8 @@ SUB_AREA_DESTINATION_DESCRIPTIONS = {
     "bowser_2": "the Bowser in the Fire Sea arena",
     "bowser_3": "the Bowser in the Sky arena",
     "ccm_cabin": "Cool, Cool Mountain outside the slide exit",
-    "sl_main": "the main Snowman's Land area",
-    "ttm_main": "the main Tall, Tall Mountain area",
+    "sl_main": "the Snowman's Land igloo entrance",
+    "ttm_main": "the Mysterious Mountainside area in Tall, Tall Mountain",
     "thi_huge": "the main Huge Island area",
     "castle_lobby_pss": "the Castle Lobby",
     "castle_lobby_totwc": "the Castle Lobby",
@@ -244,7 +240,6 @@ OUTGOING_SOURCES_BY_DESTINATION: dict[str, tuple[str, ...]] = {
     "Snowman's Land": ("sl_igloo",),
     "Tall, Tall Mountain": ("ttm_slide",),
     "Tiny-Huge Island (Huge)": ("thi_red_cave", "thi_wiggler"),
-    "Hazy Maze Cave": ("hmc_cotmc",),
     "Jolly Roger Bay": ("jrb_ship",),
     "Lethal Lava Land": ("lll_volcano",),
     "Shifting Sand Land": ("ssl_pyramid_side", "ssl_pyramid_top"),
@@ -258,17 +253,31 @@ OUTGOING_SOURCES_BY_DESTINATION: dict[str, tuple[str, ...]] = {
 }
 
 
+# Bowser in the Sky must remain the only way into its arena. These are the
+# level destinations with an internal sub-area entrance and no second
+# destination that enters the same level from elsewhere in the shuffled graph.
+BITS_BRANCH_DESTINATIONS = frozenset({
+    "Jolly Roger Bay",
+    "Lethal Lava Land",
+    "Shifting Sand Land",
+    "Bowser in the Dark World",
+    "Bowser in the Fire Sea",
+    "Bowser in the Sky",
+})
+
+
 CASTLE_RETURN_OUTGOING_BY_DESTINATION = {
     "The Princess's Secret Slide": ("pss_fall",),
     "Tower of the Wing Cap": ("totwc_fall",),
     "Vanish Cap Under the Moat": ("vcutm_fall",),
-    "cotmc": ("cotmc_fall",),
+    "Cavern of the Metal Cap": ("cotmc_fall",),
     "Dire, Dire Docks": ("ddd_fall",),
     "Wing Mario Over the Rainbow": ("wmotr_fall",),
 }
 
 
-def build_separate_connections(random: Random) -> dict[str, str]:
+def build_separate_connections(
+        random: Random, include_castle_returns: bool = False) -> dict[str, str]:
     connections: dict[str, str] = {}
 
     reusable_destinations = list(REUSABLE_ENTRY_KEYS)
@@ -284,6 +293,12 @@ def build_separate_connections(random: Random) -> dict[str, str]:
     dead_destination_keys = [key for key in SUB_AREA_DESTINATIONS if key not in REUSABLE_ENTRY_KEYS]
     random.shuffle(dead_destination_keys)
     connections.update(zip(dead_source_keys, dead_destination_keys))
+
+    if include_castle_returns:
+        castle_return_destinations = list(CASTLE_RETURN_DESTINATIONS)
+        random.shuffle(castle_return_destinations)
+        connections.update(zip(CASTLE_RETURN_SOURCES, castle_return_destinations))
+
     return connections
 
 
@@ -292,6 +307,9 @@ def build_mixed_connections(
         normal_sources: dict[str, int],
         normal_destinations: tuple[str, ...],
         include_castle_returns: bool,
+        include_sub_areas: bool = True,
+        decoupled: bool = False,
+        allow_castle_return_bits_branch: bool = False,
 ) -> dict[str, str]:
     """Build a two-deep directed entrance graph.
 
@@ -299,9 +317,16 @@ def build_mixed_connections(
     Castle entrance. All remaining outgoing sources then receive terminal
     destinations, so no shuffled path can exceed root -> branch -> terminal.
     """
-    sources = list(normal_sources) + list(SUB_AREA_SOURCES) + list(RETURN_SOURCES)
-    destinations = list(normal_destinations) + list(SUB_AREA_DESTINATIONS) + list(RETURN_DESTINATIONS)
-    outgoing = dict(OUTGOING_SOURCES_BY_DESTINATION)
+    sources = list(normal_sources)
+    destinations = list(normal_destinations)
+    outgoing = {}
+
+    if include_sub_areas:
+        sources.extend(SUB_AREA_SOURCES)
+        sources.extend(RETURN_SOURCES)
+        destinations.extend(SUB_AREA_DESTINATIONS)
+        destinations.extend(RETURN_DESTINATIONS)
+        outgoing.update(OUTGOING_SOURCES_BY_DESTINATION)
 
     if include_castle_returns:
         sources.extend(CASTLE_RETURN_SOURCES)
@@ -311,25 +336,44 @@ def build_mixed_connections(
     if len(sources) != len(destinations):
         raise ValueError(f"Sub-area source/destination mismatch: {len(sources)} != {len(destinations)}")
 
+    if not decoupled and include_sub_areas:
+        return _build_coupled_mixed_connections(
+            random, sources, destinations, normal_sources, outgoing,
+            allow_castle_return_bits_branch)
+
     branch_destinations = [destination for destination in destinations if destination in outgoing]
     root_sources = list(normal_sources)
-    if len(branch_destinations) > len(root_sources):
-        raise ValueError("Not enough Castle entrances for all non-terminal sub-area destinations")
-
     bits_source = "normal:Bowser in the Sky"
-    if bits_source not in root_sources:
-        raise ValueError("Mixed sub-area shuffle requires the Bowser in the Sky root entrance")
-
     connections: dict[str, str] = {}
-    available_branches = [destination for destination in branch_destinations if outgoing[destination]]
-    bits_branch = random.choice(available_branches)
-    connections[bits_source] = bits_branch
+    remaining_roots = list(root_sources)
+    remaining_branches = list(branch_destinations)
+    if bits_source in root_sources and "bowser_3" in destinations:
+        available_branches = [
+            destination for destination in branch_destinations
+            if destination in BITS_BRANCH_DESTINATIONS and outgoing[destination]
+        ]
+        if available_branches:
+            bits_branch = random.choice(available_branches)
+            connections[bits_source] = bits_branch
+            branch_exit = random.choice(list(outgoing[bits_branch]))
+            connections[branch_exit] = "bowser_3"
+            remaining_roots.remove(bits_source)
+            remaining_branches.remove(bits_branch)
 
-    branch_exit = random.choice(list(outgoing[bits_branch]))
-    connections[branch_exit] = "bowser_3"
+    if len(remaining_branches) > len(remaining_roots):
+        # There are not enough mixed Castle entrances to anchor every physical
+        # area. Preserve the reserved BITS route, then directly permute the
+        # remaining sources and destinations.
+        remaining_sources = [source for source in sources if source not in connections]
+        remaining_destinations = [
+            destination for destination in destinations
+            if destination not in connections.values()
+        ]
+        random.shuffle(remaining_sources)
+        random.shuffle(remaining_destinations)
+        connections.update(zip(remaining_sources, remaining_destinations))
+        return connections
 
-    remaining_roots = [source for source in root_sources if source != bits_source]
-    remaining_branches = [destination for destination in branch_destinations if destination != bits_branch]
     random.shuffle(remaining_roots)
     random.shuffle(remaining_branches)
     for source, destination in zip(remaining_roots, remaining_branches):
@@ -342,6 +386,83 @@ def build_mixed_connections(
     # consumed by the reserved branch exit. Everything left is terminal.
     if any(destination in outgoing for destination in remaining_destinations):
         raise ValueError("Mixed sub-area shuffle left a branch destination outside the root layer")
+    random.shuffle(remaining_sources)
+    random.shuffle(remaining_destinations)
+    connections.update(zip(remaining_sources, remaining_destinations))
+    return connections
+
+
+def _build_coupled_mixed_connections(
+        random: Random,
+        sources: list[str],
+        destinations: list[str],
+        normal_sources: dict[str, int],
+        outgoing: dict[str, tuple[str, ...]],
+        allow_castle_return_bits_branch: bool,
+) -> dict[str, str]:
+    """Shuffle mixed entrances while preserving reusable level returns."""
+    branch_destinations = [destination for destination in destinations if destination in outgoing]
+    bits_source = "normal:Bowser in the Sky"
+    connections: dict[str, str] = {}
+
+    source_homes = {
+        source: source.removeprefix("normal:")
+        for source in normal_sources
+    }
+    source_homes.update({
+        key: SUB_AREA_SOURCES[key].return_destination
+        for key in REUSABLE_ENTRY_KEYS if key in sources
+    })
+    available_sources = set(sources)
+    available_destinations = set(destinations)
+
+    if bits_source in sources and "bowser_3" in destinations:
+        bits_candidates = set(BITS_BRANCH_DESTINATIONS)
+        if allow_castle_return_bits_branch:
+            bits_candidates.update(CASTLE_RETURN_OUTGOING_BY_DESTINATION)
+        available = [
+            destination for destination in branch_destinations
+            if destination in bits_candidates and outgoing[destination]
+        ]
+        if available:
+            destination = random.choice(available)
+            connections[bits_source] = destination
+            exit_source = random.choice(list(outgoing[destination]))
+            connections[exit_source] = "bowser_3"
+            available_sources.difference_update((bits_source, exit_source))
+            available_destinations.difference_update((destination, "bowser_3"))
+            branch_destinations.remove(destination)
+
+    random.shuffle(branch_destinations)
+    for destination in tuple(branch_destinations):
+        if destination not in available_destinations:
+            continue
+        candidates = [
+            source for source, home in source_homes.items()
+            if source in available_sources
+            and source not in outgoing[destination]
+            and home in available_destinations
+            and home != destination
+        ]
+        exit_sources = [source for source in outgoing[destination] if source in available_sources]
+        if not candidates or not exit_sources:
+            continue
+        source = random.choice(candidates)
+        exit_source = random.choice(exit_sources)
+        home = source_homes[source]
+        connections[source] = destination
+        connections[exit_source] = home
+        available_sources.difference_update((source, exit_source))
+        available_destinations.difference_update((destination, home))
+
+    remaining_sources = [source for source in sources if source in available_sources]
+    remaining_destinations = [
+        destination for destination in destinations if destination in available_destinations
+    ]
+    if len(remaining_sources) != len(remaining_destinations):
+        raise ValueError(
+            f"Coupled mixed source/destination mismatch: "
+            f"{len(remaining_sources)} != {len(remaining_destinations)}")
     random.shuffle(remaining_sources)
     random.shuffle(remaining_destinations)
     connections.update(zip(remaining_sources, remaining_destinations))

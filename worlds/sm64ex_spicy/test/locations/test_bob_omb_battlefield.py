@@ -3,8 +3,7 @@ from ... import Options
 
 
 BOB_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
@@ -139,6 +138,23 @@ class TestBobOmbBattlefieldMarioWingsWithoutWingCap(SM64TestBase):
         ], starting_regions=["Bob-omb Battlefield"])
 
 
+class TestBobOmbBattlefieldKoopaShellAndWingCapIslandTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BOB_OPTIONS,
+        "logic_tricks": {"Bob-omb Battlefield Island with Koopa Shell and Wing Cap"},
+    }
+
+    def test_route_requires_koopa_troopa_and_wing_cap(self):
+        self.run_location_tests([
+            ["Bob-omb Battlefield - Shoot to the Island in the Sky", False,
+             ["Bob-omb Battlefield - Koopa Troopa"]],
+            ["Bob-omb Battlefield - Shoot to the Island in the Sky", False, WING_CAP],
+            ["Bob-omb Battlefield - Shoot to the Island in the Sky", True,
+             ["Bob-omb Battlefield - Koopa Troopa"] + WING_CAP],
+        ], starting_regions=["Bob-omb Battlefield"])
+
+
 class TestBobOmbBattlefieldMarioWingsWithoutCannon(SM64TestBase):
     run_default_tests = False
     options = {
@@ -174,11 +190,28 @@ class TestBobOmbBattlefieldMarioWingsWithoutCoinMarkers(SM64TestBase):
         ], starting_regions=["Bob-omb Battlefield"])
 
 
+class TestBobOmbBattlefieldMarioWingsWithTriggerSparkles(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BOB_OPTIONS,
+        "trigger_sparkles": True,
+    }
+
+    def test_location(self):
+        self.run_location_tests([
+            ["Bob-omb Battlefield - Mario Wings to the Sky", True,
+             CANNON + WING_CAP],
+        ], starting_regions=["Bob-omb Battlefield"])
+
+
 class TestBobOmbBattlefieldChainChompTrick(SM64TestBase):
     run_default_tests = False
     options = {
         **BOB_OPTIONS,
-        "logic_tricks": {"Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip"},
+        "logic_tricks": {
+            "Bob-omb Battlefield Chain Chomp Gate with Bob-omb Clip",
+            "Bob-omb Battlefield Chain Chomp Gate with Throwable Cork Box Clip"
+        },
     }
 
     def test_chain_chomp_gate_with_bob_omb(self):
@@ -188,4 +221,13 @@ class TestBobOmbBattlefieldChainChompTrick(SM64TestBase):
              ["Bob-omb Battlefield - Bob-ombs"]],
             ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
              ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Bob-ombs"]],
+        ], starting_regions=["Bob-omb Battlefield"])
+
+    def test_chain_chomp_gate_with_cork_box(self):
+        self.run_location_tests([
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False, []],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", False,
+             ["Bob-omb Battlefield - Throwable Cork Boxes"]],
+            ["Bob-omb Battlefield - Behind Chain Chomp's Gate", True,
+             ["Bob-omb Battlefield - Chain Chomp", "Bob-omb Battlefield - Throwable Cork Boxes"]],
         ], starting_regions=["Bob-omb Battlefield"])

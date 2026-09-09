@@ -2,11 +2,11 @@ import unittest
 
 from .bases import SM64TestBase
 from BaseClasses import CollectionState, ItemClassification
-from .. import Options
+from .. import Options, SPICY_MYCENA_VERSION
 from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, generic_item_data_table, global_cap_item_names, \
     simple_arbitrary_item_data_table, global_arbitrary_item_data_table, checkerboard_item_data_table, \
-    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, \
+    rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, item_table, item_data_table, \
     bowser_stage_1up_item_data_table, per_level_action_item_data_table, main_course_move_area_names, \
     separate_misc_move_area_names, collapsed_misc_move_area_names, non_climb_move_area_names, \
     cannon_item_data_table, painting_unlock_item_data_table, item_name_groups, \
@@ -17,20 +17,29 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, \
     global_checkerboard_item_names, global_rolling_log_item_names, global_purple_switch_item_names, \
     global_bobomb_buddy_item_names, global_treasure_chest_item_names, global_warp_pipe_item_names, \
-    per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names
-from ..Locations import coin_count_check_course_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
+    per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names, \
+    global_vertical_wind_item_names, global_horizontal_wind_item_names, vertical_wind_item_data_table, \
+    horizontal_wind_item_data_table, global_freestanding_star_item_names, global_star_block_item_names, \
+    global_koopa_shell_block_item_names, global_star_secret_item_names, global_jet_stream_item_names, \
+    global_cap_switch_item_names, cap_switch_item_data_table, \
+    freestanding_star_item_data_table, star_block_item_data_table, koopa_shell_block_item_data_table, \
+    star_secret_item_data_table, jet_stream_item_data_table
+from ..Locations import coin_count_check_course_data, secret_stage_coin_count_check_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coin_count_check_location_table, secret_stage_coin_count_check_location_table, get_coin_count_check_location_name, \
-    location_name_groups
+    get_global_coin_count_caps, get_global_coin_count_check_location_name, \
+    global_coin_count_check_location_table, global_coin_count_check_maximum, location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
 
 
-def world_has_reachable_starting_check(test_base: SM64TestBase, allowed_source_entrances=None) -> bool:
-    from ..Rules import has_reachable_starting_check
-    return has_reachable_starting_check(
-        test_base.multiworld, test_base.world.options, test_base.player, allowed_source_entrances)
+def world_has_two_reachable_starting_checks(test_base: SM64TestBase) -> bool:
+    state = CollectionState(test_base.multiworld)
+    return sum(
+        location.address is not None and location.can_reach(state)
+        for location in test_base.multiworld.get_locations(test_base.player)
+    ) >= 2
 
 wdw_variant_ids = {SM64_WDW_LOW, SM64_WDW_MIDDLE, SM64_WDW_HIGH}
 ttc_variant_ids = {SM64_TTC_STOPPED, SM64_TTC_SLOW, SM64_TTC_RANDOM, SM64_TTC_FAST}
@@ -76,6 +85,15 @@ class BowserStageCollapseHitsOptionTest(unittest.TestCase):
     def test_range(self):
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_start, 1)
         self.assertEqual(Options.BowserInTheSkyStageCollapseHits.range_end, 5)
+
+
+class WorldVersionSlotDataTest(SM64TestBase):
+    run_default_tests = False
+
+    def test_world_version_comes_from_manifest(self):
+        self.assertEqual(len(SPICY_MYCENA_VERSION), 3)
+        self.assertTrue(all(isinstance(part, int) and part >= 0 for part in SPICY_MYCENA_VERSION))
+        self.assertEqual(self.world.fill_slot_data()["SpicyMycenaVersion"], SPICY_MYCENA_VERSION)
 
 
 UNCOLLECT_TRAP_ONLY_OPTIONS = {
@@ -176,10 +194,10 @@ class FeatureItemPoolTestBase(SM64TestBase):
         return self.world.get_item_classification(item_data)
 
     def test_yoshi_location_id(self):
-        self.assertEqual(location_table["Castle - Yoshi"], 3626244)
+        self.assertEqual(location_table["Castle Grounds - Yoshi"], 3626244)
 
     def test_drain_the_moat_location_id(self):
-        self.assertEqual(location_table["Castle - Drain the Moat"], 3626245)
+        self.assertEqual(location_table["Castle Basement - Drain the Moat"], 3626245)
 
     def test_wmotr_bob_omb_buddy_location_id(self):
         self.assertEqual(location_table["Wing Mario Over the Rainbow - Bob-omb Buddy"], 3626525)
@@ -280,6 +298,7 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Castle - Yoshi": 3626276,
             "Unlock Bowser in the Fire Sea": 3626304,
             "Unlock Vanish Cap Under the Moat": 3626555,
+            "Unlock Bob-omb Battlefield": 3626230,
             "Unlock Whomp's Fortress": 3626231,
             "Unlock Jolly Roger Bay": 3626232,
             "Unlock Cool, Cool Mountain": 3626233,
@@ -358,8 +377,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Jolly Roger Bay - Treasure Chests": 3626929,
             "Dire, Dire Docks - Treasure Chests": 3626930,
             "Treasure Chests": 3626931,
-            "Bowser in the Dark World - Warp Pipes": 3626932,
-            "Bowser in the Sky - Warp Pipes": 3626934,
+            "Bowser in the Dark World - Warp Pipe": 3626932,
+            "Bowser in the Sky - Warp Pipe": 3626934,
             "Warp Pipes": 3626935,
             "Signs": 3626939,
             "Castle - Signs": 3626940,
@@ -379,6 +398,53 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "The Princess's Secret Slide - Signs": 3626954,
             "Cavern of the Metal Cap - Signs": 3626955,
             "Bowser in the Dark World - Signs": 3626956,
+            "Vertical Wind": 3627102,
+            "Cool, Cool Mountain - Vertical Wind": 3627103,
+            "Tall, Tall Mountain - Vertical Wind": 3627104,
+            "Tiny-Huge Island - Vertical Wind": 3627105,
+            "Horizontal Wind": 3627106,
+            "Bowser in the Sky - Horizontal Wind": 3627107,
+            "Rainbow Ride - Horizontal Wind": 3627108,
+            "Snowman's Land - Horizontal Wind": 3627109,
+            "Tiny-Huge Island - Horizontal Wind": 3627110,
+            "Dire, Dire Docks - Moat Exit": 3627114,
+            "Freestanding Stars": 3627115,
+            "Star Blocks": 3627116,
+            "Koopa Shell Blocks": 3627117,
+            "Star Secrets": 3627118,
+            "Bob-omb Battlefield - Freestanding Star": 3627119,
+            "Whomp's Fortress - Freestanding Stars": 3627120,
+            "Jolly Roger Bay - Freestanding Stars": 3627121,
+            "Cool, Cool Mountain - Freestanding Star": 3627122,
+            "Big Boo's Haunt - Freestanding Star": 3627123,
+            "Hazy Maze Cave - Freestanding Stars": 3627124,
+            "Lethal Lava Land - Freestanding Stars": 3627125,
+            "Shifting Sand Land - Freestanding Stars": 3627126,
+            "Dire, Dire Docks - Freestanding Stars": 3627127,
+            "Snowman's Land - Freestanding Stars": 3627128,
+            "Wet-Dry World - Freestanding Stars": 3627129,
+            "Tall, Tall Mountain - Freestanding Stars": 3627130,
+            "Tick Tock Clock - Freestanding Stars": 3627131,
+            "Rainbow Ride - Freestanding Stars": 3627132,
+            "Bob-omb Battlefield - Star Block": 3627133,
+            "Jolly Roger Bay - Star Blocks": 3627134,
+            "The Princess's Secret Slide - Star Block": 3627135,
+            "Rainbow Ride - Star Block": 3627136,
+            "Snowman's Land - Star Block": 3627137,
+            "Tiny-Huge Island - Star Block": 3627138,
+            "Wet-Dry World - Star Blocks": 3627139,
+            "Shifting Sand Land - Koopa Shell Block": 3627140,
+            "Snowman's Land - Koopa Shell Block": 3627141,
+            "Bob-omb Battlefield - Star Secrets": 3627142,
+            "Shifting Sand Land - Star Secrets": 3627143,
+            "Wet-Dry World - Star Secrets": 3627144,
+            "Tiny-Huge Island - Star Secrets": 3627145,
+            "Dire, Dire Docks - Jet Stream": 3627146,
+            "Jet Streams": 3627147,
+            "Cap Switches": 3627167,
+            "Tower of the Wing Cap - Cap Switch": 3627168,
+            "Cavern of the Metal Cap - Cap Switch": 3627169,
+            "Vanish Cap Under the Moat - Cap Switch": 3627170,
         }
         item_data = {
             **feature_item_data_table,
@@ -410,6 +476,24 @@ class FeatureItemPoolTestBase(SM64TestBase):
         self.assertEqual(item_table["Wing Mario Over the Rainbow - Ledge Grab"], 3627091)
         self.assertEqual(item_table["Misc - Triple Jump"], 3627092)
         self.assertEqual(item_table["Misc - Ledge Grab"], 3627101)
+
+    def test_wind_item_classifications(self):
+        expected = {
+            "Vertical Wind": ItemClassification.progression,
+            "Cool, Cool Mountain - Vertical Wind": ItemClassification.useful,
+            "Tall, Tall Mountain - Vertical Wind": ItemClassification.progression,
+            "Tiny-Huge Island - Vertical Wind": ItemClassification.progression,
+            "Horizontal Wind": ItemClassification.trap,
+            "Bowser in the Sky - Horizontal Wind": ItemClassification.trap,
+            "Rainbow Ride - Horizontal Wind": ItemClassification.trap,
+            "Snowman's Land - Horizontal Wind": ItemClassification.trap,
+            "Tiny-Huge Island - Horizontal Wind": ItemClassification.trap,
+        }
+        for item_name, classification in expected.items():
+            with self.subTest(item=item_name):
+                self.assertEqual(
+                    self.get_item_data_classification(item_data_table[item_name]),
+                    classification)
 
     def test_current_per_level_move_item_classifications(self):
         expected_classifications = {
@@ -483,6 +567,8 @@ class FeatureItemPoolTestBase(SM64TestBase):
                     "Bob-omb Buddies",
                     "Jolly Roger Bay - Treasure Chests",
                     "Dire, Dire Docks - Treasure Chests",
+                    *global_koopa_shell_block_item_names,
+                    *global_jet_stream_item_names,
                     *per_level_warp_pipe_item_names,
             }:
                 continue
@@ -494,6 +580,12 @@ class FeatureItemPoolTestBase(SM64TestBase):
             if item_name in feature_item_data_table:
                 continue
             with self.subTest("Non-act buddy in StartInventory", item=item_name):
+                self.assertEqual(start_inventory[item_table[item_name]], 1)
+
+        for item_name in (*koopa_shell_block_item_data_table, *jet_stream_item_data_table):
+            if item_name in {"Lethal Lava Land - Koopa Shell", "Jolly Roger Bay - Jet Stream"}:
+                continue
+            with self.subTest("Non-act level feature in StartInventory", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
 
     def test_precollected_items_are_only_added_to_apsm64ex_start_inventory(self):
@@ -728,6 +820,31 @@ class MariosHatItemPoolTestBase(SM64TestBase):
         self.assertNotIn(item_table["Mario's Hat"], start_inventory)
 
 
+class MariosHatLavaDamageBoostingItemPoolTestBase(SM64TestBase):
+    options = {
+        "logic_tricks": {"Lava Damage Boosting"},
+        "marios_hat": Options.MariosHat.option_true,
+    }
+
+    def test_marios_hat_is_progression_for_lava_damage_boosting(self):
+        self.assertEqual(
+            self.world.get_item_classification(optional_item_data_table["Mario's Hat"]),
+            ItemClassification.progression,
+        )
+        self.assertTrue(self.get_items_by_name("Mario's Hat")[0].advancement)
+
+
+class TinyHugeIslandImpossibleCoinKickClassificationTestBase(SM64TestBase):
+    options = {
+        "kick": Options.Kick.option_per_level,
+        "logic_tricks": {"Tiny Island Impossible Coin"},
+    }
+
+    def test_tiny_huge_island_kick_is_progression(self):
+        item = self.get_items_by_name("Tiny-Huge Island - Kick")[0]
+        self.assertEqual(item.classification, ItemClassification.progression)
+
+
 class OneUpChecksOnTestBase(SM64TestBase):
     options = {
         "one_up_checks": Options.OneUpChecks.option_true,
@@ -797,6 +914,48 @@ class BothOneUpUnlockItemPoolTestBase(SM64TestBase):
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
 
+class MontyMoleEnemyUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
+    }
+
+    def test_enemy_unlocks_generate_monty_moles_when_one_ups_are_not_shuffled(self):
+        self.assertEqual(len(self.get_items_by_name("Hazy Maze Cave - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Tall, Tall Mountain - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Monty Moles")), 0)
+
+
+class MontyMoleOneUpUnlockItemPoolTestBase(SM64TestBase):
+    options = {
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
+    }
+
+    def test_one_up_unlocks_own_monty_moles_without_duplicates(self):
+        self.assertEqual(len(self.get_items_by_name("Hazy Maze Cave - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Tall, Tall Mountain - Monty Moles")), 1)
+        self.assertEqual(len(self.get_items_by_name("Monty Moles")), 0)
+
+
+class DddMoatExitClassificationTestBase(SM64TestBase):
+    options = {"sub_area_shuffle": Options.SubAreaShuffle.option_separate}
+
+    def test_moat_exit_is_a_trap_without_castle_returns(self):
+        items = self.get_items_by_name("Dire, Dire Docks - Moat Exit")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].classification, ItemClassification.trap)
+
+
+class DddMoatExitCastleReturnsClassificationTestBase(SM64TestBase):
+    options = {"castle_return_shuffle": Options.CastleReturnShuffle.option_mixed}
+
+    def test_moat_exit_is_progression_with_castle_returns(self):
+        items = self.get_items_by_name("Dire, Dire Docks - Moat Exit")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].classification, ItemClassification.progression)
+
+
 class DisabledLevelUnlockItemPoolTestBase(SM64TestBase):
     options = {"level_unlocks": Options.LevelUnlocks.option_disabled}
 
@@ -829,6 +988,26 @@ class FullLevelUnlockItemPoolTestBase(SM64TestBase):
             self.assertEqual(len(self.get_items_by_name(item_name)), 1)
             self.assertNotIn(item_table[item_name], slot_data["StartInventory"])
 
+    def test_sphere_one_level_unlock_is_local_early(self):
+        early_items = self.multiworld.local_early_items[self.player]
+        self.assertEqual(sum(early_items.values()), 1)
+        self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
+
+    def test_optional_second_level_unlock_is_valid(self):
+        early_items = self.multiworld.early_items[self.player]
+        self.assertLessEqual(sum(early_items.values()), 1)
+        self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
+
+
+class FullLevelUnlockWithVisitChecksTestBase(FullLevelUnlockItemPoolTestBase):
+    options = {
+        "level_unlocks": Options.LevelUnlocks.option_full,
+        "visit_checks": Options.VisitChecks.option_true,
+    }
+
+    def test_visit_checks_do_not_change_the_guaranteed_local_unlock(self):
+        self.assertEqual(sum(self.multiworld.local_early_items[self.player].values()), 1)
+
 
 class BlocksanityOnTestBase(SM64TestBase):
     options = {
@@ -848,12 +1027,14 @@ class BlocksanityOnTestBase(SM64TestBase):
 class GameBehaviorSlotDataTestBase(SM64TestBase):
     options = {
         "easy_butterflies": Options.EasyButterflies.option_true,
+        "trigger_sparkles": Options.TriggerSparkles.option_true,
         "no_despawns": Options.NoDespawns.option_true,
     }
 
     def test_game_behavior_slot_data(self):
         slot_data = self.world.fill_slot_data()
         self.assertEqual(slot_data["EasyButterflies"], 1)
+        self.assertEqual(slot_data["TriggerSparkles"], 1)
         self.assertEqual(slot_data["NoDespawn"], 1)
         self.assertNotIn("PermanentCoinCollection", slot_data)
 
@@ -926,7 +1107,8 @@ class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
     options = {
         "triple_jump": Options.TripleJump.option_per_level,
         "climb": Options.Climb.option_per_level,
-        "collapse_misc_moves": Options.CollapseMiscMoves.option_false,
+        "combined_castle_and_secret_stage_move_items":
+            Options.CombinedCastleAndSecretStageMoveItems.option_false,
     }
 
     def test_separate_castle_and_secret_stage_moves_are_generated(self):
@@ -942,7 +1124,8 @@ class SeparateSecretStageMoveItemPoolTestBase(SM64TestBase):
                 self.assertEqual(len(self.get_items_by_name(f"{area_name} - Climb")), expected_count)
 
     def test_collapse_option_is_in_slot_data(self):
-        self.assertEqual(self.world.fill_slot_data()["Options"]["collapse_misc_moves"], 0)
+        self.assertEqual(
+            self.world.fill_slot_data()["Options"]["combined_castle_and_secret_stage_move_items"], 0)
 
 
 class IndividualArbitraryItemPoolTestBase(SM64TestBase):
@@ -952,7 +1135,19 @@ class IndividualArbitraryItemPoolTestBase(SM64TestBase):
     }
 
     def test_individual_arbitrary_items_are_generated(self):
-        for item_name in {**checkerboard_item_data_table, **rolling_log_item_data_table, **purple_switch_item_data_table}:
+        for item_name in {
+                **checkerboard_item_data_table,
+                **rolling_log_item_data_table,
+                **purple_switch_item_data_table,
+                **vertical_wind_item_data_table,
+                **horizontal_wind_item_data_table,
+                **freestanding_star_item_data_table,
+                **star_block_item_data_table,
+                **koopa_shell_block_item_data_table,
+                **star_secret_item_data_table,
+                **jet_stream_item_data_table,
+                **cap_switch_item_data_table,
+        }:
             with self.subTest("Individual arbitrary item generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
@@ -975,6 +1170,14 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *global_purple_switch_item_names,
             *global_treasure_chest_item_names,
             *global_warp_pipe_item_names,
+            *global_vertical_wind_item_names,
+            *global_horizontal_wind_item_names,
+            *global_freestanding_star_item_names,
+            *global_star_block_item_names,
+            *global_koopa_shell_block_item_names,
+            *global_star_secret_item_names,
+            *global_jet_stream_item_names,
+            *global_cap_switch_item_names,
         )
         per_level_names = (
             *checkerboard_item_data_table,
@@ -982,6 +1185,14 @@ class BothLevelFeatureAndBuddyItemPoolTestBase(SM64TestBase):
             *purple_switch_item_data_table,
             *per_level_treasure_chest_item_names,
             *per_level_warp_pipe_item_names,
+            *vertical_wind_item_data_table,
+            *horizontal_wind_item_data_table,
+            *freestanding_star_item_data_table,
+            *star_block_item_data_table,
+            *koopa_shell_block_item_data_table,
+            *star_secret_item_data_table,
+            *jet_stream_item_data_table,
+            *cap_switch_item_data_table,
         )
         for item_name in (*global_names, *per_level_names):
             with self.subTest(item=item_name):
@@ -1007,6 +1218,14 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Purple Switches",
                 "Treasure Chests",
                 "Warp Pipes",
+                "Vertical Wind",
+                "Horizontal Wind",
+                "Freestanding Stars",
+                "Star Blocks",
+                "Koopa Shell Blocks",
+                "Star Secrets",
+                "Jet Streams",
+                "Cap Switches",
         ):
             with self.subTest("Unshuffled arbitrary item not generated", item=item_name):
                 self.assertEqual(len(self.get_items_by_name(item_name)), 0)
@@ -1022,6 +1241,14 @@ class UnshuffledArbitraryItemPoolTestBase(SM64TestBase):
                 "Purple Switches",
                 "Treasure Chests",
                 "Warp Pipes",
+                "Vertical Wind",
+                "Horizontal Wind",
+                "Freestanding Stars",
+                "Star Blocks",
+                "Koopa Shell Blocks",
+                "Star Secrets",
+                "Jet Streams",
+                "Cap Switches",
         ):
             with self.subTest("Unshuffled arbitrary item in StartInventory only", item=item_name):
                 self.assertEqual(start_inventory[item_table[item_name]], 1)
@@ -1167,7 +1394,16 @@ class BothCoinAndEnemyUnlockItemPoolTestBase(SM64TestBase):
 class UnshuffledBowserArenaBombItemPoolTestBase(SM64TestBase):
     def test_bowser_arena_bombs_are_start_inventory_slot_data_only(self):
         start_inventory = self.world.fill_slot_data()["StartInventory"]
-        self.assertEqual(start_inventory[item_table["Progressive Bowser Arena Bomb"]], 5)
+        expected_names = {
+            *(f"Bowser Arena Bomb {bomb}" for bomb in range(1, 5)),
+            "Bowser in the Sky - Bowser Arena Bomb 5",
+        }
+        self.assertEqual({
+            item_name for item_name, item_id in item_table.items()
+            if item_id in start_inventory
+        } & set(bowser_bomb_item_data_table), expected_names)
+        for item_name in expected_names:
+            self.assertEqual(start_inventory[item_table[item_name]], 1)
         for item_name in bowser_bomb_item_data_table:
             self.assertEqual(len(self.get_items_by_name(item_name)), 0)
 
@@ -1176,40 +1412,28 @@ class GlobalBowserArenaBombItemPoolTestBase(SM64TestBase):
     options = {"bowser_bombs": Options.BowserBombs.option_global}
 
     def test_global_bowser_arena_bombs_are_generated(self):
-        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 5)
-        self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 0)
-        self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")), 0)
-        self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Fire Sea - Progressive Bowser Arena Bomb")), 0)
+        expected_names = {
+            *(f"Bowser Arena Bomb {bomb}" for bomb in range(1, 5)),
+            "Bowser in the Sky - Bowser Arena Bomb 5",
+        }
+        for item_name in bowser_bomb_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), int(item_name in expected_names))
 
 
 class IndividualBowserArenaBombItemPoolTestBase(SM64TestBase):
     options = {"bowser_bombs": Options.BowserBombs.option_per_level}
 
     def test_individual_bowser_arena_bombs_are_generated(self):
-        expected_counts = {
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb": 4,
-            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb": 4,
-            "Bowser in the Sky - Progressive Bowser Arena Bomb": 5,
-        }
-        for item_name, count in expected_counts.items():
-            self.assertEqual(len(self.get_items_by_name(item_name)), count)
-        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 0)
+        for item_name in bowser_bomb_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), int(item_name.startswith("Bowser in the")))
 
 
 class BothBowserArenaBombItemPoolTestBase(SM64TestBase):
     options = {"bowser_bombs": Options.BowserBombs.option_both}
 
     def test_both_bowser_arena_bomb_item_forms_are_generated(self):
-        self.assertEqual(len(self.get_items_by_name("Progressive Bowser Arena Bomb")), 5)
-        self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Dark World - Progressive Bowser Arena Bomb")), 4)
-        self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Fire Sea - Progressive Bowser Arena Bomb")), 4)
-        self.assertEqual(
-            len(self.get_items_by_name("Bowser in the Sky - Progressive Bowser Arena Bomb")), 5)
+        for item_name in bowser_bomb_item_data_table:
+            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
 
 
 class GroupedCastleKeyPoolTestBase(SM64TestBase):
@@ -1369,7 +1593,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
             Options.SnowmansLandCoinStarRequirement: 127,
             Options.WetDryWorldCoinStarRequirement: 152,
             Options.TallTallMountainCoinStarRequirement: 137,
-            Options.TinyHugeIslandCoinStarRequirement: 193,
+            Options.TinyHugeIslandCoinStarRequirement: 192,
             Options.TickTockClockCoinStarRequirement: 128,
             Options.RainbowRideCoinStarRequirement: 146,
         }
@@ -1410,6 +1634,7 @@ class SecretStageCoinCountMaxCoinsOptionTestBase(SM64TestBase):
                 self.assertEqual(option.range_start, 0)
                 self.assertEqual(option.range_end, range_end)
                 self.assertEqual(option.default, default)
+                self.assertEqual(option.visibility, Options.Visibility.none)
 
 
 class CoinCountChecksLocationTableTestBase(SM64TestBase):
@@ -1421,7 +1646,6 @@ class CoinCountChecksLocationTableTestBase(SM64TestBase):
             "Bob-omb Battlefield - 145 Coins": 3627144,
             "Whomp's Fortress - 1 Coin": 3627146,
             "Jolly Roger Bay - 1 Coin": 3627287,
-            "Tiny-Huge Island - 192 Coins": 3629091,
             "Rainbow Ride - 145 Coins": 3629089,
             "The Princess's Secret Slide - 1 Coin": 3629193,
             "The Princess's Secret Slide - 80 Coins": 3629272,
@@ -1455,11 +1679,11 @@ class CoinCountChecksLocationTableTestBase(SM64TestBase):
             "Snowman's Land": 127,
             "Wet-Dry World": 152,
             "Tall, Tall Mountain": 137,
-            "Tiny-Huge Island": 193,
+            "Tiny-Huge Island": 192,
             "Tick Tock Clock": 128,
             "Rainbow Ride": 146,
         }
-        self.assertEqual(len(coin_count_check_location_table), 2643)
+        self.assertEqual(len(coin_count_check_location_table), 2642)
         self.assertEqual(len(secret_stage_coin_count_check_location_table), 565)
         for course_name, coin_count in skipped_final_locations.items():
             with self.subTest("Final coin threshold skipped", course=course_name):
@@ -1472,6 +1696,95 @@ class CoinCountChecksDefaultOffTestBase(SM64TestBase):
     def test_default_no_active_coin_count_check_locations(self):
         active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
         self.assertFalse(active_locations.intersection(coin_count_check_location_table))
+
+
+class GlobalCoinCountChecksDefaultOffTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_default_no_active_global_coin_count_check_locations(self):
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertFalse(active_locations.intersection(global_coin_count_check_location_table))
+
+
+class GlobalCoinCountChecksGenerationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "global_coin_count_checks": 1,
+    }
+
+    def test_global_coin_count_checks_use_the_total_of_the_configured_course_caps(self):
+        caps = self.world.get_global_coin_count_caps()
+        maximum = sum(caps)
+        active_locations = {location.name for location in self.multiworld.get_locations(self.player)}
+        self.assertEqual(len(self.world.global_coin_count_check_location_names), (maximum + 99) // 100)
+        self.assertEqual(self.world.global_coin_count_check_location_names[-1],
+                         get_global_coin_count_check_location_name(maximum))
+        self.assertIn(get_global_coin_count_check_location_name(maximum), active_locations)
+
+    def test_global_coin_count_locations_are_in_the_origin_region(self):
+        location_name = self.world.global_coin_count_check_location_names[0]
+        location = self.multiworld.get_location(location_name, self.player)
+        self.assertEqual(location.parent_region.name, self.world.origin_region_name)
+
+    def test_global_coin_count_rules_evaluate_unreachable_courses_without_counting_them(self):
+        location_name = self.world.global_coin_count_check_location_names[0]
+        location = self.multiworld.get_location(location_name, self.player)
+        self.assertIsInstance(location.can_reach(CollectionState(self.multiworld)), bool)
+
+
+class GlobalCoinCountCapsTestBase(SM64TestBase):
+    run_default_tests = False
+
+    def test_coin_stars_and_secret_stage_maxes_cap_global_counts_by_default(self):
+        coin_star_requirements = {
+            option_name: maximum
+            for _course_name, _offset, option_name, maximum in coin_count_check_course_data
+        }
+        secret_stage_coin_maxes = {
+            option_name: maximum
+            for _course_name, _base_id, option_name, maximum in secret_stage_coin_count_check_data
+        }
+        coin_star_requirements["bob_omb_battlefield_coin_star_requirement"] = 100
+        secret_stage_coin_maxes["princess_secret_slide_coin_count_max_coins"] = 10
+        capped = get_global_coin_count_caps(
+            coin_star_requirements,
+            secret_stage_coin_maxes,
+            False,
+        )
+        all_coins = get_global_coin_count_caps(
+            coin_star_requirements,
+            secret_stage_coin_maxes,
+            True,
+            {"Snowman's Land": 126, "Tiny-Huge Island": 191},
+        )
+        self.assertEqual(capped[0], 100)
+        self.assertEqual(capped[len(coin_count_check_course_data)], 10)
+        self.assertEqual(all_coins[0], 146)
+        self.assertEqual(all_coins[len(coin_count_check_course_data)], 80)
+        self.assertEqual(all_coins[9], 126)
+        self.assertEqual(all_coins[12], 191)
+        self.assertEqual(sum(all_coins), global_coin_count_check_maximum - 2)
+
+
+class GlobalCoinCountChecksFullAccessibilityTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "global_coin_count_checks": 100,
+        "counts_coins_beyond_coin_stars": 1,
+        "accessibility": Options.SM64Accessibility.option_full,
+    }
+
+    def test_impossible_coins_do_not_create_unreachable_final_global_checks(self):
+        maximum = global_coin_count_check_maximum - 2
+        self.assertEqual(sum(self.world.get_global_coin_count_caps()), maximum)
+        self.assertIn(
+            get_global_coin_count_check_location_name(maximum),
+            self.world.global_coin_count_check_location_names,
+        )
+        self.assertNotIn(
+            get_global_coin_count_check_location_name(maximum + 1),
+            self.world.global_coin_count_check_location_names,
+        )
 
 
 class CoinCountChecksGenerationTestBase(SM64TestBase):
@@ -1490,6 +1803,46 @@ class CoinCountChecksGenerationTestBase(SM64TestBase):
     def test_thi_coin_count_check_locations_use_shared_coins_region(self):
         location = self.multiworld.get_location("Tiny-Huge Island - 33 Coins", self.player)
         self.assertEqual(location.parent_region.name, "Tiny-Huge Island - Coins")
+
+    def test_courses_with_shufflable_subareas_use_shared_coins_regions(self):
+        for course_name in (
+                "Jolly Roger Bay",
+                "Cool, Cool Mountain",
+                "Lethal Lava Land",
+                "Shifting Sand Land",
+                "Snowman's Land",
+                "Tall, Tall Mountain",
+        ):
+            with self.subTest(course=course_name):
+                location_name = next(
+                    name for name in self.world.coin_count_check_location_names
+                    if name.startswith(f"{course_name} - ")
+                )
+                location = self.multiworld.get_location(location_name, self.player)
+                self.assertEqual(location.parent_region.name, f"{course_name} - Coins")
+
+    def test_coin_star_regions_accept_only_coin_bearing_physical_areas(self):
+        expected_parents = {
+            "Jolly Roger Bay": {"Jolly Roger Bay"},
+            "Cool, Cool Mountain": {"Cool, Cool Mountain", "Cool, Cool Mountain - Secret Slide"},
+            "Lethal Lava Land": {"Lethal Lava Land", "Lethal Lava Land - Volcano"},
+            "Shifting Sand Land": {
+                "Shifting Sand Land", "Shifting Sand Land - Pyramid",
+                "Shifting Sand Land - Pyramid Top Entry",
+            },
+            "Snowman's Land": {"Snowman's Land", "Snowman's Land - Igloo"},
+            "Tall, Tall Mountain": {"Tall, Tall Mountain", "Tall, Tall Mountain - Secret Slide"},
+            "Tiny-Huge Island": {
+                "Tiny-Huge Island (Tiny)", "Tiny-Huge Island (Huge)",
+                "Tiny-Huge Island - Huge Tree Area", "Tiny-Huge Island - Red Coin Cave",
+                "Tiny-Huge Island - Wiggler's Cave",
+            },
+        }
+        for course_name, parents in expected_parents.items():
+            with self.subTest(course=course_name):
+                coin_region = self.multiworld.get_region(f"{course_name} - Coins", self.player)
+                self.assertEqual(
+                    {entrance.parent_region.name for entrance in coin_region.entrances}, parents)
 
 
 class SecretStageCoinCountChecksTestBase(SM64TestBase):
@@ -1592,8 +1945,7 @@ class TowerOfTheWingCapMasteryGenerationTestBase(TowerOfTheWingCapItemsAccessibi
 class CoinCountChecksOverflowGenerationTestBase(SM64TestBase):
     run_default_tests = False
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "level_unlocks": Options.LevelUnlocks.option_full,
+                "level_unlocks": Options.LevelUnlocks.option_full,
         "cap_items": Options.CapItems.option_per_level,
         "buddy_checks": Options.BuddyChecks.option_true,
         "one_up_checks": Options.OneUpChecks.option_false,
@@ -1637,6 +1989,18 @@ class CoinCountChecksOverflowGenerationTestBase(SM64TestBase):
                 self.assertEqual(coin_counts, list(range(1, len(coin_counts) + 1)))
 
 
+class CoinCountChecksNoOverflowWithIndividualCoinChecksTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **CoinCountChecksOverflowGenerationTestBase.options,
+        "coin_checks": 100,
+    }
+
+    def test_individual_coin_locations_prevent_false_overflow(self):
+        self.assertEqual(self.world.coin_count_check_location_names, ())
+        self.assertGreater(self.world.filler_count, 0)
+
+
 # 1-Up Checks
 class OneUpChecksOffTestBase(SM64TestBase):
     options = {
@@ -1650,9 +2014,7 @@ class OneUpChecksOffTestBase(SM64TestBase):
 
 # Entrance Randomizer
 class EntranceRandoOffTestBase(SM64TestBase):
-    options = {
-        "area_rando": Options.AreaRandomizer.option_Off
-    }
+    options = {}
 
     # Ensure entrance rando disabled
     def test_all_entrances_are_vanilla(self):
@@ -1678,14 +2040,13 @@ class EntranceRandoOffTestBase(SM64TestBase):
             with self.subTest("TTC variant maps to itself", variant=variant_id):
                 self.assertEqual(self.world.area_connections[variant_id], variant_id)
 
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+    def test_starting_state_has_two_reachable_checks(self):
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Off,
-        "level_unlocks": Options.LevelUnlocks.option_full,
+                "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
     }
 
@@ -1694,12 +2055,13 @@ class EntranceRandoOffLockedPaintingsTestBase(SM64TestBase):
             with self.subTest("Entrance maps to itself", entrance=entrance_level_id):
                 self.assertEqual(self.world.area_connections[entrance_level_id], entrance_level_id)
 
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+    def test_starting_state_has_two_reachable_checks(self):
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 class EntranceRandoCourseTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_Only
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla
     }
 
     def test_BoB_entrance(self):
@@ -1719,8 +2081,8 @@ class EntranceRandoCourseTestBase(SM64TestBase):
                 self.assertIn(variant_id, self.world.area_connections)
                 self.assertIn(self.world.area_connections[variant_id], sm64_level_to_paintings.keys())
 
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+    def test_starting_state_has_two_reachable_checks(self):
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
     def test_event_locations_are_not_entrance_hinted(self):
         hint_data = {}
@@ -1732,7 +2094,8 @@ class EntranceRandoCourseTestBase(SM64TestBase):
 
 class EntranceRandoSeparateTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate
     }
 
     def test_BoB_entrance(self):
@@ -1758,7 +2121,8 @@ class EntranceRandoSeparateTestBase(SM64TestBase):
 
 class EntranceRandoAllTestBase(SM64TestBase):
     options = {
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets
+        "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed
     }
 
     def test_BitFS_entrance(self):
@@ -1778,11 +2142,41 @@ class CompletionLastBowserTestBase(SM64TestBase):
         "completion_type": Options.CompletionType.option_Last_Bowser_Stage
     }
 
+    def test_grand_star_check_is_not_created(self):
+        self.assertNotIn(
+            "Bowser in the Sky - Grand Star",
+            {location.name for location in self.multiworld.get_locations(self.player)},
+        )
+
 
 class CompletionAllBowserTestBase(SM64TestBase):
     options = {
         "completion_type": Options.CompletionType.option_All_Bowser_Stages
     }
+
+    def test_grand_star_check_is_created(self):
+        location = self.multiworld.get_location("Bowser in the Sky - Grand Star", self.player)
+        self.assertEqual(location.parent_region.name, "Bowser in the Sky - Bowser Arena")
+
+    def test_grand_star_check_requires_all_bowser_stages(self):
+        state = self.multiworld.get_all_state(False)
+        location = self.multiworld.get_location("Bowser in the Sky - Grand Star", self.player)
+        self.assertTrue(location.can_reach(state))
+
+        for required_location_name in (
+            "Bowser in the Dark World - Key",
+            "Bowser in the Fire Sea - Key",
+        ):
+            required_location = self.multiworld.get_location(required_location_name, self.player)
+            original_rule = required_location.access_rule
+            try:
+                required_location.access_rule = lambda _: False
+                self.assertFalse(
+                    location.can_reach(self.multiworld.get_all_state(False)),
+                    required_location_name,
+                )
+            finally:
+                required_location.access_rule = original_rule
 
 
 # Option Combos
@@ -1796,24 +2190,29 @@ class NoPowerStarsTestBase(SM64TestBase):
     }
 
     def test_no_power_stars_generated(self):
-        cap_length_items = sum(
+        progressive_filler_items = sum(
             len(self.get_items_by_name(item_name))
             for item_name in (
-                "Progressive Wing Cap Length",
-                "Progressive Metal Cap Length",
-                "Progressive Vanish Cap Length",
+                "Progressive Cap Length",
+                "Progressive Breath",
+                "Progressive Damage Dodge",
             )
         )
-        self.assertGreater(cap_length_items, 0)
+        self.assertGreater(progressive_filler_items, 0)
         self.assertNotIn("1-Up Mushroom", self.world.item_name_to_id)
         slot_data = self.world.fill_slot_data()
-        cap_length_counts = [
-            slot_data["WingCapLengthItemCount"],
-            slot_data["MetalCapLengthItemCount"],
-            slot_data["VanishCapLengthItemCount"],
+        self.assertNotIn("WingCapLengthItemCount", slot_data)
+        self.assertNotIn("MetalCapLengthItemCount", slot_data)
+        self.assertNotIn("VanishCapLengthItemCount", slot_data)
+        filler_counts = [
+            len(self.get_items_by_name(item_name))
+            for item_name in (
+                "Progressive Cap Length",
+                "Progressive Breath",
+                "Progressive Damage Dodge",
+            )
         ]
-        self.assertEqual(sum(cap_length_counts), cap_length_items)
-        self.assertLessEqual(max(cap_length_counts) - min(cap_length_counts), 1)
+        self.assertLessEqual(max(filler_counts) - min(filler_counts), 1)
         self.assertNotIn("Power Star", {item.name for item in self.multiworld.get_items()})
 
 
@@ -1821,7 +2220,8 @@ class NoPowerStarsTestBase(SM64TestBase):
 class CourseEntrancesMoveTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_Only
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla
     }
 
     def test_BoB_entrance(self):
@@ -1836,27 +2236,26 @@ class CourseEntrancesMoveTestBase(SM64TestBase):
         self.assertEqual(self.world.area_connections[bitfs_level_id], bitfs_level_id)
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class CourseEntrancesLockedPaintingsMoveTestBase(SM64TestBase):
     options = {
         "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_Only
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla
     }
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
-
-    def test_princess_slide_source_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self, ("The Princess's Secret Slide",)))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class SeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate
     }
 
     def test_BoB_entrance(self):
@@ -1871,24 +2270,26 @@ class SeparateEntrancesMoveTestBase(SM64TestBase):
         self.assertIsNot(self.world.area_connections[bitfs_level_id], sm64_entrances_to_level["Dire, Dire Docks"])
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class LockedPaintingsSeparateEntrancesMoveTestBase(SM64TestBase):
     options = {
         "level_unlocks": Options.LevelUnlocks.option_full,
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets_Separate
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate
     }
 
     def test_starting_sources_have_reachable_checks(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
 
 class AllEntrancesMoveTestBase(SM64TestBase):
     options = {
         **SHUFFLED_GLOBAL_MOVE_OPTIONS,
-        "area_rando": Options.AreaRandomizer.option_Courses_and_Secrets
+        "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_mixed
     }
 
     def test_BoB_entrance(self):
@@ -1900,7 +2301,7 @@ class AllEntrancesMoveTestBase(SM64TestBase):
         self.assertIsNot(self.world.area_connections[bitfs_level_id], sm64_entrances_to_level["Dire, Dire Docks"])
 
     def test_starting_state_has_reachable_check(self):
-        self.assertTrue(world_has_reachable_starting_check(self))
+        self.assertTrue(world_has_two_reachable_starting_checks(self))
 
     def test_CotMC_entrance(self):
         cotmc_level_id = sm64_entrances_to_level["Cavern of the Metal Cap"]

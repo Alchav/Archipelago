@@ -1,22 +1,23 @@
 import re
-from typing import Union, Dict, Set
+from typing import Union
 
 from BaseClasses import CollectionState, DEFAULT_COLLECTION_RULE, Entrance, MultiWorld
 from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Has, HasAll, HasAny, \
     Or, Rule, True_
-from .Locations import locOneUp_table, location_table, one_up_unlock_category_by_location, \
-    parse_coin_count_check_location_name
+from .Locations import SM64Location, locOneUp_table, location_table, one_up_unlock_category_by_location, \
+    parse_coin_count_check_location_name, parse_global_coin_count_check_location_name, global_coin_count_course_data
 from .CoinChecks import coin_output_by_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, create_region, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
-    get_shuffled_entrance_ids, sm64_ttc_entrances, sm64_wdw_entrances
+    sm64_ttc_entrances, sm64_wdw_entrances
 from .Items import action_item_data_table, cap_item_data_table, feature_item_data_table, \
-    per_level_move_area_names, ut_glitch_item_name
+    per_level_move_area_names, ut_glitch_item_name, freestanding_star_item_data_table, \
+    star_block_item_data_table, koopa_shell_block_item_data_table, star_secret_item_data_table
 from .LogicTricks import logic_tricks
-from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoinOutput, CanCollectCoins, HasUnlock, LogicTrick, \
+from .RuleBuilder import CanCollectAllRedCoins, CanCollectCoinOutput, CanCollectCoins, CanCollectGlobalCoins, HasUnlock, LogicTrick, \
     register_coin_evaluator
-from .CoinLogic import COIN_EVALUATORS
+from .CoinLogic import COIN_EVALUATORS, SSL_UPPER_PYRAMID_ENTRANCE_RULE
 from .Signs import sign_data, sign_item_name_for_area
 from .SubAreas import CASTLE_RETURN_DESTINATIONS, CASTLE_RETURN_SOURCES, RETURN_DESTINATIONS, RETURN_SOURCES, \
     SUB_AREA_DESTINATIONS, SUB_AREA_SOURCES, build_mixed_connections, build_separate_connections, \
@@ -36,8 +37,6 @@ initial_reachable_entrances = (
     "Cool, Cool Mountain",
     "The Princess's Secret Slide",
 )
-minimum_starting_check_count = 2
-
 simple_level_feature_items = {
     "HMC_SWIMMING_BEAST": "Hazy Maze Cave - Swimming Beast",
     "RR_CARPETS": "Rainbow Ride - Carpets",
@@ -50,8 +49,8 @@ simple_level_feature_items = {
 
 warp_pipe_item_name_by_level = {
     "Tiny-Huge Island": "Tiny-Huge Island - Warp Pipes",
-    "Bowser in the Dark World": "Bowser in the Dark World - Warp Pipes",
-    "Bowser in the Sky": "Bowser in the Sky - Warp Pipes",
+    "Bowser in the Dark World": "Bowser in the Dark World - Warp Pipe",
+    "Bowser in the Sky": "Bowser in the Sky - Warp Pipe",
 }
 
 checkerboard_item_name_by_level = {
@@ -131,7 +130,11 @@ per_act_feature_tokens = {
 
 move_area_name_aliases = {
     "Castle Grounds": "Castle",
+    "Castle First Floor": "Castle",
     "Castle Courtyard": "Castle",
+    "Castle Basement": "Castle",
+    "Castle Second Floor": "Castle",
+    "Castle Third Floor": "Castle",
     "The Princess's Secret Slide": "Castle",
     "The Secret Aquarium": "Castle",
 }
@@ -149,16 +152,16 @@ misc_move_area_names = {
 }
 
 
-def get_move_area_name(level_name: str, collapse_misc_moves: bool = True) -> str:
+def get_move_area_name(level_name: str, combined_castle_and_secret_stage_move_items: bool = True) -> str:
     move_area_name = move_area_name_aliases.get(level_name, level_name)
-    if collapse_misc_moves and move_area_name in misc_move_area_names:
+    if combined_castle_and_secret_stage_move_items and move_area_name in misc_move_area_names:
         return "Misc"
     return move_area_name
 
 
 def get_per_level_action_item_name(
-        level_name: str, action: str, collapse_misc_moves: bool = True) -> str | None:
-    move_area_name = get_move_area_name(level_name, collapse_misc_moves)
+        level_name: str, action: str, combined_castle_and_secret_stage_move_items: bool = True) -> str | None:
+    move_area_name = get_move_area_name(level_name, combined_castle_and_secret_stage_move_items)
     if move_area_name not in per_level_move_area_names:
         return None
     return f"{move_area_name} - {action}"
@@ -318,7 +321,8 @@ def can_collect_all_lethal_lava_land_red_coins(
             "Lethal Lava Land - Bowser Puzzle", "Lethal Lava Land - Bowser Puzzle"):
         return True
     has_lava_crossing = (
-        state.has("Lethal Lava Land - Koopa Shell", player)
+        has_level_feature(
+            state, player, "level_features", "Koopa Shell Blocks", "Lethal Lava Land - Koopa Shell")
         or can_use_logic_trick(state, player, "logic_lava_damage_boosting", target_name)
     )
     return has_lava_crossing and has_lethal_lava_land_healing_coins(state, player)
@@ -330,7 +334,8 @@ def can_reach_lethal_lava_land_red_coins(
         has_unlock(
             state, player, "coin_object_unlocks",
             "Lethal Lava Land - Bowser Puzzle", "Lethal Lava Land - Bowser Puzzle")
-        or state.has("Lethal Lava Land - Koopa Shell", player)
+        or has_level_feature(
+            state, player, "level_features", "Koopa Shell Blocks", "Lethal Lava Land - Koopa Shell")
         or can_use_logic_trick(state, player, "logic_lava_damage_boosting", target_name)
     )
 
@@ -341,18 +346,6 @@ def shuffle_dict_keys(multiworld: MultiWorld, dictionary: dict) -> dict:
     multiworld.random.shuffle(keys)
     return dict(zip(keys, values))
 
-def fix_reg(entrance_map: Dict[SM64Levels, str], entrance: SM64Levels, invalid_regions: Set[str],
-            swapdict: Dict[SM64Levels, str], multiworld: MultiWorld):
-    if entrance_map[entrance] in invalid_regions: # Unlucky :C
-        replacement_regions = [(rand_entrance, rand_region) for rand_entrance, rand_region in swapdict.items()
-                               if rand_region not in invalid_regions]
-        rand_entrance, rand_region = multiworld.random.choice(replacement_regions)
-        old_dest = entrance_map[entrance]
-        entrance_map[entrance], entrance_map[rand_entrance] = rand_region, old_dest
-        swapdict[entrance], swapdict[rand_entrance] = rand_region, old_dest
-    swapdict.pop(entrance)
-
-
 def is_starting_check_location(location_name: str, options: SM64Options) -> bool:
     if not options.one_up_checks and location_name in locOneUp_table:
         return False
@@ -361,132 +354,10 @@ def is_starting_check_location(location_name: str, options: SM64Options) -> bool
     return True
 
 
-def get_starting_check_sources(options: SM64Options) -> tuple[str, ...]:
-    if options.level_unlocks.value == options.level_unlocks.option_full:
-        return ("Bob-omb Battlefield", "The Princess's Secret Slide")
-    return initial_reachable_entrances
-
-
-def get_randomized_entrance_connections(multiworld: MultiWorld, player: int) -> Dict[str, Entrance]:
-    return {
-        entrance.name.split(" -> ", 1)[1]: entrance
-        for entrance in multiworld.get_entrances(player)
-        if " -> " in entrance.name and entrance.name.split(" -> ", 1)[1] in sm64_entrances_to_level
-        and entrance.parent_region.name not in sm64_wdw_entrances
-    }
-
-
-def has_reachable_starting_check(
-        multiworld: MultiWorld, options: SM64Options, player: int,
-        allowed_source_entrances: tuple[str, ...] | None = None,
-        randomized_entrance_connections: Dict[str, Entrance] | None = None) -> bool:
-    if allowed_source_entrances is None:
-        allowed_source_entrances = get_starting_check_sources(options)
-    if randomized_entrance_connections is None:
-        randomized_entrance_connections = get_randomized_entrance_connections(multiworld, player)
-
-    allowed_source_entrance_set = set(allowed_source_entrances)
-    disabled_connections = {}
-    false_rule = False_().resolve(multiworld.worlds[player])
-    for source_entrance, entrance in randomized_entrance_connections.items():
-        if source_entrance not in allowed_source_entrance_set:
-            disabled_connections[entrance] = entrance.access_rule
-            entrance.access_rule = false_rule
-
-    try:
-        state = CollectionState(multiworld)
-        reachable_check_count = 0
-        for location in multiworld.get_locations(player):
-            if is_starting_check_location(location.name, options) and location.can_reach(state):
-                reachable_check_count += 1
-                if reachable_check_count >= minimum_starting_check_count:
-                    return True
-        return False
-    finally:
-        for entrance, access_rule in disabled_connections.items():
-            entrance.access_rule = access_rule
-
-
-def retarget_entrance(entrance: Entrance, target_region_name: str, multiworld: MultiWorld, player: int) -> None:
-    target_region = multiworld.get_region(target_region_name, player)
-    if entrance.connected_region is target_region:
-        return
-    if entrance.connected_region:
-        entrance.connected_region.entrances.remove(entrance)
-    entrance.connected_region = target_region
-    target_region.entrances.append(entrance)
-
-
-def sources_share_entrance_pool(source: str, donor: str, options: SM64Options) -> bool:
-    source_is_course = sm64_entrances_to_level[source] in sm64_level_to_paintings
-    donor_is_course = sm64_entrances_to_level[donor] in sm64_level_to_paintings
-    if options.area_rando == options.area_rando.option_Courses_Only:
-        return source_is_course and donor_is_course
-    if options.area_rando == options.area_rando.option_Courses_and_Secrets:
-        return True
-    return source_is_course == donor_is_course
-
-
-def has_valid_fixed_assignments(entrance_map: Dict[SM64Levels, str]) -> bool:
-    if entrance_map[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Dire, Dire Docks":
-        return False
-    invalid_cotmc_destinations = {"Hazy Maze Cave"}
-    if entrance_map[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Hazy Maze Cave":
-        invalid_cotmc_destinations.add("Dire, Dire Docks")
-    return entrance_map[SM64Levels.CAVERN_OF_THE_METAL_CAP] not in invalid_cotmc_destinations
-
-
-def ensure_reachable_starting_check(
-        multiworld: MultiWorld, options: SM64Options, player: int,
-        randomized_entrances: Dict[SM64Levels, str], randomized_entrances_s: Dict[str, str],
-        randomized_entrance_connections: Dict[str, Entrance]) -> None:
-    starting_check_sources = get_starting_check_sources(options)
-    if has_reachable_starting_check(
-            multiworld, options, player, starting_check_sources, randomized_entrance_connections):
-        return
-
-    for source in starting_check_sources:
-        source_connection = randomized_entrance_connections[source]
-        old_source_destination = randomized_entrances_s[source]
-        old_source_region = sm64_entrance_to_region[old_source_destination]
-
-        for donor, donor_destination in randomized_entrances_s.items():
-            if donor == source or not sources_share_entrance_pool(source, donor, options):
-                continue
-
-            source_level = sm64_entrances_to_level[source]
-            donor_level = sm64_entrances_to_level[donor]
-            swapped_entrances = randomized_entrances.copy()
-            swapped_entrances[source_level], swapped_entrances[donor_level] = \
-                donor_destination, old_source_destination
-            if not has_valid_fixed_assignments(swapped_entrances):
-                continue
-
-            donor_connection = randomized_entrance_connections[donor]
-            old_donor_region = sm64_entrance_to_region[donor_destination]
-            retarget_entrance(source_connection, old_donor_region, multiworld, player)
-            retarget_entrance(donor_connection, old_source_region, multiworld, player)
-
-            if has_reachable_starting_check(
-                    multiworld, options, player, starting_check_sources, randomized_entrance_connections):
-                randomized_entrances[source_level], randomized_entrances[donor_level] = \
-                    donor_destination, old_source_destination
-                randomized_entrances_s[source], randomized_entrances_s[donor] = \
-                    donor_destination, old_source_destination
-                return
-
-            retarget_entrance(source_connection, old_source_region, multiworld, player)
-            retarget_entrance(donor_connection, old_donor_region, multiworld, player)
-
-    raise Exception("Unable to place enough reachable starting checks in initially accessible SM64 entrances.")
-
 def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_connections: dict, move_rando_bitvec: int):
     world = multiworld.worlds[player]
     sub_area_mode = options.sub_area_shuffle.value
-    mixed_sub_areas = sub_area_mode in {
-        options.sub_area_shuffle.option_mixed,
-        options.sub_area_shuffle.option_mixed_plus_castle_returns,
-    }
+    castle_return_mode = options.castle_return_shuffle.value
     using_slot_area_connections = bool(area_connections)
     if using_slot_area_connections:
         randomized_entrances = {
@@ -498,41 +369,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         randomized_level_to_paintings = sm64_level_to_paintings.copy()
         randomized_level_to_secrets = sm64_level_to_secrets.copy()
 
-        if sub_area_mode:
-            randomized_level_to_secrets.pop(SM64Levels.CAVERN_OF_THE_METAL_CAP)
-
-        if options.area_rando > options.area_rando.option_Off and not mixed_sub_areas:
-            # Mixed sub-area shuffle owns all normal Castle entrance destinations.
+        if options.main_course_shuffle.value == options.main_course_shuffle.option_separate:
             randomized_level_to_paintings = shuffle_dict_keys(multiworld, sm64_level_to_paintings)
-
-        if options.area_rando == options.area_rando.option_Courses_and_Secrets_Separate and not mixed_sub_areas:
+        if options.secret_course_shuffle.value == options.secret_course_shuffle.option_separate:
             randomized_level_to_secrets = shuffle_dict_keys(multiworld, randomized_level_to_secrets)
-
-        randomized_entrances = {**randomized_level_to_paintings, **randomized_level_to_secrets} # Concatenate courses and secrets for rest
-
-        if options.area_rando == options.area_rando.option_Courses_and_Secrets and not mixed_sub_areas:
-            randomized_entrances = shuffle_dict_keys(multiworld, randomized_entrances)
-
-        if options.area_rando > options.area_rando.option_Off and not mixed_sub_areas:
-            # Now, fix assignment if necessary
-            swapdict = randomized_entrances.copy()
-            # Guarantee BITFS is not mapped to DDD
-            fix_reg(randomized_entrances, SM64Levels.BOWSER_IN_THE_FIRE_SEA, {"Dire, Dire Docks"}, swapdict, multiworld)
-            # Guarantee COTMC is not mapped to HMC, cuz thats impossible. If BitFS -> HMC, also no COTMC -> DDD.
-            if (SM64Levels.CAVERN_OF_THE_METAL_CAP in randomized_entrances
-                    and randomized_entrances[SM64Levels.BOWSER_IN_THE_FIRE_SEA] == "Hazy Maze Cave"):
-                fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP,
-                        {"Hazy Maze Cave", "Dire, Dire Docks"}, swapdict, multiworld)
-            elif SM64Levels.CAVERN_OF_THE_METAL_CAP in randomized_entrances:
-                fix_reg(randomized_entrances, SM64Levels.CAVERN_OF_THE_METAL_CAP, {"Hazy Maze Cave"}, swapdict,
-                        multiworld)
+        randomized_entrances = {**randomized_level_to_paintings, **randomized_level_to_secrets}
 
     randomized_entrances_s = {sm64_level_to_entrances[entrance_lvl]: destination for (entrance_lvl,destination) in randomized_entrances.items()}
     randomized_entrance_connections = {}
     normal_destination_ids = {
         name: int(entrance_id)
         for entrance_id, name in sm64_level_to_entrances.items()
-        if entrance_id != SM64Levels.CAVERN_OF_THE_METAL_CAP
     }
     normal_destination_ids["Bowser in the Sky"] = int(SM64Levels.BOWSER_IN_THE_SKY)
     normal_source_ids = {
@@ -553,31 +400,92 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         for entrance_id in normal_destination_ids.values()
     }
 
-    has_physical_warp_connections = any(isinstance(source, str) for source in area_connections)
-    if sub_area_mode and not has_physical_warp_connections:
-        if sub_area_mode == options.sub_area_shuffle.option_separate:
-            area_connections.update(build_separate_connections(world.random))
-        else:
+    if not using_slot_area_connections:
+        mixed_normal_ids = []
+        if options.main_course_shuffle.value == options.main_course_shuffle.option_mixed:
+            mixed_normal_ids.extend(int(entrance_id) for entrance_id in sm64_level_to_paintings)
+        if options.secret_course_shuffle.value == options.secret_course_shuffle.option_mixed:
+            mixed_normal_ids.extend(int(entrance_id) for entrance_id in sm64_level_to_secrets)
+        include_mixed_sub_areas = sub_area_mode in {
+            options.sub_area_shuffle.option_mixed,
+            options.sub_area_shuffle.option_mixed_decoupled,
+        }
+        include_mixed_castle_returns = (
+            castle_return_mode == options.castle_return_shuffle.option_mixed)
+        if mixed_normal_ids or include_mixed_sub_areas or include_mixed_castle_returns:
+            mixed_names = {
+                sm64_level_to_entrances[entrance_id]: entrance_id
+                for entrance_id in mixed_normal_ids
+            }
+            if int(SM64Levels.BOWSER_IN_THE_SKY) in mixed_normal_ids:
+                mixed_names["Bowser in the Sky"] = int(SM64Levels.BOWSER_IN_THE_SKY)
             mixed_connections = build_mixed_connections(
                 world.random,
-                {f"normal:{name}": source_id for name, source_id in normal_destination_ids.items()},
-                tuple(normal_destination_ids),
-                sub_area_mode == options.sub_area_shuffle.option_mixed_plus_castle_returns,
+                {f"normal:{name}": source_id for name, source_id in mixed_names.items()},
+                tuple(mixed_names),
+                include_mixed_castle_returns,
+                include_mixed_sub_areas,
+                decoupled=sub_area_mode == options.sub_area_shuffle.option_mixed_decoupled,
+                allow_castle_return_bits_branch=(
+                    options.main_course_shuffle.value == options.main_course_shuffle.option_mixed
+                    and sub_area_mode == options.sub_area_shuffle.option_mixed
+                    and include_mixed_castle_returns
+                ),
             )
             area_connections.update({
-                normal_destination_ids[source.removeprefix("normal:")]
+                mixed_names[source.removeprefix("normal:")]
                 if source.startswith("normal:") else source:
-                normal_destination_ids.get(destination, destination)
+                mixed_names.get(destination, destination)
                 for source, destination in mixed_connections.items()
             })
 
-    if sub_area_mode:
+            # These physical entrance/destination pairs cannot work. Swap only
+            # ordinary mixed roots so the forced Bowser in the Sky branch and
+            # the sub-area graph remain intact.
+            protected_sources = {
+                int(SM64Levels.BOWSER_IN_THE_SKY),
+                int(SM64Levels.BOWSER_IN_THE_FIRE_SEA),
+                int(SM64Levels.CAVERN_OF_THE_METAL_CAP),
+            }
+
+            def fix_invalid_mixed_destination(source_id: int, invalid_destinations: set[int]):
+                if area_connections.get(source_id) not in invalid_destinations:
+                    return
+                replacements = [
+                    candidate for candidate, destination in area_connections.items()
+                    if isinstance(candidate, int)
+                    and candidate not in protected_sources
+                    and destination not in invalid_destinations
+                ]
+                replacement = world.random.choice(replacements)
+                area_connections[source_id], area_connections[replacement] = (
+                    area_connections[replacement], area_connections[source_id])
+
+            fix_invalid_mixed_destination(
+                int(SM64Levels.BOWSER_IN_THE_FIRE_SEA),
+                {int(SM64Levels.DIRE_DIRE_DOCKS)},
+            )
+            cotmc_invalid_destinations = {int(SM64Levels.HAZY_MAZE_CAVE)}
+            if area_connections.get(int(SM64Levels.BOWSER_IN_THE_FIRE_SEA)) \
+                    == int(SM64Levels.HAZY_MAZE_CAVE):
+                cotmc_invalid_destinations.add(int(SM64Levels.DIRE_DIRE_DOCKS))
+            fix_invalid_mixed_destination(
+                int(SM64Levels.CAVERN_OF_THE_METAL_CAP),
+                cotmc_invalid_destinations,
+            )
+
+        if sub_area_mode == options.sub_area_shuffle.option_separate:
+            area_connections.update(build_separate_connections(world.random))
+
+    if sub_area_mode != options.sub_area_shuffle.option_vanilla \
+            or castle_return_mode == options.castle_return_shuffle.option_mixed:
         source_ids = {
             **normal_source_ids,
-            **{key: source.source_id for key, source in SUB_AREA_SOURCES.items()},
-            **{key: source.source_id for key, source in RETURN_SOURCES.items()},
         }
-        if sub_area_mode == options.sub_area_shuffle.option_mixed_plus_castle_returns:
+        if sub_area_mode != options.sub_area_shuffle.option_vanilla:
+            source_ids.update({key: source.source_id for key, source in SUB_AREA_SOURCES.items()})
+            source_ids.update({key: source.source_id for key, source in RETURN_SOURCES.items()})
+        if castle_return_mode == options.castle_return_shuffle.option_mixed:
             source_ids.update({key: source.source_id for key, source in CASTLE_RETURN_SOURCES.items()})
         world.sub_area_slot_data = {
             source_ids[source_key]: destination_slot_data(destination_key, normal_destination_slot_data)
@@ -610,9 +518,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     def connect_randomized_entrance(source: str, source_entrance: str, rule=None):
         entrance_id = int(sm64_entrances_to_level[source_entrance])
-        if mixed_sub_areas:
+        if entrance_id in area_connections:
             destination_entrance = area_connections[entrance_id]
-            target_region = sub_area_target_region(destination_entrance)
+            target_region = (
+                sub_area_target_region(destination_entrance)
+                if not isinstance(destination_entrance, int)
+                else sm64_entrance_to_region[sm64_level_to_entrances[destination_entrance]]
+            )
         else:
             destination_entrance = randomized_entrances_s[source_entrance]
             target_region = sm64_entrance_to_region[destination_entrance]
@@ -649,16 +561,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         return HasUnlock("Bowser Stage Extra 1-Ups", stage_item_name)
 
     def bowser_arena_bomb_rule(stage_name: str, required_hits: int) -> Rule:
-        global_item_name = "Progressive Bowser Arena Bomb"
-        stage_item_name = f"{stage_name} - Progressive Bowser Arena Bomb"
-        return Or(*(
-            HasUnlock(global_item_name, global_item_name, global_count)
-            & HasUnlock(stage_item_name, stage_item_name, required_hits - global_count)
-            for global_count in range(1, required_hits)
-        ),
-            HasUnlock(global_item_name, global_item_name, required_hits),
-            HasUnlock(stage_item_name, stage_item_name, required_hits),
-        )
+        required_bombs = []
+        for bomb in range(1, required_hits + 1):
+            stage_item_name = f"{stage_name} - Bowser Arena Bomb {bomb}"
+            if bomb == 5:
+                required_bombs.append(HasUnlock(stage_item_name, stage_item_name))
+            else:
+                global_item_name = f"Bowser Arena Bomb {bomb}"
+                required_bombs.append(
+                    HasUnlock(global_item_name, global_item_name)
+                    | HasUnlock(stage_item_name, stage_item_name))
+        return And(*required_bombs)
 
     def level_unlock_rule(item_name: str) -> Rule:
         return HasUnlock(item_name, item_name)
@@ -666,93 +579,106 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     def full_level_unlock_rule(item_name: str) -> Rule:
         return HasUnlock(item_name, item_name)
 
-    connect_regions(multiworld, player, "Castle Grounds", "Castle Lobby")
-    connect_randomized_entrance("Castle Lobby", "Bob-omb Battlefield")
-    connect_randomized_entrance("Castle Lobby", "Whomp's Fortress",
+    connect_regions(multiworld, player, "Castle Grounds", "Castle First Floor")
+    connect_regions(multiworld, player, "Castle First Floor", "Castle Courtyard")
+    connect_randomized_entrance(
+        "Castle First Floor", "Bob-omb Battlefield", level_unlock_rule("Unlock Bob-omb Battlefield"))
+    connect_randomized_entrance("Castle First Floor", "Whomp's Fortress",
                                 rf.build_rule("", painting_lvl_name="Whomp's Fortress"))
-    connect_randomized_entrance("Castle Lobby", "Jolly Roger Bay",
+    connect_randomized_entrance("Castle First Floor", "Jolly Roger Bay",
                                 rf.build_rule("", painting_lvl_name="Jolly Roger Bay"))
-    connect_randomized_entrance("Castle Lobby", "Cool, Cool Mountain",
+    connect_randomized_entrance("Castle First Floor", "Cool, Cool Mountain",
                                 rf.build_rule("", painting_lvl_name="Cool, Cool Mountain"))
-    connect_randomized_entrance("Castle Lobby", "Big Boo's Haunt",
+    connect_randomized_entrance("Castle Courtyard", "Big Boo's Haunt",
                                 level_unlock_rule("Unlock Big Boo's Haunt"))
-    connect_randomized_entrance("Castle Lobby", "The Princess's Secret Slide")
-    connect_randomized_entrance("Castle Lobby", "The Secret Aquarium",
-                                rf.build_rule(
+    connect_randomized_entrance(
+        "Castle First Floor", "The Princess's Secret Slide",
+        level_unlock_rule("Unlock The Princess's Secret Slide"))
+    connect_randomized_entrance("Castle First Floor", "The Secret Aquarium",
+                                level_unlock_rule("Unlock The Secret Aquarium") & rf.build_rule(
                                     "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
                                     "logic_secret_aquarium_wall_kick_and_ledge_grab | "
                                     "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab"))
-    connect_randomized_entrance("Castle Lobby", "Tower of the Wing Cap",
+    connect_randomized_entrance("Castle First Floor", "Tower of the Wing Cap",
                                 level_unlock_rule("Unlock Tower of the Wing Cap"))
     connect_randomized_entrance(
-        "Castle Lobby", "Bowser in the Dark World",
+        "Castle First Floor", "Bowser in the Dark World",
         first_floor_key_rule | rf.build_rule("logic_castle_lobby_8_star_door_blj"))
 
-    connect_regions(multiworld, player, "Castle Lobby", "Basement", basement_key_rule)
+    connect_regions(multiworld, player, "Castle First Floor", "Castle Basement", basement_key_rule)
 
-    connect_randomized_entrance("Basement", "Hazy Maze Cave",
+    connect_randomized_entrance("Castle Basement", "Hazy Maze Cave",
                                 rf.build_rule("", painting_lvl_name="Hazy Maze Cave"))
-    connect_randomized_entrance("Basement", "Lethal Lava Land",
+    connect_randomized_entrance("Castle Basement", "Lethal Lava Land",
                                 rf.build_rule("", painting_lvl_name="Lethal Lava Land"))
-    connect_randomized_entrance("Basement", "Shifting Sand Land",
+    connect_randomized_entrance("Castle Basement", "Shifting Sand Land",
                                 rf.build_rule("", painting_lvl_name="Shifting Sand Land"))
     ddd_entry_rule = rf.build_rule("", painting_lvl_name="Dire, Dire Docks")
-    connect_randomized_entrance("Basement", "Dire, Dire Docks",
+    connect_randomized_entrance("Castle Basement", "Dire, Dire Docks",
                                 thirty_star_door_bypass_rule & ddd_entry_rule)
-    if not sub_area_mode:
-        connect_randomized_entrance(
-            "Hazy Maze Cave", "Cavern of the Metal Cap",
-            rf.build_rule("HMC_SWIMMING_BEAST | logic_hmc_elevator_clip"))
+    connect_randomized_entrance(
+        "Hazy Maze Cave", "Cavern of the Metal Cap",
+        level_unlock_rule("Unlock Cavern of the Metal Cap")
+        & rf.build_rule(
+            "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Hazy Maze Cave"),
+            action_item_names=rf.get_action_item_names("Hazy Maze Cave")))
     connect_randomized_entrance("Castle Grounds", "Vanish Cap Under the Moat",
                                 level_unlock_rule("Unlock Vanish Cap Under the Moat"))
-    connect_randomized_entrance("Basement", "Bowser in the Fire Sea",
+    connect_randomized_entrance("Castle Basement", "Bowser in the Fire Sea",
                                 thirty_star_door_bypass_rule & level_unlock_rule("Unlock Bowser in the Fire Sea"))
 
-    connect_regions(multiworld, player, "Castle Lobby", "Second Floor", second_floor_key_rule)
+    connect_regions(multiworld, player, "Castle First Floor", "Castle Second Floor", second_floor_key_rule)
 
-    connect_randomized_entrance("Second Floor", "Snowman's Land",
+    connect_randomized_entrance("Castle Second Floor", "Snowman's Land",
                                 rf.build_rule("", painting_lvl_name="Snowman's Land"))
     for wdw_entrance in sm64_wdw_entrances:
-        wdw_entrance_rule = "LG & TJ/SF/BF" if wdw_entrance == "Wet-Dry World High" else ""
-        connect_randomized_entrance("Second Floor", wdw_entrance,
+        wdw_entrance_rule = "TJ/SF/BF" if wdw_entrance == "Wet-Dry World High" else ""
+        connect_randomized_entrance("Castle Second Floor", wdw_entrance,
                                     rf.build_rule(wdw_entrance_rule, painting_lvl_name="Wet-Dry World"))
-    connect_randomized_entrance("Second Floor", "Tall, Tall Mountain",
+    connect_randomized_entrance("Castle Second Floor", "Tall, Tall Mountain",
                                 rf.build_rule("", painting_lvl_name="Tall, Tall Mountain"))
-    connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Tiny)",
+    connect_randomized_entrance("Castle Second Floor", "Tiny-Huge Island (Tiny)",
                                 rf.build_rule("", painting_lvl_name="Tiny Island"))
-    connect_randomized_entrance("Second Floor", "Tiny-Huge Island (Huge)",
+    connect_randomized_entrance("Castle Second Floor", "Tiny-Huge Island (Huge)",
                                 rf.build_rule("", painting_lvl_name="Huge Island"))
 
-    connect_regions(multiworld, player, "Second Floor", "Third Floor", fifty_star_door_bypass_rule)
+    connect_regions(multiworld, player, "Castle Second Floor", "Castle Third Floor", fifty_star_door_bypass_rule)
 
     ttc_entrance_rule = rf.build_rule(
         "LG/TJ/SF/BF | logic_castle_ttc_with_wall_kick | "
         "logic_castle_ttc_with_long_jump_and_kick | logic_castle_ttc_with_dive_and_kick",
         painting_lvl_name="Tick Tock Clock")
     for ttc_entrance in sm64_ttc_entrances:
-        connect_randomized_entrance("Third Floor", ttc_entrance, ttc_entrance_rule)
+        connect_randomized_entrance("Castle Third Floor", ttc_entrance, ttc_entrance_rule)
     third_floor_alcove_rule = rf.build_rule(
         "TJ/SF/BF | logic_castle_3f_alcoves_with_wall_kick | "
         "logic_castle_3f_alcoves_with_dive_and_kick | "
         "logic_castle_3f_alcoves_with_dive_and_ledge_grab | "
         "logic_castle_3f_alcoves_with_long_jump_and_ledge_grab")
     connect_randomized_entrance(
-        "Third Floor", "Rainbow Ride",
+        "Castle Third Floor", "Rainbow Ride",
         third_floor_alcove_rule & full_level_unlock_rule("Unlock Rainbow Ride"))
-    connect_randomized_entrance("Third Floor", "Wing Mario Over the Rainbow",
+    connect_randomized_entrance("Castle Third Floor", "Wing Mario Over the Rainbow",
                                 third_floor_alcove_rule
                                 & full_level_unlock_rule("Unlock Wing Mario Over the Rainbow"))
-    if mixed_sub_areas:
+    if int(SM64Levels.BOWSER_IN_THE_SKY) in area_connections:
+        bits_target_region = sub_area_target_region(area_connections[int(SM64Levels.BOWSER_IN_THE_SKY)])
+    elif options.secret_course_shuffle.value != options.secret_course_shuffle.option_vanilla:
+        bits_target_region = sm64_entrance_to_region[randomized_entrances_s["Bowser in the Sky"]]
+    else:
+        bits_target_region = None
+    if bits_target_region is not None:
         bits_entrance = connect_regions(
-            multiworld, player, "Third Floor",
-            sub_area_target_region(area_connections[int(SM64Levels.BOWSER_IN_THE_SKY)]),
+            multiworld, player, "Castle Third Floor",
+            bits_target_region,
             seventy_star_door_bypass_rule,
-            name="Third Floor -> Bowser in the Sky",
+            name="Castle Third Floor -> Bowser in the Sky",
         )
         world.randomized_entrance_connections[int(SM64Levels.BOWSER_IN_THE_SKY)] = bits_entrance
     else:
         connect_regions(
-            multiworld, player, "Third Floor", "Bowser in the Sky", seventy_star_door_bypass_rule)
+            multiworld, player, "Castle Third Floor", "Bowser in the Sky", seventy_star_door_bypass_rule)
 
     def connect_sub_area_source(source_key: str, rule: Rule | None = None) -> None:
         source = SUB_AREA_SOURCES[source_key]
@@ -768,14 +694,21 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     # destination assigned to the physical warp.
     connect_regions(
         multiworld, player, "Snowman's Land", "Snowman's Land - Igloo Entrance",
+        rf.build_rule(
+            "{Snowman's Land - Whirl from the Freezing Pond} & SL_KOOPA_SHELL",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Snowman's Land"),
+            action_item_names=rf.get_action_item_names("Snowman's Land")),
         name="Snowman's Land - Igloo Approach")
     connect_regions(
         multiworld, player, "Cool, Cool Mountain - Slide Exit", "Cool, Cool Mountain",
         name="Cool, Cool Mountain - Slide Exit to Main Area")
     connect_regions(multiworld, player, "Lethal Lava Land", "Lethal Lava Land - Volcano Entrance")
     ssl_upper_pyramid_entrance_rule = rf.build_rule(
-        "TJ+WC+GP | CANN+WC+GP | "
-        "logic_ssl_pillars_shell | logic_ssl_pillars_side_flip_or_kick")
+        SSL_UPPER_PYRAMID_ENTRANCE_RULE,
+        cannon_name=rf.get_cannon_item_name("Shifting Sand Land"),
+        cap_item_names=rf.get_cap_item_names("Shifting Sand Land"),
+        arbitrary_item_names=rf.get_arbitrary_item_names("Shifting Sand Land"),
+        action_item_names=rf.get_action_item_names("Shifting Sand Land"))
     connect_regions(
         multiworld, player, "Shifting Sand Land",
         "Shifting Sand Land - Upper Pyramid Entrance", ssl_upper_pyramid_entrance_rule)
@@ -786,10 +719,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     connect_sub_area_source("sl_igloo")
     connect_sub_area_source("ttm_slide")
     connect_sub_area_source("thi_red_cave")
-    if sub_area_mode:
-        connect_sub_area_source(
-            "hmc_cotmc", rf.build_rule("HMC_SWIMMING_BEAST | logic_hmc_elevator_clip"))
-    connect_sub_area_source("jrb_ship", rf.build_rule("JRB_SUNKEN_SHIP"))
+    connect_sub_area_source(
+        "jrb_ship",
+        rf.build_rule(
+            "JRB_SUNKEN_SHIP",
+            arbitrary_item_names=rf.get_arbitrary_item_names("Jolly Roger Bay")))
     connect_sub_area_source("lll_volcano")
     connect_sub_area_source("ssl_pyramid_side")
     connect_sub_area_source("ssl_pyramid_top")
@@ -819,13 +753,6 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 name=SUB_AREA_SOURCE_NAMES[source_key])
             world.randomized_entrance_connections[source.source_id] = entrance
 
-        if sub_area_mode == options.sub_area_shuffle.option_mixed_plus_castle_returns:
-            for source_key, source in CASTLE_RETURN_SOURCES.items():
-                destination_key = area_connections[source_key]
-                entrance = connect_regions(
-                    multiworld, player, source.region, sub_area_target_region(destination_key),
-                    name=SUB_AREA_SOURCE_NAMES[source_key])
-                world.randomized_entrance_connections[source.source_id] = entrance
     else:
         for source in RETURN_SOURCES.values():
             connect_regions(
@@ -833,13 +760,24 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 sub_area_target_region(source.vanilla_destination),
                 name=SUB_AREA_SOURCE_NAMES[source.key])
 
+    if castle_return_mode == options.castle_return_shuffle.option_mixed:
+        for source_key, source in CASTLE_RETURN_SOURCES.items():
+            destination_key = area_connections[source_key]
+            source_rule = HasUnlock("Dire, Dire Docks - Moat Exit", "Dire, Dire Docks - Moat Exit") \
+                if source_key == "ddd_fall" else None
+            entrance = connect_regions(
+                multiworld, player, source.region, sub_area_target_region(destination_key),
+                source_rule,
+                name=SUB_AREA_SOURCE_NAMES[source_key])
+            world.randomized_entrance_connections[source.source_id] = entrance
+
     # Course Rules
     # Bob-omb Battlefield
     rf.assign_rule("Bob-omb Battlefield - Big Bob-Omb on the Summit", "BOB_KING")
     rf.assign_rule("Bob-omb Battlefield - Footrace with Koopa The Quick", "BOB_KOOPA")
     rf.assign_rule("Bob-omb Battlefield - Island",
                    "CANN | logic_bob_island_without_cannon | logic_bob_island_long_jump | "
-                   "logic_bob_island_koopa_shell | "
+                   "logic_bob_island_koopa_shell | logic_bob_island_koopa_shell_wing_cap | "
                    "logic_bob_mario_wings_to_the_sky_without_cannon")
     rf.assign_rule_object(
         "Bob-omb Battlefield - Mario Wings to the Sky",
@@ -850,15 +788,20 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             cap_item_names=rf.get_cap_item_names("Bob-omb Battlefield"),
             arbitrary_item_names=rf.get_arbitrary_item_names("Bob-omb Battlefield"),
             action_item_names=rf.get_action_item_names("Bob-omb Battlefield"))
-        & rf.build_rule(
+        & (True_() if options.trigger_sparkles else rf.build_rule(
             "SINGLE_YELLOW_COINS | VERTICAL_COIN_RINGS | logic_bob_mario_wings_without_coin_markers",
             cannon_name=rf.get_cannon_item_name("Bob-omb Battlefield"),
             cap_item_names=rf.get_cap_item_names("Bob-omb Battlefield"),
             arbitrary_item_names=rf.get_arbitrary_item_names("Bob-omb Battlefield"),
-            action_item_names=rf.get_action_item_names("Bob-omb Battlefield")))
+            action_item_names=rf.get_action_item_names("Bob-omb Battlefield"))))
+    rf.assign_rule(
+        "The Princess's Secret Slide - Coin Triggers 1-Up",
+        "" if options.trigger_sparkles else
+        "HORIZONTAL_COIN_LINES | logic_pss_coin_triggers_1up_without_coin_markers")
     rf.assign_rule("Bob-omb Battlefield - Behind Chain Chomp's Gate",
                    "CHAIN_CHOMP & WOODEN_POSTS & GP | "
-                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_without_ground_pound")
+                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_without_ground_pound | "
+                   "CHAIN_CHOMP & logic_bob_chain_chomp_gate_with_cork_box")
     rf.assign_rule("Bob-omb Battlefield - Bob-omb Buddy", "BOB_BUDDY")
     rf.assign_rule("Bob-omb Battlefield - Cannon Tree 1-Up", "CL/TJ/BF/SF")
     # Whomp's Fortress
@@ -909,7 +852,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Cool, Cool Mountain - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
         "Cool, Cool Mountain - Wall Kicks Will Work",
-        "TJ/WK | logic_ccm_wall_kicks_will_work_spin_jump")
+        "CANN+TJ+WK | logic_ccm_wall_kicks_will_work_spin_jump")
     # Big Boo's Haunt
     rf.assign_rule("Big Boo's Haunt - Go on a Ghost Hunt", "BOOS & BIG_BOO")
     rf.assign_rule(
@@ -924,18 +867,20 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
     rf.assign_rule("Big Boo's Haunt - Big Boo's Balcony", "BIG_BOO")
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
-    rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ/SF/WK")
+    rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ & BREAKABLE_COIN_BOXES")
     # Haze Maze Cave
     rf.assign_rule(
         "Hazy Maze Cave - Swimming Beast in the Cavern",
         "HMC_SWIMMING_BEAST | logic_hmc_elevator_clip")
-    rf.assign_rule("Hazy Maze Cave - Red Coin Area",
-                   "CHECKERBOARD_PLATFORMS & CL & WK/LG/BF/SF/TJ | "
-                   "logic_hmc_upper_red_coin_area_wall_kick")
+    rf.assign_rule("Hazy Maze Cave - Mid Red Coin Room", "WK/LG/BF/SF/TJ")
+    rf.assign_rule(
+        "Hazy Maze Cave - Upper Red Coin Room",
+        "{Hazy Maze Cave - Mid Red Coin Room} & CL | logic_hmc_upper_red_coin_area_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | logic_hmc_pit_islands_wall_kick")
+    rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move Room",
+                   "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_capless")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
-                   "PURPLE_SWITCHES & LJ+MC | logic_hmc_metal_head_capless | "
-                   "logic_hmc_metal_head_capless_no_movement")
+                   "LJ | logic_hmc_metal_head_coin_route_capless")
     rf.assign_rule("Hazy Maze Cave - Navigating the Toxic Maze", "WK/SF/BF/TJ")
     rf.assign_rule("Hazy Maze Cave - Watch for Rolling Rocks", "WK")
     for sign in sign_data:
@@ -969,6 +914,12 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     ):
         rf.assign_rule(location_name, "LLL_KOOPA_SHELL | logic_lava_damage_boosting")
     rf.assign_rule(
+        "Lethal Lava Land - Central Gray Crescent 1-Up",
+        "LLL_KOOPA_SHELL | WC+TJ | LJ | logic_lava_damage_boosting")
+    rf.assign_rule(
+        "Lethal Lava Land - Volcano Brown Platform 1-Up",
+        "LLL_KOOPA_SHELL | TJ | LJ | logic_lava_damage_boosting")
+    rf.assign_rule(
         "Lethal Lava Land - Hot-Foot-It Ledge",
         "CL | logic_lll_hot_foot_it_with_wall_kick | logic_lll_hot_foot_it_with_triple_jump | "
         "logic_lll_hot_foot_it_with_side_flip | logic_lll_hot_foot_it_with_backflip | "
@@ -992,31 +943,33 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Shifting Sand Land - In the Talons of the Big Bird", "SSL_KLEPTO")
     rf.assign_rule(
         "Shifting Sand Land - Stone Structure",
-        "TJ/SF/BF | logic_ssl_stone_structure_shy_guy_spin_jump")
+        "TJ/SF/BF | logic_ssl_top_of_stone_structure_spin_jump_or_tweesters")
     rf.assign_rule(
         "Shifting Sand Land - Upper Pyramid",
-        "SSL_PYRAMID_ELEVATOR | CL")
+        "CL")
     rf.assign_rule(
         "Shifting Sand Land - Pyramid Top Entry Elevator Route",
         "SSL_PYRAMID_ELEVATOR")
     rf.assign_rule(
         "Shifting Sand Land - Inside the Ancient Pyramid",
-        "SF/BF/TJ/LG | "
+        "SF/BF/TJ/WK/LG | "
         "{Shifting Sand Land - Pyramid Top Entry} & SSL_PYRAMID_ELEVATOR")
-    rf.assign_rule("Shifting Sand Land - Stand Tall on the Four Pillars",
-                   "{Shifting Sand Land - Upper Pyramid} & SSL_PYRAMID_ELEVATOR & EYEROK | "
+    rf.assign_rule("Shifting Sand Land - Eyerok Arena",
+                   "{Shifting Sand Land - Pyramid Top Entry} & SSL_PYRAMID_ELEVATOR & EYEROK | "
                    "logic_ssl_stand_tall_without_pyramid_elevator & EYEROK & LG/KK")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
-    rf.assign_rule("Shifting Sand Land - Pyramid Mummified Thwomp 1-Up", "THWOMP")
+    rf.assign_rule("Shifting Sand Land - Pyramid Grindel 1-Up", "THWOMP")
     rf.assign_rule("Shifting Sand Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
-        "Shifting Sand Land - Pyramid Right Path 1-Up",
+        "Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up",
         "{Shifting Sand Land - Upper Pyramid} | CL/TJ/SF/BF")
     # Dire, Dire Docks
     rf.assign_rule("Dire, Dire Docks - Board Bowser's Sub",
                    "PURPLE_SWITCHES & DDD_BOWSER_SUB | logic_ddd_board_bowsers_sub_triple_jump")
-    rf.assign_rule("Dire, Dire Docks - Through the Jet Stream", "MC | logic_ddd_jet_stream_capless")
+    rf.assign_rule(
+        "Dire, Dire Docks - Through the Jet Stream",
+        "DDD_JET_STREAM & MC | DDD_JET_STREAM & logic_ddd_jet_stream_capless")
     rf.assign_rule("Dire, Dire Docks - The Manta Ray's Reward", "DDD_MANTA_RAY")
     rf.assign_rule("Dire, Dire Docks - Collect the Caps...", "VC")
     rf.assign_rule("Dire, Dire Docks - Chests in the Current", "TREASURE_CHESTS")
@@ -1031,9 +984,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             action_item_names=rf.get_action_item_names("Snowman's Land - Whirl from the Freezing Pond")))
     rf.assign_rule(
         "Snowman's Land - Upper",
-        "{Snowman's Land - Whirl from the Freezing Pond} | TJ/SF/BF | CANN")
+        "{Snowman's Land - Whirl from the Freezing Pond} & SL_KOOPA_SHELL | TJ/SF/BF | CANN")
     rf.assign_rule("Snowman's Land - Top of Snowman's Head", "SL_PENGUIN & BF/SF/TJ | CANN")
-    rf.assign_rule("Snowman's Land - Igloo Entrance", "{Snowman's Land - Whirl from the Freezing Pond}")
     rf.assign_rule("Snowman's Land - Chill with the Bully", "BIG_BULLY")
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG")
@@ -1041,37 +993,106 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC")
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
-    wdw_near_top_block_route = (
-        "{Wet-Dry World - Low Water} | "
-        "{Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
+    wdw_pedestal_block_route = (
+        "{Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+        "{Wet-Dry World - Low Water} & SF/BF/TJ | "
+        "{Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+        "{Wet-Dry World - Mid Water} & SF/BF/TJ | "
         "{Wet-Dry World - High Water} & LG | "
         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}"
+    )
+    wdw_non_highest_near_top_routes = (
+        "{Wet-Dry World - Mid Water}",
+        "{Wet-Dry World - Low Water} & HEAVE_HOS",
+        "{Wet-Dry World - Mid-High Water} & HEAVE_HOS",
+        "{Wet-Dry World - High Water} & HEAVE_HOS",
+    )
+    wdw_top_without_highest_water = " | ".join(
+        [f"{route} & WK/TJ/SF/BF" for route in wdw_non_highest_near_top_routes]
+        + [f"{route} & PURPLE_SWITCHES & LJ" for route in wdw_non_highest_near_top_routes]
+        + [f"{route} & PURPLE_SWITCHES & logic_wdw_express_elevator_to_top_no_movement"
+           for route in wdw_non_highest_near_top_routes]
     )
     wdw_shocking_arrow_lifts_rule = (
         "{Wet-Dry World - Cannon} & {Wet-Dry World - Low Water} | "
         "{Wet-Dry World - Cannon} & {Wet-Dry World - High Water} | "
         "{Wet-Dry World - Cannon} & {Wet-Dry World - Highest Water} & "
         "logic_wdw_shocking_arrow_lifts_underwater_ground_pound | "
-        "{Wet-Dry World - Top} | "
+        f"{wdw_top_without_highest_water} | "
         "{Wet-Dry World - Mid-High Water} & LG/SF/TJ/BF"
     )
-    wdw_secrets_route = (
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
-        "{Wet-Dry World - Mid Water} & HEAVE_HOS/SF/BF/TJ | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
-        "{Wet-Dry World - High Water} & LG | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & "
-        "{Wet-Dry World - Highest Water} | "
-        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Near the Top} & {Wet-Dry World - Top}"
+    wdw_wooden_structure_block_rule = (
+        "{Wet-Dry World - Mid Water} | "
+        f"{wdw_top_without_highest_water}"
+    )
+    wdw_secrets_target = "Wet-Dry World - Secrets in the Shallows & Sky"
+    wdw_secrets_cannon = rf.get_cannon_item_name(wdw_secrets_target)
+    wdw_secrets_cap_items = rf.get_cap_item_names(wdw_secrets_target)
+    wdw_secrets_arbitrary_items = rf.get_arbitrary_item_names(wdw_secrets_target)
+    wdw_secrets_action_items = rf.get_action_item_names(wdw_secrets_target)
+
+    def build_wdw_secrets_rule(rule_expr: str) -> Rule:
+        return rf.build_rule(
+            rule_expr, wdw_secrets_cannon, wdw_secrets_cap_items,
+            wdw_secrets_arbitrary_items, wdw_secrets_action_items)
+
+    wdw_secrets_route = And(
+        build_wdw_secrets_rule("CANN/HEAVE_HOS"),
+        Or(
+            build_wdw_secrets_rule("PURPLE_SWITCHES"),
+            And(
+                build_wdw_secrets_rule("logic_wdw_top_platforms_to_express_elevator_no_movement"),
+                build_wdw_secrets_rule("CANN/SF/BF/WK/TJ"),
+            ),
+        ),
+        Or(
+            build_wdw_secrets_rule("logic_wdw_pedestal_heave_ho"),
+            build_wdw_secrets_rule("CANN/SF/BF/WK/TJ"),
+        ),
+        build_wdw_secrets_rule("SF/BF/WK/TJ/LJ/CANN/WDW_WATER_LEVEL_DIAMOND"),
+    )
+    wdw_express_elevator_target = "Wet-Dry World - Express Elevator--Hurry Up!"
+    wdw_express_elevator_cannon = rf.get_cannon_item_name(wdw_express_elevator_target)
+    wdw_express_elevator_cap_items = rf.get_cap_item_names(wdw_express_elevator_target)
+    wdw_express_elevator_arbitrary_items = rf.get_arbitrary_item_names(wdw_express_elevator_target)
+    wdw_express_elevator_action_items = rf.get_action_item_names(wdw_express_elevator_target)
+
+    def build_wdw_express_elevator_rule(rule_expr: str) -> Rule:
+        return rf.build_rule(
+            rule_expr, wdw_express_elevator_cannon, wdw_express_elevator_cap_items,
+            wdw_express_elevator_arbitrary_items, wdw_express_elevator_action_items)
+
+    wdw_express_elevator_route = And(
+        build_wdw_express_elevator_rule("CANN/HEAVE_HOS"),
+        Or(
+            build_wdw_express_elevator_rule("PURPLE_SWITCHES"),
+            And(
+                build_wdw_express_elevator_rule("logic_wdw_top_platforms_to_express_elevator_no_movement"),
+                build_wdw_express_elevator_rule("CANN/SF/BF/WK/TJ"),
+            ),
+        ),
+        build_wdw_express_elevator_rule("SF/BF/WK/WDW_WATER_LEVEL_DIAMOND"),
     )
     rf.assign_rule("Wet-Dry World - Low Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Mid Water to Low Water", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Mid Water to Mid-High Water",
-                   "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Top of the Express Elevator} | "
-                   "WDW_WATER_LEVEL_DIAMOND & TJ+DV")
+    wdw_water_level_diamond_route = (
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Top} | "
+        "WDW_WATER_LEVEL_DIAMOND & TJ+DV | "
+        "WDW_WATER_LEVEL_DIAMOND & {Wet-Dry World - Cannon} & LJ | "
+        "WDW_WATER_LEVEL_DIAMOND & PURPLE_SWITCHES"
+    )
+    rf.assign_rule(
+        "Wet-Dry World - Low Water to Mid-High Water",
+        "WDW_WATER_LEVEL_DIAMOND & LJ")
+    rf.assign_rule(
+        "Wet-Dry World - Mid Water to Mid-High Water",
+        wdw_water_level_diamond_route)
     rf.assign_rule("Wet-Dry World - Mid-High Water to Mid Water", "WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Mid-High Water to High Water", "{Wet-Dry World - Top}")
+    rf.assign_rule(
+        "Wet-Dry World - Mid-High Water to High Water",
+        "HEAVE_HOS & WK/TJ/SF/BF | "
+        "HEAVE_HOS & PURPLE_SWITCHES & LJ | "
+        "HEAVE_HOS & PURPLE_SWITCHES & logic_wdw_express_elevator_to_top_no_movement")
     rf.assign_rule("Wet-Dry World - High Water to Mid-High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Highest Water to High Water", "WDW_WATER_LEVEL_DIAMOND")
     rf.assign_rule("Wet-Dry World - Near the Top",
@@ -1082,15 +1103,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "LJ | logic_wdw_express_elevator_to_top_no_movement")
     rf.assign_rule("Wet-Dry World - Top to Top of the Express Elevator",
                    "logic_wdw_top_platforms_to_express_elevator_no_movement")
+    rf.assign_rule("Wet-Dry World - Cannon to Near the Top", "CANN")
+    rf.assign_rule("Wet-Dry World - Cannon to Top", "CANN")
     rf.assign_rule("Wet-Dry World - Downtown",
                    "{Wet-Dry World - Highest Water} & LG | "
                    "{Wet-Dry World - Top} & logic_wdw_downtown_triple_jump")
     rf.assign_rule("Wet-Dry World - Cannon to Downtown", "CANN")
     rf.assign_rule("Wet-Dry World - Shocking Arrow Lifts!", wdw_shocking_arrow_lifts_rule)
-    rf.assign_rule("Wet-Dry World - Express Elevator--Hurry Up!",
-                   "{Wet-Dry World - Low Water} & BF/SF/WK | "
-                   "{Wet-Dry World - Low Water} & WDW_WATER_LEVEL_DIAMOND")
-    rf.assign_rule("Wet-Dry World - Secrets in the Shallows & Sky", wdw_secrets_route)
+    rf.assign_rule_object("Wet-Dry World - Express Elevator--Hurry Up!", wdw_express_elevator_route)
+    rf.assign_rule_object("Wet-Dry World - Secrets in the Shallows & Sky", wdw_secrets_route)
     rf.assign_rule("Wet-Dry World - Quick Race Through Downtown!",
                    "WDW_WATER_LEVEL_DIAMOND & VC & WK/BF | "
                    "WDW_WATER_LEVEL_DIAMOND & VC & TJ+LG+PURPLE_SWITCHES | "
@@ -1099,14 +1120,18 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Wet-Dry World - Bob-omb Buddy",
                    "BOBOMB_BUDDY & {Wet-Dry World - High Water} & TJ | "
                    "BOBOMB_BUDDY & {Wet-Dry World - High Water} & SF+LG | "
-                   "BOBOMB_BUDDY & {Wet-Dry World - Highest Water} & BF/SF")
+                   "BOBOMB_BUDDY & {Wet-Dry World - Highest Water} & TJ/BF/SF")
     # Tall, Tall Mountain
-    rf.assign_rule("Tall, Tall Mountain - Upper", "TJ/BF/SF/ROLLING_LOG")
+    rf.assign_rule("Tall, Tall Mountain - Upper",
+                   "TJ+LG | BF/SF/ROLLING_LOG | logic_ttm_upper_fly_guy_spin_jump")
     rf.assign_rule("Tall, Tall Mountain - Top",
-                   "LJ/DV & LG/KK | logic_ttm_top_triple_jump | "
+                   "LJ | logic_ttm_top_triple_jump | "
                    "logic_ttm_top_wall_kick | logic_ttm_top_kick | logic_ttm_top_dive")
     rf.assign_rule("Tall, Tall Mountain - Mystery of the Monkey Cage", "TTM_UKIKI")
-    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge", "PURPLE_SWITCHES")
+    rf.assign_rule("Tall, Tall Mountain - Breathtaking View from Bridge",
+                   "{Tall, Tall Mountain - Top} & PURPLE_SWITCHES | "
+                   "logic_ttm_breathtaking_view_triple_jump_from_below")
+    rf.assign_rule("Tall, Tall Mountain - Middle", "VERTICAL_WIND/TJ/LJ")
     rf.assign_rule("Tall, Tall Mountain - Blast to the Lonely Mushroom",
                    "CANN | logic_ttm_lonely_mushroom_cannonless | "
                    "logic_ttm_lonely_mushroom_fly_guy_spin_jump")
@@ -1123,16 +1148,19 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tiny-Huge Island - Huge Piranha Area to Tiny Piranha Area", "WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Tiny Main to Koopa the Quick", "WARP_PIPES")
     rf.assign_rule("Tiny-Huge Island - Koopa the Quick to Tiny Main", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Windswept Valley to Tiny Main", "WARP_PIPES")
+    rf.assign_rule("Tiny-Huge Island - Tiny Main to Windswept Valley", "WARP_PIPES")
     rf.assign_rule(
         "Tiny-Huge Island - Windswept Valley",
-        "TJ+DV | LJ | logic_thi_windswept_valley_fly_guy_spin_jump")
+        "TJ+DV | LJ+VERTICAL_WIND | LJ+TJ | "
+        "logic_thi_windswept_valley_fly_guy_spin_jump")
     rf.assign_rule("Tiny-Huge Island - Cannonball", "LG/SF/BF/TJ/WK")
     rf.assign_rule("Tiny-Huge Island - Koopa the Quick", "SF/BF/TJ/WK")
     rf.assign_rule("Tiny-Huge Island - Huge Top", "SF/BF/TJ")
     rf.assign_rule(
         "Tiny-Huge Island - Huge Island to Huge Top with Koopa Shell",
         "logic_thi_scale_huge_mountain_koopa_shell")
-    rf.assign_rule("Tiny-Huge Island - Huge Island to Red Coin Cave Entrance", "CANN")
+    rf.assign_rule("Tiny-Huge Island - Huge Island to Huge Tree Area", "CANN")
     rf.assign_rule("Tiny-Huge Island - Make Wiggler Squirm", "WIGGLER")
     rf.assign_rule("Tiny-Huge Island - Five Itty Bitty Secrets", "PURPLE_SWITCHES")
     rf.assign_rule("Tiny-Huge Island - Rematch with Koopa the Quick", "THI_KOOPA")
@@ -1148,11 +1176,21 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "CL | logic_ttc_pit_and_pendulums_area_wall_kick")
     rf.assign_rule("Tick Tock Clock - Moving Bars Area", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule(
-        "Tick Tock Clock - Top",
-        "TJ+LG | {Tick Tock Clock Moving} & SF | logic_ttc_top_past_spinners_wall_kick")
+        "Tick Tock Clock - Upper Moving Bars Area",
+        "TJ+LG | {Tick Tock Clock Moving} & SF")
+    rf.assign_rule(
+        "Tick Tock Clock - More Moving Bars Area", "WK/TJ/LG/SF")
+    rf.assign_rule(
+        "Tick Tock Clock - Top", "TJ/LG/BF/SF")
     rf.assign_rule(
         "Tick Tock Clock - Top Past Spinners",
-        "TTC_SPINNERS | SF | TJ | logic_ttc_top_past_spinners_wall_kick")
+        "TTC_SPINNERS | SF | TJ")
+    rf.assign_rule(
+        "Tick Tock Clock - Moving Bars Area to Top with Wall Kick",
+        "logic_ttc_top_past_spinners_wall_kick")
+    rf.assign_rule(
+        "Tick Tock Clock - Moving Bars Area to Top Past Spinners with Wall Kick",
+        "logic_ttc_top_past_spinners_wall_kick")
     rf.assign_rule(
         "Tick Tock Clock - Stomp on the Thwomp",
         "{Tick Tock Clock Moving} & THWOMP | "
@@ -1170,11 +1208,17 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Rainbow Ride - Swingin' in the Breeze",
                    "LG/TJ/BF/SF | logic_rr_swingin_no_movement")
     rf.assign_rule("Rainbow Ride - Tricky Triangles!",
-                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement")
+                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement | "
+                   "logic_rr_fall_to_tricky_triangles_from_somewhere_over_the_rainbow")
     rf.assign_rule("Rainbow Ride - Tricky Triangles 1-Up",
-                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement")
+                   "PURPLE_SWITCHES & LG/TJ/BF/SF | logic_rr_tricky_triangles_no_movement | "
+                   "logic_rr_fall_to_tricky_triangles_one_up_from_somewhere_over_the_rainbow")
+    rf.assign_rule(
+        "Rainbow Ride - Cruiser to Tricky Triangles",
+        "logic_rr_fall_to_tricky_triangles_from_somewhere_over_the_rainbow | "
+        "logic_rr_fall_to_tricky_triangles_one_up_from_somewhere_over_the_rainbow")
     rf.assign_rule("Rainbow Ride - Cruiser", "RR_CARPETS & WK/SF/BF/LG/TJ")
-    rf.assign_rule("Rainbow Ride - Ship Pole 1-Up", "CL")
+    rf.assign_rule("Rainbow Ride - Cruiser Pole 1-Up", "CL")
     rf.assign_rule("Rainbow Ride - House", "RR_CARPETS & TJ/SF/BF/LG")
     rf.assign_rule("Rainbow Ride - Somewhere Over the Rainbow", "CANN")
     # Vanish Cap Under the Moat
@@ -1216,8 +1260,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "Bowser in the Dark World - Extra 1-Ups", second_floor_key_rule))
     # Bowser in the Fire Sea
     rf.assign_rule("Bowser in the Fire Sea - Upper", "CL")
-    rf.assign_rule("Bowser in the Fire Sea - Near Poles Block 1-Up", "LG/WK")
-    rf.assign_rule("Bowser in the Fire Sea - Near Poles 1-Up", "LG/WK")
+    rf.assign_rule("Bowser in the Fire Sea - Near Final Poles Block 1-Up", "WK/TJ")
+    rf.assign_rule("Bowser in the Fire Sea - Near Final Poles 1-Up", "TJ/WK")
     rf.assign_rule_object(
         "Bowser in the Fire Sea - Key",
         rf.build_rule(
@@ -1226,10 +1270,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Bowser in the Fire Sea", options.bowser_in_the_fire_sea_health.value))
     if options.one_up_checks:
         for location_name in (
-                "Bowser in the Fire Sea - Near Poles 1-Up",
+                "Bowser in the Fire Sea - Near Final Poles 1-Up",
                 "Bowser in the Fire Sea - Second Stone Structure 1-Up",
         ):
-            existing_rule = rf.build_rule("LG/WK") if location_name.endswith("Near Poles 1-Up") else True_()
+            existing_rule = rf.build_rule("TJ/WK") if location_name.endswith("Near Final Poles 1-Up") else True_()
             rf.assign_rule_object(
                 location_name,
                 existing_rule & bowser_stage_one_up_rule(
@@ -1240,7 +1284,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Wing Mario Over the Rainbow - Bob-omb Buddy Platform",
         "WC+TJ | LG & logic_wmotr_leap_of_faith | logic_wmotr_leap_of_faith_without_ledge_grab")
     rf.assign_rule("Wing Mario Over the Rainbow - Bob-omb Buddy", "BOBOMB_BUDDY")
-    rf.assign_rule("Wing Mario Over the Rainbow - Cannon", "WC+CANN")
+    rf.assign_rule("Wing Mario Over the Rainbow - Upper", "WC+CANN")
     rf.assign_rule("Wing Mario Over the Rainbow - Block 1-Up", "WC & TJ/CANN")
     # Probably possible with cannon alone, but keep this gated until the route is modeled.
     rf.assign_rule("Wing Mario Over the Rainbow - Cloud 1-Up", wmotr_flight_rule)
@@ -1259,7 +1303,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Bob-omb Battlefield - Near Flower Patches Wing Cap Block": "WC",
             "Bob-omb Battlefield - Wooden Ramp Wing Cap Block": "WC",
             "Bob-omb Battlefield - Island Wing Cap Block": "WC",
-            "Castle - Roof Wing Cap Block": "WC",
+            "Castle Grounds - Roof Wing Cap Block": "WC",
             "Cavern of the Metal Cap - First Metal Cap Block": "MC",
             "Cavern of the Metal Cap - Near Switch Metal Cap Block": "MC",
             "Dire, Dire Docks - Metal Cap Block": "MC",
@@ -1278,6 +1322,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Jolly Roger Bay - Plunder in the Sunken Ship Star Block": "TREASURE_CHESTS",
             "Lethal Lava Land - Wing Cap Block": "WC",
             "Lethal Lava Land - Koopa Shell Block": "LLL_KOOPA_SHELL",
+            "Bowser in the Fire Sea - 3 Coins Block": "CL | WK | logic_lava_damage_boosting",
+            "Bowser in the Fire Sea - Near Final Poles 1-Up Block": "WK/TJ",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
             "Snowman's Land - Vanish Cap Block": "VC",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
@@ -1301,17 +1347,15 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                 "VC & CHECKERBOARD_PLATFORMS & WK/TJ/BF/SF/LG | "
                 "VC & logic_vcutm_switch_no_movement",
             "Wet-Dry World - Shocking Arrow Lifts Star Block": wdw_shocking_arrow_lifts_rule,
-            "Wet-Dry World - Pedestal 10 Coins Block": wdw_near_top_block_route,
-            "Wet-Dry World - Wooden Structure 3 Coins Block":
-                "{Wet-Dry World - Mid Water} | {Wet-Dry World - Top} | "
-                "{Wet-Dry World - Top of the Express Elevator} & LJ",
+            "Wet-Dry World - Pedestal 10 Coins Block": wdw_pedestal_block_route,
+            "Wet-Dry World - Wooden Structure 3 Coins Block": wdw_wooden_structure_block_rule,
             "Wet-Dry World - Downtown Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Metal Cap Block": "MC",
             "Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block": "WDW_WATER_LEVEL_DIAMOND & VC",
             "Wet-Dry World - Downtown 1-Up Block": "WDW_WATER_LEVEL_DIAMOND",
             "Whomp's Fortress - Metal Cap Block": "MC",
             "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block": "WC",
-            "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block":
+            "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block":
                 wmotr_flight_rule,
             "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": "WC",
             "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block":
@@ -1406,6 +1450,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     }
     for course_name, location_name in red_coin_star_by_course.items():
         rf.assign_rule_object(location_name, CanCollectAllRedCoins(course_name))
+    rf.add_rule("Bowser in the Fire Sea - Red Coins", rf.build_rule("WK/TJ"))
     vcutm_red_coin_star = "Vanish Cap Under the Moat - Red Coins"
     rf.add_rule(vcutm_red_coin_star, rf.build_rule(
         "VC | logic_vcutm_wall_kick_over_vanish_cap_grate",
@@ -1449,52 +1494,179 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             )
             continue
         coin_count_check_location = parse_coin_count_check_location_name(location.name)
-        if coin_count_check_location is None:
+        if coin_count_check_location is not None:
+            course_name, coin_count = coin_count_check_location
+            rf.assign_rule_object(location.name, CanCollectCoins(course_name, coin_count))
             continue
-        course_name, coin_count = coin_count_check_location
-        rf.assign_rule_object(location.name, CanCollectCoins(course_name, coin_count))
+        global_coin_count = parse_global_coin_count_check_location_name(location.name)
+        if global_coin_count is not None:
+            course_caps = tuple(
+                (course_name, cap)
+                for (course_name, _offset, _option_name, _maximum), cap
+                in zip(global_coin_count_course_data, world.get_global_coin_count_caps())
+            )
+            rf.assign_rule_object(location.name, CanCollectGlobalCoins(course_caps, global_coin_count))
 
     # Castle Stars
-    rf.assign_rule("Castle - Roof", "CANN")
-    rf.add_rule("Castle - Toad (Basement)", CanReachRegion("Basement") & Has("Castle - Toads"))
-    rf.add_rule("Castle - Toad (Second Floor)", CanReachRegion("Second Floor") & Has("Castle - Toads"))
-    rf.add_rule("Castle - Toad (Third Floor)", CanReachRegion("Third Floor") & Has("Castle - Toads"))
-    rf.add_rule("Castle - Yoshi", Has("Castle - Yoshi"))
+    rf.assign_rule("Castle Grounds - Roof", "CANN")
+    rf.add_rule("Castle Basement - Toad", CanReachRegion("Castle Basement") & Has("Castle - Toads"))
+    rf.add_rule("Castle Second Floor - Toad", CanReachRegion("Castle Second Floor") & Has("Castle - Toads"))
+    rf.add_rule("Castle Third Floor - Toad", CanReachRegion("Castle Third Floor") & Has("Castle - Toads"))
+    rf.add_rule("Castle Grounds - Yoshi", Has("Castle - Yoshi"))
 
-    rf.assign_rule("Castle - Third Tree From Waterfall 1-Up",
+    rf.assign_rule("Castle Grounds - Third Tree From Waterfall 1-Up",
                    "CL/TJ/BF/SF | logic_castle_waterfall_tree_1up_with_no_movement")
-    rf.assign_rule("Castle - Bridge Coins 1-Up", "{{Castle - Drain the Moat}} & WK & TJ/SF")
-    rf.assign_rule("Castle - Jolly Roger Bay Lobby 1-Up",
+    rf.assign_rule("Castle Grounds - Bridge Coins 1-Up", "{{Castle Basement - Drain the Moat}} & WK & TJ/SF")
+    rf.assign_rule("Castle First Floor - Jolly Roger Bay Room 1-Up",
                    "SF/BF | TJ & LG | logic_secret_aquarium_triple_jump | "
                    "logic_secret_aquarium_wall_kick_and_ledge_grab | "
                    "logic_secret_aquarium_wall_kick | logic_secret_aquarium_ledge_grab")
-    rf.assign_rule("Castle - Drain the Moat", "GP")
-    rf.assign_rule("Castle - MIPS 1", "DV | logic_castle_mips_without_dive")
-    rf.assign_rule("Castle - MIPS 2", "DV | logic_castle_mips_without_dive")
+    rf.assign_rule("Castle Basement - Drain the Moat", "GP")
+    rf.assign_rule("Castle Basement - MIPS 1", "DV | logic_castle_mips_without_dive")
+    rf.assign_rule("Castle Basement - MIPS 2", "DV | logic_castle_mips_without_dive")
     rf.add_rule(
-        "Castle - MIPS 1",
-        CanReachRegion("Basement") & Has("Castle - Progressive MIPS"))
+        "Castle Basement - MIPS 1",
+        CanReachRegion("Castle Basement") & Has("Castle - Progressive MIPS"))
     rf.add_rule(
-        "Castle - MIPS 2",
-        CanReachRegion("Basement") & Has("Castle - Progressive MIPS", 2))
+        "Castle Basement - MIPS 2",
+        CanReachRegion("Castle Basement") & Has("Castle - Progressive MIPS", 2))
+
+    active_location_names = {location.name for location in multiworld.get_locations(player)}
+    freestanding_star_locations = {
+        "Bob-omb Battlefield": {"Bob-omb Battlefield - Behind Chain Chomp's Gate"},
+        "Whomp's Fortress": {
+            "Whomp's Fortress - To the Top of the Fortress",
+            "Whomp's Fortress - Shoot into the Wild Blue",
+            "Whomp's Fortress - Fall onto the Caged Island",
+            "Whomp's Fortress - Blast Away the Wall",
+        },
+        "Jolly Roger Bay": {
+            "Jolly Roger Bay - Through the Jet Stream",
+        },
+        "Cool, Cool Mountain": {"Cool, Cool Mountain - Wall Kicks Will Work"},
+        "Big Boo's Haunt": {"Big Boo's Haunt - Secret of the Haunted Books"},
+        "Hazy Maze Cave": {
+            "Hazy Maze Cave - Swimming Beast in the Cavern",
+            "Hazy Maze Cave - Metal-Head Mario Can Move!",
+            "Hazy Maze Cave - Navigating the Toxic Maze",
+            "Hazy Maze Cave - A-Maze-Ing Emergency Exit",
+            "Hazy Maze Cave - Watch for Rolling Rocks",
+        },
+        "Lethal Lava Land": {
+            "Lethal Lava Land - Red-Hot Log Rolling",
+            "Lethal Lava Land - Hot-Foot-It into the Volcano",
+            "Lethal Lava Land - Elevator Tour in the Volcano",
+        },
+        "Shifting Sand Land": {
+            "Shifting Sand Land - Shining Atop the Pyramid",
+            "Shifting Sand Land - Inside the Ancient Pyramid",
+        },
+        "Dire, Dire Docks": {
+            "Dire, Dire Docks - Board Bowser's Sub",
+            "Dire, Dire Docks - Collect the Caps...",
+        },
+        "Snowman's Land": {
+            "Snowman's Land - Snowman's Big Head",
+            "Snowman's Land - In the Deep Freeze",
+            "Snowman's Land - Into the Igloo",
+        },
+        "Wet-Dry World": {
+            "Wet-Dry World - Express Elevator--Hurry Up!",
+            "Wet-Dry World - Quick Race Through Downtown!",
+        },
+        "Tall, Tall Mountain": {
+            "Tall, Tall Mountain - Scale the Mountain",
+            "Tall, Tall Mountain - Mysterious Mountainside",
+            "Tall, Tall Mountain - Breathtaking View from Bridge",
+            "Tall, Tall Mountain - Blast to the Lonely Mushroom",
+        },
+        "Tick Tock Clock": {
+            "Tick Tock Clock - Roll into the Cage",
+            "Tick Tock Clock - The Pit and the Pendulums",
+            "Tick Tock Clock - Get a Hand",
+            "Tick Tock Clock - Stomp on the Thwomp",
+            "Tick Tock Clock - Timed Jumps on Moving Bars",
+        },
+        "Rainbow Ride": {
+            "Rainbow Ride - Cruiser Crossing the Rainbow",
+            "Rainbow Ride - The Big House in the Sky",
+            "Rainbow Ride - Swingin' in the Breeze",
+            "Rainbow Ride - Tricky Triangles!",
+        },
+    }
+    for level_name, location_names in freestanding_star_locations.items():
+        per_level_name = next(name for name in freestanding_star_item_data_table if name.startswith(f"{level_name} -"))
+        for location_name in location_names & active_location_names:
+            rf.add_rule(location_name, HasUnlock("Freestanding Stars", per_level_name))
+
+    star_block_location_names = {
+        location_name for location_name in active_location_names if location_name.endswith("Star Block")
+    }
+    for location_name in star_block_location_names:
+        level_name = location_name.split(" - ", 1)[0]
+        per_level_name = next(name for name in star_block_item_data_table if name.startswith(f"{level_name} -"))
+        rf.add_rule(location_name, HasUnlock("Star Blocks", per_level_name))
+
+    for location_name, per_level_name in {
+        "Bob-omb Battlefield - Shoot to the Island in the Sky": "Bob-omb Battlefield - Star Block",
+        "Jolly Roger Bay - Blast to the Stone Pillar": "Jolly Roger Bay - Star Blocks",
+        "Jolly Roger Bay - Plunder in the Sunken Ship": "Jolly Roger Bay - Star Blocks",
+        "The Princess's Secret Slide - Block Star": "The Princess's Secret Slide - Star Block",
+        "Rainbow Ride - Somewhere Over the Rainbow": "Rainbow Ride - Star Block",
+        "Snowman's Land - Whirl from the Freezing Pond": "Snowman's Land - Star Block",
+        "Tiny-Huge Island - The Tip Top of the Huge Island": "Tiny-Huge Island - Star Block",
+        "Wet-Dry World - Shocking Arrow Lifts!": "Wet-Dry World - Star Blocks",
+        "Wet-Dry World - Top o' the Town": "Wet-Dry World - Star Blocks",
+    }.items():
+        rf.add_rule(location_name, HasUnlock("Star Blocks", per_level_name))
+
+    for location_name, per_level_name in {
+        "Lethal Lava Land - Koopa Shell Block": "Lethal Lava Land - Koopa Shell",
+        "Shifting Sand Land - Stone Structure Koopa Shell Block": "Shifting Sand Land - Koopa Shell Block",
+        "Snowman's Land - Koopa Shell Block": "Snowman's Land - Koopa Shell Block",
+    }.items():
+        if location_name in active_location_names:
+            rf.add_rule(location_name, HasUnlock("Koopa Shell Blocks", per_level_name))
+
+    for location_name, per_level_name in {
+        "Bob-omb Battlefield - Mario Wings to the Sky": "Bob-omb Battlefield - Star Secrets",
+        "Shifting Sand Land - Pyramid Puzzle": "Shifting Sand Land - Star Secrets",
+        "Wet-Dry World - Secrets in the Shallows & Sky": "Wet-Dry World - Star Secrets",
+        "Tiny-Huge Island - Five Itty Bitty Secrets": "Tiny-Huge Island - Star Secrets",
+    }.items():
+        rf.add_rule(location_name, HasUnlock("Star Secrets", per_level_name))
+
+    for location_name in (
+            "Tower of the Wing Cap - Switch",
+            "Cavern of the Metal Cap - Switch",
+            "Vanish Cap Under the Moat - Switch"):
+        level_name = location_name.rsplit(" - ", 1)[0]
+        rf.add_rule(location_name, HasUnlock("Cap Switches", f"{level_name} - Cap Switch"))
 
     if options.one_up_checks:
-        active_location_names = {
-            location.name for location in multiworld.get_locations(player)
-        }
         for location_name, category_name in one_up_unlock_category_by_location.items():
             if location_name not in active_location_names:
                 continue
             if location_name.endswith("Monty Moles"):
                 continue
-            per_level_item_name = f"{location_name.split(' - ', 1)[0]} - {category_name}"
+            level_name = rf.get_level_name_from_target(location_name)
+            per_level_item_name = f"{level_name} - {category_name}"
             rf.add_rule(location_name, HasUnlock(category_name, per_level_item_name))
 
-    if (options.area_rando > options.area_rando.option_Off
-            and not using_slot_area_connections and not mixed_sub_areas):
-        ensure_reachable_starting_check(
-            multiworld, options, player, randomized_entrances, randomized_entrances_s,
-            randomized_entrance_connections)
+    starting_state = CollectionState(multiworld)
+    reachable_starting_checks = sum(
+        location.address is not None
+        and is_starting_check_location(location.name, options)
+        and location.can_reach(starting_state)
+        for location in multiworld.get_locations(player)
+    )
+    if reachable_starting_checks < 2:
+        castle_lobby = multiworld.get_region("Castle First Floor", player)
+        fallback_names = ("Castle First Floor - Free Item", "Castle First Floor - Another Free Item")
+        for location_name in fallback_names[:2 - reachable_starting_checks]:
+            castle_lobby.locations.append(
+                SM64Location(player, location_name, location_table[location_name], castle_lobby))
+            multiworld.itempool.append(world.create_filler())
 
     for spot in (*multiworld.get_entrances(player), *multiworld.get_locations(player)):
         if spot.access_rule is DEFAULT_COLLECTION_RULE.__func__:
@@ -1502,25 +1674,24 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
 
     # Destination Format: LVL | AREA with LVL = LEVEL_x, AREA = Area as used in sm64 code
     # Cast to int to not rely on availability of SM64Levels enum. Will cause crash in MultiServer otherwise
-    if not mixed_sub_areas:
-        area_connections.update({int(entrance_lvl): int(sm64_entrances_to_level[destination])
-                                 for (entrance_lvl, destination) in randomized_entrances.items()})
+    for entrance_lvl, destination in randomized_entrances.items():
+        area_connections.setdefault(int(entrance_lvl), int(sm64_entrances_to_level[destination]))
 
     can_defeat_bowser_in_the_sky = (
         CanReachRegion("Bowser in the Sky - Bowser Arena")
         & rf.build_rule("BOWSER", arbitrary_item_names=rf.get_arbitrary_item_names("Bowser in the Sky"))
         & bowser_arena_bomb_rule("Bowser in the Sky", options.bowser_in_the_sky_health.value)
     )
-    rf.world.set_completion_rule(can_defeat_bowser_in_the_sky)
-
     if options.completion_type == options.completion_type.option_Last_Bowser_Stage:
         rf.world.set_completion_rule(can_defeat_bowser_in_the_sky)
     elif options.completion_type == options.completion_type.option_All_Bowser_Stages:
-        rf.world.set_completion_rule(
+        all_bowser_stages = (
             CanReachLocation("Bowser in the Dark World - Key")
             & CanReachLocation("Bowser in the Fire Sea - Key")
             & can_defeat_bowser_in_the_sky
         )
+        rf.assign_rule_object("Bowser in the Sky - Grand Star", all_bowser_stages)
+        rf.world.set_completion_rule(CanReachLocation("Bowser in the Sky - Grand Star"))
 
     if defer_randomized_entrances:
         for entrance_id in world.shuffled_entrance_source_ids:
@@ -1538,7 +1709,6 @@ class RuleFactory:
     multiworld: MultiWorld
     player: int
     move_rando_bitvec: bool
-    area_randomizer: bool
     capless: bool
     cannonless: bool
     moveless: bool
@@ -1560,6 +1730,7 @@ class RuleFactory:
         "KK": "Kick",
         "CL": "Climb",
         "LG": "Ledge Grab",
+        "MARIOS_HAT": "Mario's Hat",
         "MIPS1": "Castle - Progressive MIPS",
         "BOB_KING": "Bob-omb Battlefield - King Bob-omb",
         "BOB_KOOPA": "Bob-omb Battlefield - Koopa the Quick",
@@ -1574,8 +1745,11 @@ class RuleFactory:
         "JRB_RAISED_SHIP": "Jolly Roger Bay - Raised Ship",
         "JRB_BUDDY": "Jolly Roger Bay - Bob-omb Buddy",
         "JRB_JET_STREAM": "Jolly Roger Bay - Jet Stream",
+        "DDD_JET_STREAM": "Dire, Dire Docks - Jet Stream",
         "JRB_UNAGI": "Jolly Roger Bay - Unagi",
         "LLL_KOOPA_SHELL": "Lethal Lava Land - Koopa Shell",
+        "SSL_KOOPA_SHELL": "Shifting Sand Land - Koopa Shell Block",
+        "SL_KOOPA_SHELL": "Snowman's Land - Koopa Shell Block",
         "SSL_KLEPTO": "Shifting Sand Land - Klepto with Star",
         "THI_KOOPA": "Tiny-Huge Island - Koopa the Quick",
         "TTM_UKIKI": "Tall, Tall Mountain - Ukiki",
@@ -1594,6 +1768,7 @@ class RuleFactory:
         "PURPLE_SWITCHES": "Purple Switches",
         "WDW_WATER_LEVEL_DIAMOND": "Wet-Dry World - Water Level Diamond",
         "TTC_SPINNERS": "Tick Tock Clock - Spinners",
+        "VERTICAL_WIND": "Vertical Wind",
     }
     cap_item_name_by_token_and_level = {
         "WC": {
@@ -1634,7 +1809,6 @@ class RuleFactory:
         self.options = options
         self.player = player
         self.move_rando_bitvec = move_rando_bitvec
-        self.area_randomizer = options.area_rando > 0
         self.assigned_rules: dict[str, Rule] = {}
 
     def assign_rule(self, target_name: str, rule_expr: str):
@@ -1721,7 +1895,12 @@ class RuleFactory:
 
     def get_level_name_from_target(self, target_name: str) -> str:
         if " - " in target_name:
-            return target_name.split(" - ", 1)[0]
+            level_name = target_name.split(" - ", 1)[0]
+            if level_name in {
+                    "Castle Grounds", "Castle First Floor", "Castle Courtyard",
+                    "Castle Basement", "Castle Second Floor", "Castle Third Floor"}:
+                return "Castle"
+            return level_name
         if target_name in per_level_move_area_names:
             return target_name
         for level_name in (
@@ -1755,6 +1934,7 @@ class RuleFactory:
         level_name = self.get_level_name_from_target(target_name)
         unlock_level_name = {
             "The Secret Aquarium": "Secret Aquarium",
+            "The Princess's Secret Slide": "Princess's Secret Slide",
         }.get(level_name, level_name)
         item_names = {
             token: HasUnlock(item_name, item_name)
@@ -1766,6 +1946,9 @@ class RuleFactory:
                 item_names[token] = HasUnlock("Bob-omb Buddies", per_level_item_name)
             else:
                 item_names[token] = HasUnlock(per_level_item_name, per_level_item_name)
+        if level_name in {"Jolly Roger Bay", "Dire, Dire Docks"}:
+            item_names[f"{'JRB' if level_name == 'Jolly Roger Bay' else 'DDD'}_JET_STREAM"] = HasUnlock(
+                "Jet Streams", f"{level_name} - Jet Stream")
         item_names["CHECKERBOARD_PLATFORMS"] = (
             get_level_feature_item_name(
                 self.options.level_features,
@@ -1784,6 +1967,28 @@ class RuleFactory:
                 self.options.level_features,
                 "Purple Switches", purple_switch_item_name_by_level[level_name])
             if level_name in purple_switch_item_name_by_level else True
+        )
+        koopa_shell_block_item_name_by_level = {
+            "Lethal Lava Land": "Lethal Lava Land - Koopa Shell",
+            "Shifting Sand Land": "Shifting Sand Land - Koopa Shell Block",
+            "Snowman's Land": "Snowman's Land - Koopa Shell Block",
+        }
+        koopa_shell_item_name = koopa_shell_block_item_name_by_level.get(level_name)
+        if koopa_shell_item_name:
+            token = {
+                "Lethal Lava Land": "LLL_KOOPA_SHELL",
+                "Shifting Sand Land": "SSL_KOOPA_SHELL",
+                "Snowman's Land": "SL_KOOPA_SHELL",
+            }[level_name]
+            item_names[token] = HasUnlock("Koopa Shell Blocks", koopa_shell_item_name)
+        vertical_wind_item_name_by_level = {
+            "Cool, Cool Mountain": "Cool, Cool Mountain - Vertical Wind",
+            "Tall, Tall Mountain": "Tall, Tall Mountain - Vertical Wind",
+            "Tiny-Huge Island": "Tiny-Huge Island - Vertical Wind",
+        }
+        item_names["VERTICAL_WIND"] = (
+            HasUnlock("Vertical Wind", vertical_wind_item_name_by_level[level_name])
+            if level_name in vertical_wind_item_name_by_level else True
         )
         warp_pipe_item_name = warp_pipe_item_name_by_level.get(level_name)
         if warp_pipe_item_name:
@@ -1817,6 +2022,9 @@ class RuleFactory:
         item_names["TEN_COIN_BLOCKS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "10-Coin Blocks", f"{level_name} - 10-Coin Blocks")
+        item_names["BREAKABLE_COIN_BOXES"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Breakable Coin Boxes", f"{level_name} - Breakable Coin Boxes")
         item_names["WOODEN_POSTS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Wooden Posts", f"{level_name} - Wooden Posts")
@@ -1893,6 +2101,7 @@ class RuleFactory:
             self.options, "enemy_unlocks",
             f"{level_name} - Flying Bookends", f"{level_name} - Flying Bookends")
         item_names["JRB_SIGNS"] = HasUnlock("Signs", "Jolly Roger Bay - Signs")
+        item_names["BOB_CORKBOXES"] = HasUnlock("Throwable Cork Boxes", "Bob-omb Battlefield - Throwable Cork Boxes")
         return item_names
 
     def get_action_item_names(self, target_name: str) -> dict[str, str | bool]:
@@ -1908,7 +2117,7 @@ class RuleFactory:
                 item_names[action] = True
             else:
                 per_level_item_name = get_per_level_action_item_name(
-                    level_name, action, bool(self.options.collapse_misc_moves))
+                    level_name, action, bool(self.options.combined_castle_and_secret_stage_move_items))
                 if per_level_item_name is None:
                     item_names[action] = action
                     continue

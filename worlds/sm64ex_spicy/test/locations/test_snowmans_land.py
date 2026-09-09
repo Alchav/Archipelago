@@ -3,8 +3,7 @@ from ... import Options
 
 
 SL_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -46,19 +45,20 @@ class TestSnowmansLandLocations(SM64TestBase):
             ["Snowman's Land - In the Deep Freeze", True, ["Wall Kick"]],
             ["Snowman's Land - Bob-omb Buddy", False, []],
             ["Snowman's Land - Bob-omb Buddy", True,
-             ["Snowman's Land - Bob-omb Buddy"]],
+             cannon + ["Snowman's Land - Bob-omb Buddy"]],
 
             ["Snowman's Land - Whirl from the Freezing Pond", False, []],
             ["Snowman's Land - Whirl from the Freezing Pond", True,
              ["Snowman's Land - Spindrifts"]],
             ["Snowman's Land - Koopa Shell Block", False, []],
             ["Snowman's Land - Koopa Shell Block", True,
-             ["Snowman's Land - Spindrifts"]],
+             ["Snowman's Land - Spindrifts", "Snowman's Land - Koopa Shell Block"]],
             ["Snowman's Land - Shell Shreddin' for Red Coins", False,
              ["Snowman's Land - Spindrifts"]],
             ["Snowman's Land - Shell Shreddin' for Red Coins", True, [
                 "Snowman's Land - Spindrifts",
                 "Snowman's Land - Red Coins",
+                "Snowman's Land - Koopa Shell Block",
             ]],
             ["Snowman's Land - Whirl from the Freezing Pond Star Block", False, []],
             ["Snowman's Land - Whirl from the Freezing Pond Star Block", True,

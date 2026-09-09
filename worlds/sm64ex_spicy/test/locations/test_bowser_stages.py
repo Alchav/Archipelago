@@ -3,8 +3,7 @@ from ... import Options
 
 
 BOWSER_STAGE_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "bowser_stage_1ups": Options.BowserStage1Ups.option_per_level,
@@ -39,12 +38,12 @@ class TestBowserInTheDarkWorldLocations(SM64TestBase):
         purple_switch = ["Bowser in the Dark World - Purple Switch"]
         red_coins = ["Bowser in the Dark World - Red Coins"]
         bombs = [
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+            "Bowser in the Dark World - Bowser Arena Bomb 1",
+            "Bowser in the Dark World - Bowser Arena Bomb 2",
         ]
         freestanding = ["Bowser in the Dark World - Freestanding 1-Ups"]
         extra = ["Bowser in the Dark World - Extra 1-Ups"]
-        warp_pipes = ["Bowser in the Dark World - Warp Pipes"]
+        warp_pipes = ["Bowser in the Dark World - Warp Pipe"]
         bowser = ["Bowser in the Dark World - Bowser"]
 
         self.run_location_tests([
@@ -97,9 +96,9 @@ class TestBowserInTheDarkWorldSlopeTrick(SM64TestBase):
     def test_trick_reaches_bowser_but_not_red_coin_star(self):
         trick_route = [
             "Triple Jump",
-            "Bowser in the Dark World - Warp Pipes",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
-            "Bowser in the Dark World - Progressive Bowser Arena Bomb",
+            "Bowser in the Dark World - Warp Pipe",
+            "Bowser in the Dark World - Bowser Arena Bomb 1",
+            "Bowser in the Dark World - Bowser Arena Bomb 2",
             "Bowser in the Dark World - Bowser",
         ]
         self.run_location_tests([
@@ -116,10 +115,11 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
 
     def test_locations(self):
         upper = ["Climb"]
-        near_poles = upper + ["Ledge Grab"]
+        near_final_poles_freestanding = upper + ["Triple Jump"]
+        near_final_poles = upper + ["Wall Kick"]
         bombs = [
-            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb",
-            "Bowser in the Fire Sea - Progressive Bowser Arena Bomb",
+            "Bowser in the Fire Sea - Bowser Arena Bomb 1",
+            "Bowser in the Fire Sea - Bowser Arena Bomb 2",
         ]
         bowser = ["Bowser in the Fire Sea - Bowser"]
         freestanding = ["Bowser in the Fire Sea - Freestanding 1-Ups"]
@@ -133,11 +133,20 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - Second Stone Structure 1-Up", False, extra],
             ["Bowser in the Fire Sea - Second Stone Structure 1-Up", True, freestanding + extra],
             ["Bowser in the Fire Sea - 3 Coins Block", False, []],
-            ["Bowser in the Fire Sea - 3 Coins Block", True,
+            ["Bowser in the Fire Sea - 3 Coins Block", False,
              ["Bowser in the Fire Sea - 3-Coin Block"]],
+            ["Bowser in the Fire Sea - 3 Coins Block", True,
+             upper + ["Bowser in the Fire Sea - 3-Coin Block"]],
+            ["Bowser in the Fire Sea - 3 Coins Block", True,
+             ["Wall Kick", "Bowser in the Fire Sea - 3-Coin Block"]],
 
-            ["Bowser in the Fire Sea - Red Coins", True, upper + ["Bowser in the Fire Sea - Red Coins"]],
-            ["Bowser in the Fire Sea - Red Coins", False, near_poles],
+            ["Bowser in the Fire Sea - Red Coins", False,
+             upper + ["Bowser in the Fire Sea - Red Coins"]],
+            ["Bowser in the Fire Sea - Red Coins", True,
+             near_final_poles + ["Bowser in the Fire Sea - Red Coins"]],
+            ["Bowser in the Fire Sea - Red Coins", True,
+             upper + ["Triple Jump", "Bowser in the Fire Sea - Red Coins"]],
+            ["Bowser in the Fire Sea - Red Coins", False, near_final_poles_freestanding],
             ["Bowser in the Fire Sea - Key", False, upper + bombs[:1]],
             ["Bowser in the Fire Sea - Key", False, upper + bombs],
             ["Bowser in the Fire Sea - Key", True, upper + bombs + bowser],
@@ -145,28 +154,34 @@ class TestBowserInTheFireSeaLocations(SM64TestBase):
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", False, upper],
             ["Bowser in the Fire Sea - Swaying Stairs Block 1-Up", True,
              upper + ["Bowser in the Fire Sea - 1-Up Blocks"]],
-            ["Bowser in the Fire Sea - Near Poles Block 1-Up", False,
-             near_poles],
-            ["Bowser in the Fire Sea - Near Poles Block 1-Up", True,
-             near_poles + ["Bowser in the Fire Sea - 1-Up Blocks"]],
-            ["Bowser in the Fire Sea - Elevator Pole 1-Up", False, upper],
-            ["Bowser in the Fire Sea - Elevator Pole 1-Up", True, upper + triggers],
-            ["Bowser in the Fire Sea - Stretching Platform Trigger 1-Up", False, upper],
-            ["Bowser in the Fire Sea - Stretching Platform Trigger 1-Up", True, upper + triggers],
-            ["Bowser in the Fire Sea - Near Poles 1-Up", False,
-             near_poles + freestanding],
-            ["Bowser in the Fire Sea - Near Poles 1-Up", False,
-             near_poles + extra],
-            ["Bowser in the Fire Sea - Near Poles 1-Up", True,
-             near_poles + freestanding + extra],
+            ["Bowser in the Fire Sea - Near Final Poles Block 1-Up", False,
+             near_final_poles],
+            ["Bowser in the Fire Sea - Near Final Poles Block 1-Up", True,
+             near_final_poles + ["Bowser in the Fire Sea - 1-Up Blocks"]],
+            ["Bowser in the Fire Sea - Near Final Poles Block 1-Up", True,
+             upper + ["Triple Jump", "Bowser in the Fire Sea - 1-Up Blocks"]],
+            ["Bowser in the Fire Sea - Lift Cage Pole 1-Up", False, upper],
+            ["Bowser in the Fire Sea - Lift Cage Pole 1-Up", True, upper + triggers],
+            ["Bowser in the Fire Sea - Swaying Stairs Trigger 1-Up", False, upper],
+            ["Bowser in the Fire Sea - Swaying Stairs Trigger 1-Up", True, upper + triggers],
+            ["Bowser in the Fire Sea - Near Final Poles 1-Up", False,
+             near_final_poles_freestanding + freestanding],
+            ["Bowser in the Fire Sea - Near Final Poles 1-Up", False,
+             near_final_poles_freestanding + extra],
+            ["Bowser in the Fire Sea - Near Final Poles 1-Up", True,
+             near_final_poles_freestanding + freestanding + extra],
             ["Bowser in the Fire Sea - Swaying Stairs 1-Up Block", False, []],
             ["Bowser in the Fire Sea - Swaying Stairs 1-Up Block", True,
              upper + ["Bowser in the Fire Sea - 1-Up Blocks"]],
             ["Bowser in the Fire Sea - 10 Coins Block", False, upper],
             ["Bowser in the Fire Sea - 10 Coins Block", True,
              upper + ["Bowser in the Fire Sea - 10-Coin Block"]],
-            ["Bowser in the Fire Sea - Near Poles 1-Up Block", True,
+            ["Bowser in the Fire Sea - Near Final Poles 1-Up Block", False,
              upper + ["Bowser in the Fire Sea - 1-Up Blocks"]],
+            ["Bowser in the Fire Sea - Near Final Poles 1-Up Block", True,
+             near_final_poles + ["Bowser in the Fire Sea - 1-Up Blocks"]],
+            ["Bowser in the Fire Sea - Near Final Poles 1-Up Block", True,
+             upper + ["Triple Jump", "Bowser in the Fire Sea - 1-Up Blocks"]],
         ], starting_regions=["Bowser in the Fire Sea"])
 
 
@@ -192,8 +207,8 @@ class TestBowserInTheSkyLocations(SM64TestBase):
             ["Bowser in the Sky - Ferris Wheel 1-Up", False, []],
             ["Bowser in the Sky - Ferris Wheel 1-Up", True, freestanding],
 
-            ["Bowser in the Sky - Spark Pole Coins 1-Up", False, arrow_ride],
-            ["Bowser in the Sky - Spark Pole Coins 1-Up", True, arrow_ride + trigger],
+            ["Bowser in the Sky - Spinning Platform Coins 1-Up", False, arrow_ride],
+            ["Bowser in the Sky - Spinning Platform Coins 1-Up", True, arrow_ride + trigger],
             ["Bowser in the Sky - Arrow Ride 1-Up", False, chuckya + freestanding],
             ["Bowser in the Sky - Arrow Ride 1-Up", False,
              ["Bowser in the Sky - Purple Switch", *freestanding]],
@@ -211,6 +226,18 @@ class TestBowserInTheSkyLocations(SM64TestBase):
         self.assertFalse(self.multiworld.can_beat_game(self.multiworld.state))
         self.collect(self.get_item_by_name("Bowser in the Sky - Bowser"))
         self.assertTrue(self.multiworld.can_beat_game(self.multiworld.state))
+
+
+class TestBowserInTheSkyGrandStar(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BOWSER_STAGE_OPTIONS,
+        "completion_type": Options.CompletionType.option_All_Bowser_Stages,
+    }
+
+    def test_grand_star_is_in_the_bowser_arena(self):
+        location = self.multiworld.get_location("Bowser in the Sky - Grand Star", self.player)
+        self.assertEqual(location.parent_region.name, "Bowser in the Sky - Bowser Arena")
 
 
 class TestBowserStageEntrances(SM64TestBase):

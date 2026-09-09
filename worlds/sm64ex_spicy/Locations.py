@@ -6,7 +6,6 @@ class SM64Location(Location):
     game: str = "SM64: Spicy Mycena 64"
 
 coin_count_check_location_base_id = 3627000
-tiny_huge_island_extra_coin_count_check_location_id = 3629091
 
 coin_count_check_course_data = (
     ("Bob-omb Battlefield", 0, "bob_omb_battlefield_coin_star_requirement", 146),
@@ -21,12 +20,14 @@ coin_count_check_course_data = (
     ("Snowman's Land", 1210, "snowmans_land_coin_star_requirement", 127),
     ("Wet-Dry World", 1337, "wet_dry_world_coin_star_requirement", 152),
     ("Tall, Tall Mountain", 1489, "tall_tall_mountain_coin_star_requirement", 137),
-    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 193),
+    ("Tiny-Huge Island", 1626, "tiny_huge_island_coin_star_requirement", 192),
     ("Tick Tock Clock", 1817, "tick_tock_clock_coin_star_requirement", 128),
     ("Rainbow Ride", 1945, "rainbow_ride_coin_star_requirement", 146),
 )
 
 secret_stage_coin_count_check_location_base_id = 3629193
+
+global_coin_count_check_location_base_id = 4_100_000
 
 secret_stage_coin_count_check_data = (
     ("The Princess's Secret Slide", 3629193, "princess_secret_slide_coin_count_max_coins", 80),
@@ -39,6 +40,33 @@ secret_stage_coin_count_check_data = (
     ("Bowser in the Fire Sea", 3629602, "bowser_in_the_fire_sea_coin_count_max_coins", 80),
     ("Bowser in the Sky", 3629682, "bowser_in_the_sky_coin_count_max_coins", 76),
 )
+
+global_coin_count_course_data = (
+    *coin_count_check_course_data,
+    *secret_stage_coin_count_check_data,
+)
+
+
+def get_global_coin_count_caps(
+        coin_star_requirements: dict[str, int],
+        secret_stage_coin_maxes: dict[str, int],
+        count_beyond_coin_stars: bool,
+        reachable_coin_maxima: dict[str, int] | None = None,
+) -> tuple[int, ...]:
+    if count_beyond_coin_stars:
+        return tuple(
+            min(
+                maximum,
+                (reachable_coin_maxima or {}).get(course_name, maximum),
+            )
+            for course_name, _offset, _option_name, maximum in global_coin_count_course_data
+        )
+    return tuple(
+        coin_star_requirements[option_name]
+        if option_name in coin_star_requirements
+        else secret_stage_coin_maxes[option_name]
+        for _course_name, _offset, option_name, _maximum in global_coin_count_course_data
+    )
 
 
 def get_coin_count_check_location_name(course_name: str, coin_count: int) -> str:
@@ -74,6 +102,28 @@ def get_secret_stage_coin_count_check_location_names(
     )
 
 
+def get_global_coin_count_check_location_name(coin_count: int) -> str:
+    return f"{coin_count} Coin{'s' if coin_count != 1 else ''}"
+
+
+def get_global_coin_count_check_thresholds(maximum_coins: int, percentage: int) -> tuple[int, ...]:
+    if maximum_coins <= 0 or percentage <= 0:
+        return ()
+
+    check_count = min((maximum_coins * percentage + 99) // 100, maximum_coins)
+    return tuple(
+        (maximum_coins * check_index + check_count - 1) // check_count
+        for check_index in range(1, check_count + 1)
+    )
+
+
+def get_global_coin_count_check_location_names(maximum_coins: int, percentage: int) -> tuple[str, ...]:
+    return tuple(
+        get_global_coin_count_check_location_name(coin_count)
+        for coin_count in get_global_coin_count_check_thresholds(maximum_coins, percentage)
+    )
+
+
 def parse_coin_count_check_location_name(location_name: str) -> tuple[str, int] | None:
     if location_name not in coin_count_check_location_table:
         return None
@@ -82,11 +132,8 @@ def parse_coin_count_check_location_name(location_name: str) -> tuple[str, int] 
 
 
 coin_count_check_location_table = {
-    get_coin_count_check_location_name(course_name, coin_count): (
-        tiny_huge_island_extra_coin_count_check_location_id
-        if course_name == "Tiny-Huge Island" and coin_count == 192
-        else coin_count_check_location_base_id + course_offset + coin_count - 1
-    )
+    get_coin_count_check_location_name(course_name, coin_count):
+        coin_count_check_location_base_id + course_offset + coin_count - 1
     for course_name, course_offset, _option_name, max_coin_star_requirement in coin_count_check_course_data
     for coin_count in range(1, max_coin_star_requirement)
 }
@@ -97,10 +144,24 @@ secret_stage_coin_count_check_location_table = {
     for coin_count in range(1, max_coins + 1)
 }
 
+global_coin_count_check_maximum = sum(course_data[3] for course_data in global_coin_count_course_data)
+
+global_coin_count_check_location_table = {
+    get_global_coin_count_check_location_name(coin_count):
+        global_coin_count_check_location_base_id + coin_count - 1
+    for coin_count in range(1, global_coin_count_check_maximum + 1)
+}
+
 coin_count_check_location_table = {
     **coin_count_check_location_table,
     **secret_stage_coin_count_check_location_table,
 }
+
+
+def parse_global_coin_count_check_location_name(location_name: str) -> int | None:
+    if location_name not in global_coin_count_check_location_table:
+        return None
+    return int(location_name.split(" ", 1)[0])
 
 #Bob-omb Battlefield
 locBoB_table = {
@@ -281,7 +342,7 @@ locRR_table = {
     "Rainbow Ride - Bob-omb Buddy": 3626214,
     "Rainbow Ride - Top of Red Coin Maze Block 1-Up": 3626233,
     "Rainbow Ride - Under Fly Guy Block 1-Up": 3626234,
-    "Rainbow Ride - House in the Sky Block 1-Up": 3626235
+    "Rainbow Ride - The Big House in the Sky Block 1-Up": 3626235
 }
 
 loc100Coin_table = {
@@ -339,7 +400,7 @@ locBitFS_table = {
     "Bowser in the Fire Sea - Red Coins": 3626112,
     "Bowser in the Fire Sea - Key": 3626179,
     "Bowser in the Fire Sea - Swaying Stairs Block 1-Up": 3626238,
-    "Bowser in the Fire Sea - Near Poles Block 1-Up": 3626239
+    "Bowser in the Fire Sea - Near Final Poles Block 1-Up": 3626239
 }
 
 locWMotR_table = {
@@ -350,21 +411,73 @@ locWMotR_table = {
 
 locBitS_table = {
     "Bowser in the Sky - Red Coins": 3626119,
-    "Bowser in the Sky - Block 1-Up": 3626240
+    "Bowser in the Sky - Block 1-Up": 3626240,
+    "Bowser in the Sky - Grand Star": 3629861,
 }
 
 #Secret Stars found inside the Castle
 locSS_table = {
-    "Castle - Toad (Basement)": 3626168,
-    "Castle - Toad (Second Floor)": 3626169,
-    "Castle - Toad (Third Floor)": 3626170,
-    "Castle - MIPS 1": 3626171,
-    "Castle - MIPS 2": 3626172,
-    "Castle - Yoshi": 3626244
+    "Castle Basement - Toad": 3626168,
+    "Castle Second Floor - Toad": 3626169,
+    "Castle Third Floor - Toad": 3626170,
+    "Castle Basement - MIPS 1": 3626171,
+    "Castle Basement - MIPS 2": 3626172,
+    "Castle Grounds - Yoshi": 3626244
 }
 
 locBasement_table = {
-    "Castle - Drain the Moat": 3626245
+    "Castle Basement - Drain the Moat": 3626245
+}
+
+locFreeItem_table = {
+    "Castle First Floor - Free Item": 4025000,
+    "Castle First Floor - Another Free Item": 4025001,
+}
+
+locVisit_table = {
+    name: 4026000 + index
+    for index, name in enumerate((
+        "Castle Grounds - Visited",
+        "Castle First Floor - Visited",
+        "Castle Courtyard - Visited",
+        "Castle Basement - Visited",
+        "Castle Second Floor - Visited",
+        "Bob-omb Battlefield - Visited",
+        "Whomp's Fortress - Visited",
+        "Jolly Roger Bay - Visited",
+        "Jolly Roger Bay - Sunken Ship Visited",
+        "Cool, Cool Mountain - Visited",
+        "Cool, Cool Mountain - Secret Slide Visited",
+        "Big Boo's Haunt - Visited",
+        "Hazy Maze Cave - Visited",
+        "Lethal Lava Land - Visited",
+        "Lethal Lava Land - Volcano Visited",
+        "Shifting Sand Land - Visited",
+        "Shifting Sand Land - Pyramid Visited",
+        "Dire, Dire Docks - Visited",
+        "Snowman's Land - Visited",
+        "Snowman's Land - Igloo Visited",
+        "Wet-Dry World - Visited",
+        "Tall, Tall Mountain - Visited",
+        "Tall, Tall Mountain - Secret Slide Visited",
+        "Tiny-Huge Island - Huge Island Visited",
+        "Tiny-Huge Island - Tiny Island Visited",
+        "Tiny-Huge Island - Cave Visited",
+        "Tick Tock Clock - Visited",
+        "Rainbow Ride - Visited",
+        "The Princess's Secret Slide - Visited",
+        "The Secret Aquarium - Visited",
+        "Tower of the Wing Cap - Visited",
+        "Vanish Cap Under the Moat - Visited",
+        "Cavern of the Metal Cap - Visited",
+        "Bowser in the Dark World - Visited",
+        "Bowser in the Dark World - Bowser Arena Visited",
+        "Bowser in the Fire Sea - Visited",
+        "Bowser in the Fire Sea - Bowser Arena Visited",
+        "Wing Mario Over the Rainbow - Visited",
+        "Bowser in the Sky - Visited",
+        "Bowser in the Sky - Bowser Arena Visited",
+    ))
 }
 
 locFreestanding1Up_table = {
@@ -376,14 +489,14 @@ locFreestanding1Up_table = {
     "Bowser in the Dark World - Far Overhang 1-Up": 3629104,
 
     "Bowser in the Fire Sea - First Stone Structure 1-Up": 3629105,
-    "Bowser in the Fire Sea - Elevator Pole 1-Up": 3629106,
-    "Bowser in the Fire Sea - Stretching Platform Trigger 1-Up": 3629107,
-    "Bowser in the Fire Sea - Near Poles 1-Up": 3629108,
+    "Bowser in the Fire Sea - Lift Cage Pole 1-Up": 3629106,
+    "Bowser in the Fire Sea - Swaying Stairs Trigger 1-Up": 3629107,
+    "Bowser in the Fire Sea - Near Final Poles 1-Up": 3629108,
     "Bowser in the Fire Sea - Second Stone Structure 1-Up": 3629109,
 
     "Bowser in the Sky - Before Tilting Platform 1-Up": 3629110,
     "Bowser in the Sky - Arrow Ride 1-Up": 3629111,
-    "Bowser in the Sky - Spark Pole Coins 1-Up": 3629112,
+    "Bowser in the Sky - Spinning Platform Coins 1-Up": 3629112,
     "Bowser in the Sky - Final Platform 1-Up": 3629113,
     "Bowser in the Sky - Ferris Wheel 1-Up": 3629114,
 
@@ -391,16 +504,16 @@ locFreestanding1Up_table = {
     "Bob-omb Battlefield - Switch Tunnel 1-Up": 3629116,
     "Bob-omb Battlefield - Cannon Tree 1-Up": 3629117,
 
-    "Castle - Third Tree From Waterfall 1-Up": 3629118,
-    "Castle - Roof Back 1-Up": 3629119,
-    "Castle - Roof Center 1-Up": 3629120,
-    "Castle - Roof Front 1-Up": 3629121,
-    "Castle - Bridge Coins 1-Up": 3629122,
-    "Castle - Left Butterfly 1-Up": 3629123,
-    "Castle - Right Butterfly 1-Up": 3629124,
+    "Castle Grounds - Third Tree From Waterfall 1-Up": 3629118,
+    "Castle Grounds - Roof Back 1-Up": 3629119,
+    "Castle Grounds - Roof Center 1-Up": 3629120,
+    "Castle Grounds - Roof Front 1-Up": 3629121,
+    "Castle Grounds - Bridge Coins 1-Up": 3629122,
+    "Castle Grounds - Left Butterfly 1-Up": 3629123,
+    "Castle Grounds - Right Butterfly 1-Up": 3629124,
 
-    "Castle - Jolly Roger Bay Lobby 1-Up": 3629125,
-    "Castle - Basement Water Tunnel Four Corners 1-Up": 3629126,
+    "Castle First Floor - Jolly Roger Bay Room 1-Up": 3629125,
+    "Castle Basement - Water Tunnel Four Corners 1-Up": 3629126,
 
     "Cool, Cool Mountain - Snowman Tree 1-Up": 3629127,
     "Cool, Cool Mountain - Slide Shortcut First 1-Up": 3629128,
@@ -417,7 +530,7 @@ locFreestanding1Up_table = {
     "Lethal Lava Land - Volcano Flamethrower 1-Up": 3629135,
     "Lethal Lava Land - Northeast Brown Platform 1-Up": 3629136,
     "Lethal Lava Land - Boil the Big Bully Star Lava 1-Up": 3629137,
-    "Lethal Lava Land - Volcano Curve 1-Up": 3629138,
+    "Lethal Lava Land - Central Gray Crescent 1-Up": 3629138,
     "Lethal Lava Land - Volcano Brown Platform 1-Up": 3629139,
     "Lethal Lava Land - Northwest Curve 1-Up": 3629140,
     "Lethal Lava Land - Volcano Pole 1-Up": 3629141,
@@ -427,10 +540,10 @@ locFreestanding1Up_table = {
 
     "Rainbow Ride - Tricky Triangles 1-Up": 3629144,
     "Rainbow Ride - Rotating Bridge Platform 1-Up": 3629145,
-    "Rainbow Ride - Ship Pole 1-Up": 3629146,
-    "Rainbow Ride - Ship Tip 1-Up": 3629147,
+    "Rainbow Ride - Cruiser Pole 1-Up": 3629146,
+    "Rainbow Ride - Cruiser Tip 1-Up": 3629147,
     "Rainbow Ride - House Path Donut Lifts 1-Up": 3629148,
-    "Rainbow Ride - Donut Top of Red Coin Maze 1-Up": 3629149,
+    "Rainbow Ride - Top of Red Coin Maze Donut 1-Up": 3629149,
 
     "The Secret Aquarium - Center Coin Ring 1-Up": 3629150,
 
@@ -441,14 +554,14 @@ locFreestanding1Up_table = {
     "Shifting Sand Land - Near Quicksand Pits 1-Up": 3629154,
     "Shifting Sand Land - Above Quicksand Pit 1-Up": 3629155,
     "Shifting Sand Land - Pyramid Platform Triggers 1-Up": 3629156,
-    "Shifting Sand Land - Pyramid Mummified Thwomp 1-Up": 3629157,
-    "Shifting Sand Land - Pyramid Right Path 1-Up": 3629158,
+    "Shifting Sand Land - Pyramid Grindel 1-Up": 3629157,
+    "Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up": 3629158,
 
-    "Tiny-Huge Island - Cannon Tree 1-Up": 3629159,
+    "Tiny-Huge Island - Huge Island Tree 1-Up": 3629159,
     "Tiny-Huge Island - Beach Coins 1-Up": 3629160,
     "Tiny-Huge Island - Boss Bass 1-Up": 3629161,
     "Tiny-Huge Island - Koopa Area Butterfly 1-Up": 3629162,
-    "Tiny-Huge Island - Red Coin Bridge Tree 1-Up": 3629163,
+    "Tiny-Huge Island - Huge Island Tree Butterfly 1-Up": 3629163,
     "Tiny-Huge Island - Start Butterfly 1-Up": 3629164,
     "Tiny-Huge Island - Red Coin Cave 1-Up": 3629165,
 
@@ -456,7 +569,7 @@ locFreestanding1Up_table = {
     "Tick Tock Clock - Moving Bars Platform 1-Up": 3629167,
 
     "Tall, Tall Mountain - Start Edge 1-Up": 3629168,
-    "Tall, Tall Mountain - Monty Mole Platform 1-Up": 3629169,
+    "Tall, Tall Mountain - Upper Vine Wall 1-Up": 3629169,
     "Tall, Tall Mountain - Waterfall Gap 1-Up": 3629170,
     "Tall, Tall Mountain - Vine Platform Butterfly 1-Up": 3629171,
     "Tall, Tall Mountain - Slide Start Room Corners 1-Up": 3629172,
@@ -502,7 +615,7 @@ locBlocksanity_table = {
 
     "Bowser in the Fire Sea - Swaying Stairs 1-Up Block": 3629767,
     "Bowser in the Fire Sea - 10 Coins Block": 3629768,
-    "Bowser in the Fire Sea - Near Poles 1-Up Block": 3629769,
+    "Bowser in the Fire Sea - Near Final Poles 1-Up Block": 3629769,
     "Bowser in the Fire Sea - 3 Coins Block": 3629770,
 
     "Bowser in the Sky - 1-Up Block": 3629771,
@@ -512,7 +625,7 @@ locBlocksanity_table = {
     "Bob-omb Battlefield - Island Wing Cap Block": 3629774,
     "Bob-omb Battlefield - Shoot to the Island in the Sky Star Block": 3629775,
 
-    "Castle - Roof Wing Cap Block": 3629776,
+    "Castle Grounds - Roof Wing Cap Block": 3629776,
 
     "Cool, Cool Mountain - Near Snowman 1-Up Block": 3629777,
     "Cool, Cool Mountain - Ice Pillar 1-Up Block": 3629778,
@@ -547,7 +660,7 @@ locBlocksanity_table = {
 
     "Rainbow Ride - Top of Red Coin Maze 1-Up Block": 3629801,
     "Rainbow Ride - Under Fly Guy 1-Up Block": 3629802,
-    "Rainbow Ride - House in the Sky 1-Up Block": 3629803,
+    "Rainbow Ride - The Big House in the Sky 1-Up Block": 3629803,
     "Rainbow Ride - Somewhere Over the Rainbow Star Block": 3629804,
 
     "Snowman's Land - Koopa Shell Block": 3629805,
@@ -609,7 +722,7 @@ locBlocksanity_table = {
     "Whomp's Fortress - Metal Cap Block": 3629853,
 
     "Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block": 3629854,
-    "Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block": 3629855,
+    "Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block": 3629855,
     "Wing Mario Over the Rainbow - 1-Up Block": 3629856,
     "Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block": 3629857,
     "Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block": 3629858,
@@ -623,8 +736,9 @@ location_table = {**locBoB_table,**locWhomp_table,**locJRB_table,**locCCM_table,
                   **locWDW_table,**locTTM_table,**locTHI_table,**locTTC_table,**locRR_table, \
                   **loc100Coin_table,**locPSS_table,**locSA_table,**locBitDW_table,**locTotWC_table, \
                   **locCotMC_table, **locVCutM_table, **locBitFS_table, **locWMotR_table, **locBitS_table, \
-                  **locSS_table, **locBasement_table, **locFreestanding1Up_table, **locBlocksanity_table, \
-                  **coin_count_check_location_table, **individual_coin_location_table}
+                  **locSS_table, **locBasement_table, **locFreeItem_table, **locVisit_table, **locFreestanding1Up_table, **locBlocksanity_table, \
+                  **coin_count_check_location_table, **global_coin_count_check_location_table,
+                  **individual_coin_location_table}
 
 loc1UpBlock_table = {
     location_name: location_table[location_name]
@@ -649,13 +763,13 @@ loc1UpBlock_table = {
         "Tick Tock Clock - Top Block 1-Up",
         "Rainbow Ride - Top of Red Coin Maze Block 1-Up",
         "Rainbow Ride - Under Fly Guy Block 1-Up",
-        "Rainbow Ride - House in the Sky Block 1-Up",
+        "Rainbow Ride - The Big House in the Sky Block 1-Up",
         "Bowser in the Dark World - Tower Block 1-Up",
         "Bowser in the Dark World - Near Goombas Block 1-Up",
         "Cavern of the Metal Cap - Block 1-Up",
         "Vanish Cap Under the Moat - Block 1-Up",
         "Bowser in the Fire Sea - Swaying Stairs Block 1-Up",
-        "Bowser in the Fire Sea - Near Poles Block 1-Up",
+        "Bowser in the Fire Sea - Near Final Poles Block 1-Up",
         "Wing Mario Over the Rainbow - Block 1-Up",
         "Bowser in the Sky - Block 1-Up",
     )
@@ -667,13 +781,13 @@ trigger_1up_location_ids = {
     3629122, 3629125, 3629126, 3629127,
     3629131, 3629132, 3629134, 3629141, 3629142, 3629146,
     3629149, 3629150, 3629151, 3629153, 3629156, 3629159,
-    3629160, 3629163, 3629166, 3629167,
+    3629160, 3629166, 3629167,
     3629172, 3629178, 3629181, 3629182, 3629183,
     3629185, 3629189, 3629190, 3629191, 3629192,
 }
 
 butterfly_1up_location_ids = {
-    3629123, 3629124, 3629162, 3629164, 3629171, 3629184,
+    3629123, 3629124, 3629162, 3629163, 3629164, 3629171, 3629184,
 }
 
 locTrigger1Up_table = {
@@ -765,6 +879,7 @@ location_name_groups.update({
     "Coin Count Checks": set(coin_count_check_location_table),
     "Main Course Coin Count Checks": set(coin_count_check_location_table) - set(secret_stage_coin_count_check_location_table),
     "Secret Stage Coin Count Checks": set(secret_stage_coin_count_check_location_table),
+    "Global Coin Count Checks": set(global_coin_count_check_location_table),
     "1-Ups": set(locOneUp_table),
     "1-Ups from Blocks": set(loc1UpBlock_table),
     "Freestanding 1-Ups": set(locFreestanding1Up_table),

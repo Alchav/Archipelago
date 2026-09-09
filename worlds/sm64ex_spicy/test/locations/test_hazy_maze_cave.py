@@ -3,8 +3,7 @@ from ... import Options
 
 
 HMC_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
@@ -93,7 +92,7 @@ class TestHazyMazeCaveLocations(SM64TestBase):
              ["Hazy Maze Cave - Metal Cap"]],
             ["Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block", False, []],
             ["Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block", True,
-             ["Hazy Maze Cave - Metal Cap"]],
+             ["Hazy Maze Cave - Metal Cap", "Hazy Maze Cave - Purple Switch"]],
             ["Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block", False, []],
             ["Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block", True,
              ["Hazy Maze Cave - Metal Cap"]],

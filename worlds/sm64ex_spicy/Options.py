@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCommonOptions, NamedRange, OptionGroup, \
-    OptionSet, ItemsAccessibility
+    OptionSet, ItemsAccessibility, Visibility
 
 from .LogicTricks import logic_trick_option_keys
 from .CoinChecks import coin_check_type_option_keys
@@ -51,13 +51,36 @@ class CoinChecks(Range):
 
 class CoinCheckTypes(OptionSet):
     """Choose which coin types are allowed to become Coin Checks locations.
-    Yellow Coins: Every yellow coin in a stage can be a location
-    Red Coins: Every red coin in a stage can be a location
-    Blue Coins: Every blue coin in a stage can be a location
-    Enemy Coins: Every coin from an enemy can be a location"""
+    **Yellow Coins:** Every yellow coin in a stage can be a location
+    **Red Coins:** Every red coin in a stage can be a location
+    **Blue Coins:** Every blue coin in a stage can be a location
+    **Enemy Coins:** Every coin from an enemy can be a location"""
     display_name = "Coin Check Types"
     valid_keys = coin_check_type_option_keys
     default = frozenset(coin_check_type_option_keys)
+
+
+class GlobalCoinCountChecks(Range):
+    """Adds checks for cumulative permanent coins across all coin-bearing areas.
+
+    The percentage selects evenly distributed thresholds from one through the
+    configured global maximum. The global total includes the current course's
+    live coin counter and stored permanent coins from every other course.
+    """
+    display_name = "Global Coin Count Checks"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
+class CountsCoinsBeyondCoinStars(Toggle):
+    """Counts every collected coin toward Global Coin Count Checks.
+
+    When disabled, each main course contributes at most its Coin Star
+    Requirement.
+    """
+    display_name = "Counts Coins Beyond Coin Stars"
+    default = 0
 
 
 class SM64Accessibility(ItemsAccessibility):
@@ -70,6 +93,7 @@ class PrincessSecretSlideCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 80
     default = 80
+    visibility = Visibility.none
 
 
 class SecretAquariumCoinCountMaxCoins(Range):
@@ -78,6 +102,7 @@ class SecretAquariumCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 56
     default = 56
+    visibility = Visibility.none
 
 
 class WingMarioOverTheRainbowCoinCountMaxCoins(Range):
@@ -86,6 +111,7 @@ class WingMarioOverTheRainbowCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 56
     default = 56
+    visibility = Visibility.none
 
 
 class TowerOfTheWingCapCoinCountMaxCoins(Range):
@@ -96,6 +122,7 @@ class TowerOfTheWingCapCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 63
     default = 63
+    visibility = Visibility.none
 
 
 class VanishCapUnderTheMoatCoinCountMaxCoins(Range):
@@ -104,6 +131,7 @@ class VanishCapUnderTheMoatCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 27
     default = 27
+    visibility = Visibility.none
 
 
 class CavernOfTheMetalCapCoinCountMaxCoins(Range):
@@ -112,6 +140,7 @@ class CavernOfTheMetalCapCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 47
     default = 47
+    visibility = Visibility.none
 
 
 class BowserInTheDarkWorldCoinCountMaxCoins(Range):
@@ -120,6 +149,7 @@ class BowserInTheDarkWorldCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 80
     default = 80
+    visibility = Visibility.none
 
 
 class BowserInTheFireSeaCoinCountMaxCoins(Range):
@@ -128,6 +158,7 @@ class BowserInTheFireSeaCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 80
     default = 80
+    visibility = Visibility.none
 
 
 class BowserInTheSkyCoinCountMaxCoins(Range):
@@ -136,6 +167,7 @@ class BowserInTheSkyCoinCountMaxCoins(Range):
     range_start = 0
     range_end = 76
     default = 76
+    visibility = Visibility.none
 
 
 secret_stage_coin_count_max_coin_options = (
@@ -240,11 +272,11 @@ class TallTallMountainCoinStarRequirement(CoinStarRequirement):
 
 class TinyHugeIslandCoinStarRequirement(CoinStarRequirement):
     """
-    Coins needed for the Coin Star in Tiny-Huge Island. With Full Accessibility, this is capped at 192 unless the
-    Tiny-Huge Island Impossible Coin trick is enabled.
+    Coins needed for the Coin Star in Tiny-Huge Island. With Full Accessibility, this is capped at 191 unless the
+    Tiny Island Impossible Coin trick is enabled.
     """
     display_name = "Tiny-Huge Island Coin Star Requirement"
-    range_end = 193
+    range_end = 192
 
 
 class TickTockClockCoinStarRequirement(CoinStarRequirement):
@@ -304,7 +336,8 @@ class LevelUnlocks(Choice):
     Special Only - Shuffle level unlocks for Tower of the Wing Cap, Big Boo's Haunt, Bowser in the Fire Sea,
     and Vanish Cap Under the Moat.
 
-    Full - Also shuffle the course painting unlocks, Rainbow Ride, and Wing Mario Over the Rainbow.
+    Full - Also shuffle every course entrance, Rainbow Ride, Wing Mario Over the Rainbow, The Princess's Secret Slide,
+    The Secret Aquarium, and Cavern of the Metal Cap.
 
     A locked entrance will reject Mario. Entrance Randomization may change the level reached through that entrance.
     """
@@ -359,11 +392,11 @@ class LevelFeatures(Choice):
 
     Per Act Only - Shuffle only features that were tied to specific selected Stars in vanilla Super Mario 64.
 
-    Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs, Purple
-    Switches, Treasure Chests, and Warp Pipes use global items.
+    Global - Shuffle the full suite of Spicy Mycena 64 level feature items. Features with global forms, including
+    platforms, switches, treasure chests, warp pipes, wind, freestanding Stars, Star Blocks, Koopa Shell Blocks,
+    Star Secrets, and Jet Streams, use global items.
 
-    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items. Checkerboard Platforms, Rolling Logs,
-    Purple Switches, Treasure Chests, and Warp Pipes use separate level-specific items.
+    Per Level - Shuffle the full suite of Spicy Mycena 64 level feature items using separate level-specific items.
 
     Both - Shuffle both global and level-specific items for features that support both forms.
     """
@@ -463,19 +496,19 @@ class SignUnlocks(LevelFeatureItemMode):
 
 class BowserBombs(LevelFeatureItemMode):
     """
-    Choose how Progressive Bowser Arena Bombs are handled.
+    Choose how Bowser Arena Bombs are handled.
 
-    Not Shuffled - The game starts with all Bower Arena Bombs available.
+    Not Shuffled - The game starts with all Bowser Arena Bombs available.
 
-    Global - Shuffle five Progressive Bowser Arena Bomb items that each add one bomb to each Bowser Arena.
-    Bowser in the Dark World and Bowser in the Fire Sea cap at four bombs.
+    Global - Shuffle Bowser Arena Bombs 1 through 4, which unlock the matching bomb in every arena, and Bowser in the
+    Sky - Bowser Arena Bomb 5.
 
-    Per Level - Shuffle separate bombs for each arena: four each for Bowser in the Dark World and Bowser in the
-    Fire Sea, and five for Bowser in the Sky.
+    Per Level - Shuffle separately named bombs for each arena: four each for Bowser in the Dark World and Bowser in
+    the Fire Sea, and five for Bowser in the Sky.
 
-    Both - Shuffle five global bombs in addition to all thirteen level-specific bombs.
+    Both - Shuffle global bombs 1 through 4 in addition to all level-specific bombs. Bowser in the Sky Bomb 5 is shared.
     """
-    display_name = "Progressive Bowser Arena Bomb Items"
+    display_name = "Bowser Arena Bomb Items"
 
 
 class BowserInTheDarkWorldHits(Range):
@@ -538,13 +571,22 @@ class BowserStage1Ups(Choice):
     default = 0
 
 
-class AreaRandomizer(Choice):
-    """Randomize Entrances"""
-    display_name = "Entrance Randomizer"
-    option_Off = 0
-    option_Courses_Only = 1
-    option_Courses_and_Secrets_Separate = 2
-    option_Courses_and_Secrets = 3
+class CourseShuffle(Choice):
+    """Choose whether this entrance category remains vanilla, shuffles by itself, or joins every mixed category."""
+    option_vanilla = 0
+    option_separate = 1
+    option_mixed = 2
+    default = 0
+
+
+class MainCourseShuffle(CourseShuffle):
+    """Shuffle the fifteen main-course entrances and their water/time/size variants."""
+    display_name = "Main Course Shuffle"
+
+
+class SecretCourseShuffle(CourseShuffle):
+    """Shuffle Castle entrances to secret courses and Bowser stages."""
+    display_name = "Secret Course Shuffle"
 
 
 class SubAreaShuffle(Choice):
@@ -556,19 +598,31 @@ class SubAreaShuffle(Choice):
     with a usable exit are paired so leaving returns through the corresponding
     exit in the source course.
 
-    Mixed combines every Castle course entrance with sub-area entrances. Paths
-    are constrained to at most one intermediate area before a dead end. The
-    Bowser in the Sky entrance always leads through one intermediate area to the
-    Bowser in the Sky arena.
+    Mixed joins the same pool as every other entrance category set to Mixed,
+    while keeping sub-areas with exits coupled to the return point belonging
+    to the entrance that led into them.
 
-    Mixed Plus Castle Returns also shuffles falls and exits that return to the
-    Castle Lobby or Castle Grounds.
+    Mixed Decoupled joins that pool without preserving those return pairs.
     """
     display_name = "Sub-Area Shuffle"
-    option_off = 0
+    option_vanilla = 0
     option_separate = 1
     option_mixed = 2
-    option_mixed_plus_castle_returns = 3
+    option_mixed_decoupled = 3
+    default = 0
+
+
+class CastleReturnShuffle(Choice):
+    """
+    Controls course exits that normally return to the Castle Lobby or Castle Grounds.
+
+    Vanilla leaves them unchanged. Mixed joins them with every entrance category set to Mixed.
+    Death makes them return through the entrance used to reach the current course as a death.
+    """
+    display_name = "Castle Return Shuffle"
+    option_vanilla = 0
+    option_mixed = 1
+    option_death = 2
     default = 0
 
 
@@ -587,10 +641,21 @@ class Blocksanity(Toggle):
     display_name = "Blocksanity"
 
 
+class VisitChecks(Toggle):
+    """Include a location check for entering each distinct game zone."""
+    display_name = "Visit Checks"
+
+
 class EasyButterflies(Toggle):
     """Butterflies turn into 1-Up mushrooms regardless of Mario's distance from the butterfly, and one of the three
     always has a 1-Up."""
     display_name = "Easy Butterflies"
+
+
+class TriggerSparkles(Toggle):
+    """Display sparkles at available invisible trigger locations. Green marks Trigger 1-Ups, purple marks 1-Up
+    butterflies, blue marks warps, and yellow marks Star Secrets and the Shifting Sand Land pyramid triggers."""
+    display_name = "Trigger Sparkles"
 
 
 class NoDespawns(Toggle):
@@ -643,7 +708,7 @@ class BonkTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Bonk Trap Weight"
 
 
@@ -656,7 +721,7 @@ class FireTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Burn Trap Weight"
 
 
@@ -669,7 +734,7 @@ class ElectricTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Shock Trap Weight"
 
 
@@ -682,7 +747,7 @@ class ChuckyaTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Chuckya Trap Weight"
 
 
@@ -695,7 +760,7 @@ class SpinTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Spin Trap Weight"
 
 
@@ -708,7 +773,7 @@ class GustTrapWeight(Range):
     """
     range_start = 0
     range_end = 100
-    default = 100
+    default = 50
     display_name = "Gust Trap Weight"
 
 
@@ -781,7 +846,7 @@ class MoveRandomizerMode(Choice):
     option_both = 3
 
 
-class CollapseMiscMoves(DefaultOnToggle):
+class CombinedCastleAndSecretStageMoveItems(DefaultOnToggle):
     """
     Controls per-level move items for the castle and secret stages.
 
@@ -793,7 +858,7 @@ class CollapseMiscMoves(DefaultOnToggle):
 
     This option only affects moves set to Per Level or Both.
     """
-    display_name = "Collapse Castle and Secret Stage Moves"
+    display_name = "Combined Castle and Secret Stage Move Items"
 
 
 class TripleJump(MoveRandomizerMode):
@@ -804,8 +869,8 @@ class TripleJump(MoveRandomizerMode):
 
     Global - Shuffle one Triple Jump item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Triple Jump items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Triple Jump items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Triple Jump item and every applicable level-specific Triple Jump item.
     """
@@ -820,8 +885,8 @@ class LongJump(MoveRandomizerMode):
 
     Global - Shuffle one Long Jump item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Long Jump items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Long Jump items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Long Jump item and every applicable level-specific Long Jump item.
     """
@@ -836,8 +901,8 @@ class Backflip(MoveRandomizerMode):
 
     Global - Shuffle one Backflip item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Backflip items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Backflip items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Backflip item and every applicable level-specific Backflip item.
     """
@@ -852,8 +917,8 @@ class SideFlip(MoveRandomizerMode):
 
     Global - Shuffle one Side Flip item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Side Flip items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Side Flip items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Side Flip item and every applicable level-specific Side Flip item.
     """
@@ -868,8 +933,8 @@ class WallKick(MoveRandomizerMode):
 
     Global - Shuffle one Wall Kick item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Wall Kick items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Wall Kick items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Wall Kick item and every applicable level-specific Wall Kick item.
     """
@@ -884,8 +949,8 @@ class Dive(MoveRandomizerMode):
 
     Global - Shuffle one Dive item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Dive items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Dive items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Dive item and every applicable level-specific Dive item.
     """
@@ -900,8 +965,8 @@ class GroundPound(MoveRandomizerMode):
 
     Global - Shuffle one Ground Pound item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Ground Pound items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Ground Pound items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Ground Pound item and every applicable level-specific Ground Pound item.
     """
@@ -916,8 +981,8 @@ class Kick(MoveRandomizerMode):
 
     Global - Shuffle one Kick item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Kick items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Kick items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Kick item and every applicable level-specific Kick item.
     """
@@ -934,8 +999,8 @@ class Climb(MoveRandomizerMode):
 
     Per Level - Shuffle separate Climb items for each applicable area. Big Boo's Haunt, Bowser in the Dark World,
     Vanish Cap Under the Moat, Cavern of the Metal Cap, and Tower of the Wing Cap have no climbable objects and do not
-    add Climb items. The Collapse Castle and Secret Stage Moves option determines whether the remaining Castle and
-    secret-stage areas share a Misc item or use separate items.
+    add Climb items. The Combined Castle and Secret Stage Move Items option determines whether the remaining Castle
+    and secret-stage areas share a Misc item or use separate items.
 
     Both - Shuffle the global Climb item and every applicable level-specific Climb item.
     """
@@ -950,8 +1015,8 @@ class LedgeGrab(MoveRandomizerMode):
 
     Global - Shuffle one Ledge Grab item that unlocks the move everywhere.
 
-    Per Level - Shuffle separate Ledge Grab items for each applicable area. The Collapse Castle and Secret
-    Stage Moves option determines whether Castle and secret stages share a Misc item or use separate items.
+    Per Level - Shuffle separate Ledge Grab items for each applicable area. The Combined Castle and Secret Stage
+    Move Items option determines whether Castle and secret stages share a Misc item or use separate items.
 
     Both - Shuffle the global Ledge Grab item and every applicable level-specific Ledge Grab item.
     """
@@ -1090,21 +1155,11 @@ class SkyboxShuffle(Choice):
 
 
 sm64_options_groups = [
-    OptionGroup("Logic Options", [
-        AreaRandomizer,
-        SubAreaShuffle,
-        BuddyChecks,
-        OneUpChecks,
-        Blocksanity,
-        EasyButterflies,
-        NoDespawns,
+    OptionGroup("Item Pool Options", [
         CombinedProgressiveKeys,
         LevelUnlocks,
         CapItems,
-        LogicTricks,
-        UniversalTrackerGlitchedLogic,
-    ]),
-    OptionGroup("Level Feature Unlocks", [
+        MariosHat,
         LevelFeatures,
         BobombBuddies,
         CoinObjectUnlocks,
@@ -1113,24 +1168,41 @@ sm64_options_groups = [
         SignUnlocks,
         BowserBombs,
         BowserStage1Ups,
+        CombinedCastleAndSecretStageMoveItems,
+        *move_randomizer_options,
     ]),
-    OptionGroup("Coin Options", [
-        CoinCheckTypes,
+    OptionGroup("Location Pool Options", [
+        BuddyChecks,
+        OneUpChecks,
+        Blocksanity,
+        VisitChecks,
         CoinChecks,
+        CoinCheckTypes,
         CoinCountChecks,
-        *secret_stage_coin_count_max_coin_options,
+        GlobalCoinCountChecks,
+        CountsCoinsBeyondCoinStars,
         *coin_star_requirement_options,
     ]),
-    OptionGroup("Gameplay Options", [
-        MariosHat,
+    OptionGroup("Entrance Shuffle Options", [
+        MainCourseShuffle,
+        SecretCourseShuffle,
+        SubAreaShuffle,
+        CastleReturnShuffle,
+    ]),
+    OptionGroup("Quality of Life Options", [
+        EasyButterflies,
+        TriggerSparkles,
+        NoDespawns,
+    ]),
+    OptionGroup("Logic Options", [
+        LogicTricks,
+        UniversalTrackerGlitchedLogic,
+    ]),
+    OptionGroup("Bowser Battle Options", [
         BowserInTheDarkWorldHits,
         BowserInTheFireSeaHits,
         BowserInTheSkyHits,
         BowserInTheSkyStageCollapseHits,
-    ]),
-    OptionGroup("Ability Options", [
-        CollapseMiscMoves,
-        *move_randomizer_options,
     ]),
     OptionGroup("Trap Options", [
         TrapsFillerPercentage,
@@ -1153,12 +1225,16 @@ sm64_options_groups = [
 @dataclass
 class SM64Options(PerGameCommonOptions):
     accessibility: SM64Accessibility
-    area_rando: AreaRandomizer
+    main_course_shuffle: MainCourseShuffle
+    secret_course_shuffle: SecretCourseShuffle
     sub_area_shuffle: SubAreaShuffle
+    castle_return_shuffle: CastleReturnShuffle
     buddy_checks: BuddyChecks
     one_up_checks: OneUpChecks
     blocksanity: Blocksanity
+    visit_checks: VisitChecks
     easy_butterflies: EasyButterflies
+    trigger_sparkles: TriggerSparkles
     no_despawns: NoDespawns
     combined_progressive_keys: CombinedProgressiveKeys
     level_unlocks: LevelUnlocks
@@ -1172,7 +1248,7 @@ class SM64Options(PerGameCommonOptions):
     kick: Kick
     climb: Climb
     ledge_grab: LedgeGrab
-    collapse_misc_moves: CollapseMiscMoves
+    combined_castle_and_secret_stage_move_items: CombinedCastleAndSecretStageMoveItems
     cap_items: CapItems
     level_features: LevelFeatures
     bobomb_buddies: BobombBuddies
@@ -1201,6 +1277,8 @@ class SM64Options(PerGameCommonOptions):
     coin_checks: CoinChecks
     coin_check_types: CoinCheckTypes
     coin_count_checks: CoinCountChecks
+    global_coin_count_checks: GlobalCoinCountChecks
+    counts_coins_beyond_coin_stars: CountsCoinsBeyondCoinStars
     bob_omb_battlefield_coin_star_requirement: BobOmbBattlefieldCoinStarRequirement
     whomps_fortress_coin_star_requirement: WhompsFortressCoinStarRequirement
     jolly_roger_bay_coin_star_requirement: JollyRogerBayCoinStarRequirement
