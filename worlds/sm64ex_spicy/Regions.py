@@ -371,12 +371,11 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                         "Lethal Lava Land - Northwest Curve 1-Up",
                         "Lethal Lava Land - Central Gray Crescent 1-Up",
                         "Lethal Lava Land - Volcano Brown Platform 1-Up",
+                        "Lethal Lava Land - Volcano Flamethrower 1-Up",
                         "Lethal Lava Land - Wing Cap Block",
                         "Lethal Lava Land - Koopa Shell Block")
     lll_volcano_entrance = create_region("Lethal Lava Land - Volcano Entrance", player, multiworld)
     lll_volcano = create_region("Lethal Lava Land - Volcano", player, multiworld)
-    create_locs(lll_volcano,
-                "Lethal Lava Land - Volcano Flamethrower 1-Up")
     lll_hot_foot_ledge = create_subregion(
         lll_volcano, "Lethal Lava Land - Hot-Foot-It Ledge",
         "Lethal Lava Land - Hot-Foot-It into the Volcano")
