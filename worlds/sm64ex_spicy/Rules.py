@@ -959,7 +959,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
                    "logic_ssl_stand_tall_without_pyramid_elevator & EYEROK & LG/KK")
     rf.assign_rule("Shifting Sand Land - Oasis Tree 1-Up", "CL/TJ/BF/SF")
     rf.assign_rule("Shifting Sand Land - Above Quicksand Pit 1-Up", "WC & TJ/CANN | LJ")
-    rf.assign_rule("Shifting Sand Land - Pyramid Grindel 1-Up", "THWOMP")
+    rf.assign_rule("Shifting Sand Land - Pyramid Grindel 1-Up", "THWOMP & TJ/SF/BF/LG")
     rf.assign_rule("Shifting Sand Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     rf.assign_rule(
         "Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up",
