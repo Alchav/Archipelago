@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Callable, Iterable
+from functools import cached_property
 from typing import TYPE_CHECKING, ClassVar, TypeAlias
 
 from typing_extensions import override
@@ -95,6 +96,19 @@ class CoinEvaluation:
         for source in self.children:
             result.update(collect(source, True))
         return frozenset(result)
+
+    @cached_property
+    def sources_by_id(self) -> dict[str, tuple[CoinSourceTrace, ...]]:
+        sources: dict[str, list[CoinSourceTrace]] = {}
+
+        def visit(source: CoinSourceTrace) -> None:
+            sources.setdefault(source.source_id, []).append(source)
+            for child in source.children:
+                visit(child)
+
+        for source in self.children:
+            visit(source)
+        return {source_id: tuple(matches) for source_id, matches in sources.items()}
 
 
 CoinEvaluator: TypeAlias = Callable[[CollectionState, int, int], bool | CoinEvaluation]
@@ -524,6 +538,13 @@ class CanCollectGlobalCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         force_recalculate: ClassVar[bool] = True
 
         def _evaluate_courses(self, state: CollectionState) -> tuple[int, tuple[tuple[str, int, int], ...]]:
+            cache = getattr(state, "sm64_coin_evaluation_cache", None)
+            cache_key = (self.player, "global")
+            if cache is not None:
+                cached = cache.get(cache_key)
+                if cached is not None:
+                    return cached
+
             course_totals: list[tuple[str, int, int]] = []
             total = 0
             for course_name, cap in self.course_caps:
@@ -532,7 +553,10 @@ class CanCollectGlobalCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
                 reachable = min(reachable, cap)
                 total += reachable
                 course_totals.append((course_name, reachable, cap))
-            return total, tuple(course_totals)
+            result = total, tuple(course_totals)
+            if cache is not None:
+                cache[cache_key] = result
+            return result
 
         @override
         def _evaluate(self, state: CollectionState) -> bool:
@@ -635,20 +659,11 @@ class CanCollectCoinOutput(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         entrance_dependency_names: tuple[str, ...]
         force_recalculate: ClassVar[bool] = True
 
-        def _sources(self, state: CollectionState) -> dict[str, list[CoinSourceTrace]]:
+        def _sources(self, state: CollectionState) -> dict[str, tuple[CoinSourceTrace, ...]]:
             evaluation = evaluate_coins(state, self.player, self.course_name, 0)
             if isinstance(evaluation, bool):
                 return {}
-            result: dict[str, list[CoinSourceTrace]] = {}
-
-            def visit(source: CoinSourceTrace) -> None:
-                result.setdefault(source.source_id, []).append(source)
-                for child in source.children:
-                    visit(child)
-
-            for source in evaluation.children:
-                visit(source)
-            return result
+            return evaluation.sources_by_id
 
         @override
         def _evaluate(self, state: CollectionState) -> bool:
