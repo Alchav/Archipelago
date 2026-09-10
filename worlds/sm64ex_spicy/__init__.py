@@ -558,12 +558,7 @@ class SM64World(World):
                     self.get_normal_entrance_source_name(source_id),
                     self.get_entrance_destination_name(destination),
                     'entrance', self.player)
-
-    @classmethod
-    def stage_set_rules(cls, multiworld) -> None:
-        for world in multiworld.worlds.values():
-            if isinstance(world, cls):
-                world.configure_full_level_unlock_early_items()
+        self.configure_full_level_unlock_early_items()
 
     def configure_full_level_unlock_early_items(self) -> None:
         if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
@@ -600,12 +595,11 @@ class SM64World(World):
             raise OptionError("Full Level Unlocks has no sphere-one entrance unlock candidates.")
         self.random.shuffle(candidates)
         self.multiworld.local_early_items[self.player][candidates[0]] = 1
-        sphere_one_state = CollectionState(self.multiworld)
-        sphere_one_location_count = sum(
-            location.address is not None and location.can_reach(sphere_one_state)
+        player_location_count = sum(
+            location.address is not None
             for location in self.multiworld.get_locations(self.player)
         )
-        if sphere_one_location_count > 2 and len(candidates) > 1:
+        if (player_location_count > 2 or self.multiworld.players > 1) and len(candidates) > 1:
             self.multiworld.early_items[self.player][candidates[1]] = 1
 
     def create_item(self, name: str) -> Item:
