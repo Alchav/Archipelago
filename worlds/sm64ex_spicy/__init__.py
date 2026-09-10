@@ -2,6 +2,7 @@ import typing
 import os
 import json
 import pkgutil
+from bisect import bisect_left
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
@@ -1073,20 +1074,31 @@ class SM64World(World):
 
     @classmethod
     def stage_pre_output(cls, multiworld):
-        worlds = [world for world in multiworld.worlds.values() if isinstance(world, cls)]
+        worlds = [
+            world for world in multiworld.worlds.values()
+            if isinstance(world, cls) and not world.sign_hints
+        ]
         if not worlds:
             return
 
-        state = CollectionState(multiworld)
-        remaining_locations = set(multiworld.get_filled_locations())
-        remaining_entrances = {
-            entrance
+        worlds_by_player = {world.player: world for world in worlds}
+        sign_entries_by_player: dict[int, list[tuple[int, object]]] = {
+            world.player: [] for world in worlds
+        }
+        candidates_by_player: dict[int, dict[int, list[tuple[str, object]]]] = {
+            world.player: {} for world in worlds
+        }
+        entrance_sources = {
+            entrance: (world.player, entrance_id)
             for world in worlds
             for entrance_id in world.get_shuffled_entrance_source_ids()
             if (entrance := world.randomized_entrance_connections.get(entrance_id)) is not None
         }
-        spheres = []
-        entrance_spheres = []
+
+        state = CollectionState(multiworld)
+        remaining_locations = set(multiworld.get_filled_locations())
+        remaining_entrances = set(entrance_sources)
+        sphere_index = 0
         while remaining_locations:
             sphere = {
                 location for location in remaining_locations
@@ -1098,17 +1110,40 @@ class SM64World(World):
                 entrance for entrance in remaining_entrances
                 if entrance.can_reach(state)
             }
-            spheres.append(sorted(sphere))
-            entrance_spheres.append(entrance_sphere)
             remaining_entrances -= entrance_sphere
-            for location in sphere:
+
+            for location in sorted(sphere):
+                is_own_sign = (
+                    location.player in worlds_by_player
+                    and location.name in sign_data_by_location_name
+                )
+                if is_own_sign:
+                    sign_entries_by_player[location.player].append((sphere_index, location))
+
+                item = location.item
+                if (
+                        item is not None
+                        and item.player in worlds_by_player
+                        and item.advancement
+                        and item.name not in sign_unlock_item_names
+                        and item.code is not None
+                        and location.address is not None
+                        and not (is_own_sign and item.player == location.player)
+                ):
+                    candidates_by_player[item.player].setdefault(sphere_index, []).append(
+                        ("item", location))
+
                 state.collect(location.item, True, location)
+
+            for entrance in entrance_sphere:
+                player, source_id = entrance_sources[entrance]
+                candidates_by_player[player].setdefault(sphere_index, []).append(
+                    ("entrance", source_id))
+
             remaining_locations -= sphere
+            sphere_index += 1
 
         for world in worlds:
-            if world.sign_hints:
-                continue
-
             shuffled_fallback_hints = list(fallback_hints)
             world.random.shuffle(shuffled_fallback_hints)
             world.sign_hints = {
@@ -1119,42 +1154,11 @@ class SM64World(World):
             world.sign_hint_location_players = {sign.key: 0 for sign in sign_data}
             world.sign_hint_entrances = {sign.key: 0 for sign in sign_data}
 
-            signs_by_sphere: list[list] = [[] for _sphere in spheres]
-            candidates_by_sphere: list[list[tuple[str, object]]] = [[] for _sphere in spheres]
-            for sphere_index, sphere in enumerate(spheres):
-                for location in sphere:
-                    if location.player == world.player and location.name in sign_data_by_location_name:
-                        signs_by_sphere[sphere_index].append(location)
-                    elif (
-                            location.item is not None
-                            and location.item.player == world.player
-                            and location.item.advancement
-                            and location.item.name not in sign_unlock_item_names
-                            and location.item.code is not None
-                            and location.address is not None
-                    ):
-                        candidates_by_sphere[sphere_index].append(("item", location))
-
-                for entrance in entrance_spheres[sphere_index]:
-                    if entrance.player != world.player:
-                        continue
-                    source_id = next(
-                        entrance_id for entrance_id, connection
-                        in world.randomized_entrance_connections.items()
-                        if connection is entrance
-                    )
-                    candidates_by_sphere[sphere_index].append(("entrance", source_id))
-
-            for locations in signs_by_sphere:
-                world.random.shuffle(locations)
-            for candidates in candidates_by_sphere:
+            sign_entries = sign_entries_by_player[world.player]
+            candidates_by_sphere = candidates_by_player[world.player]
+            for candidates in candidates_by_sphere.values():
                 world.random.shuffle(candidates)
-
-            sign_entries = [
-                (sphere_index, sign_location)
-                for sphere_index, sign_locations in enumerate(signs_by_sphere)
-                for sign_location in sign_locations
-            ]
+            candidate_sphere_indices = sorted(candidates_by_sphere)
             target_hint_count = min(world.sign_hint_count, len(sign_entries), len(sign_data) - 1)
             sign_buckets = [
                 sign_entries[
@@ -1170,9 +1174,16 @@ class SM64World(World):
             assignments = []
 
             def take_candidate(sign_sphere_index):
-                for candidate_sphere_index in range(sign_sphere_index, len(candidates_by_sphere)):
-                    if candidates_by_sphere[candidate_sphere_index]:
-                        return candidates_by_sphere[candidate_sphere_index].pop()
+                candidate_index = bisect_left(candidate_sphere_indices, sign_sphere_index)
+                while candidate_index < len(candidate_sphere_indices):
+                    candidate_sphere_index = candidate_sphere_indices[candidate_index]
+                    candidates = candidates_by_sphere[candidate_sphere_index]
+                    if candidates:
+                        candidate = candidates.pop()
+                        if not candidates:
+                            candidate_sphere_indices.pop(candidate_index)
+                        return candidate
+                    candidate_sphere_indices.pop(candidate_index)
                 return None
 
             # Work backward so late signs get first claim on the candidates that can validly hint them.
