@@ -17,7 +17,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     rolling_log_item_data_table, purple_switch_item_data_table, optional_item_data_table, \
     simple_arbitrary_item_data_table, per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, \
     per_level_warp_pipe_item_names, \
-    bowser_stage_1up_item_data_table, randomized_action_item_names, main_course_move_area_names, \
+    bowser_stage_1up_item_data_table, randomized_action_item_names, per_level_action_item_data_table, \
+    main_course_move_area_names, \
     separate_misc_move_area_names, collapsed_misc_move_area_names, non_climb_move_area_names, ut_glitch_item_name, \
     item_name_groups, global_coin_object_item_data_table, per_level_coin_object_item_data_table, \
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
@@ -577,7 +578,7 @@ class SM64World(World):
             "Tiny-Huge Island (Huge)": "Unlock Huge Island",
         }
         available_unlocks = set(self.get_level_unlock_item_names())
-        state = CollectionState(self.multiworld)
+        state = self.multiworld.state.copy()
         state.reachable_regions[self.player].add(
             self.multiworld.get_region(self.origin_region_name, self.player))
         state.update_reachable_regions(self.player)
@@ -596,12 +597,133 @@ class SM64World(World):
             raise OptionError("Full Level Unlocks has no sphere-one entrance unlock candidates.")
         self.random.shuffle(candidates)
         self.multiworld.local_early_items[self.player][candidates[0]] = 1
-        player_location_count = sum(
-            location.address is not None
+        sphere_one_location_count = sum(
+            location.address is not None and location.can_reach(state)
             for location in self.multiworld.get_locations(self.player)
         )
-        if (player_location_count > 2 or self.multiworld.players > 1) and len(candidates) > 1:
+        if sphere_one_location_count + self.multiworld.players > 4 and len(candidates) > 1:
             self.multiworld.early_items[self.player][candidates[1]] = 1
+
+    def _fill_both_mode_sides(self) -> list[tuple[set[str], set[str]]]:
+        sides: list[tuple[set[str], set[str]]] = []
+
+        def add(option, global_names, per_level_names) -> None:
+            if option.value == option.option_both:
+                sides.append((set(global_names), set(per_level_names)))
+
+        add(self.options.cap_items, global_cap_item_names, cap_item_data_table)
+        add(self.options.level_features,
+            (*global_checkerboard_item_names, *global_rolling_log_item_names, *global_purple_switch_item_names,
+             *global_treasure_chest_item_names, *global_warp_pipe_item_names, *global_vertical_wind_item_names,
+             *global_horizontal_wind_item_names, *global_freestanding_star_item_names,
+             *global_star_block_item_names, *global_koopa_shell_block_item_names, *global_star_secret_item_names,
+             *global_jet_stream_item_names, *global_cap_switch_item_names),
+            (*checkerboard_item_data_table, *rolling_log_item_data_table, *purple_switch_item_data_table,
+             *per_level_treasure_chest_item_names, *per_level_warp_pipe_item_names,
+             *vertical_wind_item_data_table, *horizontal_wind_item_data_table, *freestanding_star_item_data_table,
+             *star_block_item_data_table, *koopa_shell_block_item_data_table, *star_secret_item_data_table,
+             *jet_stream_item_data_table, *cap_switch_item_data_table))
+        add(self.options.bobomb_buddies, global_bobomb_buddy_item_names, per_level_bobomb_buddy_item_names)
+        add(self.options.coin_object_unlocks,
+            global_coin_object_item_data_table, per_level_coin_object_item_data_table)
+        add(self.options.enemy_unlocks, global_enemy_item_data_table, per_level_enemy_item_data_table)
+        add(self.options.one_up_unlocks,
+            global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table)
+        add(self.options.bowser_bombs,
+            (f"Bowser Arena Bomb {index}" for index in range(1, 5)),
+            (name for name in bowser_bomb_item_data_table
+             if name.startswith("Bowser in the") and name != "Bowser in the Sky - Bowser Arena Bomb 5"))
+        add(self.options.bowser_stage_1ups,
+            ("Bowser Stage Extra 1-Ups",),
+            ("Bowser in the Dark World - Extra 1-Ups", "Bowser in the Fire Sea - Extra 1-Ups"))
+
+        global_moves = set()
+        per_level_moves = set()
+        for action in randomized_action_item_names:
+            option = getattr(self.options, move_randomizer_option_name_by_action[action])
+            if option.value == option.option_both:
+                global_moves.add(action)
+                per_level_moves.update(name for name in per_level_action_item_data_table if name.endswith(f" - {action}"))
+        if global_moves:
+            sides.append((global_moves, per_level_moves))
+        return sides
+
+    def _excess_bowser_bomb_names(self) -> set[str]:
+        health_by_stage = {
+            "Bowser in the Dark World": self.options.bowser_in_the_dark_world_health.value,
+            "Bowser in the Fire Sea": self.options.bowser_in_the_fire_sea_health.value,
+            "Bowser in the Sky": self.options.bowser_in_the_sky_health.value,
+        }
+        names = {
+            f"{stage} - Bowser Arena Bomb {index}"
+            for stage, health in health_by_stage.items()
+            for index in range(health + 1, 6)
+        }
+        max_global_health = max(health_by_stage.values())
+        names.update(f"Bowser Arena Bomb {index}" for index in range(max_global_health + 1, 5))
+        if health_by_stage["Bowser in the Sky"] < 5:
+            names.add("Bowser in the Sky - Bowser Arena Bomb 5")
+        return names
+
+    def _optional_fill_reduction_names(self) -> set[str]:
+        return {
+            *cannon_item_data_table,
+            "Big Boo's Haunt - Staircase",
+            "Hazy Maze Cave - Swimming Beast",
+            "Jolly Roger Bay - Purple Switch",
+            "Shifting Sand Land - Pyramid Elevator",
+            "Shifting Sand Land - Tweesters",
+            "Snowman's Land - Penguin",
+            "Tall, Tall Mountain - Rolling Log",
+            "Tall, Tall Mountain - Vertical Wind",
+            "Tiny-Huge Island - Vertical Wind",
+            "Wet-Dry World - Heave-Hos",
+            "Whomp's Fortress - Hoot",
+            "Whomp's Fortress - Thwomps",
+            "Unlock Tiny Island",
+            "Unlock Huge Island",
+            *action_item_data_table,
+            *per_level_action_item_data_table,
+        }
+
+    def fill_hook(self, progitempool, usefulitempool, filleritempool, fill_locations) -> None:
+        def downgrade(items: typing.Iterable[Item]) -> None:
+            for item in tuple(items):
+                if item.player != self.player or not item.advancement:
+                    continue
+                progitempool.remove(item)
+                usefulitempool.append(item)
+
+        downgrade(item for item in progitempool if item.name in sign_unlock_item_names)
+        for global_names, per_level_names in self._fill_both_mode_sides():
+            selected_names = global_names if self.random.randrange(2) == 0 else per_level_names
+            downgrade(item for item in progitempool if item.name in selected_names)
+        downgrade(item for item in progitempool if item.name in self._excess_bowser_bomb_names())
+
+        candidates = [
+            item for item in progitempool
+            if item.player == self.player
+            and item.name in self._optional_fill_reduction_names()
+            and self.random.randrange(2) == 0
+        ]
+        self.random.shuffle(candidates)
+        for item in candidates:
+            itempool_index = next(
+                index for index, pool_item in enumerate(self.multiworld.itempool)
+                if pool_item is item
+            )
+            self.multiworld.itempool.pop(itempool_index)
+            try:
+                state = self.multiworld.get_all_state()
+            finally:
+                self.multiworld.itempool.insert(itempool_index, item)
+            real_locations_reachable = all(
+                location.can_reach(state)
+                for location in self.multiworld.get_locations(self.player)
+                if location.address is not None
+            )
+            if real_locations_reachable and self.multiworld.has_beaten_game(state, self.player):
+                downgrade((item,))
 
     def create_item(self, name: str) -> Item:
         data = item_data_table[name]

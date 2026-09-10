@@ -14,7 +14,7 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
     global_enemy_item_data_table, per_level_enemy_item_data_table, global_mode_coin_object_item_names, \
     global_mode_enemy_item_names, bowser_bomb_item_data_table, special_level_unlock_item_names, \
     global_one_up_unlock_item_data_table, per_level_one_up_unlock_item_data_table, \
-    global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, \
+    global_sign_unlock_item_data_table, per_level_sign_unlock_item_data_table, sign_unlock_item_names, \
     global_checkerboard_item_names, global_rolling_log_item_names, global_purple_switch_item_names, \
     global_bobomb_buddy_item_names, global_treasure_chest_item_names, global_warp_pipe_item_names, \
     per_level_bobomb_buddy_item_names, per_level_treasure_chest_item_names, per_level_warp_pipe_item_names, \
@@ -995,7 +995,19 @@ class FullLevelUnlockItemPoolTestBase(SM64TestBase):
 
     def test_optional_second_level_unlock_is_valid(self):
         early_items = self.multiworld.early_items[self.player]
-        self.assertLessEqual(sum(early_items.values()), 1)
+        state = self.multiworld.state.copy()
+        state.reachable_regions[self.player].add(
+            self.multiworld.get_region(self.world.origin_region_name, self.player)
+        )
+        state.update_reachable_regions(self.player)
+        sphere_one_location_count = sum(
+            location.address is not None and location.can_reach(state)
+            for location in self.multiworld.get_locations(self.player)
+        )
+        self.assertEqual(
+            sum(early_items.values()),
+            int(sphere_one_location_count + self.multiworld.players > 4),
+        )
         self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
 
 
@@ -1007,6 +1019,47 @@ class FullLevelUnlockWithVisitChecksTestBase(FullLevelUnlockItemPoolTestBase):
 
     def test_visit_checks_do_not_change_the_guaranteed_local_unlock(self):
         self.assertEqual(sum(self.multiworld.local_early_items[self.player].values()), 1)
+
+
+class FillClassificationReductionTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "cap_items": Options.CapItems.option_both,
+        "sign_unlocks": Options.SignUnlocks.option_both,
+        "bowser_bombs": Options.BowserBombs.option_both,
+        "bowser_in_the_sky_health": 5,
+    }
+
+    def test_fill_reductions_preserve_item_classifications(self):
+        original_classifications = {
+            id(item): item.classification for item in self.multiworld.itempool
+        }
+        progression = [item for item in self.multiworld.itempool if item.advancement]
+        useful = [item for item in self.multiworld.itempool if not item.advancement and item.useful]
+        filler = [item for item in self.multiworld.itempool if not item.advancement and not item.useful]
+
+        self.world.fill_hook(progression, useful, filler, self.multiworld.get_unfilled_locations())
+
+        sign_items = [item for item in self.multiworld.itempool if item.name in sign_unlock_item_names]
+        self.assertTrue(sign_items)
+        self.assertTrue(all(item in useful and item not in progression for item in sign_items))
+        self.assertTrue(all(item.advancement for item in sign_items))
+
+        global_caps = [item for item in self.multiworld.itempool if item.name in global_cap_item_names]
+        per_level_caps = [item for item in self.multiworld.itempool if item.name in cap_item_data_table]
+        self.assertNotEqual(
+            any(item in progression for item in global_caps),
+            any(item in progression for item in per_level_caps),
+        )
+        shared_fifth_bomb = next(
+            item for item in self.multiworld.itempool
+            if item.name == "Bowser in the Sky - Bowser Arena Bomb 5"
+        )
+        self.assertTrue(shared_fifth_bomb.advancement)
+        self.assertTrue(all(
+            item.classification == original_classifications[id(item)]
+            for item in self.multiworld.itempool
+        ))
 
 
 class BlocksanityOnTestBase(SM64TestBase):
