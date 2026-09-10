@@ -20,6 +20,32 @@ class CoinOutputKind(Enum):
     BLUE = "blue"
 
 
+ENEMY_COIN_CHECK_TYPE_NAME = "Enemy Coins"
+COIN_CHECK_TYPE_NAMES: Mapping[CoinOutputKind, str] = {
+    CoinOutputKind.YELLOW: "Yellow Coins",
+    CoinOutputKind.RED: "Red Coins",
+    CoinOutputKind.BLUE: "Blue Coins",
+}
+COIN_CHECK_TYPE_KIND_BY_NAME: Mapping[str, CoinOutputKind] = {
+    name: kind for kind, name in COIN_CHECK_TYPE_NAMES.items()
+}
+coin_check_type_option_keys = tuple(COIN_CHECK_TYPE_NAMES.values()) + (ENEMY_COIN_CHECK_TYPE_NAME,)
+
+
+def get_enabled_coin_check_kinds(selected_types: Iterable[str]) -> frozenset[CoinOutputKind]:
+    """Map the Coin Check Types option value to the CoinOutputKinds it allows as locations."""
+    return frozenset(
+        COIN_CHECK_TYPE_KIND_BY_NAME[selected_type]
+        for selected_type in selected_types
+        if selected_type in COIN_CHECK_TYPE_KIND_BY_NAME
+    )
+
+
+def get_enemy_coin_checks_enabled(selected_types: Iterable[str]) -> bool:
+    """Whether the Coin Check Types option allows enemy-sourced coins to become locations."""
+    return ENEMY_COIN_CHECK_TYPE_NAME in selected_types
+
+
 @dataclasses.dataclass(frozen=True, order=True)
 class CoinOutputID:
     course_name: str
@@ -35,6 +61,7 @@ class CoinOutputDefinition:
     kind: CoinOutputKind
     coin_value: int
     source_methods: tuple[str, ...]
+    is_enemy_source: bool = False
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1295,28 +1322,29 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             offset += 8
 
         for source_id, label, kind_name, count in SOURCE_LAYOUTS[course_name]:
-            if kind_name == "giant":
-                names = _repeat_names(_GIANT_GOOMBA_DESCRIPTORS[source_id], count)
-                outputs = []
-                for index, producer_name in enumerate(names, 1):
-                    outputs.extend((
-                        CoinOutputDefinition(
-                            CoinOutputID(course_name, source_id, index * 2 - 1), course_base + offset,
-                            f"{course_name} - {producer_name} Coin", CoinOutputKind.YELLOW, 1,
-                            (f"{source_id}_yellow",),
-                        ),
-                        CoinOutputDefinition(
-                            CoinOutputID(course_name, source_id, index * 2), course_base + offset + 1,
-                            f"{course_name} - {producer_name} Blue Coin", CoinOutputKind.BLUE, 5,
-                            (f"{source_id}_blue",),
-                        ),
-                    ))
-                    offset += 2
-                sources.append(CoinSourceDefinition(course_name, source_id, label, tuple(outputs), count * 5))
-                continue
+    if kind_name == "giant":
+        names = _repeat_names(_GIANT_GOOMBA_DESCRIPTORS[source_id], count)
+        outputs = []
+        for index, producer_name in enumerate(names, 1):
+            outputs.extend((
+                CoinOutputDefinition(
+                    CoinOutputID(course_name, source_id, index * 2 - 1), course_base + offset,
+                    f"{course_name} - {producer_name} Coin", CoinOutputKind.YELLOW, 1,
+                    (f"{source_id}_yellow",), is_enemy_source=True,
+                ),
+                CoinOutputDefinition(
+                    CoinOutputID(course_name, source_id, index * 2), course_base + offset + 1,
+                    f"{course_name} - {producer_name} Blue Coin", CoinOutputKind.BLUE, 5,
+                    (f"{source_id}_blue",), is_enemy_source=True,
+                ),
+            ))
+            offset += 2
+        sources.append(CoinSourceDefinition(course_name, source_id, label, tuple(outputs), count * 5))
+        continue
 
             kind = CoinOutputKind(kind_name)
-            names = _enemy_output_names(source_id, kind, count) or (
+            enemy_names = _enemy_output_names(source_id, kind, count)
+            names = enemy_names or (
                 _standalone_yellow_names(source_id, label, count)
                 if kind is CoinOutputKind.YELLOW and source_id in STANDALONE_YELLOW_COIN_SOURCE_IDS
                 else _output_names(label, kind, count)
@@ -1330,6 +1358,7 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
                     kind, value,
                     COIN_OUTPUT_SOURCE_METHOD_OVERRIDES.get(
                         (course_name, source_id, index), (source_id,)),
+                    is_enemy_source=enemy_names is not None,
                 )
                 for index, name in enumerate(names, 1)
             )
@@ -1412,13 +1441,27 @@ def select_individual_coin_outputs(
         percentage: int, rng: random.Random,
         catalog: Iterable[CoinOutputDefinition] = coin_output_catalog,
         excluded_output_ids: frozenset[CoinOutputID] = frozenset(),
+        allowed_kinds: frozenset[CoinOutputKind] | None = None,
+        allow_enemy_sources: bool = True,
 ) -> tuple[CoinOutputDefinition, ...]:
-    """Select the requested percentage independently within each course."""
+    """Select the requested percentage independently within each course.
+
+    Every output is gated by exactly one of two filters, based on is_enemy_source:
+      - Non-enemy outputs are gated by allowed_kinds (yellow, red, blue). None (the default) allows
+        every kind, matching prior behavior.
+      - Enemy-sourced outputs (coins that come from defeating or interacting with an enemy) are gated
+        solely by allow_enemy_sources, regardless of their color - allowed_kinds does not apply to them.
+    """
     if not 0 <= percentage <= 100:
         raise ValueError("Coin Checks percentage must be between 0 and 100")
     by_course: dict[str, list[CoinOutputDefinition]] = defaultdict(list)
     for output in catalog:
         if output.output_id in excluded_output_ids:
+            continue
+        if output.is_enemy_source:
+            if not allow_enemy_sources:
+                continue
+        elif allowed_kinds is not None and output.kind not in allowed_kinds:
             continue
         by_course[output.output_id.course_name].append(output)
     selected = []

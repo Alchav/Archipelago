@@ -3,6 +3,7 @@ from Options import DefaultOnToggle, Range, Toggle, DeathLink, Choice, PerGameCo
     OptionSet, ItemsAccessibility, Visibility
 
 from .LogicTricks import logic_trick_option_keys
+from .CoinChecks import coin_check_type_option_keys
 
 
 class CoinStarRequirement(Range):
@@ -46,6 +47,17 @@ class CoinChecks(Range):
     range_start = 0
     range_end = 100
     default = 0
+
+
+class CoinCheckTypes(OptionSet):
+    """Choose which coin types are allowed to become Coin Checks locations.
+    **Yellow Coins:** Every yellow coin in a stage can be a location
+    **Red Coins:** Every red coin in a stage can be a location
+    **Blue Coins:** Every blue coin in a stage can be a location
+    **Enemy Coins:** Every coin from an enemy can be a location"""
+    display_name = "Coin Check Types"
+    valid_keys = coin_check_type_option_keys
+    default = frozenset(coin_check_type_option_keys)
 
 
 class GlobalCoinCountChecks(Range):
@@ -1165,6 +1177,7 @@ sm64_options_groups = [
         Blocksanity,
         VisitChecks,
         CoinChecks,
+        CoinCheckTypes,
         CoinCountChecks,
         GlobalCoinCountChecks,
         CountsCoinsBeyondCoinStars,
@@ -1262,6 +1275,7 @@ class SM64Options(PerGameCommonOptions):
     music_shuffle: MusicShuffle
     skybox_shuffle: SkyboxShuffle
     coin_checks: CoinChecks
+    coin_check_types: CoinCheckTypes
     coin_count_checks: CoinCountChecks
     global_coin_count_checks: GlobalCoinCountChecks
     counts_coins_beyond_coin_stars: CountsCoinsBeyondCoinStars
