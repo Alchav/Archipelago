@@ -4755,8 +4755,8 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_initial_coin_sources_are_counted_independently(self):
         self.collect_basement_access()
         source_coins = {
-            "Lethal Lava Land - Single Yellow Coins": 21,
-            "Lethal Lava Land - Horizontal Coin Lines": 25,
+            "Lethal Lava Land - Single Yellow Coins": 26,
+            "Lethal Lava Land - Horizontal Coin Lines": 20,
             "Lethal Lava Land - Horizontal Coin Rings": 16,
             "Lethal Lava Land - Crazy Box": 5,
             "Lethal Lava Land - Bowser Puzzle": 5,
@@ -4795,27 +4795,27 @@ class LethalLavaLandIndividualUnlockLogicTestBase(SM64TestBase):
     def test_single_yellow_coin_routes(self):
         self.collect_basement_access()
         self.collect(self.get_item_by_name("Lethal Lava Land - Single Yellow Coins"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 21))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 22))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 27))
 
         self.collect(self.get_item_by_name("Long Jump"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 30))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 31))
         self.remove(self.get_item_by_name("Long Jump"))
 
         self.collect(self.world.create_item("Koopa Shell Blocks"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 30))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 31))
 
     def test_under_bridge_coin_line_requires_a_lava_route(self):
         self.collect_basement_access()
         self.collect(self.get_item_by_name("Lethal Lava Land - Horizontal Coin Lines"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 25))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 26))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 20))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 21))
 
         self.collect(self.world.create_item("Koopa Shell Blocks"))
-        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 35))
-        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 36))
+        self.assertTrue(lethal_lava_land_coins(self.multiworld.state, self.player, 30))
+        self.assertFalse(lethal_lava_land_coins(self.multiworld.state, self.player, 31))
 
     def test_red_coin_star_requires_red_coins_and_bowser_puzzle(self):
         self.collect_basement_access()

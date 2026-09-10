@@ -105,7 +105,7 @@ SOURCE_LAYOUTS = {
         ('lll_mr_is', 'Two Mr. Is', 'blue', 2),
         ('lll_under_bridge_coin_line', 'Northeast Brown Platform Coin Line', 'yellow', 5),
         ('lll_volcano_s_island_coins', 'Volcano S-shaped island coins', 'yellow', 3),
-        ('lll_volcano_first_ridge_coin_line', 'Volcano first ridge coin line', 'yellow', 5),
+        ('lll_volcano_first_ridge_coin_line', 'Volcano first ridge coins', 'yellow', 5),
         ('lll_volcano_second_ridge_coins', 'Volcano second ridge coins', 'yellow', 2),
         ('lll_volcano_floating_platform_coins', 'Volcano floating platform coins', 'yellow', 4),
         ('lll_volcano_post_platform_coin', 'Volcano coin after the floating platforms', 'yellow', 1),

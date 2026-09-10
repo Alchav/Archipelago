@@ -1250,7 +1250,7 @@ STANDALONE_YELLOW_COIN_NAME_OVERRIDES = {
     "bits_spinning_platform_coins": "Spinning Platform Coin",
     "rotating_plank_coins": "Rotating Plank Coin",
     "lll_volcano_s_island_coins": "Coin on the Volcano S-Shaped Island",
-    "lll_volcano_first_ridge_coin_line": "Coin on the Volcano First Ridge",
+    "lll_volcano_first_ridge_coin_line": "Volcano First Ridge Coin",
     "lll_volcano_second_ridge_coins": "Coin on the Volcano Second Ridge",
     "lll_volcano_floating_platform_coins": "Coin on a Volcano Floating Platform",
     "lll_volcano_post_platform_coin": "Coin After the Volcano Floating Platforms",
@@ -1322,25 +1322,25 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             offset += 8
 
         for source_id, label, kind_name, count in SOURCE_LAYOUTS[course_name]:
-    if kind_name == "giant":
-        names = _repeat_names(_GIANT_GOOMBA_DESCRIPTORS[source_id], count)
-        outputs = []
-        for index, producer_name in enumerate(names, 1):
-            outputs.extend((
-                CoinOutputDefinition(
-                    CoinOutputID(course_name, source_id, index * 2 - 1), course_base + offset,
-                    f"{course_name} - {producer_name} Coin", CoinOutputKind.YELLOW, 1,
-                    (f"{source_id}_yellow",), is_enemy_source=True,
-                ),
-                CoinOutputDefinition(
-                    CoinOutputID(course_name, source_id, index * 2), course_base + offset + 1,
-                    f"{course_name} - {producer_name} Blue Coin", CoinOutputKind.BLUE, 5,
-                    (f"{source_id}_blue",), is_enemy_source=True,
-                ),
-            ))
-            offset += 2
-        sources.append(CoinSourceDefinition(course_name, source_id, label, tuple(outputs), count * 5))
-        continue
+            if kind_name == "giant":
+                names = _repeat_names(_GIANT_GOOMBA_DESCRIPTORS[source_id], count)
+                outputs = []
+                for index, producer_name in enumerate(names, 1):
+                    outputs.extend((
+                        CoinOutputDefinition(
+                            CoinOutputID(course_name, source_id, index * 2 - 1), course_base + offset,
+                            f"{course_name} - {producer_name} Coin", CoinOutputKind.YELLOW, 1,
+                            (f"{source_id}_yellow",), is_enemy_source=True,
+                        ),
+                        CoinOutputDefinition(
+                            CoinOutputID(course_name, source_id, index * 2), course_base + offset + 1,
+                            f"{course_name} - {producer_name} Blue Coin", CoinOutputKind.BLUE, 5,
+                            (f"{source_id}_blue",), is_enemy_source=True,
+                        ),
+                    ))
+                    offset += 2
+                sources.append(CoinSourceDefinition(course_name, source_id, label, tuple(outputs), count * 5))
+                continue
 
             kind = CoinOutputKind(kind_name)
             enemy_names = _enemy_output_names(source_id, kind, count)

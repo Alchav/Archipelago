@@ -1371,9 +1371,9 @@ def lethal_lava_land_coins(
     )
     builder.add(
         "lll_volcano_first_ridge_coin_line",
-        "Volcano first ridge coin line",
+        "Volcano first ridge coins",
         5,
-        can_reach_volcano and has_horizontal_coin_lines,
+        can_reach_volcano and has_single_yellow_coins,
     )
     builder.add(
         "lll_volcano_second_ridge_coins",
@@ -4481,7 +4481,9 @@ def _middle_requirement_specs():
     _add(LLL, "lll_tilting_platform_coin_line",
          "LLL_KOOPA_SHELL | logic_lava_damage_boosting",
          (_unlock("Horizontal Coin Lines", LLL),))
-    _add(LLL, ("lll_volcano_first_ridge_coin_line", "lll_volcano_second_bully_coin_line"),
+    _add(LLL, "lll_volcano_first_ridge_coin_line",
+         f"{{{LLL} - Volcano}}", (_unlock("Single Yellow Coins", LLL),))
+    _add(LLL, "lll_volcano_second_bully_coin_line",
          f"{{{LLL} - Volcano}}", (_unlock("Horizontal Coin Lines", LLL),))
     _add(LLL, (
         "lll_grey_ramp_coins", "lll_sinking_platform_coins",

@@ -1621,6 +1621,16 @@ class LethalLavaLandCrossLavaCoinChecksAccessTest(SM64TestBase):
         "cap_items": "per_level",
     }
 
+    def test_volcano_first_ridge_uses_single_yellow_coins(self):
+        location_name = "Lethal Lava Land - Volcano First Ridge Coin 1"
+        self.run_location_tests(
+            [
+                [location_name, False, ["Lethal Lava Land - Horizontal Coin Lines"]],
+                [location_name, True, ["Lethal Lava Land - Single Yellow Coins"]],
+            ],
+            starting_regions=("Lethal Lava Land - Volcano",),
+        )
+
     def test_central_crescent_routes(self):
         location_name = "Lethal Lava Land - Central Gray Crescent Coin 1"
         coins = ["Lethal Lava Land - Single Yellow Coins"]
