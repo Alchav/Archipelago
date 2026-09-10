@@ -601,6 +601,12 @@ logic_tricks = {
         "description": "Collecting the coin hidden inside the first wooden walkway on the snowman by shooting"
                        " into it from the cannon.",
     },
+    "Snowman's Land Igloo Vanish Cap Block with Spindrift": {
+        "internal_id": "logic_sl_igloo_vanish_block_with_spindrift",
+        "rule": "VC & SPINDRIFTS",
+        "difficulty": "medium",
+        "description": "Reaching the Vanish Cap block inside the Igloo with the Spindrift.",
+    },
     # Bowser in the Dark World
     "Bowser in the Dark World Triple Jump up the Purple Switch Slope": {
         "internal_id": "logic_bitdw_purple_switch_bypass",

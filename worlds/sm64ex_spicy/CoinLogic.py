@@ -2020,13 +2020,14 @@ def snowmans_land_coins(
         and (Rules.has_action(state, player, "Long Jump", level_name) or can_reach_igloo_entrance),
     )
     can_reach_igloo = state.can_reach(f"{level_name} - Igloo", "Region", player)
+    can_reach_vanish_cap = state.can_reach(f"{level_name} - Vanish Cap Block", "Location", player)
     has_vanish_cap = Rules.has_vanish_cap(state, player, level_name)
     igloo_source_data = (
         (
             "sl_igloo_frozen_coin_lines",
             "Frozen coin lines inside the Igloo",
             20,
-            has_horizontal_coin_lines and has_vanish_cap,
+            has_horizontal_coin_lines and has_vanish_cap and can_reach_vanish_cap,
         ),
         (
             "sl_igloo_single_coins",

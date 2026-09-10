@@ -1325,7 +1325,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Bowser in the Fire Sea - 3 Coins Block": "CL | WK | logic_lava_damage_boosting",
             "Bowser in the Fire Sea - Near Final Poles 1-Up Block": "WK/TJ",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
-            "Snowman's Land - Vanish Cap Block": "VC",
+            "Snowman's Land - Vanish Cap Block": "VC & TJ/SF/BF/LG | VC & logic_sl_igloo_vanish_block_with_spindrift",
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
             "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
             "Shifting Sand Land - Cannon Wing Cap Block": "WC",
