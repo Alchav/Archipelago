@@ -603,7 +603,7 @@ class SM64World(World):
         sphere_one_state = CollectionState(self.multiworld)
         sphere_one_location_count = sum(
             location.address is not None and location.can_reach(sphere_one_state)
-            for location in self.multiworld.get_locations()
+            for location in self.multiworld.get_locations(self.player)
         )
         if sphere_one_location_count > 2 and len(candidates) > 1:
             self.multiworld.early_items[self.player][candidates[1]] = 1

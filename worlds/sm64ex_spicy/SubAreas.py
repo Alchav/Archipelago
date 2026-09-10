@@ -363,16 +363,33 @@ def build_mixed_connections(
     if len(remaining_branches) > len(remaining_roots):
         # There are not enough mixed Castle entrances to anchor every physical
         # area. Preserve the reserved BITS route, then directly permute the
-        # remaining sources and destinations.
+        # remaining sources and destinations. A flat random permutation does
+        # not respect the root/branch/terminal layering the rest of this
+        # function relies on, so a branch destination (e.g. "Cool, Cool
+        # Mountain", which gates access to its Secret Slide sub-area) can end
+        # up assigned behind a source that is never itself reachable from a
+        # root. Retry the permutation until every branch is actually
+        # reachable from an always-available root, rather than silently
+        # returning a layout that strands a whole sub-area.
         remaining_sources = [source for source in sources if source not in connections]
         remaining_destinations = [
             destination for destination in destinations
             if destination not in connections.values()
         ]
-        random.shuffle(remaining_sources)
-        random.shuffle(remaining_destinations)
-        connections.update(zip(remaining_sources, remaining_destinations))
-        return connections
+        fixed_roots = [source for source in connections if source in root_sources]
+        max_attempts = 200
+        for _ in range(max_attempts):
+            shuffled_sources = list(remaining_sources)
+            shuffled_destinations = list(remaining_destinations)
+            random.shuffle(shuffled_sources)
+            random.shuffle(shuffled_destinations)
+            attempt_connections = dict(connections)
+            attempt_connections.update(zip(shuffled_sources, shuffled_destinations))
+            if _all_branches_reachable(attempt_connections, root_sources, fixed_roots, outgoing, destinations):
+                return attempt_connections
+        raise ValueError(
+            "Mixed sub-area shuffle could not find a layout reaching every "
+            "branch destination after {} attempts".format(max_attempts))
 
     random.shuffle(remaining_roots)
     random.shuffle(remaining_branches)
@@ -391,6 +408,43 @@ def build_mixed_connections(
     connections.update(zip(remaining_sources, remaining_destinations))
     return connections
 
+def _all_branches_reachable(
+        connections: dict[str, str],
+        root_sources: list[str],
+        fixed_roots: list[str],
+        outgoing: dict[str, tuple[str, ...]],
+        destinations: list[str],
+) -> bool:
+    """Check that every branch destination present in this graph is reachable.
+
+    A "root" is any normal Castle entrance source, always available from the
+    start; a source is also reachable once the branch destination it lives
+    behind has been reached. A branch destination that isn't part of this
+    mixed pool at all (e.g. its level is on a separate/vanilla painting
+    shuffle instead) is reached through that other, always-valid mechanism,
+    so its outgoing sources are already available too. A destination that
+    never becomes reachable by either path would strand any sub-area gated
+    behind it (and any locations inside).
+    """
+    reachable_destinations: set[str] = set()
+    frontier: set[str] = set(root_sources) | set(fixed_roots)
+    for destination, outgoing_sources in outgoing.items():
+        if destination not in destinations:
+            frontier.update(outgoing_sources)
+    while frontier:
+        next_frontier: set[str] = set()
+        for source in frontier:
+            destination = connections.get(source)
+            if destination is None or destination in reachable_destinations:
+                continue
+            reachable_destinations.add(destination)
+            next_frontier.update(outgoing.get(destination, ()))
+        frontier = next_frontier
+    return all(
+        destination in reachable_destinations
+        for destination in outgoing
+        if destination in destinations
+    )
 
 def _build_coupled_mixed_connections(
         random: Random,
