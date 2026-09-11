@@ -44,13 +44,13 @@ def create_items(item_factory: StardewItemFactory, locations_count: int, items_t
     items += unique_items
     logger.debug(f"Created {len(unique_items)} unique items")
 
-    # unique_filler_items = generate_unique_filler_items(item_factory, content, options, random, locations_count - len(items))
-    # items += unique_filler_items
-    # logger.debug(f"Created {len(unique_filler_items)} unique filler items")
+    unique_filler_items = generate_unique_filler_items(item_factory, content, options, random, locations_count - len(items))
+    items += unique_filler_items
+    logger.debug(f"Created {len(unique_filler_items)} unique filler items")
 
-    # resource_pack_items = generate_resource_packs_and_traps(item_factory, options, content, random, items + items_to_exclude, locations_count - len(items))
-    # items += resource_pack_items
-    # logger.debug(f"Created {len(resource_pack_items)} resource packs")
+    resource_pack_items = generate_resource_packs_and_traps(item_factory, options, content, random, items + items_to_exclude, locations_count - len(items))
+    items += resource_pack_items
+    logger.debug(f"Created {len(resource_pack_items)} resource packs")
 
     return items
 
@@ -343,11 +343,8 @@ def create_friendsanity_items(item_factory: StardewItemFactory, options: Stardew
         for _ in content.features.friendsanity.get_randomized_hearts(villager):
             items.append(item_factory(item_name))
 
-    need_pet = options.goal == Goal.option_grandpa_evaluation
-    pet_item_classification = ItemClassification.progression_skip_balancing if need_pet else ItemClassification.useful
-
     for _ in content.features.friendsanity.get_pet_randomized_hearts():
-        items.append(item_factory(friendsanity.pet_heart_item_name, classification_pre_fill=pet_item_classification))
+        items.append(item_factory(friendsanity.pet_heart_item_name, classification_pre_fill=ItemClassification.progression_skip_balancing))
 
 
 def create_babies(item_factory: StardewItemFactory, items: List[Item], random: Random):
