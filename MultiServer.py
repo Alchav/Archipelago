@@ -15,6 +15,7 @@ import math
 import operator
 import pickle
 import random
+import re
 import shlex
 import threading
 import time
@@ -877,7 +878,9 @@ class Context:
         finished_msg = f'{self.get_aliased_name(client.team, client.slot)} (Team #{client.team + 1})' \
                        f' has completed their goal.'
         self.broadcast_text_all(finished_msg, {"type": "Goal", "team": client.team, "slot": client.slot})
-        if "auto" in self.collect_mode:
+        if self.collect_mode == "auto_cleared":
+            collect_player_cleared(self, client.team, client.slot)
+        elif "auto" in self.collect_mode:
             collect_player(self, client.team, client.slot)
         if "auto" in self.release_mode:
             release_player(self, client.team, client.slot)
@@ -964,7 +967,8 @@ def get_permissions(ctx) -> typing.Dict[str, Permission]:
     return {
         "release": Permission.from_text(ctx.release_mode),
         "remaining": Permission.from_text(ctx.remaining_mode),
-        "collect": Permission.enabled if ctx.collect_mode == "cleared" else Permission.from_text(ctx.collect_mode)
+        "collect": Permission.enabled if ctx.collect_mode in {"cleared", "auto_cleared"}
+        else Permission.from_text(ctx.collect_mode)
     }
 
 
@@ -1136,6 +1140,9 @@ def player_checked_all_not_unreachable_locations(ctx: Context, team: int, slot: 
 
 
 def collect_player_cleared(ctx: Context, team: int, slot: int) -> bool:
+    if ctx.client_game_state[team, slot] != ClientStatus.CLIENT_GOAL:
+        return False
+
     if player_checked_all_locations(ctx, team, slot):
         collect_player(ctx, team, slot)
         return True
@@ -1235,6 +1242,8 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
         del sortable
 
         ctx.location_checks[team, slot] |= new_locations
+        if ctx.collect_mode == "auto_cleared":
+            collect_player_cleared(ctx, team, slot)
         send_new_items(ctx)
         ctx.broadcast(ctx.clients[team][slot], [{
             "cmd": "RoomUpdate",
@@ -1735,9 +1744,15 @@ class ClientMessageProcessor(CommonCommandProcessor):
         if "enabled" in self.ctx.collect_mode:
             collect_player(self.ctx, self.client.team, self.client.slot)
             return True
-        elif self.ctx.collect_mode == "cleared":
+        elif self.ctx.collect_mode in {"cleared", "auto_cleared"}:
             if collect_player_cleared(self.ctx, self.client.team, self.client.slot):
                 return True
+
+            if self.ctx.client_game_state[self.client.team, self.client.slot] != ClientStatus.CLIENT_GOAL:
+                self.output(
+                    "Sorry, client collecting requires you to have beaten the game and checked every location "
+                    "in your world that is not marked Unreachable.")
+                return False
 
             checked_locations = self.ctx.location_checks[self.client.team, self.client.slot]
             not_unreachable_locations = [location for location in self.ctx.locations[self.client.slot]
@@ -2088,7 +2103,7 @@ def get_client_location_points(ctx: Context, client: Client) -> int:
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
     owner = ctx.owners[slot]
-    extra_hints = round(len([item for item in ctx.received_items[(team, 1, True)] if item.item == owner + 1000]))# * ctx.get_hint_cost(slot) * 0.5)
+    extra_hints = get_owner_hint_point_items(ctx, team, owner)
     for slot_ in ctx.owners:
         if ctx.owners[slot_] == owner and ctx.client_game_state[team, slot_] == ClientStatus.CLIENT_GOAL:
             extra_hints += ctx.get_hint_cost(slot)
@@ -2099,9 +2114,7 @@ def get_slot_points(ctx: Context, team: int, slot: int) -> int:
 def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     owner = ctx.owners[slot]
     hint_location_cost = ctx.get_hint_location_cost(slot)
-    # logging.info(f"Owner: {owner}")
-    extra_hints = round(len([item for item in ctx.received_items[(team, 1, True)] if item.item == owner + 10000]))
-    # logging.info(f"Hint points: {extra_hints}")
+    extra_hints = get_owner_hint_point_items(ctx, team, owner)
     for slot_ in ctx.owners:
         if ctx.owners[slot_] == owner and ctx.client_game_state[team, slot_] == ClientStatus.CLIENT_GOAL:
             extra_hints += hint_location_cost
@@ -2112,6 +2125,31 @@ def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     total_points = extra_hints - (hint_location_cost * hint_locations_used)
     # logging.info(f"Total points: {total_points}")
     return total_points
+
+
+def get_owner_hint_point_items(ctx: Context, team: int, owner: int) -> int:
+    """Return the value of collected hint items for an owner.
+
+    Both hint commands draw independently tracked balances from this same item set.
+    Legacy singular hint point items remain worth one point.
+    """
+    bot_game = ctx.games.get(1, "AlchapelaBot")
+    item_names = ctx.item_names.get(bot_game, {})
+    legacy_item_id = owner + 1000
+    legacy_name = item_names.get(legacy_item_id)
+    if not legacy_name:
+        return 0
+    owner_prefix = legacy_name.removesuffix(" Point")
+    pattern = re.compile(rf"^(?:(\d+) )?{re.escape(owner_prefix)} Points?$")
+    points = 0
+    for item in get_received_items(ctx, team, 1, True) + get_start_inventory(ctx, 1, True):
+        if item.item == legacy_item_id:
+            points += 1
+            continue
+        match = pattern.fullmatch(item_names.get(item.item, ""))
+        if match:
+            points += int(match.group(1) or 1)
+    return points
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):
     try:
@@ -2480,6 +2518,7 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
 def update_client_status(ctx: Context, client: Client, new_status: ClientStatus):
     current = ctx.client_game_state[client.team, client.slot]
     if current != ClientStatus.CLIENT_GOAL:  # can't undo goal completion
+        ctx.client_game_state[client.team, client.slot] = new_status
         if new_status == ClientStatus.CLIENT_GOAL:
             ctx.on_goal_achieved(client)
             # if player has yet to ever connect to the server, they will not be in client_game_state
@@ -2488,7 +2527,6 @@ def update_client_status(ctx: Context, client: Client, new_status: ClientStatus)
                    if player[0] == client.team and player[1] != client.slot):
                 ctx.broadcast_text_all(f"Team #{client.team + 1} has completed all of their games! Congratulations!")
 
-        ctx.client_game_state[client.team, client.slot] = new_status
         ctx.on_client_status_change(client.team, client.slot)
         ctx.save()
 
@@ -2812,7 +2850,7 @@ class ServerCommandProcessor(CommonCommandProcessor):
             if option_name == "release_mode":
                 valid_values.add("tokens")
             elif option_name == "collect_mode":
-                valid_values.add("cleared")
+                valid_values.update(("cleared", "auto_cleared"))
             valid_values.update(("auto", "auto_enabled") if option_name != "remaining_mode" else [])
             if option_value.lower() not in valid_values:
                 self.output(f"Unrecognized {option_name} value '{option_value}', known: {', '.join(valid_values)}")
@@ -2893,14 +2931,18 @@ def parse_args() -> argparse.Namespace:
                              auto-enabled: !release is available and automatically triggered on goal completion
                              ''')
     parser.add_argument('--collect_mode', default=defaults["collect_mode"], nargs='?',
-                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "cleared"], help='''\
+                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "cleared", "auto_cleared"],
+                        help='''\
                              Select !collect Accessibility. (default: %(default)s)
                              auto:     Automatic "collect" on goal completion
                              enabled:  !collect is always available
                              disabled: !collect is never available
                              goal:     !collect can be used after goal completion
                              auto-enabled: !collect is available and automatically triggered on goal completion
-                             cleared:  !collect can be used after checking all non-Unreachable locations
+                             cleared:  !collect can be used after goal completion and checking all non-Unreachable
+                                       locations
+                             auto_cleared: Automatic "collect" after goal completion and checking all non-Unreachable
+                                           locations
                              ''')
     parser.add_argument('--countdown_mode', default=defaults["countdown_mode"], nargs='?',
                         choices=['enabled', 'disabled', "auto"], help='''\

@@ -4,6 +4,10 @@ from NetUtils import SlotType
 from Options import PerGameCommonOptions, OptionList, Owner, OptionDict
 from dataclasses import dataclass
 
+
+HINT_POINT_ITEM_ID_BASE = 1_000_000
+HINT_POINT_ITEM_ID_OWNER_STRIDE = 100
+
 allowed_filler_games = {
     "Secret of Evermore", "Super Mario 64", "Crystalis", "DOOM 1993", "DOOM II", "Final Fantasy Mystic Quest",
     "A Hat in Time", "Pokemon Red and Blue", "The Sims 4", "Jigsaw", "Majora's Mask Recompiled",
@@ -17,6 +21,12 @@ class StartGames(OptionList):
 
 
 class HintCount(OptionDict):
+    """Total hint points for each owner (for example, ``Ophilla Hint: 1000``).
+
+    The generator divides each total evenly among the spheres containing that
+    owner's locations.  Legacy ``Hint Location`` entries are folded into the
+    corresponding owner's total.
+    """
     default = {}
 
 
@@ -42,18 +52,6 @@ class AlchapelaBotWorld(World):
         "Ophilla Hint Point": 1010,
         "Factorio Hint Point": 1011,
         "Alchav64 Hint Point": 1012,
-        "Alchav Hint Location Point": 10000,
-        "Alchav Alt Hint Location Point": 10001,
-        "AvBW Hint Location Point": 10002,
-        "AvBW Jigsaw Hint Location Point": 10003,
-        "Jack Hint Location Point": 10004,
-        "Jack Jigsaw Hint Location Point": 10005,
-        "Alyssa Hint Location Point": 10006,
-        "Alyssa Jigsaw Hint Location Point": 10007,
-        "Auto Hint Location Point": 10008,
-        "Ophilla Hint Location Point": 10010,
-        "Factorio Hint Location Point": 10011,
-        "Alchav64 Location Hint Point": 10012,
         "Nothing": 100000
     }
 
@@ -86,6 +84,18 @@ class AlchapelaBotWorld(World):
 
     def create_item(self, name):
         return UnlockItem(name, ItemClassification.progression if "Unlock" in name else ItemClassification.filler, self.item_name_to_id[name], self.player)
+
+    def create_hint_point_item(self, owner: int, amount: int):
+        """Create an owner hint item whose value is carried by its name and ID."""
+        base_name = self.item_id_to_name[owner + 1000].removesuffix(" Point")
+        name = f"{amount} {base_name} Point{'s' if amount != 1 else ''}"
+        item_id = HINT_POINT_ITEM_ID_BASE + amount * HINT_POINT_ITEM_ID_OWNER_STRIDE + owner
+        existing_name = self.item_id_to_name.get(item_id)
+        if existing_name is not None and existing_name != name:
+            raise ValueError(f"Hint point item ID collision between {existing_name!r} and {name!r}")
+        self.item_name_to_id[name] = item_id
+        self.item_id_to_name[item_id] = name
+        return self.create_item(name)
 
     def get_filler_item_name(self) -> str:
         return "Nothing"

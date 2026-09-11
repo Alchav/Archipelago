@@ -5,11 +5,14 @@ from Utils import cache_self1
 from .base_logic import BaseLogic, BaseLogicMixin
 from ..content.feature import friendsanity
 from ..data.villagers_data import Villager
-from ..stardew_rule import StardewRule, True_, false_, true_
+from ..stardew_rule import StardewRule, True_, false_
+from ..strings.ap_names.ap_option_names import CustomLogicOptionName, StartWithoutOptionName
 from ..strings.ap_names.mods.mod_items import SVEQuestItem
+from ..strings.artisan_good_names import ArtisanGood
 from ..strings.building_names import Building
 from ..strings.generic_names import Generic
 from ..strings.gift_names import Gift
+from ..strings.metal_names import Mineral
 from ..strings.region_names import Region, LogicRegion
 from ..strings.season_names import Season
 from ..strings.villager_names import NPC, ModNPC
@@ -41,6 +44,9 @@ class RelationshipLogic(BaseLogic):
     def can_get_married(self) -> StardewRule:
         return self.logic.relationship.has_hearts_with_any_bachelor(10) & self.logic.has(Gift.mermaid_pendant)
 
+    def can_get_divorced(self) -> StardewRule:
+        return self.logic.relationship.can_get_married() & self.logic.money.can_spend_at(Region.mayor_house, 50000)
+
     def has_children(self, number_children: int) -> StardewRule:
         assert number_children >= 0, "Can't have a negative amount of children."
         if number_children == 0:
@@ -52,6 +58,9 @@ class RelationshipLogic(BaseLogic):
         return self.logic.received_n(*possible_kids, count=number_children) & \
             self.logic.building.has_building(Building.kids_room) & \
             self.logic.relationship.can_reproduce(number_children)
+
+    def can_dove_children(self, number_children: int) -> StardewRule:
+        return self.logic.relationship.has_children(number_children) & self.logic.region.can_reach(Region.witch_hut) & self.logic.has(Mineral.prismatic_shard)
 
     def can_reproduce(self, number_children: int = 1) -> StardewRule:
         assert number_children >= 0, "Can't have a negative amount of children."
@@ -84,6 +93,16 @@ class RelationshipLogic(BaseLogic):
         return self.logic.or_(*(self.logic.relationship.has_hearts(name, hearts)
                                 for name, villager in self.content.villagers.items()))
 
+    def people_exist(self, number_villagers: int = 1) -> StardewRule:
+        assert number_villagers >= 0, f"Can't have a negative number of people existing"
+        if number_villagers == 0:
+            return True_()
+
+        if StartWithoutOptionName.villagers not in self.options.start_without:
+            return True_()
+
+        return self.logic.count(number_villagers, *(self.logic.relationship.exists(name) for name in self.content.villagers.keys()))
+
     def has_hearts_with_n(self, amount: int, hearts: int = 1) -> StardewRule:
         assert hearts >= 0, f"Can't have a negative hearts with any npc."
         assert amount >= 0, f"Can't have a negative amount of npc."
@@ -98,22 +117,11 @@ class RelationshipLogic(BaseLogic):
         assert hearts >= 0, f"Can't have a negative hearts with {npc}."
 
         villager = self.content.villagers.get(npc)
-
         if villager is None:
             return false_
 
         if hearts == 0:
-            return true_
-
-        # if not villager.bachelor:
-        #     hearts = 0
-        # elif hearts < 8:
-        #     hearts = 0
-        # elif hearts < 10:
-        #     hearts = 8
-        # else:
-        #     hearts = 10
-
+            return self.logic.relationship.can_meet(npc)
 
         heart_steps = self.content.features.friendsanity.get_randomized_hearts(villager)
         if not heart_steps or hearts > heart_steps[-1]:  # Hearts are sorted, bigger is the last one.
@@ -129,17 +137,45 @@ class RelationshipLogic(BaseLogic):
         return self.logic.received(heart_item, number_required) & self.can_meet(villager.name)
 
     @cache_self1
-    def can_meet(self, npc: str) -> StardewRule:
+    def exists(self, npc: str) -> StardewRule:
+        if npc == NPC.pet:
+            npcs_finding_pet = [NPC.marnie]
+            if ModNPC.ayeisha in self.content.villagers:
+                npcs_finding_pet.append(ModNPC.ayeisha)
+            return self.logic.received(f"{npc} Arrival") & self.logic.and_(*[self.exists(pet_finder) for pet_finder in npcs_finding_pet])
+
+        villager = self.content.villagers.get(npc)
+        if villager is None:
+            if npc in ["Gunther", "Marlon"]:
+                return self.logic.true_
+            return self.logic.false_
+
+        if StartWithoutOptionName.villagers in self.options.start_without or npc == NPC.kent:
+            return self.logic.received(f"{npc} Arrival")
+
+        return self.logic.true_
+
+    @cache_self1
+    def can_meet(self, npc: str | int) -> StardewRule:
+        if isinstance(npc, int):
+            number_villagers = npc
+            assert number_villagers >= 0, f"Can't meet a negative number of people"
+            if number_villagers == 0:
+                return True_()
+
+            return self.logic.count(number_villagers, *(self.logic.relationship.can_meet(name) for name in self.content.villagers.keys()))
+
         villager = self.content.villagers.get(npc)
         if villager is None:
             return false_
 
         rules = [self.logic.region.can_reach_any(*villager.locations)]
+        rules.append(self.logic.relationship.exists(npc))
 
-        if npc == NPC.kent:
-            rules.append(self.logic.time.has_year_two)
+        if npc == NPC.dwarf:
+            rules.append(self.logic.wallet.can_speak_dwarf())
 
-        elif npc == NPC.leo:
+        if npc == NPC.leo:
             rules.append(self.logic.received("Island North Turtle"))
             rules.append(self.logic.region.can_reach(Region.leo_hut))
 
@@ -161,6 +197,11 @@ class RelationshipLogic(BaseLogic):
 
         elif npc == ModNPC.goblin:
             rules.append(self.logic.region.can_reach_all(Region.witch_hut, Region.wizard_tower))
+            rules.append(self.logic.has(ArtisanGood.void_mayonnaise))
+
+        elif npc == ModNPC.juna:
+            rules.append(self.logic.region.can_reach_all(Region.farm, Region.forest))
+            rules.append(self.logic.relationship.exists(NPC.wizard))
 
         return self.logic.and_(*rules)
 
@@ -178,8 +219,8 @@ class RelationshipLogic(BaseLogic):
         if villager is None:
             return false_
 
-        # if hearts == 0:
-        #     return True_()
+        if hearts == 0:
+            return True_()
 
         rules = [self.logic.relationship.can_meet(npc)]
 
@@ -192,11 +233,10 @@ class RelationshipLogic(BaseLogic):
                 previous_heart = max(hearts - heart_size, 0)
                 rules.append(self.logic.relationship.has_hearts(npc, previous_heart))
 
-        # if hearts > 2 or hearts > heart_size:
-        #     rules.append(self.logic.season.has(villager.birthday))
-
-        # if villager.birthday == Generic.any:
-        #     rules.append(self.logic.season.has_all() | self.logic.time.has_year_three)  # push logic back for any birthday-less villager
+        if CustomLogicOptionName.ignore_birthdays not in self.options.custom_logic:
+            rules.append(self.logic.season.has(villager.birthday))
+            if villager.birthday == Generic.any:
+                rules.append(self.logic.season.has_all() | self.logic.time.has_year_three)  # push logic back for any birthday-less villager
 
         if villager.bachelor:
             if hearts > 10:
