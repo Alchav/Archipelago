@@ -7,7 +7,6 @@ import webbrowser
 from enum import Enum
 from typing import Optional, Callable, Iterable, Sequence
 
-from Launcher import launch as launch_exe
 from Utils import local_path, open_filename, is_frozen, is_kivy_running, open_file, user_path, read_apignore, \
     is_windows
 
@@ -224,6 +223,9 @@ def export_datapackage() -> None:
     open_file(path)
 
 def open_patch():
+    # Launcher imports this module for Component during startup, so importing it
+    # at module scope creates a cycle before Component has been defined.
+    from Launcher import launch as launch_exe
     from Utils import messagebox
     from os.path import isfile
     suffixes = []
