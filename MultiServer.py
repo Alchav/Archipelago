@@ -15,6 +15,7 @@ import math
 import operator
 import pickle
 import random
+import re
 import shlex
 import threading
 import time
@@ -2102,7 +2103,7 @@ def get_client_location_points(ctx: Context, client: Client) -> int:
 
 def get_slot_points(ctx: Context, team: int, slot: int) -> int:
     owner = ctx.owners[slot]
-    extra_hints = round(len([item for item in ctx.received_items[(team, 1, True)] if item.item == owner + 1000]))# * ctx.get_hint_cost(slot) * 0.5)
+    extra_hints = get_owner_hint_point_items(ctx, team, owner)
     for slot_ in ctx.owners:
         if ctx.owners[slot_] == owner and ctx.client_game_state[team, slot_] == ClientStatus.CLIENT_GOAL:
             extra_hints += ctx.get_hint_cost(slot)
@@ -2113,9 +2114,7 @@ def get_slot_points(ctx: Context, team: int, slot: int) -> int:
 def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     owner = ctx.owners[slot]
     hint_location_cost = ctx.get_hint_location_cost(slot)
-    # logging.info(f"Owner: {owner}")
-    extra_hints = round(len([item for item in ctx.received_items[(team, 1, True)] if item.item == owner + 10000]))
-    # logging.info(f"Hint points: {extra_hints}")
+    extra_hints = get_owner_hint_point_items(ctx, team, owner)
     for slot_ in ctx.owners:
         if ctx.owners[slot_] == owner and ctx.client_game_state[team, slot_] == ClientStatus.CLIENT_GOAL:
             extra_hints += hint_location_cost
@@ -2126,6 +2125,31 @@ def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     total_points = extra_hints - (hint_location_cost * hint_locations_used)
     # logging.info(f"Total points: {total_points}")
     return total_points
+
+
+def get_owner_hint_point_items(ctx: Context, team: int, owner: int) -> int:
+    """Return the value of collected hint items for an owner.
+
+    Both hint commands draw independently tracked balances from this same item set.
+    Legacy singular hint point items remain worth one point.
+    """
+    bot_game = ctx.games.get(1, "AlchapelaBot")
+    item_names = ctx.item_names.get(bot_game, {})
+    legacy_item_id = owner + 1000
+    legacy_name = item_names.get(legacy_item_id)
+    if not legacy_name:
+        return 0
+    owner_prefix = legacy_name.removesuffix(" Point")
+    pattern = re.compile(rf"^(?:(\d+) )?{re.escape(owner_prefix)} Points?$")
+    points = 0
+    for item in get_received_items(ctx, team, 1, True) + get_start_inventory(ctx, 1, True):
+        if item.item == legacy_item_id:
+            points += 1
+            continue
+        match = pattern.fullmatch(item_names.get(item.item, ""))
+        if match:
+            points += int(match.group(1) or 1)
+    return points
 
 async def process_client_cmd(ctx: Context, client: Client, args: dict):
     try:
