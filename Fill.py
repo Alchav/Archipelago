@@ -13,7 +13,16 @@ from worlds.generic.Rules import add_item_rule, add_rule
 from Options import Owner
 
 def swappable(multiworld, loc, within_local=False):
-    from worlds.papermario.data.ItemList import progression_miscitems
+    try:
+        from worlds.papermario.data.ItemList import progression_miscitems
+        if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
+            return False
+        if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
+            return False
+        if "SSS Merluvlee's House Merlow's Badges" in loc.name:
+             return False
+    except ImportError:
+        pass
     if not loc.item:
         return True
     if loc.locked:
@@ -28,12 +37,7 @@ def swappable(multiworld, loc, within_local=False):
         return False
     if loc.progress_type == LocationProgressType.EXCLUDED:
         return False
-    if loc.item.advancement and loc.item.game == "Paper Mario" and loc.item.name in progression_miscitems:
-        return False
-    if loc.name.startswith("DDO Outpost 1 Shop Item") and loc.item.filler:
-        return False
-    if "SSS Merluvlee's House Merlow's Badges" in loc.name:
-         return False
+
     if loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name):
         return False
     return True
@@ -837,7 +841,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     option = "o"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
 
     if option == "o":
-        compress_owner_spheres(multiworld)
+        # compress_owner_spheres(multiworld)
+        pass
     else:
         compress_spheres(multiworld, sphere_max)
 
@@ -1353,22 +1358,22 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
 
-    # Hint point items fund both item and location hints.  Each owner's configured
-    # point budget is spread across the access spheres containing that owner's slots.
+    # Hint point items fund both item and location hints. Each configured value is
+    # the number of hints that owner should receive, not a raw point total.
     owner_names = {value: name for name, value in Owner.options.items()}
     hint_owner_names = {
         owner: multiworld.worlds[1].item_id_to_name[owner + 1000].removesuffix(" Hint Point")
         for owner in owner_names if owner + 1000 in multiworld.worlds[1].item_id_to_name
     }
-    hint_points_by_owner = collections.defaultdict(int)
-    for configured_name, points in multiworld.worlds[1].options.hint_count.value.items():
+    hints_by_owner = collections.defaultdict(int)
+    for configured_name, hint_count in multiworld.worlds[1].options.hint_count.value.items():
         normalized_name = configured_name.replace(" Hint Location", "").replace(" Hint", "")
         normalized_name = normalized_name.removesuffix(" Points").removesuffix(" Point")
         owner = next((value for value, name in hint_owner_names.items()
                       if name.casefold() == normalized_name.casefold()), None)
         if owner is None:
             raise ValueError(f"Unknown hint point owner {configured_name!r}")
-        hint_points_by_owner[owner] += int(points)
+        hints_by_owner[owner] += int(hint_count)
 
     swap_out_locations = [
         location for location in multiworld.get_locations()
@@ -1391,36 +1396,65 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     for location, sphere_index in location_sphere.items():
         owner_spheres[multiworld.worlds[location.player].options.owner.value].add(sphere_index)
 
-    available_by_owner_sphere = collections.defaultdict(list)
+    available_by_sphere = collections.defaultdict(list)
     for location in swap_out_locations:
         if location in location_sphere:
-            location_owner = multiworld.worlds[location.player].options.owner.value
-            available_by_owner_sphere[location_owner, location_sphere[location]].append(location)
-    for locations in available_by_owner_sphere.values():
+            available_by_sphere[location_sphere[location]].append(location)
+    for locations in available_by_sphere.values():
         multiworld.random.shuffle(locations)
 
-    for owner, total_points in sorted(hint_points_by_owner.items()):
-        if total_points <= 0:
+    def apportion(weights, total):
+        if total <= 0 or not weights or sum(weights.values()) <= 0:
+            return {key: 0 for key in weights}
+        weight_total = sum(weights.values())
+        exact = {key: total * weight / weight_total for key, weight in weights.items()}
+        result = {key: int(value) for key, value in exact.items()}
+        order = sorted(weights, key=lambda key: (exact[key] - result[key], weights[key], str(key)), reverse=True)
+        for key in order[:total - sum(result.values())]:
+            result[key] += 1
+        return result
+
+    # A point item may occupy any game's location, provided the owner has at least
+    # one location in that sphere. Weight by inverse sphere count so each owner's
+    # items are spread evenly over their eligible spheres.
+    locations_by_owner_sphere = collections.defaultdict(list)
+    funded_owners = {owner for owner, hint_count in hints_by_owner.items() if hint_count > 0}
+    for sphere_index, candidates in available_by_sphere.items():
+        interested_owners = [owner for owner in funded_owners if sphere_index in owner_spheres[owner]]
+        if not interested_owners:
             continue
-        spheres_for_owner = sorted(owner_spheres[owner])
-        if not spheres_for_owner:
-            logging.warning("No spheres found for %s's %d hint points", owner_names[owner], total_points)
-            continue
-        base_amount, remainder = divmod(total_points, len(spheres_for_owner))
-        for index, sphere_index in enumerate(spheres_for_owner):
-            sphere_points = base_amount + (index < remainder)
-            if not sphere_points:
-                continue
-            candidates = available_by_owner_sphere[owner, sphere_index]
-            if not candidates:
-                raise RuntimeError(f"No room for {owner_names[owner]} hint points in sphere {sphere_index + 1}")
-            item_count = min(sphere_points, len(candidates))
-            item_base_amount, item_remainder = divmod(sphere_points, item_count)
-            for item_index, location in enumerate(candidates[:item_count]):
-                amount = item_base_amount + (item_index < item_remainder)
-                new_item = multiworld.worlds[1].create_hint_point_item(owner, amount)
-                location.item = new_item
-                new_item.location = location
+        sphere_weights = {
+            owner: hints_by_owner[owner] / len(owner_spheres[owner])
+            for owner in interested_owners
+        }
+        counts = apportion(sphere_weights, len(candidates))
+        candidate_index = 0
+        for owner, count in sorted(counts.items()):
+            locations_by_owner_sphere[owner, sphere_index].extend(
+                candidates[candidate_index:candidate_index + count])
+            candidate_index += count
+
+    placed_locations_by_owner = collections.defaultdict(list)
+    for (owner, sphere_index), locations in locations_by_owner_sphere.items():
+        placed_locations_by_owner[owner].extend((sphere_index, location) for location in locations)
+
+    placed_location_count = sum(len(locations) for locations in placed_locations_by_owner.values())
+    requested_hint_count = sum(hints_by_owner.values())
+    multiworld.hint_ratio = max(1, placed_location_count // max(1, requested_hint_count))
+
+    # Usually every item is worth one point. If there are fewer locations than
+    # requested hints, add point value to existing items so the request is met.
+    extra_point_count = max(0, requested_hint_count * multiworld.hint_ratio - placed_location_count)
+    extra_weights = {owner: hints_by_owner[owner] for owner in placed_locations_by_owner}
+    extras_by_owner = apportion(extra_weights, extra_point_count)
+    for owner, sphere_locations in sorted(placed_locations_by_owner.items()):
+        extras = extras_by_owner[owner]
+        extra_base, extra_remainder = divmod(extras, len(sphere_locations))
+        for item_index, (_sphere_index, location) in enumerate(sphere_locations):
+            amount = 1 + extra_base + (item_index < extra_remainder)
+            new_item = multiworld.worlds[1].create_hint_point_item(owner, amount)
+            location.item = new_item
+            new_item.location = location
 
     # # Prefer placing a player's own items (both kinds) in their own locations first
     # players_in_items = {p for (_, p) in items}
@@ -1472,8 +1506,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     check_no_skips(multiworld, starting_spheres)
 
-    # A hint consumes one point by default; multi-point items carry the economy.
-    multiworld.hint_ratio = 1
+    # hint_ratio was selected above from available point-item locations.
     # multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
 
     # multiworld.post_fill = True

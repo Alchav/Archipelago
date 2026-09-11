@@ -1177,8 +1177,10 @@ class SM64World(World):
             raise OptionError(f"{self.player_name}'s Spicy Mycena 64 world has {abs(self.filler_count)} more "
                               f"required items than randomized locations.")
 
-        replacement_item_names = self.get_filler_replacements(self.filler_count)
-        plain_filler_count = self.filler_count - len(replacement_item_names)
+        # Leave 90% of otherwise-filler locations empty for AlchapelaBot hint point items.
+        generated_filler_count = self.filler_count // 10
+        replacement_item_names = self.get_filler_replacements(generated_filler_count)
+        plain_filler_count = generated_filler_count - len(replacement_item_names)
         filler_item_names = [
             progressive_filler_item_names[index % len(progressive_filler_item_names)]
             for index in range(plain_filler_count)

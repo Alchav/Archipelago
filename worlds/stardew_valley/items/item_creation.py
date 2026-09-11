@@ -48,7 +48,10 @@ def create_items(item_factory: StardewItemFactory, locations_count: int, items_t
     items += unique_filler_items
     logger.debug(f"Created {len(unique_filler_items)} unique filler items")
 
-    resource_pack_items = generate_resource_packs_and_traps(item_factory, options, content, random, items + items_to_exclude, locations_count - len(items))
+    # Leave most otherwise-filler locations empty for AlchapelaBot hint point items.
+    random_filler_slots = (locations_count - len(items)) // 10
+    resource_pack_items = generate_resource_packs_and_traps(
+        item_factory, options, content, random, items + items_to_exclude, random_filler_slots)
     items += resource_pack_items
     logger.debug(f"Created {len(resource_pack_items)} resource packs")
 

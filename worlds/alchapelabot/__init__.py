@@ -21,11 +21,10 @@ class StartGames(OptionList):
 
 
 class HintCount(OptionDict):
-    """Total hint points for each owner (for example, ``Ophilla Hint: 1000``).
+    """Number of purchasable hints for each owner (for example, ``Ophilla Hint: 50``).
 
-    The generator divides each total evenly among the spheres containing that
-    owner's locations.  Legacy ``Hint Location`` entries are folded into the
-    corresponding owner's total.
+    Point items are divided among the spheres containing that owner's locations.
+    Legacy ``Hint Location`` entries are folded into the corresponding owner's total.
     """
     default = {}
 
@@ -77,10 +76,7 @@ class AlchapelaBotWorld(World):
         self.item_name_groups["Everything"] = set(self.item_name_to_id.keys())
 
     def post_fill(self) -> None:
-        allowed_filler_slots = [player for player in self.multiworld.player_ids if self.multiworld.worlds[player].game in allowed_filler_games]
-        for location in self.multiworld.get_unfilled_locations():
-            player = self.random.choice(allowed_filler_slots)
-            self.multiworld.push_item(location, self.multiworld.worlds[player].create_filler())
+        pass
 
     def create_item(self, name):
         return UnlockItem(name, ItemClassification.progression if "Unlock" in name else ItemClassification.filler, self.item_name_to_id[name], self.player)
