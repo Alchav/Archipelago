@@ -23,6 +23,9 @@ class MuseumLogic(BaseLogic):
     def can_donate_museum_items(self, number: int) -> StardewRule:
         return self.logic.region.can_reach(Region.museum) & self.logic.museum.can_find_museum_items(number)
 
+    def can_donate_museum_minerals(self, number: int) -> StardewRule:
+        return self.logic.region.can_reach(Region.museum) & self.logic.museum.can_find_museum_minerals(number)
+
     def can_donate_museum_artifacts(self, number: int) -> StardewRule:
         return self.logic.region.can_reach(Region.museum) & self.logic.museum.can_find_museum_artifacts(number)
 
@@ -31,7 +34,9 @@ class MuseumLogic(BaseLogic):
         if item.artifact_spot_locations:
             number_locations = len(item.artifact_spot_locations)
             number_required_locations = math.ceil(number_locations / 2)
-            artifact_spot_rule = self.logic.count(number_required_locations, *[self.logic.tool.can_use_tool_at(Tool.hoe, ToolMaterial.basic, spot) for spot in item.artifact_spot_locations])
+            artifact_spot_rule = self.logic.tool.has_tool(Tool.hoe) & self.logic.count(number_required_locations, *[self.logic.region.can_reach(spot) for spot in item.artifact_spot_locations])
+            if Region.dig_site in item.artifact_spot_locations:
+                artifact_spot_rule = artifact_spot_rule & self.logic.tool.has_tool(Tool.pickaxe)
         else:
             artifact_spot_rule = False_()
         if item.geodes:
