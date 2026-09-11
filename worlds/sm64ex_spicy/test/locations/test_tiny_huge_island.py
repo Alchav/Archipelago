@@ -3,12 +3,11 @@ from ... import Options
 
 
 THI_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "level_unlocks": Options.LevelUnlocks.option_full,
+        "level_unlocks": Options.LevelUnlocks.option_full,
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
@@ -46,12 +45,14 @@ class TestTinyHugeIslandTinyLocations(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Tiny Island Near Start Block 1-Up", False, []],
             ["Tiny-Huge Island - Tiny Island Near Start Block 1-Up", True, [BLOCK_1UPS]],
-            ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True, []],
+            ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True, [BLOCK_1UPS]],
             ["Tiny-Huge Island - Start Butterfly 1-Up", False, []],
             ["Tiny-Huge Island - Start Butterfly 1-Up", True, [BUTTERFLIES]],
 
-            ["Tiny-Huge Island - Pluck the Piranha Flower", False, piranha_area],
-            ["Tiny-Huge Island - Pluck the Piranha Flower", True, piranha_area + [PIPES]],
+            ["Tiny-Huge Island - Pluck the Piranha Flower", False,
+             piranha_area + [PIPES]],
+            ["Tiny-Huge Island - Pluck the Piranha Flower", True,
+             piranha_area + [PIPES, "Tiny-Huge Island - Fire Piranha Plants"]],
 
             ["Tiny-Huge Island - Five Itty Bitty Secrets", False, piranha_area],
             ["Tiny-Huge Island - Five Itty Bitty Secrets", True, tiny_main],
@@ -72,7 +73,7 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
     options = THI_OPTIONS
 
     def test_locations(self):
-        windswept = ["Long Jump"]
+        windswept = ["Long Jump", "Tiny-Huge Island - Vertical Wind"]
         koopa_region = windswept + ["Triple Jump"]
         top = koopa_region
         red_area = [CANNON]
@@ -86,7 +87,8 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
             ["Tiny-Huge Island - Windy Area Block 1-Up", False, windswept],
             ["Tiny-Huge Island - Windy Area Block 1-Up", True,
              windswept + [BLOCK_1UPS]],
-            ["Tiny-Huge Island - Windy Area 1-Up Block", True, windswept],
+            ["Tiny-Huge Island - Windy Area 1-Up Block", True,
+             windswept + [BLOCK_1UPS]],
 
             ["Tiny-Huge Island - Rematch with Koopa the Quick", False, koopa_region],
             ["Tiny-Huge Island - Rematch with Koopa the Quick", True,
@@ -96,7 +98,7 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
             ["Tiny-Huge Island - Huge Island Near Start Block 1-Up", True,
              koopa_region + [BLOCK_1UPS]],
             ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", True,
-             koopa_region],
+             koopa_region + [BLOCK_1UPS]],
             ["Tiny-Huge Island - Koopa Area Butterfly 1-Up", False, koopa_region],
             ["Tiny-Huge Island - Koopa Area Butterfly 1-Up", True,
              koopa_region + [BUTTERFLIES]],
@@ -108,20 +110,22 @@ class TestTinyHugeIslandHugeLocations(SM64TestBase):
             ["Tiny-Huge Island - Wiggler's Red Coins", False, red_area + ["Wall Kick"]],
             ["Tiny-Huge Island - Wiggler's Red Coins", True,
              red_area + ["Wall Kick", "Tiny-Huge Island - Red Coins"]],
-            ["Tiny-Huge Island - Cannon Tree 1-Up", False, red_area],
-            ["Tiny-Huge Island - Cannon Tree 1-Up", True,
+            ["Tiny-Huge Island - Huge Island Tree 1-Up", False, red_area],
+            ["Tiny-Huge Island - Huge Island Tree 1-Up", True,
              red_area + [TRIGGER_1UPS]],
-            ["Tiny-Huge Island - Red Coin Bridge Tree 1-Up", False, red_area],
-            ["Tiny-Huge Island - Red Coin Bridge Tree 1-Up", True,
-             red_area + [TRIGGER_1UPS]],
+            ["Tiny-Huge Island - Huge Island Tree Butterfly 1-Up", False, red_area],
+            ["Tiny-Huge Island - Huge Island Tree Butterfly 1-Up", True,
+             red_area + [BUTTERFLIES]],
             ["Tiny-Huge Island - Red Coin Cave 1-Up", False, red_area],
             ["Tiny-Huge Island - Red Coin Cave 1-Up", True,
              red_area + ["Wall Kick", FREESTANDING_1UPS]],
 
             ["Tiny-Huge Island - Make Wiggler Squirm", False, top + [PIPES]],
             ["Tiny-Huge Island - Make Wiggler Squirm", False, top + ["Ground Pound"]],
-            ["Tiny-Huge Island - Make Wiggler Squirm", True,
+            ["Tiny-Huge Island - Make Wiggler Squirm", False,
              top + [PIPES, "Ground Pound"]],
+            ["Tiny-Huge Island - Make Wiggler Squirm", True,
+             top + [PIPES, "Ground Pound", "Tiny-Huge Island - Wiggler"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 
@@ -139,17 +143,60 @@ class TestTinyHugeIslandPipeDirections(SM64TestBase):
     def test_tiny_main_pipe_reaches_koopa_region(self):
         self.run_location_tests([
             ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", False, []],
-            ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", True, [PIPES]],
+            ["Tiny-Huge Island - Huge Island Near Start 1-Up Block", True,
+             [PIPES, BLOCK_1UPS]],
         ], starting_regions=["Tiny-Huge Island - Tiny Main"])
 
-    def test_terminal_regions_do_not_lead_back_upstream(self):
+    def test_red_coin_cave_exits_to_huge_island_but_wiggler_cave_is_terminal(self):
         self.run_location_tests([
-            ["Tiny-Huge Island - Beach Coins 1-Up", False, [TRIGGER_1UPS]],
+            ["Tiny-Huge Island - Beach Coins 1-Up", True, [TRIGGER_1UPS]],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
-        ], starting_regions=["Tiny-Huge Island - Red Coins Area"])
+        ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
         ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
+
+    def test_wiggler_star_does_not_require_warp_pipes_once_inside_the_cave(self):
+        self.run_location_tests([
+            ["Tiny-Huge Island - Make Wiggler Squirm", True, ["Tiny-Huge Island - Wiggler"]],
+        ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
+
+
+class TestTinyHugeIslandShuffledSubAreaCoins(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **THI_OPTIONS,
+        "tiny_huge_island_coin_star_requirement": 10,
+    }
+
+    def test_wiggler_cave_coins_use_destination_region_access(self):
+        self.run_location_tests([
+            ["Tiny-Huge Island - Coins Star", False, []],
+            ["Tiny-Huge Island - Coins Star", True,
+             ["Tiny-Huge Island - Horizontal Coin Lines"]],
+        ], starting_regions=["Tiny-Huge Island - Wiggler's Cave"])
+
+    def test_red_coin_cave_coins_use_destination_region_access(self):
+        self.run_location_tests([
+            ["Tiny-Huge Island - Coins Star", False, []],
+            ["Tiny-Huge Island - Coins Star", True,
+             ["Tiny-Huge Island - Red Coins"]],
+        ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
+
+
+class TestTinyHugeIslandRedCoinCaveMovementCoinCount(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **THI_OPTIONS,
+        "tiny_huge_island_coin_star_requirement": 13,
+    }
+
+    def test_red_coin_7_requires_movement_for_coin_count(self):
+        red_coins = ["Tiny-Huge Island - Red Coins"]
+        self.run_location_tests([
+            ["Tiny-Huge Island - Coins Star", False, red_coins],
+            ["Tiny-Huge Island - Coins Star", True, red_coins + ["Side Flip"]],
+        ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
 
 
 class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):
@@ -164,7 +211,7 @@ class TestTinyHugeIslandFlyGuyTrick(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, upper_movement],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", True,
-             upper_movement + ["Tiny-Huge Island - Fly Guy"]],
+             upper_movement + ["Tiny-Huge Island - Fly Guys", "Tiny-Huge Island - Vertical Wind"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 
@@ -179,7 +226,7 @@ class TestTinyHugeIslandKoopaShellTrick(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", True,
-             ["Tiny-Huge Island - Koopa Troopa"]],
+             ["Tiny-Huge Island - Koopa Troopas"]],
         ], starting_regions=["Tiny-Huge Island (Huge)"])
 
 
@@ -192,12 +239,12 @@ class TestTinyHugeIslandFullLevelUnlocks(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", False, upstairs],
             ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True,
-             upstairs + ["Unlock Tiny Island"]],
+             upstairs + ["Unlock Tiny Island", BLOCK_1UPS]],
             ["Tiny-Huge Island - Beach Coins 1-Up", False,
              upstairs + [TRIGGER_1UPS]],
             ["Tiny-Huge Island - Beach Coins 1-Up", True,
              upstairs + ["Unlock Huge Island", TRIGGER_1UPS]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestTinyHugeIslandGlobalUnlockModes(SM64TestBase):
@@ -206,7 +253,7 @@ class TestTinyHugeIslandGlobalUnlockModes(SM64TestBase):
         **THI_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
         "enemy_unlocks": Options.EnemyUnlocks.option_global,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
         "level_features": Options.LevelFeatures.option_global,
         "bobomb_buddies": Options.BobombBuddies.option_global,
     }
@@ -215,7 +262,7 @@ class TestTinyHugeIslandGlobalUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Coins Star", True, ["Tiny-Huge Island - Goombas"]],
             ["Tiny-Huge Island - Coins Star", True, ["Goombas"]],
-            ["Tiny-Huge Island - Start Butterfly 1-Up", False,
+            ["Tiny-Huge Island - Start Butterfly 1-Up", True,
              ["Tiny-Huge Island - Butterflies"]],
             ["Tiny-Huge Island - Start Butterfly 1-Up", True, ["Butterflies"]],
             ["Tiny-Huge Island - Five Itty Bitty Secrets", False, ["Long Jump"]],
@@ -231,7 +278,7 @@ class TestTinyHugeIslandNotShuffledUnlockModes(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_disabled,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
         "enemy_unlocks": Options.EnemyUnlocks.option_not_shuffled,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "level_features": Options.LevelFeatures.option_not_shuffled,
         "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
     }
@@ -245,4 +292,4 @@ class TestTinyHugeIslandNotShuffledUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Tiny-Huge Island - Tiny Island Near Start 1-Up Block", True,
              ["Progressive Upstairs Key"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

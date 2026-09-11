@@ -3,10 +3,9 @@ from ... import Options
 
 
 SHUFFLED_TTC_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+    "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
@@ -48,7 +47,7 @@ class TestTickTockClockMovingLocations(SM64TestBase):
             ["Tick Tock Clock - Above Red Coin Spinners 3 Coins Block", True,
              LOWER + ["Tick Tock Clock - 3-Coin Blocks"]],
             ["Tick Tock Clock - Stop Time for Red Coins", False, PAST_SPINNERS],
-            ["Tick Tock Clock - Stop Time for Red Coins", True,
+            ["Tick Tock Clock - Stop Time for Red Coins", False,
              PAST_SPINNERS + ["Tick Tock Clock - Spinners", "Tick Tock Clock - Red Coins"]],
 
             ["Tick Tock Clock - The Pit and the Pendulums", False, LOWER],
@@ -68,10 +67,10 @@ class TestTickTockClockMovingLocations(SM64TestBase):
             ["Tick Tock Clock - Moving Bars Platform 1-Up", True, MID],
             ["Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block", False, MID],
             ["Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block", True,
-             MID + ["Tick Tock Clock - 3-Coin Blocks"]],
+             TOP + ["Tick Tock Clock - 3-Coin Blocks"]],
             ["Tick Tock Clock - Above Four Moving Bars 10 Coins Block", False, MID],
             ["Tick Tock Clock - Above Four Moving Bars 10 Coins Block", True,
-             MID + ["Tick Tock Clock - 10-Coin Blocks"]],
+             TOP + ["Tick Tock Clock - 10-Coin Blocks"]],
 
             ["Tick Tock Clock - Midway Up Block 1-Up", True, PAST_SPINNERS],
             ["Tick Tock Clock - Midway Up 1-Up Block", True, PAST_SPINNERS],
@@ -109,6 +108,35 @@ class TestTickTockClockMovingLocations(SM64TestBase):
                     "Tick Tock Clock - Top Past Spinners",
                     location.parent_region.name)
 
+    def test_upper_moving_bars_block_placement(self):
+        expected_regions = {
+            "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block":
+                "Tick Tock Clock - Upper Moving Bars Area",
+            "Tick Tock Clock - Above Four Moving Bars 10 Coins Block":
+                "Tick Tock Clock - More Moving Bars Area",
+        }
+        for location_name, region_name in expected_regions.items():
+            with self.subTest(location=location_name):
+                self.assertEqual(
+                    self.multiworld.get_location(location_name, self.player).parent_region.name,
+                    region_name,
+                )
+
+    def test_upper_moving_bars_requires_triple_jump_and_ledge_grab(self):
+        block = "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block"
+        unlock = "Tick Tock Clock - 3-Coin Blocks"
+        self.run_location_tests([
+            [block, False, [unlock, "Triple Jump"]],
+            [block, False, [unlock, "Ledge Grab"]],
+            [block, True, [unlock, "Triple Jump", "Ledge Grab"]],
+        ], starting_regions=["Tick Tock Clock - Moving Bars Area"])
+
+    def test_moving_time_and_side_flip_reach_upper_moving_bars(self):
+        self.run_location_tests([
+            ["Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block", True,
+             ["Side Flip", "Tick Tock Clock - 3-Coin Blocks"]],
+        ], starting_regions=["Tick Tock Clock - Moving Bars Area", "Tick Tock Clock Moving"])
+
     def test_moving_time_and_side_flip_reach_top(self):
         self.run_location_tests([
             ["Tick Tock Clock - Midway Up Block 1-Up", True,
@@ -131,6 +159,16 @@ class TestTickTockClockStoppedLocations(SM64TestBase):
                  "Ledge Grab",
                  "Tick Tock Clock - Thwomp",
              ]],
+        ], starting_regions=["Tick Tock Clock Stopped"])
+
+    def test_red_coin_star_requires_spinners_and_red_coins(self):
+        self.run_location_tests([
+            ["Tick Tock Clock - Stop Time for Red Coins", False,
+             ["Tick Tock Clock - Red Coins"]],
+            ["Tick Tock Clock - Stop Time for Red Coins", False,
+             ["Tick Tock Clock - Spinners"]],
+            ["Tick Tock Clock - Stop Time for Red Coins", True,
+             ["Tick Tock Clock - Red Coins", "Tick Tock Clock - Spinners"]],
         ], starting_regions=["Tick Tock Clock Stopped"])
 
 

@@ -9,6 +9,16 @@ from .. import SM64World
 class SM64TestBase(WorldTestBase):
     game = SM64World.game
     world: SM64World
+    include_baseline_level_feature_unlocks = True
+
+    def world_setup(self, seed=None) -> None:
+        super().world_setup(seed)
+        if not hasattr(self, "world"):
+            return
+        for item_name, count in self.options.get("start_inventory", {}).items():
+            missing = count - self.multiworld.state.count(item_name, self.player)
+            for _ in range(max(0, missing)):
+                self.multiworld.state.collect(self.world.create_item(item_name))
 
     def run_location_tests(
             self,
@@ -35,8 +45,16 @@ class SM64TestBase(WorldTestBase):
                 else:
                     items = [self.world.create_item(item_name) for item_name in item_names]
 
+                if self.include_baseline_level_feature_unlocks:
+                    items.extend(self.world.create_item(item_name) for item_name in (
+                        "Freestanding Stars",
+                        "Star Blocks",
+                        "Star Secrets",
+                    ))
+
                 state = CollectionState(self.multiworld)
-                state.reachable_regions[self.player].add(self.multiworld.get_region("Menu", self.player))
+                state.reachable_regions[self.player].add(
+                    self.multiworld.get_region(self.world.origin_region_name, self.player))
                 for region_name in starting_regions:
                     region = self.multiworld.get_region(region_name, self.player)
                     state.reachable_regions[self.player].add(region)

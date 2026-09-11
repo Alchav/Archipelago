@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Callable, Iterable
+from functools import cached_property
 from typing import TYPE_CHECKING, ClassVar, TypeAlias
 
 from typing_extensions import override
 
 from BaseClasses import CollectionState
 from NetUtils import JSONMessagePart
-from rule_builder.rules import HasAny, Rule
+from rule_builder.rules import Has, Or, Rule
 from .Items import ut_glitch_item_name
 
 if TYPE_CHECKING:
@@ -25,18 +26,46 @@ class CoinSourceTrace:
     counted: bool
     available: bool = True
     children: tuple[CoinSourceTrace, ...] = ()
+    red_coin_ids: frozenset[int] = frozenset()
+    max_coins: int | None = None
+    reachable_red_coin_ids_when_uncounted: frozenset[int] = frozenset()
+    requirement_rule: Rule.Resolved | None = None
+    collection_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.source_id:
             raise ValueError("Coin source IDs must not be empty")
+        if self.collection_id == "":
+            raise ValueError("Coin collection IDs must not be empty")
         if not self.label:
             raise ValueError("Coin source labels must not be empty")
         if self.coins < 0:
             raise ValueError("Coin source values must not be negative")
+        if self.max_coins is not None and self.max_coins < self.coins:
+            raise ValueError("Maximum coin source value cannot be less than its counted value")
         if self.counted and not self.available:
-            raise ValueError("An unavailable coin source cannot be counted")
+            raise ValueError(f"Unavailable coin source cannot be counted: {self.source_id}")
         if not isinstance(self.children, tuple):
             object.__setattr__(self, "children", tuple(self.children))
+        if not isinstance(self.red_coin_ids, frozenset):
+            object.__setattr__(self, "red_coin_ids", frozenset(self.red_coin_ids))
+        if not self.red_coin_ids.issubset(range(1, 9)):
+            raise ValueError("Red Coin IDs must be between 1 and 8")
+        if not isinstance(self.reachable_red_coin_ids_when_uncounted, frozenset):
+            object.__setattr__(
+                self, "reachable_red_coin_ids_when_uncounted",
+                frozenset(self.reachable_red_coin_ids_when_uncounted))
+        if not self.reachable_red_coin_ids_when_uncounted.issubset(range(1, 9)):
+            raise ValueError("Reachable uncounted Red Coin IDs must be between 1 and 8")
+
+    @property
+    def available_red_coin_ids(self) -> frozenset[int]:
+        if not self.available:
+            return frozenset()
+        result = set(self.red_coin_ids)
+        for child in self.children:
+            result.update(child.available_red_coin_ids)
+        return frozenset(result)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -52,9 +81,62 @@ class CoinEvaluation:
         if not isinstance(self.children, tuple):
             object.__setattr__(self, "children", tuple(self.children))
 
+    @property
+    def reachable_red_coin_ids(self) -> frozenset[int]:
+        def collect(source: CoinSourceTrace, parent_counted: bool) -> set[int]:
+            counted = parent_counted and source.counted
+            result = set(source.red_coin_ids) if counted else set()
+            if parent_counted and source.available:
+                result.update(source.reachable_red_coin_ids_when_uncounted)
+            for child in source.children:
+                result.update(collect(child, counted))
+            return result
+
+        result: set[int] = set()
+        for source in self.children:
+            result.update(collect(source, True))
+        return frozenset(result)
+
+    @cached_property
+    def sources_by_id(self) -> dict[str, tuple[CoinSourceTrace, ...]]:
+        sources: dict[str, list[CoinSourceTrace]] = {}
+
+        def visit(source: CoinSourceTrace) -> None:
+            sources.setdefault(source.source_id, []).append(source)
+            for child in source.children:
+                visit(child)
+
+        for source in self.children:
+            visit(source)
+        return {source_id: tuple(matches) for source_id, matches in sources.items()}
+
 
 CoinEvaluator: TypeAlias = Callable[[CollectionState, int, int], bool | CoinEvaluation]
-RedCoinEvaluator: TypeAlias = Callable[[CollectionState, int], bool]
+
+
+@dataclasses.dataclass()
+class SilentTrue(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
+    """A true rule omitted from explanations when an unlock starts available."""
+
+    @override
+    def _instantiate(self, world: SM64World) -> Rule.Resolved:
+        return self.Resolved(player=world.player)
+
+    class Resolved(Rule.Resolved):
+        always_true: ClassVar[bool] = True
+        skip_cache: ClassVar[bool] = True
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            return True
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            return []
+
+        @override
+        def __str__(self) -> str:
+            return "True"
 
 
 @dataclasses.dataclass()
@@ -63,6 +145,7 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
     global_item_name: str
     per_level_item_name: str
+    count: int = 1
 
     @override
     def _instantiate(self, world: SM64World) -> Rule.Resolved:
@@ -73,12 +156,20 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         if not item_names:
             raise ValueError(
                 f"Neither unlock item exists: {self.global_item_name}, {self.per_level_item_name}")
+        start_inventory_counts = getattr(world, "start_inventory_item_counts", {})
         start_inventory_ids = getattr(world, "start_inventory_item_ids", set())
-        starts_unlocked = any(world.item_name_to_id[name] in start_inventory_ids for name in item_names)
+        starts_unlocked = any(
+            start_inventory_counts.get(
+                world.item_name_to_id[name], int(world.item_name_to_id[name] in start_inventory_ids)
+            ) >= self.count
+            for name in item_names
+        )
+        if starts_unlocked:
+            return SilentTrue().resolve(world)
         return self.Resolved(
             item_names,
-            HasAny(*item_names).resolve(world),
-            starts_unlocked,
+            Or(*(Has(name, self.count) for name in item_names)).resolve(world),
+            False,
             player=world.player,
             caching_enabled=getattr(world, "rule_caching_enabled", False),
         )
@@ -99,7 +190,7 @@ class HasUnlock(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
             if self.starts_unlocked:
-                return [{"type": "text", "text": "Unlocked in StartInventory"}]
+                return []
             return self.item_rule.explain_json(state)
 
 
@@ -113,7 +204,6 @@ class CoinEvaluatorRegistration:
 
 
 _coin_evaluators: dict[str, CoinEvaluatorRegistration] = {}
-_red_coin_evaluators: dict[str, RedCoinEvaluator] = {}
 
 
 def register_coin_evaluator(
@@ -181,32 +271,36 @@ def evaluate_coins(
     return result
 
 
-def register_red_coin_evaluator(course_name: str, evaluator: RedCoinEvaluator) -> None:
-    previous = _red_coin_evaluators.get(course_name)
-    if previous is not None and previous is not evaluator:
-        raise ValueError(f"A Red Coin evaluator is already registered for {course_name}")
-    _red_coin_evaluators[course_name] = evaluator
+def _coin_source_requirement_explanation(
+        source: CoinSourceTrace,
+        state: CollectionState,
+) -> tuple[JSONMessagePart, ...]:
+    if source.requirement_rule is None:
+        return ()
+    return tuple(source.requirement_rule.explain_json(state))
 
 
-def get_red_coin_evaluator(course_name: str) -> RedCoinEvaluator:
-    try:
-        return _red_coin_evaluators[course_name]
-    except KeyError as error:
-        raise KeyError(f"No Red Coin evaluator is registered for {course_name}") from error
-
-
-def _format_coin_source(source: CoinSourceTrace, depth: int) -> list[JSONMessagePart]:
+def _format_coin_source(
+        course_name: str,
+        source: CoinSourceTrace,
+        depth: int,
+        state: CollectionState,
+        player: int,
+) -> list[JSONMessagePart]:
+    displayed_max = source.max_coins if source.max_coins is not None else source.coins
     if source.counted:
         color = "green"
         amount = f"+{source.coins}"
+        if source.max_coins is not None and source.coins != source.max_coins:
+            amount += f"/{source.max_coins}"
         suffix = ""
     elif source.available:
         color = "yellow"
-        amount = f"0/{source.coins}"
+        amount = f"0/{displayed_max}"
         suffix = " (not selected)"
     else:
         color = "salmon"
-        amount = f"0/{source.coins}"
+        amount = f"0/{displayed_max}"
         suffix = " (unavailable)"
 
     messages: list[JSONMessagePart] = [
@@ -217,8 +311,33 @@ def _format_coin_source(source: CoinSourceTrace, depth: int) -> list[JSONMessage
     ]
     if suffix:
         messages.append({"type": "text", "text": suffix})
+    multiworld = getattr(state, "multiworld", None)
+    world = multiworld.worlds[player] if multiworld is not None else None
+    if displayed_max > 0 and world is not None:
+        collection_id = source.collection_id or source.source_id
+        collected = min(
+            displayed_max,
+            world.permanent_coin_source_counts.get(
+                f"{course_name}:{collection_id}",
+                world.permanent_coin_source_counts.get(collection_id, 0),
+            ),
+        )
+        messages.extend([
+            {"type": "text", "text": f"\n{'  ' * (depth + 1)}Collected: "},
+            {
+                "type": "color",
+                "color": "green" if collected >= displayed_max else "yellow",
+                "text": f"{collected}/{displayed_max}",
+            },
+        ])
+    requirement_explanation = _coin_source_requirement_explanation(source, state)
+    if requirement_explanation:
+        messages.append({"type": "text", "text": f"\n{'  ' * (depth + 1)}("})
+        messages.extend(requirement_explanation)
+        messages.append({"type": "text", "text": ")"})
     for child in source.children:
-        messages.extend(_format_coin_source(child, depth + 1))
+        messages.extend(_format_coin_source(
+            course_name, child, depth + 1, state, player))
     return messages
 
 
@@ -226,6 +345,8 @@ def format_coin_evaluation(
         course_name: str,
         required_coins: int,
         evaluation: CoinEvaluation,
+        state: CollectionState,
+        player: int,
 ) -> list[JSONMessagePart]:
     """Format a structured coin evaluation for print_json consumers."""
     accessible = evaluation.reachable_coins >= required_coins
@@ -240,7 +361,8 @@ def format_coin_evaluation(
         },
     ]
     for child in evaluation.children:
-        messages.extend(_format_coin_source(child, 1))
+        messages.extend(_format_coin_source(
+            course_name, child, 1, state, player))
     return messages
 
 
@@ -329,7 +451,8 @@ class CanCollectCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
             result = self._evaluate_registered(state)
             if isinstance(result, CoinEvaluation):
-                return format_coin_evaluation(self.course_name, self.required_coins, result)
+                return format_coin_evaluation(
+                    self.course_name, self.required_coins, result, state, self.player)
 
             return [
                 {"type": "text", "text": "Can collect " if result else "Cannot collect "},
@@ -361,6 +484,254 @@ class CanCollectCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
 
 @dataclasses.dataclass()
+class CanCollectGlobalCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
+    """Require a capped sum of reachable coins across every coin-bearing course."""
+
+    course_caps: tuple[tuple[str, int], ...]
+    required_coins: int
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.required_coins < 0:
+            raise ValueError("Required coin counts must not be negative")
+        if not self.course_caps or any(not name or cap < 0 for name, cap in self.course_caps):
+            raise ValueError("Global coin checks need non-negative caps for every course")
+
+    @override
+    def _instantiate(self, world: SM64World) -> Rule.Resolved:
+        registrations = tuple(get_coin_evaluator(course_name) for course_name, _cap in self.course_caps)
+        return self.Resolved(
+            self.course_caps,
+            self.required_coins,
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.item_dependencies
+            )),
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.region_dependencies
+            )),
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.location_dependencies
+            )),
+            tuple(dict.fromkeys(
+                dependency
+                for registration in registrations
+                for dependency in registration.entrance_dependencies
+            )),
+            player=world.player,
+            caching_enabled=getattr(world, "rule_caching_enabled", False),
+        )
+
+    class Resolved(Rule.Resolved):
+        course_caps: tuple[tuple[str, int], ...]
+        required_coins: int
+        item_dependency_names: tuple[str, ...]
+        region_dependency_names: tuple[str, ...]
+        location_dependency_names: tuple[str, ...]
+        entrance_dependency_names: tuple[str, ...]
+
+        force_recalculate: ClassVar[bool] = True
+
+        def _evaluate_courses(self, state: CollectionState) -> tuple[int, tuple[tuple[str, int, int], ...]]:
+            cache = getattr(state, "sm64_coin_evaluation_cache", None)
+            cache_key = (self.player, "global")
+            if cache is not None:
+                cached = cache.get(cache_key)
+                if cached is not None:
+                    return cached
+
+            course_totals: list[tuple[str, int, int]] = []
+            total = 0
+            for course_name, cap in self.course_caps:
+                result = evaluate_coins(state, self.player, course_name, cap)
+                reachable = result.reachable_coins if isinstance(result, CoinEvaluation) else (cap if result else 0)
+                reachable = min(reachable, cap)
+                total += reachable
+                course_totals.append((course_name, reachable, cap))
+            result = total, tuple(course_totals)
+            if cache is not None:
+                cache[cache_key] = result
+            return result
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            total, _course_totals = self._evaluate_courses(state)
+            return total >= self.required_coins
+
+        @override
+        def item_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.item_dependency_names}
+
+        @override
+        def region_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.region_dependency_names}
+
+        @override
+        def location_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.location_dependency_names}
+
+        @override
+        def entrance_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.entrance_dependency_names}
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            if state is None:
+                return [
+                    {"type": "text", "text": "Collect "},
+                    {"type": "color", "color": "cyan", "text": str(self.required_coins)},
+                    {"type": "text", "text": " global coins"},
+                ]
+
+            total, course_totals = self._evaluate_courses(state)
+            maximum = sum(cap for _course_name, _reachable, cap in course_totals)
+            messages: list[JSONMessagePart] = [
+                {"type": "text", "text": "Reachable global coins: "},
+                {
+                    "type": "color",
+                    "color": "green" if total >= self.required_coins else "salmon",
+                    "text": f"{total}/{maximum}",
+                },
+                {"type": "text", "text": f" (requires {self.required_coins})"},
+            ]
+            for course_name, reachable, cap in course_totals:
+                messages.extend((
+                    {"type": "text", "text": "\n  "},
+                    {
+                        "type": "color",
+                        "color": "green" if reachable >= cap else "salmon",
+                        "text": f"{reachable}/{cap}",
+                    },
+                    {"type": "text", "text": f" {course_name}"},
+                ))
+            return messages
+
+        @override
+        def explain_str(self, state: CollectionState | None = None) -> str:
+            if state is None:
+                return str(self)
+            total, course_totals = self._evaluate_courses(state)
+            maximum = sum(cap for _course_name, _reachable, cap in course_totals)
+            return f"Reachable global coins: {total}/{maximum} (requires {self.required_coins})"
+
+        @override
+        def __str__(self) -> str:
+            return f"Collect {self.required_coins} global coins"
+
+
+@dataclasses.dataclass()
+class CanCollectCoinOutput(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
+    """Require one physical output through any of its CoinLogic source methods."""
+
+    course_name: str
+    source_methods: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if not self.course_name or not self.source_methods:
+            raise ValueError("Coin outputs need a course and at least one source method")
+
+    @override
+    def _instantiate(self, world: SM64World) -> Rule.Resolved:
+        registration = get_coin_evaluator(self.course_name)
+        return self.Resolved(
+            self.course_name,
+            tuple(dict.fromkeys(self.source_methods)),
+            registration.item_dependencies,
+            registration.region_dependencies,
+            registration.location_dependencies,
+            registration.entrance_dependencies,
+            player=world.player,
+            caching_enabled=getattr(world, "rule_caching_enabled", False),
+        )
+
+    class Resolved(Rule.Resolved):
+        course_name: str
+        source_methods: tuple[str, ...]
+        item_dependency_names: tuple[str, ...]
+        region_dependency_names: tuple[str, ...]
+        location_dependency_names: tuple[str, ...]
+        entrance_dependency_names: tuple[str, ...]
+        force_recalculate: ClassVar[bool] = True
+
+        def _sources(self, state: CollectionState) -> dict[str, tuple[CoinSourceTrace, ...]]:
+            evaluation = evaluate_coins(state, self.player, self.course_name, 0)
+            if isinstance(evaluation, bool):
+                return {}
+            return evaluation.sources_by_id
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            sources = self._sources(state)
+            return any(
+                source.available
+                for method in self.source_methods
+                for source in sources.get(method, ())
+            )
+
+        @override
+        def item_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.item_dependency_names}
+
+        @override
+        def region_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.region_dependency_names}
+
+        @override
+        def location_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.location_dependency_names}
+
+        @override
+        def entrance_dependencies(self) -> dict[str, set[int]]:
+            return {name: {id(self)} for name in self.entrance_dependency_names}
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            if state is None:
+                return [{"type": "text", "text": f"Collect this coin in {self.course_name}"}]
+            sources = self._sources(state)
+            messages: list[JSONMessagePart] = []
+            found_source = False
+            for method in self.source_methods:
+                for source in sources.get(method, ()):
+                    found_source = True
+                    if messages:
+                        messages.append({"type": "text", "text": " or "})
+                    if source.requirement_rule is not None:
+                        explanation = source.requirement_rule.explain_json(state)
+                        if explanation:
+                            messages.extend(explanation)
+                        else:
+                            messages.append({
+                                "type": "color",
+                                "color": "green" if source.available else "salmon",
+                                "text": source.label,
+                            })
+                    else:
+                        messages.append({
+                            "type": "color",
+                            "color": "green" if source.available else "salmon",
+                            "text": source.label,
+                        })
+            if found_source:
+                return messages
+            return [{
+                "type": "color",
+                "color": "salmon",
+                "text": f"Missing CoinLogic source: {', '.join(self.source_methods)}",
+            }]
+
+        @override
+        def __str__(self) -> str:
+            return f"Collect coin output in {self.course_name} via {' or '.join(self.source_methods)}"
+
+
+@dataclasses.dataclass()
 class CanCollectAllRedCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
     """Require every Red Coin in a course to be logically reachable."""
 
@@ -368,7 +739,7 @@ class CanCollectAllRedCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
     @override
     def _instantiate(self, world: SM64World) -> Rule.Resolved:
-        get_red_coin_evaluator(self.course_name)
+        get_coin_evaluator(self.course_name)
         return self.Resolved(
             self.course_name,
             player=world.player,
@@ -381,7 +752,11 @@ class CanCollectAllRedCoins(Rule["SM64World"], game="SM64: Spicy Mycena 64"):
 
         @override
         def _evaluate(self, state: CollectionState) -> bool:
-            return get_red_coin_evaluator(self.course_name)(state, self.player)
+            # Region reachability can change while CollectionState is sweeping.
+            # Red Coin Stars must inspect a fresh trace rather than the coin-rule cache.
+            result = get_coin_evaluator(self.course_name).evaluator(
+                state, self.player, 0)
+            return isinstance(result, CoinEvaluation) and result.reachable_red_coin_ids == frozenset(range(1, 9))
 
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:

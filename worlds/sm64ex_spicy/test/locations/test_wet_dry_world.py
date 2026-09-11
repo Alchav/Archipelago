@@ -3,17 +3,16 @@ from ... import Options
 
 
 WDW_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "level_unlocks": Options.LevelUnlocks.option_full,
+        "level_unlocks": Options.LevelUnlocks.option_full,
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
-        "bobomb_buddies": Options.BobombBuddies.option_per_level,
-    "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    "bobomb_buddies": Options.BobombBuddies.option_per_level,
+    "cap_items": Options.CapItems.option_per_level,
     "wet_dry_world_coin_star_requirement": 1,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
@@ -35,6 +34,8 @@ METAL_CAP = "Wet-Dry World - Metal Cap"
 RED_COINS = "Wet-Dry World - Red Coins"
 THREE_COIN_BLOCKS = "Wet-Dry World - 3-Coin Blocks"
 TEN_COIN_BLOCKS = "Wet-Dry World - 10-Coin Blocks"
+BREAKABLE_COIN_BOXES = "Wet-Dry World - Breakable Coin Boxes"
+HEAVE_HOS = "Wet-Dry World - Heave-Hos"
 FREESTANDING_1UPS = "Wet-Dry World - Freestanding 1-Ups"
 TRIGGER_1UPS = "Wet-Dry World - Trigger 1-Ups"
 BLOCK_1UPS = "Wet-Dry World - 1-Up Blocks"
@@ -45,7 +46,9 @@ class TestWetDryWorldLowLocations(SM64TestBase):
     options = WDW_OPTIONS
 
     def test_locations(self):
-        top_of_elevator = [PURPLE_SWITCH]
+        near_top = [DIAMOND]
+        top_of_elevator = near_top + [PURPLE_SWITCH]
+        top_of_elevator_without_diamond = [HEAVE_HOS, PURPLE_SWITCH]
         top = top_of_elevator + ["Long Jump"]
         downtown = [CANNON]
 
@@ -54,24 +57,30 @@ class TestWetDryWorldLowLocations(SM64TestBase):
             ["Wet-Dry World - Shocking Arrow Lifts Star Block", True, []],
 
             ["Wet-Dry World - Pedestal 10 Coins Block", False, []],
-            ["Wet-Dry World - Pedestal 10 Coins Block", True, [TEN_COIN_BLOCKS]],
+            ["Wet-Dry World - Pedestal 10 Coins Block", False,
+             near_top + [TEN_COIN_BLOCKS]],
+            ["Wet-Dry World - Pedestal 10 Coins Block", True,
+             near_top + ["Side Flip", TEN_COIN_BLOCKS]],
             ["Wet-Dry World - Push Block 3 Coins Block", False, []],
-            ["Wet-Dry World - Push Block 3 Coins Block", True, [THREE_COIN_BLOCKS]],
+            ["Wet-Dry World - Push Block 3 Coins Block", True,
+             near_top + [THREE_COIN_BLOCKS]],
             ["Wet-Dry World - Push Block 10 Coins Block", False, []],
             ["Wet-Dry World - Push Block 10 Coins Block", True, [TEN_COIN_BLOCKS]],
 
-            ["Wet-Dry World - Express Elevator--Hurry Up!", False, top_of_elevator],
+            ["Wet-Dry World - Express Elevator--Hurry Up!", False,
+             top_of_elevator_without_diamond],
             ["Wet-Dry World - Express Elevator--Hurry Up!", True,
-             top_of_elevator + ["Backflip"]],
-            ["Wet-Dry World - Express Elevator--Hurry Up!", True,
-             top_of_elevator + [DIAMOND]],
+             top_of_elevator_without_diamond + ["Backflip"]],
+            ["Wet-Dry World - Express Elevator--Hurry Up!", True, [CANNON, PURPLE_SWITCH, DIAMOND]],
             ["Wet-Dry World - Top of Express Elevator 10 Coins Block", False,
              top_of_elevator],
             ["Wet-Dry World - Top of Express Elevator 10 Coins Block", True,
              top_of_elevator + [TEN_COIN_BLOCKS]],
             ["Wet-Dry World - Secrets in the Shallows & Sky", False,
-             top_of_elevator],
-            ["Wet-Dry World - Secrets in the Shallows & Sky", True, top],
+             []],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", False, [CANNON]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", True,
+             [CANNON, PURPLE_SWITCH]],
 
             ["Wet-Dry World - Top o' the Town", False, top_of_elevator],
             ["Wet-Dry World - Top o' the Town", True, top],
@@ -107,12 +116,22 @@ class TestWetDryWorldLowLocations(SM64TestBase):
             ["Wet-Dry World - Quick Race Through Downtown Star Vanish Cap Block",
              True, downtown + [DIAMOND, VANISH_CAP]],
             ["Wet-Dry World - Downtown 1-Up Block", False, downtown],
-            ["Wet-Dry World - Downtown 1-Up Block", True, downtown + [DIAMOND]],
+            ["Wet-Dry World - Downtown 1-Up Block", True,
+             downtown + [DIAMOND, BLOCK_1UPS]],
 
             ["Wet-Dry World - Coins Star", False, []],
             ["Wet-Dry World - Coins Star", True,
-             ["Wet-Dry World - Horizontal Coin Rings"]],
-        ], starting_regions=["Wet-Dry World Low"])
+             [BREAKABLE_COIN_BOXES]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
+
+    def test_heave_hos_reach_near_top(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Push Block 3 Coins Block", False, [THREE_COIN_BLOCKS]],
+            ["Wet-Dry World - Push Block 3 Coins Block", True,
+             [HEAVE_HOS, THREE_COIN_BLOCKS]],
+            ["Wet-Dry World - Top o' the Town", False, [HEAVE_HOS]],
+            ["Wet-Dry World - Top o' the Town", True, [HEAVE_HOS, "Side Flip"]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
 
 
 class TestWetDryWorldMiddleLocations(SM64TestBase):
@@ -124,21 +143,111 @@ class TestWetDryWorldMiddleLocations(SM64TestBase):
             ["Wet-Dry World - Wooden Structure 3 Coins Block", False, []],
             ["Wet-Dry World - Wooden Structure 3 Coins Block", True,
              [THREE_COIN_BLOCKS]],
-        ], starting_regions=["Wet-Dry World Middle"])
+            ["Wet-Dry World - Pedestal 10 Coins Block", False, [TEN_COIN_BLOCKS]],
+            ["Wet-Dry World - Pedestal 10 Coins Block", True,
+             ["Side Flip", TEN_COIN_BLOCKS]],
+        ], starting_regions=["Wet-Dry World - Mid Water"])
+
+
+class TestWetDryWorldPedestalHeaveHoTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {"Wet-Dry World Pedestal with Heave-ho"},
+    }
+
+    def test_pedestal_heave_ho_requires_trick(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Pedestal 10 Coins Block", True, [HEAVE_HOS, TEN_COIN_BLOCKS]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
+
+
+class TestWetDryWorldSecretsRoutes(SM64TestBase):
+    run_default_tests = False
+    options = WDW_OPTIONS
+
+    def test_cannon_and_purple_switch_route(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Secrets in the Shallows & Sky", False, [CANNON]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", True, [CANNON, PURPLE_SWITCH]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
+
+
+class TestWetDryWorldSecretsTrickRoutes(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {
+            "Wet-Dry World Pedestal with Heave-ho",
+            "Wet-Dry World Top Platforms to Express Elevator without Movement Items",
+        },
+    }
+
+    def test_heave_ho_and_top_platforms_trick_route(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Secrets in the Shallows & Sky", False, [HEAVE_HOS]],
+            ["Wet-Dry World - Secrets in the Shallows & Sky", True, [HEAVE_HOS, "Side Flip"]],
+        ], starting_regions=["Wet-Dry World - Low Water"])
 
 
 class TestWetDryWorldHighLocations(SM64TestBase):
     run_default_tests = False
     options = WDW_OPTIONS
 
+    def test_highest_water_reaches_top_freely(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Top o' the Town", True, []],
+        ], starting_regions=["Wet-Dry World - Highest Water"])
+
     def test_highest_water_buddy_route(self):
         self.run_location_tests([
             ["Wet-Dry World - Bob-omb Buddy", False, []],
             ["Wet-Dry World - Bob-omb Buddy", True,
+             ["Triple Jump", "Wet-Dry World - Bob-omb Buddy"]],
+            ["Wet-Dry World - Bob-omb Buddy", True,
              ["Backflip", "Wet-Dry World - Bob-omb Buddy"]],
             ["Wet-Dry World - Bob-omb Buddy", True,
              ["Side Flip", "Wet-Dry World - Bob-omb Buddy"]],
-        ], starting_regions=["Wet-Dry World High"])
+        ], starting_regions=["Wet-Dry World - Highest Water"])
+
+    def test_highest_water_does_not_reach_shocking_arrow_lifts_via_top(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Shocking Arrow Lifts!", False, []],
+            ["Wet-Dry World - Shocking Arrow Lifts!", False,
+             ["Ground Pound", "Triple Jump", "Ledge Grab"]],
+            ["Wet-Dry World - Shocking Arrow Lifts Star Block", False, []],
+            ["Wet-Dry World - Wooden Structure 3 Coins Block", False,
+             ["Wet-Dry World - 3-Coin Blocks", "Long Jump", "Purple Switches"]],
+        ], starting_regions=["Wet-Dry World - Highest Water"])
+
+    def test_separately_reached_water_and_top_states_do_not_combine(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Shocking Arrow Lifts!", False, []],
+        ], starting_regions=[
+            "Wet-Dry World - Highest Water",
+            "Wet-Dry World - Mid-High Water",
+        ])
+        self.run_location_tests([
+            ["Wet-Dry World - Wooden Structure 3 Coins Block", False,
+             [THREE_COIN_BLOCKS]],
+        ], starting_regions=[
+            "Wet-Dry World - Highest Water",
+            "Wet-Dry World - Low Water",
+        ])
+
+
+class TestWetDryWorldShockingArrowLiftsGroundPoundTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **WDW_OPTIONS,
+        "logic_tricks": {"Wet-Dry World Ground Pound Underwater Shocking Arrow Lifts Box"},
+    }
+
+    def test_highest_water_cannon_route_accepts_ground_pound_trick(self):
+        self.run_location_tests([
+            ["Wet-Dry World - Shocking Arrow Lifts!", False, []],
+            ["Wet-Dry World - Shocking Arrow Lifts!", True, ["Ground Pound"]],
+        ], starting_regions=["Wet-Dry World - Highest Water"])
 
 
 class TestWetDryWorldDowntownTripleJumpTrick(SM64TestBase):
@@ -149,13 +258,13 @@ class TestWetDryWorldDowntownTripleJumpTrick(SM64TestBase):
     }
 
     def test_top_connects_to_downtown_with_triple_jump(self):
-        top_access = [PURPLE_SWITCH, "Long Jump", TRIGGER_1UPS]
+        top_access = [DIAMOND, PURPLE_SWITCH, "Long Jump", TRIGGER_1UPS]
         self.run_location_tests([
             ["Wet-Dry World - Downtown Center Coin Ring 1-Up", False,
              top_access],
             ["Wet-Dry World - Downtown Center Coin Ring 1-Up", True,
              top_access + ["Triple Jump"]],
-        ], starting_regions=["Wet-Dry World Low"])
+        ], starting_regions=["Wet-Dry World - Low Water"])
 
 
 class TestWetDryWorldHighRedCoinsTripleJumpTrick(SM64TestBase):
@@ -166,14 +275,14 @@ class TestWetDryWorldHighRedCoinsTripleJumpTrick(SM64TestBase):
     }
 
     def test_red_coin_star_accepts_triple_jump_instead_of_wall_kick(self):
-        requirements = [DIAMOND, RED_COINS]
+        requirements = [CANNON, DIAMOND, RED_COINS]
         self.run_location_tests([
             ["Wet-Dry World - Go to Town for Red Coins", False, requirements],
             ["Wet-Dry World - Go to Town for Red Coins", True,
              requirements + ["Wall Kick"]],
             ["Wet-Dry World - Go to Town for Red Coins", True,
              requirements + ["Triple Jump"]],
-        ], starting_regions=["Wet-Dry World - Downtown"])
+        ], starting_regions=["Wet-Dry World - Low Water"])
 
 
 class TestWetDryWorldFullLevelUnlock(SM64TestBase):
@@ -186,7 +295,7 @@ class TestWetDryWorldFullLevelUnlock(SM64TestBase):
             ["Wet-Dry World - Shocking Arrow Lifts!", False, upstairs],
             ["Wet-Dry World - Shocking Arrow Lifts!", True,
              upstairs + ["Unlock Wet-Dry World"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
@@ -194,22 +303,22 @@ class TestWetDryWorldGlobalUnlockModes(SM64TestBase):
     options = {
         **WDW_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
         "level_features": Options.LevelFeatures.option_global,
         "bobomb_buddies": Options.BobombBuddies.option_global,
     }
 
     def test_global_items_replace_per_level_items(self):
-        top = ["Purple Switches", "Long Jump"]
+        top = [DIAMOND, "Purple Switches", "Long Jump"]
         self.run_location_tests([
             ["Wet-Dry World - Coins Star", True,
-             ["Wet-Dry World - Horizontal Coin Rings"]],
-            ["Wet-Dry World - Coins Star", True, ["Horizontal Coin Rings"]],
-            ["Wet-Dry World - Cylinder Lower 1-Up", False,
+             ["Wet-Dry World - Breakable Coin Boxes"]],
+            ["Wet-Dry World - Coins Star", True, ["Breakable Coin Boxes"]],
+            ["Wet-Dry World - Cylinder Lower 1-Up", True,
              top + ["Wet-Dry World - Freestanding 1-Ups"]],
             ["Wet-Dry World - Cylinder Lower 1-Up", True,
              top + ["Freestanding 1-Ups"]],
-        ], starting_regions=["Wet-Dry World Low"])
+        ], starting_regions=["Wet-Dry World - Low Water"])
 
 
 class TestWetDryWorldNotShuffledUnlockModes(SM64TestBase):
@@ -218,7 +327,7 @@ class TestWetDryWorldNotShuffledUnlockModes(SM64TestBase):
         **WDW_OPTIONS,
         "level_unlocks": Options.LevelUnlocks.option_disabled,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "level_features": Options.LevelFeatures.option_not_shuffled,
         "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
     }
@@ -227,8 +336,8 @@ class TestWetDryWorldNotShuffledUnlockModes(SM64TestBase):
         self.run_location_tests([
             ["Wet-Dry World - Coins Star", True, []],
             ["Wet-Dry World - Cylinder Lower 1-Up", True, ["Long Jump"]],
-        ], starting_regions=["Wet-Dry World Low"])
+        ], starting_regions=["Wet-Dry World - Low Water"])
         self.run_location_tests([
             ["Wet-Dry World - Shocking Arrow Lifts!", True,
              ["Progressive Upstairs Key"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

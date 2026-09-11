@@ -3,14 +3,13 @@ from ... import Options
 
 
 WMOTR_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-    "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    "cap_items": Options.CapItems.option_per_level,
     "combined_progressive_keys": Options.CombinedProgressiveKeys.option_false,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
@@ -38,9 +37,9 @@ class TestWingMarioOverTheRainbowLocations(SM64TestBase):
             ["Wing Mario Over the Rainbow - Cloud 1-Up", False, flight],
             ["Wing Mario Over the Rainbow - Cloud 1-Up", True,
              flight + ["Wing Mario Over the Rainbow - Freestanding 1-Ups"]],
-            ["Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block",
+            ["Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block",
              False, wing_cap],
-            ["Wing Mario Over the Rainbow - Cloud Across From Starting Cloud Wing Cap Block",
+            ["Wing Mario Over the Rainbow - Below the Pole Cloud Wing Cap Block",
              True, flight],
             ["Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block", False, []],
             ["Wing Mario Over the Rainbow - Starting Cloud Wing Cap Block", True, wing_cap],
@@ -76,7 +75,8 @@ class TestWingMarioOverTheRainbowLocations(SM64TestBase):
             ["Wing Mario Over the Rainbow - Highest Cloud Wing Cap Block",
              True, cannon_route],
             ["Wing Mario Over the Rainbow - 1-Up Block", False, flight],
-            ["Wing Mario Over the Rainbow - 1-Up Block", True, cannon_route],
+            ["Wing Mario Over the Rainbow - 1-Up Block", True,
+             cannon_route + ["Wing Mario Over the Rainbow - 1-Up Blocks"]],
         ], starting_regions=["Wing Mario Over the Rainbow"])
 
 
@@ -103,7 +103,7 @@ class TestWingMarioOverTheRainbowEntrance(SM64TestBase):
                 "Unlock Wing Mario Over the Rainbow",
                 "Wing Mario Over the Rainbow - Wing Cap",
             ]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestWingMarioOverTheRainbowLeapOfFaith(SM64TestBase):
@@ -120,7 +120,9 @@ class TestWingMarioOverTheRainbowLeapOfFaith(SM64TestBase):
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, ["Long Jump"]],
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", True, buddy_leap],
             ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, ["Long Jump"]],
-            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, leap],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, leap],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True,
+             leap + ["Wing Mario Over the Rainbow - Wing Cap"]],
             ["Wing Mario Over the Rainbow - Red Coins", False, [
                 *leap,
                 "Wing Mario Over the Rainbow - Wing Cap",
@@ -147,5 +149,7 @@ class TestWingMarioOverTheRainbowLeapWithoutLedgeGrab(SM64TestBase):
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", False, []],
             ["Wing Mario Over the Rainbow - Bob-omb Buddy", True,
              ["Long Jump", "Wing Mario Over the Rainbow - Bob-omb Buddy"]],
-            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True, ["Long Jump"]],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", False, ["Long Jump"]],
+            ["Wing Mario Over the Rainbow - Lowest Cloud Wing Cap Block", True,
+             ["Long Jump", "Wing Mario Over the Rainbow - Wing Cap"]],
         ], starting_regions=["Wing Mario Over the Rainbow"])

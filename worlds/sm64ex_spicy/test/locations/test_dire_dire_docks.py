@@ -3,14 +3,13 @@ from ... import Options
 
 
 DDD_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "dire_dire_docks_coin_star_requirement": 106,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
-    "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
+    "cap_items": Options.CapItems.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
     "triple_jump": Options.TripleJump.option_global,
@@ -58,7 +57,7 @@ class TestDireDireDocksLocations(SM64TestBase):
 
             ["Dire, Dire Docks - Through the Jet Stream", False, []],
             ["Dire, Dire Docks - Through the Jet Stream", True,
-             ["Dire, Dire Docks - Metal Cap"]],
+             ["Dire, Dire Docks - Metal Cap", "Dire, Dire Docks - Jet Stream"]],
             ["Dire, Dire Docks - The Manta Ray's Reward", False, []],
             ["Dire, Dire Docks - The Manta Ray's Reward", True,
              ["Dire, Dire Docks - Manta Ray"]],

@@ -3,16 +3,15 @@ from ... import Options
 
 
 JRB_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "blocksanity": Options.Blocksanity.option_true,
+        "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
-    "per_level_cap_items": Options.PerLevelCapItems.option_true,
+    "cap_items": Options.CapItems.option_per_level,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
     "backflip": Options.Backflip.option_global,
@@ -93,12 +92,22 @@ class TestJollyRogerBayLocations(SM64TestBase):
             ["Jolly Roger Bay - Coins Star", True, [], ALL_ITEMS],
         ], starting_regions=["Jolly Roger Bay"])
 
+    def test_sunken_ship_checks_do_not_repeat_the_physical_entrance_rule(self):
+        self.run_location_tests([
+            ["Jolly Roger Bay - Plunder in the Sunken Ship", False, []],
+            ["Jolly Roger Bay - Plunder in the Sunken Ship", True,
+             ["Jolly Roger Bay - Treasure Chests"]],
+            ["Jolly Roger Bay - Plunder in the Sunken Ship Star Block", False, []],
+            ["Jolly Roger Bay - Plunder in the Sunken Ship Star Block", True,
+             ["Jolly Roger Bay - Treasure Chests"]],
+        ], starting_regions=["Jolly Roger Bay - Sunken Ship"])
+
 
 class TestJollyRogerBayTricks(SM64TestBase):
     run_default_tests = False
     options = {
         **JRB_OPTIONS,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "logic_tricks": {
             "Jolly Roger Bay Upper Platform with Ledge Grab",
             "Jolly Roger Bay Pillar Red Coin with Cannon",

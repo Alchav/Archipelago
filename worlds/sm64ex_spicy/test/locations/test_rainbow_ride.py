@@ -3,12 +3,11 @@ from ... import Options
 
 
 RR_OPTIONS = {
-    "area_rando": Options.AreaRandomizer.option_Off,
-    "level_unlocks": Options.LevelUnlocks.option_full,
+        "level_unlocks": Options.LevelUnlocks.option_full,
     "blocksanity": Options.Blocksanity.option_true,
     "buddy_checks": Options.BuddyChecks.option_true,
     "one_up_checks": Options.OneUpChecks.option_true,
-    "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_per_level,
+    "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
     "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
     "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
     "level_features": Options.LevelFeatures.option_per_level,
@@ -59,7 +58,8 @@ class TestRainbowRideLocations(SM64TestBase):
             ["Rainbow Ride - Under Fly Guy Block 1-Up", False, beneath_pole],
             ["Rainbow Ride - Under Fly Guy Block 1-Up", True,
              beneath_pole + [BLOCK_1UPS]],
-            ["Rainbow Ride - Under Fly Guy 1-Up Block", True, beneath_pole],
+            ["Rainbow Ride - Under Fly Guy 1-Up Block", True,
+             beneath_pole + [BLOCK_1UPS]],
 
             ["Rainbow Ride - Coins Amassed in a Maze", False, maze],
             ["Rainbow Ride - Coins Amassed in a Maze", False, maze + [RED_COINS]],
@@ -77,11 +77,11 @@ class TestRainbowRideLocations(SM64TestBase):
             ["Rainbow Ride - Somewhere Over the Rainbow Star Block", False, cruiser],
             ["Rainbow Ride - Somewhere Over the Rainbow Star Block", True,
              cruiser + [CANNON]],
-            ["Rainbow Ride - Ship Tip 1-Up", False, cruiser],
-            ["Rainbow Ride - Ship Tip 1-Up", True, cruiser + [FREESTANDING_1UPS]],
-            ["Rainbow Ride - Ship Pole 1-Up", False,
+            ["Rainbow Ride - Cruiser Tip 1-Up", False, cruiser],
+            ["Rainbow Ride - Cruiser Tip 1-Up", True, cruiser + [FREESTANDING_1UPS]],
+            ["Rainbow Ride - Cruiser Pole 1-Up", False,
              cruiser + [TRIGGER_1UPS]],
-            ["Rainbow Ride - Ship Pole 1-Up", True,
+            ["Rainbow Ride - Cruiser Pole 1-Up", True,
              cruiser + [TRIGGER_1UPS, "Climb"]],
             ["Rainbow Ride - Rotating Bridge Platform 1-Up", False, cruiser],
             ["Rainbow Ride - Rotating Bridge Platform 1-Up", True,
@@ -89,20 +89,22 @@ class TestRainbowRideLocations(SM64TestBase):
 
             ["Rainbow Ride - The Big House in the Sky", False, carpets],
             ["Rainbow Ride - The Big House in the Sky", True, house],
-            ["Rainbow Ride - House in the Sky Block 1-Up", False, house],
-            ["Rainbow Ride - House in the Sky Block 1-Up", True,
+            ["Rainbow Ride - The Big House in the Sky Block 1-Up", False, house],
+            ["Rainbow Ride - The Big House in the Sky Block 1-Up", True,
              house + [BLOCK_1UPS]],
-            ["Rainbow Ride - House in the Sky 1-Up Block", True, house],
+            ["Rainbow Ride - The Big House in the Sky 1-Up Block", True,
+             house + [BLOCK_1UPS]],
             ["Rainbow Ride - House Path Donut Lifts 1-Up", False, house],
             ["Rainbow Ride - House Path Donut Lifts 1-Up", True,
              house + [FREESTANDING_1UPS]],
-            ["Rainbow Ride - Donut Top of Red Coin Maze 1-Up", False, house],
-            ["Rainbow Ride - Donut Top of Red Coin Maze 1-Up", True,
+            ["Rainbow Ride - Top of Red Coin Maze Donut 1-Up", False, house],
+            ["Rainbow Ride - Top of Red Coin Maze Donut 1-Up", True,
              house + [TRIGGER_1UPS]],
             ["Rainbow Ride - Top of Red Coin Maze Block 1-Up", False, house],
             ["Rainbow Ride - Top of Red Coin Maze Block 1-Up", True,
              house + [BLOCK_1UPS]],
-            ["Rainbow Ride - Top of Red Coin Maze 1-Up Block", True, house],
+            ["Rainbow Ride - Top of Red Coin Maze 1-Up Block", True,
+             house + [BLOCK_1UPS]],
 
             ["Rainbow Ride - Coins Star", False, beneath_pole],
             ["Rainbow Ride - Coins Star", True,
@@ -133,7 +135,7 @@ class TestRainbowRideFullLevelUnlock(SM64TestBase):
             ["Rainbow Ride - Coins Star", False, third_floor],
             ["Rainbow Ride - Coins Star", True,
              third_floor + ["Unlock Rainbow Ride"]],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])
 
 
 class TestRainbowRideBuddyLedgeGrabAndCarpetsTrick(SM64TestBase):
@@ -170,13 +172,45 @@ class TestRainbowRideMazeCoinsLedgeGrabAndCarpetsTrick(SM64TestBase):
         ], starting_regions=["Rainbow Ride"])
 
 
+class TestRainbowRideFallToTrickyTrianglesTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **RR_OPTIONS,
+        "logic_tricks": {"Rainbow Ride Fall to Tricky Triangles from Somewhere Over the Rainbow"},
+    }
+
+    def test_fall_reaches_star_but_not_one_up(self):
+        self.run_location_tests([
+            ["Rainbow Ride - Tricky Triangles!", False, []],
+            ["Rainbow Ride - Tricky Triangles!", True, [CANNON]],
+            ["Rainbow Ride - Tricky Triangles 1-Up", False,
+             [CANNON, FREESTANDING_1UPS]],
+        ], starting_regions=["Rainbow Ride - Cruiser"])
+
+
+class TestRainbowRideFallToTrickyTrianglesOneUpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **RR_OPTIONS,
+        "logic_tricks": {"Rainbow Ride Fall to Tricky Triangles 1-Up from Somewhere Over the Rainbow"},
+    }
+
+    def test_fall_reaches_one_up_but_not_star(self):
+        self.run_location_tests([
+            ["Rainbow Ride - Tricky Triangles!", False, [CANNON]],
+            ["Rainbow Ride - Tricky Triangles 1-Up", False, [CANNON]],
+            ["Rainbow Ride - Tricky Triangles 1-Up", True,
+             [CANNON, FREESTANDING_1UPS]],
+        ], starting_regions=["Rainbow Ride - Cruiser"])
+
+
 class TestRainbowRideGlobalUnlockModes(SM64TestBase):
     run_default_tests = False
     options = {
         **RR_OPTIONS,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_global,
         "enemy_unlocks": Options.EnemyUnlocks.option_global,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_global,
+        "one_up_unlocks": Options.OneUpUnlocks.option_global,
         "level_features": Options.LevelFeatures.option_global,
         "bobomb_buddies": Options.BobombBuddies.option_global,
     }
@@ -187,7 +221,7 @@ class TestRainbowRideGlobalUnlockModes(SM64TestBase):
             ["Rainbow Ride - Coins Star", True,
              route + ["Rainbow Ride - Goomba"]],
             ["Rainbow Ride - Coins Star", True, route + ["Goombas"]],
-            ["Rainbow Ride - Tricky Triangles 1-Up", False,
+            ["Rainbow Ride - Tricky Triangles 1-Up", True,
              route + ["Side Flip", "Purple Switches",
                       "Rainbow Ride - Freestanding 1-Ups"]],
             ["Rainbow Ride - Tricky Triangles 1-Up", True,
@@ -202,7 +236,7 @@ class TestRainbowRideNotShuffledUnlockModes(SM64TestBase):
         "level_unlocks": Options.LevelUnlocks.option_disabled,
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_not_shuffled,
         "enemy_unlocks": Options.EnemyUnlocks.option_not_shuffled,
-        "one_up_mushroom_unlocks": Options.OneUpMushroomUnlocks.option_not_shuffled,
+        "one_up_unlocks": Options.OneUpUnlocks.option_not_shuffled,
         "level_features": Options.LevelFeatures.option_not_shuffled,
         "bobomb_buddies": Options.BobombBuddies.option_not_shuffled,
     }
@@ -221,4 +255,4 @@ class TestRainbowRideNotShuffledUnlockModes(SM64TestBase):
         ], starting_regions=["Rainbow Ride"])
         self.run_location_tests([
             ["Rainbow Ride - Coins Star", True, third_floor],
-        ], starting_regions=["Menu"])
+        ], starting_regions=["Castle Grounds"])

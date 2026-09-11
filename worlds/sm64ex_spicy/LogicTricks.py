@@ -2,10 +2,10 @@ logic_tricks = {
     # Non-level-specific tricks
     "Lava Damage Boosting": {
         "internal_id": "logic_lava_damage_boosting",
-        "rule": "",
-        "difficulty": "medium",
-        "description": "Jumping into and bouncing off lava to cross gaps or reach nearby platforms."
-                       "If you don't have Mario's Hat, you may have to die!",
+        "rule": "MARIOS_HAT",
+        "difficulty": "easy",
+        "description": "Using Mario's Hat while jumping into and bouncing off lava to cross gaps or reach nearby "
+                       "platforms.",
     },
     # Castle
     "Castle Third Tree From Waterfall 1-Up With No Movement": {
@@ -103,6 +103,13 @@ logic_tricks = {
         "difficulty": "medium",
         "video": "https://www.youtube.com/watch?v=NNfJI9hYSqI"
     },
+    "Castle Lobby Backwards Long Jump Through the 8 Star Door": {
+        "internal_id": "logic_castle_lobby_8_star_door_blj",
+        "rule": "LJ+LG",
+        "description": "Bypassing the 8 Star Door using a Lobby Backwards Long Jump.",
+        "difficulty": "hard",
+        "video": "https://www.youtube.com/watch?v=RfyThHpFXoo"
+    },
     "Castle Side Backwards Long Jump Through the 30 Star Door": {
         "internal_id": "logic_castle_30_star_door_sblj",
         "rule": "LJ",
@@ -113,7 +120,8 @@ logic_tricks = {
     "Castle MIPS Skip Through the 30 Star Door": {
         "internal_id": "logic_castle_30_star_door_mips_skip",
         "rule": "MIPS1 & DV | MIPS1 & logic_castle_mips_without_dive",
-        "description": "Bypass the 30 Star Door with MIPS.",
+        "description": "Bypass the 30 Star Door with MIPS. While this trick is enabled, MIPS becomes permanently"
+                       " available after receiving the first Progressive MIPS item.",
         "difficulty": "hard",
         "video": "https://www.youtube.com/watch?v=ahfVwNCD5bw"
     },
@@ -152,6 +160,14 @@ logic_tricks = {
         "difficulty": "medium",
         "video": "https://www.youtube.com/watch?v=cb-7NZoNaBg"
     },
+    # The Princess's Secret Slide
+    "The Princess's Secret Slide Coin Triggers 1-Up without Coin Markers": {
+        "internal_id": "logic_pss_coin_triggers_1up_without_coin_markers",
+        "rule": "",
+        "difficulty": "easy",
+        "description": "Finding the Coin Triggers 1-Up trigger locations without the Horizontal Coin Lines that "
+                       "mark them. Irrelevant when Trigger Sparkles is enabled.",
+    },
     # Bob-omb Battlefield
     "Bob-omb Battlefield Cannon Tree 1-Up With No Movement": {
         "internal_id": "logic_bob_cannon_tree_1up_with_no_movement",
@@ -165,6 +181,14 @@ logic_tricks = {
         "rule": "WC+TJ",
         "difficulty": "easy",
         "description": "Reaching the floating island without the cannon by using Wing Cap and Triple Jump.",
+    },
+    "Bob-omb Battlefield Island with Koopa Shell and Wing Cap": {
+        "internal_id": "logic_bob_island_koopa_shell_wing_cap",
+        "rule": "KOOPA_TROOPA+WC",
+        "difficulty": "easy",
+        "description": "Reaching the floating island (and collecting the red coin on it) without the cannon using "
+                       "the Koopa Shell and Wing Cap.",
+        "video": "https://www.youtube.com/watch?v=9CWEFBZAHmk",
     },
     "Bob-omb Battlefield Island Red Coin With Ground Pound": {
         "internal_id": "logic_bob_island_red_coin_with_ground_pound",
@@ -196,7 +220,8 @@ logic_tricks = {
         "rule": "",
         "difficulty": "hard",
         "description": "Collecting Mario Wings to the Sky without the Single Yellow Coins or Vertical Coin Rings "
-                       "that indicate the five invisible trigger positions.",
+                       "that indicate the five invisible trigger positions. Irrelevant when Trigger Sparkles is "
+                       "enabled.",
     },
     "Bob-omb Battlefield Island with Long Jump": {
         "internal_id": "logic_bob_island_long_jump",
@@ -220,6 +245,14 @@ logic_tricks = {
         "description": "Collecting Behind Chain Chomp's Gate without Ground Pound, using a Bob-omb to clip through"
                        "the gate.",
         "video": "https://www.youtube.com/watch?v=-dZKkhB30LY"
+    },
+    "Bob-omb Battlefield Chain Chomp Gate with Throwable Cork Box Clip": {
+        "internal_id": "logic_bob_chain_chomp_gate_with_cork_box",
+        "rule": "BOB_CORKBOXES",
+        "difficulty": "hard",
+        "description": "Collecting Behind Chain Chomp's Gate without Ground Pound, using a Throwable Cork Box "
+                       "to clip through the gate.",
+        "video": "https://www.youtube.com/watch?v=Ta6Hj2F2slo"
     },
     # Whomp's Fortress
     "Whomp's Fortress Caged Island from the Floating Island with Triple Jump Off of Whomp King": {
@@ -251,6 +284,13 @@ logic_tricks = {
         "description": "Reaching Fall onto the Caged Island from fortress top access with Long Jump.",
         # title says Long Jump and Ground Pound. Ground Pound not needed in Spicy Mycena 64
         "video": "https://www.youtube.com/watch?v=DTieM0YZ-DY"
+    },
+    "Whomp's Fortress Caged Island With Cannon": {
+        "internal_id": "logic_wf_caged_island_cannon",
+        "rule": "CANN",
+        "difficulty": "medium",
+        "description": "Reaching Fall onto the Caged Island by launching from the cannon.",
+        "video": "https://www.youtube.com/watch?v=tatC8AiuaDc",
     },
     "Whomp's Fortress Top Access with Cannon": {
         "internal_id": "logic_wf_caged_top_access_with_cannon",
@@ -304,7 +344,7 @@ logic_tricks = {
         "rule": "",
         "difficulty": "hard",
         "description": "Reaching Shoot Into the Wild Blue with a jump.",
-        "video": "https://www.youtube.com/watch?v=E7qv8EsIr5E"
+        "video": "https://www.youtube.com/watch?v=d3i77JAY6ms"
     },
     # Jolly Roger Bay
     "Jolly Roger Bay Upper Platform with Ledge Grab": {
@@ -329,7 +369,7 @@ logic_tricks = {
     },
     "Jolly Roger Bay Pillar Red Coin with Triple Jump, Backflip, or Wall Kick": {
         "internal_id": "logic_jrb_pillar_red_coin_moves",
-        "rule": "TJ/BF/WK",
+        "rule": "TJ/WK | JRB_SIGNS+BF",
         "difficulty": "medium",
         "description": "Collecting the pillar red coin with Triple Jump, Backflip or Wall Kick.",
         "video": ("https://www.youtube.com/watch?v=5Xs6S9jAMNk", # Triple Jump
@@ -381,19 +421,12 @@ logic_tricks = {
     },
 
     # Big Boo's Haunt
-    "Big Boo's Haunt Second Floor with Triple Jump and Wall Kick": {
-        "internal_id": "logic_bbh_third_floor_triple_jump_wall_kick",
-        "rule": "TJ+WK",
-        "difficulty": "medium",
-        "description": "Reaching the second floor by Triple Jumping and Wall Kicking up to the balcony, without"
-                       "the Staircase.",
-    },
-    "Big Boo's Haunt Second Floor with Side Flip and Wall Kick": {
-        "internal_id": "logic_bbh_third_floor_side_flip_wall_kick",
-        "rule": "SF+WK",
-        "difficulty": "medium",
-        "description": "Reaching the second floor by Side Flipping and Wall Kicking up to the balcony, without"
-                       "the Staircase.",
+    "Big Boo's Haunt Second Floor with Wall Kick": {
+        "internal_id": "logic_bbh_second_floor_wall_kick",
+        "rule": "WK",
+        "difficulty": "easy",
+        "description": "Reaching the second floor by Wall Kicking up to the balcony without the Staircase.",
+        "video": "https://www.youtube.com/watch?v=mUrXEnEBiMA",
     },
     "Big Boo's Haunt Third Floor with Wall Kick Only": {
         "internal_id": "logic_bbh_third_floor_wall_kick",
@@ -468,19 +501,19 @@ logic_tricks = {
                        "leading to Elevator Tour in the Volcano (and three coins).",
     },
     # Shifting Sand Land
-    "Shifting Sand Land Stone Structure with Shy Guy Bounce": {
-        "internal_id": "logic_ssl_stone_structure_shy_guy_bounce",
-        "rule": "FLY_GUY",
-        "difficulty": "medium",
-        "description": "Reaching the top of the Stone Structure by bouncing off of a Shy Guy.",
+    "Shifting Sand Land Top of Stone Structure with Spin Jump or Tweesters": {
+        "internal_id": "logic_ssl_top_of_stone_structure_spin_jump_or_tweesters",
+        "rule": "FLY_GUY/TWEESTERS",
+        "difficulty": "easy",
+        "description": "Reaching the top of the Stone Structure by spin-jumping off of a Fly Guy or using a Tweester.",
     },
     "Shifting Sand Land Three Red Coins with Tweesters": {
         "internal_id": "logic_ssl_three_red_coins_with_tweesters",
-        "rule": "",
+        "rule": "TWEESTERS",
         "difficulty": "medium",
         "description": "Using Tweesters to collect three of the elevated Red Coins.",
     },
-    "Shifting Sand Land One Red Coin with Shy Guy Spin Jump": {
+    "Shifting Sand Land One Red Coin with Spin Jump": {
         "internal_id": "logic_ssl_one_red_coin_with_shy_guy_spin_jump",
         "rule": "FLY_GUY",
         "difficulty": "medium",
@@ -488,8 +521,8 @@ logic_tricks = {
     },
     "Shifting Sand Land Pillars with Koopa Shell": {
         "internal_id": "logic_ssl_pillars_shell",
-        "rule": "{Shifting Sand Land - Stone Structure}",
-        "difficulty": "medium",
+        "rule": "{Shifting Sand Land - Stone Structure} & SSL_KOOPA_SHELL",
+        "difficulty": "easy",
         "description": "Reaching the Upper Pyramid entrance using a Koopa Shell to access the quicksand pillar.",
     },
     "Shifting Sand Land Pillars with Side Flip or Kick": {
@@ -499,7 +532,7 @@ logic_tricks = {
         "description": "Reaching the Upper Pyramid entrance using a Side Flip or Kick to access the quicksand pillar."
                        # "It's likely possible with other moves, but I have not been able to do it myself."
     },
-    "Stand Tall on the Four Pyramids Without Pyramid Elevator": {
+    "Shifting Sand Land Stand Tall on the Four Pyramids Without Pyramid Elevator": {
         "internal_id": "logic_ssl_stand_tall_without_pyramid_elevator",
         "rule": "",
         "difficulty": "medium",
@@ -510,20 +543,20 @@ logic_tricks = {
         "internal_id": "logic_thi_windswept_valley_fly_guy_spin_jump",
         "rule": "FLY_GUY",
         "difficulty": "medium",
-        "description": "Reaching Windswept Valley by spin-jumping from a Fly Guy. The Fly Guy can only be used once.",
+        "description": "Crossing the first gap toward Windswept Valley by spin-jumping from a Fly Guy. The Fly Guy "
+                       "can only be used once. Vertical Wind or Triple Jump is still needed for the second gap.",
     },
     "Tiny-Huge Island Scale the Huge Mountain on the Koopa Shell": {
         "internal_id": "logic_thi_scale_huge_mountain_koopa_shell",
         "rule": "KOOPA_TROOPA",
-        "difficulty": "medium",
+        "difficulty": "easy",
         "description": "Riding the Huge Island Koopa Troopa's shell up the mountain. The shell can only be used once.",
     },
-    "Tiny-Huge Island Impossible Coin": {
+    "Tiny Island Impossible Coin": {
         "internal_id": "logic_thi_impossible_coin",
         "rule": "GP+TJ+DV+KK",
         "difficulty": "hard",
-        "description": "Collecting the coin embedded underground on Tiny Island using Ground Pound, Triple Jump,"
-                       " Dive, and Kick.",
+        "description": "Collecting the underground coin on Tiny Island using Ground Pound, Triple Jump, Dive, and Kick.",
     },
     # Tick Tock Clock
     "Tick Tock Clock Triple Jump and Wall Kick to Stomp the Thwomp without Thwomp": {
@@ -549,7 +582,7 @@ logic_tricks = {
     "Tick Tock Clock Top Past Spinners with Wall Kick": {
         "internal_id": "logic_ttc_top_past_spinners_wall_kick",
         "rule": "WK",
-        "difficulty": "medium",
+        "difficulty": "hard",
         "description": "Reaches both the Top and Top Past Spinners areas from the Moving Bars Area using Wall Kick.",
         "video": "https://www.youtube.com/watch?v=63eenKoAxEo",
     },
@@ -586,26 +619,18 @@ logic_tricks = {
     # Wing Mario Over the Rainbow
     "Wing Mario Over the Rainbow Leap of Faith": {
         "internal_id": "logic_wmotr_leap_of_faith",
-        "rule": "",
+        "rule": "LJ",
         "difficulty": "medium",
-        "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
-                       "Red Coin. Long Jump and Ledge Grab can reach the Buddy Platform",
+        "description": "Using Wing Cap and/or Long Jump to leap down. Wing Cap or Long Jump can reach a single Red "
+                       "Coin. Long Jump and Ledge Grab can reach the Buddy Platform.",
     },
     "Wing Mario Over the Rainbow Leap of Faith Without Ledge Grab": {
         "internal_id": "logic_wmotr_leap_of_faith_without_ledge_grab",
-        "rule": "",
+        "rule": "LJ",
         "difficulty": "hard",
-        "description": "Using Wing Cap and/or Long Jump and Ledge Grab to leap down. Wing Cap can reach a single"
-                       "Red Coin. Long Jump can reach the Buddy Platform",
+        "description": "Using Wing Cap and/or Long Jump to leap down. Wing Cap can reach a single Red Coin. Long Jump"
+                       "can reach the Buddy Platform",
         "video": "https://www.youtube.com/watch?v=hAWQ97iT8wY",
-    },
-    # Tower of the Wing Cap
-    "Tower of the Wing Cap Coin Mastery": {
-        "internal_id": "logic_totwc_coin_mastery",
-        "rule": "",
-        "difficulty": "hard",
-        "description": "Collecting the difficult coin rings in Tower of the Wing Cap. The final rings require"
-                       " restarting flight with the Wing Cap.",
     },
     # Vanish Cap Under the Moat
     "Vanish Cap Under the Moat Wall Kick over the Vanish Cap Grate": {
@@ -638,12 +663,20 @@ logic_tricks = {
         "video": "https://www.youtube.com/watch?v=72TsponCYvg",
     },
     # Hazy Maze Cave
+    "Hazy Maze Cave Elevator Clip": {
+        "internal_id": "logic_hmc_elevator_clip",
+        "rule": "",
+        "difficulty": "hard",
+        "description": "Clipping through the elevator to reach the Swimming Beast cavern and the Cavern of the "
+                       "Metal Cap entrance without the Swimming Beast.",
+        "video": "https://www.youtube.com/watch?v=797eWQVltF0",
+    },
     "Hazy Maze Cave Upper Red Coin Area with Wall Kick Only": {
         "internal_id": "logic_hmc_upper_red_coin_area_wall_kick",
-        "rule": "CHECKERBOARD_PLATFORMS & WK",
+        "rule": "WK",
         "difficulty": "medium",
-        "description": "Reaches the upper red coin area and its platform coins using the Checkerboard Platform "
-                       "and Wall Kick.",
+        "description": "Reaches the Upper Red Coin Room from below using only Wall Kick. The Checkerboard "
+                       "Platform is still required for checks located along its ride.",
         "video": "https://www.youtube.com/watch?v=EHx58IaW2uU",
     },
     "Hazy Maze Cave Pit Islands with Wall Kick": {
@@ -654,20 +687,19 @@ logic_tricks = {
                        "Wall Kick, Side Flip, and Ledge Grab.",
         "video": "https://www.youtube.com/watch?v=kPSHKBJxZdY",
     },
-    "Hazy Maze Cave Metal-Head Mario without Metal Cap": {
+    "Hazy Maze Cave Metal-Head Mario Room without Metal Cap": {
         "internal_id": "logic_hmc_metal_head_capless",
-        "rule": "PURPLE_SWITCHES & LJ+TJ",
-        "difficulty": "medium",
-        "description": "Completes Metal-Head Mario Can Move and reaches its related coins without Metal Cap, using "
-                       "Purple Switches, Long Jump, and Triple Jump.",
-        "video": "https://www.youtube.com/watch?v=uBXWrnHZbpQ",
-    },
-    "Hazy Maze Cave Metal-Head Route Coins without Metal Cap": {
-        "internal_id": "logic_hmc_metal_head_coin_route_capless",
         "rule": "PURPLE_SWITCHES & TJ",
         "difficulty": "medium",
-        "description": "Collects the three coins on the Metal-Head Mario route without Metal Cap using Purple "
-                       "Switches and Triple Jump.",
+        "description": "Reaches the Metal-Head Mario Can Move room without Metal Cap by using Purple Switches and "
+                       "Triple Jump.",
+        "video": "https://www.youtube.com/watch?v=uBXWrnHZbpQ",
+    },
+    "Hazy Maze Cave Metal-Head Mario Gap with Triple Jump": {
+        "internal_id": "logic_hmc_metal_head_coin_route_capless",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Crosses the gap to the Metal-Head Mario Can Move star with Triple Jump instead of Long Jump.",
         "video": "https://www.youtube.com/watch?v=ObSmoQ-Xyxo",
     },
     "Hazy Maze Cave Metal-Head Mario without Metal Cap or Full Movement": {
@@ -708,6 +740,18 @@ logic_tricks = {
         "description": "Uses a tight running-speed jump from the top of the Express Elevator to Top o' the Town "
                        "without movement items.",
         "video": "https://www.youtube.com/watch?v=5P7OWuw9ZZM",
+    },
+    "Wet-Dry World Ground Pound Underwater Shocking Arrow Lifts Box": {
+        "internal_id": "logic_wdw_shocking_arrow_lifts_underwater_ground_pound",
+        "rule": "GP",
+        "difficulty": "easy",
+        "description": "Ground Pounds the Shocking Arrow Lifts box while it is underwater at the highest water level.",
+    },
+    "Wet-Dry World Pedestal with Heave-ho": {
+        "internal_id": "logic_wdw_pedestal_heave_ho",
+        "rule": "HEAVE_HOS",
+        "difficulty": "easy",
+        "description": "Uses a Heave-ho to reach the Pedestal with the 10-Coin Block.",
     },
     "Wet-Dry World Downtown with Triple Jump": {
         "internal_id": "logic_wdw_downtown_triple_jump",
@@ -757,6 +801,18 @@ logic_tricks = {
         "difficulty": "hard",
         "description": "Reaches the top of Tall, Tall Mountain using Dive.",
     },
+    "Tall, Tall Mountain Upper Region with Spin Jump Off of Fly Guy": {
+        "internal_id": "logic_ttm_upper_fly_guy_spin_jump",
+        "rule": "FLY_GUY",
+        "difficulty": "easy",
+        "description": "Reaches the Upper region by spin-jumping off of a Fly Guy, bypassing the Rolling Log.",
+    },
+    "Tall, Tall Mountain Breathtaking View from Bridge with Triple Jump from Below": {
+        "internal_id": "logic_ttm_breathtaking_view_triple_jump_from_below",
+        "rule": "TJ",
+        "difficulty": "medium",
+        "description": "Collects Breathtaking View from Bridge from the Upper region using Triple Jump.",
+    },
     "Tall, Tall Mountain Lonely Mushroom without Cannon": {
         "internal_id": "logic_ttm_lonely_mushroom_cannonless",
         "rule": "LJ",
@@ -804,6 +860,19 @@ logic_tricks = {
         "difficulty": "easy",
         "description": "Completes Tricky Triangles and reaches its 1-Up using Purple Switches without movement items.",
         "video": "https://www.youtube.com/watch?v=tJxuv2YGmaU",
+    },
+    "Rainbow Ride Fall to Tricky Triangles from Somewhere Over the Rainbow": {
+        "internal_id": "logic_rr_fall_to_tricky_triangles_from_somewhere_over_the_rainbow",
+        "rule": "{Rainbow Ride - Cruiser} & CANN",
+        "difficulty": "easy",
+        "description": "Reaches Tricky Triangles without Purple Switches by falling from Somewhere Over the Rainbow.",
+    },
+    "Rainbow Ride Fall to Tricky Triangles 1-Up from Somewhere Over the Rainbow": {
+        "internal_id": "logic_rr_fall_to_tricky_triangles_one_up_from_somewhere_over_the_rainbow",
+        "rule": "{Rainbow Ride - Cruiser} & CANN",
+        "difficulty": "medium",
+        "description": "Reaches the Tricky Triangles 1-Up without Purple Switches by falling from Somewhere Over the "
+                       "Rainbow.",
     },
     "Rainbow Ride Initial Coins without Carpets": {
         "internal_id": "logic_rr_initial_coins_without_carpets",
