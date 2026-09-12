@@ -687,6 +687,8 @@ class SM64World(World):
         }
 
     def fill_hook(self, progitempool, usefulitempool, filleritempool, fill_locations) -> None:
+        from Fill import sweep_from_pool
+
         def downgrade(items: typing.Iterable[Item]) -> None:
             for item in tuple(items):
                 if item.player != self.player or not item.advancement:
@@ -708,15 +710,13 @@ class SM64World(World):
         ]
         self.random.shuffle(candidates)
         for item in candidates:
-            itempool_index = next(
-                index for index, pool_item in enumerate(self.multiworld.itempool)
-                if pool_item is item
+            # Match restrictive fill's maximum-exploration state. Items already
+            # moved to usefulitempool retain their progression classification,
+            # so get_all_state() would incorrectly collect them here.
+            state = sweep_from_pool(
+                self.multiworld.state,
+                [pool_item for pool_item in progitempool if pool_item is not item],
             )
-            self.multiworld.itempool.pop(itempool_index)
-            try:
-                state = self.multiworld.get_all_state()
-            finally:
-                self.multiworld.itempool.insert(itempool_index, item)
             real_locations_reachable = all(
                 location.can_reach(state)
                 for location in self.multiworld.get_locations(self.player)
