@@ -81,9 +81,10 @@ def exclusion_rules(multiworld: MultiWorld, player: int, exclude_locations: typi
     for loc_name in exclude_locations:
         try:
             location = multiworld.get_location(loc_name, player)
-        except KeyError as e:  # failed to find the given location. Check if it's a legitimate location
-            if loc_name not in multiworld.worlds[player].location_name_to_id:
-                raise Exception(f"Unable to exclude location {loc_name} in player {player}'s world.") from e
+        except KeyError:
+            # Options can disable otherwise valid locations. Ignore configured exclusions
+            # that do not exist in this particular generated world.
+            continue
         else:
             if not location.advancement:
                 location.progress_type = LocationProgressType.EXCLUDED
