@@ -5,7 +5,7 @@ import settings
 import worlds.Files
 
 LTTPJPN10HASH: str = "03a63945398191337e896e5771f77173"
-RANDOMIZERBASEHASH: str = "b419a04b7fc6744137a379bccc2e436c"
+RANDOMIZERBASEHASH: str = "a6581273223165f550b72f9f090dc4f1"
 ROM_PLAYER_LIMIT: int = 255
 HINT_READ_TABLE_ADDRESS: int = 0x1863B0
 HINT_READ_TABLE_SIZE: int = 0x100
@@ -140,7 +140,7 @@ def _require_z3pr():
 
 
 class LttPPatchExtensions(worlds.Files.APPatchExtension):
-    game = "A Link to the Past Beta"
+    game = "A Link to the Past"
 
     @staticmethod
     def apply_encrypted_tokens(caller: worlds.Files.APProcedurePatch, rom: bytes, token_file: str,
@@ -692,7 +692,7 @@ class Sprite():
                    "sprite_version": 1,
                    "name": self.name,
                    "author": self.author_name,
-                   "game": "A Link to the Past Beta",
+                   "game": "A Link to the Past",
                    "data": self.get_delta()}
         with open(path, "w") as f:
             f.write(yaml.safe_dump(payload))
@@ -1897,7 +1897,7 @@ def patch_rom(multiworld: MultiWorld, rom: TokenRom, player: int):
 
     # set rom name
     # 21 bytes
-    rom.name = bytearray(f'XP{local_world.world_version.as_simple_string().replace(".", "")[0:3]}_{player}_{multiworld.seed:11}\0', 'utf8')[:21]
+    rom.name = bytearray(f'AP{local_world.world_version.as_simple_string().replace(".", "")[0:3]}_{player}_{multiworld.seed:11}\0', 'utf8')[:21]
     rom.name.extend([0] * (21 - len(rom.name)))
     rom.write_bytes(0x7FC0, rom.name)
 
@@ -2050,7 +2050,7 @@ def write_custom_shops(rom: TokenRom, multiworld: MultiWorld, player: int):
             price_data = get_price_data(item['price'], item["price_type"])
             replacement_price_data = get_price_data(item['replacement_price'], item['replacement_price_type'])
             slot = 0 if shop.type == ShopType.TakeAny else index
-            if item['player'] and multiworld.game[item['player']] != "A Link to the Past Beta":  # item not native to ALTTP
+            if item['player'] and multiworld.game[item['player']] != "A Link to the Past":  # item not native to ALTTP
                 item_code = get_nonnative_item_sprite(multiworld.worlds[item['player']].item_name_to_id[item['item']])
             else:
                 item_code = item_table[item["item"]].item_code
@@ -3379,8 +3379,8 @@ hash_alphabet = [
 
 class LttPDeltaPatch(worlds.Files.APProcedurePatch, worlds.Files.APTokenMixin):
     hash = LTTPJPN10HASH
-    game = "A Link to the Past Beta"
-    patch_file_ending = ".aplttpbeta"
+    game = "A Link to the Past"
+    patch_file_ending = ".aplttp"
     procedure = [
         ("apply_bsdiff4", ["basepatch.bsdiff4"]),
         ("apply_tokens", ["token_patch.bin"]),
