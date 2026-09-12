@@ -154,7 +154,8 @@ class FF4FEWorld(World):
         item_data: ItemData = next((item_data for item_data in all_items if item_data.name == item), None)
         if not item_data:
             raise Exception(f"{item} is not a valid item name for Final Fantasy 4 Free Enterprise")
-        return FF4FEItem(item, item_data.classification, self.item_name_to_id[item], self.player)
+        return FF4FEItem(item, item_data.classification,
+                         None if item == "None" else self.item_name_to_id[item], self.player)
 
     def create_event(self, event: str) -> FF4FEItem:
         return FF4FEItem(event, ItemClassification.progression, None, self.player)

@@ -11,6 +11,12 @@ class FF4FELocation(Location):
     surface = ""
     area = ""
 
+    def place_locked_item(self, item):
+        super().place_locked_item(item)
+        if item.name == "None":
+            self.address = None
+            item.code = None
+
 class LocationData():
     name: str
     surface: str
