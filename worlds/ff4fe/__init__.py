@@ -168,7 +168,9 @@ class FF4FEWorld(World):
         character_locations = locations.character_locations.copy()
         character_locations.remove("Starting Character 1")
         character_locations.remove("Starting Character 2")
-        if self.options.ConquerTheGiant:
+        # NoEarnedCharacters already handles Giant of Bab-il. Treating ConquerTheGiant
+        # as a separate missing slot as well desynchronizes the character pool and locations.
+        if self.options.ConquerTheGiant and not self.options.NoEarnedCharacters:
             character_locations.remove("Giant of Bab-il Character")
         if self.options.NoFreeCharacters:
             for location in locations.free_character_locations:
@@ -257,7 +259,7 @@ class FF4FEWorld(World):
                     forbid_items_for_player(self.get_location(location.name), set(items.characters), self.player)
 
         # Conquer the Giant doesn't have a character, so we force it to None.
-        if self.options.ConquerTheGiant:
+        if self.options.ConquerTheGiant and not self.options.NoEarnedCharacters:
             (self.get_location(
                 "Giant of Bab-il Character")
              .place_locked_item(self.create_item("None")))
