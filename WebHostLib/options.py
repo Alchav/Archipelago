@@ -65,7 +65,9 @@ def filter_dedent(text: str) -> str:
 @app.template_filter("rst_to_html")
 def filter_rst_to_html(text: str) -> str:
     """Converts reStructuredText (such as a Python docstring) to HTML."""
-    if text.startswith(" ") or text.startswith("\t"):
+    if text is None:
+        text = ""
+    elif text.startswith(" ") or text.startswith("\t"):
         text = dedent(text)
     elif "\n" in text:
         lines = text.splitlines()
