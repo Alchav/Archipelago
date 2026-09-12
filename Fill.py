@@ -1262,7 +1262,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     else:
                         continue
                 else:
-                    logging.info(f"Couldn't swap {a} for player {a.player}")
+                    logging.info(f"Couldn't swap {a} - {a.item} for player {a.player}")
             break
         player_spheres = {loc.player for loc in sphere}
         for player in player_spheres:
@@ -1375,21 +1375,28 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             raise ValueError(f"Unknown hint point owner {configured_name!r}")
         hints_by_owner[owner] += int(hint_count)
 
+    initially_empty_locations = {location for location in multiworld.get_locations() if location.item is None}
     swap_out_locations = [
         location for location in multiworld.get_locations()
-        if (
+        if location.address is not None
+           and (
                    (
                            location.item
                            and location.item.player in auto_players
                            and not location.advancement
                            and location.item.name != "SilverArrows"
+                           and not location.locked
                    )
                    or not location.item
            )
-           and not location.locked
     ]
     # swap_out_locations = multiworld.random.sample(swap_out_locations, len(swap_out_locations) // 2)
-    point_spheres = list(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False))
+    point_spheres = list(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=True))
+    unreachable_sphere_index = next(
+        (sphere_index + 1 for sphere_index, sphere in enumerate(point_spheres[:-1])
+         if not sphere and point_spheres[sphere_index + 1]),
+        None,
+    )
     location_sphere = {location: sphere_index for sphere_index, sphere in enumerate(point_spheres)
                        for location in sphere}
     owner_spheres = collections.defaultdict(set)
@@ -1422,9 +1429,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     for sphere_index, candidates in available_by_sphere.items():
         interested_owners = [owner for owner in funded_owners if sphere_index in owner_spheres[owner]]
         if not interested_owners:
-            continue
+            interested_owners = sorted(funded_owners)
         sphere_weights = {
-            owner: hints_by_owner[owner] / len(owner_spheres[owner])
+            owner: hints_by_owner[owner] / max(1, len(owner_spheres[owner]))
             for owner in interested_owners
         }
         counts = apportion(sphere_weights, len(candidates))
@@ -1444,17 +1451,44 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     # Usually every item is worth one point. If there are fewer locations than
     # requested hints, add point value to existing items so the request is met.
-    extra_point_count = max(0, requested_hint_count * multiworld.hint_ratio - placed_location_count)
-    extra_weights = {owner: hints_by_owner[owner] for owner in placed_locations_by_owner}
-    extras_by_owner = apportion(extra_weights, extra_point_count)
+    extras_by_owner = {
+        owner: max(0, hints_by_owner[owner] * multiworld.hint_ratio - len(sphere_locations))
+        for owner, sphere_locations in placed_locations_by_owner.items()
+    }
+    unreachable_bonus_by_owner = collections.defaultdict(int)
+    if unreachable_sphere_index is not None:
+        for owner in placed_locations_by_owner:
+            if any(sphere_index == unreachable_sphere_index and location in initially_empty_locations
+                   for sphere_index, location in placed_locations_by_owner[owner]):
+                reachable_sphere_count = len(owner_spheres[owner] - {unreachable_sphere_index})
+                if reachable_sphere_count:
+                    unreachable_bonus_by_owner[owner] = (
+                        hints_by_owner[owner] * multiworld.hint_ratio + reachable_sphere_count - 1
+                    ) // reachable_sphere_count
     for owner, sphere_locations in sorted(placed_locations_by_owner.items()):
         extras = extras_by_owner[owner]
         extra_base, extra_remainder = divmod(extras, len(sphere_locations))
+        unreachable_locations = [location for sphere_index, location in sphere_locations
+                                 if sphere_index == unreachable_sphere_index]
+        unreachable_location_indexes = {location: index for index, location in enumerate(unreachable_locations)}
+        bonus_base, bonus_remainder = divmod(
+            unreachable_bonus_by_owner[owner], max(1, len(unreachable_locations)))
         for item_index, (_sphere_index, location) in enumerate(sphere_locations):
             amount = 1 + extra_base + (item_index < extra_remainder)
+            if _sphere_index == unreachable_sphere_index:
+                unreachable_index = unreachable_location_indexes[location]
+                amount += bonus_base + (unreachable_index < bonus_remainder)
             new_item = multiworld.worlds[1].create_hint_point_item(owner, amount)
+            if location.item:
+                location.item.location = None
             location.item = new_item
             new_item.location = location
+
+    remaining_empty_checks = [location for location in multiworld.get_locations()
+                              if location.address is not None and location.item is None]
+    if remaining_empty_checks:
+        breakpoint()
+        # raise RuntimeError(f"Hint point fill left {len(remaining_empty_checks)} real locations empty")
 
     # # Prefer placing a player's own items (both kinds) in their own locations first
     # players_in_items = {p for (_, p) in items}
@@ -2128,21 +2162,41 @@ def compress_owner_spheres(multiworld):
 
         i += 1
         logging.info(f"compress sphere loop {i}. Highest sphere: {highest_sphere}")
-        candidate_spheres = []
+        moved_any = False
         for owner in owners_above_max_sphere:
             owner_players = owner_groups[owner]
+            candidate_spheres = []
             for sphere_index, sphere in enumerate(spheres):
-                candidates = [location for location in sphere
+                candidates = [(location, location.item) for location in sphere
                               if swappable(multiworld, location, within_local=True) and location.item and
                               location.item.advancement and location.item.player in owner_players]
                 if candidates:
-                    candidate_spheres.append((len(candidates), sphere_index, candidates))
-        if not candidate_spheres:
+                    candidate_spheres.append((len(sphere), sphere_index, candidates))
+
+            moves_remaining = (spheres_per_owner[owner] - max_sphere) + 1
+            if moves_remaining > 10:
+                moves_remaining *= 2
+            if moves_remaining > 5:
+                moves_remaining *= 2
+            while moves_remaining > 0 and candidate_spheres:
+                candidate_index = min(range(len(candidate_spheres)),
+                                      key=lambda index: (candidate_spheres[index][0],
+                                                         -candidate_spheres[index][1]))
+                sphere_size, sphere_index, candidates = candidate_spheres[candidate_index]
+                location, original_item = multiworld.random.choice(candidates)
+                candidates.remove((location, original_item))
+                if candidates:
+                    candidate_spheres[candidate_index] = (sphere_size, sphere_index, candidates)
+                else:
+                    candidate_spheres.pop(candidate_index)
+                if location.item is not original_item:
+                    continue
+                _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index,
+                                                 location, merge_jigsaw=True)
+                moved_any = True
+                moves_remaining -= 1
+        if not moved_any:
             break
-        _, sphere_index, candidates = min(candidate_spheres,
-                                          key=lambda candidate: (candidate[0], -candidate[1]))
-        _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index,
-                                         multiworld.random.choice(candidates), merge_jigsaw=True)
 
 def compress_spheres(multiworld, max_sphere):
     def gen_spheres():
