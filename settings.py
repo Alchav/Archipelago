@@ -562,6 +562,8 @@ class ServerOptions(Group):
         "auto" -> automatic release on goal completion
         "auto-enabled" -> automatic release on goal completion and manual release is also enabled
         "goal" -> release is allowed after goal completion
+        "goal-non-advancement" -> release non-advancement items after goal completion
+        "auto-non-advancement" -> automatically release non-advancement items on goal completion
         """
 
     class CollectMode(str):

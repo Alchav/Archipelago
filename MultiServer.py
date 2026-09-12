@@ -883,7 +883,8 @@ class Context:
         elif "auto" in self.collect_mode:
             collect_player(self, client.team, client.slot)
         if "auto" in self.release_mode:
-            release_player(self, client.team, client.slot)
+            release_player(self, client.team, client.slot,
+                           non_advancement="non-advancement" in self.release_mode)
         self.save()  # save goal completion flag
 
     def on_new_hint(self, team: int, slot: int):
@@ -1113,13 +1114,19 @@ def update_checked_locations(ctx: Context, team: int, slot: int):
                   [{"cmd": "RoomUpdate", "checked_locations": get_checked_checks(ctx, team, slot)}])
 
 
-def release_player(ctx: Context, team: int, slot: int, tokens=False):
+def release_player(ctx: Context, team: int, slot: int, tokens=False, non_advancement=False):
     """register any locations that are in the multidata"""
     all_locations = set(ctx.locations[slot])
     if tokens:
         all_locations = {loc for loc in all_locations if ctx.locations[slot][loc][1] == 2}
-    ctx.broadcast_text_all("%s (Team #%d) has released all remaining items from their world."
-                           % (ctx.player_names[(team, slot)], team + 1),
+    elif non_advancement:
+        all_locations = {
+            loc for loc in all_locations
+            if not ctx.locations[slot][loc][2] & ItemClassification.progression
+        }
+    released_items = "non-advancement items" if non_advancement else "items"
+    ctx.broadcast_text_all("%s (Team #%d) has released all remaining %s from their world."
+                           % (ctx.player_names[(team, slot)], team + 1, released_items),
                            {"type": "Release", "team": team, "slot": slot})
     register_location_checks(ctx, team, slot, all_locations)
     update_checked_locations(ctx, team, slot)
@@ -1731,7 +1738,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 if self.ctx.release_mode == "tokens":
                     release_player(self.ctx, self.client.team, self.client.slot, tokens=True)
                     return True
-                release_player(self.ctx, self.client.team, self.client.slot)
+                release_player(
+                    self.ctx, self.client.team, self.client.slot,
+                    non_advancement="non-advancement" in self.ctx.release_mode,
+                )
                 return True
             else:
                 self.output(
@@ -2848,7 +2858,7 @@ class ServerCommandProcessor(CommonCommandProcessor):
         elif value_type == str and option_name.endswith("mode"):
             valid_values = {"goal", "enabled", "disabled"}
             if option_name == "release_mode":
-                valid_values.add("tokens")
+                valid_values.update(("tokens", "goal-non-advancement", "auto-non-advancement"))
             elif option_name == "collect_mode":
                 valid_values.update(("cleared", "auto_cleared"))
             valid_values.update(("auto", "auto_enabled") if option_name != "remaining_mode" else [])
@@ -2922,13 +2932,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--hint_location_cost', default=defaults["hint_location_cost"], type=int)
     parser.add_argument('--disable_item_cheat', default=defaults["disable_item_cheat"], action='store_true')
     parser.add_argument('--release_mode', default=defaults["release_mode"], nargs='?',
-                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "tokens"], help='''\
+                        choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "tokens",
+                                 "goal-non-advancement", "auto-non-advancement"], help='''\
                              Select !release Accessibility. (default: %(default)s)
                              auto:     Automatic "release" on goal completion
                              enabled:  !release is always available
                              disabled: !release is never available
                              goal:     !release can be used after goal completion
                              auto-enabled: !release is available and automatically triggered on goal completion
+                             goal-non-advancement: !release non-advancement items after goal completion
+                             auto-non-advancement: Automatically release non-advancement items on goal completion
                              ''')
     parser.add_argument('--collect_mode', default=defaults["collect_mode"], nargs='?',
                         choices=['auto', 'enabled', 'disabled', "goal", "auto-enabled", "cleared", "auto_cleared"],

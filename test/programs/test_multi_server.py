@@ -4,7 +4,8 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from NetUtils import ClientStatus
-from MultiServer import Context, ServerCommandProcessor, collect_player_cleared, update_client_status
+from BaseClasses import ItemClassification
+from MultiServer import Context, ServerCommandProcessor, collect_player_cleared, release_player, update_client_status
 
 
 class TestResolvePlayerName(unittest.TestCase):
@@ -91,3 +92,24 @@ class TestClearedCollect(unittest.TestCase):
 
         update_client_status(ctx, client, ClientStatus.CLIENT_GOAL)
         ctx.on_goal_achieved.assert_called_once_with(client)
+
+
+class TestNonAdvancementRelease(unittest.TestCase):
+    def test_releases_only_non_advancement_locations(self) -> None:
+        ctx = SimpleNamespace(
+            locations={1: {
+                10: (100, 2, ItemClassification.progression),
+                11: (101, 2, ItemClassification.useful),
+                12: (102, 2, ItemClassification.trap),
+                13: (103, 2, ItemClassification.filler),
+            }},
+            player_names={(0, 1): "Player"},
+            broadcast_text_all=Mock(),
+        )
+
+        with patch("MultiServer.register_location_checks") as register, \
+                patch("MultiServer.update_checked_locations") as update:
+            release_player(ctx, 0, 1, non_advancement=True)
+
+        register.assert_called_once_with(ctx, 0, 1, {11, 12, 13})
+        update.assert_called_once_with(ctx, 0, 1)
