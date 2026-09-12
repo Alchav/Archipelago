@@ -437,6 +437,9 @@ class WaffleWorld(World):
 
         itempool += trap_pool
 
+        # Leave half of the otherwise-junk locations empty for AlchapelaBot hint point items.
+        junk_count //= 2
+
         junk_weights = []
         junk_weights += ([ItemName.one_coin] * 3)
         junk_weights += ([ItemName.five_coins] * 4)

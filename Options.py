@@ -1759,6 +1759,8 @@ class Owner(TextChoice):
     option_Ophilla = 10
     option_Factorio = 11
     option_Alchav64 = 12
+    option_Leigh = 14
+    option_LeighSDV = 15
     default = 9
 
 

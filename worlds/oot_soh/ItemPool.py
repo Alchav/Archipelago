@@ -599,7 +599,8 @@ def create_triforce_pieces(world: "SohWorld") -> None:
 
 
 def create_filler_item_pool(world: "SohWorld") -> None:
-    filler_item_count = get_open_location_count(world)
+    # Leave 75% of otherwise-filler locations empty for AlchapelaBot hint point items.
+    filler_item_count = get_open_location_count(world) // 4
 
     # Ice Trap Count
     ice_trap_count = min(filler_item_count, world.options.ice_trap_count.value)

@@ -841,8 +841,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     option = "o"  # g: total spheres, b: beaten game spheres, r: random starting spheres, o: owner chains
 
     if option == "o":
-        # compress_owner_spheres(multiworld)
-        pass
+        compress_owner_spheres(multiworld)
+        # pass
     else:
         compress_spheres(multiworld, sphere_max)
 
@@ -2091,6 +2091,7 @@ def _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index, location
 
 
 def compress_owner_spheres(multiworld):
+    logging.info("Compressing owner spheres")
     def gen_spheres():
         spheres = []
         for sphere in get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False):

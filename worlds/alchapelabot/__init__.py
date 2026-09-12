@@ -51,6 +51,8 @@ class AlchapelaBotWorld(World):
         "Ophilla Hint Point": 1010,
         "Factorio Hint Point": 1011,
         "Alchav64 Hint Point": 1012,
+        "Leigh Hint Point": 1014,
+        "Leigh SDV Hint Point": 1015,
         "Nothing": 100000
     }
 
