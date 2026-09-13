@@ -712,8 +712,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     progitempool.sort(key=lambda i: i.classification != ItemClassification.progression_skip_balancing)
 
-    prioritylocations.sort(key=lambda loc: loc.can_reach(multiworld.state))
-    defaultlocations.sort(key=lambda loc: loc.can_reach(multiworld.state))
+    prioritylocations.sort(key=lambda loc: bool(loc.can_reach(multiworld.state)))
+    defaultlocations.sort(key=lambda loc: bool(loc.can_reach(multiworld.state)))
 
     if prioritylocations:
         for player in multiworld.player_ids:
@@ -826,7 +826,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # longify_spheres(multiworld)
     sphere_max = 15
 
-    def test_beatable():
+    def test_beatable(stage=""):
         if not multiworld.can_beat_game():
             state = multiworld.state.copy()
             state.sweep_for_advancements()
@@ -848,7 +848,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
 
 
-    test_beatable()
+    test_beatable("after owner sphere compression")
 
     defaultlocations = []
     excludedlocations = []
@@ -1234,7 +1234,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             # breakpoint()
             logging.info(f"didn't find sphere count for player {player}")
 
-    test_beatable()
+    test_beatable("after filling remaining items")
 
     if not multiworld.fulfills_accessibility():
         logging.info("doesn't fulfill accessibility, breaking")
@@ -1297,6 +1297,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             #                 break
 
     check_no_skips(multiworld, starting_spheres)
+    test_beatable("after placing game unlocks")
 
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
     ordered_spheres = []
@@ -1323,6 +1324,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                 logging.info(f"{location.item} already in owner's sphere at {location}")
 
     check_no_skips(multiworld, starting_spheres)
+    test_beatable("after relocating game unlocks into owner locations")
 
     # for sphere in reversed(spheres):
     player_start_items = [item for item in sum(multiworld.precollected_items.values(), []) if item.player > 1 and item.code]
@@ -1355,6 +1357,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             logging.info(f"Can't move {item} out of start inventory")
 
     check_no_skips(multiworld, starting_spheres)
+    test_beatable("after moving precollected items into their starting spheres")
 
     auto_players = {pid for pid, name in multiworld.player_name.items() if "Auto" in name}
 
@@ -1539,6 +1542,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #     new_item.location = loc
 
     check_no_skips(multiworld, starting_spheres)
+    test_beatable("after placing hint point items")
 
     # hint_ratio was selected above from available point-item locations.
     # multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
@@ -2236,7 +2240,8 @@ def check_no_skips(multiworld, starting_spheres):
         for player in multiworld.player_ids:
             if player in sphere_games:
                 if games[player] == 2:
-                    logging.info("breaking1")
+                    logging.warning("%s (player %d) has locations after skipping sphere %d",
+                                    multiworld.player_name[player], player, n - 1)
                     breakpoint()
                 else:
                     games[player] = 1
@@ -2245,5 +2250,6 @@ def check_no_skips(multiworld, starting_spheres):
                     games[player] = 2
         for loc in sphere:
             if loc.item and loc.item.game == "AlchapelaBot" and loc.item.code in starting_spheres and starting_spheres[loc.item.code] != n:
-                logging.info("breaking2")
+                logging.warning("%s is in sphere %d instead of configured sphere %d",
+                                loc.item.name, n, starting_spheres[loc.item.code])
                 breakpoint()
