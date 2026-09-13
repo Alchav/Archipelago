@@ -1437,7 +1437,15 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             owner: hints_by_owner[owner] / max(1, len(owner_spheres[owner]))
             for owner in interested_owners
         }
-        counts = apportion(sphere_weights, len(candidates))
+        # Keep every funded owner represented in each eligible sphere whenever
+        # the sphere has enough locations, then apportion the remaining room.
+        if len(candidates) >= len(interested_owners):
+            counts = {owner: 1 for owner in interested_owners}
+            extra_counts = apportion(sphere_weights, len(candidates) - len(interested_owners))
+            for owner, count in extra_counts.items():
+                counts[owner] += count
+        else:
+            counts = apportion(sphere_weights, len(candidates))
         candidate_index = 0
         for owner, count in sorted(counts.items()):
             locations_by_owner_sphere[owner, sphere_index].extend(
@@ -1450,42 +1458,58 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     placed_location_count = sum(len(locations) for locations in placed_locations_by_owner.values())
     requested_hint_count = sum(hints_by_owner.values())
-    multiworld.hint_ratio = max(1, placed_location_count // max(1, requested_hint_count))
+    # The cost must be high enough that an equal sphere share contains at least
+    # one point for every item assigned to that sphere. This lets dense spheres
+    # use cheaper items and sparse spheres use more valuable items while every
+    # sphere receives the same total (apart from integer rounding).
+    minimum_hint_cost = max(1, (placed_location_count + max(1, requested_hint_count) - 1)
+                            // max(1, requested_hint_count))
+    for owner, sphere_locations in placed_locations_by_owner.items():
+        locations_per_sphere = collections.Counter(sphere_index for sphere_index, _location in sphere_locations)
+        reachable_spheres = [sphere_index for sphere_index in locations_per_sphere
+                             if sphere_index != unreachable_sphere_index]
+        if not reachable_spheres or hints_by_owner[owner] <= 0:
+            continue
+        densest_sphere = max(locations_per_sphere.values())
+        minimum_hint_cost = max(
+            minimum_hint_cost,
+            (densest_sphere * len(reachable_spheres) + hints_by_owner[owner] - 1)
+            // hints_by_owner[owner],
+        )
+    multiworld.hint_ratio = minimum_hint_cost
 
-    # Usually every item is worth one point. If there are fewer locations than
-    # requested hints, add point value to existing items so the request is met.
-    extras_by_owner = {
-        owner: max(0, hints_by_owner[owner] * multiworld.hint_ratio - len(sphere_locations))
-        for owner, sphere_locations in placed_locations_by_owner.items()
-    }
-    unreachable_bonus_by_owner = collections.defaultdict(int)
-    if unreachable_sphere_index is not None:
-        for owner in placed_locations_by_owner:
-            if any(sphere_index == unreachable_sphere_index and location in initially_empty_locations
-                   for sphere_index, location in placed_locations_by_owner[owner]):
-                reachable_sphere_count = len(owner_spheres[owner] - {unreachable_sphere_index})
-                if reachable_sphere_count:
-                    unreachable_bonus_by_owner[owner] = (
-                        hints_by_owner[owner] * multiworld.hint_ratio + reachable_sphere_count - 1
-                    ) // reachable_sphere_count
     for owner, sphere_locations in sorted(placed_locations_by_owner.items()):
-        extras = extras_by_owner[owner]
-        extra_base, extra_remainder = divmod(extras, len(sphere_locations))
-        unreachable_locations = [location for sphere_index, location in sphere_locations
-                                 if sphere_index == unreachable_sphere_index]
-        unreachable_location_indexes = {location: index for index, location in enumerate(unreachable_locations)}
-        bonus_base, bonus_remainder = divmod(
-            unreachable_bonus_by_owner[owner], max(1, len(unreachable_locations)))
-        for item_index, (_sphere_index, location) in enumerate(sphere_locations):
-            amount = 1 + extra_base + (item_index < extra_remainder)
-            if _sphere_index == unreachable_sphere_index:
-                unreachable_index = unreachable_location_indexes[location]
-                amount += bonus_base + (unreachable_index < bonus_remainder)
-            new_item = multiworld.worlds[1].create_hint_point_item(owner, amount)
-            if location.item:
-                location.item.location = None
-            location.item = new_item
-            new_item.location = location
+        locations_per_sphere = collections.defaultdict(list)
+        for sphere_index, location in sphere_locations:
+            locations_per_sphere[sphere_index].append(location)
+        reachable_spheres = [sphere_index for sphere_index in locations_per_sphere
+                             if sphere_index != unreachable_sphere_index]
+        sphere_point_totals = apportion(
+            {sphere_index: 1 for sphere_index in reachable_spheres},
+            hints_by_owner[owner] * multiworld.hint_ratio,
+        )
+        # An unreachable sphere is a bonus and receives the same point total as
+        # one reachable sphere, without reducing the reachable allocation.
+        if unreachable_sphere_index in locations_per_sphere and reachable_spheres:
+            sphere_point_totals[unreachable_sphere_index] = (
+                hints_by_owner[owner] * multiworld.hint_ratio + len(reachable_spheres) - 1
+            ) // len(reachable_spheres)
+
+        for sphere_index, locations in locations_per_sphere.items():
+            point_total = sphere_point_totals.get(sphere_index, len(locations))
+            if point_total < len(locations):
+                raise RuntimeError(
+                    f"Hint cost {multiworld.hint_ratio} cannot fit {len(locations)} {owner_names[owner]} "
+                    f"hint items into sphere {sphere_index + 1} with only {point_total} points"
+                )
+            base_amount, remainder = divmod(point_total, len(locations))
+            for location_index, location in enumerate(locations):
+                amount = base_amount + (location_index < remainder)
+                new_item = multiworld.worlds[1].create_hint_point_item(owner, amount)
+                if location.item:
+                    location.item.location = None
+                location.item = new_item
+                new_item.location = location
 
     remaining_empty_checks = [location for location in multiworld.get_locations()
                               if location.address is not None and location.item is None]
