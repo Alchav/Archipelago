@@ -454,19 +454,50 @@ def _build_coupled_mixed_connections(
         outgoing: dict[str, tuple[str, ...]],
         allow_castle_return_bits_branch: bool,
 ) -> dict[str, str]:
+    for _ in range(200):
+        try:
+            connections = _build_coupled_mixed_connections_once(
+                random, sources, destinations, normal_sources, outgoing,
+                allow_castle_return_bits_branch)
+        except ValueError:
+            continue
+        avoids_normal_returns = all(
+            connections[outgoing_source] != root_source.removeprefix("normal:")
+            for root_source in normal_sources
+            if connections[root_source] in outgoing
+            for outgoing_source in outgoing[connections[root_source]]
+        )
+        preserves_reusable_returns = all(
+            any(
+                connections[outgoing_source] == SUB_AREA_SOURCES[source].return_destination
+                for outgoing_source in outgoing[connections[source]]
+            )
+            for source in REUSABLE_ENTRY_KEYS
+            if source in connections and connections[source] in outgoing
+        )
+        if avoids_normal_returns and preserves_reusable_returns:
+            return connections
+    raise ValueError("Coupled mixed sub-area shuffle could not avoid a two-step vanilla return")
+
+
+def _build_coupled_mixed_connections_once(
+        random: Random,
+        sources: list[str],
+        destinations: list[str],
+        normal_sources: dict[str, int],
+        outgoing: dict[str, tuple[str, ...]],
+        allow_castle_return_bits_branch: bool,
+) -> dict[str, str]:
     """Shuffle mixed entrances while preserving reusable level returns."""
     branch_destinations = [destination for destination in destinations if destination in outgoing]
     bits_source = "normal:Bowser in the Sky"
     connections: dict[str, str] = {}
 
-    source_homes = {
-        source: source.removeprefix("normal:")
-        for source in normal_sources
-    }
-    source_homes.update({
+    reusable_source_homes = {
         key: SUB_AREA_SOURCES[key].return_destination
         for key in REUSABLE_ENTRY_KEYS if key in sources
-    })
+    }
+    root_sources = set(normal_sources) | set(reusable_source_homes)
     available_sources = set(sources)
     available_destinations = set(destinations)
 
@@ -491,23 +522,37 @@ def _build_coupled_mixed_connections(
     for destination in tuple(branch_destinations):
         if destination not in available_destinations:
             continue
+        terminal_destinations = [
+            candidate for candidate in available_destinations
+            if candidate != destination and candidate not in outgoing
+        ]
         candidates = [
-            source for source, home in source_homes.items()
+            source for source in root_sources
             if source in available_sources
             and source not in outgoing[destination]
-            and home in available_destinations
-            and home != destination
+            and (
+                reusable_source_homes.get(source) in terminal_destinations
+                if source in reusable_source_homes
+                else any(candidate != source.removeprefix("normal:") for candidate in terminal_destinations)
+            )
         ]
         exit_sources = [source for source in outgoing[destination] if source in available_sources]
         if not candidates or not exit_sources:
             continue
         source = random.choice(candidates)
         exit_source = random.choice(exit_sources)
-        home = source_homes[source]
+        if source in reusable_source_homes:
+            return_destination = reusable_source_homes[source]
+        else:
+            source_home = source.removeprefix("normal:")
+            return_destination = random.choice([
+                candidate for candidate in terminal_destinations
+                if candidate != source_home
+            ])
         connections[source] = destination
-        connections[exit_source] = home
+        connections[exit_source] = return_destination
         available_sources.difference_update((source, exit_source))
-        available_destinations.difference_update((destination, home))
+        available_destinations.difference_update((destination, return_destination))
 
     remaining_sources = [source for source in sources if source in available_sources]
     remaining_destinations = [
@@ -518,9 +563,24 @@ def _build_coupled_mixed_connections(
             f"Coupled mixed source/destination mismatch: "
             f"{len(remaining_sources)} != {len(remaining_destinations)}")
     random.shuffle(remaining_sources)
-    random.shuffle(remaining_destinations)
-    connections.update(zip(remaining_sources, remaining_destinations))
-    return connections
+    forbidden_destinations: dict[str, set[str]] = {}
+    for root_source in normal_sources:
+        branch_destination = connections.get(root_source)
+        if branch_destination not in outgoing:
+            continue
+        source_home = root_source.removeprefix("normal:")
+        for outgoing_source in outgoing[branch_destination]:
+            forbidden_destinations.setdefault(outgoing_source, set()).add(source_home)
+
+    for _ in range(200):
+        shuffled_destinations = list(remaining_destinations)
+        random.shuffle(shuffled_destinations)
+        if all(
+                destination not in forbidden_destinations.get(source, ())
+                for source, destination in zip(remaining_sources, shuffled_destinations)):
+            connections.update(zip(remaining_sources, shuffled_destinations))
+            return connections
+    raise ValueError("Coupled mixed sub-area shuffle could not avoid a two-step vanilla return")
 
 
 def destination_slot_data(destination_key: int | str, normal_destination_data: dict[int, int]) -> int:

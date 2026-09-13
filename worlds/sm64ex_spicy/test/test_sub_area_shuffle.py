@@ -180,6 +180,32 @@ class MixedSubAreaShuffleTest(SM64TestBase):
                 for exit_source in outgoing[destination]
             ))
 
+    def test_normal_entrances_do_not_return_to_their_vanilla_level_in_two_steps(self):
+        normal_destinations = {**sm64_level_to_paintings, **sm64_level_to_secrets}
+        normal_sources = {
+            f"normal:{destination}": int(source)
+            for source, destination in normal_destinations.items()
+        }
+        for seed in range(100):
+            connections = build_mixed_connections(
+                Random(seed), normal_sources, tuple(normal_destinations.values()),
+                include_castle_returns=True, include_sub_areas=True,
+                allow_castle_return_bits_branch=True,
+            )
+            for source in normal_sources:
+                destination = connections[source]
+                if destination not in OUTGOING_SOURCES_BY_DESTINATION \
+                        and destination not in CASTLE_RETURN_OUTGOING_BY_DESTINATION:
+                    continue
+                outgoing = (
+                    OUTGOING_SOURCES_BY_DESTINATION.get(destination)
+                    or CASTLE_RETURN_OUTGOING_BY_DESTINATION[destination]
+                )
+                self.assertTrue(all(
+                    connections[outgoing_source] != source.removeprefix("normal:")
+                    for outgoing_source in outgoing
+                ), (seed, source, destination))
+
     def test_bits_can_use_castle_return_level_when_all_categories_are_mixed(self):
         normal_destinations = (
             "Bob-omb Battlefield",
