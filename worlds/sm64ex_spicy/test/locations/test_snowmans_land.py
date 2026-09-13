@@ -106,7 +106,7 @@ class TestSnowmansLandLocations(SM64TestBase):
 
             ["Snowman's Land - Vanish Cap Block", False, igloo],
             ["Snowman's Land - Vanish Cap Block", True,
-             igloo + ["Snowman's Land - Vanish Cap"]],
+             igloo + ["Snowman's Land - Vanish Cap", "Ledge Grab"]],
             ["Snowman's Land - 3 Coins Block", False, igloo],
             ["Snowman's Land - 3 Coins Block", True,
              igloo + ["Snowman's Land - 3-Coin Block"]],

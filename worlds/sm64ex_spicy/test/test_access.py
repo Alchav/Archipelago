@@ -5569,7 +5569,7 @@ class SnowmansLandCoinStar126AccessTestBase(SnowmansLandCoinStarAccessTestBase):
 
         self.collect_by_name([
             "Vanish Cap",
-            "Wall Kick",
+            "Ledge Grab",
             "Snowman's Land - Cannon Unlock",
         ])
         self.assertTrue(self.can_reach_location("Snowman's Land - Into the Igloo"))

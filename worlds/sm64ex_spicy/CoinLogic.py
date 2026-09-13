@@ -2020,8 +2020,13 @@ def snowmans_land_coins(
         and (Rules.has_action(state, player, "Long Jump", level_name) or can_reach_igloo_entrance),
     )
     can_reach_igloo = state.can_reach(f"{level_name} - Igloo", "Region", player)
-    can_reach_vanish_cap = state.can_reach(f"{level_name} - Vanish Cap Block", "Location", player)
     has_vanish_cap = Rules.has_vanish_cap(state, player, level_name)
+    can_reach_vanish_cap = has_vanish_cap and (
+        any(Rules.has_action(state, player, action, level_name)
+            for action in ("Triple Jump", "Side Flip", "Backflip", "Ledge Grab"))
+        or Rules.can_use_logic_trick(
+            state, player, "logic_sl_igloo_vanish_block_with_spindrift", target_name)
+    )
     igloo_source_data = (
         (
             "sl_igloo_frozen_coin_lines",
@@ -4673,7 +4678,8 @@ def _middle_requirement_specs():
          (_unlock("Single Yellow Coins", SL),))
     _add(SL, "sl_snowman_head_region_access", f"{{{SL} - Top of Snowman's Head}}")
 
-    _add(SL, "sl_igloo_frozen_coin_lines", f"{{{SL} - Igloo}} & VC",
+    _add(SL, "sl_igloo_frozen_coin_lines",
+         f"{{{SL} - Igloo}} & (VC & TJ/SF/BF/LG | logic_sl_igloo_vanish_block_with_spindrift)",
          (_unlock("Horizontal Coin Lines", SL),))
     _add(SL, "sl_igloo_single_coins", f"{{{SL} - Igloo}}",
          unlocks=(_unlock("Single Yellow Coins", SL),))
