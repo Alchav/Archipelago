@@ -1310,7 +1310,11 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         for location in [loc for loc in sphere if loc.item and "Unlock " in loc.item.name and loc.item.player == 1]:
             if multiworld.worlds[location.item.code].options.owner.value != multiworld.worlds[location.player].options.owner.value:
                 for new_location in sphere:
-                    if not new_location.locked and multiworld.worlds[location.item.code].options.owner.value == multiworld.worlds[new_location.player].options.owner.value:
+                    if (not new_location.locked
+                            and new_location.progress_type != LocationProgressType.EXCLUDED
+                            and new_location.item_rule(location.item)
+                            and multiworld.worlds[location.item.code].options.owner.value
+                            == multiworld.worlds[new_location.player].options.owner.value):
                         location.item, new_location.item = new_location.item, location.item
                         if location.item:
                             location.item.location = location
