@@ -43,6 +43,7 @@ from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entr
     sm64_shuffled_entrance_ids, sm64_entrance_source_descriptions, \
     sm64_entrance_destination_descriptions, sm64_entrance_source_names
 from .SubAreas import CASTLE_RETURN_SOURCES, RETURN_SOURCES, SUB_AREA_SOURCES, \
+    OUTGOING_SOURCES_BY_DESTINATION, CASTLE_RETURN_OUTGOING_BY_DESTINATION, \
     SUB_AREA_DESTINATION_DESCRIPTIONS, SUB_AREA_SOURCE_DESCRIPTIONS, SUB_AREA_SOURCE_NAMES, \
     sub_area_destination_name, sub_area_source_by_id
 from BaseClasses import CollectionState, Entrance, Item, Region, Tutorial
@@ -1611,43 +1612,80 @@ class SM64World(World):
 
     def extend_hint_information(self, hint_data: typing.Dict[int, typing.Dict[int, str]]):
         if self.topology_present:
-            er_hint_data = {}
-            for entrance, destination in self.area_connections.items():
-                if not isinstance(entrance, int) or not isinstance(destination, int):
-                    continue
-                destination_name = self.get_normal_entrance_name(destination)
-                region_name = (
-                    "Bowser in the Sky" if destination == int(SM64Levels.BOWSER_IN_THE_SKY)
-                    else sm64_entrance_to_region[destination_name]
-                )
-                if destination_name == "Tiny-Huge Island (Tiny)":
-                    continue
-                if region_name == "Tick Tock Clock Moving":
-                    region_name = "Tick Tock Clock"
-                if destination_name == "Tiny-Huge Island (Huge)":
-                    # Special rules for Tiny-Huge Island's dual entrances
-                    reverse_area_connections = {
-                        mapped_destination: mapped_entrance
-                        for mapped_entrance, mapped_destination in self.area_connections.items()
-                    }
-                    entrance_name = (
-                        self.get_connection_source_name(
-                            reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_HUGE])
-                        + ' or ' + self.get_connection_source_name(
-                            reverse_area_connections[SM64Levels.TINY_HUGE_ISLAND_TINY])
+            shuffled_normal_sources = self.get_shuffled_normal_entrance_ids()
+            outgoing_sources = {
+                **OUTGOING_SOURCES_BY_DESTINATION,
+                **CASTLE_RETURN_OUTGOING_BY_DESTINATION,
+            }
+            source_data = {
+                **SUB_AREA_SOURCES,
+                **RETURN_SOURCES,
+                **CASTLE_RETURN_SOURCES,
+            }
+            location_roots: dict[int, set[int]] = {}
+
+            def destination_key_and_region(destination: int | str) -> tuple[str, str]:
+                if isinstance(destination, int):
+                    destination_name = self.get_normal_entrance_name(destination)
+                    region_name = (
+                        "Bowser in the Sky" if destination == int(SM64Levels.BOWSER_IN_THE_SKY)
+                        else sm64_entrance_to_region[destination_name]
                     )
-                    regions = [
-                        self.multiworld.get_region("Tiny-Huge Island (Huge)", self.player),
-                        self.multiworld.get_region("Tiny-Huge Island (Tiny)", self.player),
-                    ]
-                else:
-                    entrance_name = self.get_normal_entrance_source_name(entrance)
-                    regions = [self.multiworld.get_region(region_name, self.player)]
-                for region in regions[:]:
-                    regions += region.subregions
-                for region in regions:
-                    for location in region.locations:
-                        if location.address is None:
-                            continue
-                        er_hint_data[location.address] = entrance_name
-            hint_data[self.player] = er_hint_data
+                    if region_name.startswith("Wet-Dry World - "):
+                        region_name = "Wet-Dry World"
+                    elif region_name == "Tick Tock Clock Moving":
+                        region_name = "Tick Tock Clock"
+                    return destination_name, region_name
+                return destination, sub_area_destination_name(destination)
+
+            def add_destination_locations(root: int, destination: int | str) -> None:
+                destination_key, region_name = destination_key_and_region(destination)
+                region = self.multiworld.get_region(region_name, self.player)
+                regions = [region, *region.subregions]
+
+                # A shuffled portal's destination is reached through that portal,
+                # not merely by entering the surrounding course.
+                excluded_regions = {
+                    sub_area_destination_name(source_data[source_key].vanilla_destination)
+                    for source_key in outgoing_sources.get(destination_key, ())
+                    if source_key in self.area_connections
+                }
+                for included_region in regions:
+                    if included_region.name in excluded_regions:
+                        continue
+                    for location in included_region.locations:
+                        if location.address is not None:
+                            location_roots.setdefault(location.address, set()).add(root)
+
+            def walk(root: int, destination: int | str, include_destination: bool,
+                     visited: set[int | str]) -> None:
+                if destination in visited:
+                    return
+                visited.add(destination)
+                destination_key, _region_name = destination_key_and_region(destination)
+                if include_destination:
+                    add_destination_locations(root, destination)
+                for source_key in outgoing_sources.get(destination_key, ()):
+                    next_destination = self.area_connections.get(source_key)
+                    if next_destination is not None:
+                        walk(root, next_destination, True, visited)
+
+            follow_sub_area_paths = any(
+                isinstance(source, str) for source in self.area_connections
+            )
+            for root in sm64_level_to_entrances:
+                destination = self.area_connections.get(root)
+                if destination is None:
+                    continue
+                include_root_destination = root in shuffled_normal_sources
+                if include_root_destination or follow_sub_area_paths:
+                    walk(root, destination, include_root_destination, set())
+
+            root_order = {root: index for index, root in enumerate(sm64_level_to_entrances)}
+            hint_data[self.player] = {
+                location_address: " / ".join(
+                    self.get_normal_entrance_source_name(root)
+                    for root in sorted(roots, key=root_order.__getitem__)
+                )
+                for location_address, roots in location_roots.items()
+            }

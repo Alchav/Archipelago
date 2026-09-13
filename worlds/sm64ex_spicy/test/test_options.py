@@ -2172,6 +2172,73 @@ class EntranceRandoSeparateTestBase(SM64TestBase):
                 self.assertIn(self.world.area_connections[variant_id], sm64_level_to_paintings.keys())
 
 
+class SecretEntranceHintInformationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "main_course_shuffle": Options.MainCourseShuffle.option_vanilla,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_separate,
+    }
+
+    def test_only_shuffled_secret_courses_receive_entrance_hints(self):
+        hint_data = {}
+        self.world.extend_hint_information(hint_data)
+        player_hints = hint_data[self.player]
+
+        pss_location = self.multiworld.get_location(
+            "The Princess's Secret Slide - Block Star", self.player)
+        lll_location = self.multiworld.get_location(
+            "Lethal Lava Land - Boil the Big Bully", self.player)
+
+        self.assertIn(pss_location.address, player_hints)
+        self.assertNotIn(lll_location.address, player_hints)
+
+
+class MainEntranceHintInformationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "main_course_shuffle": Options.MainCourseShuffle.option_separate,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla,
+    }
+
+    def test_all_wdw_entrances_are_listed(self):
+        hint_data = {}
+        self.world.extend_hint_information(hint_data)
+        location = self.multiworld.get_location("Wet-Dry World - Top o' the Town", self.player)
+        expected_sources = {
+            self.world.get_normal_entrance_source_name(source)
+            for source, destination in self.world.area_connections.items()
+            if isinstance(source, int) and destination in wdw_variant_ids
+        }
+
+        self.assertEqual(set(hint_data[self.player][location.address].split(" / ")), expected_sources)
+        self.assertEqual(len(expected_sources), 3)
+
+
+class NestedEntranceHintInformationTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "main_course_shuffle": Options.MainCourseShuffle.option_vanilla,
+        "secret_course_shuffle": Options.SecretCourseShuffle.option_vanilla,
+        "sub_area_shuffle": Options.SubAreaShuffle.option_separate,
+    }
+
+    def test_sub_area_destination_uses_outer_course_entrance(self):
+        bob = int(sm64_entrances_to_level["Bob-omb Battlefield"])
+        ccm = int(sm64_entrances_to_level["Cool, Cool Mountain"])
+        pss = int(sm64_entrances_to_level["The Princess's Secret Slide"])
+        self.world.area_connections[bob] = ccm
+        self.world.area_connections["ccm_slide"] = pss
+
+        hint_data = {}
+        self.world.extend_hint_information(hint_data)
+        location = self.multiworld.get_location("The Princess's Secret Slide - Block Star", self.player)
+
+        self.assertIn(
+            "Bob-omb Battlefield Entrance",
+            hint_data[self.player][location.address].split(" / "),
+        )
+
+
 class EntranceRandoAllTestBase(SM64TestBase):
     options = {
         "main_course_shuffle": Options.MainCourseShuffle.option_mixed,
