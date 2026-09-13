@@ -449,6 +449,13 @@ logic_tricks = {
         "description": "Reaching the roof without Long Jump.",
         "video": "https://www.youtube.com/watch?v=Fpf28uUrR1U"
     },
+    "Big Boo's Haunt Shed Roof No Movement": {
+        "internal_id": "logic_bbh_shed_roof_no_movement",
+        "rule": "",
+        "difficulty": "medium",
+        "description": "Reaching the 1-up on top of the shed roof without any movement options",
+        "video": "https://www.youtube.com/watch?v=cOTE5iSb2GM"
+    },
     # Lethal Lava Land
     "Lethal Lava Land Hot-Foot it Into the Volcano With Wall Kick": {
         "internal_id": "logic_lll_hot_foot_it_with_wall_kick",
