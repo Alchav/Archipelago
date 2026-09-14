@@ -1,11 +1,13 @@
 import unittest
 from collections import defaultdict
+from fractions import Fraction
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from NetUtils import ClientStatus
 from BaseClasses import ItemClassification
-from MultiServer import Context, ServerCommandProcessor, collect_player_cleared, release_player, update_client_status
+from MultiServer import Context, ServerCommandProcessor, _apportion_hint_values_by_sphere, collect_player_cleared, \
+    release_player, update_client_status
 
 
 class TestResolvePlayerName(unittest.TestCase):
@@ -113,3 +115,28 @@ class TestNonAdvancementRelease(unittest.TestCase):
 
         register.assert_called_once_with(ctx, 0, 1, {11, 12, 13})
         update.assert_called_once_with(ctx, 0, 1)
+
+
+class TestProportionalHintPoints(unittest.TestCase):
+    def test_dense_sphere_items_are_worth_proportionally_less(self) -> None:
+        sparse_location = (1, 100)
+        dense_locations = [(2, location) for location in range(200, 224)]
+        values = _apportion_hint_values_by_sphere({
+            2: [sparse_location],
+            4: dense_locations,
+        }, 44)
+
+        self.assertEqual(Fraction(22), values[sparse_location])
+        self.assertEqual(Fraction(11, 12), values[dense_locations[0]])
+        self.assertEqual(Fraction(24), values[sparse_location] / values[dense_locations[0]])
+        self.assertEqual(Fraction(44), sum(values.values(), Fraction()))
+
+    def test_integer_remainder_is_distributed_between_spheres(self) -> None:
+        values = _apportion_hint_values_by_sphere({
+            1: [(1, 10), (1, 11)],
+            2: [(1, 12)],
+        }, 5)
+
+        self.assertEqual(Fraction(3), values[1, 10] + values[1, 11])
+        self.assertEqual(Fraction(2), values[1, 12])
+        self.assertEqual(Fraction(5), sum(values.values(), Fraction()))
