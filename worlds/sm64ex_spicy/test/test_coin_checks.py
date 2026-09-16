@@ -5,6 +5,7 @@ from BaseClasses import CollectionState, ItemClassification
 
 from .bases import SM64TestBase
 from ..CoinChecks import (
+    COIN_BLOCK_SOURCE_METHODS,
     COIN_SOURCE_METHOD_REGION_NAMES,
     COURSE_MAXIMUM_COIN_VALUES,
     CoinOutputKind,
@@ -18,6 +19,7 @@ from ..CoinChecks import (
     select_individual_coin_outputs,
 )
 from ..CoinLogic import COIN_EVALUATORS
+from ..Locations import location_name_groups
 from ..RuleBuilder import CanCollectCoinOutput
 
 
@@ -173,19 +175,19 @@ class CoinCheckCatalogTest(unittest.TestCase):
         expected_first_outputs = {
             "ttc_past_three_spinners_block": (
                 4_013_046, "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block Coin 1",
-                "ttc_timed_jumps_block", "Tick Tock Clock - Upper Moving Bars Area"),
+                "ttc_past_three_spinners_block", "Tick Tock Clock - Upper Moving Bars Area"),
             "ttc_top_central_platform_block": (
                 4_013_049, "Tick Tock Clock - Top Clock Hand 10-Coin Block Coin 1",
-                "ttc_top_clock_hand_block", "Tick Tock Clock - Top Past Spinners"),
+                "ttc_top_central_platform_block", "Tick Tock Clock - Top Past Spinners"),
             "ttc_timed_jumps_block": (
                 4_013_059, "Tick Tock Clock - Past Three Spinners 3-Coin Block Coin 1",
-                "ttc_past_three_spinners_block", "Tick Tock Clock - Top Past Spinners"),
+                "ttc_timed_jumps_block", "Tick Tock Clock - Top Past Spinners"),
             "ttc_four_moving_bars_block": (
                 4_013_072, "Tick Tock Clock - Top Central Platform 10-Coin Block Coin 1",
-                "ttc_top_central_platform_block", "Tick Tock Clock - Top Past Spinners"),
+                "ttc_four_moving_bars_block", "Tick Tock Clock - Top Past Spinners"),
             "ttc_top_clock_hand_block": (
                 4_013_082, "Tick Tock Clock - Above Four Moving Bars 10-Coin Block Coin 1",
-                "ttc_four_moving_bars_block", "Tick Tock Clock - More Moving Bars Area"),
+                "ttc_top_clock_hand_block", "Tick Tock Clock - More Moving Bars Area"),
         }
         sources = {
             source.source_id: source
@@ -1152,6 +1154,7 @@ class FullCataloguedCoinChecksTest(SM64TestBase):
                 location = self.multiworld.get_location(location_name, self.player)
                 self.assertFalse(location.parent_region.name.endswith(" - Coins"))
 
+
     def test_ccm_mr_blizzard_coins_are_in_the_main_region(self):
         for index in range(1, 4):
             location = self.multiworld.get_location(
@@ -1179,6 +1182,94 @@ class FullCataloguedCoinChecksTest(SM64TestBase):
         self.assertEqual(self.world.coin_check_location_names, (selected_name,))
 
 
+class CoinBlockSharedLogicTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": "minimal",
+        "blocksanity": True,
+        "coin_checks": 100,
+        "coin_object_unlocks": "both",
+        "backflip": "global",
+        "ledge_grab": "global",
+        "side_flip": "global",
+        "triple_jump": "global",
+        "wall_kick": "global",
+    }
+
+    def test_every_coin_block_uses_its_coin_source_rule(self):
+        self.assertEqual(
+            set(COIN_BLOCK_SOURCE_METHODS),
+            location_name_groups["Coin Blocks"],
+        )
+        for location_name, (course_name, source_methods) in COIN_BLOCK_SOURCE_METHODS.items():
+            with self.subTest(location=location_name):
+                location = self.multiworld.get_location(location_name, self.player)
+                self.assertIsInstance(location.access_rule, CanCollectCoinOutput.Resolved)
+                self.assertEqual(location.access_rule.course_name, course_name)
+                self.assertEqual(location.access_rule.source_methods, source_methods)
+                produced_coin_names = {
+                    output.location_name
+                    for output in coin_output_catalog
+                    if output.output_id.course_name == course_name
+                    and source_methods[0] in output.source_methods
+                }
+                self.assertTrue(produced_coin_names)
+                self.assertEqual(
+                    {
+                        self.multiworld.get_location(coin_name, self.player).parent_region.name
+                        for coin_name in produced_coin_names
+                    },
+                    {location.parent_region.name},
+                )
+
+    def test_heave_ho_blocks_and_coins_use_pit_and_pendulums_access(self):
+        unlock = ["Tick Tock Clock - 3-Coin Blocks"]
+        self.run_location_tests([
+            ["Tick Tock Clock - Heave-ho First 3 Coins Block", True, unlock],
+            ["Tick Tock Clock - Heave-ho First 3 Coins Block Coin 1", True, unlock],
+            ["Tick Tock Clock - Heave-ho Second 3 Coins Block", True, unlock],
+            ["Tick Tock Clock - Heave-ho Second 3 Coins Block Coin 1", True, unlock],
+        ], starting_regions=["Tick Tock Clock - The Pit and the Pendulums Area"])
+
+    def test_vcutm_block_and_coins_share_later_area_routes(self):
+        unlock = ["Vanish Cap Under the Moat - 3-Coin Block"]
+        self.run_location_tests([
+            ["Vanish Cap Under the Moat - 3 Coins Block", True, unlock + ["Wall Kick"]],
+            ["Vanish Cap Under the Moat - 3-Coin Block before the Turning Lifts Coin 1",
+             True, unlock + ["Wall Kick"]],
+            ["Vanish Cap Under the Moat - 3 Coins Block", True, unlock + ["Ledge Grab"]],
+            ["Vanish Cap Under the Moat - 3-Coin Block before the Turning Lifts Coin 1",
+             True, unlock + ["Ledge Grab"]],
+        ], starting_regions=["Vanish Cap Under the Moat"])
+
+
+class VanishCapUnderTheMoatBlockTrickLogicTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "accessibility": "minimal",
+        "blocksanity": True,
+        "coin_checks": 100,
+        "coin_object_unlocks": "per_level",
+        "backflip": "global",
+        "ledge_grab": "global",
+        "side_flip": "global",
+        "triple_jump": "global",
+        "wall_kick": "global",
+        "logic_tricks": {
+            "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above",
+            "Vanish Cap Under the Moat Drop to Checkerboard Platforms From Above After Crawling Back Up the Slide",
+        },
+    }
+
+    def test_drop_tricks_reach_block_and_its_coins(self):
+        unlock = ["Vanish Cap Under the Moat - 3-Coin Block"]
+        self.run_location_tests([
+            ["Vanish Cap Under the Moat - 3 Coins Block", True, unlock],
+            ["Vanish Cap Under the Moat - 3-Coin Block before the Turning Lifts Coin 1",
+             True, unlock],
+        ], starting_regions=["Vanish Cap Under the Moat"])
+
+
 class WetDryWorldWoodenStructureCoinChecksAccessTest(SM64TestBase):
     run_default_tests = False
     options = {
@@ -1199,6 +1290,12 @@ class WetDryWorldWoodenStructureCoinChecksAccessTest(SM64TestBase):
         self.run_location_tests([
             [location_name, True, ["Wet-Dry World - 3-Coin Blocks"]],
         ], starting_regions=["Wet-Dry World - Mid Water"])
+
+    def test_pedestal_block_coins_use_the_course_region(self):
+        for index in range(1, 11):
+            location = self.multiworld.get_location(
+                f"Wet-Dry World - Pedestal 10-Coin Block Coin {index}", self.player)
+            self.assertEqual(location.parent_region.name, "Wet-Dry World")
 
 
 class BigBoosHauntCoinChecksAccessTest(SM64TestBase):

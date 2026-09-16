@@ -7639,7 +7639,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
         ])
         self.assertTrue(self.can_reach_region("Tick Tock Clock - Top Past Spinners"))
-        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up Block 1-Up"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Three Spinners Block 1-Up"))
 
     def test_midway_1up_reachable_with_spinners(self):
         self.collect_third_floor_access()
@@ -7649,7 +7649,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
             self.get_item_by_name("Climb"),
             self.get_item_by_name("Tick Tock Clock - Spinners"),
         ])
-        self.assertTrue(self.can_reach_location("Tick Tock Clock - Midway Up Block 1-Up"))
+        self.assertTrue(self.can_reach_location("Tick Tock Clock - Three Spinners Block 1-Up"))
 
 
 class TTCMovelessWallKickAccessTestBase(SM64TestBase):

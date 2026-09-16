@@ -72,8 +72,8 @@ class TestTickTockClockMovingLocations(SM64TestBase):
             ["Tick Tock Clock - Above Four Moving Bars 10 Coins Block", True,
              TOP + ["Tick Tock Clock - 10-Coin Blocks"]],
 
-            ["Tick Tock Clock - Midway Up Block 1-Up", True, PAST_SPINNERS],
-            ["Tick Tock Clock - Midway Up 1-Up Block", True, PAST_SPINNERS],
+            ["Tick Tock Clock - Three Spinners Block 1-Up", True, PAST_SPINNERS],
+            ["Tick Tock Clock - Three Spinners 1-Up Block", True, PAST_SPINNERS],
             ["Tick Tock Clock - Past Three Spinners 3 Coins Block", False, TOP],
             ["Tick Tock Clock - Past Three Spinners 3 Coins Block", True,
              PAST_SPINNERS + ["Tick Tock Clock - 3-Coin Blocks"]],
@@ -99,8 +99,8 @@ class TestTickTockClockMovingLocations(SM64TestBase):
 
     def test_top_past_spinners_location_placement(self):
         for location_name in (
-                "Tick Tock Clock - Midway Up Block 1-Up",
-                "Tick Tock Clock - Midway Up 1-Up Block",
+                "Tick Tock Clock - Three Spinners Block 1-Up",
+                "Tick Tock Clock - Three Spinners 1-Up Block",
                 "Tick Tock Clock - Past Three Spinners 3 Coins Block"):
             with self.subTest(location=location_name):
                 location = self.multiworld.get_location(location_name, self.player)
@@ -139,7 +139,7 @@ class TestTickTockClockMovingLocations(SM64TestBase):
 
     def test_moving_time_and_side_flip_reach_top(self):
         self.run_location_tests([
-            ["Tick Tock Clock - Midway Up Block 1-Up", True,
+            ["Tick Tock Clock - Three Spinners Block 1-Up", True,
              ["Side Flip", "Climb"]],
         ], starting_regions=["Tick Tock Clock Moving"])
 
@@ -181,7 +181,7 @@ class TestTickTockClockTopPastSpinnersWallKickTrick(SM64TestBase):
 
     def test_wall_kick_reaches_top_and_past_spinners(self):
         self.run_location_tests([
-            ["Tick Tock Clock - Midway Up Block 1-Up", True, ["Wall Kick"]],
+            ["Tick Tock Clock - Three Spinners Block 1-Up", True, ["Wall Kick"]],
         ], starting_regions=["Tick Tock Clock - Moving Bars Area"])
 
 

@@ -327,7 +327,7 @@ locTTC_table = {
     "Tick Tock Clock - Stomp on the Thwomp": 3626094,
     "Tick Tock Clock - Timed Jumps on Moving Bars": 3626095,
     "Tick Tock Clock - Stop Time for Red Coins": 3626096,
-    "Tick Tock Clock - Midway Up Block 1-Up": 3626231,
+    "Tick Tock Clock - Three Spinners Block 1-Up": 3626231,
     "Tick Tock Clock - Top Block 1-Up": 3626232
 }
 
@@ -697,7 +697,7 @@ locBlocksanity_table = {
     "Tick Tock Clock - Heave-ho First 3 Coins Block": 3629832,
     "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block": 3629833,
     "Tick Tock Clock - Heave-ho Second 3 Coins Block": 3629834,
-    "Tick Tock Clock - Midway Up 1-Up Block": 3629835,
+    "Tick Tock Clock - Three Spinners 1-Up Block": 3629835,
     "Tick Tock Clock - Beneath the Thwomp 10 Coins Block": 3629836,
 
     "Tall, Tall Mountain - Red Mushroom 1-Up Block": 3629837,
@@ -759,7 +759,7 @@ loc1UpBlock_table = {
         "Tiny-Huge Island - Tiny Island Near Start Block 1-Up",
         "Tiny-Huge Island - Huge Island Near Start Block 1-Up",
         "Tiny-Huge Island - Windy Area Block 1-Up",
-        "Tick Tock Clock - Midway Up Block 1-Up",
+        "Tick Tock Clock - Three Spinners Block 1-Up",
         "Tick Tock Clock - Top Block 1-Up",
         "Rainbow Ride - Top of Red Coin Maze Block 1-Up",
         "Rainbow Ride - Under Fly Guy Block 1-Up",

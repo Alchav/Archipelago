@@ -729,8 +729,8 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
         "Tick Tock Clock - Above Four Moving Bars 10 Coins Block")
     ttc_top = create_subregion(ttc_more_moving_bars, "Tick Tock Clock - Top")
     ttc_top_past_spinners = create_subregion(ttc_top, "Tick Tock Clock - Top Past Spinners",
-                                             "Tick Tock Clock - Midway Up Block 1-Up",
-                                             "Tick Tock Clock - Midway Up 1-Up Block",
+                                             "Tick Tock Clock - Three Spinners Block 1-Up",
+                                             "Tick Tock Clock - Three Spinners 1-Up Block",
                                              "Tick Tock Clock - Past Three Spinners 3 Coins Block",
                                              "Tick Tock Clock - Stomp on the Thwomp",
                                              "Tick Tock Clock - Top Block 1-Up",

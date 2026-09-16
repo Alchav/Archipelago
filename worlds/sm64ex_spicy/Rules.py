@@ -6,7 +6,7 @@ from rule_builder.rules import And, CanReachLocation, CanReachRegion, False_, Ha
     Or, Rule, True_
 from .Locations import SM64Location, locOneUp_table, location_table, one_up_unlock_category_by_location, \
     parse_coin_count_check_location_name, parse_global_coin_count_check_location_name, global_coin_count_course_data
-from .CoinChecks import coin_output_by_name
+from .CoinChecks import COIN_BLOCK_SOURCE_METHODS, coin_output_by_name
 from .Options import SM64Options, move_randomizer_option_name_by_action
 from .Regions import connect_regions, create_region, SM64Levels, sm64_entrance_to_region, sm64_level_to_paintings, \
     sm64_level_to_secrets, sm64_secrets_to_level, sm64_entrances_to_level, sm64_level_to_entrances, \
@@ -1294,6 +1294,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Bowser in the Sky - Arrow Ride",
                    "PURPLE_SWITCHES | logic_bits_arrow_ride_no_purple_switch")
     rf.assign_rule("Bowser in the Sky - Top", "CL | logic_bits_top_without_climb")
+    for course_name, evaluator in COIN_EVALUATORS.items():
+        register_coin_evaluator(course_name, evaluator)
     if options.blocksanity:
         blocksanity_rules = {
             "Big Boo's Haunt - Back Entrance Vanish Cap Block": "VC",
@@ -1366,63 +1368,11 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         }
         for location_name, rule in blocksanity_rules.items():
             rf.assign_rule(location_name, rule)
-        coin_block_unlock_locations = {
-            ("3-Coin Blocks", "Bowser in the Dark World - 3-Coin Block"): (
-                "Bowser in the Dark World - 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Bowser in the Fire Sea - 3-Coin Block"): (
-                "Bowser in the Fire Sea - 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Jolly Roger Bay - 3-Coin Block"): (
-                "Jolly Roger Bay - 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Snowman's Land - 3-Coin Block"): (
-                "Snowman's Land - 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Tiny-Huge Island - 3-Coin Block"): (
-                "Tiny-Huge Island - 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Tick Tock Clock - 3-Coin Blocks"): (
-                "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block",
-                "Tick Tock Clock - First Pendulum 3 Coins Block",
-                "Tick Tock Clock - Past Three Spinners 3 Coins Block",
-                "Tick Tock Clock - Heave-ho First 3 Coins Block",
-                "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block",
-                "Tick Tock Clock - Heave-ho Second 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Vanish Cap Under the Moat - 3-Coin Block"): (
-                "Vanish Cap Under the Moat - 3 Coins Block",
-            ),
-            ("3-Coin Blocks", "Wet-Dry World - 3-Coin Blocks"): (
-                "Wet-Dry World - Push Block 3 Coins Block",
-                "Wet-Dry World - Wooden Structure 3 Coins Block",
-            ),
-            ("10-Coin Blocks", "Big Boo's Haunt - 10-Coin Block"): (
-                "Big Boo's Haunt - 10 Coins Block",
-            ),
-            ("10-Coin Blocks", "Bowser in the Fire Sea - 10-Coin Block"): (
-                "Bowser in the Fire Sea - 10 Coins Block",
-            ),
-            ("10-Coin Blocks", "Tick Tock Clock - 10-Coin Blocks"): (
-                "Tick Tock Clock - Top Clock Hand 10 Coins Block",
-                "Tick Tock Clock - Above Four Moving Bars 10 Coins Block",
-                "Tick Tock Clock - Top Central Platform 10 Coins Block",
-                "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block",
-                "Tick Tock Clock - Beneath the Thwomp 10 Coins Block",
-            ),
-            ("10-Coin Blocks", "Wet-Dry World - 10-Coin Blocks"): (
-                "Wet-Dry World - Push Block 10 Coins Block",
-                "Wet-Dry World - Pedestal 10 Coins Block",
-                "Wet-Dry World - Top of Express Elevator 10 Coins Block",
-            ),
-        }
-        for (global_item_name, per_level_item_name), location_names in coin_block_unlock_locations.items():
-            required_item = get_unlock_item_name(
-                options, "coin_object_unlocks", global_item_name, per_level_item_name)
-            for location_name in location_names:
-                rf.add_rule(location_name, required_item)
-    for course_name, evaluator in COIN_EVALUATORS.items():
-        register_coin_evaluator(course_name, evaluator)
+        for location_name, (course_name, source_methods) in COIN_BLOCK_SOURCE_METHODS.items():
+            rf.assign_rule_object(
+                location_name,
+                CanCollectCoinOutput(course_name, source_methods),
+            )
     red_coin_star_by_course = {
         "Bob-omb Battlefield": "Bob-omb Battlefield - Find the 8 Red Coins",
         "Whomp's Fortress": "Whomp's Fortress - Red Coins on the Floating Isle",

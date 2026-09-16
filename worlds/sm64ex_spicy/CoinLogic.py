@@ -3180,9 +3180,9 @@ def tick_tock_clock_coins(
         ),
     ))
 
-    has_moving_bars = state.can_reach(
-        "Tick Tock Clock - Moving Bars Area", "Region", player)
-    trace.add_route("ttc_upper", "Moving Bars Area", has_moving_bars, (
+    has_pit_and_pendulums = state.can_reach(
+        "Tick Tock Clock - The Pit and the Pendulums Area", "Region", player)
+    trace.add_route("ttc_pit_and_pendulums", "The Pit and the Pendulums Area", has_pit_and_pendulums, (
         coin_source("ttc_heave_ho_blocks",
                 "Two 3-Coin Blocks by the Heave-Hos", 6, has_three_coin_blocks),
         coin_source(
@@ -5015,9 +5015,11 @@ def _late_requirement_specs():
          "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Stopped} & LG/BF/TJ/WK",
          _unlock("Horizontal Coin Lines", TTC))
     _add(TTC, "ttc_upper", "{Tick Tock Clock - Moving Bars Area}")
-    _add(TTC, "ttc_heave_ho_blocks", "{Tick Tock Clock - Moving Bars Area} & THREE_COIN_BLOCKS",
+    _add(TTC, "ttc_heave_ho_blocks",
+         "{Tick Tock Clock - The Pit and the Pendulums Area} & THREE_COIN_BLOCKS",
          _unlock("3-Coin Blocks", TTC))
-    _add(TTC, "ttc_blue_coin_block", "{Tick Tock Clock - Moving Bars Area} & GP & BLUE_COIN_BLOCKS",
+    _add(TTC, "ttc_blue_coin_block",
+         "{Tick Tock Clock - The Pit and the Pendulums Area} & GP & BLUE_COIN_BLOCKS",
          _unlock("Blue Coin Blocks", TTC, "Blue Coin Block"))
     _add(TTC, "ttc_upper_moving_bars", "{Tick Tock Clock - Upper Moving Bars Area}")
     _add(TTC, "ttc_past_three_spinners_block",

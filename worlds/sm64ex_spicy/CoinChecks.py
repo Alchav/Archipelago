@@ -32,6 +32,55 @@ COIN_CHECK_TYPE_KIND_BY_NAME: Mapping[str, CoinOutputKind] = {
 coin_check_type_option_keys = tuple(COIN_CHECK_TYPE_NAMES.values()) + (ENEMY_COIN_CHECK_TYPE_NAME,)
 
 
+# Blocksanity locations and the physical coin sources they produce. Rules.py
+# uses this table so a block and all of its outputs share CoinLogic exactly.
+COIN_BLOCK_SOURCE_METHODS: Mapping[str, tuple[str, tuple[str, ...]]] = {
+    "Big Boo's Haunt - 10 Coins Block": ("Big Boo's Haunt", ("mansion_ten_coin_block",)),
+    "Bowser in the Dark World - 3 Coins Block":
+        ("Bowser in the Dark World", ("bitdw_three_coin_block",)),
+    "Bowser in the Fire Sea - 3 Coins Block":
+        ("Bowser in the Fire Sea", ("bitfs_three_coin_block",)),
+    "Bowser in the Fire Sea - 10 Coins Block":
+        ("Bowser in the Fire Sea", ("bitfs_ten_coin_block",)),
+    "Jolly Roger Bay - 3 Coins Block": ("Jolly Roger Bay", ("start_three_coin_block",)),
+    "Snowman's Land - 3 Coins Block": ("Snowman's Land", ("sl_igloo_three_coin_block",)),
+    "Tiny-Huge Island - 3 Coins Block": ("Tiny-Huge Island", ("tiny_main_three_coin_block",)),
+    "Tick Tock Clock - Below Red Coin Spinners 10 Coins Block":
+        ("Tick Tock Clock", ("ttc_start_ten_coin_block",)),
+    "Tick Tock Clock - First Pendulum 3 Coins Block":
+        ("Tick Tock Clock", ("ttc_second_pendulum_block",)),
+    "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block":
+        ("Tick Tock Clock", ("ttc_first_hand_block",)),
+    "Tick Tock Clock - Heave-ho First 3 Coins Block":
+        ("Tick Tock Clock", ("ttc_heave_ho_blocks",)),
+    "Tick Tock Clock - Heave-ho Second 3 Coins Block":
+        ("Tick Tock Clock", ("ttc_heave_ho_blocks",)),
+    "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block":
+        ("Tick Tock Clock", ("ttc_past_three_spinners_block",)),
+    "Tick Tock Clock - Above Four Moving Bars 10 Coins Block":
+        ("Tick Tock Clock", ("ttc_top_clock_hand_block",)),
+    "Tick Tock Clock - Past Three Spinners 3 Coins Block":
+        ("Tick Tock Clock", ("ttc_timed_jumps_block",)),
+    "Tick Tock Clock - Top Clock Hand 10 Coins Block":
+        ("Tick Tock Clock", ("ttc_top_central_platform_block",)),
+    "Tick Tock Clock - Top Central Platform 10 Coins Block":
+        ("Tick Tock Clock", ("ttc_four_moving_bars_block",)),
+    "Tick Tock Clock - Beneath the Thwomp 10 Coins Block":
+        ("Tick Tock Clock", ("ttc_beneath_thwomp_block",)),
+    "Vanish Cap Under the Moat - 3 Coins Block":
+        ("Vanish Cap Under the Moat", ("vcutm_turning_lifts_block",)),
+    "Wet-Dry World - Push Block 10 Coins Block": ("Wet-Dry World", ("low_ten_coin_block",)),
+    "Wet-Dry World - Push Block 3 Coins Block":
+        ("Wet-Dry World", ("push_block_three_coin_block",)),
+    "Wet-Dry World - Pedestal 10 Coins Block":
+        ("Wet-Dry World", ("pillar_ten_coin_block",)),
+    "Wet-Dry World - Top of Express Elevator 10 Coins Block":
+        ("Wet-Dry World", ("express_elevator_ten_coin_block",)),
+    "Wet-Dry World - Wooden Structure 3 Coins Block":
+        ("Wet-Dry World", ("wooden_structure_three_coin_block",)),
+}
+
+
 def get_enabled_coin_check_kinds(selected_types: Iterable[str]) -> frozenset[CoinOutputKind]:
     """Map the Coin Check Types option value to the CoinOutputKinds it allows as locations."""
     return frozenset(
@@ -148,7 +197,7 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "sl_upper_slope_coin_line": "Snowman's Land - Igloo Entrance",
 
     "amp_ring": "Wet-Dry World - Near the Top",
-    "pillar_ten_coin_block": "Wet-Dry World - Near the Top",
+    "pillar_ten_coin_block": "Wet-Dry World",
     "push_block_three_coin_block": "Wet-Dry World - Near the Top",
     "fourth_diamond_coin_line": "Wet-Dry World - Near the Top",
     "low_breakable_boxes": "Wet-Dry World - Low Water",
@@ -172,12 +221,16 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "ttm_slide_coin_lines": "Tall, Tall Mountain - Secret Slide",
     "ttm_slide_blue_coins": "Tall, Tall Mountain - Secret Slide",
 
-    "ttc_timed_jumps_block": "Tick Tock Clock - Upper Moving Bars Area",
-    "ttc_four_moving_bars_block": "Tick Tock Clock - More Moving Bars Area",
-    "ttc_past_three_spinners_block": "Tick Tock Clock - Top Past Spinners",
-    "ttc_top_clock_hand_block": "Tick Tock Clock - Top Past Spinners",
+    "ttc_past_three_spinners_block": "Tick Tock Clock - Upper Moving Bars Area",
+    "ttc_top_clock_hand_block": "Tick Tock Clock - More Moving Bars Area",
+    "ttc_timed_jumps_block": "Tick Tock Clock - Top Past Spinners",
+    "ttc_four_moving_bars_block": "Tick Tock Clock - Top Past Spinners",
     "ttc_top_central_platform_block": "Tick Tock Clock - Top Past Spinners",
     "ttc_beneath_thwomp_block": "Tick Tock Clock - Top Past Spinners",
+    "ttc_first_hand_block": "Tick Tock Clock - First Clock Hand Area",
+    "ttc_heave_ho_blocks": "Tick Tock Clock - The Pit and the Pendulums Area",
+
+    "bitfs_ten_coin_block": "Bowser in the Fire Sea - Upper",
 
     "tiny_start_goomba": "Tiny-Huge Island (Tiny)",
     "tiny_piranha_area_plant": "Tiny-Huge Island - Tiny Piranha Area",
@@ -288,31 +341,6 @@ COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ..
         ("Bowser in the Dark World", "bitdw_slope_single_coins", index):
             ("bitdw_single_coins_before_slope",)
         for index in range(1, 4)
-    },
-    **{
-        ("Tick Tock Clock", "ttc_past_three_spinners_block", index):
-            ("ttc_timed_jumps_block",)
-        for index in range(1, 4)
-    },
-    **{
-        ("Tick Tock Clock", "ttc_timed_jumps_block", index):
-            ("ttc_past_three_spinners_block",)
-        for index in range(1, 4)
-    },
-    **{
-        ("Tick Tock Clock", "ttc_top_clock_hand_block", index):
-            ("ttc_four_moving_bars_block",)
-        for index in range(1, 11)
-    },
-    **{
-        ("Tick Tock Clock", "ttc_top_central_platform_block", index):
-            ("ttc_top_clock_hand_block",)
-        for index in range(1, 11)
-    },
-    **{
-        ("Tick Tock Clock", "ttc_four_moving_bars_block", index):
-            ("ttc_top_central_platform_block",)
-        for index in range(1, 11)
     },
 }
 
