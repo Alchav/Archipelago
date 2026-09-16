@@ -8106,6 +8106,15 @@ class RainbowRideIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(self.get_item_by_name("Rainbow Ride - Red Coins"))
         self.assertTrue(self.can_reach_location("Rainbow Ride - Coins Amassed in a Maze"))
 
+    def test_chuckya_coins_require_cannon(self):
+        self.collect_all_rr_routes()
+        self.collect(self.get_item_by_name("Rainbow Ride - Chuckya"))
+        cannon = self.get_item_by_name("Rainbow Ride - Cannon Unlock")
+        self.remove(cannon)
+        self.assertFalse(rainbow_ride_coins(self.multiworld.state, self.player, 5))
+        self.collect(cannon)
+        self.assertTrue(rainbow_ride_coins(self.multiworld.state, self.player, 5))
+
     def test_lakitus_are_split_between_maze_and_carpets(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
         self.collect([

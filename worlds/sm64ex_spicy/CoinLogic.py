@@ -3261,6 +3261,7 @@ def rainbow_ride_coins(
     has_chuckya = rules.has_unlock(
         state, player, "enemy_unlocks",
         "Chuckyas", f"{level_name} - Chuckya")
+    has_cannon = state.has(f"{level_name} - Cannon Unlock", player)
     has_lakitus = rules.has_unlock(
         state, player, "enemy_unlocks",
         "Lakitus", f"{level_name} - Lakitus")
@@ -3392,8 +3393,7 @@ def rainbow_ride_coins(
     trace.add_route(
         "rr_somewhere_over_the_rainbow",
         "Somewhere Over the Rainbow location route",
-        state.can_reach(
-            "Rainbow Ride - Somewhere Over the Rainbow", "Location", player),
+        state.can_reach("Rainbow Ride - Cruiser", "Region", player) and has_cannon,
         (coin_source("rr_somewhere_chuckya", "Chuckya", 5, has_chuckya),),
     )
 
@@ -5087,7 +5087,7 @@ def _late_requirement_specs():
     _add(RR, "rr_ship_pole_ring", "{Rainbow Ride - Cruiser} & HORIZONTAL_COIN_RINGS",
          _unlock("Horizontal Coin Rings", RR))
     _add(RR, "rr_somewhere_over_the_rainbow", "{{Rainbow Ride - Somewhere Over the Rainbow}}")
-    _add(RR, "rr_somewhere_chuckya", "{Rainbow Ride - Cruiser} & CHUCKYA",
+    _add(RR, "rr_somewhere_chuckya", "{Rainbow Ride - Cruiser} & CANN & CHUCKYA",
          _unlock("Chuckyas", RR, "Chuckya"))
     return COIN_REQUIREMENT_SPECS
 
