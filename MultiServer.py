@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import base64
+import binascii
 import collections
 import contextlib
 import copy
@@ -61,6 +63,13 @@ server_per_message_deflate_factory = ServerPerMessageDeflateFactory(
     client_max_window_bits=11,
     compress_settings={"memLevel": 4},
 )
+
+REFUNDABLE_HINT_LOCATION_GAMES = frozenset(("Jigsaw", "Tetris", "Yacht Dice"))
+
+
+def is_refundable_hint(ctx: Context, hint: Hint) -> bool:
+    """Return whether this hint replaces one of the old generation-time automatic hints."""
+    return ctx.games[hint.finding_player] in REFUNDABLE_HINT_LOCATION_GAMES
 
 
 def remove_from_list(container, value):
@@ -886,6 +895,8 @@ class Context:
         if "auto" in self.release_mode:
             release_player(self, client.team, client.slot,
                            non_advancement="non-advancement" in self.release_mode)
+        if self.remaining_mode == "auto":
+            send_remaining(self, client)
         self.save()  # save goal completion flag
 
     def on_new_hint(self, team: int, slot: int):
@@ -1190,21 +1201,41 @@ def collect_player(ctx: Context, team: int, slot: int, is_group: bool = False, i
                 if set(group_players) == group_collected_players:
                     collect_player(ctx, team, group, True, include_unreachable=include_unreachable)
 
-def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
-    def g(self, state: typing.Dict[typing.Tuple[int, int], typing.Set[int]], team: int, slot: int, hint_data, item_names
-                      ) -> typing.List[str]:
-        checked = state[team, slot]
-        player_locations = self[slot]
-        hints = []
-        for location in player_locations:
-            if location not in checked and (bool(player_locations[location][2] & ItemClassification.progression) or bool(player_locations[location][2] & ItemClassification.useful)):
-                hints += collect_hint_location_id(ctx, team, slot, location, HintStatus.HINT_UNSPECIFIED)
+def _prepare_remaining(ctx: Context, team: int, slot: int) -> typing.Tuple[typing.List[str], typing.List[Hint]]:
+    checked = ctx.location_checks[team, slot]
+    player_locations = ctx.locations[slot]
+    hints = []
+    for location, (_, _, flags) in player_locations.items():
+        if location not in checked and flags & (ItemClassification.progression | ItemClassification.useful):
+            hints += collect_hint_location_id(ctx, team, slot, location, HintStatus.HINT_UNSPECIFIED)
 
-        ctx.notify_hints(team, hints)
-        return sorted([f"{ctx.location_names[ctx.games[slot]][location_id]}: {item_names[ctx.slot_info[player_locations[location_id][1]].game][player_locations[location_id][0]]}" + f" for {ctx.player_names[(0, player_locations[location_id][1])]}" + (f" at {hint_data[slot][location_id]}" if slot in hint_data and location_id in hint_data[slot] and hint_data[slot][location_id] else "") for
-                       location_id in player_locations if
-                       location_id not in checked])
-    return g(ctx.locations, ctx.location_checks, team, slot, ctx.er_hint_data, ctx.item_names)
+    remaining = sorted([
+        f"{ctx.location_names[ctx.games[slot]][location_id]}: "
+        f"{ctx.item_names[ctx.slot_info[player_locations[location_id][1]].game][player_locations[location_id][0]]} "
+        f"for {ctx.player_names[(0, player_locations[location_id][1])]}"
+        + (f" at {ctx.er_hint_data[slot][location_id]}"
+           if slot in ctx.er_hint_data and location_id in ctx.er_hint_data[slot]
+           and ctx.er_hint_data[slot][location_id] else "")
+        for location_id in player_locations if location_id not in checked
+    ])
+    return remaining, hints
+
+
+def get_remaining(ctx: Context, team: int, slot: int) -> typing.List[str]:
+    remaining, hints = _prepare_remaining(ctx, team, slot)
+    ctx.notify_hints(team, hints)
+    return remaining
+
+
+def send_remaining(ctx: Context, client: Client) -> None:
+    remaining_items, hints = _prepare_remaining(ctx, client.team, client.slot)
+    if remaining_items:
+        ctx.notify_client_multiple(client, ["Remaining: " + item for item in remaining_items],
+                                   {"type": "CommandResult"})
+    else:
+        ctx.notify_client(client, "No remaining items found.", {"type": "CommandResult"})
+    # Queue hints only after the entire textual remaining list has been queued.
+    ctx.notify_hints(client.team, hints)
 
 
 def send_items_to(ctx: Context, team: int, target_slot: int, *items: NetworkItem):
@@ -1827,11 +1858,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
     def _cmd_remaining(self) -> bool:
         """List remaining items in your game, but not their location or recipient"""
         if self.ctx.remaining_mode == "enabled":
-            remaining_item_ids = get_remaining(self.ctx, self.client.team, self.client.slot)
-            if remaining_item_ids:
-                self.output_multiple(["Remaining: " + itemn for itemn in remaining_item_ids])
-            else:
-                self.output("No remaining items found.")
+            send_remaining(self.ctx, self.client)
             return True
         elif self.ctx.remaining_mode == "disabled":
             self.output(
@@ -1839,11 +1866,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
             return False
         else:  # is goal
             if self.ctx.client_game_state[self.client.team, self.client.slot] == ClientStatus.CLIENT_GOAL:
-                remaining_item_ids = get_remaining(self.ctx, self.client.team, self.client.slot)
-                if remaining_item_ids:
-                    self.output_multiple(["Remaining: " + itemn for itemn in remaining_item_ids])
-                else:
-                    self.output("No remaining items found.")
+                send_remaining(self.ctx, self.client)
                 return True
             else:
                 self.output(
@@ -2036,6 +2059,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 not_found_hints = [hint for hint in new_hints if not hint.found]
                 if not not_found_hints:  # everything's been found, no need to pay
                     can_pay = 1000
+                elif any(is_refundable_hint(self.ctx, hint) for hint in not_found_hints):
+                    # These used to be pre-hinted during generation. Let the player request one even if
+                    # they cannot front the nominal cost; the hint will not be counted as used below.
+                    can_pay = 1
                 elif cost:
                     can_pay = int((points_available // cost) > 0)  # limit to 1 new hint per call
                 else:
@@ -2047,6 +2074,8 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 # By another popular vote, prefer early sphere
                 not_found_hints.sort(key=lambda hint: self.ctx.get_sphere(hint.finding_player, hint.location),
                                      reverse=True)
+                # pop() selects the hint to return, so prefer a refundable hint when one is available.
+                not_found_hints.sort(key=lambda hint: is_refundable_hint(self.ctx, hint))
 
                 hints = found_hints + old_hints
                 while can_pay > 0:
@@ -2057,6 +2086,13 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     can_pay -= 1
 
                     if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
+                        if is_refundable_hint(self.ctx, hint):
+                            point_name = "hint location points" if for_location else "hint points"
+                            self.output(
+                                f"Refunded {cost} {point_name}: anything located in "
+                                f"{self.ctx.games[hint.finding_player]} is free to hint."
+                            )
+                            continue
                         if for_location:
                             self.ctx.hint_locations_used[self.client.team, self.client.slot] += 1
                             self.output(f"Spent hint location points. Hint locations used: {self.ctx.hint_locations_used[self.client.team, self.client.slot]}")
@@ -2071,7 +2107,8 @@ class ClientMessageProcessor(CommonCommandProcessor):
                         points_available = get_client_location_points(self.ctx, self.client)
                     else:
                         points_available = get_client_points(self.ctx, self.client)
-                    if hints and cost and int((points_available // cost) == 0):
+                    if (hints and cost and int((points_available // cost) == 0)
+                            and not any(is_refundable_hint(self.ctx, hint) for hint in not_found_hints)):
                         self.output(
                             f"There may be more hintables, however, you cannot afford to pay for any more. "
                             f" You have {points_available} and need at least "
@@ -2309,6 +2346,18 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
             errors.add('InvalidPassword')
         if args['name'][:20] in ctx.connect_names:
             args['name'] = args['name'][:20]
+        if args['name'] not in ctx.connect_names:
+            try:
+                rom_name = base64.b64decode(args['name'], validate=True)
+            except (ValueError, binascii.Error):
+                pass
+            else:
+                if rom_name.startswith(b"XP"):
+                    legacy_auth = base64.b64encode(b"AP" + rom_name[2:]).decode()
+                    if legacy_auth[:20] in ctx.connect_names:
+                        legacy_auth = legacy_auth[:20]
+                    if legacy_auth in ctx.connect_names:
+                        args['name'] = legacy_auth
         if args['name'] not in ctx.connect_names:
             errors.add('InvalidSlot')
         else:
@@ -2983,7 +3032,7 @@ class ServerCommandProcessor(CommonCommandProcessor):
                 valid_values.update(("tokens", "goal-non-advancement", "auto-non-advancement"))
             elif option_name == "collect_mode":
                 valid_values.update(("cleared", "auto_cleared"))
-            valid_values.update(("auto", "auto_enabled") if option_name != "remaining_mode" else [])
+            valid_values.update(("auto", "auto_enabled") if option_name != "remaining_mode" else ("auto",))
             if option_value.lower() not in valid_values:
                 self.output(f"Unrecognized {option_name} value '{option_value}', known: {', '.join(valid_values)}")
                 return False
@@ -3087,8 +3136,9 @@ def parse_args() -> argparse.Namespace:
                                 auto:     !countdown is available for rooms with less than 30 players
                                 ''')
     parser.add_argument('--remaining_mode', default=defaults["remaining_mode"], nargs='?',
-                        choices=['enabled', 'disabled', "goal"], help='''\
+                        choices=['auto', 'enabled', 'disabled', "goal"], help='''\
                              Select !remaining Accessibility. (default: %(default)s)
+                             auto:     Automatically run !remaining on goal completion
                              enabled:  !remaining is always available
                              disabled: !remaining is never available
                              goal:     !remaining can be used after goal completion

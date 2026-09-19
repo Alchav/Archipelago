@@ -8,7 +8,7 @@ from email.utils import parsedate_to_datetime
 from flask import make_response, render_template, request, Request, Response
 from werkzeug.exceptions import abort
 
-from MultiServer import Context, get_saving_second
+from MultiServer import Context, get_owner_hint_point_items, get_saving_second
 from NetUtils import ClientStatus, Hint, NetworkItem, NetworkSlot, SlotType
 from Utils import restricted_loads, KeyedDefaultDict, utcnow
 from . import app, cache
@@ -255,6 +255,84 @@ class TrackerData:
         }
 
     @_cache_results
+    def get_room_game_unlocks(self) -> Dict[TeamPlayer, bool]:
+        """Return whether each player slot's AlchapelaBot unlock item has been obtained."""
+        players = self.get_all_players()
+        bot_slots = [slot for slot in self._multidata["slot_info"]
+                     if self.get_player_game(slot) == "AlchapelaBot"]
+        # Ordinary multiworlds do not use game unlocks; do not mark all of their slots locked.
+        if not bot_slots or "owners" not in self._multidata:
+            return {(team, player): True for team, team_players in players.items() for player in team_players}
+
+        unlocks: Dict[TeamPlayer, bool] = {}
+        for team, team_players in players.items():
+            unlocked_slots = set()
+            for bot_slot in bot_slots:
+                unlocked_slots.update(self.get_player_starting_inventory(bot_slot))
+                unlocked_slots.update(item.item for item in self.get_player_received_items(team, bot_slot))
+            unlocks.update({(team, player): player in unlocked_slots for player in team_players})
+        return unlocks
+
+    @_cache_results
+    def get_owner_hint_usage(self) -> Dict[int, List[Dict[str, Any]]]:
+        owners: Dict[int, int] = self._multidata.get("owners", {})
+        if not owners:
+            return {team: [] for team in self.get_all_players()}
+
+        tracker_context = type("TrackerHintContext", (), {})()
+        tracker_context.seed_name = self.get_seed_name()
+        tracker_context.games = {slot: self.get_player_game(slot) for slot in self._multidata["slot_info"]}
+        tracker_context.item_names = self.item_id_to_name
+        tracker_context.locations = self._multidata["locations"]
+        tracker_context.er_hint_data = self._multidata.get("er_hint_data", {})
+        tracker_context.received_items = collections.defaultdict(
+            list, self._multisave.get("received_items", {}))
+        tracker_context.start_inventory = collections.defaultdict(list, {
+            slot: [NetworkItem(item, -2, 0) for item in items]
+            for slot, items in self._multidata.get("precollected_items", {}).items()
+        })
+
+        saved_options = self._multisave.get("game_options", {})
+        generated_options = self._multidata.get("server_options", {})
+        hint_cost = int(saved_options.get("hint_cost", generated_options.get("hint_cost", 0)) or 0)
+        location_cost = int(saved_options.get(
+            "hint_location_cost", generated_options.get("hint_location_cost", 0)) or 0)
+        hints_used = self._multisave.get("hints_used", {})
+        locations_used = self._multisave.get("hint_locations_used", {})
+        bot_item_names = self.item_id_to_name.get("AlchapelaBot", {})
+
+        result: Dict[int, List[Dict[str, Any]]] = {}
+        for team in self.get_all_players():
+            rows = []
+            for owner in sorted(set(owners.values())):
+                owner_item_name = bot_item_names.get(owner + 1000)
+                if not owner_item_name:
+                    continue
+                owner_name = owner_item_name.removesuffix(" Hint Point")
+                owner_slots = [slot for slot, slot_owner in owners.items() if slot_owner == owner]
+                item_points = get_owner_hint_point_items(tracker_context, team, owner)
+                completed_slots = sum(
+                    self.get_player_client_status(team, slot) == ClientStatus.CLIENT_GOAL
+                    for slot in owner_slots
+                )
+                used_hints = sum(hints_used.get((team, slot), 0) for slot in owner_slots)
+                used_locations = sum(locations_used.get((team, slot), 0) for slot in owner_slots)
+                hint_points = item_points + completed_slots * hint_cost
+                location_points = item_points + completed_slots * location_cost
+                rows.append({
+                    "owner": owner_name,
+                    "hints_available": max(hint_points // hint_cost - used_hints, 0) if hint_cost else None,
+                    "hints_total": hint_points // hint_cost if hint_cost else None,
+                    "hints_used": used_hints,
+                    "locations_available": max(location_points // location_cost - used_locations, 0)
+                    if location_cost else None,
+                    "locations_total": location_points // location_cost if location_cost else None,
+                    "locations_used": used_locations,
+                })
+            result[team] = rows
+        return result
+
+    @_cache_results
     def get_room_long_player_names(self) -> Dict[TeamPlayer, str]:
         """Retrieves a dictionary of names with aliases for each player."""
         long_player_names = {}
@@ -459,7 +537,9 @@ def render_generic_multiworld_tracker(tracker_data: TrackerData, enabled_tracker
         completed_worlds=tracker_data.get_team_completed_worlds_count(),
         games=tracker_data.get_room_games(),
         states=tracker_data.get_room_client_statuses(),
+        game_unlocks=tracker_data.get_room_game_unlocks(),
         hints=tracker_data.get_team_hints(),
+        hint_usage=tracker_data.get_owner_hint_usage(),
         activity_timers=tracker_data.get_room_last_activity(),
         videos=tracker_data.get_room_videos(),
         item_id_to_name=tracker_data.item_id_to_name,
@@ -520,7 +600,9 @@ if "Factorio" in network_data_package["games"]:
             completed_worlds=tracker_data.get_team_completed_worlds_count(),
             games=tracker_data.get_room_games(),
             states=tracker_data.get_room_client_statuses(),
+            game_unlocks=tracker_data.get_room_game_unlocks(),
             hints=tracker_data.get_team_hints(),
+            hint_usage=tracker_data.get_owner_hint_usage(),
             activity_timers=tracker_data.get_room_last_activity(),
             videos=tracker_data.get_room_videos(),
             item_id_to_name=tracker_data.item_id_to_name,
@@ -653,7 +735,9 @@ if "A Link to the Past" in network_data_package["games"]:
             completed_worlds=tracker_data.get_team_completed_worlds_count(),
             games=tracker_data.get_room_games(),
             states=tracker_data.get_room_client_statuses(),
+            game_unlocks=tracker_data.get_room_game_unlocks(),
             hints=tracker_data.get_team_hints(),
+            hint_usage=tracker_data.get_owner_hint_usage(),
             activity_timers=tracker_data.get_room_last_activity(),
             videos=tracker_data.get_room_videos(),
             item_id_to_name=tracker_data.item_id_to_name,

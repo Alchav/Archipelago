@@ -110,6 +110,7 @@ Dictates what is allowed when it comes to a player collecting their run. A colle
 #### remaining
 Dictates what is allowed when it comes to a player querying the items remaining in their run.
 
+* `auto`: Automatically queries and displays the player's remaining items when they complete their goal.
 * `goal`: Allows a player to query for items remaining in their run but only after they completed their own goal.
 * `enabled`: Denotes that players may query for any items remaining in their run (even those belonging to other players).
 * `disabled`: All remaining item query modes disabled.

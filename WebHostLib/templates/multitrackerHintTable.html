@@ -1,4 +1,34 @@
 {% for team, hints in hints.items() %}
+    {% if hint_usage.get(team) %}
+    <div class="table-wrapper">
+        <table class="table non-unique-item-table" data-order='[[0, "asc"]]'>
+            <thead>
+            <tr>
+                <th>Owner</th>
+                <th class="center-column">Hints Available</th>
+                <th class="center-column">Hints Used</th>
+                <th class="center-column">Location Hints Available</th>
+                <th class="center-column">Location Hints Used</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for usage in hint_usage[team] %}
+                <tr>
+                    <td>{{ usage.owner }}</td>
+                    <td class="center-column">
+                        {% if usage.hints_available is none %}Free{% else %}{{ usage.hints_available }}{% endif %}
+                    </td>
+                    <td class="center-column">{{ usage.hints_used }}</td>
+                    <td class="center-column">
+                        {% if usage.locations_available is none %}Free{% else %}{{ usage.locations_available }}{% endif %}
+                    </td>
+                    <td class="center-column">{{ usage.locations_used }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
     <div class="table-wrapper">
         <table id="hints-table" class="table non-unique-item-table" data-order='[[5, "asc"], [0, "asc"]]'>
             <thead>

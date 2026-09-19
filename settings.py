@@ -582,6 +582,7 @@ class ServerOptions(Group):
         """
         Remaining modes
         !remaining handling, that tells a client which items remain in their pool
+        "auto" -> Automatically run !remaining on goal completion
         "enabled" -> Client can always ask for remaining items
         "disabled" -> Client can never ask for remaining items
         "goal" -> Client can ask for remaining items after goal completion

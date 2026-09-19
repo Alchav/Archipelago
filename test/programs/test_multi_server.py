@@ -7,7 +7,8 @@ from unittest.mock import Mock, patch
 from NetUtils import ClientStatus
 from BaseClasses import ItemClassification
 from MultiServer import Context, ServerCommandProcessor, _apportion_hint_values_by_sphere, collect_player_cleared, \
-    release_player, update_client_status
+    is_refundable_hint, release_player, send_remaining, update_client_status
+from NetUtils import Hint
 
 
 class TestResolvePlayerName(unittest.TestCase):
@@ -95,6 +96,54 @@ class TestClearedCollect(unittest.TestCase):
         update_client_status(ctx, client, ClientStatus.CLIENT_GOAL)
         ctx.on_goal_achieved.assert_called_once_with(client)
 
+    def test_auto_remaining_runs_on_goal_completion(self) -> None:
+        client = SimpleNamespace(team=0, slot=1)
+        ctx = SimpleNamespace(
+            get_aliased_name=Mock(return_value="Player"),
+            broadcast_text_all=Mock(),
+            collect_mode="disabled",
+            release_mode="disabled",
+            remaining_mode="auto",
+            save=Mock(),
+        )
+
+        with patch("MultiServer.send_remaining") as send_remaining:
+            Context.on_goal_achieved(ctx, client)
+
+        send_remaining.assert_called_once_with(ctx, client)
+
+    def test_auto_remaining_runs_after_auto_release(self) -> None:
+        client = SimpleNamespace(team=0, slot=1)
+        calls = Mock()
+        ctx = SimpleNamespace(
+            get_aliased_name=Mock(return_value="Player"),
+            broadcast_text_all=Mock(),
+            collect_mode="disabled",
+            release_mode="auto",
+            remaining_mode="auto",
+            save=Mock(),
+        )
+
+        with patch("MultiServer.release_player", side_effect=calls.release), \
+                patch("MultiServer.send_remaining", side_effect=calls.remaining):
+            Context.on_goal_achieved(ctx, client)
+
+        self.assertEqual(["release", "remaining"], [call[0] for call in calls.mock_calls])
+
+    def test_remaining_list_is_sent_before_hints(self) -> None:
+        client = SimpleNamespace(team=0, slot=1)
+        calls = Mock()
+        ctx = SimpleNamespace(
+            notify_client_multiple=Mock(side_effect=calls.remaining_list),
+            notify_client=Mock(side_effect=calls.no_remaining),
+            notify_hints=Mock(side_effect=calls.hints),
+        )
+
+        with patch("MultiServer._prepare_remaining", return_value=(["Item"], ["Hint"])):
+            send_remaining(ctx, client)
+
+        self.assertEqual(["remaining_list", "hints"], [call[0] for call in calls.mock_calls])
+
 
 class TestNonAdvancementRelease(unittest.TestCase):
     def test_releases_only_non_advancement_locations(self) -> None:
@@ -140,3 +189,23 @@ class TestProportionalHintPoints(unittest.TestCase):
         self.assertEqual(Fraction(3), values[1, 10] + values[1, 11])
         self.assertEqual(Fraction(2), values[1, 12])
         self.assertEqual(Fraction(5), sum(values.values(), Fraction()))
+
+
+class TestRefundableHints(unittest.TestCase):
+    def test_all_items_in_selected_location_games_are_refundable(self) -> None:
+        ctx = SimpleNamespace(games={1: "Jigsaw", 2: "Tetris", 3: "Yacht Dice"})
+
+        for player, classification in (
+                (1, ItemClassification.filler),
+                (2, ItemClassification.trap),
+                (3, ItemClassification.progression)):
+            with self.subTest(player=player, classification=classification):
+                hint = Hint(4, player, 100, 200, False, item_flags=classification)
+                self.assertTrue(is_refundable_hint(ctx, hint))
+
+    def test_items_in_other_location_games_are_not_refundable(self) -> None:
+        ctx = SimpleNamespace(games={1: "A Link to the Past"})
+
+        hint = Hint(3, 1, 100, 200, False, item_flags=ItemClassification.progression)
+
+        self.assertFalse(is_refundable_hint(ctx, hint))
