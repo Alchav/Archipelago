@@ -642,9 +642,9 @@ locBlocksanity_table = {
     "Hazy Maze Cave - Above Pit 1-Up Block": 3629786,
     "Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block": 3629787,
     "Hazy Maze Cave - Past Rolling Rocks 1-Up Block": 3629788,
-    "Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block": 3629789,
+    "Hazy Maze Cave - Toxic Maze Near Empty Alcove Metal Cap Block": 3629791,
     "Hazy Maze Cave - Toxic Maze Near Bats Metal Cap Block": 3629790,
-    "Hazy Maze Cave - Toxic Maze Near Twin Monty Mole Holes Metal Cap Block": 3629791,
+    "Hazy Maze Cave - Toxic Maze Near Twin Monty Mole Holes Metal Cap Block": 3629789,
 
     "Jolly Roger Bay - Beginning Metal Cap Block": 3629792,
     "Jolly Roger Bay - 3 Coins Block": 3629793,
