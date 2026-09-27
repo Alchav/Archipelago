@@ -274,8 +274,20 @@ class TrackerData:
         return unlocks
 
     @_cache_results
-    def get_owner_hint_usage(self) -> Dict[int, List[Dict[str, Any]]]:
+    def get_owners_with_locations(self) -> Dict[int, List[int]]:
+        """Return configured owners and their slots, excluding owners without any locations."""
         owners: Dict[int, int] = self._multidata.get("owners", {})
+        owner_slots: Dict[int, List[int]] = collections.defaultdict(list)
+        for slot, owner in owners.items():
+            owner_slots[owner].append(slot)
+        return {
+            owner: slots for owner, slots in sorted(owner_slots.items())
+            if any(self.get_player_locations(slot) for slot in slots)
+        }
+
+    @_cache_results
+    def get_owner_hint_usage(self) -> Dict[int, List[Dict[str, Any]]]:
+        owners = self.get_owners_with_locations()
         if not owners:
             return {team: [] for team in self.get_all_players()}
 
@@ -304,12 +316,11 @@ class TrackerData:
         result: Dict[int, List[Dict[str, Any]]] = {}
         for team in self.get_all_players():
             rows = []
-            for owner in sorted(set(owners.values())):
+            for owner, owner_slots in owners.items():
                 owner_item_name = bot_item_names.get(owner + 1000)
                 if not owner_item_name:
                     continue
                 owner_name = owner_item_name.removesuffix(" Hint Point")
-                owner_slots = [slot for slot, slot_owner in owners.items() if slot_owner == owner]
                 item_points = get_owner_hint_point_items(tracker_context, team, owner)
                 completed_slots = sum(
                     self.get_player_client_status(team, slot) == ClientStatus.CLIENT_GOAL
@@ -328,6 +339,43 @@ class TrackerData:
                     if location_cost else None,
                     "locations_total": location_points // location_cost if location_cost else None,
                     "locations_used": used_locations,
+                })
+            result[team] = rows
+        return result
+
+    @_cache_results
+    def get_owner_sphere_progress(self) -> Dict[int, List[Dict[str, Any]]]:
+        """Return checked and total sphere locations grouped by their configured owner."""
+        slot_owners: Dict[int, int] = self._multidata.get("owners", {})
+        owners = self.get_owners_with_locations()
+        spheres = self.get_spheres()
+        if not owners or not spheres:
+            return {team: [] for team in self.get_all_players()}
+
+        bot_item_names = self.item_id_to_name.get("AlchapelaBot", {})
+        result: Dict[int, List[Dict[str, Any]]] = {}
+        for team in self.get_all_players():
+            rows = []
+            for owner in owners:
+                owner_item_name = bot_item_names.get(owner + 1000)
+                if not owner_item_name:
+                    continue
+
+                progress: List[Optional[int]] = []
+                for sphere in spheres:
+                    total = 0
+                    checked = 0
+                    for player, location_ids in sphere.items():
+                        if slot_owners.get(player) != owner:
+                            continue
+                        total += len(location_ids)
+                        checked += len(location_ids.intersection(
+                            self.get_player_checked_locations(team, player)))
+                    progress.append(round(checked / total * 100) if total else None)
+
+                rows.append({
+                    "owner": owner_item_name.removesuffix(" Hint Point"),
+                    "progress": progress,
                 })
             result[team] = rows
         return result
@@ -372,7 +420,7 @@ class TrackerData:
         return video_feeds
 
     @_cache_results
-    def get_spheres(self) -> List[List[int]]:
+    def get_spheres(self) -> List[Dict[int, Set[int]]]:
         """ each sphere is { player: { location_id, ... } } """
         return self._multidata.get("spheres", [])
 
@@ -540,6 +588,8 @@ def render_generic_multiworld_tracker(tracker_data: TrackerData, enabled_tracker
         game_unlocks=tracker_data.get_room_game_unlocks(),
         hints=tracker_data.get_team_hints(),
         hint_usage=tracker_data.get_owner_hint_usage(),
+        sphere_progress=tracker_data.get_owner_sphere_progress(),
+        sphere_count=len(tracker_data.get_spheres()),
         activity_timers=tracker_data.get_room_last_activity(),
         videos=tracker_data.get_room_videos(),
         item_id_to_name=tracker_data.item_id_to_name,
@@ -603,6 +653,8 @@ if "Factorio" in network_data_package["games"]:
             game_unlocks=tracker_data.get_room_game_unlocks(),
             hints=tracker_data.get_team_hints(),
             hint_usage=tracker_data.get_owner_hint_usage(),
+            sphere_progress=tracker_data.get_owner_sphere_progress(),
+            sphere_count=len(tracker_data.get_spheres()),
             activity_timers=tracker_data.get_room_last_activity(),
             videos=tracker_data.get_room_videos(),
             item_id_to_name=tracker_data.item_id_to_name,
@@ -738,6 +790,8 @@ if "A Link to the Past" in network_data_package["games"]:
             game_unlocks=tracker_data.get_room_game_unlocks(),
             hints=tracker_data.get_team_hints(),
             hint_usage=tracker_data.get_owner_hint_usage(),
+            sphere_progress=tracker_data.get_owner_sphere_progress(),
+            sphere_count=len(tracker_data.get_spheres()),
             activity_timers=tracker_data.get_room_last_activity(),
             videos=tracker_data.get_room_videos(),
             item_id_to_name=tracker_data.item_id_to_name,
