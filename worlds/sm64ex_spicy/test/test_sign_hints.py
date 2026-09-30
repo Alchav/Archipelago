@@ -10,7 +10,11 @@ from ..Items import global_sign_unlock_item_data_table, per_level_sign_unlock_it
 from ..Options import SignUnlocks
 from ..Regions import sm64_entrance_destination_descriptions, \
     sm64_entrance_source_descriptions, sm64_shuffled_entrance_ids
-from ..Signs import fallback_hints, joke_hints, sign_data, tip_hints
+from ..Signs import fallback_hints, joke_hints, resolve_sign_hint_counts, sign_data, tip_hints
+
+
+def world_priority_value(name):
+    return {"items": 0, "entrances": 1, "at_random": 2}[name]
 
 
 class SignHintTest(unittest.TestCase):
@@ -43,7 +47,8 @@ class SignHintTest(unittest.TestCase):
 
         advancement_count = sum(item.advancement for item in multiworld.itempool if item.player == 1)
         entrance_count = len(world.get_shuffled_entrance_source_ids())
-        self.assertEqual(world.sign_hint_count, min(90, (advancement_count + entrance_count) // 5))
+        self.assertEqual(world.sign_item_hint_count, advancement_count // 5)
+        self.assertEqual(world.sign_entrance_hint_count, entrance_count // 5)
 
     def test_castle_courtyard_signs_are_in_the_courtyard_region(self):
         multiworld = setup_solo_multiworld(
@@ -76,7 +81,7 @@ class SignHintTest(unittest.TestCase):
         self.assertFalse(location.can_reach(state))
         state.collect(world.create_item("Signs"), True)
         self.assertTrue(location.can_reach(state))
-        self.assertEqual(world.sign_hint_count, advancement_without_signs // 5)
+        self.assertEqual(world.sign_item_hint_count, advancement_without_signs // 5)
         self.assertEqual(len([item for item in multiworld.itempool if item.name == "Signs"]), 1)
 
     def test_per_level_sign_items_gate_only_their_areas(self):
@@ -131,7 +136,8 @@ class SignHintTest(unittest.TestCase):
         entrance_count = len(world.get_shuffled_entrance_source_ids())
 
         self.assertGreater(entrance_count, 0)
-        self.assertEqual(world.sign_hint_count, min(90, (advancement_count + entrance_count) // 5))
+        self.assertEqual(world.sign_item_hint_count, advancement_count // 5)
+        self.assertEqual(world.sign_entrance_hint_count, entrance_count // 5)
 
     def test_real_hints_use_same_or_later_sphere_items_without_reuse(self):
         multiworld = setup_solo_multiworld(SM64World, seed=2)
@@ -167,10 +173,11 @@ class SignHintTest(unittest.TestCase):
             key: text for key, text in world.sign_hints.items()
             if world.sign_hint_entrances.get(key, 0)
         }
-        self.assertEqual(len(item_hints) + len(entrance_hints), world.sign_hint_count)
+        hint_count = world.sign_item_hint_count + world.sign_entrance_hint_count
+        self.assertEqual(len(item_hints) + len(entrance_hints), hint_count)
         self.assertEqual(
             len(set((*item_hints.values(), *entrance_hints.values()))),
-            world.sign_hint_count,
+            hint_count,
         )
         for sign_key, hint in item_hints.items():
             sign = next(sign for sign in sign_data if sign.key == sign_key)
@@ -209,6 +216,88 @@ class SignHintTest(unittest.TestCase):
                     world.sign_hint_location_players[sign.key],
                 ],
             )
+
+    def generate_hints(self, seed, options):
+        multiworld = setup_solo_multiworld(SM64World, seed=seed) if not options else setup_multiworld(
+            SM64World, seed=seed, options=options)
+        distribute_items_restrictive(multiworld)
+        SM64World.stage_pre_output(multiworld)
+        world = multiworld.worlds[1]
+        entrance_keys = [key for key, source_id in world.sign_hint_entrances.items() if source_id]
+        item_keys = [key for key, address in world.sign_hint_locations.items() if address]
+        return world, item_keys, entrance_keys
+
+    def test_explicit_item_hint_count_is_exact_and_entrance_hints_can_be_disabled(self):
+        world, item_keys, entrance_keys = self.generate_hints(
+            2, {"sign_item_hints": 7, "sign_entrance_hints": 0,
+                "main_course_shuffle": 2, "secret_course_shuffle": 2})
+
+        self.assertEqual(len(item_keys), 7)
+        self.assertEqual(entrance_keys, [])
+
+    def test_item_hints_can_be_disabled_while_entrance_hints_remain(self):
+        world, item_keys, entrance_keys = self.generate_hints(
+            2, {"sign_item_hints": 0, "sign_entrance_hints": 6,
+                "main_course_shuffle": 2, "secret_course_shuffle": 2})
+
+        self.assertEqual(item_keys, [])
+        self.assertEqual(len(entrance_keys), 6)
+
+    def test_entrance_hints_repeat_when_count_exceeds_shuffled_entrances(self):
+        world, item_keys, entrance_keys = self.generate_hints(
+            2, {"sign_item_hints": 0, "sign_entrance_hints": 60,
+                "main_course_shuffle": 1})
+        hinted_entrances = [world.sign_hint_entrances[key] for key in entrance_keys]
+
+        self.assertEqual(item_keys, [])
+        self.assertGreater(len(hinted_entrances), len(world.get_shuffled_entrance_source_ids()))
+        self.assertGreater(len(hinted_entrances), len(set(hinted_entrances)))
+
+    def test_all_entrance_hints_cover_every_shuffled_entrance_once(self):
+        world, item_keys, entrance_keys = self.generate_hints(
+            2, {"sign_item_hints": 0, "sign_entrance_hints": "all",
+                "main_course_shuffle": 1})
+        hinted_entrances = [world.sign_hint_entrances[key] for key in entrance_keys]
+
+        self.assertEqual(item_keys, [])
+        self.assertEqual(len(hinted_entrances), len(set(hinted_entrances)))
+        self.assertEqual(set(hinted_entrances), world.get_shuffled_entrance_source_ids())
+
+    def test_entrance_hints_are_skipped_when_no_entrances_are_shuffled(self):
+        world, item_keys, entrance_keys = self.generate_hints(
+            2, {"sign_item_hints": 3, "sign_entrance_hints": 40})
+
+        self.assertEqual(len(item_keys), 3)
+        self.assertEqual(entrance_keys, [])
+
+    def test_overlap_priority_decides_which_hint_type_keeps_signs(self):
+        from random import Random
+        self.assertEqual(resolve_sign_hint_counts(60, 60, 91, "items", Random(1)), (60, 31))
+        self.assertEqual(resolve_sign_hint_counts(60, 60, 91, "entrances", Random(1)), (31, 60))
+        self.assertEqual(resolve_sign_hint_counts(91, 91, 91, "items", Random(1)), (91, 0))
+        self.assertEqual(resolve_sign_hint_counts(91, 91, 91, "entrances", Random(1)), (0, 91))
+        self.assertEqual(resolve_sign_hint_counts(20, 90, 91, "items", Random(1)), (20, 71))
+        self.assertEqual(resolve_sign_hint_counts(30, 40, 91, "items", Random(1)), (30, 40))
+
+    def test_random_overlap_priority_fills_exactly_the_available_signs(self):
+        from random import Random
+        seen = set()
+        for seed in range(30):
+            items, entrances = resolve_sign_hint_counts(70, 70, 91, "at_random", Random(seed))
+            self.assertEqual(items + entrances, 91)
+            self.assertLessEqual(items, 70)
+            self.assertLessEqual(entrances, 70)
+            seen.add(items)
+        self.assertGreater(len(seen), 1)
+
+    def test_overlapping_counts_never_exceed_the_number_of_signs(self):
+        for priority in ("items", "entrances", "at_random"):
+            world, item_keys, entrance_keys = self.generate_hints(
+                2, {"sign_item_hints": 91, "sign_entrance_hints": 91,
+                    "main_course_shuffle": 2, "secret_course_shuffle": 2,
+                    "sign_hint_overlap_priority": world_priority_value(priority)})
+            self.assertLessEqual(len(item_keys) + len(entrance_keys), 91)
+            self.assertEqual(len(set(item_keys) & set(entrance_keys)), 0)
 
     def test_cross_player_item_hints_record_the_location_owner(self):
         multiworld = setup_multiworld([SM64World, SM64World], seed=17)
