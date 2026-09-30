@@ -607,6 +607,13 @@ logic_tricks = {
         "difficulty": "medium",
         "description": "Reaching the Vanish Cap block inside the Igloo with the Spindrift.",
     },
+    "Snowman's Land Whirl from the Freezing Pond area with Cannon": {
+        "internal_id": "logic_sl_whirl_from_freezing_pond_with_cannon",
+        "rule": "CANN",
+        "difficulty": "medium",
+        "description": "Reach the Whirl from the Freezing Pond star area without Spindrifts using the Cannon",
+        "video": "https://youtu.be/Enomhddu3JM"
+    },
     # Bowser in the Dark World
     "Bowser in the Dark World Triple Jump up the Purple Switch Slope": {
         "internal_id": "logic_bitdw_purple_switch_bypass",
