@@ -147,9 +147,10 @@ class TestTinyHugeIslandPipeDirections(SM64TestBase):
              [PIPES, BLOCK_1UPS]],
         ], starting_regions=["Tiny-Huge Island - Tiny Main"])
 
-    def test_red_coin_cave_exits_to_huge_island_but_wiggler_cave_is_terminal(self):
+    def test_red_coin_cave_exits_to_huge_tree_area_but_wiggler_cave_is_terminal(self):
         self.run_location_tests([
-            ["Tiny-Huge Island - Beach Coins 1-Up", True, [TRIGGER_1UPS]],
+            ["Tiny-Huge Island - Beach Coins 1-Up", False, [TRIGGER_1UPS]],
+            ["Tiny-Huge Island - Huge Island Tree 1-Up", True, [TRIGGER_1UPS]],
             ["Tiny-Huge Island - The Tip Top of the Huge Island", False, []],
         ], starting_regions=["Tiny-Huge Island - Red Coin Cave"])
         self.run_location_tests([

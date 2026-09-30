@@ -28,7 +28,8 @@ from .Items import item_data_table, action_item_data_table, cannon_item_data_tab
     per_level_sign_unlock_item_data_table, sign_unlock_item_names, progressive_filler_item_names
 from .Locations import location_table, SM64Location, coin_count_check_course_data, get_coin_count_check_location_name, \
     get_coin_count_check_location_names, get_secret_stage_coin_count_check_location_names, \
-    get_global_coin_count_check_location_names, get_global_coin_count_caps, location_name_groups
+    get_global_coin_count_check_location_names, get_global_coin_count_caps, global_coin_count_course_data, \
+    location_name_groups
 from .CoinChecks import CoinOutputID, coin_output_by_name, coin_output_region_name, select_individual_coin_outputs, \
     get_enabled_coin_check_kinds, get_enemy_coin_checks_enabled
 from .Music import build_music_slot_data
@@ -1096,6 +1097,15 @@ class SM64World(World):
             reachable_coin_maxima,
         )
 
+    def get_coin_display_maximums(self) -> tuple[int, ...]:
+        coin_star_requirements = self.get_coin_star_requirements_by_option()
+        return tuple(
+            coin_star_requirements[option_name]
+            if option_name in coin_star_requirements
+            else getattr(self.options, option_name).value
+            for _course_name, _offset, option_name, _maximum in global_coin_count_course_data
+        )
+
     def add_overflow_coin_count_check_locations(self) -> None:
         item_count = self.get_item_pool_item_count()
         fillable_location_count = (
@@ -1479,7 +1489,8 @@ class SM64World(World):
             "CoinCountCheckLocations": list(self.coin_count_check_location_names),
             "GlobalCoinCountCheckLocations": list(self.global_coin_count_check_location_names),
             "GlobalCoinCountChecksEnabled": self.options.global_coin_count_checks.value > 0,
-            "GlobalCoinCountCaps": list(self.get_global_coin_count_caps()),
+            "CountsCoinsBeyondCoinStars": bool(self.options.counts_coins_beyond_coin_stars),
+            "CoinDisplayMaximums": list(self.get_coin_display_maximums()),
             "CoinCheckLocations": list(self.coin_check_location_names),
             "StartInventory": self.get_start_inventory_slot_data(),
             "BowserStage1UpBehavior": self.options.bowser_stage_1ups.value != self.options.bowser_stage_1ups.option_vanilla,

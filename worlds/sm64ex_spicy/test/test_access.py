@@ -5674,6 +5674,7 @@ class SnowmansLandRegionAccessTestBase(SM64TestBase):
     def test_cannon_reaches_upper_top_and_igloo(self):
         self.collect_second_floor_access()
         self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
+        self.assertFalse(self.can_reach_region("Snowman's Land - Whirl from the Freezing Pond"))
         self.assertTrue(self.can_reach_region("Snowman's Land - Upper"))
         self.assertTrue(self.can_reach_region("Snowman's Land - Top of Snowman's Head"))
         self.assertTrue(self.can_reach_region("Snowman's Land - Igloo"))
@@ -7599,6 +7600,7 @@ class TTCRandomizedMoveVariantAccessTestBase(SM64TestBase):
         self.collect([
             self.get_item_by_name("Tick Tock Clock - Spinners"),
             self.get_item_by_name("Climb"),
+            self.get_item_by_name("Ledge Grab"),
         ])
         self.assertTrue(self.can_reach_region("Tick Tock Clock - The Pit and the Pendulums Area"))
         self.assertTrue(self.can_reach_location("Tick Tock Clock - The Pit and the Pendulums"))
@@ -8115,7 +8117,7 @@ class RainbowRideIndividualUnlockLogicTestBase(SM64TestBase):
         self.collect(cannon)
         self.assertTrue(rainbow_ride_coins(self.multiworld.state, self.player, 5))
 
-    def test_lakitus_are_split_between_maze_and_carpets(self):
+    def test_lakitus_are_split_between_maze_and_cruiser(self):
         self.collect([self.get_item_by_name("Progressive Upstairs Key")] * 2)
         self.collect([
             self.get_item_by_name("Long Jump"),

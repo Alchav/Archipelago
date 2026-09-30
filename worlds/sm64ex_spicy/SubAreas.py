@@ -114,7 +114,8 @@ RETURN_DESTINATIONS: dict[str, SubAreaDestination] = {
         "sl_main", "Snowman's Land - Igloo Entrance", 10, 1, 0x0B),
     "ttm_main": SubAreaDestination(
         "ttm_main", "Tall, Tall Mountain - Slide Exit Alcove", 36, 1, 0x14),
-    "thi_huge": SubAreaDestination("thi_huge", "Tiny-Huge Island (Huge)", 13, 1, 0x0B),
+    "thi_huge": SubAreaDestination(
+        "thi_huge", "Tiny-Huge Island - Huge Tree Area", 13, 1, 0x0B),
 }
 
 

@@ -228,6 +228,7 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "ttc_top_central_platform_block": "Tick Tock Clock - Top Past Spinners",
     "ttc_beneath_thwomp_block": "Tick Tock Clock - Top Past Spinners",
     "ttc_first_hand_block": "Tick Tock Clock - First Clock Hand Area",
+    "ttc_first_pole_coin_line": "Tick Tock Clock - Roll Into the Cage Area",
     "ttc_heave_ho_blocks": "Tick Tock Clock - The Pit and the Pendulums Area",
 
     "bitfs_ten_coin_block": "Bowser in the Fire Sea - Upper",
@@ -271,6 +272,7 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "red_area_plank_line": "Tiny-Huge Island - Huge Tree Area",
     "wiggler_cave_coin_lines": "Tiny-Huge Island - Wiggler's Cave",
     "huge_piranha_area_plants": "Tiny-Huge Island - Huge Piranha Area",
+    "rr_carpets_lakitu": "Rainbow Ride - Cruiser",
 }
 
 # Every source without a more specific physical-region mapping belongs to its
@@ -1174,10 +1176,10 @@ _ENEMY_DESCRIPTOR_OVERRIDES = {
     "main_koopa_troopa": "Koopa",
     "bitfs_start_goombas": "Goomba",
     "ttc_start_bob_ombs": "Bob-omb",
-    "whomp_jump_coins": "Whomp (Jump)",
-    "whomp_ground_pound_coins": "Whomp (Ground Pound)",
-    "bits_whomp_jump_coins": "Whomp (Jump)",
-    "bits_whomp_ground_pound_coins": "Whomp (Ground Pound)",
+    "whomp_jump_coins": "Whomp Coins 1-5",
+    "whomp_ground_pound_coins": "Whomp Coins 6-10",
+    "bits_whomp_jump_coins": "Whomp Coins 1-5",
+    "bits_whomp_ground_pound_coins": "Whomp Coins 6-10",
     "main_mr_is": "Main Area Mr. I",
     "merry_go_round_boos": "Merry-Go-Round Boo",
     "tiny_piranha_area_plant": "Tiny Island Fire Piranha Plant",

@@ -24,6 +24,18 @@ from ..RuleBuilder import CanCollectCoinOutput
 
 
 class CoinCheckCatalogTest(unittest.TestCase):
+    def test_ttc_first_pole_coin_line_is_in_roll_into_the_cage_area(self):
+        self.assertEqual(
+            COIN_SOURCE_METHOD_REGION_NAMES["ttc_first_pole_coin_line"],
+            "Tick Tock Clock - Roll Into the Cage Area",
+        )
+
+    def test_second_rainbow_ride_lakitu_is_in_cruiser(self):
+        self.assertEqual(
+            COIN_SOURCE_METHOD_REGION_NAMES["rr_carpets_lakitu"],
+            "Rainbow Ride - Cruiser",
+        )
+
     def test_bob_bob_omb_coin_names_are_uniform(self):
         course_name = "Bob-omb Battlefield"
         self.assertEqual(

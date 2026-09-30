@@ -977,7 +977,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.world.set_rule(
         multiworld.get_region("Snowman's Land - Whirl from the Freezing Pond", player).entrances[0],
         rf.build_rule(
-            "SPINDRIFTS | CANN",
+            "SPINDRIFTS | logic_sl_whirl_from_freezing_pond_cannon",
             cannon_name=rf.get_cannon_item_name("Snowman's Land - Whirl from the Freezing Pond"),
             cap_item_names=rf.get_cap_item_names("Snowman's Land - Whirl from the Freezing Pond"),
             arbitrary_item_names=rf.get_arbitrary_item_names("Snowman's Land - Whirl from the Freezing Pond"),
@@ -1171,9 +1171,13 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Tick Tock Clock - First Clock Hand Area",
                    "LG/TJ/SF/BF | logic_ttc_first_clock_hand_area_wall_kick | "
                    "{Tick Tock Clock Stopped} & TTC_SPINNERS")
+    rf.assign_rule("Tick Tock Clock - Roll Into the Cage Area", "LG/TJ/SF/BF")
     rf.assign_rule(
         "Tick Tock Clock - The Pit and the Pendulums Area",
         "CL | logic_ttc_pit_and_pendulums_area_wall_kick")
+    rf.assign_rule(
+        "Tick Tock Clock - Get a Hand",
+        "{Tick Tock Clock Moving} | {Tick Tock Clock - Roll Into the Cage Area}")
     rf.assign_rule("Tick Tock Clock - Moving Bars Area", "{Tick Tock Clock Moving} | WK")
     rf.assign_rule(
         "Tick Tock Clock - Upper Moving Bars Area",

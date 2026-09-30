@@ -27,7 +27,8 @@ from ..Items import arbitrary_item_data_table, cap_item_data_table, castle_key_i
 from ..Locations import coin_count_check_course_data, secret_stage_coin_count_check_data, loc100Coin_table, locOneUp_table, locBlocksanity_table, location_table, \
     coin_count_check_location_table, secret_stage_coin_count_check_location_table, get_coin_count_check_location_name, \
     get_global_coin_count_caps, get_global_coin_count_check_location_name, \
-    global_coin_count_check_location_table, global_coin_count_check_maximum, location_name_groups
+    global_coin_count_check_location_table, global_coin_count_check_maximum, global_coin_count_course_data, \
+    location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
 from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
@@ -1632,6 +1633,16 @@ class CoinStarRequirementTestBase(SM64TestBase):
             100, 90, 100, 80, 100, 100, 75, 100, 100, 100, 100, 100, 100, 100, 100
         ])
 
+    def test_coin_display_maximums_include_main_and_secret_courses(self):
+        slot_data = self.world.fill_slot_data()
+        maximums = slot_data["CoinDisplayMaximums"]
+        self.assertEqual(maximums[:15], [
+            100, 90, 100, 80, 100, 100, 75, 100, 100, 100, 100, 100, 100, 100, 100
+        ])
+        self.assertEqual(len(maximums), len(global_coin_count_course_data))
+        self.assertFalse(slot_data["CountsCoinsBeyondCoinStars"])
+        self.assertNotIn("GlobalCoinCountCaps", slot_data)
+
     def test_coin_star_requirement_ranges(self):
         expected_range_ends = {
             Options.BobOmbBattlefieldCoinStarRequirement: 146,
@@ -1838,6 +1849,7 @@ class GlobalCoinCountChecksFullAccessibilityTestBase(SM64TestBase):
             get_global_coin_count_check_location_name(maximum + 1),
             self.world.global_coin_count_check_location_names,
         )
+        self.assertTrue(self.world.fill_slot_data()["CountsCoinsBeyondCoinStars"])
 
 
 class CoinCountChecksGenerationTestBase(SM64TestBase):

@@ -119,7 +119,10 @@ class TestSnowmansLandLocations(SM64TestBase):
 
 class TestSnowmansLandWhirlCannonRoute(SM64TestBase):
     run_default_tests = False
-    options = SL_OPTIONS
+    options = {
+        **SL_OPTIONS,
+        "logic_tricks": {"Snowman's Land Whirl from the Freezing Pond Area with Cannon"},
+    }
 
     def test_cannon_reaches_whirl(self):
         self.run_location_tests([

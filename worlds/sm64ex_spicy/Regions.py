@@ -709,10 +709,12 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
                 "Tick Tock Clock - First Pendulum 3 Coins Block")
     ttc_lower = create_subregion(
         regTTC, "Tick Tock Clock - First Clock Hand Area",
-        "Tick Tock Clock - Roll into the Cage",
         "Tick Tock Clock - Get a Hand", "Tick Tock Clock - Stop Time for Red Coins",
         "Tick Tock Clock - Above Red Coin Spinners 3 Coins Block")
-    ttc_mid = create_subregion(ttc_lower, "Tick Tock Clock - The Pit and the Pendulums Area",
+    ttc_roll_into_cage = create_subregion(
+        ttc_lower, "Tick Tock Clock - Roll Into the Cage Area",
+        "Tick Tock Clock - Roll into the Cage")
+    ttc_mid = create_subregion(ttc_roll_into_cage, "Tick Tock Clock - The Pit and the Pendulums Area",
                                "Tick Tock Clock - The Pit and the Pendulums",
                                "Tick Tock Clock - Heave-ho First 3 Coins Block",
                                "Tick Tock Clock - Heave-ho Second 3 Coins Block")
@@ -742,7 +744,7 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     ttc_upper.connect(ttc_top_past_spinners,
                       name="Tick Tock Clock - Moving Bars Area to Top Past Spinners with Wall Kick")
     regTTC.subregions = [
-        ttc_lower, ttc_mid, ttc_upper, ttc_upper_moving_bars,
+        ttc_lower, ttc_roll_into_cage, ttc_mid, ttc_upper, ttc_upper_moving_bars,
         ttc_more_moving_bars, ttc_top, ttc_top_past_spinners,
     ]
     regTTCStopped = create_region("Tick Tock Clock Stopped", player, multiworld)

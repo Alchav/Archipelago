@@ -497,7 +497,7 @@ def evaluate_whomps_fortress_coins(
         coin_source("water_coin_ring", "Water Coin Ring", 8, has_horizontal_coin_rings),
         coin_source("buddy_coin_line", "Stone Ramp Coin Line", 5,
                 has_horizontal_coin_lines),
-        coin_source("whomp_jump_coins", "Coins from jumping on two Whomps", 10, has_whomps),
+        coin_source("whomp_jump_coins", "Whomp Coins 1-5", 10, has_whomps),
         coin_source("piranha_plant_coins", "Three named Piranha Plants", 15, has_piranha_plants),
         coin_source("initial_red_coins", "Five initially reachable Red Coins", 10, has_red_coins,
                     red_coin_ids=frozenset(range(1, 6))),
@@ -545,7 +545,7 @@ def evaluate_whomps_fortress_coins(
 
     has_ground_pound = Rules.has_action(state, player, "Ground Pound", level_name)
     ground_pound_children = (
-        coin_source("whomp_ground_pound_coins", "Ground Pound bonus from two Whomps", 10,
+        coin_source("whomp_ground_pound_coins", "Whomp Coins 6-10", 10,
                 has_ground_pound and has_whomps),
         coin_source("blue_coin_block", "Blue Coin Block", 20,
                 has_ground_pound and has_blue_coin_block),
@@ -3151,14 +3151,6 @@ def tick_tock_clock_coins(
         state.can_reach("Tick Tock Clock Stopped", "Region", player)
         and rules.has_simple_arbitrary_feature(state, player, "TTC_SPINNERS")
     )
-    moving_line_route = (
-        state.can_reach("Tick Tock Clock Moving", "Region", player)
-        or (
-            state.can_reach("Tick Tock Clock Stopped", "Region", player)
-            and any(rules.has_action(state, player, action, level_name)
-                    for action in ("Ledge Grab", "Backflip", "Triple Jump", "Wall Kick"))
-        )
-    )
     trace.add_route("ttc_lower", "Lower region", has_lower, (
         coin_source("ttc_first_hand_block",
                 "3-Coin Block by the first moving hand", 3, has_three_coin_blocks),
@@ -3172,11 +3164,16 @@ def tick_tock_clock_coins(
             has_red_coins and has_stopped_red_coin_route,
             red_coin_ids=frozenset({6, 7, 8}),
         ),
+    ))
+
+    has_roll_into_cage = state.can_reach(
+        "Tick Tock Clock - Roll Into the Cage Area", "Region", player)
+    trace.add_route("ttc_roll_into_cage", "Roll Into the Cage Area", has_roll_into_cage, (
         coin_source(
             "ttc_first_pole_coin_line",
-            "Slanted coin line by the first pole (moving time, or stopped-time movement)",
+            "Slanted coin line by the first pole",
             5,
-            has_horizontal_coin_lines and moving_line_route,
+            has_horizontal_coin_lines,
         ),
     ))
 
@@ -3358,7 +3355,6 @@ def rainbow_ride_coins(
     trace.add_route(
         "rr_carpets", "Carpets region",
         state.can_reach("Rainbow Ride - Carpets", "Region", player), (
-            coin_source("rr_carpets_lakitu", "Lakitu in the Carpets region", 5, has_lakitus),
             coin_source("rr_second_carpet_platform_coin",
                     "Coin on the second carpet's grey platform",
                     1, has_single_yellow_coins),
@@ -3385,6 +3381,7 @@ def rainbow_ride_coins(
     trace.add_route(
         "rr_cruiser", "Cruiser region",
         state.can_reach("Rainbow Ride - Cruiser", "Region", player), (
+            coin_source("rr_carpets_lakitu", "Lakitu in the Cruiser region", 5, has_lakitus),
             coin_source("rr_cruiser_bob_ombs", "Two Cruiser Bob-ombs",
                     2, has_bob_ombs),
             coin_source("rr_ship_pole_ring", "Cruiser Pole Coin Ring",
@@ -3427,7 +3424,7 @@ def princess_secret_slide_coins(
         ),
         coin_source(
             "pss_blue_coin_block",
-            "Blue Coin Block with Ground Pound",
+            "Blue Coin Block",
             30,
             rules.has_action(state, player, "Ground Pound", level_name)
             and rules.has_unlock(
@@ -3971,10 +3968,10 @@ def bowser_in_the_sky_coins(
                 "Two coin lines beneath the Whomp",
                 10, has_horizontal_coin_lines),
         coin_source("bits_whomp_jump_coins",
-                "Whomp coins available without Ground Pound",
+                "Whomp Coins 1-5",
                 5, has_whomp),
         coin_source("bits_whomp_ground_pound_coins",
-                "Additional Whomp coins with Ground Pound",
+                "Whomp Coins 6-10",
                 5, has_whomp and has_ground_pound),
     ))
     trace.add_route(
@@ -5011,8 +5008,7 @@ def _late_requirement_specs():
          "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Stopped} & RED_COINS & TTC_SPINNERS",
          _unlock("Red Coins", TTC))
     _add(TTC, "ttc_first_pole_coin_line",
-         "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Moving} | "
-         "{Tick Tock Clock - First Clock Hand Area} & {Tick Tock Clock Stopped} & LG/BF/TJ/WK",
+         "{Tick Tock Clock - Roll Into the Cage Area} & HORIZONTAL_COIN_LINES",
          _unlock("Horizontal Coin Lines", TTC))
     _add(TTC, "ttc_upper", "{Tick Tock Clock - Moving Bars Area}")
     _add(TTC, "ttc_heave_ho_blocks",
@@ -5062,7 +5058,7 @@ def _late_requirement_specs():
     _add(RR, "rr_maze_coin_rings", "{Rainbow Ride - Maze} & HORIZONTAL_COIN_RINGS",
          _unlock("Horizontal Coin Rings", RR))
     _add(RR, "rr_maze_lakitu", "{Rainbow Ride - Maze} & LAKITU", _unlock("Lakitus", RR))
-    _add(RR, "rr_carpets_lakitu", "{Rainbow Ride - Carpets} & LAKITU", _unlock("Lakitus", RR))
+    _add(RR, "rr_carpets_lakitu", "{Rainbow Ride - Cruiser} & LAKITU", _unlock("Lakitus", RR))
     _add(RR, "rr_maze_bob_ombs", "{Rainbow Ride - Maze} & BOB_OMBS", _unlock("Bob-ombs", RR))
     _add(RR, "rr_maze_blue_coin", "{Rainbow Ride - Maze} & BLUE_COIN_BLOCKS & GP",
          _unlock("Blue Coin Blocks", RR, "Blue Coin Block"))

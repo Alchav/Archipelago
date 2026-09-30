@@ -122,6 +122,19 @@ class TestTickTockClockMovingLocations(SM64TestBase):
                     region_name,
                 )
 
+    def test_roll_into_the_cage_area_location_placement(self):
+        self.assertEqual(
+            "Tick Tock Clock - Roll Into the Cage Area",
+            self.multiworld.get_location(
+                "Tick Tock Clock - Roll into the Cage", self.player).parent_region.name,
+        )
+
+    def test_get_a_hand_requires_moving_time_or_roll_into_the_cage_area(self):
+        self.run_location_tests([
+            ["Tick Tock Clock - Get a Hand", False, []],
+            ["Tick Tock Clock - Get a Hand", True, ["Ledge Grab"]],
+        ], starting_regions=["Tick Tock Clock - First Clock Hand Area"])
+
     def test_upper_moving_bars_requires_triple_jump_and_ledge_grab(self):
         block = "Tick Tock Clock - Above Timed Jumps on Moving Bars 3 Coins Block"
         unlock = "Tick Tock Clock - 3-Coin Blocks"
