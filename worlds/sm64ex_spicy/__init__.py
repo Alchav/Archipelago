@@ -1489,6 +1489,7 @@ class SM64World(World):
             "CoinCountCheckLocations": list(self.coin_count_check_location_names),
             "GlobalCoinCountCheckLocations": list(self.global_coin_count_check_location_names),
             "GlobalCoinCountChecksEnabled": self.options.global_coin_count_checks.value > 0,
+            "GlobalCoinCountCaps": list(self.get_global_coin_count_caps()),
             "CountsCoinsBeyondCoinStars": bool(self.options.counts_coins_beyond_coin_stars),
             "CoinDisplayMaximums": list(self.get_coin_display_maximums()),
             "CoinCheckLocations": list(self.coin_check_location_names),

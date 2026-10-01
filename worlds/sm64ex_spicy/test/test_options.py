@@ -92,6 +92,7 @@ class WorldVersionSlotDataTest(SM64TestBase):
     run_default_tests = False
 
     def test_world_version_comes_from_manifest(self):
+        self.assertEqual(SPICY_MYCENA_VERSION, (1, 0, 3))
         self.assertEqual(len(SPICY_MYCENA_VERSION), 3)
         self.assertTrue(all(isinstance(part, int) and part >= 0 for part in SPICY_MYCENA_VERSION))
         self.assertEqual(self.world.fill_slot_data()["SpicyMycenaVersion"], SPICY_MYCENA_VERSION)
@@ -1641,7 +1642,7 @@ class CoinStarRequirementTestBase(SM64TestBase):
         ])
         self.assertEqual(len(maximums), len(global_coin_count_course_data))
         self.assertFalse(slot_data["CountsCoinsBeyondCoinStars"])
-        self.assertNotIn("GlobalCoinCountCaps", slot_data)
+        self.assertEqual(slot_data["GlobalCoinCountCaps"], maximums)
 
     def test_coin_star_requirement_ranges(self):
         expected_range_ends = {
@@ -1849,7 +1850,9 @@ class GlobalCoinCountChecksFullAccessibilityTestBase(SM64TestBase):
             get_global_coin_count_check_location_name(maximum + 1),
             self.world.global_coin_count_check_location_names,
         )
-        self.assertTrue(self.world.fill_slot_data()["CountsCoinsBeyondCoinStars"])
+        slot_data = self.world.fill_slot_data()
+        self.assertTrue(slot_data["CountsCoinsBeyondCoinStars"])
+        self.assertEqual(slot_data["GlobalCoinCountCaps"], list(self.world.get_global_coin_count_caps()))
 
 
 class CoinCountChecksGenerationTestBase(SM64TestBase):
