@@ -1,5 +1,6 @@
 import unittest
 import random
+from pathlib import Path
 from types import SimpleNamespace
 
 from worlds.alttp_beta.EnemizerPatches import (
@@ -19,6 +20,7 @@ from worlds.alttp_beta.EnemizerPatches import (
     TILE_TRAP_FLOOR_TILE_ADDRESS,
     TRINEXX_ICE_FLOOR_ROUTINE_ADDRESS,
     TRINEXX_ICE_PROJECTILE_TILE_ADDRESS,
+    VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES,
     VANILLA_HIDDEN_ENEMY_CHANCE_POOL,
     SPRITE_DAMAGE_SUBCLASS_TABLE_ADDRESS,
     apply_enemy_combat_data,
@@ -745,9 +747,23 @@ class TestEnemizerPatches(unittest.TestCase):
         randomized_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + 0x02)
         self.assertEqual(randomized_damage & 0xF0, 0x80)
         self.assertIn(randomized_damage & 0x0F, range(8))
-        randomized_boss_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + 0x53)
-        self.assertEqual(randomized_boss_damage & 0x10, 0x10)
-        self.assertIn(randomized_boss_damage & 0x0F, range(8))
+        for boss_sprite_id in (0x53, 0x54, 0x88, 0x8C, 0x8D, 0x92, 0xA2, 0xA3, 0xA4, 0xCB, 0xCC, 0xCD, 0xCE):
+            if boss_sprite_id in EXCLUDED_ENEMY_TABLE_SPRITE_IDS:
+                continue
+            randomized_boss_damage = rom.read_byte(ENEMY_DAMAGE_TABLE_ADDRESS + boss_sprite_id)
+            self.assertEqual(randomized_boss_damage & 0x10, 0x10)
+            self.assertIn(randomized_boss_damage & 0x0F, range(8))
+
+    def test_enemy_damage_property_data_matches_base_rom(self) -> None:
+        base_rom_path = Path(__file__).resolve().parents[3] / "basepatch.sfc"
+        if not base_rom_path.exists():
+            self.skipTest("basepatch.sfc is not available")
+
+        with base_rom_path.open("rb") as base_rom:
+            base_rom.seek(ENEMY_DAMAGE_TABLE_ADDRESS)
+            expected = bytes(value & 0xF0 for value in base_rom.read(len(VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES)))
+
+        self.assertEqual(VANILLA_ENEMY_DAMAGE_TABLE_HIGH_NIBBLES, expected)
 
     def test_enemy_health_randomizer_does_not_corrupt_sprite_prep_helper(self) -> None:
         rom = FakeRom()
