@@ -599,6 +599,7 @@ logic_tricks = {
         "rule": "CANN",
         "difficulty": "medium",
         "description": "Reaching the Whirl from the Freezing Pond area using the cannon instead of a Spindrift.",
+        "video": "https://youtu.be/Enomhddu3JM",
     },
     "Snowman's Land Impossible Coin": {
         "internal_id": "logic_sl_impossible_coin",
