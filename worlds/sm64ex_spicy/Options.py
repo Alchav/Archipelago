@@ -494,6 +494,56 @@ class SignUnlocks(LevelFeatureItemMode):
     display_name = "Sign Unlocks"
 
 
+class SignHintCount(NamedRange):
+    range_start = 0
+    range_end = 91
+    default = -1
+    special_range_names = {"auto": -1}
+
+
+class SignItemHints(SignHintCount):
+    """
+    How many signs should contain hints for item locations.
+    Item hints only point at progression items in the same sphere as the sign or later.
+    Very high counts may place fewer hints than requested.
+
+    Auto - One hint for every five progression items.
+    """
+    display_name = "Sign Item Hints"
+
+
+class SignEntranceHints(SignHintCount):
+    """
+    How many signs should contain hints for shuffled entrances.
+    If this is higher than the number of shuffled entrances, hints may be duplicated.
+    Does nothing if no entrances are shuffled.
+
+    Auto - One hint for every five shuffled entrances.
+
+    All - One hint for every shuffled entrance.
+    This is the most that can be given before hints start repeating.
+    """
+    display_name = "Sign Entrance Hints"
+    special_range_names = {"auto": -1, "all": -2}
+
+
+class SignHintOverlapPriority(Choice):
+    """
+    Decides which kind of hint keeps its signs when the two counts together exceed the 91 signs available.
+
+    Items - Item hints keep their signs and entrance hints are reduced.
+
+    Entrances - Entrance hints keep their signs and item hints are reduced.
+
+    At Random - Signs are taken from item and entrance hints at random until the counts fit.
+    """
+    display_name = "Sign Hint Overlap Priority"
+    option_items = 0
+    option_entrances = 1
+    option_at_random = 2
+    default = 0
+
+
 class BowserBombs(LevelFeatureItemMode):
     """
     Choose how Bowser Arena Bombs are handled.
@@ -1189,6 +1239,11 @@ sm64_options_groups = [
         SubAreaShuffle,
         CastleReturnShuffle,
     ]),
+    OptionGroup("Sign Hint Options", [
+        SignItemHints,
+        SignEntranceHints,
+        SignHintOverlapPriority,
+    ]),
     OptionGroup("Quality of Life Options", [
         EasyButterflies,
         TriggerSparkles,
@@ -1256,6 +1311,9 @@ class SM64Options(PerGameCommonOptions):
     enemy_unlocks: EnemyUnlocks
     one_up_unlocks: OneUpUnlocks
     sign_unlocks: SignUnlocks
+    sign_item_hints: SignItemHints
+    sign_entrance_hints: SignEntranceHints
+    sign_hint_overlap_priority: SignHintOverlapPriority
     bowser_bombs: BowserBombs
     bowser_in_the_dark_world_health: BowserInTheDarkWorldHits
     bowser_in_the_fire_sea_health: BowserInTheFireSeaHits

@@ -158,6 +158,22 @@ sign_data = (
 sign_data_by_location_name = {sign.location_name: sign for sign in sign_data}
 
 
+def resolve_sign_hint_counts(item_count, entrance_count, capacity, priority, random):
+    excess = item_count + entrance_count - capacity
+    if excess <= 0:
+        return item_count, entrance_count
+    counts = {"item": item_count, "entrance": entrance_count}
+    if priority == "at_random":
+        for _ in range(excess):
+            counts[random.choice([kind for kind, count in counts.items() if count > 0])] -= 1
+    else:
+        loser, winner = ("entrance", "item") if priority == "items" else ("item", "entrance")
+        cut = min(excess, counts[loser])
+        counts[loser] -= cut
+        counts[winner] -= excess - cut
+    return counts["item"], counts["entrance"]
+
+
 def sign_item_name_for_area(area: str) -> str:
     if area.startswith("Castle "):
         return "Castle - Signs"

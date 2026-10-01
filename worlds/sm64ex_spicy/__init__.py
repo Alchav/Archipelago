@@ -37,7 +37,7 @@ from .Options import sm64_options_groups, SM64Options, coin_star_requirement_opt
     move_randomizer_option_name_by_action, secret_stage_coin_count_max_coin_option_names, \
     trap_weight_option_names, trap_item_name_by_option_name
 from .Rules import set_rules
-from .Signs import fallback_hints, sign_data, sign_data_by_location_name
+from .Signs import fallback_hints, resolve_sign_hint_counts, sign_data, sign_data_by_location_name
 from .LogicTricks import get_enabled_logic_tricks, logic_tricks
 from .Regions import create_regions, sm64_entrance_to_region, sm64_level_to_entrances, \
     sm64_level_to_paintings, sm64_level_to_secrets, SM64Levels, \
@@ -149,7 +149,8 @@ class SM64World(World):
     using_slot_coin_count_check_locations: bool
     start_inventory_item_ids: set[int]
     start_inventory_item_counts: dict[int, int]
-    sign_hint_count: int
+    sign_item_hint_count: int
+    sign_entrance_hint_count: int
     sign_hints: dict[str, str]
     sign_hint_locations: dict[str, int]
     sign_hint_location_players: dict[str, int]
@@ -227,7 +228,8 @@ class SM64World(World):
         self.music_slot_data = None
         self.skybox_slot_data = None
         self.using_slot_coin_count_check_locations = False
-        self.sign_hint_count = 0
+        self.sign_item_hint_count = 0
+        self.sign_entrance_hint_count = 0
         self.sign_hints = dict(slot_data.get("SignHints", {})) if slot_data else {}
         self.sign_hint_locations = dict(slot_data.get("SignHintLocations", {})) if slot_data else {}
         self.sign_hint_location_players = {
@@ -1213,7 +1215,14 @@ class SM64World(World):
             if item.player == self.player and item.name not in sign_unlock_item_names
         )
         entrance_count = len(self.get_shuffled_entrance_source_ids())
-        self.sign_hint_count = min(len(sign_data) - 1, (advancement_count + entrance_count) // 5)
+        item_hints = self.options.sign_item_hints.value
+        entrance_hints = self.options.sign_entrance_hints.value
+        self.sign_item_hint_count = item_hints if item_hints >= 0 else min(len(sign_data), advancement_count // 5)
+        if entrance_hints == -2:
+            self.sign_entrance_hint_count = min(len(sign_data), entrance_count)
+        else:
+            self.sign_entrance_hint_count = (
+                entrance_hints if entrance_hints >= 0 else min(len(sign_data), entrance_count // 5))
 
     @classmethod
     def stage_pre_output(cls, multiworld):
@@ -1228,8 +1237,8 @@ class SM64World(World):
         sign_entries_by_player: dict[int, list[tuple[int, object]]] = {
             world.player: [] for world in worlds
         }
-        candidates_by_player: dict[int, dict[int, list[tuple[str, object]]]] = {
-            world.player: {} for world in worlds
+        candidates_by_player: dict[int, dict[str, dict[int, list]]] = {
+            world.player: {"item": {}, "entrance": {}} for world in worlds
         }
         entrance_sources = {
             entrance: (world.player, entrance_id)
@@ -1273,15 +1282,13 @@ class SM64World(World):
                         and location.address is not None
                         and not (is_own_sign and item.player == location.player)
                 ):
-                    candidates_by_player[item.player].setdefault(sphere_index, []).append(
-                        ("item", location))
+                    candidates_by_player[item.player]["item"].setdefault(sphere_index, []).append(location)
 
                 state.collect(location.item, True, location)
 
             for entrance in entrance_sphere:
                 player, source_id = entrance_sources[entrance]
-                candidates_by_player[player].setdefault(sphere_index, []).append(
-                    ("entrance", source_id))
+                candidates_by_player[player]["entrance"].setdefault(sphere_index, []).append(source_id)
 
             remaining_locations -= sphere
             sphere_index += 1
@@ -1298,11 +1305,30 @@ class SM64World(World):
             world.sign_hint_entrances = {sign.key: 0 for sign in sign_data}
 
             sign_entries = sign_entries_by_player[world.player]
-            candidates_by_sphere = candidates_by_player[world.player]
-            for candidates in candidates_by_sphere.values():
-                world.random.shuffle(candidates)
-            candidate_sphere_indices = sorted(candidates_by_sphere)
-            target_hint_count = min(world.sign_hint_count, len(sign_entries), len(sign_data) - 1)
+            pools = {}
+            for kind, by_sphere in candidates_by_player[world.player].items():
+                for candidates in by_sphere.values():
+                    world.random.shuffle(candidates)
+                pools[kind] = {
+                    "master": {index: list(candidates) for index, candidates in by_sphere.items()},
+                    "by_sphere": by_sphere,
+                    "indices": sorted(by_sphere),
+                }
+            item_available = sum(len(candidates) for candidates in pools["item"]["master"].values())
+            entrance_available = sum(len(candidates) for candidates in pools["entrance"]["master"].values())
+            item_target, entrance_target = resolve_sign_hint_counts(
+                min(world.sign_item_hint_count, item_available),
+                (
+                    entrance_available if world.options.sign_entrance_hints.value == -2
+                    else world.sign_entrance_hint_count
+                ) if entrance_available else 0,
+                len(sign_entries),
+                world.options.sign_hint_overlap_priority.current_key,
+                world.random,
+            )
+            hint_kinds = ["item"] * item_target + ["entrance"] * entrance_target
+            world.random.shuffle(hint_kinds)
+            target_hint_count = len(hint_kinds)
             sign_buckets = [
                 sign_entries[
                     bucket_index * len(sign_entries) // target_hint_count:
@@ -1316,17 +1342,28 @@ class SM64World(World):
             selected_signs = set()
             assignments = []
 
-            def take_candidate(sign_sphere_index):
-                candidate_index = bisect_left(candidate_sphere_indices, sign_sphere_index)
-                while candidate_index < len(candidate_sphere_indices):
-                    candidate_sphere_index = candidate_sphere_indices[candidate_index]
-                    candidates = candidates_by_sphere[candidate_sphere_index]
-                    if candidates:
-                        candidate = candidates.pop()
-                        if not candidates:
-                            candidate_sphere_indices.pop(candidate_index)
-                        return candidate
-                    candidate_sphere_indices.pop(candidate_index)
+            def take_candidate(kind, sign_sphere_index):
+                pool = pools[kind]
+                for attempt in range(2):
+                    indices = pool["indices"]
+                    by_sphere = pool["by_sphere"]
+                    candidate_index = bisect_left(indices, sign_sphere_index)
+                    while candidate_index < len(indices):
+                        candidates = by_sphere[indices[candidate_index]]
+                        if candidates:
+                            candidate = candidates.pop()
+                            if not candidates:
+                                indices.pop(candidate_index)
+                            return kind, candidate
+                        indices.pop(candidate_index)
+                    if kind != "entrance" or attempt:
+                        break
+                    for sphere_index, master in pool["master"].items():
+                        if sphere_index >= sign_sphere_index:
+                            refill = list(master)
+                            world.random.shuffle(refill)
+                            by_sphere[sphere_index] = refill
+                    pool["indices"] = sorted(index for index, candidates in by_sphere.items() if candidates)
                 return None
 
             # Work backward so late signs get first claim on the candidates that can validly hint them.
@@ -1334,11 +1371,12 @@ class SM64World(World):
                 eligible_signs = sign_buckets[bucket_index]
                 if not eligible_signs:
                     continue
+                kind = hint_kinds[bucket_index]
                 assignment = None
                 for sign_sphere_index, sign_location in eligible_signs:
                     if sign_location in selected_signs:
                         continue
-                    candidate = take_candidate(sign_sphere_index)
+                    candidate = take_candidate(kind, sign_sphere_index)
                     if candidate is not None:
                         assignment = (sign_location, candidate)
                         break
@@ -1347,7 +1385,7 @@ class SM64World(World):
                     for sign_sphere_index, sign_location in reversed(sign_entries):
                         if sign_location in selected_signs:
                             continue
-                        candidate = take_candidate(sign_sphere_index)
+                        candidate = take_candidate(kind, sign_sphere_index)
                         if candidate is not None:
                             assignment = (sign_location, candidate)
                             break
