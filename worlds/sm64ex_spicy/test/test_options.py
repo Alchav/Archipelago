@@ -995,6 +995,25 @@ class FullLevelUnlockItemPoolTestBase(SM64TestBase):
         self.assertEqual(sum(early_items.values()), 1)
         self.assertLessEqual(set(early_items), set(self.world.get_level_unlock_item_names()))
 
+    def test_all_starting_castle_entrances_are_early_unlock_candidates(self):
+        state = self.multiworld.state.copy()
+        state.reachable_regions[self.player].clear()
+        state.blocked_connections[self.player].clear()
+        state.update_reachable_regions(self.player)
+        candidates = set(self.world.get_full_level_unlock_early_candidates(state))
+        self.assertEqual(candidates, {
+            "Unlock Bob-omb Battlefield",
+            "Unlock Whomp's Fortress",
+            "Unlock Jolly Roger Bay",
+            "Unlock Cool, Cool Mountain",
+            "Unlock Big Boo's Haunt",
+            "Unlock The Princess's Secret Slide",
+            "Unlock The Secret Aquarium",
+            "Unlock Tower of the Wing Cap",
+            "Unlock Vanish Cap Under the Moat",
+        })
+        del state
+
     def test_optional_second_level_unlock_is_valid(self):
         early_items = self.multiworld.early_items[self.player]
         state = self.multiworld.state.copy()
@@ -1021,6 +1040,27 @@ class FullLevelUnlockWithVisitChecksTestBase(FullLevelUnlockItemPoolTestBase):
 
     def test_visit_checks_do_not_change_the_guaranteed_local_unlock(self):
         self.assertEqual(sum(self.multiworld.local_early_items[self.player].values()), 1)
+
+
+class FullLevelUnlockWithShuffledAquariumMovesTest(SM64TestBase):
+    run_default_tests = False
+    options = {
+        "level_unlocks": Options.LevelUnlocks.option_full,
+        "side_flip": Options.SideFlip.option_global,
+        "backflip": Options.Backflip.option_global,
+        "triple_jump": Options.TripleJump.option_global,
+        "ledge_grab": Options.LedgeGrab.option_global,
+    }
+
+    def test_secret_aquarium_is_not_an_early_candidate_without_movement(self):
+        state = self.multiworld.state.copy()
+        state.reachable_regions[self.player].clear()
+        state.blocked_connections[self.player].clear()
+        state.update_reachable_regions(self.player)
+        self.assertNotIn(
+            "Unlock The Secret Aquarium",
+            self.world.get_full_level_unlock_early_candidates(state),
+        )
 
 
 class FillClassificationReductionTest(SM64TestBase):

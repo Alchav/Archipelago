@@ -564,10 +564,7 @@ class SM64World(World):
                     'entrance', self.player)
         self.configure_full_level_unlock_early_items()
 
-    def configure_full_level_unlock_early_items(self) -> None:
-        if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
-            return
-
+    def get_full_level_unlock_early_candidates(self, state: CollectionState) -> list[str]:
         unlock_name_by_entrance_name = {
             "Wet-Dry World Low": "Unlock Wet-Dry World",
             "Wet-Dry World Middle": "Unlock Wet-Dry World",
@@ -580,21 +577,34 @@ class SM64World(World):
             "Tiny-Huge Island (Huge)": "Unlock Huge Island",
         }
         available_unlocks = set(self.get_level_unlock_item_names())
-        state = self.multiworld.state.copy()
-        state.reachable_regions[self.player].add(
-            self.multiworld.get_region(self.origin_region_name, self.player))
-        state.update_reachable_regions(self.player)
-
         candidates = []
         for entrance_id, entrance in self.randomized_entrance_connections.items():
             entrance_name = sm64_level_to_entrances.get(entrance_id)
             if entrance_name is None or not entrance.parent_region.can_reach(state):
                 continue
             item_name = unlock_name_by_entrance_name.get(entrance_name, f"Unlock {entrance_name}")
-            if item_name in available_unlocks:
+            if item_name not in available_unlocks:
+                continue
+            trial_state = state.copy()
+            trial_state.collect(self.create_item(item_name), prevent_sweep=True)
+            if entrance.can_reach(trial_state):
                 candidates.append(item_name)
 
-        candidates = list(dict.fromkeys(candidates))
+        return list(dict.fromkeys(candidates))
+
+    def configure_full_level_unlock_early_items(self) -> None:
+        if self.options.level_unlocks.value != self.options.level_unlocks.option_full:
+            return
+
+        state = self.multiworld.state.copy()
+        # Recompute after set_rules adds the castle connections. Pre-seeding
+        # Castle Grounds marks it as already processed, preventing traversal
+        # into First Floor and the Courtyard.
+        state.reachable_regions[self.player].clear()
+        state.blocked_connections[self.player].clear()
+        state.update_reachable_regions(self.player)
+
+        candidates = self.get_full_level_unlock_early_candidates(state)
         if not candidates:
             raise OptionError("Full Level Unlocks has no sphere-one entrance unlock candidates.")
         self.random.shuffle(candidates)
