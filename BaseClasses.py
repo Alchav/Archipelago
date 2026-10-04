@@ -1722,7 +1722,6 @@ class Spoiler:
 
     def create_playthrough(self, create_paths: bool = True) -> None:
         """Destructive to the multiworld while it is run, damage gets repaired afterwards."""
-        return
         from itertools import chain
         # get locations containing progress items
         multiworld = self.multiworld

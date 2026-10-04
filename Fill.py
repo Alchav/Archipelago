@@ -325,7 +325,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
             locations -= reachable_locked
             reachable_locations = {location for location in locations if location.can_reach(state)}
 
-        if not reachable_locations:
+        if not reachable_locations and not sphere_reachable_locked:
             if locations and return_unreachables:
                 yield []
                 yield [loc for loc in locations if loc.address]  # unreachable locations
