@@ -225,14 +225,14 @@ class TboiWorld(World):
             if "type" in unlock and "void" in unlock["type"] and "The Void" in self.options.excluded_areas.value: continue
             if "type" in unlock and "ascend" in unlock["type"] and "Ascend" in self.options.excluded_areas.value: continue
             if "type" in unlock and "timed" in unlock["type"] and "Timed Areas" in self.options.excluded_areas.value: continue
-            if "type" in unlock and "shovel" in unlock["type"] and self.options.crawl_space.value != 3: continue
-            if "type" in unlock and "ehwaz" in unlock["type"] and self.options.crawl_space.value != 4: continue
-            if "type" in unlock and "telescope_lens" in unlock["type"] and self.options.planetarium.value != 3: continue
-            if "type" in unlock and "red_key" in unlock["type"] and self.options.ultra_secret_room.value != 3: continue
-            if "type" in unlock and "soul_of_cain" in unlock["type"] and self.options.ultra_secret_room.value != 4: continue
-            if "type" in unlock and "cracked_key" in unlock["type"] and self.options.ultra_secret_room.value != 5: continue
-            if "type" in unlock and "undefined" in unlock["type"] and self.options.error_room.value != 3: continue
-            if "type" in unlock and "variant" in unlock["type"] and not self.options.floor_variations.value: continue
+            # if "type" in unlock and "shovel" in unlock["type"] and self.options.crawl_space.value != 3: continue
+            # if "type" in unlock and "ehwaz" in unlock["type"] and self.options.crawl_space.value != 4: continue
+            # if "type" in unlock and "telescope_lens" in unlock["type"] and self.options.planetarium.value != 3: continue
+            # if "type" in unlock and "red_key" in unlock["type"] and self.options.ultra_secret_room.value != 3: continue
+            # if "type" in unlock and "soul_of_cain" in unlock["type"] and self.options.ultra_secret_room.value != 4: continue
+            # if "type" in unlock and "cracked_key" in unlock["type"] and self.options.ultra_secret_room.value != 5: continue
+            # if "type" in unlock and "undefined" in unlock["type"] and self.options.error_room.value != 3: continue
+            # if "type" in unlock and "variant" in unlock["type"] and not self.options.floor_variations.value: continue
             self.multiworld.itempool.append(self.create_item(f'{name} Unlock'))
             own_items += 1
         
@@ -269,12 +269,12 @@ class TboiWorld(World):
         own_items += self.addWeightedItems(self.options.trap_weights.value, filler_amount * trap_factor / 100.0)
         own_items += self.addWeightedItems(self.options.junk_weights.value, filler_amount * junk_factor / 100.0)
 
-        if own_items > total_locations:
-            for _ in range(own_items - total_locations):
-                self.multiworld.itempool.pop()
-        if own_items < total_locations:
-            for _ in range(total_locations - own_items):
-                self.multiworld.itempool.append(self.create_item("Random Coin"))
+        # if own_items > total_locations:
+        #     for _ in range(own_items - total_locations):
+        #         self.multiworld.itempool.pop()
+        # if own_items < total_locations:
+        #     for _ in range(total_locations - own_items):
+        #         self.multiworld.itempool.append(self.create_item("Random Coin"))
 
     def set_rules(self) -> None:
         goals = 0
