@@ -4,7 +4,8 @@ import unittest
 from Options import Accessibility
 from test.general import generate_items, generate_locations, generate_test_multiworld
 from Fill import FillError, balance_multiworld_progression, fill_restrictive, \
-    distribute_early_items, distribute_items_restrictive
+    distribute_early_items, distribute_items_restrictive, _item_shuffle_value, \
+    _shuffle_location_group, _shuffle_ranked_sphere
 from BaseClasses import Entrance, LocationProgressType, MultiWorld, Region, Item, Location, \
     ItemClassification
 from worlds.generic.Rules import CollectionRule, add_item_rule, locality_rules, set_rule
@@ -79,6 +80,209 @@ def generate_player_data(multiworld: MultiWorld, player_id: int, location_count:
 
 def names(objs: list) -> Iterable[str]:
     return map(lambda o: o.name, objs)
+
+
+class JigsawTestItem(Item):
+    game = "Jigsaw"
+
+
+class SuperMetroidTestItem(Item):
+    game = "Super Metroid"
+
+
+class SuperMetroidMapRandoTestItem(Item):
+    game = "Super Metroid Map Rando"
+
+
+class SMZ3TestItem(Item):
+    game = "SMZ3"
+
+
+class ALTTPTestItem(Item):
+    game = "A Link to the Past"
+
+
+class ALTTPBetaTestItem(Item):
+    game = "A Link to the Past Beta"
+
+
+class TestRankedSphereShuffle(unittest.TestCase):
+    def test_default_item_values(self):
+        multiworld = generate_test_multiworld()
+
+        filler = Item("Filler", ItemClassification.filler, 1, 1)
+        useful = Item("Useful", ItemClassification.useful, 2, 1)
+        skipped = Item("Skipped", ItemClassification.progression_skip_balancing, 3, 1)
+        deprioritized = Item("Deprioritized", ItemClassification.progression_deprioritized, 4, 1)
+        progression = Item("Progression", ItemClassification.progression, 5, 1)
+
+        self.assertEqual(1, _item_shuffle_value(multiworld, filler))
+        self.assertEqual(2, _item_shuffle_value(multiworld, useful))
+        self.assertEqual(2, _item_shuffle_value(multiworld, skipped))
+        self.assertEqual(2, _item_shuffle_value(multiworld, deprioritized))
+        self.assertEqual(3, _item_shuffle_value(multiworld, progression))
+
+    def test_jigsaw_piece_values(self):
+        multiworld = generate_test_multiworld()
+        real_pieces = JigsawTestItem("25 Puzzle Pieces", ItemClassification.progression_skip_balancing, 1, 1)
+        fake_pieces = JigsawTestItem("25 Fake Puzzle Pieces", ItemClassification.trap, 2, 1)
+
+        self.assertEqual(25, _item_shuffle_value(multiworld, real_pieces))
+        self.assertEqual(-25, _item_shuffle_value(multiworld, fake_pieces))
+
+    def test_super_metroid_item_values(self):
+        multiworld = generate_test_multiworld()
+        cases = (
+            (SuperMetroidTestItem, "Morph Ball", ItemClassification.progression, 5),
+            (SuperMetroidTestItem, "Gravity Suit", ItemClassification.progression, 5),
+            (SuperMetroidTestItem, "Charge Beam", ItemClassification.progression, 4),
+            (SuperMetroidTestItem, "Reserve Tank", ItemClassification.progression, 3),
+            (SuperMetroidTestItem, "Super Missile", ItemClassification.filler, 3),
+            (SuperMetroidTestItem, "Missile", ItemClassification.filler, 2),
+            (SuperMetroidTestItem, "Energy Tank", ItemClassification.progression, 2),
+            (SuperMetroidTestItem, "Power Bomb", ItemClassification.filler, 1),
+            (SuperMetroidMapRandoTestItem, "Morph", ItemClassification.progression, 5),
+            (SuperMetroidMapRandoTestItem, "ScrewAttack", ItemClassification.progression, 4),
+            (SuperMetroidMapRandoTestItem, "WallJump", ItemClassification.progression, 4),
+            (SuperMetroidMapRandoTestItem, "ReserveTank", ItemClassification.progression, 3),
+            (SuperMetroidMapRandoTestItem, "ProgSuper", ItemClassification.progression, 3),
+            (SuperMetroidMapRandoTestItem, "ProgMissile", ItemClassification.progression, 2),
+            (SuperMetroidMapRandoTestItem, "ETank", ItemClassification.progression, 2),
+            (SuperMetroidMapRandoTestItem, "ProgPowerBomb", ItemClassification.progression, 1),
+            (SMZ3TestItem, "SpaceJump", ItemClassification.progression, 5),
+            (SMZ3TestItem, "Grapple", ItemClassification.progression, 4),
+            (SMZ3TestItem, "ReserveTank", ItemClassification.progression, 3),
+            (SMZ3TestItem, "Super", ItemClassification.filler, 3),
+            (SMZ3TestItem, "Missile", ItemClassification.filler, 2),
+            (SMZ3TestItem, "ETank", ItemClassification.filler, 2),
+            (SMZ3TestItem, "PowerBomb", ItemClassification.filler, 1),
+        )
+        for item_type, name, classification, expected_value in cases:
+            with self.subTest(game=item_type.game, item=name):
+                item = item_type(name, classification, 1, 1)
+                self.assertEqual(expected_value, _item_shuffle_value(multiworld, item))
+
+    def test_alttp_item_values(self):
+        multiworld = generate_test_multiworld()
+        cases = (
+            (ALTTPTestItem, "Titans Mitts", ItemClassification.progression, 5),
+            (ALTTPBetaTestItem, "Progressive Glove", ItemClassification.progression, 5),
+            (ALTTPTestItem, "Fire Rod", ItemClassification.progression, 4),
+            (ALTTPBetaTestItem, "Pegasus Boots", ItemClassification.progression, 4),
+            (ALTTPTestItem, "Hookshot", ItemClassification.progression, 3),
+            (ALTTPBetaTestItem, "Triforce Piece", ItemClassification.progression_skip_balancing, 2),
+            (ALTTPTestItem, "Bottle", ItemClassification.useful, 2),
+            (ALTTPBetaTestItem, "Rupees (20)", ItemClassification.filler, 1),
+            (SMZ3TestItem, "ProgressiveGlove", ItemClassification.progression, 5),
+            (SMZ3TestItem, "Firerod", ItemClassification.progression, 4),
+            (SMZ3TestItem, "Hookshot", ItemClassification.progression, 3),
+            (SMZ3TestItem, "ProgressiveTunic", ItemClassification.useful, 2),
+            (SMZ3TestItem, "TwentyRupees", ItemClassification.filler, 1),
+        )
+        for item_type, name, classification, expected_value in cases:
+            with self.subTest(game=item_type.game, item=name):
+                item = item_type(name, classification, 1, 1)
+                self.assertEqual(expected_value, _item_shuffle_value(multiworld, item))
+
+    def test_alttp_bombless_bomb_upgrade_value(self):
+        multiworld = generate_test_multiworld()
+        bomb_upgrade = ALTTPTestItem("Bomb Upgrade (50)", ItemClassification.progression, 1, 1)
+
+        multiworld.worlds[1].options.bombless_start = False
+        self.assertEqual(3, _item_shuffle_value(multiworld, bomb_upgrade))
+        multiworld.worlds[1].options.bombless_start = True
+        self.assertEqual(4, _item_shuffle_value(multiworld, bomb_upgrade))
+
+    def test_zero_value_item_is_not_shuffled(self):
+        multiworld = generate_test_multiworld(2)
+        trap = Item("Trap", ItemClassification.trap, 1, 1)
+        filler = Item("Filler", ItemClassification.filler, 2, 2)
+        locations = [
+            Location(1, "Trap Location", 1, multiworld.get_region("Menu", 1)),
+            Location(2, "Filler Location", 2, multiworld.get_region("Menu", 2)),
+        ]
+        multiworld.push_item(locations[0], trap, False)
+        multiworld.push_item(locations[1], filler, False)
+
+        _shuffle_ranked_sphere(multiworld, locations)
+
+        self.assertIs(trap, locations[0].item)
+        self.assertIs(filler, locations[1].item)
+
+    def test_location_rules_maximize_legal_moves(self):
+        multiworld = generate_test_multiworld(3)
+        locations = [Location(player, f"Location {player}", player, multiworld.get_region("Menu", player))
+                     for player in multiworld.player_ids]
+        items = [Item(f"Item {player}", ItemClassification.filler, player, player)
+                 for player in multiworld.player_ids]
+        for location, item in zip(locations, items):
+            multiworld.push_item(location, item, False)
+
+        locations[0].item_rule = lambda item: item is items[0]
+        locations[1].item_rule = lambda item: item is items[2]
+        locations[2].item_rule = lambda item: item is items[1]
+
+        _shuffle_location_group(multiworld, locations)
+
+        self.assertIs(items[0], locations[0].item)
+        self.assertIs(items[2], locations[1].item)
+        self.assertIs(items[1], locations[2].item)
+        for location in locations:
+            self.assertIs(location, location.item.location)
+
+    def test_unequal_lists_align_from_highest_value(self):
+        multiworld = generate_test_multiworld(2)
+        player_items = {
+            1: [
+                Item("P1 High", ItemClassification.progression, 1, 1),
+                Item("P1 Middle", ItemClassification.useful, 2, 1),
+                Item("P1 Low", ItemClassification.filler, 3, 1),
+            ],
+            2: [
+                Item("P2 High", ItemClassification.progression, 4, 2),
+                Item("P2 Low", ItemClassification.filler, 5, 2),
+            ],
+        }
+        locations = []
+        for player, items in player_items.items():
+            region = multiworld.get_region("Menu", player)
+            for index, item in enumerate(items):
+                location = Location(player, f"P{player} Location {index}", player * 10 + index, region)
+                multiworld.push_item(location, item, False)
+                locations.append(location)
+
+        _shuffle_ranked_sphere(multiworld, locations)
+
+        self.assertEqual(2, player_items[1][0].location.player)
+        self.assertEqual(1, player_items[2][0].location.player)
+        self.assertEqual(2, player_items[1][1].location.player)
+        self.assertEqual(1, player_items[1][2].location.player)
+        self.assertEqual(1, player_items[2][1].location.player)
+
+    def test_rarer_items_sort_first_within_the_same_value(self):
+        multiworld = generate_test_multiworld(2)
+        rare_a = Item("Rare A", ItemClassification.filler, 1, 1)
+        common_b = Item("Common B", ItemClassification.filler, 2, 1)
+        rare_c = Item("Rare C", ItemClassification.filler, 3, 2)
+        common_d = Item("Common D", ItemClassification.filler, 4, 2)
+        placed_items = (rare_a, common_b, rare_c, common_d)
+        multiworld.itempool.extend(placed_items)
+        multiworld.itempool.extend(Item("Common B", ItemClassification.filler, 2, 1) for _ in range(19))
+        multiworld.itempool.extend(Item("Common D", ItemClassification.filler, 4, 2) for _ in range(9))
+
+        locations = {}
+        for item in placed_items:
+            location = Location(item.player, f"{item.name} Location", item.code,
+                                multiworld.get_region("Menu", item.player))
+            multiworld.push_item(location, item, False)
+            locations[item.name] = location
+
+        _shuffle_ranked_sphere(multiworld, locations.values())
+
+        self.assertIs(locations["Rare C"], rare_a.location)
+        self.assertIs(locations["Rare A"], rare_c.location)
+        self.assertIs(locations["Common D"], common_b.location)
+        self.assertIs(locations["Common B"], common_d.location)
 
 
 class TestFillRestrictive(unittest.TestCase):

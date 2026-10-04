@@ -12,6 +12,45 @@ from worlds.AutoWorld import call_all
 from worlds.generic.Rules import add_item_rule, add_rule
 from Options import Owner
 
+
+_SUPER_METROID_ITEM_VALUES = {
+    "Super Metroid": {
+        5: {"Morph Ball", "Gravity Suit", "Varia Suit", "Space Jump"},
+        4: {"Bomb", "Charge Beam", "Ice Beam", "Hi-Jump Boots", "Speed Booster", "Wave Beam", "Spazer",
+            "Spring Ball", "Plasma Beam", "Grappling Beam", "X-Ray Scope", "Screw Attack"},
+        3: {"Super Missile"},
+        2: {"Missile", "Energy Tank"},
+        1: {"Power Bomb"},
+    },
+    "Super Metroid Map Rando": {
+        5: {"Morph", "Gravity", "Varia", "SpaceJump"},
+        4: {"Bombs", "Charge", "Ice", "HiJump", "SpeedBooster", "Wave", "Spazer", "SpringBall", "Plasma",
+            "Grapple", "XRayScope", "ScrewAttack", "WallJump"},
+        3: {"Super", "ProgSuper"},
+        2: {"Missile", "ProgMissile", "ETank"},
+        1: {"PowerBomb", "ProgPowerBomb"},
+    },
+    "SMZ3": {
+        5: {"Morph", "Gravity", "Varia", "SpaceJump"},
+        4: {"Bombs", "Charge", "Ice", "HiJump", "SpeedBooster", "Wave", "Spazer", "SpringBall", "Plasma",
+            "Grapple", "XRay", "ScrewAttack"},
+        3: {"Super"},
+        2: {"Missile", "ETank"},
+        1: {"PowerBomb"},
+    },
+}
+
+_ALTTP_GAMES = {"A Link to the Past", "A Link to the Past Beta"}
+_ALTTP_PRIORITY_ITEMS = {
+    5: {"Titans Mitts", "Power Glove", "Progressive Glove", "Moon Pearl", "Hammer"},
+    4: {"Fire Rod", "Pegasus Boots", "Flippers", "Flute"},
+}
+_SMZ3_ALTTP_PRIORITY_ITEMS = {
+    5: {"ProgressiveGlove", "MoonPearl", "Hammer"},
+    4: {"Firerod", "Boots", "Flippers", "Flute"},
+}
+
+
 def swappable(multiworld, loc, within_local=False):
     try:
         from worlds.papermario.data.ItemList import progression_miscitems
@@ -41,6 +80,219 @@ def swappable(multiworld, loc, within_local=False):
     if loc.game == "ffvcd" and (loc in multiworld.worlds[loc.player].chosen_mib_locations or "Exdeath in" in loc.item.name):
         return False
     return True
+
+
+def _item_shuffle_value(multiworld: MultiWorld, item: typing.Optional[Item]) -> int:
+    """Return an item's relative value for cross-game sphere shuffling."""
+    if item is None:
+        return 1
+
+    game = item.game
+    if game == "Generic":
+        game = multiworld.worlds[item.player].game
+
+    if game == "Jigsaw":
+        count_text, separator, item_type = item.name.partition(" ")
+        if separator and count_text.isdigit():
+            piece_count = int(count_text)
+            if item_type in ("Puzzle Piece", "Puzzle Pieces"):
+                return piece_count
+            if item_type in ("Fake Puzzle Piece", "Fake Puzzle Pieces"):
+                return -piece_count
+
+    if game in _SUPER_METROID_ITEM_VALUES:
+        for value, names in _SUPER_METROID_ITEM_VALUES[game].items():
+            if item.name in names:
+                return value
+
+    if game in _ALTTP_GAMES:
+        for value, names in _ALTTP_PRIORITY_ITEMS.items():
+            if item.name in names:
+                return value
+        if (item.name == "Bomb Upgrade (50)"
+                and multiworld.worlds[item.player].options.bombless_start):
+            return 4
+        if item.classification & ItemClassification.skip_balancing:
+            return 2
+        if item.classification & ItemClassification.progression:
+            return 3
+        if item.classification & ItemClassification.useful:
+            return 2
+        if item.classification == ItemClassification.filler:
+            return 1
+
+    if game == "SMZ3":
+        for value, names in _SMZ3_ALTTP_PRIORITY_ITEMS.items():
+            if item.name in names:
+                return value
+        if item.classification & ItemClassification.skip_balancing:
+            return 2
+        if item.classification & ItemClassification.progression:
+            return 3
+        if item.classification & ItemClassification.useful:
+            return 2
+        if item.classification == ItemClassification.filler:
+            return 1
+
+    # if game == "Factorio" and item.classification == ItemClassification.filler:
+    #     return multiworld.random.randint(1, 2)
+    if game == "Tetris" and item.name == "Clear Random Line":
+        return 0
+    if not item.advancement and "Auto" in multiworld.player_name[item.player]:
+        return 0
+    if item.player == 1 and item.name.startswith("Unlock "):
+        return 0
+    # if item.classification == ItemClassification.useful and game == "Terraria":
+    #     return multiworld.random.randint(2, 3)
+    if item.classification == ItemClassification.trap:
+        if item.name == "Uncollect Random Coin Trap":
+            return 1
+        if game == "Super Mario Land 2":
+            return 1
+        if game == "Tetris" and item.name == "Increase Speed":
+            return 1
+        if game == "Jigsaw":
+            return 1
+        return 0
+    # if item.classification & ItemClassification.progression and game == "Archipeladoku":
+    #     return multiworld.random.choice([1, 2, 2, 3])
+    # if item.classification & ItemClassification.progression and game == "Spicy Mycena 64":
+    #     return multiworld.random.choice([2, 2, 3])
+    if item.classification & ItemClassification.progression and game == "Stardew Valley":
+        if (item.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
+                          "Progressive Barn", "Progressive Fishing Rod", "Progressive Pickaxe", "Bridge Repair",
+                          "Bus Repair", "Desert Obelisk", "Island Obelisk", "Dark Talisman", "Beach Bridge",
+                          "Greenhouse", "Glittering Boulder Removed", "Minecarts Repair", "Progressive Season")
+                or "Key" in item.name or "Traveling Merchant: " in item.name):
+            return 4
+        return 3
+    if item.classification & (ItemClassification.deprioritized | ItemClassification.skip_balancing):
+        return 2
+    if item.classification & ItemClassification.progression:
+        return 3
+    if item.classification & ItemClassification.useful:
+        return 2
+    return 1
+
+
+def _minimum_cost_assignment(costs: typing.List[typing.List[int]]) -> typing.List[int]:
+    """Return the minimum-cost destination column for every source row."""
+    size = len(costs)
+    if not size:
+        return []
+
+    row_potential = [0] * (size + 1)
+    column_potential = [0] * (size + 1)
+    matched_row = [0] * (size + 1)
+    previous_column = [0] * (size + 1)
+
+    for row in range(1, size + 1):
+        matched_row[0] = row
+        minimum_cost = [size + 2] * (size + 1)
+        used = [False] * (size + 1)
+        column = 0
+
+        while True:
+            used[column] = True
+            current_row = matched_row[column]
+            delta = size + 2
+            next_column = 0
+            for candidate_column in range(1, size + 1):
+                if used[candidate_column]:
+                    continue
+                reduced_cost = (costs[current_row - 1][candidate_column - 1]
+                                - row_potential[current_row] - column_potential[candidate_column])
+                if reduced_cost < minimum_cost[candidate_column]:
+                    minimum_cost[candidate_column] = reduced_cost
+                    previous_column[candidate_column] = column
+                if minimum_cost[candidate_column] < delta:
+                    delta = minimum_cost[candidate_column]
+                    next_column = candidate_column
+
+            for candidate_column in range(size + 1):
+                if used[candidate_column]:
+                    row_potential[matched_row[candidate_column]] += delta
+                    column_potential[candidate_column] -= delta
+                else:
+                    minimum_cost[candidate_column] -= delta
+            column = next_column
+            if matched_row[column] == 0:
+                break
+
+        while True:
+            previous = previous_column[column]
+            matched_row[column] = matched_row[previous]
+            column = previous
+            if column == 0:
+                break
+
+    assignment = [0] * size
+    for column in range(1, size + 1):
+        assignment[matched_row[column] - 1] = column - 1
+    return assignment
+
+
+def _shuffle_location_group(multiworld: MultiWorld, locations: typing.List[Location]) -> None:
+    """Legally permute one positional group while maximizing cross-game movement."""
+    if len(locations) < 2:
+        return
+
+    source_locations = locations.copy()
+    destination_locations = locations.copy()
+    multiworld.random.shuffle(source_locations)
+    multiworld.random.shuffle(destination_locations)
+    items = [location.item for location in source_locations]
+    forbidden_cost = len(locations) + 1
+    costs = []
+
+    for source_location, item in zip(source_locations, items):
+        row = []
+        for destination_location in destination_locations:
+            if destination_location is source_location:
+                row.append(1)
+            elif item is None or destination_location.item_rule(item):
+                row.append(0)
+            else:
+                row.append(forbidden_cost)
+        costs.append(row)
+
+    assignment = _minimum_cost_assignment(costs)
+    if any(costs[row][column] == forbidden_cost for row, column in enumerate(assignment)):
+        raise FillError("Unable to find a legal item assignment for a sphere position.", multiworld=multiworld)
+
+    for location in destination_locations:
+        location.item = None
+    for item, destination_index in zip(items, assignment):
+        destination = destination_locations[destination_index]
+        destination.item = item
+        if item:
+            item.location = destination
+
+
+def _shuffle_ranked_sphere(multiworld: MultiWorld, sphere: typing.Iterable[Location],
+                           item_counts: typing.Optional[typing.Counter[typing.Tuple[int, str]]] = None) -> None:
+    if item_counts is None:
+        item_counts = Counter((item.player, item.name) for item in multiworld.itempool)
+
+    locations_by_player = collections.defaultdict(list)
+    for location in sphere:
+        if swappable(multiworld, location) and not location.locked:
+            value = _item_shuffle_value(multiworld, location.item)
+            if value != 0:
+                item_count = (max(1, item_counts[location.item.player, location.item.name])
+                              if location.item else 1)
+                locations_by_player[location.player].append((value, item_count, location))
+
+    for ranked_locations in locations_by_player.values():
+        multiworld.random.shuffle(ranked_locations)
+        ranked_locations.sort(key=lambda entry: entry[1])
+        ranked_locations.sort(key=lambda entry: entry[0], reverse=True)
+
+    maximum_length = max((len(locations) for locations in locations_by_player.values()), default=0)
+    for position in range(maximum_length):
+        positional_group = [locations[position][2] for locations in locations_by_player.values()
+                            if position < len(locations)]
+        _shuffle_location_group(multiworld, positional_group)
 
 
 def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_unreachables=True):
@@ -892,75 +1144,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     #     old_rule = entrance.access_rule
     #     entrance.access_rule = lambda state, rule=old_rule, world=multiworld.worlds[location.player]: multiworld.completion_condition[entrance.player](state) or rule(state)
 
-    def iclass(i: Item):
-        if i is None:
-            return 1
-        game = i.game
-        if game == "Generic":
-            game = multiworld.worlds[i.player].game
-        if game == "Factorio" and i.classification == ItemClassification.filler:
-            return multiworld.random.randint(1, 2)
-        if game == "Tetris" and i.name == "Clear Random Line":
-            return 0
-        if (not i.advancement) and "Auto" in multiworld.player_name[i.player]:
-            return 0
-        if i.player == 1 and i.name.startswith("Unlock "):
-            return 0
-        if i.classification == ItemClassification.useful and game == "Terraria":
-            return multiworld.random.randint(2, 3)
-        if i.classification == ItemClassification.trap:
-            if i.name == "Uncollect Random Coin Trap":
-                return 1
-            if game == "Super Mario Land 2":
-                return 1
-            if game == "Tetris" and i.name == "Increase Speed":
-                return 1
-            if game == "Jigsaw":
-                return 1
-            return 0
-        if i.classification & ItemClassification.progression and game == "Archipeladoku":
-            return multiworld.random.choice([1,2,2,3])
-        if i.classification & ItemClassification.progression and game == "Spicy Mycena 64":
-            return multiworld.random.choice([2,2,3])
-        if i.classification & ItemClassification.progression and game == "Stardew Valley":
-            if (i.name in ("Spring", "Summer", "Winter", "Fall", "Progressive Axe", "Progressive Backpack",
-                           "Progressive Barn", "Progressive Fishing Rod", "Progressive Pickaxe", "Bridge Repair",
-                           "Bus Repair", "Desert Obelisk", "Island Obelisk", "Dark Talisman", "Beach Bridge",
-                           "Greenhouse", "Glittering Boulder Removed", "Minecarts Repair", "Progressive Movie Theater",
-                           "Progressive Season")
-                    or "Key" in i.name or "Traveling Merchant: " in i.name):
-                return 3
-            else:
-                if not multiworld.random.randint(0, 1):
-                    return 3
-                return 2
-        # if game == "Starcraft 2":
-        #     return 1
-        # elif i.classification == ItemClassification.filler or (game == "Final Fantasy V Career Day" and i.classification == ItemClassification.useful):
-        #     if "Super Metroid" in game:
-        #         return multiworld.random.randint(3, 4)
-        #     return multiworld.random.randint(4, 5)
-        # elif i.classification == ItemClassification.useful:
-        #     return multiworld.random.randint(3, 4)
-        # elif game in ("Starcraft 2",) or i.classification == ItemClassification.progression_skip_balancing:
-        #     return multiworld.random.randint(2, 3)
-        # elif i.classification == ItemClassification.progression:
-        #     return multiworld.random.randint(1, 2)
-        # breakpoint()
-        if i.classification & (ItemClassification.deprioritized | ItemClassification.skip_balancing):
-            if not multiworld.random.randint(0, 24 if i.game == "Jigsaw" else 16 if i.game == "Tetris" else 4):
-                return 3
-            if i.game in ("Jigsaw", "Tetris"):
-                return multiworld.random.randint(1, 2)
-            return 2
-        else:
-            if i.classification & ItemClassification.progression:
-                return 3
-            elif i.classification & ItemClassification.useful:
-                return 2
-            return 1
-
-
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
     starting_spheres = {}
@@ -1242,6 +1425,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     unreachable = False
     shared_spheres = {player: set() for player in multiworld.player_ids}
+    item_counts = Counter((item.player, item.name) for item in multiworld.itempool)
     for sphere_n, sphere in enumerate(spheres, 1):
         if not sphere:
             unreachable = True
@@ -1267,34 +1451,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         player_spheres = {loc.player for loc in sphere}
         for player in player_spheres:
             shared_spheres[player] |= player_spheres
-        sphere_t = [[], [], [], [], [], []]
-        for loc in sphere_list:
-            # release game:
-            #            if swappable(multiworld, loc) and beaten_game_spheres[loc.player] > sphere_n and not location.locked:
-            if swappable(multiworld, loc) and not loc.locked:
-                sphere_t[iclass(loc.item)].append(loc)
-        for t in sphere_t[1:]:
-            while t:
-                a = t.pop()
-                if not t:
-                    break
-                for b in t:
-                    if b.player != a.player:
-                        break
-                if ((not b.item) or a.item_rule(b.item)) and ((not a.item) or b.item_rule(a.item)):
-                    a.item, b.item = b.item, a.item
-                elif a.item and b.item:
-                    if not a.item_rule(b.item):
-                        logging.info(f"{a.name} cannot accept {b.item.name}")
-                    if not b.item_rule(a.item):
-                        logging.info(f"{b.name} cannot accept {a.item.name}")
-                t.remove(b)
-            # for loc in t:
-            #     if loc.player == loc.item.player and loc.item.name in multiworld.worlds[loc.player].options.non_local_items.value:
-            #         for loc2 in t:
-            #             if loc2.player != loc.player and loc.item_rule(loc2.item) and loc2.item_rule(loc.item):
-            #                 loc.item, loc2.item = loc2.item, loc.item
-            #                 break
+        _shuffle_ranked_sphere(multiworld, sphere_list, item_counts)
 
     check_no_skips(multiworld, starting_spheres)
     test_beatable("after placing game unlocks")
