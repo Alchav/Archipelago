@@ -12,7 +12,8 @@ import zlib
 import worlds
 from BaseClasses import CollectionState, Item, Location, LocationProgressType, MultiWorld
 from Fill import FillError, balance_multiworld_progression, distribute_items_restrictive, flood_items, \
-    parse_planned_blocks, distribute_planned_blocks, resolve_early_locations_for_planned,get_item_spheres
+    parse_planned_blocks, distribute_planned_blocks, resolve_early_locations_for_planned, get_item_spheres, \
+    prepare_custom_item_collections
 from NetUtils import convert_to_base_types
 from Options import StartInventoryPool
 from Utils import __version__, output_path, restricted_dumps, version_tuple
@@ -199,6 +200,8 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
     logger.info('Running Pre Main Fill.')
 
     AutoWorld.call_all(multiworld, "pre_fill")
+
+    prepare_custom_item_collections(multiworld)
 
     logger.info(f'Filling the multiworld with {len(multiworld.itempool)} items.')
 

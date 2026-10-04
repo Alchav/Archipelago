@@ -596,6 +596,12 @@ class Context:
 
         self.owners = decoded_obj.get("owners", [])
 
+        # A custom trigger can be moved to AlchapelaBot's start inventory by
+        # fill recovery. Process it for a new room immediately; otherwise it
+        # would wait for the first ordinary location check.
+        for team in self.clients:
+            process_alchapelabot_triggers(self, team)
+
     # saving
 
     def save(self, now=False) -> bool:
@@ -744,6 +750,8 @@ class Context:
         self.logger.info(
             f'Loaded save file with {sum([len(v) for k, v in self.received_items.items() if k[2]])} received items '
             f'for {sum(k[2] for k in self.received_items)} players')
+        for team in self.clients:
+            process_alchapelabot_triggers(self, team)
 
     # rest
 
@@ -1246,8 +1254,36 @@ def send_items_to(ctx: Context, team: int, target_slot: int, *items: NetworkItem
             get_received_items(ctx, team, target, True).append(item)
 
 
+def get_custom_item_triggers(ctx: Context, slot: int) -> dict[str, dict[str, typing.Any]]:
+    trigger_data = ctx.slot_data.get(1, {}).get("custom_item_triggers", {})
+    return trigger_data.get(slot, trigger_data.get(str(slot), {}))
+
+
+def process_alchapelabot_triggers(ctx: Context, team: int) -> None:
+    """Turn received custom trigger items into checks in AlchapelaBot's world."""
+    if ctx.games.get(1) != "AlchapelaBot":
+        return
+    while True:
+        received_counts = collections.Counter(
+            item.item for item in get_received_items(ctx, team, 1, True) + get_start_inventory(ctx, 1, True)
+        )
+        to_check: set[int] = set()
+        for slot in ctx.slot_info:
+            for trigger in get_custom_item_triggers(ctx, slot).values():
+                count = received_counts[trigger["item_id"]]
+                locations = trigger["locations"]
+                if trigger["kind"] == "pack" and count:
+                    to_check.update(locations)
+                elif trigger["kind"] == "progressive":
+                    to_check.update(locations[:count])
+        to_check.difference_update(ctx.location_checks[team, 1])
+        if not to_check:
+            return
+        register_location_checks(ctx, team, 1, to_check, count_activity=False, process_custom_triggers=False)
+
+
 def register_location_checks(ctx: Context, team: int, slot: int, locations: typing.Iterable[int],
-                             count_activity: bool = True):
+                             count_activity: bool = True, process_custom_triggers: bool = True):
     slot_locations = ctx.locations[slot]
     new_locations = set(locations) - ctx.location_checks[team, slot]
     new_locations.intersection_update(slot_locations)  # ignore location IDs unknown to this multidata
@@ -1300,6 +1336,8 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
         del sortable
 
         ctx.location_checks[team, slot] |= new_locations
+        if process_custom_triggers:
+            process_alchapelabot_triggers(ctx, team)
         if ctx.collect_mode == "auto_cleared":
             collect_player_cleared(ctx, team, slot)
         send_new_items(ctx)
@@ -1352,6 +1390,28 @@ def collect_hints(ctx: Context, team: int, slot: int, item: typing.Union[int, st
                 Hint(receiving_player, finding_player, location_id, item_id, found, entrance, item_flags, hint_status)
             )
 
+    return hints
+
+
+def collect_custom_trigger_hints(ctx: Context, team: int, slot: int,
+                                 trigger: dict[str, typing.Any]) -> typing.List[Hint]:
+    """Hint a bot-owned trigger while presenting and persisting it as the configuring player's item."""
+    hints = []
+    item_id = trigger["item_id"]
+    for finding_player, location_id, found_item_id, _receiving_player, item_flags \
+            in ctx.locations.find_item({1}, item_id):
+        previous = next((hint for hint in ctx.hints[team, slot]
+                         if hint.finding_player == finding_player and hint.location == location_id
+                         and hint.item == found_item_id), None)
+        if previous:
+            hints.append(previous)
+            continue
+        found = location_id in ctx.location_checks[team, finding_player]
+        hints.append(Hint(
+            slot, finding_player, location_id, found_item_id, found,
+            ctx.er_hint_data.get(finding_player, {}).get(location_id, ""), item_flags,
+            HintStatus.HINT_FOUND if found else HintStatus.HINT_PRIORITY,
+        ))
     return hints
 
 
@@ -2000,12 +2060,18 @@ class ClientMessageProcessor(CommonCommandProcessor):
         elif input_text.isnumeric():
             game = self.ctx.games[self.client.slot]
             hint_id = int(input_text)
+            custom_triggers = get_custom_item_triggers(self.ctx, self.client.slot) if not for_location else {}
+            custom_trigger = next((trigger for trigger in custom_triggers.values()
+                                   if trigger["item_id"] == hint_id), None)
             hint_name = self.ctx.item_names[game][hint_id] \
                 if not for_location and hint_id in self.ctx.item_names[game] \
                 else self.ctx.location_names[game][hint_id] \
                 if for_location and hint_id in self.ctx.location_names[game] \
                 else None
-            if hint_name in self.ctx.non_hintable_names[game]:
+            if custom_trigger is not None:
+                hints = collect_custom_trigger_hints(
+                    self.ctx, self.client.team, self.client.slot, custom_trigger)
+            elif hint_name in self.ctx.non_hintable_names[game]:
                 self.output(f"Sorry, \"{hint_name}\" is marked as non-hintable.")
                 hints = []
             elif not for_location:
@@ -2018,13 +2084,21 @@ class ClientMessageProcessor(CommonCommandProcessor):
             if game not in self.ctx.all_item_and_group_names:
                 self.output("Can't look up item/location for unknown game. Hint for ID instead.")
                 return False
-            names = self.ctx.all_location_and_group_names[game] \
-                if for_location else \
-                self.ctx.all_item_and_group_names[game]
+            custom_triggers = get_custom_item_triggers(self.ctx, self.client.slot) if not for_location else {}
+            custom_names = {
+                alias: trigger
+                for configured_name, trigger in custom_triggers.items()
+                for alias in (configured_name, trigger["name"])
+            }
+            names = self.ctx.all_location_and_group_names[game] if for_location else \
+                self.ctx.all_item_and_group_names[game] | set(custom_names)
             hint_name, usable, response = get_intended_text(input_text, names)
 
             if usable:
-                if hint_name in self.ctx.non_hintable_names[game]:
+                if not for_location and hint_name in custom_names:
+                    hints = collect_custom_trigger_hints(
+                        self.ctx, self.client.team, self.client.slot, custom_names[hint_name])
+                elif hint_name in self.ctx.non_hintable_names[game]:
                     self.output(f"Sorry, \"{hint_name}\" is marked as non-hintable.")
                     hints = []
                 elif not for_location and hint_name in self.ctx.item_name_groups[game]:  # item group name

@@ -934,6 +934,43 @@ class OptionDict(Option[typing.Dict[str, typing.Any]], VerifyKeys, typing.Mappin
         return item in self.value
 
 
+class CustomItemCollection(OptionDict):
+    """Base for named collections of ordered item names."""
+    default = {}
+    rich_text_doc = True
+
+    def __init__(self, value: typing.Dict[str, typing.Any]):
+        errors = []
+        cleaned = {}
+        for collection_name, item_names in value.items():
+            if not isinstance(collection_name, str) or not collection_name.strip():
+                errors.append(f"Collection name {collection_name!r} must be a non-empty string.")
+                continue
+            if not isinstance(item_names, list) or not item_names:
+                errors.append(f"{collection_name!r} must contain a non-empty list of item names.")
+                continue
+            if any(not isinstance(item_name, str) or not item_name.strip() for item_name in item_names):
+                errors.append(f"{collection_name!r} contains an item name that is not a non-empty string.")
+                continue
+            if len(item_names) != len(set(item_names)):
+                errors.append(f"{collection_name!r} contains duplicate item names.")
+                continue
+            cleaned[collection_name] = list(item_names)
+        if errors:
+            raise OptionError(f"For option {self.__class__.__name__}:\n" + "\n".join(errors))
+        super().__init__(cleaned)
+
+
+class CustomItemPacks(CustomItemCollection):
+    """Create one AlchapelaBot trigger that releases every remaining copy of the listed items."""
+    display_name = "Custom Item Packs"
+
+
+class CustomProgressiveSets(CustomItemCollection):
+    """Replace an ordered list of remaining items with progressive AlchapelaBot triggers."""
+    display_name = "Custom Progressive Sets"
+
+
 class OptionCounter(OptionDict):
     min: int | None = None
     max: int | None = None
@@ -1808,6 +1845,8 @@ class PerGameCommonOptions(CommonOptions):
     priority_locations: PriorityLocations
     item_links: ItemLinks
     plando_items: PlandoItems
+    custom_item_packs: CustomItemPacks
+    custom_progressive_sets: CustomProgressiveSets
 
 
 

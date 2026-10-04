@@ -313,7 +313,7 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game == "Item Dispenser" or (location.player == location.item.player and location.locked))}
+            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game in ("Item Dispenser", "AlchapelaBot") or (location.player == location.item.player and location.locked))}
             for location in reachable_events:
                 if location.item:
                   state.collect(location.item, True, location)
@@ -359,6 +359,13 @@ class FillError(RuntimeError):
         super().__init__(*args)
 
 
+def _get_item_placement_player(multiworld: MultiWorld, item: Item) -> int:
+    """Return the world an item belongs in for local-only placement."""
+    if item.player == 1 and multiworld.game.get(1) == "AlchapelaBot":
+        return getattr(multiworld.worlds[1], "custom_item_owners", {}).get(item.code, item.player)
+    return item.player
+
+
 def _log_fill_progress(name: str, placed: int, total_items: int) -> None:
     logging.info(f"Current fill step ({name}) at {placed}/{total_items} items placed.")
 
@@ -396,7 +403,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
     swapped_items: typing.Counter[typing.Tuple[int, str, bool]] = Counter()
     reachable_items: typing.Dict[int, typing.Deque[Item]] = {}
     for item in item_pool:
-        reachable_items.setdefault(item.player, deque()).append(item)
+        reachable_items.setdefault(_get_item_placement_player(multiworld, item), deque()).append(item)
 
     single_player_placement = True
 
@@ -446,19 +453,20 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                 unplaced_items += items_to_place
                 break
             item_to_place = items_to_place.pop(0)
+            item_placement_player = _get_item_placement_player(multiworld, item_to_place)
 
             spot_to_fill: typing.Optional[Location] = None
 
             # if minimal accessibility, only check whether location is reachable if game not beatable
-            if multiworld.worlds[item_to_place.player].options.accessibility == Accessibility.option_minimal:
-                perform_access_check = (item_to_place.player not in multiworld.groups and not multiworld.has_beaten_game(maximum_exploration_state,
-                                        item_to_place.player)) \
+            if multiworld.worlds[item_placement_player].options.accessibility == Accessibility.option_minimal:
+                perform_access_check = (item_placement_player not in multiworld.groups and not multiworld.has_beaten_game(maximum_exploration_state,
+                                        item_placement_player)) \
                     if single_player_placement else not has_beaten_game
             else:
                 perform_access_check = True
 
             for i, location in enumerate(locations):
-                if (location.player == item_to_place.player or (item_to_place.player in multiworld.groups and location.player in multiworld.groups[item_to_place.player]["players"]) or (location.player in z and item_to_place.player in z)) \
+                if (location.player == item_placement_player or (item_placement_player in multiworld.groups and location.player in multiworld.groups[item_placement_player]["players"]) or (location.player in z and item_placement_player in z)) \
                         and location.can_fill(maximum_exploration_state, item_to_place, perform_access_check):
                     # popping by index is faster than removing by content,
                     spot_to_fill = locations.pop(i)
@@ -480,7 +488,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                                      for unsafe in (False, True)
                                      for i, location in enumerate(placements))
                     for (i, location, unsafe) in swap_attempts:
-                        if not (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)):
+                        if not (location.player == item_placement_player or (location.player in z and item_placement_player in z)):
                             continue
                         placed_item = location.item
                         if item_to_place == placed_item:
@@ -505,13 +513,13 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                                 # Previous swap states will also have already checked many locations, making the sweep
                                 # faster.
                                 swap_state = sweep_from_pool(previous_safe_swap_state, (placed_item,) if unsafe else (),
-                                                             multiworld.get_filled_locations(item.player)
+                                                             multiworld.get_filled_locations(item_placement_player)
                                                              if single_player_placement else None)
                                 break
                         else:
                             # No previous swap_state was usable as a base state to sweep from, so create a new one.
                             swap_state = sweep_from_pool(base_state, [placed_item, *item_pool] if unsafe else item_pool,
-                                                         multiworld.get_filled_locations(item.player)
+                                                         multiworld.get_filled_locations(item_placement_player)
                                                          if single_player_placement else None)
                             # Unsafe states should not be added to the cache because they have collected `placed_item`.
                             if not unsafe:
@@ -523,7 +531,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                         # unsafe means swap_state assumes we can somehow collect placed_item before item_to_place
                         # by continuing to swap, which is not guaranteed. This is unsafe because there is no mechanic
                         # to clean that up later, so there is a chance generation fails.
-                        if (location.player == item_to_place.player or (location.player in z and item_to_place.player in z)) \
+                        if (location.player == item_placement_player or (location.player in z and item_placement_player in z)) \
                                 and location.can_fill(swap_state, item_to_place, perform_access_check):
                             # Add this item to the existing placement, and
                             # add the old item to the back of the queue
@@ -532,7 +540,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                             swap_count += 1
                             swapped_items[placed_item.player, placed_item.name, unsafe] = swap_count
 
-                            reachable_items[placed_item.player].appendleft(
+                            reachable_items[_get_item_placement_player(multiworld, placed_item)].appendleft(
                                 placed_item)
                             item_pool.append(placed_item)
 
@@ -632,11 +640,12 @@ def remaining_fill(multiworld: MultiWorld,
 
     while locations and itempool:
         item_to_place = itempool.pop()
+        item_placement_player = _get_item_placement_player(multiworld, item_to_place)
         spot_to_fill: typing.Optional[Location] = None
 
         # going through locations in the same order as the provided `locations` argument
         for i, location in enumerate(locations):
-            if (location.player == item_to_place.player or (item_to_place.player in multiworld.groups and location.player in multiworld.groups[item_to_place.player]['players'])) and location_can_fill_item(location, item_to_place):
+            if (location.player == item_placement_player or (item_placement_player in multiworld.groups and location.player in multiworld.groups[item_placement_player]['players'])) and location_can_fill_item(location, item_to_place):
                 # popping by index is faster than removing by content,
                 spot_to_fill = locations.pop(i)
                 # skipping a scan for the element
@@ -647,7 +656,7 @@ def remaining_fill(multiworld: MultiWorld,
             # try swapping this item with previously placed items
 
             for (i, location) in enumerate(placements):
-                if location.player != item_to_place.player:
+                if location.player != item_placement_player:
                     continue
                 placed_item = location.item
                 # Unplaceable items can sometimes be swapped infinitely. Limit the
@@ -851,6 +860,180 @@ def distribute_early_items(multiworld: MultiWorld,
     return fill_locations, itempool
 
 
+def prepare_custom_item_collections(multiworld: MultiWorld) -> None:
+    """Move configured item packs/progressive sets behind AlchapelaBot locations."""
+    configured_players = [
+        player for player in multiworld.player_ids
+        if (multiworld.worlds[player].options.custom_item_packs.value
+            or multiworld.worlds[player].options.custom_progressive_sets.value)
+    ]
+    if not configured_players:
+        return
+    if multiworld.game.get(1) != "AlchapelaBot":
+        raise ValueError("custom_item_packs and custom_progressive_sets require AlchapelaBot in slot 1")
+
+    bot = multiworld.worlds[1]
+    bot_region = multiworld.get_region(bot.origin_region_name, 1)
+    used_item_ids = {
+        item_id for world in multiworld.worlds.values() for item_id in world.item_name_to_id.values()
+        if isinstance(item_id, int)
+    }
+    used_location_ids = {
+        location_id for location_id in bot.location_name_to_id.values() if isinstance(location_id, int)
+    }
+    next_item_id = 2_000_000
+    next_location_id = 2_000_000
+
+    def allocate_item_id() -> int:
+        nonlocal next_item_id
+        while next_item_id in used_item_ids:
+            next_item_id += 1
+        item_id = next_item_id
+        used_item_ids.add(item_id)
+        next_item_id += 1
+        return item_id
+
+    def allocate_location_id() -> int:
+        nonlocal next_location_id
+        while next_location_id in used_location_ids:
+            next_location_id += 1
+        location_id = next_location_id
+        used_location_ids.add(location_id)
+        next_location_id += 1
+        return location_id
+
+    def take_items(player: int, name: str) -> list[Item]:
+        return [item for item in multiworld.itempool if item.player == player and item.name == name]
+
+    def remove_items(items: typing.Iterable[Item]) -> None:
+        removed_ids = {id(item) for item in items}
+        multiworld.itempool[:] = [item for item in multiworld.itempool if id(item) not in removed_ids]
+
+    def add_bot_location(name: str, item: Item, rule) -> int:
+        location_id = allocate_location_id()
+        bot.register_custom_location(name, location_id)
+        location = Location(1, name, location_id, bot_region)
+        location.access_rule = rule
+        bot_region.locations.append(location)
+        location.place_locked_item(item)
+        return location_id
+
+    for player in sorted(configured_players):
+        world = multiworld.worlds[player]
+        packs = world.options.custom_item_packs.value
+        progressives = world.options.custom_progressive_sets.value
+        player_name = multiworld.player_name[player]
+        native_names = set(world.item_names)
+
+        duplicate_custom_names = set(packs) & set(progressives)
+        if duplicate_custom_names:
+            raise ValueError(f"{player_name} uses names for both a custom pack and progressive set: "
+                             f"{sorted(duplicate_custom_names)}")
+        custom_name_collisions = (set(packs) | set(progressives)) & native_names
+        if custom_name_collisions:
+            raise ValueError(f"{player_name}'s custom collection names collide with native items: "
+                             f"{sorted(custom_name_collisions)}")
+
+        claimed_names: dict[str, str] = {}
+        referenced_packs: dict[str, str] = {}
+        for custom_name, item_names in sorted(packs.items()):
+            for item_name in item_names:
+                if item_name not in native_names:
+                    raise ValueError(f"Unknown item {item_name!r} in {player_name}'s custom pack {custom_name!r}")
+                if item_name in claimed_names:
+                    raise ValueError(f"{player_name}'s item {item_name!r} is claimed by both "
+                                     f"{claimed_names[item_name]!r} and {custom_name!r}")
+                claimed_names[item_name] = custom_name
+        for custom_name, entries in sorted(progressives.items()):
+            for entry in entries:
+                if entry in packs:
+                    if entry in referenced_packs:
+                        raise ValueError(f"{player_name}'s pack {entry!r} is referenced by both "
+                                         f"{referenced_packs[entry]!r} and {custom_name!r}")
+                    referenced_packs[entry] = custom_name
+                else:
+                    if entry not in native_names:
+                        raise ValueError(f"Unknown item or custom pack {entry!r} in "
+                                         f"{player_name}'s progressive set {custom_name!r}")
+                    if entry in claimed_names:
+                        raise ValueError(f"{player_name}'s item {entry!r} is claimed by both "
+                                         f"{claimed_names[entry]!r} and {custom_name!r}")
+                    claimed_names[entry] = custom_name
+
+        for custom_name in set(packs) | set(progressives):
+            full_name = f"{player_name}'s {custom_name}"
+            if full_name in bot.item_name_to_id or full_name in native_names:
+                raise ValueError(f"Generated custom item name {full_name!r} already exists")
+
+        pack_triggers: dict[str, Item] = {}
+        for custom_name, item_names in sorted(packs.items()):
+            contents: list[Item] = []
+            for item_name in item_names:
+                matches = take_items(player, item_name)
+                if not matches:
+                    logging.warning("%s's custom pack %r found no remaining %r items",
+                                    player_name, custom_name, item_name)
+                contents.extend(matches)
+            if not contents:
+                logging.warning("Omitting empty custom item pack %r for %s", custom_name, player_name)
+                continue
+            remove_items(contents)
+            full_name = f"{player_name}'s {custom_name}"
+            item_id = allocate_item_id()
+            bot.register_custom_item(full_name, item_id, multiworld.game[player], player)
+            classification = contents[0].classification
+            for content in contents[1:]:
+                classification |= content.classification
+            trigger = bot.create_custom_item(full_name, classification)
+            multiworld.itempool.append(trigger)
+            pack_triggers[custom_name] = trigger
+            location_ids = []
+            for index, content in enumerate(contents, 1):
+                location_name = f"{full_name} #{index}"
+                location_ids.append(add_bot_location(
+                    location_name, content,
+                    lambda state, trigger_name=full_name: state.has(trigger_name, 1),
+                ))
+            bot.custom_item_triggers.setdefault(player, {})[custom_name] = {
+                "name": full_name, "item_id": item_id, "kind": "pack", "locations": location_ids,
+            }
+
+        for custom_name, entries in sorted(progressives.items()):
+            contents: list[Item] = []
+            for entry in entries:
+                if entry in packs:
+                    trigger = pack_triggers.get(entry)
+                    if trigger is None:
+                        logging.warning("%s's progressive set %r references empty pack %r",
+                                        player_name, custom_name, entry)
+                    elif trigger in multiworld.itempool:
+                        contents.append(trigger)
+                else:
+                    matches = take_items(player, entry)
+                    if not matches:
+                        logging.warning("%s's progressive set %r found no remaining %r items",
+                                        player_name, custom_name, entry)
+                    contents.extend(matches)
+            if not contents:
+                logging.warning("Omitting empty custom progressive set %r for %s", custom_name, player_name)
+                continue
+            remove_items(contents)
+            full_name = f"{player_name}'s {custom_name}"
+            item_id = allocate_item_id()
+            bot.register_custom_item(full_name, item_id, multiworld.game[player], player)
+            location_ids = []
+            for index, content in enumerate(contents, 1):
+                multiworld.itempool.append(bot.create_custom_item(full_name, content.classification))
+                location_name = f"{full_name} #{index}"
+                location_ids.append(add_bot_location(
+                    location_name, content,
+                    lambda state, trigger_name=full_name, count=index: state.has(trigger_name, 1, count),
+                ))
+            bot.custom_item_triggers.setdefault(player, {})[custom_name] = {
+                "name": full_name, "item_id": item_id, "kind": "progressive", "locations": location_ids,
+            }
+
+
 def distribute_items_restrictive(multiworld: MultiWorld,
                                  panic_method: typing.Literal["swap", "raise", "start_inventory"] = "swap") -> None:
     assert all(item.location is None for item in multiworld.itempool), (
@@ -909,8 +1092,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     call_all(multiworld, "fill_hook", progitempool, usefulitempool, filleritempool, fill_locations)
 
-    player_start_items = [item for item in sum(multiworld.precollected_items.values(), []) if
-                          item.player > 1 and item.code]
+    player_start_items = [
+        item for item in sum(multiworld.precollected_items.values(), [])
+        if _get_item_placement_player(multiworld, item) > 1 and item.code
+    ]
 
     for item in player_start_items:
         item.hint = True
@@ -1085,7 +1270,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             beaten_games = {player: multiworld.has_beaten_game(state, player) for player in multiworld.player_ids}
             unbeaten_games = [multiworld.player_name[p] for p in beaten_games if not beaten_games[p]]
             # raise Exception(f"Game appears as unbeatable. Aborting. {beaten_games}")
-            logging.info("not beatable, breaking")
+            logging.info(f"not beatable, breaking. stage: {stage}")
             breakpoint()
     test_beatable()
     # breakpoint()
@@ -1489,9 +1674,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     test_beatable("after relocating game unlocks into owner locations")
 
     # for sphere in reversed(spheres):
-    player_start_items = [item for item in sum(multiworld.precollected_items.values(), []) if item.player > 1 and item.code]
+    player_start_items = [
+        item for item in sum(multiworld.precollected_items.values(), [])
+        if _get_item_placement_player(multiworld, item) > 1 and item.code
+    ]
     multiworld.random.shuffle(player_start_items)
     for item in player_start_items:
+        item_placement_player = _get_item_placement_player(multiworld, item)
+        is_custom_bot_trigger = item_placement_player != item.player
         if item.game == "Final Fantasy Mystic Quest" and item.name in ("Progressive Sword", "Progressive Axe",
                 "Progressive Claw", "Progressive Bomb", "Steel Sword", "Bomb", "Cat Claw", "Axe"):
             continue
@@ -1499,18 +1689,26 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             continue
         if item.game == "Super Metroid":
             continue
-        if item.hint and player_to_owner[item.player] in (Owner.option_AvBW, Owner.option_AvBWJ):
+        if item.hint and player_to_owner[item_placement_player] in (Owner.option_AvBW, Owner.option_AvBWJ):
             continue
-        i = starting_spheres[item.player]
+        i = starting_spheres[item_placement_player]
         earlier_spheres = [loc for sphere in spheres[:i] for loc in sphere]
         if False and item.hint:
             multiworld.random.shuffle(earlier_spheres)
         else:
             earlier_spheres = list(reversed(earlier_spheres))
+
         for location in earlier_spheres:
-            if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto") and not location.item.advancement))
+            # Use the same global unlock-sphere boundary as every other start
+            # item. Bot locations are the sole exception: a trigger placed in
+            # one of its own release locations can directly lock itself.
+            if is_custom_bot_trigger and location.player == 1:
+                continue
+            if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto")
+                                       and not location.item.advancement))
                     and location.item_rule(item)):
-                logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, starting sphere is {starting_spheres[item.player]}")
+                logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, "
+                             f"starting sphere is {starting_spheres[item_placement_player]}")
                 location.item = item
                 multiworld.precollected_items[item.player].remove(item)
                 item.location = location
@@ -2424,6 +2622,8 @@ def check_no_skips(multiworld, starting_spheres):
     for n, sphere in enumerate(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False), start=1):
         sphere_games = {loc.player for loc in sphere}
         for player in multiworld.player_ids:
+            if player == 1:
+                continue
             if player in sphere_games:
                 if games[player] == 2:
                     logging.warning("%s (player %d) has locations after skipping sphere %d",
