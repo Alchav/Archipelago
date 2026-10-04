@@ -575,7 +575,7 @@ class PermanentStatUpgrades(Range):
     These upgrades are permanent and will be retained when starting a new run.
     """
     range_start = 0
-    range_end = 5
+    range_end = 25
     default = 3
 
 class StartOutNerfed(Range):
