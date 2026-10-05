@@ -414,8 +414,14 @@ class SMMapRandoWorld(World):
             patch = SMMapRandoProcedurePatch(player=self.player, player_name=self.player_name)
             patch.write_file("rando_data.json", json.dumps(randomizer_data).encode("utf-8"))
             for ips_patch_name, ips in ips_patches.items():
-                patch.procedure[1][1].append(ips_patch_name)
                 patch.write_file(f"{ips_patch_name}.ips", ips.encode())
+            # ``procedure`` is a mutable class attribute. Mutating it here causes concurrently generated
+            # SMMR patches to accumulate each other's IPS names (and later generations to retain them).
+            patch.procedure = [
+                ("patch_rom", ["rando_data.json"]),
+                ("apply_ips", list(ips_patches)),
+                ("write_crc", []),
+            ]
 
             outfilebase = self.multiworld.get_out_file_name_base(self.player)
             patch.write(os.path.join(output_directory, f"{outfilebase}{patch.patch_file_ending}"))
