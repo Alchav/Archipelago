@@ -162,10 +162,18 @@ new_tree_copy.localised_name = {"technology-name.ap-technology-hidden", "{{locat
 new_tree_copy.localised_description  = {"technology-description.ap-technology-hidden", {% if tech_tree_information == 1 and item.advancement %}{"technology-description.ap-technology-item-advancement"}{% else %}""{% endif %}}
 {% endif -%}
 {% if location.crafted_item is not none %}
+{% if location.production_statistic %}
+new_tree_copy.research_trigger = {
+    type = "scripted",
+    trigger_description = {"", "Produce ", {{ location.count }}, " {{ location.crafted_item }}"}
+}
+{% else %}
 new_tree_copy.research_trigger = {
     type = "{{ 'craft-fluid' if location.crafted_item in liquids else 'craft-item' }}",
-    {{ 'fluid' if location.crafted_item in liquids else 'item' }} = {{ variable_to_lua(location.crafted_item) }}
+    {{ 'fluid' if location.crafted_item in liquids else 'item' }} = {{ variable_to_lua(location.crafted_item) }},
+    {{ 'amount' if location.crafted_item in liquids else 'count' }} = {{ location.count }}
 }
+{% endif %}
 new_tree_copy.unit = nil
 {% else %}
 new_tree_copy.unit.count = {{ location.count }}

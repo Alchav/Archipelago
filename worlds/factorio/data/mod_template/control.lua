@@ -1,4 +1,4 @@
-{% from "macros.lua" import dict_to_lua %}
+{% from "macros.lua" import dict_to_lua, variable_to_lua %}
 -- this file gets written automatically by the Archipelago Randomizer and is in its raw form a Jinja2 Template
 require "lib"
 require "util"
@@ -13,6 +13,30 @@ GOAL = {{ goal }}
 ARCHIPELAGO_DEATH_LINK_SETTING = "archipelago-death-link-{{ slot_player }}-{{ seed_name }}"
 ENERGY_INCREMENT = {{ energy_link * 10000000 }}
 ENERGY_LINK_EFFICIENCY = 0.75
+CRAFTSANITY_PRODUCTION_CHECKS = {
+{% for location, item in locations if location.production_statistic -%}
+    {technology = "ap-{{ location.address }}-", product = {{ variable_to_lua(location.crafted_item) }},
+     count = {{ location.count }}, fluid = {{ "true" if location.crafted_item in liquids else "false" }}},
+{% endfor -%}
+}
+
+function check_craftsanity_production()
+    local force = game.forces.player
+    local surface = game.get_surface(1)
+    local item_statistics = force.get_item_production_statistics(surface)
+    local fluid_statistics = force.get_fluid_production_statistics(surface)
+    for _, check in pairs(CRAFTSANITY_PRODUCTION_CHECKS) do
+        local technology = force.technologies[check.technology]
+        if technology and not technology.researched then
+            local statistics = check.fluid and fluid_statistics or item_statistics
+            if statistics.get_input_count(check.product) >= check.count then
+                force.script_trigger_research(check.technology)
+            end
+        end
+    end
+end
+
+script.on_nth_tick(60, check_craftsanity_production)
 
 if settings.global[ARCHIPELAGO_DEATH_LINK_SETTING].value then
     DEATH_LINK = 1
@@ -785,6 +809,9 @@ commands.add_command("ap-get-technology", "Grant a technology, used by the Archi
             game.play_sound({path="utility/research_completed"})
             tech.researched = true
         end
+        return
+    elseif item_name == "Craftsanity Filler" then
+        storage.index_sync[index] = item_name
         return
     elseif progressive_technologies[item_name] ~= nil then
         if storage.index_sync[index] ~= item_name then -- not yet received prog item

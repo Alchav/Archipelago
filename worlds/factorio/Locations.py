@@ -1,7 +1,8 @@
 from typing import Dict, List
 
-from .Technologies import factorio_base_id, recipes
+from .Technologies import factorio_base_id
 from .Options import MaxSciencePack
+from .CraftSanity import CRAFTSANITY_PRODUCTS, MAX_CHECKS_PER_PRODUCT, location_name
 
 
 def make_pools() -> Dict[str, List[str]]:
@@ -22,17 +23,12 @@ for pool in location_pools.values():
     end_id += len(pool)
 
 craftsanity_locations = []
-valid_items = []
-item_category = {}
-for recipe_name, recipe in recipes.items():
-    if not recipe_name.endswith(("-barrel", "-science-pack")):
-        for result in recipe.products:
-            if result not in valid_items:
-                valid_items.append(result)
-for i, item in enumerate(valid_items, start=end_id):
-    location_table[f"Craft {item}"] = i
-    craftsanity_locations.append(f"Craft {item}")
-    end_id += 1
+for product in CRAFTSANITY_PRODUCTS:
+    for ordinal in range(1, MAX_CHECKS_PER_PRODUCT + 1):
+        name = location_name(product, ordinal)
+        location_table[name] = end_id
+        craftsanity_locations.append(name)
+        end_id += 1
 
 assert end_id - len(location_table) == factorio_base_id
 del pool

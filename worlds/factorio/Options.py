@@ -61,14 +61,13 @@ class Goal(Choice):
 
 
 class CraftSanity(NamedRange):
-    """Choose a number of researches to require crafting a specific item rather than with science packs.
-    May be capped based on the total number of locations.
-    There will always be at least 2 Science Pack research locations for automation and logistics, and 1 for rocket-silo
-    if the Rocket Silo option is not set to Spawn."""
+    """Add up to 3000 craft-count checks. Checks are apportioned among products according to the complete recipe
+    demand of craftable products and generated AP science checks. Every product's final check uses its full expected
+    craft count, and no product receives more than 100 checks."""
     display_name = "CraftSanity"
     default = 0
     range_start = 0
-    range_end = 183
+    range_end = 3000
     special_range_names = {
         "disabled": 0
     }
