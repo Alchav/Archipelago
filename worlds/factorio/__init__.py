@@ -210,9 +210,8 @@ class Factorio(World):
                                                           f"{trap_name.lower().replace(' ', '_')}_traps")))
 
         cost_sorted_locations = sorted(self.science_locations, key=lambda location: location.name)
-        special_index = {"assembling-machine-1": 0,
-                         "underground-belt": 1,
-                         "splitter": 2,
+        special_index = {"automation": 0,
+                         "logistics": 1,
                          "rocket-silo": -1}
         loc: FactorioScienceLocation
         if self.options.tech_tree_information == TechTreeInformation.option_full:
