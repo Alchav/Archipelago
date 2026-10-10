@@ -193,7 +193,6 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "sl_igloo_three_coin_block": "Snowman's Land - Igloo",
     "sl_igloo_goombas": "Snowman's Land - Igloo",
     "sl_igloo_spindrifts": "Snowman's Land - Igloo",
-    "sl_igloo_route": "Snowman's Land - Igloo",
     "sl_upper_slope_coin_line": "Snowman's Land - Igloo Entrance",
 
     "amp_ring": "Wet-Dry World - Near the Top",
@@ -799,7 +798,7 @@ COIN_OUTPUT_NAME_OVERRIDES: Mapping[tuple[str, str, int], str] = {
 RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
     "Bob-omb Battlefield": {
         **{i: ("main_red_coins",) for i in range(1, 8)},
-        8: ("island_full_trick_red_coin", "island_cannon_red_coin", "island_partial_red_coin"),
+        8: ("island_partial_red_coin",),
     },
     "Whomp's Fortress": {
         **{i: ("initial_red_coins",) for i in range(1, 6)}, 6: ("thwomp_red_coin",),
@@ -830,10 +829,10 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
     },
     "Shifting Sand Land": {
         **{i: ("ssl_low_red_coins",) for i in range(1, 5)},
-        5: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
-        6: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
-        7: ("ssl_normal_high_red_coin_route", "ssl_tweester_red_coin_route"),
-        8: ("ssl_normal_high_red_coin_route", "ssl_shy_guy_red_coin_route"),
+        5: ("ssl_high_red_coins_5_to_7",),
+        6: ("ssl_high_red_coins_5_to_7",),
+        7: ("ssl_high_red_coins_5_to_7",),
+        8: ("ssl_high_red_coin_8",),
     },
     "Dire, Dire Docks": {
         1: ("ddd_remaining_red_coins",),
@@ -891,8 +890,8 @@ RED_COIN_SOURCE_METHODS: Mapping[str, Mapping[int, tuple[str, ...]]] = {
         2: ("wmotr_cannon_red_coins",),
         3: ("wmotr_cannon_red_coins",),
         4: ("wmotr_flight_red_coins",),
-        5: ("wmotr_flight_red_coins", "wmotr_long_jump_second_red_coin"),
-        6: ("wmotr_flight_red_coins", "wmotr_long_jump_first_red_coin", "wmotr_wing_cap_fallback_red_coin"),
+        5: ("wmotr_long_jump_second_red_coin",),
+        6: ("wmotr_long_jump_first_red_coin",),
         7: ("wmotr_initial_red_coin",),
         8: ("wmotr_cannon_red_coins",),
     },
@@ -1410,14 +1409,14 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             custom = (
                 ("island_vertical_ring", "Vertical Ring Coin Above the Island", 40, tuple(
                     ("island_first_ring_easy_coins",) if i in range(25, 28) else
-                    ("island_partial_first_ring_three_coins", "island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins") if i in range(28, 31) else
-                    ("island_partial_first_ring_two_coins", "island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins") if i in range(31, 33) else
-                    ("island_partial_flight_ring_coins", "island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins") if i in partial_flight_ring_indices else
-                    ("island_full_trick_vertical_ring_coins", "island_cannon_vertical_ring_coins")
+                    ("island_partial_first_ring_three_coins",) if i in range(28, 31) else
+                    ("island_partial_first_ring_two_coins",) if i in range(31, 33) else
+                    ("island_partial_flight_ring_coins",) if i in partial_flight_ring_indices else
+                    ()
                     for i in range(1, 41))),
                 ("island_ring_center", "Yellow Coin in the Center of an Island Ring", 5, tuple(
-                    ("island_partial_flight_center_coins", "island_full_trick_ring_center_coins", "island_cannon_ring_center_coins") if i in partial_flight_center_indices else
-                    ("island_full_trick_ring_center_coins", "island_cannon_ring_center_coins",)
+                    ("island_partial_flight_center_coins",) if i in partial_flight_center_indices else
+                    ("island_partial_triple_jump_coin",)
                     for i in range(1, 6))),
             )
             for source_id, label, count, methods in custom:

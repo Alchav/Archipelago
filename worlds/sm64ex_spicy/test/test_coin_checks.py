@@ -68,20 +68,15 @@ class CoinCheckCatalogTest(unittest.TestCase):
             expected_names,
         )
 
-    def test_wmotr_red_coins_match_physical_landmarks_and_routes(self):
+    def test_wmotr_red_coins_match_physical_landmarks_and_sources(self):
         course_name = "Wing Mario Over the Rainbow"
         expected = (
             ("Hanging Poles Red Coin", ("wmotr_cannon_red_coins",)),
             ("Transparent Cloud Red Coin", ("wmotr_cannon_red_coins",)),
             ("Pole Cloud Red Coin 1", ("wmotr_cannon_red_coins",)),
             ("Overlooking Bob-omb Buddy Cloud Red Coin", ("wmotr_flight_red_coins",)),
-            ("Bob-omb Buddy Platform Red Coin", (
-                "wmotr_flight_red_coins", "wmotr_long_jump_second_red_coin")),
-            ("Lowest Cloud Red Coin", (
-                "wmotr_flight_red_coins",
-                "wmotr_long_jump_first_red_coin",
-                "wmotr_wing_cap_fallback_red_coin",
-            )),
+            ("Bob-omb Buddy Platform Red Coin", ("wmotr_long_jump_second_red_coin",)),
+            ("Lowest Cloud Red Coin", ("wmotr_long_jump_first_red_coin",)),
             ("Starting Cloud Red Coin", ("wmotr_initial_red_coin",)),
             ("Pole Cloud Red Coin 2", ("wmotr_cannon_red_coins",)),
         )
@@ -447,6 +442,9 @@ class CoinCheckCatalogTest(unittest.TestCase):
         self.assertEqual(tuple(output.output_id.output_index for output in closest_ring), tuple(range(25, 33)))
         self.assertEqual(closest_ring[0].source_methods, ("island_first_ring_easy_coins",))
         self.assertIn("island_partial_first_ring_two_coins", closest_ring[-1].source_methods)
+        closest_center = coin_output_by_id[
+            CoinOutputID("Bob-omb Battlefield", "island_ring_center", 1)]
+        self.assertIn("island_partial_triple_jump_coin", closest_center.source_methods)
         self.assertEqual(
             coin_output_by_name["Hazy Maze Cave - First Room Coin 1"].output_id.source_id,
             "rolling_rocks_coins",
@@ -1126,6 +1124,14 @@ class FullCataloguedCoinChecksTest(SM64TestBase):
             if method not in available_method_ids[output.output_id.course_name]
         }
         self.assertEqual(missing, set())
+
+    def test_all_items_cannot_reach_more_than_each_course_maximum(self):
+        state = self.multiworld.get_all_state(False)
+        for course_name, maximum in COURSE_MAXIMUM_COIN_VALUES.items():
+            with self.subTest(course=course_name, required_coins=maximum + 1):
+                evaluation = COIN_EVALUATORS[course_name](
+                    state, self.player, maximum + 1)
+                self.assertLess(evaluation.reachable_coins, maximum + 1)
 
     def test_dire_dire_docks_seafloor_clam_ring_has_a_coinlogic_explanation(self):
         location = self.multiworld.get_location(

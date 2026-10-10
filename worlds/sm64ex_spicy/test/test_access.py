@@ -940,11 +940,15 @@ class CourseOneUpAccessTestBase(SM64TestBase):
 
     def test_ssl_pyramid_1up_access(self):
         self.collect_basement_access()
-        self.assertTrue(
+        self.assertFalse(
             self.can_reach_location("Shifting Sand Land - Pyramid Grindel 1-Up"))
         # The elevator cannot carry a normal lower-pyramid entry to the upper interior.
         self.assertFalse(
             self.can_reach_location("Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up"))
+
+        self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertTrue(
+            self.can_reach_location("Shifting Sand Land - Pyramid Grindel 1-Up"))
 
 
 class NoDespawnCourseOneUpAccessTestBase(CourseOneUpAccessTestBase):
@@ -2373,12 +2377,12 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
             "Vanish Cap Under the Moat - 3-Coin Block",
         ])
 
-    def test_drop_counts_only_better_side_of_drop(self):
+    def test_drop_counts_coins_from_repeated_attempts(self):
         self.collect_all_coin_sources()
         self.assertTrue(vanish_cap_under_the_moat_coins(
-            self.multiworld.state, self.player, 14))
+            self.multiworld.state, self.player, 27))
         self.assertFalse(vanish_cap_under_the_moat_coins(
-            self.multiworld.state, self.player, 15))
+            self.multiworld.state, self.player, 28))
 
     def test_drop_bypasses_movement_for_red_coin_checks(self):
         self.collect_by_name([
@@ -2391,7 +2395,7 @@ class VanishCapUnderTheMoatDropTrickTestBase(SM64TestBase):
         self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
 
         self.collect(self.get_item_by_name("Vanish Cap Under the Moat - Red Coins"))
-        self.assertFalse(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
+        self.assertTrue(self.can_reach_location("Vanish Cap Under the Moat - Red Coins"))
 
 
 class VanishCapUnderTheMoatCrawlBackDropTrickTestBase(SM64TestBase):
@@ -5598,13 +5602,16 @@ class SnowmansLandImpossibleCoinEnabledTestBase(SnowmansLandCoinStarAccessTestBa
     options = {
         **SnowmansLandCoinStarAccessTestBase.options,
         "accessibility": "minimal",
-        "logic_tricks": {"Snowman's Land Impossible Coin"},
+        "logic_tricks": {
+            "Snowman's Land Impossible Coin",
+            "Snowman's Land Whirl from the Freezing Pond Area with Cannon",
+        },
         "snowmans_land_coin_star_requirement": 127,
     }
 
     def test_trick_and_cannon_reach_127_coins(self):
         self.collect_second_floor_access()
-        self.collect_by_name(["Vanish Cap", "Wall Kick"])
+        self.collect_by_name(["Vanish Cap", "Ledge Grab"])
         self.assertFalse(self.can_reach_location("Snowman's Land - Coins Star"))
 
         self.collect(self.get_item_by_name("Snowman's Land - Cannon Unlock"))
@@ -5731,7 +5738,10 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
         "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
         "level_unlocks": Options.LevelUnlocks.option_special_only,
         "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
-        "logic_tricks": {"Snowman's Land Impossible Coin"},
+        "logic_tricks": {
+            "Snowman's Land Impossible Coin",
+            "Snowman's Land Whirl from the Freezing Pond Area with Cannon",
+        },
             }
 
     def get_full_snowmans_land_route_state(self):
@@ -7743,7 +7753,7 @@ class TickTockClockCoinStar37StoppedSpinnersAccessTestBase(TickTockClockCoinStar
         self.assertFalse(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
 
-class TickTockClockCoinStar41StoppedSpinnersWallKickAccessTestBase(TickTockClockCoinStarAccessTestBase):
+class TickTockClockCoinStar41StoppedSpinnersLedgeGrabAccessTestBase(TickTockClockCoinStarAccessTestBase):
     options = {
         **TickTockClockCoinStarAccessTestBase.options,
         "tick_tock_clock_coin_star_requirement": 41,
@@ -7754,7 +7764,7 @@ class TickTockClockCoinStar41StoppedSpinnersWallKickAccessTestBase(TickTockClock
         self.collect_third_floor_access()
         self.collect([
             self.get_item_by_name("Tick Tock Clock - Spinners"),
-            self.get_item_by_name("Wall Kick"),
+            self.get_item_by_name("Ledge Grab"),
         ])
         self.assertTrue(self.can_reach_location("Tick Tock Clock - Coins Star"))
 
