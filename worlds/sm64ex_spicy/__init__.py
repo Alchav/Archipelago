@@ -2,7 +2,7 @@ import typing
 import os
 import json
 import pkgutil
-from bisect import bisect_left
+from bisect import bisect_right
 from .Items import item_data_table, action_item_data_table, cannon_item_data_table, cap_item_data_table, \
     castle_progression_item_data_table, feature_item_data_table, global_cap_item_names, \
     painting_unlock_item_data_table, item_table, SM64Item, global_checkerboard_item_names, \
@@ -1317,7 +1317,7 @@ class SM64World(World):
             assignments = []
 
             def take_candidate(sign_sphere_index):
-                candidate_index = bisect_left(candidate_sphere_indices, sign_sphere_index)
+                candidate_index = bisect_right(candidate_sphere_indices, sign_sphere_index)
                 while candidate_index < len(candidate_sphere_indices):
                     candidate_sphere_index = candidate_sphere_indices[candidate_index]
                     candidates = candidates_by_sphere[candidate_sphere_index]

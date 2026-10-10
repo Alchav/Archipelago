@@ -133,7 +133,7 @@ class SignHintTest(unittest.TestCase):
         self.assertGreater(entrance_count, 0)
         self.assertEqual(world.sign_hint_count, min(90, (advancement_count + entrance_count) // 5))
 
-    def test_real_hints_use_same_or_later_sphere_items_without_reuse(self):
+    def test_real_hints_use_later_sphere_items_without_reuse(self):
         multiworld = setup_solo_multiworld(SM64World, seed=2)
         distribute_items_restrictive(multiworld)
         world = multiworld.worlds[1]
@@ -176,7 +176,7 @@ class SignHintTest(unittest.TestCase):
             sign = next(sign for sign in sign_data if sign.key == sign_key)
             sign_location = multiworld.get_location(sign.location_name, 1)
             item_location = candidate_by_hint[hint]
-            self.assertGreaterEqual(
+            self.assertGreater(
                 sphere_by_location[item_location],
                 sphere_by_location[sign_location],
             )
