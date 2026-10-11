@@ -1404,19 +1404,23 @@ def _build_catalog() -> tuple[CoinSourceDefinition, ...]:
             # but display and logically treat the rings from closest to the island to furthest.
             ring_display_order = {4: 1, 3: 2, 2: 3, 5: 4, 1: 5}
             closest_ring_indices = range(25, 33)
-            partial_flight_ring_indices = set(range(1, 41)) - set(closest_ring_indices)
+            highest_ring_indices = range(1, 9)
+            partial_flight_ring_indices = (
+                set(range(1, 41)) - set(closest_ring_indices) - set(highest_ring_indices)
+            )
             partial_flight_center_indices = {2, 3, 4, 5}
             custom = (
                 ("island_vertical_ring", "Vertical Ring Coin Above the Island", 40, tuple(
                     ("island_first_ring_easy_coins",) if i in range(25, 28) else
                     ("island_partial_first_ring_three_coins",) if i in range(28, 31) else
                     ("island_partial_first_ring_two_coins",) if i in range(31, 33) else
+                    ("island_highest_flight_ring_coins",) if i in highest_ring_indices else
                     ("island_partial_flight_ring_coins",) if i in partial_flight_ring_indices else
                     ()
                     for i in range(1, 41))),
                 ("island_ring_center", "Yellow Coin in the Center of an Island Ring", 5, tuple(
                     ("island_partial_flight_center_coins",) if i in partial_flight_center_indices else
-                    ("island_partial_triple_jump_coin",)
+                    ("island_highest_ring_center_coin",)
                     for i in range(1, 6))),
             )
             for source_id, label, count, methods in custom:

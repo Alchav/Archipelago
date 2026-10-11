@@ -691,6 +691,32 @@ class BobOmbBattlefieldUnlockTricksTestBase(SM64TestBase):
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Behind Chain Chomp's Gate"))
 
 
+class BobOmbBattlefieldCannonlessPartialFlightCoinTestBase(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_GLOBAL_MOVE_OPTIONS,
+        "coin_object_unlocks": Options.CoinObjectUnlocks.option_per_level,
+        "enemy_unlocks": Options.EnemyUnlocks.option_per_level,
+        "logic_tricks": {"Bob-omb Battlefield Island with Koopa Shell and Wing Cap"},
+    }
+
+    def test_highest_ring_requires_cannon_or_full_cannonless_trick(self):
+        self.collect_by_name([
+            "Bob-omb Battlefield - Koopa Troopa",
+            "Bob-omb Battlefield - Vertical Coin Rings",
+            "Bob-omb Battlefield - Single Yellow Coins",
+            "Wing Cap",
+            "Triple Jump",
+        ])
+        evaluation = COIN_EVALUATORS["Bob-omb Battlefield"](
+            self.multiworld.state, self.player, 146)
+
+        # Koopa (5), all of Ring 1 (8), Rings 2-4 (24), and their four center coins.
+        self.assertEqual(41, evaluation.reachable_coins)
+        self.assertFalse(evaluation.sources_by_id["island_highest_flight_ring_coins"][0].available)
+        self.assertFalse(evaluation.sources_by_id["island_highest_ring_center_coin"][0].available)
+
+
 class BobOmbBattlefieldCannonlessMarioWingsCoinTestBase(SM64TestBase):
     run_default_tests = False
     options = {
@@ -3400,7 +3426,7 @@ class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccess
         "bob_omb_battlefield_coin_star_requirement": 110,
     }
 
-    def test_triple_jump_extra_coin_reaches_coin_star(self):
+    def test_triple_jump_does_not_reach_highest_ring_center(self):
         self.collect([
             self.get_item_by_name("Bob-omb Battlefield - Cannon Unlock"),
             self.get_item_by_name("Side Flip"),
@@ -3408,6 +3434,8 @@ class BobOmbBattlefieldCoinStar110AccessTestBase(BobOmbBattlefieldCoinStarAccess
         self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
         self.remove_by_name("Side Flip")
         self.collect(self.get_item_by_name("Triple Jump"))
+        self.assertFalse(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
+        self.collect(self.get_item_by_name("Wing Cap"))
         self.assertTrue(self.can_reach_location("Bob-omb Battlefield - Coins Star"))
 
 

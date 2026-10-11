@@ -444,7 +444,7 @@ class CoinCheckCatalogTest(unittest.TestCase):
         self.assertIn("island_partial_first_ring_two_coins", closest_ring[-1].source_methods)
         closest_center = coin_output_by_id[
             CoinOutputID("Bob-omb Battlefield", "island_ring_center", 1)]
-        self.assertIn("island_partial_triple_jump_coin", closest_center.source_methods)
+        self.assertIn("island_highest_ring_center_coin", closest_center.source_methods)
         self.assertEqual(
             coin_output_by_name["Hazy Maze Cave - First Room Coin 1"].output_id.source_id,
             "rolling_rocks_coins",

@@ -306,11 +306,17 @@ def evaluate_bob_omb_battlefield_coins(
     traces.extend((
         coin_source(
             "island_partial_flight_ring_coins",
-            "Four complete vertical rings reached with Wing Cap and Triple Jump",
-            32,
+            "Three complete airborne vertical rings reached with Wing Cap and Triple Jump",
+            24,
             has_vertical_coin_rings and (
                 has_complete_flight_route or (has_island and has_wing_cap_flight)
             ),
+        ),
+        coin_source(
+            "island_highest_flight_ring_coins",
+            "Highest vertical ring reached with the cannon",
+            8,
+            has_vertical_coin_rings and has_complete_flight_route,
         ),
         coin_source(
             "island_partial_flight_center_coins",
@@ -353,13 +359,10 @@ def evaluate_bob_omb_battlefield_coins(
             ),
         ),
         coin_source(
-            "island_partial_triple_jump_coin",
-            "Single island coin reached with Triple Jump",
+            "island_highest_ring_center_coin",
+            "Highest ring-center coin reached with the cannon",
             1,
-            has_single_yellow_coins and (
-                has_complete_flight_route
-                or (has_island and Rules.has_action(state, player, "Triple Jump", level_name))
-            ),
+            has_single_yellow_coins and has_complete_flight_route,
         ),
     ))
     return coin_evaluation(traces, 146)
@@ -4037,6 +4040,11 @@ def _early_requirement_specs():
             f"{{{BOB} - Island}} & (logic_bob_mario_wings_to_the_sky_without_cannon | "
             f"CANN & (WC | logic_bob_mario_wings_capless) | WC & TJ)",
             ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
+        (BOB, "island_highest_flight_ring_coins"): _spec(
+            BOB_TARGET,
+            f"{{{BOB} - Island}} & (logic_bob_mario_wings_to_the_sky_without_cannon | "
+            f"CANN & (WC | logic_bob_mario_wings_capless))",
+            ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
         (BOB, "island_partial_flight_center_coins"): _spec(
             BOB_TARGET,
             f"{{{BOB} - Island}} & (logic_bob_mario_wings_to_the_sky_without_cannon | "
@@ -4061,10 +4069,10 @@ def _early_requirement_specs():
             f"{{{BOB} - Island}} & (logic_bob_mario_wings_to_the_sky_without_cannon | "
             f"CANN & (WC | logic_bob_mario_wings_capless) | SF/BF/TJ)",
             ("Vertical Coin Rings", f"{BOB} - Vertical Coin Rings")),
-        (BOB, "island_partial_triple_jump_coin"): _spec(
+        (BOB, "island_highest_ring_center_coin"): _spec(
             BOB_TARGET,
             f"{{{BOB} - Island}} & (logic_bob_mario_wings_to_the_sky_without_cannon | "
-            f"CANN & (WC | logic_bob_mario_wings_capless) | TJ)",
+            f"CANN & (WC | logic_bob_mario_wings_capless))",
             ("Single Yellow Coins", f"{BOB} - Single Yellow Coins")),
 
         # Whomp's Fortress
