@@ -1188,7 +1188,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Tick Tock Clock - Top", "TJ/LG/BF/SF")
     rf.assign_rule(
         "Tick Tock Clock - Top Past Spinners",
-        "TTC_SPINNERS | SF | TJ")
+        "TTC_SPINNERS | TJ | logic_ttc_top_past_spinners_side_flip")
     rf.assign_rule(
         "Tick Tock Clock - Moving Bars Area to Top with Wall Kick",
         "logic_ttc_top_past_spinners_wall_kick")

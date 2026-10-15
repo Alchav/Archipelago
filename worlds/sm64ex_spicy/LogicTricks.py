@@ -586,6 +586,13 @@ logic_tricks = {
         "description": "Reaches both the Top and Top Past Spinners areas from the Moving Bars Area using Wall Kick.",
         "video": "https://www.youtube.com/watch?v=63eenKoAxEo",
     },
+    "Tick Tock Clock Top Past Spinners with Side Flip": {
+        "internal_id": "logic_ttc_top_past_spinners_side_flip",
+        "rule": "SF",
+        "difficulty": "hard",
+        "description": "Getting past the three spinners at the top without the Spinners item by Side Flipping "
+                       "onto the platform in the middle, then jumping across.",
+    },
     "Tick Tock Clock Stomp on the Thwomp with Wall Kick": {
         "internal_id": "logic_ttc_stomp_thwomp_wall_kick",
         "rule": "WK",
