@@ -84,17 +84,16 @@ class CanCollectCoinsTest(unittest.TestCase):
 
     def test_unavailable_route_makes_unlocked_children_unavailable(self) -> None:
         trace = CoinTraceBuilder()
-        trace.add_route(
+        trace.add_sources(
             "unavailable_route",
             "Unavailable route",
             False,
             (coin_source("unlocked_source", "Unlocked source", 3, True),),
         )
 
-        route = trace.evaluation().children[0]
-        self.assertFalse(route.available)
-        self.assertFalse(route.children[0].available)
-        self.assertFalse(route.children[0].counted)
+        source = trace.evaluation().children[0]
+        self.assertFalse(source.available)
+        self.assertFalse(source.counted)
 
     def test_structured_explanation_formatting(self) -> None:
         resolved = CanCollectCoins(TRACE_COURSE, 10).resolve(cast(SM64World, FakeWorld()))

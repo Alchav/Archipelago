@@ -104,6 +104,7 @@ class TestShiftingSandLandLocations(SM64TestBase):
             ["Shifting Sand Land - Pyramid Grindel 1-Up", True, [
                 "Shifting Sand Land - Grindel",
                 "Shifting Sand Land - Freestanding 1-Ups",
+                "Triple Jump",
             ]],
             ["Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up", False, freestanding],
             ["Shifting Sand Land - Pyramid Above the First Wire Grid 1-Up", True,

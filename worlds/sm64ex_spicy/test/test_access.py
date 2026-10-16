@@ -4525,29 +4525,32 @@ class HazyMazeCaveCoinStar54AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar71AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar78MovementAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 71,
+        "hazy_maze_cave_coin_star_requirement": 78,
     }
 
     def test_basic_movement_coins_reach_coin_star(self):
         self.collect_basement_access()
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
         self.collect(self.get_item_by_name("Ledge Grab"))
+        self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
+        self.collect(self.get_item_by_name("Side Flip"))
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar84AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 75,
+        "hazy_maze_cave_coin_star_requirement": 84,
     }
 
     def test_long_jump_platform_route_coins_reach_coin_star(self):
         self.collect_basement_access()
         self.collect([
             self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Side Flip"),
             self.get_item_by_name("Climb"),
         ])
         self.assertFalse(self.can_reach_location("Hazy Maze Cave - Coins Star"))
@@ -4555,16 +4558,17 @@ class HazyMazeCaveCoinStar75AccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
         self.assertTrue(self.can_reach_location("Hazy Maze Cave - Coins Star"))
 
 
-class HazyMazeCaveCoinStar81CheckerboardAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
+class HazyMazeCaveCoinStar88CheckerboardAccessTestBase(HazyMazeCaveCoinStarAccessTestBase):
     options = {
         **HazyMazeCaveCoinStarAccessTestBase.options,
-        "hazy_maze_cave_coin_star_requirement": 81,
+        "hazy_maze_cave_coin_star_requirement": 88,
     }
 
     def test_checkerboard_platform_route_coins_reach_coin_star(self):
         self.collect_basement_access()
         self.collect([
             self.get_item_by_name("Ledge Grab"),
+            self.get_item_by_name("Side Flip"),
             self.get_item_by_name("Climb"),
             self.get_item_by_name("Long Jump"),
         ])

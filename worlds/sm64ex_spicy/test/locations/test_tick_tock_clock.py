@@ -198,6 +198,20 @@ class TestTickTockClockTopPastSpinnersWallKickTrick(SM64TestBase):
         ], starting_regions=["Tick Tock Clock - Moving Bars Area"])
 
 
+class TestTickTockClockTopPastSpinnersSideFlipTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **SHUFFLED_TTC_OPTIONS,
+        "logic_tricks": {"Tick Tock Clock Top Past Spinners with Side Flip"},
+    }
+
+    def test_side_flip_reaches_past_spinners_without_ledge_grab(self):
+        self.run_location_tests([
+            ["Tick Tock Clock - Three Spinners Block 1-Up", False, []],
+            ["Tick Tock Clock - Three Spinners Block 1-Up", True, ["Side Flip"]],
+        ], starting_regions=["Tick Tock Clock - Top"])
+
+
 class TestTickTockClockWallKickStompTrick(SM64TestBase):
     run_default_tests = False
     options = {

@@ -867,7 +867,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Big Boo's Haunt - Roof", "LJ | logic_bbh_roof_without_long_jump")
     rf.assign_rule("Big Boo's Haunt - Big Boo's Balcony", "BIG_BOO")
     rf.assign_rule("Big Boo's Haunt - Eye to Eye in the Secret Room", "VC & MR_IS")
-    rf.assign_rule("Big Boo's Haunt - Shed Roof 1-Up", "TJ & BREAKABLE_COIN_BOXES")
+    rf.assign_rule(
+        "Big Boo's Haunt - Shed Roof 1-Up",
+        "TJ & BREAKABLE_COIN_BOXES | logic_bbh_shed_roof_no_movement")
     # Haze Maze Cave
     rf.assign_rule(
         "Hazy Maze Cave - Swimming Beast in the Cavern",
@@ -1190,7 +1192,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Tick Tock Clock - Top", "TJ/LG/BF/SF")
     rf.assign_rule(
         "Tick Tock Clock - Top Past Spinners",
-        "TTC_SPINNERS | TJ | logic_ttc_top_past_spinners_side_flip")
+        "TTC_SPINNERS | TJ | SF/LG | logic_ttc_top_past_spinners_side_flip")
     rf.assign_rule(
         "Tick Tock Clock - Moving Bars Area to Top with Wall Kick",
         "logic_ttc_top_past_spinners_wall_kick")
@@ -1981,6 +1983,9 @@ class RuleFactory:
         item_names["BREAKABLE_COIN_BOXES"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Breakable Coin Boxes", f"{level_name} - Breakable Coin Boxes")
+        item_names["CRAZY_BOXES"] = get_unlock_item_name(
+            self.options, "coin_object_unlocks",
+            "Crazy Boxes", f"{level_name} - Crazy Box")
         item_names["WOODEN_POSTS"] = get_unlock_item_name(
             self.options, "coin_object_unlocks",
             "Wooden Posts", f"{level_name} - Wooden Posts")

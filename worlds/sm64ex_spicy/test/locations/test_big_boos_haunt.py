@@ -129,3 +129,21 @@ class TestBigBoosHauntTricks(SM64TestBase):
             ["Big Boo's Haunt - Big Boo's Balcony", True,
              THIRD_FLOOR + ["Big Boo's Haunt - Big Boos"]],
         ], starting_regions=["Big Boo's Haunt"])
+
+
+class TestBigBoosHauntShedRoofCrazyBoxTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **BBH_OPTIONS,
+        "logic_tricks": {"Big Boo's Haunt Shed Roof 1-Up with Crazy Box"},
+    }
+
+    def test_crazy_box_reaches_shed_roof_one_up(self):
+        self.run_location_tests([
+            ["Big Boo's Haunt - Shed Roof 1-Up", False,
+             ["Big Boo's Haunt - Freestanding 1-Ups"]],
+            ["Big Boo's Haunt - Shed Roof 1-Up", True, [
+                "Big Boo's Haunt - Freestanding 1-Ups",
+                "Big Boo's Haunt - Crazy Box",
+            ]],
+        ], starting_regions=["Big Boo's Haunt"])

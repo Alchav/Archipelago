@@ -449,9 +449,9 @@ logic_tricks = {
         "description": "Reaching the roof without Long Jump.",
         "video": "https://www.youtube.com/watch?v=Fpf28uUrR1U"
     },
-    "Big Boo's Haunt Shed Roof No Movement": {
+    "Big Boo's Haunt Shed Roof 1-Up with Crazy Box": {
         "internal_id": "logic_bbh_shed_roof_no_movement",
-        "rule": "",
+        "rule": "CRAZY_BOXES",
         "difficulty": "medium",
         "description": "Reaching the 1-up on top of the shed roof without any movement options",
         "video": "https://www.youtube.com/watch?v=cOTE5iSb2GM"
@@ -596,9 +596,9 @@ logic_tricks = {
     "Tick Tock Clock Top Past Spinners with Side Flip": {
         "internal_id": "logic_ttc_top_past_spinners_side_flip",
         "rule": "SF",
-        "difficulty": "hard",
+        "difficulty": "medium",
         "description": "Getting past the three spinners at the top without the Spinners item by Side Flipping "
-                       "onto the platform in the middle, then jumping across.",
+                       "onto the platform in the middle without Ledge Grab, then jumping across.",
     },
     "Tick Tock Clock Stomp on the Thwomp with Wall Kick": {
         "internal_id": "logic_ttc_stomp_thwomp_wall_kick",

@@ -57,7 +57,7 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
             for entrance in location.parent_region.exits
         ))
 
-    def test_bowser_in_the_sky_source_can_extend_hint_information(self):
+    def test_unshuffled_bowser_in_the_sky_source_is_not_an_entrance_hint(self):
         self.world.area_connections[int(SM64Levels.BOWSER_IN_THE_SKY)] = int(
             SM64Levels.BOB_OMB_BATTLEFIELD)
         hint_data = {}
@@ -66,9 +66,9 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
 
         bob_location = self.multiworld.get_location(
             "Bob-omb Battlefield - Big Bob-Omb on the Summit", self.player)
-        self.assertEqual(hint_data[self.player][bob_location.address], "Bowser in the Sky")
+        self.assertNotIn(bob_location.address, hint_data[self.player])
 
-    def test_thi_combined_hint_accepts_a_physical_sub_area_source(self):
+    def test_post_generation_connection_edits_do_not_create_false_entrance_hints(self):
         for source, destination in tuple(self.world.area_connections.items()):
             if destination in {
                 int(SM64Levels.TINY_HUGE_ISLAND_TINY),
@@ -84,10 +84,7 @@ class SeparateSubAreaShuffleTest(SM64TestBase):
 
         thi_location = self.multiworld.get_location(
             "Tiny-Huge Island - Rematch with Koopa the Quick", self.player)
-        self.assertEqual(
-            hint_data[self.player][thi_location.address],
-            "Bowser in the Sky or Cool, Cool Mountain - Chimney",
-        )
+        self.assertNotIn(thi_location.address, hint_data[self.player])
 
 
 class MixedSubAreaShuffleTest(SM64TestBase):
