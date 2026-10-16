@@ -350,16 +350,20 @@ def create_regions(multiworld: MultiWorld, options: SM64Options, player: int):
     hmc_mid_red_coin_room = create_subregion(
         regHMC, "Hazy Maze Cave - Mid Red Coin Room", "Hazy Maze Cave - Elevate for 8 Red Coins")
     hmc_upper_red_coin_room = create_subregion(regHMC, "Hazy Maze Cave - Upper Red Coin Room")
-    hmc_pit_islands = create_subregion(regHMC, "Hazy Maze Cave - Pit Islands",
+    hmc_pit_islands_elevator_room = create_subregion(
+        regHMC, "Hazy Maze Cave - Pit Islands Elevator Room")
+    hmc_pit_islands = create_subregion(hmc_pit_islands_elevator_room, "Hazy Maze Cave - Pit Islands",
                                        "Hazy Maze Cave - A-Maze-Ing Emergency Exit",
                                        "Hazy Maze Cave - Above Pit Block 1-Up",
                                        "Hazy Maze Cave - Above Pit 1-Up Block")
+    regHMC.connect(hmc_pit_islands, name="Hazy Maze Cave - Pit Islands with Wall Kick")
     hmc_metal_head_room = create_subregion(
         regHMC, "Hazy Maze Cave - Metal-Head Mario Can Move Room",
         "Hazy Maze Cave - Metal-Head Mario Can Move!",
         "Hazy Maze Cave - Metal-Head Mario Can Move Metal Cap Block")
     regHMC.subregions = [
-        hmc_mid_red_coin_room, hmc_upper_red_coin_room, hmc_pit_islands, hmc_metal_head_room]
+        hmc_mid_red_coin_room, hmc_upper_red_coin_room, hmc_pit_islands_elevator_room,
+        hmc_pit_islands, hmc_metal_head_room]
     create_locs(regHMC, "Hazy Maze Cave - Coins Star")
 
     regLLL = create_region("Lethal Lava Land", player, multiworld)

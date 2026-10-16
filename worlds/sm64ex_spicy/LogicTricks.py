@@ -700,6 +700,12 @@ logic_tricks = {
                        "Wall Kick, Side Flip, and Ledge Grab.",
         "video": "https://www.youtube.com/watch?v=kPSHKBJxZdY",
     },
+    "Hazy Maze Cave Pit Islands with Long Jump": {
+        "internal_id": "logic_hmc_pit_islands_long_jump",
+        "rule": "LJ",
+        "difficulty": "easy",
+        "description": "Reaches the pit islands using Long Jump instead of Climb.",
+    },
     "Hazy Maze Cave Metal-Head Mario Room without Metal Cap": {
         "internal_id": "logic_hmc_metal_head_capless",
         "rule": "PURPLE_SWITCHES & TJ",

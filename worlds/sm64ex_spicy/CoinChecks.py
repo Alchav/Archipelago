@@ -150,6 +150,8 @@ COIN_SOURCE_METHOD_REGION_NAMES: Mapping[str, str] = {
     "upper_red_coin_pair_first": "Hazy Maze Cave - Upper Red Coin Room",
     "upper_red_coin_pair_checkerboards": "Hazy Maze Cave - Upper Red Coin Room",
     "upper_red_coin_swoops": "Hazy Maze Cave - Upper Red Coin Room",
+    "amazing_emergency_exit_swoop_1": "Hazy Maze Cave - Pit Islands Elevator Room",
+    "amazing_emergency_exit_swoop_2": "Hazy Maze Cave - Pit Islands Elevator Room",
     "toxic_maze_star_coin_line": "Hazy Maze Cave - Pit Islands",
 
     "penguin_slide_yellow_coins": "Cool, Cool Mountain - Secret Slide",

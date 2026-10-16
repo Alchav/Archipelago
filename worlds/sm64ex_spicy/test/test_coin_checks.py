@@ -1591,7 +1591,7 @@ class HazyMazeCaveSwoopCoinChecksAccessTest(SM64TestBase):
         "triple_jump": "global",
     }
 
-    def test_pit_island_swoop_is_initial_but_emergency_exit_swoops_need_movement(self):
+    def test_emergency_exit_swoops_require_the_pit_islands_elevator_room(self):
         movement_items = {
             action
             for action in ("Wall Kick", "Ledge Grab", "Backflip", "Side Flip", "Triple Jump")
@@ -1610,6 +1610,7 @@ class HazyMazeCaveSwoopCoinChecksAccessTest(SM64TestBase):
             self.assertFalse(self.can_reach_location(location_name))
 
         self.collect_by_name(["Wall Kick"])
+        self.assertTrue(self.can_reach_region("Hazy Maze Cave - Pit Islands Elevator Room"))
         for location_name in emergency_exit_swoops:
             self.assertTrue(self.can_reach_location(location_name))
 

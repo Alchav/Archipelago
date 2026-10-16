@@ -864,10 +864,6 @@ def evaluate_hazy_maze_cave_coins(
     has_swoops = Rules.has_unlock(
         state, player, "enemy_unlocks",
         "Swoops", f"{level_name} - Swoops")
-    has_basic_movement = any(
-        Rules.has_action(state, player, action, level_name)
-        for action in ("Wall Kick", "Ledge Grab", "Backflip", "Side Flip", "Triple Jump")
-    )
     has_long_jump = Rules.has_action(state, player, "Long Jump", level_name)
     has_climb = Rules.has_action(state, player, "Climb", level_name)
     has_checkerboards = Rules.has_checkerboard_platforms(state, player, level_name)
@@ -875,6 +871,8 @@ def evaluate_hazy_maze_cave_coins(
         f"{level_name} - Mid Red Coin Room", "Region", player)
     has_upper_red_coin_room = state.can_reach(
         f"{level_name} - Upper Red Coin Room", "Region", player)
+    has_pit_islands_elevator_room = state.can_reach(
+        f"{level_name} - Pit Islands Elevator Room", "Region", player)
 
     traces = [
         coin_source("start_coin_line", "Rolling Rocks Coin Line", 5,
@@ -902,18 +900,11 @@ def evaluate_hazy_maze_cave_coins(
         coin_source("toxic_maze_swoops", "Four Swoops in the toxic maze", 4, has_swoops),
     ]
 
-    basic_movement_children = (
+    traces.extend((
         coin_source("amazing_emergency_exit_swoop_1", "A-Maze-Ing Emergency Exit Swoop 1", 1,
-                has_basic_movement and has_swoops),
+                    has_pit_islands_elevator_room and has_swoops),
         coin_source("amazing_emergency_exit_swoop_2", "A-Maze-Ing Emergency Exit Swoop 2", 1,
-                has_basic_movement and has_swoops),
-    )
-    traces.extend(coin_sources(
-        "basic_movement_sources",
-        "Sources reached with basic vertical movement",
-        has_basic_movement,
-        has_basic_movement,
-        basic_movement_children,
+                    has_pit_islands_elevator_room and has_swoops),
     ))
     traces.append(coin_source(
         "lower_red_coin_room_coins",
@@ -4270,7 +4261,6 @@ def _middle_requirement_specs():
 
     # Hazy Maze Cave
     HMC = "Hazy Maze Cave"
-    HMC_BASIC = "WK/LG/BF/SF/TJ"
     _add(HMC, ("start_coin_line", "maze_entrance_coin_line"),
          unlocks=(_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "rolling_rocks_coins", unlocks=(_unlock("Single Yellow Coins", HMC),))
@@ -4281,13 +4271,12 @@ def _middle_requirement_specs():
     _add(HMC, ("pit_island_room_swoop", "toxic_maze_swoops"),
          unlocks=(_unlock("Swoops", HMC),))
     _add(HMC, "toxic_maze_snufits", unlocks=(_unlock("Snufits", HMC),))
-    _add(HMC, "basic_movement_sources", HMC_BASIC)
     _add(HMC, "lower_red_coin_room_coins", f"{{{HMC} - Mid Red Coin Room}}",
          (_unlock("Red Coins", HMC),))
     _add(HMC, "red_coin_room_mr_is", f"{{{HMC} - Mid Red Coin Room}}",
          (_unlock("Mr. Is", HMC),))
     _add(HMC, ("amazing_emergency_exit_swoop_1", "amazing_emergency_exit_swoop_2"),
-         HMC_BASIC, (_unlock("Swoops", HMC),))
+         f"{{{HMC} - Pit Islands Elevator Room}}", (_unlock("Swoops", HMC),))
     _add(HMC, "upper_red_coin_pair_first",
          f"{{{HMC} - Upper Red Coin Room}} & LJ/CHECKERBOARD_PLATFORMS",
          (_unlock("Red Coins", HMC),))
@@ -4524,7 +4513,7 @@ def _middle_requirement_specs():
     _add(SL, "sl_impossible_coin_trick", "logic_sl_impossible_coin")
 
 
-    del HMC, HMC_BASIC
+    del HMC
     del LLL, LLL_RED_ROUTE, LLL_HEALING
     del SSL, SSL_MAIN, SSL_NORMAL_HIGH, SSL_TWEESTER, SSL_SHY_GUY
     del DDD, DDD_FIRST_RED_ROUTE, SL

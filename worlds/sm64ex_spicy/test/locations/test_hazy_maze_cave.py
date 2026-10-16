@@ -107,3 +107,29 @@ class TestHazyMazeCaveLocations(SM64TestBase):
              ["Hazy Maze Cave - Red Coins"]],
             ["Hazy Maze Cave - Coins Star", True, [], ALL_ITEMS],
         ], starting_regions=["Hazy Maze Cave"])
+
+
+class TestHazyMazeCavePitIslandsLongJumpTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **HMC_OPTIONS,
+        "logic_tricks": {"Hazy Maze Cave Pit Islands with Long Jump"},
+    }
+
+    def test_long_jump_reaches_pit_islands_from_elevator_room(self):
+        self.run_location_tests([
+            ["Hazy Maze Cave - A-Maze-Ing Emergency Exit", True, ["Triple Jump", "Long Jump"]],
+        ], starting_regions=["Hazy Maze Cave"])
+
+
+class TestHazyMazeCavePitIslandsWallKickTrick(SM64TestBase):
+    run_default_tests = False
+    options = {
+        **HMC_OPTIONS,
+        "logic_tricks": {"Hazy Maze Cave Pit Islands with Wall Kick"},
+    }
+
+    def test_wall_kick_route_connects_main_region_directly_to_pit_islands(self):
+        self.run_location_tests([
+            ["Hazy Maze Cave - A-Maze-Ing Emergency Exit", True, ["Wall Kick", "Long Jump"]],
+        ], starting_regions=["Hazy Maze Cave"])

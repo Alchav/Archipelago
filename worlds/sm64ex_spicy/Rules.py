@@ -876,7 +876,9 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule(
         "Hazy Maze Cave - Upper Red Coin Room",
         "{Hazy Maze Cave - Mid Red Coin Room} & CL | logic_hmc_upper_red_coin_area_wall_kick")
-    rf.assign_rule("Hazy Maze Cave - Pit Islands", "TJ+CL | logic_hmc_pit_islands_wall_kick")
+    rf.assign_rule("Hazy Maze Cave - Pit Islands Elevator Room", "TJ/SF/BF/WK")
+    rf.assign_rule("Hazy Maze Cave - Pit Islands", "CL | logic_hmc_pit_islands_long_jump")
+    rf.assign_rule("Hazy Maze Cave - Pit Islands with Wall Kick", "logic_hmc_pit_islands_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move Room",
                    "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_capless")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move!",
