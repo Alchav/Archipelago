@@ -823,10 +823,10 @@ trap_item_name_by_option_name = {
     "uncollect_random_coin_trap_weight": "Uncollect Random Coin Trap",
 }
 class LogicTricks(OptionSet):
-    """Choose specific advanced techniques to include in logic. Each All [Tag] Tricks entry enables every trick
-    carrying that tag. The available tag options are All Easy Tricks, All Medium Tricks, All Hard Tricks,
-    All Cannon Precision Tricks, and All Metal Cap Skip Tricks. Details and tags for each individual trick are
-    documented at https://github.com/Alchav/Archipelago/blob/spicy-mycena-64/worlds/sm64ex_spicy/LogicTricks.py"""
+    """Choose specific advanced techniques to include in logic. Each All [Tag] Tricks entry enables every trick carrying
+    that tag. The available tag options are All Easy Tricks, All Medium Tricks, All Hard Tricks, All Pro Tricks,
+    All Cannon Precision Tricks, and All Metal Cap Skip Tricks.Details and tags for each individual trick are documented
+    at https://github.com/Alchav/Archipelago/blob/spicy-mycena-64/worlds/sm64ex_spicy/LogicTricks.py"""
     display_name = "Logic Tricks"
     valid_keys = logic_trick_option_keys
 

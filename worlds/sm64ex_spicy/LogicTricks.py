@@ -107,14 +107,14 @@ logic_tricks = {
         "internal_id": "logic_castle_lobby_8_star_door_blj",
         "rule": "LJ+LG",
         "description": "Bypassing the 8 Star Door using a Lobby Backwards Long Jump.",
-        "tags": ("Hard",),
+        "tags": ("Pro",),
         "video": "https://www.youtube.com/watch?v=RfyThHpFXoo"
     },
     "Castle Side Backwards Long Jump Through the 30 Star Door": {
         "internal_id": "logic_castle_30_star_door_sblj",
         "rule": "LJ",
         "description": "Bypass the 30 Star Door with a Side Backwards Long Jump.",
-        "tags": ("Hard",),
+        "tags": ("Pro",),
         "video": "https://www.youtube.com/watch?v=zoBLGr60T3k"
     },
     "Castle MIPS Skip Through the 30 Star Door": {
@@ -129,21 +129,21 @@ logic_tricks = {
         "internal_id": "logic_castle_30_star_door_crackslide",
         "rule": "BF+KK+TJ+LG",
         "description": "Bypass the 30 Star Door with a Crackslide using Backflip, Kick, Double Jump, and Ledge Grab.",
-        "tags": ("Hard",),
+        "tags": ("Pro",),
         "video": ("https://www.youtube.com/watch?v=SIpmzYruqlA&t=26s", "https://www.youtube.com/watch?v=jRKLCny82Gc")
     },
     "Castle Crackslide Through the 30 Star Door With Double Jump Setup": {
         "internal_id": "logic_castle_30_star_door_crackslide_double_jump",
         "rule": "TJ+LG",
         "description": "Bypass the 30 Star Door with a Crackslide, using Double Jump and Ledge Grab to set up.",
-        "tags": ("Hard",),
+        "tags": ("Pro",),
         "video": "https://www.youtube.com/watch?v=SIpmzYruqlA&t=184s"
     },
     "Castle Crackslide Through the 30 Star Door With YOLO Setup": {
         "internal_id": "logic_castle_30_star_door_crackslide_yolo",
         "rule": "LG+BF",
         "description": "Bypass the 30 Star Door with a Crackslide, using Ledge Grab and Backflip to set up.",
-        "tags": ("Hard",),
+        "tags": ("Pro",),
         "video": "https://www.youtube.com/watch?v=jRKLCny82Gc&t=526"
     },
     "Castle Backwards Long Jump Through the 50 Star Door": {
@@ -942,8 +942,7 @@ preferred_logic_trick_tag_order = (
     "Easy",
     "Medium",
     "Hard",
-    "Cannon Precision",
-    "Metal Cap Skip",
+    "Pro"
 )
 
 logic_trick_tags = {tag for data in logic_tricks.values() for tag in data["tags"]}
