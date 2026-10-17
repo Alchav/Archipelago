@@ -454,7 +454,9 @@ class UTGlitchLogicTestBase(SM64TestBase):
     options = {
         "buddy_checks": Options.BuddyChecks.option_true,
         "ground_pound": Options.GroundPound.option_global,
-        "universal_tracker_glitched_logic": {"All Hard Tricks"},
+        "universal_tracker_glitched_logic": {
+            "All Easy Tricks", "All Medium Tricks", "All Hard Tricks",
+        },
     }
 
     def test_ut_glitch_satisfies_moveless(self):

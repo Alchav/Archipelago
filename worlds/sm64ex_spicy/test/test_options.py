@@ -30,7 +30,7 @@ from ..Locations import coin_count_check_course_data, secret_stage_coin_count_ch
     global_coin_count_check_location_table, global_coin_count_check_maximum, global_coin_count_course_data, \
     location_name_groups
 from ..Music import SM64_MUSIC_AREA_SEQUENCES, SM64_MUSIC_SAFE_SEQUENCE_IDS
-from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys
+from ..LogicTricks import get_enabled_logic_tricks, logic_tricks, logic_trick_option_keys, logic_trick_tag_order
 from ..Regions import SM64_TTC_FAST, SM64_TTC_RANDOM, SM64_TTC_SLOW, SM64_TTC_STOPPED, SM64_WDW_HIGH, \
     SM64_WDW_LOW, SM64_WDW_MIDDLE, sm64_entrances_to_level, sm64_level_to_paintings, sm64_level_to_secrets
 
@@ -48,23 +48,58 @@ ttc_variant_ids = {SM64_TTC_STOPPED, SM64_TTC_SLOW, SM64_TTC_RANDOM, SM64_TTC_FA
 
 class LogicTrickOptionTest(unittest.TestCase):
     def test_presets_are_first_in_option_keys(self):
-        self.assertEqual(logic_trick_option_keys[:3], (
+        self.assertEqual(logic_trick_option_keys[:5], (
             "All Easy Tricks",
             "All Medium Tricks",
             "All Hard Tricks",
+            "All Cannon Precision Tricks",
+            "All Metal Cap Skip Tricks",
         ))
 
-    def test_difficulty_presets_include_lower_difficulties(self):
-        for preset, maximum_difficulty in (("All Easy Tricks", "easy"),
-                                           ("All Medium Tricks", "medium"),
-                                           ("All Hard Tricks", "hard")):
+    def test_tag_presets_include_exactly_matching_tricks(self):
+        for tag in logic_trick_tag_order:
+            preset = f"All {tag} Tricks"
             enabled = get_enabled_logic_tricks({preset})
             expected = {
                 trick for trick, data in logic_tricks.items()
-                if ("easy", "medium", "hard").index(data["difficulty"])
-                <= ("easy", "medium", "hard").index(maximum_difficulty)
+                if tag in data["tags"]
             }
             self.assertEqual(enabled, expected)
+
+    def test_every_trick_has_at_least_one_tag(self):
+        for trick, data in logic_tricks.items():
+            self.assertTrue(data["tags"], trick)
+
+    def test_every_tag_has_an_aggregate_option(self):
+        self.assertEqual(
+            {f"All {tag} Tricks" for data in logic_tricks.values() for tag in data["tags"]},
+            set(logic_trick_option_keys[:len(logic_trick_tag_order)]),
+        )
+
+    def test_cannon_precision_tag_matches_cannon_requirements(self):
+        tagged = {
+            trick for trick, data in logic_tricks.items()
+            if "Cannon Precision" in data["tags"]
+        }
+        requires_cannon = {
+            trick for trick, data in logic_tricks.items()
+            if "CANN" in data["rule"]
+        }
+        self.assertEqual(tagged, requires_cannon)
+
+    def test_metal_cap_skip_tag(self):
+        tagged = {
+            trick for trick, data in logic_tricks.items()
+            if "Metal Cap Skip" in data["tags"]
+        }
+        self.assertEqual(tagged, {
+            "Jolly Roger Bay Through the Jet Stream without Metal Cap",
+            "Deep Underwater Coins Without Metal Cap",
+            "Hazy Maze Cave Metal-Head Mario Room without Metal Cap",
+            "Hazy Maze Cave Metal-Head Mario Gap with Triple Jump",
+            "Hazy Maze Cave Metal-Head Mario without Metal Cap or Full Movement",
+            "Dire, Dire Docks Through the Jet Stream without Metal Cap",
+        })
 
 
 class MipsSkipSlotDataDisabledTestBase(SM64TestBase):
