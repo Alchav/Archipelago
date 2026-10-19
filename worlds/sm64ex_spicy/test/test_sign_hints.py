@@ -303,6 +303,57 @@ class SignHintTest(unittest.TestCase):
 
         self.assertNotIn(entrance_id, world.bypass_entrance_connections)
 
+    def test_hinted_entrance_reveals_target_without_granting_access(self):
+        multiworld = setup_solo_multiworld(
+            SM64World,
+            steps=("generate_early", "create_regions", "create_items"),
+            seed=7,
+        )
+        multiworld.worlds[1].options.main_course_shuffle.value = 2
+        multiworld.worlds[1].options.secret_course_shuffle.value = 2
+        multiworld.generation_is_fake = True
+        multiworld.enforce_deferred_connections = "on"
+        call_all(multiworld, "set_rules")
+        world = multiworld.worlds[1]
+
+        entrance_id = 91  # Bob-omb Battlefield source in the accessible Castle Lobby.
+        entrance_bit = sm64_shuffled_entrance_ids.index(entrance_id)
+        entrance = world.randomized_entrance_connections[entrance_id]
+        multiworld.state.allow_partial_entrances = True
+
+        world.reconnect_found_entrances("SM64SpicyHintedEntrances_1", 1 << entrance_bit)
+
+        self.assertIs(entrance.connected_region, world.deferred_entrance_targets[entrance_id])
+        self.assertFalse(entrance.can_reach(multiworld.state))
+        self.assertNotIn(entrance_id, world.bypass_entrance_connections)
+
+        world.reconnect_found_entrances("SM64SpicyFoundEntrances_1", 1 << entrance_bit)
+
+        self.assertTrue(entrance.can_reach(multiworld.state))
+
+    def test_hint_does_not_hide_an_already_discovered_entrance(self):
+        multiworld = setup_solo_multiworld(
+            SM64World,
+            steps=("generate_early", "create_regions", "create_items"),
+            seed=8,
+        )
+        multiworld.worlds[1].options.main_course_shuffle.value = 2
+        multiworld.worlds[1].options.secret_course_shuffle.value = 2
+        multiworld.generation_is_fake = True
+        multiworld.enforce_deferred_connections = "on"
+        call_all(multiworld, "set_rules")
+        world = multiworld.worlds[1]
+
+        entrance_id = 91
+        entrance_bit = sm64_shuffled_entrance_ids.index(entrance_id)
+        entrance = world.randomized_entrance_connections[entrance_id]
+        multiworld.state.allow_partial_entrances = True
+
+        world.reconnect_found_entrances("SM64SpicyFoundEntrances_1", 1 << entrance_bit)
+        world.reconnect_found_entrances("SM64SpicyHintedEntrances_1", 1 << entrance_bit)
+
+        self.assertTrue(entrance.can_reach(multiworld.state))
+
     def test_courses_only_does_not_defer_secret_entrances(self):
         multiworld = setup_solo_multiworld(
             SM64World,

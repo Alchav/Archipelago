@@ -239,6 +239,8 @@ class SM64World(World):
         self.randomized_entrance_connections = {}
         self.deferred_entrance_targets = {}
         self.bypass_entrance_connections = {}
+        self.physically_discovered_entrance_ids = set()
+        self.hinted_entrance_access_rules = {}
         self.shuffled_entrance_source_ids = set()
         self.permanent_coin_source_counts = {}
         if slot_data:
@@ -293,7 +295,10 @@ class SM64World(World):
             )
         tracker_datastorage_keys = []
         if self.get_shuffled_normal_entrance_ids():
-            tracker_datastorage_keys.append("SM64SpicyFoundEntrances_{player}")
+            tracker_datastorage_keys.extend((
+                "SM64SpicyFoundEntrances_{player}",
+                "SM64SpicyHintedEntrances_{player}",
+            ))
         if (
                 self.options.sub_area_shuffle.value != self.options.sub_area_shuffle.option_vanilla
                 or self.options.castle_return_shuffle.value
@@ -302,6 +307,8 @@ class SM64World(World):
             tracker_datastorage_keys.extend((
                 "SM64SpicyFoundSubAreaEntrancesLow_{player}",
                 "SM64SpicyFoundSubAreaEntrancesHigh_{player}",
+                "SM64SpicyHintedSubAreaEntrancesLow_{player}",
+                "SM64SpicyHintedSubAreaEntrancesHigh_{player}",
             ))
         tracker_datastorage_keys.append(self.permanent_coin_sources_datastorage_key)
         self.found_entrances_datastorage_key = tracker_datastorage_keys or None
@@ -1556,12 +1563,19 @@ class SM64World(World):
         except (TypeError, ValueError):
             return
 
-        if _found_key.startswith("SM64SpicyFoundSubAreaEntrancesLow_"):
+        is_hinted = _found_key.startswith("SM64SpicyHinted")
+        if _found_key.startswith((
+                "SM64SpicyFoundSubAreaEntrancesLow_",
+                "SM64SpicyHintedSubAreaEntrancesLow_",
+        )):
             discovered_source_ids = (
                 source_id for source_id in range(1, 32)
                 if discovered & (1 << (source_id - 1))
             )
-        elif _found_key.startswith("SM64SpicyFoundSubAreaEntrancesHigh_"):
+        elif _found_key.startswith((
+                "SM64SpicyFoundSubAreaEntrancesHigh_",
+                "SM64SpicyHintedSubAreaEntrancesHigh_",
+        )):
             discovered_source_ids = (
                 source_id for source_id in range(32, 64)
                 if discovered & (1 << (source_id - 32))
@@ -1579,6 +1593,17 @@ class SM64World(World):
                 continue
             if entrance.connected_region is None:
                 entrance.connect(target)
+            if is_hinted:
+                if source_id not in self.physically_discovered_entrance_ids:
+                    if source_id not in self.hinted_entrance_access_rules:
+                        self.hinted_entrance_access_rules[source_id] = entrance.access_rule
+                    entrance.access_rule = lambda _state: False
+                continue
+
+            self.physically_discovered_entrance_ids.add(source_id)
+            original_rule = self.hinted_entrance_access_rules.pop(source_id, None)
+            if original_rule is not None:
+                entrance.access_rule = original_rule
             state = self.multiworld.state
             previous_allow_partial_entrances = state.allow_partial_entrances
             state.allow_partial_entrances = True
