@@ -26,9 +26,11 @@ from worlds.AutoWorld import WebWorld, World
 from .bundles.bundle_room import BundleRoom
 from .bundles.bundles import get_all_bundles, get_help_wanted_quests, get_trash_bear_requests
 from .content import StardewContent, create_content
+from .content.override import override
 from .content.feature.special_order_locations import get_qi_gem_amount
 from .content.feature.walnutsanity import get_walnut_amount
 from .data.regions import reverse_connection_name
+from .data.fish_data import crab_pot_difficulty, weather_any
 from .data_randomization.randomized_data_writer import add_randomized_data_to_spoiler_log, prepare_randomized_data
 from .items import (
     Group,
@@ -74,6 +76,7 @@ from .strings.entrance_names import LogicEntrance
 from .strings.goal_names import Goal as GoalName
 from .strings.region_names import LogicRegion
 from .strings.region_names import Region as RegionNames
+from .strings.season_names import Season
 
 logger = logging.getLogger(__name__)
 
@@ -196,9 +199,17 @@ class StardewValleyWorld(World):
         seed = slot_data.get(UNIVERSAL_TRACKER_SEED_PROPERTY)
         if seed is None:
             logger.warning(f"World was generated before Universal Tracker support. Tracker might not be accurate.")
+        self._apply_slot_data_options(slot_data)
+        # UT creates a replacement world from the YAML after this call. Keep the
+        # server's options so that world can restore them before building content.
+        slot_options = {name: value for name, value in slot_data.items()
+                        if name in self.options_dataclass.type_hints}
+        return {"seed": seed, "randomized_entrances": self.randomized_entrances, "options": slot_options,
+                "randomized_data": slot_data.get("randomized_data", {})}
+
+    def _apply_slot_data_options(self, slot_data: Dict[str, Any]) -> None:
         for option_name in slot_data:
             if option_name in self.options_dataclass.type_hints:
-                logger.warning(f"{option_name} in type_hints")
                 option_value = slot_data[option_name]
                 option_type = self.options_dataclass.type_hints[option_name]
                 if isinstance(option_value, option_type):
@@ -214,12 +225,41 @@ class StardewValleyWorld(World):
                                f"Yaml Value: {self.options.__getattribute__(option_name)}")
             elif option_name == "randomized_entrances":
                 self.randomized_entrances = slot_data[option_name]
-        return {"seed": seed, "randomized_entrances": self.randomized_entrances}
 
     def generate_early(self):
+        passthrough_data = getattr(self.multiworld, "re_gen_passthrough", {}).get(STARDEW_VALLEY)
+        if passthrough_data is not None:
+            self._apply_slot_data_options(passthrough_data.get("options", {}))
         force_change_options_if_banned(self.options, self.settings, self.player, self.player_name)
         force_change_options_if_incompatible(self.options, self.player, self.player_name)
         self.content = create_content(self.options, self.random)
+        if passthrough_data is not None:
+            self._restore_slot_data_fish(passthrough_data.get("randomized_data", {}).get("Fish", {}))
+
+    def _restore_slot_data_fish(self, fish_data: Dict[str, Any]) -> None:
+        # The client's actual catch data is authoritative. Replaying the RNG is
+        # insufficient across versions and non-deterministic data pool ordering.
+        for name, saved in fish_data.items():
+            fish = self.content.fishes.get(name)
+            if fish is None:
+                continue
+            changes = {}
+            for key, field in (("Location", "locations"), ("Season", "seasons"), ("Weather", "weather")):
+                if key in saved:
+                    changes[field] = tuple(saved[key])
+            if saved.get("Method") == "Crab Pot":
+                changes["difficulty"] = crab_pot_difficulty
+                # Crab-pot entries omit these fields because they have no
+                # seasonal/weather restrictions, even if regeneration chose a rod.
+                changes["seasons"] = Season.all
+                changes["weather"] = weather_any
+            elif "Difficulty" in saved:
+                changes["difficulty"] = saved["Difficulty"]
+            elif saved.get("Method") == "Fishing Rod" and fish.is_crab_pot():
+                changes["difficulty"] = 0
+            if "SellPrice" in saved:
+                changes["sell_price"] = saved["SellPrice"]
+            self.content.fishes[name] = override(fish, **changes)
 
     def create_regions(self):
 
