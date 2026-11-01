@@ -233,10 +233,23 @@ class Progressive(Choice):
 
 
 class RecipeIngredients(Choice):
-    """Select if rocket, or rocket + science pack ingredients should be random."""
+    """Select whether to randomize Rocket Part ingredients, Rocket Parts plus science packs, or every usable
+    base-game recipe. Full randomization constructs an acyclic production graph so every recipe remains craftable."""
     display_name = "Random Recipe Ingredients Level"
     option_rocket = 0
     option_science_pack = 1
+    option_full = 2
+
+
+class RecipeCostVariance(Range):
+    """Controls how far randomized recipe costs may vary from their normal target cost. Ingredient identities are
+    selected to approach the target before quantities compensate for any remainder. 0 keeps existing balancing.
+    25 is approximately 0.5x-2x, 50 is 0.1x-10x, 75 is 0.01x-100x, and 100 is 0.001x-1000x. Cheaper and dearer
+    costs are sampled symmetrically by scale."""
+    display_name = "Randomized Recipe Cost Variance"
+    range_start = 0
+    range_end = 100
+    default = 0
 
 
 class RecipeIngredientsOffset(Range):
@@ -506,6 +519,7 @@ class FactorioOptions(PerGameCommonOptions):
     recipe_time: RecipeTime
     recipe_ingredients: RecipeIngredients
     recipe_ingredients_offset: RecipeIngredientsOffset
+    recipe_cost_variance: RecipeCostVariance
     imported_blueprints: ImportedBlueprint
     world_gen: FactorioWorldGen
     progressive: Progressive

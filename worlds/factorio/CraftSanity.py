@@ -121,18 +121,19 @@ class CraftContribution(typing.NamedTuple):
 
 def expand_product(contributions: dict[str, list[CraftContribution]], product: str, amount: Fraction,
                    source: object, required_technologies: frozenset[str],
-                   custom_recipes: typing.Mapping[str, Recipe], stack: frozenset[str] = frozenset()) -> None:
+                   custom_recipes: typing.Mapping[str, Recipe], stack: frozenset[str] = frozenset(),
+                   recipe_resolver: typing.Callable[[str], Recipe | None] | None = None) -> None:
     contributions[product].append(CraftContribution(amount, source, required_technologies))
     if product in stack:
         return
-    recipe = get_product_recipe(product, custom_recipes)
+    recipe = recipe_resolver(product) if recipe_resolver else get_product_recipe(product, custom_recipes)
     if not recipe:
         return
     executions = amount / Fraction(recipe.products[product])
     next_stack = stack | {product}
     for ingredient, ingredient_amount in recipe.ingredients.items():
         expand_product(contributions, ingredient, executions * ingredient_amount, source,
-                       required_technologies, custom_recipes, next_stack)
+                       required_technologies, custom_recipes, next_stack, recipe_resolver)
 
 
 def apportion_locations(maximums: typing.Mapping[str, Fraction], count: int) -> dict[str, int]:

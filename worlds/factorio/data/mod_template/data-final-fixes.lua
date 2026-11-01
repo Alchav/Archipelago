@@ -165,7 +165,7 @@ new_tree_copy.localised_description  = {"technology-description.ap-technology-hi
 {% if location.production_statistic %}
 new_tree_copy.research_trigger = {
     type = "scripted",
-    trigger_description = {"", "Produce ", {{ location.count }}, " {{ location.crafted_item }}"}
+    trigger_description = {"", "Produce ", "{{ location.count }}", " {{ location.crafted_item }}"}
 }
 {% else %}
 new_tree_copy.research_trigger = {

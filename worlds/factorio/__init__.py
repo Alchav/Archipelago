@@ -23,7 +23,7 @@ from .Technologies import base_tech_table, recipe_sources, base_technology_table
     all_product_sources, required_technologies, get_rocket_requirements, \
     progressive_technology_table, common_tech_table, tech_to_progressive_lookup, progressive_tech_table, \
     get_science_pack_pools, Recipe, recipes, technology_table, tech_table, factorio_base_id, useless_technologies, \
-    fluids, stacking_items, valid_ingredients, progressive_rows
+    fluids, stacking_items, valid_ingredients, progressive_rows, machine_per_category
 from .settings import FactorioSettings
 
 
@@ -64,6 +64,30 @@ all_items["Inventory Spill Trap"] = factorio_base_id - 9
 all_items["Craftsanity Filler"] = factorio_base_id - 10
 
 
+WOOD_RECIPE_NAMES = {
+    "light-armor", "heavy-armor", "modular-armor", "power-armor", "power-armor-mk2",
+    "shotgun", "submachine-gun", "rocket-launcher", "flamethrower", "pistol", "combat-shotgun",
+    "nuclear-reactor", "heat-pipe", "steam-turbine", "heat-exchanger", "steam-engine", "boiler",
+    "car", "tank", "spidertron",
+    "wooden-chest", "steel-chest", "iron-chest", "passive-provider-chest", "active-provider-chest",
+    "storage-chest", "buffer-chest",
+    "locomotive", "cargo-wagon", "fluid-wagon", "artillery-wagon",
+    "burner-inserter", "rocket-silo", "cargo-landing-pad",
+}
+FULL_RECIPE_EXCLUSIONS = {"heavy-oil-cracking", "light-oil-cracking"}
+CANONICAL_FLUID_RECIPES = {
+    "petroleum-gas": "basic-oil-processing",
+    "heavy-oil": "advanced-oil-processing",
+    "light-oil": "advanced-oil-processing",
+}
+RAW_COST_PRODUCTS = {"coal", "copper-ore", "iron-ore", "stone", "wood", "raw-fish", "water", "crude-oil"}
+
+
+def recipe_may_use_wood(recipe: Recipe) -> bool:
+    return ("wood" in recipe.ingredients or recipe.name in WOOD_RECIPE_NAMES
+            or recipe.name.endswith(("-armor", "-equipment")))
+
+
 class Factorio(World):
     """
     Factorio is a game about automation. You play as an engineer who has crash landed on the planet
@@ -73,6 +97,8 @@ class Factorio(World):
     game = "Factorio"
     special_nodes = {"automation", "logistics", "rocket-silo"}
     custom_recipes: typing.Dict[str, Recipe]
+    custom_product_recipes: typing.Dict[str, Recipe]
+    custom_recipe_requirements: typing.Dict[str, frozenset[str]]
     location_pool: typing.List[FactorioScienceLocation]
     advancement_technologies: typing.Set[str]
 
@@ -106,6 +132,12 @@ class Factorio(World):
         self.removed_technologies = useless_technologies.copy()
         self.advancement_technologies = set()
         self.custom_recipes = {}
+        self.custom_product_recipes = {}
+        self.custom_recipe_requirements = {}
+        self.custom_product_requirements: dict[str, frozenset[str]] = {}
+        self.custom_product_costs: dict[str, float] = {}
+        self.vanilla_product_costs: dict[str, float] = {}
+        self.full_recipe_order: list[str] = []
         self.science_locations = []
         self.craftsanity_locations = []
         self.tech_tree_layout_prerequisites = {}
@@ -203,11 +235,9 @@ class Factorio(World):
 
         # Craft checks can make additional recipe unlocks logically relevant.
         for location in self.craftsanity_locations:
-            recipe = get_product_recipe(location.crafted_item, self.custom_recipes)
+            recipe = self.get_product_recipe(location.crafted_item)
             if recipe:
-                self.advancement_technologies |= {
-                    technology.name for technology in recipe.recursive_unlocking_technologies
-                }
+                self.advancement_technologies |= set(self.get_recipe_requirements(recipe))
         for technology in tuple(self.advancement_technologies):
             progressive = tech_to_progressive_lookup.get(technology)
             if progressive:
@@ -263,12 +293,10 @@ class Factorio(World):
         # One of every product is the base demand. Its complete contribution becomes logical when the product's
         # selected recipe (including every recursive ingredient) can be crafted.
         for product in CRAFTSANITY_PRODUCTS:
-            recipe = get_product_recipe(product, self.custom_recipes)
-            required_technology_names = frozenset(
-                technology.name for technology in recipe.recursive_unlocking_technologies
-            ) if recipe else frozenset()
+            recipe = self.get_product_recipe(product)
+            required_technology_names = self.get_product_requirements(product)
             expand_product(contributions, product, Fraction(1), None, required_technology_names,
-                           self.custom_recipes)
+                           self.custom_recipes, recipe_resolver=self.get_product_recipe)
 
         # The one-of-every-product baseline already includes one Rocket Part. Add the remainder needed for the
         # mandatory launch, including the complete randomized Rocket Part ingredient chain.
@@ -276,13 +304,13 @@ class Factorio(World):
         part_recipe = self.custom_recipes["rocket-part"]
         satellite_recipe = self.get_recipe("satellite") if self.options.goal == Goal.option_satellite else None
         cargo_pad_recipe = self.get_recipe("cargo-landing-pad") if self.options.silo != Silo.option_spawn else None
-        rocket_requirement_names = get_rocket_requirements(
-            silo_recipe, part_recipe, satellite_recipe, cargo_pad_recipe
-        )
+        rocket_requirement_names = self.get_rocket_requirements(
+            silo_recipe, part_recipe, satellite_recipe, cargo_pad_recipe)
         if self.options.silo != Silo.option_spawn:
             rocket_requirement_names.add("rocket-silo")
         expand_product(contributions, "rocket-part", Fraction(ROCKET_PARTS_PER_LAUNCH - 1), None,
-                       frozenset(rocket_requirement_names), self.custom_recipes)
+                       frozenset(rocket_requirement_names), self.custom_recipes,
+                       recipe_resolver=self.get_product_recipe)
 
         # Generated AP researches contribute their actual science counts through the player's randomized recipes.
         # Their contribution becomes logical when that specific research location becomes reachable.
@@ -291,7 +319,7 @@ class Factorio(World):
                 expand_product(contributions, science_pack,
                                Fraction(str(science_location.count)) * pack_multiplier,
                                science_location, frozenset(),
-                               self.custom_recipes)
+                               self.custom_recipes, recipe_resolver=self.get_product_recipe)
 
         maximums = {
             product: sum((contribution.amount for contribution in contributions[product]), Fraction())
@@ -308,7 +336,7 @@ class Factorio(World):
                 name = location_name(product, ordinal)
                 location = FactorioCraftsanityLocation(
                     self.player, name, self.location_name_to_id[name], nauvis, product, ordinal, threshold,
-                    get_product_recipe(product, self.custom_recipes)
+                    self.get_product_recipe(product)
                 )
                 self.craftsanity_locations.append(location)
                 nauvis.locations.append(location)
@@ -321,14 +349,19 @@ class Factorio(World):
         for ingredient in self.options.max_science_pack.get_allowed_packs():
             location = self.get_location(f"Automate {ingredient}")
 
-            if self.options.recipe_ingredients:
+            if self.options.recipe_ingredients.value == self.options.recipe_ingredients.option_full:
                 custom_recipe = self.custom_recipes[ingredient]
+                requirements = self.get_recipe_requirements(custom_recipe)
+                location.access_rule = lambda state, requirements=requirements: state.has_all(requirements, player)
 
+            elif self.options.recipe_ingredients:
+                custom_recipe = self.custom_recipes[ingredient]
                 location.access_rule = lambda state, ingredient=ingredient, custom_recipe=custom_recipe: \
                     (not technology_table[ingredient].unlocks or state.has(ingredient, player)) and \
                     all(state.has(technology.name, player) for sub_ingredient in custom_recipe.ingredients
                         for technology in required_technologies[sub_ingredient]) and \
-                    all(state.has(technology.name, player) for technology in required_technologies[custom_recipe.crafting_machine])
+                    all(state.has(technology.name, player)
+                        for technology in required_technologies[custom_recipe.crafting_machine])
 
             else:
                 location.access_rule = lambda state, ingredient=ingredient: \
@@ -391,9 +424,8 @@ class Factorio(World):
             cargo_pad_recipe = self.get_recipe("cargo-landing-pad")
         part_recipe = self.custom_recipes["rocket-part"]
         satellite_recipe = self.get_recipe("satellite")
-        victory_tech_names = get_rocket_requirements(
-            silo_recipe, part_recipe,
-            satellite_recipe if self.options.goal == Goal.option_satellite else None,
+        victory_tech_names = self.get_rocket_requirements(
+            silo_recipe, part_recipe, satellite_recipe if self.options.goal == Goal.option_satellite else None,
             cargo_pad_recipe)
         if self.options.silo == Silo.option_spawn:
             victory_tech_names -= {"rocket-silo"}
@@ -405,10 +437,31 @@ class Factorio(World):
         self.multiworld.completion_condition[player] = lambda state: state.has('Victory', player)
 
     def get_recipe(self, name: str) -> Recipe:
-        recipe = get_product_recipe(name, self.custom_recipes)
+        recipe = self.get_product_recipe(name)
         if not recipe:
             raise KeyError(name)
         return recipe
+
+    def get_product_recipe(self, product: str) -> Recipe | None:
+        if self.options.recipe_ingredients.value == self.options.recipe_ingredients.option_full:
+            return self.custom_product_recipes.get(product)
+        return get_product_recipe(product, self.custom_recipes)
+
+    def get_recipe_requirements(self, recipe: Recipe) -> frozenset[str]:
+        if self.options.recipe_ingredients.value == self.options.recipe_ingredients.option_full:
+            return self.custom_recipe_requirements.get(recipe.name, frozenset())
+        return frozenset(technology.name for technology in recipe.recursive_unlocking_technologies)
+
+    def get_product_requirements(self, product: str) -> frozenset[str]:
+        if self.options.recipe_ingredients.value == self.options.recipe_ingredients.option_full:
+            return self.custom_product_requirements.get(product, frozenset())
+        recipe = self.get_product_recipe(product)
+        return self.get_recipe_requirements(recipe) if recipe else frozenset()
+
+    def get_rocket_requirements(self, *rocket_recipes: Recipe | None) -> set[str]:
+        if self.options.recipe_ingredients.value == self.options.recipe_ingredients.option_full:
+            return set().union(*(self.get_recipe_requirements(recipe) for recipe in rocket_recipes if recipe))
+        return get_rocket_requirements(*rocket_recipes)
 
     def generate_basic(self):
         map_basic_settings = self.options.world_gen.value["basic"]
@@ -457,6 +510,8 @@ class Factorio(World):
 
     def make_quick_recipe(self, original: Recipe, pool: list, allow_liquids: int = 2,
                           ingredients_offset: int = 0) -> Recipe:
+        pool = [ingredient for ingredient in pool
+                if ingredient != "raw-fish" and (ingredient != "wood" or recipe_may_use_wood(original))]
         count: int = len(original.ingredients) + ingredients_offset
         assert len(pool) >= count, f"Can't pick {count} many items from pool {pool}."
         new_ingredients = {}
@@ -479,7 +534,8 @@ class Factorio(World):
         """Generate a recipe from pool with time and cost similar to original * factor"""
         new_ingredients = {}
         # have to first sort for determinism, while filtering out non-stacking items
-        pool: typing.List[str] = sorted(pool & valid_ingredients)
+        forbidden = {"raw-fish"} if recipe_may_use_wood(original) else {"raw-fish", "wood"}
+        pool: typing.List[str] = sorted((pool & valid_ingredients) - forbidden)
         # then sort with random data to shuffle
         self.random.shuffle(pool)
         target_raw = int(sum((count for ingredient, count in original.base_cost.items())) * factor)
@@ -521,7 +577,7 @@ class Factorio(World):
             min_num_energy = min_energy / ingredient_energy
             max_num_energy = max_energy / ingredient_energy
             min_num = int(max(1, min_num_raw, min_num_energy))
-            max_num = int(min(1000, max_num_raw, max_num_energy))
+            max_num = int(min(max_num_raw, max_num_energy))
             if min_num > max_num:
                 fallback_pool.append(ingredient)
                 continue  # can't use that ingredient
@@ -567,6 +623,256 @@ class Factorio(World):
         return Recipe(original.name, self.get_category(original.category, liquids_used), new_ingredients,
                       original.products, original.energy)
 
+    def recipe_cost_multiplier(self) -> float:
+        variance = self.options.recipe_cost_variance.value
+        if not variance:
+            return 1.0
+        anchors = ((0, 0.0), (25, math.log10(2)), (50, 1.0), (75, 2.0), (100, 3.0))
+        for (low, low_radius), (high, high_radius) in zip(anchors, anchors[1:]):
+            if variance <= high:
+                radius = low_radius + (high_radius - low_radius) * (variance - low) / (high - low)
+                return 10 ** self.random.uniform(-radius, radius)
+        raise ValueError(variance)
+
+    def select_ingredients_for_cost(self, item_pool: typing.Iterable[str], item_count: int,
+                                    fluid_pool: typing.Iterable[str], fluid_count: int,
+                                    target_cost: float) -> list[str]:
+        """Select a varied valid ingredient set before using quantities to make up the remaining cost."""
+        item_pool = sorted(set(item_pool))
+        fluid_pool = sorted(set(fluid_pool))
+        if len(item_pool) < item_count or len(fluid_pool) < fluid_count:
+            raise ValueError("not enough available ingredients")
+
+        candidates: list[tuple[str, ...]] = []
+        attempts = max(64, min(256, (len(item_pool) + len(fluid_pool)) * 2))
+        for _ in range(attempts):
+            selected = tuple(self.random.sample(item_pool, item_count) +
+                             self.random.sample(fluid_pool, fluid_count))
+            candidates.append(selected)
+
+        # Ensure both cost extremes are considered even when the randomized search does not happen to sample them.
+        for reverse in (False, True):
+            selected_items = sorted(item_pool, key=self.recipe_unit_cost, reverse=reverse)[:item_count]
+            selected_fluids = sorted(fluid_pool, key=self.recipe_unit_cost, reverse=reverse)[:fluid_count]
+            candidates.append(tuple(selected_items + selected_fluids))
+
+        def score(selected: tuple[str, ...]) -> float:
+            selected_cost = sum(self.recipe_unit_cost(ingredient) for ingredient in selected)
+            return abs(math.log(max(selected_cost, 1e-12) / max(target_cost, 1e-12)))
+
+        return list(min(candidates, key=score))
+
+    def compensate_recipe_cost(self, selected: typing.Iterable[str], target_cost: float) -> dict[str, int]:
+        """Approach target_cost while preferring costly ingredients and therefore fewer total input units."""
+        selected = list(selected)
+        ingredients = {ingredient: 1 for ingredient in selected}
+        realized_cost = sum(self.recipe_unit_cost(ingredient) for ingredient in selected)
+        remaining_cost = target_cost - realized_cost
+        if remaining_cost <= 0:
+            return ingredients
+
+        by_descending_cost = sorted(selected, key=self.recipe_unit_cost, reverse=True)
+        for index, ingredient in enumerate(by_descending_cost):
+            unit_cost = self.recipe_unit_cost(ingredient)
+            if index == len(by_descending_cost) - 1:
+                extra = max(0, round(remaining_cost / unit_cost))
+            else:
+                extra = max(0, int(remaining_cost // unit_cost))
+            ingredients[ingredient] += extra
+            remaining_cost -= extra * unit_cost
+        return ingredients
+
+    def apply_recipe_cost_variance(self, recipe: Recipe, pool: typing.Optional[typing.Iterable[str]] = None,
+                                   target_recipe: typing.Optional[Recipe] = None) -> Recipe:
+        multiplier = self.recipe_cost_multiplier()
+        if multiplier == 1:
+            return recipe
+        target_recipe = target_recipe or recipe
+        target_cost = max(float(len(recipe.ingredients)), self.vanilla_recipe_cost(target_recipe)) * multiplier
+        selected = list(recipe.ingredients)
+        if pool is not None:
+            forbidden = {"raw-fish"} if recipe_may_use_wood(target_recipe) else {"raw-fish", "wood"}
+            eligible = (set(pool) & valid_ingredients) - forbidden - set(recipe.products)
+            item_count = sum(ingredient not in fluids for ingredient in selected)
+            fluid_count = len(selected) - item_count
+            selected = self.select_ingredients_for_cost(eligible - fluids, item_count, eligible & fluids,
+                                                        fluid_count, target_cost)
+        ingredients = self.compensate_recipe_cost(selected, target_cost)
+        return Recipe(recipe.name, recipe.category, ingredients, recipe.products, recipe.energy)
+
+    def recipe_unit_cost(self, product: str) -> float:
+        generated_cost = self.custom_product_costs.get(product)
+        if generated_cost is not None:
+            return generated_cost
+        sources = [source for source in all_product_sources.get(product, ()) if source.ingredients]
+        if not sources:
+            return 1.0
+        return max(1.0, min(sum(source.base_cost.values()) / max(source.products.get(product, 1), 1)
+                            for source in sources))
+
+    def vanilla_product_cost(self, product: str, stack: frozenset[str] = frozenset()) -> float:
+        if product in RAW_COST_PRODUCTS or product in stack:
+            return 1.0
+        cached = self.vanilla_product_costs.get(product)
+        if cached is not None:
+            return cached
+        recipe = get_product_recipe(product)
+        if not recipe:
+            return 1.0
+        next_stack = stack | {product}
+        cost = sum(amount * self.vanilla_product_cost(ingredient, next_stack)
+                   for ingredient, amount in recipe.ingredients.items()) / max(recipe.products[product], 1)
+        self.vanilla_product_costs[product] = max(cost, 1.0)
+        return self.vanilla_product_costs[product]
+
+    def vanilla_recipe_cost(self, recipe: Recipe) -> float:
+        return sum(amount * self.vanilla_product_cost(ingredient)
+                   for ingredient, amount in recipe.ingredients.items())
+
+    def make_full_recipe(self, original: Recipe, available: set[str], terminal_products: set[str],
+                         smelting_ingredients: set[str]) -> Recipe:
+        offset_names = set(self.ordered_science_packs) | {"rocket-part"}
+        offset = self.options.recipe_ingredients_offset.value if original.name in offset_names else 0
+        original_fluid_count = sum(ingredient in fluids for ingredient in original.ingredients)
+        target_count = max(1, len(original.ingredients) + offset)
+        fluid_count = min(original_fluid_count, target_count)
+        item_count = target_count - fluid_count
+        excluded = set(original.products)
+        forbidden = terminal_products | {"raw-fish"}
+        if original.category == "smelting":
+            forbidden |= smelting_ingredients
+        if not recipe_may_use_wood(original):
+            forbidden.add("wood")
+        item_pool = sorted((available & valid_ingredients) - fluids - excluded - forbidden)
+        fluid_pool = sorted((available & valid_ingredients & fluids) - excluded - forbidden)
+        if len(item_pool) < item_count or len(fluid_pool) < fluid_count:
+            raise ValueError("not enough available ingredients")
+        # Every distinct ingredient has a minimum integral amount of one. Added ingredient slots therefore raise
+        # the minimum achievable target instead of making a zero-variance recipe mathematically impossible.
+        target_raw = max(float(target_count), self.vanilla_recipe_cost(original)) * self.recipe_cost_multiplier()
+        if not self.options.recipe_cost_variance.value:
+            per_slot = target_raw / target_count
+            affordable_items = [ingredient for ingredient in item_pool
+                                if self.recipe_unit_cost(ingredient) <= per_slot]
+            affordable_fluids = [ingredient for ingredient in fluid_pool
+                                 if self.recipe_unit_cost(ingredient) <= per_slot]
+            if len(affordable_items) < item_count or len(affordable_fluids) < fluid_count:
+                raise ValueError("not enough affordable ingredients")
+            selected = (self.random.sample(affordable_items, item_count) +
+                        self.random.sample(affordable_fluids, fluid_count))
+            ingredients = {
+                ingredient: max(1, int(per_slot / self.recipe_unit_cost(ingredient)))
+                for ingredient in selected
+            }
+        else:
+            selected = self.select_ingredients_for_cost(item_pool, item_count, fluid_pool, fluid_count, target_raw)
+            ingredients = self.compensate_recipe_cost(selected, target_raw)
+        return Recipe(original.name, original.category, ingredients, original.products, original.energy)
+
+    def set_full_custom_recipes(self) -> None:
+        natural_resources = {"coal", "copper-ore", "iron-ore", "stone", "wood", "raw-fish"}
+        available = natural_resources | set(self.options.starting_items.value) | {"character"}
+        self.custom_product_requirements = {product: frozenset() for product in available}
+        self.custom_product_costs = {product: 1.0 for product in natural_resources}
+        self.custom_product_costs.update({product: self.vanilla_product_cost(product)
+                                          for product in self.options.starting_items.value})
+        usable = {
+            recipe.name: recipe for recipe in recipes.values()
+            if recipe.ingredients and recipe.products and not recipe.name.startswith(("mining-", "empty-"))
+            and recipe.category != "parameters" and recipe.name not in FULL_RECIPE_EXCLUSIONS
+        }
+        start_names = {name for name in usable if not recipe_sources.get(name)}
+        pending = dict(usable)
+        terminal_products: set[str] = set()
+        smelting_ingredients: set[str] = set()
+
+        while pending:
+            restricted_to_start = bool(start_names & pending.keys())
+            candidates: list[tuple[str, Recipe]] = []
+            for name, original in sorted(pending.items()):
+                if restricted_to_start and name not in start_names:
+                    continue
+                machine = machine_per_category[original.category]
+                if machine not in available:
+                    continue
+                offset_names = set(self.ordered_science_packs) | {"rocket-part"}
+                offset = self.options.recipe_ingredients_offset.value if name in offset_names else 0
+                target_count = max(1, len(original.ingredients) + offset)
+                fluid_count = min(sum(ingredient in fluids for ingredient in original.ingredients), target_count)
+                excluded = set(original.products)
+                forbidden = terminal_products | {"raw-fish"}
+                if original.category == "smelting":
+                    forbidden |= smelting_ingredients
+                if not recipe_may_use_wood(original):
+                    forbidden.add("wood")
+                available_items = len((available & valid_ingredients) - fluids - excluded - forbidden)
+                available_fluids = len((available & valid_ingredients & fluids) - excluded - forbidden)
+                if available_items < target_count - fluid_count or available_fluids < fluid_count:
+                    continue
+                if not self.options.recipe_cost_variance.value:
+                    per_slot = max(float(target_count), self.vanilla_recipe_cost(original)) / target_count
+                    affordable_items = sum(self.recipe_unit_cost(ingredient) <= per_slot
+                                           for ingredient in (available & valid_ingredients) - fluids - excluded - forbidden)
+                    affordable_fluids = sum(self.recipe_unit_cost(ingredient) <= per_slot
+                                            for ingredient in (available & valid_ingredients & fluids) - excluded - forbidden)
+                    if affordable_items < target_count - fluid_count or affordable_fluids < fluid_count:
+                        continue
+                candidates.append((name, original))
+            if not candidates:
+                blocked = ", ".join(sorted(pending)[:20])
+                raise RuntimeError(f"Full recipe randomization became stuck with {len(pending)} recipes: {blocked}")
+
+            name, original = self.random.choice(candidates)
+            custom = self.make_full_recipe(original, available, terminal_products, smelting_ingredients)
+            machine = machine_per_category[custom.category]
+            self.custom_recipes[name] = custom
+            self.full_recipe_order.append(name)
+            requirements = set()
+            for ingredient in custom.ingredients:
+                requirements.update(self.custom_product_requirements.get(ingredient, ()))
+            requirements.update(self.custom_product_requirements.get(machine_per_category[custom.category], ()))
+            sources = sorted(recipe_sources.get(name, ()))
+            if sources:
+                requirements.add(sources[0])
+            frozen_requirements = self.custom_recipe_requirements[name] = frozenset(requirements)
+            if "wood" in custom.ingredients:
+                terminal_products.update(custom.products)
+            if custom.category == "smelting":
+                smelting_ingredients.update(custom.ingredients)
+            total_cost = sum(amount * self.recipe_unit_cost(ingredient)
+                             for ingredient, amount in custom.ingredients.items())
+            for product in custom.products:
+                # Raw resources deliberately have no canonical recipe. For every crafted product, retain the first
+                # dependency-safe producer; alternate recipes must not retroactively change its recursive cost.
+                canonical_recipe = CANONICAL_FLUID_RECIPES.get(product)
+                is_canonical = canonical_recipe == name if canonical_recipe else product not in natural_resources
+                if is_canonical and product not in self.custom_product_recipes:
+                    self.custom_product_recipes[product] = custom
+                    self.custom_product_requirements[product] = frozen_requirements
+                    self.custom_product_costs[product] = total_cost / max(custom.products[product], 1)
+                if canonical_recipe is None or canonical_recipe == name:
+                    available.add(product)
+            del pending[name]
+
+            if "offshore-pump" in available and "water" not in available:
+                available.add("water")
+                self.custom_product_requirements["water"] = self.custom_product_requirements["offshore-pump"]
+                self.custom_product_costs["water"] = 1.0
+            if "pumpjack" in available and "crude-oil" not in available:
+                available.add("crude-oil")
+                self.custom_product_requirements["crude-oil"] = self.custom_product_requirements["pumpjack"]
+                self.custom_product_costs["crude-oil"] = 1.0
+            if {"electric-mining-drill", "sulfuric-acid"} <= available and "uranium-ore" not in available:
+                available.add("uranium-ore")
+                self.custom_product_requirements["uranium-ore"] = frozenset(
+                    self.custom_product_requirements["electric-mining-drill"] |
+                    self.custom_product_requirements["sulfuric-acid"])
+                uranium_mining = recipes["mining-uranium-ore"]
+                self.custom_product_costs["uranium-ore"] = sum(
+                    amount * self.recipe_unit_cost(ingredient)
+                    for ingredient, amount in uranium_mining.ingredients.items()
+                ) / max(uranium_mining.products["uranium-ore"], 1)
+
     def set_custom_technologies(self):
         custom_technologies = {}
         allowed_packs = self.options.max_science_pack.get_allowed_packs()
@@ -576,45 +882,13 @@ class Factorio(World):
 
     def set_custom_recipes(self):
         ingredients_offset = self.options.recipe_ingredients_offset
-        original_rocket_part = recipes["rocket-part"]
+        if self.options.recipe_ingredients.value == self.options.recipe_ingredients.option_full:
+            self.custom_recipes = {}
+            self.set_full_custom_recipes()
+        else:
+            self.set_legacy_custom_recipes(ingredients_offset)
+
         science_pack_pools = get_science_pack_pools()
-        valid_pool = sorted(science_pack_pools[self.options.max_science_pack.get_max_pack()]
-                            & valid_ingredients)
-        self.random.shuffle(valid_pool)
-        self.custom_recipes = {"rocket-part": Recipe("rocket-part", original_rocket_part.category,
-                                                     {valid_pool[x]: 10 for x in range(3 + ingredients_offset)},
-                                                     original_rocket_part.products,
-                                                     original_rocket_part.energy)}
-
-        if self.options.recipe_ingredients:
-            valid_pool = []
-            for pack in self.options.max_science_pack.get_ordered_science_packs():
-                valid_pool += sorted(science_pack_pools[pack])
-                self.random.shuffle(valid_pool)
-                if pack in recipes:  # skips over space science pack
-                    new_recipe = self.make_quick_recipe(recipes[pack], valid_pool, ingredients_offset=
-                                                        ingredients_offset.value)
-                    self.custom_recipes[pack] = new_recipe
-
-        if self.options.silo.value == Silo.option_randomize_recipe \
-                or self.options.satellite.value == Satellite.option_randomize_recipe:
-            valid_pool = set()
-            for pack in sorted(self.options.max_science_pack.get_allowed_packs()):
-                valid_pool |= science_pack_pools[pack]
-
-            if self.options.silo.value == Silo.option_randomize_recipe:
-                new_recipe = self.make_balanced_recipe(
-                    recipes["rocket-silo"], valid_pool,
-                    factor=(self.options.max_science_pack.value + 1) / 7,
-                    ingredients_offset=ingredients_offset.value)
-                self.custom_recipes["rocket-silo"] = new_recipe
-
-            if self.options.satellite.value == Satellite.option_randomize_recipe:
-                new_recipe = self.make_balanced_recipe(
-                    recipes["satellite"], valid_pool,
-                    factor=(self.options.max_science_pack.value + 1) / 7,
-                    ingredients_offset=ingredients_offset.value)
-                self.custom_recipes["satellite"] = new_recipe
         bridge = "ap-energy-bridge"
         new_recipe = self.make_quick_recipe(
             Recipe(bridge, "crafting", {"replace_1": 1, "replace_2": 1, "replace_3": 1,
@@ -632,16 +906,58 @@ class Factorio(World):
         if self.options.goal.value == Goal.option_satellite:
             needed_recipes |= {"satellite"}
 
-        for recipe in needed_recipes:
-            recipe = self.custom_recipes.get(recipe, recipes[recipe])
-            self.advancement_technologies |= {tech.name for tech in recipe.recursive_unlocking_technologies}
+        for recipe_name in needed_recipes:
+            recipe = self.custom_recipes.get(recipe_name, recipes[recipe_name])
+            self.advancement_technologies |= set(self.get_recipe_requirements(recipe))
 
-        # handle marking progressive techs as advancement
-        prog_add = set()
-        for tech in self.advancement_technologies:
-            if tech in tech_to_progressive_lookup:
-                prog_add.add(tech_to_progressive_lookup[tech])
+        prog_add = {tech_to_progressive_lookup[tech] for tech in self.advancement_technologies
+                    if tech in tech_to_progressive_lookup}
         self.advancement_technologies |= prog_add
+
+    def set_legacy_custom_recipes(self, ingredients_offset) -> None:
+        original_rocket_part = recipes["rocket-part"]
+        science_pack_pools = get_science_pack_pools()
+        valid_pool = sorted(science_pack_pools[self.options.max_science_pack.get_max_pack()]
+                            & valid_ingredients)
+        self.random.shuffle(valid_pool)
+        rocket_recipe = Recipe("rocket-part", original_rocket_part.category,
+                               {valid_pool[x]: 10 for x in range(3 + ingredients_offset)},
+                               original_rocket_part.products, original_rocket_part.energy)
+        self.custom_recipes = {"rocket-part": self.apply_recipe_cost_variance(
+            rocket_recipe, valid_pool, original_rocket_part)}
+
+        if self.options.recipe_ingredients:
+            valid_pool = []
+            for pack in self.options.max_science_pack.get_ordered_science_packs():
+                valid_pool += sorted(science_pack_pools[pack])
+                self.random.shuffle(valid_pool)
+                if pack in recipes:  # skips over space science pack
+                    new_recipe = self.make_quick_recipe(recipes[pack], valid_pool, ingredients_offset=
+                                                        ingredients_offset.value)
+                    self.custom_recipes[pack] = self.apply_recipe_cost_variance(
+                        new_recipe, valid_pool, recipes[pack])
+
+        if self.options.silo.value == Silo.option_randomize_recipe \
+                or self.options.satellite.value == Satellite.option_randomize_recipe:
+            valid_pool = set()
+            for pack in sorted(self.options.max_science_pack.get_allowed_packs()):
+                valid_pool |= science_pack_pools[pack]
+
+            if self.options.silo.value == Silo.option_randomize_recipe:
+                new_recipe = self.make_balanced_recipe(
+                    recipes["rocket-silo"], valid_pool,
+                    factor=(self.options.max_science_pack.value + 1) / 7,
+                    ingredients_offset=ingredients_offset.value)
+                self.custom_recipes["rocket-silo"] = self.apply_recipe_cost_variance(
+                    new_recipe, valid_pool, recipes["rocket-silo"])
+
+            if self.options.satellite.value == Satellite.option_randomize_recipe:
+                new_recipe = self.make_balanced_recipe(
+                    recipes["satellite"], valid_pool,
+                    factor=(self.options.max_science_pack.value + 1) / 7,
+                    ingredients_offset=ingredients_offset.value)
+                self.custom_recipes["satellite"] = self.apply_recipe_cost_variance(
+                    new_recipe, valid_pool, recipes["satellite"])
 
     def create_item(self, name: str) -> FactorioItem:
         if name in tech_table:  # is a Technology
