@@ -914,6 +914,14 @@ logic_tricks = {
         "description": "Collects the eight initial Rainbow Ride coins without Carpets using Long Jump, Triple Jump, "
                        "and Ledge Grab.",
     },
+    "Rainbow Ride Beneath The Pole Wihout Movement or Carpets": {
+        "internal_id": "logic_rr_pole_coins_without_movement_or_carpets
+        "rule": "",
+        "tags": ("Pro",),
+        "description": "Accesses the coins, fly-guy, 1-Up block, goomba, Tricky Triangles 1-Up and both "
+                        " and Swinging in the Breeze and Tricky Triangle stars without movement or carpets.",
+        "video": "https://youtu.be/YUmzlE1p58c",
+    },
     # Bowser in the Sky
     "Bowser in the Sky Chuckya without Movement Items": {
         "internal_id": "logic_bits_chuckya_no_movement",
