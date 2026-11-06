@@ -839,7 +839,8 @@ class Context:
             return self.player_names[team, slot]
 
     def notify_hints(self, team: int, hints: typing.List[Hint], only_new: bool = False,
-                     persist_even_if_found: bool = False, recipients: typing.Sequence[int] = None):
+                     persist_even_if_found: bool = False, recipients: typing.Sequence[int] = None,
+                     hinting_player: typing.Optional[int] = None):
         """Send and remember hints."""
         hints = [hint for hint in hints if not hint.found]
         if only_new:
@@ -866,6 +867,13 @@ class Context:
                     for player in self.slot_set(hint.receiving_player):
                         self.hints[team, player].add(hint)
                         new_hint_events.add(player)
+
+            if hinting_player is not None:
+                if data not in concerns[hinting_player]:
+                    concerns[hinting_player].append(data)
+                if hint not in self.hints[team, hinting_player]:
+                    self.hints[team, hinting_player].add(hint)
+                    new_hint_events.add(hinting_player)
 
             self.logger.info("Notice (Team #%d): %s" % (team + 1, format_hint(self, team, hint)))
         for slot in new_hint_events:
@@ -1395,24 +1403,36 @@ def collect_hints(ctx: Context, team: int, slot: int, item: typing.Union[int, st
 
 def collect_custom_trigger_hints(ctx: Context, team: int, slot: int,
                                  trigger: dict[str, typing.Any]) -> typing.List[Hint]:
-    """Hint a bot-owned trigger while presenting and persisting it as the configuring player's item."""
-    hints = []
-    item_id = trigger["item_id"]
-    for finding_player, location_id, found_item_id, _receiving_player, item_flags \
-            in ctx.locations.find_item({1}, item_id):
-        previous = next((hint for hint in ctx.hints[team, slot]
-                         if hint.finding_player == finding_player and hint.location == location_id
-                         and hint.item == found_item_id), None)
-        if previous:
-            hints.append(previous)
-            continue
-        found = location_id in ctx.location_checks[team, finding_player]
-        hints.append(Hint(
-            slot, finding_player, location_id, found_item_id, found,
-            ctx.er_hint_data.get(finding_player, {}).get(location_id, ""), item_flags,
-            HintStatus.HINT_FOUND if found else HintStatus.HINT_PRIORITY,
-        ))
-    return hints
+    """Find the actual bot-owned item, following any enclosing collections."""
+    return resolve_custom_item_hints(ctx, team, slot, collect_hints(ctx, team, 1, trigger["item_id"]))
+
+
+def resolve_custom_item_hints(ctx: Context, team: int, slot: int,
+                              hints: typing.Iterable[Hint]) -> typing.List[Hint]:
+    """Replace collection contents with hints for the items that unlock them."""
+    triggers_by_location = {
+        location: trigger
+        for trigger in get_custom_item_triggers(ctx, slot).values()
+        for location in trigger["locations"]
+    }
+    resolved: dict[tuple[int, int], Hint] = {}
+    visited: set[tuple[int, int]] = set()
+
+    def resolve(hint: Hint) -> None:
+        key = hint.finding_player, hint.location
+        if key in visited:
+            return
+        visited.add(key)
+        trigger = triggers_by_location.get(hint.location) if hint.finding_player == 1 else None
+        if trigger is None:
+            resolved[key] = hint
+        else:
+            for unlocking_hint in collect_hints(ctx, team, 1, trigger["item_id"]):
+                resolve(unlocking_hint)
+
+    for hint in hints:
+        resolve(hint)
+    return list(resolved.values())
 
 
 def collect_hint_location_name(ctx: Context, team: int, slot: int, location: str,
@@ -2122,11 +2142,14 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 self.output(response)
                 return False
 
+        if not for_location:
+            hints = resolve_custom_item_hints(self.ctx, self.client.team, self.client.slot, hints)
+
         if hints:
             new_hints = set(hints) - self.ctx.hints[self.client.team, self.client.slot]
             old_hints = list(set(hints) - new_hints)
             if old_hints and not new_hints:
-                self.ctx.notify_hints(self.client.team, old_hints)
+                self.ctx.notify_hints(self.client.team, old_hints, hinting_player=self.client.slot)
                 self.output("Hint was previously used, no points deducted.")
             if new_hints:
                 found_hints = [hint for hint in new_hints if hint.found]
@@ -2175,7 +2198,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
                             self.output(f"Spent hint points. Hints used: {self.ctx.hints_used[self.client.team, self.client.slot]}")
 
 
-                self.ctx.notify_hints(self.client.team, hints)
+                self.ctx.notify_hints(self.client.team, hints, hinting_player=self.client.slot)
                 if not_found_hints:
                     if for_location:
                         points_available = get_client_location_points(self.ctx, self.client)

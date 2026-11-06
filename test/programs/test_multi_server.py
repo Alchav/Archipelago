@@ -8,7 +8,7 @@ from NetUtils import ClientStatus
 from BaseClasses import ItemClassification
 from MultiServer import Context, ServerCommandProcessor, _apportion_hint_values_by_sphere, collect_player_cleared, \
     is_refundable_hint, release_player, send_remaining, update_client_status
-from NetUtils import Hint
+from NetUtils import Hint, LocationStore
 
 
 class TestResolvePlayerName(unittest.TestCase):
@@ -209,3 +209,58 @@ class TestRefundableHints(unittest.TestCase):
         hint = Hint(3, 1, 100, 200, False, item_flags=ItemClassification.progression)
 
         self.assertFalse(is_refundable_hint(ctx, hint))
+
+
+class TestCustomCollectionHints(unittest.TestCase):
+    def setUp(self):
+        from MultiServer import collect_hints, resolve_custom_item_hints
+        self.collect = collect_hints
+        self.resolve = resolve_custom_item_hints
+        self.ctx = SimpleNamespace(
+            groups={}, games={1: "AlchapelaBot", 2: "Metroid"},
+            slot_data={1: {"custom_item_triggers": {2: {
+                "Missile Pack": {"item_id": 100, "locations": [10, 11]},
+                "Progressive Missile": {"item_id": 101, "locations": [12, 13]},
+            }}}},
+            locations=LocationStore({
+                1: {10: (50, 2, 1), 11: (50, 2, 1), 12: (100, 1, 1), 13: (51, 2, 1)},
+                3: {20: (101, 1, 1), 21: (101, 1, 1)},
+                2: {30: (52, 2, 1)},
+            }),
+            get_hint=Mock(return_value=None), location_checks=defaultdict(set), er_hint_data={},
+        )
+
+    def test_nested_pack_hints_outer_progressive_with_real_recipient(self):
+        hints = self.resolve(self.ctx, 0, 2, self.collect(self.ctx, 0, 2, 50))
+        self.assertEqual({20, 21}, {hint.location for hint in hints})
+        self.assertTrue(all(hint.receiving_player == 1 and hint.item == 101 for hint in hints))
+
+    def test_direct_progressive_content(self):
+        hints = self.resolve(self.ctx, 0, 2, self.collect(self.ctx, 0, 2, 51))
+        self.assertEqual({20, 21}, {hint.location for hint in hints})
+
+    def test_regular_item_is_unchanged(self):
+        hints = self.collect(self.ctx, 0, 2, 52)
+        self.assertEqual(hints, self.resolve(self.ctx, 0, 2, hints))
+
+    def test_custom_pack_alias_follows_outer_progressive(self):
+        from MultiServer import collect_custom_trigger_hints
+        hints = collect_custom_trigger_hints(self.ctx, 0, 2, {"item_id": 100})
+        self.assertEqual({20, 21}, {hint.location for hint in hints})
+
+    def test_buyer_receives_and_remembers_foreign_hint(self):
+        hint = self.collect(self.ctx, 0, 1, 101)[0]
+        client = SimpleNamespace(no_text=False)
+        ctx = SimpleNamespace(
+            hints=defaultdict(set), slot_set=lambda slot: {slot},
+            logger=Mock(), on_new_hint=Mock(), clients={0: {2: [client]}},
+            send_msgs=Mock(return_value="send task"),
+        )
+        with patch("MultiServer.format_hint", return_value="hint text"), \
+                patch("MultiServer.async_start") as start:
+            Context.notify_hints(ctx, 0, [hint], hinting_player=2)
+        self.assertIn(hint, ctx.hints[0, 2])
+        self.assertIn(hint, ctx.hints[0, 1])
+        self.assertIn(hint, ctx.hints[0, 3])
+        ctx.send_msgs.assert_called_once_with(client, [hint.as_network_message()])
+        start.assert_called_once_with("send task")
