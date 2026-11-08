@@ -11,7 +11,7 @@ As we are using BizHawk, this guide is only applicable to Windows and Linux syst
   - Detailed installation instructions for BizHawk can be found at the above link.
   - Windows users must run the prereq installer first, which can also be found at the above link.
 - The built-in Archipelago client, which can be installed [here](https://github.com/ArchipelagoMW/Archipelago/releases)
-- Pokémon Red and/or Blue ROM files. The Archipelago community cannot provide these.
+- Pokémon Red, Blue, and/or ROM files. The Archipelago community cannot provide these.
 
 ## Optional Software
 
@@ -94,7 +94,7 @@ below using BizHawk as your emulator.
 By default, opening a patch file will do steps 1-5 below for you automatically. Even so, keep them in your memory just
 in case you have to close and reopen a window mid-game for some reason.
 
-1. Pokémon Red and Blue use Archipelago's BizHawk Client. If the client isn't still open from when you patched your
+1. Pokémon Red, Blue, and Yellow use Archipelago's BizHawk Client. If the client isn't still open from when you patched your
 game, you can re-open it from the launcher.
 2. Ensure EmuHawk is running the patched ROM.
 3. In EmuHawk, go to `Tools > Lua Console`. This window must stay open while playing.
