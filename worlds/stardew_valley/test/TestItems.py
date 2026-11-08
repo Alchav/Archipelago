@@ -49,11 +49,31 @@ class TestItems(SVTestCase):
             stardrop_items = [item for item in multiworld.get_items() if item.name == "Stardrop"]
             self.assertEqual(len(stardrop_items), 7)
 
-    def test_no_duplicate_rings(self):
-        maxsanity_options = maxsanity_no_mods_7_x_x()
-        with solo_multiworld(maxsanity_options) as (multiworld, _):
-            ring_items = [item.name for item in multiworld.get_items() if Group.FILLER_RING in item_table[item.name].groups]
-            self.assertEqual(len(ring_items), len(set(ring_items)))
+    def test_decorations_are_excluded_from_pool_and_replacement_filler(self):
+        from ..items.fillers import generate_filler_choice_pool
+        from ..items.item_creation import create_unique_items
+
+        with solo_multiworld(maxsanity_no_mods_7_x_x()) as (multiworld, world):
+            # Check the fixed rewards as well as the random filler candidates.
+            unique_items = create_unique_items(world.create_item, world.options, world.content, world.random)
+            self.assertTrue(any(Group.FILLER_DECORATION in item_table[item.name].groups for item in unique_items))
+            for item in multiworld.get_items():
+                self.assertNotIn(Group.FILLER_DECORATION, item_table[item.name].groups, item.name)
+            filler_names = generate_filler_choice_pool(world.options, world.content)
+            self.assertTrue(filler_names)
+            for name in filler_names:
+                self.assertNotIn(Group.FILLER_DECORATION, item_table[name].groups, name)
+
+    def test_equippable_rings_are_excluded_from_pool_and_replacement_filler(self):
+        from ..items.fillers import generate_filler_choice_pool
+
+        with solo_multiworld(maxsanity_no_mods_7_x_x()) as (multiworld, world):
+            for item in multiworld.get_items():
+                self.assertNotIn(Group.FILLER_RING, item_table[item.name].groups, item.name)
+            filler_names = generate_filler_choice_pool(world.options, world.content)
+            self.assertTrue(filler_names)
+            for name in filler_names:
+                self.assertNotIn(Group.FILLER_RING, item_table[name].groups, name)
 
     def test_can_start_in_any_season(self):
         starting_seasons_rolled = set()

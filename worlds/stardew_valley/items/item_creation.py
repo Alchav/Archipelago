@@ -35,7 +35,8 @@ logger = logging.getLogger(__name__)
 def create_items(item_factory: StardewItemFactory, locations_count: int, items_to_exclude: List[Item],
                  options: StardewValleyOptions, content: StardewContent, random: Random) -> List[Item]:
     items = []
-    unique_items = create_unique_items(item_factory, options, content, random)
+    unique_items = [item for item in create_unique_items(item_factory, options, content, random)
+                    if not item_table[item.name].has_any_group(Group.FILLER_DECORATION, Group.FILLER_RING)]
 
     remove_items(items_to_exclude, unique_items)
 

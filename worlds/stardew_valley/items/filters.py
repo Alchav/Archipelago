@@ -8,7 +8,10 @@ from ..options import StardewValleyOptions, Hatsanity
 def remove_excluded(items: Iterable[ItemData], content: StardewContent, options: StardewValleyOptions) -> list[ItemData]:
     filtered_items = [
         item for item in items
-        if Group.DEPRECATED not in item.groups and content.are_all_enabled(item.content_packs)
+        if Group.DEPRECATED not in item.groups
+        and Group.FILLER_DECORATION not in item.groups
+        and Group.FILLER_RING not in item.groups
+        and content.are_all_enabled(item.content_packs)
     ]
     if options.hatsanity == Hatsanity.preset_none:
         return filtered_items
