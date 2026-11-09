@@ -53,7 +53,7 @@ class AlchapelaBotWorld(World):
         "Alyssa Jigsaw Hint Point": 1007,
         "Auto Hint Point": 1008,
         "Ophilla Hint Point": 1010,
-        "Factorio Hint Point": 1011,
+        "Team Hint Point": 1011,
         "Alchav64 Hint Point": 1012,
         "Leigh Hint Point": 1014,
         "Leigh SDV Hint Point": 1015,
