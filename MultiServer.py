@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import base64
-import binascii
 import collections
 import contextlib
 import copy
@@ -24,7 +22,6 @@ import time
 import typing
 import weakref
 import zlib
-from fractions import Fraction
 from signal import SIGINT, SIGTERM, signal
 from typing import Sequence
 
@@ -1393,7 +1390,7 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
             hint_value = get_hint_point_item_value(ctx, new_item)
             if hint_value is not None:
                 owner_name, value, sphere_name = hint_value
-                displayed_value = f"{float(value):.2f}".rstrip("0").rstrip(".")
+                displayed_value = str(value)
                 source_location = ctx.location_names[ctx.slot_info[slot].game][location]
                 info_texts.append({
                     "cmd": "PrintJSON",
@@ -2361,87 +2358,12 @@ def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     return total_points
 
 
-CURRENT_GAME_HINT_SEED = "31218148747982571502"
-CURRENT_GAME_HINT_TARGETS = {
-    0: 1600,   # Alchav
-    1: 400,    # Alchav Alt
-    2: 1600,   # AvBW
-    4: 1600,   # Jack
-    6: 1600,   # Alyssa
-    7: 800,    # Alyssa Jigsaw
-    14: 1600,  # Leigh
-}
-
-
-def _apportion_hint_values_by_sphere(
-        sphere_locations: typing.Mapping[int, typing.Collection[tuple[int, int]]], target: int
-) -> dict[tuple[int, int], Fraction]:
-    """Split a target evenly by sphere, then evenly among that sphere's locations."""
-    values: dict[tuple[int, int], Fraction] = {}
-    ordered_spheres = sorted(sphere_locations)
-    if not ordered_spheres:
-        return values
-    sphere_base, sphere_remainder = divmod(target, len(ordered_spheres))
-    for sphere_index, sphere in enumerate(ordered_spheres):
-        locations = sorted(sphere_locations[sphere])
-        if not locations:
-            continue
-        sphere_total = sphere_base + (sphere_index < sphere_remainder)
-        item_value = Fraction(sphere_total, len(locations))
-        values.update((location, item_value) for location in locations)
-    return values
-
-
-def _get_current_game_hint_values(ctx: Context, owner: int) -> typing.Optional[
-        dict[tuple[int, int], tuple[Fraction, str]]
-]:
-    """Build source-location hint values for the one seed generated with one-point items."""
-    if str(ctx.seed_name) != CURRENT_GAME_HINT_SEED or owner not in CURRENT_GAME_HINT_TARGETS:
-        return None
-    cache = getattr(ctx, "_current_game_hint_values", None)
-    if cache is None:
-        cache = ctx._current_game_hint_values = {}
-    if owner in cache:
-        return cache[owner]
-
-    bot_game = ctx.games.get(1, "AlchapelaBot")
-    item_names = ctx.item_names.get(bot_game, {})
-    legacy_name = item_names.get(owner + 1000)
-    if not legacy_name:
-        cache[owner] = {}
-        return cache[owner]
-    owner_prefix = legacy_name.removesuffix(" Point")
-    pattern = re.compile(rf"^(?:(\d+) )?{re.escape(owner_prefix)} Points?$")
-    numbered_locations: dict[int, list[tuple[int, int]]] = collections.defaultdict(list)
-    excluded_locations: list[tuple[int, int]] = []
-
-    for source_player, player_locations in ctx.locations.items():
-        for location, (item_id, target_player, _flags) in player_locations.items():
-            if target_player != 1 or not pattern.fullmatch(item_names.get(item_id, "")):
-                continue
-            sphere_name = ctx.er_hint_data.get(source_player, {}).get(location, "")
-            sphere_match = re.search(r"\bSphere (\d+)\b", sphere_name)
-            if sphere_match:
-                numbered_locations[int(sphere_match.group(1))].append((source_player, location))
-            elif "Excluded" in sphere_name:
-                excluded_locations.append((source_player, location))
-
-    apportioned = _apportion_hint_values_by_sphere(numbered_locations, CURRENT_GAME_HINT_TARGETS[owner])
-    values = {location: (value, f"Sphere {sphere}")
-              for sphere, locations in numbered_locations.items()
-              for location in locations
-              for value in (apportioned[location],)}
-    values.update((location, (Fraction(1), "Excluded")) for location in excluded_locations)
-    cache[owner] = values
-    return values
-
-
-def get_hint_point_item_value(ctx: Context, item: NetworkItem) -> typing.Optional[tuple[str, Fraction, str]]:
+def get_hint_point_item_value(ctx: Context, item: NetworkItem) -> typing.Optional[tuple[str, int, str]]:
     """Return display owner, value, and source sphere for a hint-point item."""
     bot_game = ctx.games.get(1, "AlchapelaBot")
     item_names = ctx.item_names.get(bot_game, {})
     item_name = item_names.get(item.item, "")
-    for owner in CURRENT_GAME_HINT_TARGETS:
+    for owner in sorted(set(ctx.owners.values())):
         legacy_name = item_names.get(owner + 1000)
         if not legacy_name:
             continue
@@ -2449,12 +2371,8 @@ def get_hint_point_item_value(ctx: Context, item: NetworkItem) -> typing.Optiona
         match = re.fullmatch(rf"^(?:(\d+) )?{re.escape(owner_prefix)} Points?$", item_name)
         if not match:
             continue
-        special_values = _get_current_game_hint_values(ctx, owner)
-        if special_values is not None and (item.player, item.location) in special_values:
-            value, sphere_name = special_values[item.player, item.location]
-        else:
-            value = Fraction(int(match.group(1) or 1))
-            sphere_name = ctx.er_hint_data.get(item.player, {}).get(item.location, "Unknown sphere")
+        value = int(match.group(1) or 1)
+        sphere_name = ctx.er_hint_data.get(item.player, {}).get(item.location, "Unknown sphere")
         return owner_prefix.removesuffix(" Hint"), value, sphere_name
     return None
 
@@ -2473,12 +2391,8 @@ def get_owner_hint_point_items(ctx: Context, team: int, owner: int) -> int:
         return 0
     owner_prefix = legacy_name.removesuffix(" Point")
     pattern = re.compile(rf"^(?:(\d+) )?{re.escape(owner_prefix)} Points?$")
-    points = Fraction(0)
+    points = 0
     for item in get_received_items(ctx, team, 1, True) + get_start_inventory(ctx, 1, True):
-        special_values = _get_current_game_hint_values(ctx, owner)
-        if special_values is not None and (item.player, item.location) in special_values:
-            points += special_values[item.player, item.location][0]
-            continue
         if item.item == legacy_item_id:
             points += 1
             continue
@@ -2513,18 +2427,6 @@ async def process_client_cmd(ctx: Context, client: Client, args: dict):
             errors.add('InvalidPassword')
         if args['name'][:20] in ctx.connect_names:
             args['name'] = args['name'][:20]
-        if args['name'] not in ctx.connect_names:
-            try:
-                rom_name = base64.b64decode(args['name'], validate=True)
-            except (ValueError, binascii.Error):
-                pass
-            else:
-                if rom_name.startswith(b"XP"):
-                    legacy_auth = base64.b64encode(b"AP" + rom_name[2:]).decode()
-                    if legacy_auth[:20] in ctx.connect_names:
-                        legacy_auth = legacy_auth[:20]
-                    if legacy_auth in ctx.connect_names:
-                        args['name'] = legacy_auth
         if args['name'] not in ctx.connect_names:
             errors.add('InvalidSlot')
         else:

@@ -51,6 +51,28 @@ _SMZ3_ALTTP_PRIORITY_ITEMS = {
 }
 
 
+def get_hint_sphere_point_totals(sphere_counts: typing.Mapping[int, int], budget: int,
+                                unreachable_sphere_index: int) -> dict[int, int]:
+    """Allocate the generated hint budget evenly, with an extra unreachable-sphere share."""
+    reachable_spheres = [sphere for sphere in sphere_counts if sphere != unreachable_sphere_index]
+    totals = apportion({sphere: 1 for sphere in reachable_spheres}, budget)
+    if unreachable_sphere_index in sphere_counts and reachable_spheres:
+        totals[unreachable_sphere_index] = (budget + len(reachable_spheres) - 1) // len(reachable_spheres)
+    return totals
+
+
+def apportion(weights, total):
+    if total <= 0 or not weights or sum(weights.values()) <= 0:
+        return {key: 0 for key in weights}
+    weight_total = sum(weights.values())
+    exact = {key: total * weight / weight_total for key, weight in weights.items()}
+    result = {key: int(value) for key, value in exact.items()}
+    order = sorted(weights, key=lambda key: (exact[key] - result[key], weights[key], str(key)), reverse=True)
+    for key in order[:total - sum(result.values())]:
+        result[key] += 1
+    return result
+
+
 def swappable(multiworld, loc, within_local=False):
     try:
         from worlds.papermario.data.ItemList import progression_miscitems
@@ -1773,17 +1795,6 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     for locations in available_by_sphere.values():
         multiworld.random.shuffle(locations)
 
-    def apportion(weights, total):
-        if total <= 0 or not weights or sum(weights.values()) <= 0:
-            return {key: 0 for key in weights}
-        weight_total = sum(weights.values())
-        exact = {key: total * weight / weight_total for key, weight in weights.items()}
-        result = {key: int(value) for key, value in exact.items()}
-        order = sorted(weights, key=lambda key: (exact[key] - result[key], weights[key], str(key)), reverse=True)
-        for key in order[:total - sum(result.values())]:
-            result[key] += 1
-        return result
-
     # A point item may occupy any game's location, provided the owner has at least
     # one location in that sphere. Weight by inverse sphere count so each owner's
     # items are spread evenly over their eligible spheres.
@@ -1842,18 +1853,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         locations_per_sphere = collections.defaultdict(list)
         for sphere_index, location in sphere_locations:
             locations_per_sphere[sphere_index].append(location)
-        reachable_spheres = [sphere_index for sphere_index in locations_per_sphere
-                             if sphere_index != unreachable_sphere_index]
-        sphere_point_totals = apportion(
-            {sphere_index: 1 for sphere_index in reachable_spheres},
-            hints_by_owner[owner] * multiworld.hint_ratio,
+        sphere_point_totals = get_hint_sphere_point_totals(
+            {sphere: len(locations) for sphere, locations in locations_per_sphere.items()},
+            hints_by_owner[owner] * multiworld.hint_ratio, unreachable_sphere_index,
         )
-        # An unreachable sphere is a bonus and receives the same point total as
-        # one reachable sphere, without reducing the reachable allocation.
-        if unreachable_sphere_index in locations_per_sphere and reachable_spheres:
-            sphere_point_totals[unreachable_sphere_index] = (
-                hints_by_owner[owner] * multiworld.hint_ratio + len(reachable_spheres) - 1
-            ) // len(reachable_spheres)
 
         for sphere_index, locations in locations_per_sphere.items():
             point_total = sphere_point_totals.get(sphere_index, len(locations))

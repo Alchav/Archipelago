@@ -1,12 +1,11 @@
 import unittest
 from collections import defaultdict
-from fractions import Fraction
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from NetUtils import ClientStatus
 from BaseClasses import ItemClassification
-from MultiServer import Context, ServerCommandProcessor, _apportion_hint_values_by_sphere, collect_player_cleared, \
+from MultiServer import Context, ServerCommandProcessor, collect_player_cleared, \
     is_refundable_hint, release_player, send_remaining, update_client_status
 from NetUtils import Hint, LocationStore
 
@@ -166,31 +165,6 @@ class TestNonAdvancementRelease(unittest.TestCase):
         update.assert_called_once_with(ctx, 0, 1)
 
 
-class TestProportionalHintPoints(unittest.TestCase):
-    def test_dense_sphere_items_are_worth_proportionally_less(self) -> None:
-        sparse_location = (1, 100)
-        dense_locations = [(2, location) for location in range(200, 224)]
-        values = _apportion_hint_values_by_sphere({
-            2: [sparse_location],
-            4: dense_locations,
-        }, 44)
-
-        self.assertEqual(Fraction(22), values[sparse_location])
-        self.assertEqual(Fraction(11, 12), values[dense_locations[0]])
-        self.assertEqual(Fraction(24), values[sparse_location] / values[dense_locations[0]])
-        self.assertEqual(Fraction(44), sum(values.values(), Fraction()))
-
-    def test_integer_remainder_is_distributed_between_spheres(self) -> None:
-        values = _apportion_hint_values_by_sphere({
-            1: [(1, 10), (1, 11)],
-            2: [(1, 12)],
-        }, 5)
-
-        self.assertEqual(Fraction(3), values[1, 10] + values[1, 11])
-        self.assertEqual(Fraction(2), values[1, 12])
-        self.assertEqual(Fraction(5), sum(values.values(), Fraction()))
-
-
 class TestRefundableHints(unittest.TestCase):
     def test_all_items_in_selected_location_games_are_refundable(self) -> None:
         ctx = SimpleNamespace(games={1: "Jigsaw", 2: "Tetris", 3: "Yacht Dice"})
@@ -264,3 +238,95 @@ class TestCustomCollectionHints(unittest.TestCase):
         self.assertIn(hint, ctx.hints[0, 3])
         ctx.send_msgs.assert_called_once_with(client, [hint.as_network_message()])
         start.assert_called_once_with("send task")
+
+
+class TestGeneratedHintPoints(unittest.TestCase):
+    def test_generated_values_survive_datapackage_and_credit_all_owners(self):
+        import json
+        from BaseClasses import MultiWorld
+        from Fill import get_hint_sphere_point_totals
+        from MultiServer import get_owner_hint_point_items, get_hint_point_item_value
+        from NetUtils import NetworkItem
+        from worlds.alchapelabot import AlchapelaBotWorld
+
+        multiworld = MultiWorld(1)
+        multiworld.player_name = {1: "Bot"}
+        world = AlchapelaBotWorld(multiworld, 1)
+        world.options = SimpleNamespace(start_games=SimpleNamespace(value=[]))
+        world.generate_early()
+        received = []
+        expected = {}
+        for owner, budget in ((0, 44), (10, 35), (15, 57)):
+            totals = get_hint_sphere_point_totals({1: 1, 2: 4, 999: 2}, budget, 999)
+            self.assertEqual(budget, totals[1] + totals[2])
+            self.assertLessEqual(abs(totals[1] - totals[2]), 1)
+            expected[owner] = sum(totals.values())
+            for sphere, count in ((1, 1), (2, 4), (999, 2)):
+                base, remainder = divmod(totals[sphere], count)
+                for index in range(count):
+                    item = world.create_hint_point_item(owner, base + (index < remainder))
+                    received.append(NetworkItem(item.code, len(received), 2, item.flags))
+        data = {"datapackage": {world.game: {}}}
+        world.modify_multidata(data)
+        package = json.loads(json.dumps(data))["datapackage"][world.game]
+        ctx = SimpleNamespace(
+            games={1: world.game}, owners={2: 0, 3: 10, 4: 15},
+            item_names={world.game: {code: name for name, code in package["item_name_to_id"].items()}},
+            received_items={(0, 1, True): received[1:]}, start_inventory={1: received[:1]},
+            er_hint_data={}, seed_name="31218148747982571502",
+        )
+        for owner, total in expected.items():
+            self.assertEqual(total, get_owner_hint_point_items(ctx, 0, owner))
+        self.assertEqual(sum(expected.values()), sum(get_hint_point_item_value(ctx, item)[1] for item in received))
+        self.assertEqual("Ophilla", get_hint_point_item_value(ctx, received[7])[0])
+        ctx.start_inventory[1].append(NetworkItem(1010, -2, 0))
+        self.assertEqual(expected[10] + 1, get_owner_hint_point_items(ctx, 0, 10))
+        self.assertIsNone(get_hint_point_item_value(ctx, NetworkItem(100000, 1, 2)))
+
+    def test_empty_and_unreachable_only_spheres(self):
+        from Fill import get_hint_sphere_point_totals
+        self.assertEqual({}, get_hint_sphere_point_totals({}, 20, 999))
+        self.assertEqual({}, get_hint_sphere_point_totals({999: 2}, 20, 999))
+
+
+class TestExactConnectionNames(unittest.IsolatedAsyncioTestCase):
+    async def test_xp_name_does_not_authenticate_against_ap_alias(self):
+        import base64
+        from unittest.mock import AsyncMock
+        from MultiServer import process_client_cmd
+        xp = base64.b64encode(b"XP123_1_12345678900").decode()
+        ap = base64.b64encode(b"AP123_1_12345678900").decode()
+        ctx = SimpleNamespace(password=None, connect_names={ap: (0, 2)}, compatibility=2,
+                              logger=Mock(), send_msgs=AsyncMock())
+        args = {"cmd": "Connect", "name": xp, "password": None, "game": "A Link to the Past Beta"}
+        await process_client_cmd(ctx, SimpleNamespace(), args)
+        self.assertEqual(xp, args["name"])
+        self.assertIn("InvalidSlot", ctx.send_msgs.call_args.args[1][0]["errors"])
+
+
+    async def test_exact_xp_key_connects(self):
+        import base64
+        from unittest.mock import AsyncMock
+        from MultiServer import process_client_cmd
+        from NetUtils import NetworkItem
+        from Utils import Version
+        key = base64.b64encode(b"XP123_1_12345678900").decode()
+        ctx = SimpleNamespace(
+            password=None, connect_names={key: (0, 2)}, compatibility=2,
+            games={2: "A Link to the Past Beta"}, minimum_client_versions={2: Version(0, 0, 0)},
+            received_items={(0, 1, True): [NetworkItem(2, 1, 1)]}, start_inventory={},
+            clients={0: {2: []}}, client_ids={}, slot_info={}, get_players_package=Mock(return_value=[]),
+            send_msgs=AsyncMock(),
+        )
+        client = SimpleNamespace(auth=False, remote_items=True, remote_start_inventory=True, no_items=False)
+        args = {"cmd": "Connect", "name": key, "password": None, "game": ctx.games[2],
+                "tags": set(), "items_handling": 7, "version": Version(0, 6, 8),
+                "uuid": "test", "slot_data": False}
+        with patch("MultiServer.get_missing_checks", return_value=[]), \
+                patch("MultiServer.get_checked_checks", return_value=[]), \
+                patch("MultiServer.get_slot_points", return_value=0), \
+                patch("MultiServer.get_slot_location_points", return_value=0), \
+                patch("MultiServer.on_client_joined", new=AsyncMock()):
+            await process_client_cmd(ctx, client, args)
+        self.assertTrue(client.auth)
+        self.assertEqual("Connected", ctx.send_msgs.call_args.args[1][0]["cmd"])
