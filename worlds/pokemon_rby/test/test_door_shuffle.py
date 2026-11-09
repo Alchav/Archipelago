@@ -21,6 +21,17 @@ SAFFRON_GYM_REGIONS = {
 }
 
 
+class TestSafariSafeDestinations(unittest.TestCase):
+    def test_fly_escape_backyards_are_not_safe_destinations(self) -> None:
+        from ..regions import insanity_safe_rooms, pokemarts, safe_rooms
+        unsafe = {
+            "Cerulean City-Badge House Backyard to Cerulean Badge House",
+            "Fuchsia City-Good Rod House Backyard to Fuchsia Good Rod House",
+        }
+        for pool in (safe_rooms, insanity_safe_rooms, pokemarts):
+            self.assertFalse(unsafe.intersection(pool))
+
+
 class TestMappedDoorShuffleRegionGroups(unittest.TestCase):
     player = 1
 
@@ -34,6 +45,22 @@ class TestMappedDoorShuffleRegionGroups(unittest.TestCase):
 
     def get_entrances(self, entrance_names):
         return [self.multiworld.get_entrance(entrance_name, self.player) for entrance_name in entrance_names]
+
+    def test_fly_escape_does_not_merge_backyard_with_city(self) -> None:
+        for backyard, city in (("Fuchsia City-Good Rod House Backyard", "Fuchsia City"),
+                               ("Cerulean City-Badge House Backyard", "Cerulean City")):
+            with self.subTest(backyard=backyard):
+                source = self.multiworld.get_region(backyard, self.player)
+                target = self.multiworld.get_region(city, self.player)
+                fly = self.multiworld.get_entrance(f"{backyard} to {city}", self.player)
+                self.assertIs(fly.connected_region, target)
+                self.assertFalse(fly.group_for_mapping)
+                warps = [PokemonRBWarp(self.player, f"test {region.name}", region, 0, 0, "")
+                         for region in (source, target)]
+                groups = discover_mapped_region_groups(self.multiworld, self.player, warps)
+                self.assertEqual(2, len(groups))
+                self.assertFalse(any(source in group["static_regions"]
+                                     and target in group["static_regions"] for group in groups))
 
     def get_warp_entrances(self):
         world = self.multiworld.worlds[self.player]
@@ -315,15 +342,41 @@ class TestMappedDoorShuffleRegionGroups(unittest.TestCase):
             for entrance in region.entrances:
                 self.assertIs(entrance.connected_region, region)
 
-    def test_insanity_mapped_fixed_connections_remain_accessible(self) -> None:
+    def test_accessibility_accepts_one_way_access_to_required_room(self) -> None:
         from ..regions import validate_mapped_door_shuffle_accessibility
+        gym = self.multiworld.get_region("Pewter Gym", self.player)
+        for entrance in gym.exits:
+            if entrance.connected_region is not None:
+                entrance.connected_region.entrances.remove(entrance)
+                entrance.connected_region = None
+        self.assertTrue(gym.entrances)
+        validate_mapped_door_shuffle_accessibility(self.multiworld, self.player)
+
+    def test_insanity_mapped_fixed_connections_remain_accessible(self) -> None:
+        from unittest.mock import patch
+        from ..regions import (connect_mapped_door_shuffle_region_groups,
+                               validate_mapped_door_shuffle_accessibility)
+        displaced = []
+
+        def check_free_doors(world, groups, warps, destinations, *args, **kwargs):
+            for warp in warps:
+                if warp.mapped_slot_destination is not None:
+                    displaced.append(warp.name)
+                    self.assertIsNone(warp.connected_region)
+                    self.assertIsNone(warp.mapped_slot_destination.connected_region)
+            return connect_mapped_door_shuffle_region_groups(
+                world, groups, warps, destinations, *args, **kwargs)
+
         for world_type in (PokemonRedWorld, PokemonYellowWorld):
-            with self.subTest(game=world_type.game):
+            with self.subTest(game=world_type.game), patch(
+                    "worlds.pokemon_rby.regions.connect_mapped_door_shuffle_region_groups",
+                    side_effect=check_free_doors):
                 multiworld = setup_multiworld(
                     world_type, seed=1,
                     options={"door_shuffle": "insanity_mapped", "accessibility": "full"},
                 )
                 validate_mapped_door_shuffle_accessibility(multiworld, self.player)
+        self.assertTrue(displaced)
 
     def test_mapped_layouts_are_deterministic(self) -> None:
         def layout(multiworld):
@@ -349,3 +402,14 @@ class TestMappedDoorShuffleRegionGroups(unittest.TestCase):
         world = self.multiworld.worlds[self.player]
         with self.assertRaisesRegex(DoorShuffleException, "Pewter Gym"):
             connect_mapped_door_shuffle_region_groups(world, [], [], [], [])
+
+    def test_search_budget_exhaustion_is_not_retried(self) -> None:
+        from unittest.mock import patch
+        from ..regions import MappedDoorShuffleSearchExhausted, door_shuffle
+        with patch("worlds.pokemon_rby.regions.MAPPED_DOOR_SHUFFLE_WORK_LIMIT", 1), \
+                patch("worlds.pokemon_rby.regions.door_shuffle", wraps=door_shuffle) as shuffle:
+            with self.assertRaisesRegex(MappedDoorShuffleSearchExhausted,
+                                        "does not prove that no valid layout exists"):
+                setup_multiworld(PokemonYellowWorld, seed=0,
+                                 options={"door_shuffle": "mapped", "accessibility": "full"})
+        self.assertEqual(1, shuffle.call_count)
