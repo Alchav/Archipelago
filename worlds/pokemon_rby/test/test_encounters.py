@@ -9,6 +9,23 @@ from ..encounters import (get_base_stat_total, get_encounter_slots, process_poke
 from ..locations import build_location_data, location_data_blue, location_data_red
 
 
+class TestObtainableSpecies(unittest.TestCase):
+    def test_static_parent_does_not_unlock_evolutions(self):
+        self.assertEqual({"Pikachu"}, encounters.obtainable_species({}, {"Pikachu": 1}))
+        self.assertEqual({"Eevee"}, encounters.obtainable_species({}, {"Eevee": 1}))
+
+    def test_repeatable_parent_unlocks_linear_and_branching_evolutions(self):
+        self.assertEqual({"Pikachu", "Raichu"}, encounters.obtainable_species({"Pikachu": 1}, {}))
+        self.assertEqual({"Eevee", "Vaporeon", "Jolteon", "Flareon"},
+                         encounters.obtainable_species({"Eevee": 1}, {}))
+
+    def test_direct_evolutions_do_not_imply_siblings(self):
+        available = encounters.obtainable_species({"Jolteon": 1, "Flareon": 1}, {"Eevee": 1})
+        self.assertNotIn("Vaporeon", available)
+        self.assertEqual({"Pikachu", "Raichu"},
+                         encounters.obtainable_species({"Raichu": 1}, {"Pikachu": 1}))
+
+
 red_location_data, _, _, _ = build_location_data(
     location_data_red,
     trainer_data={},

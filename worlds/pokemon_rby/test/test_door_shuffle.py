@@ -22,6 +22,16 @@ SAFFRON_GYM_REGIONS = {
 
 
 class TestSafariSafeDestinations(unittest.TestCase):
+    def test_sealed_position_cycle_is_rejected(self) -> None:
+        from ..regions import DoorShuffleException, validate_mapped_position_graph
+        with self.assertRaisesRegex(DoorShuffleException, "seals mapped positions"):
+            validate_mapped_position_graph(
+                {"start": {"house"}, "house": {"start"}, "a": {"b"}, "b": {"a"}}, {"start"})
+
+    def test_reachable_one_way_positions_are_allowed(self) -> None:
+        from ..regions import validate_mapped_position_graph
+        validate_mapped_position_graph({"start": {"a"}, "a": {"b"}, "b": set()}, {"start"})
+
     def test_fly_escape_backyards_are_not_safe_destinations(self) -> None:
         from ..regions import insanity_safe_rooms, pokemarts, safe_rooms
         unsafe = {

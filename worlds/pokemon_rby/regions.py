@@ -1337,6 +1337,19 @@ def count_shuffleable_warps(region_group):
     return len(region_group["warps"])
 
 
+def validate_mapped_position_graph(edges, roots):
+    reached = set()
+    pending = list(roots)
+    while pending:
+        name = pending.pop()
+        if name not in reached:
+            reached.add(name)
+            pending.extend(edges[name])
+    sealed = set(edges) - reached
+    if sealed:
+        raise DoorShuffleException(f"Forced door setup seals mapped positions: {sorted(sealed)}")
+
+
 def bucket_region_groups_by_warp_count(region_groups):
     buckets = {}
     for region_group in region_groups:
@@ -2201,6 +2214,87 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
         incoming_slots = set(vanilla_destination_warps.values()) | set(exterior_slot_warps.values())
         incoming_slots.update(initial_entry_slot_warps)
 
+        # Even rooms with unrestricted internal travel cannot repair a sealed
+        # component of positions created by the forced-door setup.
+        position_edges = {group["name"]: set() for group in region_groups}
+        for group in region_groups:
+            for warp in group["warps"]:
+                destination = vanilla_destination_warps[warp]
+                if destination in group_by_warp:
+                    position_edges[group["name"]].add(group_by_warp[destination]["name"])
+        for group in region_groups:
+            external_targets = {
+                edge.connected_region for source in region_groups
+                if count_shuffleable_warps(source) == count_shuffleable_warps(group)
+                for region in group_static_regions(source) for edge in region.exits
+                if edge not in shuffleable_warp_set
+                and edge.connected_region is not None
+                and edge.connected_region not in group_static_regions(source)
+            }
+            target_sizes = {count_shuffleable_warps(owner) for owner in region_groups
+                            if group_static_regions(owner) & external_targets}
+            position_edges[group["name"]].update(
+                owner["name"] for owner in region_groups
+                if count_shuffleable_warps(owner) in target_sizes)
+        position_roots = {group_by_warp[warp]["name"] for warp in initial_entry_slot_warps}
+        position_roots.update(group_by_warp[warp]["name"] for warp in exterior_slot_warps.values())
+        position_roots.update(group["name"] for group in region_groups
+                              if any(edge.parent_region.name == "Menu"
+                                     for region in group_static_regions(group) for edge in region.entrances))
+        validate_mapped_position_graph(position_edges, position_roots)
+
+        def completion_can_reach_required_regions():
+            # Give unfinished positions every same-sized replacement at once.
+            # This graph is deliberately more permissive than any real finish.
+            remaining_ports = {}
+            remaining_slots = {}
+            for group in region_groups:
+                size = count_shuffleable_warps(group)
+                if group["name"] not in slot_group_by_replacement_group:
+                    remaining_ports.setdefault(size, []).extend(group["warps"])
+                if group["name"] not in replacement_group_by_slot_group:
+                    remaining_slots.setdefault(size, []).extend(group["warps"])
+
+            def targets(slot):
+                if slot in replacement_warp_by_slot_warp:
+                    return {replacement_warp_by_slot_warp[slot].parent_region}
+                if slot in group_by_warp:
+                    return {warp.parent_region for warp in remaining_ports.get(
+                        count_shuffleable_warps(group_by_warp[slot]), ())}
+                return {slot.parent_region}
+
+            virtual = {}
+            for exterior, slot in exterior_slot_warps.items():
+                if exterior not in ignored_forced_exterior_warps:
+                    virtual[exterior] = targets(slot)
+            for slot, source in replacement_warp_by_slot_warp.items():
+                if source not in ignored_forced_replacement_warps:
+                    virtual[source] = targets(vanilla_destination_warps[slot])
+            for size, slots in remaining_slots.items():
+                possible = set()
+                for slot in slots:
+                    possible.update(targets(vanilla_destination_warps[slot]))
+                for source in remaining_ports[size]:
+                    virtual[source] = possible
+            reached = set()
+            pending = [world.multiworld.get_region("Menu", player)]
+            while pending:
+                region = pending.pop()
+                if region in reached:
+                    continue
+                reached.add(region)
+                for edge in region.exits:
+                    if edge in virtual:
+                        pending.extend(virtual[edge])
+                    elif edge.connected_region is not None:
+                        pending.append(edge.connected_region)
+            required_regions = required_location_regions | {
+                warp.parent_region for group in region_groups for warp in group["warps"]
+            }
+            if required_regions.issubset(reached):
+                return None
+            return set(replacement_group_by_slot_group)
+
         def failure_dependencies():
             def has_uncollected_event(group):
                 return any(
@@ -2254,6 +2348,11 @@ def connect_mapped_door_shuffle_region_groups(world, region_groups, shuffleable_
             state.blocked_connections[world.player].clear()
             state.stale[world.player] = True
             update_state(state)
+            completion_conflict = completion_can_reach_required_regions()
+            if completion_conflict is not None:
+                conflict_slots = completion_conflict
+                failed_states[signature] = frozenset(conflict_slots)
+                return False
             if len(replacement_group_by_slot_group) == len(region_groups):
                 try:
                     validate_mapped_door_shuffle_accessibility(world.multiworld, world.player)
