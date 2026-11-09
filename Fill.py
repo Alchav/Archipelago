@@ -2547,7 +2547,9 @@ def compress_owner_spheres(multiworld):
             for owner, i in spheres_per_owner.items():
                 logging.info(f"{owner_names[owner]}: {i}")
             logging.info(f"Max sphere: {max_sphere}")
-            pass
+            owner_spheres_by_name = {multiworld.worlds[1].options.owner.name_lookup[n]: sph for n, sph in spheres_per_owner.items()}
+            game_spheres_by_name = {multiworld.worlds[n].player_name: sph for n, sph in spheres_per_game.items()}
+            max_sphere = 50
         owners_above_max_sphere = [owner for owner in owner_groups if spheres_per_owner[owner] > max_sphere]
         if highest_sphere <= max_sphere:
             break
