@@ -66,7 +66,7 @@ from .options.settings import StardewSettings
 from .options.worlds_group import apply_most_restrictive_options
 from .regions import create_regions, get_target_groups, prepare_mod_data
 from .rules import set_rules
-from .stardew_rule import StardewRule
+from .stardew_rule import True_, StardewRule, HasProgressionPercent
 from .stardew_rule.rule_explain import RuleExplanation
 from .strings.ap_names.ap_option_names import EntranceRandomizationBehaviorOptionName, StartWithoutOptionName
 from .strings.ap_names.ap_weapon_names import APWeapon

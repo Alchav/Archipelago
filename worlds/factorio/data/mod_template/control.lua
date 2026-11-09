@@ -4,7 +4,7 @@ require "lib"
 require "util"
 
 FREE_SAMPLES = {{ free_samples }}
-SLOT_NAME = "{{ slot_name }}"
+SLOT_NAME = {{ variable_to_lua(slot_name) }}
 SEED_NAME = "{{ seed_name }}"
 FREE_SAMPLE_BLACKLIST = {{ dict_to_lua(free_sample_blacklist) }}
 TRAP_EVO_FACTOR = {{ evolution_trap_increase }} / 100
