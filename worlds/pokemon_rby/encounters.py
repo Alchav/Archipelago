@@ -2,9 +2,19 @@ from copy import deepcopy
 from . import poke_data
 
 
+def obtainable_species(repeatable, static):
+    evolvable = {mon for mon, count in repeatable.items() if count > 0}
+    while True:
+        expanded = evolvable | {mon for mon, parent in poke_data.evolves_from.items() if parent in evolvable}
+        if expanded == evolvable:
+            break
+        evolvable = expanded
+    return evolvable | {mon for mon, count in static.items() if count > 0}
+
+
 def get_full_accessibility_evolution_roots():
     return [pokemon for pokemon in poke_data.first_stage_pokemon
-            if pokemon in poke_data.evolves_to or pokemon == "Eevee"]
+            if pokemon in poke_data.evolves_from.values()]
 
 
 def get_non_randomized_catch_em_all_candidate_slots(game):
@@ -382,13 +392,6 @@ def process_pokemon_locations(self):
     encounter_slots = encounter_slots_master.copy()
 
     if self.options.randomize_pokemon_locations:
-        evolutions_needed = []
-        for mon in static_placed_mons:
-            if static_placed_mons[mon]:
-                if mon in poke_data.evolves_to:
-                    evolutions_needed.append(poke_data.evolves_to[mon])
-                else:
-                    placed_mons[mon] += 1
         static_exclusives = [mon for mon in static_placed_mons if static_placed_mons[mon]]
         static_exclusives = self.random.sample(static_exclusives, int(len(static_exclusives) * 0.75))
         zone_mapping = {}
@@ -427,18 +430,36 @@ def process_pokemon_locations(self):
             zone_mapping[zone][original_mon] = mon
             zone_placed_mons[zone].append(mon)
 
-        mons_to_add = []
-        remaining_pokemon = [pokemon for pokemon in poke_data.pokemon_data.keys() if placed_mons[pokemon] == 0 and
-                             (pokemon not in poke_data.legendary_pokemon or self.options.randomize_legendary_pokemon.value == 3)]
+        eligible = {mon for mon in poke_data.pokemon_data
+                    if mon not in poke_data.legendary_pokemon
+                    or self.options.randomize_legendary_pokemon.value == 3}
+        available = obtainable_species(placed_mons, static_placed_mons)
+        remaining_pokemon = sorted(eligible - available)
         full_accessibility_first_stage = (self.options.accessibility == "full"
                                           and self.options.catch_em_all != "all_pokemon")
-        if self.options.catch_em_all == "first_stage" or full_accessibility_first_stage:
-            mons_to_add = [pokemon for pokemon in poke_data.first_stage_pokemon if placed_mons[pokemon] == 0 and
-                           (pokemon not in poke_data.legendary_pokemon or self.options.randomize_legendary_pokemon.value == 3)]
-            if self.options.catch_em_all == "first_stage":
-                mons_to_add += [pokemon for pokemon in evolutions_needed if placed_mons[pokemon] == 0]
-        elif self.options.catch_em_all == "all_pokemon":
-            mons_to_add = remaining_pokemon.copy()
+        required = set()
+        if self.options.catch_em_all == "all_pokemon":
+            required = eligible
+        elif self.options.catch_em_all == "first_stage" or full_accessibility_first_stage:
+            required = obtainable_species(
+                {mon: 1 for mon in poke_data.first_stage_pokemon if mon in eligible}, {}) & eligible
+        mons_to_add = []
+        planned = placed_mons.copy()
+        for mon in poke_data.pokemon_data:
+            if mon not in required:
+                continue
+            if self.options.catch_em_all == "all_pokemon":
+                missing = planned[mon] == 0 and static_placed_mons[mon] == 0
+            else:
+                missing = mon not in obtainable_species(planned, static_placed_mons)
+            if not missing:
+                continue
+            target = mon
+            if self.options.catch_em_all != "all_pokemon":
+                while target in poke_data.evolves_from:
+                    target = poke_data.evolves_from[target]
+            mons_to_add.append(target)
+            planned[target] += 1
         logic_needed_mons = max(self.options.oaks_aide_rt_2.value,
                                 self.options.oaks_aide_rt_11.value,
                                 self.options.oaks_aide_rt_15.value,
@@ -447,9 +468,11 @@ def process_pokemon_locations(self):
             logic_needed_mons = self.options.elite_four_pokedex_condition.total
 
         self.random.shuffle(remaining_pokemon)
-        while (len([pokemon for pokemon in placed_mons if placed_mons[pokemon] > 0])
-               + len(mons_to_add) < logic_needed_mons):
-            mons_to_add.append(remaining_pokemon.pop())
+        while len(obtainable_species(planned, static_placed_mons)) < logic_needed_mons:
+            candidate = remaining_pokemon.pop()
+            if candidate not in obtainable_species(planned, static_placed_mons):
+                mons_to_add.append(candidate)
+                planned[candidate] += 1
         for mon in mons_to_add:
             stat_base = get_base_stat_total(mon)
             candidate_locations = encounter_slots_master.copy()
@@ -487,6 +510,13 @@ def process_pokemon_locations(self):
                         place_location.item.name == location.item.name]
                 else:
                     place_locations = [location]
+                trial = placed_mons.copy()
+                for place_location in place_locations:
+                    trial[place_location.item.name] -= 1
+                    trial[mon] += 1
+                covered = obtainable_species(placed_mons, static_placed_mons) & required
+                if not covered.issubset(obtainable_species(trial, static_placed_mons)):
+                    continue
                 for place_location in place_locations:
                     placed_mons[place_location.item.name] -= 1
                     place_location.item = self.create_item(mon)
