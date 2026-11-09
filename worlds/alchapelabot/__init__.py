@@ -48,7 +48,7 @@ class AlchapelaBotWorld(World):
         "AvBW Hint Point": 1002,
         "AvBW Jigsaw Hint Point": 1003,
         "Jack Hint Point": 1004,
-        "Jack Jigsaw Hint Point": 1005,
+        "Jack Alt Hint Point": 1005,
         "Alyssa Hint Point": 1006,
         "Alyssa Jigsaw Hint Point": 1007,
         "Auto Hint Point": 1008,
