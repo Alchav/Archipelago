@@ -330,3 +330,94 @@ class TestExactConnectionNames(unittest.IsolatedAsyncioTestCase):
             await process_client_cmd(ctx, client, args)
         self.assertTrue(client.auth)
         self.assertEqual("Connected", ctx.send_msgs.call_args.args[1][0]["cmd"])
+
+
+class TestHintAll(unittest.TestCase):
+    def run_purchase(self, query="Sword", enabled=True, for_location=False, points=10, cost=10, known=()):
+        import random
+        from MultiServer import ClientMessageProcessor
+        from NetUtils import HintStatus
+        sword = [Hint(2, 3, location, 100, False, item_flags=1, status=HintStatus.HINT_PRIORITY)
+                 for location in (10, 11)]
+        shield = [Hint(2, 3, 12, 101, False, item_flags=1, status=HintStatus.HINT_PRIORITY)]
+        ctx = SimpleNamespace(
+            hint_all=enabled, games={2: "Test", 3: "Test"}, slot_data={},
+            get_hint_cost=Mock(return_value=cost), get_hint_location_cost=Mock(return_value=cost),
+            hints=defaultdict(set), hints_used=defaultdict(int), hint_locations_used=defaultdict(int),
+            all_item_and_group_names={"Test": {"Sword", "Shield", "Equipment"}},
+            all_location_and_group_names={"Test": {"Locations"}},
+            item_names={"Test": {100: "Sword", 101: "Shield"}}, location_names={"Test": {}},
+            item_names_for_game=lambda game: {"Sword": 100, "Shield": 101},
+            location_names_for_game=lambda game: {"Locations": 10},
+            item_name_groups={"Test": {"Equipment": {"Sword", "Shield"}}},
+            location_name_groups={"Test": {}}, non_hintable_names={"Test": set()},
+            random=random.Random(1), get_sphere=lambda player, location: location,
+            er_hint_data={3: {10: "", 11: "", 12: ""}}, notify_hints=Mock(), save=Mock(),
+        )
+        ctx.hints[0, 2].update(sword[index] for index in known)
+        processor = ClientMessageProcessor(ctx, SimpleNamespace(team=0, slot=2))
+        processor.output = Mock()
+        def collect(_ctx, team, slot, name):
+            return sword if name in ("Sword", 100) else shield
+        with patch("MultiServer.get_client_points", return_value=points), \
+                patch("MultiServer.get_client_location_points", return_value=points), \
+                patch("MultiServer.collect_hints", side_effect=collect), \
+                patch("MultiServer.collect_hint_location_name", return_value=sword):
+            processor.get_hints(query, for_location)
+        return ctx
+
+    def test_name_and_id_reveal_every_copy_for_one_purchase(self):
+        for query in ("Sword", "100"):
+            ctx = self.run_purchase(query)
+            self.assertEqual({10, 11}, {h.location for h in ctx.notify_hints.call_args.args[1]})
+            self.assertEqual(1, ctx.hints_used[0, 2])
+
+    def test_group_selects_only_one_item_even_when_hints_are_free(self):
+        for cost in (0, 10):
+            ctx = self.run_purchase("Equipment", cost=cost)
+            hints = ctx.notify_hints.call_args.args[1]
+            self.assertEqual({100}, {hint.item for hint in hints})
+            self.assertEqual(2, len(hints))
+
+    def test_disabled_keeps_single_hint(self):
+        ctx = self.run_purchase(enabled=False)
+        self.assertEqual(1, len(ctx.notify_hints.call_args.args[1]))
+
+    def test_location_hint_is_not_expanded(self):
+        ctx = self.run_purchase("Locations", for_location=True)
+        self.assertEqual(1, len(ctx.notify_hints.call_args.args[1]))
+        self.assertEqual(1, ctx.hint_locations_used[0, 2])
+        self.assertEqual(0, ctx.hints_used[0, 2])
+
+    def test_insufficient_points_does_not_reveal_new_copies(self):
+        ctx = self.run_purchase(points=0)
+        self.assertEqual([], ctx.notify_hints.call_args.args[1])
+        self.assertEqual(0, ctx.hints_used[0, 2])
+
+    def test_previous_copy_does_not_prevent_expansion(self):
+        ctx = self.run_purchase(known=(0,))
+        self.assertEqual({10, 11}, {h.location for h in ctx.notify_hints.call_args.args[1]})
+        self.assertEqual(1, ctx.hints_used[0, 2])
+
+    def test_admin_option(self):
+        ctx = Context("", 0, "", "", 0, 10, 10, False)
+        self.assertFalse(ctx.hint_all)
+        processor = ServerCommandProcessor(ctx)
+        processor.output = Mock()
+        self.assertTrue(processor._cmd_option("hint_all", "true"))
+        self.assertTrue(ctx.hint_all)
+        self.assertTrue(processor._cmd_option("hint_all", "false"))
+        self.assertFalse(ctx.hint_all)
+
+
+    def test_option_survives_save_and_old_saves_keep_default(self):
+        ctx = Context("", 0, "", "", 0, 10, 10, False)
+        ctx.hint_all = True
+        saved = ctx.get_save()
+        restored = Context("", 0, "", "", 0, 10, 10, False)
+        restored.set_save(saved)
+        self.assertTrue(restored.hint_all)
+        del saved["game_options"]["hint_all"]
+        old_room = Context("", 0, "", "", 0, 10, 10, False)
+        old_room.set_save(saved)
+        self.assertFalse(old_room.hint_all)

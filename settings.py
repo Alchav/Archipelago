@@ -629,6 +629,8 @@ class ServerOptions(Group):
     server_password: ServerPassword | None = None
     disable_item_cheat: DisableItemCheat | bool = False
     location_check_points: LocationCheckPoints = LocationCheckPoints(1)
+    hint_all: bool = False
+    """Reveal all copies of one item per !hint purchase. Location hints are unaffected."""
     hint_cost: HintCost = HintCost(10)
     hint_location_cost: HintLocationCost = HintCost(10)
     release_mode: ReleaseMode = ReleaseMode("auto")

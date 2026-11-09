@@ -289,6 +289,7 @@ class Context:
     loader = staticmethod(decode)
 
     simple_options = {"hint_cost": int,
+                      "hint_all": bool,
                       "hint_location_cost": int,
                       "location_check_points": int,
                       "server_password": str,
@@ -357,6 +358,7 @@ class Context:
         self.start_inventory = {}
         self.name_aliases: typing.Dict[team_slot, str] = {}
         self.location_checks = collections.defaultdict(set)
+        self.hint_all = False
         self.hint_cost = hint_cost
         self.hint_location_cost = hint_location_cost
         self.location_check_points = location_check_points
@@ -765,7 +767,7 @@ class Context:
             "random_state": self.random.getstate(),
             "group_collected": dict(self.group_collected),
             "stored_data": self.stored_data,
-            "game_options": {"hint_cost": self.hint_cost, "hint_location_cost": self.hint_location_cost,
+            "game_options": {"hint_all": self.hint_all, "hint_cost": self.hint_cost, "hint_location_cost": self.hint_location_cost,
                              "location_check_points": self.location_check_points,
                              "server_password": self.server_password, "password": self.password,
                              "release_mode": self.release_mode,
@@ -799,6 +801,7 @@ class Context:
         self.random.setstate(savedata["random_state"])
 
         if "game_options" in savedata:
+            self.hint_all = savedata["game_options"].get("hint_all", self.hint_all)
             self.hint_cost = savedata["game_options"]["hint_cost"]
             self.hint_location_cost = savedata["game_options"]["hint_location_cost"]
             self.location_check_points = savedata["game_options"]["location_check_points"]
@@ -2212,10 +2215,16 @@ class ClientMessageProcessor(CommonCommandProcessor):
         if not for_location:
             hints = resolve_custom_item_hints(self.ctx, self.client.team, self.client.slot, hints)
 
+        bulk_item_hints = self.ctx.hint_all and not for_location
+
         if hints:
             new_hints = set(hints) - self.ctx.hints[self.client.team, self.client.slot]
             old_hints = list(set(hints) - new_hints)
             if old_hints and not new_hints:
+                if bulk_item_hints:
+                    selected = old_hints[0]
+                    old_hints = [hint for hint in old_hints if hint.item == selected.item and
+                                 self.ctx.games[hint.receiving_player] == self.ctx.games[selected.receiving_player]]
                 self.ctx.notify_hints(self.client.team, old_hints, hinting_player=self.client.slot)
                 self.output("Hint was previously used, no points deducted.")
             if new_hints:
@@ -2241,6 +2250,17 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 # pop() selects the hint to return, so prefer a refundable hint when one is available.
                 not_found_hints.sort(key=lambda hint: is_refundable_hint(self.ctx, hint))
 
+                if bulk_item_hints:
+                    # Select using normal hint priorities, then restrict the purchase to one item type.
+                    selected = (not_found_hints or found_hints or old_hints)[-1]
+                    def same_item(hint):
+                        return (hint.item == selected.item and
+                                self.ctx.games[hint.receiving_player] == self.ctx.games[selected.receiving_player])
+                    found_hints = [hint for hint in found_hints if same_item(hint)]
+                    old_hints = [hint for hint in old_hints if same_item(hint)]
+                    not_found_hints = [hint for hint in not_found_hints if same_item(hint)]
+                    can_pay = min(can_pay, 1)
+
                 hints = found_hints + old_hints
                 while can_pay > 0:
                     if not not_found_hints:
@@ -2248,6 +2268,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     hint = not_found_hints.pop()
                     hints.append(hint)
                     can_pay -= 1
+                    if bulk_item_hints:
+                        hints.extend(not_found_hints)
+                        not_found_hints.clear()
 
                     if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
                         if is_refundable_hint(self.ctx, hint):
@@ -2305,8 +2328,7 @@ class ClientMessageProcessor(CommonCommandProcessor):
     def _cmd_hint(self, item_name: str = "") -> bool:
         """Use !hint {item_name},
         for example !hint Lamp to get a spoiler peek for that item.
-        If hint costs are on, this will only give you one new result,
-        you can rerun the command to get more in that case."""
+        Normally buys one result; with hint_all enabled, buys every copy of one selected item."""
         return self.get_hints(item_name)
 
     @mark_raw
@@ -3193,6 +3215,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--logtime', help="Add timestamps to STDOUT",
                         default=defaults["logtime"], action='store_true')
     parser.add_argument('--location_check_points', default=defaults["location_check_points"], type=int)
+    parser.add_argument('--hint_all', action=argparse.BooleanOptionalAction, default=defaults["hint_all"],
+                        help='Reveal every copy of one selected item per !hint purchase.')
     parser.add_argument('--hint_cost', default=defaults["hint_cost"], type=int)
     parser.add_argument('--hint_location_cost', default=defaults["hint_location_cost"], type=int)
     parser.add_argument('--disable_item_cheat', default=defaults["disable_item_cheat"], action='store_true')
@@ -3297,6 +3321,7 @@ async def main(args: argparse.Namespace):
                   args.hint_cost, args.hint_location_cost, not args.disable_item_cheat, args.release_mode, args.collect_mode,
                   args.countdown_mode, args.remaining_mode,
                   args.auto_shutdown, args.compatibility, args.log_network)
+    ctx.hint_all = args.hint_all
     data_filename = args.multidata
 
     if not data_filename:

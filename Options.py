@@ -1807,7 +1807,7 @@ class Owner(TextChoice):
     option_Auto = 8
     option_Undefined = 9
     option_Ophilla = 10
-    option_Factorio = 11
+    option_Team = 11
     option_Alchav64 = 12
     option_Leigh = 14
     option_LeighSDV = 15
