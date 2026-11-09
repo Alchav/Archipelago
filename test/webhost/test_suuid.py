@@ -93,3 +93,42 @@ class TestSUUID(TestBase):
             self.assertEqual(room_id, self.converter.to_python("172"))
         with self.app.test_request_context("/tracker/172"):
             self.assertEqual(tracker, self.converter.to_python("172"))
+
+
+    def test_download_names_change_between_rooms_but_urls_keep_alias(self) -> None:
+        import io
+        import json
+        import zipfile
+        from datetime import datetime, timedelta
+        from pony.orm import db_session, flush
+        from WebHostLib.models import Room, Seed, Slot
+
+        patch_data = io.BytesIO()
+        with zipfile.ZipFile(patch_data, "w") as archive:
+            archive.writestr("archipelago.json", json.dumps({"patch_file_ending": ".aplttp"}))
+            archive.writestr("delta.bsdiff4", b"patch payload")
+        filenames = {"patch": [], "slot": []}
+        for index in range(2):
+            with db_session:
+                owner = uuid4()
+                seed = Seed(multidata=b"test", owner=owner)
+                room = Room(seed=seed, owner=owner, tracker=uuid4(),
+                            creation_time=datetime(2026, 1, 1) + timedelta(days=index))
+                patch = Slot(seed=seed, player_id=1, player_name="Tester", game="A Link to the Past Beta",
+                             data=patch_data.getvalue())
+                Slot(seed=seed, player_id=2, player_name="Tester2", game="Super Mario 64", data=b"slot payload")
+                flush()
+                patch_id, room_id = patch.id, room.id
+            self.assertEqual("172", self.converter.to_url(room_id))
+            for kind, url in (("patch", f"/dl_patch/172/{patch_id}"), ("slot", "/slot_file/172/2")):
+                response = self.client.get(url)
+                self.assertEqual(200, response.status_code)
+                disposition = response.headers["Content-Disposition"]
+                self.assertIn(room_id.hex, disposition)
+                filenames[kind].append(disposition)
+                response.close()
+                again = self.client.get(url)
+                self.assertEqual(disposition, again.headers["Content-Disposition"])
+                again.close()
+        for names in filenames.values():
+            self.assertNotEqual(names[0], names[1])

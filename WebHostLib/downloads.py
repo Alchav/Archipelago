@@ -37,7 +37,8 @@ def download_patch(room_id, patch_id):
                 patch_file_ending = manifest["patch_file_ending"]
             else:
                 patch_file_ending = AutoPatchRegister.patch_types[patch.game].patch_file_ending
-            fname = f"P{patch.player_id}_{patch.player_name}_{app.jinja_env.filters['suuid'](room_id)}" \
+            # URL aliases stay stable; filenames must identify the actual room.
+            fname = f"P{patch.player_id}_{patch.player_name}_{room_id.hex}" \
                     f"{patch_file_ending}"
             new_file.seek(0)
             return send_file(new_file, as_attachment=True, download_name=fname)
@@ -74,19 +75,19 @@ def download_slot_file(room_id, player_id: int):
                         if name.endswith(".zpf"):
                             fname = name.rsplit(".", 1)[0] + ".apz5"
             else: # pre-ootr-7.0 support
-                fname = f"AP_{app.jinja_env.filters['suuid'](room_id)}_P{slot_data.player_id}_{slot_data.player_name}.apz5"
+                fname = f"AP_{room_id.hex}_P{slot_data.player_id}_{slot_data.player_name}.apz5"
         elif slot_data.game == "VVVVVV":
-            fname = f"AP_{app.jinja_env.filters['suuid'](room_id)}_SP.apv6"
+            fname = f"AP_{room_id.hex}_SP.apv6"
         elif slot_data.game == "Zillion":
-            fname = f"AP_{app.jinja_env.filters['suuid'](room_id)}_SP.apzl"
+            fname = f"AP_{room_id.hex}_SP.apzl"
         elif slot_data.game == "Super Mario 64":
-            fname = f"AP_{app.jinja_env.filters['suuid'](room_id)}_SP.apsm64ex"
+            fname = f"AP_{room_id.hex}_SP.apsm64ex"
         elif slot_data.game == "Dark Souls III":
-            fname = f"AP_{app.jinja_env.filters['suuid'](room_id)}.json"
+            fname = f"AP_{room_id.hex}.json"
         elif slot_data.game == "Kingdom Hearts 2":
-            fname = f"AP_{app.jinja_env.filters['suuid'](room_id)}_P{slot_data.player_id}_{slot_data.player_name}.zip"
+            fname = f"AP_{room_id.hex}_P{slot_data.player_id}_{slot_data.player_name}.zip"
         elif slot_data.game == "Final Fantasy Mystic Quest":
-            fname = f"AP+{app.jinja_env.filters['suuid'](room_id)}_P{slot_data.player_id}_{slot_data.player_name}.apmq"
+            fname = f"AP+{room_id.hex}_P{slot_data.player_id}_{slot_data.player_name}.apmq"
         else:
             return "Game download not supported."
         return send_file(io.BytesIO(slot_data.data), as_attachment=True, download_name=fname)
