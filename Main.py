@@ -24,6 +24,20 @@ from worlds.generic.Rules import exclusion_rules, locality_rules
 __all__ = ["main"]
 
 
+def get_multidata_spheres(multiworld):
+    """Export the same reachable logical spheres used by fill and sphere hints."""
+    result = []
+    for sphere in get_item_spheres(multiworld, return_unreachables=False):
+        current = collections.defaultdict(set)
+        for location in sphere:
+            if (type(location.address) is int and location.item is not None
+                    and type(location.item.code) is int):
+                current[location.player].add(location.address)
+        if current:
+            result.append(dict(current))
+    return result
+
+
 def main(args, seed=None, baked_server_options: dict[str, object] | None = None):
     if not baked_server_options:
         baked_server_options = get_settings().server_options.as_dict()
@@ -384,15 +398,7 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
 
                 checks_in_area: dict[int, dict[str, int | list[int]]] = {}
 
-                # get spheres -> filter address==None -> skip empty
-                spheres: list[dict[int, set[int]]] = []
-                for sphere in multiworld.get_sendable_spheres():
-                    current_sphere: dict[int, set[int]] = collections.defaultdict(set)
-                    for sphere_location in sphere:
-                        current_sphere[sphere_location.player].add(sphere_location.address)
-
-                    if current_sphere:
-                        spheres.append(dict(current_sphere))
+                spheres = get_multidata_spheres(multiworld)
 
                 baked_server_options["hint_cost"] = multiworld.hint_ratio
                 baked_server_options["hint_location_cost"] = multiworld.hint_ratio

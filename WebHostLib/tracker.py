@@ -357,6 +357,8 @@ class TrackerData:
         for team in self.get_all_players():
             rows = []
             for owner in owners:
+                if owner == 8:  # Auto contains the bot's collection release checks, which spoil custom contents.
+                    continue
                 owner_item_name = bot_item_names.get(owner + 1000)
                 if not owner_item_name:
                     continue

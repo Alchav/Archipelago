@@ -421,3 +421,51 @@ class TestHintAll(unittest.TestCase):
         old_room = Context("", 0, "", "", 0, 10, 10, False)
         old_room.set_save(saved)
         self.assertFalse(old_room.hint_all)
+
+
+class TestSphereCommandsHideBot(unittest.TestCase):
+    def processor(self, slot=7):
+        from MultiServer import ClientMessageProcessor
+        ctx = SimpleNamespace(
+            games={7: "AlchapelaBot", 2: "Test"},
+            er_hint_data={7: {70: "Sphere 1"}, 2: {20: "Sphere 1", 21: "Sphere 2"}},
+            locations={7: {70: (1, 2, 1)}, 2: {20: (2, 2, 1), 21: (3, 2, 1)}},
+            location_checks=defaultdict(set, {(0, 7): {70}, (0, 2): {20}}),
+            hints=defaultdict(set), player_name_lookup={"Bot": (0, 7), "Player": (0, 2)},
+            player_names={(0, 7): "Bot", (0, 2): "Player"},
+            slot_info={7: SimpleNamespace(game="AlchapelaBot"), 2: SimpleNamespace(game="Test")},
+            location_names={"AlchapelaBot": {70: "Secret Pack Contents"},
+                            "Test": {20: "First Check", 21: "Second Check"}},
+        )
+        processor = ClientMessageProcessor(ctx, SimpleNamespace(team=0, slot=slot))
+        processor.output = Mock()
+        processor.output_multiple = Mock()
+        return processor
+
+    def test_global_sphere_totals_exclude_bot_even_when_bot_issues_command(self):
+        processor = self.processor()
+        processor._cmd_spheres()
+        self.assertEqual("1/1 Checked Locations in Sphere 1\n0/1 Checked Locations in Sphere 2",
+                         processor.output.call_args.args[0])
+        self.assertIn(70, processor.ctx.locations[7])
+
+    def test_numbered_sphere_lists_only_real_players(self):
+        processor = self.processor()
+        processor._cmd_spheres("1")
+        self.assertEqual(["1/1 Locations Checked in Sphere 1 by Player"],
+                         processor.output_multiple.call_args.args[0])
+
+    def test_explicit_or_default_bot_target_does_not_reveal_checks(self):
+        for command, target in (("_cmd_sphere", None), ("_cmd_sphere", "Bot"), ("_cmd_spheres", "Bot")):
+            with self.subTest(command=command, target=target):
+                processor = self.processor()
+                getattr(processor, command)(target)
+                processor.output_multiple.assert_not_called()
+                self.assertEqual("AlchapelaBot checks are hidden from sphere commands.",
+                                 processor.output.call_args.args[0])
+
+    def test_normal_player_missing_locations_are_unchanged(self):
+        processor = self.processor(slot=2)
+        processor._cmd_sphere()
+        self.assertEqual(["Missing: Second Check at Sphere 2"],
+                         processor.output_multiple.call_args.args[0])

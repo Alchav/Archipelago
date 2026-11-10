@@ -1135,27 +1135,14 @@ class TestOwnerSphereCompression(unittest.TestCase):
         self.assertTrue(all(location.item for location in [earlier, earlier2, locked, filler, other, blocked]))
         self.assertEqual(2, world.push_precollected.call_count)
 
-    def test_recomputes_spheres_after_a_batch_and_discards_stale_cache(self):
-        import random
+    def test_counts_include_empty_and_locked_checks(self):
+        from Fill import _owner_game_sphere_counts
         from types import SimpleNamespace
-        from unittest.mock import patch
-        from Fill import compress_owner_spheres
-
-        locations = [self.make_location(f"Item {i}") for i in range(51)]
-        world = SimpleNamespace(player_ids=[1], worlds={1: SimpleNamespace(options=SimpleNamespace(owner=0))},
-                                random=random.Random(1), sphere_cache=["stale"])
-        snapshots = []
-        def spheres(*args, **kwargs):
-            snapshots.append(world.sphere_cache[:])
-            return [[location] for location in locations]
-        def move(mw, all_spheres, players, sphere_count):
-            locations[-1].item = None
-            return True
-        with patch("Fill.get_item_spheres", side_effect=spheres), \
-                patch("Fill._compress_smallest_owner_spheres", side_effect=move) as batch:
-            compress_owner_spheres(world)
-        batch.assert_called_once()
-        self.assertEqual([[], []], snapshots)
+        empty = Location(1, "Empty", 1)
+        locked = self.make_location("Locked", locked=True)
+        event = Location(1, "Event", None)
+        self.assertEqual({0: 2}, _owner_game_sphere_counts(
+            SimpleNamespace(), [[empty], [locked], [event]], {0: [1]}))
 
     def test_no_eligible_items_stops_without_moving(self):
         from types import SimpleNamespace
@@ -1224,30 +1211,33 @@ class TestOwnerSphereCompression(unittest.TestCase):
         self.assertTrue(all(location.item for location in large))
         world.push_precollected.assert_not_called()
 
-    def test_batch_sphere_count_is_half_excess_rounded_up(self):
+    def test_compression_rolls_back_an_overshooting_batch(self):
         import random
         from types import SimpleNamespace
-        from unittest.mock import patch
+        from unittest.mock import Mock, patch
         from Fill import compress_owner_spheres
+        locations = [self.make_location(f"Item {i}") for i in range(54)]
+        world = SimpleNamespace(player_ids=[1], worlds={1: SimpleNamespace(options=SimpleNamespace(owner=0))},
+                                game={1: "Test"}, random=random.Random(1), sphere_cache=[], state=Mock(),
+                                get_locations=lambda: locations, precollected_items={1: []})
+        calls = []
+        def move(mw, spheres, sphere_index, location, **kwargs):
+            calls.append(location)
+            location.item = None
+            return True
+        # First trial collapses to 22; the second, smaller trial retains 49.
+        snapshots = [[[locations[0], locations[1]]] + [[location] for location in locations[2:]] +
+                     [[locations[0]]],
+                     [[location] for location in locations[:22]],
+                     [[location] for location in locations[:49]]]
+        with patch("Fill.get_item_spheres", side_effect=snapshots), \
+                patch("Fill.swappable", return_value=True), \
+                patch("Fill._move_one_item_to_earlier_sphere", side_effect=move):
+            # Make the smallest eligible sphere the two-item sphere for this controlled test.
+            with patch("Fill._owner_game_sphere_counts", side_effect=[{0:54}, {0:22}, {0:49}, {0:49}]):
+                compress_owner_spheres(world)
+        self.assertGreaterEqual(len(calls), 2)
 
-        for excess, expected in ((1, 1), (2, 1), (3, 2), (4, 2), (5, 3)):
-            with self.subTest(excess=excess):
-                locations = [self.make_location(f"Item {i}") for i in range(50 + excess)]
-                world = SimpleNamespace(player_ids=[1],
-                    worlds={1: SimpleNamespace(options=SimpleNamespace(owner=0))},
-                    random=random.Random(1), sphere_cache=[])
-                def spheres(*args, **kwargs):
-                    return [[location] for location in locations]
-                def move(*args):
-                    # End the test after one pass without requiring a full generation.
-                    for location in locations:
-                        location.item = None
-                    return True
-                with patch("Fill.get_item_spheres", side_effect=spheres), \
-                        patch("Fill._compress_smallest_owner_spheres", side_effect=move) as batch:
-                    compress_owner_spheres(world)
-                self.assertEqual(expected, batch.call_args.args[3])
-                batch.assert_called_once()
 
 
 class TestBotItemSphereBoundaries(unittest.TestCase):
@@ -1327,3 +1317,184 @@ class TestOwnerSlotQuantityOrder(unittest.TestCase):
     def test_explicit_order_takes_priority_over_quantity_creation_order(self):
         result = self.order_slots([1, 2, 3], {1: 5, 2: 0, 3: 5}, {1: 1, 2: 1, 3: 1})
         self.assertEqual([2, 1, 3], result)
+
+
+class TestDirectOwnerChainUnlocks(unittest.TestCase):
+    def setup_chain(self):
+        import random
+        mw = generate_test_multiworld(3)
+        mw.player_name = {1: "Bot", 2: "First", 3: "Second"}
+        def unlock(name):
+            return TestBotItemSphereBoundaries.BotItem(name, ItemClassification.progression, 3, 1)
+        mw.worlds[1].create_item = unlock
+        mw.random = random.Random(1)
+        first = Location(2, "First early", 1, mw.get_region("Menu", 2))
+        last = Location(2, "First final", 2, mw.get_region("Menu", 2))
+        reward = Location(3, "Second reward", 3, mw.get_region("Menu", 3))
+        reward.access_rule = lambda state: state.has("Unlock Second", 1)
+        reward.item = Item("Victory", ItemClassification.progression, 4, 3)
+        reward.item.location = reward
+        first.parent_region.locations.extend([first, last])
+        reward.parent_region.locations.append(reward)
+        mw.completion_condition[3] = lambda state: state.has("Victory", 3)
+        return mw, first, last, reward
+
+    def test_places_in_previous_games_last_sphere_and_keeps_seed_beatable(self):
+        from unittest.mock import patch
+        from Fill import _place_owner_chain_unlocks, _shuffle_ranked_sphere
+        mw, first, last, reward = self.setup_chain()
+        with patch("Fill.get_item_spheres", side_effect=AssertionError("Must not regenerate spheres per unlock")):
+            _place_owner_chain_unlocks(mw, [[first], [last, reward]], {0: [2, 3]}, {2: 0, 3: 2})
+        self.assertEqual("Unlock Second", last.item.name)
+        self.assertTrue(last.locked)
+        self.assertIs(last, last.item.location)
+        self.assertTrue(mw.can_beat_game())
+        with patch("Fill.swappable", return_value=True):
+            _shuffle_ranked_sphere(mw, [last, reward])
+        self.assertEqual("Unlock Second", last.item.name)
+        self.assertTrue(mw.can_beat_game())
+
+    def test_falls_back_to_earlier_check_without_displacing_progression(self):
+        from unittest.mock import patch
+        from Fill import _place_owner_chain_unlocks
+        mw, first, last, reward = self.setup_chain()
+        progression = Item("Needed", ItemClassification.progression, 5, 2)
+        last.item = progression
+        progression.location = last
+        _place_owner_chain_unlocks(mw, [[first], [last, reward]], {0: [2, 3]}, {2: 0, 3: 2})
+        self.assertEqual("Unlock Second", first.item.name)
+        self.assertIs(progression, last.item)
+        self.assertTrue(mw.can_beat_game())
+
+    def test_no_safe_destination_fails_without_changing_items(self):
+        from Fill import _place_owner_chain_unlocks
+        mw, first, last, reward = self.setup_chain()
+        first.progress_type = LocationProgressType.EXCLUDED
+        last.locked = True
+        with self.assertRaises(FillError):
+            _place_owner_chain_unlocks(mw, [[first], [last, reward]], {0: [2, 3]}, {2: 0, 3: 2})
+        self.assertIsNone(first.item)
+        self.assertIsNone(last.item)
+
+    def test_explicit_start_game_does_not_get_a_duplicate_unlock(self):
+        from Fill import _place_owner_chain_unlocks
+        mw, first, last, reward = self.setup_chain()
+        _place_owner_chain_unlocks(mw, [[first], [last, reward]], {0: [2, 3]}, {2: 0, 3: 0})
+        self.assertIsNone(first.item)
+        self.assertIsNone(last.item)
+
+    def test_three_game_chain_opens_in_sequence_without_regenerating_for_each_unlock(self):
+        from unittest.mock import patch
+        from Fill import _place_owner_chain_unlocks, get_item_spheres
+        mw = generate_test_multiworld(4)
+        mw.player_name = {1: "Bot", 2: "First", 3: "Second", 4: "Third"}
+        def unlock(name):
+            player = {"Unlock Second": 3, "Unlock Third": 4}[name]
+            return TestBotItemSphereBoundaries.BotItem(name, ItemClassification.progression, player, 1)
+        mw.worlds[1].create_item = unlock
+        locations = []
+        for player in (2, 3, 4):
+            region = mw.get_region("Menu", player)
+            location = Location(player, f"Game {player} final check", player, region)
+            region.locations.append(location)
+            locations.append(location)
+        locations[1].access_rule = lambda state: state.has("Unlock Second", 1)
+        locations[2].access_rule = lambda state: state.has("Unlock Third", 1)
+        locations[2].item = Item("Victory", ItemClassification.progression, 5, 4)
+        locations[2].item.location = locations[2]
+        mw.completion_condition[4] = lambda state: state.has("Victory", 4)
+        with patch("Fill.get_item_spheres", side_effect=AssertionError("Unexpected per-unlock sweep")):
+            _place_owner_chain_unlocks(mw, [locations], {0: [2, 3, 4]}, {2: 0, 3: 1, 4: 2})
+        self.assertTrue(mw.can_beat_game())
+        self.assertEqual([{location} for location in locations],
+                         [set(sphere) for sphere in get_item_spheres(mw, return_unreachables=False)])
+
+
+class TestFinalOwnerTimelines(unittest.TestCase):
+    def make_world(self):
+        from types import SimpleNamespace
+        mw = generate_test_multiworld(2)
+        mw.worlds[1].options.owner = SimpleNamespace(value=8)
+        mw.worlds[2].options.owner = SimpleNamespace(value=0)
+        return mw
+
+    def test_final_cap_and_holes_are_checked_against_reachable_locations(self):
+        from unittest.mock import patch
+        from Fill import validate_owner_sphere_limits
+        mw = self.make_world()
+        locations = [Location(2, f"Check {i}", i + 1) for i in range(51)]
+        with patch("Fill.get_item_spheres", return_value=[[location] for location in locations[:50]]):
+            self.assertEqual(set(range(1, 51)), validate_owner_sphere_limits(mw)[0])
+        with patch("Fill.get_item_spheres", return_value=[[location] for location in locations]), \
+                self.assertRaisesRegex(FillError, "last sphere 51"):
+            validate_owner_sphere_limits(mw)
+        with patch("Fill.get_item_spheres", return_value=[[locations[0]], [Location(1, "Bot", 1)], [locations[1]]]), \
+                self.assertRaisesRegex(FillError, r"gaps \[2\]"):
+            validate_owner_sphere_limits(mw)
+
+    def test_auto_release_locations_do_not_create_owner_constraints(self):
+        from unittest.mock import patch
+        from Fill import validate_owner_sphere_limits
+        mw = self.make_world()
+        with patch("Fill.get_item_spheres", return_value=[[Location(1, "Bot contents", i)] for i in range(60)]):
+            self.assertEqual({}, validate_owner_sphere_limits(mw))
+
+
+class TestExportedOwnerSpheres(unittest.TestCase):
+    def test_custom_pack_release_uses_same_boundary_in_export_as_fill(self):
+        from Main import get_multidata_spheres
+        from Fill import get_item_spheres
+        mw = generate_test_multiworld(2)
+        mw.worlds[1].custom_item_owners = {10000: 2}
+        source = Location(2, "Pack", 1, mw.get_region("Menu", 2))
+        source.item = TestBotItemSphereBoundaries.BotItem("Pack Trigger", ItemClassification.progression, 10000, 1)
+        source.item.location = source
+        source.parent_region.locations.append(source)
+        release = Location(1, "Pack release", 2, mw.get_region("Menu", 1))
+        release.item = Item("Reward", ItemClassification.progression, 3, 2)
+        release.item.location = release
+        release.locked = True
+        release.access_rule = lambda state: state.has("Pack Trigger", 1)
+        release.parent_region.locations.append(release)
+        self.assertEqual([{source, release}], list(map(set, get_item_spheres(mw, return_unreachables=False))))
+        self.assertEqual([{1: {2}, 2: {1}}], get_multidata_spheres(mw))
+        # The previous exporter inserted an extra sphere for the virtual pack release.
+        self.assertEqual(2, len(list(mw.get_sendable_spheres())))
+
+    def test_unreachable_leftovers_do_not_become_a_numbered_owner_sphere(self):
+        from Main import get_multidata_spheres
+        mw = generate_test_multiworld()
+        region = mw.get_region("Menu", 1)
+        reachable = Location(1, "Reachable", 1, region)
+        unreachable = Location(1, "Out of logic", 2, region)
+        unreachable.access_rule = lambda state: False
+        region.locations.extend([reachable, unreachable])
+        for location in (reachable, unreachable):
+            location.item = Item(location.name, ItemClassification.filler, 1, 1)
+            location.item.location = location
+        self.assertEqual([{1: {1}}], get_multidata_spheres(mw))
+
+
+class TestCompressionPuzzleBundleLimits(unittest.TestCase):
+    def test_unsupported_merged_bundle_keeps_the_original_items(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        from Fill import _move_one_item_to_earlier_sphere
+        source = Location(1, "Source", 1)
+        destination = Location(1, "Destination", 2)
+        source.item = Item("100 Puzzle Pieces", ItemClassification.progression, 100, 1)
+        source.item.location = source
+        destination.item = Item("450 Puzzle Pieces", ItemClassification.progression, 450, 1)
+        destination.item.location = destination
+        item = source.item
+        original_destination = destination.item
+        jigsaw = SimpleNamespace(item_name_to_id={"100 Puzzle Pieces": 100, "450 Puzzle Pieces": 450},
+                                 create_item=Mock())
+        mw = SimpleNamespace(game={1: "Jigsaw"}, worlds={1: jigsaw}, player_name={1: "Jigsaw"},
+                             push_precollected=Mock())
+        self.assertTrue(_move_one_item_to_earlier_sphere(mw, [[destination], [source]], 1, source,
+                                                       merge_jigsaw=True))
+        jigsaw.create_item.assert_not_called()
+        self.assertIs(original_destination, destination.item)
+        mw.push_precollected.assert_called_once_with(item)
+        self.assertIsNone(source.item)

@@ -1818,6 +1818,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
             player = self.ctx.player_name_lookup[player][1]
         else:
             player = self.client.slot
+        if self.ctx.games.get(player) == "AlchapelaBot":
+            self.output("AlchapelaBot checks are hidden from sphere commands.")
+            return
         hinted_locations = [hint.location for hint in self.ctx.hints[(0, player)]]
         lowest_sphere = 0
         highest_sphere = 0
@@ -1866,8 +1869,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
     def _cmd_spheres(self, player=None):
         if player and (player.isdigit() or player in ("-1", "-2")):
             sphere = int(player)
-            players = {player: 0 for player in self.ctx.er_hint_data.keys()}
-            checked = {player: 0 for player in self.ctx.er_hint_data.keys()}
+            players = {player: 0 for player in self.ctx.er_hint_data
+                       if self.ctx.games.get(player) != "AlchapelaBot"}
+            checked = dict.fromkeys(players, 0)
             for player in players:
                 for location in self.ctx.locations[player]:
                     try:
@@ -1884,6 +1888,10 @@ class ClientMessageProcessor(CommonCommandProcessor):
                 players = [self.ctx.player_name_lookup[player][1]]
             else:
                 players = self.ctx.er_hint_data.keys()
+            players = [slot for slot in players if self.ctx.games.get(slot) != "AlchapelaBot"]
+            if not players and player:
+                self.output("AlchapelaBot checks are hidden from sphere commands.")
+                return
             spheres = {}
             spheres_checked = {}
             for player in players:

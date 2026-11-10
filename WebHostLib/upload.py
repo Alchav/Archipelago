@@ -27,7 +27,7 @@ allowed_generation_extensions = (".archipelago", ".zip")
 games_package_schema = schema.Schema({
     "item_name_groups": {str: [str]},
     "item_name_to_id": {str: int},
-    "location_name_groups": {str: [str]},
+    "location_name_groups": schema.Or({str: [str]}, {}),
     "location_name_to_id": schema.Or({str: int}, {}),
     schema.Optional("checksum"): str,
     schema.Optional("version"): int,

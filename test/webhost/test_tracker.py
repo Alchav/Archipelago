@@ -113,15 +113,15 @@ class TestOwnerSphereProgress(TestBase):
         tracker_data = TrackerData.__new__(TrackerData)
         tracker_data._tracker_cache = {}
         tracker_data._multidata = {
-            "owners": {1: 4, 2: 4, 3: 7, 4: 9},
+            "owners": {1: 4, 2: 4, 3: 7, 4: 8},
             "spheres": [
-                {1: {10, 11}, 2: {20}, 3: {30}},
+                {1: {10, 11}, 2: {20}, 3: {30}, 4: {40}},
                 {1: {12}, 3: {31, 32}},
             ],
         }
         tracker_data.item_id_to_name = {
             "AlchapelaBot": {
-                1004: "Alice Hint Point", 1007: "Bob Hint Point", 1009: "Nobody Hint Point",
+                1004: "Alice Hint Point", 1007: "Bob Hint Point", 1008: "Auto Hint Point",
             },
         }
         tracker_data.get_all_players = Mock(return_value={0: [1, 2, 3, 4]})
@@ -129,7 +129,7 @@ class TestOwnerSphereProgress(TestBase):
             1: {10: None, 11: None, 12: None},
             2: {20: None},
             3: {30: None, 31: None, 32: None},
-            4: {},
+            4: {40: None},
         }.get)
         checked_locations = {1: {10, 12}, 2: set(), 3: {30, 32}}
         tracker_data.get_player_checked_locations = Mock(

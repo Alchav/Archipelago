@@ -1083,6 +1083,58 @@ def _order_owner_slots(multiworld, owner_group):
             owner_group[index] = player
 
 
+def _place_owner_chain_unlocks(multiworld, spheres, owner_groups, starting_spheres):
+    """Place unlocks directly in prior games using one pre-unlock sphere snapshot."""
+    per_game = collections.defaultdict(list)
+    for sphere in spheres:
+        locations_by_player = collections.defaultdict(list)
+        for location in sorted(sphere):
+            if isinstance(location.address, int):
+                locations_by_player[location.player].append(location)
+        for player, locations in locations_by_player.items():
+            per_game[player].append(locations)
+
+    placements = []
+    reserved = set()
+    for players in owner_groups.values():
+        for previous, player in zip(players, players[1:]):
+            if starting_spheres[player] == 0:
+                continue  # Explicitly starting games already have an unlock in start inventory.
+            unlock = multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}")
+            for reverse_index, sphere in enumerate(reversed(per_game[previous])):
+                candidates = [location for location in sphere
+                              if location not in reserved and not location.locked and
+                              location.progress_type != LocationProgressType.EXCLUDED and
+                              (location.item is None or not location.item.advancement) and
+                              (location.item is None or swappable(multiworld, location, within_local=True)) and
+                              location.item_rule(unlock)]
+                if not candidates:
+                    continue
+                multiworld.random.shuffle(candidates)
+                candidates.sort(key=lambda location: location.item is not None)
+                destination = candidates[0]
+                if reverse_index:
+                    logging.info("No safe unlock destination in the final sphere of %s; using an earlier sphere",
+                                 multiworld.player_name[previous])
+                reserved.add(destination)
+                placements.append((destination, unlock))
+                break
+            else:
+                raise FillError(f"No safe location in {multiworld.player_name[previous]} for {unlock.name}; "
+                                "refusing to displace progression or place the unlock behind itself.",
+                                multiworld=multiworld)
+
+    # Plan every destination before changing items so an unavailable destination cannot leave a partial chain.
+    for destination, unlock in placements:
+        displaced = destination.item
+        if displaced:
+            multiworld.push_precollected(displaced)
+            displaced.location = None
+        destination.item = None
+        destination.place_locked_item(unlock)
+        logging.info("Placed %s directly in %s", unlock, destination)
+
+
 def distribute_items_restrictive(multiworld: MultiWorld,
                                  panic_method: typing.Literal["swap", "raise", "start_inventory"] = "swap") -> None:
     assert all(item.location is None for item in multiworld.itempool), (
@@ -1381,6 +1433,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     beaten_game_spheres = {}
     spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=False))
+    original_game_spheres = spheres
     starting_spheres = {}
     owner_groups = {
         owner: [player for player in multiworld.player_ids if multiworld.worlds[player].options.owner == owner]
@@ -1532,56 +1585,63 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     # breakpoint()
 
 
-    starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items() if starting_sphere > 0]
-    starting_spheres_list.sort(key=lambda i: i[1])
-    for player, starting_sphere in starting_spheres_list:
-        spheres = [s for s in get_item_spheres(multiworld, return_unreachables=False)]
-        logging.info(f"Highest sphere: {len(spheres)}")
-        logging.info(f"Adding {multiworld.player_name[player]} with {game_spheres[player]} spheres")
-        logging.info(f"Placing {multiworld.player_name[player]} unlock item in Sphere {starting_sphere}, should bring to Sphere {starting_sphere + game_spheres[player]}")
-        # for i, sphere in enumerate(spheres, start=1):
-        sphere = spheres[starting_sphere - 1]
+    direct_owner_unlocks = option == "o" and not multiworld.groups
+    if direct_owner_unlocks:
+        _place_owner_chain_unlocks(multiworld, original_game_spheres, owner_groups, starting_spheres)
+        # This check uses a fresh CollectionState, independently of the placement snapshot.
+        if not multiworld.can_beat_game():
+            raise FillError("Direct owner-chain unlock placement made the seed unbeatable.", multiworld=multiworld)
+    else:
+        starting_spheres_list = [(player, starting_sphere) for player, starting_sphere in starting_spheres.items() if starting_sphere > 0]
+        starting_spheres_list.sort(key=lambda i: i[1])
+        for player, starting_sphere in starting_spheres_list:
+            spheres = [s for s in get_item_spheres(multiworld, return_unreachables=False)]
+            logging.info(f"Highest sphere: {len(spheres)}")
+            logging.info(f"Adding {multiworld.player_name[player]} with {game_spheres[player]} spheres")
+            logging.info(f"Placing {multiworld.player_name[player]} unlock item in Sphere {starting_sphere}, should bring to Sphere {starting_sphere + game_spheres[player]}")
+            # for i, sphere in enumerate(spheres, start=1):
+            sphere = spheres[starting_sphere - 1]
 
-        # if option == "o":
-        #     sphere = [location for location in sphere if location.player in owner_groups[player_to_owner[player]]]
+            # if option == "o":
+            #     sphere = [location for location in sphere if location.player in owner_groups[player_to_owner[player]]]
 
-        sphere = [
-            location for location in sphere
-            if location.progress_type != LocationProgressType.EXCLUDED
-        ]
-        filler_sphere = sorted([location for location in sphere if location.address and not location.item])
-        # filler_sphere = None
-        if not filler_sphere:
-            filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
+            sphere = [
+                location for location in sphere
+                if location.progress_type != LocationProgressType.EXCLUDED
+            ]
+            filler_sphere = sorted([location for location in sphere if location.address and not location.item])
+            # filler_sphere = None
             if not filler_sphere:
-                filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
+                filler_sphere = sorted([location for location in sphere if location.address and swappable(multiworld, location) and (not location.item or not location.item.advancement)])
                 if not filler_sphere:
-                    # breakpoint()
-                    filler_sphere = sorted(sphere)
-                    logging.info("no filler sphere")
-        multiworld.random.shuffle(filler_sphere)
-        filler_sphere.sort(key=lambda i: multiworld.worlds[i.player].options.owner == "Auto")
-        filler_sphere.sort(key=lambda i: multiworld.worlds[i.player].options.owner == multiworld.worlds[player].options.owner)
-        # for player, sphere_check in starting_spheres.items():
-        # location = multiworld.random.choice(filler_sphere)
-        location = filler_sphere[0]
-        # multiworld.push_precollected(location.item)
-        # if starting_sphere not in multiworld.worlds[2].displaced_items:
-        #     multiworld.worlds[2].displaced_items[starting_sphere] = []
-        if location.item:
-            # multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
-            multiworld.push_precollected(location.item)
-            location.item.location = None
-            logging.info(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing {location.item.name}")
-        else:
-            logging.info(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing nothing")
-        multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
-        # location.item =
-        # location.item.location = location
-            # logging.info(f"didn't reach sphere {starting_spheres[player]} for {multiworld.player_name[player]}")
-            # breakpoint()
+                    filler_sphere = sorted([location for location in sphere if location.address and (not location.item or not location.item.advancement) and swappable(multiworld, location)])
+                    if not filler_sphere:
+                        # breakpoint()
+                        filler_sphere = sorted(sphere)
+                        logging.info("no filler sphere")
+            multiworld.random.shuffle(filler_sphere)
+            filler_sphere.sort(key=lambda i: multiworld.worlds[i.player].options.owner == "Auto")
+            filler_sphere.sort(key=lambda i: multiworld.worlds[i.player].options.owner == multiworld.worlds[player].options.owner)
+            # for player, sphere_check in starting_spheres.items():
+            # location = multiworld.random.choice(filler_sphere)
+            location = filler_sphere[0]
+            # multiworld.push_precollected(location.item)
+            # if starting_sphere not in multiworld.worlds[2].displaced_items:
+            #     multiworld.worlds[2].displaced_items[starting_sphere] = []
+            if location.item:
+                # multiworld.worlds[2].displaced_items[starting_sphere].append(location.item)
+                multiworld.push_precollected(location.item)
+                location.item.location = None
+                logging.info(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing {location.item.name}")
+            else:
+                logging.info(f"Placing Unlock for {multiworld.player_name[player]} in Sphere {starting_sphere} ~ {location.name} ~ {multiworld.player_name[location.player]} displacing nothing")
+            multiworld.push_item(location, multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}"))
+            # location.item =
+            # location.item.location = location
+                # logging.info(f"didn't reach sphere {starting_spheres[player]} for {multiworld.player_name[player]}")
+                # breakpoint()
 
-    multiworld.sphere_cache = list(get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False))
+    multiworld.sphere_cache = []
 
     # beaten_game_spheres = {}
     # spheres = list(get_item_spheres(multiworld, beaten_game_spheres))
@@ -1674,12 +1734,13 @@ def distribute_items_restrictive(multiworld: MultiWorld,
                     if ((not b.item) or a.item_rule(b.item)) and ((not a.item) or b.item_rule(a.item)):
                         a.item, b.item = b.item, a.item
                         sphere_list.remove(b)
-                        logging.info(f"Swapped unreachable {a} with {b}")
+                        # logging.info(f"Swapped unreachable {a} with {b}")
                         break
                     else:
                         continue
                 else:
-                    logging.info(f"Couldn't swap {a} - {a.item} for player {a.player}")
+                    # logging.info(f"Couldn't swap {a} - {a.item} for player {a.player}")
+                    pass
             break
         player_spheres = {loc.player for loc in sphere}
         for player in player_spheres:
@@ -1689,36 +1750,37 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     check_no_skips(multiworld, starting_spheres)
     test_beatable("after item swap")
 
-    spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
-    ordered_spheres = []
-    for sphere in spheres:
-        sphere = list(sphere)
-        sphere.sort(key=lambda l: f"{l.player}{l.name}")
-        multiworld.random.shuffle(sphere)
-        sphere.sort(key=lambda l: 10 if not l.item or l.item.classification == ItemClassification.filler else l.item.classification)
-        ordered_spheres.append(sphere)
-        for location in [loc for loc in sphere if loc.item and "Unlock " in loc.item.name and loc.item.player == 1]:
-            if multiworld.worlds[location.item.code].options.owner.value != multiworld.worlds[location.player].options.owner.value:
-                for new_location in sphere:
-                    if (not new_location.locked
-                            and new_location.progress_type != LocationProgressType.EXCLUDED
-                            and new_location.item_rule(location.item)
-                            and multiworld.worlds[location.item.code].options.owner.value
-                            == multiworld.worlds[new_location.player].options.owner.value):
-                        location.item, new_location.item = new_location.item, location.item
-                        if location.item:
-                            location.item.location = location
-                        new_location.item.location = new_location
-                        logging.info(f"Swapped {new_location.item} from {location} to {new_location}")
-                        break
+    if not direct_owner_unlocks:
+        spheres = list(get_item_spheres(multiworld, beaten_game_spheres=beaten_game_spheres, return_unreachables=True))
+        ordered_spheres = []
+        for sphere in spheres:
+            sphere = list(sphere)
+            sphere.sort(key=lambda l: f"{l.player}{l.name}")
+            multiworld.random.shuffle(sphere)
+            sphere.sort(key=lambda l: 10 if not l.item or l.item.classification == ItemClassification.filler else l.item.classification)
+            ordered_spheres.append(sphere)
+            for location in [loc for loc in sphere if loc.item and "Unlock " in loc.item.name and loc.item.player == 1]:
+                if multiworld.worlds[location.item.code].options.owner.value != multiworld.worlds[location.player].options.owner.value:
+                    for new_location in sphere:
+                        if (not new_location.locked
+                                and new_location.progress_type != LocationProgressType.EXCLUDED
+                                and new_location.item_rule(location.item)
+                                and multiworld.worlds[location.item.code].options.owner.value
+                                == multiworld.worlds[new_location.player].options.owner.value):
+                            location.item, new_location.item = new_location.item, location.item
+                            if location.item:
+                                location.item.location = location
+                            new_location.item.location = new_location
+                            logging.info(f"Swapped {new_location.item} from {location} to {new_location}")
+                            break
+                    else:
+                        logging.info(f"Unable to place {location.item} in owner's sphere")
+                        # breakpoint()
                 else:
-                    logging.info(f"Unable to place {location.item} in owner's sphere")
-                    # breakpoint()
-            else:
-                logging.info(f"{location.item} already in owner's sphere at {location}")
+                    logging.info(f"{location.item} already in owner's sphere at {location}")
 
-    check_no_skips(multiworld, starting_spheres)
-    test_beatable("after relocating game unlocks into owner locations")
+        check_no_skips(multiworld, starting_spheres)
+        test_beatable("after relocating game unlocks into owner locations")
 
     # for sphere in reversed(spheres):
     player_start_items = [
@@ -1727,6 +1789,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
     ]
     multiworld.random.shuffle(player_start_items)
     for item in player_start_items:
+        if item.advancement:
+            continue  # The sphere-preserving shuffle assumed this item was available from the start.
         item_placement_player = _get_item_placement_player(multiworld, item)
         is_custom_bot_trigger = item_placement_player != item.player
         if item.game == "Final Fantasy Mystic Quest" and item.name in ("Progressive Sword", "Progressive Axe",
@@ -1754,14 +1818,15 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto")
                                        and not location.item.advancement))
                     and location.item_rule(item)):
-                logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, "
-                             f"starting sphere is {starting_spheres[item_placement_player]}")
+                # logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, "
+                #              f"starting sphere is {starting_spheres[item_placement_player]}")
                 location.item = item
                 multiworld.precollected_items[item.player].remove(item)
                 item.location = location
                 break
         else:
-            logging.info(f"Can't move {item} out of start inventory")
+            # logging.info(f"Can't move {item} out of start inventory")
+            pass
 
     check_no_skips(multiworld, starting_spheres)
     test_beatable("after moving precollected items into their starting spheres")
@@ -1955,6 +2020,8 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     check_no_skips(multiworld, starting_spheres)
     test_beatable("after placing hint point items")
+    if direct_owner_unlocks:
+        validate_owner_sphere_limits(multiworld)
 
     # hint_ratio was selected above from available point-item locations.
     # multiworld.hint_location_ratio = max(1, (sum(c for (k, _), c in counts_by_kind_player.items() if k == "loc") // max(1, sum(player_location_weights.values()))))
@@ -2522,10 +2589,13 @@ def _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index, location
                     multiworld.game[location.player] == "Jigsaw" and "Puzzle Piece" in item.name and
                     "Puzzle Piece" in new_location.item.name):
                 new_pieces = int(new_location.item.name.split(" ")[0]) + int(item.name.split(" ")[0])
-                new_location.item = multiworld.worlds[location.player].create_item(f"{new_pieces} Puzzle Pieces")
+                merged_name = f"{new_pieces} Puzzle Pieces"
+                if merged_name not in multiworld.worlds[location.player].item_name_to_id:
+                    continue
+                new_location.item = multiworld.worlds[location.player].create_item(merged_name)
                 new_location.item.location = new_location
                 location.item = None
-                logging.info(f"Merged puzzle pieces into {new_pieces} piece item in sphere {earlier_index + 1}")
+                # logging.info(f"Merged puzzle pieces into {new_pieces} piece item in sphere {earlier_index + 1}")
                 return True
             if (new_location.item is None and new_location.player == location.player and
                     new_location.item_rule(item) and new_location.progress_type != LocationProgressType.EXCLUDED):
@@ -2534,7 +2604,7 @@ def _move_one_item_to_earlier_sphere(multiworld, spheres, sphere_index, location
                 location.item = None
                 return True
 
-    logging.info(f"Pushing {item} to start inventory for {multiworld.player_name[item.player]}")
+    # logging.info(f"Pushing {item} to start inventory for {multiworld.player_name[item.player]}")
     multiworld.push_precollected(item)
     location.item = None
     return True
@@ -2566,39 +2636,124 @@ def _compress_smallest_owner_spheres(multiworld, spheres, owner_players, sphere_
     return moved_any
 
 
+def validate_owner_sphere_limits(multiworld, max_sphere=50):
+    """Reject final reachable owner timelines with gaps or a span beyond the configured cap."""
+    active = collections.defaultdict(set)
+    for index, sphere in enumerate(get_item_spheres(multiworld, return_unreachables=False), 1):
+        for location in sphere:
+            if type(location.address) is int:
+                owner = multiworld.worlds[location.player].options.owner.value
+                if owner != Owner.option_Auto:
+                    active[owner].add(index)
+    problems = []
+    for owner, indices in sorted(active.items()):
+        holes = sorted(set(range(1, max(indices) + 1)) - indices)
+        logging.info("Final owner timeline %s: %d spheres, last %d, gaps %s",
+                     Owner.name_lookup[owner], len(indices), max(indices), holes)
+        if holes or max(indices) > max_sphere:
+            problems.append(f"{Owner.name_lookup[owner]}: last sphere {max(indices)}, gaps {holes}")
+    if problems:
+        raise FillError("Final owner sphere constraints failed: " + "; ".join(problems), multiworld=multiworld)
+    return active
+
+
+def _owner_game_sphere_counts(multiworld, spheres, owner_groups):
+    # Count real checks, including locked checks and empty checks that get filler later.
+    games_per_sphere = [{location.player for location in sphere if type(location.address) is int}
+                        for sphere in spheres]
+    return {owner: sum(sum(player in sphere for sphere in games_per_sphere) for player in players)
+            for owner, players in owner_groups.items()}
+
+
 def compress_owner_spheres(multiworld):
+    """Measure speculative compression and keep the least destructive batch near the cap."""
     logging.info("Compressing owner spheres")
     max_sphere = 50
     owner_groups = {
         owner: [player for player in multiworld.player_ids if multiworld.worlds[player].options.owner == owner]
-        for owner in Owner.name_lookup
+        for owner in Owner.name_lookup if owner != Owner.option_Auto
     }
-    iteration = 0
-    while True:
-        # Moving items changes reachability. Never reuse a pre-move sphere cache.
-        multiworld.sphere_cache = []
-        spheres = []
-        for sphere in get_item_spheres(multiworld, beaten_game_spheres=None, return_unreachables=False):
-            sphere = sorted(location for location in sphere if not location.locked)
-            multiworld.random.shuffle(sphere)
-            spheres.append(sphere)
-        games_per_sphere = [{location.player for location in sphere if location.item} for sphere in spheres]
-        spheres_per_game = {player: sum(player in sphere for sphere in games_per_sphere)
-                            for player in multiworld.player_ids}
-        spheres_per_owner = {owner: sum(spheres_per_game[player] for player in players)
-                            for owner, players in owner_groups.items()}
-        owners_above_max_sphere = [owner for owner, count in spheres_per_owner.items() if count > max_sphere]
-        if not owners_above_max_sphere:
-            break
-        iteration += 1
-        logging.info("compress sphere loop %d. Highest sphere: %d", iteration, max(spheres_per_owner.values()))
-        moved_any = False
-        for owner in owners_above_max_sphere:
-            sphere_count = (spheres_per_owner[owner] - max_sphere + 1) // 2
-            moved_any |= _compress_smallest_owner_spheres(
-                multiworld, spheres, owner_groups[owner], sphere_count)
-        if not moved_any:
-            break
+    multiworld.sphere_cache = []
+    spheres = [sorted(sphere) for sphere in get_item_spheres(multiworld, return_unreachables=False)]
+    locations = list(multiworld.get_locations())
+
+    def snapshot():
+        return ([(location, location.item) for location in locations],
+                {player: items.copy() for player, items in multiworld.precollected_items.items()},
+                multiworld.state.copy(), multiworld.random.getstate())
+
+    def restore(saved):
+        saved_items, inventory, state, random_state = saved
+        for location in locations:
+            if location.item:
+                location.item.location = None
+        for location, item in saved_items:
+            location.item = item
+            if item:
+                item.location = location
+        multiworld.precollected_items = {player: items.copy() for player, items in inventory.items()}
+        for items in multiworld.precollected_items.values():
+            for item in items:
+                item.location = None
+        multiworld.state = state.copy()
+        multiworld.random.setstate(random_state)
+
+    for owner, players in owner_groups.items():
+        if not players:
+            continue
+        counts = _owner_game_sphere_counts(multiworld, spheres, owner_groups)
+        if counts[owner] <= max_sphere:
+            continue
+        candidate_spheres = []
+        for index, sphere in enumerate(spheres):
+            movable = [(location, location.item) for location in sphere
+                       if location.item and location.item.advancement and
+                       _get_item_placement_player(multiworld, location.item) in players and
+                       swappable(multiworld, location, within_local=True)]
+            if movable:
+                candidate_spheres.append((len(movable), -index, index, movable))
+        candidate_spheres.sort(key=lambda entry: entry[:2])
+        candidates = [(index, location, item) for _, _, index, items in candidate_spheres
+                      for location, item in items]
+        original = snapshot()
+        best = None
+        low, high = 1, len(candidates)
+        while low <= high:
+            batch_size = (low + high) // 2
+            selected = candidates[:batch_size]
+            source_indices = {index for index, _, _ in selected}
+            destinations = [sphere if index not in source_indices else []
+                            for index, sphere in enumerate(spheres)]
+            for index, location, item in selected:
+                if location.item is item:
+                    _move_one_item_to_earlier_sphere(multiworld, destinations, index, location, merge_jigsaw=True)
+            trial = [sorted(sphere) for sphere in get_item_spheres(multiworld, return_unreachables=False)]
+            trial_counts = _owner_game_sphere_counts(multiworld, trial, owner_groups)
+            count = trial_counts[owner]
+            logging.info("Compression trial %s: %d items, %d -> %d spheres",
+                         Owner.name_lookup[owner], batch_size, counts[owner], count)
+            safe_others = all(trial_counts[other] >= min(counts[other], 48) for other in counts if other != owner)
+            if count <= max_sphere and safe_others:
+                if best is None or count > best[0]:
+                    best = count, snapshot(), trial
+                if count >= 48:
+                    break
+            restore(original)
+            if count > max_sphere:
+                low = batch_size + 1
+            else:
+                high = batch_size - 1
+        if best is None or best[0] < 45:
+            restore(original)
+            raise FillError(f"No safe compression near {max_sphere} spheres for {Owner.name_lookup[owner]} "
+                            f"(started at {counts[owner]}).", multiworld=multiworld)
+        restore(best[1])
+        spheres = best[2]
+        logging.info("Compressed owner %s from %d to %d spheres", Owner.name_lookup[owner], counts[owner], best[0])
+    counts = _owner_game_sphere_counts(multiworld, spheres, owner_groups)
+    if any(count > max_sphere for count in counts.values()):
+        raise FillError(f"Owner compression exceeded the cap: {counts}", multiworld=multiworld)
+    logging.info("Owner sphere budgets after compression: %s", counts)
 
 
 def compress_spheres(multiworld, max_sphere):
