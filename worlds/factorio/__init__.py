@@ -233,11 +233,14 @@ class Factorio(World):
             for _ in self.craftsanity_locations
         )
 
-        # Craft checks can make additional recipe unlocks logically relevant.
+        # A craft threshold counts production from every contributing recipe, including products that did not
+        # receive their own check. Those recipe unlocks must survive filler replacement too.
         for location in self.craftsanity_locations:
             recipe = self.get_product_recipe(location.crafted_item)
             if recipe:
                 self.advancement_technologies |= set(self.get_recipe_requirements(recipe))
+            for contribution in self.craftsanity_contributions[location.crafted_item]:
+                self.advancement_technologies.update(contribution.required_technologies)
         for technology in tuple(self.advancement_technologies):
             progressive = tech_to_progressive_lookup.get(technology)
             if progressive:
