@@ -36,6 +36,37 @@ class TestCraftsanityHelpers(unittest.TestCase):
 
 
 class TestCraftsanityWorld(unittest.TestCase):
+    def test_partial_product_checks_mark_all_contribution_unlocks_as_progression(self) -> None:
+        from BaseClasses import CollectionState
+
+        multiworld = setup_multiworld(Factorio, seed=172172172, options={
+            "craftsanity": 183,
+            "recipe_ingredients": "full",
+            "recipe_ingredients_offset": -1,
+            "max_science_pack": "utility_science_pack",
+            "goal": "satellite",
+            "silo": "randomize_recipe",
+            "satellite": "randomize_recipe",
+            "progressive": "on",
+            "tech_tree_layout": "single",
+        })
+        world = multiworld.worlds[1]
+        required = {
+            technology
+            for location in world.craftsanity_locations
+            for contribution in world.craftsanity_contributions[location.crafted_item]
+            for technology in contribution.required_technologies
+        }
+        self.assertTrue(required <= world.advancement_technologies,
+                        required - world.advancement_technologies)
+        state = CollectionState(multiworld)
+        for item in multiworld.get_items():
+            if item.advancement:
+                state.collect(item, True)
+        state.sweep_for_advancements()
+        for location in world.craftsanity_locations:
+            self.assertTrue(location.access_rule(state), location.name)
+
     def test_maximum_option_creates_exactly_3000_locations(self) -> None:
         multiworld = setup_multiworld(Factorio, seed=1, options={"craftsanity": MAX_CRAFTSANITY_LOCATIONS})
         world = multiworld.worlds[1]
