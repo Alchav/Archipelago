@@ -335,7 +335,17 @@ def get_item_spheres(multiworld: MultiWorld, beaten_game_spheres=None, return_un
         while old_reachable_locations != reachable_locations:
             old_reachable_locations = reachable_locations.copy()
             reachable_events = {location for location in reachable_locations if location.address is None}
-            reachable_locked = {location for location in reachable_locations if location.address and location.item and (location.item.game in ("Item Dispenser", "AlchapelaBot") or (location.player == location.item.player and location.locked))}
+            # Only custom collection triggers collapse into their contents' sphere. Game unlocks must
+            # advance the sphere boundary, even when placed at a locked location in the bot's world.
+            custom_bot_items = getattr(multiworld.worlds.get(1), "custom_item_owners", {})
+            reachable_locked = {
+                location for location in reachable_locations
+                if location.address and location.item and (
+                    location.item.code in custom_bot_items if location.item.game == "AlchapelaBot" else
+                    location.item.game == "Item Dispenser" or
+                    (location.player == location.item.player and location.locked)
+                )
+            }
             for location in reachable_events:
                 if location.item:
                   state.collect(location.item, True, location)
