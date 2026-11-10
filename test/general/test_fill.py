@@ -1084,3 +1084,213 @@ class TestBalanceMultiworldProgression(unittest.TestCase):
 
         self.assertRegionContains(
             self.player1.regions[2], self.player2.prog_items[0])
+
+
+class TestOwnerSphereCompression(unittest.TestCase):
+    def make_location(self, name, owner=1, advancement=True, locked=False):
+        location = Location(1, name, 100 + len(name))
+        item = Item(name, ItemClassification.progression if advancement else ItemClassification.filler, 1, owner)
+        location.item = item
+        item.location = location
+        location.locked = locked
+        return location
+
+    def test_moves_whole_smallest_owner_batch_rather_than_smallest_global_sphere(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from Fill import _compress_smallest_owner_spheres
+
+        destinations = [Location(1, f"Empty {i}", i) for i in range(4)]
+        larger = [self.make_location(f"Large {i}") for i in range(3)]
+        smallest = [self.make_location(f"Small {i}") for i in range(2)]
+        foreign = [self.make_location(f"Foreign {i}", owner=2) for i in range(5)]
+        items = [loc.item for loc in smallest]
+        world = SimpleNamespace(game={1: "Test"}, push_precollected=Mock())
+        with patch("Fill.swappable", side_effect=lambda mw, loc, **kw: not loc.locked):
+            self.assertTrue(_compress_smallest_owner_spheres(
+                world, [destinations, larger, smallest + foreign], [1]))
+        self.assertTrue(all(location.item is None for location in smallest))
+        self.assertTrue(all(item.location in destinations + larger for item in items))
+        self.assertTrue(all(location.item for location in larger + foreign))
+        world.push_precollected.assert_not_called()
+
+    def test_ties_prefer_later_sphere_and_protect_other_items(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from Fill import _compress_smallest_owner_spheres
+
+        earlier = self.make_location("Earlier")
+        later = [self.make_location(f"Later {i}") for i in range(2)]
+        # The earlier sphere has two eligible owner items too.
+        earlier2 = self.make_location("Earlier2")
+        locked = self.make_location("Locked", locked=True)
+        filler = self.make_location("Filler", advancement=False)
+        other = self.make_location("Other", owner=2)
+        blocked = self.make_location("Blocked")
+        world = SimpleNamespace(game={1: "Test"}, player_name={1: "Owner"}, push_precollected=Mock())
+        with patch("Fill.swappable", side_effect=lambda mw, loc, **kw: not loc.locked and loc is not blocked):
+            self.assertTrue(_compress_smallest_owner_spheres(
+                world, [[earlier, earlier2], later + [locked, filler, other, blocked]], [1]))
+        self.assertTrue(all(location.item is None for location in later))
+        self.assertTrue(all(location.item for location in [earlier, earlier2, locked, filler, other, blocked]))
+        self.assertEqual(2, world.push_precollected.call_count)
+
+    def test_recomputes_spheres_after_a_batch_and_discards_stale_cache(self):
+        import random
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from Fill import compress_owner_spheres
+
+        locations = [self.make_location(f"Item {i}") for i in range(51)]
+        world = SimpleNamespace(player_ids=[1], worlds={1: SimpleNamespace(options=SimpleNamespace(owner=0))},
+                                random=random.Random(1), sphere_cache=["stale"])
+        snapshots = []
+        def spheres(*args, **kwargs):
+            snapshots.append(world.sphere_cache[:])
+            return [[location] for location in locations]
+        def move(mw, all_spheres, players, sphere_count):
+            locations[-1].item = None
+            return True
+        with patch("Fill.get_item_spheres", side_effect=spheres), \
+                patch("Fill._compress_smallest_owner_spheres", side_effect=move) as batch:
+            compress_owner_spheres(world)
+        batch.assert_called_once()
+        self.assertEqual([[], []], snapshots)
+
+    def test_no_eligible_items_stops_without_moving(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from Fill import _compress_smallest_owner_spheres
+
+        with patch("Fill._move_one_item_to_earlier_sphere") as move:
+            self.assertFalse(_compress_smallest_owner_spheres(
+                SimpleNamespace(), [[self.make_location("Foreign", owner=2)]], [1]))
+        move.assert_not_called()
+
+
+    def test_custom_triggers_move_with_configuring_player_and_keep_bot_recipient(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from Fill import _compress_smallest_owner_spheres
+
+        def trigger(name, code):
+            location = Location(2, name, code)
+            location.item = Item(name, ItemClassification.progression, code, 1)
+            location.item.location = location
+            return location
+
+        pack = trigger("Custom Pack", 100)
+        progressive = trigger("Custom Progressive", 101)
+        foreign = trigger("Other Player Pack", 102)
+        ordinary_bot = trigger("Ordinary Bot Item", 103)
+        locked = trigger("Locked Custom Pack", 104)
+        locked.locked = True
+        normal = Location(2, "Normal Player Item", 105)
+        normal.item = Item("Normal Player Item", ItemClassification.progression, 105, 2)
+        normal.item.location = normal
+        destinations = [Location(2, f"Earlier {i}", i) for i in range(3)]
+        items = [pack.item, progressive.item, normal.item]
+        world = SimpleNamespace(
+            game={1: "AlchapelaBot", 2: "Test", 3: "Test"},
+            worlds={1: SimpleNamespace(custom_item_owners={100: 2, 101: 2, 102: 3, 104: 2})},
+            push_precollected=Mock(),
+        )
+        with patch("Fill.swappable", side_effect=lambda mw, loc, **kw: not loc.locked):
+            self.assertTrue(_compress_smallest_owner_spheres(
+                world, [destinations, [pack, progressive, normal, foreign, ordinary_bot, locked]], [2]))
+        self.assertTrue(all(location.item is None for location in [pack, progressive, normal]))
+        self.assertTrue(all(item.location in destinations for item in items))
+        self.assertEqual([1, 1, 2], [item.player for item in items])
+        self.assertTrue(all(location.item for location in [foreign, ordinary_bot, locked]))
+        world.push_precollected.assert_not_called()
+
+
+    def test_multiple_smallest_spheres_move_together_without_refilling_sources(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from Fill import _compress_smallest_owner_spheres
+
+        destinations = [Location(1, f"Empty {i}", i) for i in range(5)]
+        large = [self.make_location(f"Large {i}") for i in range(4)]
+        first = [self.make_location(f"First {i}") for i in range(2)]
+        last = [self.make_location("Last")]
+        originals = [location.item for location in first + last]
+        world = SimpleNamespace(game={1: "Test"}, push_precollected=Mock())
+        with patch("Fill.swappable", return_value=True):
+            self.assertTrue(_compress_smallest_owner_spheres(
+                world, [destinations, large, first, last], [1], 2))
+        self.assertTrue(all(location.item is None for location in first + last))
+        self.assertTrue(all(item.location in destinations for item in originals))
+        self.assertTrue(all(location.item for location in large))
+        world.push_precollected.assert_not_called()
+
+    def test_batch_sphere_count_is_half_excess_rounded_up(self):
+        import random
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from Fill import compress_owner_spheres
+
+        for excess, expected in ((1, 1), (2, 1), (3, 2), (4, 2), (5, 3)):
+            with self.subTest(excess=excess):
+                locations = [self.make_location(f"Item {i}") for i in range(50 + excess)]
+                world = SimpleNamespace(player_ids=[1],
+                    worlds={1: SimpleNamespace(options=SimpleNamespace(owner=0))},
+                    random=random.Random(1), sphere_cache=[])
+                def spheres(*args, **kwargs):
+                    return [[location] for location in locations]
+                def move(*args):
+                    # End the test after one pass without requiring a full generation.
+                    for location in locations:
+                        location.item = None
+                    return True
+                with patch("Fill.get_item_spheres", side_effect=spheres), \
+                        patch("Fill._compress_smallest_owner_spheres", side_effect=move) as batch:
+                    compress_owner_spheres(world)
+                self.assertEqual(expected, batch.call_args.args[3])
+                batch.assert_called_once()
+
+
+class TestBotItemSphereBoundaries(unittest.TestCase):
+    class BotItem(Item):
+        game = "AlchapelaBot"
+
+    def test_game_unlock_opens_next_sphere_even_if_locked_in_bot_world(self):
+        from Fill import get_item_spheres
+        for locked in (False, True):
+            with self.subTest(locked=locked):
+                mw = generate_test_multiworld(2)
+                mw.worlds[1].custom_item_owners = {}
+                source = Location(1, "Unlock source", 1, mw.get_region("Menu", 1))
+                source.parent_region.locations.append(source)
+                source.item = self.BotItem("Unlock Player 2", ItemClassification.progression, 2, 1)
+                source.item.location = source
+                source.locked = locked
+                reward = Location(2, "Unlocked check", 2, mw.get_region("Menu", 2))
+                reward.parent_region.locations.append(reward)
+                reward.access_rule = lambda state: state.has("Unlock Player 2", 1)
+                reward.item = Item("Reward", ItemClassification.progression, 3, 2)
+                reward.item.location = reward
+                spheres = list(get_item_spheres(mw, return_unreachables=False))
+                self.assertEqual([{source}, {reward}], [set(sphere) for sphere in spheres])
+
+    def test_nested_progressive_and_pack_triggers_stay_in_same_sphere(self):
+        from Fill import get_item_spheres
+        mw = generate_test_multiworld(2)
+        mw.worlds[1].custom_item_owners = {10000: 2, 10001: 2}
+        menu = mw.get_region("Menu", 1)
+        source = Location(2, "Progressive source", 1, mw.get_region("Menu", 2))
+        source.parent_region.locations.append(source)
+        source.item = self.BotItem("Progressive Pack", ItemClassification.progression, 10000, 1)
+        pack = Location(1, "Progressive contents", 2, menu)
+        pack.access_rule = lambda state: state.has("Progressive Pack", 1)
+        pack.item = self.BotItem("Item Pack", ItemClassification.progression, 10001, 1)
+        pack.locked = True
+        reward = Location(1, "Pack contents", 3, menu)
+        reward.access_rule = lambda state: state.has("Item Pack", 1)
+        reward.item = Item("Reward", ItemClassification.progression, 3, 2)
+        reward.locked = True
+        menu.locations.extend([pack, reward])
+        for location in (source, pack, reward):
+            location.item.location = location
+        spheres = list(get_item_spheres(mw, return_unreachables=False))
+        self.assertEqual([{source, pack, reward}], [set(sphere) for sphere in spheres])
