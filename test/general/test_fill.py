@@ -1294,3 +1294,36 @@ class TestBotItemSphereBoundaries(unittest.TestCase):
             location.item.location = location
         spheres = list(get_item_spheres(mw, return_unreachables=False))
         self.assertEqual([{source, pack, reward}], [set(sphere) for sphere in spheres])
+
+
+class TestOwnerSlotQuantityOrder(unittest.TestCase):
+    def order_slots(self, players, orders, groups):
+        from types import SimpleNamespace
+        from Fill import _order_owner_slots
+        # A predictable shuffle makes unintended global sorting visible.
+        class ReverseShuffle:
+            def shuffle(self, values):
+                values.reverse()
+        world = SimpleNamespace(
+            random=ReverseShuffle(), quantity_groups=groups,
+            worlds={player: SimpleNamespace(options=SimpleNamespace(order=SimpleNamespace(value=value)))
+                    for player, value in orders.items()},
+        )
+        result = players.copy()
+        _order_owner_slots(world, result)
+        return result
+
+    def test_independent_equal_order_slots_keep_shuffled_order(self):
+        self.assertEqual([3, 2, 1], self.order_slots([1, 2, 3], {1: 0, 2: 0, 3: 0}, {}))
+
+    def test_quantity_siblings_follow_creation_order_without_sorting_other_slots(self):
+        result = self.order_slots([1, 2, 3, 4, 5], dict.fromkeys(range(1, 6), 0), {1: 1, 2: 1, 3: 1})
+        self.assertEqual([5, 4, 1, 2, 3], result)
+
+    def test_separate_quantity_groups_do_not_sort_each_other(self):
+        result = self.order_slots([1, 2, 3, 4], dict.fromkeys(range(1, 5), 0), {1: 1, 2: 1, 3: 3, 4: 3})
+        self.assertEqual([3, 4, 1, 2], result)
+
+    def test_explicit_order_takes_priority_over_quantity_creation_order(self):
+        result = self.order_slots([1, 2, 3], {1: 5, 2: 0, 3: 5}, {1: 1, 2: 1, 3: 1})
+        self.assertEqual([2, 1, 3], result)

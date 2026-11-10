@@ -238,6 +238,8 @@ def main(args=None) -> tuple[argparse.Namespace, int]:
         player_path_cache[player] = player_files.get(player, args.weights_file_path)
     name_counter: Counter[str] = Counter()
     args.player_options = {}
+    args.quantity_groups = {}
+    quantity_group_ids = {}
 
     player = 1
     while player <= args.multi:
@@ -248,6 +250,10 @@ def main(args=None) -> tuple[argparse.Namespace, int]:
             continue
 
         for doc_index, yaml in enumerate(weights_cache[path]):
+            # Quantity copies share the same parsed document; separate documents/files do not.
+            if yaml.get("quantity", 1) > 1:
+                group = quantity_group_ids.setdefault((path, id(yaml)), player)
+                args.quantity_groups[player] = group
             name = yaml.get("name")
             try:
                 # Use the cached settings object if it exists, otherwise roll settings within the try-catch
