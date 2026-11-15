@@ -84,6 +84,16 @@ class CountsCoinsBeyondCoinStars(Toggle):
 
 
 class SM64Accessibility(ItemsAccessibility):
+    """
+    Set rules for reachability of your items/locations.
+
+    **Full:** ensure everything can be reached and acquired.
+
+    **Minimal:** ensure what is needed to reach your goal can be acquired.
+
+    **Items:** ensure all logically relevant items can be acquired. Some items, such as keys, may be self-locking, and
+    some locations may be inaccessible.
+    """
     default = ItemsAccessibility.option_full
 
 
