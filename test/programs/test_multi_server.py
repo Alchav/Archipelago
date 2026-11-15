@@ -245,7 +245,7 @@ class TestGeneratedHintPoints(unittest.TestCase):
         import json
         from BaseClasses import MultiWorld
         from Fill import get_hint_sphere_point_totals
-        from MultiServer import get_owner_hint_point_items, get_hint_point_item_value
+        from MultiServer import get_owner_hint_point_items
         from NetUtils import NetworkItem
         from worlds.alchapelabot import AlchapelaBotWorld
 
@@ -277,11 +277,8 @@ class TestGeneratedHintPoints(unittest.TestCase):
         )
         for owner, total in expected.items():
             self.assertEqual(total, get_owner_hint_point_items(ctx, 0, owner))
-        self.assertEqual(sum(expected.values()), sum(get_hint_point_item_value(ctx, item)[1] for item in received))
-        self.assertEqual("Ophilla", get_hint_point_item_value(ctx, received[7])[0])
         ctx.start_inventory[1].append(NetworkItem(1010, -2, 0))
         self.assertEqual(expected[10] + 1, get_owner_hint_point_items(ctx, 0, 10))
-        self.assertIsNone(get_hint_point_item_value(ctx, NetworkItem(100000, 1, 2)))
 
     def test_empty_and_unreachable_only_spheres(self):
         from Fill import get_hint_sphere_point_totals
@@ -333,15 +330,17 @@ class TestExactConnectionNames(unittest.IsolatedAsyncioTestCase):
 
 
 class TestHintAll(unittest.TestCase):
-    def run_purchase(self, query="Sword", enabled=True, for_location=False, points=10, cost=10, known=()):
+    def run_purchase(self, query="Sword", enabled=True, for_location=False, points=10, cost=10, known=(),
+                     location_games=("Test", "Test")):
         import random
         from MultiServer import ClientMessageProcessor
         from NetUtils import HintStatus
-        sword = [Hint(2, 3, location, 100, False, item_flags=1, status=HintStatus.HINT_PRIORITY)
+        sword = [Hint(2, 3 if location == 10 else 4, location, 100, False,
+                      item_flags=1, status=HintStatus.HINT_PRIORITY)
                  for location in (10, 11)]
         shield = [Hint(2, 3, 12, 101, False, item_flags=1, status=HintStatus.HINT_PRIORITY)]
         ctx = SimpleNamespace(
-            hint_all=enabled, games={2: "Test", 3: "Test"}, slot_data={},
+            hint_all=enabled, games={2: "Test", 3: location_games[0], 4: location_games[1]}, slot_data={},
             get_hint_cost=Mock(return_value=cost), get_hint_location_cost=Mock(return_value=cost),
             hints=defaultdict(set), hints_used=defaultdict(int), hint_locations_used=defaultdict(int),
             all_item_and_group_names={"Test": {"Sword", "Shield", "Equipment"}},
@@ -352,7 +351,7 @@ class TestHintAll(unittest.TestCase):
             item_name_groups={"Test": {"Equipment": {"Sword", "Shield"}}},
             location_name_groups={"Test": {}}, non_hintable_names={"Test": set()},
             random=random.Random(1), get_sphere=lambda player, location: location,
-            er_hint_data={3: {10: "", 11: "", 12: ""}}, notify_hints=Mock(), save=Mock(),
+            er_hint_data={3: {10: "", 12: ""}, 4: {11: ""}}, notify_hints=Mock(), save=Mock(),
         )
         ctx.hints[0, 2].update(sword[index] for index in known)
         processor = ClientMessageProcessor(ctx, SimpleNamespace(team=0, slot=2))
@@ -396,6 +395,27 @@ class TestHintAll(unittest.TestCase):
 
     def test_previous_copy_does_not_prevent_expansion(self):
         ctx = self.run_purchase(known=(0,))
+        self.assertEqual({10, 11}, {h.location for h in ctx.notify_hints.call_args.args[1]})
+        self.assertEqual(1, ctx.hints_used[0, 2])
+
+    def test_mixed_refund_games_charge_once(self):
+        for games in (("Jigsaw", "Test"), ("Test", "Jigsaw")):
+            ctx = self.run_purchase(location_games=games)
+            self.assertEqual({10, 11}, {h.location for h in ctx.notify_hints.call_args.args[1]})
+            self.assertEqual(1, ctx.hints_used[0, 2])
+
+    def test_mixed_refund_games_require_payment(self):
+        ctx = self.run_purchase(location_games=("Jigsaw", "Test"), points=0)
+        self.assertEqual([], ctx.notify_hints.call_args.args[1])
+        self.assertEqual(0, ctx.hints_used[0, 2])
+
+    def test_all_refund_games_are_free_without_points(self):
+        ctx = self.run_purchase(location_games=("Jigsaw", "Tetris"), points=0)
+        self.assertEqual({10, 11}, {h.location for h in ctx.notify_hints.call_args.args[1]})
+        self.assertEqual(0, ctx.hints_used[0, 2])
+
+    def test_previous_non_refund_location_prevents_refund(self):
+        ctx = self.run_purchase(location_games=("Test", "Jigsaw"), known=(0,))
         self.assertEqual({10, 11}, {h.location for h in ctx.notify_hints.call_args.args[1]})
         self.assertEqual(1, ctx.hints_used[0, 2])
 

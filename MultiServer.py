@@ -1390,25 +1390,6 @@ def register_location_checks(ctx: Context, team: int, slot: int, locations: typi
                 ctx.broadcast_team(team, info_texts)
                 info_texts.clear()
             info_texts.append(json_format_send_event(new_item, target_player, ctx.er_hint_data.get(slot, {}).get(new_item.location, "")))
-            hint_value = get_hint_point_item_value(ctx, new_item)
-            if hint_value is not None:
-                owner_name, value, sphere_name = hint_value
-                displayed_value = str(value)
-                source_location = ctx.location_names[ctx.slot_info[slot].game][location]
-                info_texts.append({
-                    "cmd": "PrintJSON",
-                    "data": [{
-                        "text": f"{owner_name} hint point from {source_location} in {sphere_name} "
-                                f"was worth {displayed_value} hint point{'s' if value != 1 else ''}."
-                    }],
-                    "type": "HintPointValue",
-                    "team": team,
-                    "owner": owner_name,
-                    "value": displayed_value,
-                    "source": slot,
-                    "location": location,
-                    "sphere": sphere_name,
-                })
         ctx.broadcast_team(team, info_texts)
         del info_texts
         del sortable
@@ -2267,7 +2248,9 @@ class ClientMessageProcessor(CommonCommandProcessor):
                     found_hints = [hint for hint in found_hints if same_item(hint)]
                     old_hints = [hint for hint in old_hints if same_item(hint)]
                     not_found_hints = [hint for hint in not_found_hints if same_item(hint)]
-                    can_pay = min(can_pay, 1)
+                    bulk_refundable = all(is_refundable_hint(self.ctx, hint)
+                                          for hint in found_hints + old_hints + not_found_hints)
+                    can_pay = int(bulk_refundable or not cost or points_available >= cost)
 
                 hints = found_hints + old_hints
                 while can_pay > 0:
@@ -2280,12 +2263,16 @@ class ClientMessageProcessor(CommonCommandProcessor):
                         hints.extend(not_found_hints)
                         not_found_hints.clear()
 
-                    if "Unreachable" not in self.ctx.er_hint_data[hint.finding_player][hint.location]:
-                        if is_refundable_hint(self.ctx, hint):
+                    billing_hints = hints if bulk_item_hints else [hint]
+                    if any("Unreachable" not in self.ctx.er_hint_data[h.finding_player][h.location]
+                           for h in billing_hints):
+                        refundable = bulk_refundable if bulk_item_hints else is_refundable_hint(self.ctx, hint)
+                        if refundable:
                             point_name = "hint location points" if for_location else "hint points"
+                            reason = ("all hinted locations are in free-to-hint games" if bulk_item_hints else
+                                      f"anything located in {self.ctx.games[hint.finding_player]} is free to hint")
                             self.output(
-                                f"Refunded {cost} {point_name}: anything located in "
-                                f"{self.ctx.games[hint.finding_player]} is free to hint."
+                                f"Refunded {cost} {point_name}: {reason}."
                             )
                             continue
                         if for_location:
@@ -2386,25 +2373,6 @@ def get_slot_location_points(ctx: Context, team: int, slot: int) -> int:
     total_points = extra_hints - (hint_location_cost * hint_locations_used)
     # logging.info(f"Total points: {total_points}")
     return total_points
-
-
-def get_hint_point_item_value(ctx: Context, item: NetworkItem) -> typing.Optional[tuple[str, int, str]]:
-    """Return display owner, value, and source sphere for a hint-point item."""
-    bot_game = ctx.games.get(1, "AlchapelaBot")
-    item_names = ctx.item_names.get(bot_game, {})
-    item_name = item_names.get(item.item, "")
-    for owner in sorted(set(ctx.owners.values())):
-        legacy_name = item_names.get(owner + 1000)
-        if not legacy_name:
-            continue
-        owner_prefix = legacy_name.removesuffix(" Point")
-        match = re.fullmatch(rf"^(?:(\d+) )?{re.escape(owner_prefix)} Points?$", item_name)
-        if not match:
-            continue
-        value = int(match.group(1) or 1)
-        sphere_name = ctx.er_hint_data.get(item.player, {}).get(item.location, "Unknown sphere")
-        return owner_prefix.removesuffix(" Hint"), value, sphere_name
-    return None
 
 
 def get_owner_hint_point_items(ctx: Context, team: int, owner: int) -> int:
