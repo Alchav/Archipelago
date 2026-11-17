@@ -1206,7 +1206,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "THWOMP & logic_ttc_stomp_thwomp_wall_kick | "
         "logic_ttc_stomp_thwomp_triple_jump_wall_kick & logic_ttc_stomp_thwomp_wall_kick")
     # Rainbow Ride
-    rf.assign_rule("Rainbow Ride - Beneath the Pole", "LJ/TJ/DV")
+    rf.assign_rule("Rainbow Ride - Beneath the Pole", "LG/LJ/TJ/DV | logic_rr_pole_coins_without_movement_or_carpets")
     rf.assign_rule("Rainbow Ride - Maze", "CL")
     rf.assign_rule("Rainbow Ride - Initial to Maze", "RR_CARPETS")
     rf.assign_rule("Rainbow Ride - Carpets", "RR_CARPETS")
