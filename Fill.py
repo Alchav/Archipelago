@@ -1101,28 +1101,23 @@ def _place_owner_chain_unlocks(multiworld, spheres, owner_groups, starting_spher
             if starting_spheres[player] == 0:
                 continue  # Explicitly starting games already have an unlock in start inventory.
             unlock = multiworld.worlds[1].create_item(f"Unlock {multiworld.player_name[player]}")
-            for reverse_index, sphere in enumerate(reversed(per_game[previous])):
-                candidates = [location for location in sphere
-                              if location not in reserved and not location.locked and
-                              location.progress_type != LocationProgressType.EXCLUDED and
-                              (location.item is None or not location.item.advancement) and
-                              (location.item is None or swappable(multiworld, location, within_local=True)) and
-                              location.item_rule(unlock)]
-                if not candidates:
-                    continue
-                multiworld.random.shuffle(candidates)
-                candidates.sort(key=lambda location: location.item is not None)
-                destination = candidates[0]
-                if reverse_index:
-                    logging.info("No safe unlock destination in the final sphere of %s; using an earlier sphere",
-                                 multiworld.player_name[previous])
-                reserved.add(destination)
-                placements.append((destination, unlock))
-                break
-            else:
-                raise FillError(f"No safe location in {multiworld.player_name[previous]} for {unlock.name}; "
+            final_sphere = per_game[previous][-1] if per_game[previous] else ()
+            candidates = [location for location in final_sphere
+                          if location not in reserved and not location.locked and
+                          location.progress_type != LocationProgressType.EXCLUDED and
+                          (location.item is None or not location.item.advancement) and
+                          (location.item is None or swappable(multiworld, location, within_local=True)) and
+                          location.item_rule(unlock)]
+            if not candidates:
+                raise FillError(f"No safe location in the final sphere of {multiworld.player_name[previous]} "
+                                f"for {unlock.name}; "
                                 "refusing to displace progression or place the unlock behind itself.",
                                 multiworld=multiworld)
+            multiworld.random.shuffle(candidates)
+            candidates.sort(key=lambda location: location.item is not None)
+            destination = candidates[0]
+            reserved.add(destination)
+            placements.append((destination, unlock))
 
     # Plan every destination before changing items so an unavailable destination cannot leave a partial chain.
     for destination, unlock in placements:
@@ -1133,6 +1128,52 @@ def _place_owner_chain_unlocks(multiworld, spheres, owner_groups, starting_spher
         destination.item = None
         destination.place_locked_item(unlock)
         logging.info("Placed %s directly in %s", unlock, destination)
+
+
+def _place_start_inventory_before_game(multiworld, spheres, starting_spheres, player_to_owner):
+    """Move starting items, including progression, before their game starts."""
+    player_start_items = [
+        item for item in sum(multiworld.precollected_items.values(), [])
+        if _get_item_placement_player(multiworld, item) > 1 and item.code
+    ]
+    multiworld.random.shuffle(player_start_items)
+    for item in player_start_items:
+        item_placement_player = _get_item_placement_player(multiworld, item)
+        is_custom_bot_trigger = item_placement_player != item.player
+        if item.game == "Final Fantasy Mystic Quest" and item.name in ("Progressive Sword", "Progressive Axe",
+                "Progressive Claw", "Progressive Bomb", "Steel Sword", "Bomb", "Cat Claw", "Axe"):
+            continue
+        if item.game == "Stardew Valley" and item.name in ("Winter", "Fall", "Summer", "Spring"):
+            continue
+        if item.game == "Super Metroid":
+            continue
+        if item.hint and player_to_owner[item_placement_player] in (Owner.option_AvBW, Owner.option_AvBWJ):
+            continue
+        i = starting_spheres[item_placement_player]
+        earlier_spheres = [loc for sphere in spheres[:i] for loc in sphere]
+        if False and item.hint:
+            multiworld.random.shuffle(earlier_spheres)
+        else:
+            earlier_spheres = list(reversed(earlier_spheres))
+
+        for location in earlier_spheres:
+            # Use the same global unlock-sphere boundary as every other start
+            # item. Bot locations are the sole exception: a trigger placed in
+            # one of its own release locations can directly lock itself.
+            if is_custom_bot_trigger and location.player == 1:
+                continue
+            if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto")
+                                       and not location.item.advancement))
+                    and location.item_rule(item)):
+                # logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, "
+                #              f"starting sphere is {starting_spheres[item_placement_player]}")
+                location.item = item
+                multiworld.precollected_items[item.player].remove(item)
+                item.location = location
+                break
+        else:
+            # logging.info(f"Can't move {item} out of start inventory")
+            pass
 
 
 def distribute_items_restrictive(multiworld: MultiWorld,
@@ -1782,51 +1823,7 @@ def distribute_items_restrictive(multiworld: MultiWorld,
         check_no_skips(multiworld, starting_spheres)
         test_beatable("after relocating game unlocks into owner locations")
 
-    # for sphere in reversed(spheres):
-    player_start_items = [
-        item for item in sum(multiworld.precollected_items.values(), [])
-        if _get_item_placement_player(multiworld, item) > 1 and item.code
-    ]
-    multiworld.random.shuffle(player_start_items)
-    for item in player_start_items:
-        if item.advancement:
-            continue  # The sphere-preserving shuffle assumed this item was available from the start.
-        item_placement_player = _get_item_placement_player(multiworld, item)
-        is_custom_bot_trigger = item_placement_player != item.player
-        if item.game == "Final Fantasy Mystic Quest" and item.name in ("Progressive Sword", "Progressive Axe",
-                "Progressive Claw", "Progressive Bomb", "Steel Sword", "Bomb", "Cat Claw", "Axe"):
-            continue
-        if item.game == "Stardew Valley" and item.name in ("Winter", "Fall", "Summer", "Spring"):
-            continue
-        if item.game == "Super Metroid":
-            continue
-        if item.hint and player_to_owner[item_placement_player] in (Owner.option_AvBW, Owner.option_AvBWJ):
-            continue
-        i = starting_spheres[item_placement_player]
-        earlier_spheres = [loc for sphere in spheres[:i] for loc in sphere]
-        if False and item.hint:
-            multiworld.random.shuffle(earlier_spheres)
-        else:
-            earlier_spheres = list(reversed(earlier_spheres))
-
-        for location in earlier_spheres:
-            # Use the same global unlock-sphere boundary as every other start
-            # item. Bot locations are the sole exception: a trigger placed in
-            # one of its own release locations can directly lock itself.
-            if is_custom_bot_trigger and location.player == 1:
-                continue
-            if ((not location.item or (multiworld.player_name[location.item.player].startswith("Auto")
-                                       and not location.item.advancement))
-                    and location.item_rule(item)):
-                # logging.info(f"Placing {item} from start inventory in {location} in sphere {i}, "
-                #              f"starting sphere is {starting_spheres[item_placement_player]}")
-                location.item = item
-                multiworld.precollected_items[item.player].remove(item)
-                item.location = location
-                break
-        else:
-            # logging.info(f"Can't move {item} out of start inventory")
-            pass
+    _place_start_inventory_before_game(multiworld, spheres, starting_spheres, player_to_owner)
 
     check_no_skips(multiworld, starting_spheres)
     test_beatable("after moving precollected items into their starting spheres")

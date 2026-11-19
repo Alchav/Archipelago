@@ -1354,17 +1354,17 @@ class TestDirectOwnerChainUnlocks(unittest.TestCase):
         self.assertEqual("Unlock Second", last.item.name)
         self.assertTrue(mw.can_beat_game())
 
-    def test_falls_back_to_earlier_check_without_displacing_progression(self):
-        from unittest.mock import patch
+    def test_blocked_final_sphere_fails_instead_of_using_an_earlier_check(self):
         from Fill import _place_owner_chain_unlocks
         mw, first, last, reward = self.setup_chain()
         progression = Item("Needed", ItemClassification.progression, 5, 2)
         last.item = progression
         progression.location = last
-        _place_owner_chain_unlocks(mw, [[first], [last, reward]], {0: [2, 3]}, {2: 0, 3: 2})
-        self.assertEqual("Unlock Second", first.item.name)
+        with self.assertRaisesRegex(FillError, "final sphere"):
+            _place_owner_chain_unlocks(mw, [[first], [last, reward]], {0: [2, 3]}, {2: 0, 3: 2})
+        self.assertIsNone(first.item)
         self.assertIs(progression, last.item)
-        self.assertTrue(mw.can_beat_game())
+        self.assertIs(last, progression.location)
 
     def test_no_safe_destination_fails_without_changing_items(self):
         from Fill import _place_owner_chain_unlocks
@@ -1408,6 +1408,75 @@ class TestDirectOwnerChainUnlocks(unittest.TestCase):
         self.assertTrue(mw.can_beat_game())
         self.assertEqual([{location} for location in locations],
                          [set(sphere) for sphere in get_item_spheres(mw, return_unreachables=False)])
+
+
+class TestStartInventoryBeforeGame(unittest.TestCase):
+    def setup_items(self, item_type=Item):
+        mw = generate_test_multiworld(3)
+        early = Location(2, "Earlier game check", 1, mw.get_region("Menu", 2))
+        own = Location(3, "Recipient first check", 2, mw.get_region("Menu", 3))
+        early.parent_region.locations.append(early)
+        own.parent_region.locations.append(own)
+        item = item_type("Starting ability", ItemClassification.progression, 10, 3)
+        mw.push_precollected(item)
+        own.access_rule = lambda state: state.has(item.name, 3)
+        own.place_locked_item(Item("Victory", ItemClassification.progression, 11, 3))
+        mw.completion_condition[3] = lambda state: state.has("Victory", 3)
+        return mw, early, own, item
+
+    def test_advancement_moves_before_its_game_and_remains_beatable(self):
+        from Fill import _place_start_inventory_before_game, get_item_spheres
+        from BaseClasses import CollectionState
+        for item_type in (Item, SuperMetroidMapRandoTestItem):
+            with self.subTest(game=item_type.game):
+                mw, early, own, item = self.setup_items(item_type)
+                _place_start_inventory_before_game(mw, [[early], [own]], {2: 0, 3: 1}, {2: 0, 3: 0})
+                self.assertNotIn(item, mw.precollected_items[3])
+                self.assertIs(item, early.item)
+                self.assertIs(early, item.location)
+                self.assertFalse(CollectionState(mw).has(item.name, 3))
+                self.assertTrue(mw.can_beat_game())
+                self.assertEqual([{early}, {own}],
+                                 [set(s) for s in get_item_spheres(mw, return_unreachables=False)])
+
+    def test_does_not_move_into_the_games_first_sphere(self):
+        from Fill import _place_start_inventory_before_game
+        mw, early, own, item = self.setup_items()
+        _place_start_inventory_before_game(mw, [[early], [own]], {2: 0, 3: 0}, {2: 0, 3: 0})
+        self.assertIn(item, mw.precollected_items[3])
+        self.assertIsNone(early.item)
+
+    def test_no_legal_earlier_destination_keeps_the_starting_item(self):
+        from Fill import _place_start_inventory_before_game
+        mw, early, own, item = self.setup_items()
+        early.item_rule = lambda candidate: False
+        _place_start_inventory_before_game(mw, [[early], [own]], {2: 0, 3: 1}, {2: 0, 3: 0})
+        self.assertIn(item, mw.precollected_items[3])
+        self.assertIsNone(early.item)
+        self.assertIsNone(item.location)
+
+    def test_super_metroid_exception_is_preserved(self):
+        from Fill import _place_start_inventory_before_game
+        mw, early, own, item = self.setup_items(SuperMetroidTestItem)
+        _place_start_inventory_before_game(mw, [[early], [own]], {2: 0, 3: 1}, {2: 0, 3: 0})
+        self.assertIn(item, mw.precollected_items[3])
+        self.assertIsNone(early.item)
+
+    def test_custom_progression_uses_its_effective_owner_and_avoids_bot_locations(self):
+        from Fill import _place_start_inventory_before_game
+        mw, early, own, item = self.setup_items()
+        mw.precollected_items[3].remove(item)
+        mw.game[1] = "AlchapelaBot"
+        trigger = TestBotItemSphereBoundaries.BotItem("Custom progressive", ItemClassification.progression,
+                                                    2000000, 1)
+        mw.worlds[1].custom_item_owners = {trigger.code: 3}
+        mw.push_precollected(trigger)
+        release = Location(1, "Bot release", 3, mw.get_region("Menu", 1))
+        release.parent_region.locations.append(release)
+        _place_start_inventory_before_game(mw, [[early, release], [own]], {2: 0, 3: 1}, {2: 0, 3: 0})
+        self.assertNotIn(trigger, mw.precollected_items[1])
+        self.assertIs(trigger, early.item)
+        self.assertIsNone(release.item)
 
 
 class TestFinalOwnerTimelines(unittest.TestCase):
