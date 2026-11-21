@@ -515,12 +515,12 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     # Big Boo's Haunt
     "Big Boo's Haunt - Triple Jump": SM64ItemData(sm64ex_base_id + 365),
     "Big Boo's Haunt - Long Jump": SM64ItemData(sm64ex_base_id + 366),
-    "Big Boo's Haunt - Backflip": SM64ItemData(sm64ex_base_id + 367, progression_deprioritized_skip_balancing),
+    "Big Boo's Haunt - Backflip": SM64ItemData(sm64ex_base_id + 367, filler),
     "Big Boo's Haunt - Side Flip": SM64ItemData(sm64ex_base_id + 368),
     "Big Boo's Haunt - Wall Kick": SM64ItemData(sm64ex_base_id + 369),
     "Big Boo's Haunt - Dive": SM64ItemData(sm64ex_base_id + 370, useful),
     "Big Boo's Haunt - Ground Pound": SM64ItemData(sm64ex_base_id + 371, progression_deprioritized_skip_balancing),
-    "Big Boo's Haunt - Kick": SM64ItemData(sm64ex_base_id + 372, progression_deprioritized_skip_balancing),
+    "Big Boo's Haunt - Kick": SM64ItemData(sm64ex_base_id + 372, filler),
     "Big Boo's Haunt - Climb": SM64ItemData(sm64ex_base_id + 373, filler), # not used
     "Big Boo's Haunt - Ledge Grab": SM64ItemData(sm64ex_base_id + 374),
     # Hazy Maze Cave
@@ -586,7 +586,7 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Wet-Dry World - Wall Kick": SM64ItemData(sm64ex_base_id + 429),
     "Wet-Dry World - Dive": SM64ItemData(sm64ex_base_id + 430),
     "Wet-Dry World - Ground Pound": SM64ItemData(sm64ex_base_id + 431, progression_deprioritized_skip_balancing),
-    "Wet-Dry World - Kick": SM64ItemData(sm64ex_base_id + 432, progression_deprioritized_skip_balancing),
+    "Wet-Dry World - Kick": SM64ItemData(sm64ex_base_id + 432, filler),
     "Wet-Dry World - Climb": SM64ItemData(sm64ex_base_id + 433, useful),
     "Wet-Dry World - Ledge Grab": SM64ItemData(sm64ex_base_id + 434),
     # Tall, Tall Mountain
@@ -614,7 +614,7 @@ per_level_action_item_data_table: dict[str, SM64ItemData] = {
     "Tiny-Huge Island - Ledge Grab": SM64ItemData(sm64ex_base_id + 454),
     # Tick Tock Clock
     "Tick Tock Clock - Triple Jump": SM64ItemData(sm64ex_base_id + 455),
-    "Tick Tock Clock - Long Jump": SM64ItemData(sm64ex_base_id + 456, progression_deprioritized_skip_balancing),
+    "Tick Tock Clock - Long Jump": SM64ItemData(sm64ex_base_id + 456, useful),
     "Tick Tock Clock - Backflip": SM64ItemData(sm64ex_base_id + 457),
     "Tick Tock Clock - Side Flip": SM64ItemData(sm64ex_base_id + 458),
     "Tick Tock Clock - Wall Kick": SM64ItemData(sm64ex_base_id + 459),

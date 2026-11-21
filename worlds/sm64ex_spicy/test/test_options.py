@@ -544,6 +544,10 @@ class FeatureItemPoolTestBase(SM64TestBase):
             "Dire, Dire Docks - Ledge Grab": ItemClassification.filler,
             "Tiny-Huge Island - Backflip": ItemClassification.filler,
             "Tiny-Huge Island - Kick": ItemClassification.filler,
+            "Big Boo's Haunt - Backflip": ItemClassification.filler,
+            "Big Boo's Haunt - Kick": ItemClassification.filler,
+            "Wet-Dry World - Kick": ItemClassification.filler,
+            "Tick Tock Clock - Long Jump": ItemClassification.useful,
         }
         for item_name, classification in expected_classifications.items():
             with self.subTest("Per-level move item classification", item=item_name):
@@ -556,7 +560,6 @@ class FeatureItemPoolTestBase(SM64TestBase):
                 "Cool, Cool Mountain - Triple Jump",
                 "Jolly Roger Bay - Long Jump",
                 "Snowman's Land - Climb",
-                "Wet-Dry World - Kick",
                 "Tick Tock Clock - Ground Pound",
         ):
             with self.subTest("One-check per-level move item skips balancing", item=item_name):
