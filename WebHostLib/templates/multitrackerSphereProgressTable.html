@@ -1,0 +1,39 @@
+{% if sphere_count %}
+    <div class="sphere-progress-controls">
+        <label for="sphere-cumulative" title="Count checks in this sphere and all earlier spheres">
+            <input type="checkbox" role="switch" id="sphere-cumulative" />
+            Cumulative
+        </label>
+    </div>
+    {% for team, rows in sphere_progress.items() %}
+        {% if rows %}
+        <div class="table-wrapper">
+            <table class="table non-unique-item-table sphere-progress-table" data-order='[[0, "asc"]]'>
+                <thead>
+                <tr>
+                    <th>Owner</th>
+                    {% for sphere_number in range(1, sphere_count + 1) %}
+                        <th class="center-column">{{ sphere_number }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td>{{ row.owner }}</td>
+                        {% for percent in row.progress %}
+                            {% set cumulative = row.cumulative_progress[loop.index0] %}
+                            <td class="center-column number"
+                                data-sphere-progress="{{ percent if percent is not none else '' }}"
+                                data-sphere-cumulative="{{ cumulative if cumulative is not none else '' }}">
+                                {% if percent is none %}&mdash;{% else %}{{ percent }}%{% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}

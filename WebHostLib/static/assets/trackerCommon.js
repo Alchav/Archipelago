@@ -33,6 +33,19 @@ const secondsToHours = (seconds) => {
 };
 
 window.addEventListener('load', () => {
+    const sphereCumulativeToggle = document.getElementById('sphere-cumulative');
+    if (sphereCumulativeToggle) {
+        sphereCumulativeToggle.checked = localStorage.getItem('tracker_sphere_cumulative') === 'true';
+    }
+    const updateSphereProgress = (root) => {
+        root.querySelectorAll('[data-sphere-progress]').forEach((cell) => {
+            const percent = sphereCumulativeToggle?.checked
+                ? cell.dataset.sphereCumulative : cell.dataset.sphereProgress;
+            cell.textContent = percent === '' ? '—' : `${percent}%`;
+        });
+    };
+    updateSphereProgress(document);
+
     const tables = $(".table").DataTable({
         paging: false,
         info: false,
@@ -98,6 +111,15 @@ window.addEventListener('load', () => {
         // the tbody and render two separate tables.
     });
 
+    sphereCumulativeToggle?.addEventListener('change', () => {
+        localStorage.setItem('tracker_sphere_cumulative', String(sphereCumulativeToggle.checked));
+        const sphereTables = tables.tables('.sphere-progress-table');
+        // Include rows detached from the DOM by the search filter.
+        sphereTables.rows().nodes().each((row) => updateSphereProgress(row));
+        sphereTables.rows().invalidate('dom');
+        sphereTables.draw(false);
+    });
+
     const searchBox = document.getElementById("search");
     searchBox.value = tables.search();
     searchBox.focus();
@@ -108,7 +130,8 @@ window.addEventListener('load', () => {
     };
     searchBox.addEventListener("keyup", doSearch);
     window.addEventListener("keydown", (event) => {
-        if (!event.ctrlKey && !event.altKey && event.key.length === 1 && document.activeElement !== searchBox) {
+        if (!event.ctrlKey && !event.altKey && event.key.length === 1 && document.activeElement !== searchBox
+            && document.activeElement !== sphereCumulativeToggle) {
             searchBox.focus();
             searchBox.select();
         }
@@ -144,6 +167,7 @@ window.addEventListener('load', () => {
             target.load(location.href, function (response, status) {
                 if (status === "success") {
                     target.find(".table").each(function (i, new_table) {
+                        updateSphereProgress(new_table);
                         const new_trs = $(new_table).find("tbody>tr");
                         const footer_tr = $(new_table).find("tfoot>tr");
                         const old_table = tables.eq(i);

@@ -364,6 +364,9 @@ class TrackerData:
                     continue
 
                 progress: List[Optional[int]] = []
+                cumulative_progress: List[Optional[int]] = []
+                cumulative_checked = 0
+                cumulative_total = 0
                 for sphere in spheres:
                     total = 0
                     checked = 0
@@ -374,10 +377,15 @@ class TrackerData:
                         checked += len(location_ids.intersection(
                             self.get_player_checked_locations(team, player)))
                     progress.append(round(checked / total * 100) if total else None)
+                    cumulative_checked += checked
+                    cumulative_total += total
+                    cumulative_progress.append(
+                        round(cumulative_checked / cumulative_total * 100) if cumulative_total else None)
 
                 rows.append({
                     "owner": owner_item_name.removesuffix(" Hint Point"),
                     "progress": progress,
+                    "cumulative_progress": cumulative_progress,
                 })
             result[team] = rows
         return result

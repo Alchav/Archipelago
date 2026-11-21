@@ -107,7 +107,7 @@ class TestTracker(TestBase):
 
 
 class TestOwnerSphereProgress(TestBase):
-    def test_progress_is_grouped_by_owner_and_sphere(self) -> None:
+    def make_tracker_data(self):
         from WebHostLib.tracker import TrackerData
 
         tracker_data = TrackerData.__new__(TrackerData)
@@ -134,8 +134,34 @@ class TestOwnerSphereProgress(TestBase):
         checked_locations = {1: {10, 12}, 2: set(), 3: {30, 32}}
         tracker_data.get_player_checked_locations = Mock(
             side_effect=lambda team, player: checked_locations[player])
+        return tracker_data
 
+    def test_progress_is_grouped_by_owner_and_sphere(self) -> None:
+        tracker_data = self.make_tracker_data()
         self.assertEqual(tracker_data.get_owner_sphere_progress(), {0: [
-            {"owner": "Alice", "progress": [33, 100]},
-            {"owner": "Bob", "progress": [100, 50]},
+            {"owner": "Alice", "progress": [33, 100], "cumulative_progress": [33, 50]},
+            {"owner": "Bob", "progress": [100, 50], "cumulative_progress": [100, 67]},
         ]})
+
+    def test_cumulative_progress_carries_across_empty_spheres(self) -> None:
+        tracker_data = self.make_tracker_data()
+        tracker_data._multidata["spheres"] = [{}, *tracker_data._multidata["spheres"], {}]
+        self.assertEqual(tracker_data.get_owner_sphere_progress(), {0: [
+            {"owner": "Alice", "progress": [None, 33, 100, None],
+             "cumulative_progress": [None, 33, 50, 50]},
+            {"owner": "Bob", "progress": [None, 100, 50, None],
+             "cumulative_progress": [None, 100, 67, 67]},
+        ]})
+
+    def test_sphere_table_includes_switch_and_both_percentages(self) -> None:
+        from flask import render_template
+
+        tracker_data = self.make_tracker_data()
+        with self.app.app_context():
+            html = render_template("multitrackerSphereProgressTable.html", sphere_count=2,
+                                   sphere_progress=tracker_data.get_owner_sphere_progress())
+        self.assertEqual(1, html.count('id="sphere-cumulative"'))
+        self.assertIn('role="switch"', html)
+        self.assertIn('data-sphere-progress="100"\n                                data-sphere-cumulative="50"',
+                      html)
+        self.assertNotIn("Auto", html)
