@@ -122,6 +122,34 @@ class TrackerData:
         return self._multisave.get("received_items", {}).get((team, player, True), [])
 
     @_cache_results
+    def get_team_logic(self, team: int) -> dict:
+        from ServerLogic import inventory_digest, unknown_result
+        if not self._multidata.get("logic_replay"):
+            return unknown_result('unavailable', 'This seed has no recorded generation inputs')
+        received = {slot: [(item.item, item.flags, item.player, item.location)
+                           for item in self.get_player_received_items(team, slot)]
+                    for slot in self._multidata["slot_info"]}
+        checked = {slot: self.get_player_checked_locations(team, slot) for slot in self._multidata['slot_info']}
+        result = self._multisave.get('logic_results', {}).get(team)
+        signature = inventory_digest(received, checked)
+        if result is not None and result.get('input_digest') == signature:
+            return result
+        return unknown_result('building', 'Waiting for server logic reconstruction or inventory update', signature)
+
+    def get_location_logic(self, team: int, player: int, location: int) -> Optional[bool]:
+        return self.get_team_logic(team)["locations"].get(player, {}).get(location)
+
+    def get_player_logic_summary(self, team: int, player: int) -> dict:
+        statuses = self.get_team_logic(team)["locations"].get(player, {})
+        unchecked = set(self.get_player_locations(player)) - self.get_player_checked_locations(team, player)
+        return {"reachable": sum(statuses.get(loc) is True for loc in unchecked),
+                "unknown": sum(statuses.get(loc) is None for loc in unchecked)}
+
+    def get_logic_diagnostics(self) -> List[str]:
+        return sorted({message for team in self.get_all_players()
+                       for message in self.get_team_logic(team)['diagnostics']})
+
+    @_cache_results
     def get_player_inventory_counts(self, team: int, player: int) -> collections.Counter:
         """Retrieves a dictionary of all items received by their id and their received count."""
         received_items = self.get_player_received_items(team, player)
@@ -567,6 +595,8 @@ def render_generic_tracker(tracker_data: TrackerData, team: int, player: int) ->
         inventory=tracker_data.get_player_inventory_counts(team, player),
         locations=tracker_data.get_player_locations(player),
         checked_locations=tracker_data.get_player_checked_locations(team, player),
+        location_logic=tracker_data.get_location_logic,
+        logic_diagnostics=tracker_data.get_logic_diagnostics(),
         received_items=received_items_in_order,
         saving_second=tracker_data.get_room_saving_second(),
         game=game,
@@ -598,6 +628,9 @@ def render_generic_multiworld_tracker(tracker_data: TrackerData, enabled_tracker
         game_unlocks=tracker_data.get_room_game_unlocks(),
         hints=tracker_data.get_team_hints(),
         hint_usage=tracker_data.get_owner_hint_usage(),
+        location_logic=tracker_data.get_location_logic,
+        logic_summary=tracker_data.get_player_logic_summary,
+        logic_diagnostics=tracker_data.get_logic_diagnostics(),
         sphere_progress=tracker_data.get_owner_sphere_progress(),
         sphere_count=len(tracker_data.get_spheres()),
         activity_timers=tracker_data.get_room_last_activity(),
@@ -663,6 +696,9 @@ if "Factorio" in network_data_package["games"]:
             game_unlocks=tracker_data.get_room_game_unlocks(),
             hints=tracker_data.get_team_hints(),
             hint_usage=tracker_data.get_owner_hint_usage(),
+            location_logic=tracker_data.get_location_logic,
+            logic_summary=tracker_data.get_player_logic_summary,
+            logic_diagnostics=tracker_data.get_logic_diagnostics(),
             sphere_progress=tracker_data.get_owner_sphere_progress(),
             sphere_count=len(tracker_data.get_spheres()),
             activity_timers=tracker_data.get_room_last_activity(),
@@ -800,6 +836,9 @@ if "A Link to the Past" in network_data_package["games"]:
             game_unlocks=tracker_data.get_room_game_unlocks(),
             hints=tracker_data.get_team_hints(),
             hint_usage=tracker_data.get_owner_hint_usage(),
+            location_logic=tracker_data.get_location_logic,
+            logic_summary=tracker_data.get_player_logic_summary,
+            logic_diagnostics=tracker_data.get_logic_diagnostics(),
             sphere_progress=tracker_data.get_owner_sphere_progress(),
             sphere_count=len(tracker_data.get_spheres()),
             activity_timers=tracker_data.get_room_last_activity(),

@@ -341,6 +341,10 @@ class Context:
         self.clients = {}
         self.compatibility: int = compatibility
         self.shutdown_task = None
+        self.logic_replay = None
+        self.logic_results = {}
+        self._logic_service = None
+        self._logic_task = None
         self.data_filename = None
         self.save_filename = None
         self.saving = False
@@ -537,6 +541,7 @@ class Context:
 
     def _load(self, decoded_obj: MultiData, use_embedded_server_options: bool) -> None:
         self.read_data = {}
+        self.logic_replay = decoded_obj.get("logic_replay")
         # there might be a better place to put this.
         race_mode = decoded_obj.get("race_mode", 0)
         self.read_data["race_mode"] = lambda: race_mode
@@ -716,6 +721,33 @@ class Context:
             except Exception as e:
                 self.logger.exception(e)
             self._start_async_saving()
+        self.start_logic_tracking()
+
+    def start_logic_tracking(self):
+        if not self.logic_replay or self._logic_task is not None:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+
+        async def monitor():
+            try:
+                while not self.exit_event.is_set():
+                    for team in self.clients:
+                        previous = self.logic_results.get(team)
+                        current = self.get_logic_locations(team)
+                        if current != previous:
+                            self.save()
+                    try:
+                        await asyncio.wait_for(self.exit_event.wait(), 5)
+                    except asyncio.TimeoutError:
+                        pass
+            finally:
+                if self._logic_service is not None:
+                    self._logic_service.close()
+
+        self._logic_task = loop.create_task(monitor())
 
     def _start_async_saving(self, atexit_save: bool = True):
         if not self.auto_saver_thread:
@@ -758,6 +790,7 @@ class Context:
             "hint_locations_used": dict(self.hint_locations_used),
             "hints": dict(self.hints),
             "location_checks": dict(self.location_checks),
+            "logic_results": dict(self.logic_results),
             "name_aliases": self.name_aliases,
             "client_game_state": dict(self.client_game_state),
             "client_activity_timers": tuple(
@@ -867,6 +900,19 @@ class Context:
     def get_rechecked_hints(self, team: int, slot: int):
         self.recheck_hints(team, slot)
         return self.hints[team, slot]
+
+    def get_logic_locations(self, team: int) -> dict:
+        """Request real-world logic evaluation without blocking the server loop."""
+        from ServerLogic import LogicService
+        if self._logic_service is None:
+            self._logic_service = LogicService(self.logic_replay)
+        received = {slot: [(item.item, item.flags, item.player, item.location)
+                           for item in self.received_items.get((team, slot, True), [])]
+                    for slot in self.slot_info}
+        checked = {slot: set(self.location_checks.get((team, slot), set())) for slot in self.slot_info}
+        result = self._logic_service.request(received, checked)
+        self.logic_results[team] = result
+        return result
 
     def get_sphere(self, player: int, location_id: int) -> int:
         """Get sphere of a location, -1 if spheres are not available."""
@@ -1789,6 +1835,24 @@ class ClientMessageProcessor(CommonCommandProcessor):
             if remaining_item_pool[item]:
                 texts.append(f"{item}: {remaining_item_pool[item]}")
         self.output_multiple(texts)
+
+    def _cmd_logic(self):
+        """List your unchecked locations reachable with currently received items."""
+        if self.ctx.games.get(self.client.slot) == "AlchapelaBot":
+            self.output("AlchapelaBot checks are hidden from logic commands.")
+            return
+        result = self.ctx.get_logic_locations(self.client.team)
+        statuses = result["locations"].get(self.client.slot, {})
+        checked = self.ctx.location_checks[self.client.team, self.client.slot]
+        names = self.ctx.location_names[self.ctx.games[self.client.slot]]
+        reachable = [names[location] for location in self.ctx.locations[self.client.slot]
+                     if location not in checked and statuses.get(location) is True]
+        unknown = sum(statuses.get(location) is None for location in self.ctx.locations[self.client.slot]
+                      if location not in checked)
+        self.output(f"{len(reachable)} unchecked locations in logic; {unknown} unknown.")
+        self.output_multiple(sorted(reachable))
+        for diagnostic in result["diagnostics"]:
+            self.output(diagnostic)
 
     def _cmd_sphere(self, player=None):
         spheres = {}

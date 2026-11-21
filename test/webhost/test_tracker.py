@@ -1,5 +1,6 @@
 import os
 import pickle
+import unittest
 from pathlib import Path
 from typing import ClassVar
 from unittest.mock import Mock
@@ -105,6 +106,48 @@ class TestTracker(TestBase):
             with self.client.open(url_for("api.tracker_slot_data", tracker=self.tracker_uuid)) as response:
                 self.assertEqual(response.status_code, 200)
 
+    def test_logic_api_old_seed_is_unknown(self) -> None:
+        with self.app.test_request_context():
+            response = self.client.get(url_for("api.tracker_logic", tracker=self.tracker_uuid, team=0))
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertFalse(data["available"])
+        for player in data["players"]:
+            self.assertTrue(all(loc["in_logic"] is None for loc in player["locations"]))
+
+    def test_logic_api_and_location_page_with_server_results(self) -> None:
+        import zlib
+        from pony.orm import db_session
+        from MultiServer import Context
+        from WebHostLib.models import Room
+        from ServerLogic import inventory_digest
+
+        with db_session:
+            room = Room.get(id=self.room_id)
+            data = Context.decompress(room.seed.multidata)
+            player = next(iter(data["locations"]))
+            from NetUtils import NetworkSlot, SlotType
+            data['slot_info'][player] = NetworkSlot('Tester', 'Archipelago', SlotType.player)
+            addresses = [100, 101]
+            data['locations'][player] = {address: (1, player, 0) for address in addresses}
+            data['logic_replay'] = {'version': 1}
+            result = {'status': 'ready', 'input_digest': inventory_digest({player: []}, {player: set()}),
+                      'locations': {player: {addresses[0]: True, addresses[1]: False}}, 'diagnostics': []}
+            room.multisave = pickle.dumps({'logic_results': {0: result}})
+            room.seed.multidata = b'\x03' + zlib.compress(pickle.dumps(data))
+        with self.app.test_request_context():
+            response = self.client.get(url_for("api.tracker_logic", tracker=self.tracker_uuid, team=0))
+            self.assertEqual(response.status_code, 200)
+            statuses = next(p for p in response.get_json()['players'] if p['player'] == player)['locations']
+            self.assertTrue(statuses[0]['in_logic'])
+            self.assertTrue(all(loc['in_logic'] is False for loc in statuses[1:]))
+            page = self.client.get(url_for('get_generic_game_tracker', tracker=self.tracker_uuid,
+                                          tracked_team=0, tracked_player=player))
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'In logic', page.data)
+        self.assertIn(b'Out of logic', page.data)
+        self.assertNotIn(b'"arguments"', response.data)
+
 
 class TestOwnerSphereProgress(TestBase):
     def make_tracker_data(self):
@@ -165,3 +208,32 @@ class TestOwnerSphereProgress(TestBase):
         self.assertIn('data-sphere-progress="100"\n                                data-sphere-cumulative="50"',
                       html)
         self.assertNotIn("Auto", html)
+
+
+class TestLogicFreshness(unittest.TestCase):
+    def make_data(self):
+        from WebHostLib.tracker import TrackerData
+        from ServerLogic import inventory_digest
+        data = TrackerData.__new__(TrackerData)
+        data._tracker_cache = {}
+        data._multidata = {'logic_replay': {'version': 1}, 'slot_info': {1: None}}
+        data._multisave = {'logic_results': {0: {
+            'status': 'ready', 'input_digest': inventory_digest({1: []}, {1: set()}),
+            'locations': {1: {100: False}}, 'diagnostics': [],
+        }}}
+        return data
+
+    def test_current_server_results_are_used(self):
+        self.assertIs(self.make_data().get_location_logic(0, 1, 100), False)
+
+    def test_new_received_items_hide_stale_results(self):
+        from NetUtils import NetworkItem
+        data = self.make_data()
+        data._multisave['received_items'] = {(0, 1, True): [NetworkItem(123, 456, 1, 1)]}
+        self.assertIsNone(data.get_location_logic(0, 1, 100))
+        self.assertEqual(data.get_team_logic(0)['status'], 'building')
+
+    def test_new_checked_locations_hide_stale_results(self):
+        data = self.make_data()
+        data._multisave['location_checks'] = {(0, 1): {999}}
+        self.assertIsNone(data.get_location_logic(0, 1, 100))

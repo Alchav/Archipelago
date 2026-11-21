@@ -4,6 +4,7 @@ from collections.abc import Mapping, Sequence
 import typing
 import enum
 import warnings
+from typing_extensions import NotRequired
 from json import JSONEncoder, JSONDecoder
 
 if typing.TYPE_CHECKING:
@@ -541,6 +542,7 @@ class MultiData(typing.TypedDict):
     datapackage: dict[str, GamesPackage]
     race_mode: int
     owners: dict[int, int]
+    logic_replay: NotRequired[dict[str, typing.Any] | None]
 
 
 #if typing.TYPE_CHECKING:  # type-check with pure python implementation until we have a typing stub

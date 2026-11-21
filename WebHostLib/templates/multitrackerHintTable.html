@@ -1,3 +1,4 @@
+{% from "logicStatus.html" import logic_status with context %}
 {% for team, hints in hints.items() %}
     {% if hint_usage.get(team) %}
     <div class="table-wrapper">
@@ -40,6 +41,7 @@
                 <th>Game</th>
                 <th>Entrance</th>
                 <th class="center-column">Found</th>
+                <th class="center-column">Logic</th>
             </tr>
             </thead>
             <tbody>
@@ -70,6 +72,7 @@
                         <td>{{ games[(team, hint.finding_player)] }}</td>
                         <td>{% if hint.entrance %}{{ hint.entrance }}{% else %}Vanilla{% endif %}</td>
                         <td class="center-column">{% if hint.found %}✔{% endif %}</td>
+                        <td class="center-column">{{ logic_status(team, hint.finding_player, hint.location) }}</td>
                     </tr>
                 {% endif %}
             {%- endfor -%}

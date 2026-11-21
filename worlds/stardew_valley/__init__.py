@@ -50,6 +50,7 @@ from .options import (
     BundlePerRoom,
     BundleRandomization,
     BundleWhitelist,
+    DataRandomizationFishOrder,
     EnabledFillerBuffs,
     EntranceRandomization,
     Goal,
@@ -666,7 +667,7 @@ class StardewValleyWorld(World):
 
         randomized_data = prepare_randomized_data(self.content, self.options)
 
-        excluded_options = [BundleRandomization, BundlePerRoom, NumberOfMovementBuffs,
+        excluded_options = [DataRandomizationFishOrder, BundleRandomization, BundlePerRoom, NumberOfMovementBuffs,
                             EnabledFillerBuffs, TrapDistribution, BundleWhitelist, BundleBlacklist, JojaAreYouSure]
         excluded_option_names = [option.internal_name for option in excluded_options]
         generic_option_names = [option_name for option_name in PerGameCommonOptions.type_hints]

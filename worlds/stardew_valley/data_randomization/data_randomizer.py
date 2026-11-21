@@ -45,7 +45,8 @@ def randomize_data(content: StardewContent, options: StardewValleyOptions, rando
 
 def randomize_fish_data(behavior, content, data_to_randomize, random, options: StardewValleyOptions):
     if DataRandomizationOptionName.fish_cohesive in data_to_randomize:
-        randomize_fish_cohesive(content, data_to_randomize, behavior, random)
+        randomize_fish_cohesive(content, data_to_randomize, behavior, random,
+                               options.data_randomization_fish_order.value)
     else:
         randomize_fish_catch_method(content, data_to_randomize, behavior, random)
         randomize_fish_difficulty(content, data_to_randomize, behavior, random)
@@ -86,7 +87,8 @@ def fish_is_included(data_to_randomize: set[str], fish_data: FishItem) -> bool:
     return fish_data.difficulty != crab_pot_difficulty
 
 
-def randomize_fish_cohesive(content: StardewContent, data_to_randomize: set[str], behavior: DataRandomizationBehavior, random: Random):
+def randomize_fish_cohesive(content: StardewContent, data_to_randomize: set[str], behavior: DataRandomizationBehavior,
+                           random: Random, legacy_order=()):
     include_catch_method = DataRandomizationOptionName.fish_catch_method in data_to_randomize
     include_difficulty = DataRandomizationOptionName.fish_difficulty in data_to_randomize
     include_location = DataRandomizationOptionName.fish_location in data_to_randomize
@@ -100,7 +102,11 @@ def randomize_fish_cohesive(content: StardewContent, data_to_randomize: set[str]
 
     data_by_fish = {fish_name: fish_data for fish_name, fish_data in content.fishes.items() if include_catch_method or fish_data.difficulty != crab_pot_difficulty}
 
-    random_data_per_fish = randomizers_per_behavior[behavior](data_by_fish, random)
+    # FishItem has no natural ordering. Its old memory-address ordering changed
+    # across processes, so a seed could produce different catch requirements.
+    positions = {name: index for index, name in enumerate(legacy_order)}
+    random_data_per_fish = randomizers_per_behavior[behavior](
+        data_by_fish, random, value_key=lambda fish: (positions.get(fish.name, len(positions)), fish.name))
 
     for fish_name, random_fish_data in random_data_per_fish.items():
         original_data = content.fishes[fish_name]

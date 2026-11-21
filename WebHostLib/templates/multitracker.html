@@ -39,6 +39,9 @@
         </div>
 
         <div id="tables-container">
+        <div class="logic-diagnostics info" role="status">
+            {% for message in logic_diagnostics %}<div>{{ message }}</div>{% endfor %}
+        </div>
         {%- for team, players in room_players.items() -%}
             <div class="table-wrapper">
                 <table id="checks-table" class="table non-unique-item-table">
@@ -53,6 +56,7 @@
                             {% endblock %}
                             <th class="center-column">Checks</th>
                             <th class="center-column">&percnt;</th>
+                            <th class="center-column">In Logic</th>
                             <th class="center-column hours last-activity">Last<br>Activity</th>
                         </tr>
                     </thead>
@@ -103,6 +107,14 @@
                                 {%- endif -%}
                                 </td>
 
+                                <td class="center-column">
+                                    {% set logic = logic_summary(team, player) %}
+                                    <a href="{{ url_for('get_generic_game_tracker', tracker=room.tracker, tracked_team=team, tracked_player=player) }}"
+                                       title="Unchecked locations reachable with currently received items">
+                                        {{ logic.reachable }}{% if logic.unknown %} ({{ logic.unknown }} unknown){% endif %}
+                                    </a>
+                                </td>
+
                                 {%- if activity_timers[(team, player)] -%}
                                     <td class="center-column">{{ activity_timers[(team, player)].total_seconds() }}</td>
                                 {%- else -%}
@@ -129,6 +141,7 @@
                                         {{ "{0:.2f}".format(total_team_locations_complete[team] / total_team_locations[team] * 100) }}
                                     {%- endif -%}
                                 </td>
+                                <td class="center-column"></td>
                                 <td class="center-column last-activity"></td>
                             </tr>
                         </tfoot>

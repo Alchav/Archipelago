@@ -7,6 +7,53 @@ from ..strings.skill_names import Skill
 from ..strings.tool_names import FishingRod
 
 
+class TestCohesiveFishDeterminism(SVTestBase):
+    options = {
+        DataRandomization.internal_name: frozenset({
+            "Cohesive Fish", "Fish Catch Method", "Fish Difficulty", "Fish Location",
+            "Fish Season", "Fish Weather", "Fish Sell Price",
+        }),
+    }
+
+    def test_cohesive_data_is_repeatable_for_every_behavior(self):
+        from copy import copy
+        from random import Random
+        from ..content import create_content
+        from ..data_randomization.randomized_data_writer import prepare_randomized_data
+
+        options = copy(self.world.options)
+        options.data_randomization_behavior = DataRandomizationBehavior(1)
+        for behavior in range(1, 6):
+            with self.subTest(behavior=behavior):
+                options.data_randomization_behavior.value = behavior
+                first = create_content(options, Random(172))
+                # Keep allocations alive so a new content build gets different addresses.
+                allocations = [object() for _ in range(10000)]
+                second = create_content(options, Random(172))
+                self.assertEqual(prepare_randomized_data(first, options),
+                                 prepare_randomized_data(second, options))
+                self.assertEqual(len(allocations), 10000)
+
+    def test_legacy_order_is_repeatable_and_affects_randomization(self):
+        from copy import copy
+        from random import Random
+        from ..content import create_content
+        from ..data_randomization.randomized_data_writer import prepare_randomized_data
+
+        from ..options import DataRandomizationFishOrder
+        options = copy(self.world.options)
+        options.data_randomization_behavior = DataRandomizationBehavior(DataRandomizationBehavior.option_shuffled)
+        options.data_randomization_fish_order = DataRandomizationFishOrder([])
+        first = create_content(options, Random(172))
+        options.data_randomization_fish_order.value = sorted(first.fishes, reverse=True)
+        recovered = create_content(options, Random(172))
+        repeated = create_content(options, Random(172))
+        self.assertNotEqual(prepare_randomized_data(first, options),
+                            prepare_randomized_data(recovered, options))
+        self.assertEqual(prepare_randomized_data(recovered, options),
+                         prepare_randomized_data(repeated, options))
+
+
 class TestDataRandomizationRequirements(SVTestBase):
     options = {
         DataRandomization.internal_name: DataRandomization.preset_all,

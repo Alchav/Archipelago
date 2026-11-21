@@ -1176,6 +1176,37 @@ def _place_start_inventory_before_game(multiworld, spheres, starting_spheres, pl
             pass
 
 
+def apply_out_of_logic_rules(multiworld, targets=None):
+    """Apply the core's configured exclusions without running placement."""
+    if targets is None:
+        targets = [(loc.player, loc.name) for loc in multiworld.get_unfilled_locations()
+                   if loc.name in multiworld.worlds[loc.player].options.ool_locations]
+    for player, name in targets:
+        multiworld.get_location(name, player).access_rule = lambda state: False
+    return targets
+
+
+def apply_game_unlock_rules(multiworld, targets=None):
+    """Share the core's unlock gates between generation and logic reconstruction."""
+    if targets is None:
+        targets = []
+        for player, world in multiworld.worlds.items():
+            if player == 1 or player in multiworld.groups:
+                continue
+            try:
+                menu = multiworld.get_region(world.origin_region_name, player)
+            except KeyError:
+                continue
+            locations = (multiworld.get_locations(player)
+                         if world.game in ("Ocarina of Time", "Super Metroid Map Rando") else menu.locations)
+            targets.extend((player, 'location', loc.name) for loc in locations)
+            targets.extend((player, 'entrance', entrance.name) for entrance in menu.exits)
+    for player, kind, name in targets:
+        target = getattr(multiworld, 'get_' + kind)(name, player)
+        add_rule(target, lambda state, p=player: state.has(f"Unlock {multiworld.player_name[p]}", 1))
+    return targets
+
+
 def distribute_items_restrictive(multiworld: MultiWorld,
                                  panic_method: typing.Literal["swap", "raise", "start_inventory"] = "swap") -> None:
     assert all(item.location is None for item in multiworld.itempool), (
@@ -1186,9 +1217,10 @@ def distribute_items_restrictive(multiworld: MultiWorld,
 
     fill_locations = sorted(multiworld.get_unfilled_locations())
 
-    for location in fill_locations:
-        if location.name in multiworld.worlds[location.player].options.ool_locations:
-            location.access_rule = lambda state: False
+    rule_targets = apply_out_of_logic_rules(multiworld)
+    record = getattr(multiworld, '_logic_record', None)
+    if record is not None:
+        record['out_of_logic_locations'] = rule_targets
 
     multiworld.random.shuffle(fill_locations)
     # get items to distribute
@@ -1232,7 +1264,14 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             else:
                 filleritempool.append(item)
 
+    if record is not None:
+        from GenerationReplay import capture_checkpoint
+        capture_checkpoint(record, multiworld, 'fill_hook',
+                           [progitempool, usefulitempool, filleritempool, fill_locations])
     call_all(multiworld, "fill_hook", progitempool, usefulitempool, filleritempool, fill_locations)
+    if record is not None:
+        from GenerationReplay import register_items
+        register_items(multiworld, progitempool + usefulitempool + filleritempool)
 
     player_start_items = [
         item for item in sum(multiworld.precollected_items.values(), [])
@@ -1593,22 +1632,9 @@ def distribute_items_restrictive(multiworld: MultiWorld,
             starting_spheres[player] = earliest_start
 
     logging.info("adding rule")
-    for player, world in multiworld.worlds.items():
-        if player == 1 or player in multiworld.groups:
-            continue
-        try:
-            menu = multiworld.get_region(world.origin_region_name, player)
-        except KeyError:
-            continue
-        rule = lambda state, p=player: state.has(f"Unlock {multiworld.player_name[p]}", 1)
-        if multiworld.worlds[player].game in ("Ocarina of Time", "Super Metroid Map Rando"):
-            for location in multiworld.get_locations(player):
-                add_rule(location, rule)
-        else:
-            for location in menu.locations:
-                add_rule(location, rule)
-        for entrance in menu.exits:
-            add_rule(entrance, rule)
+    unlock_targets = apply_game_unlock_rules(multiworld)
+    if record is not None:
+        record['game_unlock_targets'] = unlock_targets
 
     # add_order = [player for player in multiworld.player_ids if multiworld.player_name[player] not in multiworld.worlds[1].options.start_games]
     # add_order.sort(key=lambda p: starting_spheres[p])

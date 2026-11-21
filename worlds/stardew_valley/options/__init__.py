@@ -16,6 +16,7 @@ from .options import (
     Cropsanity,
     DataRandomization,
     DataRandomizationBehavior,
+    DataRandomizationFishOrder,
     DebrisMultiplier,
     Eatsanity,
     ElevatorProgression,

@@ -38,7 +38,7 @@ def get_multidata_spheres(multiworld):
     return result
 
 
-def main(args, seed=None, baked_server_options: dict[str, object] | None = None):
+def main(args, seed=None, baked_server_options: dict[str, object] | None = None, *, logic_replay=None):
     if not baked_server_options:
         baked_server_options = get_settings().server_options.as_dict()
     assert isinstance(baked_server_options, dict)
@@ -52,6 +52,17 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
 
     logger = logging.getLogger()
     multiworld.set_seed(seed, args.race, str(args.outputname) if args.outputname else None)
+    from GenerationReplay import (begin_record, finish_record, RaceRandom, capture_checkpoint,
+                                  restore_checkpoint, register_items, generation_fingerprint, ReplayError)
+    if logic_replay is None and not args.skip_output and not args.spoiler_only:
+        generation_record = begin_record(args, multiworld)
+        from GenerationReplay import encode_value
+        generation_record['server_options'] = encode_value(baked_server_options)
+    else:
+        generation_record = None
+        if logic_replay is not None and args.race:
+            multiworld.random.obj = RaceRandom(tape=logic_replay['race_tape'])
+    multiworld._logic_record = generation_record
     multiworld.plando_options = args.plando
     multiworld.game = args.game.copy()
     multiworld.player_name = args.name.copy()
@@ -209,33 +220,72 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
 
     logger.info("Running Item Plando.")
     resolve_early_locations_for_planned(multiworld)
-    distribute_planned_blocks(multiworld, [x for player in multiworld.plando_item_blocks
-                                           for x in multiworld.plando_item_blocks[player]])
+    if generation_record is not None:
+        register_items(multiworld)
+        generation_record['before_plando'] = generation_fingerprint(multiworld)
+    if logic_replay is not None:
+        if generation_fingerprint(multiworld) != logic_replay['before_plando']:
+            raise ReplayError('Deterministic world setup did not match the original generation')
+        register_items(multiworld)
+        restore_checkpoint(logic_replay, multiworld, 'after_plando')
+    else:
+        distribute_planned_blocks(multiworld, [x for player in multiworld.plando_item_blocks
+                                               for x in multiworld.plando_item_blocks[player]])
+        capture_checkpoint(generation_record, multiworld, 'after_plando')
 
     logger.info('Running Pre Main Fill.')
 
     AutoWorld.call_all(multiworld, "pre_fill")
 
     prepare_custom_item_collections(multiworld)
+    if generation_record is not None:
+        register_items(multiworld)
+        generation_record['before_fill'] = generation_fingerprint(multiworld)
 
-    logger.info(f'Filling the multiworld with {len(multiworld.itempool)} items.')
-
-    if multiworld.algorithm == 'flood':
-        flood_items(multiworld)  # different algo, biased towards early game progress items
-    elif multiworld.algorithm == 'balanced':
-        distribute_items_restrictive(multiworld, get_settings().generator.panic_method)
+    if logic_replay is not None:
+        if generation_fingerprint(multiworld) != logic_replay['before_fill']:
+            raise ReplayError('Deterministic world setup did not match the original generation')
+        register_items(multiworld)
+        from Fill import apply_out_of_logic_rules, apply_game_unlock_rules
+        if 'fill_hook' in logic_replay['checkpoints']:
+            hook_lists = restore_checkpoint(logic_replay, multiworld, 'fill_hook')
+            apply_out_of_logic_rules(multiworld, logic_replay.get('out_of_logic_locations', []))
+            AutoWorld.call_all(multiworld, 'fill_hook', *hook_lists)
+            register_items(multiworld, (item for values in hook_lists[:3] for item in values))
+        restore_checkpoint(logic_replay, multiworld, 'after_fill')
+        apply_game_unlock_rules(multiworld, logic_replay.get('game_unlock_targets', []))
+    else:
+        logger.info(f'Filling the multiworld with {len(multiworld.itempool)} items.')
+        if multiworld.algorithm == 'flood':
+            flood_items(multiworld)  # different algo, biased towards early game progress items
+        elif multiworld.algorithm == 'balanced':
+            distribute_items_restrictive(multiworld, get_settings().generator.panic_method)
+        capture_checkpoint(generation_record, multiworld, 'after_fill')
 
     AutoWorld.call_all(multiworld, 'post_fill')
 
-    if multiworld.players > 1 and not args.skip_prog_balancing:
+    if generation_record is not None:
+        register_items(multiworld)
+
+    if logic_replay is not None:
+        register_items(multiworld)
+        restore_checkpoint(logic_replay, multiworld, 'after_balancing')
+    elif multiworld.players > 1 and not args.skip_prog_balancing:
         balance_multiworld_progression(multiworld)
     else:
         logger.info("Progression balancing skipped.")
+
+    capture_checkpoint(generation_record, multiworld, 'after_balancing')
 
     logger.info("Running pre-output steps.")
 
     AutoWorld.call_all(multiworld, "finalize_multiworld")
     AutoWorld.call_all(multiworld, "pre_output")
+
+    if logic_replay is not None:
+        return multiworld
+    if generation_record is not None:
+        finish_record(generation_record, multiworld)
 
     # we're about to output using multithreading, so we're removing the global random state to prevent accidental use
     multiworld.random.passthrough = False
@@ -420,6 +470,7 @@ def main(args, seed=None, baked_server_options: dict[str, object] | None = None)
                     "spheres": spheres,
                     "datapackage": data_package,
                     "race_mode": int(multiworld.is_race),
+                    "logic_replay": generation_record,
                 }
                 # TODO: change to `"version": version_tuple` after getting better serialization
                 AutoWorld.call_all(multiworld, "modify_multidata", multidata)

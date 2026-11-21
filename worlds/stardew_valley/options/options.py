@@ -1085,6 +1085,16 @@ class DataRandomizationBehavior(Choice):
     # option_wild = 6 # Wild: All entries are given a random value, with no regard for the original entries at all.
 
 
+class DataRandomizationFishOrder(OptionList):
+    """Recovery input for older seeds whose cohesive fish pool was sorted by memory address.
+
+    New seeds leave this empty and use fish names as a stable ordering.
+    """
+    internal_name = "data_randomization_fish_order"
+    display_name = "Data Randomization Fish Order"
+    visibility = Visibility.none
+
+
 class DataRandomization(OptionSet):
     """
     Enable randomization for various internal game data values. This can invalidate pre-existing game knowledge from you, or the internet - This option can be blocked by the host
@@ -1426,6 +1436,7 @@ class StardewValleyOptions(PerGameCommonOptions):
     trap_distribution: TrapDistribution
     data_randomization_behavior: DataRandomizationBehavior
     data_randomization: DataRandomization
+    data_randomization_fish_order: DataRandomizationFishOrder
     custom_logic: CustomLogic
     multiple_day_sleep_enabled: MultipleDaySleepEnabled
     multiple_day_sleep_cost: MultipleDaySleepCost

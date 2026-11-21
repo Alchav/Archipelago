@@ -160,6 +160,7 @@ class WebHostContext(Context):
                     self.set_save(restricted_loads(savegame_data))
             self._start_async_saving(atexit_save=False)
         asyncio.create_task(self.listen_to_db_commands())
+        self.start_logic_tracking()
 
     @db_session
     def _save(self, exit_save: bool = False) -> bool:

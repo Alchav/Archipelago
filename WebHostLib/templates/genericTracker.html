@@ -1,4 +1,5 @@
 {% extends "tablepage.html" %}
+{% from "logicStatus.html" import logic_status with context %}
 {% block head %}
     {{ super() }}
     <title>{{ player_name }}&apos;s Tracker</title>
@@ -33,6 +34,9 @@
         <div id="tracker-header-bar">
             <input placeholder="Search" id="search" />
             <div class="info">This tracker will automatically update itself periodically.</div>
+            <div class="logic-diagnostics info" role="status">
+                {% for message in logic_diagnostics %}<div>{{ message }}</div>{% endfor %}
+            </div>
         </div>
         <div id="tables-container">
             <div class="table-wrapper">
@@ -63,6 +67,7 @@
                         <tr>
                             <th>Location</th>
                             <th class="center-column">Checked</th>
+                            <th class="center-column">Logic</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,6 +78,7 @@
                             <td class="center-column">
                                 {% if location in checked_locations %}✔{% endif %}
                             </td>
+                            <td class="center-column">{{ logic_status(team, player, location) }}</td>
                         </tr>
                     {%- endfor -%}
 
@@ -90,6 +96,7 @@
                             <th>Game</th>
                             <th>Entrance</th>
                             <th class="center-column">Found</th>
+                            <th class="center-column">Logic</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -122,6 +129,7 @@
                             <td>{{ games[(team, hint.finding_player)] }}</td>
                             <td>{% if hint.entrance %}{{ hint.entrance }}{% else %}Vanilla{% endif %}</td>
                             <td class="center-column">{% if hint.found %}✔{% endif %}</td>
+                            <td class="center-column">{{ logic_status(team, hint.finding_player, hint.location) }}</td>
                         </tr>
                     {%- endfor -%}
                     </tbody>

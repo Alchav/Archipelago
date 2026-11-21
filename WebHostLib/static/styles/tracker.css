@@ -261,3 +261,6 @@ img.icon-sprite {
         min-height: 10px;
     }
 }
+.logic-in { color: #155b22; font-weight: bold; }
+.logic-out { color: #842929; }
+.logic-unknown { color: #555; font-style: italic; }

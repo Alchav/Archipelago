@@ -9,7 +9,7 @@ from ..options.options import DataRandomizationBehavior
 def shuffle_data(existing_values: dict[Any, Any], random: Random, *args, **kwargs) -> dict[Any, Any]:
     keys = sorted([key for key in existing_values.keys()])
     try:
-        values = sorted([val for val in existing_values.values()])
+        values = sorted([val for val in existing_values.values()], key=kwargs.get('value_key'))
     except TypeError:
         values = sorted([val for val in existing_values.values()], key=lambda x: id(x))
 
@@ -25,7 +25,7 @@ def shuffle_data(existing_values: dict[Any, Any], random: Random, *args, **kwarg
 def weight_randomize(existing_values: dict[Any, Any], random: Random, *args, **kwargs) -> dict[Any, Any]:
     keys = sorted([key for key in existing_values.keys()])
     try:
-        values = sorted([val for val in existing_values.values()])
+        values = sorted([val for val in existing_values.values()], key=kwargs.get('value_key'))
     except TypeError:
         values = sorted([val for val in existing_values.values()], key=lambda x: id(x))
 
@@ -38,9 +38,9 @@ def weight_randomize(existing_values: dict[Any, Any], random: Random, *args, **k
 
 def normal_randomize(existing_values: dict[Any, Any], random: Random, *args, **kwargs) -> dict[Any, Any]:
     if len(existing_values) < 2 or all(isinstance(val, bool) for val in existing_values.values()):
-        return randomize(existing_values, random)
+        return randomize(existing_values, random, *args, **kwargs)
     if any(not isinstance(val, Number) for val in existing_values.values()):
-        return randomize(existing_values, random)
+        return randomize(existing_values, random, *args, **kwargs)
 
     keys = sorted([key for key in existing_values.keys()])
     values = sorted([val for val in existing_values.values()])
@@ -83,7 +83,7 @@ def normal_sample(random: Random, mean: float = 0.0, standard_deviation: float =
 def randomize(existing_values: dict[Any, Any], random: Random, *args, **kwargs) -> dict[Any, Any]:
     keys = sorted([key for key in existing_values.keys()])
     try:
-        values = sorted({val for val in existing_values.values()})
+        values = sorted({val for val in existing_values.values()}, key=kwargs.get('value_key'))
     except TypeError:
         values = sorted({val for val in existing_values.values()}, key=lambda x: id(x))
 
@@ -127,7 +127,7 @@ def range_randomize_numeric(existing_values: dict[Any, Number], random: Random, 
         values = sorted({val for val in existing_values.values()}, key=lambda x: id(x))
 
     if len(values) < 2:
-        return randomize(existing_values, random)
+        return randomize(existing_values, random, *args, **kwargs)
 
     # TODO: Handle floats because this shit doesn't work
     # max_decimals = max(len(str(val - (val // 1))) - 2 for val in values)
@@ -161,7 +161,7 @@ def range_randomize_iterable(existing_values: dict[Any, Iterable], random: Rando
     value_for_type = values[0]
 
     if len(values) < 2:
-        return randomize(existing_values, random)
+        return randomize(existing_values, random, *args, **kwargs)
 
     value_sizes = [len(val) for val in values]
     smallest_value_size = min(value_sizes)
