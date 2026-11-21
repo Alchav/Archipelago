@@ -935,7 +935,9 @@ class PerLevelOneUpUnlockItemPoolTestBase(SM64TestBase):
         for item_name in global_one_up_unlock_item_data_table:
             self.assertEqual(len(self.get_items_by_name(item_name)), 0)
         for item_name in per_level_one_up_unlock_item_data_table:
-            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            self.assertEqual(len(self.get_items_by_name(item_name)),
+                             int(item_name != "Hazy Maze Cave - Trigger 1-Ups"), item_name)
+        self.assertEqual(self.world.item_name_to_id["Hazy Maze Cave - Trigger 1-Ups"], 3626884)
         self.assertEqual(item_table["Castle - Butterflies"], 3626915)
         self.assertEqual(item_table["Tall, Tall Mountain - Butterflies"], 3626918)
 
@@ -948,7 +950,8 @@ class BothOneUpUnlockItemPoolTestBase(SM64TestBase):
 
     def test_both_one_up_unlock_item_forms_are_generated(self):
         for item_name in (*global_one_up_unlock_item_data_table, *per_level_one_up_unlock_item_data_table):
-            self.assertEqual(len(self.get_items_by_name(item_name)), 1)
+            self.assertEqual(len(self.get_items_by_name(item_name)),
+                             int(item_name != "Hazy Maze Cave - Trigger 1-Ups"), item_name)
 
 
 class MontyMoleEnemyUnlockItemPoolTestBase(SM64TestBase):

@@ -945,7 +945,8 @@ class SM64World(World):
         item_names = self.get_unlock_item_names(
             self.options.one_up_unlocks,
             global_one_up_unlock_item_names,
-            per_level_one_up_unlock_item_data_table)
+            (name for name in per_level_one_up_unlock_item_data_table
+             if name != "Hazy Maze Cave - Trigger 1-Ups"))
         if self.options.one_up_unlocks.value == self.options.one_up_unlocks.option_not_shuffled:
             return []
         if self.options.one_up_checks:
