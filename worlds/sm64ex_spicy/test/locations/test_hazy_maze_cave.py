@@ -12,6 +12,7 @@ HMC_OPTIONS = {
         "bobomb_buddies": Options.BobombBuddies.option_per_level,
     "one_up_checks": Options.OneUpChecks.option_true,
     "one_up_unlocks": Options.OneUpUnlocks.option_per_level,
+    "sign_unlocks": Options.SignUnlocks.option_per_level,
     "cap_items": Options.CapItems.option_per_level,
     "triple_jump": Options.TripleJump.option_global,
     "long_jump": Options.LongJump.option_global,
@@ -39,8 +40,17 @@ class TestHazyMazeCaveLocations(SM64TestBase):
             "Wall Kick",
         ]
         pit_islands = ["Triple Jump", "Climb"]
+        climb_without_height = ["Backflip", "Climb"]
+        climb_with_sign = climb_without_height + ["Hazy Maze Cave - Signs"]
+        blocks = ["Hazy Maze Cave - 1-Up Blocks"]
 
         self.run_location_tests([
+            ["Hazy Maze Cave - A-Maze-Ing Emergency Exit", False, climb_without_height],
+            ["Hazy Maze Cave - A-Maze-Ing Emergency Exit", True, climb_with_sign],
+            ["Hazy Maze Cave - Above Pit 1-Up Block", False, climb_without_height + blocks],
+            ["Hazy Maze Cave - Above Pit 1-Up Block", True, climb_with_sign + blocks],
+            ["Hazy Maze Cave - Above Pit Block 1-Up", False, climb_without_height + blocks],
+            ["Hazy Maze Cave - Above Pit Block 1-Up", True, climb_with_sign + blocks],
             ["Hazy Maze Cave - Swimming Beast in the Cavern", False, []],
             ["Hazy Maze Cave - Swimming Beast in the Cavern", True,
              ["Hazy Maze Cave - Swimming Beast"]],

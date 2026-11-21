@@ -879,7 +879,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
         "Hazy Maze Cave - Upper Red Coin Room",
         "{Hazy Maze Cave - Mid Red Coin Room} & CL | logic_hmc_upper_red_coin_area_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Pit Islands Elevator Room", "TJ/SF/BF/WK")
-    rf.assign_rule("Hazy Maze Cave - Pit Islands", "CL | logic_hmc_pit_islands_long_jump")
+    rf.assign_rule("Hazy Maze Cave - Pit Islands", "CL & TJ/HMC_SIGNS | logic_hmc_pit_islands_long_jump")
     rf.assign_rule("Hazy Maze Cave - Pit Islands with Wall Kick", "logic_hmc_pit_islands_wall_kick")
     rf.assign_rule("Hazy Maze Cave - Metal-Head Mario Can Move Room",
                    "PURPLE_SWITCHES & MC | PURPLE_SWITCHES & logic_hmc_metal_head_capless")
@@ -2062,6 +2062,7 @@ class RuleFactory:
             self.options, "enemy_unlocks",
             f"{level_name} - Flying Bookends", f"{level_name} - Flying Bookends")
         item_names["JRB_SIGNS"] = HasUnlock("Signs", "Jolly Roger Bay - Signs")
+        item_names["HMC_SIGNS"] = HasUnlock("Signs", "Hazy Maze Cave - Signs")
         item_names["BOB_CORKBOXES"] = HasUnlock("Throwable Cork Boxes", "Bob-omb Battlefield - Throwable Cork Boxes")
         return item_names
 

@@ -952,7 +952,9 @@ def evaluate_hazy_maze_cave_coins(
         "Coin line on the hangable ceiling above Pit Islands",
         5,
         state.can_reach(f"{level_name} - Pit Islands", "Region", player)
-        and has_climb and has_horizontal_coin_lines,
+        and has_climb and has_horizontal_coin_lines
+        and (Rules.has_action(state, player, "Triple Jump", level_name)
+             or Rules.has_unlock(state, player, "sign_unlocks", "Signs", f"{level_name} - Signs")),
     ))
     traces.append(coin_source(
         "swimming_beast_coin_ring",
@@ -4293,7 +4295,7 @@ def _middle_requirement_specs():
     _add(HMC, "upper_red_coin_swoops",
          f"{{{HMC} - Upper Red Coin Room}} & CHECKERBOARD_PLATFORMS",
          (_unlock("Swoops", HMC),))
-    _add(HMC, "toxic_maze_star_coin_line", f"{{{HMC} - Pit Islands}} & CL",
+    _add(HMC, "toxic_maze_star_coin_line", f"{{{HMC} - Pit Islands}} & CL & TJ/HMC_SIGNS",
          (_unlock("Horizontal Coin Lines", HMC),))
     _add(HMC, "swimming_beast_coin_ring",
          unlocks=(_unlock("Horizontal Coin Rings", HMC),))

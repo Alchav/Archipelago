@@ -715,7 +715,8 @@ class SM64World(World):
                 progitempool.remove(item)
                 usefulitempool.append(item)
 
-        downgrade(item for item in progitempool if item.name in sign_unlock_item_names)
+        downgrade(item for item in progitempool if item.name in sign_unlock_item_names
+                  and item.name not in {"Signs", "Hazy Maze Cave - Signs"})
         for global_names, per_level_names in self._fill_both_mode_sides():
             selected_names = global_names if self.random.randrange(2) == 0 else per_level_names
             downgrade(item for item in progitempool if item.name in selected_names)
