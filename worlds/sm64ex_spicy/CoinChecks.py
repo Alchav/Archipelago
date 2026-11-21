@@ -308,10 +308,8 @@ COIN_OUTPUT_SOURCE_METHOD_OVERRIDES: Mapping[tuple[str, str, int], tuple[str, ..
         ("Jolly Roger Bay", "purple_switch_lower_coin_line", index): ("vertical_coin_line",)
         for index in range(1, 4)
     },
-    **{
-        ("Jolly Roger Bay", "purple_switch_upper_coin_line", index): ("vertical_coin_line",)
-        for index in range(1, 3)
-    },
+    ("Jolly Roger Bay", "purple_switch_upper_coin_line", 1): ("vertical_coin_line",),
+    ("Jolly Roger Bay", "purple_switch_upper_coin_line", 2): ("vertical_coin_line_top",),
     ("Tall, Tall Mountain", "ttm_upper_leaf_coin_line", 1):
         ("ttm_upper_leaf_first_coin",),
     **{

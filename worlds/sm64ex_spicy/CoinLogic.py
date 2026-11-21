@@ -552,7 +552,11 @@ def evaluate_jolly_roger_bay_coins(
                 has_vertical_coin_rings),
         coin_source("tall_spike_coin_ring", "Coin ring around the tall spike", 8,
                 has_horizontal_coin_rings),
-        coin_source("vertical_coin_line", "Vertical Coin Line", 5, has_vertical_coin_lines),
+        coin_source("vertical_coin_line", "Lower four coins in the Vertical Coin Line", 4,
+                    has_vertical_coin_lines),
+        coin_source("vertical_coin_line_top", "Top coin in the Vertical Coin Line", 1,
+                    has_vertical_coin_lines and (
+                        has_upper or Rules.has_action(state, player, "Triple Jump", level_name))),
         coin_source("jet_stream_coin_ring", "Treasure Cave Coin Ring", 8,
                 has_horizontal_coin_rings),
         coin_source("cave_chest_coin_ring", "Clam Coin Ring", 8,
@@ -4126,6 +4130,9 @@ def _early_requirement_specs():
             JRB_TARGET, "", ("Horizontal Coin Rings", f"{JRB} - Horizontal Coin Rings")),
         (JRB, "vertical_coin_line"): _spec(
             JRB_TARGET, "", ("Vertical Coin Lines", f"{JRB} - Vertical Coin Lines")),
+        (JRB, "vertical_coin_line_top"): _spec(
+            JRB_TARGET, f"TJ | {{{JRB} - Upper}}",
+            ("Vertical Coin Lines", f"{JRB} - Vertical Coin Lines")),
         (JRB, "jet_stream_coin_ring"): _spec(
             JRB_TARGET, "", ("Horizontal Coin Rings", f"{JRB} - Horizontal Coin Rings")),
         (JRB, "cave_chest_coin_ring"): _spec(
