@@ -58,6 +58,8 @@ class TestWetDryWorldLowLocations(SM64TestBase):
 
             ["Wet-Dry World - Pedestal 10 Coins Block", False, []],
             ["Wet-Dry World - Pedestal 10 Coins Block", False,
+             ["Backflip", "Wall Kick", TEN_COIN_BLOCKS]],
+            ["Wet-Dry World - Pedestal 10 Coins Block", False,
              near_top + [TEN_COIN_BLOCKS]],
             ["Wet-Dry World - Pedestal 10 Coins Block", True,
              near_top + ["Side Flip", TEN_COIN_BLOCKS]],

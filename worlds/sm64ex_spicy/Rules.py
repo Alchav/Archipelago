@@ -998,10 +998,10 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
     wdw_pedestal_block_route = (
-        "{Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
-        "{Wet-Dry World - Low Water} & SF/BF/TJ | "
-        "{Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
-        "{Wet-Dry World - Mid Water} & SF/BF/TJ | "
+        "{Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+        "{Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} & SF/BF/TJ | "
+        "{Wet-Dry World - Near the Top} & {Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+        "{Wet-Dry World - Near the Top} & {Wet-Dry World - Mid Water} & SF/BF/TJ | "
         "{Wet-Dry World - High Water} & LG | "
         "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}"
     )

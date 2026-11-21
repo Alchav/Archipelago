@@ -2427,7 +2427,7 @@ def wet_dry_world_coin_evaluation(
         f"{level_name} - Top of the Express Elevator", "Region", player)
     can_reach_downtown = state.can_reach(f"{level_name} - Downtown", "Region", player)
     pedestal_block_route = (
-        (can_reach_low or can_reach_mid)
+        can_reach_near_top and (can_reach_low or can_reach_mid)
         and (
             has_heave_hos and can_use_pedestal_heave_ho
             or has_side_flip or has_backflip or has_triple_jump
@@ -4606,10 +4606,10 @@ def _late_requirement_specs():
     _add(WDW, "amp_ring", "{Wet-Dry World - Near the Top} & HORIZONTAL_COIN_RINGS",
          _unlock("Horizontal Coin Rings", WDW))
     _add(WDW, "pillar_ten_coin_block",
-         "{Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
-         "{Wet-Dry World - Low Water} & SF/BF/TJ | "
-         "{Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
-         "{Wet-Dry World - Mid Water} & SF/BF/TJ | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Low Water} & SF/BF/TJ | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Mid Water} & HEAVE_HOS & logic_wdw_pedestal_heave_ho | "
+         "{Wet-Dry World - Near the Top} & {Wet-Dry World - Mid Water} & SF/BF/TJ | "
          "{Wet-Dry World - High Water} & LG | "
          "{Wet-Dry World - Highest Water} | {Wet-Dry World - Top}",
          _unlock("10-Coin Blocks", WDW))
