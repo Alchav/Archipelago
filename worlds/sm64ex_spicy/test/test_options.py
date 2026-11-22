@@ -847,6 +847,26 @@ class TowerOfTheWingCapCoinCountChecksCapItemPoolTestBase(SM64TestBase):
             ItemClassification.progression_deprioritized_skip_balancing)
         self.assertTrue(self.get_items_by_name(item_name)[0].advancement)
 
+class TowerOfTheWingCapGlobalCoinChecksCapItemPoolTest(SM64TestBase):
+    options = {
+        "cap_items": Options.CapItems.option_per_level,
+        "blocksanity": 0,
+        "coin_count_checks": 0,
+        "global_coin_count_checks": 10,
+        "tower_of_the_wing_cap_coin_count_max_coins": 63,
+    }
+
+    def test_wing_cap_is_progression_for_global_coin_checks(self):
+        from ..CoinLogic import tower_of_the_wing_cap_coins
+
+        item = self.get_items_by_name("Tower of the Wing Cap - Wing Cap")[0]
+        self.assertTrue(item.advancement)
+        state = self.multiworld.get_all_state()
+        self.assertEqual(tower_of_the_wing_cap_coins(state, self.player, 63).reachable_coins, 63)
+        state.remove(item)
+        self.assertEqual(tower_of_the_wing_cap_coins(state, self.player, 63).reachable_coins, 51)
+
+
 class MariosHatItemPoolTestBase(SM64TestBase):
     options = {
         "marios_hat": Options.MariosHat.option_true,

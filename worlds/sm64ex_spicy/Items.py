@@ -38,7 +38,7 @@ def progression_deprioritized_skip_balancing_if_blocksanity(options):
 
 def progression_deprioritized_skip_balancing_if_totwc_coin_count_checks(options):
     if (options.blocksanity
-            or options.coin_count_checks.value > 0
+            or (options.coin_count_checks.value > 0 or options.global_coin_count_checks.value > 0)
             and options.tower_of_the_wing_cap_coin_count_max_coins.value > 51):
         return ItemClassification.progression_deprioritized_skip_balancing
     return ItemClassification.filler
