@@ -221,6 +221,7 @@ class SM64World(World):
     )
 
     def generate_early(self):
+        self.coin_trick_rule_cache = {}
         slot_data = self.get_re_gen_slot_data()
         self.area_connections = {}
         self.sub_area_slot_data = {}

@@ -5,6 +5,7 @@ from BaseClasses import CollectionState, ItemClassification
 from .bases import SM64TestBase as _SM64TestBase
 from .. import Options
 from ..CoinLogic import COIN_EVALUATORS
+from ..Items import ut_glitch_item_name
 from ..RuleBuilder import evaluate_coins
 from ..Regions import sm64_ttc_entrances
 from ..Rules import can_use_logic_trick, get_per_level_action_item_name
@@ -5797,6 +5798,28 @@ class SnowmansLandIndividualUnlockLogicTestBase(SM64TestBase):
         self.assertTrue(state.can_reach("Snowman's Land - Upper", "Region", self.player))
         self.assertTrue(state.can_reach("Snowman's Land - Into the Igloo", "Location", self.player))
         return state
+
+    def test_cached_trick_uses_current_inventory_and_glitch_eligibility(self):
+        trick = "logic_sl_impossible_coin"
+        target = "Snowman's Land - Coins Star"
+        state = CollectionState(self.multiworld)
+        cannon = self.world.create_item("Snowman's Land - Cannon Unlock")
+
+        self.assertFalse(can_use_logic_trick(state, self.player, trick, target))
+        cached_rule = self.world.coin_trick_rule_cache[trick, target]
+        state.collect(cannon)
+        self.assertTrue(can_use_logic_trick(state, self.player, trick, target))
+        self.assertIs(self.world.coin_trick_rule_cache[trick, target], cached_rule)
+        state.remove(cannon)
+        self.assertFalse(can_use_logic_trick(state, self.player, trick, target))
+
+        with patch.object(self.world, trick, False):
+            state.collect(cannon)
+            self.assertFalse(can_use_logic_trick(state, self.player, trick, target))
+            with patch.object(self.world, f"{trick}_ut_glitch", True, create=True):
+                self.assertFalse(can_use_logic_trick(state, self.player, trick, target))
+                state.collect(self.world.create_event_item(ut_glitch_item_name))
+                self.assertTrue(can_use_logic_trick(state, self.player, trick, target))
 
     def test_each_unlock_matches_documented_total(self):
         source_coins = {

@@ -203,14 +203,19 @@ def can_use_logic_trick(
     if not has_logic_trick(state, player, trick_name):
         return False
     world = state.multiworld.worlds[player]
-    rule_factory = RuleFactory(state.multiworld, world.options, player, world.move_rando_bitvec)
-    return rule_factory.build_rule(
-        trick_name,
-        rule_factory.get_cannon_item_name(target_name),
-        rule_factory.get_cap_item_names(target_name),
-        rule_factory.get_arbitrary_item_names(target_name),
-        rule_factory.get_action_item_names(target_name),
-    ).resolve(world)(state)
+    key = (trick_name, target_name)
+    rule = world.coin_trick_rule_cache.get(key)
+    if rule is None:
+        rule_factory = RuleFactory(state.multiworld, world.options, player, world.move_rando_bitvec)
+        rule = rule_factory.build_rule(
+            trick_name,
+            rule_factory.get_cannon_item_name(target_name),
+            rule_factory.get_cap_item_names(target_name),
+            rule_factory.get_arbitrary_item_names(target_name),
+            rule_factory.get_action_item_names(target_name),
+        ).resolve(world)
+        world.coin_trick_rule_cache[key] = rule
+    return rule(state)
 
 
 def has_metal_cap(state: CollectionState, player: int, level_name: str) -> bool:
