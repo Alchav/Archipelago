@@ -18,19 +18,23 @@ class PlayerAlias(TypedDict):
 
 
 @api_endpoints.route("/tracker/<suuid:tracker>/logic/<int:team>")
-@cache.memoize(timeout=60)
 def tracker_logic(tracker: UUID, team: int) -> dict[str, Any]:
-    """Current access only: no randomized rewards, rules, or placements exposed."""
+    """Verified access, retaining the previous snapshot while updating; no rewards exposed."""
     room = Room.get(tracker=tracker)
     if room is None:
         abort(404)
+    key = f'{tracker}_logic_{team}'
+    previous = cache.get(key)
+    revision = room.last_activity.isoformat()
+    if previous and previous['revision'] == revision:
+        return previous['data']
     data = TrackerData(room)
     if team not in data.get_all_players():
         abort(404)
     result = data.get_team_logic(team)
-    return {
+    response = {
         "team": team,
-        "available": result.get('status') == 'ready',
+        "available": result.get('status') in ('ready', 'updating'),
         "status": result.get('status', 'unavailable'),
         "diagnostics": result["diagnostics"],
         "players": [{"player": player, "locations": [
@@ -39,6 +43,9 @@ def tracker_logic(tracker: UUID, team: int) -> dict[str, Any]:
         ]} for player in data.get_all_players()[team]
            if data.get_player_game(player) != "AlchapelaBot"],
     }
+    cache.set(key, {'revision': revision, 'data': response},
+              timeout=2 if result.get('status') in ('building', 'updating') else 60)
+    return response
 
 
 class PlayerItemsReceived(TypedDict):

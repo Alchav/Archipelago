@@ -391,6 +391,14 @@ def add_json_hint_status(parts: list, hint_status: HintStatus, text: typing.Opti
                   "hint_status": hint_status, "type": JSONTypes.hint_status, **kwargs})
 
 
+def hint_logic_text(in_logic: typing.Optional[bool]) -> str:
+    if in_logic is True:
+        return '(in logic)'
+    if in_logic is False:
+        return '(out of logic)'
+    return '(logic unknown)'
+
+
 class Hint(typing.NamedTuple):
     receiving_player: int
     finding_player: int
@@ -419,7 +427,7 @@ class Hint(typing.NamedTuple):
     def __hash__(self):
         return hash((self.receiving_player, self.finding_player, self.location, self.item, self.entrance))
 
-    def as_network_message(self) -> dict:
+    def as_network_message(self, in_logic: typing.Optional[bool] = None) -> dict:
         parts = []
         add_json_text(parts, "[Hint]: ")
         add_json_text(parts, self.receiving_player, type="player_id")
@@ -436,6 +444,7 @@ class Hint(typing.NamedTuple):
             add_json_text(parts, "'s World")
         add_json_text(parts, ". ")
         add_json_hint_status(parts, self.status)
+        add_json_text(parts, ' ' + hint_logic_text(in_logic))
 
         return {"cmd": "PrintJSON", "data": parts, "type": "Hint",
                 "receiving": self.receiving_player,

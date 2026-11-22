@@ -162,14 +162,14 @@ class WebHostContext(Context):
         asyncio.create_task(self.listen_to_db_commands())
         self.start_logic_tracking()
 
-    @db_session
     def _save(self, exit_save: bool = False) -> bool:
-        room = Room.get(id=self.room_id)
-        # Does not use Utils.restricted_dumps because we'd rather make a save than not make one
-        room.multisave = pickle.dumps(self.get_save())
-        # saving only occurs on activity, so we can "abuse" this information to mark this as last_activity
-        if not exit_save:  # we don't want to count a shutdown as activity, which would restart the server again
-            room.last_activity = Utils.utcnow()
+        # Commit before releasing the lock so an older autosave cannot overwrite
+        # a freshly published logic result from the server loop.
+        with self._save_lock, db_session:
+            room = Room.get(id=self.room_id)
+            room.multisave = pickle.dumps(self.get_save())
+            if not exit_save:
+                room.last_activity = Utils.utcnow()
         return True
 
     def get_save(self) -> dict:

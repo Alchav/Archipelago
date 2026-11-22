@@ -39,7 +39,7 @@
         </div>
 
         <div id="tables-container">
-        <div class="logic-diagnostics info" role="status">
+        <div class="logic-diagnostics info" role="status" data-logic-updating="{{ 1 if logic_updating else 0 }}">
             {% for message in logic_diagnostics %}<div>{{ message }}</div>{% endfor %}
         </div>
         {%- for team, players in room_players.items() -%}
@@ -74,19 +74,7 @@
                                     <td>{{ games[(team, player)] }}</td>
                                 {%- endif -%}
                                 <td>
-                                    {% if not game_unlocks[(team, player)] %}
-                                        Locked
-                                    {% else %}
-                                    {{
-                                        {
-                                            0: "Disconnected",
-                                            5: "Connected",
-                                            10: "Ready",
-                                            20: "Playing",
-                                            30: "Goal Completed"
-                                        }.get(states[(team, player)], "Unknown State")
-                                    }}
-                                    {% endif %}
+                                    {{ slot_status(team, player) }}
                                 </td>
 
                                 {% block custom_table_row scoped %}

@@ -135,6 +135,7 @@ class TestTracker(TestBase):
                       'locations': {player: {addresses[0]: True, addresses[1]: False}}, 'diagnostics': []}
             room.multisave = pickle.dumps({'logic_results': {0: result}})
             room.seed.multidata = b'\x03' + zlib.compress(pickle.dumps(data))
+            room.last_activity = room.last_activity.replace(microsecond=100000)
         with self.app.test_request_context():
             response = self.client.get(url_for("api.tracker_logic", tracker=self.tracker_uuid, team=0))
             self.assertEqual(response.status_code, 200)
@@ -147,6 +148,40 @@ class TestTracker(TestBase):
         self.assertIn(b'In logic', page.data)
         self.assertIn(b'Out of logic', page.data)
         self.assertNotIn(b'"arguments"', response.data)
+
+        # A save can arrive while its replacement logic is still being evaluated.
+        # Keep the known values visible, and invalidate both page/API caches even
+        # when the next save has the same whole-second Last-Modified timestamp.
+        with db_session:
+            room = Room.get(id=self.room_id)
+            room.multisave = pickle.dumps({'logic_results': {0: result},
+                                          'location_checks': {(0, player): {100}}})
+            room.last_activity = room.last_activity.replace(microsecond=200000)
+        with self.app.test_request_context():
+            updating = self.client.get(url_for('api.tracker_logic', tracker=self.tracker_uuid, team=0)).get_json()
+            self.assertEqual(updating['status'], 'updating')
+            self.assertTrue(updating['available'])
+            self.assertTrue(all(loc['in_logic'] is not None for p in updating['players'] for loc in p['locations']))
+            updated_page = self.client.get(
+                url_for('get_generic_game_tracker', tracker=self.tracker_uuid, tracked_team=0, tracked_player=player),
+                headers={'If-None-Match': page.headers['ETag'],
+                         'If-Modified-Since': page.headers['Last-Modified']})
+            self.assertEqual(updated_page.status_code, 200)
+            self.assertIn(b'data-logic-updating="1"', updated_page.data)
+            self.assertIn(b'last verified', updated_page.data)
+            self.assertNotEqual(page.headers['ETag'], updated_page.headers['ETag'])
+
+        result = {**result, 'input_digest': inventory_digest({player: []}, {player: {100}}),
+                  'locations': {player: {100: True, 101: True}}}
+        with db_session:
+            room = Room.get(id=self.room_id)
+            room.multisave = pickle.dumps({'logic_results': {0: result},
+                                          'location_checks': {(0, player): {100}}})
+            room.last_activity = room.last_activity.replace(microsecond=300000)
+        with self.app.test_request_context():
+            ready = self.client.get(url_for('api.tracker_logic', tracker=self.tracker_uuid, team=0)).get_json()
+            self.assertEqual(ready['status'], 'ready')
+            self.assertTrue(all(loc['in_logic'] for p in ready['players'] for loc in p['locations']))
 
 
 class TestOwnerSphereProgress(TestBase):
@@ -211,6 +246,30 @@ class TestOwnerSphereProgress(TestBase):
 
 
 class TestLogicFreshness(unittest.TestCase):
+    def test_slot_status_precedence_and_connection_independence(self):
+        from NetUtils import ClientStatus
+        for client_status, unlocked, go_mode, expected in (
+                (0, False, False, 'Locked'), (20, False, True, 'Locked'),
+                (0, True, False, 'Active'), (5, True, False, 'Active'),
+                (10, True, False, 'Active'), (20, True, False, 'Active'),
+                (0, True, True, 'Go Mode'), (20, True, True, 'Go Mode'),
+                (ClientStatus.CLIENT_GOAL, True, True, 'Goal Completed'),
+                (ClientStatus.CLIENT_GOAL, False, False, 'Goal Completed')):
+            with self.subTest(expected=expected, client_status=client_status):
+                data = self.make_data()
+                data.get_room_game_unlocks = Mock(return_value={(0, 1): unlocked})
+                data._multisave['client_game_state'] = {(0, 1): client_status}
+                data._multisave['logic_results'][0]['completion'] = {1: go_mode}
+                self.assertEqual(data.get_player_slot_status(0, 1), expected)
+
+    def test_pending_completion_keeps_verified_go_mode(self):
+        data = self.make_data()
+        data.get_room_game_unlocks = Mock(return_value={(0, 1): True})
+        data._multisave['logic_results'][0]['completion'] = {1: True}
+        data._multisave['location_checks'] = {(0, 1): {999}}
+        self.assertEqual(data.get_player_slot_status(0, 1), 'Go Mode')
+        self.assertEqual(data.get_team_logic(0)['status'], 'updating')
+
     def make_data(self):
         from WebHostLib.tracker import TrackerData
         from ServerLogic import inventory_digest
@@ -226,14 +285,22 @@ class TestLogicFreshness(unittest.TestCase):
     def test_current_server_results_are_used(self):
         self.assertIs(self.make_data().get_location_logic(0, 1, 100), False)
 
-    def test_new_received_items_hide_stale_results(self):
+    def test_new_received_items_keep_verified_results_while_updating(self):
         from NetUtils import NetworkItem
         data = self.make_data()
         data._multisave['received_items'] = {(0, 1, True): [NetworkItem(123, 456, 1, 1)]}
-        self.assertIsNone(data.get_location_logic(0, 1, 100))
-        self.assertEqual(data.get_team_logic(0)['status'], 'building')
+        self.assertIs(data.get_location_logic(0, 1, 100), False)
+        self.assertEqual(data.get_team_logic(0)['status'], 'updating')
+        self.assertIn('last verified', data.get_team_logic(0)['diagnostics'][0])
 
-    def test_new_checked_locations_hide_stale_results(self):
+    def test_new_checked_locations_keep_verified_results_while_updating(self):
         data = self.make_data()
         data._multisave['location_checks'] = {(0, 1): {999}}
+        self.assertIs(data.get_location_logic(0, 1, 100), False)
+        self.assertEqual(data.get_team_logic(0)['status'], 'updating')
+
+    def test_no_verified_result_remains_unknown(self):
+        data = self.make_data()
+        data._multisave['logic_results'] = {}
         self.assertIsNone(data.get_location_logic(0, 1, 100))
+        self.assertEqual(data.get_team_logic(0)['status'], 'building')

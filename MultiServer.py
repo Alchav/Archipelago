@@ -388,6 +388,7 @@ class Context:
         self.auto_save_interval = 60  # in seconds
         self.auto_saver_thread: typing.Optional[threading.Thread] = None
         self.save_dirty = False
+        self._save_lock = threading.RLock()
         self.tags = ['AP']
         self.games: typing.Dict[int, str] = {}
         self.played_games = set()
@@ -693,16 +694,17 @@ class Context:
         return False
 
     def _save(self, exit_save: bool = False) -> bool:
-        try:
-            # Does not use Utils.restricted_dumps because we'd rather make a save than not make one
-            encoded_save = pickle.dumps(self.get_save())
-            with open(self.save_filename, "wb") as f:
-                f.write(zlib.compress(encoded_save))
-        except Exception as e:
-            self.logger.exception(e)
-            return False
-        else:
-            return True
+        with self._save_lock:
+            try:
+                # Does not use Utils.restricted_dumps because we'd rather make a save than not make one
+                encoded_save = pickle.dumps(self.get_save())
+                with open(self.save_filename, "wb") as f:
+                    f.write(zlib.compress(encoded_save))
+            except Exception as e:
+                self.logger.exception(e)
+                return False
+            else:
+                return True
 
     def init_save(self, enabled: bool = True):
         self.saving = enabled
@@ -732,15 +734,21 @@ class Context:
             return
 
         async def monitor():
+            published = dict(self.logic_results)
             try:
                 while not self.exit_event.is_set():
+                    pending = False
                     for team in self.clients:
-                        previous = self.logic_results.get(team)
                         current = self.get_logic_locations(team)
-                        if current != previous:
-                            self.save()
+                        pending |= current.get('status') == 'building'
+                    if self.logic_results != published:
+                        try:
+                            if self.save(now=True) or not self.saving:
+                                published = dict(self.logic_results)
+                        except OperationalError:
+                            self.logger.exception('Unable to publish logic results; retrying')
                     try:
-                        await asyncio.wait_for(self.exit_event.wait(), 5)
+                        await asyncio.wait_for(self.exit_event.wait(), .25 if pending else 1)
                     except asyncio.TimeoutError:
                         pass
             finally:
@@ -910,8 +918,12 @@ class Context:
                            for item in self.received_items.get((team, slot, True), [])]
                     for slot in self.slot_info}
         checked = {slot: set(self.location_checks.get((team, slot), set())) for slot in self.slot_info}
-        result = self._logic_service.request(received, checked)
-        self.logic_results[team] = result
+        result = self._logic_service.request(received, checked, team=team)
+        previous = self.logic_results.get(team)
+        if result.get('status') == 'building' and result.get('previous_result'):
+            self.logic_results[team] = result['previous_result']
+        elif not (result.get('status') == 'building' and previous and previous.get('status') == 'ready'):
+            self.logic_results[team] = result
         return result
 
     def get_sphere(self, player: int, location_id: int) -> int:
@@ -968,8 +980,11 @@ class Context:
             return
         new_hint_events: typing.Set[int] = set()
         concerns = collections.defaultdict(list)
+        logic = self.get_logic_locations(team)
         for hint in sorted(hints, key=operator.attrgetter('found'), reverse=True):
-            data = (hint, hint.as_network_message())
+            in_logic = (logic['locations'].get(hint.finding_player, {}).get(hint.location)
+                        if logic.get('status') == 'ready' else None)
+            data = (hint, hint.as_network_message(in_logic))
             for player in self.slot_set(hint.receiving_player):
                 concerns[player].append(data)
             if not hint.local and data not in concerns[hint.finding_player]:
@@ -994,7 +1009,7 @@ class Context:
                     self.hints[team, hinting_player].add(hint)
                     new_hint_events.add(hinting_player)
 
-            self.logger.info("Notice (Team #%d): %s" % (team + 1, format_hint(self, team, hint)))
+            self.logger.info("Notice (Team #%d): %s" % (team + 1, format_hint(self, team, hint, logic)))
         for slot in new_hint_events:
             self.on_new_hint(team, slot)
         for slot, hint_data in concerns.items():
@@ -1577,7 +1592,8 @@ status_names: typing.Dict[HintStatus, str] = {
     HintStatus.HINT_AVOID: "(avoid)",
     HintStatus.HINT_PRIORITY: "(priority)",
 }
-def format_hint(ctx: Context, team: int, hint: Hint) -> str:
+def format_hint(ctx: Context, team: int, hint: Hint, logic: typing.Optional[dict] = None) -> str:
+    from NetUtils import hint_logic_text
     text = f"[Hint]: {ctx.player_names[team, hint.receiving_player]}'s " \
            f"{ctx.item_names[ctx.slot_info[hint.receiving_player].game][hint.item]} is " \
            f"at {ctx.location_names[ctx.slot_info[hint.finding_player].game][hint.location]} " \
@@ -1586,7 +1602,11 @@ def format_hint(ctx: Context, team: int, hint: Hint) -> str:
     if hint.entrance:
         text += f" at {hint.entrance}"
 
-    return text + ". " + status_names.get(hint.status, "(unknown)")
+    if logic is None:
+        logic = ctx.get_logic_locations(team)
+    in_logic = (logic['locations'].get(hint.finding_player, {}).get(hint.location)
+                if logic.get('status') == 'ready' else None)
+    return text + ". " + status_names.get(hint.status, "(unknown)") + ' ' + hint_logic_text(in_logic)
 
 
 def json_format_send_event(net_item: NetworkItem, receiving_player: int, hint):

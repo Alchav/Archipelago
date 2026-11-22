@@ -229,6 +229,7 @@ class TestCustomCollectionHints(unittest.TestCase):
             hints=defaultdict(set), slot_set=lambda slot: {slot},
             logger=Mock(), on_new_hint=Mock(), clients={0: {2: [client]}},
             send_msgs=Mock(return_value="send task"),
+            get_logic_locations=Mock(return_value={'status': 'unavailable', 'locations': {}}),
         )
         with patch("MultiServer.format_hint", return_value="hint text"), \
                 patch("MultiServer.async_start") as start:
@@ -238,6 +239,58 @@ class TestCustomCollectionHints(unittest.TestCase):
         self.assertIn(hint, ctx.hints[0, 3])
         ctx.send_msgs.assert_called_once_with(client, [hint.as_network_message()])
         start.assert_called_once_with("send task")
+
+
+class TestLogicPublication(unittest.TestCase):
+    def test_pending_request_keeps_ready_snapshot_but_returns_pending_to_hints(self):
+        ready = {'status': 'ready', 'input_digest': 'previous', 'locations': {1: {100: True}}}
+        pending = {'status': 'building', 'locations': {}}
+        ctx = SimpleNamespace(
+            _logic_service=SimpleNamespace(request=Mock(return_value=pending)),
+            slot_info={1: None}, received_items={}, location_checks={}, logic_results={0: ready},
+        )
+        self.assertIs(Context.get_logic_locations(ctx, 0), pending)
+        self.assertIs(ctx.logic_results[0], ready)
+        completed_while_pending = {**ready, 'input_digest': 'intermediate'}
+        ctx._logic_service.request.return_value = {**pending, 'previous_result': completed_while_pending}
+        self.assertEqual(Context.get_logic_locations(ctx, 0)['status'], 'building')
+        self.assertIs(ctx.logic_results[0], completed_while_pending)
+        replacement = {**ready, 'input_digest': 'new'}
+        ctx._logic_service.request.return_value = replacement
+        self.assertIs(Context.get_logic_locations(ctx, 0), replacement)
+        self.assertIs(ctx.logic_results[0], replacement)
+        error = {'status': 'error', 'locations': {}, 'diagnostics': ['failed']}
+        ctx._logic_service.request.return_value = error
+        Context.get_logic_locations(ctx, 0)
+        self.assertIs(ctx.logic_results[0], error)
+
+
+class TestHintLogicLabels(unittest.TestCase):
+    def test_hint_text_and_network_use_finding_players_logic(self):
+        from MultiServer import format_hint
+        for status, reachable, expected in (
+                ('ready', True, '(in logic)'), ('ready', False, '(out of logic)'),
+                ('building', True, '(logic unknown)')):
+            with self.subTest(expected=expected):
+                hint = Hint(2, 3, 100, 123, False)
+                client = SimpleNamespace(no_text=False)
+                logic = {'status': status, 'locations': {2: {100: not reachable}, 3: {100: reachable}}}
+                ctx = SimpleNamespace(
+                    hints=defaultdict(set), slot_set=lambda slot: {slot}, logger=Mock(),
+                    on_new_hint=Mock(), clients={0: {2: [client]}},
+                    send_msgs=Mock(return_value='send task'), get_logic_locations=Mock(return_value=logic),
+                    player_names={(0, 2): 'Receiver', (0, 3): 'Finder'},
+                    slot_info={2: SimpleNamespace(game='Receiver Game'), 3: SimpleNamespace(game='Finder Game')},
+                    item_names={'Receiver Game': {123: 'Example Item'}},
+                    location_names={'Finder Game': {100: 'Example Location'}},
+                )
+                with patch('MultiServer.async_start'):
+                    Context.notify_hints(ctx, 0, [hint])
+                packet = ctx.send_msgs.call_args.args[1][0]
+                self.assertTrue(''.join(part['text'] for part in packet['data']).endswith(expected))
+                self.assertTrue(format_hint(ctx, 0, hint).endswith(expected))
+                self.assertEqual(packet['item'].player, 3)
+                self.assertEqual(packet['receiving'], 2)
 
 
 class TestGeneratedHintPoints(unittest.TestCase):

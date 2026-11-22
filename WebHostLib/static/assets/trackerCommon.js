@@ -150,6 +150,7 @@ window.addEventListener('load', () => {
     console.log("Target second of refresh: " + target_second);
 
     function getSleepTimeSeconds() {
+        if (document.querySelector('[data-logic-updating="1"]')) return 2;
         // -40 % 60 is -40, which is absolutely wrong and should burn
         var sleepSeconds = (((target_second - new Date().getSeconds()) % 60) + 60) % 60;
         return sleepSeconds || 60;
@@ -160,6 +161,7 @@ window.addEventListener('load', () => {
         if (document.hidden) {
             console.log("Document reporting as not visible, not updating Tracker...");
             update_on_view = true;
+            updater = setTimeout(update, getSleepTimeSeconds() * 1000);
         } else {
             update_on_view = false;
             const target = $("<div></div>");
@@ -184,13 +186,15 @@ window.addEventListener('load', () => {
                     });
                     $("#multi-stream-link").replaceWith(target.find("#multi-stream-link"));
                     $(".logic-diagnostics").html(target.find(".logic-diagnostics").html());
+                    $(".logic-diagnostics").attr("data-logic-updating",
+                        target.find(".logic-diagnostics").attr("data-logic-updating"));
                 } else {
                     console.log("Failed to connect to Server, in order to update Table Data.");
                     console.log(response);
                 }
+                updater = setTimeout(update, getSleepTimeSeconds() * 1000);
             })
         }
-        updater = setTimeout(update, getSleepTimeSeconds() * 1000);
     }
     let updater = setTimeout(update, getSleepTimeSeconds() * 1000);
 

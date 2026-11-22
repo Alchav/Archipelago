@@ -34,7 +34,7 @@
         <div id="tracker-header-bar">
             <input placeholder="Search" id="search" />
             <div class="info">This tracker will automatically update itself periodically.</div>
-            <div class="logic-diagnostics info" role="status">
+            <div class="logic-diagnostics info" role="status" data-logic-updating="{{ 1 if logic_updating else 0 }}">
                 {% for message in logic_diagnostics %}<div>{{ message }}</div>{% endfor %}
             </div>
         </div>

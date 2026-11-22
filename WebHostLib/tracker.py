@@ -14,7 +14,7 @@ from Utils import restricted_loads, KeyedDefaultDict, utcnow
 from . import app, cache
 from .models import GameDataPackage, Room
 
-# Multisave is currently updated, at most, every minute.
+# Normal page refresh cadence; verified logic updates can publish sooner.
 TRACKER_CACHE_TIMEOUT_IN_SECONDS = 60
 
 _multiworld_trackers: Dict[str, Callable] = {}
@@ -134,6 +134,9 @@ class TrackerData:
         signature = inventory_digest(received, checked)
         if result is not None and result.get('input_digest') == signature:
             return result
+        if result is not None and result.get('status') == 'ready':
+            return {**result, 'status': 'updating',
+                    'diagnostics': ['Updating logic; showing the last verified results.']}
         return unknown_result('building', 'Waiting for server logic reconstruction or inventory update', signature)
 
     def get_location_logic(self, team: int, player: int, location: int) -> Optional[bool]:
@@ -145,9 +148,28 @@ class TrackerData:
         return {"reachable": sum(statuses.get(loc) is True for loc in unchecked),
                 "unknown": sum(statuses.get(loc) is None for loc in unchecked)}
 
+    def get_player_slot_status(self, team: int, player: int) -> str:
+        if self.get_player_client_status(team, player) == ClientStatus.CLIENT_GOAL:
+            return 'Goal Completed'
+        if not self.get_room_game_unlocks()[team, player]:
+            return 'Locked'
+        logic = self.get_team_logic(team)
+        if logic.get('status') in ('ready', 'updating') and logic.get('completion', {}).get(player) is True:
+            return 'Go Mode'
+        return 'Active'
+
     def get_logic_diagnostics(self) -> List[str]:
         return sorted({message for team in self.get_all_players()
                        for message in self.get_team_logic(team)['diagnostics']})
+
+    def is_logic_updating(self) -> bool:
+        return any(self.get_team_logic(team)['status'] in ('building', 'updating')
+                   for team in self.get_all_players())
+
+    def get_refresh_timeout(self) -> int:
+        timeout = ((self.get_room_saving_second() - datetime.datetime.now().second)
+                   % TRACKER_CACHE_TIMEOUT_IN_SECONDS or TRACKER_CACHE_TIMEOUT_IN_SECONDS)
+        return min(timeout, 2) if self.is_logic_updating() else timeout
 
     @_cache_results
     def get_player_inventory_counts(self, team: int, player: int) -> collections.Counter:
@@ -467,6 +489,13 @@ def _process_if_request_valid(incoming_request: Request, room: Optional[Room]) -
     if not room:
         abort(404)
 
+    if incoming_request.if_none_match:
+        if incoming_request.if_none_match.contains_weak(room.last_activity.isoformat()):
+            response = make_response('', 304)
+            response.set_etag(room.last_activity.isoformat())
+            return response
+        return None  # ETags take precedence over second-resolution timestamps.
+
     if_modified_str: Optional[str] = incoming_request.headers.get("If-Modified-Since", None)
     if if_modified_str:
         if_modified = parsedate_to_datetime(if_modified_str)
@@ -486,20 +515,20 @@ def _process_if_request_valid(incoming_request: Request, room: Optional[Room]) -
 @app.route("/tracker/<suuid:tracker>/<int:tracked_team>/<int:tracked_player>")
 def get_player_tracker(tracker: UUID, tracked_team: int, tracked_player: int, generic: bool = False) -> Response:
     key = f"{tracker}_{tracked_team}_{tracked_player}_{generic}"
-    response: Optional[Response] = cache.get(key)
-    if response:
-        return response
-
-    # Room must exist.
     room = Room.get(tracker=tracker)
 
     response = _process_if_request_valid(request, room)
     if response:
         return response
 
+    response = cache.get(key)
+    if response and response.get_etag()[0] == room.last_activity.isoformat():
+        return response
+
     timeout, last_modified, tracker_page = get_timeout_and_player_tracker(room, tracked_team, tracked_player, generic)
     response = make_response(tracker_page)
     response.last_modified = last_modified
+    response.set_etag(room.last_activity.isoformat())
     cache.set(key, response, timeout)
     return response
 
@@ -515,8 +544,7 @@ def get_timeout_and_player_tracker(room: Room, tracked_team: int, tracked_player
     else:
         tracker = render_generic_tracker(tracker_data, tracked_team, tracked_player)
 
-    return ((tracker_data.get_room_saving_second() - datetime.datetime.now().second)
-            % TRACKER_CACHE_TIMEOUT_IN_SECONDS or TRACKER_CACHE_TIMEOUT_IN_SECONDS, room.last_activity, tracker)
+    return tracker_data.get_refresh_timeout(), room.last_activity, tracker
 
 
 @app.route("/generic_tracker/<suuid:tracker>/<int:tracked_team>/<int:tracked_player>")
@@ -528,20 +556,20 @@ def get_generic_game_tracker(tracker: UUID, tracked_team: int, tracked_player: i
 @app.route("/tracker/<suuid:tracker>/<game>")
 def get_multiworld_tracker(tracker: UUID, game: str) -> Response:
     key = f"{tracker}_{game}"
-    response: Optional[Response] = cache.get(key)
-    if response:
-        return response
-
-    # Room must exist.
     room = Room.get(tracker=tracker)
 
     response = _process_if_request_valid(request, room)
     if response:
         return response
 
+    response = cache.get(key)
+    if response and response.get_etag()[0] == room.last_activity.isoformat():
+        return response
+
     timeout, last_modified, tracker_page = get_timeout_and_multiworld_tracker(room, game)
     response = make_response(tracker_page)
     response.last_modified = last_modified
+    response.set_etag(room.last_activity.isoformat())
     cache.set(key, response, timeout)
     return response
 
@@ -555,8 +583,7 @@ def get_timeout_and_multiworld_tracker(room: Room, game: str)\
     else:
         tracker = render_generic_multiworld_tracker(tracker_data, enabled_trackers)
 
-    return ((tracker_data.get_room_saving_second() - datetime.datetime.now().second)
-            % TRACKER_CACHE_TIMEOUT_IN_SECONDS or TRACKER_CACHE_TIMEOUT_IN_SECONDS, room.last_activity, tracker)
+    return tracker_data.get_refresh_timeout(), room.last_activity, tracker
 
 
 def get_enabled_multiworld_trackers(room: Room) -> Dict[str, Callable]:
@@ -597,6 +624,7 @@ def render_generic_tracker(tracker_data: TrackerData, team: int, player: int) ->
         checked_locations=tracker_data.get_player_checked_locations(team, player),
         location_logic=tracker_data.get_location_logic,
         logic_diagnostics=tracker_data.get_logic_diagnostics(),
+        logic_updating=tracker_data.is_logic_updating(),
         received_items=received_items_in_order,
         saving_second=tracker_data.get_room_saving_second(),
         game=game,
@@ -626,11 +654,13 @@ def render_generic_multiworld_tracker(tracker_data: TrackerData, enabled_tracker
         games=tracker_data.get_room_games(),
         states=tracker_data.get_room_client_statuses(),
         game_unlocks=tracker_data.get_room_game_unlocks(),
+        slot_status=tracker_data.get_player_slot_status,
         hints=tracker_data.get_team_hints(),
         hint_usage=tracker_data.get_owner_hint_usage(),
         location_logic=tracker_data.get_location_logic,
         logic_summary=tracker_data.get_player_logic_summary,
         logic_diagnostics=tracker_data.get_logic_diagnostics(),
+        logic_updating=tracker_data.is_logic_updating(),
         sphere_progress=tracker_data.get_owner_sphere_progress(),
         sphere_count=len(tracker_data.get_spheres()),
         activity_timers=tracker_data.get_room_last_activity(),
@@ -694,11 +724,13 @@ if "Factorio" in network_data_package["games"]:
             games=tracker_data.get_room_games(),
             states=tracker_data.get_room_client_statuses(),
             game_unlocks=tracker_data.get_room_game_unlocks(),
+            slot_status=tracker_data.get_player_slot_status,
             hints=tracker_data.get_team_hints(),
             hint_usage=tracker_data.get_owner_hint_usage(),
             location_logic=tracker_data.get_location_logic,
             logic_summary=tracker_data.get_player_logic_summary,
             logic_diagnostics=tracker_data.get_logic_diagnostics(),
+            logic_updating=tracker_data.is_logic_updating(),
             sphere_progress=tracker_data.get_owner_sphere_progress(),
             sphere_count=len(tracker_data.get_spheres()),
             activity_timers=tracker_data.get_room_last_activity(),
@@ -834,11 +866,13 @@ if "A Link to the Past" in network_data_package["games"]:
             games=tracker_data.get_room_games(),
             states=tracker_data.get_room_client_statuses(),
             game_unlocks=tracker_data.get_room_game_unlocks(),
+            slot_status=tracker_data.get_player_slot_status,
             hints=tracker_data.get_team_hints(),
             hint_usage=tracker_data.get_owner_hint_usage(),
             location_logic=tracker_data.get_location_logic,
             logic_summary=tracker_data.get_player_logic_summary,
             logic_diagnostics=tracker_data.get_logic_diagnostics(),
+            logic_updating=tracker_data.is_logic_updating(),
             sphere_progress=tracker_data.get_owner_sphere_progress(),
             sphere_count=len(tracker_data.get_spheres()),
             activity_timers=tracker_data.get_room_last_activity(),
