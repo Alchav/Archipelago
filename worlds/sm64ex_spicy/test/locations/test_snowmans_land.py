@@ -84,9 +84,12 @@ class TestSnowmansLandLocations(SM64TestBase):
             ]],
             ["Snowman's Land - Igloo Ice Block 1-Up", False,
              igloo + ["Snowman's Land - Freestanding 1-Ups"]],
+            ["Snowman's Land - Igloo Ice Block 1-Up", False,
+             igloo + ["Snowman's Land - Vanish Cap", "Snowman's Land - Freestanding 1-Ups"]],
             ["Snowman's Land - Igloo Ice Block 1-Up", True, igloo + [
                 "Snowman's Land - Vanish Cap",
                 "Snowman's Land - Freestanding 1-Ups",
+                "Ledge Grab",
             ]],
 
             ["Snowman's Land - Near Moneybags Block 1-Up", False, []],

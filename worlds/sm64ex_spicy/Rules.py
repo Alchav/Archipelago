@@ -999,7 +999,8 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
     rf.assign_rule("Snowman's Land - In the Deep Freeze", "WK/SF/LG/BF/CANN/TJ")
     rf.assign_rule("Snowman's Land - Into the Igloo", "VC & TJ/SF/BF/WK/LG")
     rf.assign_rule("Snowman's Land - Snowman Tree 1-Up", "CL/TJ/BF/SF")
-    rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", "VC")
+    sl_igloo_vanish_block_route = "VC & TJ/SF/BF/LG | logic_sl_igloo_vanish_block_with_spindrift"
+    rf.assign_rule("Snowman's Land - Igloo Ice Block 1-Up", sl_igloo_vanish_block_route)
     rf.assign_rule("Snowman's Land - Bob-omb Buddy", "BOBOMB_BUDDY")
     # Wet-Dry World
     wdw_pedestal_block_route = (
@@ -1340,7 +1341,7 @@ def set_rules(multiworld: MultiWorld, options: SM64Options, player: int, area_co
             "Bowser in the Fire Sea - 3 Coins Block": "CL | WK | logic_lava_damage_boosting",
             "Bowser in the Fire Sea - Near Final Poles 1-Up Block": "WK/TJ",
             "Rainbow Ride - Somewhere Over the Rainbow Star Block": "CANN",
-            "Snowman's Land - Vanish Cap Block": "VC & TJ/SF/BF/LG | logic_sl_igloo_vanish_block_with_spindrift",
+            "Snowman's Land - Vanish Cap Block": sl_igloo_vanish_block_route,
             "Shifting Sand Land - Outside Pyramid Wing Cap Block": "WC",
             "Shifting Sand Land - Stone Structure Wing Cap Block": "WC",
             "Shifting Sand Land - Cannon Wing Cap Block": "WC",
